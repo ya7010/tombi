@@ -1,11 +1,11 @@
 [package]
-name = "lexer"
-version.workspace = true
+name = "dom"
+version = "0.0.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
 [dependencies]
-logos.workspace = true
-rowan.workspace = true
+lexer = { path = "../lexer" }
+
 thiserror.workspace = true

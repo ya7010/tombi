@@ -2,6 +2,7 @@
 #[derive(logos::Logos, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u16)]
 #[logos(skip r"[ \t]+")]
+#[logos(error = crate::Error)]
 #[allow(non_camel_case_types)]
 pub enum Token {
     ROOT = 0,
@@ -193,5 +194,18 @@ mod tests {
         assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
         assert_eq!(lex.next(), Some(Ok(Token::LITERAL_STRING)));
         assert_eq!(lex.next(), Some(Ok(Token::BRACE_END)));
+    }
+
+    #[test]
+    fn invalid_source() {
+        let mut lex = Token::lexer("key1 = { key2 = 'value");
+
+        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(Token::BRACE_START)));
+        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
+        assert_eq!(lex.next(), Some(Err(crate::Error::InvalidToken)));
+        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
     }
 }
