@@ -2,44 +2,60 @@
 #[derive(logos::Logos, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u16)]
 #[logos(skip r"[ \t]+")]
+#[allow(non_camel_case_types)]
 pub enum SyntaxKind {
     ROOT = 0,
 
     #[regex(r"(\n|\r\n)+")]
-    Newline,
+    NEWLINE,
 
     #[token(".")]
-    Period,
+    PERIOD,
 
     #[token(",")]
-    Comma,
+    COMMA,
 
     #[token("=")]
-    Equal,
+    EQUAL,
 
     #[token("{")]
-    BraceOpen,
+    BRACE_OPEN,
 
     #[token("}")]
-    BraceClose,
+    BRACE_CLOSE,
 
     #[regex(r"[A-Za-z0-9_-]+", priority = 2)]
-    BareKey,
+    BARE_KEY,
 
     #[regex(r#"""#, |lex| lex_single_line_string(lex, '"'))]
-    BasicString,
+    BASIC_STRING,
 
     #[regex(r#"""""#, |lex| lex_multi_line_string(lex, '"'))]
-    MultiLineBasicString,
+    MULTI_LINE_BASIC_STRING,
 
     #[regex(r#"'"#, |lex| lex_single_line_string(lex, '\''))]
-    LiteralString,
+    LITERAL_STRING,
 
     #[regex(r"'''", |lex| lex_multi_line_string(lex, '\''))]
-    MultiLineLiteralString,
+    MULTI_LINE_LITERAL_STRING,
+
+    #[regex(r"[+-]?[0-9_]+", priority = 4)]
+    INTEGER,
+
+    #[regex(r"0x[0-9A-Fa-f_]+")]
+    INTEGER_HEX,
+
+    #[regex(r"0o[0-7_]+")]
+    INTEGER_OCT,
+
+    #[regex(r"0b(0|1|_)+")]
+    INTEGER_BIN,
+
+    #[regex(r"true|false")]
+    BOOL,
 
     #[regex(r"#[^\n\r]*")]
-    Comment,
+    COMMENT,
 }
 
 impl From<SyntaxKind> for rowan::SyntaxKind {
@@ -133,28 +149,28 @@ mod tests {
     fn bare_key() {
         let mut lex = SyntaxKind::lexer("test");
 
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
     }
 
     #[test]
     fn key_value() {
         let mut lex = SyntaxKind::lexer("key = 'value'");
 
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LiteralString)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
     }
 
     #[test]
     fn inline_table() {
         let mut lex = SyntaxKind::lexer("key1 = { key2 = 'value' }");
 
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BraceOpen)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LiteralString)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BraceClose)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_OPEN)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_CLOSE)));
     }
 }
