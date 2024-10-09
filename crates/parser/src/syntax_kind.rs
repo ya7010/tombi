@@ -18,11 +18,17 @@ pub enum SyntaxKind {
     #[token("=")]
     EQUAL,
 
+    #[token("[")]
+    BRACKET_START,
+
+    #[token("]")]
+    BRACKET_END,
+
     #[token("{")]
-    BRACE_OPEN,
+    BRACE_START,
 
     #[token("}")]
-    BRACE_CLOSE,
+    BRACE_END,
 
     #[regex(r"[A-Za-z0-9_-]+", priority = 2)]
     BARE_KEY,
@@ -51,8 +57,23 @@ pub enum SyntaxKind {
     #[regex(r"0b(0|1|_)+")]
     INTEGER_BIN,
 
+    #[regex(r"[-+]?([0-9_]+(\.[0-9_]+)?([eE][+-]?[0-9_]+)?|nan|inf)", priority = 3)]
+    FLOAT,
+
     #[regex(r"true|false")]
-    BOOL,
+    BOOLEAN,
+
+    #[regex(r#"(?:[1-9]\d\d\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)(?:T|t| )(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?(?:[Zz]|[+-][01]\d:[0-5]\d)"#)]
+    OFFSET_DATE_TIME,
+
+    #[regex(r#"(?:[1-9]\d\d\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)(?:T|t| )(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?"#)]
+    LOCAL_DATE_TIME,
+
+    #[regex(r#"(?:[1-9]\d\d\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)"#)]
+    LOCAL_DATE,
+
+    #[regex(r#"(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?"#)]
+    LOCAL_TIME,
 
     #[regex(r"#[^\n\r]*")]
     COMMENT,
@@ -167,10 +188,10 @@ mod tests {
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_OPEN)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_START)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_CLOSE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_END)));
     }
 }
