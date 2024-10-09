@@ -1,20 +1,7 @@
 use logos::Logos;
 use rowan::GreenNode;
 
-#[macro_use]
-mod macros;
-
-pub fn parse(source: &str) -> Parse {
-    let mut parser = Parser::new(source);
-    let _ = with_node!(parser.builder, lexer::Token::ROOT, parser.parse_root());
-
-    Parse {
-        green_node: parser.builder.finish(),
-        errors: parser.errors,
-    }
-}
-
-struct Parser<'p> {
+pub struct Parser<'p> {
     current_token: Option<lexer::Token>,
     pub builder: rowan::GreenNodeBuilder<'p>,
     pub lexer: logos::Lexer<'p, lexer::Token>,
@@ -22,7 +9,7 @@ struct Parser<'p> {
 }
 
 impl<'p> Parser<'p> {
-    fn new(source: &'p str) -> Self {
+    pub fn new(source: &'p str) -> Self {
         Parser {
             current_token: None,
             lexer: lexer::Token::lexer(source),
@@ -31,7 +18,7 @@ impl<'p> Parser<'p> {
         }
     }
 
-    fn parse_root(&mut self) {}
+    pub fn parse_root(&mut self) {}
 }
 
 #[derive(Debug, Clone)]
