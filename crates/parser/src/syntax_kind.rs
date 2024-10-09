@@ -48,22 +48,20 @@ fn lex_string(lex: &mut logos::Lexer<SyntaxKind>) -> bool {
     let remainder: &str = lex.remainder();
 
     let mut total_len = 0;
-    let mut escaped = false;
+    let mut chars = remainder.chars();
 
-    for c in remainder.chars() {
+    while let Some(c) = chars.next() {
         total_len += c.len_utf8();
 
         if c == '\\' {
-            escaped = !escaped;
-            continue;
+            if let Some(c) = chars.next() {
+                total_len += c.len_utf8();
+                if c == '"' {
+                    lex.bump(remainder[0..total_len].as_bytes().len());
+                    return true;
+                }
+            }
         }
-
-        if c == '"' && !escaped {
-            lex.bump(remainder[0..total_len].as_bytes().len());
-            return true;
-        }
-
-        escaped = false;
     }
     false
 }
