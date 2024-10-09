@@ -2,7 +2,6 @@ use logos::Logos;
 use rowan::GreenNode;
 
 pub struct Parser<'p> {
-    current_token: Option<lexer::Token>,
     pub builder: rowan::GreenNodeBuilder<'p>,
     pub lexer: logos::Lexer<'p, lexer::Token>,
     pub errors: Vec<crate::Error>,
@@ -11,14 +10,31 @@ pub struct Parser<'p> {
 impl<'p> Parser<'p> {
     pub fn new(source: &'p str) -> Self {
         Parser {
-            current_token: None,
             lexer: lexer::Token::lexer(source),
             builder: Default::default(),
             errors: Default::default(),
         }
     }
 
-    pub fn parse_root(&mut self) {}
+    pub fn parse_root(&mut self) {
+        use lexer::Token::*;
+
+        while let Some(token) = self.lexer.next() {
+            match token {
+                Ok(token) => match token {
+                    COMMENT => {
+                        // TODO: need allowed_comment_chars
+                        self.builder.token(token.into(), self.lexer.slice());
+                    }
+                    _ => continue,
+                },
+                Err(error) => {
+                    let span = self.lexer.span();
+                    self.errors.push(crate::Error::InvalidToken { error, span });
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
