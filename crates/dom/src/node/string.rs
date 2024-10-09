@@ -1,5 +1,15 @@
+#[derive(Debug, Clone, Copy)]
+pub enum StringKind {
+    Basic,
+    MultiLineBasic,
+    Literal,
+    MultiLineLiteral,
+    Invalid,
+}
+
 #[derive(Debug, Clone)]
 pub struct StringNode<'a> {
+    pub kind: StringKind,
     pub value: Option<&'a str>,
     pub syntax: &'a lexer::SyntaxElement,
     pub errors: Vec<crate::Error>,
@@ -10,31 +20,37 @@ impl<'a> crate::FromSyntax<'a> for StringNode<'a> {
         use lexer::Token::*;
 
         let mut errors = Vec::new();
-        match syntax.kind() {
-            BASIC_STRING => {
-                let value = syntax.as_token().map(|t| t.text());
-                if value.is_none() {
-                    errors.push(crate::Error::InvalidStringValue {
-                        syntax: syntax.clone(),
-                    });
-                }
-
-                Self {
-                    value,
-                    syntax,
-                    errors,
-                }
-            }
+        let kind = match syntax.kind() {
+            BASIC_STRING => StringKind::Basic,
+            MULTI_LINE_BASIC_STRING => StringKind::MultiLineBasic,
+            LITERAL_STRING => StringKind::Literal,
+            MULTI_LINE_LITERAL_STRING => StringKind::MultiLineLiteral,
             _ => {
                 errors.push(crate::Error::UnexpectedSyntax {
                     syntax: syntax.clone(),
                 });
+                StringKind::Invalid
+            }
+        };
+        let value = syntax.as_token().map(|t| t.text());
 
-                Self {
-                    value: None,
-                    syntax,
-                    errors,
-                }
+        if let Some(value) = value {
+            Self {
+                kind,
+                value: Some(value),
+                syntax,
+                errors,
+            }
+        } else {
+            errors.push(crate::Error::InvalidStringValue {
+                syntax: syntax.clone(),
+            });
+
+            Self {
+                kind,
+                value: None,
+                syntax,
+                errors,
             }
         }
     }

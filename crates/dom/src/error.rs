@@ -8,4 +8,7 @@ pub enum Error {
 
     #[error("the string value was invalid: {syntax:#?}")]
     InvalidStringValue { syntax: lexer::SyntaxElement },
+
+    #[error("the string kind was invalid: {syntax:#?}")]
+    InvalidStringKind { syntax: lexer::SyntaxElement },
 }
