@@ -4,7 +4,6 @@ pub enum StringKind {
     MultiLineBasic,
     Literal,
     MultiLineLiteral,
-    Invalid,
 }
 
 #[derive(Debug, Clone)]
@@ -25,12 +24,7 @@ impl<'a> crate::FromSyntax<'a> for StringNode<'a> {
             MULTI_LINE_BASIC_STRING => StringKind::MultiLineBasic,
             LITERAL_STRING => StringKind::Literal,
             MULTI_LINE_LITERAL_STRING => StringKind::MultiLineLiteral,
-            _ => {
-                errors.push(crate::Error::UnexpectedSyntax {
-                    syntax: syntax.clone(),
-                });
-                StringKind::Invalid
-            }
+            _ => unreachable!("invalid string kind: {syntax:#?}"),
         };
         let value = syntax.as_token().map(|t| t.text());
 

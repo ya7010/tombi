@@ -19,7 +19,9 @@ impl<'a> crate::FromSyntax<'a> for Node<'a> {
 
         match syntax.kind() {
             BOOLEAN => Node::Boolean(BooleanNode::from_syntax(syntax)),
-            BASIC_STRING => Node::String(StringNode::from_syntax(syntax)),
+            BASIC_STRING | MULTI_LINE_BASIC_STRING | LITERAL_STRING | MULTI_LINE_LITERAL_STRING => {
+                Node::String(StringNode::from_syntax(syntax))
+            }
             _ => Node::Invalid(InvalidNode::from_syntax(syntax)),
         }
     }
