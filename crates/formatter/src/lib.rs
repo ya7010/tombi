@@ -1,3 +1,7 @@
 mod options;
 
-pub use options::Options;
+pub use options::*;
+
+pub fn format(_input: &str, _options: &Options) {
+    unimplemented!()
+}
