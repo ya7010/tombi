@@ -1,5 +1,6 @@
 use clap::Parser;
 
+/// TOML: TOML linter and code formatter.
 #[derive(clap::Parser)]
 #[command(name = "toml", version)]
 pub struct Args {
