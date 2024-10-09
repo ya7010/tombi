@@ -1,15 +1,12 @@
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, schemars::JsonSchema)]
 pub struct Options {
-    pub line_length: u8,
+    pub max_line_length: Option<u8>,
 }
 
 impl Default for Options {
     fn default() -> Self {
         Self {
-            line_length: DEFAULT_LINE_LENGTH,
+            max_line_length: Default::default(),
         }
     }
 }
-
-pub const DEFAULT_LINE_LENGTH: u8 = 100;
-pub const DEFAULT_LINE_LENGTH_STR: &'static str = "100";
