@@ -3,6 +3,8 @@
 #[repr(u16)]
 #[logos(skip r"[ \t]+")]
 pub enum SyntaxKind {
+    ROOT = 0,
+
     #[regex(r"(\n|\r\n)+")]
     Newline,
 
@@ -38,8 +40,6 @@ pub enum SyntaxKind {
 
     #[regex(r"#[^\n\r]*")]
     Comment,
-
-    ROOT, // root node
 }
 
 impl From<SyntaxKind> for rowan::SyntaxKind {
