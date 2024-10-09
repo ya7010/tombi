@@ -12,3 +12,4 @@ license = "MIT"
 serde = { version = "^1.0.0", features = ["derive"] }
 schemars = "0.8.21"
 thiserror = "1.0.64"
+rowan = "0.15.16"

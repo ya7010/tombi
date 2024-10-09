@@ -1,12 +1,10 @@
 [package]
-name = "parser"
-version = "0.0.0"
+name = "lexer"
+version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
 [dependencies]
-lexer = { path = "../lexer" }
-
+logos = "0.14.2"
 rowan.workspace = true
-thiserror.workspace = true
