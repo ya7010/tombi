@@ -9,4 +9,5 @@ authors = ["yassun7010 <yassun7010@outlook.com>"]
 license = "MIT"
 
 [workspace.dependencies]
+serde = { version = "^1.0.0", features = ["derive"] }
 thiserror = "1.0.64"
