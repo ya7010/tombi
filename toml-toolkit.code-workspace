@@ -1,0 +1,8 @@
+{
+	"folders": [
+		{ "name": "root", "path": "." },
+		{ "path": "core/toml-cli" },
+		{ "path": "core/toml-lsp" },
+		{ "path": "crates/parser" }
+	]
+}
