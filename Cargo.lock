@@ -174,10 +174,11 @@ dependencies = [
 
 [[package]]
 name = "parser"
-version = "0.0.1"
+version = "0.0.0"
 dependencies = [
  "logos",
  "rowan",
+ "thiserror",
 ]
 
 [[package]]

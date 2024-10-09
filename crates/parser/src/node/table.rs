@@ -4,5 +4,5 @@ pub struct Table {
 }
 
 pub(crate) struct TableInner {
-    errors: 
+    // errors:
 }

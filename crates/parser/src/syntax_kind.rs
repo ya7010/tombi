@@ -1,10 +1,8 @@
 #[doc = r" The kind of syntax node, e.g. `WHITESPACE`, `COMMENT`, or `TABLE`."]
 #[derive(logos::Logos, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u16)]
+#[logos(skip r"[ \t]+")]
 pub enum SyntaxKind {
-    #[regex(r"([ \t])+")]
-    Whitespace = 0,
-
     #[regex(r"(\n|\r\n)+")]
     Newline,
 
@@ -16,6 +14,12 @@ pub enum SyntaxKind {
 
     #[token("=")]
     Equal,
+
+    #[token("{")]
+    BraceOpen,
+
+    #[token("}")]
+    BraceClose,
 
     #[regex(r"[A-Za-z0-9_-]+", priority = 2)]
     BareKey,
@@ -137,9 +141,20 @@ mod tests {
         let mut lex = SyntaxKind::lexer("key = 'value'");
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Whitespace)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Whitespace)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::LiteralString)));
+    }
+
+    #[test]
+    fn inline_table() {
+        let mut lex = SyntaxKind::lexer("key1 = { key2 = 'value' }");
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BraceOpen)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LiteralString)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BraceClose)));
     }
 }
