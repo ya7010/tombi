@@ -32,26 +32,6 @@ impl<'p> Parser<'p> {
     }
 
     fn parse_root(&mut self) {}
-
-    fn get_token(&mut self) -> Result<lexer::Token, ()> {
-        if self.current_token.is_none() {
-            self.step();
-        }
-
-        self.current_token.ok_or(())
-    }
-
-    fn step(&mut self) {
-        self.current_token = None;
-        while let Some(Ok(token)) = self.lexer.next() {
-            match token {
-                _ => {
-                    self.current_token = Some(token);
-                    break;
-                }
-            }
-        }
-    }
 }
 
 #[derive(Debug, Clone)]

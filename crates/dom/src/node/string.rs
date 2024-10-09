@@ -9,16 +9,14 @@ pub enum StringKind {
 #[derive(Debug, Clone)]
 pub struct StringNode<'a> {
     pub kind: StringKind,
-    pub value: Option<&'a str>,
+    pub value: &'a str,
     pub syntax: &'a lexer::SyntaxElement,
-    pub errors: Vec<crate::Error>,
 }
 
 impl<'a> crate::FromSyntax<'a> for StringNode<'a> {
-    fn from_syntax(syntax: &'a lexer::SyntaxElement) -> Self {
+    fn from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
         use lexer::Token::*;
 
-        let mut errors = Vec::new();
         let kind = match syntax.kind() {
             BASIC_STRING => StringKind::Basic,
             MULTI_LINE_BASIC_STRING => StringKind::MultiLineBasic,
@@ -26,26 +24,17 @@ impl<'a> crate::FromSyntax<'a> for StringNode<'a> {
             MULTI_LINE_LITERAL_STRING => StringKind::MultiLineLiteral,
             _ => unreachable!("invalid string kind: {syntax:#?}"),
         };
-        let value = syntax.as_token().map(|t| t.text());
 
-        if let Some(value) = value {
-            Self {
+        if let Some(value) = syntax.as_token().map(|t| t.text()) {
+            Ok(Self {
                 kind,
-                value: Some(value),
+                value,
                 syntax,
-                errors,
-            }
+            })
         } else {
-            errors.push(crate::Error::InvalidStringValue {
+            Err(vec![crate::Error::InvalidStringValue {
                 syntax: syntax.clone(),
-            });
-
-            Self {
-                kind,
-                value: None,
-                syntax,
-                errors,
-            }
+            }])
         }
     }
 }
