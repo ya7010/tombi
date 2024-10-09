@@ -20,13 +20,13 @@ pub enum SyntaxKind {
     #[regex(r"[A-Za-z0-9_-]+", priority = 2)]
     BareKey,
 
-    #[regex(r#"""#, lex_string)]
+    #[regex(r#"""#, |lex| lex_single_line_string(lex, '"'))]
     BasicString,
 
     #[regex(r#"""""#, |lex| lex_multi_line_string(lex, '"'))]
     MultiLineBasicString,
 
-    #[regex(r#"'"#, lex_literal_string)]
+    #[regex(r#"'"#, |lex| lex_single_line_string(lex, '\''))]
     LiteralString,
 
     #[regex(r"'''", |lex| lex_multi_line_string(lex, '\''))]
@@ -44,23 +44,16 @@ impl From<SyntaxKind> for rowan::SyntaxKind {
     }
 }
 
-fn lex_string(lex: &mut logos::Lexer<SyntaxKind>) -> bool {
+fn lex_single_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
     let remainder: &str = lex.remainder();
-
     let mut total_len = 0;
-    let mut chars = remainder.chars();
 
-    while let Some(c) = chars.next() {
+    for c in remainder.chars() {
         total_len += c.len_utf8();
 
-        if c == '\\' {
-            if let Some(c) = chars.next() {
-                total_len += c.len_utf8();
-                if c == '"' {
-                    lex.bump(remainder[0..total_len].as_bytes().len());
-                    return true;
-                }
-            }
+        if c == quote {
+            lex.bump(remainder[0..total_len].as_bytes().len());
+            return true;
         }
     }
     false
@@ -125,21 +118,6 @@ fn lex_multi_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> boo
     } else {
         false
     }
-}
-
-fn lex_literal_string(lex: &mut logos::Lexer<SyntaxKind>) -> bool {
-    let remainder: &str = lex.remainder();
-    let mut total_len = 0;
-
-    for c in remainder.chars() {
-        total_len += c.len_utf8();
-
-        if c == '\'' {
-            lex.bump(remainder[0..total_len].as_bytes().len());
-            return true;
-        }
-    }
-    false
 }
 
 #[cfg(test)]
