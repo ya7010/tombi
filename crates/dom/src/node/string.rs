@@ -13,8 +13,8 @@ pub struct StringNode<'a> {
     pub syntax: &'a lexer::SyntaxElement,
 }
 
-impl<'a> crate::FromSyntax<'a> for StringNode<'a> {
-    fn from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
+impl<'a> crate::TryFromSyntax<'a> for StringNode<'a> {
+    fn try_from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
         use lexer::Token::*;
 
         let kind = match syntax.kind() {

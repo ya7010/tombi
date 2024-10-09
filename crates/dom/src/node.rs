@@ -10,14 +10,14 @@ pub enum Node<'a> {
     String(StringNode<'a>),
 }
 
-impl<'a> crate::FromSyntax<'a> for Node<'a> {
-    fn from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
+impl<'a> crate::TryFromSyntax<'a> for Node<'a> {
+    fn try_from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
         use lexer::Token::*;
 
         match syntax.kind() {
-            BOOLEAN => BooleanNode::from_syntax(syntax).map(|node| Node::Boolean(node)),
+            BOOLEAN => BooleanNode::try_from_syntax(syntax).map(|node| Node::Boolean(node)),
             BASIC_STRING | MULTI_LINE_BASIC_STRING | LITERAL_STRING | MULTI_LINE_LITERAL_STRING => {
-                StringNode::from_syntax(syntax).map(|node| Node::String(node))
+                StringNode::try_from_syntax(syntax).map(|node| Node::String(node))
             }
             _ => Err(vec![crate::Error::InvalidSyntax {
                 syntax: syntax.clone(),

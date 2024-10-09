@@ -4,8 +4,8 @@ pub struct BooleanNode<'a> {
     pub syntax: &'a lexer::SyntaxElement,
 }
 
-impl<'a> crate::FromSyntax<'a> for BooleanNode<'a> {
-    fn from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
+impl<'a> crate::TryFromSyntax<'a> for BooleanNode<'a> {
+    fn try_from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
         use lexer::Token::*;
 
         match syntax.kind() {
