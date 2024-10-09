@@ -15,7 +15,7 @@ pub enum SyntaxKind {
     Comma,
 
     #[token("=")]
-    Eq,
+    Equal,
 
     #[regex(r"[A-Za-z0-9_-]+", priority = 2)]
     BareKey,
@@ -160,7 +160,7 @@ mod tests {
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BareKey)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::Whitespace)));
-        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Eq)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::Equal)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::Whitespace)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::LiteralString)));
     }
