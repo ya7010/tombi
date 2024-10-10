@@ -16,14 +16,20 @@ impl<'p> Parser<'p> {
         }
     }
 
-    pub fn parse_root(&mut self) {
+    pub fn parse(&mut self) {
         use lexer::Token::*;
 
         while let Some(token) = self.lexer.next() {
             match token {
                 Ok(token) => match token {
+                    ROOT => {
+                        unreachable!("unexpected root token");
+                    }
                     COMMENT => {
                         // TODO: need allowed_comment_chars
+                        self.builder.token(token.into(), self.lexer.slice());
+                    }
+                    NEWLINE => {
                         self.builder.token(token.into(), self.lexer.slice());
                     }
                     _ => continue,

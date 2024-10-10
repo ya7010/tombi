@@ -10,7 +10,7 @@ mod macros;
 
 pub fn parse(source: &str) -> Parse {
     let mut parser = parser::Parser::new(source);
-    let _ = with_node!(parser.builder, lexer::Token::ROOT, parser.parse_root());
+    let _ = with_node!(parser.builder, lexer::Token::ROOT, parser.parse());
 
     Parse {
         green_node: parser.builder.finish(),
