@@ -1,16 +1,16 @@
+mod bare_key;
 mod boolean;
-mod key;
 mod string;
 
+pub use bare_key::BareKeyNode;
 pub use boolean::BooleanNode;
-use key::KeyNode;
 pub use string::StringNode;
 
 #[derive(Debug, Clone)]
 pub enum Node<'a> {
     Boolean(BooleanNode<'a>),
     String(StringNode<'a>),
-    Key(KeyNode<'a>),
+    BareKey(BareKeyNode<'a>),
 }
 
 impl<'a> crate::TryFromSyntax<'a> for Node<'a> {
@@ -22,7 +22,7 @@ impl<'a> crate::TryFromSyntax<'a> for Node<'a> {
             BASIC_STRING | MULTI_LINE_BASIC_STRING | LITERAL_STRING | MULTI_LINE_LITERAL_STRING => {
                 StringNode::try_from_syntax(syntax).map(|node| Node::String(node))
             }
-            BARE_KEY => KeyNode::try_from_syntax(syntax).map(|node| Node::Key(node)),
+            BARE_KEY => BareKeyNode::try_from_syntax(syntax).map(|node| Node::BareKey(node)),
             _ => Err(vec![crate::Error::InvalidSyntax {
                 syntax: syntax.clone(),
             }]),

@@ -1,19 +1,70 @@
+mod container;
 mod error;
-mod parser;
 
 pub use error::Error;
 pub use lexer::Token;
-pub use parser::Parse;
-
-#[macro_use]
-mod macros;
+use logos::Logos;
 
 pub fn parse(source: &str) -> Parse {
-    let mut parser = parser::Parser::new(source);
-    let _ = with_node!(parser.builder, lexer::Token::ROOT, parser.parse());
+    use lexer::Token::*;
+    let mut lexer = lexer::Token::lexer(source);
+    let mut builder = rowan::GreenNodeBuilder::default();
+    let mut errors = vec![];
+
+    while let Some(token) = lexer.next() {
+        match token {
+            Ok(token) => match token {
+                ROOT => {
+                    unreachable!("unexpected root token");
+                }
+                COMMENT => {
+                    // TODO: need allowed_comment_chars
+                    builder.token(token.into(), lexer.slice());
+                }
+                NEWLINE => {
+                    builder.token(token.into(), lexer.slice());
+                }
+                BARE_KEY => {
+                    let value = lexer.slice();
+                    builder.token(token.into(), value);
+                }
+                EQUAL => {
+                    builder.token(token.into(), lexer.slice());
+                }
+                BASIC_STRING
+                | MULTI_LINE_BASIC_STRING
+                | LITERAL_STRING
+                | MULTI_LINE_LITERAL_STRING
+                | INTEGER
+                | INTEGER_HEX
+                | INTEGER_OCT
+                | INTEGER_BIN
+                | FLOAT
+                | BOOLEAN
+                | OFFSET_DATE_TIME
+                | LOCAL_DATE_TIME
+                | LOCAL_DATE
+                | LOCAL_TIME => {
+                    let value = lexer.slice();
+                    builder.token(token.into(), value);
+                }
+                _ => continue,
+            },
+            Err(error) => {
+                let span = lexer.span();
+                errors.push(crate::Error::InvalidToken { error, span });
+            }
+        }
+    }
 
     Parse {
-        green_node: parser.builder.finish(),
-        errors: parser.errors,
+        green_node: builder.finish(),
+        errors: vec![],
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct Parse {
+    pub green_node: rowan::GreenNode,
+    pub errors: Vec<crate::Error>,
 }
