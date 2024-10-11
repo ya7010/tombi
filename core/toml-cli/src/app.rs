@@ -13,6 +13,7 @@ where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
+    #[inline]
     fn from(value: I) -> Self {
         Self::parse_from(value)
     }
