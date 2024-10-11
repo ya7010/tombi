@@ -4,6 +4,7 @@ pub struct Container<'a> {
 }
 
 impl<'a> Container<'a> {
+    #[allow(dead_code)]
     pub fn new(builder: &'a mut rowan::GreenNodeBuilder<'static>) -> Self {
         Self {
             tokens: vec![],
@@ -11,6 +12,7 @@ impl<'a> Container<'a> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn push(&mut self, token: lexer::Token) {
         self.builder.start_node(token.into());
         self.tokens.push(token);

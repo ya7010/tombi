@@ -1,7 +1,6 @@
 mod container;
 mod error;
 
-use dom::TryFromSyntax;
 pub use error::Error;
 pub use lexer::Token;
 use logos::Logos;
