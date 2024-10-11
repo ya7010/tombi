@@ -1,2 +1,3 @@
 [alias]
+toml = "run --package toml-cli --bin toml --"
 xtask = "run --package xtask --bin xtask --"
