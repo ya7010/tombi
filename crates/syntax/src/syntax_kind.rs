@@ -1,11 +1,13 @@
 #[doc = r" The kind of syntax node, e.g. `WHITESPACE`, `COMMENT`, or `TABLE`."]
 #[derive(logos::Logos, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u16)]
-#[logos(skip r"[ \t]+")]
 #[logos(error = crate::Error)]
 #[allow(non_camel_case_types)]
 pub enum SyntaxKind {
     ROOT = 0,
+
+    #[regex(r"[ \t]+")]
+    WHITESPACE,
 
     #[regex(r"(\n|\r\n)+")]
     NEWLINE,
@@ -179,7 +181,9 @@ mod tests {
         let mut lex = SyntaxKind::lexer("key = 'value'");
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
     }
 
@@ -188,11 +192,17 @@ mod tests {
         let mut lex = SyntaxKind::lexer("key1 = { key2 = 'value' }");
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_START)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_END)));
     }
 
@@ -201,10 +211,15 @@ mod tests {
         let mut lex = SyntaxKind::lexer("key1 = { key2 = 'value");
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_START)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Err(crate::Error::InvalidToken)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
     }
