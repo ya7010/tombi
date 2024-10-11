@@ -35,23 +35,31 @@
 SyntaxElement = SyntaxElement
 TomlBogus = SyntaxElement*
 TomlBogusValue = SyntaxElement*
+
 TomlRoot =
-    value: TomlValue*
+    value: TomlRootValue*
     eof: 'EOF'
-TomlValue =
+
+TomlRootValue =
     TomlKeyValue
     | TomlTable
     | TomlArrayTable
     | TomlBogusValue
+
 TomlKeyValue = key: TomlKey '=' value: TomlAnyValue
-TomlKey = TomlSimpleKey ('.' TomlSimpleKey)*
-TomlSimpleKey = 'bare_key' | 'quoted_key'
+
+TomlKey = TomlSingleKey ('.' TomlSingleKey)*
+TomlSingleKey = 'bare_key' | 'quoted_key'
+
 TomlAnyValue =
     TomlStringValue
     | TomlIntegerValue
     | TomlFloatValue
     | TomlBooleanValue
-    | TomlDatetimeValue
+    | TomlOffsetDatetimeValue
+    | TomlLocalDatetimeValue
+    | TomlLocalDateValue
+    | TomlLocalTimeValue
     | TomlArrayValue
     | TomlInlineTableValue
     | TomlBogusValue
@@ -59,10 +67,17 @@ TomlStringValue = value: 'basic_string' | 'literal_string'
 TomlIntegerValue = value: 'integer'
 TomlFloatValue = value: 'float'
 TomlBooleanValue = value_token: ('true' | 'false')
-TomlDatetimeValue = value: 'date_time'
+TomlOffsetDatetimeValue = value: 'offset_date_time'
+TomlLocalDatetimeValue = value: 'local_date_time'
+TomlLocalDateValue = value: 'local_date'
+TomlLocalTimeValue = value: 'local_time'
+
 TomlArrayValue = '[' elements: TomlArrayElementList ']'
 TomlArrayElementList = (TomlAnyValue (',' TomlAnyValue)* ','?)
+
 TomlInlineTableValue = '{' elements: TomlInlineTableElementList '}'
 TomlInlineTableElementList = (TomlKeyValue (',' TomlKeyValue)* ','?)
+
 TomlTable = '[' header: TomlKey ']'
-TomlArrayTable = '[[' header: TomlKey ']]'
+
+TomlArrayOfTable = '[[' header: TomlKey ']]'
