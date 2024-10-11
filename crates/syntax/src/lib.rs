@@ -1,8 +1,8 @@
 mod error;
-mod syntax_kind;
+mod kind;
 
 pub use error::Error;
-pub use syntax_kind::SyntaxKind;
+pub use kind::SyntaxKind;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TomlLanguage {}
