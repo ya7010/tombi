@@ -6,6 +6,6 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-lexer = { path = "../lexer" }
+syntax = { path = "../syntax" }
 
 thiserror.workspace = true

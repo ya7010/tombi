@@ -2,7 +2,7 @@
 pub enum Error {
     #[error("{error}")]
     InvalidToken {
-        error: lexer::Error,
+        error: syntax::Error,
         span: logos::Span,
     },
 }

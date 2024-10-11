@@ -1,12 +1,12 @@
 #[derive(Debug, Clone)]
 pub struct BooleanNode<'a> {
     pub value: bool,
-    pub syntax: &'a lexer::SyntaxElement,
+    pub syntax: &'a syntax::SyntaxElement,
 }
 
 impl<'a> crate::TryFromSyntax<'a> for BooleanNode<'a> {
-    fn try_from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
-        use lexer::Token::*;
+    fn try_from_syntax(syntax: &'a syntax::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
+        use syntax::Token::*;
 
         match syntax.kind() {
             BOOLEAN => {

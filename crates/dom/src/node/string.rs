@@ -10,12 +10,12 @@ pub enum StringKind {
 pub struct StringNode<'a> {
     pub kind: StringKind,
     pub value: &'a str,
-    pub syntax: &'a lexer::SyntaxElement,
+    pub syntax: &'a syntax::SyntaxElement,
 }
 
 impl<'a> crate::TryFromSyntax<'a> for StringNode<'a> {
-    fn try_from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
-        use lexer::Token::*;
+    fn try_from_syntax(syntax: &'a syntax::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
+        use syntax::Token::*;
 
         let kind = match syntax.kind() {
             BASIC_STRING => StringKind::Basic,

@@ -7,7 +7,7 @@ license.workspace = true
 
 [dependencies]
 parser = { path = "../../crates/parser" }
-lexer = { path = "../../crates/lexer" }
+syntax = { path = "../../crates/syntax" }
 dom = { path = "../../crates/dom" }
 
 schemars.workspace = true

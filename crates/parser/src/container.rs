@@ -1,5 +1,5 @@
 pub struct Container<'a> {
-    tokens: Vec<lexer::Token>,
+    tokens: Vec<syntax::Token>,
     pub builder: &'a mut rowan::GreenNodeBuilder<'static>,
 }
 
@@ -13,12 +13,12 @@ impl<'a> Container<'a> {
     }
 
     #[allow(dead_code)]
-    pub fn push(&mut self, token: lexer::Token) {
+    pub fn push(&mut self, token: syntax::Token) {
         self.builder.start_node(token.into());
         self.tokens.push(token);
     }
 
-    pub fn pop(&mut self) -> Option<lexer::Token> {
+    pub fn pop(&mut self) -> Option<syntax::Token> {
         if let Some(token) = self.tokens.pop() {
             self.builder.finish_node();
             Some(token)
@@ -37,7 +37,7 @@ impl<'a> Drop for Container<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lexer::Token;
+    use syntax::Token;
 
     #[test]
     fn test_container() {

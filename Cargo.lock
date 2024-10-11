@@ -113,7 +113,7 @@ checksum = "7704b5fdd17b18ae31c4c1da5a2e0305a2bf17b5249300a9ee9ed7b72114c636"
 name = "dom"
 version = "0.0.0"
 dependencies = [
- "lexer",
+ "syntax",
  "thiserror",
 ]
 
@@ -134,10 +134,10 @@ name = "formatter"
 version = "0.0.0"
 dependencies = [
  "dom",
- "lexer",
  "parser",
  "schemars",
  "serde",
+ "syntax",
  "thiserror",
 ]
 
@@ -170,15 +170,6 @@ name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
-
-[[package]]
-name = "lexer"
-version = "0.0.1"
-dependencies = [
- "logos",
- "rowan",
- "thiserror",
-]
 
 [[package]]
 name = "logos"
@@ -224,9 +215,9 @@ name = "parser"
 version = "0.0.0"
 dependencies = [
  "dom",
- "lexer",
  "logos",
  "rowan",
+ "syntax",
  "thiserror",
 ]
 
@@ -360,6 +351,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "syntax"
+version = "0.0.1"
+dependencies = [
+ "logos",
+ "rowan",
+ "thiserror",
 ]
 
 [[package]]

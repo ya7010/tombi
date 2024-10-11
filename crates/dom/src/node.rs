@@ -14,8 +14,8 @@ pub enum Node<'a> {
 }
 
 impl<'a> crate::TryFromSyntax<'a> for Node<'a> {
-    fn try_from_syntax(syntax: &'a lexer::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
-        use lexer::Token::*;
+    fn try_from_syntax(syntax: &'a syntax::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
+        use syntax::Token::*;
 
         match syntax.kind() {
             BOOLEAN => BooleanNode::try_from_syntax(syntax).map(|node| Node::Boolean(node)),
