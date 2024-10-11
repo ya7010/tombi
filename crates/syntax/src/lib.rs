@@ -19,6 +19,7 @@ impl rowan::Language for TomlLanguage {
     }
 }
 
+/// en: SyntaxNode is also known as `RedNode`.
 pub type SyntaxNode = rowan::SyntaxNode<crate::TomlLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<crate::TomlLanguage>;
 pub type SyntaxElement = rowan::NodeOrToken<SyntaxNode, SyntaxToken>;
