@@ -8,3 +8,4 @@ license.workspace = true
 [dependencies]
 clap.workspace = true
 thiserror.workspace = true
+ungrammar = "1.16.1"

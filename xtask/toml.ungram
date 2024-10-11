@@ -43,7 +43,7 @@ TomlRoot =
 TomlRootValue =
     TomlKeyValue
     | TomlTable
-    | TomlArrayTable
+    | TomlArrayOfTable
     | TomlBogusValue
 
 TomlKeyValue = key: TomlKey '=' value: TomlAnyValue

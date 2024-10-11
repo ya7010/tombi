@@ -1,6 +1,7 @@
 mod app;
 mod command;
 mod error;
+mod utils;
 
 pub use error::Error;
 
