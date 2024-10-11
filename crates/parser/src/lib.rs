@@ -3,11 +3,11 @@ mod error;
 
 pub use error::Error;
 use logos::Logos;
-pub use syntax::Token;
+pub use syntax::SyntaxKind;
 
 pub fn parse(source: &str) -> Parse {
-    use syntax::Token::*;
-    let mut lexer = syntax::Token::lexer(source);
+    use syntax::SyntaxKind::*;
+    let mut lexer = syntax::SyntaxKind::lexer(source);
     let mut builder = rowan::GreenNodeBuilder::default();
     let mut errors = vec![];
     builder.start_node(ROOT.into());

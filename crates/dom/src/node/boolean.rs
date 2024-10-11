@@ -6,7 +6,7 @@ pub struct BooleanNode<'a> {
 
 impl<'a> crate::TryFromSyntax<'a> for BooleanNode<'a> {
     fn try_from_syntax(syntax: &'a syntax::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
-        use syntax::Token::*;
+        use syntax::SyntaxKind::*;
 
         match syntax.kind() {
             BOOLEAN => {

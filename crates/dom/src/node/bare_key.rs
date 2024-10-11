@@ -6,7 +6,7 @@ pub struct BareKeyNode<'a> {
 
 impl<'a> crate::TryFromSyntax<'a> for BareKeyNode<'a> {
     fn try_from_syntax(syntax: &'a syntax::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
-        use syntax::Token::*;
+        use syntax::SyntaxKind::*;
         if syntax.kind() != BARE_KEY {
             unreachable!("invalid bare key kind: {syntax:#?}")
         }

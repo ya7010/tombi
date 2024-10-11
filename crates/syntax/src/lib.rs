@@ -1,10 +1,10 @@
 mod error;
 mod lang;
-mod token;
+mod syntax_kind;
 
 pub use error::Error;
 pub use lang::TomlLang;
-pub use token::Token;
+pub use syntax_kind::SyntaxKind;
 
 pub type SyntaxNode = rowan::SyntaxNode<crate::TomlLang>;
 #[allow(unused)]

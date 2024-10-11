@@ -4,7 +4,7 @@
 #[logos(skip r"[ \t]+")]
 #[logos(error = crate::Error)]
 #[allow(non_camel_case_types)]
-pub enum Token {
+pub enum SyntaxKind {
     ROOT = 0,
 
     #[regex(r"(\n|\r\n)+")]
@@ -80,13 +80,13 @@ pub enum Token {
     COMMENT,
 }
 
-impl From<Token> for rowan::SyntaxKind {
-    fn from(kind: Token) -> Self {
+impl From<SyntaxKind> for rowan::SyntaxKind {
+    fn from(kind: SyntaxKind) -> Self {
         Self(kind as u16)
     }
 }
 
-fn lex_single_line_string(lex: &mut logos::Lexer<Token>, quote: char) -> bool {
+fn lex_single_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
     let remainder: &str = lex.remainder();
     let mut total_len = 0;
 
@@ -101,7 +101,7 @@ fn lex_single_line_string(lex: &mut logos::Lexer<Token>, quote: char) -> bool {
     false
 }
 
-fn lex_multi_line_string(lex: &mut logos::Lexer<Token>, quote: char) -> bool {
+fn lex_multi_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
     let remainder: &str = lex.remainder();
 
     let mut total_len = 0;
@@ -169,43 +169,43 @@ mod tests {
 
     #[test]
     fn bare_key() {
-        let mut lex = Token::lexer("test");
+        let mut lex = SyntaxKind::lexer("test");
 
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
     }
 
     #[test]
     fn key_value() {
-        let mut lex = Token::lexer("key = 'value'");
+        let mut lex = SyntaxKind::lexer("key = 'value'");
 
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
-        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
-        assert_eq!(lex.next(), Some(Ok(Token::LITERAL_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
     }
 
     #[test]
     fn inline_table() {
-        let mut lex = Token::lexer("key1 = { key2 = 'value' }");
+        let mut lex = SyntaxKind::lexer("key1 = { key2 = 'value' }");
 
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
-        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
-        assert_eq!(lex.next(), Some(Ok(Token::BRACE_START)));
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
-        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
-        assert_eq!(lex.next(), Some(Ok(Token::LITERAL_STRING)));
-        assert_eq!(lex.next(), Some(Ok(Token::BRACE_END)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_START)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_END)));
     }
 
     #[test]
     fn invalid_source() {
-        let mut lex = Token::lexer("key1 = { key2 = 'value");
+        let mut lex = SyntaxKind::lexer("key1 = { key2 = 'value");
 
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
-        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
-        assert_eq!(lex.next(), Some(Ok(Token::BRACE_START)));
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
-        assert_eq!(lex.next(), Some(Ok(Token::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_START)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
         assert_eq!(lex.next(), Some(Err(crate::Error::InvalidToken)));
-        assert_eq!(lex.next(), Some(Ok(Token::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
     }
 }

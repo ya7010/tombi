@@ -15,7 +15,7 @@ pub struct StringNode<'a> {
 
 impl<'a> crate::TryFromSyntax<'a> for StringNode<'a> {
     fn try_from_syntax(syntax: &'a syntax::SyntaxElement) -> Result<Self, Vec<crate::Error>> {
-        use syntax::Token::*;
+        use syntax::SyntaxKind::*;
 
         let kind = match syntax.kind() {
             BASIC_STRING => StringKind::Basic,
