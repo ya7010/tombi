@@ -18,6 +18,9 @@
 		},
 		{
 			"path": "crates/formatter"
-		}
+		},
+		{
+			"path": "xtask"
+		},
 	]
 }
