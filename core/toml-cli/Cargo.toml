@@ -10,7 +10,6 @@ name = "toml"
 path = "src/main.rs"
 
 [dependencies]
-formatter = { path = "../../crates/formatter" }
-
 clap = { version = "4.5.20", features = ["derive"] }
+formatter.workspace = true
 thiserror.workspace = true

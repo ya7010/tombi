@@ -11,9 +11,6 @@
 			"path": "core/toml-lsp"
 		},
 		{
-			"path": "crates/lexer"
-		},
-		{
 			"path": "crates/dom"
 		},
 		{

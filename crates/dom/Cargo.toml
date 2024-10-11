@@ -6,6 +6,5 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-syntax = { path = "../syntax" }
-
+syntax.workspace = true
 thiserror.workspace = true

@@ -9,8 +9,12 @@ authors = ["yassun7010 <yassun7010@outlook.com>"]
 license = "MIT"
 
 [workspace.dependencies]
-serde = { version = "^1.0.0", features = ["derive"] }
-schemars = "0.8.21"
-thiserror = "1.0.64"
-rowan = "0.15.16"
+dom = { path = "crates/dom" }
+formatter = { path = "crates/formatter" }
 logos = "0.14.2"
+parser = { path = "crates/parser" }
+rowan = "0.15.16"
+schemars = "0.8.21"
+serde = { version = "^1.0.0", features = ["derive"] }
+syntax = { path = "crates/syntax" }
+thiserror = "1.0.64"
