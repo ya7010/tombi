@@ -18,3 +18,4 @@ schemars = "0.8.21"
 serde = { version = "^1.0.0", features = ["derive"] }
 syntax = { path = "crates/syntax" }
 thiserror = "1.0.64"
+clap = { version = "4.5.20", features = ["derive"] }

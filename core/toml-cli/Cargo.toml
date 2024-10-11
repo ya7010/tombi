@@ -10,6 +10,6 @@ name = "toml"
 path = "src/main.rs"
 
 [dependencies]
-clap = { version = "4.5.20", features = ["derive"] }
+clap.workspace = true
 formatter.workspace = true
 thiserror.workspace = true
