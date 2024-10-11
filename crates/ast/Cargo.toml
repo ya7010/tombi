@@ -1,0 +1,9 @@
+[package]
+name = "ast"
+version = "0.0.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+syntax = { path = "../syntax" }

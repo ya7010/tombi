@@ -52,6 +52,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast"
+version = "0.0.0"
+dependencies = [
+ "syntax",
+]
+
+[[package]]
 name = "beef"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -96,6 +103,10 @@ name = "clap_lex"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
+
+[[package]]
+name = "codegen"
+version = "0.0.1"
 
 [[package]]
 name = "colorchoice"
