@@ -6,5 +6,10 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
+parser = { path = "../../crates/parser" }
+lexer = { path = "../../crates/lexer" }
+dom = { path = "../../crates/dom" }
+
 schemars.workspace = true
 serde.workspace = true
+thiserror.workspace = true

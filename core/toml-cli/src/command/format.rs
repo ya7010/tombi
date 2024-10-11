@@ -7,6 +7,6 @@ pub struct Args {
 }
 
 pub fn run(_args: Args) -> Result<(), crate::Error> {
-    formatter::format("", &formatter::Options::default());
+    formatter::format("", &formatter::Options::default())?;
     Ok(())
 }

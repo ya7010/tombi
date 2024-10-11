@@ -1,6 +1,7 @@
 mod container;
 mod error;
 
+use dom::TryFromSyntax;
 pub use error::Error;
 pub use lexer::Token;
 use logos::Logos;
@@ -10,7 +11,7 @@ pub fn parse(source: &str) -> Parse {
     let mut lexer = lexer::Token::lexer(source);
     let mut builder = rowan::GreenNodeBuilder::default();
     let mut errors = vec![];
-
+    builder.start_node(ROOT.into());
     while let Some(token) = lexer.next() {
         match token {
             Ok(token) => match token {
@@ -57,6 +58,8 @@ pub fn parse(source: &str) -> Parse {
         }
     }
 
+    builder.finish_node();
+
     Parse {
         green_node: builder.finish(),
         errors: vec![],
@@ -67,4 +70,11 @@ pub fn parse(source: &str) -> Parse {
 pub struct Parse {
     pub green_node: rowan::GreenNode,
     pub errors: Vec<crate::Error>,
+}
+
+impl Parse {
+    /// Turn the parse into a syntax node.
+    pub fn into_syntax(self) -> lexer::SyntaxNode {
+        lexer::SyntaxNode::new_root(self.green_node)
+    }
 }
