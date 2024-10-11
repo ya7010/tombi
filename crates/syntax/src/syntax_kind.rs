@@ -83,6 +83,7 @@ pub enum SyntaxKind {
 }
 
 impl From<SyntaxKind> for rowan::SyntaxKind {
+    #[inline]
     fn from(kind: SyntaxKind) -> Self {
         Self(kind as u16)
     }
