@@ -14,7 +14,7 @@ pub struct Args {
 }
 
 pub fn run(args: Args) -> Result<(), crate::Error> {
-    match crate::arg::FileInput::from(args.files) {
+    match crate::arg::FileInput::from(args.files.as_ref()) {
         crate::arg::FileInput::Stdin => {
             let mut buffer = String::new();
             if let Ok(_) = std::io::stdin().read_to_string(&mut buffer) {
