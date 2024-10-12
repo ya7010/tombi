@@ -8,6 +8,7 @@ pub trait AstNode {
     fn syntax(&self) -> &syntax::SyntaxNode;
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct AstChildren<N> {
     inner: syntax::SyntaxNodeChildren,
@@ -23,6 +24,7 @@ impl<N> AstChildren<N> {
     }
 }
 
+#[allow(dead_code)]
 mod support {
     use super::{AstChildren, AstNode};
 

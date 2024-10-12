@@ -1,4 +1,5 @@
 mod app;
+mod arg;
 mod command;
 mod error;
 
