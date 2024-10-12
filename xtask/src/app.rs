@@ -19,7 +19,7 @@ where
     }
 }
 
-pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
+pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
     let args = args.into();
     match args.subcommand {
         command::XTaskCommand::Codegen(subcommand) => match subcommand {

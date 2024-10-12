@@ -9,12 +9,16 @@ authors = ["yassun7010 <yassun7010@outlook.com>"]
 license = "MIT"
 
 [workspace.dependencies]
+anyhow = "1.0.89"
 ast = { path = "crates/ast" }
 clap = { version = "4.5.20", features = ["derive"] }
 dom = { path = "crates/dom" }
+either = "1.13.0"
 formatter = { path = "crates/formatter" }
 logos = "0.14.2"
 parser = { path = "crates/parser" }
+proc-macro2 = "1.0.87"
+quote = "1.0.37"
 rowan = "0.15.16"
 schemars = "0.8.21"
 serde = { version = "^1.0.0", features = ["derive"] }

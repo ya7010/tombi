@@ -1,10 +1,8 @@
 mod app;
 mod codegen;
 mod command;
-mod error;
+mod glue;
 mod utils;
-
-pub use error::Error;
 
 fn main() {
     if let Err(err) = app::run(std::env::args_os()) {
