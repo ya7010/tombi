@@ -1,4 +1,4 @@
-// Toml Un-Grammar.
+// TOML Un-Grammar.
 //
 // This grammar specifies the structure of TOML's concrete syntax tree.
 // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
@@ -17,67 +17,48 @@
 //   A?                          -- zero or one repetition
 //   (A)                         -- same as A
 //   label:A                     -- suggested name for field of AST node
-// NOTES
-//
-// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
-// - Bogus nodes are special nodes used to keep track of broken code; they are
-//   not part of the grammar but they will appear inside the green tree
-///////////////
-// BOGUS NODES
-///////////////
-// SyntaxElement is a generic data structure that is meant to track nodes and tokens
-// in cases where we care about both types
-//
-// As Bogus* node will need to yield both tokens and nodes without discrimination,
-// and their children will need to yield nodes and tokens as well.
-// For this reason, SyntaxElement = SyntaxElement
 
-SyntaxElement = SyntaxElement
-TomlBogus = SyntaxElement*
-TomlBogusValue = SyntaxElement*
-
-TomlRoot =
-    value: TomlRootValue*
+Root =
+    value: RootValue*
     eof: 'EOF'
 
-TomlRootValue =
-    TomlKeyValue
-    | TomlTable
-    | TomlArrayOfTable
-    | TomlBogusValue
+RootValue =
+    KeyValue
+    | Table
+    | ArrayOfTable
 
-TomlKeyValue = key: TomlKey '=' value: TomlAnyValue
+KeyValue = key: Key '=' value: Value
 
-TomlKey = TomlSingleKey ('.' TomlSingleKey)*
-TomlSingleKey = 'bare_key' | 'quoted_key'
+Key = SingleKey ('.' SingleKey)*
+SingleKey = 'bare_key' | 'quoted_key'
 
-TomlAnyValue =
-    TomlStringValue
-    | TomlIntegerValue
-    | TomlFloatValue
-    | TomlBooleanValue
-    | TomlOffsetDatetimeValue
-    | TomlLocalDatetimeValue
-    | TomlLocalDateValue
-    | TomlLocalTimeValue
-    | TomlArrayValue
-    | TomlInlineTableValue
-    | TomlBogusValue
-TomlStringValue = value: 'basic_string' | 'literal_string'
-TomlIntegerValue = value: 'integer'
-TomlFloatValue = value: 'float'
-TomlBooleanValue = value_token: ('true' | 'false')
-TomlOffsetDatetimeValue = value: 'offset_date_time'
-TomlLocalDatetimeValue = value: 'local_date_time'
-TomlLocalDateValue = value: 'local_date'
-TomlLocalTimeValue = value: 'local_time'
+Value =
+    String
+    | Integer
+    | Float
+    | Boolean
+    | OffsetDatetime
+    | LocalDatetime
+    | LocalDate
+    | LocalTime
+    | Array
+    | InlineTable
 
-TomlArrayValue = '[' elements: TomlArrayElementList ']'
-TomlArrayElementList = (TomlAnyValue (',' TomlAnyValue)* ','?)
+String = value: 'basic_string' | 'literal_string'
+Integer = value: 'integer'
+Float = value: 'float'
+Boolean = value_token: ('true' | 'false')
+OffsetDatetime = value: 'offset_date_time'
+LocalDatetime = value: 'local_date_time'
+LocalDate = value: 'local_date'
+LocalTime = value: 'local_time'
 
-TomlInlineTableValue = '{' elements: TomlInlineTableElementList '}'
-TomlInlineTableElementList = (TomlKeyValue (',' TomlKeyValue)* ','?)
+Array = '[' elements: ArrayElementList ']'
+ArrayElementList = (Value (',' Value)* ','?)
 
-TomlTable = '[' header: TomlKey ']'
+InlineTable = '{' elements: InlineTableElementList '}'
+InlineTableElementList = (KeyValue (',' KeyValue)* ','?)
 
-TomlArrayOfTable = '[[' header: TomlKey ']]'
+Table = '[' header: Key ']'
+
+ArrayOfTable = '[[' header: Key ']]'

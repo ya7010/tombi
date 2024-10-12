@@ -15,7 +15,7 @@ pub fn run(_args: Args) -> Result<(), anyhow::Error> {
     write_file(
         &generate_syntax_kind(&grammar)
             .context(format!("Failed to generate syntax kind from grammar."))?,
-        &project_root().join("crates/syntax/src/syntax_kind/generated.rs"),
+        &project_root().join("crates/syntax/src/generated/syntax_kind.rs"),
     );
     Ok(())
 }

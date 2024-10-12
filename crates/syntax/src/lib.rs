@@ -1,7 +1,10 @@
 mod error;
+mod generated;
 mod kind;
 
 pub use error::{Error, SyntaxError};
+#[allow(unused_imports)]
+pub use generated::*;
 pub use kind::SyntaxKind;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

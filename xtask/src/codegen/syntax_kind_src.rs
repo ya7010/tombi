@@ -1,14 +1,13 @@
 #![allow(dead_code)]
 
-pub const PUNCT: &[(&str, &str)] = &[
-    (":", "COLON"),
+pub const PUNCTUATIONS: &[(&str, &str)] = &[
     (",", "COMMA"),
-    ("(", "L_PAREN"),
-    (")", "R_PAREN"),
-    ("{", "L_CURLY"),
-    ("}", "R_CURLY"),
-    ("[", "L_BRACK"),
-    ("]", "R_BRACK"),
+    (".", "DOT"),
+    ("=", "EQUAL"),
+    ("[", "BRACKET_START"),
+    ("]", "BRACKET_END"),
+    ("{", "BRACE_START"),
+    ("}", "BRACE_END"),
 ];
 
 pub const KEYWORDS: &[&str] = &["true", "false"];
