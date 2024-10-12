@@ -1,3 +1,6 @@
+mod arg;
+mod command;
+
 use clap::Parser;
 
 /// TOML: TOML linter and code formatter.
@@ -5,7 +8,7 @@ use clap::Parser;
 #[command(name = "toml", version)]
 pub struct Args {
     #[command(subcommand)]
-    pub subcommand: crate::command::TomlCommand,
+    pub subcommand: command::TomlCommand,
 }
 
 impl<I, T> From<I> for Args
@@ -22,7 +25,7 @@ where
 pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
     let args = args.into();
     match args.subcommand {
-        crate::command::TomlCommand::Format(args) => crate::command::format::run(args),
-        crate::command::TomlCommand::Lint(args) => crate::command::lint::run(args),
+        command::TomlCommand::Format(args) => command::format::run(args),
+        command::TomlCommand::Lint(args) => command::lint::run(args),
     }
 }
