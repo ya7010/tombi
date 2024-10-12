@@ -1,7 +1,7 @@
 mod error;
 mod kind;
 
-pub use error::Error;
+pub use error::{Error, SyntaxError};
 pub use kind::SyntaxKind;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

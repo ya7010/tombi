@@ -1,0 +1,9 @@
+use syntax::{SyntaxError, SyntaxNode};
+
+pub(crate) fn validate(root: &SyntaxNode, errors: &mut Vec<SyntaxError>) {
+    // let _p = tracing::info_span!("parser::validate").entered();
+
+    for node in root.descendants() {
+        continue;
+    }
+}

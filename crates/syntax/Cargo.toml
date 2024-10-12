@@ -6,6 +6,7 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-logos.workspace = true
-rowan.workspace = true
-thiserror.workspace = true
+logos = { workspace = true }
+rowan = { workspace = true }
+thiserror = { workspace = true }
+text-size = { workspace = true }

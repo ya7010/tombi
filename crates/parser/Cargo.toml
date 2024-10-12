@@ -6,8 +6,9 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-dom.workspace = true
-logos.workspace = true
-rowan.workspace = true
-syntax.workspace = true
-thiserror.workspace = true
+dom = { workspace = true }
+logos = { workspace = true }
+rowan = { workspace = true }
+syntax = { workspace = true }
+thiserror = { workspace = true }
+ast = { workspace = true }
