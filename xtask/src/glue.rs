@@ -1,5 +1,4 @@
-//
-! A shell but bad, some cross platform glue code
+//! A shell but bad, some cross platform glue code
 #![allow(dead_code)]
 
 use std::{
