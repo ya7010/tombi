@@ -147,6 +147,67 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
         })
         .unzip();
 
+    let (any_node_defs, any_node_boilerplate_impls): (Vec<_>, Vec<_>) = ast
+        .nodes
+        .iter()
+        .flat_map(|node| node.traits.iter().map(move |t: &String| (t, node)))
+        .into_group_map()
+        .into_iter()
+        .sorted_by_key(|(name, _)| *name)
+        .map(|(trait_name, nodes)| {
+            let name = format_ident!("Any{}", trait_name);
+            let trait_name = format_ident!("{}", trait_name);
+            let kinds: Vec<_> = nodes
+                .iter()
+                .map(|name| format_ident!("{}", &name.name.to_string().to_case(Case::UpperSnake)))
+                .collect();
+            let nodes = nodes.iter().map(|node| format_ident!("{}", node.name));
+            (
+                quote! {
+                    #[pretty_doc_comment_placeholder_workaround]
+                    #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+                    pub struct #name {
+                        pub(crate) syntax: SyntaxNode,
+                    }
+                    impl ast::#trait_name for #name {}
+                },
+                quote! {
+                    impl #name {
+                        #[inline]
+                        pub fn new<T: ast::#trait_name>(node: T) -> #name {
+                            #name {
+                                syntax: node.syntax().clone()
+                            }
+                        }
+                    }
+                    impl AstNode for #name {
+                        #[inline]
+                        fn can_cast(kind: SyntaxKind) -> bool {
+                            matches!(kind, #(#kinds)|*)
+                        }
+                        #[inline]
+                        fn cast(syntax: SyntaxNode) -> Option<Self> {
+                            Self::can_cast(syntax.kind()).then_some(#name { syntax })
+                        }
+                        #[inline]
+                        fn syntax(&self) -> &SyntaxNode {
+                            &self.syntax
+                        }
+                    }
+
+                    #(
+                        impl From<#nodes> for #name {
+                            #[inline]
+                            fn from(node: #nodes) -> #name {
+                                #name { syntax: node.syntax }
+                            }
+                        }
+                    )*
+                },
+            )
+        })
+        .unzip();
+
     let enum_names = ast.enums.iter().map(|it| &it.name);
     let node_names = ast.nodes.iter().map(|it| &it.name);
 
@@ -172,8 +233,10 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
 
             #(#node_defs)*
             #(#enum_defs)*
+            #(#any_node_defs)*
             #(#node_boilerplate_impls)*
             #(#enum_boilerplate_impls)*
+            #(#any_node_boilerplate_impls)*
             #(#display_impls)*
         }
         .to_string(),
