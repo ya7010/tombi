@@ -71,7 +71,6 @@ pub fn generate_syntax_kind(_grammer: &Grammar) -> Result<String, anyhow::Error>
         macro_rules! T {
             #([#punctuation_values] => { $crate::SyntaxKind::#punctuations };)*
             #([#keyword_idents] => { $crate::SyntaxKind::#keywords };)*
-            [ident] => { $crate::SyntaxKind::IDENT };
         }
     };
 

@@ -39,7 +39,7 @@ pub fn parse(source: &str) -> Parse<SyntaxNode> {
                 | MULTI_LINE_BASIC_STRING
                 | LITERAL_STRING
                 | MULTI_LINE_LITERAL_STRING
-                | INTEGER
+                | INTEGER_DEC
                 | INTEGER_HEX
                 | INTEGER_OCT
                 | INTEGER_BIN
