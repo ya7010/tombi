@@ -49,7 +49,7 @@ pub enum SyntaxKind {
     MULTI_LINE_LITERAL_STRING,
 
     #[regex(r"[+-]?[0-9_]+", priority = 4)]
-    INTEGER,
+    INTEGER_DEC,
 
     #[regex(r"0x[0-9A-Fa-f_]+")]
     INTEGER_HEX,
