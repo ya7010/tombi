@@ -15,11 +15,11 @@ impl Array {
         support::children(&self.syntax)
     }
     #[inline]
-    pub fn array_open_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_start_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['['])
     }
     #[inline]
-    pub fn array_close_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_end_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
     }
 }
@@ -34,11 +34,11 @@ impl ArrayOfTable {
         support::child(&self.syntax)
     }
     #[inline]
-    pub fn array_table_open_token(&self) -> Option<SyntaxToken> {
+    pub fn double_bracket_start_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!["[["])
     }
     #[inline]
-    pub fn array_table_close_token(&self) -> Option<SyntaxToken> {
+    pub fn double_bracket_end_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!["]]"])
     }
 }
@@ -87,11 +87,11 @@ impl InlineTable {
         support::children(&self.syntax)
     }
     #[inline]
-    pub fn inline_table_open_token(&self) -> Option<SyntaxToken> {
+    pub fn brace_start_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['{'])
     }
     #[inline]
-    pub fn inline_table_close_token(&self) -> Option<SyntaxToken> {
+    pub fn brace_end_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['}'])
     }
 }
@@ -204,11 +204,11 @@ impl Table {
         support::child(&self.syntax)
     }
     #[inline]
-    pub fn array_open_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_start_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['['])
     }
     #[inline]
-    pub fn array_close_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_end_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
     }
 }

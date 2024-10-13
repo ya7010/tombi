@@ -3,7 +3,7 @@ use crate::{
         ast_node::generate_ast_node, ast_token::generate_ast_token, lower,
         syntax_kind::generate_syntax_kind,
     },
-    utils::project_root,
+    utils::{ensure_rustfmt, project_root},
 };
 use anyhow::Context;
 use ungrammar::Grammar;
@@ -19,6 +19,8 @@ pub fn run(_args: Args) -> Result<(), anyhow::Error> {
         .unwrap();
 
     let ast = lower(&grammar);
+
+    ensure_rustfmt()?;
 
     write_file(
         &generate_syntax_kind().context(format!("Failed to generate syntax kind from grammar."))?,

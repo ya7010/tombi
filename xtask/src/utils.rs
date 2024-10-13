@@ -20,7 +20,6 @@ pub fn prepend_generated_preamble(content: impl std::fmt::Display) -> String {
 
 pub fn reformat_without_preamble(text: impl std::fmt::Display) -> Result<String, anyhow::Error> {
     let _e = pushenv("RUSTUP_TOOLCHAIN", "stable");
-    ensure_rustfmt()?;
     let output = run!(
         "rustfmt --config newline_style=Unix";
         <text.to_string().as_bytes()

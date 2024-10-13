@@ -69,12 +69,12 @@ impl Field {
         match self {
             Field::Token(name) => {
                 let name = match name.as_str() {
-                    "'{'" => "inline_table_open",
-                    "'}'" => "inline_table_close",
-                    "'['" => "array_open",
-                    "']'" => "array_close",
-                    "[[" => "array_table_open",
-                    "]]" => "array_table_close",
+                    "'{'" => "brace_start",
+                    "'}'" => "brace_end",
+                    "'['" => "bracket_start",
+                    "']'" => "bracket_end",
+                    "[[" => "double_bracket_start",
+                    "]]" => "double_bracket_end",
                     "=" => "eq",
                     "." => "dot",
                     "," => "comma",
