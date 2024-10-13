@@ -27,7 +27,7 @@ pub const LITERALS: &[&str] = &[
     "LOCAL_DATE",
     "LOCAL_TIME",
 ];
-pub const TOKENS: &[&str] = &["NEWLINE", "WHITESPACE", "BARE_KEY", "COMMENT"];
+pub const TOKENS: &[&str] = &["DOTTED_KEY", "NEWLINE", "WHITESPACE", "BARE_KEY", "COMMENT"];
 
 pub const NODES: &[&str] = &[
     "ROOT",
@@ -36,8 +36,12 @@ pub const NODES: &[&str] = &[
     "KEY",
     "VALUE",
     "KEY_VALUE",
+    "STRING",
+    "INTEGER",
     "ARRAY",
+    "ARRAY_ELEMENT",
     "TABLE",
     "INLINE_TABLE",
+    "INLINE_TABLE_ELEMENT_LIST",
     "ARRAY_OF_TABLE",
 ];

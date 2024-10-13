@@ -20,38 +20,44 @@
 
 KeyValue = key: Key '=' value: Value
 
-Key = SingleKey ('.' SingleKey)*
-SingleKey = 'bare_key' | 'quoted_key'
+Key = BareKey | QuotedKey | DottedKeys
+BareKey = '@bare_key'
+QuotedKey = '@basic_string' | '@literal_string'
+DottedKeys = DottedKey ('.' DottedKey)*
+DottedKey = BareKey | QuotedKey
 
 Value =
     String
     | Integer
     | Float
     | Boolean
-    | OffsetDatetime
-    | LocalDatetime
+    | OffsetDateTime
+    | LocalDateTime
     | LocalDate
     | LocalTime
     | Array
     | InlineTable
 
-String = value: '@basic_string' | '@literal_string'
-Integer = value: '@integer'
+String = value:
+    '@basic_string'
+    | '@multi_line_basic_string'
+    | '@literal_string'
+    | '@multi_line_literal_string'
+Integer = value:
+    '@integer_dec'
+    | '@integer_hex'
+    | '@integer_oct'
+    | '@integer_bin'
 Float = value: '@float'
 Boolean = value: ('true' | 'false')
-OffsetDatetime = value: '@offset_date_time'
-LocalDatetime = value: '@local_date_time'
+OffsetDateTime = value: '@offset_date_time'
+LocalDateTime = value: '@local_date_time'
 LocalDate = value: '@local_date'
 LocalTime = value: '@local_time'
 
-Array = '[' elements: ArrayElementList ']'
-ArrayElementList = (Value (',' Value)* ','?)
-
-InlineTable = '{' elements: InlineTableElementList '}'
-InlineTableElementList = (KeyValue (',' KeyValue)* ','?)
-
-Table = '[' header: Key ']'
-
+Array = '[' elements: (Value (',' Value)* ','?) ']'
+Table = '[' header: Key ']' 
+InlineTable = '{' elements: (KeyValue (',' KeyValue)* ','?) '}'
 ArrayOfTable = '[[' header: Key ']]'
 
 Root =

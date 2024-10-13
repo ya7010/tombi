@@ -77,8 +77,29 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
         /// Utility macro for creating a SyntaxKind through simple macro syntax
         #[macro_export]
         macro_rules! T {
+            // Punctuation
             #([#punctuation_values] => { $crate::SyntaxKind::#punctuations };)*
+            // Keywords
             #([#keyword_idents] => { $crate::SyntaxKind::#keywords };)*
+            // Bare key
+            [bare_key] => { $crate::SyntaxKind::BARE_KEY };
+            // String
+            [basic_string] => { $crate::SyntaxKind::BASIC_STRING };
+            [multi_line_basic_string] => { $crate::SyntaxKind::MULTI_LINE_BASIC_STRING };
+            [literal_string] => { $crate::SyntaxKind::LITERAL_STRING };
+            [multi_line_literal_string] => { $crate::SyntaxKind::MULTI_LINE_LITERAL_STRING };
+            // Integer
+            [integer_dec] => { $crate::SyntaxKind::INTEGER_DEC };
+            [integer_hex] => { $crate::SyntaxKind::INTEGER_HEX };
+            [integer_oct] => { $crate::SyntaxKind::INTEGER_OCT };
+            [integer_bin] => { $crate::SyntaxKind::INTEGER_BIN };
+            // Float
+            [float] => { $crate::SyntaxKind::FLOAT };
+            // Date and time
+            [offset_date_time] => { $crate::SyntaxKind::OFFSET_DATE_TIME };
+            [local_date_time] => { $crate::SyntaxKind::LOCAL_DATE_TIME };
+            [local_date] => { $crate::SyntaxKind::LOCAL_DATE };
+            [local_time] => { $crate::SyntaxKind::LOCAL_TIME };
         }
     };
 
