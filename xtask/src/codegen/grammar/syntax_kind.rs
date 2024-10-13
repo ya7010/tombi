@@ -86,6 +86,82 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
             }
         }
 
+        fn lex_single_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
+            let remainder: &str = lex.remainder();
+            let mut total_len = 0;
+
+            for c in remainder.chars() {
+                total_len += c.len_utf8();
+
+                if c == quote {
+                    lex.bump(remainder[0..total_len].as_bytes().len());
+                    return true;
+                }
+            }
+            false
+        }
+
+        fn lex_multi_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
+            let remainder: &str = lex.remainder();
+
+            let mut total_len = 0;
+            let mut quote_count = 0;
+            let mut escaped = false;
+
+            // As the string can contain ",
+            // we can end up with more than 3 "-s at
+            // the end, in that case we need to include all
+            // in the string.
+            let mut quotes_found = false;
+
+            for c in remainder.chars() {
+                if quotes_found {
+                    if c != quote {
+                        if quote_count >= 6 {
+                            return false;
+                        }
+
+                        lex.bump(remainder[0..total_len].as_bytes().len());
+                        return true;
+                    } else {
+                        quote_count += 1;
+                        total_len += c.len_utf8();
+                        continue;
+                    }
+                }
+                total_len += c.len_utf8();
+
+                if c == '\\' {
+                    escaped = true;
+                    continue;
+                }
+
+                if c == quote && !escaped {
+                    quote_count += 1;
+                } else {
+                    quote_count = 0;
+                }
+
+                if quote_count == 3 {
+                    quotes_found = true;
+                }
+
+                escaped = false;
+            }
+
+            // End of input
+            if quotes_found {
+                if quote_count >= 6 {
+                    return false;
+                }
+
+                lex.bump(remainder[0..total_len].as_bytes().len());
+                true
+            } else {
+                false
+            }
+        }
+
         /// Utility macro for creating a SyntaxKind through simple macro syntax
         #[macro_export]
         macro_rules! T {

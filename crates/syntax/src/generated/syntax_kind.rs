@@ -26,13 +26,13 @@ pub enum SyntaxKind {
     DOUBLE_BRACKET_END,
     TRUE_KW,
     FALSE_KW,
-    #[regex("\"")]
+    # [regex ("\"" , callback = | lex | lex_single_line_string (lex , '"'))]
     BASIC_STRING,
-    #[regex("\"\"\"")]
+    # [regex ("\"\"\"" , callback = | lex | lex_multi_line_string (lex , '"'))]
     MULTI_LINE_BASIC_STRING,
-    #[regex("'")]
+    # [regex ("'" , callback = | lex | lex_single_line_string (lex , '\''))]
     LITERAL_STRING,
-    #[regex("'''")]
+    # [regex ("'''" , callback = | lex | lex_multi_line_string (lex , '\''))]
     MULTI_LINE_LITERAL_STRING,
     #[regex("[+-]?[0-9_]+", priority = 4)]
     INTEGER_DEC,
@@ -55,9 +55,9 @@ pub enum SyntaxKind {
     #[regex("(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?:\\.|,)\\d+)?")]
     LOCAL_TIME,
     #[regex("[ \\t]+")]
-    NEWLINE,
-    #[regex("(\\n|\\r\\n)+")]
     WHITESPACE,
+    #[regex("(\\n|\\r\\n)+")]
+    NEWLINE,
     #[regex("[A-Za-z0-9_-]+", priority = 2)]
     BARE_KEY,
     #[regex("#[^\\n\\r]*")]
@@ -91,6 +91,63 @@ impl From<SyntaxKind> for rowan::SyntaxKind {
     #[inline]
     fn from(k: SyntaxKind) -> Self {
         Self(k as u16)
+    }
+}
+fn lex_single_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
+    let remainder: &str = lex.remainder();
+    let mut total_len = 0;
+    for c in remainder.chars() {
+        total_len += c.len_utf8();
+        if c == quote {
+            lex.bump(remainder[0..total_len].as_bytes().len());
+            return true;
+        }
+    }
+    false
+}
+fn lex_multi_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {
+    let remainder: &str = lex.remainder();
+    let mut total_len = 0;
+    let mut quote_count = 0;
+    let mut escaped = false;
+    let mut quotes_found = false;
+    for c in remainder.chars() {
+        if quotes_found {
+            if c != quote {
+                if quote_count >= 6 {
+                    return false;
+                }
+                lex.bump(remainder[0..total_len].as_bytes().len());
+                return true;
+            } else {
+                quote_count += 1;
+                total_len += c.len_utf8();
+                continue;
+            }
+        }
+        total_len += c.len_utf8();
+        if c == '\\' {
+            escaped = true;
+            continue;
+        }
+        if c == quote && !escaped {
+            quote_count += 1;
+        } else {
+            quote_count = 0;
+        }
+        if quote_count == 3 {
+            quotes_found = true;
+        }
+        escaped = false;
+    }
+    if quotes_found {
+        if quote_count >= 6 {
+            return false;
+        }
+        lex.bump(remainder[0..total_len].as_bytes().len());
+        true
+    } else {
+        false
     }
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]

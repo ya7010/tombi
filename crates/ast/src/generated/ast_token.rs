@@ -4,17 +4,17 @@ use crate::AstToken;
 use syntax::{SyntaxKind, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Newline {
+pub struct Whitespace {
     pub(crate) syntax: SyntaxToken,
 }
-impl std::fmt::Display for Newline {
+impl std::fmt::Display for Whitespace {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.syntax, f)
     }
 }
-impl AstToken for Newline {
+impl AstToken for Whitespace {
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::NEWLINE
+        kind == SyntaxKind::WHITESPACE
     }
     fn cast(syntax: SyntaxToken) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -29,17 +29,17 @@ impl AstToken for Newline {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Whitespace {
+pub struct Newline {
     pub(crate) syntax: SyntaxToken,
 }
-impl std::fmt::Display for Whitespace {
+impl std::fmt::Display for Newline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.syntax, f)
     }
 }
-impl AstToken for Whitespace {
+impl AstToken for Newline {
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::WHITESPACE
+        kind == SyntaxKind::NEWLINE
     }
     fn cast(syntax: SyntaxToken) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {

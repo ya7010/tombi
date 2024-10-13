@@ -1,4 +1,3 @@
-use proc_macro2::Literal;
 use quote::{format_ident, quote};
 
 pub const PUNCTUATIONS: &[(&str, &str)] = &[
@@ -16,10 +15,26 @@ pub const PUNCTUATIONS: &[(&str, &str)] = &[
 pub const KEYWORDS: &[&str] = &["true", "false"];
 
 pub const LITERALS: &[RegexItem] = &[
-    RegexItem::new("BASIC_STRING", r#"""#),
-    RegexItem::new("MULTI_LINE_BASIC_STRING", r#"""""#),
-    RegexItem::new("LITERAL_STRING", r#"'"#),
-    RegexItem::new("MULTI_LINE_LITERAL_STRING", r#"'''"#),
+    RegexItem::new_with_callback(
+        "BASIC_STRING",
+        r#"""#,
+        r#"|lex| lex_single_line_string(lex, '"')"#,
+    ),
+    RegexItem::new_with_callback(
+        "MULTI_LINE_BASIC_STRING",
+        r#"""""#,
+        r#"|lex| lex_multi_line_string(lex, '"')"#,
+    ),
+    RegexItem::new_with_callback(
+        "LITERAL_STRING",
+        r#"'"#,
+        r#"|lex| lex_single_line_string(lex, '\'')"#,
+    ),
+    RegexItem::new_with_callback(
+        "MULTI_LINE_LITERAL_STRING",
+        r#"'''"#,
+        r#"|lex| lex_multi_line_string(lex, '\'')"#,
+    ),
     RegexItem::new_with_priority("INTEGER_DEC", r"[+-]?[0-9_]+", 4),
     RegexItem::new("INTEGER_HEX", r"0x[0-9A-Fa-f_]+"),
     RegexItem::new("INTEGER_OCT", r"0o[0-7_]+"),
@@ -48,8 +63,8 @@ pub const LITERALS: &[RegexItem] = &[
     ),
 ];
 pub const TOKENS: &[RegexItem] = &[
-    RegexItem::new("NEWLINE", r"[ \t]+"),
-    RegexItem::new("WHITESPACE", r"(\n|\r\n)+"),
+    RegexItem::new("WHITESPACE", r"[ \t]+"),
+    RegexItem::new("NEWLINE", r"(\n|\r\n)+"),
     RegexItem::new_with_priority("BARE_KEY", r"[A-Za-z0-9_-]+", 2),
     RegexItem::new("COMMENT", r"#[^\n\r]*"),
 ];
@@ -112,10 +127,11 @@ impl<'a> RegexItem<'a> {
         let name = format_ident!("{}", self.name);
         let regex = self.regex;
         if let Some(priority) = self.priority {
-            let priority = Literal::u8_unsuffixed(priority);
+            let priority = proc_macro2::Literal::u8_unsuffixed(priority);
             quote! { #[regex(#regex, priority = #priority)] #name }
-        } else if let Some(callback) = self.callback {
-            let callback = format_ident!("{}", callback);
+        } else if let Some(callback) = &self.callback {
+            let callback: proc_macro2::TokenStream = (&*(*callback)).parse().unwrap();
+
             quote! { #[regex(#regex, callback = #callback)] #name }
         } else {
             quote! { #[regex(#regex)] #name }
