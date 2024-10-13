@@ -23,7 +23,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
     let args = args.into();
     match args.subcommand {
         command::XTaskCommand::Codegen(subcommand) => match subcommand {
-            command::CodeGenCommand::Grammer(args) => command::codegen_grammer::run(args)?,
+            command::CodeGenCommand::Grammar(args) => command::codegen_grammar::run(args)?,
         },
     }
     Ok(())

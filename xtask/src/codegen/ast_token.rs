@@ -6,7 +6,7 @@ use crate::utils::reformat;
 
 use super::syntax_kind_src::TOKENS;
 
-pub fn generate_ast_token(_grammer: &Grammar) -> Result<String, anyhow::Error> {
+pub fn generate_ast_token(_grammar: &Grammar) -> Result<String, anyhow::Error> {
     let tokens = TOKENS.iter().map(|token| {
         let name = format_ident!("{}", token.to_case(Case::Pascal));
         let kind = format_ident!("{}", token.to_case(Case::UpperSnake));

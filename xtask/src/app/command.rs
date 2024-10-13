@@ -1,5 +1,5 @@
 pub mod codegen;
-pub mod codegen_grammer;
+pub mod codegen_grammar;
 pub use codegen::CodeGenCommand;
 
 #[derive(clap::Subcommand)]

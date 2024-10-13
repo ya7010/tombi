@@ -6,8 +6,14 @@ use crate::utils::reformat;
 
 use super::syntax_kind_src::NODES;
 
-pub fn generate_ast_node(_grammer: &Grammar) -> Result<String, anyhow::Error> {
-    let tokens = NODES.iter().map(|token| {
+pub fn generate_ast_node(grammar: &Grammar) -> Result<String, anyhow::Error> {
+    let nodes = grammar.iter().collect::<Vec<_>>();
+    for &node in &nodes {
+        let name = grammar[node].name.clone();
+        let rule = &grammar[node].rule;
+        println!("{}: {:?}", name, rule);
+    }
+    let nodes = NODES.iter().map(|token| {
         let name = format_ident!("{}", token.to_case(Case::Pascal));
         let kind = format_ident!("{}", token.to_case(Case::UpperSnake));
         quote! {
@@ -34,7 +40,7 @@ pub fn generate_ast_node(_grammer: &Grammar) -> Result<String, anyhow::Error> {
         quote! {
             use crate::AstNode;
             use syntax::{SyntaxKind, SyntaxNode};
-            #(#tokens)*
+            #(#nodes)*
         }
         .to_string(),
     )

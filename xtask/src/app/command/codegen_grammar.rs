@@ -8,7 +8,7 @@ use crate::{
 use anyhow::Context;
 use ungrammar::Grammar;
 
-/// Codegen Grammer.
+/// Codegen Grammar.
 #[derive(clap::Args)]
 pub struct Args {}
 
