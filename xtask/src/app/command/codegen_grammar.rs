@@ -1,5 +1,5 @@
 use crate::{
-    codegen::{
+    codegen::grammar::{
         ast_node::generate_ast_node, ast_token::generate_ast_token,
         syntax_kind::generate_syntax_kind,
     },
