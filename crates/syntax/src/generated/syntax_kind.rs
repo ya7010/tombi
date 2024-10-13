@@ -1,41 +1,66 @@
 //! Generated file, do not edit by hand, see `xtask/src/codegen`
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[doc = r" The kind of syntax node, e.g. `WHITESPACE`, `COMMENT`, or `TABLE`."]
+#[derive(logos :: Logos, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u16)]
+# [logos (error = crate :: Error)]
 #[allow(non_camel_case_types)]
 pub enum SyntaxKind {
+    #[token(",")]
     COMMA,
+    #[token(".")]
     DOT,
+    #[token("=")]
     EQUAL,
+    #[token("[")]
     BRACKET_START,
+    #[token("]")]
     BRACKET_END,
+    #[token("{")]
     BRACE_START,
+    #[token("}")]
     BRACE_END,
+    #[token("[[")]
     DOUBLE_BRACKET_START,
+    #[token("]]")]
     DOUBLE_BRACKET_END,
     TRUE_KW,
     FALSE_KW,
+    #[regex("\"")]
     BASIC_STRING,
+    #[regex("\"\"\"")]
     MULTI_LINE_BASIC_STRING,
+    #[regex("'")]
     LITERAL_STRING,
+    #[regex("'''")]
     MULTI_LINE_LITERAL_STRING,
+    #[regex("[+-]?[0-9_]+", priority = 4)]
     INTEGER_DEC,
+    #[regex("0x[0-9A-Fa-f_]+")]
     INTEGER_HEX,
+    #[regex("0o[0-7_]+")]
     INTEGER_OCT,
+    #[regex("0b(0|1|_)+")]
     INTEGER_BIN,
+    #[regex("[-+]?([0-9_]+(\\.[0-9_]+)?([eE][+-]?[0-9_]+)?|nan|inf)", priority = 3)]
     FLOAT,
+    #[regex("true|false")]
     BOOLEAN,
+    # [regex ("(?:[1-9]\\d\\d\\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)(?:T|t| )(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?:\\.|,)\\d+)?(?:[Zz]|[+-][01]\\d:[0-5]\\d)")]
     OFFSET_DATE_TIME,
+    # [regex ("(?:[1-9]\\d\\d\\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)(?:T|t| )(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?:\\.|,)\\d+)?")]
     LOCAL_DATE_TIME,
+    # [regex ("(?:[1-9]\\d\\d\\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)")]
     LOCAL_DATE,
+    #[regex("(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?:\\.|,)\\d+)?")]
     LOCAL_TIME,
-    DOTTED_KEY,
     NEWLINE,
     WHITESPACE,
     BARE_KEY,
     COMMENT,
     ROOT,
     QUOTED_KEY,
+    DOTTED_KEY,
     DOTTED_KEYS,
     KEY,
     VALUE,

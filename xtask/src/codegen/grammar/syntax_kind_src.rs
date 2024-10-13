@@ -1,4 +1,5 @@
-#![allow(dead_code)]
+use proc_macro2::Literal;
+use quote::{format_ident, quote};
 
 pub const PUNCTUATIONS: &[(&str, &str)] = &[
     (",", "COMMA"),
@@ -13,27 +14,96 @@ pub const PUNCTUATIONS: &[(&str, &str)] = &[
 ];
 
 pub const KEYWORDS: &[&str] = &["true", "false"];
-pub const LITERALS: &[&str] = &[
-    "BASIC_STRING",
-    "MULTI_LINE_BASIC_STRING",
-    "LITERAL_STRING",
-    "MULTI_LINE_LITERAL_STRING",
-    "INTEGER_DEC",
-    "INTEGER_HEX",
-    "INTEGER_OCT",
-    "INTEGER_BIN",
-    "FLOAT",
-    "BOOLEAN",
-    "OFFSET_DATE_TIME",
-    "LOCAL_DATE_TIME",
-    "LOCAL_DATE",
-    "LOCAL_TIME",
+
+#[derive(Debug)]
+pub struct RegexItem<'a> {
+    pub name: &'a str,
+    regex: &'a str,
+    callback: Option<&'a str>,
+    priority: Option<u8>,
+}
+
+impl<'a> RegexItem<'a> {
+    pub const fn new(name: &'a str, regex: &'a str) -> Self {
+        Self {
+            name,
+            regex,
+            callback: None,
+            priority: None,
+        }
+    }
+
+    pub const fn new_with_callback(name: &'a str, regex: &'a str, callback: &'a str) -> Self {
+        Self {
+            name,
+            regex,
+            callback: Some(callback),
+            priority: None,
+        }
+    }
+
+    pub const fn new_with_priority(name: &'a str, regex: &'a str, priority: u8) -> Self {
+        Self {
+            name,
+            regex,
+            callback: None,
+            priority: Some(priority),
+        }
+    }
+
+    pub fn to_attr_token(&self) -> proc_macro2::TokenStream {
+        let name = format_ident!("{}", self.name);
+        let regex = self.regex;
+        if let Some(priority) = self.priority {
+            let priority = Literal::u8_unsuffixed(priority);
+            quote! { #[regex(#regex, priority = #priority)] #name }
+        } else if let Some(callback) = self.callback {
+            let callback = format_ident!("{}", callback);
+            quote! { #[regex(#regex, callback = #callback)] #name }
+        } else {
+            quote! { #[regex(#regex)] #name }
+        }
+    }
+}
+
+pub const LITERALS: &[RegexItem] = &[
+    RegexItem::new("BASIC_STRING", r#"""#),
+    RegexItem::new("MULTI_LINE_BASIC_STRING", r#"""""#),
+    RegexItem::new("LITERAL_STRING", r#"'"#),
+    RegexItem::new("MULTI_LINE_LITERAL_STRING", r#"'''"#),
+    RegexItem::new_with_priority("INTEGER_DEC", r"[+-]?[0-9_]+", 4),
+    RegexItem::new("INTEGER_HEX", r"0x[0-9A-Fa-f_]+"),
+    RegexItem::new("INTEGER_OCT", r"0o[0-7_]+"),
+    RegexItem::new("INTEGER_BIN", r"0b(0|1|_)+"),
+    RegexItem::new_with_priority(
+        "FLOAT",
+        r"[-+]?([0-9_]+(\.[0-9_]+)?([eE][+-]?[0-9_]+)?|nan|inf)",
+        3,
+    ),
+    RegexItem::new("BOOLEAN", r"true|false"),
+    RegexItem::new(
+        "OFFSET_DATE_TIME",
+        r#"(?:[1-9]\d\d\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)(?:T|t| )(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?(?:[Zz]|[+-][01]\d:[0-5]\d)"#,
+    ),
+    RegexItem::new(
+        "LOCAL_DATE_TIME",
+        r#"(?:[1-9]\d\d\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)(?:T|t| )(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?"#,
+    ),
+    RegexItem::new(
+        "LOCAL_DATE",
+        r#"(?:[1-9]\d\d\d-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)"#,
+    ),
+    RegexItem::new(
+        "LOCAL_TIME",
+        r#"(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?"#,
+    ),
 ];
-pub const TOKENS: &[&str] = &["DOTTED_KEY", "NEWLINE", "WHITESPACE", "BARE_KEY", "COMMENT"];
+pub const TOKENS: &[&str] = &["NEWLINE", "WHITESPACE", "BARE_KEY", "COMMENT"];
 
 pub const NODES: &[&str] = &[
     "ROOT",
     "QUOTED_KEY",
+    "DOTTED_KEY",
     "DOTTED_KEYS",
     "KEY",
     "VALUE",

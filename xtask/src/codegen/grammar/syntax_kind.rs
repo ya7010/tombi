@@ -22,6 +22,13 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
         .iter()
         .map(|(_, name)| format_ident!("{}", name))
         .collect::<Vec<_>>();
+    let attr_punctuations = PUNCTUATIONS
+        .iter()
+        .map(|(token, name)| {
+            let ident = format_ident!("{}", name);
+            quote! { #[token(#token)] #ident }
+        })
+        .collect::<Vec<_>>();
 
     let keyword_idents = KEYWORDS
         .iter()
@@ -32,9 +39,9 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
         .map(|kw| format_ident!("{}_KW", kw.to_case(Case::Upper)))
         .collect::<Vec<_>>();
 
-    let literals = LITERALS
+    let attr_literals = LITERALS
         .iter()
-        .map(|name| format_ident!("{}", name))
+        .map(|item| item.to_attr_token())
         .collect::<Vec<_>>();
 
     let tokens = TOKENS
@@ -48,13 +55,15 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
         .collect::<Vec<_>>();
 
     let token = quote! {
-        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+        #[doc = r" The kind of syntax node, e.g. `WHITESPACE`, `COMMENT`, or `TABLE`."]
+        #[derive(logos::Logos, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
         #[repr(u16)]
+        #[logos(error = crate::Error)]
         #[allow(non_camel_case_types)]
         pub enum SyntaxKind {
-            #(#punctuations,)*
+            #(#attr_punctuations,)*
             #(#keywords,)*
-            #(#literals,)*
+            #(#attr_literals,)*
             #(#tokens,)*
             #(#nodes,)*
         }

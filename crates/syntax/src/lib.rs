@@ -1,6 +1,5 @@
 mod error;
 mod generated;
-mod kind;
 
 pub use error::{Error, SyntaxError};
 pub use generated::SyntaxKind;
