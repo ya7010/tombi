@@ -112,4 +112,51 @@ version = "0.5.8"
         assert_eq!(lex.next(), Some(Err(crate::Error::InvalidToken)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
     }
+
+    #[test]
+    fn array_of_table() {
+        let source = r#"
+[[package]]
+name = "toml"
+version = "0.5.8"
+
+[[package]]
+name = "json"
+version = "1.2.4"
+"#
+        .trim();
+        let mut lex = SyntaxKind::lexer(source);
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::DOUBLE_BRACKET_START)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::DOUBLE_BRACKET_END)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::DOUBLE_BRACKET_START)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::DOUBLE_BRACKET_END)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), None);
+    }
 }
