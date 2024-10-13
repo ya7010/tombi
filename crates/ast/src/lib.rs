@@ -1,11 +1,36 @@
+mod node;
 use std::marker::PhantomData;
+mod generated;
+
+pub use generated::*;
 
 pub trait AstNode {
+    fn can_cast(kind: syntax::SyntaxKind) -> bool
+    where
+        Self: Sized;
+
     fn cast(syntax: syntax::SyntaxNode) -> Option<Self>
     where
         Self: Sized;
 
     fn syntax(&self) -> &syntax::SyntaxNode;
+}
+
+/// Like `AstNode`, but wraps tokens rather than interior nodes.
+pub trait AstToken {
+    fn can_cast(token: syntax::SyntaxKind) -> bool
+    where
+        Self: Sized;
+
+    fn cast(syntax: syntax::SyntaxToken) -> Option<Self>
+    where
+        Self: Sized;
+
+    fn syntax(&self) -> &syntax::SyntaxToken;
+
+    fn text(&self) -> &str {
+        self.syntax().text()
+    }
 }
 
 #[allow(dead_code)]

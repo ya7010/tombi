@@ -2,7 +2,8 @@
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u16)]
-pub enum SyntaxToken {
+#[allow(non_camel_case_types)]
+pub enum SyntaxKind {
     COMMA,
     DOT,
     EQUAL,
@@ -42,13 +43,19 @@ pub enum SyntaxToken {
     INLINE_TABLE,
     ARRAY_OF_TABLE,
 }
-use self::SyntaxToken::*;
-impl SyntaxToken {
+use self::SyntaxKind::*;
+impl SyntaxKind {
     pub fn is_keyword(self) -> bool {
         match self {
             TRUE_KW | FALSE_KW => true,
             _ => false,
         }
+    }
+}
+impl From<SyntaxKind> for rowan::SyntaxKind {
+    #[inline]
+    fn from(k: SyntaxKind) -> Self {
+        Self(k as u16)
     }
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]

@@ -47,7 +47,8 @@ pub fn generate_syntax_kind(_grammer: &Grammar) -> Result<String, anyhow::Error>
     let token = quote! {
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
         #[repr(u16)]
-        pub enum SyntaxToken {
+        #[allow(non_camel_case_types)]
+        pub enum SyntaxKind {
             #(#punctuations,)*
             #(#keywords,)*
             #(#literals,)*
@@ -55,14 +56,21 @@ pub fn generate_syntax_kind(_grammer: &Grammar) -> Result<String, anyhow::Error>
             #(#nodes,)*
         }
 
-        use self::SyntaxToken::*;
+        use self::SyntaxKind::*;
 
-        impl SyntaxToken {
+        impl SyntaxKind {
             pub fn is_keyword(self) -> bool {
                 match self {
                     #(#keywords)|* => true,
                     _ => false,
                 }
+            }
+        }
+
+        impl From<SyntaxKind> for rowan::SyntaxKind {
+            #[inline]
+            fn from(k: SyntaxKind) -> Self {
+                Self(k as u16)
             }
         }
 

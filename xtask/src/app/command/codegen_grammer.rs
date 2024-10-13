@@ -1,4 +1,10 @@
-use crate::{codegen::syntax_kind::generate_syntax_kind, utils::project_root};
+use crate::{
+    codegen::{
+        ast_node::generate_ast_node, ast_token::generate_ast_token,
+        syntax_kind::generate_syntax_kind,
+    },
+    utils::project_root,
+};
 use anyhow::Context;
 use ungrammar::Grammar;
 
@@ -17,6 +23,19 @@ pub fn run(_args: Args) -> Result<(), anyhow::Error> {
             .context(format!("Failed to generate syntax kind from grammar."))?,
         &project_root().join("crates/syntax/src/generated/syntax_kind.rs"),
     );
+
+    write_file(
+        &generate_ast_node(&grammar)
+            .context(format!("Failed to generate ast node from grammar."))?,
+        &project_root().join("crates/ast/src/generated/ast_node.rs"),
+    );
+
+    write_file(
+        &generate_ast_token(&grammar)
+            .context(format!("Failed to generate ast node from grammar."))?,
+        &project_root().join("crates/ast/src/generated/ast_token.rs"),
+    );
+
     Ok(())
 }
 

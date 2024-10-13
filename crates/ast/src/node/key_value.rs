@@ -1,3 +1,5 @@
+use syntax::T;
+
 pub enum Key {
     BareKey,
     QuotedKey,
@@ -24,14 +26,14 @@ pub struct KeyValue {
 
 impl KeyValue {
     pub fn key(&self) -> Option<Key> {
-        crate::support::child(self.syntax())
+        crate::support::child(&self.syntax)
     }
 
     pub fn eq_token(&self) -> Option<syntax::SyntaxToken> {
-        crate::support::token(self.syntax(), syntax::SyntaxKind::EQUAL)
+        crate::support::token(&self.syntax, T![=])
     }
 
     pub fn value(&self) -> Option<Value> {
-        crate::support::child(self.syntax())
+        crate::support::child(&self.syntax)
     }
 }
