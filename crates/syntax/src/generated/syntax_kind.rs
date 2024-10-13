@@ -54,9 +54,13 @@ pub enum SyntaxKind {
     LOCAL_DATE,
     #[regex("(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?:\\.|,)\\d+)?")]
     LOCAL_TIME,
+    #[regex("[ \\t]+")]
     NEWLINE,
+    #[regex("(\\n|\\r\\n)+")]
     WHITESPACE,
+    #[regex("[A-Za-z0-9_-]+", priority = 2)]
     BARE_KEY,
+    #[regex("#[^\\n\\r]*")]
     COMMENT,
     ROOT,
     QUOTED_KEY,

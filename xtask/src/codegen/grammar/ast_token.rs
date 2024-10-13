@@ -7,8 +7,8 @@ use super::syntax_kind_src::TOKENS;
 
 pub fn generate_ast_token() -> Result<String, anyhow::Error> {
     let tokens = TOKENS.iter().map(|token| {
-        let name = format_ident!("{}", token.to_case(Case::Pascal));
-        let kind = format_ident!("{}", token.to_case(Case::UpperSnake));
+        let name = format_ident!("{}", token.name.to_case(Case::Pascal));
+        let kind = format_ident!("{}", token.name.to_case(Case::UpperSnake));
         quote! {
             #[derive(Debug, Clone, PartialEq, Eq, Hash)]
             pub struct #name {

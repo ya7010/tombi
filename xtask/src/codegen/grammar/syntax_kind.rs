@@ -44,9 +44,9 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
         .map(|item| item.to_attr_token())
         .collect::<Vec<_>>();
 
-    let tokens = TOKENS
+    let attr_tokens = TOKENS
         .iter()
-        .map(|name| format_ident!("{}", name))
+        .map(|item| item.to_attr_token())
         .collect::<Vec<_>>();
 
     let nodes = NODES
@@ -64,7 +64,7 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
             #(#attr_punctuations,)*
             #(#keywords,)*
             #(#attr_literals,)*
-            #(#tokens,)*
+            #(#attr_tokens,)*
             #(#nodes,)*
         }
 
