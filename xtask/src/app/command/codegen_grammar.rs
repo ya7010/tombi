@@ -1,6 +1,6 @@
 use crate::{
     codegen::grammar::{
-        ast_node::generate_ast_node, ast_token::generate_ast_token,
+        ast_node::generate_ast_node, ast_token::generate_ast_token, lower,
         syntax_kind::generate_syntax_kind,
     },
     utils::project_root,
@@ -18,21 +18,20 @@ pub fn run(_args: Args) -> Result<(), anyhow::Error> {
         .parse::<Grammar>()
         .unwrap();
 
+    let ast = lower(&grammar);
+
     write_file(
-        &generate_syntax_kind(&grammar)
-            .context(format!("Failed to generate syntax kind from grammar."))?,
+        &generate_syntax_kind().context(format!("Failed to generate syntax kind from grammar."))?,
         &project_root().join("crates/syntax/src/generated/syntax_kind.rs"),
     );
 
     write_file(
-        &generate_ast_node(&grammar)
-            .context(format!("Failed to generate ast node from grammar."))?,
+        &generate_ast_node(&ast).context(format!("Failed to generate ast node from grammar."))?,
         &project_root().join("crates/ast/src/generated/ast_node.rs"),
     );
 
     write_file(
-        &generate_ast_token(&grammar)
-            .context(format!("Failed to generate ast node from grammar."))?,
+        &generate_ast_token().context(format!("Failed to generate ast node from grammar."))?,
         &project_root().join("crates/ast/src/generated/ast_token.rs"),
     );
 

@@ -5,7 +5,7 @@ use ungrammar::Grammar;
 
 use super::syntax_kind_src::{KEYWORDS, LITERALS, NODES, PUNCTUATIONS, TOKENS};
 
-pub fn generate_syntax_kind(_grammar: &Grammar) -> Result<String, anyhow::Error> {
+pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
     let punctuation_values = PUNCTUATIONS.iter().map(|(token, _)| {
         if "{}[]()".contains(token) {
             let c = token.chars().next().unwrap();

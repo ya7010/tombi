@@ -4,31 +4,6 @@ use crate::AstToken;
 use syntax::{SyntaxKind, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ErrorToken {
-    pub(crate) syntax: SyntaxToken,
-}
-impl std::fmt::Display for ErrorToken {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.syntax, f)
-    }
-}
-impl AstToken for ErrorToken {
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::ERROR_TOKEN
-    }
-    fn cast(syntax: SyntaxToken) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxToken {
-        &self.syntax
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Newline {
     pub(crate) syntax: SyntaxToken,
 }

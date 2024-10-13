@@ -2,17 +2,14 @@ use convert_case::{Case, Casing};
 use quote::{format_ident, quote};
 use ungrammar::Grammar;
 
-use crate::utils::reformat;
+use crate::{
+    codegen::grammar::{ast_src::AstEnumSrc, lower_enum},
+    utils::reformat,
+};
 
-use super::syntax_kind_src::NODES;
+use super::{ast_src::AstSrc, syntax_kind_src::NODES};
 
-pub fn generate_ast_node(grammar: &Grammar) -> Result<String, anyhow::Error> {
-    let nodes = grammar.iter().collect::<Vec<_>>();
-    for &node in &nodes {
-        let name = grammar[node].name.clone();
-        let rule = &grammar[node].rule;
-        println!("{}: {:?}", name, rule);
-    }
+pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
     let nodes = NODES.iter().map(|token| {
         let name = format_ident!("{}", token.to_case(Case::Pascal));
         let kind = format_ident!("{}", token.to_case(Case::UpperSnake));

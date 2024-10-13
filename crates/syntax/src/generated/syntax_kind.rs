@@ -27,7 +27,6 @@ pub enum SyntaxKind {
     LOCAL_DATE_TIME,
     LOCAL_DATE,
     LOCAL_TIME,
-    ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
     BARE_KEY,

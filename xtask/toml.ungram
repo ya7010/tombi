@@ -18,15 +18,6 @@
 //   (A)                         -- same as A
 //   label:A                     -- suggested name for field of AST node
 
-Root =
-    value: RootValue*
-    eof: 'EOF'
-
-RootValue =
-    KeyValue
-    | Table
-    | ArrayOfTable
-
 KeyValue = key: Key '=' value: Value
 
 Key = SingleKey ('.' SingleKey)*
@@ -44,14 +35,14 @@ Value =
     | Array
     | InlineTable
 
-String = value: 'basic_string' | 'literal_string'
-Integer = value: 'integer'
-Float = value: 'float'
-Boolean = value_token: ('true' | 'false')
-OffsetDatetime = value: 'offset_date_time'
-LocalDatetime = value: 'local_date_time'
-LocalDate = value: 'local_date'
-LocalTime = value: 'local_time'
+String = value: '@basic_string' | '@literal_string'
+Integer = value: '@integer'
+Float = value: '@float'
+Boolean = value: ('true' | 'false')
+OffsetDatetime = value: '@offset_date_time'
+LocalDatetime = value: '@local_date_time'
+LocalDate = value: '@local_date'
+LocalTime = value: '@local_time'
 
 Array = '[' elements: ArrayElementList ']'
 ArrayElementList = (Value (',' Value)* ','?)
@@ -62,3 +53,11 @@ InlineTableElementList = (KeyValue (',' KeyValue)* ','?)
 Table = '[' header: Key ']'
 
 ArrayOfTable = '[[' header: Key ']]'
+
+Root =
+    value: RootValue*
+
+RootValue =
+    KeyValue
+    | Table
+    | ArrayOfTable
