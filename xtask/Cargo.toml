@@ -10,6 +10,7 @@ anyhow = { workspace = true }
 clap = { workspace = true }
 convert_case = "0.6.0"
 either = { workspace = true }
+itertools = { workspace = true }
 proc-macro2 = { workspace = true }
 quote = { workspace = true }
 thiserror = { workspace = true }

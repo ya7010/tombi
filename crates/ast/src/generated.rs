@@ -1,3 +1,4 @@
+#![allow(ambiguous_glob_reexports)]
 mod ast_node;
 mod ast_token;
 

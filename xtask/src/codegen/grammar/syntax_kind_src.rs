@@ -8,6 +8,8 @@ pub const PUNCTUATIONS: &[(&str, &str)] = &[
     ("]", "BRACKET_END"),
     ("{", "BRACE_START"),
     ("}", "BRACE_END"),
+    ("[[", "DOUBLE_BRACKET_START"),
+    ("]]", "DOUBLE_BRACKET_END"),
 ];
 
 pub const KEYWORDS: &[&str] = &["true", "false"];

@@ -1,13 +1,10 @@
 use convert_case::{Case, Casing};
+use itertools::Itertools;
 use quote::{format_ident, quote};
-use ungrammar::Grammar;
 
-use crate::{
-    codegen::grammar::{ast_src::AstEnumSrc, lower_enum},
-    utils::reformat,
-};
+use crate::utils::reformat;
 
-use super::{ast_src::AstSrc, syntax_kind_src::NODES};
+use super::ast_src::AstSrc;
 
 pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
     let (node_defs, node_boilerplate_impls): (Vec<_>, Vec<_>) = ast
@@ -79,6 +76,93 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
         })
         .unzip();
 
+    let (enum_defs, enum_boilerplate_impls): (Vec<_>, Vec<_>) = ast
+        .enums
+        .iter()
+        .map(|en| {
+            let variants: Vec<_> = en
+                .variants
+                .iter()
+                .map(|var| format_ident!("{}", var))
+                .sorted()
+                .collect();
+            let name = format_ident!("{}", en.name);
+            let kinds: Vec<_> = variants
+                .iter()
+                .map(|name| format_ident!("{}", name.to_string().to_case(Case::UpperSnake)))
+                .collect();
+            let traits = en.traits.iter().sorted().map(|trait_name| {
+                let trait_name = format_ident!("{}", trait_name);
+                quote!(impl ast::#trait_name for #name {})
+            });
+
+            let ast_node = quote! {
+                impl AstNode for #name {
+                    #[inline]
+                    fn can_cast(kind: SyntaxKind) -> bool {
+                        matches!(kind, #(SyntaxKind::#kinds)|*)
+                    }
+                    #[inline]
+                    fn cast(syntax: SyntaxNode) -> Option<Self> {
+                        let res = match syntax.kind() {
+                            #(
+                            SyntaxKind::#kinds => #name::#variants(#variants { syntax }),
+                            )*
+                            _ => return None,
+                        };
+                        Some(res)
+                    }
+                    #[inline]
+                    fn syntax(&self) -> &SyntaxNode {
+                        match self {
+                            #(
+                            #name::#variants(it) => &it.syntax,
+                            )*
+                        }
+                    }
+                }
+            };
+
+            (
+                quote! {
+                    #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+                    pub enum #name {
+                        #(#variants(#variants),)*
+                    }
+
+                    #(#traits)*
+                },
+                quote! {
+                    #(
+                        impl From<#variants> for #name {
+                            #[inline]
+                            fn from(node: #variants) -> #name {
+                                #name::#variants(node)
+                            }
+                        }
+                    )*
+                    #ast_node
+                },
+            )
+        })
+        .unzip();
+
+    let enum_names = ast.enums.iter().map(|it| &it.name);
+    let node_names = ast.nodes.iter().map(|it| &it.name);
+
+    let display_impls = enum_names
+        .chain(node_names.clone())
+        .map(|it| format_ident!("{}", it))
+        .map(|name| {
+            quote! {
+                impl std::fmt::Display for #name {
+                    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        std::fmt::Display::fmt(self.syntax(), f)
+                    }
+                }
+            }
+        });
+
     reformat(
         quote! {
             use crate::AstNode;
@@ -87,7 +171,10 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
             use crate::AstChildren;
 
             #(#node_defs)*
+            #(#enum_defs)*
             #(#node_boilerplate_impls)*
+            #(#enum_boilerplate_impls)*
+            #(#display_impls)*
         }
         .to_string(),
     )

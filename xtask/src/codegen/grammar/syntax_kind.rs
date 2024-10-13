@@ -1,17 +1,20 @@
 use convert_case::{Case, Casing};
 use proc_macro2::{Punct, Spacing};
 use quote::{format_ident, quote};
-use ungrammar::Grammar;
 
 use super::syntax_kind_src::{KEYWORDS, LITERALS, NODES, PUNCTUATIONS, TOKENS};
 
 pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
-    let punctuation_values = PUNCTUATIONS.iter().map(|(token, _)| {
-        if "{}[]()".contains(token) {
+    let punctuation_values = PUNCTUATIONS.iter().map(|(token, _)| match *token {
+        "{" | "}" | "[" | "]" => {
             let c = token.chars().next().unwrap();
             quote! { #c }
-        } else {
-            let cs = token.chars().map(|c| Punct::new(c, Spacing::Joint));
+        }
+        "[[" | "]]" => {
+            quote!(#token)
+        }
+        _ => {
+            let cs = token.chars().map(|c| Punct::new(c, Spacing::Alone));
             quote! { #(#cs)* }
         }
     });

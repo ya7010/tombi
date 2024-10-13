@@ -1,4 +1,3 @@
-use anyhow::Context;
 use quote::{format_ident, quote};
 
 #[derive(Default, Debug)]
@@ -10,6 +9,7 @@ pub(crate) struct AstSrc {
 
 #[derive(Debug)]
 pub(crate) struct AstNodeSrc {
+    #[allow(dead_code)]
     pub(crate) doc: Vec<String>,
     pub(crate) name: String,
     pub(crate) traits: Vec<String>,
@@ -18,6 +18,7 @@ pub(crate) struct AstNodeSrc {
 
 #[derive(Debug)]
 pub(crate) struct AstEnumSrc {
+    #[allow(dead_code)]
     pub(crate) doc: Vec<String>,
     pub(crate) name: String,
     pub(crate) traits: Vec<String>,
@@ -54,8 +55,8 @@ impl Field {
         match self {
             Field::Token(token) => {
                 let token: proc_macro2::TokenStream = match token.as_str() {
-                    "[[" => quote! { T!["[["] },
-                    "]]" => quote! { T!["]]"] },
+                    "[[" => quote! { "[[" },
+                    "]]" => quote! { "]]" },
                     token => token.parse().unwrap(),
                 };
                 Some(quote! { T![#token] })

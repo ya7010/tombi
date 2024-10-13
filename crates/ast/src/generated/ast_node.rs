@@ -35,11 +35,11 @@ impl ArrayOfTable {
     }
     #[inline]
     pub fn array_table_open_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![T!["[["]])
+        support::token(&self.syntax, T!["[["])
     }
     #[inline]
     pub fn array_table_close_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![T!["]]"]])
+        support::token(&self.syntax, T!["]]"])
     }
 }
 
@@ -211,6 +211,40 @@ impl Table {
     pub fn array_close_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum DottedKey {
+    BareKey(BareKey),
+    QuotedKey(QuotedKey),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Key {
+    BareKey(BareKey),
+    DottedKeys(DottedKeys),
+    QuotedKey(QuotedKey),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum RootValue {
+    ArrayOfTable(ArrayOfTable),
+    KeyValue(KeyValue),
+    Table(Table),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Value {
+    Array(Array),
+    Boolean(Boolean),
+    Float(Float),
+    InlineTable(InlineTable),
+    Integer(Integer),
+    LocalDate(LocalDate),
+    LocalDateTime(LocalDateTime),
+    LocalTime(LocalTime),
+    OffsetDateTime(OffsetDateTime),
+    String(String),
 }
 impl AstNode for Array {
     #[inline]
@@ -516,5 +550,344 @@ impl AstNode for Table {
     #[inline]
     fn syntax(&self) -> &SyntaxNode {
         &self.syntax
+    }
+}
+impl From<BareKey> for DottedKey {
+    #[inline]
+    fn from(node: BareKey) -> DottedKey {
+        DottedKey::BareKey(node)
+    }
+}
+impl From<QuotedKey> for DottedKey {
+    #[inline]
+    fn from(node: QuotedKey) -> DottedKey {
+        DottedKey::QuotedKey(node)
+    }
+}
+impl AstNode for DottedKey {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SyntaxKind::BARE_KEY | SyntaxKind::QUOTED_KEY)
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SyntaxKind::BARE_KEY => DottedKey::BareKey(BareKey { syntax }),
+            SyntaxKind::QUOTED_KEY => DottedKey::QuotedKey(QuotedKey { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            DottedKey::BareKey(it) => &it.syntax,
+            DottedKey::QuotedKey(it) => &it.syntax,
+        }
+    }
+}
+impl From<BareKey> for Key {
+    #[inline]
+    fn from(node: BareKey) -> Key {
+        Key::BareKey(node)
+    }
+}
+impl From<DottedKeys> for Key {
+    #[inline]
+    fn from(node: DottedKeys) -> Key {
+        Key::DottedKeys(node)
+    }
+}
+impl From<QuotedKey> for Key {
+    #[inline]
+    fn from(node: QuotedKey) -> Key {
+        Key::QuotedKey(node)
+    }
+}
+impl AstNode for Key {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SyntaxKind::BARE_KEY | SyntaxKind::DOTTED_KEYS | SyntaxKind::QUOTED_KEY
+        )
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SyntaxKind::BARE_KEY => Key::BareKey(BareKey { syntax }),
+            SyntaxKind::DOTTED_KEYS => Key::DottedKeys(DottedKeys { syntax }),
+            SyntaxKind::QUOTED_KEY => Key::QuotedKey(QuotedKey { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Key::BareKey(it) => &it.syntax,
+            Key::DottedKeys(it) => &it.syntax,
+            Key::QuotedKey(it) => &it.syntax,
+        }
+    }
+}
+impl From<ArrayOfTable> for RootValue {
+    #[inline]
+    fn from(node: ArrayOfTable) -> RootValue {
+        RootValue::ArrayOfTable(node)
+    }
+}
+impl From<KeyValue> for RootValue {
+    #[inline]
+    fn from(node: KeyValue) -> RootValue {
+        RootValue::KeyValue(node)
+    }
+}
+impl From<Table> for RootValue {
+    #[inline]
+    fn from(node: Table) -> RootValue {
+        RootValue::Table(node)
+    }
+}
+impl AstNode for RootValue {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SyntaxKind::ARRAY_OF_TABLE | SyntaxKind::KEY_VALUE | SyntaxKind::TABLE
+        )
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SyntaxKind::ARRAY_OF_TABLE => RootValue::ArrayOfTable(ArrayOfTable { syntax }),
+            SyntaxKind::KEY_VALUE => RootValue::KeyValue(KeyValue { syntax }),
+            SyntaxKind::TABLE => RootValue::Table(Table { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            RootValue::ArrayOfTable(it) => &it.syntax,
+            RootValue::KeyValue(it) => &it.syntax,
+            RootValue::Table(it) => &it.syntax,
+        }
+    }
+}
+impl From<Array> for Value {
+    #[inline]
+    fn from(node: Array) -> Value {
+        Value::Array(node)
+    }
+}
+impl From<Boolean> for Value {
+    #[inline]
+    fn from(node: Boolean) -> Value {
+        Value::Boolean(node)
+    }
+}
+impl From<Float> for Value {
+    #[inline]
+    fn from(node: Float) -> Value {
+        Value::Float(node)
+    }
+}
+impl From<InlineTable> for Value {
+    #[inline]
+    fn from(node: InlineTable) -> Value {
+        Value::InlineTable(node)
+    }
+}
+impl From<Integer> for Value {
+    #[inline]
+    fn from(node: Integer) -> Value {
+        Value::Integer(node)
+    }
+}
+impl From<LocalDate> for Value {
+    #[inline]
+    fn from(node: LocalDate) -> Value {
+        Value::LocalDate(node)
+    }
+}
+impl From<LocalDateTime> for Value {
+    #[inline]
+    fn from(node: LocalDateTime) -> Value {
+        Value::LocalDateTime(node)
+    }
+}
+impl From<LocalTime> for Value {
+    #[inline]
+    fn from(node: LocalTime) -> Value {
+        Value::LocalTime(node)
+    }
+}
+impl From<OffsetDateTime> for Value {
+    #[inline]
+    fn from(node: OffsetDateTime) -> Value {
+        Value::OffsetDateTime(node)
+    }
+}
+impl From<String> for Value {
+    #[inline]
+    fn from(node: String) -> Value {
+        Value::String(node)
+    }
+}
+impl AstNode for Value {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SyntaxKind::ARRAY
+                | SyntaxKind::BOOLEAN
+                | SyntaxKind::FLOAT
+                | SyntaxKind::INLINE_TABLE
+                | SyntaxKind::INTEGER
+                | SyntaxKind::LOCAL_DATE
+                | SyntaxKind::LOCAL_DATE_TIME
+                | SyntaxKind::LOCAL_TIME
+                | SyntaxKind::OFFSET_DATE_TIME
+                | SyntaxKind::STRING
+        )
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SyntaxKind::ARRAY => Value::Array(Array { syntax }),
+            SyntaxKind::BOOLEAN => Value::Boolean(Boolean { syntax }),
+            SyntaxKind::FLOAT => Value::Float(Float { syntax }),
+            SyntaxKind::INLINE_TABLE => Value::InlineTable(InlineTable { syntax }),
+            SyntaxKind::INTEGER => Value::Integer(Integer { syntax }),
+            SyntaxKind::LOCAL_DATE => Value::LocalDate(LocalDate { syntax }),
+            SyntaxKind::LOCAL_DATE_TIME => Value::LocalDateTime(LocalDateTime { syntax }),
+            SyntaxKind::LOCAL_TIME => Value::LocalTime(LocalTime { syntax }),
+            SyntaxKind::OFFSET_DATE_TIME => Value::OffsetDateTime(OffsetDateTime { syntax }),
+            SyntaxKind::STRING => Value::String(String { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Value::Array(it) => &it.syntax,
+            Value::Boolean(it) => &it.syntax,
+            Value::Float(it) => &it.syntax,
+            Value::InlineTable(it) => &it.syntax,
+            Value::Integer(it) => &it.syntax,
+            Value::LocalDate(it) => &it.syntax,
+            Value::LocalDateTime(it) => &it.syntax,
+            Value::LocalTime(it) => &it.syntax,
+            Value::OffsetDateTime(it) => &it.syntax,
+            Value::String(it) => &it.syntax,
+        }
+    }
+}
+impl std::fmt::Display for DottedKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Key {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for RootValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Array {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ArrayOfTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for BareKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Boolean {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for DottedKeys {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Float {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for InlineTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Integer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for KeyValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for LocalDate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for LocalDateTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for LocalTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for OffsetDateTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for QuotedKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Root {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for String {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Table {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
     }
 }
