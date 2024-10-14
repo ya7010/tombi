@@ -27,3 +27,4 @@ syntax = { path = "crates/syntax" }
 text-size = "1.1.1"
 thiserror = "1.0.64"
 tracing = "0.1.40"
+rstest = "0.23.0"

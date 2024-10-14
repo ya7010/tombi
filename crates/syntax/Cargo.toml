@@ -10,3 +10,4 @@ logos = { workspace = true }
 rowan = { workspace = true }
 thiserror = { workspace = true }
 text-size = { workspace = true }
+rstest.workspace = true

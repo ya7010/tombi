@@ -31,6 +31,7 @@ pub type PreorderWithTokens = rowan::api::PreorderWithTokens<TomlLanguage>;
 mod tests {
     use super::*;
     use logos::Logos;
+    use rstest::rstest;
 
     #[test]
     fn empty() {
@@ -56,6 +57,36 @@ mod tests {
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), None);
+    }
+
+    #[rstest]
+    #[case("odt1 = 1979-05-27T07:32:00Z")]
+    #[case("odt2 = 1979-05-27T00:32:00-07:00")]
+    #[case("odt3 = 1979-05-27T00:32:00.999999-07:00")]
+    #[case("odt4 = 1979-05-27 07:32:00Z")]
+    fn offset_date_time(#[case] source: &str) {
+        let mut lex = SyntaxKind::lexer(source);
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::OFFSET_DATE_TIME)));
+        assert_eq!(lex.next(), None);
+    }
+
+    #[rstest]
+    #[case("ldt1 = 1979-05-27T07:32:00")]
+    #[case("ldt2 = 1979-05-27T00:32:00.999999")]
+    fn local_date_time(#[case] source: &str) {
+        let mut lex = SyntaxKind::lexer(source);
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LOCAL_DATE_TIME)));
         assert_eq!(lex.next(), None);
     }
 
