@@ -1,4 +1,5 @@
 mod error;
+mod format;
 mod options;
 
 use dom::TryFromSyntax;

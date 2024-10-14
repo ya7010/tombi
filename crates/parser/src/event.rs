@@ -1,14 +1,12 @@
-use std::num::{NonZeroU32, NonZeroU8};
-
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum Event {
     Start {
         kind: syntax::SyntaxKind,
-        forward_parent: Option<NonZeroU32>,
+        forward_parent: Option<u32>,
     },
 
-    End,
+    Finish,
 
     /// Produce a single leaf-element.
     /// `n_raw_tokens` is used to glue complex contextual tokens.
@@ -16,6 +14,15 @@ pub enum Event {
     /// `n_raw_tokens = 2` is used to produced a single `>>`.
     Token {
         kind: syntax::SyntaxKind,
-        n_raw_tokens: NonZeroU8,
+        n_raw_tokens: u8,
     },
+}
+
+impl Event {
+    pub(crate) fn tombstone() -> Self {
+        Event::Start {
+            kind: syntax::SyntaxKind::TOMBSTONE,
+            forward_parent: None,
+        }
+    }
 }

@@ -1,6 +1,8 @@
+mod builder;
 mod error;
 mod generated;
 
+pub use builder::SyntaxTreeBuilder;
 pub use error::{Error, SyntaxError};
 pub use generated::SyntaxKind;
 

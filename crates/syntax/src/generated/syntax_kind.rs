@@ -6,6 +6,10 @@
 # [logos (error = crate :: Error)]
 #[allow(non_camel_case_types)]
 pub enum SyntaxKind {
+    #[doc(hidden)]
+    TOMBSTONE,
+    #[doc(hidden)]
+    EOF,
     #[token(",")]
     COMMA,
     #[token(".")]
@@ -73,11 +77,26 @@ pub enum SyntaxKind {
     INLINE_TABLE,
     INLINE_TABLE_ELEMENT_LIST,
     ARRAY_OF_TABLE,
+    #[doc(hidden)]
+    __LAST,
 }
 impl From<SyntaxKind> for rowan::SyntaxKind {
     #[inline]
     fn from(k: SyntaxKind) -> Self {
         Self(k as u16)
+    }
+}
+impl From<u16> for SyntaxKind {
+    #[inline]
+    fn from(d: u16) -> SyntaxKind {
+        assert!(d <= (SyntaxKind::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, SyntaxKind>(d) }
+    }
+}
+impl From<SyntaxKind> for u16 {
+    #[inline]
+    fn from(k: SyntaxKind) -> u16 {
+        k as u16
     }
 }
 fn lex_single_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> bool {

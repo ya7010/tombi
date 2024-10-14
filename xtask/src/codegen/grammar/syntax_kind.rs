@@ -51,16 +51,37 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
         #[logos(error = crate::Error)]
         #[allow(non_camel_case_types)]
         pub enum SyntaxKind {
+            #[doc(hidden)]
+            TOMBSTONE,
+            #[doc(hidden)]
+            EOF,
             #(#attr_punctuations,)*
             #(#attr_literals,)*
             #(#attr_tokens,)*
             #(#nodes,)*
+            #[doc(hidden)]
+            __LAST,
         }
 
         impl From<SyntaxKind> for rowan::SyntaxKind {
             #[inline]
             fn from(k: SyntaxKind) -> Self {
                 Self(k as u16)
+            }
+        }
+
+        impl From<u16> for SyntaxKind {
+            #[inline]
+            fn from(d: u16) -> SyntaxKind {
+                assert!(d <= (SyntaxKind::__LAST as u16));
+                unsafe { std::mem::transmute::<u16, SyntaxKind>(d) }
+            }
+        }
+
+        impl From<SyntaxKind> for u16 {
+            #[inline]
+            fn from(k: SyntaxKind) -> u16 {
+                k as u16
             }
         }
 

@@ -1,5 +1,6 @@
 mod node;
 use std::marker::PhantomData;
+mod builder;
 mod generated;
 
 pub use generated::*;
