@@ -44,6 +44,21 @@ mod tests {
         let mut lex = SyntaxKind::lexer("test");
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), None);
+    }
+
+    #[test]
+    fn dotted_keys() {
+        let mut lex = SyntaxKind::lexer(r#"apple.type = "fruit""#);
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::DOT)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), None);
     }
 
     #[test]
@@ -93,6 +108,7 @@ version = "0.5.8"
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::LITERAL_STRING)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACE_END)));
+        assert_eq!(lex.next(), None);
     }
 
     #[test]
@@ -111,6 +127,7 @@ version = "0.5.8"
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Err(crate::Error::InvalidToken)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), None);
     }
 
     #[test]
