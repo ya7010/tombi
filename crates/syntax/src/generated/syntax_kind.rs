@@ -20,12 +20,8 @@ pub enum SyntaxKind {
     BRACE_START,
     #[token("}")]
     BRACE_END,
-    #[token("[[")]
     DOUBLE_BRACKET_START,
-    #[token("]]")]
     DOUBLE_BRACKET_END,
-    TRUE_KW,
-    FALSE_KW,
     # [regex ("\"" , callback = | lex | lex_single_line_string (lex , '"'))]
     BASIC_STRING,
     # [regex ("\"\"\"" , callback = | lex | lex_multi_line_string (lex , '"'))]
@@ -77,15 +73,6 @@ pub enum SyntaxKind {
     INLINE_TABLE,
     INLINE_TABLE_ELEMENT_LIST,
     ARRAY_OF_TABLE,
-}
-use self::SyntaxKind::*;
-impl SyntaxKind {
-    pub fn is_keyword(self) -> bool {
-        match self {
-            TRUE_KW | FALSE_KW => true,
-            _ => false,
-        }
-    }
 }
 impl From<SyntaxKind> for rowan::SyntaxKind {
     #[inline]
@@ -152,4 +139,4 @@ fn lex_multi_line_string(lex: &mut logos::Lexer<SyntaxKind>, quote: char) -> boo
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [,] => { $ crate :: SyntaxKind :: COMMA } ; [.] => { $ crate :: SyntaxKind :: DOT } ; [=] => { $ crate :: SyntaxKind :: EQUAL } ; ['['] => { $ crate :: SyntaxKind :: BRACKET_START } ; [']'] => { $ crate :: SyntaxKind :: BRACKET_END } ; ['{'] => { $ crate :: SyntaxKind :: BRACE_START } ; ['}'] => { $ crate :: SyntaxKind :: BRACE_END } ; ["[["] => { $ crate :: SyntaxKind :: DOUBLE_BRACKET_START } ; ["]]"] => { $ crate :: SyntaxKind :: DOUBLE_BRACKET_END } ; [true] => { $ crate :: SyntaxKind :: TRUE_KW } ; [false] => { $ crate :: SyntaxKind :: FALSE_KW } ; [bare_key] => { $ crate :: SyntaxKind :: BARE_KEY } ; [basic_string] => { $ crate :: SyntaxKind :: BASIC_STRING } ; [multi_line_basic_string] => { $ crate :: SyntaxKind :: MULTI_LINE_BASIC_STRING } ; [literal_string] => { $ crate :: SyntaxKind :: LITERAL_STRING } ; [multi_line_literal_string] => { $ crate :: SyntaxKind :: MULTI_LINE_LITERAL_STRING } ; [integer_dec] => { $ crate :: SyntaxKind :: INTEGER_DEC } ; [integer_hex] => { $ crate :: SyntaxKind :: INTEGER_HEX } ; [integer_oct] => { $ crate :: SyntaxKind :: INTEGER_OCT } ; [integer_bin] => { $ crate :: SyntaxKind :: INTEGER_BIN } ; [float] => { $ crate :: SyntaxKind :: FLOAT } ; [offset_date_time] => { $ crate :: SyntaxKind :: OFFSET_DATE_TIME } ; [local_date_time] => { $ crate :: SyntaxKind :: LOCAL_DATE_TIME } ; [local_date] => { $ crate :: SyntaxKind :: LOCAL_DATE } ; [local_time] => { $ crate :: SyntaxKind :: LOCAL_TIME } ; }
+macro_rules ! T { [,] => { $ crate :: SyntaxKind :: COMMA } ; [.] => { $ crate :: SyntaxKind :: DOT } ; [=] => { $ crate :: SyntaxKind :: EQUAL } ; ['['] => { $ crate :: SyntaxKind :: BRACKET_START } ; [']'] => { $ crate :: SyntaxKind :: BRACKET_END } ; ['{'] => { $ crate :: SyntaxKind :: BRACE_START } ; ['}'] => { $ crate :: SyntaxKind :: BRACE_END } ; ["[["] => { $ crate :: SyntaxKind :: DOUBLE_BRACKET_START } ; ["]]"] => { $ crate :: SyntaxKind :: DOUBLE_BRACKET_END } ; [bare_key] => { $ crate :: SyntaxKind :: BARE_KEY } ; [basic_string] => { $ crate :: SyntaxKind :: BASIC_STRING } ; [multi_line_basic_string] => { $ crate :: SyntaxKind :: MULTI_LINE_BASIC_STRING } ; [literal_string] => { $ crate :: SyntaxKind :: LITERAL_STRING } ; [multi_line_literal_string] => { $ crate :: SyntaxKind :: MULTI_LINE_LITERAL_STRING } ; [integer_dec] => { $ crate :: SyntaxKind :: INTEGER_DEC } ; [integer_hex] => { $ crate :: SyntaxKind :: INTEGER_HEX } ; [integer_oct] => { $ crate :: SyntaxKind :: INTEGER_OCT } ; [integer_bin] => { $ crate :: SyntaxKind :: INTEGER_BIN } ; [float] => { $ crate :: SyntaxKind :: FLOAT } ; [offset_date_time] => { $ crate :: SyntaxKind :: OFFSET_DATE_TIME } ; [local_date_time] => { $ crate :: SyntaxKind :: LOCAL_DATE_TIME } ; [local_date] => { $ crate :: SyntaxKind :: LOCAL_DATE } ; [local_time] => { $ crate :: SyntaxKind :: LOCAL_TIME } ; }

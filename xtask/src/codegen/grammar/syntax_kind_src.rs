@@ -1,18 +1,16 @@
 use quote::{format_ident, quote};
 
-pub const PUNCTUATIONS: &[(&str, &str)] = &[
-    (",", "COMMA"),
-    (".", "DOT"),
-    ("=", "EQUAL"),
-    ("[", "BRACKET_START"),
-    ("]", "BRACKET_END"),
-    ("{", "BRACE_START"),
-    ("}", "BRACE_END"),
-    ("[[", "DOUBLE_BRACKET_START"),
-    ("]]", "DOUBLE_BRACKET_END"),
+pub const PUNCTUATIONS: &[TokenItem] = &[
+    TokenItem::new_with_attr(",", "COMMA"),
+    TokenItem::new_with_attr(".", "DOT"),
+    TokenItem::new_with_attr("=", "EQUAL"),
+    TokenItem::new_with_attr("[", "BRACKET_START"),
+    TokenItem::new_with_attr("]", "BRACKET_END"),
+    TokenItem::new_with_attr("{", "BRACE_START"),
+    TokenItem::new_with_attr("}", "BRACE_END"),
+    TokenItem::new("[[", "DOUBLE_BRACKET_START"),
+    TokenItem::new("]]", "DOUBLE_BRACKET_END"),
 ];
-
-pub const KEYWORDS: &[&str] = &["true", "false"];
 
 pub const LITERALS: &[RegexItem] = &[
     RegexItem::new_with_callback(
@@ -86,6 +84,41 @@ pub const NODES: &[&str] = &[
     "INLINE_TABLE_ELEMENT_LIST",
     "ARRAY_OF_TABLE",
 ];
+
+#[derive(Debug)]
+pub struct TokenItem<'a> {
+    pub token: &'a str,
+    pub name: &'a str,
+    has_attr: bool,
+}
+
+impl<'a> TokenItem<'a> {
+    pub const fn new(token: &'a str, name: &'a str) -> Self {
+        Self {
+            token,
+            name,
+            has_attr: false,
+        }
+    }
+
+    pub const fn new_with_attr(token: &'a str, name: &'a str) -> Self {
+        Self {
+            token,
+            name,
+            has_attr: true,
+        }
+    }
+
+    pub fn to_attr_token(&self) -> proc_macro2::TokenStream {
+        let name = format_ident!("{}", self.name);
+        if self.has_attr {
+            let token = self.token;
+            quote! { #[token(#token)] #name }
+        } else {
+            quote! { #name }
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct RegexItem<'a> {
