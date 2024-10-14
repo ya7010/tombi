@@ -48,6 +48,18 @@ mod tests {
     }
 
     #[test]
+    fn float_dot_key() {
+        let mut lex = SyntaxKind::lexer(r#"3.14159 = "pi""#);
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::FLOAT)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
+        assert_eq!(lex.next(), None);
+    }
+
+    #[test]
     fn dotted_keys() {
         let mut lex = SyntaxKind::lexer(r#"apple.type = "fruit""#);
 
