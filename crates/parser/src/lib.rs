@@ -16,7 +16,6 @@ pub use error::Error;
 pub use event::Event;
 use input::Input;
 use lexed::{lex, LexedStr};
-use logos::{Lexer, Logos};
 use output::Output;
 use parse::Parse;
 use rowan::cursor::SyntaxNode;
