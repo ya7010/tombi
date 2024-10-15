@@ -1,6 +1,7 @@
 use logos::Logos;
 use syntax::SyntaxKind::{self, *};
 
+use crate::builder::{Builder, State};
 use crate::{input::Input, output::Step, step::StrStep};
 
 #[derive(Debug)]
@@ -161,12 +162,7 @@ impl<'a> LexedStr<'a> {
         output: &crate::Output,
         sink: &mut dyn FnMut(StrStep<'_>),
     ) -> bool {
-        let mut builder = Builder {
-            lexed: self,
-            pos: 0,
-            state: State::PendingEnter,
-            sink,
-        };
+        let mut builder = Builder::new(self, sink);
 
         for event in output.iter() {
             match event {
@@ -193,84 +189,5 @@ impl<'a> LexedStr<'a> {
 
         // is_eof?
         builder.pos == builder.lexed.len()
-    }
-}
-
-struct Builder<'a, 'b> {
-    lexed: &'a LexedStr<'a>,
-    pos: usize,
-    state: State,
-    sink: &'b mut dyn FnMut(StrStep<'_>),
-}
-
-enum State {
-    PendingEnter,
-    Normal,
-    PendingExit,
-}
-
-impl Builder<'_, '_> {
-    fn token(&mut self, kind: SyntaxKind, n_tokens: u8) {
-        match std::mem::replace(&mut self.state, State::Normal) {
-            State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(StrStep::Exit),
-            State::Normal => (),
-        }
-        self.eat_trivias();
-        self.do_token(kind, n_tokens as usize);
-    }
-
-    fn enter(&mut self, kind: SyntaxKind) {
-        match std::mem::replace(&mut self.state, State::Normal) {
-            State::PendingEnter => {
-                (self.sink)(StrStep::Enter { kind });
-                // No need to attach trivias to previous node: there is no
-                // previous node.
-                return;
-            }
-            State::PendingExit => (self.sink)(StrStep::Exit),
-            State::Normal => (),
-        }
-
-        let n_trivias = (self.pos..self.lexed.len())
-            .take_while(|&it| self.lexed.kind(it).is_trivia())
-            .count();
-        let leading_trivias = self.pos..self.pos + n_trivias;
-        self.eat_n_trivias(n_trivias);
-        // self.eat_n_trivias(n_trivias - n_attached_trivias);
-        // (self.sink)(StrStep::Enter { kind });
-        // self.eat_n_trivias(n_attached_trivias);
-    }
-
-    fn exit(&mut self) {
-        match std::mem::replace(&mut self.state, State::PendingExit) {
-            State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(StrStep::Exit),
-            State::Normal => (),
-        }
-    }
-
-    fn eat_trivias(&mut self) {
-        while self.pos < self.lexed.len() {
-            let kind = self.lexed.kind(self.pos);
-            if !kind.is_trivia() {
-                break;
-            }
-            self.do_token(kind, 1);
-        }
-    }
-
-    fn eat_n_trivias(&mut self, n: usize) {
-        for _ in 0..n {
-            let kind = self.lexed.kind(self.pos);
-            assert!(kind.is_trivia());
-            self.do_token(kind, 1);
-        }
-    }
-
-    fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
-        let text = &self.lexed.range_text(self.pos..self.pos + n_tokens);
-        self.pos += n_tokens;
-        (self.sink)(StrStep::Token { kind, text });
     }
 }
