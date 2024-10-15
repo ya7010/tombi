@@ -13,7 +13,8 @@ pub use options::Options;
 
 pub fn format(source: &str, options: &Options) -> Result<String, crate::Error> {
     let p = parser::parse(source);
-    if let Some(root) = ast::Root::cast(p.into_syntax_node()) {
+    if p.errors().len() == 0 {
+        let root = ast::Root::cast(p.into_syntax_node()).unwrap();
         Ok(root.format(&Context {
             options: Cow::Borrowed(options),
         }))
