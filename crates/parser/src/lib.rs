@@ -19,15 +19,12 @@ use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
 use parse::Parse;
-use rowan::cursor::SyntaxNode;
-pub use syntax::SyntaxKind;
+pub use syntax::{SyntaxKind, SyntaxNode};
 
 pub fn parse(source: &str) -> Parse<SyntaxNode> {
     let lexed = lex(source);
-    dbg!(&lexed);
     let input = lexed.to_input();
-    dbg!(&input);
-    let output: Output = grammar::parse(&input);
+    let output = grammar::parse(&input);
     let (tree, errors) = build_tree(&lexed, output);
 
     Parse::new(tree, errors)
@@ -40,8 +37,6 @@ pub fn build_tree(
     let _p = tracing::info_span!("build_tree").entered();
     let mut builder = syntax::SyntaxTreeBuilder::default();
 
-    dbg!(lexed);
-    dbg!(&parser_output);
     let is_eof = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
         step::StrStep::Token { kind, text } => builder.token(kind, text),
         step::StrStep::Enter { kind } => builder.start_node(kind),

@@ -49,6 +49,13 @@ impl<N> AstChildren<N> {
     }
 }
 
+impl<N: AstNode> Iterator for AstChildren<N> {
+    type Item = N;
+    fn next(&mut self) -> Option<N> {
+        self.inner.find_map(N::cast)
+    }
+}
+
 #[allow(dead_code)]
 mod support {
     use super::{AstChildren, AstNode};

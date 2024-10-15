@@ -110,6 +110,10 @@ impl Integer {
         support::token(&self.syntax, T![integer_bin])
     }
     #[inline]
+    pub fn integer_dec_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, T![integer_dec])
+    }
+    #[inline]
     pub fn integer_hex_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![integer_hex])
     }
@@ -126,6 +130,10 @@ pub struct KeyValue {
 impl KeyValue {
     #[inline]
     pub fn key(&self) -> Option<Key> {
+        support::child(&self.syntax)
+    }
+    #[inline]
+    pub fn value(&self) -> Option<Value> {
         support::child(&self.syntax)
     }
     #[inline]
@@ -179,7 +187,7 @@ pub struct Root {
 }
 impl Root {
     #[inline]
-    pub fn root_items(&self) -> AstChildren<RootItem> {
+    pub fn items(&self) -> AstChildren<RootItem> {
         support::children(&self.syntax)
     }
 }
@@ -189,6 +197,10 @@ pub struct String {
     pub(crate) syntax: SyntaxNode,
 }
 impl String {
+    #[inline]
+    pub fn basic_string_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, T![basic_string])
+    }
     #[inline]
     pub fn literal_string_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![literal_string])

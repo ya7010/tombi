@@ -7,6 +7,7 @@ use syntax::{
 
 use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};
 
+#[derive(Debug)]
 pub(crate) struct Parser<'t> {
     input: &'t Input,
     pos: usize,

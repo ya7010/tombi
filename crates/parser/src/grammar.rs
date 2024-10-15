@@ -9,6 +9,7 @@ pub fn parse(input: &crate::Input) -> Output {
     let mut p = crate::parser::Parser::new(input);
 
     root::parse(&mut p);
+
     let events = p.finish();
 
     crate::event::process(events)

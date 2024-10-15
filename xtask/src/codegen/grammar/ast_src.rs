@@ -82,13 +82,10 @@ impl Field {
                 };
                 format!("{name}_token",)
             }
-            Field::Node { name, .. } => {
-                if name == "type" {
-                    String::from("ty")
-                } else {
-                    name.to_owned()
-                }
-            }
+            Field::Node { name, .. } => match name.as_str() {
+                "root_items" => "items".to_owned(),
+                _ => name.to_owned(),
+            },
         }
     }
 

@@ -61,11 +61,8 @@ impl<'a, 'b> Builder<'a, 'b> {
         let n_trivias = (self.pos..self.lexed.len())
             .take_while(|&it| self.lexed.kind(it).is_trivia())
             .count();
-        let leading_trivias = self.pos..self.pos + n_trivias;
         self.eat_n_trivias(n_trivias);
-        // self.eat_n_trivias(n_trivias - n_attached_trivias);
-        // (self.sink)(StrStep::Enter { kind });
-        // self.eat_n_trivias(n_attached_trivias);
+        (self.sink)(StrStep::Enter { kind });
     }
 
     pub fn exit(&mut self) {

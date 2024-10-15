@@ -102,7 +102,7 @@ impl Output {
     }
 
     pub(crate) fn error(&mut self, error: String) {
-        let idx = self.error.len();
+        let idx: usize = self.error.len();
         self.error.push(error);
         let e = (idx as u32) << Self::ERROR_SHIFT;
         self.event.push(e);

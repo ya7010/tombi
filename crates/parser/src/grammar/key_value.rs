@@ -62,7 +62,9 @@ pub fn parse_key(p: &mut Parser<'_>) {
     } else {
         p.error("expected key");
     }
-    m.complete(p, SyntaxKind::KEY);
+
+    // FIXME: This should be a KEY token.
+    m.complete(p, SyntaxKind::BARE_KEY);
 }
 
 pub fn parse_value(p: &mut Parser<'_>) {
@@ -73,5 +75,6 @@ pub fn parse_value(p: &mut Parser<'_>) {
         p.error("expected value");
     }
 
-    m.complete(p, SyntaxKind::VALUE);
+    // FIXME: This should be a VALUE token.
+    m.complete(p, SyntaxKind::BOOLEAN);
 }

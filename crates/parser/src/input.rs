@@ -1,6 +1,6 @@
 //! See [`Input`].
 
-use crate::SyntaxKind;
+use crate::SyntaxKind::{self, *};
 
 #[allow(non_camel_case_types)]
 type bits = u64;
@@ -46,7 +46,7 @@ impl Input {
 /// pub(crate) impl used by the parser to consume `Tokens`.
 impl Input {
     pub(crate) fn kind(&self, idx: usize) -> SyntaxKind {
-        self.kind.get(idx).copied().unwrap_or(SyntaxKind::EOF)
+        self.kind.get(idx).copied().unwrap_or(EOF)
     }
 
     pub(crate) fn is_joint(&self, n: usize) -> bool {

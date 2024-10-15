@@ -1,5 +1,6 @@
 use std::{marker::PhantomData, sync::Arc};
 
+use ast::AstNode;
 use syntax::{SyntaxError, SyntaxNode};
 
 use crate::validation;
@@ -28,6 +29,10 @@ impl<T> Parse<T> {
         SyntaxNode::new_root(self.green.clone())
     }
 
+    pub fn into_syntax_node(self) -> SyntaxNode {
+        SyntaxNode::new_root(self.green)
+    }
+
     pub fn errors(&self) -> Vec<SyntaxError> {
         let mut errors = if let Some(e) = self.errors.as_deref() {
             e.to_vec()
@@ -49,7 +54,7 @@ impl<T> Clone for Parse<T> {
     }
 }
 
-impl<T: ast::AstNode> Parse<T> {
+impl<T: AstNode> Parse<T> {
     /// Converts this parse result into a parse result for an untyped syntax tree.
     pub fn to_syntax(self) -> Parse<SyntaxNode> {
         Parse {
@@ -74,6 +79,20 @@ impl<T: ast::AstNode> Parse<T> {
         match self.errors() {
             errors if !errors.is_empty() => Err(errors),
             _ => Ok(self.tree()),
+        }
+    }
+}
+
+impl Parse<SyntaxNode> {
+    pub fn cast<N: AstNode>(self) -> Option<Parse<N>> {
+        if N::cast(self.syntax_node()).is_some() {
+            Some(Parse {
+                green: self.green,
+                errors: self.errors,
+                _ty: PhantomData,
+            })
+        } else {
+            None
         }
     }
 }

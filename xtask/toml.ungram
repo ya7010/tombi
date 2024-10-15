@@ -18,7 +18,7 @@
 //   (A)                         -- same as A
 //   label:A                     -- suggested name for field of AST node
 
-KeyValue = key: Key '=' value: Value
+KeyValue = Key '=' Value
 
 Key = BareKey | QuotedKey | DottedKeys
 BareKey = '@bare_key'
@@ -38,12 +38,12 @@ Value =
     | Array
     | InlineTable
 
-String = value:
+String = 
     '@basic_string'
     | '@multi_line_basic_string'
     | '@literal_string'
     | '@multi_line_literal_string'
-Integer = value:
+Integer = 
     '@integer_dec'
     | '@integer_hex'
     | '@integer_oct'

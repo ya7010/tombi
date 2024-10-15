@@ -56,6 +56,7 @@ impl<'a> LexedStr<'a> {
             offset += 1;
         }
         kind.push(EOF);
+        start.push(text.len() as u32);
 
         Self {
             text,
@@ -165,7 +166,6 @@ impl<'a> LexedStr<'a> {
         let mut builder = Builder::new(self, sink);
 
         for event in output.iter() {
-            dbg!(&event);
             match event {
                 Step::Token {
                     kind,
@@ -179,7 +179,6 @@ impl<'a> LexedStr<'a> {
                 }
             }
         }
-        dbg!(&builder);
 
         match std::mem::replace(&mut builder.state, State::Normal) {
             State::PendingExit => {
