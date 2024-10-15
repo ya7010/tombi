@@ -12,11 +12,15 @@ impl Format for Boolean {
 mod tests {
     use super::*;
     use ast::AstNode;
+    use rstest::rstest;
 
-    #[test]
-    fn test_boolean() {
-        tracing_subscriber::fmt::init();
-        let p = parser::parse("boolean = true");
+    #[rstest]
+    #[case("boolean = true")]
+    #[case("boolean  = true")]
+    #[case("boolean =  true")]
+    #[case("boolean   =  true")]
+    fn test_boolean(#[case] source: &str) {
+        let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), "boolean = true");
     }
