@@ -63,6 +63,13 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
             __LAST,
         }
 
+        impl SyntaxKind {
+            #[inline]
+            pub fn is_trivia(self) -> bool {
+                matches!(self, SyntaxKind::WHITESPACE | SyntaxKind::COMMENT)
+            }
+        }
+
         impl From<SyntaxKind> for rowan::SyntaxKind {
             #[inline]
             fn from(k: SyntaxKind) -> Self {

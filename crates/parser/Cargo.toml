@@ -13,3 +13,5 @@ syntax = { workspace = true }
 thiserror = { workspace = true }
 ast = { workspace = true }
 drop_bomb = "0.1.5"
+tracing = { workspace = true }
+itertools = { workspace = true }

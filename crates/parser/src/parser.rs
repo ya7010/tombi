@@ -1,8 +1,11 @@
 use std::cell::Cell;
 
-use syntax::{SyntaxKind, T};
+use syntax::{
+    SyntaxKind::{self, *},
+    T,
+};
 
-use crate::{input::Input, marker::Marker, Event};
+use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};
 
 pub(crate) struct Parser<'t> {
     input: &'t Input,
@@ -77,6 +80,11 @@ impl<'t> Parser<'t> {
             && self.input.is_joint(self.pos + n)
     }
 
+    /// Checks if the current token is in `kinds`.
+    pub(crate) fn at_ts(&self, kinds: TokenSet) -> bool {
+        kinds.contains(self.current())
+    }
+
     /// Checks if the current token is contextual keyword `kw`.
     pub(crate) fn at_contextual_kw(&self, kw: SyntaxKind) -> bool {
         self.input.contextual_kind(self.pos) == kw
@@ -96,6 +104,20 @@ impl<'t> Parser<'t> {
         Marker::new(pos)
     }
 
+    /// Consume the next token. Panics if the parser isn't currently at `kind`.
+    pub(crate) fn bump(&mut self, kind: SyntaxKind) {
+        assert!(self.eat(kind));
+    }
+
+    /// Advances the parser by one token
+    pub(crate) fn bump_any(&mut self) {
+        let kind = self.nth(0);
+        if kind == EOF {
+            return;
+        }
+        self.do_bump(kind, 1);
+    }
+
     /// Advances the parser by one token, remapping its kind.
     /// This is useful to create contextual keywords from
     /// identifiers. For example, the lexer creates a `union`
@@ -103,7 +125,7 @@ impl<'t> Parser<'t> {
     /// `union` keyword, and keyword is what ends up in the
     /// final tree.
     pub(crate) fn bump_remap(&mut self, kind: SyntaxKind) {
-        if self.nth(0) == SyntaxKind::EOF {
+        if self.nth(0) == EOF {
             // FIXME: panic!?
             return;
         }
@@ -118,5 +140,14 @@ impl<'t> Parser<'t> {
 
     pub(crate) fn push_event(&mut self, event: Event) {
         self.events.push(event);
+    }
+
+    /// Emit error with the `message`
+    /// FIXME: this should be much more fancy and support
+    /// structured errors with spans and notes, like rustc
+    /// does.
+    pub(crate) fn error<T: Into<String>>(&mut self, message: T) {
+        let msg = message.into();
+        self.push_event(Event::Error { msg });
     }
 }

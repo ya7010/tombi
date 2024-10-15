@@ -80,6 +80,12 @@ pub enum SyntaxKind {
     #[doc(hidden)]
     __LAST,
 }
+impl SyntaxKind {
+    #[inline]
+    pub fn is_trivia(self) -> bool {
+        matches!(self, SyntaxKind::WHITESPACE | SyntaxKind::COMMENT)
+    }
+}
 impl From<SyntaxKind> for rowan::SyntaxKind {
     #[inline]
     fn from(k: SyntaxKind) -> Self {

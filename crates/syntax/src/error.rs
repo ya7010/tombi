@@ -5,6 +5,14 @@ pub enum Error {
     InvalidToken,
 }
 
+impl Error {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::InvalidToken => "Invalid token",
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxError(String, text_size::TextRange);
 
