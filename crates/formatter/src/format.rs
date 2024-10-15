@@ -1,5 +1,6 @@
 mod boolean;
+mod root;
 
-trait Format {
-    fn write_fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result;
+pub trait Format {
+    fn format(&self) -> String;
 }

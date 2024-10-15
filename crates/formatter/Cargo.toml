@@ -6,7 +6,6 @@ authors = { workspace = true }
 license = { workspace = true }
 
 [dependencies]
-dom = { workspace = true }
 ast = { workspace = true }
 parser = { workspace = true }
 schemars = { workspace = true }

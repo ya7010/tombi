@@ -17,9 +17,6 @@
 			"path": "crates/ast"
 		},
 		{
-			"path": "crates/dom"
-		},
-		{
 			"path": "crates/parser"
 		},
 		{

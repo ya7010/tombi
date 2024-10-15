@@ -3,8 +3,8 @@ use ast::Boolean;
 use super::Format;
 
 impl Format for Boolean {
-    fn write_fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        std::fmt::Display::fmt(self, f)
+    fn format(&self) -> String {
+        self.to_string()
     }
 }
 
@@ -22,6 +22,6 @@ mod tests {
         assert_matches!(ast, Some(Boolean { .. }));
 
         let boolean = ast.unwrap();
-        assert_eq!(boolean.to_string(), "true");
+        assert_eq!(boolean.format(), "true");
     }
 }

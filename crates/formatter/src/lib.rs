@@ -2,17 +2,16 @@ mod error;
 mod format;
 mod options;
 
-use dom::TryFromSyntax;
+use ast::AstNode;
 pub use error::Error;
+use format::Format;
 pub use options::Options;
 
-pub fn format(source: &str, _options: &Options) -> Result<(), crate::Error> {
+pub fn format(source: &str, _options: &Options) -> Result<String, crate::Error> {
     let p = parser::parse(source);
-    let syntax = p.syntax_node().into();
-    let dom = dom::Node::try_from_syntax(&syntax).map_err(|e| crate::Error::Dom(e))?;
-
-    println!("source: {:#?}", source);
-    println!("dom: {:#?}", dom);
-
-    Ok(())
+    if let Some(root) = ast::Root::cast(p.syntax_node()) {
+        Ok(root.format())
+    } else {
+        Err(crate::Error::ParseInvalid)
+    }
 }

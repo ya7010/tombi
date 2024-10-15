@@ -159,14 +159,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7704b5fdd17b18ae31c4c1da5a2e0305a2bf17b5249300a9ee9ed7b72114c636"
 
 [[package]]
-name = "dom"
-version = "0.0.0"
-dependencies = [
- "syntax",
- "thiserror",
-]
-
-[[package]]
 name = "drop_bomb"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -202,7 +194,6 @@ version = "0.0.0"
 dependencies = [
  "assert_matches",
  "ast",
- "dom",
  "logos",
  "parser",
  "rstest",
@@ -418,7 +409,6 @@ name = "parser"
 version = "0.0.0"
 dependencies = [
  "ast",
- "dom",
  "drop_bomb",
  "itertools",
  "logos",
