@@ -16,6 +16,7 @@ mod tests {
 
     #[test]
     fn test_boolean() {
+        tracing_subscriber::fmt::init();
         let p = parser::parse("true");
 
         let ast = Boolean::cast(p.syntax_node());

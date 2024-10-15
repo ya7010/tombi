@@ -3,6 +3,7 @@ use syntax::SyntaxKind::{self, *};
 
 use crate::{input::Input, output::Step, step::StrStep};
 
+#[derive(Debug)]
 pub struct LexedStr<'a> {
     pub text: &'a str,
     pub kind: Vec<SyntaxKind>,
@@ -10,6 +11,7 @@ pub struct LexedStr<'a> {
     pub error: Vec<LexError>,
 }
 
+#[derive(Debug)]
 pub struct LexError {
     token_index: usize,
     error: syntax::Error,
@@ -31,12 +33,7 @@ impl LexError {
 
 pub fn lex(source: &str) -> LexedStr<'_> {
     let _p = tracing::info_span!("lex").entered();
-    LexedStr {
-        text: source,
-        kind: Vec::new(),
-        start: Vec::new(),
-        error: Vec::new(),
-    }
+    LexedStr::new(source)
 }
 
 impl<'a> LexedStr<'a> {
@@ -58,6 +55,10 @@ impl<'a> LexedStr<'a> {
             offset += 1;
         }
         kind.push(EOF);
+
+        println!("kind: {:?}", kind);
+        println!("start: {:?}", start);
+        println!("error: {:?}", error);
 
         Self {
             text,

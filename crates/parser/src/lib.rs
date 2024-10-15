@@ -1,4 +1,3 @@
-mod container;
 mod error;
 mod event;
 mod grammar;
