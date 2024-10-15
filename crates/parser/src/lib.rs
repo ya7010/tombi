@@ -24,7 +24,10 @@ pub use syntax::SyntaxKind;
 
 pub fn parse(source: &str) -> Parse<SyntaxNode> {
     let lexed = lex(source);
-    let output: Output = grammar::parse(&lexed.to_input());
+    dbg!(&lexed);
+    let input = lexed.to_input();
+    dbg!(&input);
+    let output: Output = grammar::parse(&input);
     let (tree, errors) = build_tree(&lexed, output);
 
     Parse::new(tree, errors)

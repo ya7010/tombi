@@ -3,7 +3,7 @@ use syntax::{
     T,
 };
 
-use crate::{marker::CompletedMarker, parser::Parser, token_set::TokenSet};
+use crate::{parser::Parser, token_set::TokenSet};
 
 pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
@@ -43,44 +43,35 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
     }
 
     let m = p.start();
-    if !p.at_ts(KEY_FIRST) || !parse_key(p).is_some() {
-        p.error("expected key");
-    }
-
-    if p.eat(T![=]) {
-        parse_value(p);
-    } else {
-        p.error("expected '='");
-    }
 
     parse_key(p);
+
+    if !p.eat(T![=]) {
+        p.error("expected '='");
+    }
+    parse_value(p);
 
     m.complete(p, KEY_VALUE);
 }
 
-pub fn parse_key(p: &mut Parser<'_>) -> Option<CompletedMarker> {
-    if !p.at_ts(KEY_FIRST) {
-        return None;
-    }
-    let m: crate::marker::Marker = p.start();
-    p.bump_any();
-    Some(m.complete(p, SyntaxKind::KEY))
-}
-
-pub fn parse_bare_key(p: &mut Parser<'_>) -> Option<CompletedMarker> {
-    if !p.at(SyntaxKind::BARE_KEY) || p.nth_at(1, SyntaxKind::DOT) {
-        return None;
-    }
+pub fn parse_key(p: &mut Parser<'_>) {
     let m = p.start();
-    p.bump(SyntaxKind::BARE_KEY);
-    Some(m.complete(p, SyntaxKind::KEY))
+
+    if p.at_ts(KEY_FIRST) {
+        p.bump_any();
+    } else {
+        p.error("expected key");
+    }
+    m.complete(p, SyntaxKind::KEY);
 }
 
-pub fn parse_value(p: &mut Parser<'_>) -> Option<CompletedMarker> {
-    if !p.at_ts(KEY_FIRST) {
-        return None;
+pub fn parse_value(p: &mut Parser<'_>) {
+    let m = p.start();
+    if p.at_ts(VALUE_FIRST) {
+        p.bump_any();
+    } else {
+        p.error("expected value");
     }
-    let m: crate::marker::Marker = p.start();
-    p.bump_any();
-    Some(m.complete(p, SyntaxKind::KEY))
+
+    m.complete(p, SyntaxKind::VALUE);
 }

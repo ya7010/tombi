@@ -139,7 +139,7 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn to_input(&self) -> Input {
-        let _p = tracing::info_span!("Into<Input> for Lexer<'a, SyntaxKind>::into").entered();
+        let _p = tracing::info_span!("Lexer<'a, SyntaxKind>::to_input").entered();
 
         let mut res = Input::default();
         let mut was_joint = false;
@@ -165,6 +165,7 @@ impl<'a> LexedStr<'a> {
         let mut builder = Builder::new(self, sink);
 
         for event in output.iter() {
+            dbg!(&event);
             match event {
                 Step::Token {
                     kind,
@@ -178,6 +179,7 @@ impl<'a> LexedStr<'a> {
                 }
             }
         }
+        dbg!(&builder);
 
         match std::mem::replace(&mut builder.state, State::Normal) {
             State::PendingExit => {

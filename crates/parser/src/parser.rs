@@ -66,14 +66,6 @@ impl<'t> Parser<'t> {
         true
     }
 
-    pub(crate) fn eat_contextual_kw(&mut self, kind: SyntaxKind) -> bool {
-        if !self.at_contextual_kw(kind) {
-            return false;
-        }
-        self.bump_remap(kind);
-        true
-    }
-
     fn at_composite2(&self, n: usize, k1: SyntaxKind, k2: SyntaxKind) -> bool {
         self.input.kind(self.pos + n) == k1
             && self.input.kind(self.pos + n + 1) == k2
@@ -83,16 +75,6 @@ impl<'t> Parser<'t> {
     /// Checks if the current token is in `kinds`.
     pub(crate) fn at_ts(&self, kinds: TokenSet) -> bool {
         kinds.contains(self.current())
-    }
-
-    /// Checks if the current token is contextual keyword `kw`.
-    pub(crate) fn at_contextual_kw(&self, kw: SyntaxKind) -> bool {
-        self.input.contextual_kind(self.pos) == kw
-    }
-
-    /// Checks if the nth token is contextual keyword `kw`.
-    pub(crate) fn nth_at_contextual_kw(&self, n: usize, kw: SyntaxKind) -> bool {
-        self.input.contextual_kind(self.pos + n) == kw
     }
 
     /// Starts a new node in the syntax tree. All nodes and tokens

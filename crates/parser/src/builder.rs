@@ -9,6 +9,17 @@ pub struct Builder<'a, 'b> {
     pub(crate) sink: &'b mut dyn FnMut(StrStep<'_>),
 }
 
+impl std::fmt::Debug for Builder<'_, '_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Builder")
+            .field("lexed", &self.lexed)
+            .field("pos", &self.pos)
+            .field("state", &self.state)
+            .finish()
+    }
+}
+
+#[derive(Debug)]
 pub enum State {
     PendingEnter,
     Normal,
