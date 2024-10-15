@@ -34,6 +34,10 @@ impl ArrayOfTable {
         support::child(&self.syntax)
     }
     #[inline]
+    pub fn key_values(&self) -> AstChildren<KeyValue> {
+        support::children(&self.syntax)
+    }
+    #[inline]
     pub fn double_bracket_start_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!["[["])
     }
@@ -173,7 +177,12 @@ impl QuotedKey {
 pub struct Root {
     pub(crate) syntax: SyntaxNode,
 }
-impl Root {}
+impl Root {
+    #[inline]
+    pub fn root_items(&self) -> AstChildren<RootItem> {
+        support::children(&self.syntax)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct String {
@@ -204,6 +213,10 @@ impl Table {
         support::child(&self.syntax)
     }
     #[inline]
+    pub fn key_values(&self) -> AstChildren<KeyValue> {
+        support::children(&self.syntax)
+    }
+    #[inline]
     pub fn bracket_start_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['['])
     }
@@ -227,7 +240,7 @@ pub enum Key {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum RootValue {
+pub enum RootItem {
     ArrayOfTable(ArrayOfTable),
     KeyValue(KeyValue),
     Table(Table),
@@ -631,25 +644,25 @@ impl AstNode for Key {
         }
     }
 }
-impl From<ArrayOfTable> for RootValue {
+impl From<ArrayOfTable> for RootItem {
     #[inline]
-    fn from(node: ArrayOfTable) -> RootValue {
-        RootValue::ArrayOfTable(node)
+    fn from(node: ArrayOfTable) -> RootItem {
+        RootItem::ArrayOfTable(node)
     }
 }
-impl From<KeyValue> for RootValue {
+impl From<KeyValue> for RootItem {
     #[inline]
-    fn from(node: KeyValue) -> RootValue {
-        RootValue::KeyValue(node)
+    fn from(node: KeyValue) -> RootItem {
+        RootItem::KeyValue(node)
     }
 }
-impl From<Table> for RootValue {
+impl From<Table> for RootItem {
     #[inline]
-    fn from(node: Table) -> RootValue {
-        RootValue::Table(node)
+    fn from(node: Table) -> RootItem {
+        RootItem::Table(node)
     }
 }
-impl AstNode for RootValue {
+impl AstNode for RootItem {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -660,9 +673,9 @@ impl AstNode for RootValue {
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            SyntaxKind::ARRAY_OF_TABLE => RootValue::ArrayOfTable(ArrayOfTable { syntax }),
-            SyntaxKind::KEY_VALUE => RootValue::KeyValue(KeyValue { syntax }),
-            SyntaxKind::TABLE => RootValue::Table(Table { syntax }),
+            SyntaxKind::ARRAY_OF_TABLE => RootItem::ArrayOfTable(ArrayOfTable { syntax }),
+            SyntaxKind::KEY_VALUE => RootItem::KeyValue(KeyValue { syntax }),
+            SyntaxKind::TABLE => RootItem::Table(Table { syntax }),
             _ => return None,
         };
         Some(res)
@@ -670,9 +683,9 @@ impl AstNode for RootValue {
     #[inline]
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            RootValue::ArrayOfTable(it) => &it.syntax,
-            RootValue::KeyValue(it) => &it.syntax,
-            RootValue::Table(it) => &it.syntax,
+            RootItem::ArrayOfTable(it) => &it.syntax,
+            RootItem::KeyValue(it) => &it.syntax,
+            RootItem::Table(it) => &it.syntax,
         }
     }
 }
@@ -796,7 +809,7 @@ impl std::fmt::Display for Key {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for RootValue {
+impl std::fmt::Display for RootItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -56,14 +56,13 @@ LocalDate = value: '@local_date'
 LocalTime = value: '@local_time'
 
 Array = '[' elements: (Value (',' Value)* ','?) ']'
-Table = '[' header: Key ']' 
+Table = '[' header: Key ']' KeyValue*
 InlineTable = '{' elements: (KeyValue (',' KeyValue)* ','?) '}'
-ArrayOfTable = '[[' header: Key ']]'
+ArrayOfTable = '[[' header: Key ']]' KeyValue*
 
-Root =
-    value: RootValue*
+Root = RootItem*
 
-RootValue =
+RootItem =
     KeyValue
     | Table
     | ArrayOfTable
