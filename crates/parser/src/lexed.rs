@@ -56,10 +56,6 @@ impl<'a> LexedStr<'a> {
         }
         kind.push(EOF);
 
-        println!("kind: {:?}", kind);
-        println!("start: {:?}", start);
-        println!("error: {:?}", error);
-
         Self {
             text,
             kind,

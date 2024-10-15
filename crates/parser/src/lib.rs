@@ -14,7 +14,8 @@ mod validation;
 pub use error::Error;
 pub use event::Event;
 use input::Input;
-use lexed::{lex, LexedStr};
+use lexed::lex;
+pub use lexed::LexedStr;
 use output::Output;
 use parse::Parse;
 use rowan::cursor::SyntaxNode;
@@ -35,6 +36,8 @@ pub fn build_tree(
     let _p = tracing::info_span!("build_tree").entered();
     let mut builder = syntax::SyntaxTreeBuilder::default();
 
+    dbg!(lexed);
+    dbg!(&parser_output);
     let is_eof = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
         step::StrStep::Token { kind, text } => builder.token(kind, text),
         step::StrStep::Enter { kind } => builder.start_node(kind),

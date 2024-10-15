@@ -11,7 +11,7 @@ use syntax::SyntaxKind;
 /// interspersed into the original [`crate::Input`]. The output is fundamentally
 /// coordinated with the input and `n_input_tokens` refers to the number of
 /// times [`crate::Input::push`] was called.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Output {
     /// 32-bit encoding of events. If LSB is zero, then that's an index into the
     /// error vector. Otherwise, it's one of the thee other variants, with data encoded as

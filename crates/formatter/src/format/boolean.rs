@@ -17,8 +17,8 @@ mod tests {
     #[test]
     fn test_boolean() {
         tracing_subscriber::fmt::init();
-        let p = parser::parse("true");
-
+        let p = parser::parse("boolean = true");
+        dbg!("{:?}", &p);
         let ast = Boolean::cast(p.syntax_node());
         assert_matches!(ast, Some(Boolean { .. }));
 

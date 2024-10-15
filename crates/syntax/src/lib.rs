@@ -116,7 +116,6 @@ version = "0.5.8"
         .trim();
 
         let mut lex = SyntaxKind::lexer(source);
-        println!("{:?}", lex);
 
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACKET_START)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
