@@ -17,3 +17,4 @@ rstest = { workspace = true }
 
 [dev-dependencies]
 logos = { workspace = true }
+assert_matches = { workspace = true }

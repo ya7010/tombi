@@ -11,16 +11,17 @@ impl Format for Boolean {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_matches::assert_matches;
     use ast::AstNode;
-    use logos::Logos;
-    use rstest::rstest;
-    use syntax::{SyntaxKind, SyntaxNode};
 
     #[test]
     fn test_boolean() {
-        let mut lex = SyntaxKind::lexer("true");
-        Boolean::cast(SyntaxNode::new_root(lex));
-        let actual = format!("{}", input);
-        assert_eq!(actual, expected);
+        let p = parser::parse("true");
+
+        let ast = Boolean::cast(p.syntax_node());
+        assert_matches!(ast, Some(Boolean { .. }));
+
+        let boolean = ast.unwrap();
+        assert_eq!(boolean.to_string(), "true");
     }
 }
