@@ -57,22 +57,35 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
 pub fn parse_key(p: &mut Parser<'_>) {
     let m = p.start();
 
-    if p.at_ts(KEY_FIRST) {
-        p.bump_any();
-    } else {
-        p.error("expected key");
-    }
-
-    // FIXME: This should be a KEY token.
-    m.complete(p, SyntaxKind::BARE_KEY);
+    dbg!(p.current());
+    match p.current() {
+        BARE_KEY | BASIC_STRING | LITERAL_STRING => {
+            let kind = p.current();
+            p.bump(kind);
+            m.complete(p, kind);
+        }
+        _ => {
+            p.error("expected key");
+        }
+    };
 }
 
 pub fn parse_value(p: &mut Parser<'_>) {
     let m = p.start();
-    if p.at_ts(VALUE_FIRST) {
-        p.bump_any();
-    } else {
-        p.error("expected value");
+    match p.current() {
+        BASIC_STRING
+        | MULTI_LINE_BASIC_STRING
+        | LITERAL_STRING
+        | MULTI_LINE_LITERAL_STRING
+        | INTEGER_DEC
+        | INTEGER_BIN
+        | INTEGER_OCT
+        | INTEGER_HEX
+        | FLOAT
+        | BOOLEAN => {
+            p.bump(p.current());
+        }
+        _ => p.error("expected value"),
     }
 
     // FIXME: This should be a VALUE token.

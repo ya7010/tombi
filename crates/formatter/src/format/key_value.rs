@@ -1,10 +1,10 @@
-use ast::{AstNode, BareKey, Key, KeyValue};
+use ast::AstNode;
 
 use crate::children_kinds;
 
 use super::Format;
 
-impl Format for KeyValue {
+impl Format for ast::KeyValue {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         println!("{:?}", children_kinds::<syntax::SyntaxKind>(self.syntax()));
         println!(
@@ -17,16 +17,16 @@ impl Format for KeyValue {
     }
 }
 
-impl Format for Key {
+impl Format for ast::Key {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         match self {
-            Key::BareKey(it) => it.format(context),
+            Self::BareKey(it) => it.format(context),
             _ => unimplemented!("Key::format is not implemented for {:?}", self),
         }
     }
 }
 
-impl Format for BareKey {
+impl Format for ast::BareKey {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
         self.to_string()
     }

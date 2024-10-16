@@ -1,8 +1,6 @@
-use ast::{Root, RootItem};
-
 use super::Format;
 
-impl Format for Root {
+impl Format for ast::Root {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         self.items()
             .map(|item| item.format(context))
@@ -11,10 +9,10 @@ impl Format for Root {
     }
 }
 
-impl Format for RootItem {
+impl Format for ast::RootItem {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         match self {
-            RootItem::KeyValue(it) => it.format(context),
+            Self::KeyValue(it) => it.format(context),
             _ => unimplemented!("RootItem::format is not implemented for {:?}", self),
         }
     }
