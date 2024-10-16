@@ -82,7 +82,11 @@ pub fn parse_value(p: &mut Parser<'_>) {
         | INTEGER_OCT
         | INTEGER_HEX
         | FLOAT
-        | BOOLEAN => {
+        | BOOLEAN
+        | OFFSET_DATE_TIME
+        | LOCAL_DATE_TIME
+        | LOCAL_DATE
+        | LOCAL_TIME => {
             p.bump(p.current());
         }
         _ => p.error("expected value"),

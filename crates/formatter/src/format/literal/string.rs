@@ -1,4 +1,4 @@
-use super::Format;
+use crate::Format;
 
 impl Format for ast::BasicString {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {

@@ -1,6 +1,6 @@
 use ast::Boolean;
 
-use super::Format;
+use crate::Format;
 
 impl Format for Boolean {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {

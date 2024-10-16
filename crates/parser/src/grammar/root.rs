@@ -10,6 +10,7 @@ pub fn parse(p: &mut Parser<'_>) {
             parse_key_value(p);
         } else {
             p.error("unknown token");
+            p.bump_any()
         }
     }
     m.complete(p, ROOT);
