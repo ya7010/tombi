@@ -49,7 +49,11 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn enter(&mut self, kind: SyntaxKind) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => {
-                (self.sink)(StrStep::Enter { kind });
+                let n_trivias = self.n_trivias();
+                (self.sink)(StrStep::Enter {
+                    kind,
+                    pos: self.pos + n_trivias,
+                });
                 // No need to attach trivias to previous node: there is no
                 // previous node.
                 return;
@@ -58,11 +62,11 @@ impl<'a, 'b> Builder<'a, 'b> {
             State::Normal => (),
         }
 
-        let n_trivias = (self.pos..self.lexed.len())
-            .take_while(|&it| self.lexed.kind(it).is_trivia())
-            .count();
-        self.eat_n_trivias(n_trivias);
-        (self.sink)(StrStep::Enter { kind });
+        self.eat_n_trivias();
+        (self.sink)(StrStep::Enter {
+            kind,
+            pos: self.pos,
+        });
     }
 
     pub fn exit(&mut self) {
@@ -83,8 +87,14 @@ impl<'a, 'b> Builder<'a, 'b> {
         }
     }
 
-    pub fn eat_n_trivias(&mut self, n: usize) {
-        for _ in 0..n {
+    fn n_trivias(&self) -> usize {
+        (self.pos..self.lexed.len())
+            .take_while(|&it| self.lexed.kind(it).is_trivia())
+            .count()
+    }
+
+    pub fn eat_n_trivias(&mut self) {
+        for _ in 0..self.n_trivias() {
             let kind = self.lexed.kind(self.pos);
             assert!(kind.is_trivia());
             self.do_token(kind, 1);

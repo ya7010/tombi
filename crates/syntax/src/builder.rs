@@ -1,6 +1,6 @@
 use rowan::Language;
 
-use crate::TomlLanguage;
+use crate::{IntoRange, TomlLanguage};
 
 #[derive(Default)]
 pub struct SyntaxTreeBuilder {
@@ -28,7 +28,7 @@ impl SyntaxTreeBuilder {
         self.inner.finish_node();
     }
 
-    pub fn error(&mut self, error: String, text_pos: rowan::TextSize) {
-        self.errors.push(crate::SyntaxError::new(error, text_pos));
+    pub fn error(&mut self, error: String, range: impl IntoRange) {
+        self.errors.push(crate::SyntaxError::new(error, range));
     }
 }

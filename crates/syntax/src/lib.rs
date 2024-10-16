@@ -29,6 +29,22 @@ pub type SyntaxNodeChildren = rowan::SyntaxNodeChildren<TomlLanguage>;
 pub type SyntaxElementChildren = rowan::SyntaxElementChildren<TomlLanguage>;
 pub type PreorderWithTokens = rowan::api::PreorderWithTokens<TomlLanguage>;
 
+pub trait IntoRange {
+    fn into_range(self) -> text_size::TextRange;
+}
+
+impl IntoRange for text_size::TextRange {
+    fn into_range(self) -> text_size::TextRange {
+        self
+    }
+}
+
+impl IntoRange for std::ops::Range<u32> {
+    fn into_range(self) -> text_size::TextRange {
+        text_size::TextRange::new(self.start.into(), self.end.into())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

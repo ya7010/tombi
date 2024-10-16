@@ -85,7 +85,7 @@ pub enum SyntaxKind {
 impl SyntaxKind {
     #[inline]
     pub fn is_trivia(self) -> bool {
-        matches!(self, SyntaxKind::WHITESPACE | SyntaxKind::COMMENT)
+        matches!(self, SyntaxKind::WHITESPACE)
     }
 }
 impl From<SyntaxKind> for rowan::SyntaxKind {

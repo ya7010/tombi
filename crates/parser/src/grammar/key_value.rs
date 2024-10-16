@@ -52,6 +52,10 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
     }
     parse_value(p);
 
+    if p.at(COMMENT) {
+        p.bump(COMMENT);
+    }
+
     m.complete(p, KEY_VALUE);
 }
 
@@ -93,7 +97,7 @@ pub fn parse_value(p: &mut Parser<'_>) {
             m.complete(p, kind);
         }
         _ => {
-            while !p.at_ts(TokenSet::new(&[NEWLINE, EOF])) {
+            while !p.at_ts(TokenSet::new(&[NEWLINE, COMMENT, EOF])) {
                 p.bump_any();
             }
             p.error(crate::Error::ExpectedValue);
