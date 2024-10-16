@@ -59,6 +59,12 @@ impl BareKey {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BasicString {
+    pub(crate) syntax: SyntaxNode,
+}
+impl BasicString {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Boolean {
     pub(crate) syntax: SyntaxNode,
 }
@@ -101,27 +107,28 @@ impl InlineTable {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Integer {
+pub struct IntegerBin {
     pub(crate) syntax: SyntaxNode,
 }
-impl Integer {
-    #[inline]
-    pub fn integer_bin_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![integer_bin])
-    }
-    #[inline]
-    pub fn integer_dec_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![integer_dec])
-    }
-    #[inline]
-    pub fn integer_hex_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![integer_hex])
-    }
-    #[inline]
-    pub fn integer_oct_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![integer_oct])
-    }
+impl IntegerBin {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct IntegerDec {
+    pub(crate) syntax: SyntaxNode,
 }
+impl IntegerDec {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct IntegerHex {
+    pub(crate) syntax: SyntaxNode,
+}
+impl IntegerHex {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct IntegerOct {
+    pub(crate) syntax: SyntaxNode,
+}
+impl IntegerOct {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct KeyValue {
@@ -143,6 +150,12 @@ impl KeyValue {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct LiteralString {
+    pub(crate) syntax: SyntaxNode,
+}
+impl LiteralString {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LocalDate {
     pub(crate) syntax: SyntaxNode,
 }
@@ -159,6 +172,18 @@ pub struct LocalTime {
     pub(crate) syntax: SyntaxNode,
 }
 impl LocalTime {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MultiLineBasicString {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MultiLineBasicString {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MultiLineLiteralString {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MultiLineLiteralString {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct OffsetDateTime {
@@ -189,29 +214,6 @@ impl Root {
     #[inline]
     pub fn items(&self) -> AstChildren<RootItem> {
         support::children(&self.syntax)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct String {
-    pub(crate) syntax: SyntaxNode,
-}
-impl String {
-    #[inline]
-    pub fn basic_string_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![basic_string])
-    }
-    #[inline]
-    pub fn literal_string_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![literal_string])
-    }
-    #[inline]
-    pub fn multi_line_basic_string_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![multi_line_basic_string])
-    }
-    #[inline]
-    pub fn multi_line_literal_string_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![multi_line_literal_string])
     }
 }
 
@@ -261,15 +263,21 @@ pub enum RootItem {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Value {
     Array(Array),
+    BasicString(BasicString),
     Boolean(Boolean),
     Float(Float),
     InlineTable(InlineTable),
-    Integer(Integer),
+    IntegerBin(IntegerBin),
+    IntegerDec(IntegerDec),
+    IntegerHex(IntegerHex),
+    IntegerOct(IntegerOct),
+    LiteralString(LiteralString),
     LocalDate(LocalDate),
     LocalDateTime(LocalDateTime),
     LocalTime(LocalTime),
+    MultiLineBasicString(MultiLineBasicString),
+    MultiLineLiteralString(MultiLineLiteralString),
     OffsetDateTime(OffsetDateTime),
-    String(String),
 }
 impl AstNode for Array {
     #[inline]
@@ -311,6 +319,24 @@ impl AstNode for BareKey {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::BARE_KEY
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for BasicString {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::BASIC_STRING
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -397,10 +423,64 @@ impl AstNode for InlineTable {
         &self.syntax
     }
 }
-impl AstNode for Integer {
+impl AstNode for IntegerBin {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::INTEGER
+        kind == SyntaxKind::INTEGER_BIN
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for IntegerDec {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::INTEGER_DEC
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for IntegerHex {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::INTEGER_HEX
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for IntegerOct {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::INTEGER_OCT
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -419,6 +499,24 @@ impl AstNode for KeyValue {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::KEY_VALUE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for LiteralString {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::LITERAL_STRING
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -487,6 +585,42 @@ impl AstNode for LocalTime {
         &self.syntax
     }
 }
+impl AstNode for MultiLineBasicString {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::MULTI_LINE_BASIC_STRING
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for MultiLineLiteralString {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::MULTI_LINE_LITERAL_STRING
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
 impl AstNode for OffsetDateTime {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -527,24 +661,6 @@ impl AstNode for Root {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::ROOT
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-}
-impl AstNode for String {
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::STRING
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -707,6 +823,12 @@ impl From<Array> for Value {
         Value::Array(node)
     }
 }
+impl From<BasicString> for Value {
+    #[inline]
+    fn from(node: BasicString) -> Value {
+        Value::BasicString(node)
+    }
+}
 impl From<Boolean> for Value {
     #[inline]
     fn from(node: Boolean) -> Value {
@@ -725,10 +847,34 @@ impl From<InlineTable> for Value {
         Value::InlineTable(node)
     }
 }
-impl From<Integer> for Value {
+impl From<IntegerBin> for Value {
     #[inline]
-    fn from(node: Integer) -> Value {
-        Value::Integer(node)
+    fn from(node: IntegerBin) -> Value {
+        Value::IntegerBin(node)
+    }
+}
+impl From<IntegerDec> for Value {
+    #[inline]
+    fn from(node: IntegerDec) -> Value {
+        Value::IntegerDec(node)
+    }
+}
+impl From<IntegerHex> for Value {
+    #[inline]
+    fn from(node: IntegerHex) -> Value {
+        Value::IntegerHex(node)
+    }
+}
+impl From<IntegerOct> for Value {
+    #[inline]
+    fn from(node: IntegerOct) -> Value {
+        Value::IntegerOct(node)
+    }
+}
+impl From<LiteralString> for Value {
+    #[inline]
+    fn from(node: LiteralString) -> Value {
+        Value::LiteralString(node)
     }
 }
 impl From<LocalDate> for Value {
@@ -749,16 +895,22 @@ impl From<LocalTime> for Value {
         Value::LocalTime(node)
     }
 }
+impl From<MultiLineBasicString> for Value {
+    #[inline]
+    fn from(node: MultiLineBasicString) -> Value {
+        Value::MultiLineBasicString(node)
+    }
+}
+impl From<MultiLineLiteralString> for Value {
+    #[inline]
+    fn from(node: MultiLineLiteralString) -> Value {
+        Value::MultiLineLiteralString(node)
+    }
+}
 impl From<OffsetDateTime> for Value {
     #[inline]
     fn from(node: OffsetDateTime) -> Value {
         Value::OffsetDateTime(node)
-    }
-}
-impl From<String> for Value {
-    #[inline]
-    fn from(node: String) -> Value {
-        Value::String(node)
     }
 }
 impl AstNode for Value {
@@ -767,30 +919,46 @@ impl AstNode for Value {
         matches!(
             kind,
             SyntaxKind::ARRAY
+                | SyntaxKind::BASIC_STRING
                 | SyntaxKind::BOOLEAN
                 | SyntaxKind::FLOAT
                 | SyntaxKind::INLINE_TABLE
-                | SyntaxKind::INTEGER
+                | SyntaxKind::INTEGER_BIN
+                | SyntaxKind::INTEGER_DEC
+                | SyntaxKind::INTEGER_HEX
+                | SyntaxKind::INTEGER_OCT
+                | SyntaxKind::LITERAL_STRING
                 | SyntaxKind::LOCAL_DATE
                 | SyntaxKind::LOCAL_DATE_TIME
                 | SyntaxKind::LOCAL_TIME
+                | SyntaxKind::MULTI_LINE_BASIC_STRING
+                | SyntaxKind::MULTI_LINE_LITERAL_STRING
                 | SyntaxKind::OFFSET_DATE_TIME
-                | SyntaxKind::STRING
         )
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             SyntaxKind::ARRAY => Value::Array(Array { syntax }),
+            SyntaxKind::BASIC_STRING => Value::BasicString(BasicString { syntax }),
             SyntaxKind::BOOLEAN => Value::Boolean(Boolean { syntax }),
             SyntaxKind::FLOAT => Value::Float(Float { syntax }),
             SyntaxKind::INLINE_TABLE => Value::InlineTable(InlineTable { syntax }),
-            SyntaxKind::INTEGER => Value::Integer(Integer { syntax }),
+            SyntaxKind::INTEGER_BIN => Value::IntegerBin(IntegerBin { syntax }),
+            SyntaxKind::INTEGER_DEC => Value::IntegerDec(IntegerDec { syntax }),
+            SyntaxKind::INTEGER_HEX => Value::IntegerHex(IntegerHex { syntax }),
+            SyntaxKind::INTEGER_OCT => Value::IntegerOct(IntegerOct { syntax }),
+            SyntaxKind::LITERAL_STRING => Value::LiteralString(LiteralString { syntax }),
             SyntaxKind::LOCAL_DATE => Value::LocalDate(LocalDate { syntax }),
             SyntaxKind::LOCAL_DATE_TIME => Value::LocalDateTime(LocalDateTime { syntax }),
             SyntaxKind::LOCAL_TIME => Value::LocalTime(LocalTime { syntax }),
+            SyntaxKind::MULTI_LINE_BASIC_STRING => {
+                Value::MultiLineBasicString(MultiLineBasicString { syntax })
+            }
+            SyntaxKind::MULTI_LINE_LITERAL_STRING => {
+                Value::MultiLineLiteralString(MultiLineLiteralString { syntax })
+            }
             SyntaxKind::OFFSET_DATE_TIME => Value::OffsetDateTime(OffsetDateTime { syntax }),
-            SyntaxKind::STRING => Value::String(String { syntax }),
             _ => return None,
         };
         Some(res)
@@ -799,15 +967,21 @@ impl AstNode for Value {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Value::Array(it) => &it.syntax,
+            Value::BasicString(it) => &it.syntax,
             Value::Boolean(it) => &it.syntax,
             Value::Float(it) => &it.syntax,
             Value::InlineTable(it) => &it.syntax,
-            Value::Integer(it) => &it.syntax,
+            Value::IntegerBin(it) => &it.syntax,
+            Value::IntegerDec(it) => &it.syntax,
+            Value::IntegerHex(it) => &it.syntax,
+            Value::IntegerOct(it) => &it.syntax,
+            Value::LiteralString(it) => &it.syntax,
             Value::LocalDate(it) => &it.syntax,
             Value::LocalDateTime(it) => &it.syntax,
             Value::LocalTime(it) => &it.syntax,
+            Value::MultiLineBasicString(it) => &it.syntax,
+            Value::MultiLineLiteralString(it) => &it.syntax,
             Value::OffsetDateTime(it) => &it.syntax,
-            Value::String(it) => &it.syntax,
         }
     }
 }
@@ -846,6 +1020,11 @@ impl std::fmt::Display for BareKey {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for BasicString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for Boolean {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -866,12 +1045,32 @@ impl std::fmt::Display for InlineTable {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for Integer {
+impl std::fmt::Display for IntegerBin {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for IntegerDec {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for IntegerHex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for IntegerOct {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for KeyValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for LiteralString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -891,6 +1090,16 @@ impl std::fmt::Display for LocalTime {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for MultiLineBasicString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MultiLineLiteralString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for OffsetDateTime {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -902,11 +1111,6 @@ impl std::fmt::Display for QuotedKey {
     }
 }
 impl std::fmt::Display for Root {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for String {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -27,33 +27,28 @@ DottedKeys = DottedKey ('.' DottedKey)*
 DottedKey = BareKey | QuotedKey
 
 Value =
-    String
-    | Integer
+    BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString
+    | IntegerBin | IntegerOct | IntegerDec | IntegerHex
     | Float
     | Boolean
-    | OffsetDateTime
-    | LocalDateTime
-    | LocalDate
-    | LocalTime
+    | OffsetDateTime | LocalDateTime | LocalDate | LocalTime
     | Array
     | InlineTable
 
-String = 
-    '@basic_string'
-    | '@multi_line_basic_string'
-    | '@literal_string'
-    | '@multi_line_literal_string'
-Integer = 
-    '@integer_dec'
-    | '@integer_hex'
-    | '@integer_oct'
-    | '@integer_bin'
-Float = value: '@float'
+BasicString = value: 'basic_string'
+MultiLineBasicString = value: 'multi_line_basic_string'
+LiteralString = value: 'literal_string'
+MultiLineLiteralString = value: 'multi_line_literal_string'
+IntegerBin = value: 'integer_bin'
+IntegerOct = value: 'integer_oct'
+IntegerDec = value: 'integer_dec'
+IntegerHex = value: 'integer_hex'
+Float = value: 'float'
 Boolean = value: ('true' | 'false')
-OffsetDateTime = value: '@offset_date_time'
-LocalDateTime = value: '@local_date_time'
-LocalDate = value: '@local_date'
-LocalTime = value: '@local_time'
+OffsetDateTime = value: 'offset_date_time'
+LocalDateTime = value: 'local_date_time'
+LocalDate = value: 'local_date'
+LocalTime = value: 'local_time'
 
 Array = '[' elements: (Value (',' Value)* ','?) ']'
 Table = '[' header: Key ']' KeyValue*

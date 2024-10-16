@@ -1,6 +1,6 @@
 use super::Format;
 
-impl Format for ast::String {
+impl Format for ast::BasicString {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
         self.to_string()
     }
