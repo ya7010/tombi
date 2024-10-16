@@ -26,6 +26,7 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), format!("key = {value}"));
+        assert_eq!(p.errors().len(), 0);
     }
 
     #[rstest]
@@ -34,6 +35,6 @@ mod tests {
     #[case("invalid_float_3 = 3.e+20")]
     fn invalid_key_value(#[case] source: &str) {
         let p = parser::parse(source);
-        assert_matches!(ast::Root::cast(p.syntax_node()), Some(_));
+        assert_ne!(p.errors().len(), 0);
     }
 }

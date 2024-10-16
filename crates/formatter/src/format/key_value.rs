@@ -21,7 +21,8 @@ impl Format for ast::Key {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         match self {
             Self::BareKey(it) => it.format(context),
-            _ => unimplemented!("Key::format is not implemented for {:?}", self),
+            Self::QuotedKey(it) => it.format(context),
+            Self::DottedKeys(it) => it.format(context),
         }
     }
 }
@@ -29,6 +30,31 @@ impl Format for ast::Key {
 impl Format for ast::BareKey {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
         self.to_string()
+    }
+}
+
+impl Format for ast::QuotedKey {
+    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
+        self.to_string()
+    }
+}
+
+impl Format for ast::DottedKey {
+    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
+        match self {
+            ast::DottedKey::BareKey(it) => it.format(_context),
+            ast::DottedKey::QuotedKey(it) => it.format(_context),
+        }
+    }
+}
+
+impl Format for ast::DottedKeys {
+    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
+        self.dotted_keys()
+            .into_iter()
+            .map(|it| it.format(_context))
+            .collect::<Vec<_>>()
+            .join(".")
     }
 }
 
@@ -52,5 +78,28 @@ impl Format for ast::Value {
             ast::Value::MultiLineLiteralString(it) => it.format(context),
             ast::Value::OffsetDateTime(it) => it.format(context),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case(r#"key = "value""#)]
+    #[case(r#"key    = "value""#)]
+    fn bare_key_value(#[case] source: &str) {
+        let p = parser::parse(source);
+        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        assert_eq!(ast.format_default(), "key = \"value\"");
+        assert_eq!(p.errors().len(), 0);
+    }
+
+    #[rstest]
+    #[case("key = # INVALID")]
+    fn invalid_bare_key_value(#[case] source: &str) {
+        let p = parser::parse(source);
+        assert_ne!(p.errors().len(), 0);
     }
 }
