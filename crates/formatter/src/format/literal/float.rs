@@ -9,7 +9,6 @@ impl Format for ast::Float {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_matches::assert_matches;
     use ast::AstNode;
     use rstest::rstest;
 

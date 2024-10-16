@@ -13,6 +13,7 @@ serde = { workspace = true }
 syntax = { workspace = true }
 thiserror = { workspace = true }
 rstest = { workspace = true }
+text-size = "1.1.1"
 
 [dev-dependencies]
 logos = { workspace = true }

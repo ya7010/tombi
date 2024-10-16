@@ -2,6 +2,7 @@ use syntax::{
     SyntaxKind::{self, *},
     T,
 };
+use tracing::Instrument;
 
 use crate::{parser::Parser, token_set::TokenSet};
 
@@ -47,7 +48,7 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
     parse_key(p);
 
     if !p.eat(T![=]) {
-        p.error("expected '='");
+        p.error(crate::Error::ExpectedEquals);
     }
     parse_value(p);
 
@@ -65,7 +66,7 @@ pub fn parse_key(p: &mut Parser<'_>) {
             m.complete(p, kind);
         }
         _ => {
-            p.error("expected key");
+            p.error(crate::Error::ExpectedKey);
         }
     };
 }
@@ -95,7 +96,7 @@ pub fn parse_value(p: &mut Parser<'_>) {
             while !p.at_ts(TokenSet::new(&[NEWLINE, EOF])) {
                 p.bump_any();
             }
-            p.error("expected value");
+            p.error(crate::Error::ExpectedValue);
             m.complete(p, INVALID_TOKENS);
         }
     }

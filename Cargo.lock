@@ -200,6 +200,7 @@ dependencies = [
  "schemars",
  "serde",
  "syntax",
+ "text-size",
  "thiserror",
  "tracing-subscriber",
 ]

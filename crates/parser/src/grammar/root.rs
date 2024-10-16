@@ -9,7 +9,7 @@ pub fn parse(p: &mut Parser<'_>) {
         if p.at_ts(KEY_FIRST) {
             parse_key_value(p);
         } else {
-            p.error("unknown token");
+            p.error(crate::Error::UnknownToken);
             p.bump_any()
         }
     }

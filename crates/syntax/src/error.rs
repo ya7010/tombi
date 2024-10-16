@@ -1,3 +1,5 @@
+use rowan::TextSize;
+
 #[derive(thiserror::Error, Default, Debug, Clone, PartialEq)]
 pub enum Error {
     #[default]
@@ -16,9 +18,25 @@ impl Error {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxError(String, text_size::TextRange);
 
+pub trait IntoRange {
+    fn into_range(self) -> text_size::TextRange;
+}
+
+impl IntoRange for text_size::TextRange {
+    fn into_range(self) -> text_size::TextRange {
+        self
+    }
+}
+
+impl IntoRange for std::ops::Range<u32> {
+    fn into_range(self) -> text_size::TextRange {
+        text_size::TextRange::new(self.start.into(), self.end.into())
+    }
+}
+
 impl SyntaxError {
-    pub fn new(message: impl Into<String>, range: text_size::TextRange) -> Self {
-        Self(message.into(), range)
+    pub fn new(message: impl Into<String>, range: impl IntoRange) -> Self {
+        Self(message.into(), range.into_range())
     }
 
     pub fn new_at_offset(message: impl Into<String>, offset: text_size::TextSize) -> Self {

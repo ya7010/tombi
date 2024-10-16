@@ -85,6 +85,7 @@ impl Format for ast::Value {
 mod tests {
     use super::*;
     use rstest::rstest;
+    use syntax::SyntaxError;
 
     #[rstest]
     #[case(r#"key = "value""#)]
@@ -101,5 +102,9 @@ mod tests {
     fn invalid_bare_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         assert_ne!(p.errors().len(), 0);
+        assert_eq!(
+            p.errors(),
+            vec![SyntaxError::new(parser::Error::ExpectedValue, 15..15)]
+        );
     }
 }
