@@ -1,4 +1,5 @@
-#[derive(thiserror::Error, Debug, Clone, PartialEq)]
+#[derive(thiserror::Error, Debug, Clone, Copy, PartialEq)]
+#[repr(u16)]
 pub enum Error {
     #[error("expected key")]
     ExpectedKey,

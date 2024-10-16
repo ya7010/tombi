@@ -5,8 +5,6 @@ use syntax::SyntaxKind;
 pub(crate) struct TokenSet([u64; 3]);
 
 impl TokenSet {
-    pub(crate) const EMPTY: TokenSet = TokenSet([0; 3]);
-
     pub(crate) const fn new(kinds: &[SyntaxKind]) -> TokenSet {
         let mut res = [0; 3];
         let mut i = 0;

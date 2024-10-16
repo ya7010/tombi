@@ -173,9 +173,12 @@ impl<'a> LexedStr<'a> {
                 } => builder.token(kind, n_raw_tokens),
                 Step::Enter { kind } => builder.enter(kind),
                 Step::Exit => builder.exit(),
-                Step::Error { msg } => {
+                Step::Error { error } => {
                     let text_pos = builder.lexed.text_start(builder.pos);
-                    (builder.sink)(StrStep::Error { msg, pos: text_pos });
+                    (builder.sink)(StrStep::Error {
+                        error,
+                        pos: text_pos,
+                    });
                 }
             }
         }

@@ -22,7 +22,7 @@ pub enum Event {
     },
 
     Error {
-        msg: String,
+        error: crate::Error,
     },
 }
 
@@ -80,7 +80,7 @@ pub(super) fn process(mut events: Vec<Event>) -> Output {
             Event::Token { kind, n_raw_tokens } => {
                 res.token(kind, n_raw_tokens);
             }
-            Event::Error { msg } => res.error(msg),
+            Event::Error { error } => res.error(error),
         }
     }
 

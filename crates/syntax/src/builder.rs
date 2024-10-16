@@ -29,7 +29,6 @@ impl SyntaxTreeBuilder {
     }
 
     pub fn error(&mut self, error: String, text_pos: rowan::TextSize) {
-        self.errors
-            .push(crate::SyntaxError::new_at_offset(error, text_pos));
+        self.errors.push(crate::SyntaxError::new(error, text_pos));
     }
 }

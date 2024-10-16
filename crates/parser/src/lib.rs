@@ -41,7 +41,9 @@ pub fn build_tree(
         step::StrStep::Token { kind, text } => builder.token(kind, text),
         step::StrStep::Enter { kind } => builder.start_node(kind),
         step::StrStep::Exit => builder.finish_node(),
-        step::StrStep::Error { msg, pos } => builder.error(msg.to_owned(), pos.try_into().unwrap()),
+        step::StrStep::Error { error, pos } => {
+            builder.error(error.to_string(), pos.try_into().unwrap())
+        }
     });
 
     builder.finish()

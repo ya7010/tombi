@@ -19,11 +19,11 @@ pub struct Output {
     /// |16 bit kind|8 bit n_input_tokens|4 bit tag|4 bit leftover|
     ///
     event: Vec<u32>,
-    error: Vec<String>,
+    error: Vec<crate::Error>,
 }
 
 #[derive(Debug)]
-pub enum Step<'a> {
+pub enum Step {
     Token {
         kind: SyntaxKind,
         n_input_tokens: u8,
@@ -33,7 +33,7 @@ pub enum Step<'a> {
     },
     Exit,
     Error {
-        msg: &'a str,
+        error: crate::Error,
     },
 }
 
@@ -52,11 +52,11 @@ impl Output {
     const ENTER_EVENT: u8 = 1;
     const EXIT_EVENT: u8 = 2;
 
-    pub fn iter(&self) -> impl Iterator<Item = Step<'_>> {
+    pub fn iter<'a>(&'a self) -> impl Iterator<Item = Step> + 'a {
         self.event.iter().map(|&event| {
             if event & Self::EVENT_MASK == 0 {
                 return Step::Error {
-                    msg: self.error[(event as usize) >> Self::ERROR_SHIFT].as_str(),
+                    error: self.error[(event as usize) >> Self::ERROR_SHIFT],
                 };
             }
             let tag = ((event & Self::TAG_MASK) >> Self::TAG_SHIFT) as u8;
@@ -101,7 +101,7 @@ impl Output {
         self.event.push(e)
     }
 
-    pub(crate) fn error(&mut self, error: String) {
+    pub(crate) fn error(&mut self, error: crate::Error) {
         let idx: usize = self.error.len();
         self.error.push(error);
         let e = (idx as u32) << Self::ERROR_SHIFT;

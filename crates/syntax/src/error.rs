@@ -1,5 +1,3 @@
-use rowan::TextSize;
-
 #[derive(thiserror::Error, Default, Debug, Clone, PartialEq)]
 pub enum Error {
     #[default]
@@ -37,10 +35,6 @@ impl IntoRange for std::ops::Range<u32> {
 impl SyntaxError {
     pub fn new(message: impl Into<String>, range: impl IntoRange) -> Self {
         Self(message.into(), range.into_range())
-    }
-
-    pub fn new_at_offset(message: impl Into<String>, offset: text_size::TextSize) -> Self {
-        Self(message.into(), text_size::TextRange::empty(offset))
     }
 
     pub fn range(&self) -> text_size::TextRange {

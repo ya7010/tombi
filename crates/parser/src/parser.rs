@@ -134,8 +134,7 @@ impl<'t> Parser<'t> {
     /// FIXME: this should be much more fancy and support
     /// structured errors with spans and notes, like rustc
     /// does.
-    pub(crate) fn error<T: Into<String>>(&mut self, message: T) {
-        let msg = message.into();
-        self.push_event(Event::Error { msg });
+    pub(crate) fn error(&mut self, error: crate::Error) {
+        self.push_event(Event::Error { error });
     }
 }
