@@ -51,7 +51,6 @@ impl Format for ast::Value {
             ast::Value::MultiLineBasicString(it) => it.format(context),
             ast::Value::MultiLineLiteralString(it) => it.format(context),
             ast::Value::OffsetDateTime(it) => it.format(context),
-            ast::Value::Boolean(it) => it.format(context),
         }
     }
 }
