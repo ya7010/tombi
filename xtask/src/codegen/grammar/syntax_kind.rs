@@ -60,6 +60,8 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
             #(#attr_tokens,)*
             #(#nodes,)*
             #[doc(hidden)]
+            INVALID_TOKENS,
+            #[doc(hidden)]
             __LAST,
         }
 

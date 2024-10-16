@@ -87,11 +87,16 @@ pub fn parse_value(p: &mut Parser<'_>) {
         | LOCAL_DATE_TIME
         | LOCAL_DATE
         | LOCAL_TIME => {
-            p.bump(p.current());
+            let kind = p.current();
+            p.bump(kind);
+            m.complete(p, kind);
         }
-        _ => p.error("expected value"),
+        _ => {
+            while !p.at_ts(TokenSet::new(&[NEWLINE, EOF])) {
+                p.bump_any();
+            }
+            p.error("expected value");
+            m.complete(p, INVALID_TOKENS);
+        }
     }
-
-    // FIXME: This should be a VALUE token.
-    m.complete(p, SyntaxKind::BOOLEAN);
 }

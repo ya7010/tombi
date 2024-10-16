@@ -78,6 +78,8 @@ pub enum SyntaxKind {
     INLINE_TABLE_ELEMENT_LIST,
     ARRAY_OF_TABLE,
     #[doc(hidden)]
+    INVALID_TOKENS,
+    #[doc(hidden)]
     __LAST,
 }
 impl SyntaxKind {

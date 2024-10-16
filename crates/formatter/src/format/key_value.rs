@@ -35,8 +35,23 @@ impl Format for ast::BareKey {
 impl Format for ast::Value {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         match self {
+            ast::Value::Array(it) => it.format(context),
+            ast::Value::BasicString(it) => it.format(context),
             ast::Value::Boolean(it) => it.format(context),
-            _ => unimplemented!("Value::format is not implemented for {:?}", self),
+            ast::Value::Float(it) => it.format(context),
+            ast::Value::InlineTable(it) => it.format(context),
+            ast::Value::IntegerBin(it) => it.format(context),
+            ast::Value::IntegerDec(it) => it.format(context),
+            ast::Value::IntegerHex(it) => it.format(context),
+            ast::Value::IntegerOct(it) => it.format(context),
+            ast::Value::LiteralString(it) => it.format(context),
+            ast::Value::LocalDate(it) => it.format(context),
+            ast::Value::LocalDateTime(it) => it.format(context),
+            ast::Value::LocalTime(it) => it.format(context),
+            ast::Value::MultiLineBasicString(it) => it.format(context),
+            ast::Value::MultiLineLiteralString(it) => it.format(context),
+            ast::Value::OffsetDateTime(it) => it.format(context),
+            ast::Value::Boolean(it) => it.format(context),
         }
     }
 }
