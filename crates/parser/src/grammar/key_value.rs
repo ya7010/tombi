@@ -47,11 +47,10 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
     if !p.eat(T![=]) {
         p.error(crate::Error::ExpectedEquals);
     }
+
     parse_value(p);
 
-    if p.at(COMMENT) {
-        p.bump(COMMENT);
-    }
+    p.eat(COMMENT);
 
     m.complete(p, KEY_VALUE);
 }
@@ -67,25 +66,24 @@ pub fn parse_key(p: &mut Parser<'_>) {
 }
 
 fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
-    if let Some(kind) = eat_single_key(p) {
-        let mut is_dot = false;
-        while p.eat(T![.]) {
-            is_dot = true;
+    if p.nth_at(1, T![.]) {
+        // Dotted keys Mode
+        loop {
             let m = p.start();
             if let Some(kind) = eat_single_key(p) {
                 m.complete(p, kind);
             } else {
+                p.error(crate::Error::ExpectedKey);
                 m.complete(p, INVALID_TOKENS);
                 return None;
             }
+            if !p.eat(T![.]) {
+                break;
+            }
         }
-        if is_dot {
-            Some(DOTTED_KEYS)
-        } else {
-            Some(kind)
-        }
+        Some(DOTTED_KEYS)
     } else {
-        None
+        eat_single_key(p)
     }
 }
 
