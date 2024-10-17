@@ -38,7 +38,7 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), format!("{source}"));
-        assert_eq!(p.errors().len(), 0);
+        assert_eq!(p.errors(), []);
     }
 
     #[rstest]
@@ -48,7 +48,7 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), format!("{source}"));
-        assert_eq!(p.errors().len(), 0);
+        assert_eq!(p.errors(), []);
     }
 
     #[rstest]
@@ -57,7 +57,7 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), format!("{source}"));
-        assert_eq!(p.errors().len(), 0);
+        assert_eq!(p.errors(), []);
     }
 
     #[rstest]
@@ -67,6 +67,6 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), format!("{source}"));
-        assert_eq!(p.errors().len(), 0);
+        assert_eq!(p.errors(), []);
     }
 }

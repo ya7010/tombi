@@ -6,13 +6,6 @@ use super::Format;
 
 impl Format for ast::KeyValue {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        println!("{:?}", children_kinds::<syntax::SyntaxKind>(self.syntax()));
-        println!(
-            "key: {:?}, eq: {:?}, value: {:?}",
-            self.key(),
-            self.eq_token(),
-            self.value()
-        );
         self.key().unwrap().format(context) + " = " + &self.value().unwrap().format(context)
     }
 }
@@ -50,7 +43,6 @@ impl Format for ast::SingleKey {
 
 impl Format for ast::DottedKeys {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        dbg!(self.single_keys());
         self.single_keys()
             .into_iter()
             .map(|it| it.format(_context))
@@ -95,7 +87,7 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.format_default(), "key = \"value\"");
-        assert_eq!(p.errors().len(), 0);
+        assert_eq!(p.errors(), []);
     }
 
     #[rstest]

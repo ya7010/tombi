@@ -24,8 +24,8 @@ mod tests {
     fn inline_table_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
+
+        assert_eq!(p.errors(), []);
         assert_eq!(ast.format_default(), source);
-        dbg!(p.errors());
-        assert_eq!(p.errors().len(), 0);
     }
 }

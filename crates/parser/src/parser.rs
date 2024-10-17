@@ -48,10 +48,7 @@ impl<'t> Parser<'t> {
     }
 
     pub(crate) fn nth_at(&self, n: usize, kind: SyntaxKind) -> bool {
-        match kind {
-            T!["[["] => self.at_composite2(n, T!['['], T![']']),
-            _ => self.input.kind(self.pos + n) == kind,
-        }
+        self.input.kind(self.pos + n) == kind
     }
 
     /// Consume the next token if `kind` matches.
@@ -59,18 +56,8 @@ impl<'t> Parser<'t> {
         if !self.at(kind) {
             return false;
         }
-        let n_raw_tokens = match kind {
-            T!["[["] | T!["]]"] => 2,
-            _ => 1,
-        };
-        self.do_bump(kind, n_raw_tokens);
+        self.do_bump(kind, 1);
         true
-    }
-
-    fn at_composite2(&self, n: usize, k1: SyntaxKind, k2: SyntaxKind) -> bool {
-        self.input.kind(self.pos + n) == k1
-            && self.input.kind(self.pos + n + 1) == k2
-            && self.input.is_joint(self.pos + n)
     }
 
     /// Checks if the current token is in `kinds`.

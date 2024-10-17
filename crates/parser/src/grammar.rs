@@ -1,3 +1,4 @@
+mod array_of_table;
 mod inline_table;
 mod key_value;
 mod root;

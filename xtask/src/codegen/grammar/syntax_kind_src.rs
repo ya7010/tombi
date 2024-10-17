@@ -1,15 +1,15 @@
 use quote::{format_ident, quote};
 
 pub const PUNCTUATIONS: &[PunctuationItem] = &[
-    PunctuationItem::new_with_attr(",", "COMMA"),
-    PunctuationItem::new_with_attr(".", "DOT"),
-    PunctuationItem::new_with_attr("=", "EQUAL"),
-    PunctuationItem::new_with_attr("[", "BRACKET_START"),
-    PunctuationItem::new_with_attr("]", "BRACKET_END"),
-    PunctuationItem::new_with_attr("{", "BRACE_START"),
-    PunctuationItem::new_with_attr("}", "BRACE_END"),
-    PunctuationItem::new("[[", "DOUBLE_BRACKET_START"),
-    PunctuationItem::new("]]", "DOUBLE_BRACKET_END"),
+    PunctuationItem::new(",", "COMMA"),
+    PunctuationItem::new(".", "DOT"),
+    PunctuationItem::new("=", "EQUAL"),
+    PunctuationItem::new("[", "BRACKET_START"),
+    PunctuationItem::new("]", "BRACKET_END"),
+    PunctuationItem::new("{", "BRACE_START"),
+    PunctuationItem::new("}", "BRACE_END"),
+    PunctuationItem::new_with_priority("[[", "DOUBLE_BRACKET_START", 2),
+    PunctuationItem::new_with_priority("]]", "DOUBLE_BRACKET_END", 2),
 ];
 
 pub const LITERALS: &[RegexItem] = &[
@@ -94,7 +94,7 @@ pub const NODES: &[&str] = &[
 pub struct PunctuationItem<'a> {
     pub token: &'a str,
     pub name: &'a str,
-    has_attr: bool,
+    priority: Option<u8>,
 }
 
 impl<'a> PunctuationItem<'a> {
@@ -102,25 +102,26 @@ impl<'a> PunctuationItem<'a> {
         Self {
             token,
             name,
-            has_attr: false,
+            priority: None,
         }
     }
 
-    pub const fn new_with_attr(token: &'a str, name: &'a str) -> Self {
+    pub const fn new_with_priority(token: &'a str, name: &'a str, priority: u8) -> Self {
         Self {
             token,
             name,
-            has_attr: true,
+            priority: Some(priority),
         }
     }
 
     pub fn to_attr_token(&self) -> proc_macro2::TokenStream {
         let name = format_ident!("{}", self.name);
-        if self.has_attr {
-            let token = self.token;
-            quote! { #[token(#token)] #name }
+        let token = self.token;
+        if let Some(priority) = self.priority {
+            let priority = proc_macro2::Literal::u8_unsuffixed(priority);
+            quote! { #[token(#token, priority = #priority)] #name }
         } else {
-            quote! { #name }
+            quote! { #[token(#token)] #name }
         }
     }
 }

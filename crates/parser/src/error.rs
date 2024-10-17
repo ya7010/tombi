@@ -15,6 +15,9 @@ pub enum Error {
     ExpectedBracketStart,
     #[error("expected '}}'")]
     ExpectedBracketEnd,
+
+    #[error("expected '}}}}'")]
+    ExpectedDoubleBracketEnd,
 }
 
 impl Into<String> for Error {

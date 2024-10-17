@@ -31,8 +31,6 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
 
     parse_value(p);
 
-    p.eat(COMMENT);
-
     m.complete(p, KEY_VALUE);
 }
 
