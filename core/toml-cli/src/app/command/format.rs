@@ -19,7 +19,7 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
         arg::FileInput::Stdin => {
             let mut buffer = String::new();
             if let Ok(_) = std::io::stdin().read_to_string(&mut buffer) {
-                formatter::format(&buffer, &Default::default())?;
+                formatter::format_with_option(&buffer, &Default::default())?;
             }
         }
         arg::FileInput::Files(files) => {
@@ -30,7 +30,7 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
                         match std::fs::File::open(&path) {
                             Ok(mut file) => {
                                 if let Ok(_) = file.read_to_string(&mut buffer) {
-                                    formatter::format(&buffer, &Default::default())?;
+                                    formatter::format_with_option(&buffer, &Default::default())?;
                                 }
                             }
                             Err(err) => eprintln!("Error: {:?}", err),
