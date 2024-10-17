@@ -11,7 +11,11 @@ pub use error::Error;
 use format::Format;
 pub use options::Options;
 
-pub fn format(source: &str, options: &Options) -> Result<String, crate::Error> {
+pub fn format(source: &str) -> Result<String, crate::Error> {
+    format_with_option(source, &Options::default())
+}
+
+pub fn format_with_option(source: &str, options: &Options) -> Result<String, crate::Error> {
     let p = parser::parse(source);
     if p.errors().len() == 0 {
         let root = ast::Root::cast(p.into_syntax_node()).unwrap();
@@ -19,7 +23,7 @@ pub fn format(source: &str, options: &Options) -> Result<String, crate::Error> {
             options: Cow::Borrowed(options),
         }))
     } else {
-        Err(crate::Error::ParseInvalid)
+        Err(crate::Error::ParseInvalid(p.errors()))
     }
 }
 

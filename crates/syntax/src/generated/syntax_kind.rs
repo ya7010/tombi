@@ -62,6 +62,7 @@ pub enum SyntaxKind {
     BARE_KEY,
     #[regex("#[^\\n\\r]*")]
     COMMENT,
+    ERROR,
     ROOT,
     QUOTED_KEY,
     DOTTED_KEY,

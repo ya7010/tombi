@@ -1,15 +1,15 @@
 use quote::{format_ident, quote};
 
-pub const PUNCTUATIONS: &[TokenItem] = &[
-    TokenItem::new_with_attr(",", "COMMA"),
-    TokenItem::new_with_attr(".", "DOT"),
-    TokenItem::new_with_attr("=", "EQUAL"),
-    TokenItem::new_with_attr("[", "BRACKET_START"),
-    TokenItem::new_with_attr("]", "BRACKET_END"),
-    TokenItem::new_with_attr("{", "BRACE_START"),
-    TokenItem::new_with_attr("}", "BRACE_END"),
-    TokenItem::new("[[", "DOUBLE_BRACKET_START"),
-    TokenItem::new("]]", "DOUBLE_BRACKET_END"),
+pub const PUNCTUATIONS: &[PunctuationItem] = &[
+    PunctuationItem::new_with_attr(",", "COMMA"),
+    PunctuationItem::new_with_attr(".", "DOT"),
+    PunctuationItem::new_with_attr("=", "EQUAL"),
+    PunctuationItem::new_with_attr("[", "BRACKET_START"),
+    PunctuationItem::new_with_attr("]", "BRACKET_END"),
+    PunctuationItem::new_with_attr("{", "BRACE_START"),
+    PunctuationItem::new_with_attr("}", "BRACE_END"),
+    PunctuationItem::new("[[", "DOUBLE_BRACKET_START"),
+    PunctuationItem::new("]]", "DOUBLE_BRACKET_END"),
 ];
 
 pub const LITERALS: &[RegexItem] = &[
@@ -60,11 +60,16 @@ pub const LITERALS: &[RegexItem] = &[
         r#"(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:(?:\.|,)\d+)?"#,
     ),
 ];
-pub const TOKENS: &[RegexItem] = &[
-    RegexItem::new("WHITESPACE", r"[ \t]+"),
-    RegexItem::new("NEWLINE", r"(\n|\r\n)+"),
-    RegexItem::new_with_priority("BARE_KEY", r"[A-Za-z0-9_-]+", 2),
-    RegexItem::new("COMMENT", r"#[^\n\r]*"),
+pub const TOKENS: &[TokenItem] = &[
+    TokenItem::Regex(RegexItem::new("WHITESPACE", r"[ \t]+")),
+    TokenItem::Regex(RegexItem::new("NEWLINE", r"(\n|\r\n)+")),
+    TokenItem::Regex(RegexItem::new_with_priority(
+        "BARE_KEY",
+        r"[A-Za-z0-9_-]+",
+        2,
+    )),
+    TokenItem::Regex(RegexItem::new("COMMENT", r"#[^\n\r]*")),
+    TokenItem::Token("ERROR"),
 ];
 
 pub const NODES: &[&str] = &[
@@ -86,13 +91,13 @@ pub const NODES: &[&str] = &[
 ];
 
 #[derive(Debug)]
-pub struct TokenItem<'a> {
+pub struct PunctuationItem<'a> {
     pub token: &'a str,
     pub name: &'a str,
     has_attr: bool,
 }
 
-impl<'a> TokenItem<'a> {
+impl<'a> PunctuationItem<'a> {
     pub const fn new(token: &'a str, name: &'a str) -> Self {
         Self {
             token,
@@ -120,9 +125,32 @@ impl<'a> TokenItem<'a> {
     }
 }
 
+pub enum TokenItem<'a> {
+    Token(&'a str),
+    Regex(RegexItem<'static>),
+}
+
+impl<'a> TokenItem<'a> {
+    pub fn name(&'a self) -> &'a str {
+        match self {
+            Self::Token(name) => name,
+            Self::Regex(regex) => regex.name(),
+        }
+    }
+    pub fn to_attr_token(&self) -> proc_macro2::TokenStream {
+        match self {
+            Self::Token(name) => {
+                let name = format_ident!("{}", name);
+                quote! { #name }
+            }
+            Self::Regex(regex) => regex.to_attr_token(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct RegexItem<'a> {
-    pub name: &'a str,
+    name: &'a str,
     regex: &'a str,
     callback: Option<&'a str>,
     priority: Option<u8>,
@@ -154,6 +182,10 @@ impl<'a> RegexItem<'a> {
             callback: None,
             priority: Some(priority),
         }
+    }
+
+    pub fn name(&'a self) -> &'a str {
+        self.name
     }
 
     pub fn to_attr_token(&self) -> proc_macro2::TokenStream {

@@ -15,7 +15,7 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // 'key2' = "value"
     SyntaxKind::LITERAL_STRING,
     // 1234 = "value"
-    SyntaxKind::INTEGER_BIN,
+    SyntaxKind::INTEGER_DEC,
     // 3.14159 = "pi"
     SyntaxKind::FLOAT,
 ]);
