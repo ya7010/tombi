@@ -17,3 +17,7 @@ pub fn parse(input: &crate::Input) -> Output {
 
     crate::event::process(events)
 }
+
+fn eat_line_end(p: &mut crate::parser::Parser<'_>) {
+    while p.eat(crate::SyntaxKind::NEWLINE) || p.eat(crate::SyntaxKind::COMMENT) {}
+}

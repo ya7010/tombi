@@ -20,25 +20,6 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     SyntaxKind::FLOAT,
 ]);
 
-pub(crate) const VALUE_FIRST: TokenSet = TokenSet::new(&[
-    SyntaxKind::BASIC_STRING,
-    SyntaxKind::MULTI_LINE_BASIC_STRING,
-    SyntaxKind::LITERAL_STRING,
-    SyntaxKind::MULTI_LINE_LITERAL_STRING,
-    SyntaxKind::INTEGER_BIN,
-    SyntaxKind::INTEGER_OCT,
-    SyntaxKind::INTEGER_DEC,
-    SyntaxKind::INTEGER_HEX,
-    SyntaxKind::FLOAT,
-    SyntaxKind::BOOLEAN,
-    SyntaxKind::OFFSET_DATE_TIME,
-    SyntaxKind::LOCAL_DATE_TIME,
-    SyntaxKind::LOCAL_DATE,
-    SyntaxKind::LOCAL_TIME,
-    SyntaxKind::BRACE_START,
-    SyntaxKind::BRACKET_START,
-]);
-
 pub fn parse_key_value(p: &mut Parser<'_>) {
     let m = p.start();
 

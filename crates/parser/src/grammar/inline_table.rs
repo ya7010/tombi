@@ -1,34 +1,24 @@
 use syntax::{SyntaxKind::*, T};
 
-use crate::parser::Parser;
+use crate::{grammar::eat_line_end, parser::Parser};
 
 use super::key_value::parse_key_value;
 
 pub fn parse_inline_table(p: &mut Parser<'_>) {
+    assert!(p.at(T!['{']));
+
     let m = p.start();
+    p.eat(T!['{']);
 
-    if !p.eat(T!['{']) {
-        p.error(crate::Error::ExpectedEquals);
-    }
-
-    while !p.eat(NEWLINE) {
+    while !p.at(EOF) && !p.at(T!['}']) {
         parse_key_value(p);
-        while p.eat(NEWLINE) || p.eat(COMMENT) {}
+        eat_line_end(p);
         p.eat(T![,]);
-        while p.eat(NEWLINE) || p.eat(COMMENT) {}
-        if p.eat(T!['}']) {
-            break;
-        }
-
-        while p.eat(NEWLINE) || p.eat(COMMENT) {}
-        if p.at(EOF) {
-            p.error(crate::Error::ExpectedBracketEnd);
-            break;
-        }
+        eat_line_end(p);
     }
 
-    if p.at(COMMENT) {
-        p.bump(COMMENT);
+    if !p.eat(T!['}']) {
+        p.error(crate::Error::ExpectedBracketEnd);
     }
 
     m.complete(p, INLINE_TABLE);

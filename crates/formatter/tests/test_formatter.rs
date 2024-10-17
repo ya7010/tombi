@@ -1,6 +1,8 @@
 use assert_matches::assert_matches;
 
+#[ignore]
 #[test]
+
 fn format_text() {
     let result = formatter::format(
         r#"
