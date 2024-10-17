@@ -39,18 +39,19 @@ impl Format for ast::QuotedKey {
     }
 }
 
-impl Format for ast::DottedKey {
+impl Format for ast::SingleKey {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
         match self {
-            ast::DottedKey::BareKey(it) => it.format(_context),
-            ast::DottedKey::QuotedKey(it) => it.format(_context),
+            ast::SingleKey::BareKey(it) => it.format(_context),
+            ast::SingleKey::QuotedKey(it) => it.format(_context),
         }
     }
 }
 
 impl Format for ast::DottedKeys {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.dotted_keys()
+        dbg!(self.single_keys());
+        self.single_keys()
             .into_iter()
             .map(|it| it.format(_context))
             .collect::<Vec<_>>()

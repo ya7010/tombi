@@ -5,10 +5,14 @@ pub enum Error {
     ExpectedKey,
     #[error("expected value")]
     ExpectedValue,
-    #[error("expected '='")]
-    ExpectedEquals,
     #[error("unknown token")]
     UnknownToken,
+    #[error("expected '='")]
+    ExpectedEquals,
+    #[error("expected '{{'")]
+    ExpectedBracketStart,
+    #[error("expected '}}'")]
+    ExpectedBracketEnd,
 }
 
 impl Into<String> for Error {

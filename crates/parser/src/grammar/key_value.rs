@@ -2,9 +2,10 @@ use syntax::{
     SyntaxKind::{self, *},
     T,
 };
-use tracing::Instrument;
 
 use crate::{parser::Parser, token_set::TokenSet};
+
+use super::inline_table::parse_inline_table;
 
 pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
@@ -39,10 +40,6 @@ pub(crate) const VALUE_FIRST: TokenSet = TokenSet::new(&[
 ]);
 
 pub fn parse_key_value(p: &mut Parser<'_>) {
-    if p.eat(NEWLINE) {
-        return;
-    }
-
     let m = p.start();
 
     parse_key(p);
@@ -61,22 +58,49 @@ pub fn parse_key_value(p: &mut Parser<'_>) {
 
 pub fn parse_key(p: &mut Parser<'_>) {
     let m = p.start();
-
-    dbg!(p.current());
-    match p.current() {
-        BARE_KEY | BASIC_STRING | LITERAL_STRING => {
-            let kind = p.current();
-            p.bump(kind);
-            m.complete(p, kind);
-        }
-        _ => {
-            p.error(crate::Error::ExpectedKey);
-        }
+    if let Some(kind) = eat_key(p) {
+        m.complete(p, kind);
+    } else {
+        p.error(crate::Error::ExpectedKey);
+        m.complete(p, INVALID_TOKENS);
     };
 }
 
+fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
+    if let Some(kind) = eat_single_key(p) {
+        let mut is_dot = false;
+        while p.eat(T![.]) {
+            is_dot = true;
+            let m = p.start();
+            if let Some(kind) = eat_single_key(p) {
+                m.complete(p, kind);
+            } else {
+                m.complete(p, INVALID_TOKENS);
+                return None;
+            }
+        }
+        if is_dot {
+            Some(DOTTED_KEYS)
+        } else {
+            Some(kind)
+        }
+    } else {
+        None
+    }
+}
+
+pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
+    let kind = p.current();
+    match kind {
+        BARE_KEY | BASIC_STRING | LITERAL_STRING => {
+            p.bump_any();
+            Some(kind)
+        }
+        _ => None,
+    }
+}
+
 pub fn parse_value(p: &mut Parser<'_>) {
-    let m = p.start();
     match p.current() {
         BASIC_STRING
         | MULTI_LINE_BASIC_STRING
@@ -92,11 +116,14 @@ pub fn parse_value(p: &mut Parser<'_>) {
         | LOCAL_DATE_TIME
         | LOCAL_DATE
         | LOCAL_TIME => {
+            let m = p.start();
             let kind = p.current();
             p.bump(kind);
             m.complete(p, kind);
         }
+        BRACE_START => parse_inline_table(p),
         _ => {
+            let m = p.start();
             while !p.at_ts(TokenSet::new(&[NEWLINE, COMMENT, EOF])) {
                 p.bump_any();
             }

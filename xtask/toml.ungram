@@ -23,8 +23,8 @@ KeyValue = Key '=' Value
 Key = BareKey | QuotedKey | DottedKeys
 BareKey = '@bare_key'
 QuotedKey = '@basic_string' | '@literal_string'
-DottedKeys = DottedKey ('.' DottedKey)*
-DottedKey = BareKey | QuotedKey
+DottedKeys = SingleKey ('.' SingleKey)*
+SingleKey = BareKey | QuotedKey
 
 Value =
     BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString

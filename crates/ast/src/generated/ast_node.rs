@@ -76,7 +76,7 @@ pub struct DottedKeys {
 }
 impl DottedKeys {
     #[inline]
-    pub fn dotted_keys(&self) -> AstChildren<DottedKey> {
+    pub fn single_keys(&self) -> AstChildren<SingleKey> {
         support::children(&self.syntax)
     }
 }
@@ -241,12 +241,6 @@ impl Table {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum DottedKey {
-    BareKey(BareKey),
-    QuotedKey(QuotedKey),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Key {
     BareKey(BareKey),
     DottedKeys(DottedKeys),
@@ -258,6 +252,12 @@ pub enum RootItem {
     ArrayOfTable(ArrayOfTable),
     KeyValue(KeyValue),
     Table(Table),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum SingleKey {
+    BareKey(BareKey),
+    QuotedKey(QuotedKey),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -693,40 +693,6 @@ impl AstNode for Table {
         &self.syntax
     }
 }
-impl From<BareKey> for DottedKey {
-    #[inline]
-    fn from(node: BareKey) -> DottedKey {
-        DottedKey::BareKey(node)
-    }
-}
-impl From<QuotedKey> for DottedKey {
-    #[inline]
-    fn from(node: QuotedKey) -> DottedKey {
-        DottedKey::QuotedKey(node)
-    }
-}
-impl AstNode for DottedKey {
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, SyntaxKind::BARE_KEY | SyntaxKind::QUOTED_KEY)
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            SyntaxKind::BARE_KEY => DottedKey::BareKey(BareKey { syntax }),
-            SyntaxKind::QUOTED_KEY => DottedKey::QuotedKey(QuotedKey { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            DottedKey::BareKey(it) => &it.syntax,
-            DottedKey::QuotedKey(it) => &it.syntax,
-        }
-    }
-}
 impl From<BareKey> for Key {
     #[inline]
     fn from(node: BareKey) -> Key {
@@ -814,6 +780,40 @@ impl AstNode for RootItem {
             RootItem::ArrayOfTable(it) => &it.syntax,
             RootItem::KeyValue(it) => &it.syntax,
             RootItem::Table(it) => &it.syntax,
+        }
+    }
+}
+impl From<BareKey> for SingleKey {
+    #[inline]
+    fn from(node: BareKey) -> SingleKey {
+        SingleKey::BareKey(node)
+    }
+}
+impl From<QuotedKey> for SingleKey {
+    #[inline]
+    fn from(node: QuotedKey) -> SingleKey {
+        SingleKey::QuotedKey(node)
+    }
+}
+impl AstNode for SingleKey {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SyntaxKind::BARE_KEY | SyntaxKind::QUOTED_KEY)
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SyntaxKind::BARE_KEY => SingleKey::BareKey(BareKey { syntax }),
+            SyntaxKind::QUOTED_KEY => SingleKey::QuotedKey(QuotedKey { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            SingleKey::BareKey(it) => &it.syntax,
+            SingleKey::QuotedKey(it) => &it.syntax,
         }
     }
 }
@@ -985,17 +985,17 @@ impl AstNode for Value {
         }
     }
 }
-impl std::fmt::Display for DottedKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for Key {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for RootItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for SingleKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
