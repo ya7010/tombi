@@ -2,6 +2,7 @@ mod arg;
 mod command;
 
 use clap::Parser;
+use clap_verbosity_flag::Verbosity;
 
 /// TOML: TOML linter and code formatter.
 #[derive(clap::Parser)]
@@ -9,6 +10,8 @@ use clap::Parser;
 pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
+    #[command(flatten)]
+    verbose: Verbosity,
 }
 
 impl<I, T> From<I> for Args

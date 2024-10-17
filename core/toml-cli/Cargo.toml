@@ -10,7 +10,8 @@ name = "toml"
 path = "src/main.rs"
 
 [dependencies]
-clap.workspace = true
-formatter.workspace = true
+clap = { workspace = true, features = ["derive"] }
+clap-verbosity-flag = { workspace = true }
+formatter = { workspace = true }
 glob = "0.3.1"
-thiserror.workspace = true
+thiserror = { workspace = true }
