@@ -7,6 +7,8 @@ pub enum Error {
     ExpectedValue,
     #[error("unknown token")]
     UnknownToken,
+    #[error("unknown line")]
+    UnknownLine,
     #[error("expected '='")]
     ExpectedEquals,
     #[error("expected '{{'")]
