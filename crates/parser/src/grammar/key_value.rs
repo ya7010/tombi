@@ -73,7 +73,18 @@ pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             p.bump_any();
             Some(kind)
         }
-        _ => None,
+        INTEGER_DEC => {
+            p.bump_any();
+            Some(BARE_KEY)
+        }
+        FLOAT => {
+            p.bump_any();
+            Some(DOTTED_KEYS)
+        }
+        _ => {
+            dbg!(kind);
+            None
+        }
     }
 }
 

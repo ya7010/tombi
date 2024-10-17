@@ -26,12 +26,3 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, cra
         Err(crate::Error::from_syntax_error(source, &p.errors()))
     }
 }
-
-#[inline]
-fn children_kinds<T: From<u16>>(parent: &syntax::SyntaxNode) -> Vec<T> {
-    parent
-        .children()
-        .into_iter()
-        .map(|it| T::from(it.kind() as u16))
-        .collect()
-}

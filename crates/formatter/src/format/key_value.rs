@@ -1,8 +1,4 @@
-use ast::AstNode;
-
-use crate::children_kinds;
-
-use super::Format;
+use crate::Format;
 
 impl Format for ast::KeyValue {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
@@ -43,6 +39,7 @@ impl Format for ast::SingleKey {
 
 impl Format for ast::DottedKeys {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
+        println!("DottedKeys::format");
         self.single_keys()
             .into_iter()
             .map(|it| it.format(_context))
@@ -76,9 +73,12 @@ impl Format for ast::Value {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use ast::AstNode;
+
     use rstest::rstest;
     use syntax::SyntaxError;
+
+    use crate::Format;
 
     #[rstest]
     #[case(r#"key = "value""#)]
