@@ -23,6 +23,10 @@ impl SyntaxError {
         Self(message.into(), range.into_range())
     }
 
+    pub fn message(&self) -> &str {
+        &self.0
+    }
+
     pub fn range(&self) -> text_size::TextRange {
         self.1
     }

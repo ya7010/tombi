@@ -23,7 +23,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, cra
             options: Cow::Borrowed(options),
         }))
     } else {
-        Err(crate::Error::ParseInvalid(p.errors()))
+        Err(crate::Error::from_syntax_error(source, &p.errors()))
     }
 }
 
