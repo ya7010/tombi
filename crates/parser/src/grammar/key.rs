@@ -59,13 +59,17 @@ pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             p.bump_any();
             Some(kind)
         }
-        INTEGER_DEC | BOOLEAN => {
+        INTEGER_DEC => {
             p.bump_remap(BARE_KEY);
             Some(BARE_KEY)
         }
         FLOAT => {
             p.bump_any();
             Some(DOTTED_KEYS)
+        }
+        BOOLEAN => {
+            p.bump_remap(BARE_KEY);
+            Some(BARE_KEY)
         }
         _ => {
             dbg!(kind);

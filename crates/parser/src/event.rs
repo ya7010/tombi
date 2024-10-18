@@ -3,7 +3,6 @@ use syntax::SyntaxKind::{self, *};
 use crate::output::Output;
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub enum Event {
     Start {
         kind: syntax::SyntaxKind,
