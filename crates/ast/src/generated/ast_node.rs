@@ -192,21 +192,6 @@ pub struct OffsetDateTime {
 impl OffsetDateTime {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct QuotedKey {
-    pub(crate) syntax: SyntaxNode,
-}
-impl QuotedKey {
-    #[inline]
-    pub fn basic_string_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![basic_string])
-    }
-    #[inline]
-    pub fn literal_string_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![literal_string])
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Root {
     pub(crate) syntax: SyntaxNode,
 }
@@ -243,8 +228,9 @@ impl Table {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Key {
     BareKey(BareKey),
+    BasicString(BasicString),
     DottedKeys(DottedKeys),
-    QuotedKey(QuotedKey),
+    LiteralString(LiteralString),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -257,7 +243,8 @@ pub enum RootItem {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SingleKey {
     BareKey(BareKey),
-    QuotedKey(QuotedKey),
+    BasicString(BasicString),
+    LiteralString(LiteralString),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -639,24 +626,6 @@ impl AstNode for OffsetDateTime {
         &self.syntax
     }
 }
-impl AstNode for QuotedKey {
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::QUOTED_KEY
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-}
 impl AstNode for Root {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -699,16 +668,22 @@ impl From<BareKey> for Key {
         Key::BareKey(node)
     }
 }
+impl From<BasicString> for Key {
+    #[inline]
+    fn from(node: BasicString) -> Key {
+        Key::BasicString(node)
+    }
+}
 impl From<DottedKeys> for Key {
     #[inline]
     fn from(node: DottedKeys) -> Key {
         Key::DottedKeys(node)
     }
 }
-impl From<QuotedKey> for Key {
+impl From<LiteralString> for Key {
     #[inline]
-    fn from(node: QuotedKey) -> Key {
-        Key::QuotedKey(node)
+    fn from(node: LiteralString) -> Key {
+        Key::LiteralString(node)
     }
 }
 impl AstNode for Key {
@@ -716,15 +691,19 @@ impl AstNode for Key {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            SyntaxKind::BARE_KEY | SyntaxKind::DOTTED_KEYS | SyntaxKind::QUOTED_KEY
+            SyntaxKind::BARE_KEY
+                | SyntaxKind::BASIC_STRING
+                | SyntaxKind::DOTTED_KEYS
+                | SyntaxKind::LITERAL_STRING
         )
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             SyntaxKind::BARE_KEY => Key::BareKey(BareKey { syntax }),
+            SyntaxKind::BASIC_STRING => Key::BasicString(BasicString { syntax }),
             SyntaxKind::DOTTED_KEYS => Key::DottedKeys(DottedKeys { syntax }),
-            SyntaxKind::QUOTED_KEY => Key::QuotedKey(QuotedKey { syntax }),
+            SyntaxKind::LITERAL_STRING => Key::LiteralString(LiteralString { syntax }),
             _ => return None,
         };
         Some(res)
@@ -733,8 +712,9 @@ impl AstNode for Key {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Key::BareKey(it) => &it.syntax,
+            Key::BasicString(it) => &it.syntax,
             Key::DottedKeys(it) => &it.syntax,
-            Key::QuotedKey(it) => &it.syntax,
+            Key::LiteralString(it) => &it.syntax,
         }
     }
 }
@@ -789,22 +769,32 @@ impl From<BareKey> for SingleKey {
         SingleKey::BareKey(node)
     }
 }
-impl From<QuotedKey> for SingleKey {
+impl From<BasicString> for SingleKey {
     #[inline]
-    fn from(node: QuotedKey) -> SingleKey {
-        SingleKey::QuotedKey(node)
+    fn from(node: BasicString) -> SingleKey {
+        SingleKey::BasicString(node)
+    }
+}
+impl From<LiteralString> for SingleKey {
+    #[inline]
+    fn from(node: LiteralString) -> SingleKey {
+        SingleKey::LiteralString(node)
     }
 }
 impl AstNode for SingleKey {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, SyntaxKind::BARE_KEY | SyntaxKind::QUOTED_KEY)
+        matches!(
+            kind,
+            SyntaxKind::BARE_KEY | SyntaxKind::BASIC_STRING | SyntaxKind::LITERAL_STRING
+        )
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             SyntaxKind::BARE_KEY => SingleKey::BareKey(BareKey { syntax }),
-            SyntaxKind::QUOTED_KEY => SingleKey::QuotedKey(QuotedKey { syntax }),
+            SyntaxKind::BASIC_STRING => SingleKey::BasicString(BasicString { syntax }),
+            SyntaxKind::LITERAL_STRING => SingleKey::LiteralString(LiteralString { syntax }),
             _ => return None,
         };
         Some(res)
@@ -813,7 +803,8 @@ impl AstNode for SingleKey {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             SingleKey::BareKey(it) => &it.syntax,
-            SingleKey::QuotedKey(it) => &it.syntax,
+            SingleKey::BasicString(it) => &it.syntax,
+            SingleKey::LiteralString(it) => &it.syntax,
         }
     }
 }
@@ -1101,11 +1092,6 @@ impl std::fmt::Display for MultiLineLiteralString {
     }
 }
 impl std::fmt::Display for OffsetDateTime {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for QuotedKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

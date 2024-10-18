@@ -20,11 +20,10 @@
 
 KeyValue = Key '=' Value
 
-Key = BareKey | QuotedKey | DottedKeys
+Key = BareKey | BasicString | LiteralString | DottedKeys
 BareKey = '@bare_key'
-QuotedKey = '@basic_string' | '@literal_string'
 DottedKeys = SingleKey ('.' SingleKey)*
-SingleKey = BareKey | QuotedKey
+SingleKey = BareKey | BasicString | LiteralString
 
 Value =
     BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString

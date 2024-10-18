@@ -18,6 +18,8 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     SyntaxKind::INTEGER_DEC,
     // 3.14159 = "pi"
     SyntaxKind::FLOAT,
+    // true = "value"
+    SyntaxKind::BOOLEAN,
 ]);
 
 pub fn parse_key_value(p: &mut Parser<'_>) {
@@ -73,8 +75,8 @@ pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             p.bump_any();
             Some(kind)
         }
-        INTEGER_DEC => {
-            p.bump_any();
+        INTEGER_DEC | BOOLEAN => {
+            p.bump_remap(BARE_KEY);
             Some(BARE_KEY)
         }
         FLOAT => {

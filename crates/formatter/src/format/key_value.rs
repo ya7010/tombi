@@ -10,7 +10,8 @@ impl Format for ast::Key {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         match self {
             Self::BareKey(it) => it.format(context),
-            Self::QuotedKey(it) => it.format(context),
+            Self::BasicString(it) => it.format(context),
+            Self::LiteralString(it) => it.format(context),
             Self::DottedKeys(it) => it.format(context),
         }
     }
@@ -22,24 +23,18 @@ impl Format for ast::BareKey {
     }
 }
 
-impl Format for ast::QuotedKey {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
-    }
-}
-
 impl Format for ast::SingleKey {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
         match self {
             ast::SingleKey::BareKey(it) => it.format(_context),
-            ast::SingleKey::QuotedKey(it) => it.format(_context),
+            ast::SingleKey::BasicString(it) => it.format(_context),
+            ast::SingleKey::LiteralString(it) => it.format(_context),
         }
     }
 }
 
 impl Format for ast::DottedKeys {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        println!("DottedKeys::format");
         self.single_keys()
             .into_iter()
             .map(|it| it.format(_context))

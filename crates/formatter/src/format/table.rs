@@ -26,7 +26,7 @@ mod tests {
 
     #[rstest]
     #[case(r#"[package]"#)]
-    #[case(r#"[dependencies.\"unicase\"]"#)]
+    #[case(r#"[dependencies."unicase"]"#)]
     #[case(r#"[dependencies.unicase]"#)]
     fn table_only_header(#[case] source: &str) {
         let p = parser::parse(source);
