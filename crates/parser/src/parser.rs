@@ -1,9 +1,6 @@
 use std::cell::Cell;
 
-use syntax::{
-    SyntaxKind::{self, *},
-    T,
-};
+use syntax::SyntaxKind::{self, *};
 
 use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};
 

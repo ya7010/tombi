@@ -1,7 +1,7 @@
 use syntax::T;
 
 use crate::{
-    grammar::{key_value::parse_value, line_end},
+    grammar::{line_end, value::parse_value},
     parser::Parser,
 };
 use syntax::SyntaxKind::*;

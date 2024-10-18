@@ -1,9 +1,11 @@
 mod array;
 mod array_of_table;
 mod inline_table;
+mod key;
 mod key_value;
 mod root;
 mod table;
+mod value;
 
 use root::parse_root;
 

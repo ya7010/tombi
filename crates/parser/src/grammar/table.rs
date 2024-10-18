@@ -1,11 +1,7 @@
 use syntax::T;
 
 use crate::{
-    grammar::{
-        key_value::{parse_key, parse_key_value},
-        line_end,
-        root::SECTION_END,
-    },
+    grammar::{key::parse_key, key_value::parse_key_value, line_end, root::SECTION_END},
     parser::Parser,
 };
 use syntax::SyntaxKind::*;

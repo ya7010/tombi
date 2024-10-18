@@ -4,10 +4,7 @@ use crate::{
     token_set::TokenSet,
 };
 
-use super::{
-    key_value::{parse_key_value, KEY_FIRST},
-    line_end,
-};
+use super::{key::KEY_FIRST, key_value::parse_key_value, line_end};
 use syntax::{SyntaxKind::*, T};
 
 const LINE_END: TokenSet = TokenSet::new(&[NEWLINE, COMMENT, EOF]);
