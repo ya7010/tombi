@@ -1,0 +1,27 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "files.insertFinalNewline": true,
+    "editor.useTabStops": true,
+    "editor.trimAutoWhitespace": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.comments.insertSpace": true,
+    "[typescript]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[javascript]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[json]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[toml]": {
+        "editor.tabSize": 2
+    }
+}

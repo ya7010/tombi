@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      vscode-languageclient:
-        specifier: ^9.0.1
-        version: 9.0.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -21,12 +17,19 @@ importers:
       '@types/vscode':
         specifier: ^1.94.0
         version: 1.94.0
-      '@vscode/vsce':
-        specifier: ^3.1.1
-        version: 3.1.1
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
+
+  editors/vscode:
+    dependencies:
+      vscode-languageclient:
+        specifier: ^9.0.1
+        version: 9.0.1
+    devDependencies:
+      '@vscode/vsce':
+        specifier: ^3.1.1
+        version: 3.1.1
 
 packages:
 
