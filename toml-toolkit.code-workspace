@@ -1,29 +1,29 @@
 {
-    "folders": [
-        {
-            "name": "root",
-            "path": "."
-        },
-        {
-            "path": "core/toml-cli"
-        },
-        {
-            "path": "core/toml-lsp"
-        },
-        {
-            "path": "crates/syntax"
-        },
-        {
-            "path": "crates/ast"
-        },
-        {
-            "path": "crates/parser"
-        },
-        {
-            "path": "crates/formatter"
-        },
-        {
-            "path": "xtask"
-        }
-    ]
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "path": "core/toml-cli"
+    },
+    {
+      "path": "core/toml-lsp"
+    },
+    {
+      "path": "crates/syntax"
+    },
+    {
+      "path": "crates/ast"
+    },
+    {
+      "path": "crates/parser"
+    },
+    {
+      "path": "crates/formatter"
+    },
+    {
+      "path": "xtask"
+    }
+  ]
 }

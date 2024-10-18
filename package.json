@@ -1,17 +1,18 @@
 {
-    "name": "toml-toolkit",
-    "version": "0.0.0",
-    "scripts": {
-        "format": "biome format --write ./",
-        "vscode": "pnpm -F \"vscode\""
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@types/node": "^22.7.6",
-        "@types/vscode": "^1.94.0",
-        "typescript": "^5.6.3"
-    }
+  "name": "toml-toolkit",
+  "version": "0.0.0",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "format": "biome format --write ./",
+    "vscode": "pnpm -F \"vscode\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.7.6",
+    "@types/vscode": "^1.94.0",
+    "typescript": "^5.6.3"
+  }
 }
