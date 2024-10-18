@@ -792,6 +792,14 @@ dependencies = [
 [[package]]
 name = "toml-lsp"
 version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "clap",
+ "clap-verbosity-flag",
+ "thiserror",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "toml_datetime"
