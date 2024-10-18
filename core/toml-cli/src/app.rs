@@ -32,7 +32,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
         .with(tracing_subscriber::EnvFilter::from(
             args.verbose.log_level_filter().to_string(),
         ))
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().pretty().without_time())
         .init();
 
     match args.subcommand {

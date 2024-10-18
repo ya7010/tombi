@@ -15,8 +15,8 @@ pub struct Args {
 }
 
 pub fn run(args: Args) -> Result<(), crate::Error> {
-    tracing::debug_span!("format command").in_scope(|| {
-        tracing::debug!("args: {:?}", args);
+    tracing::debug_span!("run").in_scope(|| {
+        tracing::debug!("{args:?}");
         match arg::FileInput::from(args.files.as_ref()) {
             arg::FileInput::Stdin => {
                 let mut buffer = String::new();
