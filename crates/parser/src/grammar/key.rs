@@ -71,9 +71,6 @@ pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             p.bump_remap(BARE_KEY);
             Some(BARE_KEY)
         }
-        _ => {
-            dbg!(kind);
-            None
-        }
+        _ => None,
     }
 }
