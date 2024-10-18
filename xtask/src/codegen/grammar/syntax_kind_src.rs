@@ -74,19 +74,11 @@ pub const TOKENS: &[TokenItem] = &[
 
 pub const NODES: &[&str] = &[
     "ROOT",
-    "QUOTED_KEY",
-    "DOTTED_KEY",
     "DOTTED_KEYS",
-    "KEY",
-    "VALUE",
     "KEY_VALUE",
-    "STRING",
-    "INTEGER",
     "ARRAY",
-    "ARRAY_ELEMENT",
     "TABLE",
     "INLINE_TABLE",
-    "INLINE_TABLE_ELEMENT_LIST",
     "ARRAY_OF_TABLE",
 ];
 
