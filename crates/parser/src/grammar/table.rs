@@ -19,7 +19,7 @@ pub fn parse_table(p: &mut Parser<'_>) {
     parse_key(p);
 
     if !p.eat(T![']']) {
-        p.error(crate::Error::ExpectedBracketEnd);
+        p.error(crate::Error::ExpectedBraceEnd);
     }
 
     line_end(p);

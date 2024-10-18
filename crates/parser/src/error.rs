@@ -11,13 +11,12 @@ pub enum Error {
     UnknownLine,
     #[error("expected '='")]
     ExpectedEquals,
-    #[error("expected '{{'")]
-    ExpectedBracketStart,
-    #[error("expected '}}'")]
+    #[error("expected ']'")]
     ExpectedBracketEnd,
-
+    #[error("expected '}}'")]
+    ExpectedBraceEnd,
     #[error("expected '}}}}'")]
-    ExpectedDoubleBracketEnd,
+    ExpectedDoubleBracetEnd,
 }
 
 impl Into<String> for Error {

@@ -18,7 +18,7 @@ pub fn parse_inline_table(p: &mut Parser<'_>) {
     }
 
     if !p.eat(T!['}']) {
-        p.error(crate::Error::ExpectedBracketEnd);
+        p.error(crate::Error::ExpectedBraceEnd);
     }
 
     m.complete(p, INLINE_TABLE);

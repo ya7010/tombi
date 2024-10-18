@@ -5,7 +5,7 @@ use syntax::{
 
 use crate::{parser::Parser, token_set::TokenSet};
 
-use super::inline_table::parse_inline_table;
+use super::{array::parse_array, inline_table::parse_inline_table};
 
 pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
@@ -109,7 +109,8 @@ pub fn parse_value(p: &mut Parser<'_>) {
             p.bump(kind);
             m.complete(p, kind);
         }
-        BRACE_START => parse_inline_table(p),
+        T!('[') => parse_array(p),
+        T!('{') => parse_inline_table(p),
         _ => {
             let m = p.start();
             while !p.at_ts(TokenSet::new(&[NEWLINE, COMMENT, EOF])) {
