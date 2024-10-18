@@ -3,26 +3,54 @@
   "displayName": "Tomy (TOML Toolkit)",
   "version": "0.0.1",
   "description": "A TOML language support extention backed by tomy",
-  "main": "./out/main",
+  "author": {
+    "name": "yassun7010",
+    "email": "yassun7010@outlook.com"
+  },
+  "license": "MIT",
+  "keywords": ["toml"],
+  "categories": ["Programming Languages", "Formatters", "Linters", "Snippets"],
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "main": "./dist/main",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "npm run build-base -- --sourcemap",
     "watch": "npm run build-base -- --sourcemap --watch",
+    "package": "vsce package -o tomy.vsix",
     "format": "biome format --write ./",
     "format:check": "biome format ./",
     "lint": "biome lint ./",
     "typecheck": "tsc"
   },
-  "keywords": ["toml"],
-  "engines": {
-    "vscode": "^1.94.0"
-  },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@vscode/vsce": "^3.1.1"
+  },
+  "activationEvents": ["onLanguage:toml", "onLanguage:cargoLock"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "toml",
+        "aliases": ["TOML"],
+        "extensions": [".toml"],
+        "filenames": ["Cargo.lock", "uv.lock"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "configuration": {
+      "title": "Tomy",
+      "properties": {
+        "tomy.binPath": {
+          "description": "Path to the tomy command",
+          "type": ["string", "null"],
+          "scope": "resource",
+          "default": null
+        }
+      }
+    }
   }
 }

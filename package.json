@@ -1,14 +1,17 @@
 {
   "name": "toml-toolkit",
   "version": "0.0.0",
+  "packageManager": "pnpm@9.12.2",
+  "engines": {
+    "pnpm": ">=9.12.2"
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "format": "biome format --write ./",
-    "vscode": "pnpm -F \"vscode\""
+    "vscode": "pnpm -C \"editors/vscode\""
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.7.6",
