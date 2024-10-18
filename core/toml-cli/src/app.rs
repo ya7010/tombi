@@ -3,6 +3,7 @@ mod command;
 
 use clap::Parser;
 use clap_verbosity_flag::Verbosity;
+use tracing_subscriber::prelude::*;
 
 /// TOML: TOML linter and code formatter.
 #[derive(clap::Parser)]
@@ -27,6 +28,13 @@ where
 
 pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
     let args = args.into();
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
     match args.subcommand {
         command::TomlCommand::Format(args) => command::format::run(args),
         command::TomlCommand::Lint(args) => command::lint::run(args),
