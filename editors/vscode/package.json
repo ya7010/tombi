@@ -42,10 +42,10 @@
       }
     ],
     "configuration": {
-      "title": "Tomy",
+      "title": "tomy",
       "properties": {
-        "tomy.binPath": {
-          "description": "Path to the tomy command",
+        "tomy.path": {
+          "description": "Absolute path to tomy executable.",
           "type": ["string", "null"],
           "scope": "resource",
           "default": null
