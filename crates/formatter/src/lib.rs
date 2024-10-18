@@ -19,7 +19,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, cra
     let p = parser::parse(source);
     if p.errors().len() == 0 {
         let root = ast::Root::cast(p.into_syntax_node()).unwrap();
-        tracing::debug!("ast: {:#?}", root);
+        tracing::trace!("ast: {:#?}", root);
         Ok(root.format(&Context {
             options: Cow::Borrowed(options),
         }))

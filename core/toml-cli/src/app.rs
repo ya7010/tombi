@@ -2,7 +2,7 @@ mod arg;
 mod command;
 
 use clap::Parser;
-use clap_verbosity_flag::Verbosity;
+use clap_verbosity_flag::{InfoLevel, Verbosity};
 use tracing_subscriber::prelude::*;
 
 /// TOML: TOML linter and code formatter.
@@ -12,7 +12,7 @@ pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
     #[command(flatten)]
-    verbose: Verbosity,
+    verbose: Verbosity<InfoLevel>,
 }
 
 impl<I, T> From<I> for Args
@@ -27,11 +27,11 @@ where
 }
 
 pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
-    let args = args.into();
+    let args: Args = args.into();
     tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
-        )
+        .with(tracing_subscriber::EnvFilter::from(
+            args.verbose.log_level_filter().to_string(),
+        ))
         .with(tracing_subscriber::fmt::layer())
         .init();
 
