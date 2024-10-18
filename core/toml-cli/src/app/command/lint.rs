@@ -1,7 +1,15 @@
 /// Lint TOML files.
-#[derive(clap::Args)]
-pub struct Args {}
+#[derive(clap::Args, Debug)]
+pub struct Args {
+    /// Paths or glob patterns to TOML documents.
+    ///
+    /// If the only argument is "-", the standard input will be used.
+    files: Vec<String>,
+}
 
-pub fn run(_args: Args) -> Result<(), crate::Error> {
-    Ok(())
+pub fn run(args: Args) -> Result<(), crate::Error> {
+    tracing::debug_span!("lint command").in_scope(|| {
+        tracing::debug!("args: {:?}", args);
+        Ok(())
+    })
 }
