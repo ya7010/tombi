@@ -95,4 +95,14 @@ mod tests {
             vec![SyntaxError::new(parser::Error::ExpectedValue, 4..6)]
         );
     }
+
+    #[rstest]
+    #[case(r#"key1.key2.key3 = "value""#)]
+    #[case(r#"site."google.com" = true"#)]
+    fn dotted_keys_value(#[case] source: &str) {
+        let p = parser::parse(source);
+        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        assert_eq!(ast.format_default(), source);
+        assert_eq!(p.errors(), []);
+    }
 }
