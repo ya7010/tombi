@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
-use camino::Utf8PathBuf;
+use lsp_server::Message;
+use lsp_types::request::GotoDefinition;
 
 use crate::{from_json, lsp};
 
@@ -62,12 +61,77 @@ pub fn run() -> Result<(), anyhow::Error> {
     let server_capabilities = lsp::server_capabilities(&client_capabilities);
 
     let initialize_result = lsp_types::InitializeResult {
-        capabilities: server_capabilities,
         server_info: Some(lsp_types::ServerInfo {
             name: String::from("toml-toolkit"),
             version: Some(crate::version().to_string()),
         }),
+        capabilities: server_capabilities,
     };
 
+    let initialize_result = serde_json::to_value(initialize_result).unwrap();
+
+    if let Err(e) = connection.initialize_finish(initialize_id, initialize_result) {
+        if e.channel_is_disconnected() {
+            io_threads.join()?;
+        }
+        return Err(e.into());
+    }
+
+    // If the io_threads have an error, there's usually an error on the main
+    // loop too because the channels are closed. Ensure we report both errors.
+    match (main_loop(connection), io_threads.join()) {
+        (Err(loop_e), Err(join_e)) => anyhow::bail!("{loop_e}\n{join_e}"),
+        (Ok(_), Err(join_e)) => anyhow::bail!("{join_e}"),
+        (Err(loop_e), Ok(_)) => anyhow::bail!("{loop_e}"),
+        (Ok(_), Ok(_)) => {}
+    }
+
+    tracing::info!("server did shut down");
+
     Ok(())
+}
+
+fn main_loop(connection: lsp_server::Connection) -> Result<(), anyhow::Error> {
+    for msg in &connection.receiver {
+        match msg {
+            Message::Request(req) => {
+                tracing::debug!("request: {:?}", req);
+                if connection.handle_shutdown(&req)? {
+                    break;
+                }
+                match cast::<lsp_types::request::Formatting>(req) {
+                    Ok((id, params)) => {
+                        tracing::debug!("got gotoDefinition request #{id}: {params:?}");
+                    }
+                    Err(err @ lsp_server::ExtractError::JsonError { .. }) => {
+                        tracing::debug!("ExtractError::JsonError: {:?}", err);
+                        break;
+                    }
+                    Err(lsp_server::ExtractError::MethodMismatch(req)) => {
+                        tracing::debug!("ExtractError::MethodMismatch: {:?}", req)
+                    }
+                };
+            }
+            Message::Notification(notification) => {
+                tracing::debug!("notification: {:?}", notification);
+                // handle_notification(&mut state, notification);
+            }
+            Message::Response(response) => {
+                tracing::debug!("response: {:?}", response);
+                // state.handle_response(response);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn cast<R>(
+    req: lsp_server::Request,
+) -> Result<(lsp_server::RequestId, R::Params), lsp_server::ExtractError<lsp_server::Request>>
+where
+    R: lsp_types::request::Request,
+    R::Params: serde::de::DeserializeOwned,
+{
+    req.extract(R::METHOD)
 }
