@@ -2,7 +2,7 @@ import type * as vscode from "vscode";
 import { Extension } from "@/extention";
 import { bootstrap } from "@/bootstrap";
 import { Server } from "@/lsp/server";
-import { showVersion } from "./command/show-version";
+import { showServerVersion } from "./command/show-server-version";
 
 let extention: Extension;
 
@@ -11,7 +11,7 @@ export async function activate(
 ): Promise<void> {
   const serverPath = await bootstrap(context, {});
   const server = new Server(serverPath);
-  await showVersion(server);
+  await showServerVersion(server);
   if (!extention) extention = new Extension(context, server);
 }
 
