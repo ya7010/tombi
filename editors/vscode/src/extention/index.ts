@@ -4,7 +4,7 @@ import { clientOptions } from "@/options/client-options";
 import { serverOptions } from "@/options/server-options";
 import { Server } from "@/lsp/server";
 import type { Settings } from "./settings";
-import { showServerVersion } from "@/command/show-server-version";
+import * as command from "@/command";
 import { bootstrap } from "@/bootstrap";
 export type { Settings };
 
@@ -12,20 +12,12 @@ export const EXTENTION_ID = "toml-toolkit";
 export const EXTENTION_NAME = "TOML Toolkit";
 
 export class Extension {
-  static async activate(context: vscode.ExtensionContext): Promise<Extension> {
-    const serverPath = await bootstrap(context, {});
-    const server = new Server(serverPath);
-    await showServerVersion(server);
-
-    const extension = new Extension(context, server);
-
-    return extension;
-  }
   constructor(
     private context: vscode.ExtensionContext,
     private server: Server,
     private client?: node.LanguageClient,
   ) {
+    this.registerCommands();
     for (const document of vscode.workspace.textDocuments) {
       this.onDidOpentextDocument({ document });
     }
@@ -35,7 +27,7 @@ export class Extension {
     );
 
     vscode.workspace.onDidChangeConfiguration(
-      async (event) => {
+      async (_event) => {
         await this.client?.sendNotification(
           node.DidChangeConfigurationNotification.type,
           {
@@ -48,11 +40,31 @@ export class Extension {
     );
   }
 
+  static async activate(context: vscode.ExtensionContext): Promise<Extension> {
+    const serverPath = await bootstrap(context, {});
+    const server = new Server(serverPath);
+
+    return new Extension(context, server);
+  }
+
   deactivate(): Thenable<void> | undefined {
     return this.client?.stop();
   }
 
-  onDidOpentextDocument({ document }: { document: vscode.TextDocument }): void {
+  private registerCommands() {
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        `${EXTENTION_ID}.showServerVersion`,
+        async () => {
+          await command.showServerVersion(this.server);
+        },
+      ),
+    );
+  }
+
+  private onDidOpentextDocument({
+    document,
+  }: { document: vscode.TextDocument }): void {
     if (document.languageId !== "toml") return;
 
     if (!this.client) {
