@@ -15,10 +15,11 @@ export class Server {
         version = await text(
           spawn(this.binPath, ["--version"]).stdout.setEncoding("utf-8"),
         );
-        // version の先頭文字が LANGUAGE_SERVER_BIN_NAME で始まる場合は、その文字列を削除し、文字列の先頭の空白も削除する
-        if (version.startsWith(LANGUAGE_SERVER_BIN_NAME)) {
-          version = version.slice(LANGUAGE_SERVER_BIN_NAME.length).trimStart();
-        }
+
+        const prefix = LANGUAGE_SERVER_BIN_NAME;
+        version = version
+          .slice(version.startsWith(prefix) ? prefix.length : 0)
+          .trim();
       } catch {
         version = "<unknown>";
       }
