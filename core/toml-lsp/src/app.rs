@@ -4,7 +4,7 @@ use tracing_subscriber::prelude::*;
 
 /// TOML: TOML linter and code formatter.
 #[derive(clap::Parser)]
-#[command(name = "toml", version = crate::version())]
+#[command(name = "toml-lsp", version = crate::version())]
 pub struct Args {
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
@@ -23,8 +23,6 @@ where
 
 pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
     let args: Args = args.into();
-
-    println!("version: {}", crate::version());
 
     if std::env::var("RUST_BACKTRACE").is_err() {
         std::env::set_var("RUST_BACKTRACE", "1");
