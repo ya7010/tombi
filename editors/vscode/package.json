@@ -8,8 +8,15 @@
     "email": "yassun7010@outlook.com"
   },
   "license": "MIT",
-  "keywords": ["toml"],
-  "categories": ["Programming Languages", "Formatters", "Linters", "Snippets"],
+  "keywords": [
+    "toml"
+  ],
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Linters",
+    "Snippets"
+  ],
   "engines": {
     "vscode": "^1.94.0"
   },
@@ -28,16 +35,26 @@
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
-    "@vscode/vsce": "^3.1.1"
+    "@vscode/vsce": "^3.1.1",
+    "esbuild": "^0.24.0"
   },
-  "activationEvents": ["onLanguage:cargoLock"],
+  "activationEvents": [
+    "onLanguage:cargoLock"
+  ],
   "contributes": {
     "languages": [
       {
         "id": "toml",
-        "aliases": ["TOML"],
-        "extensions": [".toml"],
-        "filenames": ["Cargo.lock", "uv.lock"],
+        "aliases": [
+          "TOML"
+        ],
+        "extensions": [
+          ".toml"
+        ],
+        "filenames": [
+          "Cargo.lock",
+          "uv.lock"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -46,7 +63,10 @@
       "properties": {
         "toml-toolkit.path": {
           "description": "Absolute path to toml-lsp executable.",
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "scope": "resource",
           "default": null
         }
