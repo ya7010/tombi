@@ -2,19 +2,19 @@
   "comments": {
     "lineComment": "#"
   },
-  "autoCloseBefore": ".,=)}] \n\t",
-  "brackets": [["[", "]"]],
+  "autoCloseBefore": ".,=}] \n\t",
+  "brackets": [["[", "]"], ["{", "}"]],
   "autoClosingPairs": [
     { "open": "\"", "close": "\"", "notIn": ["string"] },
     { "open": "'", "close": "'", "notIn": ["string", "comment"] },
     { "open": "[", "close": "]" },
     { "open": "{", "close": "}" }
   ],
-  "surroundingPairs": [
-    ["\"", "\""],
-    ["'", "'"],
-    ["(", ")"],
-    ["[", "]"],
-    ["{", "}"]
-  ]
+  "surroundingPairs": [["\"", "\""], ["'", "'"], ["[", "]"], ["{", "}"]],
+  "folding": {
+    "markers": {
+      "start": "^\\s*// region:\\b",
+      "end": "^\\s*// endregion\\b"
+    }
+  }
 }
