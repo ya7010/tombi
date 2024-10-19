@@ -41,14 +41,14 @@ export async function getServerPath(
     return explicitPath;
   }
 
-  if (packageJson.releaseTag === null) return "rust-analyzer";
+  if (packageJson.releaseTag === null) return "toml-lsp";
 
   // finally, use the bundled one
   const ext = process.platform === "win32" ? ".exe" : "";
   const bundledUri = vscode.Uri.joinPath(
     context.extensionUri,
     "server",
-    `rust-analyzer${ext}`,
+    `toml-lsp${ext}`,
   );
   if (await fileExists(bundledUri)) {
     return bundledUri.fsPath;

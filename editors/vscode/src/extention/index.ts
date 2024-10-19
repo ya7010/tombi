@@ -24,7 +24,7 @@ export class Extension {
         await this.client?.sendNotification(
           node.DidChangeConfigurationNotification.type,
           {
-            settings: "tomy", // For event test
+            settings: "toml-toolkit", // For event test
           },
         );
       },
