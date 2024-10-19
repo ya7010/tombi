@@ -3,7 +3,7 @@ import { inspect } from "node:util";
 
 class Log {
   private readonly output = vscode.window.createOutputChannel(
-    "TOML LSP Client",
+    "TOML Language Server",
     {
       log: true,
     },

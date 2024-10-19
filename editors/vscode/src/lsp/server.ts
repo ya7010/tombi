@@ -4,16 +4,16 @@ import { text } from "node:stream/consumers";
 export const LSP_BINARY_NAME = "toml-lsp";
 
 export class Server {
-  private serverVersion?: string;
+  private version?: string;
 
-  constructor(private serverPath: string) {}
+  constructor(public binPath: string) {}
 
   async showVersion(): Promise<string> {
-    if (this.serverVersion === undefined) {
+    if (this.version === undefined) {
       let version: string;
       try {
         version = await text(
-          spawn(this.serverPath, ["--version"]).stdout.setEncoding("utf-8"),
+          spawn(this.binPath, ["--version"]).stdout.setEncoding("utf-8"),
         );
         // version の先頭文字が LSP_BINARY_NAME で始まる場合は、その文字列を削除し、文字列の先頭の空白も削除する
         if (version.startsWith(LSP_BINARY_NAME)) {
@@ -23,11 +23,11 @@ export class Server {
         version = "<unknown>";
       }
 
-      this.serverVersion = version;
+      this.version = version;
 
       return version;
     }
 
-    return this.serverVersion;
+    return this.version;
   }
 }

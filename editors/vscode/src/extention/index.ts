@@ -2,11 +2,25 @@ import * as vscode from "vscode";
 import * as node from "vscode-languageclient/node";
 import { clientOptions } from "@/options/client-options";
 import { serverOptions } from "@/options/server-options";
-import type { Server } from "@/lsp/server";
+import { Server } from "@/lsp/server";
 import type { Settings } from "./settings";
+import { showServerVersion } from "@/command/show-server-version";
+import { bootstrap } from "@/bootstrap";
 export type { Settings };
 
+export const EXTENTION_ID = "toml-toolkit";
+export const EXTENTION_NAME = "TOML Toolkit";
+
 export class Extension {
+  static async activate(context: vscode.ExtensionContext): Promise<Extension> {
+    const serverPath = await bootstrap(context, {});
+    const server = new Server(serverPath);
+    await showServerVersion(server);
+
+    const extension = new Extension(context, server);
+
+    return extension;
+  }
   constructor(
     private context: vscode.ExtensionContext,
     private server: Server,
@@ -25,7 +39,7 @@ export class Extension {
         await this.client?.sendNotification(
           node.DidChangeConfigurationNotification.type,
           {
-            settings: "toml-toolkit", // For event test
+            settings: EXTENTION_ID,
           },
         );
       },
@@ -45,8 +59,8 @@ export class Extension {
       const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
 
       this.client = new node.LanguageClient(
-        "tomy",
-        serverOptions(this.context),
+        EXTENTION_NAME,
+        serverOptions(this.context, this.server.binPath),
         clientOptions(workspaceFolder),
       );
 
