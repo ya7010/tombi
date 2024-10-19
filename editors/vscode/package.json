@@ -47,7 +47,7 @@
     "commands": [
       {
         "command": "toml-toolkit.showServerVersion",
-        "title": "Show 'toml-lsp' Version",
+        "title": "Show Language Server Version",
         "category": "toml-toolkit"
       }
     ],
