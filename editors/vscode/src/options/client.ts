@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import type * as languageclient from "vscode-languageclient";
 
-export function makeLanguageOptions(
+export function clientOptions(
   workspaceFolder?: vscode.WorkspaceFolder,
 ): languageclient.LanguageClientOptions {
   return {
@@ -13,9 +13,9 @@ export function makeLanguageOptions(
     ],
     workspaceFolder,
     synchronize: {
-      // Notify the server about file changes to tomy.toml and JSON files contained in the workspace
+      // Notify the server about file changes to tomkit.toml and JSON files contained in the workspace
       fileEvents: [
-        vscode.workspace.createFileSystemWatcher("**/tomy.toml"),
+        vscode.workspace.createFileSystemWatcher("**/tomkit.toml"),
         vscode.workspace.createFileSystemWatcher("**/pyproject.toml"),
       ],
     },

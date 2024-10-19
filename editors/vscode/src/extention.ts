@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as node from "vscode-languageclient/node";
 
-import { makeLanguageOptions } from "./options/client";
-import { makeServerOptions } from "./options/server-options";
+import { clientOptions } from "./options/client";
+import { serverOptions } from "./options/server-options";
 
 export class Extension {
   constructor(
@@ -43,8 +43,8 @@ export class Extension {
 
       this.client = new node.LanguageClient(
         "tomy",
-        makeServerOptions(this.context),
-        makeLanguageOptions(workspaceFolder),
+        serverOptions(this.context),
+        clientOptions(workspaceFolder),
       );
 
       this.client.start();

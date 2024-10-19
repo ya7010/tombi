@@ -7,12 +7,18 @@ license = { workspace = true }
 
 [[bin]]
 name = "toml-lsp"
-path = "src/main.rs"
+path = "src/bin/main.rs"
 
 [dependencies]
-anyhow = { workspace = true }
-clap = { workspace = true }
+anyhow = { workspace = true, features = ["backtrace"] }
+camino = { workspace = true }
+clap = { workspace = true, features = ["string"] }
 clap-verbosity-flag = { workspace = true }
+lsp-server = "0.7.7"
+lsp-types = "0.97.0"
+semver = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }

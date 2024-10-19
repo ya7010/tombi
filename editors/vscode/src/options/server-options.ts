@@ -1,7 +1,7 @@
 import * as node from "vscode-languageclient/node";
 import type * as vscode from "vscode";
 
-export function makeServerOptions(
+export function serverOptions(
   context: vscode.ExtensionContext,
 ): node.ServerOptions {
   const run = {

@@ -3,7 +3,7 @@ resolver = "2"
 members = ["core/*", "crates/*", "xtask"]
 
 [workspace.package]
-version = "0.0.1"
+version = "0.0.0"
 edition = "2021"
 authors = ["yassun7010 <yassun7010@outlook.com>"]
 license = "MIT"
@@ -12,6 +12,7 @@ license = "MIT"
 anyhow = "1.0.89"
 assert_matches = "1.5.0"
 ast = { path = "crates/ast" }
+camino = "1.1.9"
 clap = { version = "4.5.20", features = ["derive"] }
 clap-verbosity-flag = "2.2.2"
 either = "1.13.0"
@@ -24,7 +25,9 @@ quote = "1.0.37"
 rowan = "0.15.16"
 rstest = "0.23.0"
 schemars = "0.8.21"
+semver = "1.0.23"
 serde = { version = "^1.0.0", features = ["derive"] }
+serde_json = "1.0.130"
 syntax = { path = "crates/syntax" }
 text-size = "1.1.1"
 thiserror = "1.0.64"

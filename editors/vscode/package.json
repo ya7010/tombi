@@ -1,8 +1,8 @@
 {
-  "name": "vscode-tomy",
-  "displayName": "Tomy (TOML Toolkit)",
+  "name": "vscode-toml-toolkit",
+  "displayName": "TOML Toolkit",
   "version": "0.0.1",
-  "description": "A TOML language support extention backed by tomy",
+  "description": "A TOML language support extention backed by toml-toolkit.",
   "author": {
     "name": "yassun7010",
     "email": "yassun7010@outlook.com"
@@ -18,7 +18,7 @@
     "preinstall": "npx only-allow pnpm",
     "build": "npm run build-base -- --sourcemap",
     "watch": "npm run build-base -- --sourcemap --watch",
-    "package": "vsce package -o tomy.vsix",
+    "package": "vsce package -o toml-toolkit.vsix",
     "format": "biome format --write ./",
     "format:check": "biome format ./",
     "lint": "biome lint ./",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@vscode/vsce": "^3.1.1"
   },
-  "activationEvents": ["onLanguage:toml", "onLanguage:cargoLock"],
+  "activationEvents": ["onLanguage:cargoLock"],
   "contributes": {
     "languages": [
       {
@@ -42,10 +42,10 @@
       }
     ],
     "configuration": {
-      "title": "tomy",
+      "title": "toml-toolkit",
       "properties": {
-        "tomy.path": {
-          "description": "Absolute path to tomy executable.",
+        "toml-toolkit.path": {
+          "description": "Absolute path to toml-lsp executable.",
           "type": ["string", "null"],
           "scope": "resource",
           "default": null
