@@ -3,7 +3,7 @@ import * as os from "node:os";
 import { spawnSync } from "node:child_process";
 import type * as extention from "./extention";
 import { log } from "./logging";
-import { LSP_BINARY_NAME } from "./lsp/server";
+import { LANGUAGE_SERVER_BIN_NAME } from "./lsp/server";
 
 export type Env = {
   [name: string]: string;
@@ -42,14 +42,14 @@ export async function getServerPath(
     return explicitPath;
   }
 
-  if (packageJson.releaseTag === null) return LSP_BINARY_NAME;
+  if (packageJson.releaseTag === null) return LANGUAGE_SERVER_BIN_NAME;
 
   // finally, use the bundled one
   const ext = process.platform === "win32" ? ".exe" : "";
   const bundledUri = vscode.Uri.joinPath(
     context.extensionUri,
     "server",
-    LSP_BINARY_NAME + ext,
+    LANGUAGE_SERVER_BIN_NAME + ext,
   );
   if (await fileExists(bundledUri)) {
     return bundledUri.fsPath;
