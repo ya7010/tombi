@@ -1,12 +1,14 @@
 import * as vscode from "vscode";
 import * as node from "vscode-languageclient/node";
-
-import { clientOptions } from "./options/client";
-import { serverOptions } from "./options/server-options";
+import { clientOptions } from "../options/client-options";
+import { serverOptions } from "../options/server-options";
+import type { Settings } from "./settings";
+export type { Settings };
 
 export class Extension {
   constructor(
     private context: vscode.ExtensionContext,
+    private serverPath: string,
     private client?: node.LanguageClient,
   ) {
     for (const document of vscode.workspace.textDocuments) {

@@ -1,12 +1,16 @@
 import type * as vscode from "vscode";
 import { Extension } from "./extention";
+import { bootstrap } from "./bootstrap";
 
 let extention: Extension;
 
-export function activate(context: vscode.ExtensionContext): void {
-  if (!extention) extention = new Extension(context);
+export async function activate(
+  context: vscode.ExtensionContext,
+): Promise<void> {
+  const serverPath = await bootstrap(context, {});
+  if (!extention) extention = new Extension(context, serverPath);
 }
 
-export function deactivate(): Thenable<void> | undefined {
-  return extention?.deactivate();
+export async function deactivate(): Promise<void> {
+  extention?.deactivate();
 }
