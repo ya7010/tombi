@@ -55,11 +55,7 @@ impl Field {
         match self {
             Field::Token(token) => match token.as_str() {
                 "[[" | "]]" => Some(quote! { T![#token]}),
-                token
-                    if token
-                        .chars()
-                        .all(|s| matches!(s, 'A'..='Z' | 'a'..='z' | '_')) =>
-                {
+                token if token.chars().all(|s| matches!(s, 'a'..='z' | '_')) => {
                     let token: proc_macro2::TokenStream = token.to_uppercase().parse().unwrap();
                     return Some(quote! {#token});
                 }
