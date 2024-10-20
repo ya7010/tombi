@@ -50,7 +50,7 @@ where
 
     match input {
         arg::FileInput::Stdin => {
-            tracing::debug!("Formatting from stdin");
+            tracing::debug!("stdin input formatting...");
             if format_file(std::io::stdin(), printer, &args) {
                 success_num += 1;
             } else {
@@ -61,7 +61,7 @@ where
             for file in files {
                 match file {
                     Ok(path) => {
-                        tracing::debug!("Formatting file: {:?}", path);
+                        tracing::debug!("{:?} formatting...", path);
                         match std::fs::File::open(&path) {
                             Ok(file) => {
                                 if format_file(file, printer, &args) {

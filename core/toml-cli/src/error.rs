@@ -10,9 +10,9 @@ use nu_ansi_term::Style;
 pub enum Error {
     #[error(transparent)]
     NotFormatted(#[from] NotFormattedError),
-    #[error("\"{0}\" file not found")]
+    #[error("{0:?} file not found")]
     FileNotFound(PathBuf),
-    #[error("\"{0}\" is invalid glob pattern")]
+    #[error("{0:?} is invalid glob pattern")]
     GlobPatternInvalid(String),
     #[error(transparent)]
     Io(#[from] std::io::Error),
@@ -42,7 +42,7 @@ impl NotFormattedError {
 impl std::fmt::Display for NotFormattedError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.source_path {
-            Some(path) => write!(f, "\"{:?}\" is not formatted", path),
+            Some(path) => write!(f, "{:?} is not formatted", path),
             None => write!(f, "Input is not formatted"),
         }
     }
