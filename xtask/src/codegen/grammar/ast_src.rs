@@ -70,26 +70,24 @@ impl Field {
 
     pub fn method_name(&self) -> String {
         match self {
-            Field::Token(name) => {
-                let name = match name.as_str() {
-                    "'{'" => "brace_start",
-                    "'}'" => "brace_end",
-                    "'['" => "bracket_start",
-                    "']'" => "bracket_end",
-                    "[[" => "double_bracket_start",
-                    "]]" => "double_bracket_end",
-                    "=" => "eq",
-                    "." => "dot",
-                    "," => "comma",
-                    _ => name,
-                };
-                format!("{name}_token",)
-            }
+            Field::Token(name) => match name.as_str() {
+                "'{'" => "brace_start",
+                "'}'" => "brace_end",
+                "'['" => "bracket_start",
+                "']'" => "bracket_end",
+                "[[" => "double_bracket_start",
+                "]]" => "double_bracket_end",
+                "=" => "eq",
+                "." => "dot",
+                "," => "comma",
+                _ => "token",
+            },
             Field::Node { name, .. } => match name.as_str() {
-                "root_items" => "items".to_owned(),
-                _ => name.to_owned(),
+                "root_items" => "items",
+                _ => name,
             },
         }
+        .to_owned()
     }
 
     pub fn ty(&self) -> proc_macro2::Ident {

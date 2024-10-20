@@ -15,11 +15,11 @@ impl Array {
         support::children(&self.syntax)
     }
     #[inline]
-    pub fn bracket_start_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_start(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['['])
     }
     #[inline]
-    pub fn bracket_end_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
     }
 }
@@ -38,11 +38,11 @@ impl ArrayOfTable {
         support::children(&self.syntax)
     }
     #[inline]
-    pub fn double_bracket_start_token(&self) -> Option<SyntaxToken> {
+    pub fn double_bracket_start(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!["[["])
     }
     #[inline]
-    pub fn double_bracket_end_token(&self) -> Option<SyntaxToken> {
+    pub fn double_bracket_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!["]]"])
     }
 }
@@ -53,7 +53,7 @@ pub struct BareKey {
 }
 impl BareKey {
     #[inline]
-    pub fn bare_key_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, BARE_KEY)
     }
 }
@@ -64,7 +64,7 @@ pub struct BasicString {
 }
 impl BasicString {
     #[inline]
-    pub fn basic_string_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, BASIC_STRING)
     }
 }
@@ -75,7 +75,7 @@ pub struct Boolean {
 }
 impl Boolean {
     #[inline]
-    pub fn boolean_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, BOOLEAN)
     }
 }
@@ -97,7 +97,7 @@ pub struct Float {
 }
 impl Float {
     #[inline]
-    pub fn float_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, FLOAT)
     }
 }
@@ -112,11 +112,11 @@ impl InlineTable {
         support::children(&self.syntax)
     }
     #[inline]
-    pub fn brace_start_token(&self) -> Option<SyntaxToken> {
+    pub fn brace_start(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['{'])
     }
     #[inline]
-    pub fn brace_end_token(&self) -> Option<SyntaxToken> {
+    pub fn brace_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['}'])
     }
 }
@@ -127,7 +127,7 @@ pub struct IntegerBin {
 }
 impl IntegerBin {
     #[inline]
-    pub fn integer_bin_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_BIN)
     }
 }
@@ -138,7 +138,7 @@ pub struct IntegerDec {
 }
 impl IntegerDec {
     #[inline]
-    pub fn integer_dec_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_DEC)
     }
 }
@@ -149,7 +149,7 @@ pub struct IntegerHex {
 }
 impl IntegerHex {
     #[inline]
-    pub fn integer_hex_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_HEX)
     }
 }
@@ -160,7 +160,7 @@ pub struct IntegerOct {
 }
 impl IntegerOct {
     #[inline]
-    pub fn integer_oct_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_OCT)
     }
 }
@@ -179,7 +179,7 @@ impl KeyValue {
         support::child(&self.syntax)
     }
     #[inline]
-    pub fn eq_token(&self) -> Option<SyntaxToken> {
+    pub fn eq(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T ! [=])
     }
 }
@@ -190,7 +190,7 @@ pub struct LiteralString {
 }
 impl LiteralString {
     #[inline]
-    pub fn literal_string_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LITERAL_STRING)
     }
 }
@@ -201,7 +201,7 @@ pub struct LocalDate {
 }
 impl LocalDate {
     #[inline]
-    pub fn local_date_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LOCAL_DATE)
     }
 }
@@ -212,7 +212,7 @@ pub struct LocalDateTime {
 }
 impl LocalDateTime {
     #[inline]
-    pub fn local_date_time_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LOCAL_DATE_TIME)
     }
 }
@@ -223,7 +223,7 @@ pub struct LocalTime {
 }
 impl LocalTime {
     #[inline]
-    pub fn local_time_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LOCAL_TIME)
     }
 }
@@ -234,7 +234,7 @@ pub struct MultiLineBasicString {
 }
 impl MultiLineBasicString {
     #[inline]
-    pub fn multi_line_basic_string_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, MULTI_LINE_BASIC_STRING)
     }
 }
@@ -245,7 +245,7 @@ pub struct MultiLineLiteralString {
 }
 impl MultiLineLiteralString {
     #[inline]
-    pub fn multi_line_literal_string_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
     }
 }
@@ -256,7 +256,7 @@ pub struct OffsetDateTime {
 }
 impl OffsetDateTime {
     #[inline]
-    pub fn offset_date_time_token(&self) -> Option<SyntaxToken> {
+    pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, OFFSET_DATE_TIME)
     }
 }
@@ -286,11 +286,11 @@ impl Table {
         support::children(&self.syntax)
     }
     #[inline]
-    pub fn bracket_start_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_start(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['['])
     }
     #[inline]
-    pub fn bracket_end_token(&self) -> Option<SyntaxToken> {
+    pub fn bracket_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
     }
 }
