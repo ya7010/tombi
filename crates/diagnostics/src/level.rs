@@ -14,6 +14,13 @@ impl Level {
         }
     }
 
+    pub fn as_padded_str(&self) -> &'static str {
+        match self {
+            Level::Error => "  Error",
+            Level::Warning => "Warning",
+        }
+    }
+
     pub fn color(&self) -> Color {
         match self {
             Level::Error => Color::Red,

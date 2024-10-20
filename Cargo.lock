@@ -287,6 +287,7 @@ version = "0.0.0"
 dependencies = [
  "assert_matches",
  "ast",
+ "diagnostics",
  "logos",
  "parser",
  "rstest",
@@ -962,8 +963,10 @@ version = "0.0.1"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
+ "diagnostics",
  "formatter",
  "glob",
+ "nu-ansi-term 0.50.1",
  "thiserror",
  "tracing",
  "tracing-subscriber",

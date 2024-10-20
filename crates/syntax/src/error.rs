@@ -16,23 +16,29 @@ impl Error {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SyntaxError(String, text_size::TextRange);
+pub struct SyntaxError {
+    message: String,
+    range: text_size::TextRange,
+}
 
 impl SyntaxError {
     pub fn new(message: impl Into<String>, range: impl IntoRange) -> Self {
-        Self(message.into(), range.into_range())
+        Self {
+            message: message.into(),
+            range: range.into_range(),
+        }
     }
 
     pub fn message(&self) -> &str {
-        &self.0
+        &self.message
     }
 
     pub fn range(&self) -> text_size::TextRange {
-        self.1
+        self.range
     }
 
     pub fn with_range(mut self, range: text_size::TextRange) -> Self {
-        self.1 = range;
+        self.range = range;
         self
     }
 }

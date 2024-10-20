@@ -6,15 +6,7 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub enum FileInput {
     Stdin,
-    Files(Vec<Result<PathBuf, Error>>),
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("File not found: {0}")]
-    FileNotFound(String),
-    #[error("Invalid glob pattern: {0}")]
-    GlobPatternInvalid(String),
+    Files(Vec<Result<PathBuf, crate::Error>>),
 }
 
 impl<T> From<&[T]> for FileInput
@@ -29,30 +21,34 @@ where
                 FileInput::Files(
                     glob::glob(grob_pattern)
                         .unwrap()
-                        .filter_map(|x| Result::<_, Error>::Ok(x.ok()).transpose())
+                        .filter_map(|x| Result::<_, crate::Error>::Ok(x.ok()).transpose())
                         .collect::<Vec<_>>(),
                 )
             }
             1 if files[0].as_ref() == "-" => FileInput::Stdin,
             _ => {
-                let mut results: Vec<Result<PathBuf, Error>> = Vec::with_capacity(files.len());
+                let mut results: Vec<Result<PathBuf, crate::Error>> = vec![];
                 for file in files {
                     if is_glob_pattern(file.as_ref()) {
                         if let Ok(paths) = glob::glob(file.as_ref()) {
                             results.extend(
                                 paths
-                                    .filter_map(|x| Result::<_, Error>::Ok(x.ok()).transpose())
+                                    .filter_map(|x| {
+                                        Result::<_, crate::Error>::Ok(x.ok()).transpose()
+                                    })
                                     .collect::<Vec<_>>(),
                             );
                         } else {
-                            results.push(Err(Error::GlobPatternInvalid(file.as_ref().into())));
+                            results
+                                .push(Err(crate::Error::GlobPatternInvalid(file.as_ref().into())));
                         };
                     } else {
                         let path = PathBuf::from(file.as_ref());
                         if !path.exists() {
-                            results.push(Err(Error::FileNotFound(file.as_ref().into())));
+                            results.push(Err(crate::Error::FileNotFound(file.as_ref().into())));
+                        } else {
+                            results.push(Ok(path));
                         }
-                        results.push(Ok(path));
                     }
                 }
                 FileInput::Files(results)

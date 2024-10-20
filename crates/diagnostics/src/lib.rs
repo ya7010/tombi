@@ -1,8 +1,8 @@
-mod formatter;
 mod level;
+pub mod printer;
 
-pub use formatter::Pretty;
 pub use level::Level;
+pub use printer::Print;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagnostic {
@@ -14,20 +14,28 @@ pub struct Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn new_warnig(message: String, source: &str, range: text_size::TextRange) -> Self {
+    pub fn new_warning(
+        message: impl Into<String>,
+        source: &str,
+        range: text_size::TextRange,
+    ) -> Self {
         Self {
             level: level::Level::Warning,
-            message,
+            message: message.into(),
             position: text_size::TextPosition::from_source(source, range.start()),
             range,
             source_file: None,
         }
     }
 
-    pub fn new_error(message: String, source: &str, range: text_size::TextRange) -> Self {
+    pub fn new_error(
+        message: impl Into<String>,
+        source: &str,
+        range: text_size::TextRange,
+    ) -> Self {
         Self {
             level: level::Level::Error,
-            message,
+            message: message.into(),
             position: text_size::TextPosition::from_source(source, range.start()),
             range,
             source_file: None,
@@ -60,7 +68,24 @@ impl Diagnostic {
     }
 }
 
-pub trait Print<Target> {
-    /// Formats the object using the given formatter.
-    fn print(&self, target: &Target);
+pub trait OkOrPrint<T, E, P> {
+    fn ok_or_print(self, printer: P) -> Option<T>;
+}
+
+impl<T, E, P> OkOrPrint<T, E, P> for Result<T, Vec<E>>
+where
+    E: Print<P>,
+    P: Copy,
+{
+    fn ok_or_print(self, printer: P) -> Option<T> {
+        match self {
+            Ok(value) => Some(value),
+            Err(diagnostics) => {
+                for diagnostic in diagnostics {
+                    Print::<P>::print(&diagnostic, printer);
+                }
+                None
+            }
+        }
+    }
 }

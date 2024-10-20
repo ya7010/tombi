@@ -2,8 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
-use diagnostics::Diagnostic;
-use diagnostics::{Pretty, Print};
+use diagnostics::{printer::Pretty, Diagnostic, Print};
 use text_size::TextRange;
 use tracing_subscriber::prelude::*;
 
@@ -39,10 +38,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .init();
 
     let source_file = source_file();
-    println!("source_file: {:?}", source_file);
     let source = std::fs::read_to_string(&source_file)?;
 
-    let warning = Diagnostic::new_warnig(
+    let warning = Diagnostic::new_warning(
         "Some warning occured.".to_owned(),
         &source,
         TextRange::new(0.into(), 10.into()),
@@ -53,10 +51,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         TextRange::new(12.into(), 20.into()),
     );
 
-    Pretty.print(&warning);
-    Pretty.print(&warning.with_source_file(&source_file));
+    warning.print(Pretty);
+    warning.with_source_file(&source_file).print(Pretty);
+    error.print(Pretty);
+    error.with_source_file(&source_file).print(Pretty);
 
-    Pretty.print(&error);
-    Pretty.print(&error.with_source_file(&source_file));
     Ok(())
 }

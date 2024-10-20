@@ -15,6 +15,7 @@ thiserror = { workspace = true }
 rstest = { workspace = true }
 tracing = { workspace = true }
 text-size = { workspace = true }
+diagnostics = { workspace = true }
 
 [dev-dependencies]
 logos = { workspace = true }
