@@ -21,7 +21,7 @@ pub fn parse_value(p: &mut Parser<'_>) {
             let m = p.start();
             let kind = p.current();
             p.bump(kind);
-            m.complete(p, kind);
+            m.complete(p, VALUE);
         }
         T!('[') => parse_array(p),
         T!('{') => parse_inline_table(p),

@@ -23,7 +23,7 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
 pub fn parse_key(p: &mut Parser<'_>) {
     let m = p.start();
     if let Some(kind) = eat_key(p) {
-        m.complete(p, kind);
+        m.complete(p, KEY);
     } else {
         p.error(crate::Error::ExpectedKey);
         m.complete(p, INVALID_TOKENS);
@@ -36,7 +36,7 @@ fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
         loop {
             let m = p.start();
             if let Some(kind) = eat_single_key(p) {
-                m.complete(p, kind);
+                m.complete(p, KEY);
             } else {
                 p.error(crate::Error::ExpectedKey);
                 m.complete(p, INVALID_TOKENS);
