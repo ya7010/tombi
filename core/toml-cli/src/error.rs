@@ -49,14 +49,14 @@ impl std::fmt::Display for NotFormattedError {
 }
 
 impl Print<Pretty> for Error {
-    fn print(&self, printer: Pretty) {
-        Level::Error.print(printer);
-        println!(": {}", Style::new().bold().paint(self.to_string()));
+    fn print(&self, _printer: Pretty) {
+        self.print(Simple);
     }
 }
 
 impl Print<Simple> for Error {
-    fn print(&self, _printer: Simple) {
-        eprintln!("{}", self);
+    fn print(&self, printer: Simple) {
+        Level::Error.print(printer);
+        println!(": {}", Style::new().bold().paint(self.to_string()));
     }
 }
