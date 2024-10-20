@@ -9,6 +9,9 @@ pub struct Args {
     /// If the only argument is "-", the standard input will be used.
     files: Vec<String>,
 
+    /// Check if the input is formatted.
+    check: bool,
+
     /// Set the line-length
     #[arg(long, default_value = None)]
     pub max_line_length: Option<u8>,
@@ -19,23 +22,30 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
         tracing::debug!("{args:?}");
         match arg::FileInput::from(args.files.as_ref()) {
             arg::FileInput::Stdin => {
-                let mut buffer = String::new();
-                if let Ok(_) = std::io::stdin().read_to_string(&mut buffer) {
-                    formatter::format_with_option(&buffer, &Default::default())?;
+                let mut source = String::new();
+                if let Ok(_) = std::io::stdin().read_to_string(&mut source) {
+                    let formatted = formatter::format_with_option(&source, &Default::default())?;
+
+                    if args.check && source != formatted {
+                        eprintln!("Error: input is not formatted");
+                    }
                 }
             }
             arg::FileInput::Files(files) => {
                 for file in files {
                     match file {
                         Ok(path) => {
-                            let mut buffer = String::new();
+                            let mut source = String::new();
                             match std::fs::File::open(&path) {
                                 Ok(mut file) => {
-                                    if let Ok(_) = file.read_to_string(&mut buffer) {
-                                        formatter::format_with_option(
-                                            &buffer,
+                                    if let Ok(_) = file.read_to_string(&mut source) {
+                                        let formatted = formatter::format_with_option(
+                                            &source,
                                             &Default::default(),
                                         )?;
+                                        if args.check && source != formatted {
+                                            eprintln!("Error: input is not formatted");
+                                        }
                                     }
                                 }
                                 Err(err) => eprintln!("Error: {:?}", err),

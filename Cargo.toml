@@ -3,7 +3,7 @@ resolver = "2"
 members = ["core/*", "crates/*", "xtask"]
 
 [workspace.package]
-version = "0.0.0"
+version = "0.0.1"
 edition = "2021"
 authors = ["yassun7010 <yassun7010@outlook.com>"]
 license = "MIT"
@@ -19,6 +19,7 @@ either = "1.13.0"
 formatter = { path = "crates/formatter" }
 itertools = "0.13.0"
 logos = "0.14.2"
+nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
@@ -29,7 +30,7 @@ semver = "1.0.23"
 serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "1.0.130"
 syntax = { path = "crates/syntax" }
-text-size = "1.1.1"
+text-size = { path = "crates/text-size" }
 thiserror = "1.0.64"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"

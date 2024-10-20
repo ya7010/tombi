@@ -14,7 +14,7 @@ syntax = { workspace = true }
 thiserror = { workspace = true }
 rstest = { workspace = true }
 tracing = { workspace = true }
-text-size = "1.1.1"
+text-size = { workspace = true }
 
 [dev-dependencies]
 logos = { workspace = true }

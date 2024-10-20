@@ -1,5 +1,4 @@
-mod tag;
-use crate::highlight::{self, Highlight};
+use crate::highlight::Highlight;
 use text_size::TextRange;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

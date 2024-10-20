@@ -2,7 +2,7 @@ use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use tracing_subscriber::prelude::*;
 
-/// TOML: TOML linter and code formatter.
+/// TOML Language Server
 #[derive(clap::Parser)]
 #[command(name = "toml-lsp", version = crate::version())]
 pub struct Args {

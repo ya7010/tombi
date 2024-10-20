@@ -1,10 +1,10 @@
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error)]
 pub enum Error {
     #[error("parse error")]
     ParseInvalid(Vec<ParseError>),
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error)]
 pub struct ParseError {
     pub message: String,
     pub range: text_size::TextRange,

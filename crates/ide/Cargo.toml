@@ -1,11 +1,11 @@
 [package]
 name = "ide"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+license = { workspace = true }
 
 [dependencies]
-ast.workspace = true
-text-size.workspace = true
-tracing.workspace = true
+ast = { workspace = true }
+text-size = { workspace = true }
+tracing = { workspace = true }
