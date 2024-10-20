@@ -25,7 +25,6 @@ impl Print<Pretty> for Diagnostic {
                 link_style.paint(format!("{}:{}", source_file.display(), self.position())),
             );
         } else {
-            // 標準入力の x 行 y 列 でエラーが発生しました
             println!(
                 "    {}",
                 at_style.paint(format!(
