@@ -13,7 +13,7 @@ use ungrammar::Grammar;
 pub struct Args {}
 
 pub fn run(_args: Args) -> Result<(), anyhow::Error> {
-    let grammar = std::fs::read_to_string(project_root().join("xtask/toml.ungram"))
+    let grammar = std::fs::read_to_string(project_root().join("toml.ungram"))
         .unwrap()
         .parse::<Grammar>()
         .unwrap();
