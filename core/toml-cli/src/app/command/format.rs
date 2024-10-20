@@ -39,7 +39,7 @@ where
     crate::Error: Print<P>,
     P: Copy,
 {
-    let mut formatted_num = 0;
+    let mut success_num = 0;
 
     match arg::FileInput::from(args.files.as_ref()) {
         arg::FileInput::Stdin => {
@@ -53,7 +53,7 @@ where
                             .to_error()
                             .print(printer);
                     } else {
-                        formatted_num += 1;
+                        success_num += 1;
                     }
                 }
             }
@@ -75,7 +75,7 @@ where
                                                 .to_error()
                                                 .print(printer);
                                         } else {
-                                            formatted_num += 1;
+                                            success_num += 1;
                                         }
                                     }
                                 }
@@ -95,5 +95,5 @@ where
         }
     };
 
-    formatted_num
+    success_num
 }
