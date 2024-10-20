@@ -21,7 +21,7 @@ impl Print<Pretty> for Diagnostic {
         if let Some(source_file) = self.source_file() {
             println!(
                 "    {} {}",
-                at_style.paint("in"),
+                at_style.paint("at"),
                 link_style.paint(format!("{}:{}", source_file.display(), self.position())),
             );
         } else {
