@@ -34,20 +34,20 @@ Value =
     | Array
     | InlineTable
 
-BasicString = value: 'basic_string'
-MultiLineBasicString = value: 'multi_line_basic_string'
-LiteralString = value: 'literal_string'
-MultiLineLiteralString = value: 'multi_line_literal_string'
-IntegerBin = value: 'integer_bin'
-IntegerOct = value: 'integer_oct'
-IntegerDec = value: 'integer_dec'
-IntegerHex = value: 'integer_hex'
-Float = value: 'float'
-Boolean = value: ('true' | 'false')
-OffsetDateTime = value: 'offset_date_time'
-LocalDateTime = value: 'local_date_time'
-LocalDate = value: 'local_date'
-LocalTime = value: 'local_time'
+BasicString = '@basic_string'
+MultiLineBasicString = '@multi_line_basic_string'
+LiteralString = '@literal_string'
+MultiLineLiteralString = '@multi_line_literal_string'
+IntegerBin = '@integer_bin'
+IntegerOct = '@integer_oct'
+IntegerDec = '@integer_dec'
+IntegerHex = '@integer_hex'
+Float = '@float'
+Boolean = '@boolean'
+OffsetDateTime = '@offset_date_time'
+LocalDateTime = '@local_date_time'
+LocalDate = '@local_date'
+LocalTime = '@local_time'
 
 Array = '[' elements: (Value (',' Value)* ','?) ']'
 Table = '[' header: Key ']' KeyValue*

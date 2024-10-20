@@ -53,14 +53,21 @@ impl Field {
     }
     pub fn token_kind(&self) -> Option<proc_macro2::TokenStream> {
         match self {
-            Field::Token(token) => {
-                let token: proc_macro2::TokenStream = match token.as_str() {
-                    "[[" => quote! { "[[" },
-                    "]]" => quote! { "]]" },
-                    token => token.parse().unwrap(),
-                };
-                Some(quote! { T![#token] })
-            }
+            Field::Token(token) => match token.as_str() {
+                "[[" | "]]" => Some(quote! { T![#token]}),
+                token
+                    if token
+                        .chars()
+                        .all(|s| matches!(s, 'A'..='Z' | 'a'..='z' | '_')) =>
+                {
+                    let token: proc_macro2::TokenStream = token.to_uppercase().parse().unwrap();
+                    return Some(quote! {#token});
+                }
+                _ => {
+                    let token: proc_macro2::TokenStream = token.parse().unwrap();
+                    Some(quote! { T![#token] })
+                }
+            },
             _ => None,
         }
     }

@@ -3,7 +3,7 @@
 use crate::support;
 use crate::AstChildren;
 use crate::AstNode;
-use syntax::{SyntaxKind, SyntaxNode, SyntaxToken, T};
+use syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Array {
@@ -54,7 +54,7 @@ pub struct BareKey {
 impl BareKey {
     #[inline]
     pub fn bare_key_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![bare_key])
+        support::token(&self.syntax, BARE_KEY)
     }
 }
 
@@ -62,13 +62,23 @@ impl BareKey {
 pub struct BasicString {
     pub(crate) syntax: SyntaxNode,
 }
-impl BasicString {}
+impl BasicString {
+    #[inline]
+    pub fn basic_string_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, BASIC_STRING)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Boolean {
     pub(crate) syntax: SyntaxNode,
 }
-impl Boolean {}
+impl Boolean {
+    #[inline]
+    pub fn boolean_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, BOOLEAN)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct DottedKeys {
@@ -85,7 +95,12 @@ impl DottedKeys {
 pub struct Float {
     pub(crate) syntax: SyntaxNode,
 }
-impl Float {}
+impl Float {
+    #[inline]
+    pub fn float_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, FLOAT)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct InlineTable {
@@ -110,25 +125,45 @@ impl InlineTable {
 pub struct IntegerBin {
     pub(crate) syntax: SyntaxNode,
 }
-impl IntegerBin {}
+impl IntegerBin {
+    #[inline]
+    pub fn integer_bin_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, INTEGER_BIN)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct IntegerDec {
     pub(crate) syntax: SyntaxNode,
 }
-impl IntegerDec {}
+impl IntegerDec {
+    #[inline]
+    pub fn integer_dec_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, INTEGER_DEC)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct IntegerHex {
     pub(crate) syntax: SyntaxNode,
 }
-impl IntegerHex {}
+impl IntegerHex {
+    #[inline]
+    pub fn integer_hex_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, INTEGER_HEX)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct IntegerOct {
     pub(crate) syntax: SyntaxNode,
 }
-impl IntegerOct {}
+impl IntegerOct {
+    #[inline]
+    pub fn integer_oct_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, INTEGER_OCT)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct KeyValue {
@@ -153,43 +188,78 @@ impl KeyValue {
 pub struct LiteralString {
     pub(crate) syntax: SyntaxNode,
 }
-impl LiteralString {}
+impl LiteralString {
+    #[inline]
+    pub fn literal_string_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, LITERAL_STRING)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LocalDate {
     pub(crate) syntax: SyntaxNode,
 }
-impl LocalDate {}
+impl LocalDate {
+    #[inline]
+    pub fn local_date_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, LOCAL_DATE)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LocalDateTime {
     pub(crate) syntax: SyntaxNode,
 }
-impl LocalDateTime {}
+impl LocalDateTime {
+    #[inline]
+    pub fn local_date_time_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, LOCAL_DATE_TIME)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LocalTime {
     pub(crate) syntax: SyntaxNode,
 }
-impl LocalTime {}
+impl LocalTime {
+    #[inline]
+    pub fn local_time_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, LOCAL_TIME)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MultiLineBasicString {
     pub(crate) syntax: SyntaxNode,
 }
-impl MultiLineBasicString {}
+impl MultiLineBasicString {
+    #[inline]
+    pub fn multi_line_basic_string_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, MULTI_LINE_BASIC_STRING)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MultiLineLiteralString {
     pub(crate) syntax: SyntaxNode,
 }
-impl MultiLineLiteralString {}
+impl MultiLineLiteralString {
+    #[inline]
+    pub fn multi_line_literal_string_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct OffsetDateTime {
     pub(crate) syntax: SyntaxNode,
 }
-impl OffsetDateTime {}
+impl OffsetDateTime {
+    #[inline]
+    pub fn offset_date_time_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, OFFSET_DATE_TIME)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Root {
