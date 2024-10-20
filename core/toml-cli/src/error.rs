@@ -33,6 +33,10 @@ impl NotFormattedError {
     pub fn from_input() -> Self {
         Self { source_path: None }
     }
+
+    pub fn to_error(self) -> Error {
+        Error::NotFormatted(self)
+    }
 }
 
 impl std::fmt::Display for NotFormattedError {

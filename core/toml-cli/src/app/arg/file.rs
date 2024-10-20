@@ -16,7 +16,7 @@ where
     fn from(files: &[T]) -> Self {
         match files.len() {
             0 => {
-                let grob_pattern = "*/*.toml";
+                let grob_pattern = "**/*.toml";
 
                 FileInput::Files(
                     glob::glob(grob_pattern)

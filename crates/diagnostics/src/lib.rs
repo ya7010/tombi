@@ -81,8 +81,8 @@ where
         match self {
             Ok(value) => Some(value),
             Err(diagnostics) => {
-                for diagnostic in diagnostics {
-                    Print::<P>::print(&diagnostic, printer);
+                for diagnostic in &diagnostics {
+                    Print::<P>::print(diagnostic, printer);
                 }
                 None
             }
