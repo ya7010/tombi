@@ -9,6 +9,15 @@ pub enum FileInput {
     Files(Vec<Result<PathBuf, crate::Error>>),
 }
 
+impl FileInput {
+    pub fn len(&self) -> usize {
+        match self {
+            FileInput::Stdin => 1,
+            FileInput::Files(files) => files.len(),
+        }
+    }
+}
+
 impl<T> From<&[T]> for FileInput
 where
     T: AsRef<str>,
@@ -75,6 +84,13 @@ mod test {
     #[test]
     fn single_file() {
         let input = vec!["Cargo.toml"];
+        let file_input = FileInput::from(input.as_ref());
+        assert!(matches!(file_input, FileInput::Files(_)));
+    }
+
+    #[test]
+    fn glob_file() {
+        let input = vec!["**/Cargo.toml"];
         let file_input = FileInput::from(input.as_ref());
         assert!(matches!(file_input, FileInput::Files(_)));
     }

@@ -24,7 +24,10 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     tracing::debug_span!("run").in_scope(|| {
         tracing::debug!("{args:?}");
 
-        let success_num = inner_run(args, Pretty);
+        let (success_num, error_num) = inner_run(args, Pretty);
+        if error_num > 0 {
+            std::process::exit(1);
+        }
         if success_num > 0 {
             eprintln!("{} files formatted", success_num);
         }
@@ -33,51 +36,37 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     })
 }
 
-fn inner_run<P>(args: Args, printer: P) -> usize
+fn inner_run<P>(args: Args, printer: P) -> (usize, usize)
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
     P: Copy,
 {
-    let mut success_num = 0;
+    let input = arg::FileInput::from(args.files.as_ref());
 
-    match arg::FileInput::from(args.files.as_ref()) {
+    let total_num = input.len();
+    let mut success_num = 0;
+    let mut error_num = 0;
+
+    match input {
         arg::FileInput::Stdin => {
-            let mut source = String::new();
-            if std::io::stdin().read_to_string(&mut source).is_ok() {
-                if let Some(formatted) =
-                    formatter::format_with_option(&source, &Default::default()).ok_or_print(printer)
-                {
-                    if args.check && source != formatted {
-                        crate::error::NotFormattedError::from_input()
-                            .to_error()
-                            .print(printer);
-                    } else {
-                        success_num += 1;
-                    }
-                }
+            tracing::debug!("Formatting from stdin");
+            if format_file(std::io::stdin(), printer, &args) {
+                success_num += 1;
+            } else {
+                error_num += 1;
             }
         }
         arg::FileInput::Files(files) => {
             for file in files {
                 match file {
                     Ok(path) => {
-                        let mut source = String::new();
+                        tracing::debug!("Formatting file: {:?}", path);
                         match std::fs::File::open(&path) {
-                            Ok(mut file) => {
-                                if file.read_to_string(&mut source).is_ok() {
-                                    if let Some(formatted) =
-                                        formatter::format_with_option(&source, &Default::default())
-                                            .ok_or_print(printer)
-                                    {
-                                        if args.check && source != formatted {
-                                            crate::error::NotFormattedError::from_input()
-                                                .to_error()
-                                                .print(printer);
-                                        } else {
-                                            success_num += 1;
-                                        }
-                                    }
+                            Ok(file) => {
+                                if format_file(file, printer, &args) {
+                                    success_num += 1;
+                                    continue;
                                 }
                             }
                             Err(err) => {
@@ -91,9 +80,35 @@ where
                     }
                     Err(err) => err.print(printer),
                 }
+                error_num += 1;
             }
         }
     };
 
-    success_num
+    assert_eq!(success_num + error_num, total_num);
+
+    (success_num, error_num)
+}
+
+fn format_file<R: Read, P>(mut reader: R, printer: P, args: &Args) -> bool
+where
+    Diagnostic: Print<P>,
+    crate::Error: Print<P>,
+    P: Copy,
+{
+    let mut source = String::new();
+    if reader.read_to_string(&mut source).is_ok() {
+        if let Some(formatted) =
+            formatter::format_with_option(&source, &Default::default()).ok_or_print(printer)
+        {
+            if args.check && source != formatted {
+                crate::error::NotFormattedError::from_input()
+                    .to_error()
+                    .print(printer);
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
