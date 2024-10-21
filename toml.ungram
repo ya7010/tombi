@@ -20,9 +20,8 @@
 
 KeyValue = Keys '=' Value
 
-Keys = BareKey | BasicString | LiteralString | DottedKeys
+Keys = Key ('.' Key)*
 BareKey = '@bare_key'
-DottedKeys = Key ('.' Key)*
 Key = BareKey | BasicString | LiteralString
 
 Value =

@@ -75,6 +75,7 @@ pub const TOKENS: &[TokenItem] = &[
 pub const NODES: &[&str] = &[
     "ROOT",
     "DOTTED_KEYS",
+    "KEYS",
     "KEY",
     "VALUE",
     "KEY_VALUE",

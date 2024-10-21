@@ -20,22 +20,22 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     SyntaxKind::BOOLEAN,
 ]);
 
-pub fn parse_key(p: &mut Parser<'_>) {
+pub fn parse_keys(p: &mut Parser<'_>) {
     let m = p.start();
-    if let Some(kind) = eat_key(p) {
-        m.complete(p, kind);
+    if eat_keys(p).is_some() {
+        m.complete(p, KEYS);
     } else {
         p.error(crate::Error::ExpectedKey);
         m.complete(p, INVALID_TOKENS);
     };
 }
 
-fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
+fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
     if p.nth_at(1, T![.]) {
         // Dotted keys Mode
         loop {
             let m = p.start();
-            if let Some(kind) = eat_single_key(p) {
+            if let Some(kind) = eat_key(p) {
                 m.complete(p, kind);
             } else {
                 p.error(crate::Error::ExpectedKey);
@@ -48,11 +48,19 @@ fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
         }
         Some(DOTTED_KEYS)
     } else {
-        eat_single_key(p)
+        let m = p.start();
+        if let Some(kind) = eat_key(p) {
+            m.complete(p, kind);
+            Some(kind)
+        } else {
+            p.error(crate::Error::ExpectedKey);
+            m.complete(p, INVALID_TOKENS);
+            None
+        }
     }
 }
 
-pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
+pub fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
     let kind = p.current();
     match kind {
         BARE_KEY | BASIC_STRING | LITERAL_STRING => {
@@ -64,7 +72,7 @@ pub fn eat_single_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             Some(BARE_KEY)
         }
         FLOAT => {
-            p.bump_any();
+            p.bump_remap(BARE_KEY);
             Some(DOTTED_KEYS)
         }
         BOOLEAN => {

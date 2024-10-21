@@ -1,7 +1,7 @@
 use syntax::T;
 
 use crate::{
-    grammar::{key::parse_key, key_value::parse_key_value, line_end, root::SECTION_END},
+    grammar::{key::parse_keys, key_value::parse_key_value, line_end, root::SECTION_END},
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
@@ -12,7 +12,7 @@ pub fn parse_array_of_table(p: &mut Parser<'_>) {
     let m = p.start();
     p.eat(T!("[["));
 
-    parse_key(p);
+    parse_keys(p);
 
     if !p.eat(T!("]]")) {
         p.error(crate::Error::ExpectedDoubleBracetEnd);

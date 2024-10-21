@@ -67,6 +67,7 @@ pub enum SyntaxKind {
     ERROR,
     ROOT,
     DOTTED_KEYS,
+    KEYS,
     KEY,
     VALUE,
     KEY_VALUE,

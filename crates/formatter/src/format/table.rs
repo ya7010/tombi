@@ -41,7 +41,7 @@ mod tests {
         r#"
 [package]
 name = "toml-rs"
-version = "0.4.0"
+cli.version = "0.4.0"
 "#.trim()
     )]
     fn table(#[case] source: &str) {

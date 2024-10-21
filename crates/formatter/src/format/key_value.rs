@@ -8,12 +8,11 @@ impl Format for ast::KeyValue {
 
 impl Format for ast::Keys {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        match self {
-            Self::BareKey(it) => it.format(context),
-            Self::BasicString(it) => it.format(context),
-            Self::LiteralString(it) => it.format(context),
-            Self::DottedKeys(it) => it.format(context),
-        }
+        self.keys()
+            .into_iter()
+            .map(|it| it.format(context))
+            .collect::<Vec<_>>()
+            .join(".")
     }
 }
 
@@ -30,16 +29,6 @@ impl Format for ast::Key {
             Self::BasicString(it) => it.format(_context),
             Self::LiteralString(it) => it.format(_context),
         }
-    }
-}
-
-impl Format for ast::DottedKeys {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.keys()
-            .into_iter()
-            .map(|it| it.format(_context))
-            .collect::<Vec<_>>()
-            .join(".")
     }
 }
 
@@ -102,6 +91,7 @@ mod tests {
     fn dotted_keys_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
+
         assert_eq!(ast.format_default(), source);
         assert_eq!(p.errors(), []);
     }

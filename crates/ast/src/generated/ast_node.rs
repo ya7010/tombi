@@ -81,17 +81,6 @@ impl Boolean {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct DottedKeys {
-    pub(crate) syntax: SyntaxNode,
-}
-impl DottedKeys {
-    #[inline]
-    pub fn keys(&self) -> AstChildren<Key> {
-        support::children(&self.syntax)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Float {
     pub(crate) syntax: SyntaxNode,
 }
@@ -181,6 +170,17 @@ impl KeyValue {
     #[inline]
     pub fn eq(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T ! [=])
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Keys {
+    pub(crate) syntax: SyntaxNode,
+}
+impl Keys {
+    #[inline]
+    pub fn keys(&self) -> AstChildren<Key> {
+        support::children(&self.syntax)
     }
 }
 
@@ -303,14 +303,6 @@ pub enum Key {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Keys {
-    BareKey(BareKey),
-    BasicString(BasicString),
-    DottedKeys(DottedKeys),
-    LiteralString(LiteralString),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum RootItem {
     ArrayOfTable(ArrayOfTable),
     KeyValue(KeyValue),
@@ -412,24 +404,6 @@ impl AstNode for Boolean {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::BOOLEAN
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-}
-impl AstNode for DottedKeys {
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::DOTTED_KEYS
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -556,6 +530,24 @@ impl AstNode for KeyValue {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::KEY_VALUE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for Keys {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::KEYS
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -777,62 +769,6 @@ impl AstNode for Key {
         }
     }
 }
-impl From<BareKey> for Keys {
-    #[inline]
-    fn from(node: BareKey) -> Keys {
-        Keys::BareKey(node)
-    }
-}
-impl From<BasicString> for Keys {
-    #[inline]
-    fn from(node: BasicString) -> Keys {
-        Keys::BasicString(node)
-    }
-}
-impl From<DottedKeys> for Keys {
-    #[inline]
-    fn from(node: DottedKeys) -> Keys {
-        Keys::DottedKeys(node)
-    }
-}
-impl From<LiteralString> for Keys {
-    #[inline]
-    fn from(node: LiteralString) -> Keys {
-        Keys::LiteralString(node)
-    }
-}
-impl AstNode for Keys {
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            SyntaxKind::BARE_KEY
-                | SyntaxKind::BASIC_STRING
-                | SyntaxKind::DOTTED_KEYS
-                | SyntaxKind::LITERAL_STRING
-        )
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            SyntaxKind::BARE_KEY => Keys::BareKey(BareKey { syntax }),
-            SyntaxKind::BASIC_STRING => Keys::BasicString(BasicString { syntax }),
-            SyntaxKind::DOTTED_KEYS => Keys::DottedKeys(DottedKeys { syntax }),
-            SyntaxKind::LITERAL_STRING => Keys::LiteralString(LiteralString { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Keys::BareKey(it) => &it.syntax,
-            Keys::BasicString(it) => &it.syntax,
-            Keys::DottedKeys(it) => &it.syntax,
-            Keys::LiteralString(it) => &it.syntax,
-        }
-    }
-}
 impl From<ArrayOfTable> for RootItem {
     #[inline]
     fn from(node: ArrayOfTable) -> RootItem {
@@ -1051,11 +987,6 @@ impl std::fmt::Display for Key {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for Keys {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for RootItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -1091,11 +1022,6 @@ impl std::fmt::Display for Boolean {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for DottedKeys {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for Float {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -1127,6 +1053,11 @@ impl std::fmt::Display for IntegerOct {
     }
 }
 impl std::fmt::Display for KeyValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Keys {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
