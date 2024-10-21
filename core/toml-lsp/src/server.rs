@@ -1,5 +1,13 @@
+mod handler;
+mod router;
+mod state;
+
 use lsp_server::Message;
-use lsp_types::request::GotoDefinition;
+use lsp_types::request::DocumentSymbolRequest;
+use lsp_types::request::Request;
+use state::ServerState;
+
+use handler::handle_document_symbol;
 
 use crate::{from_json, lsp};
 
@@ -24,7 +32,6 @@ pub fn run() -> Result<(), anyhow::Error> {
     let lsp_types::InitializeParams {
         capabilities,
         workspace_folders,
-        initialization_options,
         client_info,
         ..
     } = from_json::<lsp_types::InitializeParams>("InitializeParams", &initialize_params)?;
@@ -35,20 +42,6 @@ pub fn run() -> Result<(), anyhow::Error> {
             client_info.name,
             client_info.version.as_deref().unwrap_or_default()
         );
-        if let Some(vscode_version) = client_info
-            .name
-            .starts_with("Visual Studio Code")
-            .then(|| {
-                client_info
-                    .version
-                    .as_deref()
-                    .map(semver::Version::parse)
-                    .and_then(Result::ok)
-            })
-            .flatten()
-        {
-            tracing::info!("VSCode Version: {:?}", vscode_version);
-        }
     }
 
     let workspace_uris = workspace_folders
@@ -77,9 +70,13 @@ pub fn run() -> Result<(), anyhow::Error> {
         return Err(e.into());
     }
 
+    let state = ServerState {
+        client_capabilities,
+    };
+
     // If the io_threads have an error, there's usually an error on the main
     // loop too because the channels are closed. Ensure we report both errors.
-    match (main_loop(connection), io_threads.join()) {
+    match (main_loop(connection, state), io_threads.join()) {
         (Err(loop_e), Err(join_e)) => anyhow::bail!("{loop_e}\n{join_e}"),
         (Ok(_), Err(join_e)) => anyhow::bail!("{join_e}"),
         (Err(loop_e), Ok(_)) => anyhow::bail!("{loop_e}"),
@@ -91,26 +88,44 @@ pub fn run() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn main_loop(connection: lsp_server::Connection) -> Result<(), anyhow::Error> {
+fn main_loop(connection: lsp_server::Connection, state: ServerState) -> Result<(), anyhow::Error> {
     for msg in &connection.receiver {
         match msg {
-            Message::Request(req) => {
-                tracing::debug!("request: {:?}", req);
-                if connection.handle_shutdown(&req)? {
+            Message::Request(request) => {
+                tracing::debug!("request: {:?}", request);
+                if connection.handle_shutdown(&request)? {
                     break;
                 }
-                match cast::<lsp_types::request::Formatting>(req) {
+
+                match request.clone().extract(DocumentSymbolRequest::METHOD) {
                     Ok((id, params)) => {
-                        tracing::debug!("got gotoDefinition request #{id}: {params:?}");
+                        tracing::debug!("match request #{id}: {params:?}");
+                        match handle_document_symbol(state.clone(), params) {
+                            Ok(Some(response)) => {
+                                connection
+                                    .sender
+                                    .send(
+                                        lsp_server::Request::new(
+                                            id,
+                                            DocumentSymbolRequest::METHOD.to_string(),
+                                            response,
+                                        )
+                                        .into(),
+                                    )
+                                    .unwrap();
+                            }
+                            Ok(None) => {
+                                tracing::info!("No response for request: {:?}", &request);
+                            }
+                            Err(err) => {
+                                tracing::error!("handler error: {:?}", err);
+                            }
+                        };
                     }
-                    Err(err @ lsp_server::ExtractError::JsonError { .. }) => {
-                        tracing::debug!("ExtractError::JsonError: {:?}", err);
-                        break;
+                    Err(err) => {
+                        tracing::error!("ExtractError: {:?}", err);
                     }
-                    Err(lsp_server::ExtractError::MethodMismatch(req)) => {
-                        tracing::debug!("ExtractError::MethodMismatch: {:?}", req)
-                    }
-                };
+                }
             }
             Message::Notification(notification) => {
                 tracing::debug!("notification: {:?}", notification);
@@ -124,14 +139,4 @@ fn main_loop(connection: lsp_server::Connection) -> Result<(), anyhow::Error> {
     }
 
     Ok(())
-}
-
-fn cast<R>(
-    req: lsp_server::Request,
-) -> Result<(lsp_server::RequestId, R::Params), lsp_server::ExtractError<lsp_server::Request>>
-where
-    R: lsp_types::request::Request,
-    R::Params: serde::de::DeserializeOwned,
-{
-    req.extract(R::METHOD)
 }
