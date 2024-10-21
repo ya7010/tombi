@@ -22,15 +22,20 @@ impl Print<Pretty> for Diagnostic {
             println!(
                 "    {} {}",
                 at_style.paint("at"),
-                link_style.paint(format!("{}:{}", source_file.display(), self.position())),
+                link_style.paint(format!(
+                    "{}:{}:{}",
+                    source_file.display(),
+                    self.position().line() + 1,
+                    self.position().column() + 1
+                )),
             );
         } else {
             println!(
                 "    {}",
                 at_style.paint(format!(
                     "at line {} column {}",
-                    self.position().line(),
-                    self.position().column()
+                    self.position().line() + 1,
+                    self.position().column() + 1
                 )),
             );
         }

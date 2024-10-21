@@ -19,15 +19,15 @@ impl TextPosition {
 
     pub fn from_source(source: &str, offset: TextSize) -> Self {
         let offset = offset.into();
-        let mut line = 1;
-        let mut column = 1;
+        let mut line = 0;
+        let mut column = 0;
         for (i, c) in source.char_indices() {
             if i == offset {
                 return Self { line, column };
             }
             if c == '\n' {
                 line += 1;
-                column = 1;
+                column = 0;
             } else {
                 column += 1;
             }
