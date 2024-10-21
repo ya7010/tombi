@@ -18,21 +18,8 @@
 //   (A)                         -- same as A
 //   label:A                     -- suggested name for field of AST node
 
-KeyValue = Keys '=' Value
 
-Keys = Key ('.' Key)*
 BareKey = '@bare_key'
-Key = BareKey | BasicString | LiteralString
-
-Value =
-    BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString
-    | IntegerBin | IntegerOct | IntegerDec | IntegerHex
-    | Float
-    | Boolean
-    | OffsetDateTime | LocalDateTime | LocalDate | LocalTime
-    | Array
-    | InlineTable
-
 BasicString = '@basic_string'
 MultiLineBasicString = '@multi_line_basic_string'
 LiteralString = '@literal_string'
@@ -48,6 +35,19 @@ LocalDateTime = '@local_date_time'
 LocalDate = '@local_date'
 LocalTime = '@local_time'
 
+Key = BareKey | BasicString | LiteralString
+Keys = Key ('.' Key)*
+
+Value =
+    BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString
+    | IntegerBin | IntegerOct | IntegerDec | IntegerHex
+    | Float
+    | Boolean
+    | OffsetDateTime | LocalDateTime | LocalDate | LocalTime
+    | Array
+    | InlineTable
+
+KeyValue = Keys '=' Value
 Array = '[' elements: (Value (',' Value)* ','?) ']'
 Table = '[' header: Keys ']' KeyValue*
 InlineTable = '{' elements: (KeyValue (',' KeyValue)* ','?) '}'
