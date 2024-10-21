@@ -17,6 +17,8 @@ pub enum Error {
     ExpectedBraceEnd,
     #[error("expected '}}}}'")]
     ExpectedDoubleBracetEnd,
+    #[error("Invalid key")]
+    InvalidKey,
 }
 
 impl Into<String> for Error {

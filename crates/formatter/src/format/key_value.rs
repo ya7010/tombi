@@ -2,11 +2,11 @@ use crate::Format;
 
 impl Format for ast::KeyValue {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        self.key().unwrap().format(context) + " = " + &self.value().unwrap().format(context)
+        self.keys().unwrap().format(context) + " = " + &self.value().unwrap().format(context)
     }
 }
 
-impl Format for ast::Key {
+impl Format for ast::Keys {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         match self {
             Self::BareKey(it) => it.format(context),
@@ -23,19 +23,19 @@ impl Format for ast::BareKey {
     }
 }
 
-impl Format for ast::SingleKey {
+impl Format for ast::Key {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
         match self {
-            ast::SingleKey::BareKey(it) => it.format(_context),
-            ast::SingleKey::BasicString(it) => it.format(_context),
-            ast::SingleKey::LiteralString(it) => it.format(_context),
+            Self::BareKey(it) => it.format(_context),
+            Self::BasicString(it) => it.format(_context),
+            Self::LiteralString(it) => it.format(_context),
         }
     }
 }
 
 impl Format for ast::DottedKeys {
     fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.single_keys()
+        self.keys()
             .into_iter()
             .map(|it| it.format(_context))
             .collect::<Vec<_>>()

@@ -18,12 +18,12 @@
 //   (A)                         -- same as A
 //   label:A                     -- suggested name for field of AST node
 
-KeyValue = Key '=' Value
+KeyValue = Keys '=' Value
 
-Key = BareKey | BasicString | LiteralString | DottedKeys
+Keys = BareKey | BasicString | LiteralString | DottedKeys
 BareKey = '@bare_key'
-DottedKeys = SingleKey ('.' SingleKey)*
-SingleKey = BareKey | BasicString | LiteralString
+DottedKeys = Key ('.' Key)*
+Key = BareKey | BasicString | LiteralString
 
 Value =
     BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString
@@ -50,9 +50,9 @@ LocalDate = '@local_date'
 LocalTime = '@local_time'
 
 Array = '[' elements: (Value (',' Value)* ','?) ']'
-Table = '[' header: Key ']' KeyValue*
+Table = '[' header: Keys ']' KeyValue*
 InlineTable = '{' elements: (KeyValue (',' KeyValue)* ','?) '}'
-ArrayOfTable = '[[' header: Key ']]' KeyValue*
+ArrayOfTable = '[[' header: Keys ']]' KeyValue*
 
 Root = RootItem*
 
