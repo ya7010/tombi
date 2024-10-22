@@ -1,4 +1,4 @@
 [alias]
-toml = "run --package toml-cli --bin toml --"
+tombi = "run --package tombi-cli --bin tombi --"
 xtask = "run --package xtask --bin xtask --"
-lsp = "run --package toml-lsp --bin toml-lsp"
+lsp = "run --package tombi-lsp --bin tombi-lsp"

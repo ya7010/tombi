@@ -958,7 +958,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "toml-cli"
+name = "tombi-cli"
 version = "0.0.1"
 dependencies = [
  "clap",
@@ -973,7 +973,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "toml-lsp"
+name = "tombi-lsp"
 version = "0.0.1"
 dependencies = [
  "anyhow",

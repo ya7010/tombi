@@ -8,7 +8,7 @@ import * as command from "@/command";
 import { bootstrap } from "@/bootstrap";
 export type { Settings };
 
-export const EXTENTION_ID = "toml-toolkit";
+export const EXTENTION_ID = "tombi";
 export const EXTENTION_NAME = "TOML Toolkit";
 
 export class Extension {

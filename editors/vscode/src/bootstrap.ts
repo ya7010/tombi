@@ -15,7 +15,7 @@ export async function bootstrap(
 ): Promise<string> {
   const path = await getServerPath(context, settings);
   if (!path) {
-    throw new Error("toml-toolkit Language Server is not available.");
+    throw new Error("tombi Language Server is not available.");
   }
 
   log.info("Using Language Server binary at", path);

@@ -1,6 +1,6 @@
-//! Code for representing toml-toolkit's release version number.
+//! Code for representing tombi's release version number.
 
-/// Information about the git repository where toml-toolkit was built from.
+/// Information about the git repository where tombi was built from.
 pub struct CommitInfo {
     pub short_commit_hash: &'static str,
     pub commit_hash: &'static str,

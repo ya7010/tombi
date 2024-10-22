@@ -55,7 +55,7 @@ pub fn run() -> Result<(), anyhow::Error> {
 
     let initialize_result = lsp_types::InitializeResult {
         server_info: Some(lsp_types::ServerInfo {
-            name: String::from("toml-toolkit"),
+            name: String::from("tombi"),
             version: Some(crate::version().to_string()),
         }),
         capabilities: server_capabilities,

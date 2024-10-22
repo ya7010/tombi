@@ -7,7 +7,7 @@ toml + oi (io の反対) とも見えて、語感も悪くない。
 
 
 ### 候補
-- toml-toolkit
+- tombi
 - tomy
 - tombi
 

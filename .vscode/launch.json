@@ -13,7 +13,7 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}/editors/vscode",
-        "--log yassun7010.toml-toolkit:debug"
+        "--log yassun7010.tombi:debug"
       ],
       "outFiles": ["${workspaceFolder}/editors/vscode/dist/**/*.js"],
       "preLaunchTask": "Build Server and Extension",

@@ -1,8 +1,8 @@
 {
-  "name": "vscode-toml-toolkit",
+  "name": "vscode-tombi",
   "displayName": "TOML Toolkit",
   "version": "0.0.1",
-  "description": "A TOML language support extention backed by toml-toolkit.",
+  "description": "A TOML language support extention backed by tombi.",
   "author": {
     "name": "yassun7010",
     "email": "yassun7010@outlook.com"
@@ -19,7 +19,7 @@
     "build-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node16",
     "build": "npm run build-base -- --sourcemap",
     "watch": "npm run build-base -- --sourcemap --watch",
-    "package": "vsce package -o toml-toolkit.vsix",
+    "package": "vsce package -o tombi.vsix",
     "format": "biome format --write ./",
     "format:check": "biome format ./",
     "lint": "biome lint ./",
@@ -46,15 +46,15 @@
     ],
     "commands": [
       {
-        "command": "toml-toolkit.showServerVersion",
+        "command": "tombi.showServerVersion",
         "title": "Show Language Server Version",
-        "category": "toml-toolkit"
+        "category": "tombi"
       }
     ],
     "configuration": {
-      "title": "toml-toolkit",
+      "title": "tombi",
       "properties": {
-        "toml-toolkit.path": {
+        "tombi.path": {
           "description": "Absolute path to toml-lsp executable.",
           "type": ["string", "null"],
           "scope": "resource",

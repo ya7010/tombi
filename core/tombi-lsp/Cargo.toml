@@ -1,12 +1,12 @@
 [package]
-name = "toml-lsp"
+name = "tombi-lsp"
 version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }
 license = { workspace = true }
 
 [[bin]]
-name = "toml-lsp"
+name = "tombi-lsp"
 path = "src/bin/main.rs"
 
 [dependencies]
