@@ -5,10 +5,10 @@
       "path": "."
     },
     {
-      "path": "rust/toml-cli"
+      "path": "rust/tombi-cli"
     },
     {
-      "path": "rust/toml-lsp"
+      "path": "rust/tombi-lsp"
     },
     {
       "path": "crates/syntax"
