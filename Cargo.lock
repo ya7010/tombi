@@ -980,6 +980,8 @@ dependencies = [
  "camino",
  "clap",
  "clap-verbosity-flag",
+ "futures",
+ "futures-util",
  "lsp-server",
  "lsp-types",
  "semver",

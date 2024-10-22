@@ -14,6 +14,8 @@ anyhow = { workspace = true, features = ["backtrace"] }
 camino = { workspace = true }
 clap = { workspace = true, features = ["string"] }
 clap-verbosity-flag = { workspace = true }
+futures = { workspace = true }
+futures-util = { workspace = true }
 lsp-server = "0.7.7"
 lsp-types = "0.97.0"
 semver = { workspace = true }
