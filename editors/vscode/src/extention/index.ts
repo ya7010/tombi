@@ -14,23 +14,36 @@ export const EXTENTION_NAME = "Tombi";
 export const SUPPORT_LANGUAGES = ["toml", "cargoLock"];
 
 export class Extension {
-  private client?: node.LanguageClient;
-
   constructor(
     private context: vscode.ExtensionContext,
+    private client: node.LanguageClient,
     private server: Server,
   ) {
     vscode.languages.registerDocumentFormattingEditProvider("toml", {
-      provideDocumentFormattingEdits(
+      async provideDocumentFormattingEdits(
         document: vscode.TextDocument,
-      ): vscode.TextEdit[] {
-        const firstLine = document.lineAt(0);
-        if (firstLine.text !== "42") {
-          return [
-            vscode.TextEdit.insert(firstLine.range.start, "#############\n"),
-          ];
-        }
-        return [];
+      ): Promise<vscode.TextEdit[]> {
+        log.info("provideDocumentFormattingEdits", document.languageId);
+        const response =
+          (await client.sendRequest(node.DocumentFormattingRequest.type, {
+            textDocument: { uri: document.uri.toString() },
+            options: {
+              tabSize: 4,
+              insertSpaces: true,
+            },
+          })) || [];
+        log.info("response", response);
+        return response.map((edit) => {
+          return new vscode.TextEdit(
+            new vscode.Range(
+              edit.range.start.line,
+              edit.range.start.character,
+              edit.range.end.line,
+              edit.range.end.character,
+            ),
+            edit.newText,
+          );
+        });
       },
     });
     this.registerEvents();
@@ -40,8 +53,14 @@ export class Extension {
   static async activate(context: vscode.ExtensionContext): Promise<Extension> {
     const serverPath = await bootstrap(context, {});
     const server = new Server(serverPath);
+    const client = new node.LanguageClient(
+      EXTENTION_ID,
+      EXTENTION_NAME,
+      serverOptions(server.binPath),
+      clientOptions(),
+    );
 
-    const extenstion = new Extension(context, server);
+    const extenstion = new Extension(context, client, server);
     log.info("extension started");
 
     return extenstion;
@@ -81,15 +100,6 @@ export class Extension {
   }: vscode.TextDocumentChangeEvent): Promise<void> {
     if (!SUPPORT_LANGUAGES.includes(document.languageId)) {
       return;
-    }
-
-    if (this.client) {
-      this.client = new node.LanguageClient(
-        EXTENTION_ID,
-        EXTENTION_NAME,
-        serverOptions(this.server.binPath),
-        clientOptions(),
-      );
     }
   }
 

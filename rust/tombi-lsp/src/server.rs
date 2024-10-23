@@ -40,7 +40,7 @@ fn main_loop(connection: lsp_server::Connection, io_threads: lsp_server::IoThrea
                         break;
                     }
                     Formatting::METHOD => {
-                        tracing::info!("Formatting request: {:?}", request);
+                        Formatting::handle_with(sender.clone(), request);
                     }
                     DocumentSymbolRequest::METHOD => {
                         DocumentSymbolRequest::handle_with(sender.clone(), request)

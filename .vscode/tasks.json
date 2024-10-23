@@ -52,7 +52,6 @@
         "fileLocation": ["relative", "${workspaceFolder}/editors/vscode/"]
       }
     },
-
     {
       "label": "Build Server and Extension",
       "dependsOn": ["Build Server", "Build Extension"],
