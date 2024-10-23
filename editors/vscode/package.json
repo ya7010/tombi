@@ -58,7 +58,8 @@
           "description": "Absolute path to tombi-lsp executable.",
           "type": ["string", "null"],
           "scope": "resource",
-          "default": null
+          "default": null,
+          "pattern": "^.*tombi-lsp(\\.exe)?$"
         }
       }
     }
