@@ -3,12 +3,13 @@
   "displayName": "Tombi",
   "version": "0.0.1",
   "description": "A TOML language support extention backed by Tombi.",
+  "publisher": "yassun7010",
   "author": {
     "name": "yassun7010",
     "email": "yassun7010@outlook.com"
   },
   "license": "MIT",
-  "keywords": ["toml"],
+  "keywords": ["toml", "formatter"],
   "categories": ["Programming Languages", "Formatters", "Linters"],
   "engines": {
     "vscode": "^1.94.0"

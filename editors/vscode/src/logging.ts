@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { inspect } from "node:util";
 
 class Log {
-  private readonly output = vscode.window.createOutputChannel("Tombi Client", {
+  readonly output = vscode.window.createOutputChannel("Tombi Client", {
     log: true,
   });
 

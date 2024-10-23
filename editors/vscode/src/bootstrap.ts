@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as os from "node:os";
 import { spawnSync } from "node:child_process";
 import type * as extention from "./extention";
-import { log } from "./logging";
+import { log } from "@/logging";
 import { LANGUAGE_SERVER_BIN_NAME } from "./lsp/server";
 
 export type Env = {
