@@ -23,5 +23,6 @@
   },
   "[toml]": {
     "editor.tabSize": 2
-  }
+  },
+  "tombi.path": ""
 }

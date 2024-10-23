@@ -48,11 +48,11 @@
       {
         "command": "tombi.showServerVersion",
         "title": "Show Language Server Version",
-        "category": "tombi"
+        "category": "Tombi"
       }
     ],
     "configuration": {
-      "title": "tombi",
+      "title": "Tombi",
       "properties": {
         "tombi.path": {
           "description": "Absolute path to tombi-lsp executable.",
