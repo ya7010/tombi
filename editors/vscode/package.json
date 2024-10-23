@@ -1,8 +1,8 @@
 {
   "name": "vscode-tombi",
-  "displayName": "TOML Toolkit",
+  "displayName": "Tombi",
   "version": "0.0.1",
-  "description": "A TOML language support extention backed by tombi.",
+  "description": "A TOML language support extention backed by Tombi.",
   "author": {
     "name": "yassun7010",
     "email": "yassun7010@outlook.com"
