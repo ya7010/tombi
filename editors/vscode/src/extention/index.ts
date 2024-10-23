@@ -9,7 +9,7 @@ import { bootstrap } from "@/bootstrap";
 export type { Settings };
 
 export const EXTENTION_ID = "tombi";
-export const EXTENTION_NAME = "TOML Toolkit";
+export const EXTENTION_NAME = "Tombi";
 
 export class Extension {
   constructor(

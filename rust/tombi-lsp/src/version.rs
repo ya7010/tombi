@@ -9,7 +9,7 @@ pub struct CommitInfo {
 
 /// Cargo's version.
 pub struct VersionInfo {
-    /// toml-lsp's version, such as "1.57.0", "1.58.0-beta.1", "1.59.0-nightly", etc.
+    /// tombi-lsp's version, such as "1.57.0", "1.58.0-beta.1", "1.59.0-nightly", etc.
     pub version: &'static str,
     /// The release channel we were built for (stable/beta/nightly/dev).
     ///

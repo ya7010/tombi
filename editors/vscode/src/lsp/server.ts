@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { text } from "node:stream/consumers";
 
-export const LANGUAGE_SERVER_BIN_NAME = "toml-lsp";
+export const LANGUAGE_SERVER_BIN_NAME = "tombi-lsp";
 
 export class Server {
   private version?: string;

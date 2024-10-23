@@ -19,5 +19,5 @@ export function clientOptions(
         vscode.workspace.createFileSystemWatcher("**/pyproject.toml"),
       ],
     },
-  };
+  } as languageclient.LanguageClientOptions;
 }

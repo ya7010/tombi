@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "keywords": ["toml"],
-  "categories": ["Programming Languages", "Formatters", "Linters", "Snippets"],
+  "categories": ["Programming Languages", "Formatters", "Linters"],
   "engines": {
     "vscode": "^1.94.0"
   },
@@ -55,7 +55,7 @@
       "title": "tombi",
       "properties": {
         "tombi.path": {
-          "description": "Absolute path to toml-lsp executable.",
+          "description": "Absolute path to tombi-lsp executable.",
           "type": ["string", "null"],
           "scope": "resource",
           "default": null

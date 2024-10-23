@@ -2,12 +2,9 @@ import * as vscode from "vscode";
 import { inspect } from "node:util";
 
 class Log {
-  private readonly output = vscode.window.createOutputChannel(
-    "TOML Language Server",
-    {
-      log: true,
-    },
-  );
+  private readonly output = vscode.window.createOutputChannel("Tombi Client", {
+    log: true,
+  });
 
   trace(...messages: [unknown, ...unknown[]]): void {
     this.output.trace(this.stringify(messages));

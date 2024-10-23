@@ -30,14 +30,14 @@
       "label": "Build Server",
       "group": "build",
       "type": "shell",
-      "command": "cargo build --package toml-lsp",
+      "command": "cargo build --package tombi-lsp",
       "problemMatcher": "$rustc"
     },
     {
       "label": "Build Server (Release)",
       "group": "build",
       "type": "shell",
-      "command": "cargo build --release --package toml-lsp",
+      "command": "cargo build --release --package tombi-lsp",
       "problemMatcher": "$rustc"
     },
     {

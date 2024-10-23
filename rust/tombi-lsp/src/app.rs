@@ -4,7 +4,7 @@ use tracing_subscriber::prelude::*;
 
 /// TOML Language Server
 #[derive(clap::Parser)]
-#[command(name = "toml-lsp", version = crate::version())]
+#[command(name = "tombi-lsp", version = crate::version())]
 pub struct Args {
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
