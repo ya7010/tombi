@@ -1,16 +1,19 @@
-use lsp_types::{DocumentSymbolParams, DocumentSymbolResponse};
+use lsp_types::{request::DocumentSymbolRequest, DocumentSymbolParams, DocumentSymbolResponse};
 
-use crate::server::state::ServerState;
+use super::Handler;
 
 pub fn handle_document_symbol(
-    state: ServerState,
-    params: DocumentSymbolParams,
+    _params: DocumentSymbolParams,
 ) -> anyhow::Result<Option<DocumentSymbolResponse>> {
-    let _p = tracing::info_span!("handle_document_symbol").entered();
-    tracing::info!("params: {:?}", params);
-    if state.hierarchical_symbols() {
-        Ok(Some(DocumentSymbolResponse::Nested(vec![])))
-    } else {
-        Ok(Some(DocumentSymbolResponse::Flat(vec![])))
+    Ok(Some(DocumentSymbolResponse::Flat(vec![])))
+}
+
+impl Handler for DocumentSymbolRequest {
+    type Request = Self;
+
+    fn handle(
+        params: DocumentSymbolParams,
+    ) -> Result<Option<DocumentSymbolResponse>, anyhow::Error> {
+        handle_document_symbol(params)
     }
 }

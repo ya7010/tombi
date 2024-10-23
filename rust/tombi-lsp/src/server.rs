@@ -2,12 +2,13 @@ mod handler;
 mod router;
 mod state;
 
+use handler::Handler;
 use lsp_server::Message;
 use lsp_types::request::DocumentSymbolRequest;
+use lsp_types::request::Initialize;
 use lsp_types::request::Request;
+use lsp_types::request::Shutdown;
 use state::ServerState;
-
-use handler::handle_document_symbol;
 
 use crate::{from_json, lsp};
 
@@ -76,54 +77,31 @@ pub fn run() -> Result<(), anyhow::Error> {
 
     // If the io_threads have an error, there's usually an error on the main
     // loop too because the channels are closed. Ensure we report both errors.
-    match (main_loop(connection, state), io_threads.join()) {
-        (Err(loop_e), Err(join_e)) => anyhow::bail!("{loop_e}\n{join_e}"),
-        (Ok(_), Err(join_e)) => anyhow::bail!("{join_e}"),
-        (Err(loop_e), Ok(_)) => anyhow::bail!("{loop_e}"),
-        (Ok(_), Ok(_)) => {}
-    }
+    main_loop(connection, state);
 
     tracing::info!("server did shut down");
 
     Ok(())
 }
 
-fn main_loop(connection: lsp_server::Connection, state: ServerState) -> Result<(), anyhow::Error> {
-    for msg in &connection.receiver {
+fn main_loop(connection: lsp_server::Connection, state: ServerState) {
+    let receiver = connection.receiver;
+    let sender = connection.sender;
+    for msg in receiver {
         match msg {
             Message::Request(request) => {
                 tracing::debug!("request: {:?}", request);
-                if connection.handle_shutdown(&request)? {
-                    break;
-                }
-
-                match request.clone().extract(DocumentSymbolRequest::METHOD) {
-                    Ok((id, params)) => {
-                        tracing::debug!("match request #{id}: {params:?}");
-                        match handle_document_symbol(state.clone(), params) {
-                            Ok(Some(response)) => {
-                                connection
-                                    .sender
-                                    .send(
-                                        lsp_server::Request::new(
-                                            id,
-                                            DocumentSymbolRequest::METHOD.to_string(),
-                                            response,
-                                        )
-                                        .into(),
-                                    )
-                                    .unwrap();
-                            }
-                            Ok(None) => {
-                                tracing::info!("No response for request: {:?}", &request);
-                            }
-                            Err(err) => {
-                                tracing::error!("handler error: {:?}", err);
-                            }
-                        };
+                match request.method.as_str() {
+                    Initialize::METHOD => Initialize::handle_with(sender.clone(), request),
+                    Shutdown::METHOD => {
+                        Shutdown::handle_with(sender.clone(), request);
+                        break;
                     }
-                    Err(err) => {
-                        tracing::error!("ExtractError: {:?}", err);
+                    DocumentSymbolRequest::METHOD => {
+                        DocumentSymbolRequest::handle_with(sender.clone(), request)
+                    }
+                    _ => {
+                        tracing::debug!("No handler for request: {:?}", &request);
                     }
                 }
             }
@@ -137,6 +115,4 @@ fn main_loop(connection: lsp_server::Connection, state: ServerState) -> Result<(
             }
         }
     }
-
-    Ok(())
 }
