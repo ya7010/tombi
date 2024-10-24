@@ -9,13 +9,11 @@ use lsp_types::request::Formatting;
 use lsp_types::request::Initialize;
 use lsp_types::request::Request;
 use lsp_types::request::Shutdown;
-use lsp_types::DocumentChanges;
-use state::ServerState;
 
-use crate::{from_json, lsp};
+use crate::version::version;
 
 pub fn run() -> Result<(), anyhow::Error> {
-    tracing::info!("server version {} will start", 1);
+    tracing::info!("Tombi LSP Server Version \"{}\" will start.", version());
 
     let (connection, io_threads) = lsp_server::Connection::stdio();
 
@@ -34,21 +32,27 @@ fn main_loop(connection: lsp_server::Connection, io_threads: lsp_server::IoThrea
             Message::Request(request) => {
                 tracing::debug!("request: {:?}", request);
                 match request.method.as_str() {
-                    Initialize::METHOD => Initialize::handle_with(sender.clone(), request),
+                    Initialize::METHOD => sender.send(Initialize::handle_with(request)),
                     Shutdown::METHOD => {
-                        Shutdown::handle_with(sender.clone(), request);
+                        sender
+                            .send(Shutdown::handle_with(request))
+                            .map_err(|e| {
+                                tracing::error!("Failed to send shutdown response: {:?}", e)
+                            })
+                            .ok();
                         break;
                     }
-                    Formatting::METHOD => {
-                        Formatting::handle_with(sender.clone(), request);
-                    }
+                    Formatting::METHOD => sender.send(Formatting::handle_with(request)),
                     DocumentSymbolRequest::METHOD => {
-                        DocumentSymbolRequest::handle_with(sender.clone(), request)
+                        sender.send(DocumentSymbolRequest::handle_with(request))
                     }
                     _ => {
                         tracing::debug!("No handler for request: {:?}", &request);
+                        Ok(())
                     }
                 }
+                .map_err(|e| tracing::error!("Failed to send shutdown response: {:?}", e))
+                .ok();
             }
             Message::Notification(notification) => {
                 tracing::debug!("notification: {:?}", notification);
