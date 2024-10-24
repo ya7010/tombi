@@ -32,7 +32,12 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
         .with(tracing_subscriber::EnvFilter::from(
             args.verbose.log_level_filter().to_string(),
         ))
-        .with(tracing_subscriber::fmt::layer().pretty().without_time())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .pretty()
+                .with_writer(std::io::stderr)
+                .without_time(),
+        )
         .init();
 
     crate::server::run()
