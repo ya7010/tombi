@@ -29,7 +29,7 @@ where
 
                 FileInput::Files(
                     glob::glob(grob_pattern)
-                        .unwrap() // No Probrem grob pattern is const.
+                        .unwrap() // No Probrem. grob pattern is const.
                         .filter_map(|x| Result::<_, crate::Error>::Ok(x.ok()).transpose())
                         .collect::<Vec<_>>(),
                 )
