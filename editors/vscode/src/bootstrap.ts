@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as os from "node:os";
-import { spawnSync } from "node:child_process";
 import type * as extention from "./extention";
 import { log } from "@/logging";
 import { LANGUAGE_SERVER_BIN_NAME } from "./lsp/server";
@@ -62,21 +61,6 @@ export async function getServerPath(
   return undefined;
 }
 
-export function isValidExecutable(path: string, extraEnv: Env): boolean {
-  log.debug("Checking availability of a binary at", path);
-
-  const res = spawnSync(path, ["--version"], {
-    encoding: "utf8",
-    env: { ...process.env, ...extraEnv },
-  });
-
-  if (res.error) {
-    log.warn(path, "--version:", res);
-  } else {
-    log.info(path, "--version:", res);
-  }
-  return res.status === 0;
-}
 
 async function fileExists(uri: vscode.Uri) {
   return await vscode.workspace.fs.stat(uri).then(
