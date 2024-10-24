@@ -1,4 +1,6 @@
 {
   "recommendations": ["biomejs.biome", "rust-lang.rust-analyzer"],
-  "unwantedRecommendations": ["tamasfe.even-better-toml"]
+  "unwantedRecommendations": [
+    // "tamasfe.even-better-toml",
+  ]
 }
