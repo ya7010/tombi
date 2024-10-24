@@ -25,10 +25,8 @@ where
     fn from(files: &[T]) -> Self {
         match files.len() {
             0 => {
-                let grob_pattern = "**/*.toml";
-
                 FileInput::Files(
-                    glob::glob(grob_pattern)
+                    glob::glob("**/*.toml")
                         .unwrap() // No Probrem. grob pattern is const.
                         .filter_map(|x| Result::<_, crate::Error>::Ok(x.ok()).transpose())
                         .collect::<Vec<_>>(),
