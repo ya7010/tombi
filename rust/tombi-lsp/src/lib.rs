@@ -1,5 +1,4 @@
 pub mod app;
-mod lsp;
 mod server;
 mod version;
 
