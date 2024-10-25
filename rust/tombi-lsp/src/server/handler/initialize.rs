@@ -1,9 +1,8 @@
-use lsp_types::request::Initialize;
 use lsp_types::{
     CallHierarchyServerCapability, ClientInfo, CodeLensOptions, CompletionOptions,
     CompletionOptionsCompletionItem, DeclarationCapability, FoldingRangeProviderCapability,
     HoverProviderCapability, ImplementationProviderCapability, InlayHintOptions,
-    InlayHintServerCapabilities, OneOf, PositionEncodingKind, RenameOptions, SaveOptions,
+    InlayHintServerCapabilities, OneOf, RenameOptions, SaveOptions,
     SelectionRangeProviderCapability, SemanticTokensFullOptions, SemanticTokensLegend,
     SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
     TextDocumentSyncKind, TextDocumentSyncOptions, TypeDefinitionProviderCapability,
@@ -11,9 +10,10 @@ use lsp_types::{
 };
 use lsp_types::{InitializeParams, InitializeResult};
 
-use super::Handler;
+use crate::server::state::{ServerState, State};
 
 pub fn handle_initialize(
+    state: State<ServerState>,
     InitializeParams {
         capabilities: client_capabilities,
         client_info,
@@ -34,14 +34,6 @@ pub fn handle_initialize(
         }),
         capabilities: server_capabilities(&client_capabilities),
     })
-}
-
-impl Handler for Initialize {
-    type Request = Self;
-
-    fn handle(params: InitializeParams) -> Result<InitializeResult, anyhow::Error> {
-        handle_initialize(params)
-    }
 }
 
 pub fn server_capabilities(
