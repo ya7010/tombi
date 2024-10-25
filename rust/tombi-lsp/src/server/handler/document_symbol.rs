@@ -156,12 +156,7 @@ impl IntoKeysSymbols for ast::Keys {
                     detail: None,
                 };
 
-                let mut symbols = vec![symbol];
-                if let Some(children) = children {
-                    symbols.extend(children);
-                }
-
-                symbols
+                vec![symbol]
             }
             _ => vec![],
         }
