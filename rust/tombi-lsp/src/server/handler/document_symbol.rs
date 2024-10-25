@@ -80,7 +80,7 @@ impl IntoSymbols for ast::Table {
         };
 
         self.header()
-            .map(|header| header.into_keys_symbols(source, SymbolKind::STRUCT, childrens))
+            .map(|header| header.into_keys_symbols(source, SymbolKind::OBJECT, childrens))
             .unwrap_or_default()
     }
 }
@@ -100,7 +100,7 @@ impl IntoSymbols for ast::ArrayOfTable {
         };
 
         self.header()
-            .map(|header| header.into_keys_symbols(source, SymbolKind::STRUCT, childrens))
+            .map(|header| header.into_keys_symbols(source, SymbolKind::OBJECT, childrens))
             .unwrap_or_default()
     }
 }
@@ -123,17 +123,15 @@ impl IntoKeysSymbols for ast::Keys {
         kind: tower_lsp::lsp_types::SymbolKind,
         children: Option<Vec<DocumentSymbol>>,
     ) -> Vec<DocumentSymbol> {
-        let keys = self.keys().into_iter().collect::<Vec<_>>();
-        let name = keys
-            .iter()
-            .map(|key| key.syntax().text().to_string())
+        self.keys()
+            .into_iter()
             .collect::<Vec<_>>()
-            .join(".");
-        match (keys.first(), keys.last()) {
-            (Some(first), Some(last)) => {
+            .into_iter()
+            .rev()
+            .fold(children.unwrap_or_default(), |children, key| {
                 let start_pos =
-                    TextPosition::from_source(source, first.syntax().text_range().start());
-                let end_pos = TextPosition::from_source(source, last.syntax().text_range().end());
+                    TextPosition::from_source(source, key.syntax().text_range().start());
+                let end_pos = TextPosition::from_source(source, key.syntax().text_range().end());
                 let range = Range {
                     start: Position {
                         line: start_pos.line(),
@@ -144,22 +142,23 @@ impl IntoKeysSymbols for ast::Keys {
                         character: end_pos.column(),
                     },
                 };
-                #[allow(deprecated)]
-                let symbol = DocumentSymbol {
-                    name,
-                    kind,
-                    tags: None,
-                    range,
-                    selection_range: range,
-                    children: children.clone(),
-                    deprecated: None,
-                    detail: None,
-                };
 
-                vec![symbol]
-            }
-            _ => vec![],
-        }
+                let symbols = vec![
+                    #[allow(deprecated)]
+                    DocumentSymbol {
+                        name: key.syntax().text().to_string(),
+                        kind,
+                        tags: None,
+                        range,
+                        selection_range: range,
+                        children: Some(children.clone()),
+                        deprecated: None,
+                        detail: None,
+                    },
+                ];
+
+                symbols
+            })
     }
 }
 
