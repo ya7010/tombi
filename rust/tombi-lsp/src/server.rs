@@ -1,5 +1,4 @@
 mod handler;
-mod router;
 mod state;
 
 use handler::Handler;
@@ -9,8 +8,6 @@ use lsp_types::request::Formatting;
 use lsp_types::request::Initialize;
 use lsp_types::request::Request;
 use lsp_types::request::Shutdown;
-use lsp_types::OneOf;
-use lsp_types::ServerCapabilities;
 
 use crate::version::version;
 
@@ -18,21 +15,7 @@ pub fn run() -> Result<(), anyhow::Error> {
     tracing::info!("Tombi LSP Server Version \"{}\" will start.", version());
 
     let (connection, io_threads) = lsp_server::Connection::stdio();
-    let server_capabilities = serde_json::to_value(&ServerCapabilities {
-        definition_provider: Some(OneOf::Left(true)),
-        ..Default::default()
-    })
-    .unwrap();
-    let initialization_params = match connection.initialize(server_capabilities) {
-        Ok(it) => it,
-        Err(e) => {
-            if e.channel_is_disconnected() {
-                io_threads.join()?;
-            }
-            return Err(e.into());
-        }
-    };
-    dbg!(&initialization_params);
+
     main_loop(connection);
 
     io_threads.join()?;

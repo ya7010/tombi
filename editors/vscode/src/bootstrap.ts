@@ -32,7 +32,7 @@ export async function getServerPath(
 
   const explicitPath =
     // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-    process.env["__TOML_LSP_SERVER_DEBUG"] ?? settings.server?.path;
+    process.env["__TOMBI_LSP_SERVER_DEBUG"] ?? settings.server?.path;
 
   if (explicitPath) {
     if (explicitPath.startsWith("~/")) {
@@ -60,7 +60,6 @@ export async function getServerPath(
 
   return undefined;
 }
-
 
 async function fileExists(uri: vscode.Uri) {
   return await vscode.workspace.fs.stat(uri).then(

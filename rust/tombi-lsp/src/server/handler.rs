@@ -31,6 +31,7 @@ pub trait Handler {
                 return message;
             }
         };
+
         match Self::handle(request_params) {
             Ok(result) => {
                 let response = lsp_server::Response::new_ok(request_id, result);

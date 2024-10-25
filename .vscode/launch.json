@@ -19,7 +19,7 @@
       "preLaunchTask": "Build Server and Extension",
       "skipFiles": ["<node_internals>/**/*.js"],
       "env": {
-        "__TOML_LSP_SERVER_DEBUG": "${workspaceFolder}/target/debug/tombi-lsp"
+        "__TOMBI_LSP_SERVER_DEBUG": "${workspaceFolder}/target/debug/tombi-lsp"
       }
     }
   ]

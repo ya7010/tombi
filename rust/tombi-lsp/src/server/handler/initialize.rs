@@ -48,7 +48,7 @@ pub fn server_capabilities(
     client_capabilities: &lsp_types::ClientCapabilities,
 ) -> ServerCapabilities {
     ServerCapabilities {
-        position_encoding: Some(PositionEncodingKind::UTF8),
+        position_encoding: None,
         text_document_sync: Some(TextDocumentSyncCapability::Options(
             TextDocumentSyncOptions {
                 open_close: Some(true),

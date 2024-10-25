@@ -58,6 +58,8 @@ export class Extension {
       EXTENTION_NAME,
       serverOptions(server.binPath),
       clientOptions(),
+      // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+      process.env["__TOMBI_LSP_SERVER_DEBUG"] !== undefined,
     );
 
     const extenstion = new Extension(context, client, server);

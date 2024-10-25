@@ -18,18 +18,6 @@ export function clientOptions(
         vscode.workspace.createFileSystemWatcher("**/pyproject.toml"),
       ],
     },
-    middleware: {
-      async provideDocumentFormattingEdits(
-        document,
-      ): Promise<vscode.TextEdit[]> {
-        return [
-          vscode.TextEdit.insert(
-            new vscode.Position(10, 0),
-            "This is a formatting test",
-          ),
-        ];
-      },
-    },
   } as languageclient.LanguageClientOptions;
 
   return options;
