@@ -1,25 +1,22 @@
-use lsp_types::{
-    CallHierarchyServerCapability, ClientInfo, CodeLensOptions, CompletionOptions,
-    CompletionOptionsCompletionItem, DeclarationCapability, FoldingRangeProviderCapability,
-    HoverProviderCapability, ImplementationProviderCapability, InlayHintOptions,
-    InlayHintServerCapabilities, OneOf, RenameOptions, SaveOptions,
-    SelectionRangeProviderCapability, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, TypeDefinitionProviderCapability,
-    WorkDoneProgressOptions, WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
+use tower_lsp::lsp_types::{
+    CallHierarchyServerCapability, ClientCapabilities, ClientInfo, CodeLensOptions,
+    CompletionOptions, CompletionOptionsCompletionItem, DeclarationCapability,
+    FoldingRangeProviderCapability, HoverProviderCapability, ImplementationProviderCapability,
+    InitializeParams, InitializeResult, InlayHintOptions, InlayHintServerCapabilities, OneOf,
+    RenameOptions, SaveOptions, SelectionRangeProviderCapability, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TypeDefinitionProviderCapability, WorkDoneProgressOptions, WorkspaceFoldersServerCapabilities,
+    WorkspaceServerCapabilities,
 };
-use lsp_types::{InitializeParams, InitializeResult};
-
-use crate::server::state::{ServerState, State};
 
 pub fn handle_initialize(
-    state: State<ServerState>,
     InitializeParams {
         capabilities: client_capabilities,
         client_info,
         ..
     }: InitializeParams,
-) -> Result<InitializeResult, anyhow::Error> {
+) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
     let _p = tracing::debug_span!("handle_initialize").entered();
 
     if let Some(ClientInfo { name, version }) = client_info {
@@ -36,92 +33,90 @@ pub fn handle_initialize(
     })
 }
 
-pub fn server_capabilities(
-    client_capabilities: &lsp_types::ClientCapabilities,
-) -> ServerCapabilities {
+pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerCapabilities {
     ServerCapabilities {
         position_encoding: None,
-        text_document_sync: Some(TextDocumentSyncCapability::Options(
-            TextDocumentSyncOptions {
-                open_close: Some(true),
-                change: Some(TextDocumentSyncKind::INCREMENTAL),
-                will_save: None,
-                will_save_wait_until: None,
-                save: Some(SaveOptions::default().into()),
-            },
-        )),
-        hover_provider: Some(HoverProviderCapability::Simple(true)),
-        completion_provider: Some(CompletionOptions {
-            trigger_characters: Some(vec![
-                ".".into(),
-                "=".into(),
-                "[".into(),
-                "{".into(),
-                ",".into(),
-                "'".into(),
-                "\"".into(),
-            ]),
-            completion_item: Some(CompletionOptionsCompletionItem {
-                label_details_support: (|| -> _ {
-                    client_capabilities
-                        .text_document
-                        .as_ref()?
-                        .completion
-                        .as_ref()?
-                        .completion_item
-                        .as_ref()?
-                        .label_details_support
-                })(),
-            }),
-            ..Default::default()
-        }),
-        declaration_provider: Some(DeclarationCapability::Simple(true)),
-        definition_provider: Some(OneOf::Left(true)),
-        type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
-        implementation_provider: Some(ImplementationProviderCapability::Simple(true)),
-        references_provider: Some(OneOf::Left(true)),
-        document_highlight_provider: Some(OneOf::Left(true)),
+        // text_document_sync: Some(TextDocumentSyncCapability::Options(
+        //     TextDocumentSyncOptions {
+        //         open_close: Some(true),
+        //         change: Some(TextDocumentSyncKind::INCREMENTAL),
+        //         will_save: None,
+        //         will_save_wait_until: None,
+        //         save: Some(SaveOptions::default().into()),
+        //     },
+        // )),
+        // hover_provider: Some(HoverProviderCapability::Simple(true)),
+        // completion_provider: Some(CompletionOptions {
+        //     trigger_characters: Some(vec![
+        //         ".".into(),
+        //         "=".into(),
+        //         "[".into(),
+        //         "{".into(),
+        //         ",".into(),
+        //         "'".into(),
+        //         "\"".into(),
+        //     ]),
+        //     completion_item: Some(CompletionOptionsCompletionItem {
+        //         label_details_support: (|| -> _ {
+        //             client_capabilities
+        //                 .text_document
+        //                 .as_ref()?
+        //                 .completion
+        //                 .as_ref()?
+        //                 .completion_item
+        //                 .as_ref()?
+        //                 .label_details_support
+        //         })(),
+        //     }),
+        //     ..Default::default()
+        // }),
+        // declaration_provider: Some(DeclarationCapability::Simple(true)),
+        // definition_provider: Some(OneOf::Left(true)),
+        // type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
+        // implementation_provider: Some(ImplementationProviderCapability::Simple(true)),
+        // references_provider: Some(OneOf::Left(true)),
+        // document_highlight_provider: Some(OneOf::Left(true)),
         document_symbol_provider: Some(OneOf::Left(true)),
-        workspace_symbol_provider: Some(OneOf::Left(true)),
-        code_lens_provider: Some(CodeLensOptions {
-            resolve_provider: Some(true),
-        }),
+        // workspace_symbol_provider: Some(OneOf::Left(true)),
+        // code_lens_provider: Some(CodeLensOptions {
+        //     resolve_provider: Some(true),
+        // }),
         document_formatting_provider: Some(OneOf::Left(true)),
-        selection_range_provider: Some(SelectionRangeProviderCapability::Simple(true)),
-        folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
-        rename_provider: Some(OneOf::Right(RenameOptions {
-            prepare_provider: Some(true),
-            work_done_progress_options: WorkDoneProgressOptions {
-                work_done_progress: None,
-            },
-        })),
-        workspace: Some(WorkspaceServerCapabilities {
-            workspace_folders: Some(WorkspaceFoldersServerCapabilities {
-                supported: Some(true),
-                change_notifications: Some(OneOf::Left(true)),
-            }),
-            file_operations: None,
-        }),
-        call_hierarchy_provider: Some(CallHierarchyServerCapability::Simple(true)),
-        semantic_tokens_provider: Some(
-            SemanticTokensOptions {
-                legend: SemanticTokensLegend {
-                    token_types: vec![],
-                    token_modifiers: vec![],
-                },
+        // selection_range_provider: Some(SelectionRangeProviderCapability::Simple(true)),
+        // folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
+        // rename_provider: Some(OneOf::Right(RenameOptions {
+        //     prepare_provider: Some(true),
+        //     work_done_progress_options: WorkDoneProgressOptions {
+        //         work_done_progress: None,
+        //     },
+        // })),
+        // workspace: Some(WorkspaceServerCapabilities {
+        //     workspace_folders: Some(WorkspaceFoldersServerCapabilities {
+        //         supported: Some(true),
+        //         change_notifications: Some(OneOf::Left(true)),
+        //     }),
+        //     file_operations: None,
+        // }),
+        // call_hierarchy_provider: Some(CallHierarchyServerCapability::Simple(true)),
+        // semantic_tokens_provider: Some(
+        //     SemanticTokensOptions {
+        //         legend: SemanticTokensLegend {
+        //             token_types: vec![],
+        //             token_modifiers: vec![],
+        //         },
 
-                full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
-                range: Some(true),
-                work_done_progress_options: Default::default(),
-            }
-            .into(),
-        ),
-        inlay_hint_provider: Some(OneOf::Right(InlayHintServerCapabilities::Options(
-            InlayHintOptions {
-                work_done_progress_options: Default::default(),
-                resolve_provider: Some(true),
-            },
-        ))),
+        //         full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
+        //         range: Some(true),
+        //         work_done_progress_options: Default::default(),
+        //     }
+        //     .into(),
+        // ),
+        // inlay_hint_provider: Some(OneOf::Right(InlayHintServerCapabilities::Options(
+        //     InlayHintOptions {
+        //         work_done_progress_options: Default::default(),
+        //         resolve_provider: Some(true),
+        //     },
+        // ))),
         ..Default::default()
     }
 }

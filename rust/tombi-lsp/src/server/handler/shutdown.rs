@@ -1,6 +1,4 @@
-use crate::server::state::{ServerState, State};
-
-pub fn handle_shutdown(_state: State<ServerState>, _params: ()) -> Result<(), anyhow::Error> {
+pub fn handle_shutdown() -> Result<(), tower_lsp::jsonrpc::Error> {
     tracing::info!("Server shutting down");
 
     Ok(())

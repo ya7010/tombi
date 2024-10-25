@@ -40,5 +40,8 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
         )
         .init();
 
-    crate::server::run()
+    tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()?
+        .block_on(crate::server::run())
 }

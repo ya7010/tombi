@@ -1,11 +1,8 @@
-use lsp_types::{request::Formatting, DocumentFormattingParams, Position, Range, TextEdit};
+use tower_lsp::lsp_types::{DocumentFormattingParams, Position, Range, TextEdit};
 
-use crate::server::state::{ServerState, State};
-
-pub fn handle_formatting(
-    state: State<ServerState>,
+pub async fn handle_formatting(
     _params: DocumentFormattingParams,
-) -> Result<Option<Vec<TextEdit>>, anyhow::Error> {
+) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
     Ok(Some(vec![TextEdit {
         range: Range {
             start: Position {

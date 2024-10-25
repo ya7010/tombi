@@ -1,10 +1,10 @@
-use lsp_types::{DocumentSymbolParams, DocumentSymbolResponse};
+use tower_lsp::lsp_types::{DocumentSymbolParams, DocumentSymbolResponse};
 
-use crate::server::state::{ServerState, State};
+use crate::server::backend::Backend;
 
-pub fn handle_document_symbol(
-    state: State<ServerState>,
+pub async fn handle_document_symbol(
+    backend: &Backend,
     _params: DocumentSymbolParams,
-) -> anyhow::Result<Option<DocumentSymbolResponse>> {
+) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     Ok(Some(DocumentSymbolResponse::Flat(vec![])))
 }
