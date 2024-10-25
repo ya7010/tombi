@@ -55,7 +55,7 @@ export class Extension {
     const server = new Server(serverPath);
     const client = new node.LanguageClient(
       EXTENTION_ID,
-      EXTENTION_NAME,
+      `${EXTENTION_NAME} LSP`,
       serverOptions(server.binPath),
       clientOptions(),
       // biome-ignore lint/complexity/useLiteralKeys: <explanation>

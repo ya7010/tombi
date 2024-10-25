@@ -1,6 +1,6 @@
 use dashmap::DashMap;
 use tower_lsp::{
-    lsp_types::{InitializeParams, InitializeResult},
+    lsp_types::{InitializeParams, InitializeResult, Url},
     LanguageServer,
 };
 
@@ -11,7 +11,7 @@ use super::handler::{
 #[derive(Debug)]
 pub struct Backend {
     pub client: tower_lsp::Client,
-    pub file_map: DashMap<String, String>,
+    pub file_map: DashMap<Url, String>,
 }
 
 #[tower_lsp::async_trait]
@@ -39,6 +39,6 @@ impl LanguageServer for Backend {
         &self,
         params: tower_lsp::lsp_types::DocumentFormattingParams,
     ) -> Result<Option<Vec<tower_lsp::lsp_types::TextEdit>>, tower_lsp::jsonrpc::Error> {
-        handle_formatting(params).await
+        handle_formatting(self, params).await
     }
 }

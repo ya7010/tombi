@@ -1,5 +1,6 @@
 pub mod app;
 mod server;
+mod toml;
 mod version;
 
 use serde::de::DeserializeOwned;

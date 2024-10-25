@@ -297,7 +297,8 @@ dependencies = [
  "clap-verbosity-flag",
  "nu-ansi-term 0.50.1",
  "serde",
- "text-size 0.0.0",
+ "text-position",
+ "text-size",
  "thiserror",
  "tracing",
  "tracing-subscriber",
@@ -355,7 +356,7 @@ dependencies = [
  "schemars",
  "serde",
  "syntax",
- "text-size 0.0.0",
+ "text-size",
  "thiserror",
  "tracing",
  "tracing-subscriber",
@@ -497,7 +498,7 @@ name = "ide"
 version = "0.0.1"
 dependencies = [
  "ast",
- "text-size 0.0.0",
+ "text-size",
  "tracing",
 ]
 
@@ -841,7 +842,7 @@ dependencies = [
  "countme",
  "hashbrown 0.14.5",
  "rustc-hash",
- "text-size 1.1.1",
+ "text-size",
 ]
 
 [[package]]
@@ -1039,15 +1040,16 @@ dependencies = [
  "logos",
  "rowan",
  "rstest",
- "text-size 0.0.0",
+ "text-size",
  "thiserror",
 ]
 
 [[package]]
-name = "text-size"
+name = "text-position"
 version = "0.0.0"
 dependencies = [
  "serde",
+ "text-size",
 ]
 
 [[package]]
@@ -1144,6 +1146,7 @@ name = "tombi-lsp"
 version = "0.0.1"
 dependencies = [
  "anyhow",
+ "ast",
  "camino",
  "clap",
  "clap-verbosity-flag",
@@ -1151,9 +1154,12 @@ dependencies = [
  "dashmap 6.1.0",
  "futures",
  "futures-util",
+ "parser",
  "semver",
  "serde",
  "serde_json",
+ "text-position",
+ "text-size",
  "thiserror",
  "tokio",
  "tower-lsp",

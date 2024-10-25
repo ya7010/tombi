@@ -1,4 +1,4 @@
-use crate::TextSize;
+use text_size::TextSize;
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TextPosition {
@@ -43,5 +43,11 @@ impl TextPosition {
     #[inline]
     pub fn column(&self) -> u32 {
         self.column
+    }
+}
+
+impl From<TextSize> for TextPosition {
+    fn from(offset: TextSize) -> Self {
+        Self::new(0, offset.into())
     }
 }

@@ -1,13 +1,6 @@
 use tower_lsp::lsp_types::{
-    CallHierarchyServerCapability, ClientCapabilities, ClientInfo, CodeLensOptions,
-    CompletionOptions, CompletionOptionsCompletionItem, DeclarationCapability,
-    FoldingRangeProviderCapability, HoverProviderCapability, ImplementationProviderCapability,
-    InitializeParams, InitializeResult, InlayHintOptions, InlayHintServerCapabilities, OneOf,
-    RenameOptions, SaveOptions, SelectionRangeProviderCapability, SemanticTokensFullOptions,
-    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TypeDefinitionProviderCapability, WorkDoneProgressOptions, WorkspaceFoldersServerCapabilities,
-    WorkspaceServerCapabilities,
+    ClientCapabilities, ClientInfo, InitializeParams, InitializeResult, OneOf, ServerCapabilities,
+    ServerInfo,
 };
 
 pub fn handle_initialize(
