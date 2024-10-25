@@ -2,9 +2,10 @@ use crate::{server::backend::Backend, toml};
 use ast::AstNode;
 use text_position::TextPosition;
 use tower_lsp::lsp_types::{
-    lsif::Document, DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType,
-    Position, Range, SymbolKind, Url,
+    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType, Position, Range,
+    SymbolKind,
 };
+
 pub async fn handle_document_symbol(
     backend: &Backend,
     params: DocumentSymbolParams,
@@ -110,11 +111,17 @@ impl IntoKeysSymbols for ast::Keys {
                     tags: None,
                     range,
                     selection_range: range,
-                    children,
+                    children: children.clone(),
                     deprecated: None,
                     detail: None,
                 };
-                vec![symbol]
+
+                let mut symbols = vec![symbol];
+                if let Some(children) = children {
+                    symbols.extend(children);
+                }
+
+                symbols
             }
             _ => vec![],
         }
@@ -129,8 +136,20 @@ impl IntoSymbols for ast::Value {
 
 impl IntoSymbols for ast::Table {
     fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
+        let childlens = self
+            .key_values()
+            .map(|kv| kv.into_symbols(source))
+            .flatten()
+            .collect::<Vec<_>>();
+
+        let childrens = if childlens.is_empty() {
+            None
+        } else {
+            Some(childlens)
+        };
+
         self.header()
-            .map(|header| header.into_keys_symbols(source, SymbolKind::STRUCT, None))
+            .map(|header| header.into_keys_symbols(source, SymbolKind::STRUCT, childrens))
             .unwrap_or_default()
     }
 }

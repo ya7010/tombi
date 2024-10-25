@@ -2,3 +2,9 @@
 [aaaa.bbb]
 key1 = 1
 key2 = "2"
+
+[aaaa.ccc]
+key1 = 11
+key2 = "22"
+
+[bbb]
