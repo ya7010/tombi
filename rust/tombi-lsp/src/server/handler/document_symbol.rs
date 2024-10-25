@@ -60,7 +60,7 @@ impl IntoSymbols for ast::RootItem {
         match self {
             Self::KeyValue(kv) => kv.into_symbols(source),
             Self::Table(table) => table.into_symbols(source),
-            _ => vec![],
+            Self::ArrayOfTable(array_of_table) => array_of_table.into_symbols(source),
         }
     }
 }
@@ -129,12 +129,67 @@ impl IntoKeysSymbols for ast::Keys {
 }
 
 impl IntoSymbols for ast::Value {
-    fn into_symbols(self, _source: &str) -> Vec<DocumentSymbol> {
-        vec![]
+    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
+        match self {
+            Self::BasicString(_)
+            | Self::LiteralString(_)
+            | Self::MultiLineBasicString(_)
+            | Self::MultiLineLiteralString(_)
+            | Self::IntegerBin(_)
+            | Self::IntegerOct(_)
+            | Self::IntegerDec(_)
+            | Self::IntegerHex(_)
+            | Self::Float(_)
+            | Self::Boolean(_)
+            | Self::OffsetDateTime(_)
+            | Self::LocalDateTime(_)
+            | Self::LocalDate(_)
+            | Self::LocalTime(_) => vec![],
+            Self::Array(array) => array.into_symbols(source),
+            Self::InlineTable(inline_table) => inline_table.into_symbols(source),
+        }
+    }
+}
+
+impl IntoSymbols for ast::Array {
+    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
+        self.elements()
+            .map(|element| element.into_symbols(source))
+            .flatten()
+            .collect()
+    }
+}
+
+impl IntoSymbols for ast::InlineTable {
+    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
+        self.elements()
+            .map(|element| element.into_symbols(source))
+            .flatten()
+            .collect()
     }
 }
 
 impl IntoSymbols for ast::Table {
+    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
+        let childlens = self
+            .key_values()
+            .map(|kv| kv.into_symbols(source))
+            .flatten()
+            .collect::<Vec<_>>();
+
+        let childrens = if childlens.is_empty() {
+            None
+        } else {
+            Some(childlens)
+        };
+
+        self.header()
+            .map(|header| header.into_keys_symbols(source, SymbolKind::STRUCT, childrens))
+            .unwrap_or_default()
+    }
+}
+
+impl IntoSymbols for ast::ArrayOfTable {
     fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
         let childlens = self
             .key_values()
