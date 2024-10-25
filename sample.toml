@@ -2,9 +2,13 @@
 [aaaa.bbb]
 key1 = 1
 key2 = "2"
+array1 = [
+  { key3 = 12, key4 = 2024-01-01 }
+]
 
 [aaaa.ccc]
 key1 = 11
 key2 = "22"
 
 [bbb]
+key5 = true
