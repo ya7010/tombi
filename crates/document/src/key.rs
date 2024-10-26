@@ -13,6 +13,14 @@ impl Key {
             range: Range::from_source(source, key),
         }
     }
+
+    pub fn value(&self) -> &str {
+        &self.value
+    }
+
+    pub fn range(&self) -> Range {
+        self.range
+    }
 }
 
 impl std::fmt::Display for Key {

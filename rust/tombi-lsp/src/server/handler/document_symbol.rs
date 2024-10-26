@@ -1,9 +1,11 @@
 use crate::{server::backend::Backend, toml};
 use ast::AstNode;
+use document::{Parse, Value};
 use text_position::TextPosition;
+use text_size::TextRange;
 use tower_lsp::lsp_types::{
-    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType, Position, Range,
-    SymbolKind,
+    lsif::Document, DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType,
+    Position, Range, SymbolKind,
 };
 
 pub async fn handle_document_symbol(
@@ -13,258 +15,165 @@ pub async fn handle_document_symbol(
     let source = toml::try_load(&params.text_document.uri)?;
 
     let p = parser::parse(&source);
-    let symbol_infos = ast::Root::cast(p.into_syntax_node())
-        .map(|root| root.into_symbols(&source))
-        .unwrap_or_default();
+    let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
+        return Ok(None);
+    };
+
+    let pp = root.parse(&source);
+    let symbols = create_symbols(pp.document());
 
     backend
         .client
-        .log_message(MessageType::INFO, format!("Symbols: {symbol_infos:#?}"))
+        .log_message(MessageType::INFO, format!("Symbols: {symbols:#?}"))
         .await;
 
-    Ok(Some(DocumentSymbolResponse::Nested(symbol_infos)))
+    Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-trait IntoSymbols {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol>;
-}
+fn create_symbols(document: &document::Table) -> Vec<DocumentSymbol> {
+    let mut symbols: Vec<DocumentSymbol> = vec![];
 
-trait IntoSymbolsWithChildren {
-    fn into_symbols_with_childen(
-        self,
-        source: &str,
-        children: Option<Vec<DocumentSymbol>>,
-    ) -> Vec<DocumentSymbol>;
-}
-
-trait IntoKeysSymbols {
-    fn into_keys_symbols(
-        self,
-        source: &str,
-        kind: tower_lsp::lsp_types::SymbolKind,
-        children: Option<Vec<DocumentSymbol>>,
-    ) -> Vec<DocumentSymbol>;
-}
-
-impl IntoSymbols for ast::Root {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        self.items()
-            .map(|item| item.into_symbols(source))
-            .flatten()
-            .collect()
+    for (key, entry) in document.entries() {
+        symbols_for_value(key.to_string(), None, entry, &mut symbols);
     }
+
+    symbols
 }
 
-impl IntoSymbols for ast::RootItem {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        match self {
-            Self::Table(table) => table.into_symbols(source),
-            Self::ArrayOfTable(array_of_table) => array_of_table.into_symbols(source),
-            Self::KeyValue(kv) => kv.into_symbols(source),
-        }
-    }
-}
+#[allow(deprecated)]
+fn symbols_for_value(
+    name: String,
+    key_range: Option<document::Range>,
+    node: &document::Value,
+    symbols: &mut Vec<DocumentSymbol>,
+) {
+    let own_range = node.range();
+    let range = if let Some(key_r) = key_range {
+        key_r.merge(&own_range)
+    } else {
+        own_range
+    };
 
-impl IntoSymbols for ast::Table {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        let childlens = self
-            .key_values()
-            .map(|kv| kv.into_symbols(source))
-            .flatten()
-            .collect::<Vec<_>>();
+    let selection_range = key_range.map_or(own_range, |range| range);
 
-        let childrens = if childlens.is_empty() {
-            None
-        } else {
-            Some(childlens)
-        };
-
-        self.header()
-            .map(|header| header.into_keys_symbols(source, SymbolKind::OBJECT, childrens))
-            .unwrap_or_default()
-    }
-}
-
-impl IntoSymbols for ast::ArrayOfTable {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        let childlens = self
-            .key_values()
-            .map(|kv| kv.into_symbols(source))
-            .flatten()
-            .collect::<Vec<_>>();
-
-        let childrens = if childlens.is_empty() {
-            None
-        } else {
-            Some(childlens)
-        };
-
-        self.header()
-            .map(|header| header.into_keys_symbols(source, SymbolKind::OBJECT, childrens))
-            .unwrap_or_default()
-    }
-}
-
-impl IntoSymbols for ast::KeyValue {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        if let Some(keys) = self.keys() {
-            let children = self.value().map(|value| value.into_symbols(source));
-            keys.into_keys_symbols(source, SymbolKind::KEY, children)
-        } else {
-            vec![]
-        }
-    }
-}
-
-impl IntoKeysSymbols for ast::Keys {
-    fn into_keys_symbols(
-        self,
-        source: &str,
-        kind: tower_lsp::lsp_types::SymbolKind,
-        children: Option<Vec<DocumentSymbol>>,
-    ) -> Vec<DocumentSymbol> {
-        self.keys()
-            .into_iter()
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-            .fold(children.unwrap_or_default(), |children, key| {
-                let start_pos =
-                    TextPosition::from_source(source, key.syntax().text_range().start());
-                let end_pos = TextPosition::from_source(source, key.syntax().text_range().end());
-                let range = Range {
-                    start: Position {
-                        line: start_pos.line(),
-                        character: start_pos.column(),
-                    },
-                    end: Position {
-                        line: end_pos.line(),
-                        character: end_pos.column(),
-                    },
-                };
-
-                let symbols = vec![
-                    #[allow(deprecated)]
-                    DocumentSymbol {
-                        name: key.syntax().text().to_string(),
-                        kind,
-                        tags: None,
-                        range,
-                        selection_range: range,
-                        children: Some(children.clone()),
-                        deprecated: None,
-                        detail: None,
-                    },
-                ];
-
-                symbols
-            })
-    }
-}
-
-impl IntoSymbols for ast::Value {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        match self {
-            Self::BasicString(_)
-            | Self::LiteralString(_)
-            | Self::MultiLineBasicString(_)
-            | Self::MultiLineLiteralString(_)
-            | Self::IntegerBin(_)
-            | Self::IntegerOct(_)
-            | Self::IntegerDec(_)
-            | Self::IntegerHex(_)
-            | Self::Float(_)
-            | Self::Boolean(_)
-            | Self::OffsetDateTime(_)
-            | Self::LocalDateTime(_)
-            | Self::LocalDate(_)
-            | Self::LocalTime(_) => vec![],
-            Self::Array(array) => array.into_symbols(source),
-            Self::InlineTable(inline_table) => inline_table.into_symbols(source),
-        }
-    }
-}
-
-impl IntoSymbols for ast::Array {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        let childern = self
-            .elements()
-            .map(|element| element.into_symbols(source))
-            .flatten()
-            .collect();
-
-        let start_pos =
-            TextPosition::from_source(source, self.bracket_start().unwrap().text_range().start());
-        let end_pos =
-            TextPosition::from_source(source, self.bracket_end().unwrap().text_range().end());
-        let range = Range {
-            start: Position {
-                line: start_pos.line(),
-                character: start_pos.column(),
-            },
-            end: Position {
-                line: end_pos.line(),
-                character: end_pos.column(),
-            },
-        };
-
-        vec![
-            #[allow(deprecated)]
-            DocumentSymbol {
-                name: "array".to_string(),
-                kind: tower_lsp::lsp_types::SymbolKind::ARRAY,
-                tags: None,
-                range,
-                selection_range: range,
-                children: Some(childern),
-                deprecated: None,
+    match node {
+        Value::Boolean(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::BOOLEAN,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
                 detail: None,
-            },
-        ]
-    }
-}
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::Integer(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::NUMBER,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::Float(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::NUMBER,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::String(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::STRING,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::DateTime(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::STRING,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::Date(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::STRING,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::Time(_) => {
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::STRING,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: None,
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::Array(array) => {
+            let mut children = vec![];
+            for (index, element) in array.elements().iter().enumerate() {
+                symbols_for_value(index.to_string(), Some(range), element, &mut children);
+            }
 
-impl IntoSymbols for ast::InlineTable {
-    fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        self.elements()
-            .map(|element| element.into_symbols(source))
-            .flatten()
-            .collect()
-    }
-}
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::ARRAY,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: Some(children),
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+        Value::Table(table) => {
+            let mut children = vec![];
+            for (key, entry) in table.entries() {
+                symbols_for_value(key.to_string(), Some(range), entry, &mut children);
+            }
 
-// not document this function
-#[allow(dead_code)]
-fn debug_document_symbol() -> Vec<DocumentSymbol> {
-    vec![
-        #[allow(deprecated)]
-        DocumentSymbol {
-            name: "debug".to_string(),
-            kind: tower_lsp::lsp_types::SymbolKind::KEY,
-            tags: None,
-            range: Range {
-                start: Position {
-                    line: 0,
-                    character: 0,
-                },
-                end: Position {
-                    line: 0,
-                    character: 0,
-                },
-            },
-            selection_range: Range {
-                start: Position {
-                    line: 0,
-                    character: 0,
-                },
-                end: Position {
-                    line: 0,
-                    character: 0,
-                },
-            },
-            children: None,
-            deprecated: None,
-            detail: None,
-        },
-    ]
+            symbols.push(DocumentSymbol {
+                name,
+                kind: SymbolKind::OBJECT,
+                range: range.into(),
+                selection_range: selection_range.into(),
+                children: Some(children),
+                detail: None,
+                deprecated: None,
+                tags: None,
+            });
+        }
+    }
 }

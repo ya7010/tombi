@@ -23,4 +23,30 @@ impl Range {
     pub fn end(&self) -> &TextPosition {
         &self.end
     }
+
+    pub fn merge(&self, other: &Self) -> Self {
+        let start = if self.start < other.start {
+            self.start
+        } else {
+            other.start
+        };
+
+        let end = if self.end > other.end {
+            self.end
+        } else {
+            other.end
+        };
+
+        Self { start, end }
+    }
+}
+
+#[cfg(feature = "lsp")]
+impl Into<tower_lsp::lsp_types::Range> for Range {
+    fn into(self) -> tower_lsp::lsp_types::Range {
+        tower_lsp::lsp_types::Range {
+            start: self.start.into(),
+            end: self.end.into(),
+        }
+    }
 }

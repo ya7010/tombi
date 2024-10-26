@@ -313,6 +313,7 @@ dependencies = [
  "text-position",
  "text-size",
  "thiserror",
+ "tower-lsp",
 ]
 
 [[package]]
@@ -1061,6 +1062,7 @@ version = "0.0.0"
 dependencies = [
  "serde",
  "text-size",
+ "tower-lsp",
 ]
 
 [[package]]
@@ -1163,6 +1165,7 @@ dependencies = [
  "clap-verbosity-flag",
  "crossbeam-channel",
  "dashmap 6.1.0",
+ "document",
  "futures",
  "futures-util",
  "parser",
