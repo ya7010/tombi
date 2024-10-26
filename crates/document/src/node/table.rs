@@ -2,7 +2,7 @@ use indexmap::map::Entry;
 use indexmap::IndexMap;
 
 use crate::Key;
-use crate::Value;
+use crate::Node;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TableKind {
@@ -16,7 +16,7 @@ pub enum TableKind {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Table {
     kind: TableKind,
-    entries: IndexMap<Key, Value>,
+    entries: IndexMap<Key, Node>,
 }
 
 impl Table {
@@ -32,35 +32,35 @@ impl Table {
         source: &str,
         node: ast::KeyValue,
     ) -> Vec<crate::Error> {
-        let mut value_cursor = &mut crate::Value::Table(std::mem::take(self));
+        let mut node_cursor = &mut crate::Node::Table(std::mem::take(self));
         let mut errors = vec![];
 
         if let (Some(keys), Some(value)) = (node.keys(), node.value()) {
             let mut keys = keys.keys().into_iter();
             while let Some(key) = keys.next() {
                 let key = crate::Key::new(source, key);
-                if let Value::Table(table) = value_cursor {
-                    value_cursor = table
+                if let Node::Table(table) = node_cursor {
+                    node_cursor = table
                         .entry(key)
-                        .or_insert(Value::Table(Table::new(TableKind::DottedKeys)));
+                        .or_insert(Node::Table(Table::new(TableKind::DottedKeys)));
                 } else {
                     errors.push(crate::Error::DuplicateKey { key });
                 }
             }
-            *value_cursor = Value::new(source, value);
+            *node_cursor = Node::new(source, value);
         }
         errors
     }
 
-    pub fn entries(&self) -> &IndexMap<Key, Value> {
+    pub fn entries(&self) -> &IndexMap<Key, Node> {
         &self.entries
     }
 
-    pub fn insert(&mut self, key: Key, value: Value) {
-        self.entries.insert(key, value);
+    pub fn insert(&mut self, key: Key, node: Node) {
+        self.entries.insert(key, node);
     }
 
-    pub fn entry(&mut self, key: Key) -> Entry<'_, Key, Value> {
+    pub fn entry(&mut self, key: Key) -> Entry<'_, Key, Node> {
         self.entries.entry(key)
     }
 
@@ -72,7 +72,7 @@ impl Table {
                 Entry::Occupied(mut entry) => {
                     let value1 = entry.get_mut();
                     match (value1, value2) {
-                        (Value::Table(table1), Value::Table(table2)) => {
+                        (Node::Table(table1), Node::Table(table2)) => {
                             table1.merge(table2);
                         }
                         _ => {

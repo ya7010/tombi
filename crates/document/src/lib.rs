@@ -1,13 +1,13 @@
 mod error;
 mod key;
+mod node;
 mod range;
-mod value;
 
 pub use error::Error;
 pub use key::Key;
+use node::TableKind;
+pub use node::{Array, Boolean, Float, Integer, Node, String, Table};
 pub use range::Range;
-use value::TableKind;
-pub use value::{Array, Boolean, Float, Integer, String, Table, Value};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parsed {
@@ -60,23 +60,23 @@ impl Parse for ast::Table {
     fn parse(self, source: &str) -> Parsed {
         let mut p = Parsed::default();
 
-        let mut value_cursor = &mut Value::Table(Table::new(TableKind::Table));
+        let mut node_cursor = &mut Node::Table(Table::new(TableKind::Table));
 
         if let Some(header) = self.header() {
             let mut keys = header.keys().into_iter();
             while let Some(key) = keys.next() {
                 let key = crate::Key::new(source, key);
-                if let Value::Table(table) = value_cursor {
-                    value_cursor = table
+                if let Node::Table(table) = node_cursor {
+                    node_cursor = table
                         .entry(key)
-                        .or_insert_with(|| Value::Table(Table::new(TableKind::Table)));
+                        .or_insert_with(|| Node::Table(Table::new(TableKind::Table)));
                 } else {
                     p.errors.push(crate::Error::DuplicateKey { key });
                 }
             }
         }
 
-        if let Value::Table(table) = value_cursor {
+        if let Node::Table(table) = node_cursor {
             for kv in self.key_values() {
                 p.errors.extend(table.append_key_value(source, kv));
             }
@@ -90,35 +90,35 @@ impl Parse for ast::ArrayOfTable {
     fn parse(self, source: &str) -> Parsed {
         let mut p = Parsed::default();
 
-        let mut value_cursor = &mut Value::Table(Table::new(TableKind::ArrayOfTables));
+        let mut node_cursor = &mut Node::Table(Table::new(TableKind::ArrayOfTables));
 
         if let Some(header) = self.header() {
             let mut keys = header.keys().into_iter();
             while let Some(key) = keys.next() {
                 let key = crate::Key::new(source, key);
-                if let Value::Table(table) = value_cursor {
-                    value_cursor = table
+                if let Node::Table(table) = node_cursor {
+                    node_cursor = table
                         .entry(key)
-                        .or_insert_with(|| Value::Table(Table::new(TableKind::ArrayOfTables)));
+                        .or_insert_with(|| Node::Table(Table::new(TableKind::ArrayOfTables)));
                 } else {
                     p.errors.push(crate::Error::DuplicateKey { key });
                 }
             }
         }
 
-        if let Value::Table(table) = value_cursor {
+        if let Node::Table(table) = node_cursor {
             if table.kind() == TableKind::ArrayOfTables && table.entries().is_empty() {
-                *value_cursor = Value::Array(Array::new_array_of_tables());
+                *node_cursor = Node::Array(Array::new_array_of_tables());
             }
         }
 
-        if let Value::Array(array) = value_cursor {
+        if let Node::Array(array) = node_cursor {
             let mut table = Table::new(TableKind::ArrayOfTables);
             for kv in self.key_values() {
                 p.errors.extend(table.append_key_value(source, kv));
             }
 
-            array.push(Value::Table(table));
+            array.push(Node::Table(table));
         }
 
         p

@@ -1,6 +1,6 @@
 use crate::{server::backend::Backend, toml};
 use ast::AstNode;
-use document::{Parse, Value};
+use document::{Node, Parse};
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType, SymbolKind,
 };
@@ -45,7 +45,7 @@ fn create_symbols(document: &document::Table) -> Vec<DocumentSymbol> {
 fn symbols_for_value(
     name: String,
     key_range: Option<document::Range>,
-    node: &document::Value,
+    node: &document::Node,
     symbols: &mut Vec<DocumentSymbol>,
 ) {
     let own_range = node.range();
@@ -58,7 +58,7 @@ fn symbols_for_value(
     let selection_range = key_range.map_or(own_range, |range| range);
 
     match node {
-        Value::Boolean(_) => {
+        Node::Boolean(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::BOOLEAN,
@@ -70,7 +70,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Integer(_) => {
+        Node::Integer(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -82,7 +82,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Float(_) => {
+        Node::Float(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -94,7 +94,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::String(_) => {
+        Node::String(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -106,7 +106,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::DateTime(_) => {
+        Node::DateTime(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -118,7 +118,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Date(_) => {
+        Node::Date(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -130,7 +130,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Time(_) => {
+        Node::Time(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -142,7 +142,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Array(array) => {
+        Node::Array(array) => {
             let mut children = vec![];
             for (index, element) in array.elements().iter().enumerate() {
                 symbols_for_value(index.to_string(), Some(range), element, &mut children);
@@ -159,7 +159,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Table(table) => {
+        Node::Table(table) => {
             let mut children = vec![];
             for (key, entry) in table.entries() {
                 symbols_for_value(key.to_string(), Some(range), entry, &mut children);

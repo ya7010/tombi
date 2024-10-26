@@ -1,4 +1,4 @@
-use crate::{Range, Value};
+use crate::{Node, Range};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -21,7 +21,7 @@ pub enum ArrayKind {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Array {
     kind: ArrayKind,
-    elements: Vec<Value>,
+    elements: Vec<Node>,
     range: Range,
 }
 
@@ -39,15 +39,15 @@ impl Array {
         }
     }
 
-    pub fn push(&mut self, value: Value) {
-        self.elements.push(value);
+    pub fn push(&mut self, node: Node) {
+        self.elements.push(node);
     }
 
     pub fn kind(&self) -> ArrayKind {
         self.kind
     }
 
-    pub fn elements(&self) -> &[Value] {
+    pub fn elements(&self) -> &[Node] {
         &self.elements
     }
 

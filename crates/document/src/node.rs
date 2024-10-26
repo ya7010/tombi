@@ -19,7 +19,7 @@ pub use table::{Table, TableKind};
 pub use time::Time;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Value {
+pub enum Node {
     Boolean(Boolean),
     Integer(Integer),
     Float(Float),
@@ -31,7 +31,7 @@ pub enum Value {
     Table(Table),
 }
 
-impl Value {
+impl Node {
     pub fn new(source: &str, value: ast::Value) -> Self {
         match value {
             ast::Value::Boolean(boolean) => Self::Boolean(Boolean::new(source, boolean)),
