@@ -20,6 +20,10 @@ pub async fn handle_document_symbol(
     };
 
     let pp = root.parse(&source);
+    backend
+        .client
+        .log_message(MessageType::INFO, format!("Document: {:#?}", pp.document()))
+        .await;
     let symbols = create_symbols(pp.document());
 
     backend
