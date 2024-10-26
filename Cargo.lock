@@ -1157,6 +1157,7 @@ dependencies = [
  "crossbeam-channel",
  "dashmap 6.1.0",
  "document",
+ "formatter",
  "futures",
  "futures-util",
  "parser",
