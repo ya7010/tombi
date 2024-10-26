@@ -25,8 +25,8 @@ impl Parsed {
     }
 
     pub fn merge(mut self, other: Parsed) -> Self {
-        self.table = self.table.merge(other.table);
-        self.errors.extend(other.errors);
+        self.table.merge(other.table);
+        self.errors.extend(other.errors.clone());
 
         self
     }

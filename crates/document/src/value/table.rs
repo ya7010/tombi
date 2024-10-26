@@ -64,11 +64,28 @@ impl Table {
         self.entries.entry(key)
     }
 
-    pub fn merge(mut self, other: Self) -> Self {
-        for (key, value) in other.entries {
-            self.entries.insert(key, value);
+    pub fn merge(&mut self, other: Self) -> Vec<crate::Error> {
+        let mut errors = vec![];
+        // Merge the entries of the two tables recursively
+        for (key, value2) in other.entries {
+            match self.entries.entry(key.clone()) {
+                Entry::Occupied(mut entry) => {
+                    let value1 = entry.get_mut();
+                    match (value1, value2) {
+                        (Value::Table(table1), Value::Table(table2)) => {
+                            table1.merge(table2);
+                        }
+                        _ => {
+                            errors.push(crate::Error::DuplicateKey { key: key.clone() });
+                        }
+                    }
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(value2);
+                }
+            }
         }
-        self
+        errors
     }
 
     pub fn kind(&self) -> TableKind {
