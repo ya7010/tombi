@@ -187,10 +187,40 @@ impl IntoSymbols for ast::Value {
 
 impl IntoSymbols for ast::Array {
     fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
-        self.elements()
+        let childern = self
+            .elements()
             .map(|element| element.into_symbols(source))
             .flatten()
-            .collect()
+            .collect();
+
+        let start_pos =
+            TextPosition::from_source(source, self.bracket_start().unwrap().text_range().start());
+        let end_pos =
+            TextPosition::from_source(source, self.bracket_end().unwrap().text_range().end());
+        let range = Range {
+            start: Position {
+                line: start_pos.line(),
+                character: start_pos.column(),
+            },
+            end: Position {
+                line: end_pos.line(),
+                character: end_pos.column(),
+            },
+        };
+
+        vec![
+            #[allow(deprecated)]
+            DocumentSymbol {
+                name: "array".to_string(),
+                kind: tower_lsp::lsp_types::SymbolKind::ARRAY,
+                tags: None,
+                range,
+                selection_range: range,
+                children: Some(childern),
+                deprecated: None,
+                detail: None,
+            },
+        ]
     }
 }
 

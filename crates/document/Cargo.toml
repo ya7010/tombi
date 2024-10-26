@@ -1,0 +1,13 @@
+[package]
+name = "document"
+version = "0.0.0"
+edition = {workspace = true}
+authors = {workspace = true}
+license = {workspace = true}
+
+[dependencies]
+ast = {workspace = true}
+indexmap = { workspace = true}
+text-position = {workspace = true}
+text-size = { workspace = true }
+thiserror.workspace = true

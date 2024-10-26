@@ -305,6 +305,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "document"
+version = "0.0.0"
+dependencies = [
+ "ast",
+ "indexmap",
+ "text-position",
+ "text-size",
+ "thiserror",
+]
+
+[[package]]
 name = "drop_bomb"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
