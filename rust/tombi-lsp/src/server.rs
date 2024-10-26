@@ -15,7 +15,7 @@ pub async fn run() -> Result<(), anyhow::Error> {
 
     let (service, socket) = LspService::build(|client| Backend {
         client,
-        file_map: Default::default(),
+        _file_map: Default::default(),
     })
     .finish();
 

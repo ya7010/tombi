@@ -1,11 +1,8 @@
 use crate::{server::backend::Backend, toml};
 use ast::AstNode;
 use document::{Parse, Value};
-use text_position::TextPosition;
-use text_size::TextRange;
 use tower_lsp::lsp_types::{
-    lsif::Document, DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType,
-    Position, Range, SymbolKind,
+    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType, SymbolKind,
 };
 
 pub async fn handle_document_symbol(

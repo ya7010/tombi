@@ -11,7 +11,7 @@ use super::handler::{
 #[derive(Debug)]
 pub struct Backend {
     pub client: tower_lsp::Client,
-    pub file_map: DashMap<Url, String>,
+    pub _file_map: DashMap<Url, String>,
 }
 
 #[tower_lsp::async_trait]

@@ -1,4 +1,4 @@
-use tower_lsp::lsp_types::{DocumentFormattingParams, Position, Range, TextEdit};
+use tower_lsp::lsp_types::{DocumentFormattingParams, TextEdit};
 
 use crate::server::backend::Backend;
 
