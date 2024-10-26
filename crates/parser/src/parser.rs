@@ -62,11 +62,6 @@ impl<'t> Parser<'t> {
         kinds.contains(self.current())
     }
 
-    /// Checks if the current token is in `kinds`.
-    pub(crate) fn nth_at_ts(&self, u: usize, kinds: TokenSet) -> bool {
-        kinds.contains(self.nth(u))
-    }
-
     /// Starts a new node in the syntax tree. All nodes and tokens
     /// consumed between the `start` and the corresponding `Marker::complete`
     /// belong to the same node.

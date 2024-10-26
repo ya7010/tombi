@@ -38,7 +38,7 @@ pub fn build_tree(
     let mut builder = syntax::SyntaxTreeBuilder::default();
     let mut enter_pos = 0;
 
-    let is_eof = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
+    let _ = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
         step::StrStep::Token { kind, text } => builder.token(kind, text),
         step::StrStep::Enter { kind, pos } => {
             builder.start_node(kind);
