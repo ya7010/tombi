@@ -109,7 +109,7 @@ impl IntoSymbols for ast::KeyValue {
     fn into_symbols(self, source: &str) -> Vec<DocumentSymbol> {
         if let Some(keys) = self.keys() {
             let children = self.value().map(|value| value.into_symbols(source));
-            keys.into_keys_symbols(source, SymbolKind::VARIABLE, children)
+            keys.into_keys_symbols(source, SymbolKind::KEY, children)
         } else {
             vec![]
         }
@@ -210,7 +210,7 @@ fn debug_document_symbol() -> Vec<DocumentSymbol> {
         #[allow(deprecated)]
         DocumentSymbol {
             name: "debug".to_string(),
-            kind: tower_lsp::lsp_types::SymbolKind::VARIABLE,
+            kind: tower_lsp::lsp_types::SymbolKind::KEY,
             tags: None,
             range: Range {
                 start: Position {

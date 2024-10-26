@@ -12,3 +12,6 @@ key2 = "22"
 
 [bbb]
 key5 = true
+
+[ddd.eee]
+key5 = true
