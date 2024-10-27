@@ -11,13 +11,13 @@ pub use range::Range;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Parsed {
-    table: Table,
+    document: Table,
     errors: Vec<crate::Error>,
 }
 
 impl Parsed {
     pub fn document(&self) -> &Table {
-        &self.table
+        &self.document
     }
 
     pub fn errors(&self) -> &[crate::Error] {
@@ -25,10 +25,16 @@ impl Parsed {
     }
 
     pub fn merge(mut self, other: Parsed) -> Self {
-        self.table.merge(other.table);
+        self.document.merge(other.document);
         self.errors.extend(other.errors.clone());
 
         self
+    }
+}
+
+impl Into<(Table, Vec<crate::Error>)> for Parsed {
+    fn into(self) -> (Table, Vec<crate::Error>) {
+        (self.document, self.errors)
     }
 }
 
@@ -129,7 +135,7 @@ impl Parse for ast::KeyValue {
     fn parse(self, source: &str) -> Parsed {
         let mut p = Parsed::default();
 
-        p.table.append_key_value(source, self);
+        p.document.append_key_value(source, self);
 
         p
     }
