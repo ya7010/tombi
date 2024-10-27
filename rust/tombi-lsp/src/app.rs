@@ -34,7 +34,6 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
         ))
         .with(
             tracing_subscriber::fmt::layer()
-                .pretty()
                 .with_ansi(false)
                 .with_writer(std::io::stderr)
                 .without_time(),

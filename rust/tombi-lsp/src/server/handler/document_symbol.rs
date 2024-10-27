@@ -16,7 +16,10 @@ pub async fn handle_document_symbol(
     };
 
     let (document, _) = ast.parse(&source).into();
+
     let symbols = create_symbols(&document);
+
+    tracing::info!("DocumentSymbols: {symbols:#?}");
 
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }

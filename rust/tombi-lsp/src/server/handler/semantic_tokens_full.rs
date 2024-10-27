@@ -44,6 +44,8 @@ pub async fn handle_semantic_tokens_full(
     let mut tokens = Vec::new();
     ast.append_semantic_tokens(&mut tokens);
 
+    tracing::info!("SemanticTokens: {tokens:#?}");
+
     Ok(Some(SemanticTokensResult::Tokens(SemanticTokens {
         result_id: None,
         data: tokens,
