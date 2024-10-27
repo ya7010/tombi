@@ -27,26 +27,29 @@ pub async fn handle_document_highlight(
         let Some(ast) = ast::Root::cast(p.into_syntax_node()) else {
             return Ok(None);
         };
-        if let Some(node) = find_node_at_offset::<ast::Table>(
-            &ast.syntax(),
-            TextSize::new(TextPosition::from(&source, position).offset() as u32),
-        ) {
-            let start = TextPosition::from_source(&source, node.syntax().text_range().start());
-            let end = TextPosition::from_source(&source, node.syntax().text_range().end());
-            let range = Range {
-                start: Position {
-                    line: start.line(),
-                    character: start.column(),
-                },
-                end: Position {
-                    line: end.line(),
-                    character: end.column(),
-                },
-            };
-            highlights.push(DocumentHighlight {
-                range,
-                kind: Some(DocumentHighlightKind::TEXT),
-            });
+        let offset = TextSize::new(TextPosition::from(&source, position).offset() as u32);
+        if let Some(node) = find_node_at_offset::<ast::Table>(&ast.syntax(), offset) {
+            if let Some(header) = node.header() {
+                if find_node_at_offset::<ast::Keys>(header.syntax(), offset).is_some() {
+                    let start =
+                        TextPosition::from_source(&source, node.syntax().text_range().start());
+                    let end = TextPosition::from_source(&source, node.syntax().text_range().end());
+                    let range = Range {
+                        start: Position {
+                            line: start.line(),
+                            character: start.column(),
+                        },
+                        end: Position {
+                            line: end.line(),
+                            character: end.column(),
+                        },
+                    };
+                    highlights.push(DocumentHighlight {
+                        range,
+                        kind: Some(DocumentHighlightKind::READ),
+                    });
+                }
+            }
         };
 
         (highlights, format!("Ast Hilight: {:#?}", ast))
