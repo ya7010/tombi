@@ -2,11 +2,11 @@ use crate::{server::backend::Backend, toml};
 use ast::AstNode;
 use document::{Node, Parse};
 use tower_lsp::lsp_types::{
-    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, MessageType, SymbolKind,
+    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
 
 pub async fn handle_document_symbol(
-    backend: &Backend,
+    _backend: &Backend,
     params: DocumentSymbolParams,
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     let source = toml::try_load(&params.text_document.uri)?;
@@ -16,16 +16,7 @@ pub async fn handle_document_symbol(
     };
 
     let (document, _) = ast.parse(&source).into();
-    backend
-        .client
-        .log_message(MessageType::INFO, format!("Document: {:#?}", &document))
-        .await;
     let symbols = create_symbols(&document);
-
-    backend
-        .client
-        .log_message(MessageType::INFO, format!("Symbols: {symbols:#?}"))
-        .await;
 
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
