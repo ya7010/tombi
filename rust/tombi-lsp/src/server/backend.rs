@@ -9,8 +9,8 @@ use tower_lsp::{
 };
 
 use super::handler::{
-    handle_did_change_configuration, handle_document_highlight, handle_document_symbol,
-    handle_formatting, handle_initialize, handle_semantic_tokens_full, handle_shutdown,
+    handle_did_change_configuration, handle_document_symbol, handle_formatting, handle_initialize,
+    handle_semantic_tokens_full, handle_shutdown,
 };
 
 #[derive(Debug)]
@@ -48,13 +48,6 @@ impl LanguageServer for Backend {
         params: DocumentSymbolParams,
     ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
         handle_document_symbol(self, params).await
-    }
-
-    async fn document_highlight(
-        &self,
-        params: DocumentHighlightParams,
-    ) -> Result<Option<Vec<DocumentHighlight>>, tower_lsp::jsonrpc::Error> {
-        handle_document_highlight(self, params).await
     }
 
     async fn formatting(

@@ -71,7 +71,6 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
         // type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
         // implementation_provider: Some(ImplementationProviderCapability::Simple(true)),
         // references_provider: Some(OneOf::Left(true)),
-        document_highlight_provider: Some(OneOf::Left(true)),
         document_symbol_provider: Some(OneOf::Left(true)),
         // workspace_symbol_provider: Some(OneOf::Left(true)),
         // code_lens_provider: Some(CodeLensOptions {
