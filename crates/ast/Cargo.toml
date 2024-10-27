@@ -7,3 +7,5 @@ license.workspace = true
 
 [dependencies]
 syntax.workspace = true
+text-size = { workspace = true }
+itertools = { workspace = true }

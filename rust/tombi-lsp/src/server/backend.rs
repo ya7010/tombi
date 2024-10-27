@@ -1,11 +1,15 @@
 use dashmap::DashMap;
 use tower_lsp::{
-    lsp_types::{InitializeParams, InitializeResult, Url},
+    lsp_types::{
+        DocumentHighlight, DocumentHighlightParams, DocumentSymbolParams, DocumentSymbolResponse,
+        InitializeParams, InitializeResult, Url,
+    },
     LanguageServer,
 };
 
 use super::handler::{
-    handle_document_symbol, handle_formatting, handle_initialize, handle_shutdown,
+    handle_document_highlight, handle_document_symbol, handle_formatting, handle_initialize,
+    handle_shutdown,
 };
 
 #[derive(Debug)]
@@ -29,10 +33,16 @@ impl LanguageServer for Backend {
 
     async fn document_symbol(
         &self,
-        params: tower_lsp::lsp_types::DocumentSymbolParams,
-    ) -> Result<Option<tower_lsp::lsp_types::DocumentSymbolResponse>, tower_lsp::jsonrpc::Error>
-    {
+        params: DocumentSymbolParams,
+    ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
         handle_document_symbol(self, params).await
+    }
+
+    async fn document_highlight(
+        &self,
+        params: DocumentHighlightParams,
+    ) -> Result<Option<Vec<DocumentHighlight>>, tower_lsp::jsonrpc::Error> {
+        handle_document_highlight(self, params).await
     }
 
     async fn formatting(

@@ -12,11 +12,11 @@ pub async fn handle_document_symbol(
     let source = toml::try_load(&params.text_document.uri)?;
 
     let p = parser::parse(&source);
-    let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
+    let Some(ast) = ast::Root::cast(p.into_syntax_node()) else {
         return Ok(None);
     };
 
-    let pp = root.parse(&source);
+    let pp = ast.parse(&source);
     backend
         .client
         .log_message(MessageType::INFO, format!("Document: {:#?}", pp.document()))

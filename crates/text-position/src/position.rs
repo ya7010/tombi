@@ -72,3 +72,33 @@ impl Into<tower_lsp::lsp_types::Position> for TextPosition {
         }
     }
 }
+
+#[cfg(feature = "lsp")]
+impl TextPosition {
+    pub fn from(source: &str, position: tower_lsp::lsp_types::Position) -> Self {
+        let mut line = 0;
+        let mut column = 0;
+        let mut offset = 0;
+        for (i, c) in source.char_indices() {
+            if line == position.line && column == position.character {
+                return Self {
+                    line,
+                    column,
+                    offset,
+                };
+            }
+            if c == '\n' {
+                line += 1;
+                column = 0;
+            } else {
+                column += 1;
+            }
+            offset = i;
+        }
+        Self {
+            line,
+            column,
+            offset,
+        }
+    }
+}
