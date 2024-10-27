@@ -1,7 +1,10 @@
 use tower_lsp::lsp_types::{
-    ClientCapabilities, ClientInfo, InitializeParams, InitializeResult, OneOf, ServerCapabilities,
-    ServerInfo,
+    ClientCapabilities, ClientInfo, InitializeParams, InitializeResult, OneOf,
+    SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
+    ServerCapabilities, ServerInfo,
 };
+
+use super::semantic_tokens_full::TokenType;
 
 pub fn handle_initialize(
     InitializeParams {
@@ -91,19 +94,17 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
         //     file_operations: None,
         // }),
         // call_hierarchy_provider: Some(CallHierarchyServerCapability::Simple(true)),
-        // semantic_tokens_provider: Some(
-        //     SemanticTokensOptions {
-        //         legend: SemanticTokensLegend {
-        //             token_types: vec![],
-        //             token_modifiers: vec![],
-        //         },
-
-        //         full: Some(SemanticTokensFullOptions::Delta { delta: Some(true) }),
-        //         range: Some(true),
-        //         work_done_progress_options: Default::default(),
-        //     }
-        //     .into(),
-        // ),
+        semantic_tokens_provider: Some(
+            SemanticTokensOptions {
+                legend: SemanticTokensLegend {
+                    token_types: TokenType::LEGEND.to_vec(),
+                    token_modifiers: vec![SemanticTokenModifier::READONLY],
+                },
+                full: Some(SemanticTokensFullOptions::Bool(true)),
+                ..Default::default()
+            }
+            .into(),
+        ),
         // inlay_hint_provider: Some(OneOf::Right(InlayHintServerCapabilities::Options(
         //     InlayHintOptions {
         //         work_done_progress_options: Default::default(),

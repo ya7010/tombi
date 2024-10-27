@@ -1,15 +1,16 @@
 use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
-        DocumentHighlight, DocumentHighlightParams, DocumentSymbolParams, DocumentSymbolResponse,
-        InitializeParams, InitializeResult, Url,
+        DidChangeConfigurationParams, DocumentHighlight, DocumentHighlightParams,
+        DocumentSymbolParams, DocumentSymbolResponse, InitializeParams, InitializeResult,
+        SemanticTokensParams, SemanticTokensResult, Url,
     },
     LanguageServer,
 };
 
 use super::handler::{
-    handle_document_highlight, handle_document_symbol, handle_formatting, handle_initialize,
-    handle_shutdown,
+    handle_did_change_configuration, handle_document_highlight, handle_document_symbol,
+    handle_formatting, handle_initialize, handle_semantic_tokens_full, handle_shutdown,
 };
 
 #[derive(Debug)]
@@ -29,6 +30,17 @@ impl LanguageServer for Backend {
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {
         handle_shutdown()
+    }
+
+    async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
+        handle_did_change_configuration(params).await
+    }
+
+    async fn semantic_tokens_full(
+        &self,
+        params: SemanticTokensParams,
+    ) -> Result<Option<SemanticTokensResult>, tower_lsp::jsonrpc::Error> {
+        handle_semantic_tokens_full(self, params).await
     }
 
     async fn document_symbol(

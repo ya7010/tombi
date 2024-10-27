@@ -11,17 +11,16 @@ pub async fn handle_document_symbol(
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     let source = toml::try_load(&params.text_document.uri)?;
 
-    let p = parser::parse(&source);
-    let Some(ast) = ast::Root::cast(p.into_syntax_node()) else {
+    let Some(ast) = ast::Root::cast(parser::parse(&source).into_syntax_node()) else {
         return Ok(None);
     };
 
-    let pp = ast.parse(&source);
+    let (document, _) = ast.parse(&source).into();
     backend
         .client
-        .log_message(MessageType::INFO, format!("Document: {:#?}", pp.document()))
+        .log_message(MessageType::INFO, format!("Document: {:#?}", &document))
         .await;
-    let symbols = create_symbols(pp.document());
+    let symbols = create_symbols(&document);
 
     backend
         .client
