@@ -44,9 +44,12 @@ pub async fn handle_hover(
 fn get_hover(ast: ast::Root, source: &str, position: Position) -> Option<(String, TextRange)> {
     let offset = TextSize::new(TextPosition::from(&source, position).offset() as u32);
 
-    tracing::debug!("Hovering at offset: {offset:#?}",);
+    // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
+    //       For now, all nodes are displayed for debugging purposes.
+
+    tracing::info!("Hovering at offset: {offset:#?}",);
     for node in ancestors_at_offset(&ast.syntax(), offset) {
-        tracing::debug!("Hovering node: {:?}", node);
+        tracing::info!("Hovering node: {:?}", node);
 
         if let Some(node) = ast::IntegerDec::cast(node.to_owned()) {
             return Some(("IntegerDec".to_owned(), node.syntax().text_range()));
