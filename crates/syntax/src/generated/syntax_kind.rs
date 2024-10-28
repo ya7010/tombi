@@ -76,7 +76,7 @@ pub enum SyntaxKind {
     INLINE_TABLE,
     ARRAY_OF_TABLE,
     #[doc(hidden)]
-    INVALID_TOKENS,
+    INVALID_TOKEN,
     #[doc(hidden)]
     __LAST,
 }

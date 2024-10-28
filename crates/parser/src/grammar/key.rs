@@ -26,7 +26,7 @@ pub fn parse_keys(p: &mut Parser<'_>) {
         m.complete(p, KEYS);
     } else {
         p.error(crate::Error::ExpectedKey);
-        m.complete(p, INVALID_TOKENS);
+        m.complete(p, INVALID_TOKEN);
     };
 }
 
@@ -39,7 +39,7 @@ fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
                 m.complete(p, kind);
             } else {
                 p.error(crate::Error::ExpectedKey);
-                m.complete(p, INVALID_TOKENS);
+                m.complete(p, INVALID_TOKEN);
                 return None;
             }
             if !p.eat(T![.]) {
@@ -54,7 +54,7 @@ fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             Some(kind)
         } else {
             p.error(crate::Error::ExpectedKey);
-            m.complete(p, INVALID_TOKENS);
+            m.complete(p, INVALID_TOKEN);
             None
         }
     }

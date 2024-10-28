@@ -1,5 +1,6 @@
 use crate::toml;
 use ast::{algo::ancestors_at_offset, AstNode};
+use parser::SyntaxKind;
 use text_position::TextPosition;
 use text_size::{TextRange, TextSize};
 use tower_lsp::lsp_types::{
@@ -97,6 +98,8 @@ fn get_hover(ast: ast::Root, source: &str, position: Position) -> Option<(String
             return Some(("Table".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::ArrayOfTable::cast(node.to_owned()) {
             return Some(("ArrayOfTable".to_owned(), node.syntax().text_range()));
+        } else if node.kind() == SyntaxKind::INVALID_TOKEN {
+            return Some(("INVALID_TOKEN".to_owned(), node.text_range()));
         }
     }
     None

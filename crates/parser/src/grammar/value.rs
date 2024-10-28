@@ -31,7 +31,7 @@ pub fn parse_value(p: &mut Parser<'_>) {
                 p.bump_any();
             }
             p.error(crate::Error::ExpectedValue);
-            m.complete(p, INVALID_TOKENS);
+            m.complete(p, INVALID_TOKEN);
         }
     }
 }
