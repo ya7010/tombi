@@ -108,6 +108,33 @@ mod tests {
         assert_eq!(lex.next(), None);
     }
 
+    #[rstest]
+    #[case("ld1 = 1979-05-27")]
+    fn local_date(#[case] source: &str) {
+        let mut lex = SyntaxKind::lexer(source);
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LOCAL_DATE)));
+        assert_eq!(lex.next(), None);
+    }
+
+    #[rstest]
+    #[case("lt1 = 07:32:00")]
+    #[case("lt2 = 00:32:00.999999")]
+    fn local_time(#[case] source: &str) {
+        let mut lex = SyntaxKind::lexer(source);
+
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::EQUAL)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::LOCAL_TIME)));
+        assert_eq!(lex.next(), None);
+    }
+
     #[test]
     fn dotted_keys() {
         let mut lex = SyntaxKind::lexer(r#"apple.type = "fruit""#);
