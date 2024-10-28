@@ -1,7 +1,7 @@
 use tower_lsp::lsp_types::{
-    ClientCapabilities, ClientInfo, InitializeParams, InitializeResult, OneOf,
-    SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
-    ServerCapabilities, ServerInfo,
+    ClientCapabilities, ClientInfo, HoverProviderCapability, InitializeParams, InitializeResult,
+    OneOf, SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend,
+    SemanticTokensOptions, ServerCapabilities, ServerInfo,
 };
 
 use super::semantic_tokens_full::TokenType;
@@ -41,7 +41,7 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
         //         save: Some(SaveOptions::default().into()),
         //     },
         // )),
-        // hover_provider: Some(HoverProviderCapability::Simple(true)),
+        hover_provider: Some(HoverProviderCapability::Simple(true)),
         // completion_provider: Some(CompletionOptions {
         //     trigger_characters: Some(vec![
         //         ".".into(),
