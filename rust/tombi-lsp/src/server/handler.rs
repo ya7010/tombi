@@ -1,3 +1,4 @@
+mod diagnostic;
 mod did_change_configuration;
 mod document_symbol;
 mod formatting;
@@ -6,6 +7,7 @@ mod initialize;
 mod semantic_tokens_full;
 mod shutdown;
 
+pub use diagnostic::handle_diagnostic;
 pub use did_change_configuration::handle_did_change_configuration;
 pub use document_symbol::handle_document_symbol;
 pub use formatting::handle_formatting;

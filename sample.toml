@@ -1,7 +1,9 @@
 [aaaa]
+
 [aaaa.bbb]
 key1 = 1
 key2 = "2"
+
 array1 = [
   { key3 = 12, key4 = 2024-01-01 }
 ]
@@ -18,6 +20,15 @@ key5 = true
 
 [[ffff.ggg]]
 key6 = 1
+
+[[ffff.ggg]]
+key6 = 2
+
+[[ffff.ggg]]
+key6 = 1
+
+[[ffff.ggg]]
+key6 = 2
 
 [[ffff.ggg]]
 key6 = 2

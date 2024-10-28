@@ -1,16 +1,16 @@
 use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
-        DidChangeConfigurationParams, DocumentSymbolParams, DocumentSymbolResponse, Hover,
-        HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensResult, Url,
+        DidChangeConfigurationParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
+        DocumentSymbolParams, DocumentSymbolResponse, Hover, HoverParams, InitializeParams,
+        InitializeResult, SemanticTokensParams, SemanticTokensResult, Url,
     },
     LanguageServer,
 };
 
 use super::handler::{
-    handle_did_change_configuration, handle_document_symbol, handle_formatting, handle_hover,
-    handle_initialize, handle_semantic_tokens_full, handle_shutdown,
+    handle_diagnostic, handle_did_change_configuration, handle_document_symbol, handle_formatting,
+    handle_hover, handle_initialize, handle_semantic_tokens_full, handle_shutdown,
 };
 
 #[derive(Debug)]
@@ -59,5 +59,12 @@ impl LanguageServer for Backend {
         params: tower_lsp::lsp_types::DocumentFormattingParams,
     ) -> Result<Option<Vec<tower_lsp::lsp_types::TextEdit>>, tower_lsp::jsonrpc::Error> {
         handle_formatting(self, params).await
+    }
+
+    async fn diagnostic(
+        &self,
+        params: DocumentDiagnosticParams,
+    ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
+        handle_diagnostic(params).await
     }
 }

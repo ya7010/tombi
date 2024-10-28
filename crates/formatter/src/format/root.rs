@@ -5,7 +5,7 @@ impl Format for ast::Root {
         self.items()
             .map(|item| item.format(context))
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("\n\n")
     }
 }
 
