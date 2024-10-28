@@ -1,6 +1,7 @@
 use ast::AstNode;
-use parser::SyntaxNode;
+use parser::{SyntaxNode, SyntaxToken};
 use text_position::TextPosition;
+use text_size::TextRange;
 use tower_lsp::lsp_types::{
     Position, Range, SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams,
     SemanticTokensResult,
@@ -17,6 +18,7 @@ pub enum TokenType {
     KEYWORD,
     VARIABLE,
     REGEXP,
+    OPERATOR,
     COMMENT,
 }
 
@@ -28,6 +30,7 @@ impl TokenType {
         SemanticTokenType::KEYWORD,
         SemanticTokenType::VARIABLE,
         SemanticTokenType::REGEXP,
+        SemanticTokenType::OPERATOR,
         SemanticTokenType::COMMENT,
     ];
 }
@@ -79,11 +82,17 @@ impl AppendSemanticTokens for ast::RootItem {
 
 impl AppendSemanticTokens for ast::Table {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
+        self.bracket_start()
+            .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
+
         if let Some(header) = self.header() {
             for key in header.keys() {
-                builder.add_token(TokenType::STRUCT, key.syntax());
+                builder.add_token(TokenType::STRUCT, key.syntax().into());
             }
         }
+
+        self.bracket_end()
+            .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
 
         for entry in self.key_values() {
             entry.append_semantic_tokens(builder);
@@ -93,11 +102,19 @@ impl AppendSemanticTokens for ast::Table {
 
 impl AppendSemanticTokens for ast::ArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
+        self.double_bracket_start().map(|token| {
+            builder.add_token(TokenType::OPERATOR, (&token).into());
+        });
+
         if let Some(header) = self.header() {
             for key in header.keys() {
-                builder.add_token(TokenType::STRUCT, key.syntax());
+                builder.add_token(TokenType::STRUCT, key.syntax().into());
             }
         }
+
+        self.double_bracket_end().map(|token| {
+            builder.add_token(TokenType::OPERATOR, (&token).into());
+        });
 
         for table in self.key_values() {
             table.append_semantic_tokens(builder);
@@ -123,7 +140,7 @@ impl AppendSemanticTokens for ast::Keys {
 
 impl AppendSemanticTokens for ast::Key {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        builder.add_token(TokenType::VARIABLE, self.syntax());
+        builder.add_token(TokenType::VARIABLE, self.syntax().into());
     }
 }
 
@@ -134,18 +151,18 @@ impl AppendSemanticTokens for ast::Value {
             | Self::LiteralString(_)
             | Self::MultiLineBasicString(_)
             | Self::MultiLineLiteralString(_) => {
-                builder.add_token(TokenType::STRING, self.syntax())
+                builder.add_token(TokenType::STRING, self.syntax().into())
             }
             Self::IntegerBin(_)
             | Self::IntegerOct(_)
             | Self::IntegerDec(_)
             | Self::IntegerHex(_)
-            | Self::Float(_) => builder.add_token(TokenType::NUMBER, self.syntax()),
-            Self::Boolean(_) => builder.add_token(TokenType::KEYWORD, self.syntax()),
+            | Self::Float(_) => builder.add_token(TokenType::NUMBER, self.syntax().into()),
+            Self::Boolean(_) => builder.add_token(TokenType::KEYWORD, self.syntax().into()),
             Self::OffsetDateTime(_)
             | Self::LocalDateTime(_)
             | Self::LocalDate(_)
-            | Self::LocalTime(_) => builder.add_token(TokenType::REGEXP, self.syntax()),
+            | Self::LocalTime(_) => builder.add_token(TokenType::REGEXP, self.syntax().into()),
             Self::Array(array) => array.append_semantic_tokens(builder),
             Self::InlineTable(inline_table) => inline_table.append_semantic_tokens(builder),
         }
@@ -183,7 +200,7 @@ impl<'a> SemanticTokensBuilder<'a> {
         }
     }
 
-    fn add_token(&mut self, token_type: TokenType, node: &SyntaxNode) {
+    fn add_token(&mut self, token_type: TokenType, node: TokenOrNode) {
         let range = Range::new(
             TextPosition::from_source(self.source, node.text_range().start()).into(),
             TextPosition::from_source(self.source, node.text_range().end()).into(),
@@ -205,6 +222,32 @@ impl<'a> SemanticTokensBuilder<'a> {
 
     fn build(self) -> Vec<SemanticToken> {
         self.tokens
+    }
+}
+
+enum TokenOrNode<'a> {
+    Token(&'a SyntaxToken),
+    Node(&'a SyntaxNode),
+}
+
+impl<'a> TokenOrNode<'a> {
+    fn text_range(&self) -> TextRange {
+        match self {
+            Self::Token(token) => token.text_range(),
+            Self::Node(node) => node.text_range(),
+        }
+    }
+}
+
+impl<'a> From<&'a SyntaxToken> for TokenOrNode<'a> {
+    fn from(token: &'a SyntaxToken) -> Self {
+        Self::Token(token)
+    }
+}
+
+impl<'a> From<&'a SyntaxNode> for TokenOrNode<'a> {
+    fn from(node: &'a SyntaxNode) -> Self {
+        Self::Node(node)
     }
 }
 

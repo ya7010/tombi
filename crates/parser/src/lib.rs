@@ -19,7 +19,7 @@ use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
 use parse::Parse;
-pub use syntax::{SyntaxKind, SyntaxNode};
+pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub fn parse(source: &str) -> Parse<SyntaxNode> {
     let lexed = lex(source);
