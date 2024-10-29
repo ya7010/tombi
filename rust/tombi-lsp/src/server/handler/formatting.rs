@@ -11,14 +11,15 @@ pub async fn handle_formatting(
     let source = toml::try_load(&text_document.uri)?;
 
     if let Ok(new_text) = formatter::format(&source) {
-        Ok(Some(vec![TextEdit {
-            range: Range::new(
-                Position::new(0, 0),
-                TextPosition::from_source(&source, TextSize::new(source.len() as u32)).into(),
-            ),
-            new_text,
-        }]))
-    } else {
-        Ok(None)
+        if new_text != source {
+            return Ok(Some(vec![TextEdit {
+                range: Range::new(
+                    Position::new(0, 0),
+                    TextPosition::from_source(&source, TextSize::new(source.len() as u32)).into(),
+                ),
+                new_text,
+            }]));
+        }
     }
+    Ok(None)
 }
