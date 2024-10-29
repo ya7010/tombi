@@ -13,6 +13,7 @@ pub fn parse_array(p: &mut Parser<'_>) {
     p.eat(T!['[']);
 
     while !p.at(EOF) && !p.at(T![']']) {
+        line_end(p);
         parse_value(p);
         line_end(p);
         p.eat(T![,]);
