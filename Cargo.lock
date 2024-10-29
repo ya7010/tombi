@@ -1073,6 +1073,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "text"
+version = "0.0.1"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "text-position"
 version = "0.0.0"
 dependencies = [
