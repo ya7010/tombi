@@ -5,5 +5,9 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[features]
+lsp = ["tower-lsp"]
+
 [dependencies]
 serde = { workspace = true, optional = true, default_features = false }
+tower-lsp = { workspace = true, optional = true }

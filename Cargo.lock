@@ -1079,6 +1079,7 @@ name = "text"
 version = "0.0.1"
 dependencies = [
  "serde",
+ "tower-lsp",
 ]
 
 [[package]]
@@ -1201,6 +1202,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "text",
  "text-position",
  "text-size",
  "thiserror",
