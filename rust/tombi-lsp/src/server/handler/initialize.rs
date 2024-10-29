@@ -1,8 +1,8 @@
 use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, DiagnosticOptions, DiagnosticServerCapabilities,
-    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, SemanticTokenModifier,
-    SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities,
-    ServerInfo,
+    DocumentOnTypeFormattingOptions, HoverProviderCapability, InitializeParams, InitializeResult,
+    OneOf, SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend,
+    SemanticTokensOptions, ServerCapabilities, ServerInfo,
 };
 
 use super::semantic_tokens_full::TokenType;
@@ -43,6 +43,15 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
         //     },
         // )),
         hover_provider: Some(HoverProviderCapability::Simple(true)),
+        document_on_type_formatting_provider: Some(DocumentOnTypeFormattingOptions {
+            first_trigger_character: "=".to_string(),
+            more_trigger_character: Some(vec![
+                ".".to_owned(),
+                "[".to_owned(),
+                "{".to_owned(),
+                "(".to_owned(),
+            ]),
+        }),
         // completion_provider: Some(CompletionOptions {
         //     trigger_characters: Some(vec![
         //         ".".into(),
