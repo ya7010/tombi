@@ -7,7 +7,7 @@ license.workspace = true
 
 [dependencies]
 logos = { workspace = true }
-rowan = { workspace = true }
+tombi-rowan = { workspace = true }
 thiserror = { workspace = true }
-text-size = { workspace = true }
-rstest.workspace = true
+text = { workspace = true }
+rstest = { workspace = true}

@@ -4,8 +4,14 @@ impl Format for ast::Root {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
         self.items()
             .map(|item| item.format(context))
-            .collect::<Vec<_>>()
-            .join("\n\n")
+            .reduce(|acc, item| {
+                if item.starts_with('[') {
+                    format!("{}\n\n{}", acc, item)
+                } else {
+                    format!("{}\n{}", acc, item)
+                }
+            })
+            .unwrap_or_default()
     }
 }
 

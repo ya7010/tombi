@@ -2,7 +2,7 @@ use std::{
     fmt,
     ops::{AddAssign, Deref},
 };
-use text_size::TextSize;
+use text::TextSize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum NodeOrToken<N, T> {

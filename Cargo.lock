@@ -102,7 +102,7 @@ version = "0.0.0"
 dependencies = [
  "itertools",
  "syntax",
- "text-size",
+ "text",
 ]
 
 [[package]]
@@ -384,7 +384,7 @@ dependencies = [
  "schemars",
  "serde",
  "syntax",
- "text-size",
+ "text",
  "thiserror",
  "tracing",
  "tracing-subscriber",
@@ -726,9 +726,9 @@ dependencies = [
  "drop_bomb",
  "itertools",
  "logos",
- "rowan",
  "syntax",
  "thiserror",
+ "tombi-rowan",
  "tracing",
  "tracing-subscriber",
 ]
@@ -858,18 +858,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba39f3699c378cd8970968dcbff9c43159ea4cfbd88d43c00b22f2ef10a435d2"
 
 [[package]]
-name = "rowan"
-version = "0.15.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a542b0253fa46e632d27a1dc5cf7b930de4df8659dc6e720b647fc72147ae3d"
-dependencies = [
- "countme",
- "hashbrown 0.14.5",
- "rustc-hash 1.1.0",
- "text-size",
-]
-
-[[package]]
 name = "rstest"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -904,12 +892,6 @@ name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
-
-[[package]]
-name = "rustc-hash"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc-hash"
@@ -1068,10 +1050,10 @@ name = "syntax"
 version = "0.0.1"
 dependencies = [
  "logos",
- "rowan",
  "rstest",
- "text-size",
+ "text",
  "thiserror",
+ "tombi-rowan",
 ]
 
 [[package]]
@@ -1087,7 +1069,7 @@ name = "text-position"
 version = "0.0.0"
 dependencies = [
  "serde",
- "text-size",
+ "text",
  "tower-lsp",
 ]
 
@@ -1096,9 +1078,6 @@ name = "text-size"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f18aa187839b2bdb1ad2fa35ead8c4c2976b64e4363c386d45ac0f7ee85c9233"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "thiserror"
@@ -1213,14 +1192,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "tombi_rowan"
+name = "tombi-rowan"
 version = "0.0.0"
 dependencies = [
  "countme",
  "hashbrown 0.15.0",
- "rustc-hash 2.0.0",
+ "rustc-hash",
  "serde",
- "text-size",
+ "text",
 ]
 
 [[package]]

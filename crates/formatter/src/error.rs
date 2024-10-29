@@ -7,7 +7,7 @@ pub enum Error {
 #[derive(Debug, Clone, thiserror::Error)]
 pub struct ParseError {
     pub message: String,
-    pub range: text_size::TextRange,
+    pub range: text::TextRange,
     pub text: String,
 }
 

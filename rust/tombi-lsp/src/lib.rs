@@ -1,4 +1,5 @@
 pub mod app;
+mod document;
 mod server;
 mod toml;
 mod version;

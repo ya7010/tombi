@@ -1,16 +1,17 @@
 [package]
-name = "tombi_rowan"
+name = "tombi-rowan"
 version = "0.0.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
 [features]
-serde1 = ["serde", "text-size/serde"]
+default = []
+serde1 = ["serde", "text/serde"]
 
 [dependencies]
 countme = "3.0.1"
 hashbrown = "0.15.0"
 rustc-hash = "2.0.0"
-serde = {workspace = true, optional = true, default-features = false}
-text-size.workspace = true
+serde = { workspace = true, optional = true }
+text = { workspace = true }

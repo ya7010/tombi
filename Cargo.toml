@@ -28,18 +28,18 @@ nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
-rowan = "0.15.16"
 rstest = "0.23.0"
 schemars = "0.8.21"
 semver = "1.0.23"
 serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "1.0.130"
 syntax = { path = "crates/syntax" }
-text-position = { path = "crates/text-position" }
 text = { path = "crates/text" }
+text-position = { path = "crates/text-position" }
 text-size = { version = "1.1.1" }
 thiserror = "1.0.64"
 tokio = "1.41.0"
+tombi-rowan = { path = "crates/tombi-rowan" }
 tower-lsp = "0.20.0"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"

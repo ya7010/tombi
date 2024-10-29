@@ -86,7 +86,7 @@ impl SyntaxKind {
         matches!(self, SyntaxKind::WHITESPACE)
     }
 }
-impl From<SyntaxKind> for rowan::SyntaxKind {
+impl From<SyntaxKind> for tombi_rowan::SyntaxKind {
     #[inline]
     fn from(k: SyntaxKind) -> Self {
         Self(k as u16)

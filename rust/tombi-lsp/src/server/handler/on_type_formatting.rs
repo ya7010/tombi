@@ -1,5 +1,5 @@
 use text_position::TextPosition;
-use text_size::TextSize;
+use text::TextSize;
 use tower_lsp::lsp_types::{
     DocumentOnTypeFormattingParams, Position, Range, TextDocumentPositionParams, TextEdit,
 };

@@ -2,7 +2,7 @@ use crate::toml;
 use ast::{algo::ancestors_at_offset, AstNode};
 use parser::SyntaxKind;
 use text_position::TextPosition;
-use text_size::{TextRange, TextSize};
+use text::{TextRange, TextSize};
 use tower_lsp::lsp_types::{
     Hover, HoverContents, HoverParams, MarkupContent, MarkupKind, Position, Range,
     TextDocumentPositionParams,

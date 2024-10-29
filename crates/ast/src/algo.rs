@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use syntax::SyntaxNode;
-use text_size::TextSize;
+use text::TextSize;
 
 use crate::AstNode;
 

@@ -1,7 +1,7 @@
 use ast::AstNode;
 use parser::{SyntaxNode, SyntaxToken};
+use text::TextRange;
 use text_position::TextPosition;
-use text_size::TextRange;
 use tower_lsp::lsp_types::{
     Position, Range, SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams,
     SemanticTokensResult,

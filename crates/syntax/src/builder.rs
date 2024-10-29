@@ -1,15 +1,15 @@
-use rowan::Language;
+use tombi_rowan::Language;
 
 use crate::{IntoRange, TomlLanguage};
 
 #[derive(Default)]
 pub struct SyntaxTreeBuilder {
     errors: Vec<crate::SyntaxError>,
-    inner: rowan::GreenNodeBuilder<'static>,
+    inner: tombi_rowan::GreenNodeBuilder<'static>,
 }
 
 impl SyntaxTreeBuilder {
-    pub fn finish(self) -> (rowan::GreenNode, Vec<crate::SyntaxError>) {
+    pub fn finish(self) -> (tombi_rowan::GreenNode, Vec<crate::SyntaxError>) {
         let green = self.inner.finish();
         (green, self.errors)
     }

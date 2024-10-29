@@ -18,7 +18,7 @@ impl Error {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxError {
     message: String,
-    range: text_size::TextRange,
+    range: text::TextRange,
 }
 
 impl SyntaxError {
@@ -33,11 +33,11 @@ impl SyntaxError {
         &self.message
     }
 
-    pub fn range(&self) -> text_size::TextRange {
+    pub fn range(&self) -> text::TextRange {
         self.range
     }
 
-    pub fn with_range(mut self, range: text_size::TextRange) -> Self {
+    pub fn with_range(mut self, range: text::TextRange) -> Self {
         self.range = range;
         self
     }

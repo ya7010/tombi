@@ -10,5 +10,5 @@ lsp = ["tower-lsp"]
 
 [dependencies]
 serde = { workspace = true, optional = true }
-text-size = { workspace = true }
+text = { workspace = true }
 tower-lsp = { workspace = true, optional = true }

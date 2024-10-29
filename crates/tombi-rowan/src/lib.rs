@@ -26,7 +26,7 @@ mod serde_impls;
 #[allow(unsafe_code)]
 mod sll;
 
-pub use text_size::{TextLen, TextRange, TextSize};
+pub use text::{TextLen, TextRange, TextSize};
 
 pub use crate::{
     api::{

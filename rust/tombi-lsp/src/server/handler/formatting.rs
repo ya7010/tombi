@@ -1,5 +1,5 @@
+use text::TextSize;
 use text_position::TextPosition;
-use text_size::TextSize;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Position, Range, TextEdit};
 
 use crate::{server::backend::Backend, toml};

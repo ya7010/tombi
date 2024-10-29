@@ -9,16 +9,12 @@ pub struct Diagnostic {
     level: level::Level,
     message: String,
     position: text_position::TextPosition,
-    range: text_size::TextRange,
+    range: text::TextRange,
     source_file: Option<std::path::PathBuf>,
 }
 
 impl Diagnostic {
-    pub fn new_warning(
-        message: impl Into<String>,
-        source: &str,
-        range: text_size::TextRange,
-    ) -> Self {
+    pub fn new_warning(message: impl Into<String>, source: &str, range: text::TextRange) -> Self {
         Self {
             level: level::Level::Warning,
             message: message.into(),
@@ -28,11 +24,7 @@ impl Diagnostic {
         }
     }
 
-    pub fn new_error(
-        message: impl Into<String>,
-        source: &str,
-        range: text_size::TextRange,
-    ) -> Self {
+    pub fn new_error(message: impl Into<String>, source: &str, range: text::TextRange) -> Self {
         Self {
             level: level::Level::Error,
             message: message.into(),
@@ -59,7 +51,7 @@ impl Diagnostic {
         self.position
     }
 
-    pub fn range(&self) -> text_size::TextRange {
+    pub fn range(&self) -> text::TextRange {
         self.range
     }
 

@@ -1,10 +1,9 @@
-use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
         DocumentOnTypeFormattingParams, DocumentSymbolParams, DocumentSymbolResponse, Hover,
         HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensResult, TextEdit, Url,
+        SemanticTokensResult, TextEdit,
     },
     LanguageServer,
 };
@@ -17,8 +16,18 @@ use super::handler::{
 
 #[derive(Debug)]
 pub struct Backend {
+    #[allow(dead_code)]
     pub client: tower_lsp::Client,
-    pub _file_map: DashMap<Url, String>,
+    // pub documents: DashMap<Url, Document>,
+}
+
+impl Backend {
+    pub fn new(client: tower_lsp::Client) -> Self {
+        Self {
+            client,
+            // documents: DashMap::new(),
+        }
+    }
 }
 
 #[tower_lsp::async_trait]

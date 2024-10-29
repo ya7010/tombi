@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use text_size::TextSize;
+use text::TextSize;
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash, Ord)]
 pub struct TextPosition {
