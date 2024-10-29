@@ -1,5 +1,6 @@
 mod features;
 mod position;
+mod range;
 mod text_range;
 mod text_size;
 mod traits;
