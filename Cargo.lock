@@ -1178,6 +1178,7 @@ dependencies = [
  "futures",
  "futures-util",
  "parser",
+ "rustc-hash",
  "semver",
  "serde",
  "serde_json",

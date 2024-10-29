@@ -29,6 +29,7 @@ parser = { path = "crates/parser" }
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
 rstest = "0.23.0"
+rustc-hash = "2.0.0"
 schemars = "0.8.21"
 semver = "1.0.23"
 serde = { version = "^1.0.0", features = ["derive"] }

@@ -1,9 +1,11 @@
 use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, DiagnosticOptions, DiagnosticServerCapabilities,
     DocumentOnTypeFormattingOptions, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, ServerCapabilities, ServerInfo,
+    OneOf, PositionEncodingKind, SemanticTokenModifier, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
 };
+
+use crate::converters::encoding::{negotiated_encoding, PositionEncoding, WideEncoding};
 
 use super::semantic_tokens_full::TokenType;
 
@@ -30,9 +32,15 @@ pub fn handle_initialize(
     })
 }
 
-pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerCapabilities {
+pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCapabilities {
     ServerCapabilities {
-        position_encoding: None,
+        position_encoding: Some(match negotiated_encoding(client_capabilities) {
+            PositionEncoding::Utf8 => PositionEncodingKind::UTF8,
+            PositionEncoding::Wide(wide) => match wide {
+                WideEncoding::Utf16 => PositionEncodingKind::UTF16,
+                WideEncoding::Utf32 => PositionEncodingKind::UTF32,
+            },
+        }),
         // text_document_sync: Some(TextDocumentSyncCapability::Options(
         //     TextDocumentSyncOptions {
         //         open_close: Some(true),
