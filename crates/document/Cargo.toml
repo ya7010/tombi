@@ -11,6 +11,7 @@ lsp = ["tower-lsp"]
 [dependencies]
 ast = {workspace = true}
 indexmap = { workspace = true}
+text = {workspace = true}
 text-position = {workspace = true}
 text-size = { workspace = true }
 thiserror.workspace = true

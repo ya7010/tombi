@@ -9,6 +9,7 @@ license = { workspace = true }
 nu-ansi-term = { workspace = true }
 serde = { workspace = true }
 text-position = { workspace = true }
+text = { workspace = true }
 text-size = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }

@@ -305,6 +305,7 @@ dependencies = [
  "clap-verbosity-flag",
  "nu-ansi-term 0.50.1",
  "serde",
+ "text",
  "text-position",
  "text-size",
  "thiserror",
@@ -318,6 +319,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "indexmap",
+ "text",
  "text-position",
  "text-size",
  "thiserror",

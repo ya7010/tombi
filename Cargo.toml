@@ -36,6 +36,7 @@ serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "1.0.130"
 syntax = { path = "crates/syntax" }
 text-position = { path = "crates/text-position" }
+text = { path = "crates/text" }
 text-size = { version = "1.1.1" }
 thiserror = "1.0.64"
 tokio = "1.41.0"

@@ -26,6 +26,7 @@ semver = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { workspace = true }
 text-position = { workspace = true, features = ["lsp"] }
+text = { workspace = true, features = ["lsp"] }
 text-size = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["io-std", "rt"] }
