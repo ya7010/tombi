@@ -1,26 +1,24 @@
-use text_position::TextPosition;
-
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Range {
-    start: TextPosition,
-    end: TextPosition,
+    start: text::Position,
+    end: text::Position,
 }
 
 impl Range {
     #[inline]
     pub fn from_source(source: &str, node: impl ast::AstNode) -> Self {
-        let start = TextPosition::from_source(source, node.syntax().text_range().start());
-        let end = TextPosition::from_source(source, node.syntax().text_range().end());
+        let start = text::Position::from_source(source, node.syntax().text_range().start());
+        let end = text::Position::from_source(source, node.syntax().text_range().end());
         Self { start, end }
     }
 
     #[inline]
-    pub fn start(&self) -> &TextPosition {
+    pub fn start(&self) -> &text::Position {
         &self.start
     }
 
     #[inline]
-    pub fn end(&self) -> &TextPosition {
+    pub fn end(&self) -> &text::Position {
         &self.end
     }
 

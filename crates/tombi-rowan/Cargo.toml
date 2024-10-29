@@ -7,7 +7,7 @@ license.workspace = true
 
 [features]
 default = []
-serde1 = ["serde", "text/serde"]
+serde = ["dep:serde", "text/serde"]
 
 [dependencies]
 countme = "3.0.1"

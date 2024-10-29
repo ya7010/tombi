@@ -1,7 +1,6 @@
 use crate::toml;
 use ast::{algo::ancestors_at_offset, AstNode};
 use parser::SyntaxKind;
-use text_position::TextPosition;
 use text::{TextRange, TextSize};
 use tower_lsp::lsp_types::{
     Hover, HoverContents, HoverParams, MarkupContent, MarkupKind, Position, Range,
@@ -26,8 +25,8 @@ pub async fn handle_hover(
 
     if let Some((value, range)) = get_hover(ast, &source, position) {
         let range = Some(Range::new(
-            TextPosition::from_source(&source, range.start()).into(),
-            TextPosition::from_source(&source, range.end()).into(),
+            text::Position::from_source(&source, range.start()).into(),
+            text::Position::from_source(&source, range.end()).into(),
         ));
 
         Ok(Some(Hover {
@@ -43,7 +42,7 @@ pub async fn handle_hover(
 }
 
 fn get_hover(ast: ast::Root, source: &str, position: Position) -> Option<(String, TextRange)> {
-    let offset = TextSize::new(TextPosition::from(&source, position).offset() as u32);
+    let offset = TextSize::from_source(source, position);
 
     // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.

@@ -1,7 +1,6 @@
 use ast::AstNode;
 use parser::{SyntaxNode, SyntaxToken};
 use text::TextRange;
-use text_position::TextPosition;
 use tower_lsp::lsp_types::{
     Position, Range, SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams,
     SemanticTokensResult,
@@ -202,8 +201,8 @@ impl<'a> SemanticTokensBuilder<'a> {
 
     fn add_token(&mut self, token_type: TokenType, node: TokenOrNode) {
         let range = Range::new(
-            TextPosition::from_source(self.source, node.text_range().start()).into(),
-            TextPosition::from_source(self.source, node.text_range().end()).into(),
+            text::Position::from_source(self.source, node.text_range().start()).into(),
+            text::Position::from_source(self.source, node.text_range().end()).into(),
         );
 
         let relative = relative_range(range, self.last_range);

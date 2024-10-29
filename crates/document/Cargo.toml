@@ -6,13 +6,11 @@ authors = {workspace = true}
 license = {workspace = true}
 
 [features]
-lsp = ["tower-lsp"]
+lsp = ["tower-lsp", "text/lsp"]
 
 [dependencies]
 ast = {workspace = true}
 indexmap = { workspace = true}
-text = {workspace = true}
-text-position = {workspace = true}
-text-size = { workspace = true }
+text = { workspace = true }
 thiserror.workspace = true
 tower-lsp = { workspace = true, optional = true }

@@ -8,7 +8,7 @@ pub use printer::Print;
 pub struct Diagnostic {
     level: level::Level,
     message: String,
-    position: text_position::TextPosition,
+    position: text::Position,
     range: text::TextRange,
     source_file: Option<std::path::PathBuf>,
 }
@@ -18,7 +18,7 @@ impl Diagnostic {
         Self {
             level: level::Level::Warning,
             message: message.into(),
-            position: text_position::TextPosition::from_source(source, range.start()),
+            position: text::Position::from_source(source, range.start()),
             range,
             source_file: None,
         }
@@ -28,7 +28,7 @@ impl Diagnostic {
         Self {
             level: level::Level::Error,
             message: message.into(),
-            position: text_position::TextPosition::from_source(source, range.start()),
+            position: text::Position::from_source(source, range.start()),
             range,
             source_file: None,
         }
@@ -47,7 +47,7 @@ impl Diagnostic {
         &self.message
     }
 
-    pub fn position(&self) -> text_position::TextPosition {
+    pub fn position(&self) -> text::Position {
         self.position
     }
 

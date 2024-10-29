@@ -1,6 +1,5 @@
 use text::TextSize;
-use text_position::TextPosition;
-use tower_lsp::lsp_types::{DocumentFormattingParams, Position, Range, TextEdit};
+use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
 use crate::{server::backend::Backend, toml};
 
@@ -14,8 +13,8 @@ pub async fn handle_formatting(
         if new_text != source {
             return Ok(Some(vec![TextEdit {
                 range: Range::new(
-                    Position::new(0, 0),
-                    TextPosition::from_source(&source, TextSize::new(source.len() as u32)).into(),
+                    text::Position::new(0, 0).into(),
+                    text::Position::from_source(&source, TextSize::new(source.len() as u32)).into(),
                 ),
                 new_text,
             }]));

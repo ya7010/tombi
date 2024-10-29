@@ -1,7 +1,6 @@
-use text_position::TextPosition;
 use text::TextSize;
 use tower_lsp::lsp_types::{
-    DocumentOnTypeFormattingParams, Position, Range, TextDocumentPositionParams, TextEdit,
+    DocumentOnTypeFormattingParams, Range, TextDocumentPositionParams, TextEdit,
 };
 
 use crate::toml;
@@ -18,8 +17,8 @@ pub async fn handle_on_type_formatting(
         if new_text != source {
             return Ok(Some(vec![TextEdit {
                 range: Range::new(
-                    Position::new(0, 0),
-                    TextPosition::from_source(&source, TextSize::new(source.len() as u32)).into(),
+                    text::Position::new(0, 0).into(),
+                    text::Position::from_source(&source, TextSize::new(source.len() as u32)).into(),
                 ),
                 new_text,
             }]));

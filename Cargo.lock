@@ -306,8 +306,6 @@ dependencies = [
  "nu-ansi-term 0.50.1",
  "serde",
  "text",
- "text-position",
- "text-size",
  "thiserror",
  "tracing",
  "tracing-subscriber",
@@ -320,8 +318,6 @@ dependencies = [
  "ast",
  "indexmap",
  "text",
- "text-position",
- "text-size",
  "thiserror",
  "tower-lsp",
 ]
@@ -1065,21 +1061,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "text-position"
-version = "0.0.0"
-dependencies = [
- "serde",
- "text",
- "tower-lsp",
-]
-
-[[package]]
-name = "text-size"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f18aa187839b2bdb1ad2fa35ead8c4c2976b64e4363c386d45ac0f7ee85c9233"
-
-[[package]]
 name = "thiserror"
 version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1183,8 +1164,6 @@ dependencies = [
  "serde",
  "serde_json",
  "text",
- "text-position",
- "text-size",
  "thiserror",
  "tokio",
  "tower-lsp",

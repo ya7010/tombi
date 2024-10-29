@@ -1,5 +1,5 @@
 #[cfg(feature = "lsp")]
-mod lsp;
+pub mod lsp;
 
 #[cfg(feature = "serde")]
-mod serde;
+pub mod serde;

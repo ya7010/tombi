@@ -1,4 +1,4 @@
-use text_position::TextPosition;
+use text::Position;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, Range, RelatedFullDocumentDiagnosticReport,
@@ -17,8 +17,8 @@ pub async fn handle_diagnostic(
             .map(|error| {
                 let range = error.range();
                 let range = Range::new(
-                    TextPosition::from_source(&source, range.start()).into(),
-                    TextPosition::from_source(&source, range.end()).into(),
+                    text::Position::from_source(&source, range.start()).into(),
+                    text::Position::from_source(&source, range.end()).into(),
                 );
                 tower_lsp::lsp_types::Diagnostic {
                     range,
