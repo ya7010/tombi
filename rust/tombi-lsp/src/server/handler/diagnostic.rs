@@ -1,46 +1,60 @@
-use text::Position;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
-    FullDocumentDiagnosticReport, Range, RelatedFullDocumentDiagnosticReport,
+    FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
 };
 
-use crate::toml;
+use crate::{
+    converters::{
+        encoding::{PositionEncoding, WideEncoding},
+        to_lsp,
+    },
+    document::Document,
+    server::backend::Backend,
+};
 
 pub async fn handle_diagnostic(
+    backend: &Backend,
     DocumentDiagnosticParams { text_document, .. }: DocumentDiagnosticParams,
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_diagnostic");
 
-    let source = toml::try_load(&text_document.uri)?;
-
-    let items = if let Err(errors) = formatter::format(&source) {
-        errors
-            .iter()
-            .map(|error| {
-                let range = error.range();
-                let range = Range::new(
-                    text::Position::from_source(&source, range.start()).into(),
-                    text::Position::from_source(&source, range.end()).into(),
-                );
-                tower_lsp::lsp_types::Diagnostic {
-                    range,
-                    severity: Some(tower_lsp::lsp_types::DiagnosticSeverity::ERROR),
-                    message: error.message().to_string(),
-                    ..Default::default()
-                }
-            })
-            .collect()
-    } else {
-        vec![]
-    };
+    let diagnostics = get_diagnostics(backend.documents.get(&text_document.uri).as_deref()).await;
 
     Ok(DocumentDiagnosticReportResult::Report(
         DocumentDiagnosticReport::Full(RelatedFullDocumentDiagnosticReport {
             full_document_diagnostic_report: FullDocumentDiagnosticReport {
-                items,
+                items: diagnostics,
                 ..Default::default()
             },
             ..Default::default()
         }),
     ))
+}
+
+pub async fn get_diagnostics(document: Option<&Document>) -> Vec<tower_lsp::lsp_types::Diagnostic> {
+    let Some(document) = document else {
+        return vec![];
+    };
+
+    if let Err(diagnostics) = formatter::format(&document.source) {
+        diagnostics
+            .iter()
+            .filter_map(|diagnostic| {
+                to_lsp::range(
+                    &document.line_index,
+                    diagnostic.range(),
+                    PositionEncoding::Wide(WideEncoding::Utf16),
+                )
+                .ok()
+                .map(|range| tower_lsp::lsp_types::Diagnostic {
+                    range,
+                    severity: Some(tower_lsp::lsp_types::DiagnosticSeverity::ERROR),
+                    message: diagnostic.message().to_string(),
+                    ..Default::default()
+                })
+            })
+            .collect()
+    } else {
+        vec![]
+    }
 }

@@ -2,7 +2,8 @@ use super::Format;
 
 impl Format for ast::Root {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        self.items()
+        match self
+            .items()
             .map(|item| item.format(context))
             .reduce(|acc, item| {
                 if item.starts_with('[') {
@@ -10,8 +11,10 @@ impl Format for ast::Root {
                 } else {
                     format!("{}\n{}", acc, item)
                 }
-            })
-            .unwrap_or_default()
+            }) {
+            Some(it) => it + "\n",
+            None => Default::default(),
+        }
     }
 }
 

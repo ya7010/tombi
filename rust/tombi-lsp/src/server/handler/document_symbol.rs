@@ -1,4 +1,7 @@
-use crate::{server::backend::Backend, toml};
+use crate::{
+    server::backend::{self, Backend},
+    toml,
+};
 use ast::AstNode;
 use document::{Node, Parse};
 use tower_lsp::lsp_types::{
@@ -6,18 +9,20 @@ use tower_lsp::lsp_types::{
 };
 
 pub async fn handle_document_symbol(
-    _backend: &Backend,
+    backend: &Backend,
     DocumentSymbolParams { text_document, .. }: DocumentSymbolParams,
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_document_symbol");
 
-    let source = toml::try_load(&text_document.uri)?;
-
-    let Some(ast) = ast::Root::cast(parser::parse(&source).into_syntax_node()) else {
+    let Some(document) = backend.documents.get(&text_document.uri) else {
         return Ok(None);
     };
 
-    let (document, _) = ast.parse(&source).into();
+    let Some(ast) = ast::Root::cast(parser::parse(&document.source).into_syntax_node()) else {
+        return Ok(None);
+    };
+
+    let (document, _) = ast.parse(&document.source).into();
 
     let symbols = create_symbols(&document);
 

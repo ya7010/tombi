@@ -4,6 +4,7 @@ use tower_lsp::lsp_types::{
     OneOf, PositionEncodingKind, SaveOptions, SemanticTokenModifier, SemanticTokensFullOptions,
     SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
     TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TextDocumentSyncSaveOptions,
 };
 
 use crate::converters::encoding::{negotiated_encoding, PositionEncoding, WideEncoding};
@@ -128,9 +129,9 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
         //         resolve_provider: Some(true),
         //     },
         // ))),
-        diagnostic_provider: Some(DiagnosticServerCapabilities::Options(
-            DiagnosticOptions::default(),
-        )),
+        diagnostic_provider: Some(DiagnosticServerCapabilities::Options(DiagnosticOptions {
+            ..Default::default()
+        })),
 
         ..Default::default()
     }
