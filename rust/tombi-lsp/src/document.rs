@@ -1,10 +1,10 @@
 use crate::converters::line_index::LineIndex;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Document {
-    source: String,
-    line_index: LineIndex,
-    document: Option<document::Table>,
+    pub source: String,
+    pub line_index: LineIndex,
+    pub document: Option<document::Table>,
 }
 
 impl Document {
@@ -17,21 +17,5 @@ impl Document {
             line_index,
             document: None,
         }
-    }
-
-    pub fn source(&self) -> &str {
-        self.source.as_str()
-    }
-
-    pub fn line_index(&self) -> &LineIndex {
-        &self.line_index
-    }
-
-    pub fn document(&mut self) -> &document::Table {
-        // TODO: Implement this
-        // if self.document.is_none() {
-        //     self.document = Some(document::Table::new(&self.ast));
-        // }
-        self.document.as_ref().unwrap()
     }
 }

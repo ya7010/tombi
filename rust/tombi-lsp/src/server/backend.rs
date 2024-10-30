@@ -1,11 +1,10 @@
 use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
-        ClientCapabilities, DidChangeConfigurationParams, DidChangeTextDocumentParams,
-        DidOpenTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
-        DocumentOnTypeFormattingParams, DocumentSymbolParams, DocumentSymbolResponse, Hover,
-        HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensResult, TextEdit, Url,
+        DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
+        DocumentDiagnosticParams, DocumentDiagnosticReportResult, DocumentOnTypeFormattingParams,
+        DocumentSymbolParams, DocumentSymbolResponse, Hover, HoverParams, InitializeParams,
+        InitializeResult, SemanticTokensParams, SemanticTokensResult, TextEdit, Url,
     },
     LanguageServer,
 };
@@ -29,7 +28,7 @@ impl Backend {
     pub fn new(client: tower_lsp::Client) -> Self {
         Self {
             client,
-            documents: DashMap::new(),
+            documents: Default::default(),
         }
     }
 }

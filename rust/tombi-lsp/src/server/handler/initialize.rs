@@ -1,8 +1,9 @@
 use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, DiagnosticOptions, DiagnosticServerCapabilities,
     DocumentOnTypeFormattingOptions, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, PositionEncodingKind, SemanticTokenModifier, SemanticTokensFullOptions,
+    OneOf, PositionEncodingKind, SaveOptions, SemanticTokenModifier, SemanticTokensFullOptions,
     SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
 };
 
 use crate::converters::encoding::{negotiated_encoding, PositionEncoding, WideEncoding};
@@ -41,15 +42,14 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
                 WideEncoding::Utf32 => PositionEncodingKind::UTF32,
             },
         }),
-        // text_document_sync: Some(TextDocumentSyncCapability::Options(
-        //     TextDocumentSyncOptions {
-        //         open_close: Some(true),
-        //         change: Some(TextDocumentSyncKind::INCREMENTAL),
-        //         will_save: None,
-        //         will_save_wait_until: None,
-        //         save: Some(SaveOptions::default().into()),
-        //     },
-        // )),
+        text_document_sync: Some(TextDocumentSyncCapability::Options(
+            TextDocumentSyncOptions {
+                open_close: Some(true),
+                change: Some(TextDocumentSyncKind::INCREMENTAL),
+                save: Some(SaveOptions::default().into()),
+                ..Default::default()
+            },
+        )),
         hover_provider: Some(HoverProviderCapability::Simple(true)),
         document_on_type_formatting_provider: Some(DocumentOnTypeFormattingOptions {
             first_trigger_character: "=".to_string(),
@@ -131,6 +131,7 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
         diagnostic_provider: Some(DiagnosticServerCapabilities::Options(
             DiagnosticOptions::default(),
         )),
+
         ..Default::default()
     }
 }
