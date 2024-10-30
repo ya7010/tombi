@@ -17,6 +17,8 @@ pub async fn handle_hover(
         ..
     }: HoverParams,
 ) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
+    tracing::info!("handle_hover");
+
     let source = toml::try_load(&text_document.uri)?;
 
     let Some(ast) = ast::Root::cast(parser::parse(&source).into_syntax_node()) else {
@@ -47,10 +49,7 @@ fn get_hover(ast: ast::Root, source: &str, position: Position) -> Option<(String
     // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.
 
-    tracing::info!("Hovering at offset: {offset:#?}",);
     for node in ancestors_at_offset(&ast.syntax(), offset) {
-        tracing::info!("Hovering node: {:?}", node);
-
         if let Some(node) = ast::IntegerDec::cast(node.to_owned()) {
             return Some(("IntegerDec".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::IntegerBin::cast(node.to_owned()) {

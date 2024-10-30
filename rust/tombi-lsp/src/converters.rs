@@ -1,4 +1,4 @@
 pub mod encoding;
-pub mod from_proto;
+pub mod from_lsp;
 pub mod line_index;
-pub mod to_proto;
+pub mod to_lsp;

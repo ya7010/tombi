@@ -17,7 +17,7 @@ pub async fn run() -> Result<(), anyhow::Error> {
 
     Server::new(stdin, stdout, socket).serve(service).await;
 
-    tracing::info!("server did shut down");
+    tracing::info!("Tombi LSP Server did shut down.");
 
     Ok(())
 }

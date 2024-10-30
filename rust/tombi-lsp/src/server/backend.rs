@@ -1,31 +1,35 @@
+use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
-        DidChangeConfigurationParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
+        ClientCapabilities, DidChangeConfigurationParams, DidChangeTextDocumentParams,
+        DidOpenTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
         DocumentOnTypeFormattingParams, DocumentSymbolParams, DocumentSymbolResponse, Hover,
         HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensResult, TextEdit,
+        SemanticTokensResult, TextEdit, Url,
     },
     LanguageServer,
 };
 
+use crate::document::Document;
+
 use super::handler::{
-    handle_diagnostic, handle_did_change_configuration, handle_document_symbol, handle_formatting,
-    handle_hover, handle_initialize, handle_on_type_formatting, handle_semantic_tokens_full,
-    handle_shutdown,
+    handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
+    handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
+    handle_on_type_formatting, handle_semantic_tokens_full, handle_shutdown,
 };
 
 #[derive(Debug)]
 pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
-    // pub documents: DashMap<Url, Document>,
+    pub documents: DashMap<Url, Document>,
 }
 
 impl Backend {
     pub fn new(client: tower_lsp::Client) -> Self {
         Self {
             client,
-            // documents: DashMap::new(),
+            documents: DashMap::new(),
         }
     }
 }
@@ -41,6 +45,14 @@ impl LanguageServer for Backend {
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {
         handle_shutdown()
+    }
+
+    async fn did_open(&self, params: DidOpenTextDocumentParams) {
+        handle_did_open(self, params).await
+    }
+
+    async fn did_change(&self, params: DidChangeTextDocumentParams) {
+        handle_did_change(self, params).await
     }
 
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {

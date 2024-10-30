@@ -1,3 +1,5 @@
 use tower_lsp::lsp_types::DidChangeConfigurationParams;
 
-pub async fn handle_did_change_configuration(_params: DidChangeConfigurationParams) {}
+pub async fn handle_did_change_configuration(_params: DidChangeConfigurationParams) {
+    tracing::info!("handle_did_change_configuration");
+}

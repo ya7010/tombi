@@ -1,16 +1,25 @@
 use text::TextSize;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
-use crate::{server::backend::Backend, toml};
+use crate::{document::Document, server::backend::Backend};
 
 pub async fn handle_formatting(
-    _backend: &Backend,
+    backend: &Backend,
     DocumentFormattingParams { text_document, .. }: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
-    let source = toml::try_load(&text_document.uri)?;
+    tracing::info!("handle_formatting");
+
+    let uri = &text_document.uri;
+    let Some(document) = backend.documents.get(&uri) else {
+        return Ok(None);
+    };
+    let source = document.source();
 
     if let Ok(new_text) = formatter::format(&source) {
         if new_text != source {
+            backend
+                .documents
+                .insert(text_document.uri, Document::new(new_text.clone()));
             return Ok(Some(vec![TextEdit {
                 range: Range::new(
                     text::Position::new(0, 0).into(),
@@ -20,5 +29,6 @@ pub async fn handle_formatting(
             }]));
         }
     }
+
     Ok(None)
 }

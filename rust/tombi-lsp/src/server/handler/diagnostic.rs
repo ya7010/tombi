@@ -9,6 +9,8 @@ use crate::toml;
 pub async fn handle_diagnostic(
     DocumentDiagnosticParams { text_document, .. }: DocumentDiagnosticParams,
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
+    tracing::info!("handle_diagnostic");
+
     let source = toml::try_load(&text_document.uri)?;
 
     let items = if let Err(errors) = formatter::format(&source) {

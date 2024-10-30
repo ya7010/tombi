@@ -82,9 +82,9 @@ impl WideChar {
 mod tests {
     use crate::converters::encoding::WideEncoding::{Utf16, Utf32};
     use crate::converters::encoding::{LineCol, PositionEncoding, WideEncoding};
-    use crate::converters::from_proto::offset;
+    use crate::converters::from_lsp::offset;
     use crate::converters::line_index::LineIndex;
-    use crate::converters::to_proto::position;
+    use crate::converters::to_lsp::position;
     use text::TextSize;
     use tower_lsp::lsp_types::Position;
 

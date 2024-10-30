@@ -7,9 +7,11 @@ use tower_lsp::lsp_types::{
 
 pub async fn handle_document_symbol(
     _backend: &Backend,
-    params: DocumentSymbolParams,
+    DocumentSymbolParams { text_document, .. }: DocumentSymbolParams,
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
-    let source = toml::try_load(&params.text_document.uri)?;
+    tracing::info!("handle_document_symbol");
+
+    let source = toml::try_load(&text_document.uri)?;
 
     let Some(ast) = ast::Root::cast(parser::parse(&source).into_syntax_node()) else {
         return Ok(None);
@@ -19,7 +21,7 @@ pub async fn handle_document_symbol(
 
     let symbols = create_symbols(&document);
 
-    tracing::info!("DocumentSymbols: {symbols:#?}");
+    tracing::debug!("DocumentSymbols: {symbols:#?}");
 
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }

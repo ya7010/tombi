@@ -11,9 +11,12 @@ pub async fn handle_on_type_formatting(
         ..
     }: DocumentOnTypeFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
+    tracing::info!("handle_on_type_formatting");
+
     let source = toml::try_load(&text_document.uri)?;
 
     if let Ok(new_text) = formatter::format(&source) {
+        tracing::info!("new_text: {}", new_text);
         if new_text != source {
             return Ok(Some(vec![TextEdit {
                 range: Range::new(
