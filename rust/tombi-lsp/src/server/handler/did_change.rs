@@ -31,7 +31,6 @@ pub async fn handle_did_change(
         }
     };
 
-    tracing::info!("content_changes: {content_changes:#?}");
     for content_change in content_changes {
         if let Some(range) = content_change.range {
             let Ok(range) = from_lsp::text_range(
@@ -41,6 +40,11 @@ pub async fn handle_did_change(
             ) else {
                 continue;
             };
+
+            if Into::<usize>::into(range.end()) > document.source.len() {
+                tracing::warn!("range is out of range");
+                continue;
+            }
 
             document
                 .source
