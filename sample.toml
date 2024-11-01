@@ -3,7 +3,7 @@
 [aaaa.bbb]
 key1 = 1
 key2 = "2"
-array1 = [ { key3 = 12, key4 = 2024-01-01 } ]
+array1 = [ { key3 = 12, key4 = 2024-01-01T } ]
 
 [aaaa.ccc]
 key1 = 11
@@ -22,7 +22,7 @@ key6 = 1
 key6 = 2
 
 [[ffff.ggg]]
-key6 = 1
+key6 = 2
 
 [[ffff.ggg]]
 key6 = 2

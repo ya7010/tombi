@@ -46,7 +46,7 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
         text_document_sync: Some(TextDocumentSyncCapability::Options(
             TextDocumentSyncOptions {
                 open_close: Some(true),
-                change: Some(TextDocumentSyncKind::INCREMENTAL),
+                change: Some(TextDocumentSyncKind::FULL),
                 save: Some(SaveOptions::default().into()),
                 ..Default::default()
             },

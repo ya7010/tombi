@@ -38,6 +38,7 @@ pub async fn handle_did_change(
                 range,
                 PositionEncoding::Wide(WideEncoding::Utf16),
             ) else {
+                tracing::warn!("failed to convert range");
                 continue;
             };
 
@@ -49,6 +50,8 @@ pub async fn handle_did_change(
             document
                 .source
                 .replace_range(std::ops::Range::<usize>::from(range), &content_change.text);
+        } else {
+            document.source = content_change.text;
         }
     }
 }
