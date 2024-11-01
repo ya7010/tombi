@@ -1,5 +1,5 @@
 use dashmap::try_result::TryResult;
-use tower_lsp::lsp_types::DidChangeTextDocumentParams;
+use tower_lsp::lsp_types::{DidChangeTextDocumentParams, TextDocumentIdentifier};
 
 use crate::{
     converters::{
@@ -9,6 +9,7 @@ use crate::{
     server::backend::Backend,
 };
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_did_change(
     backend: &Backend,
     DidChangeTextDocumentParams {
@@ -18,7 +19,7 @@ pub async fn handle_did_change(
 ) {
     tracing::info!("handle_did_change");
 
-    let uri = text_document.uri;
+    let uri = &text_document.uri;
     let mut document = match backend.documents.try_get_mut(&uri) {
         TryResult::Present(document) => document,
         TryResult::Absent => {

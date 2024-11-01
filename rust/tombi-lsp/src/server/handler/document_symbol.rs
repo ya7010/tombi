@@ -1,7 +1,4 @@
-use crate::{
-    server::backend::{self, Backend},
-    toml,
-};
+use crate::server::backend::Backend;
 use ast::AstNode;
 use document::{Node, Parse};
 use tower_lsp::lsp_types::{
