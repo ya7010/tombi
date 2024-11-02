@@ -3,14 +3,38 @@ mod generated;
 
 pub use generated::*;
 use std::marker::PhantomData;
+use syntax::SyntaxKind::*;
 
 pub trait AstNode {
     fn leading_comments(&self) -> Vec<crate::Comment> {
-        vec![]
+        // 先頭から newline もしくは comment が連続して続いている領域を取り出し、 comment のみに絞り込んで返す。
+
+        self.syntax()
+            .children()
+            .into_iter()
+            .take_while(|node| {
+                matches!(
+                    node.kind(),
+                    syntax::SyntaxKind::COMMENT | syntax::SyntaxKind::NEWLINE
+                )
+            })
+            .filter_map(|node| {
+                support::token(&node, COMMENT)
+                    .map(crate::Comment::cast)
+                    .flatten()
+            })
+            .collect()
     }
 
     fn tailing_comment(&self) -> Option<crate::Comment> {
-        None
+        // 末尾から newline もしくは comment が連続して続いている領域を取り出し、 comment のみに絞り込んで返す。
+
+        match self.syntax().children().into_iter().last() {
+            Some(node) => support::token(&node, COMMENT)
+                .map(crate::Comment::cast)
+                .flatten(),
+            None => None,
+        }
     }
 
     fn can_cast(kind: syntax::SyntaxKind) -> bool
