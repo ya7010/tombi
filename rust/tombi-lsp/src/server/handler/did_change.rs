@@ -1,5 +1,5 @@
 use dashmap::try_result::TryResult;
-use tower_lsp::lsp_types::{DidChangeTextDocumentParams, TextDocumentIdentifier};
+use tower_lsp::lsp_types::DidChangeTextDocumentParams;
 
 use crate::{
     converters::{

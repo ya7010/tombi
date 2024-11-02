@@ -24,7 +24,6 @@ pub async fn handle_formatting(
         }
     };
 
-    tracing::info!("start formatting");
     match formatter::format(&document.source) {
         Ok(new_text) => {
             tracing::info!("formatted");
