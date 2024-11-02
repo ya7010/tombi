@@ -48,9 +48,9 @@ Value =
     | InlineTable
 
 KeyValue = Keys '=' Value
-Array = '[' elements: (Value (',' Value)* ','?) ']'
+Array = '[' values: (Value (',' Value)* ','?) ']'
 Table = '[' header: Keys ']' KeyValue*
-InlineTable = '{' elements: (KeyValue (',' KeyValue)* ','?) '}'
+InlineTable = '{' entries: (KeyValue (',' KeyValue)* ','?) '}'
 ArrayOfTable = '[[' header: Keys ']]' KeyValue*
 
 Root = RootItem*

@@ -2,12 +2,12 @@ use crate::Format;
 
 impl Format for ast::Array {
     fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        let elements = self
-            .elements()
+        let values = self
+            .values()
             .map(|it| it.format(context))
             .collect::<Vec<_>>()
             .join(", ");
-        format!("[ {} ]", elements)
+        format!("[ {} ]", values)
     }
 }
 

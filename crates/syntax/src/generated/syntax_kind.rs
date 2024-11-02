@@ -49,14 +49,18 @@ pub enum SyntaxKind {
     #[regex("true|false")]
     BOOLEAN,
     #[regex(
-        "\\d{4}-\\d{2}-\\d{2}[Tt ]\\d{2}:\\d{2}:\\d{2}(?:[\\.,]\\d+)?(?:[Zz]|[+-]\\d{2}:\\d{2})"
+        "\\d{4}-\\d{2}-\\d{2}[Tt ]\\d{2}:\\d{2}:\\d{2}(?:[\\.,]\\d+)?(?:[Zz]|[+-]\\d{2}:\\d{2})",
+        priority = 5
     )]
     OFFSET_DATE_TIME,
-    #[regex("\\d{4}-\\d{2}-\\d{2}(?:T|t| )\\d{2}:\\d{2}:\\d{2}(?:[\\.,]\\d+)?")]
+    #[regex(
+        "\\d{4}-\\d{2}-\\d{2}(?:T|t| )\\d{2}:\\d{2}:\\d{2}(?:[\\.,]\\d+)?",
+        priority = 5
+    )]
     LOCAL_DATE_TIME,
     #[regex("\\d{4}-\\d{2}-\\d{2}", priority = 5)]
     LOCAL_DATE,
-    #[regex("\\d{2}:\\d{2}:\\d{2}(?:[\\.,]\\d+)?")]
+    #[regex("\\d{2}:\\d{2}:\\d{2}(?:[\\.,]\\d+)?", priority = 5)]
     LOCAL_TIME,
     #[regex("[ \\t]+")]
     WHITESPACE,

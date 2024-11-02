@@ -11,7 +11,7 @@ pub struct Array {
 }
 impl Array {
     #[inline]
-    pub fn elements(&self) -> AstChildren<Value> {
+    pub fn values(&self) -> AstChildren<Value> {
         support::children(&self.syntax)
     }
     #[inline]
@@ -97,7 +97,7 @@ pub struct InlineTable {
 }
 impl InlineTable {
     #[inline]
-    pub fn elements(&self) -> AstChildren<KeyValue> {
+    pub fn entries(&self) -> AstChildren<KeyValue> {
         support::children(&self.syntax)
     }
     #[inline]

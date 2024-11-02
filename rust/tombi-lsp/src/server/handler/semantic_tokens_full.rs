@@ -172,7 +172,7 @@ impl AppendSemanticTokens for ast::Value {
 
 impl AppendSemanticTokens for ast::Array {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for value in self.elements() {
+        for value in self.values() {
             value.append_semantic_tokens(builder);
         }
     }
@@ -180,7 +180,7 @@ impl AppendSemanticTokens for ast::Array {
 
 impl AppendSemanticTokens for ast::InlineTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for entry in self.elements() {
+        for entry in self.entries() {
             entry.append_semantic_tokens(builder);
         }
     }
