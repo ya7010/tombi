@@ -1,23 +1,27 @@
 use syntax::T;
 
 use crate::{
-    grammar::{line_end, value::parse_value},
+    grammar::{tailing_comment, value::parse_value},
+    marker::Marker,
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
 
-pub fn parse_array(p: &mut Parser<'_>) {
+pub fn parse_array(p: &mut Parser<'_>, m: Marker) {
     assert!(p.at(T!['[']));
 
-    let m = p.start();
     p.eat(T!['[']);
 
-    while !p.at(EOF) && !p.at(T![']']) {
-        line_end(p);
-        parse_value(p);
-        line_end(p);
+    loop {
+        let child_m = p.start();
+        if p.at(EOF) || p.at(T![']']) {
+            child_m.abandon(p);
+            break;
+        }
+
+        parse_value(p, child_m);
         p.eat(T![,]);
-        line_end(p);
+        tailing_comment(p);
     }
 
     if !p.eat(T![']']) {

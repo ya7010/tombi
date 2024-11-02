@@ -1,6 +1,6 @@
 [aaaa]
 [aaaa.bbb]
-key1 = 1
+key1 = 1 # comment
 key2 = "2"
 array1 = [ { key3 = 12, key4 = 2024-01-01 } ]
 date = 2024-01-01
@@ -46,5 +46,12 @@ key6 = 2
 [[ffff.ggg]]
 key6 = 2
 
-[[ffff.ggg]]
-key6 = 2
+
+# header leading comment1
+# header leading comment2
+[[ffff.ggg]] # header tailing comment
+# key value leading comment1
+# key value leading comment2
+key6 = 2 # key value tailing comment
+
+# last comment

@@ -5,6 +5,14 @@ pub use generated::*;
 use std::marker::PhantomData;
 
 pub trait AstNode {
+    fn leading_comments(&self) -> Vec<crate::Comment> {
+        vec![]
+    }
+
+    fn tailing_comment(&self) -> Option<crate::Comment> {
+        None
+    }
+
     fn can_cast(kind: syntax::SyntaxKind) -> bool
     where
         Self: Sized;

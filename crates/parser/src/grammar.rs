@@ -10,6 +10,7 @@ mod value;
 use root::parse_root;
 
 use crate::output::Output;
+use crate::SyntaxKind::*;
 
 pub fn parse(input: &crate::Input) -> Output {
     let _p = tracing::info_span!("grammar::parse").entered();
@@ -22,6 +23,10 @@ pub fn parse(input: &crate::Input) -> Output {
     crate::event::process(events)
 }
 
-fn line_end(p: &mut crate::parser::Parser<'_>) {
-    while p.eat(crate::SyntaxKind::NEWLINE) || p.eat(crate::SyntaxKind::COMMENT) {}
+fn leading_comments(p: &mut crate::parser::Parser<'_>) {
+    while p.eat(WHITESPACE) || p.eat(COMMENT) || p.eat(NEWLINE) {}
+}
+
+fn tailing_comment(p: &mut crate::parser::Parser<'_>) {
+    while p.eat(WHITESPACE) || p.eat(COMMENT) {}
 }
