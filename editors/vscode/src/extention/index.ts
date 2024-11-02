@@ -19,33 +19,6 @@ export class Extension {
     private client: node.LanguageClient,
     private server: Server,
   ) {
-    vscode.languages.registerDocumentFormattingEditProvider("toml", {
-      async provideDocumentFormattingEdits(
-        document: vscode.TextDocument,
-      ): Promise<vscode.TextEdit[]> {
-        log.info("provideDocumentFormattingEdits", document.languageId);
-        const response =
-          (await client.sendRequest(node.DocumentFormattingRequest.type, {
-            textDocument: { uri: document.uri.toString() },
-            options: {
-              tabSize: 4,
-              insertSpaces: true,
-            },
-          })) || [];
-        log.info("response", response);
-        return response.map((edit) => {
-          return new vscode.TextEdit(
-            new vscode.Range(
-              edit.range.start.line,
-              edit.range.start.character,
-              edit.range.end.line,
-              edit.range.end.character,
-            ),
-            edit.newText,
-          );
-        });
-      },
-    });
     this.registerEvents();
     this.registerCommands();
   }
@@ -120,6 +93,7 @@ export class Extension {
     document: vscode.TextDocument,
   ): Promise<void> {
     log.info("onDidSaveTextDocument", document.languageId);
-    if (SUPPORT_LANGUAGES.includes(document.languageId)) return;
+    if (SUPPORT_LANGUAGES.includes(document.languageId)) {
+    }
   }
 }
