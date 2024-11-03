@@ -57,7 +57,7 @@ impl Field {
                 "[[" | "]]" => Some(quote! { T![#token]}),
                 token if token.chars().all(|s| matches!(s, 'a'..='z' | '_')) => {
                     let token: proc_macro2::TokenStream = token.to_uppercase().parse().unwrap();
-                    return Some(quote! {#token});
+                    Some(quote! {#token})
                 }
                 _ => {
                     let token: proc_macro2::TokenStream = token.parse().unwrap();

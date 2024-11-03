@@ -7,10 +7,5 @@ mod root;
 mod table;
 
 pub trait Format {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String;
-
-    #[allow(unused)]
-    fn format_default(&self) -> String {
-        self.format(&crate::Context::default())
-    }
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error>;
 }

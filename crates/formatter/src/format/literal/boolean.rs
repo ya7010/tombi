@@ -1,10 +1,10 @@
-use ast::Boolean;
-
 use crate::Format;
+use ast::Boolean;
+use std::fmt::Write;
 
 impl Format for Boolean {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
@@ -20,7 +20,12 @@ mod tests {
     fn boolean_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), source);
+
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
     }
 }

@@ -1,56 +1,65 @@
+use ast::AstNode;
+
 use crate::Format;
+use std::fmt::Write;
 
 impl Format for ast::KeyValue {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        self.keys().unwrap().format(context) + " = " + &self.value().unwrap().format(context)
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        self.keys().unwrap().fmt(f)?;
+        write!(f, " = ")?;
+        self.value().unwrap().fmt(f)?;
+
+        Ok(())
     }
 }
 
 impl Format for ast::Keys {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        self.keys()
-            .into_iter()
-            .map(|it| it.format(context))
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        let keys = self
+            .keys()
+            .map(|key| key.syntax().text().to_string())
             .collect::<Vec<_>>()
-            .join(".")
+            .join(".");
+
+        write!(f, "{}", keys)
     }
 }
 
 impl Format for ast::BareKey {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.syntax().text())
     }
 }
 
 impl Format for ast::Key {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            Self::BareKey(it) => it.format(_context),
-            Self::BasicString(it) => it.format(_context),
-            Self::LiteralString(it) => it.format(_context),
+            Self::BareKey(it) => it.fmt(f),
+            Self::BasicString(it) => it.fmt(f),
+            Self::LiteralString(it) => it.fmt(f),
         }
     }
 }
 
 impl Format for ast::Value {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            ast::Value::Array(it) => it.format(context),
-            ast::Value::BasicString(it) => it.format(context),
-            ast::Value::Boolean(it) => it.format(context),
-            ast::Value::Float(it) => it.format(context),
-            ast::Value::InlineTable(it) => it.format(context),
-            ast::Value::IntegerBin(it) => it.format(context),
-            ast::Value::IntegerDec(it) => it.format(context),
-            ast::Value::IntegerHex(it) => it.format(context),
-            ast::Value::IntegerOct(it) => it.format(context),
-            ast::Value::LiteralString(it) => it.format(context),
-            ast::Value::LocalDate(it) => it.format(context),
-            ast::Value::LocalDateTime(it) => it.format(context),
-            ast::Value::LocalTime(it) => it.format(context),
-            ast::Value::MultiLineBasicString(it) => it.format(context),
-            ast::Value::MultiLineLiteralString(it) => it.format(context),
-            ast::Value::OffsetDateTime(it) => it.format(context),
+            Self::Array(it) => it.fmt(f),
+            Self::BasicString(it) => it.fmt(f),
+            Self::Boolean(it) => it.fmt(f),
+            Self::Float(it) => it.fmt(f),
+            Self::InlineTable(it) => it.fmt(f),
+            Self::IntegerBin(it) => it.fmt(f),
+            Self::IntegerDec(it) => it.fmt(f),
+            Self::IntegerHex(it) => it.fmt(f),
+            Self::IntegerOct(it) => it.fmt(f),
+            Self::LiteralString(it) => it.fmt(f),
+            Self::LocalDate(it) => it.fmt(f),
+            Self::LocalDateTime(it) => it.fmt(f),
+            Self::LocalTime(it) => it.fmt(f),
+            Self::MultiLineBasicString(it) => it.fmt(f),
+            Self::MultiLineLiteralString(it) => it.fmt(f),
+            Self::OffsetDateTime(it) => it.fmt(f),
         }
     }
 }
@@ -70,7 +79,11 @@ mod tests {
     fn bare_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), "key = \"value\"");
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, "key = \"value\"");
         assert_eq!(p.errors(), []);
     }
 
@@ -78,7 +91,7 @@ mod tests {
     #[case("key = # INVALID")]
     fn invalid_bare_key_value(#[case] source: &str) {
         let p = parser::parse(source);
-        assert_ne!(p.errors().len(), 0);
+
         assert_eq!(
             p.errors(),
             vec![SyntaxError::new(parser::Error::ExpectedValue, 4..6)]
@@ -91,8 +104,11 @@ mod tests {
     fn dotted_keys_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
 
-        assert_eq!(ast.format_default(), source);
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
     }
 }

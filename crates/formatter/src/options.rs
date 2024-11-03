@@ -12,11 +12,11 @@ pub struct Options {
 
 impl Options {
     #[inline]
-    pub fn tab(&self) -> String {
+    pub fn ident(&self, depth: u8) -> String {
         if self.insert_space == Some(false) {
-            "\t".to_string()
+            "\t".repeat(depth as usize)
         } else {
-            " ".repeat(self.tab_size.unwrap_or(2) as usize)
+            " ".repeat((self.tab_size.unwrap_or(2) * depth) as usize)
         }
     }
 

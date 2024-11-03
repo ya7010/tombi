@@ -1,13 +1,19 @@
 use crate::Format;
+use std::fmt::Write;
 
 impl Format for ast::InlineTable {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        let entries = self
-            .entries()
-            .map(|it| it.format(context))
-            .collect::<Vec<_>>()
-            .join(", ");
-        format!("{{ {} }}", entries)
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{{ ")?;
+
+        let key_values = self.entries().collect::<Vec<_>>();
+        for (i, key_value) in key_values.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            key_value.fmt(f)?;
+        }
+
+        write!(f, " }}")
     }
 }
 
@@ -25,7 +31,11 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
-        assert_eq!(ast.format_default(), source);
     }
 }

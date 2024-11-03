@@ -1,9 +1,10 @@
 use ast::AstNode;
 
 use super::Format;
+use std::fmt::Write;
 
 impl Format for ast::Root {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         self.items()
             .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
                 ast::RootItem::Table(table) => {
@@ -42,18 +43,23 @@ impl Format for ast::Root {
             })
             .1
             .into_iter()
-            .map(|item| item.format(context))
-            .collect::<Vec<_>>()
-            .join("\n")
+            .enumerate()
+            .map(|(i, item)| {
+                if i > 0 {
+                    ItemOrNewLine::NewLine.fmt(f)?;
+                }
+                item.fmt(f)
+            })
+            .collect::<Result<_, _>>()
     }
 }
 
 impl Format for ast::RootItem {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            Self::KeyValue(it) => it.format(context),
-            Self::Table(it) => it.format(context),
-            Self::ArrayOfTable(it) => it.format(context),
+            ast::RootItem::Table(it) => it.fmt(f),
+            ast::RootItem::ArrayOfTable(it) => it.fmt(f),
+            ast::RootItem::KeyValue(it) => it.fmt(f),
         }
     }
 }
@@ -64,10 +70,10 @@ enum ItemOrNewLine {
 }
 
 impl Format for ItemOrNewLine {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            Self::Item(it) => it.format(context),
-            Self::NewLine => "".to_string(),
+            Self::Item(it) => it.fmt(f),
+            Self::NewLine => write!(f, "\n"),
         }
     }
 }

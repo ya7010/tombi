@@ -187,7 +187,7 @@ impl<'a> RegexItem<'a> {
             let priority = proc_macro2::Literal::u8_unsuffixed(priority);
             quote! { #[regex(#regex, priority = #priority)] #name }
         } else if let Some(callback) = &self.callback {
-            let callback: proc_macro2::TokenStream = (&*(*callback)).parse().unwrap();
+            let callback: proc_macro2::TokenStream = callback.parse().unwrap();
 
             quote! { #[regex(#regex, callback = #callback)] #name }
         } else {

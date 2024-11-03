@@ -1,26 +1,27 @@
 use crate::Format;
+use std::fmt::Write;
 
 impl Format for ast::BasicString {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
 impl Format for ast::MultiLineBasicString {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
 impl Format for ast::LiteralString {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
 impl Format for ast::MultiLineLiteralString {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
@@ -36,7 +37,12 @@ mod tests {
     fn barestring_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), r#"key = "value\""#);
+
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, r#"key = "value\""#);
         assert_eq!(p.errors(), []);
     }
 }

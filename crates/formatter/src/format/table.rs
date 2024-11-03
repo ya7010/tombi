@@ -1,20 +1,31 @@
 use crate::Format;
+use ast::AstNode;
+use std::fmt::Write;
 
 impl Format for ast::Table {
-    fn format<'a>(&self, context: &'a crate::Context<'a>) -> String {
-        let header = self.header().unwrap().format(context);
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        let header = self.header().unwrap();
         let key_values = self.key_values().collect::<Vec<_>>();
 
-        if key_values.is_empty() {
-            format!("[{header}]")
-        } else {
-            let key_values = key_values
-                .iter()
-                .map(|it| it.format(context))
-                .collect::<Vec<_>>()
-                .join("\n");
-            format!("[{header}]\n{key_values}")
+        header
+            .leading_comments()
+            .iter()
+            .map(|comment| write!(f, "{}\n", comment))
+            .collect::<Result<(), std::fmt::Error>>()?;
+
+        write!(f, "[{header}]")?;
+
+        if let Some(comment) = header.tailing_comment() {
+            write!(f, "  {}", comment)?;
         }
+
+        key_values
+            .iter()
+            .map(|it| {
+                write!(f, "\n")?;
+                it.fmt(f)
+            })
+            .collect::<Result<(), std::fmt::Error>>()
     }
 }
 
@@ -32,8 +43,12 @@ mod tests {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
-        assert_eq!(ast.format_default(), source);
     }
 
     #[rstest]
@@ -48,7 +63,11 @@ cli.version = "0.4.0"
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
-        assert_eq!(ast.format_default(), source);
     }
 }

@@ -1,26 +1,27 @@
 use crate::Format;
+use std::fmt::Write;
 
 impl Format for ast::IntegerBin {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
 impl Format for ast::IntegerHex {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
 impl Format for ast::IntegerDec {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
 impl Format for ast::IntegerOct {
-    fn format<'a>(&self, _context: &'a crate::Context<'a>) -> String {
-        self.to_string()
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self)
     }
 }
 
@@ -43,7 +44,12 @@ mod tests {
     fn valid_integer_dec_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), format!("{source}"));
+
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
     }
 
@@ -54,7 +60,12 @@ mod tests {
     fn valid_integer_hex_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), format!("{source}"));
+
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
     }
 
@@ -64,7 +75,12 @@ mod tests {
     fn valid_integer_oct_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), format!("{source}"));
+
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
     }
 
@@ -74,7 +90,12 @@ mod tests {
     fn valid_integer_bin_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.format_default(), format!("{source}"));
+
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
         assert_eq!(p.errors(), []);
     }
 }
