@@ -24,9 +24,7 @@ pub enum SyntaxKind {
     BRACE_START,
     #[token("}")]
     BRACE_END,
-    #[token("[[", priority = 2)]
     DOUBLE_BRACKET_START,
-    #[token("]]", priority = 2)]
     DOUBLE_BRACKET_END,
     # [regex ("\"" , callback = | lex | lex_single_line_string (lex , '"'))]
     BASIC_STRING,

@@ -8,8 +8,8 @@ pub const PUNCTUATIONS: &[PunctuationItem] = &[
     PunctuationItem::new("]", "BRACKET_END"),
     PunctuationItem::new("{", "BRACE_START"),
     PunctuationItem::new("}", "BRACE_END"),
-    PunctuationItem::new_with_priority("[[", "DOUBLE_BRACKET_START", 2),
-    PunctuationItem::new_with_priority("]]", "DOUBLE_BRACKET_END", 2),
+    PunctuationItem::new_without_attribute("[[", "DOUBLE_BRACKET_START"),
+    PunctuationItem::new_without_attribute("]]", "DOUBLE_BRACKET_END"),
 ];
 
 pub const LITERALS: &[RegexItem] = &[
@@ -85,7 +85,7 @@ pub const NODES: &[&str] = &[
 pub struct PunctuationItem<'a> {
     pub token: &'a str,
     pub name: &'a str,
-    priority: Option<u8>,
+    has_attribute: bool,
 }
 
 impl<'a> PunctuationItem<'a> {
@@ -93,26 +93,25 @@ impl<'a> PunctuationItem<'a> {
         Self {
             token,
             name,
-            priority: None,
+            has_attribute: true,
         }
     }
 
-    pub const fn new_with_priority(token: &'a str, name: &'a str, priority: u8) -> Self {
+    pub const fn new_without_attribute(token: &'a str, name: &'a str) -> Self {
         Self {
             token,
             name,
-            priority: Some(priority),
+            has_attribute: false,
         }
     }
 
     pub fn to_attr_token(&self) -> proc_macro2::TokenStream {
         let name = format_ident!("{}", self.name);
         let token = self.token;
-        if let Some(priority) = self.priority {
-            let priority = proc_macro2::Literal::u8_unsuffixed(priority);
-            quote! { #[token(#token, priority = #priority)] #name }
-        } else {
+        if self.has_attribute {
             quote! { #[token(#token)] #name }
+        } else {
+            quote! { #name }
         }
     }
 }
