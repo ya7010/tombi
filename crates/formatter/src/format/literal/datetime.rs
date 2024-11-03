@@ -1,33 +1,32 @@
-use crate::Format;
-use std::fmt::Write;
+use super::LiteralNode;
 
-impl Format for ast::OffsetDateTime {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::OffsetDateTime {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
-impl Format for ast::LocalDateTime {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::LocalDateTime {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
-impl Format for ast::LocalDate {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::LocalDate {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
-impl Format for ast::LocalTime {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::LocalTime {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::Format;
     use ast::AstNode;
     use rstest::rstest;
 

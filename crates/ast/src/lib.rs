@@ -2,39 +2,30 @@ pub mod algo;
 mod generated;
 
 pub use generated::*;
-use std::marker::PhantomData;
-use syntax::SyntaxKind::*;
+use std::{fmt::Debug, marker::PhantomData};
+use syntax::{NodeOrToken, SyntaxKind::*};
 
-pub trait AstNode {
+pub trait AstNode
+where
+    Self: Debug,
+{
     fn leading_comments(&self) -> Vec<crate::Comment> {
-        // 先頭から newline もしくは comment が連続して続いている領域を取り出し、 comment のみに絞り込んで返す。
-
         self.syntax()
-            .children()
+            .children_with_tokens()
             .into_iter()
-            .take_while(|node| {
-                matches!(
-                    node.kind(),
-                    syntax::SyntaxKind::COMMENT | syntax::SyntaxKind::NEWLINE
-                )
-            })
-            .filter_map(|node| {
-                support::token(&node, COMMENT)
-                    .map(crate::Comment::cast)
-                    .flatten()
+            .take_while(|node| matches!(node.kind(), COMMENT | NEWLINE))
+            .filter_map(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) => crate::Comment::cast(token),
+                NodeOrToken::Node(_) => None,
             })
             .collect()
     }
 
     fn tailing_comment(&self) -> Option<crate::Comment> {
-        // 末尾から newline もしくは comment が連続して続いている領域を取り出し、 comment のみに絞り込んで返す。
-
-        match self.syntax().children().into_iter().last() {
-            Some(node) => support::token(&node, COMMENT)
-                .map(crate::Comment::cast)
-                .flatten(),
-            None => None,
-        }
+        self.syntax()
+            .last_token()
+            .map(crate::Comment::cast)
+            .flatten()
     }
 
     fn can_cast(kind: syntax::SyntaxKind) -> bool

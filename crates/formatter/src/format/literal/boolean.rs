@@ -1,16 +1,16 @@
-use crate::Format;
 use ast::Boolean;
-use std::fmt::Write;
 
-impl Format for Boolean {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+use super::LiteralNode;
+
+impl LiteralNode for Boolean {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::Format;
     use ast::AstNode;
     use rstest::rstest;
 

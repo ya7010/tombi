@@ -1,15 +1,14 @@
-use crate::Format;
-use std::fmt::Write;
+use super::LiteralNode;
 
-impl Format for ast::Float {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::Float {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::Format;
     use ast::AstNode;
     use rstest::rstest;
 

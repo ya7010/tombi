@@ -1,36 +1,34 @@
-use crate::Format;
-use std::fmt::Write;
+use super::LiteralNode;
 
-impl Format for ast::IntegerBin {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::IntegerBin {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
-impl Format for ast::IntegerHex {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::IntegerHex {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
-impl Format for ast::IntegerDec {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::IntegerDec {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
-impl Format for ast::IntegerOct {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self)
+impl LiteralNode for ast::IntegerOct {
+    fn token(&self) -> Option<syntax::SyntaxToken> {
+        self.token()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Format;
     use ast::AstNode;
     use rstest::rstest;
-
-    use crate::format::Format;
 
     #[rstest]
     #[case("int1 = +99")]

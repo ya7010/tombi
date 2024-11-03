@@ -5,6 +5,10 @@ use std::fmt::Write;
 
 impl Format for ast::KeyValue {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        self.leading_comments()
+            .iter()
+            .map(|comment| write!(f, "{}\n", comment))
+            .collect::<Result<(), std::fmt::Error>>()?;
         self.keys().unwrap().fmt(f)?;
         write!(f, " = ")?;
         self.value().unwrap().fmt(f)?;
@@ -104,6 +108,26 @@ mod tests {
     fn dotted_keys_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        let mut formatted_text = String::new();
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, source);
+        assert_eq!(p.errors(), []);
+    }
+
+    #[rstest]
+    #[case(
+        r#"
+# leading comment1
+# leading comment2
+key = "value"  # tailing comment
+    "#.trim()
+    )]
+    fn key_value_with_comment(#[case] source: &str) {
+        let p = parser::parse(source);
+        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+
         let mut formatted_text = String::new();
         ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
             .unwrap();
