@@ -8,12 +8,7 @@ impl Format for ast::Root {
         self.items()
             .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
                 ast::RootItem::Table(table) => {
-                    let headers = table
-                        .header()
-                        .iter()
-                        .map(|it| it.syntax().to_string())
-                        .collect::<Vec<_>>()
-                        .join(".");
+                    let headers = table.header().unwrap().syntax().to_string();
                     match pre_header {
                         Some(Header::Table(pre_table_headers)) => {
                             if !headers.starts_with(&pre_table_headers) {
@@ -45,7 +40,7 @@ impl Format for ast::Root {
             .into_iter()
             .enumerate()
             .map(|(i, item)| {
-                if i > 0 {
+                if i > 0 && matches!(item, ItemOrNewLine::Item(_)) {
                     ItemOrNewLine::NewLine.fmt(f)?;
                 }
                 item.fmt(f)
