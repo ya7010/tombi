@@ -7,7 +7,8 @@ Tombi is a toolkit for TOML; providing a formatter/linter and LSP server.
 - [ ] コメントの完全なサポート
     - [x] トップブロックのコメントサポート
     - [ ] Array のコメントサポート
-    - [ ] Inline Table のコメントサポートs
+    - [ ] Inline Table のコメントサポート
+- [ ] inf/nan のキーワード化
 - [ ] diagnostics のエラーメッセージの範囲の改善
 - [ ] Document のサポート。
 - [ ] linter のサポート
