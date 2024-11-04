@@ -11,5 +11,5 @@ Tombi is a toolkit for TOML; providing a formatter/linter and LSP server.
 - [ ] Document のサポート。
 - [ ] linter のサポート
 - [ ] リリース
-- [ ] JSOn Schema のサポート
+- [ ] JSON Schema のサポート
 - [ ] syntax tree 側での行・列情報のサポート
