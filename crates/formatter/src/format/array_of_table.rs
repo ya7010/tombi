@@ -87,7 +87,6 @@ key = "value"  # key tailing comment
     #[case(
         r#"
   # header leading comment1
-
 # header leading comment2
 [[header]]# header tailing comment
 

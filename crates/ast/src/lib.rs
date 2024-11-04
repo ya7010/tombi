@@ -81,7 +81,7 @@ impl<N: AstNode> Iterator for AstChildren<N> {
 
 #[allow(dead_code)]
 mod support {
-    use super::{AstChildren, AstNode};
+    use super::*;
 
     #[inline]
     pub(super) fn child<N: AstNode>(parent: &syntax::SyntaxNode) -> Option<N> {
@@ -103,11 +103,40 @@ mod support {
             .filter_map(|it| it.into_token())
             .find(|it| it.kind() == kind)
     }
-}
 
-impl Root {
-    pub fn begin_dangling_comments(&self) -> Vec<crate::Comment> {
-        self.syntax()
+    #[inline]
+    pub(super) fn header_leading_comments<N: AstNode>(node: &N) -> Vec<crate::Comment> {
+        node.leading_comments()
+    }
+
+    #[inline]
+    pub(super) fn header_tailing_comment<N: AstNode>(
+        node: &N,
+        end: syntax::SyntaxKind,
+    ) -> Option<crate::Comment> {
+        let mut iter = node
+            .syntax()
+            .children_with_tokens()
+            .skip_while(|item| item.kind() != end && item.kind() != EOF)
+            .skip(1);
+
+        match iter.next()? {
+            NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
+            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
+                iter.next().and_then(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
+                        crate::Comment::cast(token)
+                    }
+                    _ => None,
+                })
+            }
+            _ => None,
+        }
+    }
+
+    #[inline]
+    pub(super) fn begin_dangling_comments<N: AstNode>(node: &N) -> Vec<crate::Comment> {
+        node.syntax()
             .children_with_tokens()
             .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
             .filter_map(|node_or_token| match node_or_token {
@@ -117,8 +146,9 @@ impl Root {
             .collect()
     }
 
-    pub fn end_dangling_comments(&self) -> Vec<crate::Comment> {
-        self.syntax()
+    #[inline]
+    pub(super) fn end_dangling_comments<N: AstNode>(node: &N) -> Vec<crate::Comment> {
+        node.syntax()
             .children_with_tokens()
             .collect::<Vec<_>>()
             .into_iter()
@@ -132,59 +162,42 @@ impl Root {
             .into_iter()
             .rev()
             .collect()
+    }
+}
+
+impl Root {
+    pub fn begin_dangling_comments(&self) -> Vec<crate::Comment> {
+        support::begin_dangling_comments(self)
+    }
+
+    pub fn end_dangling_comments(&self) -> Vec<crate::Comment> {
+        support::end_dangling_comments(self)
     }
 }
 
 impl Table {
     pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
-        self.leading_comments()
+        support::header_leading_comments(self)
     }
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
-        let mut iter = self
-            .syntax()
-            .children_with_tokens()
-            .skip_while(|item| item.kind() != T!(']') && item.kind() != EOF)
-            .skip(1);
-
-        match iter.next()? {
-            NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
-            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
-                iter.next().and_then(|node_or_token| match node_or_token {
-                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
-                        crate::Comment::cast(token)
-                    }
-                    _ => None,
-                })
-            }
-            _ => None,
-        }
+        support::header_tailing_comment(self, T!(']'))
     }
 }
 
 impl ArrayOfTable {
     pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
-        self.leading_comments()
+        support::header_leading_comments(self)
     }
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
-        let mut iter = self
-            .syntax()
-            .children_with_tokens()
-            .skip_while(|item| item.kind() != T!("]]") && item.kind() != EOF)
-            .skip(1);
+        support::header_tailing_comment(self, T!("]]"))
+    }
+}
 
-        match iter.next()? {
-            NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
-            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
-                iter.next().and_then(|node_or_token| match node_or_token {
-                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
-                        crate::Comment::cast(token)
-                    }
-                    _ => None,
-                })
-            }
-            _ => None,
-        }
+impl Array {
+    pub fn has_tailing_comma_after_last_element(&self) -> bool {
+        dbg!(self.syntax().children().collect::<Vec<_>>());
+        false
     }
 }
