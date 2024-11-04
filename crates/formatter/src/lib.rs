@@ -21,7 +21,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
     let root = ast::Root::cast(p.into_syntax_node()).unwrap();
     tracing::trace!("ast: {:#?}", root);
 
-    if errors.len() == 0 {
+    if errors.is_empty() {
         let mut formatted_text = String::new();
         root.fmt(&mut Formatter::new_with_options(
             &mut formatted_text,
