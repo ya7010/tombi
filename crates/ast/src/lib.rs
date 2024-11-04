@@ -3,7 +3,7 @@ mod generated;
 
 pub use generated::*;
 use std::{fmt::Debug, marker::PhantomData};
-use syntax::{NodeOrToken, SyntaxKind::*};
+use syntax::{NodeOrToken, SyntaxKind::*, T};
 
 pub trait AstNode
 where
@@ -121,5 +121,28 @@ impl Root {
             .into_iter()
             .rev()
             .collect()
+    }
+}
+
+impl Table {
+    pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
+        self.leading_comments()
+    }
+
+    pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
+        self.syntax()
+            .children_with_tokens()
+            .skip_while(|item| item.kind() != T!(']') && item.kind() != EOF)
+            .skip_while(|item| item.kind() != WHITESPACE)
+            .nth(1)
+            .and_then(|item| {
+                dbg!(&item);
+                match item {
+                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
+                        crate::Comment::cast(token)
+                    }
+                    _ => None,
+                }
+            })
     }
 }
