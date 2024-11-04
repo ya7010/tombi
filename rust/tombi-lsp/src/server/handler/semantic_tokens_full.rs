@@ -68,6 +68,9 @@ impl AppendSemanticTokens for ast::Root {
         for item in self.items() {
             item.append_semantic_tokens(builder);
         }
+        self.last_dangling_comments()
+            .iter()
+            .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
     }
 }
 
@@ -166,22 +169,44 @@ impl AppendSemanticTokens for ast::Key {
 impl AppendSemanticTokens for ast::Value {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         match self {
-            Self::BasicString(_)
-            | Self::LiteralString(_)
-            | Self::MultiLineBasicString(_)
-            | Self::MultiLineLiteralString(_) => {
-                builder.add_token(TokenType::STRING, self.syntax().into())
+            Self::BasicString(n) => {
+                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
             }
-            Self::IntegerBin(_)
-            | Self::IntegerOct(_)
-            | Self::IntegerDec(_)
-            | Self::IntegerHex(_)
-            | Self::Float(_) => builder.add_token(TokenType::NUMBER, self.syntax().into()),
-            Self::Boolean(_) => builder.add_token(TokenType::KEYWORD, self.syntax().into()),
-            Self::OffsetDateTime(_)
-            | Self::LocalDateTime(_)
-            | Self::LocalDate(_)
-            | Self::LocalTime(_) => builder.add_token(TokenType::REGEXP, self.syntax().into()),
+            Self::LiteralString(n) => {
+                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+            }
+            Self::MultiLineBasicString(n) => {
+                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+            }
+            Self::MultiLineLiteralString(n) => {
+                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+            }
+            Self::IntegerBin(n) => {
+                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+            }
+            Self::IntegerOct(n) => {
+                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+            }
+            Self::IntegerDec(n) => {
+                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+            }
+            Self::IntegerHex(n) => {
+                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+            }
+            Self::Float(n) => builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into()),
+            Self::Boolean(n) => builder.add_token(TokenType::KEYWORD, (&n.token().unwrap()).into()),
+            Self::OffsetDateTime(n) => {
+                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+            }
+            Self::LocalDateTime(n) => {
+                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+            }
+            Self::LocalDate(n) => {
+                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+            }
+            Self::LocalTime(n) => {
+                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+            }
             Self::Array(array) => array.append_semantic_tokens(builder),
             Self::InlineTable(inline_table) => inline_table.append_semantic_tokens(builder),
         }

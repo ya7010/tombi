@@ -4,6 +4,7 @@ dec = 1  # dec comment
 bin = 0b01  # bin comment
 oct = 0o01  # oct comment
 hex = 0x01  # hex comment
+float = 0.1234  # float comment
 bs = "2"  # bs comment
 ls = '3'  # ls comment
 array1 = [{ key3 = 12, key4 = 2024-01-01T10:10:00 }]
@@ -17,6 +18,7 @@ ldt1 = 1979-05-27T07:32:00  # ldt1 comment
 ldt2 = 1979-05-27T00:32:00.999999  # ldt2 comment
 ld1 = 1979-05-27  # ld1 comment
 lt1 = 07:32:00  # lt1 comment
+# lt2 leading comment
 lt2 = 00:32:00.999999  # lt2 comment
 
 [aaaa.ccc]
