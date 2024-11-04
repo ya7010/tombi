@@ -5,14 +5,31 @@
 pub struct Definitions;
 
 impl Definitions {
+    /// Returns the space before the tailing comment.
+    ///
+    /// ```toml
+    /// key = "value"  # tailing comment
+    /// #            ^^  <-this space
+    /// ```
     pub const fn tailing_comment_space(&self) -> &'static str {
         "  "
     }
 
+    /// Returns the space inside the brackets of an array.
+    ///
+    /// ```toml
+    /// key = [ 1, 2, 3 ]
+    /// #      ^       ^  <- this space
     pub const fn array_bracket_inner_space(&self) -> &'static str {
         ""
     }
 
+    /// Returns the space inside the brackets of an inline table.
+    ///
+    /// ```toml
+    /// key = { a = 1, b = 2 }
+    /// #      ^            ^  <- this space
+    /// ```
     pub const fn inline_table_brace_inner_space(&self) -> &'static str {
         " "
     }
