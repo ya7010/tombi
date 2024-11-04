@@ -2,7 +2,7 @@ use assert_matches::assert_matches;
 
 #[test]
 
-fn format_preformatted_text() {
+fn test_key_values() {
     let source = r#"
 key = "value"
 bare_key = "value"
