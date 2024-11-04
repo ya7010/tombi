@@ -2,7 +2,7 @@
 [aaaa.bbb]
 key1 = 1  # comment
 key2 = "2"
-array1 = [{ key3 = 12, key4 = 2024-01-01 }]
+array1 = [{ key3 = 12, key4 = 2024-01-01T10:10:00 }]
 date = 2024-01-01
 time = 10:11:00
 odt1 = 1979-05-27T07:32:00Z
@@ -22,7 +22,7 @@ key2 = "22"
 [bbb]
 key5 = true
 
-[ddd.eee]
+[ddd.eee]  # header tailing comment
 key5 = true
 
 [[ffff.ggg]]
@@ -44,11 +44,13 @@ key6 = 2
 key6 = 2
 
 [[ffff.ggg]]
+# key value leading comment2
 key6 = 2
 
-[[ffff.ggg]]
+[[ffff.ggg]]  # header tailing comment
 # key value leading comment1
 # key value leading comment2
 key6 = 2  # key value tailing comment
 
-# last comment
+# last comment1
+# last comment2

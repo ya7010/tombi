@@ -83,7 +83,7 @@ impl AppendSemanticTokens for ast::RootItem {
 
 impl AppendSemanticTokens for ast::Table {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        self.leading_comments()
+        self.header_leading_comments()
             .iter()
             .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
 
@@ -99,8 +99,8 @@ impl AppendSemanticTokens for ast::Table {
         self.bracket_end()
             .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
 
-        // self.tailing_comment()
-        //     .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        self.header_tailing_comment()
+            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
 
         for key_value in self.key_values() {
             key_value.append_semantic_tokens(builder);
@@ -110,7 +110,7 @@ impl AppendSemanticTokens for ast::Table {
 
 impl AppendSemanticTokens for ast::ArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        self.leading_comments()
+        self.header_leading_comments()
             .iter()
             .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
 
@@ -128,8 +128,8 @@ impl AppendSemanticTokens for ast::ArrayOfTable {
             builder.add_token(TokenType::OPERATOR, (&token).into());
         });
 
-        // self.tailing_comment()
-        //     .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        self.header_tailing_comment()
+            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
 
         for key_value in self.key_values() {
             key_value.append_semantic_tokens(builder);
