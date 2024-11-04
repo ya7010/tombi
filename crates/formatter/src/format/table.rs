@@ -84,8 +84,10 @@ key = "value"  # key tailing comment
     #[case(
         r#"
   # header leading comment1
+
  # header leading comment2
 [header]# header tailing comment
+
   # key value leading comment1
  # key value leading comment2
 key = "value" # key tailing comment

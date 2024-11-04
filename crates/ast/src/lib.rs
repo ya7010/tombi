@@ -134,28 +134,19 @@ impl Table {
             .syntax()
             .children_with_tokens()
             .skip_while(|item| item.kind() != T!(']') && item.kind() != EOF)
-            .skip(1)
-            .take(2);
+            .skip(1);
 
-        let Some(node_or_token) = iter.next() else {
-            return None;
-        };
-
-        // Check the next token is a comment or whitespace.
-        match node_or_token {
-            NodeOrToken::Token(token) if token.kind() == COMMENT => {
-                return crate::Comment::cast(token)
-            }
-            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
-                // Skip the whitespace and check the next token is a comment.
-            }
-            _ => return None,
-        }
-
-        // Check the next token is a comment.
-        iter.next().and_then(|node_or_token| match node_or_token {
+        match iter.next()? {
             NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
+            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
+                iter.next().and_then(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
+                        crate::Comment::cast(token)
+                    }
+                    _ => None,
+                })
+            }
             _ => None,
-        })
+        }
     }
 }
