@@ -9,9 +9,9 @@ impl Format for ast::Root {
 
         let begin_dangling_comments = self.begin_dangling_comments();
         if !begin_dangling_comments.is_empty() {
-            begin_dangling_comments
-                .iter()
-                .try_for_each(|comment| write!(f, "{}\n", comment))?;
+            for comment in begin_dangling_comments {
+                write!(f, "{}\n", comment)?;
+            }
             write!(f, "\n")?;
         }
 
@@ -60,9 +60,9 @@ impl Format for ast::Root {
         let end_dangling_comments = self.end_dangling_comments();
         if !end_dangling_comments.is_empty() {
             write!(f, "\n")?;
-            end_dangling_comments
-                .iter()
-                .try_for_each(|comment| write!(f, "\n{}", comment))?;
+            for comment in end_dangling_comments {
+                write!(f, "{}\n", comment)?;
+            }
         }
 
         Ok(())

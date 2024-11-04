@@ -40,6 +40,16 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
+    pub fn inc_ident(&mut self) {
+        self.ident_depth += 1;
+    }
+
+    #[inline]
+    pub fn dec_ident(&mut self) {
+        self.ident_depth = self.ident_depth.saturating_sub(1);
+    }
+
+    #[inline]
     pub fn reset_ident(&mut self) {
         self.ident_depth = 0;
     }

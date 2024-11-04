@@ -1,7 +1,10 @@
 use syntax::T;
 
 use crate::{
-    grammar::{leading_comments, peek_leading_comments, tailing_comment, Grammer},
+    grammar::{
+        begin_dangling_comments, end_dangling_comments, leading_comments, peek_leading_comments,
+        tailing_comment, Grammer,
+    },
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
@@ -16,6 +19,8 @@ impl Grammer for ast::Array {
 
         p.eat(T!['[']);
 
+        begin_dangling_comments(p);
+
         loop {
             let n = peek_leading_comments(p);
             if p.nth_at(n, EOF) || p.nth_at(n, T![']']) {
@@ -27,6 +32,8 @@ impl Grammer for ast::Array {
             p.eat(T![,]);
             tailing_comment(p);
         }
+
+        end_dangling_comments(p);
 
         if !p.eat(T![']']) {
             p.error(crate::Error::ExpectedBracketEnd);

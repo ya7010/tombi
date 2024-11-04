@@ -135,10 +135,10 @@ mod support {
     }
 
     #[inline]
-    pub(super) fn begin_dangling_comments<N: AstNode>(node: &N) -> Vec<crate::Comment> {
-        node.syntax()
-            .children_with_tokens()
-            .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
+    pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+        iter: I,
+    ) -> Vec<crate::Comment> {
+        iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
@@ -147,10 +147,10 @@ mod support {
     }
 
     #[inline]
-    pub(super) fn end_dangling_comments<N: AstNode>(node: &N) -> Vec<crate::Comment> {
-        node.syntax()
-            .children_with_tokens()
-            .collect::<Vec<_>>()
+    pub(super) fn end_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+        iter: I,
+    ) -> Vec<crate::Comment> {
+        iter.collect::<Vec<_>>()
             .into_iter()
             .rev()
             .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
@@ -167,11 +167,11 @@ mod support {
 
 impl Root {
     pub fn begin_dangling_comments(&self) -> Vec<crate::Comment> {
-        support::begin_dangling_comments(self)
+        support::begin_dangling_comments(self.syntax().children_with_tokens())
     }
 
     pub fn end_dangling_comments(&self) -> Vec<crate::Comment> {
-        support::end_dangling_comments(self)
+        support::end_dangling_comments(self.syntax().children_with_tokens())
     }
 }
 
@@ -196,6 +196,23 @@ impl ArrayOfTable {
 }
 
 impl Array {
+    pub fn inner_begin_dangling_comments(&self) -> Vec<crate::Comment> {
+        support::begin_dangling_comments(
+            self.syntax()
+                .children_with_tokens()
+                .skip_while(|node| node.kind() != T!('['))
+                .skip(1),
+        )
+    }
+
+    pub fn has_inner_comments(&self) -> bool {
+        self.syntax()
+            .children_with_tokens()
+            .skip_while(|node| node.kind() != T!('['))
+            .skip(1)
+            .any(|node| node.kind() == COMMENT)
+    }
+
     pub fn has_tailing_comma_after_last_element(&self) -> bool {
         self.syntax()
             .children_with_tokens()
@@ -204,7 +221,7 @@ impl Array {
             .rev()
             .skip_while(|item| item.kind() != T!(']'))
             .skip(1)
-            .skip_while(|item| [WHITESPACE, COMMENT, NEWLINE].contains(&item.kind()))
+            .skip_while(|item| matches!(item.kind(), WHITESPACE | COMMENT | NEWLINE))
             .next()
             .map_or(false, |it| it.kind() == T!(,))
     }
