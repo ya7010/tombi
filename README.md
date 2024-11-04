@@ -8,3 +8,4 @@ Tombi is a toolkit for TOML; providing a formatter/linter and LSP server.
 - [ ] linter のサポート
 - [ ] リリース
 - [ ] JSOn Schema のサポート
+- [ ] syntax tree 側での行・列情報のサポート
