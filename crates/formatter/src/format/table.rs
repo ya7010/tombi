@@ -70,9 +70,29 @@ cli.version = "0.4.0"
         assert_eq!(p.errors(), []);
     }
 
-    #[test]
-    fn table_comment() {
-        let source = r#"
+    #[rstest]
+    #[case(
+        r#"
+# header leading comment1
+# header leading comment2
+[header]  # header tailing comment
+# key value leading comment1
+# key value leading comment2
+key = "value"  # key tailing comment
+"#.trim()
+    )]
+    #[case(
+        r#"
+  # header leading comment1
+ # header leading comment2
+[header]# header tailing comment
+  # key value leading comment1
+ # key value leading comment2
+key = "value" # key tailing comment
+"#.trim()
+    )]
+    fn table_comment(#[case] source: &str) {
+        let expected = r#"
 # header leading comment1
 # header leading comment2
 [header]  # header tailing comment
@@ -84,6 +104,6 @@ key = "value"  # key tailing comment
 
         let result = crate::format(&source);
         assert_matches!(result, Ok(_));
-        assert_eq!(result.unwrap(), source);
+        assert_eq!(result.unwrap(), expected);
     }
 }

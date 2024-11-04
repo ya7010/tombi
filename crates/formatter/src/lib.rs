@@ -3,8 +3,6 @@ mod format;
 mod formatter;
 mod options;
 
-use std::borrow::Cow;
-
 use ast::AstNode;
 use diagnostics::Diagnostic;
 pub use error::Error;

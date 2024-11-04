@@ -13,7 +13,7 @@ where
         self.syntax()
             .children_with_tokens()
             .into_iter()
-            .take_while(|node| matches!(node.kind(), COMMENT | NEWLINE))
+            .take_while(|node| matches!(node.kind(), COMMENT | NEWLINE | WHITESPACE))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
@@ -130,19 +130,32 @@ impl Table {
     }
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
-        self.syntax()
+        let mut iter = self
+            .syntax()
             .children_with_tokens()
             .skip_while(|item| item.kind() != T!(']') && item.kind() != EOF)
-            .skip_while(|item| item.kind() != WHITESPACE)
-            .nth(1)
-            .and_then(|item| {
-                dbg!(&item);
-                match item {
-                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
-                        crate::Comment::cast(token)
-                    }
-                    _ => None,
-                }
-            })
+            .skip(1)
+            .take(2);
+
+        let Some(node_or_token) = iter.next() else {
+            return None;
+        };
+
+        // Check the next token is a comment or whitespace.
+        match node_or_token {
+            NodeOrToken::Token(token) if token.kind() == COMMENT => {
+                return crate::Comment::cast(token)
+            }
+            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
+                // Skip the whitespace and check the next token is a comment.
+            }
+            _ => return None,
+        }
+
+        // Check the next token is a comment.
+        iter.next().and_then(|node_or_token| match node_or_token {
+            NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
+            _ => None,
+        })
     }
 }
