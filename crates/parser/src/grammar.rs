@@ -23,6 +23,19 @@ pub fn parse(input: &crate::Input) -> Output {
     crate::event::process(events)
 }
 
+fn dangling_comments(p: &mut crate::parser::Parser<'_>) {
+    while p.eat(WHITESPACE) || p.eat(COMMENT) || p.eat(NEWLINE) {}
+}
+
+fn peek_leading_comments(p: &mut crate::parser::Parser<'_>) -> usize {
+    let mut n = 0;
+    while p.nth_at(n, WHITESPACE) || p.nth_at(n, COMMENT) || p.nth_at(n, NEWLINE) {
+        n += 1;
+    }
+
+    n
+}
+
 fn leading_comments(p: &mut crate::parser::Parser<'_>) {
     while p.eat(WHITESPACE) || p.eat(COMMENT) || p.eat(NEWLINE) {}
 }

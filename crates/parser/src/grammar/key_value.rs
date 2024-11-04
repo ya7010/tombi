@@ -1,16 +1,19 @@
-use super::{key::parse_keys, tailing_comment, value::parse_value};
-use crate::{marker::Marker, parser::Parser};
+use super::{key::parse_keys, leading_comments, tailing_comment, value::parse_value};
+use crate::parser::Parser;
 use syntax::{SyntaxKind::*, T};
 
-pub fn parse_key_value(p: &mut Parser<'_>, m: Marker) {
+pub fn parse_key_value(p: &mut Parser<'_>) {
+    let m = p.start();
+
+    leading_comments(p);
+
     parse_keys(p);
 
     if !p.eat(T![=]) {
         p.error(crate::Error::ExpectedEquals);
     }
 
-    let child_m = p.start();
-    parse_value(p, child_m);
+    parse_value(p);
 
     tailing_comment(p);
 

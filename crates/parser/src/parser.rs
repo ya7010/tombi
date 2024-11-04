@@ -34,8 +34,6 @@ impl<'t> Parser<'t> {
     }
 
     pub(crate) fn nth(&self, n: usize) -> SyntaxKind {
-        assert!(n <= 3);
-
         let steps = self.steps.get();
         self.steps.set(steps + 1);
 
@@ -80,6 +78,11 @@ impl<'t> Parser<'t> {
     /// Checks if the current token is in `kinds`.
     pub(crate) fn at_ts(&self, kinds: TokenSet) -> bool {
         kinds.contains(self.current())
+    }
+
+    /// Checks if the `n`-th token is in `kinds`.
+    pub(crate) fn nth_at_ts(&self, n: usize, kinds: TokenSet) -> bool {
+        kinds.contains(self.nth(n))
     }
 
     /// Starts a new node in the syntax tree. All nodes and tokens

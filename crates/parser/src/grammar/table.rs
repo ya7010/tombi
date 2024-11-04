@@ -2,15 +2,18 @@ use syntax::T;
 
 use crate::{
     grammar::{
-        key::parse_keys, key_value::parse_key_value, leading_comments, root::NEXT_SECTION,
-        tailing_comment,
+        key::parse_keys, key_value::parse_key_value, leading_comments, peek_leading_comments,
+        root::NEXT_SECTION, tailing_comment,
     },
-    marker::Marker,
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
 
-pub fn parse_table(p: &mut Parser<'_>, m: Marker) {
+pub fn parse_table(p: &mut Parser<'_>) {
+    let m = p.start();
+
+    leading_comments(p);
+
     assert!(p.at(T!['[']));
 
     p.eat(T!['[']);
@@ -24,14 +27,13 @@ pub fn parse_table(p: &mut Parser<'_>, m: Marker) {
     tailing_comment(p);
 
     loop {
-        let child_m = p.start();
-        leading_comments(p);
+        let n = peek_leading_comments(p);
 
-        if p.at_ts(NEXT_SECTION) {
-            child_m.abandon(p);
+        if p.nth_at_ts(n, NEXT_SECTION) {
             break;
         }
-        parse_key_value(p, child_m);
+
+        parse_key_value(p);
     }
 
     m.complete(p, TABLE);

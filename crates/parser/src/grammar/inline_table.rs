@@ -1,26 +1,27 @@
 use syntax::{SyntaxKind::*, T};
 
 use crate::{
-    grammar::{leading_comments, tailing_comment},
-    marker::Marker,
+    grammar::{leading_comments, peek_leading_comments, tailing_comment},
     parser::Parser,
 };
 
 use super::key_value::parse_key_value;
 
-pub fn parse_inline_table(p: &mut Parser<'_>, m: Marker) {
+pub fn parse_inline_table(p: &mut Parser<'_>) {
+    let m = p.start();
+
+    leading_comments(p);
+
     assert!(p.at(T!['{']));
 
     p.eat(T!['{']);
 
     loop {
-        let child_m = p.start();
-        leading_comments(p);
-        if p.at(EOF) || p.at(T!['}']) {
-            child_m.abandon(p);
+        let n = peek_leading_comments(p);
+        if p.nth_at(n, EOF) || p.nth_at(n, T!['}']) {
             break;
         }
-        parse_key_value(p, child_m);
+        parse_key_value(p);
         p.eat(T![,]);
         tailing_comment(p);
     }
