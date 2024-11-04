@@ -150,3 +150,30 @@ impl Table {
         }
     }
 }
+
+impl ArrayOfTable {
+    pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
+        self.leading_comments()
+    }
+
+    pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
+        let mut iter = self
+            .syntax()
+            .children_with_tokens()
+            .skip_while(|item| item.kind() != T!("]]") && item.kind() != EOF)
+            .skip(1);
+
+        match iter.next()? {
+            NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
+            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
+                iter.next().and_then(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
+                        crate::Comment::cast(token)
+                    }
+                    _ => None,
+                })
+            }
+            _ => None,
+        }
+    }
+}
