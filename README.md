@@ -3,6 +3,7 @@
 Tombi is a toolkit for TOML; providing a formatter/linter and LSP server.
 
 ## TODO
+### Features
 - [ ] コメントの完全なサポート
     - [ ] トップブロックのコメントサポート
     - [ ] Array のコメントサポート
@@ -13,3 +14,7 @@ Tombi is a toolkit for TOML; providing a formatter/linter and LSP server.
 - [ ] リリース
 - [ ] JSON Schema のサポート
 - [ ] syntax tree 側での行・列情報のサポート
+
+### Bugs
+- [ ] Local Date 型が誤って IntegerDec としてパースされる
+- [ ] Keys に float や int を使った場合、誤ってパースされる
