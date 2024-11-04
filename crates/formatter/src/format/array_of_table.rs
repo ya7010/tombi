@@ -1,6 +1,8 @@
 use crate::Format;
 use std::fmt::Write;
 
+use super::comment::TailingComment;
+
 impl Format for ast::ArrayOfTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
@@ -14,7 +16,7 @@ impl Format for ast::ArrayOfTable {
         write!(f, "[[{header}]]")?;
 
         if let Some(comment) = self.header_tailing_comment() {
-            write!(f, "  {}", comment)?;
+            TailingComment(comment).fmt(f)?;
         }
 
         key_values

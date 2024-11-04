@@ -1,9 +1,11 @@
+mod definitions;
 mod error;
 mod format;
 mod formatter;
 mod options;
 
 use ast::AstNode;
+pub use definitions::Definitions;
 use diagnostics::Diagnostic;
 pub use error::Error;
 use format::Format;

@@ -5,6 +5,8 @@ use std::fmt::Write;
 
 impl Format for ast::Root {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        f.reset_ident();
+
         self.items()
             .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
                 ast::RootItem::Table(table) => {

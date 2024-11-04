@@ -7,6 +7,7 @@ mod datetime;
 mod float;
 mod integer;
 mod string;
+use super::comment::TailingComment;
 use std::fmt::Write;
 
 trait LiteralNode {
@@ -20,7 +21,7 @@ where
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", self.token().unwrap())?;
         if let Some(comment) = self.tailing_comment() {
-            write!(f, "  {}", comment)?;
+            TailingComment(comment).fmt(f)?;
         }
 
         Ok(())

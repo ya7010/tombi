@@ -1,3 +1,4 @@
+use super::comment::TailingComment;
 use crate::Format;
 use std::fmt::Write;
 
@@ -14,7 +15,7 @@ impl Format for ast::Table {
         write!(f, "[{header}]")?;
 
         if let Some(comment) = self.header_tailing_comment() {
-            write!(f, "  {}", comment)?;
+            TailingComment(comment).fmt(f)?;
         }
 
         key_values

@@ -2,6 +2,7 @@ use std::fmt::Write;
 
 pub struct Formatter<'a> {
     options: crate::Options,
+    defs: crate::Definitions,
     ident_depth: u8,
 
     buf: &'a mut (dyn Write + 'a),
@@ -15,6 +16,7 @@ impl<'a> Formatter<'a> {
     pub fn new_with_options(buf: &'a mut (dyn Write + 'a), options: crate::Options) -> Self {
         Self {
             options,
+            defs: crate::Definitions,
             ident_depth: 0,
             buf,
         }
@@ -24,8 +26,16 @@ impl<'a> Formatter<'a> {
         &self.options
     }
 
+    pub fn defs(&self) -> crate::Definitions {
+        self.defs
+    }
+
     pub fn ident(&self) -> String {
         self.options.ident(self.ident_depth)
+    }
+
+    pub fn reset_ident(&mut self) {
+        self.ident_depth = 0;
     }
 }
 
