@@ -40,9 +40,12 @@ pub enum SyntaxKind {
     INTEGER_HEX,
     #[regex("0o[0-7_]+")]
     INTEGER_OCT,
-    #[regex("0b(0|1|_)+")]
+    #[regex("0b[0|1|_]+")]
     INTEGER_BIN,
-    #[regex("[-+]?([0-9_]+(\\.[0-9_]+)?([eE][+-]?[0-9_]+)?|nan|inf)", priority = 3)]
+    #[regex(
+        "[-+]?(:?[0-9_]+(:?\\.[0-9_]+)?(:?[eE][+-]?[0-9_]+)?|nan|inf)",
+        priority = 3
+    )]
     FLOAT,
     #[regex("true|false")]
     BOOLEAN,
@@ -62,7 +65,7 @@ pub enum SyntaxKind {
     LOCAL_TIME,
     #[regex("[ \\t]+")]
     WHITESPACE,
-    #[regex("(\\n|\\r\\n)+")]
+    #[regex("\\n|\\r\\n")]
     NEWLINE,
     #[regex("[A-Za-z0-9_-]+", priority = 2)]
     BARE_KEY,

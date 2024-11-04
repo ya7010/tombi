@@ -36,10 +36,10 @@ pub const LITERALS: &[RegexItem] = &[
     RegexItem::new_with_priority("INTEGER_DEC", r"[+-]?[0-9_]+", 4),
     RegexItem::new("INTEGER_HEX", r"0x[0-9A-Fa-f_]+"),
     RegexItem::new("INTEGER_OCT", r"0o[0-7_]+"),
-    RegexItem::new("INTEGER_BIN", r"0b(0|1|_)+"),
+    RegexItem::new("INTEGER_BIN", r"0b[0|1|_]+"),
     RegexItem::new_with_priority(
         "FLOAT",
-        r"[-+]?([0-9_]+(\.[0-9_]+)?([eE][+-]?[0-9_]+)?|nan|inf)",
+        r"[-+]?(:?[0-9_]+(:?\.[0-9_]+)?(:?[eE][+-]?[0-9_]+)?|nan|inf)",
         3,
     ),
     RegexItem::new("BOOLEAN", r"true|false"),
@@ -58,7 +58,7 @@ pub const LITERALS: &[RegexItem] = &[
 ];
 pub const TOKENS: &[TokenItem] = &[
     TokenItem::Regex(RegexItem::new("WHITESPACE", r"[ \t]+")),
-    TokenItem::Regex(RegexItem::new("NEWLINE", r"(\n|\r\n)+")),
+    TokenItem::Regex(RegexItem::new("NEWLINE", r"\n|\r\n")),
     TokenItem::Regex(RegexItem::new_with_priority(
         "BARE_KEY",
         r"[A-Za-z0-9_-]+",

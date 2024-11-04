@@ -7,6 +7,14 @@ impl Format for ast::Root {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset_ident();
 
+        let begin_dangling_comments = self.begin_dangling_comments();
+        if !begin_dangling_comments.is_empty() {
+            begin_dangling_comments
+                .iter()
+                .try_for_each(|comment| write!(f, "{}\n", comment))?;
+            write!(f, "\n")?;
+        }
+
         self.items()
             .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
                 ast::RootItem::Table(table) => {
@@ -49,12 +57,12 @@ impl Format for ast::Root {
             })
             .collect::<Result<(), std::fmt::Error>>()?;
 
-        let last_dangling_comments = self.last_dangling_comments();
-        if !last_dangling_comments.is_empty() {
-            write!(f, "\n\n")?;
-            last_dangling_comments
+        let end_dangling_comments = self.end_dangling_comments();
+        if !end_dangling_comments.is_empty() {
+            write!(f, "\n")?;
+            end_dangling_comments
                 .iter()
-                .try_for_each(|comment| write!(f, "{}\n", comment))?;
+                .try_for_each(|comment| write!(f, "\n{}", comment))?;
         }
 
         Ok(())

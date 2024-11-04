@@ -23,7 +23,32 @@ pub fn parse(input: &crate::Input) -> Output {
     crate::event::process(events)
 }
 
-fn dangling_comments(p: &mut crate::parser::Parser<'_>) {
+fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
+    let mut n = 0;
+    let mut comment_count = 0;
+    while p.nth_at(n, WHITESPACE) || p.nth_at(n, COMMENT) || p.nth_at(n, NEWLINE) {
+        let kind = p.nth(n);
+        match kind {
+            COMMENT => {
+                comment_count += 1;
+            }
+            NEWLINE => {
+                if p.nth_at(n + 1, NEWLINE) {
+                    if comment_count > 0 {
+                        (0..=n).for_each(|_| p.bump_any());
+                        while p.eat(NEWLINE) || p.eat(WHITESPACE) {}
+                        break;
+                    }
+                    n += 1;
+                }
+            }
+            _ => {}
+        }
+        n += 1;
+    }
+}
+
+fn end_dangling_comments(p: &mut crate::parser::Parser<'_>) {
     while p.eat(WHITESPACE) || p.eat(COMMENT) || p.eat(NEWLINE) {}
 }
 

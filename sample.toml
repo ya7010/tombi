@@ -1,25 +1,32 @@
+# begin dangling comment1
+# begin dangling comment2
+
+# table leading comment1
+# table leading comment2
 [aaaa]
+# table leading comment1
+# table leading comment2
 [aaaa.bbb]
-dec = 1  # dec comment
-bin = 0b01  # bin comment
-oct = 0o01  # oct comment
-hex = 0x01  # hex comment
-float = 0.1234  # float comment
-bs = "2"  # bs comment
-ls = '3'  # ls comment
+dec = 1  # dec tailing comment
+bin = 0b01  # bin tailing comment
+oct = 0o01  # oct tailing comment
+hex = 0x01  # hex tailing comment
+float = 0.1234  # float tailing comment
+bs = "2"  # bs tailing comment
+ls = '3'  # ls tailing comment
 array1 = [{ key3 = 12, key4 = 2024-01-01T10:10:00 }]
-date = 2024-01-01  # date comment
-time = 10:11:00  # time comment
-odt1 = 1979-05-27T07:32:00Z  # odt1 comment
-odt2 = 1979-05-27T00:32:00-07:00  # odt2 comment
-odt3 = 1979-05-27T00:32:00.999999-07:00  # odt3 comment
-odt4 = 1979-05-27 07:32:00Z  # odt4 comment
-ldt1 = 1979-05-27T07:32:00  # ldt1 comment
-ldt2 = 1979-05-27T00:32:00.999999  # ldt2 comment
-ld1 = 1979-05-27  # ld1 comment
-lt1 = 07:32:00  # lt1 comment
-# lt2 leading comment
-lt2 = 00:32:00.999999  # lt2 comment
+date = 2024-01-01  # date tailing comment
+time = 10:11:00  # time tailing comment
+odt1 = 1979-05-27T07:32:00Z  # odt1 tailing comment
+odt2 = 1979-05-27T00:32:00-07:00  # odt2 tailing comment
+odt3 = 1979-05-27T00:32:00.999999-07:00  # odt3 tailing comment
+odt4 = 1979-05-27 07:32:00Z  # odt4 tailing comment
+ldt1 = 1979-05-27T07:32:00  # ldt1 tailing comment
+ldt2 = 1979-05-27T00:32:00.999999  # ldt2 tailing comment
+ld1 = 1979-05-27  # ld1 tailing comment
+lt1 = 07:32:00  # lt1 tailing comment
+# lt2 leading tailing comment
+lt2 = 00:32:00.999999  # lt2 tailing comment
 
 [aaaa.ccc]
 key1 = 11
@@ -58,5 +65,5 @@ key6 = 2
 # key value leading comment2
 key6 = 2  # key value tailing comment
 
-# last comment1
-# last comment2
+# end dangling comment1
+# end dangling comment2
