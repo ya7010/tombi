@@ -9,10 +9,12 @@ pub struct Formatter<'a> {
 }
 
 impl<'a> Formatter<'a> {
+    #[inline]
     pub fn new(buf: &'a mut (dyn Write + 'a)) -> Self {
         Self::new_with_options(buf, Default::default())
     }
 
+    #[inline]
     pub fn new_with_options(buf: &'a mut (dyn Write + 'a), options: crate::Options) -> Self {
         Self {
             options,
@@ -22,18 +24,22 @@ impl<'a> Formatter<'a> {
         }
     }
 
+    #[inline]
     pub fn options(&self) -> &crate::Options {
         &self.options
     }
 
+    #[inline]
     pub fn defs(&self) -> crate::Definitions {
         self.defs
     }
 
+    #[inline]
     pub fn ident(&self) -> String {
         self.options.ident(self.ident_depth)
     }
 
+    #[inline]
     pub fn reset_ident(&mut self) {
         self.ident_depth = 0;
     }

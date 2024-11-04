@@ -11,6 +11,7 @@ impl Definitions {
     /// key = "value"  # tailing comment
     /// #            ^^  <-this space
     /// ```
+    #[inline]
     pub const fn tailing_comment_space(&self) -> &'static str {
         "  "
     }
@@ -20,8 +21,19 @@ impl Definitions {
     /// ```toml
     /// key = [ 1, 2, 3 ]
     /// #      ^       ^  <- this space
-    pub const fn array_bracket_inner_space(&self) -> &'static str {
+    #[inline]
+    pub const fn inline_array_bracket_inner_space(&self) -> &'static str {
         ""
+    }
+
+    /// Returns the space after the comma in an array.
+    ///
+    /// ```toml
+    /// key = [ 1, 2, 3 ]
+    /// #         ^  ^    <- this space
+    #[inline]
+    pub const fn inline_array_comma_trailing_space(&self) -> &'static str {
+        " "
     }
 
     /// Returns the space inside the brackets of an inline table.
@@ -30,6 +42,7 @@ impl Definitions {
     /// key = { a = 1, b = 2 }
     /// #      ^            ^  <- this space
     /// ```
+    #[inline]
     pub const fn inline_table_brace_inner_space(&self) -> &'static str {
         " "
     }

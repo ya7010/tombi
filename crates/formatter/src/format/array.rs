@@ -3,17 +3,17 @@ use std::fmt::Write;
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "[{}", f.defs().array_bracket_inner_space())?;
+        write!(f, "[{}", f.defs().inline_array_bracket_inner_space())?;
 
         let values = self.values().collect::<Vec<_>>();
         for (i, value) in values.iter().enumerate() {
             if i > 0 {
-                write!(f, ", ")?;
+                write!(f, ",{}", f.defs().inline_array_comma_trailing_space())?;
             }
             value.fmt(f)?;
         }
 
-        write!(f, "{}]", f.defs().array_bracket_inner_space())
+        write!(f, "{}]", f.defs().inline_array_bracket_inner_space())
     }
 }
 
