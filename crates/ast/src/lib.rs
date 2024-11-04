@@ -197,8 +197,16 @@ impl ArrayOfTable {
 
 impl Array {
     pub fn has_tailing_comma_after_last_element(&self) -> bool {
-        dbg!(self.syntax().children().collect::<Vec<_>>());
-        false
+        self.syntax()
+            .children_with_tokens()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .skip_while(|item| item.kind() != T!(']'))
+            .skip(1)
+            .skip_while(|item| [WHITESPACE, COMMENT, NEWLINE].contains(&item.kind()))
+            .next()
+            .map_or(false, |it| it.kind() == T!(,))
     }
 }
 

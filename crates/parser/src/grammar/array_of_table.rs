@@ -1,39 +1,39 @@
 use syntax::T;
 
+use super::Grammer;
 use crate::{
-    grammar::{
-        key::parse_keys, key_value::parse_key_value, leading_comments, peek_leading_comments,
-        root::NEXT_SECTION, tailing_comment,
-    },
+    grammar::{leading_comments, peek_leading_comments, root::NEXT_SECTION, tailing_comment},
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
 
-pub fn parse_array_of_table(p: &mut Parser<'_>) {
-    let m = p.start();
+impl Grammer for ast::ArrayOfTable {
+    fn parse(p: &mut Parser<'_>) {
+        let m = p.start();
 
-    leading_comments(p);
+        leading_comments(p);
 
-    assert!(p.at(T!("[[")));
+        assert!(p.at(T!("[[")));
 
-    p.eat(T!("[["));
+        p.eat(T!("[["));
 
-    parse_keys(p);
+        ast::Keys::parse(p);
 
-    if !p.eat(T!("]]")) {
-        p.error(crate::Error::ExpectedDoubleBracetEnd);
-    }
-
-    tailing_comment(p);
-
-    loop {
-        let n = peek_leading_comments(p);
-
-        if p.nth_at_ts(n, NEXT_SECTION) {
-            break;
+        if !p.eat(T!("]]")) {
+            p.error(crate::Error::ExpectedDoubleBracetEnd);
         }
-        parse_key_value(p);
-    }
 
-    m.complete(p, ARRAY_OF_TABLE);
+        tailing_comment(p);
+
+        loop {
+            let n = peek_leading_comments(p);
+
+            if p.nth_at_ts(n, NEXT_SECTION) {
+                break;
+            }
+            ast::KeyValue::parse(p);
+        }
+
+        m.complete(p, ARRAY_OF_TABLE);
+    }
 }

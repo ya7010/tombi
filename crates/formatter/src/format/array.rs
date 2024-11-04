@@ -41,7 +41,7 @@ mod tests {
         r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#,
         r#"string_array = ["all", 'strings', """are the same""", '''type''']"#
     )]
-    fn single_line_array(#[case] source: &str, #[case] expected: &str) {
+    fn inline_array(#[case] source: &str, #[case] expected: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
@@ -51,5 +51,16 @@ mod tests {
 
         assert_eq!(formatted_text, expected);
         assert_eq!(p.errors(), []);
+    }
+
+    #[rstest]
+    #[case("[1, 2, 3,]", true)]
+    #[case("[1, 2, 3]", false)]
+    fn has_tailing_comma_after_last_element(#[case] source: &str, #[case] expected: bool) {
+        let p = parser::parse_as::<ast::Array>(source);
+        assert_eq!(p.errors(), []);
+
+        let ast = ast::Array::cast(p.syntax_node()).unwrap();
+        assert_eq!(ast.has_tailing_comma_after_last_element(), expected);
     }
 }

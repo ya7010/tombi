@@ -7,11 +7,14 @@
 # table leading comment1
 # table leading comment2
 [aaaa.bbb]
+bool1 = true
+bool2 = false
 dec = 1  # dec tailing comment
 bin = 0b01  # bin tailing comment
 oct = 0o01  # oct tailing comment
 hex = 0x01  # hex tailing comment
-float = 0.1234  # float tailing comment
+float1 = 0.1234  # float tailing comment
+inf = inf
 bs = "2"  # bs tailing comment
 ls = '3'  # ls tailing comment
 array1 = [{ key3 = 12, key4 = 2024-01-01T10:10:00 }]

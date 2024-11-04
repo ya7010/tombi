@@ -1,30 +1,29 @@
-use super::{
-    array::parse_array, inline_table::parse_inline_table, leading_comments, peek_leading_comments,
-    tailing_comment,
-};
+use super::{leading_comments, peek_leading_comments, tailing_comment, Grammer};
 use crate::{parser::Parser, token_set::TokenSet};
 use syntax::{SyntaxKind::*, T};
 
-pub fn parse_value(p: &mut Parser<'_>) {
-    let n = peek_leading_comments(p);
-    match p.nth(n) {
-        BASIC_STRING
-        | MULTI_LINE_BASIC_STRING
-        | LITERAL_STRING
-        | MULTI_LINE_LITERAL_STRING
-        | INTEGER_DEC
-        | INTEGER_BIN
-        | INTEGER_OCT
-        | INTEGER_HEX
-        | FLOAT
-        | BOOLEAN
-        | OFFSET_DATE_TIME
-        | LOCAL_DATE_TIME
-        | LOCAL_DATE
-        | LOCAL_TIME => parse_literal_value(p),
-        T!('[') => parse_array(p),
-        T!('{') => parse_inline_table(p),
-        _ => parse_invalid_value(p),
+impl Grammer for ast::Value {
+    fn parse(p: &mut Parser<'_>) {
+        let n = peek_leading_comments(p);
+        match p.nth(n) {
+            BASIC_STRING
+            | MULTI_LINE_BASIC_STRING
+            | LITERAL_STRING
+            | MULTI_LINE_LITERAL_STRING
+            | INTEGER_DEC
+            | INTEGER_BIN
+            | INTEGER_OCT
+            | INTEGER_HEX
+            | FLOAT
+            | BOOLEAN
+            | OFFSET_DATE_TIME
+            | LOCAL_DATE_TIME
+            | LOCAL_DATE
+            | LOCAL_TIME => parse_literal_value(p),
+            T!('[') => ast::Array::parse(p),
+            T!('{') => ast::InlineTable::parse(p),
+            _ => parse_invalid_value(p),
+        }
     }
 }
 

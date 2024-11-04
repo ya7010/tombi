@@ -14,6 +14,7 @@ mod validation;
 
 pub use error::Error;
 pub use event::Event;
+use grammar::Grammer;
 use input::Input;
 use lexed::lex;
 pub use lexed::LexedStr;
@@ -22,9 +23,14 @@ use parse::Parse;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub fn parse(source: &str) -> Parse<SyntaxNode> {
+    parse_as::<ast::Root>(source)
+}
+
+#[allow(private_bounds)]
+pub fn parse_as<G: Grammer>(source: &str) -> Parse<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
-    let output = grammar::parse(&input);
+    let output = grammar::parse::<G>(&input);
     let (tree, errors) = build_tree(&lexed, output);
 
     Parse::new(tree, errors)

@@ -7,20 +7,22 @@ mod root;
 mod table;
 mod value;
 
-use root::parse_root;
-
-use crate::output::Output;
+use crate::{output::Output, parser::Parser};
 use support::*;
 
-pub fn parse(input: &crate::Input) -> Output {
+pub fn parse<G: Grammer>(input: &crate::Input) -> Output {
     let _p = tracing::info_span!("grammar::parse").entered();
     let mut p = crate::parser::Parser::new(input);
 
-    parse_root(&mut p);
+    G::parse(&mut p);
 
     let events = p.finish();
 
     crate::event::process(events)
+}
+
+pub(crate) trait Grammer {
+    fn parse(p: &mut Parser<'_>);
 }
 
 mod support {

@@ -5,6 +5,8 @@ use syntax::{
 
 use crate::{parser::Parser, token_set::TokenSet};
 
+use super::Grammer;
+
 pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
     SyntaxKind::BARE_KEY,
@@ -20,14 +22,16 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     SyntaxKind::BOOLEAN,
 ]);
 
-pub fn parse_keys(p: &mut Parser<'_>) {
-    let m = p.start();
-    if eat_keys(p).is_some() {
-        m.complete(p, KEYS);
-    } else {
-        p.error(crate::Error::ExpectedKey);
-        m.complete(p, INVALID_TOKEN);
-    };
+impl Grammer for ast::Keys {
+    fn parse(p: &mut Parser<'_>) {
+        let m = p.start();
+        if eat_keys(p).is_some() {
+            m.complete(p, KEYS);
+        } else {
+            p.error(crate::Error::ExpectedKey);
+            m.complete(p, INVALID_TOKEN);
+        };
+    }
 }
 
 fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {

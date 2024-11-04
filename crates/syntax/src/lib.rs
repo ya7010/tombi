@@ -249,6 +249,7 @@ version = "1.2.4"
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::WHITESPACE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BASIC_STRING)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
+        assert_eq!(lex.next(), Some(Ok(SyntaxKind::NEWLINE)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACKET_START)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BRACKET_START)));
         assert_eq!(lex.next(), Some(Ok(SyntaxKind::BARE_KEY)));

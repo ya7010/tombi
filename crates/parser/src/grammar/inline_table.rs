@@ -1,36 +1,36 @@
 use syntax::{SyntaxKind::*, T};
 
 use crate::{
-    grammar::{leading_comments, peek_leading_comments, tailing_comment},
+    grammar::{leading_comments, peek_leading_comments, tailing_comment, Grammer},
     parser::Parser,
 };
 
-use super::key_value::parse_key_value;
+impl Grammer for ast::InlineTable {
+    fn parse(p: &mut Parser<'_>) {
+        let m = p.start();
 
-pub fn parse_inline_table(p: &mut Parser<'_>) {
-    let m = p.start();
+        leading_comments(p);
 
-    leading_comments(p);
+        assert!(p.at(T!['{']));
 
-    assert!(p.at(T!['{']));
+        p.eat(T!['{']);
 
-    p.eat(T!['{']);
-
-    loop {
-        let n = peek_leading_comments(p);
-        if p.nth_at(n, EOF) || p.nth_at(n, T!['}']) {
-            break;
+        loop {
+            let n = peek_leading_comments(p);
+            if p.nth_at(n, EOF) || p.nth_at(n, T!['}']) {
+                break;
+            }
+            ast::KeyValue::parse(p);
+            p.eat(T![,]);
+            tailing_comment(p);
         }
-        parse_key_value(p);
-        p.eat(T![,]);
+
+        if !p.eat(T!['}']) {
+            p.error(crate::Error::ExpectedBraceEnd);
+        }
+
         tailing_comment(p);
+
+        m.complete(p, INLINE_TABLE);
     }
-
-    if !p.eat(T!['}']) {
-        p.error(crate::Error::ExpectedBraceEnd);
-    }
-
-    tailing_comment(p);
-
-    m.complete(p, INLINE_TABLE);
 }
