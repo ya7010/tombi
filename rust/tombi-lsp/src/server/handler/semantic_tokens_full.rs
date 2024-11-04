@@ -99,11 +99,11 @@ impl AppendSemanticTokens for ast::Table {
         self.bracket_end()
             .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
 
-        self.tailing_comment()
-            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        // self.tailing_comment()
+        //     .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
 
-        for entry in self.key_values() {
-            entry.append_semantic_tokens(builder);
+        for key_value in self.key_values() {
+            key_value.append_semantic_tokens(builder);
         }
     }
 }
@@ -128,11 +128,11 @@ impl AppendSemanticTokens for ast::ArrayOfTable {
             builder.add_token(TokenType::OPERATOR, (&token).into());
         });
 
-        self.tailing_comment()
-            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        // self.tailing_comment()
+        //     .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
 
-        for table in self.key_values() {
-            table.append_semantic_tokens(builder);
+        for key_value in self.key_values() {
+            key_value.append_semantic_tokens(builder);
         }
     }
 }

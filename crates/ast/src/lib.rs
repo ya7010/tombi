@@ -104,3 +104,22 @@ mod support {
             .find(|it| it.kind() == kind)
     }
 }
+
+impl Root {
+    pub fn last_dangling_comments(&self) -> Vec<crate::Comment> {
+        self.syntax()
+            .children_with_tokens()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .take_while(|node| matches!(node.kind(), COMMENT | NEWLINE))
+            .filter_map(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) => crate::Comment::cast(token),
+                NodeOrToken::Node(_) => None,
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect()
+    }
+}

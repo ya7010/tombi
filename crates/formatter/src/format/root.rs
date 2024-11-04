@@ -45,7 +45,17 @@ impl Format for ast::Root {
                 }
                 item.fmt(f)
             })
-            .collect::<Result<_, _>>()
+            .collect::<Result<(), std::fmt::Error>>()?;
+
+        let last_dangling_comments = self.last_dangling_comments();
+        if !last_dangling_comments.is_empty() {
+            write!(f, "\n\n")?;
+            last_dangling_comments
+                .iter()
+                .try_for_each(|comment| write!(f, "{}\n", comment))?;
+        }
+
+        Ok(())
     }
 }
 
