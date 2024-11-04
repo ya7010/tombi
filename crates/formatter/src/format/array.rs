@@ -63,4 +63,69 @@ mod tests {
         let ast = ast::Array::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.has_tailing_comma_after_last_element(), expected);
     }
+
+    #[rstest]
+    #[case(
+        r#"
+# array leading comment1
+# array leading comment2
+array = [
+
+    # inner array begin dangling comment1
+    # inner array begin dangling comment2
+
+    # item1 leading comment1
+    # item1 leading comment2
+    1 # item1 trailing comment
+    , # item1 comma tailing comment
+    2 # item2 trailing comment
+    # item2 comma leading comment1
+    # item2 comma leading comment2
+    , # item2 comma tailing comment
+    # item3 leading comment1
+    # item3 leading comment2
+    3 # item3 trailing comment
+    # array end dangling comment1
+
+    # array end dangling comment2
+
+] # array tailing comment
+"#.trim(),
+r#"
+# array leading comment1
+# array leading comment2
+array = [
+  # inner array begin dangling comment1
+  # inner array begin dangling comment2
+
+  # item1 leading comment1
+  # item1 leading comment2
+  1  # item1 trailing comment
+  ,  # item1 comma tailing comment
+  2  # item2 trailing comment
+  # item2 comma leading comment1
+  # item2 comma leading comment2
+  ,  # item2 comma tailing comment
+  # item3 leading comment1
+  # item3 leading comment2
+  3  # item3 trailing comment
+
+  # array end dangling comment1
+  # array end dangling comment2
+]
+"#.trim()
+    )]
+    fn multiline_array_with_comment(#[case] source: &str, #[case] expected: &str) {
+        let p = parser::parse(source);
+        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+
+        let mut formatted_text = String::new();
+
+        dbg!(&ast);
+        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            .unwrap();
+
+        assert_eq!(formatted_text, expected);
+        assert_eq!(p.errors(), []);
+    }
 }
