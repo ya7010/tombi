@@ -1,19 +1,23 @@
 [aaaa]
 [aaaa.bbb]
-key1 = 1  # comment
-key2 = "2"
+dec = 1  # dec comment
+bin = 0b01  # bin comment
+oct = 0o01  # oct comment
+hex = 0x01  # hex comment
+bs = "2"  # bs comment
+ls = '3'  # ls comment
 array1 = [{ key3 = 12, key4 = 2024-01-01T10:10:00 }]
-date = 2024-01-01
-time = 10:11:00
-odt1 = 1979-05-27T07:32:00Z
-odt2 = 1979-05-27T00:32:00-07:00
-odt3 = 1979-05-27T00:32:00.999999-07:00
-odt4 = 1979-05-27 07:32:00Z
-ldt1 = 1979-05-27T07:32:00
-ldt2 = 1979-05-27T00:32:00.999999
-ld1 = 1979-05-27
-lt1 = 07:32:00
-lt2 = 00:32:00.999999
+date = 2024-01-01  # date comment
+time = 10:11:00  # time comment
+odt1 = 1979-05-27T07:32:00Z  # odt1 comment
+odt2 = 1979-05-27T00:32:00-07:00  # odt2 comment
+odt3 = 1979-05-27T00:32:00.999999-07:00  # odt3 comment
+odt4 = 1979-05-27 07:32:00Z  # odt4 comment
+ldt1 = 1979-05-27T07:32:00  # ldt1 comment
+ldt2 = 1979-05-27T00:32:00.999999  # ldt2 comment
+ld1 = 1979-05-27  # ld1 comment
+lt1 = 07:32:00  # lt1 comment
+lt2 = 00:32:00.999999  # lt2 comment
 
 [aaaa.ccc]
 key1 = 11
