@@ -1,11 +1,13 @@
 use super::{
-    array::parse_array, inline_table::parse_inline_table, leading_comments, tailing_comment,
+    array::parse_array, inline_table::parse_inline_table, leading_comments, peek_leading_comments,
+    tailing_comment,
 };
 use crate::{parser::Parser, token_set::TokenSet};
 use syntax::{SyntaxKind::*, T};
 
 pub fn parse_value(p: &mut Parser<'_>) {
-    match p.current() {
+    let n = peek_leading_comments(p);
+    match p.nth(n) {
         BASIC_STRING
         | MULTI_LINE_BASIC_STRING
         | LITERAL_STRING
