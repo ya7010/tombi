@@ -18,7 +18,7 @@ impl<'a> Formatter<'a> {
     pub fn new_with_options(buf: &'a mut (dyn Write + 'a), options: crate::Options) -> Self {
         Self {
             options,
-            defs: crate::Definitions,
+            defs: Default::default(),
             ident_depth: 0,
             buf,
         }
@@ -30,13 +30,13 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn defs(&self) -> crate::Definitions {
-        self.defs
+    pub fn defs(&self) -> &crate::Definitions {
+        &self.defs
     }
 
     #[inline]
     pub fn ident(&self) -> String {
-        self.options.ident(self.ident_depth)
+        self.defs.ident(self.ident_depth)
     }
 
     #[inline]

@@ -1,10 +1,25 @@
 /// Definitions provides the definition of the format that does not have the freedom set by Options.
 ///
 /// NOTE: Some of the items defined in Definitions may be moved to Options in the future.
-#[derive(Debug, Clone, Copy)]
-pub struct Definitions;
+#[derive(Debug, Default, Clone, Copy)]
+pub struct Definitions {
+    /// Size of a tab in spaces.
+    pub tab_size: Option<u8>,
+
+    /// Prefer spaces over tabs.
+    pub insert_space: Option<bool>,
+}
 
 impl Definitions {
+    #[inline]
+    pub fn ident(&self, depth: u8) -> String {
+        if self.insert_space == Some(false) {
+            "\t".repeat(depth as usize)
+        } else {
+            " ".repeat((self.tab_size.unwrap_or(2) * depth) as usize)
+        }
+    }
+
     /// Returns the space before the tailing comment.
     ///
     /// ```toml
