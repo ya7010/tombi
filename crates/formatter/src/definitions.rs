@@ -22,7 +22,7 @@ impl Definitions {
     /// key = [ 1, 2, 3 ]
     /// #      ^       ^  <- this space
     #[inline]
-    pub const fn inline_array_bracket_inner_space(&self) -> &'static str {
+    pub const fn singleline_array_bracket_inner_space(&self) -> &'static str {
         ""
     }
 
@@ -32,7 +32,7 @@ impl Definitions {
     /// key = [ 1, 2, 3 ]
     /// #         ^  ^    <- this space
     #[inline]
-    pub const fn inline_array_comma_trailing_space(&self) -> &'static str {
+    pub const fn singleline_array_comma_trailing_space(&self) -> &'static str {
         " "
     }
 

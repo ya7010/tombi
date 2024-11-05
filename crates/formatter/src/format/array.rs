@@ -8,7 +8,7 @@ impl Format for ast::Array {
         if self.has_tailing_comma_after_last_element() || self.has_inner_comments() {
             format_multiline_array(self, f)
         } else {
-            format_inline_array(self, f)
+            format_singleline_array(self, f)
         }
     }
 }
@@ -46,21 +46,21 @@ fn format_multiline_array(
     Ok(())
 }
 
-fn format_inline_array(
+fn format_singleline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    write!(f, "[{}", f.defs().inline_array_bracket_inner_space())?;
+    write!(f, "[{}", f.defs().singleline_array_bracket_inner_space())?;
 
     let values = array.values().collect::<Vec<_>>();
     for (i, value) in values.iter().enumerate() {
         if i > 0 {
-            write!(f, ",{}", f.defs().inline_array_comma_trailing_space())?;
+            write!(f, ",{}", f.defs().singleline_array_comma_trailing_space())?;
         }
         value.fmt(f)?;
     }
 
-    write!(f, "{}]", f.defs().inline_array_bracket_inner_space())
+    write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())
 }
 
 #[cfg(test)]
