@@ -1,4 +1,4 @@
-use super::comment::TailingComment;
+use super::comment::{LeadingComment, TailingComment};
 use crate::Format;
 use std::fmt::Write;
 
@@ -7,10 +7,9 @@ impl Format for ast::Table {
         let header = self.header().unwrap();
         let key_values = self.key_values().collect::<Vec<_>>();
 
-        self.header_leading_comments()
-            .iter()
-            .map(|comment| write!(f, "{}\n", comment))
-            .collect::<Result<(), std::fmt::Error>>()?;
+        for comment in self.header_leading_comments() {
+            LeadingComment(comment).fmt(f)?;
+        }
 
         write!(f, "[{header}]")?;
 
@@ -20,9 +19,9 @@ impl Format for ast::Table {
 
         key_values
             .iter()
-            .map(|it| {
+            .map(|kv| {
                 write!(f, "\n")?;
-                it.fmt(f)
+                kv.fmt(f)
             })
             .collect::<Result<(), std::fmt::Error>>()
     }

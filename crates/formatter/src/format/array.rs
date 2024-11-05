@@ -1,7 +1,7 @@
-use ast::{AstNode, AstToken};
-
 use crate::Format;
 use std::fmt::Write;
+
+use super::comment::{DanglingComment, LeadingComment, TailingComment};
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -26,18 +26,26 @@ fn format_multiline_array(
 
     if inner_begin_dangling_comments.len() > 0 {
         for comment in inner_begin_dangling_comments {
-            write!(f, "{}{}\n", f.ident(), comment.text().to_string())?;
+            DanglingComment(comment).fmt(f)?;
         }
         write!(f, "\n")?;
     }
 
-    for (i, value) in array.values().enumerate() {
+    for (i, (value, comma_leading_comments, comma_tailing_comment)) in
+        array.values_with_comma_comments().into_iter().enumerate()
+    {
         if i > 0 {
             write!(f, "\n")?;
         }
         value.fmt(f)?;
-        if value.tailing_comment().is_some() {
+
+        for comment in comma_leading_comments {
+            LeadingComment(comment).fmt(f)?;
+        }
+
+        if let Some(comment) = comma_tailing_comment {
             write!(f, "\n{},", f.ident())?;
+            TailingComment(comment).fmt(f)?;
         } else {
             write!(f, ",")?;
         }
@@ -47,7 +55,7 @@ fn format_multiline_array(
     if inner_end_dangling_comments.len() > 0 {
         write!(f, "\n")?;
         for comment in inner_end_dangling_comments {
-            write!(f, "{}{}\n", f.ident(), comment.text().to_string())?;
+            DanglingComment(comment).fmt(f)?;
         }
     }
 

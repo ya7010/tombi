@@ -3,15 +3,18 @@ use ast::AstNode;
 use crate::Format;
 use std::fmt::Write;
 
+use super::comment::LeadingComment;
+
 impl Format for ast::KeyValue {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        self.leading_comments()
-            .iter()
-            .map(|comment| write!(f, "{}\n", comment))
-            .collect::<Result<(), std::fmt::Error>>()?;
+        for comment in self.leading_comments() {
+            LeadingComment(comment).fmt(f)?;
+        }
         self.keys().unwrap().fmt(f)?;
         write!(f, " = ")?;
         self.value().unwrap().fmt(f)?;
+
+        // NOTE: tailing comment is output by `value.fmt(f)`.
 
         Ok(())
     }

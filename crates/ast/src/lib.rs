@@ -2,6 +2,7 @@ pub mod algo;
 mod generated;
 
 pub use generated::*;
+use itertools::Itertools;
 use std::{fmt::Debug, marker::PhantomData};
 use syntax::{NodeOrToken, SyntaxKind::*, T};
 
@@ -10,15 +11,7 @@ where
     Self: Debug,
 {
     fn leading_comments(&self) -> Vec<crate::Comment> {
-        self.syntax()
-            .children_with_tokens()
-            .into_iter()
-            .take_while(|node| matches!(node.kind(), COMMENT | NEWLINE | WHITESPACE))
-            .filter_map(|node_or_token| match node_or_token {
-                NodeOrToken::Token(token) => crate::Comment::cast(token),
-                NodeOrToken::Node(_) => None,
-            })
-            .collect()
+        support::leading_comments(self.syntax().children_with_tokens())
     }
 
     fn tailing_comment(&self) -> Option<crate::Comment> {
@@ -105,18 +98,23 @@ mod support {
     }
 
     #[inline]
-    pub(super) fn header_leading_comments<N: AstNode>(node: &N) -> Vec<crate::Comment> {
-        node.leading_comments()
+    pub(super) fn leading_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+        iter: I,
+    ) -> Vec<crate::Comment> {
+        iter.take_while(|node| matches!(node.kind(), COMMENT | NEWLINE | WHITESPACE))
+            .filter_map(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) => crate::Comment::cast(token),
+                NodeOrToken::Node(_) => None,
+            })
+            .collect()
     }
 
     #[inline]
-    pub(super) fn header_tailing_comment<N: AstNode>(
-        node: &N,
+    pub(super) fn tailing_comment<I: Iterator<Item = syntax::NodeOrToken>>(
+        iter: I,
         end: syntax::SyntaxKind,
     ) -> Option<crate::Comment> {
-        let mut iter = node
-            .syntax()
-            .children_with_tokens()
+        let mut iter = iter
             .skip_while(|item| item.kind() != end && item.kind() != EOF)
             .skip(1);
 
@@ -177,21 +175,21 @@ impl Root {
 
 impl Table {
     pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
-        support::header_leading_comments(self)
+        support::leading_comments(self.syntax().children_with_tokens())
     }
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
-        support::header_tailing_comment(self, T!(']'))
+        support::tailing_comment(self.syntax().children_with_tokens(), T!(']'))
     }
 }
 
 impl ArrayOfTable {
     pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
-        support::header_leading_comments(self)
+        support::leading_comments(self.syntax().children_with_tokens())
     }
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
-        support::header_tailing_comment(self, T!("]]"))
+        support::tailing_comment(self.syntax().children_with_tokens(), T!("]]"))
     }
 }
 
@@ -220,6 +218,39 @@ impl Array {
             .skip_while(|node| node.kind() != T!('['))
             .skip(1)
             .any(|node| node.kind() == COMMENT)
+    }
+
+    pub fn values_with_comma_comments(
+        &self,
+    ) -> Vec<(crate::Value, Vec<crate::Comment>, Option<crate::Comment>)> {
+        let mut result = Vec::new();
+        let mut leading_comments_iter = self
+            .syntax()
+            .children_with_tokens()
+            .skip_while(|node| node.kind() != T!('['))
+            .skip(1);
+        let mut tailing_comment_iter = leading_comments_iter.clone();
+
+        for value in self.values() {
+            let leading_comments = support::leading_comments(
+                leading_comments_iter
+                    .take_while_ref(|token_or_node| token_or_node.kind() != T![,])
+                    .collect::<Vec<_>>()
+                    .into_iter()
+                    .rev(),
+            )
+            .into_iter()
+            .rev()
+            .collect();
+
+            result.push((
+                value,
+                leading_comments,
+                support::tailing_comment(&mut tailing_comment_iter, T![,]),
+            ));
+        }
+
+        result
     }
 
     pub fn has_tailing_comma_after_last_element(&self) -> bool {

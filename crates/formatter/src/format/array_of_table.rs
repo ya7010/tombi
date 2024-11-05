@@ -21,9 +21,9 @@ impl Format for ast::ArrayOfTable {
 
         key_values
             .iter()
-            .map(|it| {
+            .map(|kv| {
                 write!(f, "\n")?;
-                it.fmt(f)
+                kv.fmt(f)
             })
             .collect::<Result<(), std::fmt::Error>>()
     }

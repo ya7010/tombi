@@ -1,6 +1,6 @@
 use ast::AstNode;
 
-use super::Format;
+use super::{comment::DanglingComment, Format};
 use std::fmt::Write;
 
 impl Format for ast::Root {
@@ -10,7 +10,7 @@ impl Format for ast::Root {
         let begin_dangling_comments = self.begin_dangling_comments();
         if !begin_dangling_comments.is_empty() {
             for comment in begin_dangling_comments {
-                write!(f, "{}\n", comment)?;
+                DanglingComment(comment).fmt(f)?;
             }
             write!(f, "\n")?;
         }
@@ -61,7 +61,7 @@ impl Format for ast::Root {
         if !end_dangling_comments.is_empty() {
             write!(f, "\n")?;
             for comment in end_dangling_comments {
-                write!(f, "{}\n", comment)?;
+                DanglingComment(comment).fmt(f)?;
             }
         }
 
