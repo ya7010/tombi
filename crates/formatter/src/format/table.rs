@@ -5,7 +5,6 @@ use std::fmt::Write;
 impl Format for ast::Table {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
-        let key_values = self.key_values().collect::<Vec<_>>();
 
         for comment in self.header_leading_comments() {
             LeadingComment(comment).fmt(f)?;
@@ -17,13 +16,12 @@ impl Format for ast::Table {
             TailingComment(comment).fmt(f)?;
         }
 
-        key_values
-            .iter()
-            .map(|kv| {
-                write!(f, "\n")?;
-                kv.fmt(f)
-            })
-            .collect::<Result<(), std::fmt::Error>>()
+        for kv in self.key_values() {
+            write!(f, "\n")?;
+            kv.fmt(f)?;
+        }
+
+        Ok(())
     }
 }
 
