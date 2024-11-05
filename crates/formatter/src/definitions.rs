@@ -2,22 +2,12 @@
 ///
 /// NOTE: Some of the items defined in Definitions may be moved to Options in the future.
 #[derive(Debug, Default, Clone, Copy)]
-pub struct Definitions {
-    /// Size of a tab in spaces.
-    pub tab_size: Option<u8>,
-
-    /// Prefer spaces over tabs.
-    pub insert_space: Option<bool>,
-}
+pub struct Definitions {}
 
 impl Definitions {
     #[inline]
     pub fn ident(&self, depth: u8) -> String {
-        if self.insert_space == Some(false) {
-            "\t".repeat(depth as usize)
-        } else {
-            " ".repeat((self.tab_size.unwrap_or(2) * depth) as usize)
-        }
+        " ".repeat((2 * depth) as usize)
     }
 
     /// Returns the space before the tailing comment.
