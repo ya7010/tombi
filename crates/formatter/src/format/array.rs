@@ -1,7 +1,9 @@
+use ast::AstNode;
+
 use crate::Format;
 use std::fmt::Write;
 
-use super::comment::{DanglingComment, LeadingComment, TailingComment};
+use super::comment::{BeginDanglingComment, EndDanglingComment, LeadingComment, TailingComment};
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -26,7 +28,7 @@ fn format_multiline_array(
 
     if inner_begin_dangling_comments.len() > 0 {
         for comment in inner_begin_dangling_comments {
-            DanglingComment(comment).fmt(f)?;
+            BeginDanglingComment(comment).fmt(f)?;
         }
         write!(f, "\n")?;
     }
@@ -39,15 +41,22 @@ fn format_multiline_array(
         }
         value.fmt(f)?;
 
-        for comment in comma_leading_comments {
-            LeadingComment(comment).fmt(f)?;
+        if comma_leading_comments.len() > 0 {
+            write!(f, "\n")?;
+            for comment in comma_leading_comments {
+                LeadingComment(comment).fmt(f)?;
+            }
+            write!(f, "{},", f.ident())?;
+        } else {
+            if value.tailing_comment().is_some() {
+                write!(f, "\n{},", f.ident())?;
+            } else {
+                write!(f, ",")?;
+            }
         }
 
         if let Some(comment) = comma_tailing_comment {
-            write!(f, "\n{},", f.ident())?;
             TailingComment(comment).fmt(f)?;
-        } else {
-            write!(f, ",")?;
         }
     }
 
@@ -55,13 +64,18 @@ fn format_multiline_array(
     if inner_end_dangling_comments.len() > 0 {
         write!(f, "\n")?;
         for comment in inner_end_dangling_comments {
-            DanglingComment(comment).fmt(f)?;
+            EndDanglingComment(comment).fmt(f)?;
         }
     }
 
     f.dec_ident();
 
-    write!(f, "{}]", f.ident())?;
+    write!(f, "\n{}]", f.ident())?;
+
+    if let Some(comment) = array.tailing_comment() {
+        TailingComment(comment).fmt(f)?;
+    }
+
     f.dec_ident();
 
     Ok(())
@@ -81,7 +95,13 @@ fn format_singleline_array(
         value.fmt(f)?;
     }
 
-    write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())
+    write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())?;
+
+    if let Some(comment) = array.tailing_comment() {
+        TailingComment(comment).fmt(f)?;
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -176,10 +196,11 @@ array = [
     # item3 leading comment1
     # item3 leading comment2
     3  # item3 trailing comment
+    ,
 
     # array end dangling comment1
     # array end dangling comment2
-  ]
+  ]  # array tailing comment
 "#.trim()
     )]
     fn multiline_array_with_comment(#[case] source: &str, #[case] expected: &str) {

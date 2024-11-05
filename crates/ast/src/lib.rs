@@ -224,30 +224,44 @@ impl Array {
         &self,
     ) -> Vec<(crate::Value, Vec<crate::Comment>, Option<crate::Comment>)> {
         let mut result = Vec::new();
-        let mut leading_comments_iter = self
+        let mut iter = self
             .syntax()
             .children_with_tokens()
             .skip_while(|node| node.kind() != T!('['))
             .skip(1);
-        let mut tailing_comment_iter = leading_comments_iter.clone();
 
         for value in self.values() {
-            let leading_comments = support::leading_comments(
-                leading_comments_iter
-                    .take_while_ref(|token_or_node| token_or_node.kind() != T![,])
-                    .collect::<Vec<_>>()
-                    .into_iter()
-                    .rev(),
-            )
-            .into_iter()
-            .rev()
-            .collect();
-
-            result.push((
-                value,
-                leading_comments,
-                support::tailing_comment(&mut tailing_comment_iter, T![,]),
-            ));
+            if iter
+                .clone()
+                .skip_while(|node_or_token| node_or_token.kind() != T!(,))
+                .next()
+                .is_none()
+            {
+                result.push((value, vec![], None));
+            } else {
+                let leading_comments = iter
+                    .clone()
+                    .skip_while(|token_or_node| {
+                        matches!(token_or_node.kind(), WHITESPACE | COMMENT | NEWLINE)
+                    })
+                    .skip(1)
+                    .skip_while(|token_or_node| {
+                        matches!(token_or_node.kind(), WHITESPACE | COMMENT)
+                    })
+                    .take_while_ref(|token_or_node| {
+                        matches!(token_or_node.kind(), WHITESPACE | COMMENT | NEWLINE)
+                    })
+                    .filter_map(|node_or_token| match node_or_token {
+                        NodeOrToken::Token(token) => crate::Comment::cast(token),
+                        NodeOrToken::Node(_) => None,
+                    })
+                    .collect::<Vec<_>>();
+                result.push((
+                    value,
+                    leading_comments,
+                    support::tailing_comment(&mut iter, T![,]),
+                ));
+            }
         }
 
         result
