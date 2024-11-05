@@ -68,7 +68,7 @@ fn format_singleline_array(
     let values = array.values().collect::<Vec<_>>();
     for (i, value) in values.iter().enumerate() {
         if i > 0 {
-            write!(f, ",{}", f.defs().singleline_array_comma_trailing_space())?;
+            write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
         }
         value.fmt(f)?;
     }

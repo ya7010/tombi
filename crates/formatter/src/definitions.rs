@@ -37,7 +37,7 @@ impl Definitions {
     /// key = [ 1, 2, 3 ]
     /// #         ^  ^    <- this space
     #[inline]
-    pub const fn singleline_array_comma_trailing_space(&self) -> &'static str {
+    pub const fn singleline_array_space_after_comma(&self) -> &'static str {
         " "
     }
 
