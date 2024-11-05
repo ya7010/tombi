@@ -19,7 +19,12 @@ where
     T: LiteralNode + ast::AstNode,
 {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.token().unwrap())?;
+        for comment in self.leading_comments() {
+            write!(f, "{}{}\n", f.ident(), comment)?;
+        }
+
+        write!(f, "{}{}", f.ident(), self.token().unwrap())?;
+
         if let Some(comment) = self.tailing_comment() {
             TailingComment(comment).fmt(f)?;
         }

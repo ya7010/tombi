@@ -205,6 +205,15 @@ impl Array {
         )
     }
 
+    pub fn inner_end_dangling_comments(&self) -> Vec<crate::Comment> {
+        support::end_dangling_comments(
+            self.syntax()
+                .children_with_tokens()
+                .into_iter()
+                .take_while(|node| node.kind() != T!(']')),
+        )
+    }
+
     pub fn has_inner_comments(&self) -> bool {
         self.syntax()
             .children_with_tokens()

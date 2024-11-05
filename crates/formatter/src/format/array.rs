@@ -1,4 +1,4 @@
-use ast::AstToken;
+use ast::{AstNode, AstToken};
 
 use crate::Format;
 use std::fmt::Write;
@@ -35,9 +35,22 @@ fn format_multiline_array(
         if i > 0 {
             write!(f, "\n")?;
         }
-        write!(f, "{}", f.ident())?;
         value.fmt(f)?;
+        if value.tailing_comment().is_some() {
+            write!(f, "\n{},", f.ident())?;
+        } else {
+            write!(f, ",")?;
+        }
     }
+
+    let inner_end_dangling_comments = array.inner_end_dangling_comments();
+    if inner_end_dangling_comments.len() > 0 {
+        write!(f, "\n")?;
+        for comment in inner_end_dangling_comments {
+            write!(f, "{}{}\n", f.ident(), comment.text().to_string())?;
+        }
+    }
+
     f.dec_ident();
 
     write!(f, "{}]", f.ident())?;
