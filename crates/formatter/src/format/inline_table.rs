@@ -3,7 +3,12 @@ use std::fmt::Write;
 
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{{{}", f.defs().inline_table_brace_inner_space())?;
+        write!(
+            f,
+            "{}{{{}",
+            f.ident(),
+            f.defs().inline_table_brace_inner_space()
+        )?;
 
         let key_values = self.entries().collect::<Vec<_>>();
         for (i, key_value) in key_values.iter().enumerate() {

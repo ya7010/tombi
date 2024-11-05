@@ -50,6 +50,22 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
+    pub fn with_reset_ident(
+        &mut self,
+        f: impl FnOnce(&mut Self) -> Result<(), std::fmt::Error>,
+    ) -> Result<(), std::fmt::Error> {
+        let depth = self.ident_depth;
+
+        self.reset_ident();
+
+        let result = f(self);
+
+        self.ident_depth = depth;
+
+        result
+    }
+
+    #[inline]
     pub fn reset_ident(&mut self) {
         self.ident_depth = 0;
     }

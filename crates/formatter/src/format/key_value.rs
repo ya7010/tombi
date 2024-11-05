@@ -12,7 +12,7 @@ impl Format for ast::KeyValue {
         }
         self.keys().unwrap().fmt(f)?;
         write!(f, " = ")?;
-        self.value().unwrap().fmt(f)?;
+        f.with_reset_ident(|f| self.value().unwrap().fmt(f))?;
 
         // NOTE: tailing comment is output by `value.fmt(f)`.
 
