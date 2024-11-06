@@ -74,26 +74,10 @@ key6 = 1
 [[ffff.ggg]]
 key6 = 2
 
-[[ffff.ggg]]
-key6 = 2
-
-[[ffff.ggg]]
-key6 = 2
-
-[[ffff.ggg]]
-key6 = 2
-
-[[ffff.ggg]]
-key6 = 2
-
-[[ffff.ggg]]
-# key value leading comment2
-key6 = 2
-
 [[ffff.ggg]]  # header tailing comment
 # key value leading comment1
 # key value leading comment2
-key6 = 2  # key value tailing comment
+key6 = 3  # key value tailing comment
 
 # end dangling comment1
 # end dangling comment2
