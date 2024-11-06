@@ -28,10 +28,14 @@ pub(crate) trait Grammer {
 mod support {
     use crate::{token_set::TokenSet, SyntaxKind::*};
 
+    const DANGLING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, NEWLINE, WHITESPACE]);
+    const LEADING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, NEWLINE, WHITESPACE]);
+    const TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
+
     pub fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
         let mut n = 0;
         let mut comment_count = 0;
-        while p.nth_at(n, WHITESPACE) || p.nth_at(n, COMMENT) || p.nth_at(n, NEWLINE) {
+        while p.nth_at_ts(n, DANGLING_COMMENTS_KINDS) {
             let kind = p.nth(n);
             match kind {
                 COMMENT => {
@@ -54,12 +58,12 @@ mod support {
     }
 
     pub fn end_dangling_comments(p: &mut crate::parser::Parser<'_>) {
-        while p.eat(WHITESPACE) || p.eat(COMMENT) || p.eat(NEWLINE) {}
+        while p.eat_ts(DANGLING_COMMENTS_KINDS) {}
     }
 
     pub fn peek_leading_comments(p: &mut crate::parser::Parser<'_>) -> usize {
         let mut n = 0;
-        while p.nth_at(n, WHITESPACE) || p.nth_at(n, COMMENT) || p.nth_at(n, NEWLINE) {
+        while p.nth_at_ts(n, LEADING_COMMENTS_KINDS) {
             n += 1;
         }
 
@@ -68,15 +72,11 @@ mod support {
 
     #[inline]
     pub fn leading_comments(p: &mut crate::parser::Parser<'_>) {
-        const KINDS: TokenSet = TokenSet::new(&[COMMENT, NEWLINE, WHITESPACE]);
-
-        while p.eat_ts(KINDS) {}
+        while p.eat_ts(LEADING_COMMENTS_KINDS) {}
     }
 
     #[inline]
     pub fn tailing_comment(p: &mut crate::parser::Parser<'_>) {
-        const KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
-
-        while p.eat_ts(KINDS) {}
+        while p.eat_ts(TAILING_COMMENT_KINDS) {}
     }
 }
