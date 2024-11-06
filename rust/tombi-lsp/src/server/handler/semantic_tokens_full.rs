@@ -172,6 +172,10 @@ impl AppendSemanticTokens for ast::Key {
 
 impl AppendSemanticTokens for ast::Value {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
+        for comment in self.leading_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
+
         match self {
             Self::BasicString(n) => {
                 builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
@@ -222,8 +226,24 @@ impl AppendSemanticTokens for ast::Value {
 
 impl AppendSemanticTokens for ast::Array {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for value in self.values() {
+        for comment in self.inner_begin_dangling_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
+
+        for (value, comma) in self.values_with_comma() {
             value.append_semantic_tokens(builder);
+            if let Some(comma) = comma {
+                comma.leading_comments().iter().for_each(|comment| {
+                    builder.add_token(TokenType::COMMENT, comment.syntax().into())
+                });
+                comma
+                    .tailing_comment()
+                    .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+            }
+        }
+
+        for comment in self.inner_end_dangling_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
         }
     }
 }
