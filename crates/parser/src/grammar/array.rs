@@ -28,7 +28,8 @@ impl Grammer for ast::Array {
             }
 
             ast::Value::parse(p);
-            while p.eat(WHITESPACE) || p.eat(NEWLINE) || p.eat(COMMENT) {}
+
+            leading_comments(p);
             p.eat(T![,]);
             tailing_comment(p);
         }

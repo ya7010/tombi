@@ -29,6 +29,7 @@ impl<'t> Parser<'t> {
         self.events
     }
 
+    #[inline]
     pub(crate) fn current(&self) -> SyntaxKind {
         self.nth(0)
     }
@@ -65,12 +66,18 @@ impl<'t> Parser<'t> {
             return false;
         }
 
-        let n_raw_tokens = match kind {
-            T!["[["] | T!["]]"] => 2,
-            _ => 1,
-        };
+        self.do_bump_kind(kind);
 
-        self.do_bump(kind, n_raw_tokens);
+        true
+    }
+
+    pub(crate) fn eat_ts(&mut self, kinds: TokenSet) -> bool {
+        let kind = self.current();
+        if !kinds.contains(kind) {
+            return false;
+        }
+
+        self.do_bump_kind(kind);
 
         true
     }
@@ -126,6 +133,15 @@ impl<'t> Parser<'t> {
         self.pos += n_raw_tokens as usize;
         self.steps.set(0);
         self.push_event(Event::Token { kind, n_raw_tokens });
+    }
+
+    fn do_bump_kind(&mut self, kind: SyntaxKind) {
+        let n_raw_tokens = match kind {
+            T!["[["] | T!["]]"] => 2,
+            _ => 1,
+        };
+
+        self.do_bump(kind, n_raw_tokens);
     }
 
     pub(crate) fn push_event(&mut self, event: Event) {

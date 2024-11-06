@@ -26,7 +26,7 @@ pub(crate) trait Grammer {
 }
 
 mod support {
-    use crate::SyntaxKind::*;
+    use crate::{token_set::TokenSet, SyntaxKind::*};
 
     pub fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
         let mut n = 0;
@@ -66,11 +66,17 @@ mod support {
         n
     }
 
+    #[inline]
     pub fn leading_comments(p: &mut crate::parser::Parser<'_>) {
-        while p.eat(WHITESPACE) || p.eat(COMMENT) || p.eat(NEWLINE) {}
+        const KINDS: TokenSet = TokenSet::new(&[COMMENT, NEWLINE, WHITESPACE]);
+
+        while p.eat_ts(KINDS) {}
     }
 
+    #[inline]
     pub fn tailing_comment(p: &mut crate::parser::Parser<'_>) {
-        while p.eat(WHITESPACE) || p.eat(COMMENT) {}
+        const KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
+
+        while p.eat_ts(KINDS) {}
     }
 }
