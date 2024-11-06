@@ -40,6 +40,9 @@ Comma = ','
 Key = BareKey | BasicString | LiteralString
 Keys = Key ('.' Key)*
 
+Array = '[' values: (Value (',' Value)* ','?) ']'
+InlineTable = '{' entries: (KeyValue (',' KeyValue)* ','?) '}'
+
 Value =
     BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString
     | IntegerBin | IntegerOct | IntegerDec | IntegerHex
@@ -50,9 +53,7 @@ Value =
     | InlineTable
 
 KeyValue = Keys '=' Value
-Array = '[' values: (Value (',' Value)* ','?) ']'
 Table = '[' header: Keys ']' KeyValue*
-InlineTable = '{' entries: (KeyValue (',' KeyValue)* ','?) '}'
 ArrayOfTable = '[[' header: Keys ']]' KeyValue*
 
 Root = RootItem*
