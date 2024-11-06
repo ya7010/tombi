@@ -240,4 +240,31 @@ array = [
         assert_matches!(result, Ok(_));
         assert_eq!(result.unwrap(), expected);
     }
+
+    #[rstest]
+    #[case(
+        r#"
+array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"#.trim(),
+        r#"
+array = [
+    [
+      1,
+      2,
+      3,
+    ],
+    [4, 5, 6],
+    [
+      7,
+      8,
+      9,
+    ]
+  ]
+"#.trim()
+    )]
+    fn nested_multiline_array(#[case] source: &str, #[case] expected: &str) {
+        let result = crate::format(source);
+
+        assert_matches!(result, Ok(_));
+        assert_eq!(result.unwrap(), expected);
+    }
 }
