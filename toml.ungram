@@ -34,6 +34,8 @@ OffsetDateTime = '@offset_date_time'
 LocalDateTime = '@local_date_time'
 LocalDate = '@local_date'
 LocalTime = '@local_time'
+// Comma may be followed by a comment, so it is treated as a Node.
+Comma = ','
 
 Key = BareKey | BasicString | LiteralString
 Keys = Key ('.' Key)*

@@ -275,35 +275,3 @@ macro_rules! match_ast {
         { $catch_all }
     }};
 }
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Comma {
-    pub(crate) syntax: SyntaxNode,
-}
-impl Comma {
-    #[inline]
-    pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, BARE_KEY)
-    }
-}
-
-impl AstNode for Comma {
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::COMMA
-    }
-
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-}

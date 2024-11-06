@@ -81,6 +81,17 @@ impl Boolean {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Comma {
+    pub(crate) syntax: SyntaxNode,
+}
+impl Comma {
+    #[inline]
+    pub fn comma(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, T ! [,])
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Float {
     pub(crate) syntax: SyntaxNode,
 }
@@ -404,6 +415,24 @@ impl AstNode for Boolean {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::BOOLEAN
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+impl AstNode for Comma {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::COMMA
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -1018,6 +1047,11 @@ impl std::fmt::Display for BasicString {
     }
 }
 impl std::fmt::Display for Boolean {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for Comma {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
