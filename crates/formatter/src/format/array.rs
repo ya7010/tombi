@@ -19,13 +19,16 @@ fn format_multiline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
+    for comment in array.leading_comments() {
+        LeadingComment(comment).fmt(f)?;
+    }
+
     write!(f, "[\n")?;
 
     f.inc_ident();
     f.inc_ident();
 
     let inner_begin_dangling_comments = array.inner_begin_dangling_comments();
-
     if inner_begin_dangling_comments.len() > 0 {
         for comment in inner_begin_dangling_comments {
             BeginDanglingComment(comment).fmt(f)?;
@@ -33,30 +36,41 @@ fn format_multiline_array(
         write!(f, "\n")?;
     }
 
-    for (i, (value, comma_leading_comments, comma_tailing_comment)) in
-        array.values_with_comma_comments().into_iter().enumerate()
-    {
-        if i > 0 {
-            write!(f, "\n")?;
-        }
-        value.fmt(f)?;
-
-        if comma_leading_comments.len() > 0 {
-            write!(f, "\n")?;
-            for comment in comma_leading_comments {
-                LeadingComment(comment).fmt(f)?;
+    for (i, (value, comma)) in array.values_with_comma().into_iter().enumerate() {
+        // value format
+        {
+            if i > 0 {
+                write!(f, "\n")?;
             }
-            write!(f, "{},", f.ident())?;
-        } else {
-            if value.tailing_comment().is_some() {
-                write!(f, "\n{},", f.ident())?;
+            value.fmt(f)?;
+        }
+
+        // comma format
+        {
+            let (comma_leading_comments, comma_tailing_comment) = match comma {
+                Some(comma) => {
+                    (comma.leading_comments(), comma.tailing_comment())
+                }
+                None => (vec![], None),
+            };
+    
+            if comma_leading_comments.len() > 0 {
+                write!(f, "\n")?;
+                for comment in comma_leading_comments {
+                    LeadingComment(comment).fmt(f)?;
+                }
+                write!(f, "{},", f.ident())?;
             } else {
-                write!(f, ",")?;
+                if value.tailing_comment().is_some() {
+                    write!(f, "\n{},", f.ident())?;
+                } else {
+                    write!(f, ",")?;
+                }
             }
-        }
-
-        if let Some(comment) = comma_tailing_comment {
-            TailingComment(comment).fmt(f)?;
+    
+            if let Some(comment) = comma_tailing_comment {
+                TailingComment(comment).fmt(f)?;
+            }
         }
     }
 
@@ -209,7 +223,6 @@ array = [
 
         let mut formatted_text = String::new();
 
-        dbg!(&ast);
         ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
             .unwrap();
 

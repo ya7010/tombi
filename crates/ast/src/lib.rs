@@ -4,7 +4,11 @@ mod generated;
 pub use generated::*;
 use itertools::Itertools;
 use std::{fmt::Debug, marker::PhantomData};
-use syntax::{NodeOrToken, SyntaxKind::*, T};
+use syntax::{
+    NodeOrToken,
+    SyntaxKind::{self, *},
+    SyntaxNode, SyntaxToken, T,
+};
 
 pub trait AstNode
 where
@@ -220,51 +224,15 @@ impl Array {
             .any(|node| node.kind() == COMMENT)
     }
 
-    pub fn values_with_comma_comments(
-        &self,
-    ) -> Vec<(crate::Value, Vec<crate::Comment>, Option<crate::Comment>)> {
-        let mut result = Vec::new();
-        let mut iter = self
-            .syntax()
-            .children_with_tokens()
-            .skip_while(|node| node.kind() != T!('['))
-            .skip(1);
-
-        for value in self.values() {
-            if iter
-                .clone()
-                .skip_while(|node_or_token| node_or_token.kind() != T!(,))
-                .next()
-                .is_none()
-            {
-                result.push((value, vec![], None));
-            } else {
-                let leading_comments = iter
-                    .clone()
-                    .skip_while(|token_or_node| {
-                        matches!(token_or_node.kind(), WHITESPACE | COMMENT | NEWLINE)
-                    })
-                    .skip(1)
-                    .skip_while(|token_or_node| {
-                        matches!(token_or_node.kind(), WHITESPACE | COMMENT)
-                    })
-                    .take_while_ref(|token_or_node| {
-                        matches!(token_or_node.kind(), WHITESPACE | COMMENT | NEWLINE)
-                    })
-                    .filter_map(|node_or_token| match node_or_token {
-                        NodeOrToken::Token(token) => crate::Comment::cast(token),
-                        NodeOrToken::Node(_) => None,
-                    })
-                    .collect::<Vec<_>>();
-                result.push((
-                    value,
-                    leading_comments,
-                    support::tailing_comment(&mut iter, T![,]),
-                ));
-            }
-        }
-
-        result
+    pub fn values_with_comma(&self) -> Vec<(crate::Value, Option<crate::Comma>)> {
+        self.values()
+            .zip_longest(support::children::<crate::Comma>(self.syntax()))
+            .map(|value_with_comma| match value_with_comma {
+                itertools::EitherOrBoth::Both(value, comma) => (value, Some(comma)),
+                itertools::EitherOrBoth::Left(value) => (value, None),
+                itertools::EitherOrBoth::Right(_) => unreachable!(),
+            })
+            .collect()
     }
 
     pub fn has_tailing_comma_after_last_element(&self) -> bool {
@@ -306,4 +274,36 @@ macro_rules! match_ast {
         $( if let Some($it) = $($path::)+cast($node.clone()) { $res } else )*
         { $catch_all }
     }};
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Comma {
+    pub(crate) syntax: SyntaxNode,
+}
+impl Comma {
+    #[inline]
+    pub fn token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, BARE_KEY)
+    }
+}
+
+impl AstNode for Comma {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SyntaxKind::COMMA
+    }
+
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
 }

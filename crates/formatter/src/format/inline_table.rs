@@ -1,8 +1,16 @@
-use crate::Format;
+use crate::{
+    format::comment::{LeadingComment, TailingComment},
+    Format,
+};
+use ast::AstNode;
 use std::fmt::Write;
 
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        for comment in self.leading_comments() {
+            LeadingComment(comment).fmt(f)?;
+        }
+
         write!(
             f,
             "{}{{{}",
@@ -18,7 +26,13 @@ impl Format for ast::InlineTable {
             key_value.fmt(f)?;
         }
 
-        write!(f, "{}}}", f.defs().inline_table_brace_inner_space())
+        write!(f, "{}}}", f.defs().inline_table_brace_inner_space())?;
+
+        if let Some(comment) = self.tailing_comment() {
+            TailingComment(comment).fmt(f)?;
+        }
+
+        Ok(())
     }
 }
 
