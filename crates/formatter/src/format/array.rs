@@ -48,12 +48,10 @@ fn format_multiline_array(
         // comma format
         {
             let (comma_leading_comments, comma_tailing_comment) = match comma {
-                Some(comma) => {
-                    (comma.leading_comments(), comma.tailing_comment())
-                }
+                Some(comma) => (comma.leading_comments(), comma.tailing_comment()),
                 None => (vec![], None),
             };
-    
+
             if comma_leading_comments.len() > 0 {
                 write!(f, "\n")?;
                 for comment in comma_leading_comments {
@@ -67,7 +65,7 @@ fn format_multiline_array(
                     write!(f, ",")?;
                 }
             }
-    
+
             if let Some(comment) = comma_tailing_comment {
                 TailingComment(comment).fmt(f)?;
             }
@@ -165,9 +163,9 @@ mod tests {
         assert_eq!(ast.has_tailing_comma_after_last_element(), expected);
     }
 
-    #[rstest]
-    #[case(
-        r#"
+    #[test]
+    fn multiline_array_with_comment() {
+        let source = r#"
 # array leading comment1
 # array leading comment2
 array = [
@@ -191,8 +189,10 @@ array = [
     # array end dangling comment2
 
 ] # array tailing comment
-"#.trim(),
-r#"
+"#
+        .trim();
+
+        let expected = r#"
 # array leading comment1
 # array leading comment2
 array = [
@@ -215,9 +215,8 @@ array = [
     # array end dangling comment1
     # array end dangling comment2
   ]  # array tailing comment
-"#.trim()
-    )]
-    fn multiline_array_with_comment(#[case] source: &str, #[case] expected: &str) {
+"#
+        .trim();
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
