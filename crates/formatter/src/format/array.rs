@@ -119,10 +119,13 @@ fn format_singleline_array(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_matches::assert_matches;
     use ast::AstNode;
     use rstest::rstest;
 
     #[rstest]
+    #[case(r#"array=[1,2,3]"#, r#"array = [1, 2, 3]"#)]
+    #[case(r#"array=[ 1 ]"#, r#"array = [1]"#)]
     #[case(r#"integers = [ 1, 2, 3 ]"#, r#"integers = [1, 2, 3]"#)]
     #[case(
         r#"colors = [ "red", "yellow", "green" ]"#,
@@ -140,7 +143,7 @@ mod tests {
         r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#,
         r#"string_array = ["all", 'strings', """are the same""", '''type''']"#
     )]
-    fn inline_array(#[case] source: &str, #[case] expected: &str) {
+    fn singleline_array(#[case] source: &str, #[case] expected: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
@@ -150,6 +153,25 @@ mod tests {
 
         assert_eq!(formatted_text, expected);
         assert_eq!(p.errors(), []);
+    }
+
+    #[rstest]
+    #[case("array = [1, 2, 3,]", r#"
+array = [
+    1,
+    2,
+    3,
+  ]
+"#.trim())]
+    #[case("array = [1, ]", r#"
+array = [
+    1,
+  ]
+"#.trim())]
+    fn multiline_array(#[case] source: &str, #[case] expected: &str) {
+        let result = crate::format(source);
+        assert_matches!(result, Ok(_));
+        assert_eq!(result.unwrap(), expected);
     }
 
     #[rstest]
