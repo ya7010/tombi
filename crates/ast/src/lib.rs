@@ -235,7 +235,7 @@ impl Array {
             .collect()
     }
 
-    pub fn has_tailing_comma_after_last_element(&self) -> bool {
+    pub fn has_tailing_comma_after_last_value(&self) -> bool {
         self.syntax()
             .children_with_tokens()
             .collect::<Vec<_>>()
@@ -246,6 +246,10 @@ impl Array {
             .skip_while(|item| matches!(item.kind(), WHITESPACE | COMMENT | NEWLINE))
             .next()
             .map_or(false, |it| it.kind() == T!(,))
+    }
+
+    pub fn is_multiline(&self) -> bool {
+        self.has_tailing_comma_after_last_value() || self.has_inner_comments()
     }
 }
 

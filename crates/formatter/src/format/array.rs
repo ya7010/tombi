@@ -7,7 +7,7 @@ use super::comment::{BeginDanglingComment, EndDanglingComment, LeadingComment, T
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.has_tailing_comma_after_last_element() || self.has_inner_comments() {
+        if self.is_multiline() {
             format_multiline_array(self, f)
         } else {
             format_singleline_array(self, f)
@@ -190,17 +190,17 @@ array = [
     # inner array begin dangling comment1
     # inner array begin dangling comment2
 
-    # item1 leading comment1
-    # item1 leading comment2
-    1 # item1 trailing comment
-    , # item1 comma tailing comment
-    2 # item2 trailing comment
-    # item2 comma leading comment1
-    # item2 comma leading comment2
-    , # item2 comma tailing comment
-    # item3 leading comment1
-    # item3 leading comment2
-    3 # item3 trailing comment
+    # value1 leading comment1
+    # value1 leading comment2
+    1 # value1 trailing comment
+    , # value1 comma tailing comment
+    2 # value2 trailing comment
+    # value2 comma leading comment1
+    # value2 comma leading comment2
+    , # value2 comma tailing comment
+    # value3 leading comment1
+    # value3 leading comment2
+    3 # value3 trailing comment
     # array end dangling comment1
 
     # array end dangling comment2
@@ -216,17 +216,17 @@ array = [
     # inner array begin dangling comment1
     # inner array begin dangling comment2
 
-    # item1 leading comment1
-    # item1 leading comment2
-    1  # item1 trailing comment
-    ,  # item1 comma tailing comment
-    2  # item2 trailing comment
-    # item2 comma leading comment1
-    # item2 comma leading comment2
-    ,  # item2 comma tailing comment
-    # item3 leading comment1
-    # item3 leading comment2
-    3  # item3 trailing comment
+    # value1 leading comment1
+    # value1 leading comment2
+    1  # value1 trailing comment
+    ,  # value1 comma tailing comment
+    2  # value2 trailing comment
+    # value2 comma leading comment1
+    # value2 comma leading comment2
+    ,  # value2 comma tailing comment
+    # value3 leading comment1
+    # value3 leading comment2
+    3  # value3 trailing comment
     ,
 
     # array end dangling comment1

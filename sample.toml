@@ -21,14 +21,14 @@ array1 = [
     # array begin dangling comment1
     # array begin dangling comment2
 
-    # item1 leading comment1
-    # item1 leading comment2
-    # item1 leading comment3
+    # value1 leading comment1
+    # value1 leading comment2
+    # value1 leading comment3
     { key3 = 12, key4 = 2024-01-01T10:10:00 }
-    # item1 comma leading comment1
-    # item1 comma leading comment2
-    # item1 comma leading comment3
-    ,  # item1 comma tailing comment
+    # value1 comma leading comment1
+    # value1 comma leading comment2
+    # value1 comma leading comment3
+    ,  # value1 comma tailing comment
     { key3 = 11, key4 = 2024-01-01T10:10:00 },
 
     # array end dangling comment1
