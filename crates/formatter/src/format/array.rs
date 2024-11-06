@@ -119,8 +119,8 @@ fn format_singleline_array(
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use assert_matches::assert_matches;
-    use ast::AstNode;
     use rstest::rstest;
 
     #[rstest]
@@ -144,15 +144,10 @@ mod tests {
         r#"string_array = ["all", 'strings', """are the same""", '''type''']"#
     )]
     fn singleline_array(#[case] source: &str, #[case] expected: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        let result = crate::format(source);
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
-
-        assert_eq!(formatted_text, expected);
-        assert_eq!(p.errors(), []);
+        assert_matches!(result, Ok(_));
+        assert_eq!(result.unwrap(), expected);
     }
 
     #[rstest]
@@ -239,15 +234,10 @@ array = [
   ]  # array tailing comment
 "#
         .trim();
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
-        let mut formatted_text = String::new();
+        let result = crate::format(source);
 
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
-
-        assert_eq!(formatted_text, expected);
-        assert_eq!(p.errors(), []);
+        assert_matches!(result, Ok(_));
+        assert_eq!(result.unwrap(), expected);
     }
 }
