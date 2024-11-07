@@ -29,14 +29,7 @@ impl Grammer for ast::Array {
 
             ast::Value::parse(p);
 
-            let child_m = p.start();
-            leading_comments(p);
-            if p.eat(T![,]) {
-                tailing_comment(p);
-                child_m.complete(p, T!(,));
-            } else {
-                child_m.abandon(p);
-            }
+            Option::<ast::Comma>::parse(p);
         }
 
         end_dangling_comments(p);

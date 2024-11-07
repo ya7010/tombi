@@ -1,5 +1,6 @@
 mod array;
 mod array_of_table;
+mod comma;
 mod inline_table;
 mod key;
 mod key_value;

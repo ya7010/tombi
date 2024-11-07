@@ -1,7 +1,10 @@
 use syntax::{SyntaxKind::*, T};
 
 use crate::{
-    grammar::{leading_comments, peek_leading_comments, tailing_comment, Grammer},
+    grammar::{
+        begin_dangling_comments, end_dangling_comments, leading_comments, peek_leading_comments,
+        tailing_comment, Grammer,
+    },
     parser::Parser,
 };
 
@@ -15,15 +18,20 @@ impl Grammer for ast::InlineTable {
 
         p.eat(T!['{']);
 
+        begin_dangling_comments(p);
+
         loop {
             let n = peek_leading_comments(p);
             if p.nth_at(n, EOF) || p.nth_at(n, T!['}']) {
                 break;
             }
+
             ast::KeyValue::parse(p);
-            p.eat(T![,]);
-            tailing_comment(p);
+
+            Option::<ast::Comma>::parse(p);
         }
+
+        end_dangling_comments(p);
 
         if !p.eat(T!['}']) {
             p.error(crate::Error::ExpectedBraceEnd);
