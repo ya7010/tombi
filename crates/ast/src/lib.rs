@@ -223,7 +223,7 @@ impl Array {
         )
     }
 
-    pub fn values_with_comma(&self) -> Vec<(crate::Value, Option<crate::Comma>)> {
+    pub fn values_with_comma(&self) -> impl Iterator<Item = (crate::Value, Option<crate::Comma>)> {
         self.values()
             .zip_longest(support::children::<crate::Comma>(self.syntax()))
             .map(|value_with_comma| match value_with_comma {
@@ -231,7 +231,6 @@ impl Array {
                 itertools::EitherOrBoth::Left(value) => (value, None),
                 itertools::EitherOrBoth::Right(_) => unreachable!(),
             })
-            .collect()
     }
 
     pub fn is_multiline(&self) -> bool {

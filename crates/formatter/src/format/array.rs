@@ -34,7 +34,7 @@ fn format_multiline_array(
         .collect::<Vec<_>>()
         .fmt(f)?;
 
-    for (i, (value, comma)) in array.values_with_comma().into_iter().enumerate() {
+    for (i, (value, comma)) in array.values_with_comma().enumerate() {
         // value format
         {
             if i > 0 {
