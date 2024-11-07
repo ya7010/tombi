@@ -26,7 +26,6 @@ fn format_multiline_array(
     write!(f, "{}[\n", f.ident())?;
 
     f.inc_ident();
-    f.inc_ident();
 
     let inner_begin_dangling_comments = array.inner_begin_dangling_comments();
     if inner_begin_dangling_comments.len() > 0 {
@@ -87,8 +86,6 @@ fn format_multiline_array(
     if let Some(comment) = array.tailing_comment() {
         TailingComment(comment).fmt(f)?;
     }
-
-    f.dec_ident();
 
     Ok(())
 }
@@ -162,15 +159,15 @@ mod tests {
     #[rstest]
     #[case("array = [1, 2, 3,]", r#"
 array = [
-    1,
-    2,
-    3,
-  ]
+  1,
+  2,
+  3,
+]
 "#.trim())]
     #[case("array = [1, ]", r#"
 array = [
-    1,
-  ]
+  1,
+]
 "#.trim())]
     fn multiline_array(#[case] source: &str, #[case] expected: &str) {
         let result = crate::format(source);
@@ -196,23 +193,23 @@ array = [
 # array leading comment2
 array = [
 
-    # inner array begin dangling comment1
-    # inner array begin dangling comment2
+  # inner array begin dangling comment1
+  # inner array begin dangling comment2
 
-    # value1 leading comment1
-    # value1 leading comment2
-    1 # value1 trailing comment
-    , # value1 comma tailing comment
-    2 # value2 trailing comment
-    # value2 comma leading comment1
-    # value2 comma leading comment2
-    , # value2 comma tailing comment
-    # value3 leading comment1
-    # value3 leading comment2
-    3 # value3 trailing comment
-    # array end dangling comment1
+  # value1 leading comment1
+  # value1 leading comment2
+  1 # value1 trailing comment
+  , # value1 comma tailing comment
+  2 # value2 trailing comment
+  # value2 comma leading comment1
+  # value2 comma leading comment2
+  , # value2 comma tailing comment
+  # value3 leading comment1
+  # value3 leading comment2
+  3 # value3 trailing comment
+  # array end dangling comment1
 
-    # array end dangling comment2
+  # array end dangling comment2
 
 ] # array tailing comment
 "#
@@ -222,25 +219,25 @@ array = [
 # array leading comment1
 # array leading comment2
 array = [
-    # inner array begin dangling comment1
-    # inner array begin dangling comment2
+  # inner array begin dangling comment1
+  # inner array begin dangling comment2
 
-    # value1 leading comment1
-    # value1 leading comment2
-    1  # value1 trailing comment
-    ,  # value1 comma tailing comment
-    2  # value2 trailing comment
-    # value2 comma leading comment1
-    # value2 comma leading comment2
-    ,  # value2 comma tailing comment
-    # value3 leading comment1
-    # value3 leading comment2
-    3  # value3 trailing comment
-    ,
+  # value1 leading comment1
+  # value1 leading comment2
+  1  # value1 trailing comment
+  ,  # value1 comma tailing comment
+  2  # value2 trailing comment
+  # value2 comma leading comment1
+  # value2 comma leading comment2
+  ,  # value2 comma tailing comment
+  # value3 leading comment1
+  # value3 leading comment2
+  3  # value3 trailing comment
+  ,
 
-    # array end dangling comment1
-    # array end dangling comment2
-  ]  # array tailing comment
+  # array end dangling comment1
+  # array end dangling comment2
+]  # array tailing comment
 "#
         .trim();
 
@@ -256,18 +253,18 @@ array = [
 array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"#.trim(),
         r#"
 array = [
-    [
-      1,
-      2,
-      3,
-    ],
-    [4, 5, 6],
-    [
-      7,
-      8,
-      9,
-    ]
-  ]
+  [
+    1,
+    2,
+    3,
+  ],
+  [4, 5, 6],
+  [
+    7,
+    8,
+    9,
+  ],
+]
 "#.trim()
     )]
     fn nested_multiline_array(#[case] source: &str, #[case] expected: &str) {
