@@ -216,14 +216,6 @@ impl Array {
         )
     }
 
-    pub fn has_inner_comments(&self) -> bool {
-        self.syntax()
-            .children_with_tokens()
-            .skip_while(|node| node.kind() != T!('['))
-            .skip(1)
-            .any(|node| node.kind() == COMMENT)
-    }
-
     pub fn values_with_comma(&self) -> Vec<(crate::Value, Option<crate::Comma>)> {
         self.values()
             .zip_longest(support::children::<crate::Comma>(self.syntax()))
@@ -233,6 +225,12 @@ impl Array {
                 itertools::EitherOrBoth::Right(_) => unreachable!(),
             })
             .collect()
+    }
+
+    pub fn is_multiline(&self) -> bool {
+        self.has_tailing_comma_after_last_value()
+            || self.has_multiline_values()
+            || self.has_inner_comments()
     }
 
     pub fn has_tailing_comma_after_last_value(&self) -> bool {
@@ -248,8 +246,19 @@ impl Array {
             .map_or(false, |it| it.kind() == T!(,))
     }
 
-    pub fn is_multiline(&self) -> bool {
-        self.has_tailing_comma_after_last_value() || self.has_inner_comments()
+    pub fn has_multiline_values(&self) -> bool {
+        self.values().any(|value| match value {
+            crate::Value::Array(array) => array.is_multiline(),
+            _ => false,
+        })
+    }
+
+    pub fn has_inner_comments(&self) -> bool {
+        self.syntax()
+            .children_with_tokens()
+            .skip_while(|node| node.kind() != T!('['))
+            .skip(1)
+            .any(|node| node.kind() == COMMENT)
     }
 }
 

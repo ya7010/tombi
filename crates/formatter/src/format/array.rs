@@ -23,7 +23,7 @@ fn format_multiline_array(
         LeadingComment(comment).fmt(f)?;
     }
 
-    write!(f, "[\n")?;
+    write!(f, "{}[\n", f.ident())?;
 
     f.inc_ident();
     f.inc_ident();
@@ -97,15 +97,24 @@ fn format_singleline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    write!(f, "[{}", f.defs().singleline_array_bracket_inner_space())?;
+    write!(
+        f,
+        "{}[{}",
+        f.ident(),
+        f.defs().singleline_array_bracket_inner_space()
+    )?;
 
-    let values = array.values().collect::<Vec<_>>();
-    for (i, value) in values.iter().enumerate() {
-        if i > 0 {
-            write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
+    f.with_reset_ident(|f| {
+        let values = array.values().collect::<Vec<_>>();
+        for (i, value) in values.iter().enumerate() {
+            if i > 0 {
+                write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
+            }
+            value.fmt(f)?;
         }
-        value.fmt(f)?;
-    }
+
+        Ok(())
+    })?;
 
     write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())?;
 
@@ -172,12 +181,12 @@ array = [
     #[rstest]
     #[case("[1, 2, 3,]", true)]
     #[case("[1, 2, 3]", false)]
-    fn has_tailing_comma_after_last_element(#[case] source: &str, #[case] expected: bool) {
+    fn has_tailing_comma_after_last_value(#[case] source: &str, #[case] expected: bool) {
         let p = parser::parse_as::<ast::Array>(source);
         assert_eq!(p.errors(), []);
 
         let ast = ast::Array::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.has_tailing_comma_after_last_element(), expected);
+        assert_eq!(ast.has_tailing_comma_after_last_value(), expected);
     }
 
     #[test]
