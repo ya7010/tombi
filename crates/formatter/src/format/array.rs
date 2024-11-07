@@ -29,7 +29,6 @@ fn format_multiline_array(
 
     array
         .inner_begin_dangling_comments()
-        .into_iter()
         .map(BeginDanglingComment)
         .collect::<Vec<_>>()
         .fmt(f)?;
