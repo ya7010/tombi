@@ -4,11 +4,7 @@ mod generated;
 pub use generated::*;
 use itertools::Itertools;
 use std::{fmt::Debug, marker::PhantomData};
-use syntax::{
-    NodeOrToken,
-    SyntaxKind::{self, *},
-    SyntaxNode, SyntaxToken, T,
-};
+use syntax::{NodeOrToken, SyntaxKind::*, T};
 
 pub trait AstNode
 where
@@ -78,6 +74,8 @@ impl<N: AstNode> Iterator for AstChildren<N> {
 
 #[allow(dead_code)]
 mod support {
+    use syntax::SyntaxKind;
+
     use super::*;
 
     #[inline]
@@ -164,6 +162,18 @@ mod support {
             .into_iter()
             .rev()
             .collect()
+    }
+
+    #[inline]
+    pub(super) fn has_inner_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+        iter: I,
+        start: SyntaxKind,
+        end: SyntaxKind,
+    ) -> bool {
+        iter.skip_while(|node| node.kind() != start)
+            .skip(1)
+            .take_while(|node| node.kind() != end)
+            .any(|node| node.kind() == COMMENT)
     }
 }
 
@@ -254,11 +264,28 @@ impl Array {
     }
 
     pub fn has_inner_comments(&self) -> bool {
-        self.syntax()
-            .children_with_tokens()
-            .skip_while(|node| node.kind() != T!('['))
-            .skip(1)
-            .any(|node| node.kind() == COMMENT)
+        support::has_inner_comments(self.syntax().children_with_tokens(), T!('['), T!(']'))
+    }
+}
+
+impl InlineTable {
+    pub fn is_multiline(&self) -> bool {
+        self.has_multiline_values()
+            // || self.has_tailing_comma_after_last_value()
+            || self.has_inner_comments()
+    }
+
+    pub fn has_multiline_values(&self) -> bool {
+        self.entries().any(|entry| {
+            entry.value().map_or(false, |value| match value {
+                crate::Value::Array(array) => array.is_multiline(),
+                _ => false,
+            })
+        })
+    }
+
+    pub fn has_inner_comments(&self) -> bool {
+        support::has_inner_comments(self.syntax().children_with_tokens(), T!('{'), T!('}'))
     }
 }
 
