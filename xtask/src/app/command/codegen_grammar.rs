@@ -23,17 +23,19 @@ pub fn run(_args: Args) -> Result<(), anyhow::Error> {
     ensure_rustfmt()?;
 
     write_file(
-        &generate_syntax_kind().context(format!("Failed to generate syntax kind from grammar."))?,
+        &generate_syntax_kind()
+            .context("Failed to generate syntax kind from grammar.".to_string())?,
         &project_root().join("crates/syntax/src/generated/syntax_kind.rs"),
     );
 
     write_file(
-        &generate_ast_node(&ast).context(format!("Failed to generate ast node from grammar."))?,
+        &generate_ast_node(&ast)
+            .context("Failed to generate ast node from grammar.".to_string())?,
         &project_root().join("crates/ast/src/generated/ast_node.rs"),
     );
 
     write_file(
-        &generate_ast_token().context(format!("Failed to generate ast node from grammar."))?,
+        &generate_ast_token().context("Failed to generate ast node from grammar.".to_string())?,
         &project_root().join("crates/ast/src/generated/ast_token.rs"),
     );
 

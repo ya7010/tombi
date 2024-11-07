@@ -21,8 +21,8 @@ pub enum Error {
     InvalidKey,
 }
 
-impl Into<String> for Error {
-    fn into(self) -> String {
-        self.to_string()
+impl From<Error> for String {
+    fn from(val: Error) -> Self {
+        val.to_string()
     }
 }

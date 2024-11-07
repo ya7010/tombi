@@ -52,7 +52,7 @@ impl Output {
     const ENTER_EVENT: u8 = 1;
     const EXIT_EVENT: u8 = 2;
 
-    pub fn iter<'a>(&'a self) -> impl Iterator<Item = Step> + 'a {
+    pub fn iter(&self) -> impl Iterator<Item = Step> + '_ {
         self.event.iter().map(|&event| {
             if event & Self::EVENT_MASK == 0 {
                 return Step::Error {

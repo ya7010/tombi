@@ -131,7 +131,7 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn errors(&self) -> impl Iterator<Item = (usize, &str)> + '_ {
-        self.error.iter().map(|it| (it.token() as usize, it.msg()))
+        self.error.iter().map(|it| (it.token(), it.msg()))
     }
 
     fn push(&mut self, kind: SyntaxKind, offset: usize) {

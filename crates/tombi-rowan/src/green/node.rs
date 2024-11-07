@@ -24,8 +24,14 @@ pub(super) struct GreenNodeHead {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GreenChild {
-    Node { rel_offset: TextSize, node: GreenNode },
-    Token { rel_offset: TextSize, token: GreenToken },
+    Node {
+        rel_offset: TextSize,
+        node: GreenNode,
+    },
+    Token {
+        rel_offset: TextSize,
+        token: GreenToken,
+    },
 }
 #[cfg(target_pointer_width = "64")]
 static_assert!(mem::size_of::<GreenChild>() == mem::size_of::<usize>() * 2);
@@ -65,7 +71,7 @@ impl ToOwned for GreenNodeData {
 impl Borrow<GreenNodeData> for GreenNode {
     #[inline]
     fn borrow(&self) -> &GreenNodeData {
-        &*self
+        self
     }
 }
 
@@ -88,14 +94,14 @@ impl fmt::Debug for GreenNodeData {
 
 impl fmt::Debug for GreenNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenNodeData = &*self;
+        let data: &GreenNodeData = self;
         fmt::Debug::fmt(data, f)
     }
 }
 
 impl fmt::Display for GreenNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenNodeData = &*self;
+        let data: &GreenNodeData = self;
         fmt::Display::fmt(data, f)
     }
 }
@@ -135,7 +141,9 @@ impl GreenNodeData {
     /// Children of this node.
     #[inline]
     pub fn children(&self) -> Children<'_> {
-        Children { raw: self.slice().iter() }
+        Children {
+            raw: self.slice().iter(),
+        }
     }
 
     pub(crate) fn child_at_range(
@@ -150,7 +158,10 @@ impl GreenNodeData {
             })
             // XXX: this handles empty ranges
             .unwrap_or_else(|it| it.saturating_sub(1));
-        let child = &self.slice().get(idx).filter(|it| it.rel_range().contains_range(rel_range))?;
+        let child = &self
+            .slice()
+            .get(idx)
+            .filter(|it| it.rel_range().contains_range(rel_range))?;
         Some((idx, child.rel_offset(), child.as_ref()))
     }
 
@@ -219,7 +230,11 @@ impl GreenNode {
         });
 
         let data = ThinArc::from_header_and_iter(
-            GreenNodeHead { kind, text_len: 0.into(), _c: Count::new() },
+            GreenNodeHead {
+                kind,
+                text_len: 0.into(),
+                _c: Count::new(),
+            },
             children,
         );
 
@@ -237,8 +252,8 @@ impl GreenNode {
     #[inline]
     pub(crate) fn into_raw(this: GreenNode) -> ptr::NonNull<GreenNodeData> {
         let green = ManuallyDrop::new(this);
-        let green: &GreenNodeData = &*green;
-        ptr::NonNull::from(&*green)
+        let green: &GreenNodeData = &green;
+        ptr::NonNull::from(green)
     }
 
     #[inline]
@@ -320,12 +335,12 @@ impl<'a> Iterator for Children<'a> {
     }
 
     #[inline]
-    fn fold<Acc, Fold>(mut self, init: Acc, mut f: Fold) -> Acc
+    fn fold<Acc, Fold>(self, init: Acc, mut f: Fold) -> Acc
     where
         Fold: FnMut(Acc, Self::Item) -> Acc,
     {
         let mut accum = init;
-        while let Some(x) = self.next() {
+        for x in self {
             accum = f(accum, x);
         }
         accum

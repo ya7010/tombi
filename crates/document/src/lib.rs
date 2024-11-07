@@ -32,9 +32,9 @@ impl Parsed {
     }
 }
 
-impl Into<(Table, Vec<crate::Error>)> for Parsed {
-    fn into(self) -> (Table, Vec<crate::Error>) {
-        (self.document, self.errors)
+impl From<Parsed> for (Table, Vec<crate::Error>) {
+    fn from(val: Parsed) -> Self {
+        (val.document, val.errors)
     }
 }
 
@@ -46,7 +46,6 @@ impl Parse for ast::Root {
     fn parse(self, source: &str) -> Parsed {
         self.items()
             .map(|item| item.parse(source))
-            .into_iter()
             .reduce(|acc, item| acc.merge(item))
             .unwrap_or_default()
     }
@@ -69,8 +68,7 @@ impl Parse for ast::Table {
         let mut node_cursor = &mut Node::Table(Table::new(TableKind::Table));
 
         if let Some(header) = self.header() {
-            let mut keys = header.keys().into_iter();
-            while let Some(key) = keys.next() {
+            for key in header.keys() {
                 let key = crate::Key::new(source, key);
                 if let Node::Table(table) = node_cursor {
                     node_cursor = table
@@ -99,8 +97,7 @@ impl Parse for ast::ArrayOfTable {
         let mut node_cursor = &mut Node::Table(Table::new(TableKind::ArrayOfTables));
 
         if let Some(header) = self.header() {
-            let mut keys = header.keys().into_iter();
-            while let Some(key) = keys.next() {
+            for key in header.keys() {
                 let key = crate::Key::new(source, key);
                 if let Node::Table(table) = node_cursor {
                     node_cursor = table

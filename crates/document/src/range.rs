@@ -40,11 +40,11 @@ impl Range {
 }
 
 #[cfg(feature = "lsp")]
-impl Into<tower_lsp::lsp_types::Range> for Range {
-    fn into(self) -> tower_lsp::lsp_types::Range {
+impl From<Range> for tower_lsp::lsp_types::Range {
+    fn from(val: Range) -> Self {
         tower_lsp::lsp_types::Range {
-            start: self.start.into(),
-            end: self.end.into(),
+            start: val.start.into(),
+            end: val.end.into(),
         }
     }
 }

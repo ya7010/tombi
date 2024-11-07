@@ -49,7 +49,7 @@ fn get_hover(ast: ast::Root, source: &str, position: Position) -> Option<(String
     // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.
 
-    for node in ancestors_at_offset(&ast.syntax(), offset) {
+    for node in ancestors_at_offset(ast.syntax(), offset) {
         if let Some(node) = ast::IntegerDec::cast(node.to_owned()) {
             return Some(("IntegerDec".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::IntegerBin::cast(node.to_owned()) {

@@ -9,6 +9,7 @@
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.comments.insertSpace": true,
+  "rust-analyzer.check.command": "clippy",
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.defaultFormatter": "biomejs.biome"
@@ -23,6 +24,6 @@
   },
   "[toml]": {
     "editor.tabSize": 2,
-    "editor.defaultFormatter": "yassun7010.vscode-tombi",
+    "editor.defaultFormatter": "yassun7010.tombi"
   }
 }

@@ -34,7 +34,7 @@ impl NotFormattedError {
         Self { source_path: None }
     }
 
-    pub fn to_error(self) -> Error {
+    pub fn into_error(self) -> Error {
         Error::NotFormatted(self)
     }
 }

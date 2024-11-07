@@ -1,9 +1,9 @@
 #[cfg(feature = "lsp")]
-impl Into<tower_lsp::lsp_types::Position> for crate::Position {
-    fn into(self) -> tower_lsp::lsp_types::Position {
+impl From<crate::Position> for tower_lsp::lsp_types::Position {
+    fn from(val: crate::Position) -> Self {
         tower_lsp::lsp_types::Position {
-            line: self.line(),
-            character: self.column(),
+            line: val.line(),
+            character: val.column(),
         }
     }
 }

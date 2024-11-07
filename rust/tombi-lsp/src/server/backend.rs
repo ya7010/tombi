@@ -3,9 +3,8 @@ use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
         DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
-        DocumentOnTypeFormattingParams, DocumentSymbolParams, DocumentSymbolResponse, Hover,
-        HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensResult, TextEdit, Url,
+        DocumentSymbolParams, DocumentSymbolResponse, Hover, HoverParams, InitializeParams,
+        InitializeResult, SemanticTokensParams, SemanticTokensResult, Url,
     },
     LanguageServer,
 };

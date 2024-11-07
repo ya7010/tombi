@@ -26,7 +26,8 @@ impl SyntaxText {
     }
 
     pub fn contains_char(&self, c: char) -> bool {
-        self.try_for_each_chunk(|chunk| if chunk.contains(c) { Err(()) } else { Ok(()) }).is_err()
+        self.try_for_each_chunk(|chunk| if chunk.contains(c) { Err(()) } else { Ok(()) })
+            .is_err()
     }
 
     pub fn find_char(&self, c: char) -> Option<TextSize> {
@@ -43,7 +44,6 @@ impl SyntaxText {
     }
 
     pub fn char_at(&self, offset: TextSize) -> Option<char> {
-        let offset = offset.into();
         let mut start: TextSize = 0.into();
         let res = self.try_for_each_chunk(|chunk| {
             let end = start + TextSize::of(chunk);
@@ -77,7 +77,10 @@ impl SyntaxText {
             self.range,
             range,
         );
-        SyntaxText { node: self.node.clone(), range }
+        SyntaxText {
+            node: self.node.clone(),
+            range,
+        }
     }
 
     pub fn try_fold_chunks<T, F, E>(&self, init: T, mut f: F) -> Result<T, E>
@@ -85,7 +88,9 @@ impl SyntaxText {
         F: FnMut(T, &str) -> Result<T, E>,
     {
         self.tokens_with_ranges()
-            .try_fold(init, move |acc, (token, range)| f(acc, &token.text()[range]))
+            .try_fold(init, move |acc, (token, range)| {
+                f(acc, &token.text()[range])
+            })
     }
 
     pub fn try_for_each_chunk<F: FnMut(&str) -> Result<(), E>, E>(
@@ -97,7 +102,10 @@ impl SyntaxText {
 
     pub fn for_each_chunk<F: FnMut(&str)>(&self, mut f: F) {
         enum Void {}
-        match self.try_for_each_chunk(|chunk| Ok::<(), Void>(f(chunk))) {
+        match self.try_for_each_chunk(|chunk| {
+            f(chunk);
+            Ok::<(), Void>(())
+        }) {
             Ok(()) => (),
             Err(void) => match void {},
         }
@@ -105,13 +113,14 @@ impl SyntaxText {
 
     fn tokens_with_ranges(&self) -> impl Iterator<Item = (SyntaxToken, TextRange)> {
         let text_range = self.range;
-        self.node.descendants_with_tokens().filter_map(|element| element.into_token()).filter_map(
-            move |token| {
+        self.node
+            .descendants_with_tokens()
+            .filter_map(|element| element.into_token())
+            .filter_map(move |token| {
                 let token_range = token.text_range();
                 let range = text_range.intersect(token_range)?;
                 Some((token, range - token_range.start()))
-            },
-        )
+            })
     }
 }
 
@@ -274,7 +283,7 @@ mod tests {
         let mut builder = GreenNodeBuilder::new();
         builder.start_node(SyntaxKind(62));
         for &chunk in chunks.iter() {
-            builder.token(SyntaxKind(92), chunk.into())
+            builder.token(SyntaxKind(92), chunk)
         }
         builder.finish_node();
         SyntaxNode::new_root(builder.finish())
@@ -287,8 +296,12 @@ mod tests {
             let t2 = build_tree(t2).text();
             let expected = t1.to_string() == t2.to_string();
             let actual = t1 == t2;
-            assert_eq!(expected, actual, "`{}` (SyntaxText) `{}` (SyntaxText)", t1, t2);
-            let actual = t1 == &*t2.to_string();
+            assert_eq!(
+                expected, actual,
+                "`{}` (SyntaxText) `{}` (SyntaxText)",
+                t1, t2
+            );
+            let actual = t1 == *t2.to_string();
             assert_eq!(expected, actual, "`{}` (SyntaxText) `{}` (&str)", t1, t2);
         }
         fn check(t1: &[&str], t2: &[&str]) {

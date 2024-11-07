@@ -23,7 +23,7 @@ fn format_multiline_array(
         LeadingComment(comment).fmt(f)?;
     }
 
-    write!(f, "{}[\n", f.ident())?;
+    writeln!(f, "{}[", f.ident())?;
 
     f.inc_ident();
 
@@ -37,7 +37,7 @@ fn format_multiline_array(
         // value format
         {
             if i > 0 {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
             value.fmt(f)?;
         }
@@ -52,18 +52,16 @@ fn format_multiline_array(
                 None => (vec![], None),
             };
 
-            if comma_leading_comments.len() > 0 {
-                write!(f, "\n")?;
+            if !comma_leading_comments.is_empty() {
+                writeln!(f)?;
                 for comment in comma_leading_comments {
                     LeadingComment(comment).fmt(f)?;
                 }
                 write!(f, "{},", f.ident())?;
+            } else if value.tailing_comment().is_some() {
+                write!(f, "\n{},", f.ident())?;
             } else {
-                if value.tailing_comment().is_some() {
-                    write!(f, "\n{},", f.ident())?;
-                } else {
-                    write!(f, ",")?;
-                }
+                write!(f, ",")?;
             }
 
             if let Some(comment) = comma_tailing_comment {

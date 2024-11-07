@@ -49,13 +49,12 @@ impl Format for ast::Root {
             .1
             .into_iter()
             .enumerate()
-            .map(|(i, item)| {
+            .try_for_each(|(i, item)| {
                 if i > 0 && matches!(item, ItemOrNewLine::Item(_)) {
                     ItemOrNewLine::NewLine.fmt(f)?;
                 }
                 item.fmt(f)
-            })
-            .collect::<Result<(), std::fmt::Error>>()?;
+            })?;
 
         self.end_dangling_comments()
             .map(EndDanglingComment)
@@ -85,7 +84,7 @@ impl Format for ItemOrNewLine {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             Self::Item(it) => it.fmt(f),
-            Self::NewLine => write!(f, "\n"),
+            Self::NewLine => writeln!(f),
         }
     }
 }

@@ -80,7 +80,6 @@ impl WideChar {
 
 #[cfg(test)]
 mod tests {
-    use crate::converters::encoding::WideEncoding::{Utf16, Utf32};
     use crate::converters::encoding::{LineCol, PositionEncoding, WideEncoding};
     use crate::converters::from_lsp::offset;
     use crate::converters::line_index::LineIndex;

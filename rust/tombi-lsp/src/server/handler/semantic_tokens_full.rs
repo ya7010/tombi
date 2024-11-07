@@ -10,15 +10,16 @@ use crate::{server::backend::Backend, toml};
 
 #[derive(Debug, Copy, Clone)]
 #[repr(u32)]
+
 pub enum TokenType {
-    STRUCT,
-    STRING,
-    NUMBER,
-    KEYWORD,
-    VARIABLE,
-    REGEXP,
-    OPERATOR,
-    COMMENT,
+    Struct,
+    String,
+    Number,
+    Keyword,
+    Variable,
+    Regexp,
+    Operator,
+    Comment,
 }
 
 impl TokenType {
@@ -66,7 +67,7 @@ trait AppendSemanticTokens {
 impl AppendSemanticTokens for ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.begin_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
 
         for item in self.items() {
@@ -74,7 +75,7 @@ impl AppendSemanticTokens for ast::Root {
         }
 
         for comment in self.end_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
     }
 }
@@ -92,23 +93,26 @@ impl AppendSemanticTokens for ast::RootItem {
 impl AppendSemanticTokens for ast::Table {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
 
-        self.bracket_start()
-            .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
+        if let Some(token) = self.bracket_start() {
+            builder.add_token(TokenType::Operator, (&token).into())
+        }
 
         if let Some(header) = self.header() {
             for key in header.keys() {
-                builder.add_token(TokenType::STRUCT, key.syntax().into());
+                builder.add_token(TokenType::Struct, key.syntax().into());
             }
         }
 
-        self.bracket_end()
-            .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
+        if let Some(token) = self.bracket_end() {
+            builder.add_token(TokenType::Operator, (&token).into())
+        }
 
-        self.header_tailing_comment()
-            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        if let Some(comment) = self.header_tailing_comment() {
+            builder.add_token(TokenType::Comment, comment.syntax().into())
+        }
 
         for key_value in self.key_values() {
             key_value.append_semantic_tokens(builder);
@@ -119,25 +123,26 @@ impl AppendSemanticTokens for ast::Table {
 impl AppendSemanticTokens for ast::ArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
 
-        self.double_bracket_start().map(|token| {
-            builder.add_token(TokenType::OPERATOR, (&token).into());
-        });
+        if let Some(token) = self.double_bracket_start() {
+            builder.add_token(TokenType::Operator, (&token).into());
+        }
 
         if let Some(header) = self.header() {
             for key in header.keys() {
-                builder.add_token(TokenType::STRUCT, key.syntax().into());
+                builder.add_token(TokenType::Struct, key.syntax().into());
             }
         }
 
-        self.double_bracket_end().map(|token| {
-            builder.add_token(TokenType::OPERATOR, (&token).into());
-        });
+        if let Some(token) = self.double_bracket_end() {
+            builder.add_token(TokenType::Operator, (&token).into());
+        }
 
-        self.header_tailing_comment()
-            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        if let Some(comment) = self.header_tailing_comment() {
+            builder.add_token(TokenType::Comment, comment.syntax().into())
+        }
 
         for key_value in self.key_values() {
             key_value.append_semantic_tokens(builder);
@@ -148,13 +153,16 @@ impl AppendSemanticTokens for ast::ArrayOfTable {
 impl AppendSemanticTokens for ast::KeyValue {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
 
-        self.keys().map(|key| key.append_semantic_tokens(builder));
+        if let Some(key) = self.keys() {
+            key.append_semantic_tokens(builder)
+        }
 
-        self.value()
-            .map(|value| value.append_semantic_tokens(builder));
+        if let Some(value) = self.value() {
+            value.append_semantic_tokens(builder)
+        }
     }
 }
 
@@ -168,85 +176,86 @@ impl AppendSemanticTokens for ast::Keys {
 
 impl AppendSemanticTokens for ast::Key {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        builder.add_token(TokenType::VARIABLE, self.syntax().into());
+        builder.add_token(TokenType::Variable, self.syntax().into());
     }
 }
 
 impl AppendSemanticTokens for ast::Value {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
 
         match self {
             Self::BasicString(n) => {
-                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::String, (&n.token().unwrap()).into())
             }
             Self::LiteralString(n) => {
-                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::String, (&n.token().unwrap()).into())
             }
             Self::MultiLineBasicString(n) => {
-                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::String, (&n.token().unwrap()).into())
             }
             Self::MultiLineLiteralString(n) => {
-                builder.add_token(TokenType::STRING, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::String, (&n.token().unwrap()).into())
             }
             Self::IntegerBin(n) => {
-                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Number, (&n.token().unwrap()).into())
             }
             Self::IntegerOct(n) => {
-                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Number, (&n.token().unwrap()).into())
             }
             Self::IntegerDec(n) => {
-                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Number, (&n.token().unwrap()).into())
             }
             Self::IntegerHex(n) => {
-                builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Number, (&n.token().unwrap()).into())
             }
-            Self::Float(n) => builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into()),
-            Self::Boolean(n) => builder.add_token(TokenType::KEYWORD, (&n.token().unwrap()).into()),
+            Self::Float(n) => builder.add_token(TokenType::Number, (&n.token().unwrap()).into()),
+            Self::Boolean(n) => builder.add_token(TokenType::Keyword, (&n.token().unwrap()).into()),
             Self::OffsetDateTime(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Regexp, (&n.token().unwrap()).into())
             }
             Self::LocalDateTime(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Regexp, (&n.token().unwrap()).into())
             }
             Self::LocalDate(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Regexp, (&n.token().unwrap()).into())
             }
             Self::LocalTime(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::Regexp, (&n.token().unwrap()).into())
             }
             Self::Array(array) => array.append_semantic_tokens(builder),
             Self::InlineTable(inline_table) => inline_table.append_semantic_tokens(builder),
         }
 
-        self.tailing_comment()
-            .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        if let Some(comment) = self.tailing_comment() {
+            builder.add_token(TokenType::Comment, comment.syntax().into())
+        }
     }
 }
 
 impl AppendSemanticTokens for ast::Array {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.inner_begin_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
 
         for (value, comma) in self.values_with_comma() {
             value.append_semantic_tokens(builder);
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {
-                    builder.add_token(TokenType::COMMENT, comment.syntax().into());
+                    builder.add_token(TokenType::Comment, comment.syntax().into());
                 }
 
-                comma
-                    .tailing_comment()
-                    .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+                if let Some(comment) = comma.tailing_comment() {
+                    builder.add_token(TokenType::Comment, comment.syntax().into())
+                }
             }
         }
 
         for comment in self.inner_end_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
     }
 }

@@ -3,6 +3,10 @@
 use std::{cell::Cell, cmp::Ordering, ptr};
 
 use crate::utility_types::Delta;
+
+/// A type that can be inserted into a sorted linked list.
+///
+/// # Safety
 pub(crate) unsafe trait Elem {
     fn prev(&self) -> &Cell<*const Self>;
     fn next(&self) -> &Cell<*const Self>;

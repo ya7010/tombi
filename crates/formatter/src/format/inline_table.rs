@@ -23,14 +23,14 @@ fn format_multiline_inline_table(
         LeadingComment(comment).fmt(f)?;
     }
 
-    write!(f, "{}{{\n", f.ident(),)?;
+    writeln!(f, "{}{{", f.ident(),)?;
 
     f.inc_ident();
 
     let key_values = table.entries().collect::<Vec<_>>();
     for (i, key_value) in key_values.iter().enumerate() {
         if i > 0 {
-            write!(f, ",\n")?;
+            writeln!(f, ",")?;
         }
         key_value.fmt(f)?;
     }

@@ -53,7 +53,7 @@ impl ToOwned for GreenTokenData {
 impl Borrow<GreenTokenData> for GreenToken {
     #[inline]
     fn borrow(&self) -> &GreenTokenData {
-        &*self
+        self
     }
 }
 
@@ -68,14 +68,14 @@ impl fmt::Debug for GreenTokenData {
 
 impl fmt::Debug for GreenToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenTokenData = &*self;
+        let data: &GreenTokenData = self;
         fmt::Debug::fmt(data, f)
     }
 }
 
 impl fmt::Display for GreenToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenTokenData = &*self;
+        let data: &GreenTokenData = self;
         fmt::Display::fmt(data, f)
     }
 }
@@ -110,15 +110,18 @@ impl GreenToken {
     /// Creates new Token.
     #[inline]
     pub fn new(kind: SyntaxKind, text: &str) -> GreenToken {
-        let head = GreenTokenHead { kind, _c: Count::new() };
+        let head = GreenTokenHead {
+            kind,
+            _c: Count::new(),
+        };
         let ptr = ThinArc::from_header_and_iter(head, text.bytes());
         GreenToken { ptr }
     }
     #[inline]
     pub(crate) fn into_raw(this: GreenToken) -> ptr::NonNull<GreenTokenData> {
         let green = ManuallyDrop::new(this);
-        let green: &GreenTokenData = &*green;
-        ptr::NonNull::from(&*green)
+        let green: &GreenTokenData = &green;
+        ptr::NonNull::from(green)
     }
 
     #[inline]

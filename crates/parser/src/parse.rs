@@ -56,7 +56,7 @@ impl<T> Clone for Parse<T> {
 
 impl<T: AstNode> Parse<T> {
     /// Converts this parse result into a parse result for an untyped syntax tree.
-    pub fn to_syntax(self) -> Parse<SyntaxNode> {
+    pub fn into_syntax(self) -> Parse<SyntaxNode> {
         Parse {
             green: self.green,
             errors: self.errors,

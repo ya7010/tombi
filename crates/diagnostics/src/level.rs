@@ -29,9 +29,9 @@ impl Level {
     }
 }
 
-impl Into<Style> for Level {
-    fn into(self) -> Style {
-        match self {
+impl From<Level> for Style {
+    fn from(val: Level) -> Self {
+        match val {
             Level::Error => Style::new().bold().fg(Color::Red),
             Level::Warning => Style::new().bold().fg(Color::Yellow),
         }

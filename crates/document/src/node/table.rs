@@ -36,8 +36,7 @@ impl Table {
         let mut errors = vec![];
 
         if let (Some(keys), Some(value)) = (node.keys(), node.value()) {
-            let mut keys = keys.keys().into_iter();
-            while let Some(key) = keys.next() {
+            for key in keys.keys() {
                 let key = crate::Key::new(source, key);
                 if let Node::Table(table) = node_cursor {
                     node_cursor = table

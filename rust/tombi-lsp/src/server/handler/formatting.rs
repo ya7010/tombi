@@ -12,7 +12,7 @@ pub async fn handle_formatting(
     tracing::info!("handle_formatting: {}", text_document.uri);
 
     let uri = &text_document.uri;
-    let mut document = match backend.documents.try_get_mut(&uri) {
+    let mut document = match backend.documents.try_get_mut(uri) {
         TryResult::Present(document) => document,
         TryResult::Absent => {
             tracing::warn!("document not found: {}", uri);
@@ -27,7 +27,7 @@ pub async fn handle_formatting(
     match formatter::format(&document.source) {
         Ok(new_text) => {
             tracing::info!("formatted");
-            if &new_text != &document.source {
+            if new_text != document.source {
                 let range = Range::new(
                     text::Position::new(0, 0).into(),
                     text::Position::from_source(

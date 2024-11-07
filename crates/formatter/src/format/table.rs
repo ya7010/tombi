@@ -17,7 +17,7 @@ impl Format for ast::Table {
         }
 
         for kv in self.key_values() {
-            write!(f, "\n")?;
+            writeln!(f)?;
             kv.fmt(f)?;
         }
 
@@ -101,7 +101,7 @@ key = "value"  # key tailing comment
 "#
         .trim();
 
-        let result = crate::format(&source);
+        let result = crate::format(source);
         assert_matches!(result, Ok(_));
         assert_eq!(result.unwrap(), expected);
     }

@@ -1,5 +1,5 @@
 {
-  "name": "vscode-tombi",
+  "name": "tombi",
   "displayName": "Tombi",
   "version": "0.0.1",
   "description": "A TOML language support extention backed by Tombi.",

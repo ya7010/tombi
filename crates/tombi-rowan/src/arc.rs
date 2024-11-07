@@ -56,7 +56,10 @@ impl<T> Arc<T> {
         // To find the corresponding pointer to the `ArcInner` we need
         // to subtract the offset of the `data` field from the pointer.
         let ptr = (ptr as *const u8).sub(offset_of!(ArcInner<T>, data));
-        Arc { p: ptr::NonNull::new_unchecked(ptr as *mut ArcInner<T>), phantom: PhantomData }
+        Arc {
+            p: ptr::NonNull::new_unchecked(ptr as *mut ArcInner<T>),
+            phantom: PhantomData,
+        }
     }
 }
 
@@ -118,7 +121,12 @@ impl<T: ?Sized> Clone for Arc<T> {
             std::process::abort();
         }
 
-        unsafe { Arc { p: ptr::NonNull::new_unchecked(self.ptr()), phantom: PhantomData } }
+        unsafe {
+            Arc {
+                p: ptr::NonNull::new_unchecked(self.ptr()),
+                phantom: PhantomData,
+            }
+        }
     }
 }
 
@@ -194,10 +202,6 @@ impl<T: ?Sized> Drop for Arc<T> {
 impl<T: ?Sized + PartialEq> PartialEq for Arc<T> {
     fn eq(&self, other: &Arc<T>) -> bool {
         Self::ptr_eq(self, other) || *(*self) == *(*other)
-    }
-
-    fn ne(&self, other: &Arc<T>) -> bool {
-        !Self::ptr_eq(self, other) && *(*self) != *(*other)
     }
 }
 
@@ -312,10 +316,9 @@ impl<H, T> ThinArc<H, T> {
         };
 
         // Expose the transient Arc to the callback, which may clone it if it wants.
-        let result = f(&transient);
 
         // Forward the result.
-        result
+        f(&transient)
     }
 
     /// Creates a `ThinArc` for a HeaderSlice using the given header struct and
@@ -334,8 +337,12 @@ impl<H, T> ThinArc<H, T> {
         let slice_offset = inner_to_data_offset + data_to_slice_offset;
 
         // Compute the size of the real payload.
-        let slice_size = mem::size_of::<T>().checked_mul(num_items).expect("size overflows");
-        let usable_size = slice_offset.checked_add(slice_size).expect("size overflows");
+        let slice_size = mem::size_of::<T>()
+            .checked_mul(num_items)
+            .expect("size overflows");
+        let usable_size = slice_offset
+            .checked_add(slice_size)
+            .expect("size overflows");
 
         // Round up size to alignment.
         let align = mem::align_of::<ArcInner<HeaderSlice<H, [T; 0]>>>();
@@ -376,19 +383,30 @@ impl<H, T> ThinArc<H, T> {
                 for _ in 0..num_items {
                     ptr::write(
                         current,
-                        items.next().expect("ExactSizeIterator over-reported length"),
+                        items
+                            .next()
+                            .expect("ExactSizeIterator over-reported length"),
                     );
                     current = current.offset(1);
                 }
-                assert!(items.next().is_none(), "ExactSizeIterator under-reported length");
+                assert!(
+                    items.next().is_none(),
+                    "ExactSizeIterator under-reported length"
+                );
 
                 // We should have consumed the buffer exactly.
                 debug_assert_eq!(current as *mut u8, buffer.add(usable_size));
             }
-            assert!(items.next().is_none(), "ExactSizeIterator under-reported length");
+            assert!(
+                items.next().is_none(),
+                "ExactSizeIterator under-reported length"
+            );
         }
 
-        ThinArc { ptr: unsafe { ptr::NonNull::new_unchecked(ptr) }, phantom: PhantomData }
+        ThinArc {
+            ptr: unsafe { ptr::NonNull::new_unchecked(ptr) },
+            phantom: PhantomData,
+        }
     }
 }
 
@@ -411,7 +429,10 @@ impl<H, T> Clone for ThinArc<H, T> {
 impl<H, T> Drop for ThinArc<H, T> {
     #[inline]
     fn drop(&mut self) {
-        let _ = Arc::from_thin(ThinArc { ptr: self.ptr, phantom: PhantomData });
+        let _ = Arc::from_thin(ThinArc {
+            ptr: self.ptr,
+            phantom: PhantomData,
+        });
     }
 }
 
@@ -420,7 +441,11 @@ impl<H, T> Arc<HeaderSlice<H, [T]>> {
     /// is not modified.
     #[inline]
     pub(crate) fn into_thin(a: Self) -> ThinArc<H, T> {
-        assert_eq!(a.length, a.slice.len(), "Length needs to be correct for ThinArc to work");
+        assert_eq!(
+            a.length,
+            a.slice.len(),
+            "Length needs to be correct for ThinArc to work"
+        );
         let fat_ptr: *mut ArcInner<HeaderSlice<H, [T]>> = a.ptr();
         mem::forget(a);
         let thin_ptr = fat_ptr as *mut [usize] as *mut usize;
@@ -438,7 +463,12 @@ impl<H, T> Arc<HeaderSlice<H, [T]>> {
     pub(crate) fn from_thin(a: ThinArc<H, T>) -> Self {
         let ptr = thin_to_thick(a.ptr.as_ptr());
         mem::forget(a);
-        unsafe { Arc { p: ptr::NonNull::new_unchecked(ptr), phantom: PhantomData } }
+        unsafe {
+            Arc {
+                p: ptr::NonNull::new_unchecked(ptr),
+                phantom: PhantomData,
+            }
+        }
     }
 }
 

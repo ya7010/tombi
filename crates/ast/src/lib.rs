@@ -15,10 +15,7 @@ where
     }
 
     fn tailing_comment(&self) -> Option<crate::Comment> {
-        self.syntax()
-            .last_token()
-            .map(crate::Comment::cast)
-            .flatten()
+        self.syntax().last_token().and_then(crate::Comment::cast)
     }
 
     fn can_cast(kind: syntax::SyntaxKind) -> bool
@@ -218,7 +215,6 @@ impl Array {
         support::end_dangling_comments(
             self.syntax()
                 .children_with_tokens()
-                .into_iter()
                 .take_while(|node| node.kind() != T!(']')),
         )
     }
@@ -247,8 +243,7 @@ impl Array {
             .rev()
             .skip_while(|item| item.kind() != T!(']'))
             .skip(1)
-            .skip_while(|item| matches!(item.kind(), WHITESPACE | COMMENT | NEWLINE))
-            .next()
+            .find(|item| !matches!(item.kind(), WHITESPACE | COMMENT | NEWLINE))
             .map_or(false, |it| it.kind() == T!(,))
     }
 

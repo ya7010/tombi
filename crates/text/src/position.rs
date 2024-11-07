@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use crate::TextSize;
 
-#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash, Ord)]
+#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Position {
     line: u32,
     column: u32,
@@ -14,6 +14,7 @@ impl std::fmt::Display for Position {
     }
 }
 
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd for Position {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(
@@ -21,6 +22,14 @@ impl PartialOrd for Position {
                 .cmp(&other.line)
                 .then_with(|| self.column.cmp(&other.column)),
         )
+    }
+}
+
+impl Ord for Position {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.line
+            .cmp(&other.line)
+            .then_with(|| self.column.cmp(&other.column))
     }
 }
 

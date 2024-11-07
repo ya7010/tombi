@@ -103,12 +103,12 @@ where
         {
             if args.check && source != formatted {
                 crate::error::NotFormattedError::from_input()
-                    .to_error()
+                    .into_error()
                     .print(printer);
             } else {
                 return true;
             }
         }
     }
-    return false;
+    false
 }
