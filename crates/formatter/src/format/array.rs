@@ -27,13 +27,12 @@ fn format_multiline_array(
 
     f.inc_ident();
 
-    let inner_begin_dangling_comments = array.inner_begin_dangling_comments();
-    if inner_begin_dangling_comments.len() > 0 {
-        for comment in inner_begin_dangling_comments {
-            BeginDanglingComment(comment).fmt(f)?;
-        }
-        write!(f, "\n")?;
-    }
+    array
+        .inner_begin_dangling_comments()
+        .into_iter()
+        .map(BeginDanglingComment)
+        .collect::<Vec<_>>()
+        .fmt(f)?;
 
     for (i, (value, comma)) in array.values_with_comma().into_iter().enumerate() {
         // value format
@@ -71,13 +70,11 @@ fn format_multiline_array(
         }
     }
 
-    let inner_end_dangling_comments = array.inner_end_dangling_comments();
-    if inner_end_dangling_comments.len() > 0 {
-        write!(f, "\n")?;
-        for comment in inner_end_dangling_comments {
-            EndDanglingComment(comment).fmt(f)?;
-        }
-    }
+    array
+        .inner_end_dangling_comments()
+        .map(EndDanglingComment)
+        .collect::<Vec<_>>()
+        .fmt(f)?;
 
     f.dec_ident();
 

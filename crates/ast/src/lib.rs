@@ -137,19 +137,18 @@ mod support {
     #[inline]
     pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
         iter: I,
-    ) -> Vec<crate::Comment> {
+    ) -> impl Iterator<Item = crate::Comment> {
         iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
             })
-            .collect()
     }
 
     #[inline]
     pub(super) fn end_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
         iter: I,
-    ) -> Vec<crate::Comment> {
+    ) -> impl Iterator<Item = crate::Comment> {
         iter.collect::<Vec<_>>()
             .into_iter()
             .rev()
@@ -161,7 +160,6 @@ mod support {
             .collect::<Vec<_>>()
             .into_iter()
             .rev()
-            .collect()
     }
 
     #[inline]
@@ -178,11 +176,11 @@ mod support {
 }
 
 impl Root {
-    pub fn begin_dangling_comments(&self) -> Vec<crate::Comment> {
+    pub fn begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::begin_dangling_comments(self.syntax().children_with_tokens())
     }
 
-    pub fn end_dangling_comments(&self) -> Vec<crate::Comment> {
+    pub fn end_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::end_dangling_comments(self.syntax().children_with_tokens())
     }
 }
@@ -208,7 +206,7 @@ impl ArrayOfTable {
 }
 
 impl Array {
-    pub fn inner_begin_dangling_comments(&self) -> Vec<crate::Comment> {
+    pub fn inner_begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
@@ -217,7 +215,7 @@ impl Array {
         )
     }
 
-    pub fn inner_end_dangling_comments(&self) -> Vec<crate::Comment> {
+    pub fn inner_end_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::end_dangling_comments(
             self.syntax()
                 .children_with_tokens()

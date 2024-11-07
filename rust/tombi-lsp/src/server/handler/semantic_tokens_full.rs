@@ -65,16 +65,17 @@ trait AppendSemanticTokens {
 
 impl AppendSemanticTokens for ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        self.begin_dangling_comments()
-            .iter()
-            .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        for comment in self.begin_dangling_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
 
         for item in self.items() {
             item.append_semantic_tokens(builder);
         }
-        self.end_dangling_comments()
-            .iter()
-            .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+
+        for comment in self.end_dangling_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
     }
 }
 

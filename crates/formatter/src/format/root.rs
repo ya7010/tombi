@@ -10,13 +10,10 @@ impl Format for ast::Root {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset_ident();
 
-        let begin_dangling_comments = self.begin_dangling_comments();
-        if !begin_dangling_comments.is_empty() {
-            for comment in begin_dangling_comments {
-                BeginDanglingComment(comment).fmt(f)?;
-            }
-            write!(f, "\n")?;
-        }
+        self.begin_dangling_comments()
+            .map(BeginDanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
 
         self.items()
             .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
@@ -60,13 +57,10 @@ impl Format for ast::Root {
             })
             .collect::<Result<(), std::fmt::Error>>()?;
 
-        let end_dangling_comments = self.end_dangling_comments();
-        if !end_dangling_comments.is_empty() {
-            write!(f, "\n")?;
-            for comment in end_dangling_comments {
-                EndDanglingComment(comment).fmt(f)?;
-            }
-        }
+        self.end_dangling_comments()
+            .map(EndDanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
 
         Ok(())
     }
