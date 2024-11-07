@@ -46,7 +46,10 @@ fn format_multiline_array(
         // comma format
         {
             let (comma_leading_comments, comma_tailing_comment) = match comma {
-                Some(comma) => (comma.leading_comments(), comma.tailing_comment()),
+                Some(comma) => (
+                    comma.leading_comments().collect::<Vec<_>>(),
+                    comma.tailing_comment(),
+                ),
                 None => (vec![], None),
             };
 

@@ -10,7 +10,7 @@ pub trait AstNode
 where
     Self: Debug,
 {
-    fn leading_comments(&self) -> Vec<crate::Comment> {
+    fn leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::leading_comments(self.syntax().children_with_tokens())
     }
 
@@ -102,13 +102,12 @@ mod support {
     #[inline]
     pub(super) fn leading_comments<I: Iterator<Item = syntax::NodeOrToken>>(
         iter: I,
-    ) -> Vec<crate::Comment> {
+    ) -> impl Iterator<Item = crate::Comment> {
         iter.take_while(|node| matches!(node.kind(), COMMENT | NEWLINE | WHITESPACE))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
             })
-            .collect()
     }
 
     #[inline]
@@ -186,7 +185,7 @@ impl Root {
 }
 
 impl Table {
-    pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
+    pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::leading_comments(self.syntax().children_with_tokens())
     }
 
@@ -196,7 +195,7 @@ impl Table {
 }
 
 impl ArrayOfTable {
-    pub fn header_leading_comments(&self) -> Vec<crate::Comment> {
+    pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::leading_comments(self.syntax().children_with_tokens())
     }
 

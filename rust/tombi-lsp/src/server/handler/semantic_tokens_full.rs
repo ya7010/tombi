@@ -91,9 +91,9 @@ impl AppendSemanticTokens for ast::RootItem {
 
 impl AppendSemanticTokens for ast::Table {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        self.header_leading_comments()
-            .iter()
-            .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        for comment in self.header_leading_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
 
         self.bracket_start()
             .map(|token| builder.add_token(TokenType::OPERATOR, (&token).into()));
@@ -118,9 +118,9 @@ impl AppendSemanticTokens for ast::Table {
 
 impl AppendSemanticTokens for ast::ArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        self.header_leading_comments()
-            .iter()
-            .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        for comment in self.header_leading_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
 
         self.double_bracket_start().map(|token| {
             builder.add_token(TokenType::OPERATOR, (&token).into());
@@ -147,11 +147,12 @@ impl AppendSemanticTokens for ast::ArrayOfTable {
 
 impl AppendSemanticTokens for ast::KeyValue {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        self.leading_comments()
-            .iter()
-            .for_each(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
+        for comment in self.leading_comments() {
+            builder.add_token(TokenType::COMMENT, comment.syntax().into());
+        }
 
         self.keys().map(|key| key.append_semantic_tokens(builder));
+
         self.value()
             .map(|value| value.append_semantic_tokens(builder));
     }
@@ -234,9 +235,10 @@ impl AppendSemanticTokens for ast::Array {
         for (value, comma) in self.values_with_comma() {
             value.append_semantic_tokens(builder);
             if let Some(comma) = comma {
-                comma.leading_comments().iter().for_each(|comment| {
-                    builder.add_token(TokenType::COMMENT, comment.syntax().into())
-                });
+                for comment in comma.leading_comments() {
+                    builder.add_token(TokenType::COMMENT, comment.syntax().into());
+                }
+
                 comma
                     .tailing_comment()
                     .map(|comment| builder.add_token(TokenType::COMMENT, comment.syntax().into()));
