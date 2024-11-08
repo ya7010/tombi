@@ -7,7 +7,7 @@ use super::comment::{BeginDanglingComment, EndDanglingComment, LeadingComment, T
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.is_multiline() {
+        if self.should_be_multiline() {
             format_multiline_array(self, f)
         } else {
             format_singleline_array(self, f)
@@ -154,16 +154,45 @@ mod tests {
     }
 
     #[rstest]
-    #[case("array = [1, 2, 3,]", r#"
+    #[case(
+"array = [1, 2, 3,]",
+
+r#"
 array = [
   1,
   2,
   3,
 ]
 "#.trim())]
-    #[case("array = [1, ]", r#"
+    #[case(
+"array = [1, ]",
+
+r#"
 array = [
   1,
+]
+"#.trim())]
+    #[case(
+r#"
+array = [
+  1  # comment
+]"#,
+
+r#"
+array = [
+  1  # comment
+  ,
+]
+"#.trim())]
+    #[case(
+r#"
+array = [
+  1,  # comment
+]"#,
+
+r#"
+array = [
+  1,  # comment
 ]
 "#.trim())]
     fn multiline_array(#[case] source: &str, #[case] expected: &str) {

@@ -167,7 +167,18 @@ mod support {
         iter.skip_while(|node| node.kind() != start)
             .skip(1)
             .take_while(|node| node.kind() != end)
-            .any(|node| node.kind() == COMMENT)
+            .any(|node| {
+                dbg!(&node);
+                node.kind() == COMMENT
+                    || match node {
+                        syntax::NodeOrToken::Node(node) => {
+                            dbg!(&node);
+                            node.children_with_tokens()
+                                .any(|node| node.kind() == COMMENT)
+                        }
+                        _ => false,
+                    }
+            })
     }
 }
 
@@ -229,7 +240,7 @@ impl Array {
             })
     }
 
-    pub fn is_multiline(&self) -> bool {
+    pub fn should_be_multiline(&self) -> bool {
         self.has_tailing_comma_after_last_value()
             || self.has_multiline_values()
             || self.has_inner_comments()
@@ -249,7 +260,7 @@ impl Array {
 
     pub fn has_multiline_values(&self) -> bool {
         self.values().any(|value| match value {
-            crate::Value::Array(array) => array.is_multiline(),
+            crate::Value::Array(array) => array.should_be_multiline(),
             _ => false,
         })
     }
@@ -289,7 +300,7 @@ impl InlineTable {
             })
     }
 
-    pub fn is_multiline(&self) -> bool {
+    pub fn should_be_multiline(&self) -> bool {
         self.has_multiline_values()
             // || self.has_tailing_comma_after_last_value()
             || self.has_inner_comments()
@@ -298,7 +309,7 @@ impl InlineTable {
     pub fn has_multiline_values(&self) -> bool {
         self.entries().any(|entry| {
             entry.value().map_or(false, |value| match value {
-                crate::Value::Array(array) => array.is_multiline(),
+                crate::Value::Array(array) => array.should_be_multiline(),
                 _ => false,
             })
         })

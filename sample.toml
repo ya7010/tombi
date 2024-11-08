@@ -48,6 +48,9 @@ array4 = [
   ],
   [1, 2, 3],
 ]
+array5 = [
+  1,  # comment
+]
 date = 2024-01-01  # date tailing comment
 time = 10:11:00  # time tailing comment
 odt1 = 1979-05-27T07:32:00Z  # odt1 tailing comment
