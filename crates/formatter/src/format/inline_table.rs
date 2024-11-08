@@ -35,13 +35,13 @@ fn format_multiline_inline_table(
         .collect::<Vec<_>>()
         .fmt(f)?;
 
-    for (i, (key_value, comma)) in table.entries_with_comma().enumerate() {
+    for (i, (entry, comma)) in table.entries_with_comma().enumerate() {
         // value format
         {
             if i > 0 {
                 writeln!(f)?;
             }
-            key_value.fmt(f)?;
+            entry.fmt(f)?;
         }
 
         // comma format
@@ -60,7 +60,7 @@ fn format_multiline_inline_table(
                     LeadingComment(comment).fmt(f)?;
                 }
                 write!(f, "{},", f.ident())?;
-            } else if key_value.tailing_comment().is_some() {
+            } else if entry.tailing_comment().is_some() {
                 write!(f, "\n{},", f.ident())?;
             } else {
                 write!(f, ",")?;
@@ -105,11 +105,11 @@ fn format_singleline_inline_table(
     )?;
 
     f.with_reset_ident(|f| {
-        for (i, key_value) in table.entries().enumerate() {
+        for (i, entry) in table.entries().enumerate() {
             if i > 0 {
                 write!(f, ", ")?;
             }
-            key_value.fmt(f)?;
+            entry.fmt(f)?;
         }
         Ok(())
     })?;

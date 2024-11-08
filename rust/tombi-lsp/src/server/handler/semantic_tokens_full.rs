@@ -262,8 +262,25 @@ impl AppendSemanticTokens for ast::Array {
 
 impl AppendSemanticTokens for ast::InlineTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for entry in self.entries() {
+        for comment in self.inner_begin_dangling_comments() {
+            builder.add_token(TokenType::Comment, comment.syntax().into());
+        }
+
+        for (entry, comma) in self.entries_with_comma() {
             entry.append_semantic_tokens(builder);
+            if let Some(comma) = comma {
+                for comment in comma.leading_comments() {
+                    builder.add_token(TokenType::Comment, comment.syntax().into());
+                }
+
+                if let Some(comment) = comma.tailing_comment() {
+                    builder.add_token(TokenType::Comment, comment.syntax().into())
+                }
+            }
+        }
+
+        for comment in self.inner_end_dangling_comments() {
+            builder.add_token(TokenType::Comment, comment.syntax().into());
         }
     }
 }
