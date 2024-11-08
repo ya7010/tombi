@@ -168,14 +168,11 @@ mod support {
             .skip(1)
             .take_while(|node| node.kind() != end)
             .any(|node| {
-                dbg!(&node);
                 node.kind() == COMMENT
                     || match node {
-                        syntax::NodeOrToken::Node(node) => {
-                            dbg!(&node);
-                            node.children_with_tokens()
-                                .any(|node| node.kind() == COMMENT)
-                        }
+                        syntax::NodeOrToken::Node(node) => node
+                            .children_with_tokens()
+                            .any(|node| node.kind() == COMMENT),
                         _ => false,
                     }
             })

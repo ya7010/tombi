@@ -67,8 +67,6 @@ mod test {
         .trim();
         let p = crate::parse(input);
 
-        // dbg!(p.syntax_node());
-
         assert_eq!(p.errors(), vec![]);
     }
 }
