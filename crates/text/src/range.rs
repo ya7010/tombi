@@ -12,18 +12,3 @@ impl std::fmt::Debug for Range {
         write!(f, "{}..{}", self.start, self.end)
     }
 }
-
-impl Range {
-    #[inline]
-    pub const fn new(start: Position, end: Position) -> Range {
-        Range { start, end }
-    }
-
-    #[inline]
-    pub const fn empty(pos: Position) -> Range {
-        Range {
-            start: pos,
-            end: pos,
-        }
-    }
-}
