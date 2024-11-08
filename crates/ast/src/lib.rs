@@ -260,6 +260,35 @@ impl Array {
 }
 
 impl InlineTable {
+    pub fn inner_begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+        support::begin_dangling_comments(
+            self.syntax()
+                .children_with_tokens()
+                .skip_while(|node| node.kind() != T!('['))
+                .skip(1),
+        )
+    }
+
+    pub fn inner_end_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+        support::end_dangling_comments(
+            self.syntax()
+                .children_with_tokens()
+                .take_while(|node| node.kind() != T!(']')),
+        )
+    }
+
+    pub fn entries_with_comma(
+        &self,
+    ) -> impl Iterator<Item = (crate::KeyValue, Option<crate::Comma>)> {
+        self.entries()
+            .zip_longest(support::children::<crate::Comma>(self.syntax()))
+            .map(|value_with_comma| match value_with_comma {
+                itertools::EitherOrBoth::Both(value, comma) => (value, Some(comma)),
+                itertools::EitherOrBoth::Left(value) => (value, None),
+                itertools::EitherOrBoth::Right(_) => unreachable!(),
+            })
+    }
+
     pub fn is_multiline(&self) -> bool {
         self.has_multiline_values()
             // || self.has_tailing_comma_after_last_value()

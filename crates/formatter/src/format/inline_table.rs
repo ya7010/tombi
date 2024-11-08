@@ -5,6 +5,8 @@ use crate::{
 use ast::AstNode;
 use std::fmt::Write;
 
+use super::comment::{BeginDanglingComment, EndDanglingComment};
+
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         if self.is_multiline() {
@@ -27,13 +29,54 @@ fn format_multiline_inline_table(
 
     f.inc_ident();
 
-    let key_values = table.entries().collect::<Vec<_>>();
-    for (i, key_value) in key_values.iter().enumerate() {
-        if i > 0 {
-            writeln!(f, ",")?;
+    table
+        .inner_begin_dangling_comments()
+        .map(BeginDanglingComment)
+        .collect::<Vec<_>>()
+        .fmt(f)?;
+
+    for (i, (key_value, comma)) in table.entries_with_comma().enumerate() {
+        // value format
+        {
+            if i > 0 {
+                writeln!(f)?;
+            }
+            key_value.fmt(f)?;
         }
-        key_value.fmt(f)?;
+
+        // comma format
+        {
+            let (comma_leading_comments, comma_tailing_comment) = match comma {
+                Some(comma) => (
+                    comma.leading_comments().collect::<Vec<_>>(),
+                    comma.tailing_comment(),
+                ),
+                None => (vec![], None),
+            };
+
+            if !comma_leading_comments.is_empty() {
+                writeln!(f)?;
+                for comment in comma_leading_comments {
+                    LeadingComment(comment).fmt(f)?;
+                }
+                write!(f, "{},", f.ident())?;
+            } else if key_value.tailing_comment().is_some() {
+                write!(f, "\n{},", f.ident())?;
+            } else {
+                write!(f, ",")?;
+            }
+
+            if let Some(comment) = comma_tailing_comment {
+                TailingComment(comment).fmt(f)?;
+            }
+        }
     }
+
+    table
+        .inner_end_dangling_comments()
+        .map(EndDanglingComment)
+        .collect::<Vec<_>>()
+        .fmt(f)?;
 
     f.dec_ident();
 
