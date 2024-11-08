@@ -178,6 +178,10 @@ array = [
   1  # comment
 ]"#,
 
+// NOTE: Currently, This test is collect.
+//       In the future, by inserting a layer that rewrites the ast before formatting,
+//       when there is no value tailing comment and there is a comma tailing comment,
+//       we will add logic to swap them.
 r#"
 array = [
   1  # comment
