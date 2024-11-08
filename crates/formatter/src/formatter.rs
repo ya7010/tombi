@@ -1,7 +1,7 @@
-use std::fmt::Write;
+use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
-    options: crate::Options,
+    options: Cow<'a, crate::Options>,
     defs: crate::Definitions,
     ident_depth: u8,
 
@@ -11,13 +11,18 @@ pub struct Formatter<'a> {
 impl<'a> Formatter<'a> {
     #[inline]
     pub fn new(buf: &'a mut (dyn Write + 'a)) -> Self {
-        Self::new_with_options(buf, Default::default())
+        Self {
+            options: Cow::Owned(crate::Options::default()),
+            defs: Default::default(),
+            ident_depth: 0,
+            buf,
+        }
     }
 
     #[inline]
-    pub fn new_with_options(buf: &'a mut (dyn Write + 'a), options: crate::Options) -> Self {
+    pub fn new_with_options(buf: &'a mut (dyn Write + 'a), options: &'a crate::Options) -> Self {
         Self {
-            options,
+            options: Cow::Borrowed(options),
             defs: Default::default(),
             ident_depth: 0,
             buf,

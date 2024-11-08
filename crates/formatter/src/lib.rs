@@ -27,7 +27,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
         let mut formatted_text = String::new();
         root.fmt(&mut Formatter::new_with_options(
             &mut formatted_text,
-            options.clone(),
+            options,
         ))
         .unwrap();
 
