@@ -14,10 +14,6 @@ pub struct Args {
     /// Check if the input is formatted.
     #[arg(long, default_value_t = false)]
     check: bool,
-
-    /// Set the line-length
-    #[arg(long, default_value = None)]
-    pub max_line_length: Option<u8>,
 }
 
 pub fn run(args: Args) -> Result<(), crate::Error> {
