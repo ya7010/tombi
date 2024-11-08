@@ -10,8 +10,12 @@ impl Format for ast::KeyValue {
         for comment in self.leading_comments() {
             LeadingComment(comment).fmt(f)?;
         }
+
+        write!(f, "{}", f.ident())?;
         self.keys().unwrap().fmt(f)?;
+
         write!(f, " = ")?;
+
         f.with_reset_ident(|f| self.value().unwrap().fmt(f))?;
 
         // NOTE: tailing comment is output by `value.fmt(f)`.

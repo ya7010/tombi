@@ -272,7 +272,7 @@ impl InlineTable {
         support::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
-                .skip_while(|node| node.kind() != T!('['))
+                .skip_while(|node| node.kind() != T!('{'))
                 .skip(1),
         )
     }
@@ -281,7 +281,7 @@ impl InlineTable {
         support::end_dangling_comments(
             self.syntax()
                 .children_with_tokens()
-                .take_while(|node| node.kind() != T!(']')),
+                .take_while(|node| node.kind() != T!('}')),
         )
     }
 

@@ -104,13 +104,15 @@ fn format_singleline_inline_table(
         f.defs().inline_table_brace_inner_space()
     )?;
 
-    let key_values = table.entries().collect::<Vec<_>>();
-    for (i, key_value) in key_values.iter().enumerate() {
-        if i > 0 {
-            write!(f, ", ")?;
+    f.with_reset_ident(|f| {
+        for (i, key_value) in table.entries().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            key_value.fmt(f)?;
         }
-        key_value.fmt(f)?;
-    }
+        Ok(())
+    })?;
 
     write!(f, "{}}}", f.defs().inline_table_brace_inner_space())?;
 
