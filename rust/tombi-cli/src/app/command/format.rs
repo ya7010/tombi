@@ -1,4 +1,4 @@
-use diagnostics::{printer::Pretty, Diagnostic, OkOrErrPrint, Print};
+use diagnostics::{printer::Pretty, Diagnostic, Print};
 
 use crate::app::arg;
 use std::io::Read;
@@ -94,16 +94,17 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
-        if let Some(formatted) =
-            formatter::format_with_option(&source, &Default::default()).ok_or_err_print(printer)
-        {
-            if args.check && source != formatted {
-                crate::error::NotFormattedError::from_input()
-                    .into_error()
-                    .print(printer);
-            } else {
-                return true;
+        match formatter::format_with_option(&source, &Default::default()) {
+            Ok(formatted) => {
+                if args.check && source != formatted {
+                    crate::error::NotFormattedError::from_input()
+                        .into_error()
+                        .print(printer);
+                } else {
+                    return true;
+                }
             }
+            Err(diagnostics) => diagnostics.print(printer),
         }
     }
     false

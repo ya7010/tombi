@@ -59,25 +59,3 @@ impl Diagnostic {
         self.source_file.as_deref()
     }
 }
-
-pub trait OkOrErrPrint<T, E, P> {
-    fn ok_or_err_print(self, printer: P) -> Option<T>;
-}
-
-impl<T, E, P> OkOrErrPrint<T, E, P> for Result<T, Vec<E>>
-where
-    E: Print<P>,
-    P: Copy,
-{
-    fn ok_or_err_print(self, printer: P) -> Option<T> {
-        match self {
-            Ok(value) => Some(value),
-            Err(diagnostics) => {
-                for diagnostic in &diagnostics {
-                    Print::<P>::print(diagnostic, printer);
-                }
-                None
-            }
-        }
-    }
-}
