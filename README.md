@@ -3,7 +3,7 @@
 Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and LSP server.
 
 ## TODO
-### Features
+### Milestone 1
 - [x] コメントの完全なサポート
     - [x] トップブロックのコメントサポート
     - [x] Array のコメントサポート
@@ -12,7 +12,15 @@ Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and LSP server.
 - [ ] Document のサポート。
 - [ ] linter のサポート
 - [ ] リリース
+
+### Milestone 2
 - [ ] JSON Schema のサポート
+
+### Milestone 3
+- [ ] Linter の機能強化
+- [ ] Formatter のオプションサポート
+
+### Refactoring
 - [ ] syntax tree 側での行・列情報のサポート
 
 ### Bugs
