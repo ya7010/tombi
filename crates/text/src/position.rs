@@ -14,6 +14,11 @@ impl Position {
         Self { line, column }
     }
 
+    #[inline]
+    pub const fn zero() -> Self {
+        Self { line: 0, column: 0 }
+    }
+
     pub fn from_source(source: &str, offset: TextSize) -> Self {
         let offset: usize = offset.into();
         let mut line = 0;

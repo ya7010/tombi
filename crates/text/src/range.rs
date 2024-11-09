@@ -15,6 +15,14 @@ impl Range {
     }
 
     #[inline]
+    pub const fn zero() -> Self {
+        Self {
+            start: Position::zero(),
+            end: Position::zero(),
+        }
+    }
+
+    #[inline]
     pub fn start(&self) -> Position {
         self.start
     }
