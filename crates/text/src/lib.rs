@@ -1,12 +1,14 @@
 mod features;
 mod position;
 mod range;
+mod relative_position;
 mod text_range;
 mod text_size;
 mod traits;
 
 pub use crate::{
-    position::Position, range::Range, text_range::TextRange, text_size::TextSize, traits::TextLen,
+    position::Position, range::Range, relative_position::RelativePosition, text_range::TextRange,
+    text_size::TextSize, traits::TextLen,
 };
 
 #[cfg(target_pointer_width = "16")]
