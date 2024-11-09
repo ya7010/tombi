@@ -12,3 +12,6 @@ lsp = ["tower-lsp"]
 [dependencies]
 serde = { workspace = true, optional = true }
 tower-lsp = { workspace = true, optional = true }
+
+[dev-dependencies]
+rstest.workspace = true

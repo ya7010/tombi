@@ -8,32 +8,8 @@ pub struct Position {
     column: u32,
 }
 
-impl std::fmt::Display for Position {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}", self.line, self.column)
-    }
-}
-
-#[allow(clippy::non_canonical_partial_ord_impl)]
-impl PartialOrd for Position {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(
-            self.line
-                .cmp(&other.line)
-                .then_with(|| self.column.cmp(&other.column)),
-        )
-    }
-}
-
-impl Ord for Position {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.line
-            .cmp(&other.line)
-            .then_with(|| self.column.cmp(&other.column))
-    }
-}
-
 impl Position {
+    #[inline]
     pub fn new(line: u32, column: u32) -> Self {
         Self { line, column }
     }
@@ -64,5 +40,49 @@ impl Position {
     #[inline]
     pub fn column(&self) -> u32 {
         self.column
+    }
+}
+
+impl std::fmt::Display for Position {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}:{}", self.line, self.column)
+    }
+}
+
+impl Ord for Position {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.line
+            .cmp(&other.line)
+            .then_with(|| self.column.cmp(&other.column))
+    }
+}
+
+impl PartialOrd for Position {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl From<(u32, u32)> for Position {
+    #[inline]
+    fn from((line, column): (u32, u32)) -> Self {
+        Self::new(line, column)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_position_cmp() {
+        use super::Position;
+
+        let p1 = Position::new(1, 2);
+        let p2 = Position::new(1, 3);
+        let p3 = Position::new(2, 0);
+
+        assert!(p1 < p2);
+        assert!(p2 < p3);
+        assert!(p1 < p3);
     }
 }
