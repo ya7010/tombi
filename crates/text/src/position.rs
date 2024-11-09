@@ -1,6 +1,9 @@
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    ops::{Add, AddAssign},
+};
 
-use crate::TextSize;
+use crate::{RelativePosition, TextSize};
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Position {
@@ -73,6 +76,27 @@ impl From<(u32, u32)> for Position {
     #[inline]
     fn from((line, column): (u32, u32)) -> Self {
         Self::new(line, column)
+    }
+}
+
+impl Add<RelativePosition> for Position {
+    type Output = Position;
+
+    #[inline]
+    fn add(self, rhs: RelativePosition) -> Self::Output {
+        Self::new(self.line + rhs.line(), rhs.column())
+    }
+}
+
+impl AddAssign<RelativePosition> for Position {
+    #[inline]
+    fn add_assign(&mut self, rhs: RelativePosition) {
+        self.line += rhs.line();
+        if rhs.line() == 0 {
+            self.column += rhs.column();
+        } else {
+            self.column = rhs.column();
+        }
     }
 }
 

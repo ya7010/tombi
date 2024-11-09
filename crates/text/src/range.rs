@@ -1,4 +1,6 @@
-use crate::position::Position;
+use std::ops::AddAssign;
+
+use crate::{Position, RelativePosition};
 
 #[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Range {
@@ -74,6 +76,13 @@ impl From<((u32, u32), (u32, u32))> for Range {
     }
 }
 
+impl AddAssign<RelativePosition> for Range {
+    #[inline]
+    fn add_assign(&mut self, rhs: RelativePosition) {
+        self.end += rhs;
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::range::Range;
@@ -97,5 +106,19 @@ mod test {
         let r2 = Range::from(other);
         dbg!(&r1, &r2);
         assert_eq!(r1.cmp(&r2), expected);
+    }
+
+    #[rstest]
+    #[case(((1, 1), (1, 2)), "a", ((1, 1), (1, 3)))]
+    #[case(((1, 1), (1, 2)), "a\n", ((1, 1), (2, 0)))]
+    #[case(((1, 1), (1, 2)), "a\nb", ((1, 1), (2, 1)))]
+    fn test_add_assign(
+        #[case] range: ((u32, u32), (u32, u32)),
+        #[case] text: &str,
+        #[case] expected: ((u32, u32), (u32, u32)),
+    ) {
+        let mut range = Range::from(range);
+        range += text.into();
+        assert_eq!(range, expected.into());
     }
 }
