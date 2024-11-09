@@ -1,4 +1,4 @@
-use diagnostics::{printer::Pretty, Diagnostic, OkOrPrint, Print};
+use diagnostics::{printer::Pretty, Diagnostic, OkOrErrPrint, Print};
 
 use crate::app::arg;
 use std::io::Read;
@@ -95,7 +95,7 @@ where
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
         if let Some(formatted) =
-            formatter::format_with_option(&source, &Default::default()).ok_or_print(printer)
+            formatter::format_with_option(&source, &Default::default()).ok_or_err_print(printer)
         {
             if args.check && source != formatted {
                 crate::error::NotFormattedError::from_input()
