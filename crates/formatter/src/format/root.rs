@@ -84,7 +84,7 @@ impl Format for ItemOrNewLine {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             Self::Item(it) => it.fmt(f),
-            Self::NewLine => writeln!(f),
+            Self::NewLine => write!(f, "{}", f.line_ending()),
         }
     }
 }

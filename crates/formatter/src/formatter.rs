@@ -40,6 +40,14 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
+    pub fn line_ending(&self) -> &'static str {
+        match self.options.line_ending.unwrap_or_default() {
+            crate::options::LineEnding::Lf => "\n",
+            crate::options::LineEnding::Crlf => "\r\n",
+        }
+    }
+
+    #[inline]
     pub fn ident(&self) -> String {
         self.defs.ident(self.ident_depth)
     }

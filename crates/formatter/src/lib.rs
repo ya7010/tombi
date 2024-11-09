@@ -25,13 +25,13 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
 
     if errors.is_empty() {
         let mut formatted_text = String::new();
-        root.fmt(&mut Formatter::new_with_options(
-            &mut formatted_text,
-            options,
-        ))
-        .unwrap();
+        let line_ending = {
+            let mut f = Formatter::new_with_options(&mut formatted_text, options);
+            root.fmt(&mut f).unwrap();
+            f.line_ending()
+        };
 
-        Ok(formatted_text + "\n")
+        Ok(formatted_text + line_ending)
     } else {
         Err(errors
             .into_iter()

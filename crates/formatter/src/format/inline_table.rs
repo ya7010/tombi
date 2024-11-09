@@ -25,7 +25,7 @@ fn format_multiline_inline_table(
         LeadingComment(comment).fmt(f)?;
     }
 
-    writeln!(f, "{}{{", f.ident(),)?;
+    write!(f, "{}{{{}", f.ident(), f.line_ending())?;
 
     f.inc_ident();
 
@@ -39,7 +39,7 @@ fn format_multiline_inline_table(
         // value format
         {
             if i > 0 {
-                writeln!(f)?;
+                write!(f, "{}", f.line_ending())?;
             }
             entry.fmt(f)?;
         }
@@ -55,13 +55,13 @@ fn format_multiline_inline_table(
             };
 
             if !comma_leading_comments.is_empty() {
-                writeln!(f)?;
+                write!(f, "{}", f.line_ending())?;
                 for comment in comma_leading_comments {
                     LeadingComment(comment).fmt(f)?;
                 }
                 write!(f, "{},", f.ident())?;
             } else if entry.tailing_comment().is_some() {
-                write!(f, "\n{},", f.ident())?;
+                write!(f, "{}{},", f.line_ending(), f.ident())?;
             } else {
                 write!(f, ",")?;
             }
@@ -80,7 +80,7 @@ fn format_multiline_inline_table(
 
     f.dec_ident();
 
-    write!(f, "\n{}}}", f.ident())?;
+    write!(f, "{}{}}}", f.line_ending(), f.ident())?;
 
     if let Some(comment) = table.tailing_comment() {
         TailingComment(comment).fmt(f)?;

@@ -18,7 +18,7 @@ impl Format for ast::ArrayOfTable {
         }
 
         for kv in self.key_values() {
-            writeln!(f)?;
+            write!(f, "{}", f.line_ending())?;
             kv.fmt(f)?;
         }
 

@@ -7,7 +7,7 @@ pub struct BeginDanglingComment(pub ast::Comment);
 impl Format for BeginDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        writeln!(f, "{}{}", f.ident(), self.0)
+        write!(f, "{}{}{}", f.ident(), self.0, f.line_ending())
     }
 }
 
@@ -21,7 +21,7 @@ impl Format for Vec<BeginDanglingComment> {
         for comment in self {
             comment.fmt(f)?;
         }
-        writeln!(f)?;
+        write!(f, "{}", f.line_ending())?;
 
         Ok(())
     }
@@ -33,7 +33,7 @@ pub struct EndDanglingComment(pub ast::Comment);
 impl Format for EndDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "\n{}{}", f.ident(), self.0)
+        write!(f, "{}{}{}", f.line_ending(), f.ident(), self.0)
     }
 }
 
@@ -44,7 +44,7 @@ impl Format for Vec<EndDanglingComment> {
             return Ok(());
         }
 
-        writeln!(f)?;
+        write!(f, "{}", f.line_ending())?;
 
         for comment in self {
             comment.fmt(f)?;
@@ -60,7 +60,7 @@ pub struct LeadingComment(pub ast::Comment);
 impl Format for LeadingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        writeln!(f, "{}{}", f.ident(), self.0)
+        write!(f, "{}{}{}", f.ident(), self.0, f.line_ending())
     }
 }
 
