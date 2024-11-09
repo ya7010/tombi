@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let warning = Diagnostic::new_warning(
         "Some warning occured.".to_owned(),
         &source,
-        TextRange::new(0.into(), 10.into()),
+        TextRange::new(12.into(), 20.into()),
     );
     let error = Diagnostic::new_error(
         "Some error occured.".to_owned(),
