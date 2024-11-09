@@ -1,4 +1,4 @@
-# Tombi
+![Logo](./docs/images/tombi.svg)
 
 Tombi is a toolkit for TOML; providing a formatter/linter and LSP server.
 
