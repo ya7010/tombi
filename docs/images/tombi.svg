@@ -4,14 +4,14 @@
     <g transform="matrix(1.13455,0,0,0.858525,-2.1526,0.143586)">
         <rect x="1.897" y="-0.167" width="528.845" height="232.958" style="fill:rgb(0,0,102);"/>
     </g>
-    <g transform="matrix(1,0,0,1,17.9231,2.1446)">
+    <g transform="matrix(1,0,0,1,7.02996,2.41209)">
         <g transform="matrix(0.503781,0,0,0.443457,77.97,36.309)">
             <clipPath id="_clip1">
                 <rect x="0" y="0" width="300" height="300"/>
             </clipPath>
             <g clip-path="url(#_clip1)">
-                <g transform="matrix(1.98499,-0,-0,2.25501,-190.347,-86.7132)">
-                    <use xlink:href="#_Image2" x="95.893" y="38.454" width="152px" height="134px"/>
+                <g transform="matrix(1.98499,-0,-0,2.25501,-168.724,-87.3164)">
+                    <use xlink:href="#_Image2" x="85" y="38.721" width="152px" height="134px"/>
                 </g>
             </g>
         </g>
