@@ -29,8 +29,8 @@ pub(crate) trait Grammer {
 mod support {
     use crate::{token_set::TokenSet, SyntaxKind::*};
 
-    const DANGLING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, NEWLINE, WHITESPACE]);
-    const LEADING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, NEWLINE, WHITESPACE]);
+    const DANGLING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, WHITESPACE]);
+    const LEADING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, WHITESPACE]);
     const TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
 
     pub fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
@@ -42,11 +42,11 @@ mod support {
                 COMMENT => {
                     comment_count += 1;
                 }
-                NEWLINE => {
-                    if p.nth_at(n + 1, NEWLINE) {
+                LINE_BREAK => {
+                    if p.nth_at(n + 1, LINE_BREAK) {
                         if comment_count > 0 {
                             (0..=n).for_each(|_| p.bump_any());
-                            while p.eat(NEWLINE) || p.eat(WHITESPACE) {}
+                            while p.eat(LINE_BREAK) || p.eat(WHITESPACE) {}
                             break;
                         }
                         n += 1;

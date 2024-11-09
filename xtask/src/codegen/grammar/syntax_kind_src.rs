@@ -58,7 +58,7 @@ pub const LITERALS: &[RegexItem] = &[
 ];
 pub const TOKENS: &[TokenItem] = &[
     TokenItem::Regex(RegexItem::new("WHITESPACE", r"[ \t]+")),
-    TokenItem::Regex(RegexItem::new("NEWLINE", r"\n|\r\n")),
+    TokenItem::Regex(RegexItem::new("LINE_BREAK", r"\n|\r\n")),
     TokenItem::Regex(RegexItem::new_with_priority(
         "BARE_KEY",
         r"[A-Za-z0-9_-]+",

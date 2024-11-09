@@ -100,7 +100,7 @@ mod support {
     pub(super) fn leading_comments<I: Iterator<Item = syntax::NodeOrToken>>(
         iter: I,
     ) -> impl Iterator<Item = crate::Comment> {
-        iter.take_while(|node| matches!(node.kind(), COMMENT | NEWLINE | WHITESPACE))
+        iter.take_while(|node| matches!(node.kind(), COMMENT | LINE_BREAK | WHITESPACE))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
@@ -134,7 +134,7 @@ mod support {
     pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
         iter: I,
     ) -> impl Iterator<Item = crate::Comment> {
-        iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
+        iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
@@ -148,7 +148,7 @@ mod support {
         iter.collect::<Vec<_>>()
             .into_iter()
             .rev()
-            .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | NEWLINE))
+            .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
             .filter_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) => crate::Comment::cast(token),
                 NodeOrToken::Node(_) => None,
@@ -251,7 +251,7 @@ impl Array {
             .rev()
             .skip_while(|item| item.kind() != T!(']'))
             .skip(1)
-            .find(|item| !matches!(item.kind(), WHITESPACE | COMMENT | NEWLINE))
+            .find(|item| !matches!(item.kind(), WHITESPACE | COMMENT | LINE_BREAK))
             .map_or(false, |it| it.kind() == T!(,))
     }
 

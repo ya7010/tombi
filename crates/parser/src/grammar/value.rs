@@ -46,7 +46,7 @@ fn parse_invalid_value(p: &mut Parser<'_>) {
 
     leading_comments(p);
 
-    while !p.at_ts(TokenSet::new(&[NEWLINE, COMMENT, EOF])) {
+    while !p.at_ts(TokenSet::new(&[LINE_BREAK, COMMENT, EOF])) {
         p.bump_any();
     }
     p.error(crate::Error::ExpectedValue);

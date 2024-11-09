@@ -29,17 +29,17 @@ impl AstToken for Whitespace {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Newline {
+pub struct LineBreak {
     pub(crate) syntax: SyntaxToken,
 }
-impl std::fmt::Display for Newline {
+impl std::fmt::Display for LineBreak {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.syntax, f)
     }
 }
-impl AstToken for Newline {
+impl AstToken for LineBreak {
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::NEWLINE
+        kind == SyntaxKind::LINE_BREAK
     }
     fn cast(syntax: SyntaxToken) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {

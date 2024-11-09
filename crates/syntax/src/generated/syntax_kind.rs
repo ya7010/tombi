@@ -66,7 +66,7 @@ pub enum SyntaxKind {
     #[regex("[ \\t]+")]
     WHITESPACE,
     #[regex("\\n|\\r\\n")]
-    NEWLINE,
+    LINE_BREAK,
     #[regex("[A-Za-z0-9_-]+", priority = 2)]
     BARE_KEY,
     #[regex("#[^\\n\\r]*")]
