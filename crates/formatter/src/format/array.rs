@@ -127,24 +127,40 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case(r#"array=[1,2,3]"#, r#"array = [1, 2, 3]"#)]
-    #[case(r#"array=[ 1 ]"#, r#"array = [1]"#)]
-    #[case(r#"integers = [ 1, 2, 3 ]"#, r#"integers = [1, 2, 3]"#)]
+    #[case(
+        r#"array=[1,2,3]"#,
+        r#"array = [1, 2, 3]
+"#
+    )]
+    #[case(
+        r#"array=[ 1 ]"#,
+        r#"array = [1]
+"#
+    )]
+    #[case(
+        r#"integers = [ 1, 2, 3 ]"#,
+        r#"integers = [1, 2, 3]
+"#
+    )]
     #[case(
         r#"colors = [ "red", "yellow", "green" ]"#,
-        r#"colors = ["red", "yellow", "green"]"#
+        r#"colors = ["red", "yellow", "green"]
+"#
     )]
     #[case(
         r#"nested_arrays_of_ints = [ [ 1, 2 ], [ 3, 4, 5 ] ]"#,
-        r#"nested_arrays_of_ints = [[1, 2], [3, 4, 5]]"#
+        r#"nested_arrays_of_ints = [[1, 2], [3, 4, 5]]
+"#
     )]
     #[case(
         r#"nested_mixed_array = [ [ 1, 2 ], [ "a", "b", "c" ] ]"#,
-        r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]"#
+        r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]
+"#
     )]
     #[case(
         r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#,
-        r#"string_array = ["all", 'strings', """are the same""", '''type''']"#
+        r#"string_array = ["all", 'strings', """are the same""", '''type''']
+"#
     )]
     fn singleline_array(#[case] source: &str, #[case] expected: &str) {
         let result = crate::format(source);
@@ -163,7 +179,7 @@ array = [
   2,
   3,
 ]
-"#.trim())]
+"#.trim_start())]
     #[case(
 "array = [1, ]",
 
@@ -171,12 +187,12 @@ r#"
 array = [
   1,
 ]
-"#.trim())]
+"#.trim_start())]
     #[case(
 r#"
 array = [
   1  # comment
-]"#,
+]"#.trim_start(),
 
 // NOTE: Currently, This test is collect.
 //       In the future, by inserting a layer that rewrites the ast before formatting,
@@ -187,7 +203,7 @@ array = [
   1  # comment
   ,
 ]
-"#.trim())]
+"#.trim_start())]
     #[case(
 r#"
 array = [
@@ -198,7 +214,7 @@ r#"
 array = [
   1,  # comment
 ]
-"#.trim())]
+"#.trim_start())]
     fn multiline_array(#[case] source: &str, #[case] expected: &str) {
         let result = crate::format(source);
         assert_matches!(result, Ok(_));
@@ -243,7 +259,7 @@ array = [
 
 ] # array tailing comment
 "#
-        .trim();
+        .trim_start();
 
         let expected = r#"
 # array leading comment1
@@ -269,7 +285,7 @@ array = [
   # array end dangling comment2
 ]  # array tailing comment
 "#
-        .trim();
+        .trim_start();
 
         let result = crate::format(source);
 
@@ -280,7 +296,7 @@ array = [
     #[rstest]
     #[case(
         r#"
-array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"#.trim(),
+array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"#.trim_start(),
         r#"
 array = [
   [
@@ -295,7 +311,7 @@ array = [
     9,
   ],
 ]
-"#.trim()
+"#.trim_start()
     )]
     fn nested_multiline_array(#[case] source: &str, #[case] expected: &str) {
         let result = crate::format(source);

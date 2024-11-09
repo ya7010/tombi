@@ -26,7 +26,6 @@ pub async fn handle_formatting(
 
     match formatter::format(&document.source) {
         Ok(new_text) => {
-            tracing::info!("formatted");
             if new_text != document.source {
                 let range = Range::new(
                     text::Position::new(0, 0).into(),

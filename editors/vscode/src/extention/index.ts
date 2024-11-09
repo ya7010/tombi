@@ -92,7 +92,7 @@ export class Extension {
   private async onDidSaveTextDocument(
     document: vscode.TextDocument,
   ): Promise<void> {
-    log.info("onDidSaveTextDocument", document.languageId);
+    log.info("onDidSaveTextDocument");
     if (SUPPORT_LANGUAGES.includes(document.languageId)) {
     }
   }

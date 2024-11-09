@@ -31,7 +31,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
         ))
         .unwrap();
 
-        Ok(formatted_text)
+        Ok(formatted_text + "\n")
     } else {
         Err(errors
             .into_iter()

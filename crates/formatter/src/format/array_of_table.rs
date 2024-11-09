@@ -79,7 +79,7 @@ version = "0.4.0"
 # key value leading comment2
 key = "value"  # key tailing comment
 "#
-        .trim()
+        .trim_start()
     )]
     #[case(
         r#"
@@ -91,7 +91,7 @@ key = "value"  # key tailing comment
  # key value leading comment2
 key = "value" # key tailing comment
 "#
-        .trim()
+        .trim_start()
     )]
     fn array_of_table_comment(#[case] source: &str) {
         let expected = r#"
@@ -102,7 +102,7 @@ key = "value" # key tailing comment
 # key value leading comment2
 key = "value"  # key tailing comment
 "#
-        .trim();
+        .trim_start();
 
         let result = crate::format(source);
         assert_matches!(result, Ok(_));
