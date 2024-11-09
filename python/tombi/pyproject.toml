@@ -1,10 +1,13 @@
 [project]
 name = "tombi"
 version = "0.0.1"
-description = "Add your description here"
+description = "Reserved package for tombi"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[project.urls]
+GitHub = "https://github.com/yassun7010/tombi"
 
 [build-system]
 requires = ["hatchling"]
