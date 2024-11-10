@@ -38,7 +38,7 @@ pub async fn get_diagnostics(document: Option<&Document>) -> Vec<tower_lsp::lsp_
 
     if let Err(diagnostics) = formatter::format(&document.source) {
         diagnostics
-            .iter()
+            .into_iter()
             .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
                 range: tower_lsp::lsp_types::Range::from(diagnostic.range()),
                 severity: Some(tower_lsp::lsp_types::DiagnosticSeverity::ERROR),
