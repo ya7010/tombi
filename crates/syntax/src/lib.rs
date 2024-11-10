@@ -30,22 +30,6 @@ pub type SyntaxElementChildren = tombi_rowan::SyntaxElementChildren<TomlLanguage
 pub type PreorderWithTokens = tombi_rowan::api::PreorderWithTokens<TomlLanguage>;
 pub type NodeOrToken = tombi_rowan::NodeOrToken<SyntaxNode, SyntaxToken>;
 
-pub trait IntoRange {
-    fn into_range(self) -> text::TextRange;
-}
-
-impl IntoRange for text::TextRange {
-    fn into_range(self) -> text::TextRange {
-        self
-    }
-}
-
-impl IntoRange for std::ops::Range<u32> {
-    fn into_range(self) -> text::TextRange {
-        text::TextRange::new(self.start.into(), self.end.into())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

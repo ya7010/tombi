@@ -51,9 +51,7 @@ pub fn build_tree(
             enter_pos = pos as u32;
         }
         step::StrStep::Exit => builder.finish_node(),
-        step::StrStep::Error { error, pos } => {
-            builder.error(error.to_string(), enter_pos..(pos as u32))
-        }
+        step::StrStep::Error { error, pos } => builder.error(error.to_string(), pos as u32),
     });
 
     builder.finish()

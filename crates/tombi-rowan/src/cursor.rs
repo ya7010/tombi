@@ -125,6 +125,7 @@ struct NodeData {
     mutable: bool,
     /// Absolute offset for immutable nodes, unused for mutable nodes.
     offset: TextSize,
+    position: text::Position,
     // The following links only have meaning when `mutable` is true.
     first: Cell<*const NodeData>,
     /// Invariant: never null if mutable.
@@ -229,6 +230,7 @@ impl NodeData {
         parent: Option<SyntaxNode>,
         index: u32,
         offset: TextSize,
+        position: text::Position,
         green: Green,
         mutable: bool,
     ) -> ptr::NonNull<NodeData> {
@@ -242,6 +244,7 @@ impl NodeData {
 
             mutable,
             offset,
+            position,
             first: Cell::new(ptr::null()),
             next: Cell::new(ptr::null()),
             prev: Cell::new(ptr::null()),
@@ -377,6 +380,30 @@ impl NodeData {
     }
 
     #[inline]
+    fn position(&self) -> text::Position {
+        if self.mutable {
+            self.position_mut()
+        } else {
+            self.position
+        }
+    }
+
+    #[cold]
+    fn position_mut(&self) -> text::Position {
+        let mut res = text::Position::zero();
+
+        let mut node = self;
+        while let Some(parent) = node.parent() {
+            let green = parent.green().into_node().unwrap();
+            let child = green.children().raw.nth(node.index() as usize).unwrap();
+            res += child.rel_position();
+            node = parent;
+        }
+
+        res
+    }
+
+    #[inline]
     fn text_range(&self) -> TextRange {
         let offset = self.offset();
         let len = self.green().text_len();
@@ -397,7 +424,14 @@ impl NodeData {
             child.as_ref().into_node().and_then(|green| {
                 let parent = self.parent_node()?;
                 let offset = parent.offset() + child.rel_offset();
-                Some(SyntaxNode::new_child(green, parent, index as u32, offset))
+                let position = parent.position() + child.rel_position();
+                Some(SyntaxNode::new_child(
+                    green,
+                    parent,
+                    index as u32,
+                    offset,
+                    position,
+                ))
             })
         })
     }
@@ -410,7 +444,14 @@ impl NodeData {
             child.as_ref().into_node().and_then(|green| {
                 let parent = self.parent_node()?;
                 let offset = parent.offset() + child.rel_offset();
-                Some(SyntaxNode::new_child(green, parent, index as u32, offset))
+                let position = parent.position() + child.rel_position();
+                Some(SyntaxNode::new_child(
+                    green,
+                    parent,
+                    index as u32,
+                    offset,
+                    position,
+                ))
             })
         })
     }
@@ -422,11 +463,13 @@ impl NodeData {
         siblings.nth(index).and_then(|(index, child)| {
             let parent = self.parent_node()?;
             let offset = parent.offset() + child.rel_offset();
+            let position = parent.position() + child.rel_position();
             Some(SyntaxElement::new(
                 child.as_ref(),
                 parent,
                 index as u32,
                 offset,
+                position,
             ))
         })
     }
@@ -437,11 +480,13 @@ impl NodeData {
         siblings.nth(index).and_then(|(index, child)| {
             let parent = self.parent_node()?;
             let offset = parent.offset() + child.rel_offset();
+            let position = parent.position() + child.rel_position();
             Some(SyntaxElement::new(
                 child.as_ref(),
                 parent,
                 index as u32,
                 offset,
+                position,
             ))
         })
     }
@@ -546,7 +591,7 @@ impl SyntaxNode {
             ptr: Cell::new(green),
         };
         SyntaxNode {
-            ptr: NodeData::new(None, 0, 0.into(), green, false),
+            ptr: NodeData::new(None, 0, 0.into(), text::Position::zero(), green, false),
         }
     }
 
@@ -556,7 +601,7 @@ impl SyntaxNode {
             ptr: Cell::new(green),
         };
         SyntaxNode {
-            ptr: NodeData::new(None, 0, 0.into(), green, true),
+            ptr: NodeData::new(None, 0, 0.into(), text::Position::zero(), green, true),
         }
     }
 
@@ -565,13 +610,14 @@ impl SyntaxNode {
         parent: SyntaxNode,
         index: u32,
         offset: TextSize,
+        position: text::Position,
     ) -> SyntaxNode {
         let mutable = parent.data().mutable;
         let green = Green::Node {
             ptr: Cell::new(green.into()),
         };
         SyntaxNode {
-            ptr: NodeData::new(Some(parent), index, offset, green, mutable),
+            ptr: NodeData::new(Some(parent), index, offset, position, green, mutable),
         }
     }
 
@@ -584,7 +630,13 @@ impl SyntaxNode {
         match self.parent() {
             Some(parent) => {
                 let parent = parent.clone_for_update();
-                SyntaxNode::new_child(self.green_ref(), parent, self.data().index(), self.offset())
+                SyntaxNode::new_child(
+                    self.green_ref(),
+                    parent,
+                    self.data().index(),
+                    self.offset(),
+                    self.position(),
+                )
             }
             None => SyntaxNode::new_root_mut(self.green_ref().to_owned()),
         }
@@ -620,6 +672,11 @@ impl SyntaxNode {
     #[inline]
     fn offset(&self) -> TextSize {
         self.data().offset()
+    }
+
+    #[inline]
+    fn position(&self) -> text::Position {
+        self.data().position()
     }
 
     #[inline]
@@ -682,6 +739,7 @@ impl SyntaxNode {
                         self.clone(),
                         index as u32,
                         self.offset() + child.rel_offset(),
+                        self.position() + child.rel_position(),
                     )
                 })
             })
@@ -699,6 +757,7 @@ impl SyntaxNode {
                         self.clone(),
                         index as u32,
                         self.offset() + child.rel_offset(),
+                        self.position() + child.rel_position(),
                     )
                 })
             })
@@ -711,6 +770,7 @@ impl SyntaxNode {
                 self.clone(),
                 0,
                 self.offset() + child.rel_offset(),
+                self.position() + child.rel_position(),
             )
         })
     }
@@ -726,6 +786,7 @@ impl SyntaxNode {
                     self.clone(),
                     index as u32,
                     self.offset() + child.rel_offset(),
+                    self.position() + child.rel_position(),
                 )
             })
     }
@@ -855,16 +916,17 @@ impl SyntaxNode {
 
     pub fn child_or_token_at_range(&self, range: TextRange) -> Option<SyntaxElement> {
         let rel_range = range - self.offset();
-        self.green_ref()
-            .child_at_range(rel_range)
-            .map(|(index, rel_offset, green)| {
+        self.green_ref().child_at_range(rel_range).map(
+            |(index, rel_offset, rel_position, green)| {
                 SyntaxElement::new(
                     green,
                     self.clone(),
                     index as u32,
                     self.offset() + rel_offset,
+                    self.position() + rel_position,
                 )
-            })
+            },
+        )
     }
 
     pub fn splice_children(&self, to_delete: Range<usize>, to_insert: Vec<SyntaxElement>) {
@@ -903,11 +965,12 @@ impl SyntaxToken {
         parent: SyntaxNode,
         index: u32,
         offset: TextSize,
+        position: text::Position,
     ) -> SyntaxToken {
         let mutable = parent.data().mutable;
         let green = Green::Token { ptr: green.into() };
         SyntaxToken {
-            ptr: NodeData::new(Some(parent), index, offset, green, mutable),
+            ptr: NodeData::new(Some(parent), index, offset, position, green, mutable),
         }
     }
 
@@ -1022,10 +1085,15 @@ impl SyntaxElement {
         parent: SyntaxNode,
         index: u32,
         offset: TextSize,
+        position: text::Position,
     ) -> SyntaxElement {
         match element {
-            NodeOrToken::Node(node) => SyntaxNode::new_child(node, parent, index, offset).into(),
-            NodeOrToken::Token(token) => SyntaxToken::new(token, parent, index, offset).into(),
+            NodeOrToken::Node(node) => {
+                SyntaxNode::new_child(node, parent, index, offset, position).into()
+            }
+            NodeOrToken::Token(token) => {
+                SyntaxToken::new(token, parent, index, offset, position).into()
+            }
         }
     }
 

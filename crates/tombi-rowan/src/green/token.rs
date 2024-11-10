@@ -104,6 +104,11 @@ impl GreenTokenData {
     pub fn text_len(&self) -> TextSize {
         TextSize::of(self.text())
     }
+
+    #[inline]
+    pub fn text_rel_position(&self) -> text::RelativePosition {
+        text::RelativePosition::from(self.text())
+    }
 }
 
 impl GreenToken {

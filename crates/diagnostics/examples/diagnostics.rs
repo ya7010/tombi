@@ -38,18 +38,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .init();
 
     let source_file = source_file();
-    let source = std::fs::read_to_string(&source_file)?;
 
-    let warning = Diagnostic::new_warning(
-        "Some warning occured.".to_owned(),
-        &source,
-        TextRange::new(12.into(), 20.into()),
-    );
-    let error = Diagnostic::new_error(
-        "Some error occured.".to_owned(),
-        &source,
-        TextRange::new(12.into(), 20.into()),
-    );
+    let warning =
+        Diagnostic::new_warning("Some warning occured.".to_owned(), ((2, 1), (2, 3)).into());
+    let error = Diagnostic::new_error("Some error occured.".to_owned(), ((2, 1), (2, 3)).into());
 
     warning.print(Pretty);
     warning.with_source_file(&source_file).print(Pretty);

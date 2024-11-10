@@ -1,4 +1,3 @@
-#[cfg(feature = "lsp")]
 impl From<crate::Position> for tower_lsp::lsp_types::Position {
     fn from(val: crate::Position) -> Self {
         tower_lsp::lsp_types::Position {
@@ -8,7 +7,15 @@ impl From<crate::Position> for tower_lsp::lsp_types::Position {
     }
 }
 
-#[cfg(feature = "lsp")]
+impl From<crate::Range> for tower_lsp::lsp_types::Range {
+    fn from(val: crate::Range) -> Self {
+        tower_lsp::lsp_types::Range {
+            start: val.start().into(),
+            end: val.end().into(),
+        }
+    }
+}
+
 impl crate::TextSize {
     pub fn from_source(source: &str, position: tower_lsp::lsp_types::Position) -> Self {
         let mut line = 0;

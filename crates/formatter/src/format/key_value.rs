@@ -105,7 +105,7 @@ mod tests {
 
         assert_eq!(
             p.errors(),
-            vec![SyntaxError::new(parser::Error::ExpectedValue, 4..15)]
+            vec![SyntaxError::new(parser::Error::ExpectedValue, 15)]
         );
     }
 

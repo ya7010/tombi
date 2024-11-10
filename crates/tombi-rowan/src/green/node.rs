@@ -19,6 +19,7 @@ use crate::{
 pub(super) struct GreenNodeHead {
     kind: SyntaxKind,
     text_len: TextSize,
+    text_rel_position: text::RelativePosition,
     _c: Count<GreenNode>,
 }
 
@@ -26,15 +27,18 @@ pub(super) struct GreenNodeHead {
 pub(crate) enum GreenChild {
     Node {
         rel_offset: TextSize,
+        rel_position: text::RelativePosition,
         node: GreenNode,
     },
     Token {
         rel_offset: TextSize,
+        rel_position: text::RelativePosition,
         token: GreenToken,
     },
 }
+
 #[cfg(target_pointer_width = "64")]
-static_assert!(mem::size_of::<GreenChild>() == mem::size_of::<usize>() * 2);
+static_assert!(mem::size_of::<GreenChild>() == mem::size_of::<usize>() * 3);
 
 type Repr = HeaderSlice<GreenNodeHead, [GreenChild]>;
 type ReprThin = HeaderSlice<GreenNodeHead, [GreenChild; 0]>;
@@ -138,6 +142,11 @@ impl GreenNodeData {
         self.header().text_len
     }
 
+    #[inline]
+    pub fn text_rel_position(&self) -> text::RelativePosition {
+        self.header().text_rel_position
+    }
+
     /// Children of this node.
     #[inline]
     pub fn children(&self) -> Children<'_> {
@@ -149,7 +158,7 @@ impl GreenNodeData {
     pub(crate) fn child_at_range(
         &self,
         rel_range: TextRange,
-    ) -> Option<(usize, TextSize, GreenElementRef<'_>)> {
+    ) -> Option<(usize, TextSize, text::RelativePosition, GreenElementRef<'_>)> {
         let idx = self
             .slice()
             .binary_search_by(|it| {
@@ -162,7 +171,12 @@ impl GreenNodeData {
             .slice()
             .get(idx)
             .filter(|it| it.rel_range().contains_range(rel_range))?;
-        Some((idx, child.rel_offset(), child.as_ref()))
+        Some((
+            idx,
+            child.rel_offset(),
+            child.rel_position(),
+            child.as_ref(),
+        ))
     }
 
     #[must_use]
@@ -220,12 +234,24 @@ impl GreenNode {
         I::IntoIter: ExactSizeIterator,
     {
         let mut text_len: TextSize = 0.into();
+        let mut text_rel_position = text::RelativePosition::zero();
         let children = children.into_iter().map(|el| {
             let rel_offset = text_len;
+            let rel_position = el.text_rel_position();
             text_len += el.text_len();
+            text_rel_position += rel_position;
+
             match el {
-                NodeOrToken::Node(node) => GreenChild::Node { rel_offset, node },
-                NodeOrToken::Token(token) => GreenChild::Token { rel_offset, token },
+                NodeOrToken::Node(node) => GreenChild::Node {
+                    rel_offset,
+                    rel_position,
+                    node,
+                },
+                NodeOrToken::Token(token) => GreenChild::Token {
+                    rel_offset,
+                    rel_position,
+                    token,
+                },
             }
         });
 
@@ -233,6 +259,7 @@ impl GreenNode {
             GreenNodeHead {
                 kind,
                 text_len: 0.into(),
+                text_rel_position: text::RelativePosition::zero(),
                 _c: Count::new(),
             },
             children,
@@ -243,6 +270,7 @@ impl GreenNode {
         let data = {
             let mut data = Arc::from_thin(data);
             Arc::get_mut(&mut data).unwrap().header.text_len = text_len;
+            Arc::get_mut(&mut data).unwrap().header.text_rel_position = text_rel_position;
             Arc::into_thin(data)
         };
 
@@ -280,6 +308,16 @@ impl GreenChild {
             }
         }
     }
+
+    #[inline]
+    pub(crate) fn rel_position(&self) -> text::RelativePosition {
+        match self {
+            GreenChild::Node { rel_position, .. } | GreenChild::Token { rel_position, .. } => {
+                *rel_position
+            }
+        }
+    }
+
     #[inline]
     fn rel_range(&self) -> TextRange {
         let len = self.as_ref().text_len();

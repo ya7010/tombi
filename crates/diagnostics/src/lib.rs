@@ -8,27 +8,26 @@ pub use printer::Print;
 pub struct Diagnostic {
     level: level::Level,
     message: String,
-    position: text::Position,
-    range: text::TextRange,
+    range: text::Range,
     source_file: Option<std::path::PathBuf>,
 }
 
 impl Diagnostic {
-    pub fn new_warning(message: impl Into<String>, source: &str, range: text::TextRange) -> Self {
+    #[inline]
+    pub fn new_warning(message: impl Into<String>, range: text::Range) -> Self {
         Self {
             level: level::Level::Warning,
             message: message.into(),
-            position: text::Position::from_source(source, range.start()),
             range,
             source_file: None,
         }
     }
 
-    pub fn new_error(message: impl Into<String>, source: &str, range: text::TextRange) -> Self {
+    #[inline]
+    pub fn new_error(message: impl Into<String>, range: text::Range) -> Self {
         Self {
             level: level::Level::Error,
             message: message.into(),
-            position: text::Position::from_source(source, range.start()),
             range,
             source_file: None,
         }
@@ -39,22 +38,27 @@ impl Diagnostic {
         self
     }
 
+    #[inline]
     pub fn level(&self) -> level::Level {
         self.level
     }
 
+    #[inline]
     pub fn message(&self) -> &str {
         &self.message
     }
 
+    #[inline]
     pub fn position(&self) -> text::Position {
-        self.position
+        self.range.start()
     }
 
-    pub fn range(&self) -> text::TextRange {
+    #[inline]
+    pub fn range(&self) -> text::Range {
         self.range
     }
 
+    #[inline]
     pub fn source_file(&self) -> Option<&std::path::Path> {
         self.source_file.as_deref()
     }

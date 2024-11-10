@@ -20,18 +20,3 @@ impl std::fmt::Display for ParseError {
         )
     }
 }
-
-impl Error {
-    pub fn from_syntax_error(source: &str, errors: &[syntax::SyntaxError]) -> Self {
-        Self::ParseInvalid(
-            errors
-                .iter()
-                .map(|err| ParseError {
-                    message: err.message().to_owned(),
-                    range: err.range(),
-                    text: source[err.range()].to_string(),
-                })
-                .collect(),
-        )
-    }
-}

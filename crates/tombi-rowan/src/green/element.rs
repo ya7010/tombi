@@ -66,6 +66,11 @@ impl GreenElement {
     pub fn text_len(&self) -> TextSize {
         self.as_deref().text_len()
     }
+
+    #[inline]
+    pub fn text_rel_position(&self) -> text::RelativePosition {
+        self.as_deref().text_rel_position()
+    }
 }
 
 impl GreenElementRef<'_> {
@@ -84,6 +89,14 @@ impl GreenElementRef<'_> {
         match self {
             NodeOrToken::Node(it) => it.text_len(),
             NodeOrToken::Token(it) => it.text_len(),
+        }
+    }
+
+    #[inline]
+    pub fn text_rel_position(self) -> text::RelativePosition {
+        match self {
+            NodeOrToken::Node(it) => it.text_rel_position(),
+            NodeOrToken::Token(it) => it.text_rel_position(),
         }
     }
 }

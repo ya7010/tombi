@@ -1,5 +1,3 @@
-use crate::IntoRange;
-
 #[derive(thiserror::Error, Default, Debug, Clone, PartialEq)]
 pub enum Error {
     #[default]
@@ -18,14 +16,14 @@ impl Error {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxError {
     message: String,
-    range: text::TextRange,
+    pos: u32,
 }
 
 impl SyntaxError {
-    pub fn new(message: impl Into<String>, range: impl IntoRange) -> Self {
+    pub fn new(message: impl Into<String>, pos: u32) -> Self {
         Self {
             message: message.into(),
-            range: range.into_range(),
+            pos,
         }
     }
 
@@ -33,12 +31,7 @@ impl SyntaxError {
         &self.message
     }
 
-    pub fn range(&self) -> text::TextRange {
-        self.range
-    }
-
-    pub fn with_range(mut self, range: text::TextRange) -> Self {
-        self.range = range;
-        self
+    pub fn pos(&self) -> u32 {
+        self.pos
     }
 }

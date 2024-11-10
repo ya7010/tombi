@@ -39,19 +39,11 @@ pub async fn get_diagnostics(document: Option<&Document>) -> Vec<tower_lsp::lsp_
     if let Err(diagnostics) = formatter::format(&document.source) {
         diagnostics
             .iter()
-            .filter_map(|diagnostic| {
-                to_lsp::range(
-                    &document.line_index,
-                    diagnostic.range(),
-                    PositionEncoding::Wide(WideEncoding::Utf16),
-                )
-                .ok()
-                .map(|range| tower_lsp::lsp_types::Diagnostic {
-                    range,
-                    severity: Some(tower_lsp::lsp_types::DiagnosticSeverity::ERROR),
-                    message: diagnostic.message().to_string(),
-                    ..Default::default()
-                })
+            .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
+                range: tower_lsp::lsp_types::Range::from(diagnostic.range()),
+                severity: Some(tower_lsp::lsp_types::DiagnosticSeverity::ERROR),
+                message: diagnostic.message().to_string(),
+                ..Default::default()
             })
             .collect()
     } else {

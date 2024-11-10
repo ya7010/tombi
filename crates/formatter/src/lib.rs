@@ -35,7 +35,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
     } else {
         Err(errors
             .into_iter()
-            .map(|error| Diagnostic::new_error(error.message(), source, error.range()))
+            .map(|error| Diagnostic::new_error(error.message(), ((0, 0), (error.pos(), 0)).into()))
             .collect())
     }
 }
