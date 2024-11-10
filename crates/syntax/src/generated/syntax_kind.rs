@@ -65,7 +65,7 @@ pub enum SyntaxKind {
     LOCAL_TIME,
     #[regex("[ \\t]+")]
     WHITESPACE,
-    #[regex("\\n|\\r\\n")]
+    #[regex("\\r?\\n")]
     LINE_BREAK,
     #[regex("[A-Za-z0-9_-]+", priority = 2)]
     BARE_KEY,
