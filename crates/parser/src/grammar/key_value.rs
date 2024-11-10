@@ -24,40 +24,24 @@ impl Grammer for ast::KeyValue {
 
 #[cfg(test)]
 mod test {
+    use rstest::rstest;
     use syntax::SyntaxError;
+    use text::{Column, Line};
 
-    #[test]
-    fn key_value_value_not_found() {
-        let p = crate::parse("key1 = # INVALID");
-
-        assert_eq!(
-            p.errors(),
-            vec![SyntaxError::new(
-                crate::Error::ExpectedValue,
-                ((0, 6), (0, 7)).into()
-            )]
-        );
-    }
-
-    #[test]
-    fn multiple_key_value_value_not_found() {
-        let p = crate::parse(
-            r#"
+    #[rstest]
+    #[case("key1 = # INVALID", crate::Error::ExpectedValue, ((0, 6), (0, 7)))]
+    #[case(r#"
 key1 = 1
 key2 = # INVALID
 key3 = 3
-"#
-            .trim_start(),
-        );
+"#.trim_start(), crate::Error::ExpectedValue, ((1, 6), (1, 7)))]
+    fn invalid_key_value(
+        #[case] source: &str,
+        #[case] error: crate::Error,
+        #[case] range: ((Line, Column), (Line, Column)),
+    ) {
+        let p = crate::parse(source);
 
-        dbg!(p.syntax_node());
-
-        assert_eq!(
-            p.errors(),
-            vec![SyntaxError::new(
-                crate::Error::ExpectedValue,
-                ((1, 6), (1, 7)).into()
-            )]
-        );
+        assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
     }
 }

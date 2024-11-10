@@ -722,6 +722,7 @@ dependencies = [
  "drop_bomb",
  "itertools",
  "logos",
+ "rstest",
  "syntax",
  "text",
  "thiserror",
