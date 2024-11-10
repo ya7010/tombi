@@ -1,13 +1,10 @@
-use crate::{parser::Parser, token_set::TokenSet};
+use crate::parser::Parser;
 
 use super::{
     begin_dangling_comments, end_dangling_comments, key::KEY_FIRST, leading_comments,
-    peek_leading_comments, tailing_comment, Grammer,
+    peek_leading_comments, tailing_comment, Grammer, LINE_END,
 };
 use syntax::{SyntaxKind::*, T};
-
-pub const LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, COMMENT, EOF]);
-pub const NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
 impl Grammer for ast::Root {
     fn parse(p: &mut Parser<'_>) {
@@ -27,7 +24,7 @@ impl Grammer for ast::Root {
             } else if p.nth_at(n, T!['[']) {
                 ast::Table::parse(p);
             } else {
-                parse_unknwon_line(p);
+                unknwon_line(p);
             }
         }
 
@@ -37,7 +34,7 @@ impl Grammer for ast::Root {
     }
 }
 
-fn parse_unknwon_line(p: &mut Parser<'_>) {
+fn unknwon_line(p: &mut Parser<'_>) {
     let m = p.start();
 
     leading_comments(p);

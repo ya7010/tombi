@@ -3,9 +3,7 @@ use syntax::T;
 use super::Grammer;
 use crate::{
     grammar::{
-        leading_comments, peek_leading_comments,
-        root::{LINE_END, NEXT_SECTION},
-        tailing_comment,
+        invalid_line, leading_comments, peek_leading_comments, tailing_comment, NEXT_SECTION,
     },
     parser::Parser,
 };
@@ -24,9 +22,7 @@ impl Grammer for ast::ArrayOfTable {
         ast::Keys::parse(p);
 
         if !p.eat(T!("]]")) {
-            while !p.at_ts(LINE_END) {
-                p.bump_any()
-            }
+            invalid_line(p);
             p.error(crate::Error::ExpectedDoubleBracketEnd);
         }
 

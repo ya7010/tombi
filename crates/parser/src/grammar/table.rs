@@ -2,9 +2,8 @@ use syntax::T;
 
 use crate::{
     grammar::{
-        leading_comments, peek_leading_comments,
-        root::{LINE_END, NEXT_SECTION},
-        tailing_comment, Grammer,
+        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Grammer,
+        NEXT_SECTION,
     },
     parser::Parser,
 };
@@ -23,9 +22,7 @@ impl Grammer for ast::Table {
         ast::Keys::parse(p);
 
         if !p.eat(T![']']) {
-            while !p.at_ts(LINE_END) {
-                p.bump_any()
-            }
+            invalid_line(p);
             p.error(crate::Error::ExpectedBracketEnd);
         }
 

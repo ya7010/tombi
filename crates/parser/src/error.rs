@@ -17,6 +17,8 @@ pub enum Error {
     ExpectedDoubleBracketEnd,
     #[error("expected '}}'")]
     ExpectedBraceEnd,
+    #[error("expected '\n'")]
+    ExpectedLineBreak,
     #[error("Invalid key")]
     InvalidKey,
 }

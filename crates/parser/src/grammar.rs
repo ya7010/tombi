@@ -8,8 +8,12 @@ mod root;
 mod table;
 mod value;
 
-use crate::{output::Output, parser::Parser};
+use crate::{output::Output, parser::Parser, token_set::TokenSet};
 use support::*;
+use syntax::{SyntaxKind::*, T};
+
+const LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
+const NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
 pub fn parse<G: Grammer>(input: &crate::Input) -> Output {
     let _p = tracing::info_span!("grammar::parse").entered();
@@ -24,6 +28,12 @@ pub fn parse<G: Grammer>(input: &crate::Input) -> Output {
 
 pub(crate) trait Grammer {
     fn parse(p: &mut Parser<'_>);
+}
+
+pub fn invalid_line(p: &mut Parser<'_>) {
+    while !p.at_ts(LINE_END) {
+        p.bump_any()
+    }
 }
 
 mod support {
