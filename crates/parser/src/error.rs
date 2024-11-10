@@ -10,7 +10,7 @@ pub enum Error {
     #[error("unknown line")]
     UnknownLine,
     #[error("expected '='")]
-    ExpectedEquals,
+    ExpectedEqual,
     #[error("expected ']'")]
     ExpectedBracketEnd,
     #[error("expected ']]'")]

@@ -12,7 +12,7 @@ impl Grammer for ast::KeyValue {
 
         if !p.eat(T![=]) {
             p.bump_any();
-            p.error(crate::Error::ExpectedEquals);
+            p.error(crate::Error::ExpectedEqual);
         }
 
         ast::Value::parse(p);
@@ -65,7 +65,7 @@ key3 = 1
 key1 "value"
 key2 = 1
 "#.trim_start(), &[
-    (crate::Error::ExpectedEquals, ((0, 5), (0, 12))),
+    (crate::Error::ExpectedEqual, ((0, 5), (0, 12))),
     (crate::Error::ExpectedValue, ((0, 5), (0, 12)))
 ]
     )]
