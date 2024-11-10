@@ -80,7 +80,6 @@ mod tests {
     use ast::AstNode;
 
     use rstest::rstest;
-    use syntax::SyntaxError;
 
     use crate::Format;
 
@@ -96,20 +95,6 @@ mod tests {
 
         assert_eq!(formatted_text, "key = \"value\"");
         assert_eq!(p.errors(), []);
-    }
-
-    #[rstest]
-    #[case("key = # INVALID")]
-    fn invalid_bare_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-
-        assert_eq!(
-            p.errors(),
-            vec![SyntaxError::new(
-                parser::Error::ExpectedValue,
-                ((0, 6), (0, 15)).into()
-            )]
-        );
     }
 
     #[rstest]
@@ -132,7 +117,7 @@ mod tests {
 # leading comment1
 # leading comment2
 key = "value"  # tailing comment
-    "#.trim()
+"#.trim()
     )]
     fn key_value_with_comment(#[case] source: &str) {
         let p = parser::parse(source);

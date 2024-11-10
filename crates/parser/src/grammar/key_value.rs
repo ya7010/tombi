@@ -21,3 +21,43 @@ impl Grammer for ast::KeyValue {
         m.complete(p, KEY_VALUE);
     }
 }
+
+#[cfg(test)]
+mod test {
+    use syntax::SyntaxError;
+
+    #[test]
+    fn key_value_value_not_found() {
+        let p = crate::parse("key1 = # INVALID");
+
+        assert_eq!(
+            p.errors(),
+            vec![SyntaxError::new(
+                crate::Error::ExpectedValue,
+                ((0, 6), (0, 7)).into()
+            )]
+        );
+    }
+
+    #[test]
+    fn multiple_key_value_value_not_found() {
+        let p = crate::parse(
+            r#"
+key1 = 1
+key2 = # INVALID
+key3 = 3
+"#
+            .trim_start(),
+        );
+
+        dbg!(p.syntax_node());
+
+        assert_eq!(
+            p.errors(),
+            vec![SyntaxError::new(
+                crate::Error::ExpectedValue,
+                ((1, 6), (1, 7)).into()
+            )]
+        );
+    }
+}

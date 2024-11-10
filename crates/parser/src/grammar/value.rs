@@ -22,7 +22,7 @@ impl Grammer for ast::Value {
             | LOCAL_TIME => parse_literal_value(p),
             T!('[') => ast::Array::parse(p),
             T!('{') => ast::InlineTable::parse(p),
-            _ => parse_invalid_value(p),
+            _ => parse_invalid_value(p, n),
         }
     }
 }
@@ -41,10 +41,12 @@ fn parse_literal_value(p: &mut Parser<'_>) {
     m.complete(p, kind);
 }
 
-fn parse_invalid_value(p: &mut Parser<'_>) {
+fn parse_invalid_value(p: &mut Parser<'_>, n: usize) {
     let m = p.start();
 
-    leading_comments(p);
+    if n > 1 && p.nth_at(n, LINE_BREAK) {
+        leading_comments(p);
+    }
 
     while !p.at_ts(TokenSet::new(&[LINE_BREAK, COMMENT, EOF])) {
         p.bump_any();
