@@ -37,7 +37,7 @@ impl Grammer for ast::ArrayOfTable {
             ast::KeyValue::parse(p);
 
             if !p.at_ts(LINE_END) {
-                invalid_line(p, crate::Error::ExpectedLineBreak);
+                invalid_line(p, crate::Error::ExpectedLineBreakOrComment);
             }
         }
 
@@ -72,6 +72,11 @@ key2 = 2
 key1 = 1
 key2 = 2
 "#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 9), (0, 10)))]
+    #[case(r#"
+[[aaa.bbb]]
+key1 = 1 INVALID COMMENT
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedLineBreakOrComment, ((1, 9), (1, 16)))]
     fn invalid_array_of_table(
         #[case] source: &str,
         #[case] error: crate::Error,
