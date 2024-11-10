@@ -6,6 +6,9 @@ mod text_range;
 mod text_size;
 mod traits;
 
+pub type Line = u32;
+pub type Column = u32;
+
 pub use crate::{
     position::Position, range::Range, relative_position::RelativePosition, text_range::TextRange,
     text_size::TextSize, traits::TextLen,

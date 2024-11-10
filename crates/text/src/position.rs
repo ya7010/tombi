@@ -3,17 +3,17 @@ use std::{
     ops::{Add, AddAssign},
 };
 
-use crate::{RelativePosition, TextSize};
+use crate::{Column, Line, RelativePosition, TextSize};
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Position {
-    line: u32,
-    column: u32,
+    line: Line,
+    column: Column,
 }
 
 impl Position {
     #[inline]
-    pub fn new(line: u32, column: u32) -> Self {
+    pub fn new(line: Line, column: Column) -> Self {
         Self { line, column }
     }
 
@@ -41,12 +41,12 @@ impl Position {
     }
 
     #[inline]
-    pub fn line(&self) -> u32 {
+    pub fn line(&self) -> Line {
         self.line
     }
 
     #[inline]
-    pub fn column(&self) -> u32 {
+    pub fn column(&self) -> Column {
         self.column
     }
 }
@@ -72,9 +72,9 @@ impl PartialOrd for Position {
     }
 }
 
-impl From<(u32, u32)> for Position {
+impl From<(Line, Column)> for Position {
     #[inline]
-    fn from((line, column): (u32, u32)) -> Self {
+    fn from((line, column): (Line, Column)) -> Self {
         Self::new(line, column)
     }
 }

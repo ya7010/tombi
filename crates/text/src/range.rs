@@ -1,6 +1,6 @@
 use std::ops::AddAssign;
 
-use crate::{Position, RelativePosition};
+use crate::{Column, Line, Position, RelativePosition};
 
 #[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Range {
@@ -64,10 +64,10 @@ impl From<(Position, Position)> for Range {
     }
 }
 
-impl From<((u32, u32), (u32, u32))> for Range {
+impl From<((Line, Column), (Line, Column))> for Range {
     #[inline]
     fn from(
-        ((start_line, start_column), (end_line, end_column)): ((u32, u32), (u32, u32)),
+        ((start_line, start_column), (end_line, end_column)): ((Line, Column), (Line, Column)),
     ) -> Self {
         Self::new(
             Position::new(start_line, start_column),
@@ -85,7 +85,7 @@ impl AddAssign<RelativePosition> for Range {
 
 #[cfg(test)]
 mod test {
-    use crate::range::Range;
+    use super::*;
     use rstest::rstest;
     use std::cmp::Ordering;
 
@@ -98,8 +98,8 @@ mod test {
     #[case(((1, 1), (1, 2)), ((1, 1), (1, 1)), Ordering::Greater)]
     #[case(((1, 1), (2, 1)), ((1, 1), (1, 1)), Ordering::Greater)]
     fn test_range_cmp(
-        #[case] range: ((u32, u32), (u32, u32)),
-        #[case] other: ((u32, u32), (u32, u32)),
+        #[case] range: ((Line, Column), (Line, Column)),
+        #[case] other: ((Line, Column), (Line, Column)),
         #[case] expected: Ordering,
     ) {
         let r1 = Range::from(range);
@@ -113,9 +113,9 @@ mod test {
     #[case(((1, 1), (1, 2)), "a\n", ((1, 1), (2, 0)))]
     #[case(((1, 1), (1, 2)), "a\nb", ((1, 1), (2, 1)))]
     fn test_add_assign(
-        #[case] range: ((u32, u32), (u32, u32)),
+        #[case] range: ((Line, Column), (Line, Column)),
         #[case] text: &str,
-        #[case] expected: ((u32, u32), (u32, u32)),
+        #[case] expected: ((Line, Column), (Line, Column)),
     ) {
         let mut range = Range::from(range);
         range += text.into();

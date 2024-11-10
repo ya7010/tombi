@@ -1,9 +1,14 @@
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    ops::{Add, AddAssign},
+};
+
+use crate::{Column, Line};
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct RelativePosition {
-    line: u32,
-    column: u32,
+    line: Line,
+    column: Column,
 }
 
 impl RelativePosition {
@@ -13,12 +18,12 @@ impl RelativePosition {
     }
 
     #[inline]
-    pub fn line(&self) -> u32 {
+    pub fn line(&self) -> Line {
         self.line
     }
 
     #[inline]
-    pub fn column(&self) -> u32 {
+    pub fn column(&self) -> Column {
         self.column
     }
 }
@@ -38,9 +43,9 @@ impl PartialOrd for RelativePosition {
     }
 }
 
-impl From<(u32, u32)> for RelativePosition {
+impl From<(Line, Column)> for RelativePosition {
     #[inline]
-    fn from((line, column): (u32, u32)) -> Self {
+    fn from((line, column): (Line, Column)) -> Self {
         Self { line, column }
     }
 }
@@ -62,6 +67,30 @@ impl From<&str> for RelativePosition {
     }
 }
 
+impl Add for RelativePosition {
+    type Output = RelativePosition;
+
+    #[inline]
+    fn add(self, rhs: RelativePosition) -> Self::Output {
+        Self {
+            line: self.line + rhs.line(),
+            column: rhs.column(),
+        }
+    }
+}
+
+impl AddAssign for RelativePosition {
+    #[inline]
+    fn add_assign(&mut self, rhs: RelativePosition) {
+        self.line += rhs.line();
+        if rhs.line() == 0 {
+            self.column += rhs.column();
+        } else {
+            self.column = rhs.column();
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -72,7 +101,7 @@ mod test {
     #[case("a", (0, 1))]
     #[case("abc\ndef\nghi", (2, 3))]
     #[case("abc\r\ndef\r\nghi", (2, 3))]
-    fn test_position(#[case] source: &str, #[case] expected: (u32, u32)) {
+    fn test_position(#[case] source: &str, #[case] expected: (Line, Column)) {
         assert_eq!(RelativePosition::from(source), expected.into());
     }
 }
