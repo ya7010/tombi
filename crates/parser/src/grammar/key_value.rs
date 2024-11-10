@@ -30,6 +30,7 @@ mod test {
 
     #[rstest]
     #[case("key1 = # INVALID", crate::Error::ExpectedValue, ((0, 6), (0, 7)))]
+    #[case("key1 = 2024-01-00T", crate::Error::ExpectedValue, ((0, 7), (0, 18)))]
     #[case(r#"
 key1 = 1
 key2 = # INVALID
