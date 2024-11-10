@@ -30,7 +30,9 @@ pub(crate) trait Grammer {
     fn parse(p: &mut Parser<'_>);
 }
 
-pub fn invalid_line(p: &mut Parser<'_>) {
+pub fn invalid_line(p: &mut Parser<'_>, error: crate::Error) {
+    p.bump_any();
+    p.error(error);
     while !p.at_ts(LINE_END) {
         p.bump_any()
     }

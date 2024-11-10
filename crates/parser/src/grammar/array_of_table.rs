@@ -3,7 +3,8 @@ use syntax::T;
 use super::Grammer;
 use crate::{
     grammar::{
-        invalid_line, leading_comments, peek_leading_comments, tailing_comment, NEXT_SECTION,
+        invalid_line, leading_comments, peek_leading_comments, tailing_comment, LINE_END,
+        NEXT_SECTION,
     },
     parser::Parser,
 };
@@ -22,8 +23,7 @@ impl Grammer for ast::ArrayOfTable {
         ast::Keys::parse(p);
 
         if !p.eat(T!("]]")) {
-            invalid_line(p);
-            p.error(crate::Error::ExpectedDoubleBracketEnd);
+            invalid_line(p, crate::Error::ExpectedDoubleBracketEnd);
         }
 
         tailing_comment(p);
@@ -35,6 +35,10 @@ impl Grammer for ast::ArrayOfTable {
                 break;
             }
             ast::KeyValue::parse(p);
+
+            if !p.at_ts(LINE_END) {
+                invalid_line(p, crate::Error::ExpectedLineBreak);
+            }
         }
 
         m.complete(p, ARRAY_OF_TABLE);
@@ -62,7 +66,7 @@ key2 = 2
 [[aaa.bbb
 key1 = 1
 key2 = 2
-"#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 6), (0, 9)))]
+"#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 9), (1, 0)))]
     #[case(r#"
 [[aaa.bbb]
 key1 = 1
