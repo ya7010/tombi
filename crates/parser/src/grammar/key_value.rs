@@ -11,6 +11,7 @@ impl Grammer for ast::KeyValue {
         ast::Keys::parse(p);
 
         if !p.eat(T![=]) {
+            p.bump_any();
             p.error(crate::Error::ExpectedEquals);
         }
 
@@ -29,44 +30,57 @@ mod test {
     use text::{Column, Line};
 
     #[rstest]
-    #[case("key1 = # INVALID", crate::Error::ExpectedValue, ((0, 6), (0, 7)))]
-    #[case("key1 = 2024-01-00T", crate::Error::ExpectedValue, ((0, 7), (0, 18)))]
+    #[case("key1 = # INVALID", &[(crate::Error::ExpectedValue, ((0, 6), (0, 7)))])]
+    #[case("key1 = 2024-01-00T", &[(crate::Error::ExpectedValue, ((0, 7), (0, 18)))])]
     #[case(r#"
 key1 = 1
 key2 = # INVALID
 key3 = 3
-"#.trim_start(), crate::Error::ExpectedValue, ((1, 6), (1, 7)))]
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 6), (1, 7)))])]
     #[case(r#"
 key1 = "str"
 key2 = "invalid
 key3 = 1
-"#.trim_start(), crate::Error::ExpectedValue, ((1, 8), (1, 15))
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 8), (1, 15)))]
     )]
     #[case(r#"
 key1 = "str"
 key2 = invalid"
 key3 = 1
-"#.trim_start(), crate::Error::ExpectedValue, ((1, 7), (1, 15))
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
     )]
     #[case(r#"
 key1 = 'str'
 key2 = 'invalid
 key3 = 1
-"#.trim_start(), crate::Error::ExpectedValue, ((1, 8), (1, 15))
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 8), (1, 15)))]
     )]
     #[case(r#"
 key1 = 'str'
 key2 = invalid'
 key3 = 1
-"#.trim_start(), crate::Error::ExpectedValue, ((1, 7), (1, 15))
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
+    )]
+    #[case(r#"
+key1 "value"
+key2 = 1
+"#.trim_start(), &[
+    (crate::Error::ExpectedEquals, ((0, 5), (0, 12))),
+    (crate::Error::ExpectedValue, ((0, 5), (0, 12)))
+]
     )]
     fn invalid_key_value(
         #[case] source: &str,
-        #[case] error: crate::Error,
-        #[case] range: ((Line, Column), (Line, Column)),
+        #[case] errors: &[(crate::Error, ((Line, Column), (Line, Column)))],
     ) {
         let p = crate::parse(source);
 
-        assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
+        assert_eq!(
+            p.errors(),
+            errors
+                .into_iter()
+                .map(|(error, range)| SyntaxError::new(*error, (*range).into()))
+                .collect::<Vec<_>>()
+        );
     }
 }
