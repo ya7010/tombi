@@ -7,6 +7,7 @@ use tower_lsp::lsp_types::{
     TextDocumentPositionParams,
 };
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_hover(
     HoverParams {
         text_document_position_params:

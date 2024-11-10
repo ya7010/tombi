@@ -2,6 +2,7 @@ use tower_lsp::lsp_types::DidSaveTextDocumentParams;
 
 use crate::server::backend::Backend;
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_did_save(
     backend: &Backend,
     DidSaveTextDocumentParams {

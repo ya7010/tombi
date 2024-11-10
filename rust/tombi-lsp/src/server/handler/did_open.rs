@@ -2,6 +2,7 @@ use tower_lsp::lsp_types::DidOpenTextDocumentParams;
 
 use crate::{document::Document, server::backend::Backend};
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_did_open(backend: &Backend, params: DidOpenTextDocumentParams) {
     tracing::info!("handle_did_open");
 

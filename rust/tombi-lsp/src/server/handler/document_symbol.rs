@@ -5,6 +5,7 @@ use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_document_symbol(
     backend: &Backend,
     DocumentSymbolParams { text_document, .. }: DocumentSymbolParams,

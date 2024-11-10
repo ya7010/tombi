@@ -35,6 +35,7 @@ impl TokenType {
     ];
 }
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_semantic_tokens_full(
     _backend: &Backend,
     SemanticTokensParams { text_document, .. }: SemanticTokensParams,

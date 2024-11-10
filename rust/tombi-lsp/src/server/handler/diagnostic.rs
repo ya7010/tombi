@@ -3,15 +3,9 @@ use tower_lsp::lsp_types::{
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
 };
 
-use crate::{
-    converters::{
-        encoding::{PositionEncoding, WideEncoding},
-        to_lsp,
-    },
-    document::Document,
-    server::backend::Backend,
-};
+use crate::{document::Document, server::backend::Backend};
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_diagnostic(
     backend: &Backend,
     DocumentDiagnosticParams { text_document, .. }: DocumentDiagnosticParams,

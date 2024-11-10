@@ -10,6 +10,7 @@ use crate::converters::encoding::{negotiated_encoding, PositionEncoding, WideEnc
 
 use super::semantic_tokens_full::TokenType;
 
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn handle_initialize(
     InitializeParams {
         capabilities: client_capabilities,
