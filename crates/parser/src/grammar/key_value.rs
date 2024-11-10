@@ -47,6 +47,18 @@ key2 = invalid"
 key3 = 1
 "#.trim_start(), crate::Error::ExpectedValue, ((1, 7), (1, 15))
     )]
+    #[case(r#"
+key1 = 'str'
+key2 = 'invalid
+key3 = 1
+"#.trim_start(), crate::Error::ExpectedValue, ((1, 8), (1, 15))
+    )]
+    #[case(r#"
+key1 = 'str'
+key2 = invalid'
+key3 = 1
+"#.trim_start(), crate::Error::ExpectedValue, ((1, 7), (1, 15))
+    )]
     fn invalid_key_value(
         #[case] source: &str,
         #[case] error: crate::Error,
