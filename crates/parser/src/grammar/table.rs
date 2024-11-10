@@ -21,7 +21,7 @@ impl Grammer for ast::Table {
         ast::Keys::parse(p);
 
         if !p.eat(T![']']) {
-            p.error(crate::Error::ExpectedBraceEnd);
+            p.error(crate::Error::ExpectedBracketEnd);
         }
 
         tailing_comment(p);
@@ -37,5 +37,38 @@ impl Grammer for ast::Table {
         }
 
         m.complete(p, TABLE);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use rstest::rstest;
+    use syntax::SyntaxError;
+    use text::{Column, Line};
+
+    #[rstest]
+    #[case(r#"
+[]
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedKey, ((0, 0), (0, 1)))]
+    #[case(r#"
+[aaa.]
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedKey, ((0, 4), (0, 5)))]
+    #[case(r#"
+[aaa.bbb
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedBracketEnd, ((0, 5), (0, 8)))]
+    fn invalid_table(
+        #[case] source: &str,
+        #[case] error: crate::Error,
+        #[case] range: ((Line, Column), (Line, Column)),
+    ) {
+        let p = crate::parse(source);
+
+        assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
     }
 }

@@ -28,7 +28,6 @@ impl Grammer for ast::Keys {
         if eat_keys(p).is_some() {
             m.complete(p, KEYS);
         } else {
-            p.error(crate::Error::ExpectedKey);
             m.complete(p, INVALID_TOKEN);
         };
     }
