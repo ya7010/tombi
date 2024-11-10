@@ -13,10 +13,10 @@ pub enum Error {
     ExpectedEquals,
     #[error("expected ']'")]
     ExpectedBracketEnd,
+    #[error("expected ']]'")]
+    ExpectedDoubleBracketEnd,
     #[error("expected '}}'")]
     ExpectedBraceEnd,
-    #[error("expected '}}}}'")]
-    ExpectedDoubleBracetEnd,
     #[error("Invalid key")]
     InvalidKey,
 }

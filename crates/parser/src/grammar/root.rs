@@ -6,7 +6,7 @@ use super::{
 };
 use syntax::{SyntaxKind::*, T};
 
-const LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, COMMENT, EOF]);
+pub const LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, COMMENT, EOF]);
 pub const NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
 impl Grammer for ast::Root {

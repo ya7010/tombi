@@ -2,7 +2,11 @@ use syntax::T;
 
 use super::Grammer;
 use crate::{
-    grammar::{leading_comments, peek_leading_comments, root::NEXT_SECTION, tailing_comment},
+    grammar::{
+        leading_comments, peek_leading_comments,
+        root::{LINE_END, NEXT_SECTION},
+        tailing_comment,
+    },
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
@@ -20,7 +24,10 @@ impl Grammer for ast::ArrayOfTable {
         ast::Keys::parse(p);
 
         if !p.eat(T!("]]")) {
-            p.error(crate::Error::ExpectedDoubleBracetEnd);
+            while !p.at_ts(LINE_END) {
+                p.bump_any()
+            }
+            p.error(crate::Error::ExpectedDoubleBracketEnd);
         }
 
         tailing_comment(p);
@@ -35,5 +42,45 @@ impl Grammer for ast::ArrayOfTable {
         }
 
         m.complete(p, ARRAY_OF_TABLE);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use rstest::rstest;
+    use syntax::SyntaxError;
+    use text::{Column, Line};
+
+    #[rstest]
+    #[case(r#"
+[[]]
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedKey, ((0, 0), (0, 2)))]
+    #[case(r#"
+[[aaa.]]
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedKey, ((0, 5), (0, 6)))]
+    #[case(r#"
+[[aaa.bbb
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 6), (0, 9)))]
+    #[case(r#"
+[[aaa.bbb]
+key1 = 1
+key2 = 2
+"#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 9), (0, 10)))]
+    fn invalid_array_of_table(
+        #[case] source: &str,
+        #[case] error: crate::Error,
+        #[case] range: ((Line, Column), (Line, Column)),
+    ) {
+        let p = crate::parse(source);
+
+        dbg!(p.syntax_node());
+
+        assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
     }
 }
