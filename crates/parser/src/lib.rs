@@ -8,7 +8,6 @@ mod marker;
 mod output;
 mod parse;
 mod parser;
-mod step;
 mod token_set;
 mod validation;
 
@@ -42,16 +41,24 @@ pub fn build_tree(
 ) -> (tombi_rowan::GreenNode, Vec<syntax::SyntaxError>) {
     let _p = tracing::info_span!("build_tree").entered();
     let mut builder = syntax::SyntaxTreeBuilder::default();
-    let mut enter_pos = 0;
+    let mut enter_position = Default::default();
 
     let _ = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
-        step::StrStep::Token { kind, text } => builder.token(kind, text),
-        step::StrStep::Enter { kind, pos } => {
-            builder.start_node(kind);
-            enter_pos = pos as u32;
+        lexed::Step::Token {
+            kind,
+            text,
+            position,
+        } => {
+            builder.token(kind, text);
+            enter_position = position;
         }
-        step::StrStep::Exit => builder.finish_node(),
-        step::StrStep::Error { error, pos } => builder.error(error.to_string(), pos as u32),
+        lexed::Step::Enter { kind } => {
+            builder.start_node(kind);
+        }
+        lexed::Step::Exit => builder.finish_node(),
+        lexed::Step::Error { error, position } => {
+            builder.error(error.to_string(), (enter_position, position).into())
+        }
     });
 
     builder.finish()

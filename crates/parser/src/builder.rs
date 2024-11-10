@@ -1,19 +1,20 @@
 use syntax::SyntaxKind;
 
-use crate::{step::StrStep, LexedStr};
+use crate::{lexed, LexedStr};
 
 pub struct Builder<'a, 'b> {
     pub(crate) lexed: &'a LexedStr<'a>,
-    pub(crate) pos: usize,
+    pub(crate) event_index: usize,
+    pub(crate) position: text::Position,
     pub(crate) state: State,
-    pub(crate) sink: &'b mut dyn FnMut(StrStep<'_>),
+    pub(crate) sink: &'b mut dyn FnMut(lexed::Step<'_>),
 }
 
 impl std::fmt::Debug for Builder<'_, '_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Builder")
             .field("lexed", &self.lexed)
-            .field("pos", &self.pos)
+            .field("event_index", &self.event_index)
             .field("state", &self.state)
             .finish()
     }
@@ -27,10 +28,11 @@ pub enum State {
 }
 
 impl<'a, 'b> Builder<'a, 'b> {
-    pub fn new(lexed: &'a LexedStr<'a>, sink: &'b mut dyn FnMut(StrStep<'_>)) -> Self {
+    pub fn new(lexed: &'a LexedStr<'a>, sink: &'b mut dyn FnMut(lexed::Step<'_>)) -> Self {
         Self {
             lexed,
-            pos: 0,
+            event_index: 0,
+            position: Default::default(),
             state: State::PendingEnter,
             sink,
         }
@@ -39,7 +41,7 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn token(&mut self, kind: SyntaxKind, n_tokens: u8) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(StrStep::Exit),
+            State::PendingExit => (self.sink)(lexed::Step::Exit),
             State::Normal => (),
         }
         self.eat_trivias();
@@ -49,37 +51,30 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn enter(&mut self, kind: SyntaxKind) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => {
-                let n_trivias = self.n_trivias();
-                (self.sink)(StrStep::Enter {
-                    kind,
-                    pos: self.pos + n_trivias,
-                });
+                (self.sink)(lexed::Step::Enter { kind });
                 // No need to attach trivias to previous node: there is no
                 // previous node.
                 return;
             }
-            State::PendingExit => (self.sink)(StrStep::Exit),
+            State::PendingExit => (self.sink)(lexed::Step::Exit),
             State::Normal => (),
         }
 
         self.eat_n_trivias();
-        (self.sink)(StrStep::Enter {
-            kind,
-            pos: self.pos,
-        });
+        (self.sink)(lexed::Step::Enter { kind });
     }
 
     pub fn exit(&mut self) {
         match std::mem::replace(&mut self.state, State::PendingExit) {
             State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(StrStep::Exit),
+            State::PendingExit => (self.sink)(lexed::Step::Exit),
             State::Normal => (),
         }
     }
 
     pub fn eat_trivias(&mut self) {
-        while self.pos < self.lexed.len() {
-            let kind = self.lexed.kind(self.pos);
+        while self.event_index < self.lexed.len() {
+            let kind = self.lexed.kind(self.event_index);
             if !kind.is_trivia() {
                 break;
             }
@@ -88,22 +83,31 @@ impl<'a, 'b> Builder<'a, 'b> {
     }
 
     fn n_trivias(&self) -> usize {
-        (self.pos..self.lexed.len())
+        (self.event_index..self.lexed.len())
             .take_while(|&it| self.lexed.kind(it).is_trivia())
             .count()
     }
 
     pub fn eat_n_trivias(&mut self) {
         for _ in 0..self.n_trivias() {
-            let kind = self.lexed.kind(self.pos);
+            let kind = self.lexed.kind(self.event_index);
             assert!(kind.is_trivia());
             self.do_token(kind, 1);
         }
     }
 
     pub fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
-        let text = &self.lexed.range_text(self.pos..self.pos + n_tokens);
-        self.pos += n_tokens;
-        (self.sink)(StrStep::Token { kind, text });
+        let start_position = self.position;
+        let text = &self
+            .lexed
+            .range_text(self.event_index..self.event_index + n_tokens);
+        self.event_index += n_tokens;
+        self.position = self.position.add_text(text);
+
+        (self.sink)(lexed::Step::Token {
+            kind,
+            text,
+            position: start_position,
+        });
     }
 }

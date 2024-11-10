@@ -13,11 +13,6 @@ pub struct RelativePosition {
 
 impl RelativePosition {
     #[inline]
-    pub const fn zero() -> Self {
-        Self { line: 0, column: 0 }
-    }
-
-    #[inline]
     pub fn line(&self) -> Line {
         self.line
     }

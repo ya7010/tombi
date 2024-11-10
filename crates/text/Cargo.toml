@@ -7,7 +7,7 @@ license.workspace = true
 
 [features]
 default = []
-lsp = ["tower-lsp"]
+lsp = ["dep:tower-lsp"]
 
 [dependencies]
 serde = { workspace = true, optional = true }

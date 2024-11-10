@@ -234,7 +234,7 @@ impl GreenNode {
         I::IntoIter: ExactSizeIterator,
     {
         let mut text_len: TextSize = 0.into();
-        let mut text_rel_position = text::RelativePosition::zero();
+        let mut text_rel_position = Default::default();
         let children = children.into_iter().map(|el| {
             let rel_offset = text_len;
             let rel_position = el.text_rel_position();
@@ -259,7 +259,7 @@ impl GreenNode {
             GreenNodeHead {
                 kind,
                 text_len: 0.into(),
-                text_rel_position: text::RelativePosition::zero(),
+                text_rel_position: Default::default(),
                 _c: Count::new(),
             },
             children,

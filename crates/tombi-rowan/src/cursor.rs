@@ -390,7 +390,7 @@ impl NodeData {
 
     #[cold]
     fn position_mut(&self) -> text::Position {
-        let mut res = text::Position::zero();
+        let mut res = Default::default();
 
         let mut node = self;
         while let Some(parent) = node.parent() {
@@ -591,7 +591,7 @@ impl SyntaxNode {
             ptr: Cell::new(green),
         };
         SyntaxNode {
-            ptr: NodeData::new(None, 0, 0.into(), text::Position::zero(), green, false),
+            ptr: NodeData::new(None, 0, 0.into(), Default::default(), green, false),
         }
     }
 
@@ -601,7 +601,7 @@ impl SyntaxNode {
             ptr: Cell::new(green),
         };
         SyntaxNode {
-            ptr: NodeData::new(None, 0, 0.into(), text::Position::zero(), green, true),
+            ptr: NodeData::new(None, 0, 0.into(), Default::default(), green, true),
         }
     }
 

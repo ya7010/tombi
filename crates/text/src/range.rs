@@ -17,14 +17,6 @@ impl Range {
     }
 
     #[inline]
-    pub const fn zero() -> Self {
-        Self {
-            start: Position::zero(),
-            end: Position::zero(),
-        }
-    }
-
-    #[inline]
     pub fn start(&self) -> Position {
         self.start
     }
@@ -104,7 +96,7 @@ mod test {
     ) {
         let r1 = Range::from(range);
         let r2 = Range::from(other);
-        dbg!(&r1, &r2);
+
         assert_eq!(r1.cmp(&r2), expected);
     }
 

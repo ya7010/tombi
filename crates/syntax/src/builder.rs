@@ -28,7 +28,7 @@ impl SyntaxTreeBuilder {
         self.inner.finish_node();
     }
 
-    pub fn error(&mut self, error: String, pos: u32) {
-        self.errors.push(crate::SyntaxError::new(error, pos));
+    pub fn error(&mut self, message: String, range: text::Range) {
+        self.errors.push(crate::SyntaxError::new(message, range));
     }
 }

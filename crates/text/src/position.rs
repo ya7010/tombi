@@ -18,8 +18,8 @@ impl Position {
     }
 
     #[inline]
-    pub const fn zero() -> Self {
-        Self { line: 0, column: 0 }
+    pub fn add_text(&self, text: &str) -> Self {
+        (*self) + RelativePosition::from(text)
     }
 
     pub fn from_source(source: &str, offset: TextSize) -> Self {
@@ -84,7 +84,13 @@ impl Add<RelativePosition> for Position {
 
     #[inline]
     fn add(self, rhs: RelativePosition) -> Self::Output {
-        Self::new(self.line + rhs.line(), rhs.column())
+        let line = self.line + rhs.line();
+        let column = if rhs.line() == 0 {
+            self.column + rhs.column()
+        } else {
+            rhs.column()
+        };
+        Position::new(line, column)
     }
 }
 

@@ -723,6 +723,7 @@ dependencies = [
  "itertools",
  "logos",
  "syntax",
+ "text",
  "thiserror",
  "tombi-rowan",
  "tracing",

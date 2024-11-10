@@ -2,14 +2,31 @@ use logos::Logos;
 use syntax::SyntaxKind::{self, *};
 
 use crate::builder::{Builder, State};
-use crate::{input::Input, output::Step, step::StrStep};
+use crate::{input::Input, output};
 
 #[derive(Debug)]
 pub struct LexedStr<'a> {
     pub text: &'a str,
     pub kind: Vec<SyntaxKind>,
-    pub start: Vec<u32>,
+    pub start_offsets: Vec<u32>,
     pub error: Vec<LexError>,
+}
+
+#[derive(Debug)]
+pub enum Step<'a> {
+    Token {
+        kind: SyntaxKind,
+        text: &'a str,
+        position: text::Position,
+    },
+    Enter {
+        kind: SyntaxKind,
+    },
+    Exit,
+    Error {
+        error: crate::Error,
+        position: text::Position,
+    },
 }
 
 #[derive(Debug)]
@@ -42,26 +59,26 @@ impl<'a> LexedStr<'a> {
         let _p = tracing::info_span!("LexedStr::new").entered();
         let mut lexed = SyntaxKind::lexer(text);
         let mut kind = Vec::new();
-        let mut start = Vec::new();
+        let mut start_offsets: Vec<u32> = Vec::new();
         let mut error = Vec::new();
         let mut offset = 0;
         while let Some(token) = lexed.next() {
             match token {
                 Ok(k) => {
                     kind.push(k);
-                    start.push(lexed.span().start as u32)
+                    start_offsets.push(lexed.span().start as u32);
                 }
                 Err(err) => error.push(LexError::new(offset, err)),
             }
             offset += 1;
         }
         kind.push(EOF);
-        start.push(text.len() as u32);
+        start_offsets.push(text.len() as u32);
 
         Self {
             text,
             kind,
-            start,
+            start_offsets,
             error,
         }
     }
@@ -97,22 +114,26 @@ impl<'a> LexedStr<'a> {
 
     pub fn range_text(&self, r: std::ops::Range<usize>) -> &str {
         assert!(r.start < r.end && r.end <= self.len());
-        let lo = self.start[r.start] as usize;
-        let hi = self.start[r.end] as usize;
+        let lo = self.start_offsets[r.start] as usize;
+        let hi = self.start_offsets[r.end] as usize;
         &self.text[lo..hi]
     }
 
     // Naming is hard.
     pub fn text_range(&self, i: usize) -> std::ops::Range<usize> {
         assert!(i < self.len());
-        let lo = self.start[i] as usize;
-        let hi = self.start[i + 1] as usize;
+        let lo = self.start_offsets[i] as usize;
+        let hi = self.start_offsets[i + 1] as usize;
         lo..hi
     }
 
-    pub fn text_start(&self, i: usize) -> usize {
+    pub fn text_start_offset(&self, i: usize) -> usize {
         assert!(i <= self.len());
-        self.start[i] as usize
+        self.start_offsets[i] as usize
+    }
+
+    pub fn text_start_position(&self, i: usize) -> text::Position {
+        text::Position::from_source(&self.text, (self.text_start_offset(i) as u32).into())
     }
 
     pub fn text_len(&self, i: usize) -> usize {
@@ -132,11 +153,6 @@ impl<'a> LexedStr<'a> {
 
     pub fn errors(&self) -> impl Iterator<Item = (usize, &str)> + '_ {
         self.error.iter().map(|it| (it.token(), it.msg()))
-    }
-
-    fn push(&mut self, kind: SyntaxKind, offset: usize) {
-        self.kind.push(kind);
-        self.start.push(offset as u32);
     }
 
     pub fn to_input(&self) -> Input {
@@ -161,23 +177,23 @@ impl<'a> LexedStr<'a> {
     pub fn intersperse_trivia(
         &self,
         output: &crate::Output,
-        sink: &mut dyn FnMut(StrStep<'_>),
+        sink: &mut dyn FnMut(Step<'_>),
     ) -> bool {
         let mut builder = Builder::new(self, sink);
 
         for event in output.iter() {
             match event {
-                Step::Token {
+                output::Step::Token {
                     kind,
                     n_input_tokens: n_raw_tokens,
                 } => builder.token(kind, n_raw_tokens),
-                Step::Enter { kind } => builder.enter(kind),
-                Step::Exit => builder.exit(),
-                Step::Error { error } => {
-                    let text_pos = builder.lexed.text_start(builder.pos);
-                    (builder.sink)(StrStep::Error {
+                output::Step::Enter { kind } => builder.enter(kind),
+                output::Step::Exit => builder.exit(),
+                output::Step::Error { error } => {
+                    let start_position = builder.lexed.text_start_position(builder.event_index);
+                    (builder.sink)(Step::Error {
                         error,
-                        pos: text_pos,
+                        position: start_position,
                     });
                 }
             }
@@ -186,12 +202,12 @@ impl<'a> LexedStr<'a> {
         match std::mem::replace(&mut builder.state, State::Normal) {
             State::PendingExit => {
                 builder.eat_trivias();
-                (builder.sink)(StrStep::Exit);
+                (builder.sink)(Step::Exit);
             }
             State::PendingEnter | State::Normal => unreachable!(),
         }
 
         // is_eof?
-        builder.pos == builder.lexed.len()
+        builder.event_index == builder.lexed.len()
     }
 }

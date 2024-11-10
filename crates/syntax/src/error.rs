@@ -16,14 +16,14 @@ impl Error {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxError {
     message: String,
-    pos: u32,
+    range: text::Range,
 }
 
 impl SyntaxError {
-    pub fn new(message: impl Into<String>, pos: u32) -> Self {
+    pub fn new(message: impl Into<String>, range: text::Range) -> Self {
         Self {
             message: message.into(),
-            pos,
+            range,
         }
     }
 
@@ -31,7 +31,11 @@ impl SyntaxError {
         &self.message
     }
 
-    pub fn pos(&self) -> u32 {
-        self.pos
+    pub fn position(&self) -> text::Position {
+        self.range.start()
+    }
+
+    pub fn range(&self) -> text::Range {
+        self.range
     }
 }

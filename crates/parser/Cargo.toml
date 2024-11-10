@@ -14,6 +14,7 @@ tombi-rowan = { workspace = true }
 syntax = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+text.workspace = true
 
 [dev-dependencies]
 tracing-subscriber = { workspace = true }
