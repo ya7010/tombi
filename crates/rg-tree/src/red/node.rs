@@ -1,10 +1,10 @@
 use std::{borrow::Cow, fmt, marker::PhantomData, ops::Range};
 
 use crate::{
-    api::{Language, Preorder, PreorderWithTokens, SyntaxElementChildren, SyntaxNodeChildren},
     cursor,
     green::{GreenNode, GreenNodeData},
-    Direction, NodeOrToken, SyntaxText, TextRange, TextSize, TokenAtOffset, WalkEvent,
+    red::{Preorder, PreorderWithTokens, RedElementChildren, RedNodeChildren},
+    Direction, Language, NodeOrToken, SyntaxText, TextRange, TextSize, TokenAtOffset, WalkEvent,
 };
 
 use super::{RedElement, RedToken};
@@ -91,11 +91,11 @@ impl<L: Language> RedNode<L> {
         self.raw.ancestors().map(RedNode::from)
     }
 
-    pub fn children(&self) -> SyntaxNodeChildren<L> {
+    pub fn children(&self) -> RedNodeChildren<L> {
         self.raw.children().into()
     }
 
-    pub fn children_with_tokens(&self) -> SyntaxElementChildren<L> {
+    pub fn children_with_tokens(&self) -> RedElementChildren<L> {
         self.raw.children_with_tokens().into()
     }
 

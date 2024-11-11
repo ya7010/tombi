@@ -23,10 +23,10 @@ impl rg_tree::Language for TomlLanguage {
 
 pub type SyntaxNode = rg_tree::RedNode<crate::TomlLanguage>;
 pub type SyntaxToken = rg_tree::RedToken<crate::TomlLanguage>;
-pub type SyntaxElement = rg_tree::NodeOrToken<SyntaxNode, SyntaxToken>;
-pub type SyntaxNodeChildren = rg_tree::SyntaxNodeChildren<TomlLanguage>;
-pub type SyntaxElementChildren = rg_tree::SyntaxElementChildren<TomlLanguage>;
-pub type PreorderWithTokens = rg_tree::api::PreorderWithTokens<TomlLanguage>;
+pub type SyntaxElement = rg_tree::RedElement<crate::TomlLanguage>;
+pub type SyntaxNodeChildren = rg_tree::RedNodeChildren<TomlLanguage>;
+pub type SyntaxElementChildren = rg_tree::RedElementChildren<TomlLanguage>;
+pub type PreorderWithTokens = rg_tree::PreorderWithTokens<TomlLanguage>;
 
 #[cfg(test)]
 mod tests {
