@@ -38,7 +38,7 @@ pub fn parse_as<G: Grammer>(source: &str) -> Parse<SyntaxNode> {
 pub fn build_tree(
     lexed: &LexedStr<'_>,
     parser_output: crate::Output,
-) -> (tombi_rowan::GreenNode, Vec<syntax::SyntaxError>) {
+) -> (red_green_tree::GreenNode, Vec<syntax::SyntaxError>) {
     let _p = tracing::info_span!("build_tree").entered();
     let mut builder = syntax::SyntaxTreeBuilder::default();
     let mut enter_position = Default::default();

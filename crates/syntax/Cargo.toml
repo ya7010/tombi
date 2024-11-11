@@ -7,7 +7,7 @@ license.workspace = true
 
 [dependencies]
 logos = { workspace = true }
-tombi-rowan = { workspace = true }
+red-green-tree = { workspace = true }
 thiserror = { workspace = true }
 text = { workspace = true }
 rstest = { workspace = true}

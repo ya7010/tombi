@@ -1,5 +1,5 @@
 [package]
-name = "tombi-rowan"
+name = "red-green-tree"
 version = "0.0.0"
 edition.workspace = true
 authors.workspace = true

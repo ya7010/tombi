@@ -722,11 +722,11 @@ dependencies = [
  "drop_bomb",
  "itertools",
  "logos",
+ "red-green-tree",
  "rstest",
  "syntax",
  "text",
  "thiserror",
- "tombi-rowan",
  "tracing",
  "tracing-subscriber",
 ]
@@ -794,6 +794,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5b9d34b8991d19d98081b46eacdd8eb58c6f2b201139f7c5f643cc155a633af"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "red-green-tree"
+version = "0.0.0"
+dependencies = [
+ "countme",
+ "hashbrown 0.15.0",
+ "rustc-hash",
+ "serde",
+ "text",
 ]
 
 [[package]]
@@ -1048,10 +1059,10 @@ name = "syntax"
 version = "0.0.1"
 dependencies = [
  "logos",
+ "red-green-tree",
  "rstest",
  "text",
  "thiserror",
- "tombi-rowan",
 ]
 
 [[package]]
@@ -1176,17 +1187,6 @@ dependencies = [
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "tombi-rowan"
-version = "0.0.0"
-dependencies = [
- "countme",
- "hashbrown 0.15.0",
- "rustc-hash",
- "serde",
- "text",
 ]
 
 [[package]]
