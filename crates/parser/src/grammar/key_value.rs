@@ -18,9 +18,6 @@ impl Grammer for ast::KeyValue {
         }
 
         if p.at_ts(TS_COMMEMT_OR_LINE_END) {
-            if !p.at_ts(TS_COMMEMT_OR_LINE_END) {
-                p.bump_remap(INVALID_TOKEN);
-            }
             p.error(crate::Error::ExpectedValue);
         } else {
             ast::Value::parse(p);
