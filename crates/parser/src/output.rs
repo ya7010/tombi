@@ -18,8 +18,8 @@ pub struct Output {
     ///
     /// |16 bit kind|8 bit n_input_tokens|4 bit tag|4 bit leftover|
     ///
-    event: Vec<u32>,
-    error: Vec<crate::Error>,
+    events: Vec<u32>,
+    errors: Vec<crate::Error>,
 }
 
 #[derive(Debug)]
@@ -53,10 +53,10 @@ impl Output {
     const EXIT_EVENT: u8 = 2;
 
     pub fn iter(&self) -> impl Iterator<Item = Step> + '_ {
-        self.event.iter().map(|&event| {
+        self.events.iter().map(|&event| {
             if event & Self::EVENT_MASK == 0 {
                 return Step::Error {
-                    error: self.error[(event as usize) >> Self::ERROR_SHIFT],
+                    error: self.errors[(event as usize) >> Self::ERROR_SHIFT],
                 };
             }
             let tag = ((event & Self::TAG_MASK) >> Self::TAG_SHIFT) as u8;
@@ -86,25 +86,25 @@ impl Output {
         let e = ((kind as u16 as u32) << Self::KIND_SHIFT)
             | ((n_tokens as u32) << Self::N_INPUT_TOKEN_SHIFT)
             | Self::EVENT_MASK;
-        self.event.push(e)
+        self.events.push(e)
     }
 
     pub(crate) fn enter_node(&mut self, kind: SyntaxKind) {
         let e = ((kind as u16 as u32) << Self::KIND_SHIFT)
             | ((Self::ENTER_EVENT as u32) << Self::TAG_SHIFT)
             | Self::EVENT_MASK;
-        self.event.push(e)
+        self.events.push(e)
     }
 
     pub(crate) fn leave_node(&mut self) {
         let e = (Self::EXIT_EVENT as u32) << Self::TAG_SHIFT | Self::EVENT_MASK;
-        self.event.push(e)
+        self.events.push(e)
     }
 
     pub(crate) fn error(&mut self, error: crate::Error) {
-        let idx: usize = self.error.len();
-        self.error.push(error);
+        let idx: usize = self.errors.len();
+        self.errors.push(error);
         let e = (idx as u32) << Self::ERROR_SHIFT;
-        self.event.push(e);
+        self.events.push(e);
     }
 }
