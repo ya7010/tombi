@@ -7,13 +7,13 @@ use crate::validation;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Parse<T> {
-    green: red_green_tree::GreenNode,
+    green: rg_tree::GreenNode,
     errors: Option<Arc<[syntax::SyntaxError]>>,
     _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> Parse<T> {
-    pub fn new(green: red_green_tree::GreenNode, errors: Vec<SyntaxError>) -> Parse<T> {
+    pub fn new(green: rg_tree::GreenNode, errors: Vec<SyntaxError>) -> Parse<T> {
         Parse {
             green,
             errors: if errors.is_empty() {

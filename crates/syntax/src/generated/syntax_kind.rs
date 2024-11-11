@@ -93,7 +93,7 @@ impl SyntaxKind {
         matches!(self, SyntaxKind::WHITESPACE)
     }
 }
-impl From<SyntaxKind> for red_green_tree::SyntaxKind {
+impl From<SyntaxKind> for rg_tree::SyntaxKind {
     #[inline]
     fn from(k: SyntaxKind) -> Self {
         Self(k as u16)

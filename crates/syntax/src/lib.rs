@@ -9,25 +9,25 @@ pub use generated::SyntaxKind;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TomlLanguage {}
 
-impl red_green_tree::Language for TomlLanguage {
+impl rg_tree::Language for TomlLanguage {
     type Kind = crate::SyntaxKind;
 
-    fn kind_from_raw(raw: red_green_tree::SyntaxKind) -> Self::Kind {
+    fn kind_from_raw(raw: rg_tree::SyntaxKind) -> Self::Kind {
         assert!(raw.0 <= crate::SyntaxKind::__LAST as u16);
         unsafe { std::mem::transmute::<u16, crate::SyntaxKind>(raw.0) }
     }
-    fn kind_to_raw(kind: Self::Kind) -> red_green_tree::SyntaxKind {
+    fn kind_to_raw(kind: Self::Kind) -> rg_tree::SyntaxKind {
         kind.into()
     }
 }
 
 /// en: SyntaxNode is also known as `RedNode`.
-pub type SyntaxNode = red_green_tree::RedNode<crate::TomlLanguage>;
-pub type SyntaxToken = red_green_tree::RedToken<crate::TomlLanguage>;
-pub type SyntaxElement = red_green_tree::NodeOrToken<SyntaxNode, SyntaxToken>;
-pub type SyntaxNodeChildren = red_green_tree::SyntaxNodeChildren<TomlLanguage>;
-pub type SyntaxElementChildren = red_green_tree::SyntaxElementChildren<TomlLanguage>;
-pub type PreorderWithTokens = red_green_tree::api::PreorderWithTokens<TomlLanguage>;
+pub type SyntaxNode = rg_tree::RedNode<crate::TomlLanguage>;
+pub type SyntaxToken = rg_tree::RedToken<crate::TomlLanguage>;
+pub type SyntaxElement = rg_tree::NodeOrToken<SyntaxNode, SyntaxToken>;
+pub type SyntaxNodeChildren = rg_tree::SyntaxNodeChildren<TomlLanguage>;
+pub type SyntaxElementChildren = rg_tree::SyntaxElementChildren<TomlLanguage>;
+pub type PreorderWithTokens = rg_tree::api::PreorderWithTokens<TomlLanguage>;
 
 #[cfg(test)]
 mod tests {

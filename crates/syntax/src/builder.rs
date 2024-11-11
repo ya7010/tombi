@@ -1,15 +1,15 @@
-use red_green_tree::Language;
+use rg_tree::Language;
 
 use crate::TomlLanguage;
 
 #[derive(Default)]
 pub struct SyntaxTreeBuilder {
     errors: Vec<crate::SyntaxError>,
-    inner: red_green_tree::GreenNodeBuilder<'static>,
+    inner: rg_tree::GreenNodeBuilder<'static>,
 }
 
 impl SyntaxTreeBuilder {
-    pub fn finish(self) -> (red_green_tree::GreenNode, Vec<crate::SyntaxError>) {
+    pub fn finish(self) -> (rg_tree::GreenNode, Vec<crate::SyntaxError>) {
         let green = self.inner.finish();
         (green, self.errors)
     }

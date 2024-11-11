@@ -38,7 +38,7 @@ syntax = { path = "crates/syntax" }
 text = { path = "crates/text" }
 thiserror = "1.0.64"
 tokio = "1.41.0"
-red-green-tree = { path = "crates/red-green-tree" }
+rg-tree = { path = "crates/rg-tree" }
 tower-lsp = "0.20.0"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
