@@ -21,7 +21,6 @@ impl rg_tree::Language for TomlLanguage {
     }
 }
 
-/// en: SyntaxNode is also known as `RedNode`.
 pub type SyntaxNode = rg_tree::RedNode<crate::TomlLanguage>;
 pub type SyntaxToken = rg_tree::RedToken<crate::TomlLanguage>;
 pub type SyntaxElement = rg_tree::NodeOrToken<SyntaxNode, SyntaxToken>;
