@@ -12,6 +12,7 @@
 pub mod cursor;
 #[allow(unsafe_code)]
 mod green;
+mod red;
 
 pub mod api;
 mod syntax_text;
@@ -29,13 +30,12 @@ mod sll;
 pub use text::{TextLen, TextRange, TextSize};
 
 pub use crate::{
-    api::{
-        Language, SyntaxElement, SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren, SyntaxToken,
-    },
+    api::{Language, SyntaxElementChildren, SyntaxNodeChildren},
     green::{
         Checkpoint, Children, GreenNode, GreenNodeBuilder, GreenNodeData, GreenToken,
         GreenTokenData, NodeCache, SyntaxKind,
     },
+    red::{RedElement, RedNode, RedToken},
     syntax_text::SyntaxText,
     utility_types::{Direction, NodeOrToken, TokenAtOffset, WalkEvent},
 };

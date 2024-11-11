@@ -4,7 +4,7 @@ mod generated;
 pub use generated::*;
 use itertools::Itertools;
 use std::{fmt::Debug, marker::PhantomData};
-use syntax::{NodeOrToken, SyntaxKind::*, T};
+use syntax::{SyntaxElement, SyntaxKind::*, T};
 
 pub trait AstNode
 where
@@ -97,18 +97,18 @@ mod support {
     }
 
     #[inline]
-    pub(super) fn leading_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+    pub(super) fn leading_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         iter: I,
     ) -> impl Iterator<Item = crate::Comment> {
         iter.take_while(|node| matches!(node.kind(), COMMENT | LINE_BREAK | WHITESPACE))
             .filter_map(|node_or_token| match node_or_token {
-                NodeOrToken::Token(token) => crate::Comment::cast(token),
-                NodeOrToken::Node(_) => None,
+                SyntaxElement::Token(token) => crate::Comment::cast(token),
+                SyntaxElement::Node(_) => None,
             })
     }
 
     #[inline]
-    pub(super) fn tailing_comment<I: Iterator<Item = syntax::NodeOrToken>>(
+    pub(super) fn tailing_comment<I: Iterator<Item = syntax::SyntaxElement>>(
         iter: I,
         end: syntax::SyntaxKind,
     ) -> Option<crate::Comment> {
@@ -117,10 +117,10 @@ mod support {
             .skip(1);
 
         match iter.next()? {
-            NodeOrToken::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
-            NodeOrToken::Token(token) if token.kind() == WHITESPACE => {
+            SyntaxElement::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
+            SyntaxElement::Token(token) if token.kind() == WHITESPACE => {
                 iter.next().and_then(|node_or_token| match node_or_token {
-                    NodeOrToken::Token(token) if token.kind() == COMMENT => {
+                    SyntaxElement::Token(token) if token.kind() == COMMENT => {
                         crate::Comment::cast(token)
                     }
                     _ => None,
@@ -131,18 +131,18 @@ mod support {
     }
 
     #[inline]
-    pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+    pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         iter: I,
     ) -> impl Iterator<Item = crate::Comment> {
         iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
             .filter_map(|node_or_token| match node_or_token {
-                NodeOrToken::Token(token) => crate::Comment::cast(token),
-                NodeOrToken::Node(_) => None,
+                SyntaxElement::Token(token) => crate::Comment::cast(token),
+                SyntaxElement::Node(_) => None,
             })
     }
 
     #[inline]
-    pub(super) fn end_dangling_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+    pub(super) fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         iter: I,
     ) -> impl Iterator<Item = crate::Comment> {
         iter.collect::<Vec<_>>()
@@ -150,8 +150,8 @@ mod support {
             .rev()
             .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
             .filter_map(|node_or_token| match node_or_token {
-                NodeOrToken::Token(token) => crate::Comment::cast(token),
-                NodeOrToken::Node(_) => None,
+                SyntaxElement::Token(token) => crate::Comment::cast(token),
+                SyntaxElement::Node(_) => None,
             })
             .collect::<Vec<_>>()
             .into_iter()
@@ -159,7 +159,7 @@ mod support {
     }
 
     #[inline]
-    pub(super) fn has_inner_comments<I: Iterator<Item = syntax::NodeOrToken>>(
+    pub(super) fn has_inner_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         iter: I,
         start: SyntaxKind,
         end: SyntaxKind,
@@ -170,7 +170,7 @@ mod support {
             .any(|node| {
                 node.kind() == COMMENT
                     || match node {
-                        syntax::NodeOrToken::Node(node) => node
+                        syntax::SyntaxElement::Node(node) => node
                             .children_with_tokens()
                             .any(|node| node.kind() == COMMENT),
                         _ => false,

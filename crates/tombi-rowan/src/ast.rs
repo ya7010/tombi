@@ -20,7 +20,7 @@ use std::{
     marker::PhantomData,
 };
 
-use crate::{Language, SyntaxNode, SyntaxNodeChildren, TextRange};
+use crate::{Language, RedNode, SyntaxNodeChildren, TextRange};
 
 /// The main trait to go from untyped [`SyntaxNode`] to a typed AST. The
 /// conversion itself has zero runtime cost: AST and syntax nodes have exactly
@@ -33,11 +33,11 @@ pub trait AstNode {
     where
         Self: Sized;
 
-    fn cast(node: SyntaxNode<Self::Language>) -> Option<Self>
+    fn cast(node: RedNode<Self::Language>) -> Option<Self>
     where
         Self: Sized;
 
-    fn syntax(&self) -> &SyntaxNode<Self::Language>;
+    fn syntax(&self) -> &RedNode<Self::Language>;
 
     fn clone_for_update(&self) -> Self
     where
@@ -70,7 +70,7 @@ impl<L: Language> SyntaxNodePtr<L> {
     /// Returns a [`SyntaxNodePtr`] for the node.
     ///
     /// Panics if the provided node is mutable
-    pub fn new(node: &SyntaxNode<L>) -> Self {
+    pub fn new(node: &RedNode<L>) -> Self {
         assert!(!node.is_mutable(), "tree is mutable");
         Self {
             kind: node.kind(),
@@ -80,7 +80,7 @@ impl<L: Language> SyntaxNodePtr<L> {
 
     /// Like [`Self::try_to_node`] but panics instead of returning `None` on
     /// failure.
-    pub fn to_node(&self, root: &SyntaxNode<L>) -> SyntaxNode<L> {
+    pub fn to_node(&self, root: &RedNode<L>) -> RedNode<L> {
         self.try_to_node(root)
             .unwrap_or_else(|| panic!("can't resolve {self:?} with {root:?}"))
     }
@@ -99,7 +99,7 @@ impl<L: Language> SyntaxNodePtr<L> {
     /// The complexity is linear in the depth of the tree and logarithmic in
     /// tree width. As most trees are shallow, thinking about this as
     /// `O(log(N))` in the size of the tree is not too wrong!
-    pub fn try_to_node(&self, root: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
+    pub fn try_to_node(&self, root: &RedNode<L>) -> Option<RedNode<L>> {
         assert!(!root.is_mutable(), "tree is mutable");
         if root.parent().is_some() {
             return None;
@@ -151,14 +151,14 @@ impl<N: AstNode> AstPtr<N> {
     }
 
     /// Like `Self::try_to_node` but panics on failure.
-    pub fn to_node(&self, root: &SyntaxNode<N::Language>) -> N {
+    pub fn to_node(&self, root: &RedNode<N::Language>) -> N {
         self.try_to_node(root)
             .unwrap_or_else(|| panic!("can't resolve {self:?} with {root:?}"))
     }
 
     /// Given the root node containing the node `n` that `self` is a pointer to,
     /// returns `n` if possible. Panics if `root` is mutable. See [`SyntaxNodePtr::try_to_node`].
-    pub fn try_to_node(&self, root: &SyntaxNode<N::Language>) -> Option<N> {
+    pub fn try_to_node(&self, root: &RedNode<N::Language>) -> Option<N> {
         // The above mentioned panic is handled by SyntaxNodePtr
         N::cast(self.raw.try_to_node(root)?)
     }
@@ -216,7 +216,7 @@ pub struct AstChildren<N: AstNode> {
 }
 
 impl<N: AstNode> AstChildren<N> {
-    fn new(parent: &SyntaxNode<N::Language>) -> Self {
+    fn new(parent: &RedNode<N::Language>) -> Self {
         AstChildren {
             inner: parent.children(),
             ph: PhantomData,
@@ -233,17 +233,17 @@ impl<N: AstNode> Iterator for AstChildren<N> {
 
 pub mod support {
     use super::{AstChildren, AstNode};
-    use crate::{Language, SyntaxNode, SyntaxToken};
+    use crate::{Language, RedNode, RedToken};
 
-    pub fn child<N: AstNode>(parent: &SyntaxNode<N::Language>) -> Option<N> {
+    pub fn child<N: AstNode>(parent: &RedNode<N::Language>) -> Option<N> {
         parent.children().find_map(N::cast)
     }
 
-    pub fn children<N: AstNode>(parent: &SyntaxNode<N::Language>) -> AstChildren<N> {
+    pub fn children<N: AstNode>(parent: &RedNode<N::Language>) -> AstChildren<N> {
         AstChildren::new(parent)
     }
 
-    pub fn token<L: Language>(parent: &SyntaxNode<L>, kind: L::Kind) -> Option<SyntaxToken<L>> {
+    pub fn token<L: Language>(parent: &RedNode<L>, kind: L::Kind) -> Option<RedToken<L>> {
         parent
             .children_with_tokens()
             .filter_map(|it| it.into_token())
@@ -253,7 +253,7 @@ pub mod support {
 
 #[cfg(test)]
 mod tests {
-    use crate::{GreenNodeBuilder, Language, SyntaxKind, SyntaxNode};
+    use crate::{GreenNodeBuilder, Language, SyntaxKind, RedNode};
 
     use super::SyntaxNodePtr;
 
@@ -271,13 +271,13 @@ mod tests {
         }
     }
 
-    fn build_immut_tree() -> SyntaxNode<TestLanguage> {
+    fn build_immut_tree() -> RedNode<TestLanguage> {
         // Creates a single-node tree
         let mut builder = GreenNodeBuilder::new();
         builder.start_node(SyntaxKind(0));
         builder.finish_node();
 
-        SyntaxNode::<TestLanguage>::new_root(builder.finish())
+        RedNode::<TestLanguage>::new_root(builder.finish())
     }
 
     #[test]

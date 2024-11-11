@@ -22,13 +22,12 @@ impl tombi_rowan::Language for TomlLanguage {
 }
 
 /// en: SyntaxNode is also known as `RedNode`.
-pub type SyntaxNode = tombi_rowan::SyntaxNode<crate::TomlLanguage>;
-pub type SyntaxToken = tombi_rowan::SyntaxToken<crate::TomlLanguage>;
+pub type SyntaxNode = tombi_rowan::RedNode<crate::TomlLanguage>;
+pub type SyntaxToken = tombi_rowan::RedToken<crate::TomlLanguage>;
 pub type SyntaxElement = tombi_rowan::NodeOrToken<SyntaxNode, SyntaxToken>;
 pub type SyntaxNodeChildren = tombi_rowan::SyntaxNodeChildren<TomlLanguage>;
 pub type SyntaxElementChildren = tombi_rowan::SyntaxElementChildren<TomlLanguage>;
 pub type PreorderWithTokens = tombi_rowan::api::PreorderWithTokens<TomlLanguage>;
-pub type NodeOrToken = tombi_rowan::NodeOrToken<SyntaxNode, SyntaxToken>;
 
 #[cfg(test)]
 mod tests {
