@@ -190,7 +190,7 @@ impl<'a> LexedStr<'a> {
                 output::Step::Enter { kind } => builder.enter(kind),
                 output::Step::Exit => builder.exit(),
                 output::Step::Error { error } => {
-                    let start_position = builder.lexed.text_start_position(builder.event_index);
+                    let start_position = builder.lexed.text_start_position(builder.token_index);
                     (builder.sink)(Step::Error {
                         error,
                         position: start_position,
@@ -208,6 +208,6 @@ impl<'a> LexedStr<'a> {
         }
 
         // is_eof?
-        builder.event_index == builder.lexed.len()
+        builder.token_index == builder.lexed.len()
     }
 }

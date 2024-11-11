@@ -4,7 +4,7 @@ use crate::{lexed, LexedStr};
 
 pub struct Builder<'a, 'b> {
     pub(crate) lexed: &'a LexedStr<'a>,
-    pub(crate) event_index: usize,
+    pub(crate) token_index: usize,
     pub(crate) position: text::Position,
     pub(crate) state: State,
     pub(crate) sink: &'b mut dyn FnMut(lexed::Step<'_>),
@@ -14,7 +14,7 @@ impl std::fmt::Debug for Builder<'_, '_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Builder")
             .field("lexed", &self.lexed)
-            .field("event_index", &self.event_index)
+            .field("token_index", &self.token_index)
             .field("state", &self.state)
             .finish()
     }
@@ -31,7 +31,7 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn new(lexed: &'a LexedStr<'a>, sink: &'b mut dyn FnMut(lexed::Step<'_>)) -> Self {
         Self {
             lexed,
-            event_index: 0,
+            token_index: 0,
             position: Default::default(),
             state: State::PendingEnter,
             sink,
@@ -73,8 +73,8 @@ impl<'a, 'b> Builder<'a, 'b> {
     }
 
     pub fn eat_trivias(&mut self) {
-        while self.event_index < self.lexed.len() {
-            let kind = self.lexed.kind(self.event_index);
+        while self.token_index < self.lexed.len() {
+            let kind = self.lexed.kind(self.token_index);
             if !kind.is_trivia() {
                 break;
             }
@@ -83,14 +83,14 @@ impl<'a, 'b> Builder<'a, 'b> {
     }
 
     fn n_trivias(&self) -> usize {
-        (self.event_index..self.lexed.len())
+        (self.token_index..self.lexed.len())
             .take_while(|&it| self.lexed.kind(it).is_trivia())
             .count()
     }
 
     pub fn eat_n_trivias(&mut self) {
         for _ in 0..self.n_trivias() {
-            let kind = self.lexed.kind(self.event_index);
+            let kind = self.lexed.kind(self.token_index);
             assert!(kind.is_trivia());
             self.do_token(kind, 1);
         }
@@ -100,8 +100,8 @@ impl<'a, 'b> Builder<'a, 'b> {
         let start_position = self.position;
         let text = &self
             .lexed
-            .range_text(self.event_index..self.event_index + n_tokens);
-        self.event_index += n_tokens;
+            .range_text(self.token_index..self.token_index + n_tokens);
+        self.token_index += n_tokens;
         self.position = self.position.add_text(text);
 
         (self.sink)(lexed::Step::Token {
