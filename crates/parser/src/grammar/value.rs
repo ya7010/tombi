@@ -1,5 +1,7 @@
-use super::{leading_comments, peek_leading_comments, tailing_comment, Grammer};
-use crate::{parser::Parser, token_set::TokenSet};
+use super::{
+    leading_comments, peek_leading_comments, tailing_comment, Grammer, TS_COMMEMT_OR_LINE_END,
+};
+use crate::parser::Parser;
 use syntax::{SyntaxKind::*, T};
 
 impl Grammer for ast::Value {
@@ -48,7 +50,7 @@ fn parse_invalid_value(p: &mut Parser<'_>, n: usize) {
         leading_comments(p);
     }
 
-    while !p.at_ts(TokenSet::new(&[LINE_BREAK, COMMENT, EOF])) {
+    while !p.at_ts(TS_COMMEMT_OR_LINE_END) {
         p.bump_any();
     }
     p.error(crate::Error::ExpectedValue);

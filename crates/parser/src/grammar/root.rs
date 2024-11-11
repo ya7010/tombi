@@ -2,7 +2,7 @@ use crate::parser::Parser;
 
 use super::{
     begin_dangling_comments, end_dangling_comments, key::KEY_FIRST, leading_comments,
-    peek_leading_comments, tailing_comment, Grammer, LINE_END,
+    peek_leading_comments, tailing_comment, Grammer, TS_LINE_END,
 };
 use syntax::{SyntaxKind::*, T};
 
@@ -39,7 +39,7 @@ fn unknwon_line(p: &mut Parser<'_>) {
 
     leading_comments(p);
 
-    while !p.at_ts(LINE_END) {
+    while !p.at_ts(TS_LINE_END) {
         p.bump_any();
     }
     p.error(crate::Error::UnknownLine);

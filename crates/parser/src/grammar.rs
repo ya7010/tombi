@@ -12,8 +12,9 @@ use crate::{output::Output, parser::Parser, token_set::TokenSet};
 use support::*;
 use syntax::{SyntaxKind::*, T};
 
-const LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
-const NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
+const TS_LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
+const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EOF]);
+const TS_NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
 pub fn parse<G: Grammer>(input: &crate::Input) -> Output {
     let _p = tracing::info_span!("grammar::parse").entered();
@@ -33,7 +34,7 @@ pub(crate) trait Grammer {
 pub fn invalid_line(p: &mut Parser<'_>, error: crate::Error) {
     p.bump_any();
     p.error(error);
-    while !p.at_ts(LINE_END) {
+    while !p.at_ts(TS_LINE_END) {
         p.bump_any()
     }
 }

@@ -2,8 +2,8 @@ use syntax::T;
 
 use crate::{
     grammar::{
-        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Grammer, LINE_END,
-        NEXT_SECTION,
+        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Grammer,
+        TS_LINE_END, TS_NEXT_SECTION,
     },
     parser::Parser,
 };
@@ -30,13 +30,13 @@ impl Grammer for ast::Table {
         loop {
             let n = peek_leading_comments(p);
 
-            if p.nth_at_ts(n, NEXT_SECTION) {
+            if p.nth_at_ts(n, TS_NEXT_SECTION) {
                 break;
             }
 
             ast::KeyValue::parse(p);
 
-            if !p.at_ts(LINE_END) {
+            if !p.at_ts(TS_LINE_END) {
                 invalid_line(p, crate::Error::ExpectedLineBreakOrComment);
             }
         }
