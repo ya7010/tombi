@@ -96,9 +96,9 @@ impl<'t> Parser<'t> {
     /// consumed between the `start` and the corresponding `Marker::complete`
     /// belong to the same node.
     pub(crate) fn start(&mut self) -> Marker {
-        let pos = self.events.len() as u32;
+        let event_index = self.events.len() as u32;
         self.push_event(Event::tombstone());
-        Marker::new(pos)
+        Marker::new(event_index)
     }
 
     /// Consume the next token. Panics if the parser isn't currently at `kind`.

@@ -4,14 +4,14 @@ use syntax::SyntaxKind;
 use crate::{parser::Parser, Event};
 
 pub(crate) struct Marker {
-    pos: u32,
+    event_index: u32,
     bomb: DropBomb,
 }
 
 impl Marker {
-    pub fn new(pos: u32) -> Marker {
+    pub fn new(event_index: u32) -> Marker {
         Marker {
-            pos,
+            event_index,
             bomb: DropBomb::new("Marker must be either completed or abandoned"),
         }
     }
@@ -21,7 +21,7 @@ impl Marker {
     /// operation like `.precede()` to deal with forward_parent.
     pub(crate) fn complete(mut self, p: &mut Parser<'_>, kind: SyntaxKind) -> CompletedMarker {
         self.bomb.defuse();
-        let idx = self.pos as usize;
+        let idx = self.event_index as usize;
         match &mut p.events[idx] {
             Event::Start { kind: slot, .. } => {
                 *slot = kind;
@@ -29,14 +29,14 @@ impl Marker {
             _ => unreachable!(),
         }
         p.push_event(Event::Finish);
-        CompletedMarker::new(self.pos, kind)
+        CompletedMarker::new(self.event_index, kind)
     }
 
     /// Abandons the syntax tree node. All its children
     /// are attached to its parent instead.
     pub(crate) fn abandon(mut self, p: &mut Parser<'_>) {
         self.bomb.defuse();
-        let idx = self.pos as usize;
+        let idx = self.event_index as usize;
         if idx == p.events.len() - 1 {
             match p.events.pop() {
                 Some(Event::Start {
@@ -50,13 +50,13 @@ impl Marker {
 }
 
 pub(crate) struct CompletedMarker {
-    pos: u32,
+    event_index: u32,
     kind: SyntaxKind,
 }
 
 impl CompletedMarker {
-    fn new(pos: u32, kind: SyntaxKind) -> Self {
-        CompletedMarker { pos, kind }
+    fn new(event_index: u32, kind: SyntaxKind) -> Self {
+        CompletedMarker { event_index, kind }
     }
 
     /// This method allows to create a new node which starts
@@ -73,24 +73,24 @@ impl CompletedMarker {
     /// then mark `NEWSTART` as `START`'s parent with saving its relative
     /// distance to `NEWSTART` into forward_parent(=2 in this case);
     pub(crate) fn precede(self, p: &mut Parser<'_>) -> Marker {
-        let new_pos = p.start();
-        let idx = self.pos as usize;
+        let new_m = p.start();
+        let idx = self.event_index as usize;
         match &mut p.events[idx] {
             Event::Start { forward_parent, .. } => {
-                *forward_parent = Some(new_pos.pos - self.pos);
+                *forward_parent = Some(new_m.event_index - self.event_index);
             }
             _ => unreachable!(),
         }
-        new_pos
+        new_m
     }
 
     /// Extends this completed marker *to the left* up to `m`.
     pub(crate) fn extend_to(self, p: &mut Parser<'_>, mut m: Marker) -> CompletedMarker {
         m.bomb.defuse();
-        let idx = m.pos as usize;
+        let idx = m.event_index as usize;
         match &mut p.events[idx] {
             Event::Start { forward_parent, .. } => {
-                *forward_parent = Some(self.pos - m.pos);
+                *forward_parent = Some(self.event_index - m.event_index);
             }
             _ => unreachable!(),
         }
