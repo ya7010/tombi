@@ -1,13 +1,7 @@
 use dashmap::try_result::TryResult;
 use tower_lsp::lsp_types::DidChangeTextDocumentParams;
 
-use crate::{
-    converters::{
-        encoding::{PositionEncoding, WideEncoding},
-        from_lsp,
-    },
-    server::backend::Backend,
-};
+use crate::server::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_did_change(
@@ -34,23 +28,7 @@ pub async fn handle_did_change(
 
     for content_change in content_changes {
         if let Some(range) = content_change.range {
-            let Ok(range) = from_lsp::text_range(
-                &document.line_index,
-                range,
-                PositionEncoding::Wide(WideEncoding::Utf16),
-            ) else {
-                tracing::warn!("failed to convert range");
-                continue;
-            };
-
-            if Into::<usize>::into(range.end()) > document.source.len() {
-                tracing::warn!("range is out of range");
-                continue;
-            }
-
-            document
-                .source
-                .replace_range(std::ops::Range::<usize>::from(range), &content_change.text);
+            tracing::warn!("range change is not supported: {:?}", range);
         } else {
             document.source = content_change.text;
         }

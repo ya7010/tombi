@@ -6,8 +6,6 @@ use tower_lsp::lsp_types::{
     TextDocumentSyncKind, TextDocumentSyncOptions,
 };
 
-use crate::converters::encoding::{negotiated_encoding, PositionEncoding, WideEncoding};
-
 use super::semantic_tokens_full::TokenType;
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -34,15 +32,9 @@ pub fn handle_initialize(
     })
 }
 
-pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCapabilities {
+pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerCapabilities {
     ServerCapabilities {
-        position_encoding: Some(match negotiated_encoding(client_capabilities) {
-            PositionEncoding::Utf8 => PositionEncodingKind::UTF8,
-            PositionEncoding::Wide(wide) => match wide {
-                WideEncoding::Utf16 => PositionEncodingKind::UTF16,
-                WideEncoding::Utf32 => PositionEncodingKind::UTF32,
-            },
-        }),
+        position_encoding: Some(PositionEncodingKind::UTF16),
         text_document_sync: Some(TextDocumentSyncCapability::Options(
             TextDocumentSyncOptions {
                 open_close: Some(true),
