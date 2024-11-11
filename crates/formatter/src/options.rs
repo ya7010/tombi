@@ -2,7 +2,7 @@
 pub struct Options {
     /// The type of line ending.
     ///
-    /// - `lf`: Line Feed only (`\n`), common on Linux and macOS as well as inside git repos;
+    /// - `lf`: Line Feed only (`\n`), common on Linux and macOS as well as inside git repos.
     /// - `crlf`: Carriage Return Line Feed (`\r\n`), common on Windows.
     pub line_ending: Option<LineEnding>,
 }
