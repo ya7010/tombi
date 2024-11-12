@@ -16,7 +16,7 @@ pub struct Args {
     check: bool,
 }
 
-#[tracing::instrument(level = "debug")]
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn run(args: Args) -> Result<(), crate::Error> {
     let (success_num, error_num) = inner_run(args, Pretty);
 

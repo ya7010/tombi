@@ -7,7 +7,7 @@ pub struct Args {
     files: Vec<String>,
 }
 
-#[tracing::instrument(level = "debug")]
-pub fn run(args: Args) -> Result<(), crate::Error> {
+#[tracing::instrument(level = "debug", skip_all)]
+pub fn run(_args: Args) -> Result<(), crate::Error> {
     Ok(())
 }
