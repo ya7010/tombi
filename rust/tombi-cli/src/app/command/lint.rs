@@ -3,7 +3,7 @@
 pub struct Args {
     /// Paths or glob patterns to TOML documents.
     ///
-    /// If the only argument is "-", the standard input will be used.
+    /// If the only argument is "-", the standard input is used.
     files: Vec<String>,
 }
 
