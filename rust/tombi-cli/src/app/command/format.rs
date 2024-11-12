@@ -16,20 +16,21 @@ pub struct Args {
     check: bool,
 }
 
+#[tracing::instrument(level = "debug")]
 pub fn run(args: Args) -> Result<(), crate::Error> {
-    tracing::debug_span!("run").in_scope(|| {
-        tracing::debug!("{args:?}");
+    let (success_num, error_num) = inner_run(args, Pretty);
 
-        let (success_num, error_num) = inner_run(args, Pretty);
-        if error_num > 0 {
-            std::process::exit(1);
-        }
-        if success_num > 0 {
-            eprintln!("{} files formatted", success_num);
-        }
+    match success_num {
+        0 => eprintln!("No files formatted."),
+        1 => eprintln!("1 file formatted."),
+        _ => eprintln!("{} files formatted.", success_num),
+    }
 
-        Ok(())
-    })
+    if error_num > 0 {
+        std::process::exit(1);
+    }
+
+    Ok(())
 }
 
 fn inner_run<P>(args: Args, printer: P) -> (usize, usize)
