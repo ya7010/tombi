@@ -136,3 +136,10 @@ fn boolean(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offset
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(kind, span.into())]);
 }
+
+#[rstest]
+#[case("key", (0, 3))]
+fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(BARE_KEY, span.into())]);
+}

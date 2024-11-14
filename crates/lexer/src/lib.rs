@@ -87,8 +87,11 @@ impl Cursor<'_> {
             ',' => Token::new(T!(,), self.span()),
             '.' => Token::new(T!(.), self.span()),
             '=' => Token::new(T!(=), self.span()),
-            _ => Token::new(SyntaxKind::INVALID_TOKEN, self.span()),
-            // _ => std::process::exit(1),
+            'A'..='Z' | 'a'..='z' | '_' => self.key(),
+            _ => {
+                self.eat_while(|c| !is_token_separator(c));
+                Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+            }
         };
 
         token
