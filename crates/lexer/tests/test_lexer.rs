@@ -1,5 +1,5 @@
 use lexer::{tokenize, Token};
-use syntax::SyntaxKind;
+use syntax::SyntaxKind::*;
 
 #[test]
 fn empty_source() {
@@ -12,10 +12,7 @@ fn empty_source() {
 fn only_comment() {
     let source = "# This is a comment";
     let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(
-        tokens,
-        vec![Token::new(SyntaxKind::COMMENT, (0, 19).into())]
-    );
+    assert_eq!(tokens, vec![Token::new(COMMENT, (0, 19).into())]);
 }
 
 #[test]
@@ -25,8 +22,8 @@ fn comment_line_break() {
     assert_eq!(
         tokens,
         vec![
-            Token::new(SyntaxKind::COMMENT, (0, 19).into()),
-            Token::new(SyntaxKind::LINE_BREAK, (19, 20).into())
+            Token::new(COMMENT, (0, 19).into()),
+            Token::new(LINE_BREAK, (19, 20).into())
         ]
     );
 }
@@ -38,8 +35,22 @@ fn comment_line_break_crlf() {
     assert_eq!(
         tokens,
         vec![
-            Token::new(SyntaxKind::COMMENT, (0, 19).into()),
-            Token::new(SyntaxKind::LINE_BREAK, (19, 21).into())
+            Token::new(COMMENT, (0, 19).into()),
+            Token::new(LINE_BREAK, (19, 21).into())
+        ]
+    );
+}
+
+#[test]
+fn whitespace_comment_line_break_crlf() {
+    let source = "   # This is a comment\r\n";
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(
+        tokens,
+        vec![
+            Token::new(WHITESPACE, (0, 3).into()),
+            Token::new(COMMENT, (3, 22).into()),
+            Token::new(LINE_BREAK, (22, 24).into())
         ]
     );
 }

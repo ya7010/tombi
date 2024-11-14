@@ -37,9 +37,9 @@ impl Cursor<'_> {
         dbg!(self.current());
 
         let token = match self.current() {
+            _ if self.is_whitespace() => self.whitespace(),
+            _ if self.is_line_break() => self.line_break(),
             '#' => self.line_comment(),
-            // _ if self.is_whitespace().is_some() => self.whitespace(),
-            c if self.is_line_break(c) => self.line_break(),
             // '"' => {
             //     if self.first() == '"' && self.second() == '"' {
             //         self.multi_line_basic_string()
@@ -60,22 +60,13 @@ impl Cursor<'_> {
         token
     }
 
-    pub fn is_whitespace(&self) -> Option<bool> {
-        if self.is_eof() {
-            return None;
-        } else {
-            Some(matches!(self.current(), ' ' | '\t'))
-        }
+    pub fn is_whitespace(&self) -> bool {
+        is_whitespace(self.current())
     }
 
     pub fn whitespace(&mut self) -> Token {
-        let start = self.offset();
-        while self.is_whitespace().is_some() {
-            self.bump();
-        }
-
-        let end = self.offset();
-        Token::new(SyntaxKind::WHITESPACE, (start, end).into())
+        self.eat_while(|c| matches!(c, ' ' | '\t'));
+        Token::new(SyntaxKind::WHITESPACE, self.span())
     }
 
     pub fn line_comment(&mut self) -> Token {
@@ -88,8 +79,8 @@ impl Cursor<'_> {
         Token::new(SyntaxKind::COMMENT, self.span())
     }
 
-    fn is_line_break(&self, c: char) -> bool {
-        c == '\n' || (c == '\r' && self.first() == '\n')
+    fn is_line_break(&self) -> bool {
+        is_line_break(self.current(), self.first())
     }
 
     pub fn line_break(&mut self) -> Token {
@@ -149,4 +140,14 @@ impl Cursor<'_> {
 
     //     Token::new(SyntaxKind::INVALID_TOKEN, (start, end).into())
     // }
+}
+
+#[inline]
+fn is_whitespace(c: char) -> bool {
+    matches!(c, ' ' | '\t')
+}
+
+#[inline]
+fn is_line_break(c1: char, c2: char) -> bool {
+    c1 == '\n' || (c1 == '\r' && c2 == '\n')
 }
