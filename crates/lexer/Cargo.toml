@@ -10,3 +10,6 @@ syntax.workspace = true
 text.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true

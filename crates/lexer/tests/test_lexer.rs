@@ -1,5 +1,7 @@
 use lexer::{tokenize, Token};
+use rstest::rstest;
 use syntax::{SyntaxKind::*, T};
+use text::Offset;
 
 #[test]
 fn empty_source() {
@@ -69,5 +71,29 @@ fn tokens() {
             Token::new(T!(']'), (4, 5).into()),
             Token::new(T!(=), (5, 6).into())
         ]
+    );
+}
+
+#[rstest]
+#[case(r#""Hello, World!""#, (0, 15))]
+#[case(r#""Hello, \"Taro\"!""#, (0, 18))]
+fn basic_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(BASIC_STRING, span.into())]);
+}
+
+#[rstest]
+#[case(r#""""aaaa""""#, (0, 10))]
+#[case(r#"
+"""
+aaaa
+"""
+"#.trim(), (0, 12))]
+fn multi_line_basic_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+
+    assert_eq!(
+        tokens,
+        vec![Token::new(MULTI_LINE_BASIC_STRING, span.into())]
     );
 }

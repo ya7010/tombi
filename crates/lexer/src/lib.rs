@@ -40,13 +40,13 @@ impl Cursor<'_> {
             _ if self.is_whitespace() => self.whitespace(),
             _ if self.is_line_break() => self.line_break(),
             '#' => self.line_comment(),
-            // '"' => {
-            //     if self.first() == '"' && self.second() == '"' {
-            //         self.multi_line_basic_string()
-            //     } else {
-            //         self.basic_string()
-            //     }
-            // }
+            '"' => {
+                if self.first() == '"' && self.second() == '"' {
+                    self.multi_line_basic_string()
+                } else {
+                    self.basic_string()
+                }
+            }
             '{' => Token::new(T!('{'), self.span()),
             '}' => Token::new(T!('}'), self.span()),
             '[' => Token::new(T!('['), self.span()),
@@ -97,49 +97,41 @@ impl Cursor<'_> {
         Token::new(SyntaxKind::LINE_BREAK, self.span())
     }
 
-    // pub fn basic_string(&mut self) -> Token {
-    //     assert!(self.current() == '"' && self.first() != '"');
+    pub fn basic_string(&mut self) -> Token {
+        assert!(self.current() == '"' && self.first() != '"');
 
-    //     let start = self.offset();
-    //     let mut end = start + 1;
-    //     while let Some(c) = self.bump() {
-    //         end += 1;
-    //         match c {
-    //             '"' => return Token::new(SyntaxKind::BASIC_STRING, (start, end).into()),
-    //             '\\' if self.first() == '"' => {
-    //                 self.bump();
-    //                 end += 1;
-    //             }
-    //             _ if self.is_line_break() => {
-    //                 return Token::new(SyntaxKind::INVALID_TOKEN, (start, end).into());
-    //             }
-    //             _ => (),
-    //         }
-    //     }
+        while let Some(c) = self.bump() {
+            match c {
+                '"' => return Token::new(SyntaxKind::BASIC_STRING, self.span()),
+                '\\' if self.first() == '"' => {
+                    self.bump();
+                }
+                _ if self.is_line_break() => {
+                    return Token::new(SyntaxKind::INVALID_TOKEN, self.span());
+                }
+                _ => (),
+            }
+        }
 
-    //     Token::new(SyntaxKind::INVALID_TOKEN, (start, end).into())
-    // }
+        Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+    }
 
-    // pub fn multi_line_basic_string(&mut self) -> Token {
-    //     assert!(self.current() == '"' && self.first() == '"' && self.second() == '"');
+    pub fn multi_line_basic_string(&mut self) -> Token {
+        assert!(self.current() == '"' && self.first() == '"' && self.second() == '"');
 
-    //     let start = self.offset();
-    //     let mut end = start + 3;
-    //     while let Some(c) = self.bump() {
-    //         end += 1;
-    //         match c {
-    //             '"' if self.first() == '"' && self.second() == '"' => {
-    //                 self.bump();
-    //                 self.bump();
-    //                 end += 2;
-    //                 return Token::new(SyntaxKind::MULTI_LINE_BASIC_STRING, (start, end).into());
-    //             }
-    //             _ => (),
-    //         }
-    //     }
+        while let Some(c) = self.bump() {
+            match c {
+                '"' if self.first() == '"' && self.second() == '"' => {
+                    self.bump();
+                    self.bump();
+                    return Token::new(SyntaxKind::MULTI_LINE_BASIC_STRING, self.span());
+                }
+                _ => (),
+            }
+        }
 
-    //     Token::new(SyntaxKind::INVALID_TOKEN, (start, end).into())
-    // }
+        Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+    }
 }
 
 #[inline]
