@@ -1,36 +1,20 @@
-// ---
-// jupyter:
-//   jupytext:
-//     cell_metadata_filter: -all
-//     custom_cell_magics: kql
-//     text_representation:
-//       extension: .rs
-//       format_name: percent
-//       format_version: '1.3'
-//       jupytext_version: 1.11.2
-// ---
-
-// %%
 mod cursor;
 mod error;
 mod lexed;
 mod token;
 
-// %%
 use cursor::Cursor;
 pub use error::Error;
 pub use lexed::Lexed;
 use syntax::{SyntaxKind, T};
 pub use token::Token;
 
-// %%
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn lex(source: &str) -> Lexed {
     let _p = tracing::info_span!("lex").entered();
     Lexed::new(source)
 }
 
-// %%
 pub fn tokenize(source: &str) -> impl Iterator<Item = Token> + '_ {
     let mut cursor = Cursor::new(source);
     std::iter::from_fn(move || {
@@ -43,7 +27,6 @@ pub fn tokenize(source: &str) -> impl Iterator<Item = Token> + '_ {
     })
 }
 
-// %%
 impl Cursor<'_> {
     /// Parses a token from the input string.
     pub fn advance_token(&mut self) -> Token {
@@ -97,7 +80,6 @@ impl Cursor<'_> {
         assert!(self.current() == '#');
 
         self.eat_while(|c| !matches!(c, '\n' | '\r'));
-
         Token::new(SyntaxKind::COMMENT, self.span())
     }
 
@@ -172,13 +154,11 @@ impl Cursor<'_> {
     }
 }
 
-// %%
 #[inline]
 fn is_whitespace(c: char) -> bool {
     matches!(c, ' ' | '\t')
 }
 
-// %%
 #[inline]
 fn is_line_break(c1: char, c2: char) -> bool {
     c1 == '\n' || (c1 == '\r' && c2 == '\n')
