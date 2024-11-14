@@ -47,12 +47,12 @@ impl Cursor<'_> {
             //         self.basic_string()
             //     }
             // }
-            // '{' => Token::new(T!('{'), 1),
-            // '}' => Token::new(T!('}'), 1),
-            // '[' => Token::new(T!('['), 1),
-            // ']' => Token::new(T!(']'), 1),
-            // ',' => Token::new(T!(,), 1),
-            // '=' => Token::new(T!(=), 1),
+            '{' => Token::new(T!('{'), self.span()),
+            '}' => Token::new(T!('}'), self.span()),
+            '[' => Token::new(T!('['), self.span()),
+            ']' => Token::new(T!(']'), self.span()),
+            ',' => Token::new(T!(,), self.span()),
+            '=' => Token::new(T!(=), self.span()),
             _ => Token::new(SyntaxKind::INVALID_TOKEN, self.span()),
             // _ => std::process::exit(1),
         };

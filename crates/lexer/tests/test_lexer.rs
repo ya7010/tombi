@@ -1,5 +1,5 @@
 use lexer::{tokenize, Token};
-use syntax::SyntaxKind::*;
+use syntax::{SyntaxKind::*, T};
 
 #[test]
 fn empty_source() {
@@ -51,6 +51,23 @@ fn whitespace_comment_line_break_crlf() {
             Token::new(WHITESPACE, (0, 3).into()),
             Token::new(COMMENT, (3, 22).into()),
             Token::new(LINE_BREAK, (22, 24).into())
+        ]
+    );
+}
+
+#[test]
+fn tokens() {
+    let source = "{},[]=";
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(
+        tokens,
+        vec![
+            Token::new(T!('{'), (0, 1).into()),
+            Token::new(T!('}'), (1, 2).into()),
+            Token::new(T!(,), (2, 3).into()),
+            Token::new(T!('['), (3, 4).into()),
+            Token::new(T!(']'), (4, 5).into()),
+            Token::new(T!(=), (5, 6).into())
         ]
     );
 }
