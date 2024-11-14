@@ -59,6 +59,7 @@ impl Cursor<'_> {
             '[' => Token::new(T!('['), self.span()),
             ']' => Token::new(T!(']'), self.span()),
             ',' => Token::new(T!(,), self.span()),
+            '.' => Token::new(T!(.), self.span()),
             '=' => Token::new(T!(=), self.span()),
             _ => Token::new(SyntaxKind::INVALID_TOKEN, self.span()),
             // _ => std::process::exit(1),
