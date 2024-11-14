@@ -98,6 +98,15 @@ impl<'a> Cursor<'a> {
         }
     }
 
+    pub(crate) fn eat_n(&mut self, n: usize) {
+        assert!(n > 0);
+        for _ in 0..n {
+            if self.bump().is_none() {
+                break;
+            }
+        }
+    }
+
     /// Eats symbols while predicate returns true or until the end of file is reached.
     pub(crate) fn eat_while(&mut self, mut predicate: impl FnMut(char) -> bool) {
         // It was tried making optimized version of this for eg. line comments, but

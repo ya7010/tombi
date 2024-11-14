@@ -128,3 +128,11 @@ fn datetime(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offse
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(kind, span.into())]);
 }
+
+#[rstest]
+#[case("true", BOOLEAN, (0, 4))]
+#[case("false", BOOLEAN, (0, 5))]
+fn boolean(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(kind, span.into())]);
+}
