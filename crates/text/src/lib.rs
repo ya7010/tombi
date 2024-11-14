@@ -6,6 +6,7 @@ mod text_range;
 mod text_size;
 mod traits;
 
+pub type Offset = u32;
 pub type Line = u32;
 pub type Column = u32;
 

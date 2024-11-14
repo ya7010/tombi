@@ -574,6 +574,9 @@ name = "lexer"
 version = "0.0.1"
 dependencies = [
  "syntax",
+ "text",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]

@@ -7,3 +7,6 @@ license.workspace = true
 
 [dependencies]
 syntax.workspace = true
+text.workspace = true
+thiserror.workspace = true
+tracing.workspace = true

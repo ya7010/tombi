@@ -382,6 +382,13 @@ impl RangeBounds<TextSize> for TextRange {
     }
 }
 
+impl From<(crate::Offset, crate::Offset)> for TextRange {
+    #[inline]
+    fn from((start, end): (crate::Offset, crate::Offset)) -> Self {
+        TextRange::new(start.into(), end.into())
+    }
+}
+
 impl<T> From<TextRange> for Range<T>
 where
     T: From<TextSize>,
