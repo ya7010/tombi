@@ -1,6 +1,9 @@
 use lexer::{tokenize, Token};
 use rstest::rstest;
-use syntax::{SyntaxKind::*, T};
+use syntax::{
+    SyntaxKind::{self, *},
+    T,
+};
 use text::Offset;
 
 #[test]
@@ -105,4 +108,23 @@ fn multi_line_basic_string(#[case] source: &str, #[case] span: (Offset, Offset))
 fn literal_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(&source).collect();
     assert_eq!(tokens, vec![Token::new(LITERAL_STRING, span.into())]);
+}
+
+#[rstest]
+#[case("2021-01-01T00:00:00Z", OFFSET_DATE_TIME, (0, 20))]
+#[case("2021-01-01T00:00:00+09:00", OFFSET_DATE_TIME, (0, 25))]
+#[case("2021-01-01T00:00:00-09:00", OFFSET_DATE_TIME, (0, 25))]
+#[case("2021-01-01T00:00:00.123456Z", OFFSET_DATE_TIME, (0, 27))]
+#[case("2021-01-01T00:00:00.123456+09:00", OFFSET_DATE_TIME, (0, 32))]
+#[case("2021-01-01T00:00:00.123456-09:00", OFFSET_DATE_TIME, (0, 32))]
+#[case("2021-01-01 00:00:00", LOCAL_DATE_TIME, (0, 19))]
+#[case("2021-01-01 00:00:00.123456", LOCAL_DATE_TIME, (0, 26))]
+#[case("2021-01-01T00:00:00", LOCAL_DATE_TIME, (0, 19))]
+#[case("2021-01-01T00:00:00.123456", LOCAL_DATE_TIME, (0, 26))]
+#[case("2021-01-01", LOCAL_DATE, (0, 10))]
+#[case("00:00:00", LOCAL_TIME, (0, 8))]
+#[case("00:00:00.123456", LOCAL_TIME, (0, 15))]
+fn datetime(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(kind, span.into())]);
 }

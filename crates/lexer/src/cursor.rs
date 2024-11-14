@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 pub struct Cursor<'a> {
     /// Iterator over chars. Slightly faster than a &str.
     chars: std::str::Chars<'a>,
@@ -37,6 +39,34 @@ impl<'a> Cursor<'a> {
             .unwrap_or(EOF_CHAR)
     }
 
+    pub fn peeks_with_current(&self, size: usize) -> String {
+        let mut iter = self.chars.clone();
+        let mut s = String::with_capacity(size + 1);
+        s.push(self.current);
+        for _ in 0..size {
+            if let Some(c) = iter.next() {
+                s.push(c);
+            } else {
+                break;
+            }
+        }
+        s
+    }
+
+    pub fn peek_with_current_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
+        let mut iter = self.chars.clone();
+        let mut s = String::new();
+        s.push(self.current);
+        while let Some(c) = iter.next() {
+            if predicate(c) {
+                s.push(c);
+            } else {
+                break;
+            }
+        }
+        s
+    }
+
     /// Checks if the charactor at the current position is a expected.
     pub fn matches(&self, expected: &str) -> bool {
         let mut iter = expected.chars();
@@ -58,10 +88,14 @@ impl<'a> Cursor<'a> {
 
     /// Moves to the next character.
     pub(crate) fn bump(&mut self) -> Option<char> {
-        self.offset += 1;
-        let c = self.chars.next();
-        self.current = c.unwrap_or(EOF_CHAR);
-        c
+        if let Some(c) = self.chars.next() {
+            self.offset += 1;
+            self.current = c;
+            Some(c)
+        } else {
+            self.current = EOF_CHAR;
+            None
+        }
     }
 
     /// Eats symbols while predicate returns true or until the end of file is reached.

@@ -6,6 +6,7 @@ mod token;
 use cursor::Cursor;
 pub use error::Error;
 pub use lexed::Lexed;
+use regex_macro::regex;
 use syntax::{SyntaxKind, T};
 pub use token::Token;
 
@@ -34,8 +35,6 @@ impl Cursor<'_> {
             return Token::eof();
         }
 
-        dbg!(self.current());
-
         let token = match self.current() {
             _ if self.is_whitespace() => self.whitespace(),
             _ if self.is_line_break() => self.line_break(),
@@ -45,6 +44,16 @@ impl Cursor<'_> {
                     self.multi_line_basic_string()
                 } else {
                     self.basic_string()
+                }
+            }
+            // number
+            '0'..='9' => {
+                if self.is_datetime() {
+                    self.datetime()
+                } else if self.is_time() {
+                    self.time()
+                } else {
+                    self.integer()
                 }
             }
             '\'' => {
@@ -85,7 +94,7 @@ impl Cursor<'_> {
     }
 
     fn is_line_break(&self) -> bool {
-        is_line_break(self.current(), self.peek(1))
+        is_line_break(self.current())
     }
 
     fn line_break(&mut self) -> Token {
@@ -100,6 +109,72 @@ impl Cursor<'_> {
         };
 
         Token::new(SyntaxKind::LINE_BREAK, self.span())
+    }
+
+    fn is_datetime(&self) -> bool {
+        assert!(self.current().is_ascii_digit());
+        assert!("2000-01-01".len() == 10);
+        regex!(r"\d{4}-\d{2}-\d{2}").is_match(&self.peeks_with_current(10))
+    }
+
+    fn datetime(&mut self) -> Token {
+        assert!(self.current().is_ascii_digit());
+
+        let line = self.peek_with_current_while(|c| !is_line_break(c));
+        if let Some(m) = regex!(
+            r#"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})"#
+        )
+        .find(&line)
+        {
+            for _ in 0..m.end() {
+                self.bump();
+            }
+            Token::new(SyntaxKind::OFFSET_DATE_TIME, self.span())
+        } else if let Some(m) =
+            regex!(r"\d{4}-\d{2}-\d{2}(?:T|t| )\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?").find(&line)
+        {
+            for _ in 0..m.end() {
+                self.bump();
+            }
+            Token::new(SyntaxKind::LOCAL_DATE_TIME, self.span())
+        } else if let Some(m) = regex!(r"\d{4}-\d{2}-\d{2}").find(&line) {
+            for _ in 0..m.end() {
+                self.bump();
+            }
+            Token::new(SyntaxKind::LOCAL_DATE, self.span())
+        } else {
+            self.eat_while(|c| !is_line_break(c) && !is_whitespace(c));
+            Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        }
+    }
+
+    fn is_time(&self) -> bool {
+        assert!(self.current().is_ascii_digit());
+        assert!("00:00:00".len() == 8);
+        regex!(r"\d{2}:\d{2}:\d{2}").is_match(&self.peeks_with_current(8))
+    }
+
+    fn time(&mut self) -> Token {
+        assert!(self.current().is_ascii_digit());
+
+        let line = self.peek_with_current_while(|c| !is_line_break(c));
+        if let Some(m) = regex!(r"\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?").find(&line) {
+            for _ in 0..m.end() {
+                self.bump();
+            }
+            Token::new(SyntaxKind::LOCAL_TIME, self.span())
+        } else {
+            self.eat_while(|c| !is_line_break(c) && !is_whitespace(c));
+            Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        }
+    }
+
+    fn integer(&mut self) -> Token {
+        assert!(self.current().is_ascii_digit());
+
+        self.eat_while(|c| c.is_ascii_digit());
+
+        Token::new(SyntaxKind::INTEGER_DEC, self.span())
     }
 
     fn basic_string(&mut self) -> Token {
@@ -161,6 +236,6 @@ fn is_whitespace(c: char) -> bool {
 }
 
 #[inline]
-fn is_line_break(c1: char, c2: char) -> bool {
-    c1 == '\n' || (c1 == '\r' && c2 == '\n')
+fn is_line_break(c: char) -> bool {
+    matches!(c, '\r' | '\n')
 }

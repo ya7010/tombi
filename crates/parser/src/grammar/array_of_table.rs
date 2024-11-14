@@ -84,8 +84,6 @@ key2 = 2
     ) {
         let p = crate::parse(source);
 
-        dbg!(p.syntax_node());
-
         assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
     }
 }

@@ -28,6 +28,9 @@ nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
+regex = "1.11.1"
+regex-macro = "0.2.0"
+rg-tree = { path = "crates/rg-tree" }
 rstest = "0.23.0"
 rustc-hash = "2.0.0"
 schemars = "0.8.21"
@@ -38,7 +41,6 @@ syntax = { path = "crates/syntax" }
 text = { path = "crates/text" }
 thiserror = "1.0.64"
 tokio = "1.41.0"
-rg-tree = { path = "crates/rg-tree" }
 tower-lsp = "0.20.0"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
