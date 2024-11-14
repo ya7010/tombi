@@ -97,3 +97,11 @@ fn multi_line_basic_string(#[case] source: &str, #[case] span: (Offset, Offset))
         vec![Token::new(MULTI_LINE_BASIC_STRING, span.into())]
     );
 }
+
+#[rstest]
+#[case("'Hello, World!'", (0, 15))]
+#[case("'Hello, \\'Taro\\'!'", (0, 18))]
+fn literal_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(&source).collect();
+    assert_eq!(tokens, vec![Token::new(LITERAL_STRING, span.into())]);
+}

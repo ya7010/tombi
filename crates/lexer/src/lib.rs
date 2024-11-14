@@ -1,20 +1,36 @@
+// ---
+// jupyter:
+//   jupytext:
+//     cell_metadata_filter: -all
+//     custom_cell_magics: kql
+//     text_representation:
+//       extension: .rs
+//       format_name: percent
+//       format_version: '1.3'
+//       jupytext_version: 1.11.2
+// ---
+
+// %%
 mod cursor;
 mod error;
 mod lexed;
 mod token;
 
+// %%
 use cursor::Cursor;
 pub use error::Error;
 pub use lexed::Lexed;
 use syntax::{SyntaxKind, T};
 pub use token::Token;
 
+// %%
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn lex(source: &str) -> Lexed {
     let _p = tracing::info_span!("lex").entered();
     Lexed::new(source)
 }
 
+// %%
 pub fn tokenize(source: &str) -> impl Iterator<Item = Token> + '_ {
     let mut cursor = Cursor::new(source);
     std::iter::from_fn(move || {
@@ -27,6 +43,7 @@ pub fn tokenize(source: &str) -> impl Iterator<Item = Token> + '_ {
     })
 }
 
+// %%
 impl Cursor<'_> {
     /// Parses a token from the input string.
     pub fn advance_token(&mut self) -> Token {
@@ -47,6 +64,13 @@ impl Cursor<'_> {
                     self.basic_string()
                 }
             }
+            '\'' => {
+                if self.first() == '\'' && self.second() == '\'' {
+                    self.multi_line_literal_string()
+                } else {
+                    self.literal_string()
+                }
+            }
             '{' => Token::new(T!('{'), self.span()),
             '}' => Token::new(T!('}'), self.span()),
             '[' => Token::new(T!('['), self.span()),
@@ -60,21 +84,19 @@ impl Cursor<'_> {
         token
     }
 
-    pub fn is_whitespace(&self) -> bool {
+    fn is_whitespace(&self) -> bool {
         is_whitespace(self.current())
     }
 
-    pub fn whitespace(&mut self) -> Token {
+    fn whitespace(&mut self) -> Token {
         self.eat_while(|c| matches!(c, ' ' | '\t'));
         Token::new(SyntaxKind::WHITESPACE, self.span())
     }
 
-    pub fn line_comment(&mut self) -> Token {
+    fn line_comment(&mut self) -> Token {
         assert!(self.current() == '#');
 
-        dbg!((self.current(), self.first(), self.second()));
         self.eat_while(|c| !matches!(c, '\n' | '\r'));
-        dbg!((self.current(), self.first(), self.second()));
 
         Token::new(SyntaxKind::COMMENT, self.span())
     }
@@ -83,7 +105,7 @@ impl Cursor<'_> {
         is_line_break(self.current(), self.first())
     }
 
-    pub fn line_break(&mut self) -> Token {
+    fn line_break(&mut self) -> Token {
         let c = self.current();
 
         assert!(matches!(c, '\n' | '\r'));
@@ -97,13 +119,29 @@ impl Cursor<'_> {
         Token::new(SyntaxKind::LINE_BREAK, self.span())
     }
 
-    pub fn basic_string(&mut self) -> Token {
-        assert!(self.current() == '"' && self.first() != '"');
+    fn basic_string(&mut self) -> Token {
+        self.single_line_string(SyntaxKind::BASIC_STRING, '"')
+    }
+
+    fn multi_line_basic_string(&mut self) -> Token {
+        self.multi_line_string(SyntaxKind::MULTI_LINE_BASIC_STRING, '"')
+    }
+
+    fn literal_string(&mut self) -> Token {
+        self.single_line_string(SyntaxKind::LITERAL_STRING, '\'')
+    }
+
+    fn multi_line_literal_string(&mut self) -> Token {
+        self.multi_line_string(SyntaxKind::MULTI_LINE_LITERAL_STRING, '\'')
+    }
+
+    fn single_line_string(&mut self, kind: SyntaxKind, quote: char) -> Token {
+        assert!(self.current() == quote);
 
         while let Some(c) = self.bump() {
             match c {
-                '"' => return Token::new(SyntaxKind::BASIC_STRING, self.span()),
-                '\\' if self.first() == '"' => {
+                _ if c == quote => return Token::new(kind, self.span()),
+                '\\' if self.first() == quote => {
                     self.bump();
                 }
                 _ if self.is_line_break() => {
@@ -116,15 +154,15 @@ impl Cursor<'_> {
         Token::new(SyntaxKind::INVALID_TOKEN, self.span())
     }
 
-    pub fn multi_line_basic_string(&mut self) -> Token {
-        assert!(self.current() == '"' && self.first() == '"' && self.second() == '"');
+    fn multi_line_string(&mut self, kind: SyntaxKind, quote: char) -> Token {
+        assert!(self.current() == quote && self.first() == quote);
 
         while let Some(c) = self.bump() {
             match c {
-                '"' if self.first() == '"' && self.second() == '"' => {
+                _ if self.current() == quote && self.first() == quote && self.second() == quote => {
                     self.bump();
                     self.bump();
-                    return Token::new(SyntaxKind::MULTI_LINE_BASIC_STRING, self.span());
+                    return Token::new(kind, self.span());
                 }
                 _ => (),
             }
@@ -134,11 +172,13 @@ impl Cursor<'_> {
     }
 }
 
+// %%
 #[inline]
 fn is_whitespace(c: char) -> bool {
     matches!(c, ' ' | '\t')
 }
 
+// %%
 #[inline]
 fn is_line_break(c1: char, c2: char) -> bool {
     c1 == '\n' || (c1 == '\r' && c2 == '\n')
