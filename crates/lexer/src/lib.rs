@@ -143,7 +143,7 @@ impl Cursor<'_> {
             }
             Token::new(SyntaxKind::LOCAL_DATE, self.span())
         } else {
-            self.eat_while(|c| !is_line_break(c) && !is_whitespace(c));
+            self.eat_while(|c| !is_line_break(c) && !is_whitespace(c) && !is_comment(c));
             Token::new(SyntaxKind::INVALID_TOKEN, self.span())
         }
     }
@@ -238,4 +238,9 @@ fn is_whitespace(c: char) -> bool {
 #[inline]
 fn is_line_break(c: char) -> bool {
     matches!(c, '\r' | '\n')
+}
+
+#[inline]
+fn is_comment(c: char) -> bool {
+    matches!(c, '#')
 }
