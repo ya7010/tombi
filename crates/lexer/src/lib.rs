@@ -41,14 +41,14 @@ impl Cursor<'_> {
             _ if self.is_line_break() => self.line_break(),
             '#' => self.line_comment(),
             '"' => {
-                if self.first() == '"' && self.second() == '"' {
+                if self.matches(r#"""""#) {
                     self.multi_line_basic_string()
                 } else {
                     self.basic_string()
                 }
             }
             '\'' => {
-                if self.first() == '\'' && self.second() == '\'' {
+                if self.matches("'''") {
                     self.multi_line_literal_string()
                 } else {
                     self.literal_string()
@@ -85,14 +85,14 @@ impl Cursor<'_> {
     }
 
     fn is_line_break(&self) -> bool {
-        is_line_break(self.current(), self.first())
+        is_line_break(self.current(), self.peek(1))
     }
 
     fn line_break(&mut self) -> Token {
         let c = self.current();
 
         assert!(matches!(c, '\n' | '\r'));
-        if c == '\r' && self.first() == '\n' {
+        if self.matches("\r\n") {
             self.bump();
             2
         } else {
@@ -124,7 +124,7 @@ impl Cursor<'_> {
         while let Some(c) = self.bump() {
             match c {
                 _ if c == quote => return Token::new(kind, self.span()),
-                '\\' if self.first() == quote => {
+                '\\' if self.peek(1) == quote => {
                     self.bump();
                 }
                 _ if self.is_line_break() => {
@@ -138,11 +138,11 @@ impl Cursor<'_> {
     }
 
     fn multi_line_string(&mut self, kind: SyntaxKind, quote: char) -> Token {
-        assert!(self.current() == quote && self.first() == quote);
+        assert!(self.current() == quote && self.peek(1) == quote);
 
         while let Some(c) = self.bump() {
             match c {
-                _ if self.current() == quote && self.first() == quote && self.second() == quote => {
+                _ if self.current() == quote && self.peek(1) == quote && self.peek(2) == quote => {
                     self.bump();
                     self.bump();
                     return Token::new(kind, self.span());
