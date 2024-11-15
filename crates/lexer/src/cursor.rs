@@ -1,5 +1,3 @@
-use std::str::Chars;
-
 pub struct Cursor<'a> {
     /// Iterator over chars. Slightly faster than a &str.
     chars: std::str::Chars<'a>,
