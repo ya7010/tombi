@@ -56,28 +56,22 @@ impl Cursor<'_> {
                     self.integer()
                 }
             }
-            // boolean
-            't' => {
-                if self.is_true() {
-                    self.eat_n(3);
-                    return Token::new(SyntaxKind::BOOLEAN, self.span());
-                } else {
-                    self.key()
-                }
-            }
-            'f' => {
-                if self.is_false() {
-                    self.eat_n(4);
-                    return Token::new(SyntaxKind::BOOLEAN, self.span());
-                } else {
-                    self.key()
-                }
-            }
             '\'' => {
                 if self.matches("'''") {
                     self.multi_line_literal_string()
                 } else {
                     self.literal_string()
+                }
+            }
+            '+' | '-' => {
+                if self.is_keyword("inf") || self.is_keyword("nan") {
+                    self.eat_n(2);
+                    Token::new(SyntaxKind::FLOAT, self.span())
+                } else if self.peek(1).is_ascii_digit() {
+                    self.integer()
+                } else {
+                    self.eat_while(|c| !is_token_separator(c));
+                    Token::new(SyntaxKind::INVALID_TOKEN, self.span())
                 }
             }
             '{' => Token::new(T!('{'), self.span()),
@@ -87,7 +81,20 @@ impl Cursor<'_> {
             ',' => Token::new(T!(,), self.span()),
             '.' => Token::new(T!(.), self.span()),
             '=' => Token::new(T!(=), self.span()),
-            'A'..='Z' | 'a'..='z' | '_' => self.key(),
+            'A'..='Z' | 'a'..='z' | '_' => {
+                if self.is_keyword("inf") || self.is_keyword("nan") {
+                    self.eat_n(2);
+                    Token::new(SyntaxKind::FLOAT, self.span())
+                } else if self.is_keyword("true") {
+                    self.eat_n(3);
+                    Token::new(SyntaxKind::BOOLEAN, self.span())
+                } else if self.is_keyword("false") {
+                    self.eat_n(4);
+                    Token::new(SyntaxKind::BOOLEAN, self.span())
+                } else {
+                    self.key()
+                }
+            }
             _ => {
                 self.eat_while(|c| !is_token_separator(c));
                 Token::new(SyntaxKind::INVALID_TOKEN, self.span())
@@ -132,15 +139,8 @@ impl Cursor<'_> {
     }
 
     #[inline]
-    fn is_true(&self) -> bool {
-        assert!(self.current() == 't');
-        self.matches("true") && is_token_separator(self.peek(4))
-    }
-
-    #[inline]
-    fn is_false(&self) -> bool {
-        assert!(self.current() == 'f');
-        self.matches("false") && is_token_separator(self.peek(5))
+    fn is_keyword(&self, keyword: &str) -> bool {
+        self.matches(keyword) && is_token_separator(self.peek(keyword.len() + 1))
     }
 
     fn is_datetime(&self) -> bool {
