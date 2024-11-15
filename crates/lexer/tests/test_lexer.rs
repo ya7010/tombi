@@ -143,3 +143,15 @@ fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(BARE_KEY, span.into())]);
 }
+
+#[rstest]
+#[case("inf", (0, 3))]
+#[case("nan", (0, 3))]
+#[case("+inf", (0, 4))]
+#[case("+nan", (0, 4))]
+#[case("-inf", (0, 4))]
+#[case("-nan", (0, 4))]
+fn special_float(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
+}

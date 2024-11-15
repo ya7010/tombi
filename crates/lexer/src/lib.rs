@@ -64,6 +64,7 @@ impl Cursor<'_> {
                 }
             }
             '+' | '-' => {
+                self.bump();
                 if self.is_keyword("inf") || self.is_keyword("nan") {
                     self.eat_n(2);
                     Token::new(SyntaxKind::FLOAT, self.span())
