@@ -146,18 +146,6 @@ fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
 }
 
 #[rstest]
-#[case("inf", (0, 3))]
-#[case("nan", (0, 3))]
-#[case("+inf", (0, 4))]
-#[case("+nan", (0, 4))]
-#[case("-inf", (0, 4))]
-#[case("-nan", (0, 4))]
-fn special_float(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
-}
-
-#[rstest]
 #[case("0", (0, 1))]
 #[case("1", (0, 1))]
 #[case("1234567890", (0, 10))]
@@ -216,4 +204,29 @@ fn integer_oct(#[case] source: &str, #[case] span: (Offset, Offset)) {
 fn integer_hex(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(INTEGER_HEX, span.into())]);
+}
+
+#[rstest]
+#[case("+1.0", (0, 4))]
+#[case("3.1415", (0, 6))]
+#[case("-0.01", (0, 5))]
+#[case("5e+22", (0, 5))]
+#[case("1e06", (0, 4))]
+#[case("-2E-2", (0, 5))]
+#[case("6.626e-34", (0, 9))]
+fn float(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
+}
+
+#[rstest]
+#[case("inf", (0, 3))]
+#[case("nan", (0, 3))]
+#[case("+inf", (0, 4))]
+#[case("+nan", (0, 4))]
+#[case("-inf", (0, 4))]
+#[case("-nan", (0, 4))]
+fn special_float(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
 }

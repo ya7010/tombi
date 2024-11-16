@@ -195,7 +195,9 @@ impl Cursor<'_> {
 
     fn number(&mut self) -> Token {
         let line = self.peek_with_current_while(|c| !is_line_break(c));
-        if let Some(m) = regex!(r"[0-9_]+(:?\.[0-9_]+|[eE][+-]?[0-9_]+)").find(&line) {
+        if let Some(m) = regex!(r"[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)").find(&line)
+        {
+            dbg!(m.as_str());
             self.eat_n(m.end());
             Token::new(SyntaxKind::FLOAT, self.span())
         } else if let Some(m) = regex!(r"0b[0|1|_]+").find(&line) {
