@@ -34,7 +34,6 @@ impl Cursor<'_> {
         if self.bump().is_none() {
             return Token::eof();
         }
-
         let token = match self.current() {
             _ if self.is_whitespace() => self.whitespace(),
             _ if self.is_line_break() => self.line_break(),
@@ -53,7 +52,7 @@ impl Cursor<'_> {
                 } else if self.is_time() {
                     self.time()
                 } else {
-                    self.integer()
+                    self.number()
                 }
             }
             '\'' => {
@@ -68,8 +67,8 @@ impl Cursor<'_> {
                 if self.is_keyword("inf") || self.is_keyword("nan") {
                     self.eat_n(2);
                     Token::new(SyntaxKind::FLOAT, self.span())
-                } else if self.peek(1).is_ascii_digit() {
-                    self.integer()
+                } else if self.current().is_ascii_digit() {
+                    self.number()
                 } else {
                     self.eat_while(|c| !is_token_separator(c));
                     Token::new(SyntaxKind::INVALID_TOKEN, self.span())
@@ -194,12 +193,27 @@ impl Cursor<'_> {
         }
     }
 
-    fn integer(&mut self) -> Token {
-        assert!(self.current().is_ascii_digit());
-
-        self.eat_while(|c| c.is_ascii_digit());
-
-        Token::new(SyntaxKind::INTEGER_DEC, self.span())
+    fn number(&mut self) -> Token {
+        let line = self.peek_with_current_while(|c| !is_line_break(c));
+        if let Some(m) = regex!(r"[0-9_]+(:?\.[0-9_]+|[eE][+-]?[0-9_]+)").find(&line) {
+            self.eat_n(m.end());
+            Token::new(SyntaxKind::FLOAT, self.span())
+        } else if let Some(m) = regex!(r"0b[0|1|_]+").find(&line) {
+            self.eat_n(m.end());
+            Token::new(SyntaxKind::INTEGER_BIN, self.span())
+        } else if let Some(m) = regex!(r"0o[0-7_]+").find(&line) {
+            self.eat_n(m.end());
+            Token::new(SyntaxKind::INTEGER_OCT, self.span())
+        } else if let Some(m) = regex!(r"0x[0-9A-Fa-f_]+").find(&line) {
+            self.eat_n(m.end());
+            Token::new(SyntaxKind::INTEGER_HEX, self.span())
+        } else if let Some(m) = regex!(r"[0-9_]+").find(&line) {
+            self.eat_n(m.end());
+            Token::new(SyntaxKind::INTEGER_DEC, self.span())
+        } else {
+            self.eat_while(|c| !is_line_break(c) && !is_whitespace(c) && !is_comment(c));
+            Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        }
     }
 
     fn basic_string(&mut self) -> Token {

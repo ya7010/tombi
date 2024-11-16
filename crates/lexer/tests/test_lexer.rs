@@ -139,6 +139,7 @@ fn boolean(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offset
 
 #[rstest]
 #[case("key", (0, 3))]
+#[case("_1234567890", (0, 11))]
 fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(BARE_KEY, span.into())]);
@@ -154,4 +155,26 @@ fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
 fn special_float(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
+}
+
+#[rstest]
+#[case("0", (0, 1))]
+#[case("1", (0, 1))]
+#[case("1234567890", (0, 10))]
+#[case("+1234567890", (0, 11))]
+#[case("-1234567890", (0, 11))]
+#[case("1_234_567_890", (0, 13))]
+#[case("+1_234_567_890", (0, 14))]
+#[case("-1_234_567_890", (0, 14))]
+fn integer_dec(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(INTEGER_DEC, span.into())]);
+}
+
+#[rstest]
+#[case("+_1234567890", (0, 12))]
+#[case("-_1234567890", (0, 12))]
+fn invalid_integer_dec(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(INVALID_TOKEN, span.into())]);
 }
