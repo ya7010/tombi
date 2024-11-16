@@ -191,3 +191,16 @@ fn integer_bin(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(INTEGER_BIN, span.into())]);
 }
+
+#[rstest]
+#[case("0o0", (0, 3))]
+#[case("0o1", (0, 3))]
+#[case("0o01", (0, 4))]
+#[case("0o10", (0, 4))]
+#[case("0o1234567", (0, 9))]
+#[case("0o_1234_567", (0, 11))]
+#[case("0o12_34_567", (0, 11))]
+fn integer_oct(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(INTEGER_OCT, span.into())]);
+}
