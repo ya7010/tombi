@@ -204,3 +204,16 @@ fn integer_oct(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(INTEGER_OCT, span.into())]);
 }
+
+#[rstest]
+#[case("0x0", (0, 3))]
+#[case("0x1", (0, 3))]
+#[case("0x01", (0, 4))]
+#[case("0x10", (0, 4))]
+#[case("0x1234567890abcdef", (0, 18))]
+#[case("0x_1234_5678_90ab_cdef", (0, 22))]
+#[case("0x12_34_5678_90ab_cdef", (0, 22))]
+fn integer_hex(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(INTEGER_HEX, span.into())]);
+}
