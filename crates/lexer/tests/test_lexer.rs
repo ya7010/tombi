@@ -178,3 +178,16 @@ fn invalid_integer_dec(#[case] source: &str, #[case] span: (Offset, Offset)) {
     let tokens: Vec<Token> = tokenize(source).collect();
     assert_eq!(tokens, vec![Token::new(INVALID_TOKEN, span.into())]);
 }
+
+#[rstest]
+#[case("0b0", (0, 3))]
+#[case("0b1", (0, 3))]
+#[case("0b01", (0, 4))]
+#[case("0b10", (0, 4))]
+#[case("0b101010", (0, 8))]
+#[case("0b_1010_10", (0, 10))]
+#[case("0b10_101_010", (0, 12))]
+fn integer_bin(#[case] source: &str, #[case] span: (Offset, Offset)) {
+    let tokens: Vec<Token> = tokenize(source).collect();
+    assert_eq!(tokens, vec![Token::new(INTEGER_BIN, span.into())]);
+}
