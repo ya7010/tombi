@@ -734,6 +734,7 @@ dependencies = [
  "ast",
  "drop_bomb",
  "itertools",
+ "lexer",
  "logos",
  "rg-tree",
  "rstest",
