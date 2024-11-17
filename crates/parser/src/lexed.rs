@@ -1,5 +1,6 @@
 use logos::Logos;
 use syntax::SyntaxKind::{self, *};
+use text::Offset;
 
 use crate::builder::{Builder, State};
 use crate::{input::Input, output};
@@ -8,7 +9,7 @@ use crate::{input::Input, output};
 pub struct LexedStr<'a> {
     pub text: &'a str,
     pub kind: Vec<SyntaxKind>,
-    pub start_offsets: Vec<u32>,
+    pub start_offsets: Vec<Offset>,
     pub error: Vec<LexError>,
 }
 
@@ -59,21 +60,21 @@ impl<'a> LexedStr<'a> {
         let _p = tracing::info_span!("LexedStr::new").entered();
         let mut lexed = SyntaxKind::lexer(text);
         let mut kind = Vec::new();
-        let mut start_offsets: Vec<u32> = Vec::new();
+        let mut start_offsets: Vec<Offset> = Vec::new();
         let mut error = Vec::new();
         let mut offset = 0;
         while let Some(token) = lexed.next() {
             match token {
                 Ok(k) => {
                     kind.push(k);
-                    start_offsets.push(lexed.span().start as u32);
+                    start_offsets.push(lexed.span().start as Offset);
                 }
                 Err(err) => error.push(LexError::new(offset, err)),
             }
             offset += 1;
         }
         kind.push(EOF);
-        start_offsets.push(text.len() as u32);
+        start_offsets.push(text.len() as Offset);
 
         Self {
             text,
@@ -127,13 +128,13 @@ impl<'a> LexedStr<'a> {
         lo..hi
     }
 
-    pub fn text_start_offset(&self, i: usize) -> usize {
+    pub fn text_start_offset(&self, i: usize) -> Offset {
         assert!(i <= self.len());
-        self.start_offsets[i] as usize
+        self.start_offsets[i]
     }
 
     pub fn text_start_position(&self, i: usize) -> text::Position {
-        text::Position::from_source(&self.text, (self.text_start_offset(i) as u32).into())
+        text::Position::from_source(&self.text, (self.text_start_offset(i)).into())
     }
 
     pub fn text_len(&self, i: usize) -> usize {
