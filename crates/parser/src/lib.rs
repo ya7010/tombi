@@ -6,7 +6,7 @@ mod input;
 mod lexed;
 mod marker;
 mod output;
-mod parse;
+mod parsed;
 mod parser;
 mod token_set;
 mod validation;
@@ -18,21 +18,21 @@ use input::Input;
 use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
-use parse::Parse;
+use parsed::Parsed;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
-pub fn parse(source: &str) -> Parse<SyntaxNode> {
+pub fn parse(source: &str) -> Parsed<SyntaxNode> {
     parse_as::<ast::Root>(source)
 }
 
 #[allow(private_bounds)]
-pub fn parse_as<G: Grammer>(source: &str) -> Parse<SyntaxNode> {
+pub fn parse_as<G: Grammer>(source: &str) -> Parsed<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
     let output = grammar::parse::<G>(&input);
     let (tree, errors) = build_tree(&lexed, output);
 
-    Parse::new(tree, errors)
+    Parsed::new(tree, errors)
 }
 
 pub fn build_tree(

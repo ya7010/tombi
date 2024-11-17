@@ -6,15 +6,15 @@ use syntax::{SyntaxError, SyntaxNode};
 use crate::validation;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Parse<T> {
+pub struct Parsed<T> {
     green: rg_tree::GreenNode,
     errors: Option<Arc<[syntax::SyntaxError]>>,
     _ty: PhantomData<fn() -> T>,
 }
 
-impl<T> Parse<T> {
-    pub fn new(green: rg_tree::GreenNode, errors: Vec<SyntaxError>) -> Parse<T> {
-        Parse {
+impl<T> Parsed<T> {
+    pub fn new(green: rg_tree::GreenNode, errors: Vec<SyntaxError>) -> Parsed<T> {
+        Parsed {
             green,
             errors: if errors.is_empty() {
                 None
@@ -44,9 +44,9 @@ impl<T> Parse<T> {
     }
 }
 
-impl<T> Clone for Parse<T> {
-    fn clone(&self) -> Parse<T> {
-        Parse {
+impl<T> Clone for Parsed<T> {
+    fn clone(&self) -> Parsed<T> {
+        Parsed {
             green: self.green.clone(),
             errors: self.errors.clone(),
             _ty: PhantomData,
@@ -54,10 +54,10 @@ impl<T> Clone for Parse<T> {
     }
 }
 
-impl<T: AstNode> Parse<T> {
+impl<T: AstNode> Parsed<T> {
     /// Converts this parse result into a parse result for an untyped syntax tree.
-    pub fn into_syntax(self) -> Parse<SyntaxNode> {
-        Parse {
+    pub fn into_syntax(self) -> Parsed<SyntaxNode> {
+        Parsed {
             green: self.green,
             errors: self.errors,
             _ty: PhantomData,
@@ -83,10 +83,10 @@ impl<T: AstNode> Parse<T> {
     }
 }
 
-impl Parse<SyntaxNode> {
-    pub fn cast<N: AstNode>(self) -> Option<Parse<N>> {
+impl Parsed<SyntaxNode> {
+    pub fn cast<N: AstNode>(self) -> Option<Parsed<N>> {
         if N::cast(self.syntax_node()).is_some() {
-            Some(Parse {
+            Some(Parsed {
                 green: self.green,
                 errors: self.errors,
                 _ty: PhantomData,
