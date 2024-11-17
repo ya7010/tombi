@@ -6,7 +6,7 @@ use crate::{input::Input, output};
 
 #[derive(Debug)]
 pub struct LexedStr<'a> {
-    pub text: &'a str,
+    pub source: &'a str,
     pub kind: Vec<SyntaxKind>,
     pub start_offsets: Vec<text::Offset>,
     pub error: Vec<LexError>,
@@ -55,9 +55,9 @@ pub fn lex(source: &str) -> LexedStr<'_> {
 }
 
 impl<'a> LexedStr<'a> {
-    pub fn new(text: &'a str) -> Self {
+    pub fn new(source: &'a str) -> Self {
         let _p = tracing::info_span!("LexedStr::new").entered();
-        let mut lexed = SyntaxKind::lexer(text);
+        let mut lexed = SyntaxKind::lexer(source);
         let mut kind = Vec::new();
         let mut start_offsets: Vec<text::Offset> = Vec::new();
         let mut error = Vec::new();
@@ -73,10 +73,10 @@ impl<'a> LexedStr<'a> {
             offset += 1;
         }
         kind.push(EOF);
-        start_offsets.push(text::Offset::new(text.len() as u32));
+        start_offsets.push(text::Offset::new(source.len() as u32));
 
         Self {
-            text,
+            source,
             kind,
             start_offsets,
             error,
@@ -92,7 +92,7 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn as_str(&self) -> &str {
-        self.text
+        self.source
     }
 
     pub fn len(&self) -> usize {
@@ -116,7 +116,7 @@ impl<'a> LexedStr<'a> {
         assert!(r.start < r.end && r.end <= self.len());
         let lo = self.start_offsets[r.start].into();
         let hi = self.start_offsets[r.end].into();
-        &self.text[lo..hi]
+        &self.source[lo..hi]
     }
 
     // Naming is hard.
@@ -133,7 +133,7 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn text_start_position(&self, i: usize) -> text::Position {
-        text::Position::from_source(&self.text, (self.text_start_offset(i)).into())
+        text::Position::from_source(&self.source, (self.text_start_offset(i)).into())
     }
 
     pub fn text_len(&self, i: usize) -> usize {
