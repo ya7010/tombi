@@ -65,12 +65,3 @@ impl Input {
         self.kinds.len()
     }
 }
-
-impl From<lexer::Lexed> for Input {
-    fn from(lexed: lexer::Lexed) -> Self {
-        Self {
-            kinds: lexed.kinds,
-            joints: lexed.joints,
-        }
-    }
-}

@@ -1,28 +1,21 @@
-use syntax::SyntaxKind;
-
 #[allow(non_camel_case_types)]
 type bits = u64;
 
 #[derive(Debug, Default)]
 pub struct Lexed {
-    pub kinds: Vec<SyntaxKind>,
+    pub token_results: Vec<Result<crate::Token, crate::Error>>,
     pub joints: Vec<bits>,
     pub errors: Vec<crate::Error>,
 }
 
 impl Lexed {
     #[inline]
-    pub fn push_kind(&mut self, kind: SyntaxKind) {
+    pub fn push_token_result(&mut self, token_result: Result<crate::Token, crate::Error>) {
         let idx = self.len();
         if idx % (bits::BITS as usize) == 0 {
             self.joints.push(0);
         }
-        self.kinds.push(kind);
-    }
-
-    #[inline]
-    pub fn push_error(&mut self, error: crate::Error) {
-        self.errors.push(error);
+        self.token_results.push(token_result);
     }
 
     fn bit_index(&self, n: usize) -> (usize, usize) {
@@ -32,7 +25,7 @@ impl Lexed {
     }
 
     fn len(&self) -> usize {
-        self.kinds.len()
+        self.token_results.len()
     }
 
     /// Sets jointness for the last token we've pushed.

@@ -16,25 +16,13 @@ pub fn lex(source: &str) -> Lexed {
     let mut was_joint = false;
     for res in tokenize(source) {
         match res {
-            Ok(token) => {
-                let kind = token.kind;
-                if kind.is_trivia() {
-                    was_joint = false
-                } else {
-                    if was_joint {
-                        lexed.set_joint();
-                    }
-                    lexed.push_kind(kind);
-
-                    was_joint = true;
-                }
-            }
-            Err(error) => {
+            Ok(token) if token.kind().is_trivia() => was_joint = false,
+            _ => {
                 if was_joint {
                     lexed.set_joint();
                 }
-                lexed.push_kind(SyntaxKind::INVALID_TOKEN);
-                lexed.push_error(error);
+                lexed.push_token_result(res);
+
                 was_joint = true;
             }
         }
@@ -47,7 +35,7 @@ pub fn tokenize(source: &str) -> impl Iterator<Item = Result<Token, crate::Error
     let mut cursor = Cursor::new(source);
     std::iter::from_fn(move || match cursor.advance_token() {
         Ok(token) => {
-            if token.kind != SyntaxKind::EOF {
+            if token.kind() != SyntaxKind::EOF {
                 Some(Ok(token))
             } else {
                 None
@@ -301,12 +289,6 @@ impl Cursor<'_> {
     fn key(&mut self) -> Token {
         self.eat_while(|c| matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-'));
         Token::new(SyntaxKind::BARE_KEY, self.span())
-    }
-
-    fn error(&mut self) -> Token {
-        let span = self.span();
-
-        Token::new(SyntaxKind::INVALID_TOKEN, span)
     }
 }
 

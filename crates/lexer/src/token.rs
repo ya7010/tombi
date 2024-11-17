@@ -2,8 +2,8 @@ use syntax::SyntaxKind;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Token {
-    pub kind: SyntaxKind,
-    pub span: text::Span,
+    kind: SyntaxKind,
+    span: text::Span,
 }
 
 impl Token {
@@ -21,5 +21,15 @@ impl Token {
     #[inline]
     pub fn is_eof(&self) -> bool {
         self.kind == SyntaxKind::EOF
+    }
+
+    #[inline]
+    pub fn kind(&self) -> SyntaxKind {
+        self.kind
+    }
+
+    #[inline]
+    pub fn span(&self) -> text::Span {
+        self.span
     }
 }
