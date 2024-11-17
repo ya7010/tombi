@@ -7,8 +7,8 @@ pub struct Range {
 impl Range {
     #[inline]
     pub fn from_source(source: &str, node: impl ast::AstNode) -> Self {
-        let start = text::Position::from_source(source, node.syntax().text_range().start());
-        let end = text::Position::from_source(source, node.syntax().text_range().end());
+        let start = text::Position::from_source(source, node.syntax().text_span().start());
+        let end = text::Position::from_source(source, node.syntax().text_span().end());
         Self { start, end }
     }
 

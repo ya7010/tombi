@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq, Eq)]
 pub struct Error {
     kind: ErrorKind,
-    span: text::TextRange,
+    span: text::Span,
     error: syntax::Error,
 }
 
@@ -14,7 +14,7 @@ pub enum ErrorKind {
 }
 
 impl Error {
-    pub fn new(kind: ErrorKind, span: text::TextRange, error: syntax::Error) -> Self {
+    pub fn new(kind: ErrorKind, span: text::Span, error: syntax::Error) -> Self {
         Self { kind, span, error }
     }
 

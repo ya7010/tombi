@@ -2,7 +2,7 @@ mod features;
 mod position;
 mod range;
 mod relative_position;
-mod text_range;
+mod span;
 mod text_size;
 mod traits;
 
@@ -11,7 +11,7 @@ pub type Line = u32;
 pub type Column = u32;
 
 pub use crate::{
-    position::Position, range::Range, relative_position::RelativePosition, text_range::TextRange,
+    position::Position, range::Range, relative_position::RelativePosition, span::Span,
     text_size::TextSize, traits::TextLen,
 };
 

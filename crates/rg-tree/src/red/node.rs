@@ -4,7 +4,7 @@ use crate::{
     cursor,
     green::{GreenNode, GreenNodeData},
     red::{Preorder, PreorderWithTokens, RedElementChildren, RedNodeChildren},
-    Direction, Language, NodeOrToken, SyntaxText, TextRange, TextSize, TokenAtOffset, WalkEvent,
+    Direction, Language, NodeOrToken, Span, SyntaxText, TextSize, TokenAtOffset, WalkEvent,
 };
 
 use super::{RedElement, RedToken};
@@ -37,7 +37,7 @@ impl<L: Language> fmt::Debug for RedNode<L> {
             assert_eq!(level, 0);
             Ok(())
         } else {
-            write!(f, "{:?}@{:?}", self.kind(), self.text_range())
+            write!(f, "{:?}@{:?}", self.kind(), self.text_span())
         }
     }
 }
@@ -67,8 +67,8 @@ impl<L: Language> RedNode<L> {
         L::kind_from_raw(self.raw.kind())
     }
 
-    pub fn text_range(&self) -> TextRange {
-        self.raw.text_range()
+    pub fn text_span(&self) -> Span {
+        self.raw.text_span()
     }
 
     pub fn index(&self) -> usize {
@@ -170,28 +170,26 @@ impl<L: Language> RedNode<L> {
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
-    /// Precondition: offset must be within node's range.
+    /// Precondition: offset must be within node's span.
     pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<RedToken<L>> {
         self.raw.token_at_offset(offset).map(RedToken::from)
     }
 
     /// Return the deepest node or token in the current subtree that fully
-    /// contains the range. If the range is empty and is contained in two leaf
-    /// nodes, either one can be returned. Precondition: range must be contained
+    /// contains the span. If the span is empty and is contained in two leaf
+    /// nodes, either one can be returned. Precondition: span must be contained
     /// within the current node
-    pub fn covering_element(&self, range: TextRange) -> RedElement<L> {
-        NodeOrToken::from(self.raw.covering_element(range))
+    pub fn covering_element(&self, span: Span) -> RedElement<L> {
+        NodeOrToken::from(self.raw.covering_element(span))
     }
 
-    /// Finds a [`SyntaxElement`] which intersects with a given `range`. If
+    /// Finds a [`SyntaxElement`] which intersects with a given `span`. If
     /// there are several intersecting elements, any one can be returned.
     ///
     /// The method uses binary search internally, so it's complexity is
     /// `O(log(N))` where `N = self.children_with_tokens().count()`.
-    pub fn child_or_token_at_range(&self, range: TextRange) -> Option<RedElement<L>> {
-        self.raw
-            .child_or_token_at_range(range)
-            .map(RedElement::from)
+    pub fn child_or_token_at_span(&self, span: Span) -> Option<RedElement<L>> {
+        self.raw.child_or_token_at_span(span).map(RedElement::from)
     }
 
     /// Returns an independent copy of the subtree rooted at this node.

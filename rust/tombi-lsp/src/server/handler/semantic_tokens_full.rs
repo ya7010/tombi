@@ -1,6 +1,6 @@
 use ast::{AstNode, AstToken};
 use parser::{SyntaxNode, SyntaxToken};
-use text::TextRange;
+use text::Span;
 use tower_lsp::lsp_types::{
     Position, Range, SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams,
     SemanticTokensResult,
@@ -303,8 +303,8 @@ impl<'a> SemanticTokensBuilder<'a> {
 
     fn add_token(&mut self, token_type: TokenType, node: TokenOrNode) {
         let range = Range::new(
-            text::Position::from_source(self.source, node.text_range().start()).into(),
-            text::Position::from_source(self.source, node.text_range().end()).into(),
+            text::Position::from_source(self.source, node.text_span().start()).into(),
+            text::Position::from_source(self.source, node.text_span().end()).into(),
         );
 
         let relative = relative_range(range, self.last_range);
@@ -332,10 +332,10 @@ enum TokenOrNode<'a> {
 }
 
 impl<'a> TokenOrNode<'a> {
-    fn text_range(&self) -> TextRange {
+    fn text_span(&self) -> Span {
         match self {
-            Self::Token(token) => token.text_range(),
-            Self::Node(node) => node.text_range(),
+            Self::Token(token) => token.text_span(),
+            Self::Node(node) => node.text_span(),
         }
     }
 }
@@ -366,19 +366,19 @@ pub fn relative_position(position: Position, to: Position) -> Position {
     }
 }
 
-pub fn relative_range(range: Range, to: Range) -> Range {
-    let line_diff = range.end.line - range.start.line;
-    let start = relative_position(range.start, to.start);
+pub fn relative_range(from: Range, to: Range) -> Range {
+    let line_diff = from.end.line - from.start.line;
+    let start = relative_position(from.start, to.start);
 
     let end = if line_diff == 0 {
         Position {
             line: start.line,
-            character: start.character + range.end.character - range.start.character,
+            character: start.character + from.end.character - from.start.character,
         }
     } else {
         Position {
             line: start.line + line_diff,
-            character: range.end.character,
+            character: from.end.character,
         }
     };
 

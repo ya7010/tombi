@@ -12,7 +12,7 @@ use crate::{
     arc::{Arc, HeaderSlice, ThinArc},
     green::{GreenElement, GreenElementRef, SyntaxKind},
     utility_types::static_assert,
-    GreenToken, NodeOrToken, TextRange, TextSize,
+    GreenToken, NodeOrToken, Span, TextSize,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -155,22 +155,22 @@ impl GreenNodeData {
         }
     }
 
-    pub(crate) fn child_at_range(
+    pub(crate) fn child_at_span(
         &self,
-        rel_range: TextRange,
+        rel_span: Span,
     ) -> Option<(usize, TextSize, text::RelativePosition, GreenElementRef<'_>)> {
         let idx = self
             .slice()
             .binary_search_by(|it| {
-                let child_range = it.rel_range();
-                TextRange::ordering(child_range, rel_range)
+                let child_range = it.rel_span();
+                Span::ordering(child_range, rel_span)
             })
             // XXX: this handles empty ranges
             .unwrap_or_else(|it| it.saturating_sub(1));
         let child = &self
             .slice()
             .get(idx)
-            .filter(|it| it.rel_range().contains_range(rel_range))?;
+            .filter(|it| it.rel_span().contains_span(rel_span))?;
         Some((
             idx,
             child.rel_offset(),
@@ -319,9 +319,9 @@ impl GreenChild {
     }
 
     #[inline]
-    fn rel_range(&self) -> TextRange {
+    fn rel_span(&self) -> Span {
         let len = self.as_ref().text_len();
-        TextRange::at(self.rel_offset(), len)
+        Span::at(self.rel_offset(), len)
     }
 }
 

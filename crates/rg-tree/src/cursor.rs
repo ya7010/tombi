@@ -98,7 +98,7 @@ use crate::{
     green::{GreenChild, GreenElementRef, GreenNodeData, GreenTokenData, SyntaxKind},
     sll,
     utility_types::Delta,
-    Direction, GreenNode, GreenToken, NodeOrToken, SyntaxText, TextRange, TextSize, TokenAtOffset,
+    Direction, GreenNode, GreenToken, NodeOrToken, Span, SyntaxText, TextSize, TokenAtOffset,
     WalkEvent,
 };
 
@@ -404,10 +404,10 @@ impl NodeData {
     }
 
     #[inline]
-    fn text_range(&self) -> TextRange {
+    fn text_span(&self) -> Span {
         let offset = self.offset();
         let len = self.green().text_len();
-        TextRange::at(offset, len)
+        Span::at(offset, len)
     }
 
     #[inline]
@@ -680,8 +680,8 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn text_range(&self) -> TextRange {
-        self.data().text_range()
+    pub fn text_span(&self) -> Span {
+        self.data().text_span()
     }
 
     #[inline]
@@ -862,21 +862,20 @@ impl SyntaxNode {
         // TODO: this could be faster if we first drill-down to node, and only
         // then switch to token search. We should also replace explicit
         // recursion with a loop.
-        let range = self.text_range();
+        let span = self.text_span();
         assert!(
-            range.start() <= offset && offset <= range.end(),
-            "Bad offset: range {:?} offset {:?}",
-            range,
+            span.start() <= offset && offset <= span.end(),
+            "Bad offset: span {:?} offset {:?}",
+            span,
             offset
         );
-        if range.is_empty() {
+        if span.is_empty() {
             return TokenAtOffset::None;
         }
 
         let mut children = self.children_with_tokens().filter(|child| {
-            let child_range = child.text_range();
-            !child_range.is_empty()
-                && (child_range.start() <= offset && offset <= child_range.end())
+            let child_span = child.text_span();
+            !child_span.is_empty() && (child_span.start() <= offset && offset <= child_span.end())
         });
 
         let left = children.next().unwrap();
@@ -895,18 +894,18 @@ impl SyntaxNode {
         }
     }
 
-    pub fn covering_element(&self, range: TextRange) -> SyntaxElement {
+    pub fn covering_element(&self, span: Span) -> SyntaxElement {
         let mut res: SyntaxElement = self.clone().into();
         loop {
             assert!(
-                res.text_range().contains_range(range),
-                "Bad range: node range {:?}, range {:?}",
-                res.text_range(),
-                range,
+                res.text_span().contains_span(span),
+                "Bad span: node span {:?}, span {:?}",
+                res.text_span(),
+                span,
             );
             res = match &res {
                 NodeOrToken::Token(_) => return res,
-                NodeOrToken::Node(node) => match node.child_or_token_at_range(range) {
+                NodeOrToken::Node(node) => match node.child_or_token_at_span(span) {
                     Some(it) => it,
                     None => return res,
                 },
@@ -914,9 +913,8 @@ impl SyntaxNode {
         }
     }
 
-    pub fn child_or_token_at_range(&self, range: TextRange) -> Option<SyntaxElement> {
-        let rel_range = range - self.offset();
-        self.green_ref().child_at_range(rel_range).map(
+    pub fn child_or_token_at_span(&self, span: Span) -> Option<SyntaxElement> {
+        self.green_ref().child_at_span(span - self.offset()).map(
             |(index, rel_offset, rel_position, green)| {
                 SyntaxElement::new(
                     green,
@@ -996,8 +994,8 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn text_range(&self) -> TextRange {
-        self.data().text_range()
+    pub fn text_span(&self) -> Span {
+        self.data().text_span()
     }
 
     #[inline]
@@ -1098,10 +1096,10 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn text_range(&self) -> TextRange {
+    pub fn text_span(&self) -> Span {
         match self {
-            NodeOrToken::Node(it) => it.text_range(),
-            NodeOrToken::Token(it) => it.text_range(),
+            NodeOrToken::Node(it) => it.text_span(),
+            NodeOrToken::Token(it) => it.text_span(),
         }
     }
 
@@ -1165,7 +1163,7 @@ impl SyntaxElement {
     }
 
     fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
-        assert!(self.text_range().start() <= offset && offset <= self.text_range().end());
+        assert!(self.text_span().start() <= offset && offset <= self.text_span().end());
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
             NodeOrToken::Node(node) => node.token_at_offset(offset),
@@ -1203,7 +1201,7 @@ impl fmt::Debug for SyntaxNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SyntaxNode")
             .field("kind", &self.kind())
-            .field("text_range", &self.text_range())
+            .field("text_span", &self.text_span())
             .finish()
     }
 }

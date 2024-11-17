@@ -2,27 +2,28 @@ use std::fmt;
 
 use crate::{
     cursor::{SyntaxNode, SyntaxToken},
-    TextRange, TextSize,
+    Span, TextSize,
 };
 
 #[derive(Clone)]
 pub struct SyntaxText {
     node: SyntaxNode,
-    range: TextRange,
+    span: Span,
 }
 
 impl SyntaxText {
+    #[inline]
     pub(crate) fn new(node: SyntaxNode) -> SyntaxText {
-        let range = node.text_range();
-        SyntaxText { node, range }
+        let span = node.text_span();
+        SyntaxText { node, span }
     }
 
     pub fn len(&self) -> TextSize {
-        self.range.len()
+        self.span.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.range.is_empty()
+        self.span.is_empty()
     }
 
     pub fn contains_char(&self, c: char) -> bool {
@@ -57,29 +58,29 @@ impl SyntaxText {
         found(res)
     }
 
-    pub fn slice<R: private::SyntaxTextRange>(&self, range: R) -> SyntaxText {
-        let start = range.start().unwrap_or_default();
-        let end = range.end().unwrap_or(self.len());
+    pub fn slice<S: private::SyntaxTextSpan>(&self, span: S) -> SyntaxText {
+        let start = span.start().unwrap_or_default();
+        let end = span.end().unwrap_or(self.len());
         assert!(start <= end);
         let len = end - start;
-        let start = self.range.start() + start;
+        let start = self.span.start() + start;
         let end = start + len;
         assert!(
             start <= end,
-            "invalid slice, range: {:?}, slice: {:?}",
-            self.range,
-            (range.start(), range.end()),
+            "invalid slice, span: {:?}, slice: {:?}",
+            self.span,
+            (span.start(), span.end()),
         );
-        let range = TextRange::new(start, end);
+        let span = Span::new(start, end);
         assert!(
-            self.range.contains_range(range),
-            "invalid slice, range: {:?}, slice: {:?}",
-            self.range,
-            range,
+            self.span.contains_span(span),
+            "invalid slice, span: {:?}, slice: {:?}",
+            self.span,
+            span,
         );
         SyntaxText {
             node: self.node.clone(),
-            range,
+            span,
         }
     }
 
@@ -87,10 +88,8 @@ impl SyntaxText {
     where
         F: FnMut(T, &str) -> Result<T, E>,
     {
-        self.tokens_with_ranges()
-            .try_fold(init, move |acc, (token, range)| {
-                f(acc, &token.text()[range])
-            })
+        self.tokens_with_spans()
+            .try_fold(init, move |acc, (token, span)| f(acc, &token.text()[span]))
     }
 
     pub fn try_for_each_chunk<F: FnMut(&str) -> Result<(), E>, E>(
@@ -111,15 +110,15 @@ impl SyntaxText {
         }
     }
 
-    fn tokens_with_ranges(&self) -> impl Iterator<Item = (SyntaxToken, TextRange)> {
-        let text_range = self.range;
+    fn tokens_with_spans(&self) -> impl Iterator<Item = (SyntaxToken, Span)> {
+        let text_span = self.span;
         self.node
             .descendants_with_tokens()
             .filter_map(|element| element.into_token())
             .filter_map(move |token| {
-                let token_range = token.text_range();
-                let range = text_range.intersect(token_range)?;
-                Some((token, range - token_range.start()))
+                let token_span = token.text_span();
+                let span = text_span.intersect(token_span)?;
+                Some((token, span - token_span.start()))
             })
     }
 }
@@ -183,18 +182,18 @@ impl PartialEq<SyntaxText> for &'_ str {
 
 impl PartialEq for SyntaxText {
     fn eq(&self, other: &SyntaxText) -> bool {
-        if self.range.len() != other.range.len() {
+        if self.span.len() != other.span.len() {
             return false;
         }
-        let mut lhs = self.tokens_with_ranges();
-        let mut rhs = other.tokens_with_ranges();
+        let mut lhs = self.tokens_with_spans();
+        let mut rhs = other.tokens_with_spans();
         zip_texts(&mut lhs, &mut rhs).is_none()
             && lhs.all(|it| it.1.is_empty())
             && rhs.all(|it| it.1.is_empty())
     }
 }
 
-fn zip_texts<I: Iterator<Item = (SyntaxToken, TextRange)>>(xs: &mut I, ys: &mut I) -> Option<()> {
+fn zip_texts<I: Iterator<Item = (SyntaxToken, Span)>>(xs: &mut I, ys: &mut I) -> Option<()> {
     let mut x = xs.next()?;
     let mut y = ys.next()?;
     loop {
@@ -210,8 +209,8 @@ fn zip_texts<I: Iterator<Item = (SyntaxToken, TextRange)>>(xs: &mut I, ys: &mut 
             return Some(());
         }
         let advance = std::cmp::min(x.1.len(), y.1.len());
-        x.1 = TextRange::new(x.1.start() + advance, x.1.end());
-        y.1 = TextRange::new(y.1.start() + advance, y.1.end());
+        x.1 = Span::new(x.1.start() + advance, x.1.end());
+        y.1 = Span::new(y.1.start() + advance, y.1.end());
     }
 }
 
@@ -220,23 +219,23 @@ impl Eq for SyntaxText {}
 mod private {
     use std::ops;
 
-    use crate::{TextRange, TextSize};
+    use crate::{Span, TextSize};
 
-    pub trait SyntaxTextRange {
+    pub trait SyntaxTextSpan {
         fn start(&self) -> Option<TextSize>;
         fn end(&self) -> Option<TextSize>;
     }
 
-    impl SyntaxTextRange for TextRange {
+    impl SyntaxTextSpan for Span {
         fn start(&self) -> Option<TextSize> {
-            Some(TextRange::start(*self))
+            Some(Span::start(*self))
         }
         fn end(&self) -> Option<TextSize> {
-            Some(TextRange::end(*self))
+            Some(Span::end(*self))
         }
     }
 
-    impl SyntaxTextRange for ops::Range<TextSize> {
+    impl SyntaxTextSpan for ops::Range<TextSize> {
         fn start(&self) -> Option<TextSize> {
             Some(self.start)
         }
@@ -245,7 +244,7 @@ mod private {
         }
     }
 
-    impl SyntaxTextRange for ops::RangeFrom<TextSize> {
+    impl SyntaxTextSpan for ops::RangeFrom<TextSize> {
         fn start(&self) -> Option<TextSize> {
             Some(self.start)
         }
@@ -254,7 +253,7 @@ mod private {
         }
     }
 
-    impl SyntaxTextRange for ops::RangeTo<TextSize> {
+    impl SyntaxTextSpan for ops::RangeTo<TextSize> {
         fn start(&self) -> Option<TextSize> {
             None
         }
@@ -263,7 +262,7 @@ mod private {
         }
     }
 
-    impl SyntaxTextRange for ops::RangeFull {
+    impl SyntaxTextSpan for ops::RangeFull {
         fn start(&self) -> Option<TextSize> {
             None
         }

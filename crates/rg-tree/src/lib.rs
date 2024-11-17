@@ -26,7 +26,7 @@ mod serde_impls;
 #[allow(unsafe_code)]
 mod sll;
 
-pub use text::{TextLen, TextRange, TextSize};
+pub use text::{Span, TextLen, TextSize};
 
 use crate::utility_types::{Direction, NodeOrToken, TokenAtOffset, WalkEvent};
 pub use crate::{

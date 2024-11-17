@@ -8,24 +8,24 @@ use {
     },
 };
 
-/// A range in text, represented as a pair of [`TextSize`][struct@TextSize].
+/// A span in text, represented as a pair of [`TextSize`][struct@TextSize].
 ///
 /// It is a logic error for `start` to be greater than `end`.
 #[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
-pub struct TextRange {
+pub struct Span {
     // Invariant: start <= end
     start: TextSize,
     end: TextSize,
 }
 
-impl fmt::Debug for TextRange {
+impl fmt::Debug for Span {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}..{}", self.start().raw, self.end().raw)
     }
 }
 
-impl TextRange {
-    /// Creates a new `TextRange` with the given `start` and `end` (`start..end`).
+impl Span {
+    /// Creates a new `Span` with the given `start` and `end` (`start..end`).
     ///
     /// # Panics
     ///
@@ -37,19 +37,19 @@ impl TextRange {
     /// # use text::*;
     /// let start = TextSize::from(5);
     /// let end = TextSize::from(10);
-    /// let range = TextRange::new(start, end);
+    /// let span = Span::new(start, end);
     ///
-    /// assert_eq!(range.start(), start);
-    /// assert_eq!(range.end(), end);
-    /// assert_eq!(range.len(), end - start);
+    /// assert_eq!(span.start(), start);
+    /// assert_eq!(span.end(), end);
+    /// assert_eq!(span.len(), end - start);
     /// ```
     #[inline]
-    pub const fn new(start: TextSize, end: TextSize) -> TextRange {
+    pub const fn new(start: TextSize, end: TextSize) -> Span {
         assert!(start.raw <= end.raw);
-        TextRange { start, end }
+        Span { start, end }
     }
 
-    /// Create a new `TextRange` with the given `offset` and `len` (`offset..offset + len`).
+    /// Create a new `Span` with the given `offset` and `len` (`offset..offset + len`).
     ///
     /// # Examples
     ///
@@ -59,17 +59,17 @@ impl TextRange {
     ///
     /// let offset = TextSize::from(2);
     /// let length = TextSize::from(5);
-    /// let range = TextRange::at(offset, length);
+    /// let span = Span::at(offset, length);
     ///
-    /// assert_eq!(range, TextRange::new(offset, offset + length));
-    /// assert_eq!(&text[range], "23456")
+    /// assert_eq!(span, Span::new(offset, offset + length));
+    /// assert_eq!(&text[span], "23456")
     /// ```
     #[inline]
-    pub const fn at(offset: TextSize, len: TextSize) -> TextRange {
-        TextRange::new(offset, TextSize::new(offset.raw + len.raw))
+    pub const fn at(offset: TextSize, len: TextSize) -> Span {
+        Span::new(offset, TextSize::new(offset.raw + len.raw))
     }
 
-    /// Create a zero-length range at the specified offset (`offset..offset`).
+    /// Create a zero-length span at the specified offset (`offset..offset`).
     ///
     /// # Examples
     ///
@@ -77,19 +77,19 @@ impl TextRange {
     /// # use text::*;
     /// let point: TextSize;
     /// # point = TextSize::from(3);
-    /// let range = TextRange::empty(point);
-    /// assert!(range.is_empty());
-    /// assert_eq!(range, TextRange::new(point, point));
+    /// let span = Span::empty(point);
+    /// assert!(span.is_empty());
+    /// assert_eq!(span, Span::new(point, point));
     /// ```
     #[inline]
-    pub const fn empty(offset: TextSize) -> TextRange {
-        TextRange {
+    pub const fn empty(offset: TextSize) -> Span {
+        Span {
             start: offset,
             end: offset,
         }
     }
 
-    /// Create a range up to the given end (`..end`).
+    /// Create a span up to the given end (`..end`).
     ///
     /// # Examples
     ///
@@ -97,15 +97,15 @@ impl TextRange {
     /// # use text::*;
     /// let point: TextSize;
     /// # point = TextSize::from(12);
-    /// let range = TextRange::up_to(point);
+    /// let span = Span::up_to(point);
     ///
-    /// assert_eq!(range.len(), point);
-    /// assert_eq!(range, TextRange::new(0.into(), point));
-    /// assert_eq!(range, TextRange::at(0.into(), point));
+    /// assert_eq!(span.len(), point);
+    /// assert_eq!(span, Span::new(0.into(), point));
+    /// assert_eq!(span, Span::at(0.into(), point));
     /// ```
     #[inline]
-    pub const fn up_to(end: TextSize) -> TextRange {
-        TextRange {
+    pub const fn up_to(end: TextSize) -> Span {
+        Span {
             start: TextSize::new(0),
             end,
         }
@@ -113,20 +113,20 @@ impl TextRange {
 }
 
 /// Identity methods.
-impl TextRange {
-    /// The start point of this range.
+impl Span {
+    /// The start point of this span.
     #[inline]
     pub const fn start(self) -> TextSize {
         self.start
     }
 
-    /// The end point of this range.
+    /// The end point of this span.
     #[inline]
     pub const fn end(self) -> TextSize {
         self.end
     }
 
-    /// The size of this range.
+    /// The size of this span.
     #[inline]
     pub const fn len(self) -> TextSize {
         // HACK for const fn: math on primitives only
@@ -135,7 +135,7 @@ impl TextRange {
         }
     }
 
-    /// Check if this range is empty.
+    /// Check if this span is empty.
     #[inline]
     pub const fn is_empty(self) -> bool {
         // HACK for const fn: math on primitives only
@@ -144,8 +144,8 @@ impl TextRange {
 }
 
 /// Manipulation methods.
-impl TextRange {
-    /// Check if this range contains an offset.
+impl Span {
+    /// Check if this span contains an offset.
     ///
     /// The end index is considered excluded.
     ///
@@ -155,16 +155,16 @@ impl TextRange {
     /// # use text::*;
     /// let (start, end): (TextSize, TextSize);
     /// # start = 10.into(); end = 20.into();
-    /// let range = TextRange::new(start, end);
-    /// assert!(range.contains(start));
-    /// assert!(!range.contains(end));
+    /// let span = Span::new(start, end);
+    /// assert!(span.contains(start));
+    /// assert!(!span.contains(end));
     /// ```
     #[inline]
     pub fn contains(self, offset: TextSize) -> bool {
         self.start() <= offset && offset < self.end()
     }
 
-    /// Check if this range contains an offset.
+    /// Check if this span contains an offset.
     ///
     /// The end index is considered included.
     ///
@@ -174,124 +174,124 @@ impl TextRange {
     /// # use text::*;
     /// let (start, end): (TextSize, TextSize);
     /// # start = 10.into(); end = 20.into();
-    /// let range = TextRange::new(start, end);
-    /// assert!(range.contains_inclusive(start));
-    /// assert!(range.contains_inclusive(end));
+    /// let span = Span::new(start, end);
+    /// assert!(span.contains_inclusive(start));
+    /// assert!(span.contains_inclusive(end));
     /// ```
     #[inline]
     pub fn contains_inclusive(self, offset: TextSize) -> bool {
         self.start() <= offset && offset <= self.end()
     }
 
-    /// Check if this range completely contains another range.
+    /// Check if this span completely contains another span.
     ///
     /// # Examples
     ///
     /// ```rust
     /// # use text::*;
-    /// let larger = TextRange::new(0.into(), 20.into());
-    /// let smaller = TextRange::new(5.into(), 15.into());
-    /// assert!(larger.contains_range(smaller));
-    /// assert!(!smaller.contains_range(larger));
+    /// let larger = Span::new(0.into(), 20.into());
+    /// let smaller = Span::new(5.into(), 15.into());
+    /// assert!(larger.contains_span(smaller));
+    /// assert!(!smaller.contains_span(larger));
     ///
-    /// // a range always contains itself
-    /// assert!(larger.contains_range(larger));
-    /// assert!(smaller.contains_range(smaller));
+    /// // a span always contains itself
+    /// assert!(larger.contains_span(larger));
+    /// assert!(smaller.contains_span(smaller));
     /// ```
     #[inline]
-    pub fn contains_range(self, other: TextRange) -> bool {
+    pub fn contains_span(self, other: Span) -> bool {
         self.start() <= other.start() && other.end() <= self.end()
     }
 
-    /// The range covered by both ranges, if it exists.
-    /// If the ranges touch but do not overlap, the output range is empty.
+    /// The span covered by both ranges, if it exists.
+    /// If the ranges touch but do not overlap, the output span is empty.
     ///
     /// # Examples
     ///
     /// ```rust
     /// # use text::*;
     /// assert_eq!(
-    ///     TextRange::intersect(
-    ///         TextRange::new(0.into(), 10.into()),
-    ///         TextRange::new(5.into(), 15.into()),
+    ///     Span::intersect(
+    ///         Span::new(0.into(), 10.into()),
+    ///         Span::new(5.into(), 15.into()),
     ///     ),
-    ///     Some(TextRange::new(5.into(), 10.into())),
+    ///     Some(Span::new(5.into(), 10.into())),
     /// );
     /// ```
     #[inline]
-    pub fn intersect(self, other: TextRange) -> Option<TextRange> {
+    pub fn intersect(self, other: Span) -> Option<Span> {
         let start = cmp::max(self.start(), other.start());
         let end = cmp::min(self.end(), other.end());
         if end < start {
             return None;
         }
-        Some(TextRange::new(start, end))
+        Some(Span::new(start, end))
     }
 
-    /// Extends the range to cover `other` as well.
+    /// Extends the span to cover `other` as well.
     ///
     /// # Examples
     ///
     /// ```rust
     /// # use text::*;
     /// assert_eq!(
-    ///     TextRange::cover(
-    ///         TextRange::new(0.into(), 5.into()),
-    ///         TextRange::new(15.into(), 20.into()),
+    ///     Span::cover(
+    ///         Span::new(0.into(), 5.into()),
+    ///         Span::new(15.into(), 20.into()),
     ///     ),
-    ///     TextRange::new(0.into(), 20.into()),
+    ///     Span::new(0.into(), 20.into()),
     /// );
     /// ```
     #[inline]
-    pub fn cover(self, other: TextRange) -> TextRange {
+    pub fn cover(self, other: Span) -> Span {
         let start = cmp::min(self.start(), other.start());
         let end = cmp::max(self.end(), other.end());
-        TextRange::new(start, end)
+        Span::new(start, end)
     }
 
-    /// Extends the range to cover `other` offsets as well.
+    /// Extends the span to cover `other` offsets as well.
     ///
     /// # Examples
     ///
     /// ```rust
     /// # use text::*;
     /// assert_eq!(
-    ///     TextRange::empty(0.into()).cover_offset(20.into()),
-    ///     TextRange::new(0.into(), 20.into()),
+    ///     Span::empty(0.into()).cover_offset(20.into()),
+    ///     Span::new(0.into(), 20.into()),
     /// )
     /// ```
     #[inline]
-    pub fn cover_offset(self, offset: TextSize) -> TextRange {
-        self.cover(TextRange::empty(offset))
+    pub fn cover_offset(self, offset: TextSize) -> Span {
+        self.cover(Span::empty(offset))
     }
 
-    /// Add an offset to this range.
+    /// Add an offset to this span.
     ///
-    /// Note that this is not appropriate for changing where a `TextRange` is
+    /// Note that this is not appropriate for changing where a `Span` is
     /// within some string; rather, it is for changing the reference anchor
-    /// that the `TextRange` is measured against.
+    /// that the `Span` is measured against.
     ///
     /// The unchecked version (`Add::add`) will _always_ panic on overflow,
     /// in contrast to primitive integers, which check in debug mode only.
     #[inline]
-    pub fn checked_add(self, offset: TextSize) -> Option<TextRange> {
-        Some(TextRange {
+    pub fn checked_add(self, offset: TextSize) -> Option<Span> {
+        Some(Span {
             start: self.start.checked_add(offset)?,
             end: self.end.checked_add(offset)?,
         })
     }
 
-    /// Subtract an offset from this range.
+    /// Subtract an offset from this span.
     ///
-    /// Note that this is not appropriate for changing where a `TextRange` is
+    /// Note that this is not appropriate for changing where a `Span` is
     /// within some string; rather, it is for changing the reference anchor
-    /// that the `TextRange` is measured against.
+    /// that the `Span` is measured against.
     ///
     /// The unchecked version (`Sub::sub`) will _always_ panic on overflow,
     /// in contrast to primitive integers, which check in debug mode only.
     #[inline]
-    pub fn checked_sub(self, offset: TextSize) -> Option<TextRange> {
-        Some(TextRange {
+    pub fn checked_sub(self, offset: TextSize) -> Option<Span> {
+        Some(Span {
             start: self.start.checked_sub(offset)?,
             end: self.end.checked_sub(offset)?,
         })
@@ -310,28 +310,28 @@ impl TextRange {
     /// # use text::*;
     /// # use std::cmp::Ordering;
     ///
-    /// let a = TextRange::new(0.into(), 3.into());
-    /// let b = TextRange::new(4.into(), 5.into());
+    /// let a = Span::new(0.into(), 3.into());
+    /// let b = Span::new(4.into(), 5.into());
     /// assert_eq!(a.ordering(b), Ordering::Less);
     ///
-    /// let a = TextRange::new(0.into(), 3.into());
-    /// let b = TextRange::new(3.into(), 5.into());
+    /// let a = Span::new(0.into(), 3.into());
+    /// let b = Span::new(3.into(), 5.into());
     /// assert_eq!(a.ordering(b), Ordering::Less);
     ///
-    /// let a = TextRange::new(0.into(), 3.into());
-    /// let b = TextRange::new(2.into(), 5.into());
+    /// let a = Span::new(0.into(), 3.into());
+    /// let b = Span::new(2.into(), 5.into());
     /// assert_eq!(a.ordering(b), Ordering::Equal);
     ///
-    /// let a = TextRange::new(0.into(), 3.into());
-    /// let b = TextRange::new(2.into(), 2.into());
+    /// let a = Span::new(0.into(), 3.into());
+    /// let b = Span::new(2.into(), 2.into());
     /// assert_eq!(a.ordering(b), Ordering::Equal);
     ///
-    /// let a = TextRange::new(2.into(), 3.into());
-    /// let b = TextRange::new(2.into(), 2.into());
+    /// let a = Span::new(2.into(), 3.into());
+    /// let b = Span::new(2.into(), 2.into());
     /// assert_eq!(a.ordering(b), Ordering::Greater);
     /// ```
     #[inline]
-    pub fn ordering(self, other: TextRange) -> Ordering {
+    pub fn ordering(self, other: Span) -> Ordering {
         if self.end() <= other.start() {
             Ordering::Less
         } else if other.end() <= self.start() {
@@ -342,37 +342,37 @@ impl TextRange {
     }
 }
 
-impl Index<TextRange> for str {
+impl Index<Span> for str {
     type Output = str;
     #[inline]
-    fn index(&self, index: TextRange) -> &str {
+    fn index(&self, index: Span) -> &str {
         &self[Range::<usize>::from(index)]
     }
 }
 
-impl Index<TextRange> for String {
+impl Index<Span> for String {
     type Output = str;
     #[inline]
-    fn index(&self, index: TextRange) -> &str {
+    fn index(&self, index: Span) -> &str {
         &self[Range::<usize>::from(index)]
     }
 }
 
-impl IndexMut<TextRange> for str {
+impl IndexMut<Span> for str {
     #[inline]
-    fn index_mut(&mut self, index: TextRange) -> &mut str {
+    fn index_mut(&mut self, index: Span) -> &mut str {
         &mut self[Range::<usize>::from(index)]
     }
 }
 
-impl IndexMut<TextRange> for String {
+impl IndexMut<Span> for String {
     #[inline]
-    fn index_mut(&mut self, index: TextRange) -> &mut str {
+    fn index_mut(&mut self, index: Span) -> &mut str {
         &mut self[Range::<usize>::from(index)]
     }
 }
 
-impl RangeBounds<TextSize> for TextRange {
+impl RangeBounds<TextSize> for Span {
     fn start_bound(&self) -> Bound<&TextSize> {
         Bound::Included(&self.start)
     }
@@ -382,69 +382,67 @@ impl RangeBounds<TextSize> for TextRange {
     }
 }
 
-impl From<(crate::Offset, crate::Offset)> for TextRange {
+impl From<(crate::Offset, crate::Offset)> for Span {
     #[inline]
     fn from((start, end): (crate::Offset, crate::Offset)) -> Self {
-        TextRange::new(start.into(), end.into())
+        Span::new(start.into(), end.into())
     }
 }
 
-impl<T> From<TextRange> for Range<T>
+impl<T> From<Span> for Range<T>
 where
     T: From<TextSize>,
 {
     #[inline]
-    fn from(r: TextRange) -> Self {
+    fn from(r: Span) -> Self {
         r.start().into()..r.end().into()
     }
 }
 
 macro_rules! ops {
-    (impl $Op:ident for TextRange by fn $f:ident = $op:tt) => {
-        impl $Op<&TextSize> for TextRange {
-            type Output = TextRange;
+    (impl $Op:ident for Span by fn $f:ident = $op:tt) => {
+        impl $Op<&TextSize> for Span {
+            type Output = Span;
             #[inline]
-            fn $f(self, other: &TextSize) -> TextRange {
+            fn $f(self, other: &TextSize) -> Span {
                 self $op *other
             }
         }
-        impl<T> $Op<T> for &TextRange
+        impl<T> $Op<T> for &Span
         where
-            TextRange: $Op<T, Output=TextRange>,
+            Span: $Op<T, Output=Span>,
         {
-            type Output = TextRange;
+            type Output = Span;
             #[inline]
-            fn $f(self, other: T) -> TextRange {
+            fn $f(self, other: T) -> Span {
                 *self $op other
             }
         }
     };
 }
 
-impl Add<TextSize> for TextRange {
-    type Output = TextRange;
+impl Add<TextSize> for Span {
+    type Output = Span;
     #[inline]
-    fn add(self, offset: TextSize) -> TextRange {
-        self.checked_add(offset)
-            .expect("TextRange +offset overflowed")
+    fn add(self, offset: TextSize) -> Span {
+        self.checked_add(offset).expect("Span +offset overflowed")
     }
 }
 
-impl Sub<TextSize> for TextRange {
-    type Output = TextRange;
+impl Sub<TextSize> for Span {
+    type Output = Span;
     #[inline]
-    fn sub(self, offset: TextSize) -> TextRange {
-        self.checked_sub(offset)
-            .expect("TextRange -offset overflowed")
+    fn sub(self, offset: TextSize) -> Span {
+        self.checked_sub(offset).expect("Span -offset overflowed")
     }
 }
 
-ops!(impl Add for TextRange by fn add = +);
-ops!(impl Sub for TextRange by fn sub = -);
+ops!(impl Add for Span by fn add = +);
+ops!(impl Sub for Span by fn sub = -);
 
-impl<A> AddAssign<A> for TextRange
+impl<A> AddAssign<A> for Span
 where
-    TextRange: Add<A, Output = TextRange>,
+    Span: Add<A, Output = Span>,
 {
     #[inline]
     fn add_assign(&mut self, rhs: A) {
@@ -452,9 +450,9 @@ where
     }
 }
 
-impl<S> SubAssign<S> for TextRange
+impl<S> SubAssign<S> for Span
 where
-    TextRange: Sub<S, Output = TextRange>,
+    Span: Sub<S, Output = Span>,
 {
     #[inline]
     fn sub_assign(&mut self, rhs: S) {

@@ -115,10 +115,10 @@ impl<'a> Cursor<'a> {
     }
 
     #[inline]
-    pub(crate) fn span(&mut self) -> text::TextRange {
+    pub(crate) fn span(&mut self) -> text::Span {
         let start = self.token_start;
         let end = self.offset;
         self.token_start = self.offset;
-        text::TextRange::new(start.into(), end.into())
+        text::Span::new(start.into(), end.into())
     }
 }

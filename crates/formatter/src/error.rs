@@ -7,7 +7,7 @@ pub enum Error {
 #[derive(Debug, Clone, thiserror::Error)]
 pub struct ParseError {
     pub message: String,
-    pub range: text::TextRange,
+    pub span: text::Span,
     pub text: String,
 }
 
@@ -16,7 +16,7 @@ impl std::fmt::Display for ParseError {
         write!(
             f,
             "{} at {:?} text {:?}",
-            self.message, self.range, self.text
+            self.message, self.span, self.text
         )
     }
 }

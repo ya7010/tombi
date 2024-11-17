@@ -4,7 +4,7 @@ use crate::{
     cursor,
     green::{GreenNode, GreenToken, GreenTokenData},
     red::{RedElement, RedNode},
-    Direction, Language, NodeOrToken, TextRange,
+    Direction, Language, NodeOrToken, Span,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15,7 +15,7 @@ pub struct RedToken<L: Language> {
 
 impl<L: Language> fmt::Debug for RedToken<L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}@{:?}", self.kind(), self.text_range())?;
+        write!(f, "{:?}@{:?}", self.kind(), self.text_span())?;
         if self.text().len() < 25 {
             return write!(f, " {:?}", self.text());
         }
@@ -48,8 +48,8 @@ impl<L: Language> RedToken<L> {
         L::kind_from_raw(self.raw.kind())
     }
 
-    pub fn text_range(&self) -> TextRange {
-        self.raw.text_range()
+    pub fn text_span(&self) -> Span {
+        self.raw.text_span()
     }
 
     pub fn index(&self) -> usize {
