@@ -1,4 +1,4 @@
-#[derive(thiserror::Error, Default, Debug, Clone, PartialEq)]
+#[derive(thiserror::Error, Default, Debug, Clone, PartialEq, Eq)]
 pub enum Error {
     #[default]
     #[error("Invalid token")]

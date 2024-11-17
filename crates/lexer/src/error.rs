@@ -1,16 +1,25 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Error {
-    token_index: usize,
+    kind: ErrorKind,
+    span: text::TextRange,
     error: syntax::Error,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ErrorKind {
+    InvalidOffsetDatetime,
+    InvalidLocalDatetime,
+    InvalidLocalDate,
+    InvalidLocalTime,
+}
+
 impl Error {
-    pub fn new(token_index: usize, error: syntax::Error) -> Self {
-        Self { token_index, error }
+    pub fn new(kind: ErrorKind, span: text::TextRange, error: syntax::Error) -> Self {
+        Self { kind, span, error }
     }
 
-    pub fn token(&self) -> usize {
-        self.token_index
+    pub fn kind(&self) -> ErrorKind {
+        self.kind
     }
 
     pub fn msg(&self) -> &str {

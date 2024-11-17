@@ -12,27 +12,56 @@ pub use token::Token;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn lex(source: &str) -> Lexed {
-    let _p = tracing::info_span!("lex").entered();
-    Lexed::new(source)
+    let mut lexed = Lexed::default();
+    let mut was_joint = false;
+    for res in tokenize(source) {
+        match res {
+            Ok(token) => {
+                let kind = token.kind;
+                if kind.is_trivia() {
+                    was_joint = false
+                } else {
+                    if was_joint {
+                        lexed.set_joint();
+                    }
+                    lexed.push_kind(kind);
+
+                    was_joint = true;
+                }
+            }
+            Err(error) => {
+                if was_joint {
+                    lexed.set_joint();
+                }
+                lexed.push_kind(SyntaxKind::INVALID_TOKEN);
+                lexed.push_error(error);
+                was_joint = true;
+            }
+        }
+    }
+
+    lexed
 }
 
-pub fn tokenize(source: &str) -> impl Iterator<Item = Token> + '_ {
+pub fn tokenize(source: &str) -> impl Iterator<Item = Result<Token, crate::Error>> + '_ {
     let mut cursor = Cursor::new(source);
-    std::iter::from_fn(move || {
-        let token = cursor.advance_token();
-        if token.kind != SyntaxKind::EOF {
-            Some(token)
-        } else {
-            None
+    std::iter::from_fn(move || match cursor.advance_token() {
+        Ok(token) => {
+            if token.kind != SyntaxKind::EOF {
+                Some(Ok(token))
+            } else {
+                None
+            }
         }
+        Err(error) => Some(Err(error)),
     })
 }
 
 impl Cursor<'_> {
     /// Parses a token from the input string.
-    pub fn advance_token(&mut self) -> Token {
+    pub fn advance_token(&mut self) -> Result<Token, crate::Error> {
         if self.bump().is_none() {
-            return Token::eof();
+            return Ok(Token::eof());
         }
         let token = match self.current() {
             _ if self.is_whitespace() => self.whitespace(),
@@ -101,7 +130,7 @@ impl Cursor<'_> {
             }
         };
 
-        token
+        Ok(token)
     }
 
     fn is_whitespace(&self) -> bool {
@@ -272,6 +301,12 @@ impl Cursor<'_> {
     fn key(&mut self) -> Token {
         self.eat_while(|c| matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-'));
         Token::new(SyntaxKind::BARE_KEY, self.span())
+    }
+
+    fn error(&mut self) -> Token {
+        let span = self.span();
+
+        Token::new(SyntaxKind::INVALID_TOKEN, span)
     }
 }
 

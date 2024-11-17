@@ -9,26 +9,26 @@ use text::Offset;
 #[test]
 fn empty_source() {
     let source = "";
-    let tokens: Vec<Token> = tokenize(source).collect();
+    let tokens = tokenize(source).collect::<Vec<_>>();
     assert_eq!(tokens, vec![]);
 }
 
 #[test]
 fn only_comment() {
     let source = "# This is a comment";
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(COMMENT, (0, 19).into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(COMMENT, (0, 19).into()))]);
 }
 
 #[test]
 fn comment_line_break() {
     let source = "# This is a comment\n";
-    let tokens: Vec<Token> = tokenize(source).collect();
+    let tokens = tokenize(source).collect::<Vec<_>>();
     assert_eq!(
         tokens,
         vec![
-            Token::new(COMMENT, (0, 19).into()),
-            Token::new(LINE_BREAK, (19, 20).into())
+            Ok(Token::new(COMMENT, (0, 19).into())),
+            Ok(Token::new(LINE_BREAK, (19, 20).into()))
         ]
     );
 }
@@ -36,12 +36,12 @@ fn comment_line_break() {
 #[test]
 fn comment_line_break_crlf() {
     let source = "# This is a comment\r\n";
-    let tokens: Vec<Token> = tokenize(source).collect();
+    let tokens = tokenize(source).collect::<Vec<_>>();
     assert_eq!(
         tokens,
         vec![
-            Token::new(COMMENT, (0, 19).into()),
-            Token::new(LINE_BREAK, (19, 21).into())
+            Ok(Token::new(COMMENT, (0, 19).into())),
+            Ok(Token::new(LINE_BREAK, (19, 21).into()))
         ]
     );
 }
@@ -49,13 +49,13 @@ fn comment_line_break_crlf() {
 #[test]
 fn whitespace_comment_line_break_crlf() {
     let source = "   # This is a comment\r\n";
-    let tokens: Vec<Token> = tokenize(source).collect();
+    let tokens = tokenize(source).collect::<Vec<_>>();
     assert_eq!(
         tokens,
         vec![
-            Token::new(WHITESPACE, (0, 3).into()),
-            Token::new(COMMENT, (3, 22).into()),
-            Token::new(LINE_BREAK, (22, 24).into())
+            Ok(Token::new(WHITESPACE, (0, 3).into())),
+            Ok(Token::new(COMMENT, (3, 22).into())),
+            Ok(Token::new(LINE_BREAK, (22, 24).into()))
         ]
     );
 }
@@ -63,17 +63,17 @@ fn whitespace_comment_line_break_crlf() {
 #[test]
 fn tokens() {
     let source = "{},.[]=";
-    let tokens: Vec<Token> = tokenize(source).collect();
+    let tokens = tokenize(source).collect::<Vec<_>>();
     assert_eq!(
         tokens,
         vec![
-            Token::new(T!('{'), (0, 1).into()),
-            Token::new(T!('}'), (1, 2).into()),
-            Token::new(T!(,), (2, 3).into()),
-            Token::new(T!(.), (3, 4).into()),
-            Token::new(T!('['), (4, 5).into()),
-            Token::new(T!(']'), (5, 6).into()),
-            Token::new(T!(=), (6, 7).into())
+            Ok(Token::new(T!('{'), (0, 1).into())),
+            Ok(Token::new(T!('}'), (1, 2).into())),
+            Ok(Token::new(T!(,), (2, 3).into())),
+            Ok(Token::new(T!(.), (3, 4).into())),
+            Ok(Token::new(T!('['), (4, 5).into())),
+            Ok(Token::new(T!(']'), (5, 6).into())),
+            Ok(Token::new(T!(=), (6, 7).into()))
         ]
     );
 }
@@ -82,8 +82,8 @@ fn tokens() {
 #[case(r#""Hello, World!""#, (0, 15))]
 #[case(r#""Hello, \"Taro\"!""#, (0, 18))]
 fn basic_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(BASIC_STRING, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(BASIC_STRING, span.into()))]);
 }
 
 #[rstest]
@@ -94,11 +94,11 @@ aaaa
 """
 "#.trim(), (0, 12))]
 fn multi_line_basic_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
+    let tokens = tokenize(source).collect::<Vec<_>>();
 
     assert_eq!(
         tokens,
-        vec![Token::new(MULTI_LINE_BASIC_STRING, span.into())]
+        vec![Ok(Token::new(MULTI_LINE_BASIC_STRING, span.into()))]
     );
 }
 
@@ -106,8 +106,8 @@ fn multi_line_basic_string(#[case] source: &str, #[case] span: (Offset, Offset))
 #[case("'Hello, World!'", (0, 15))]
 #[case("'Hello, \\'Taro\\'!'", (0, 18))]
 fn literal_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(&source).collect();
-    assert_eq!(tokens, vec![Token::new(LITERAL_STRING, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(LITERAL_STRING, span.into()))]);
 }
 
 #[rstest]
@@ -125,24 +125,24 @@ fn literal_string(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("00:00:00", LOCAL_TIME, (0, 8))]
 #[case("00:00:00.123456", LOCAL_TIME, (0, 15))]
 fn datetime(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(kind, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(kind, span.into()))]);
 }
 
 #[rstest]
 #[case("true", BOOLEAN, (0, 4))]
 #[case("false", BOOLEAN, (0, 5))]
 fn boolean(#[case] source: &str, #[case] kind: SyntaxKind, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(kind, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(kind, span.into()))]);
 }
 
 #[rstest]
 #[case("key", (0, 3))]
 #[case("_1234567890", (0, 11))]
 fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(BARE_KEY, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(BARE_KEY, span.into()))]);
 }
 
 #[rstest]
@@ -155,16 +155,16 @@ fn key(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("+1_234_567_890", (0, 14))]
 #[case("-1_234_567_890", (0, 14))]
 fn integer_dec(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(INTEGER_DEC, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(INTEGER_DEC, span.into()))]);
 }
 
 #[rstest]
 #[case("+_1234567890", (0, 12))]
 #[case("-_1234567890", (0, 12))]
 fn invalid_integer_dec(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(INVALID_TOKEN, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(INVALID_TOKEN, span.into()))]);
 }
 
 #[rstest]
@@ -176,8 +176,8 @@ fn invalid_integer_dec(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("0b_1010_10", (0, 10))]
 #[case("0b10_101_010", (0, 12))]
 fn integer_bin(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(INTEGER_BIN, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(INTEGER_BIN, span.into()))]);
 }
 
 #[rstest]
@@ -189,8 +189,8 @@ fn integer_bin(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("0o_1234_567", (0, 11))]
 #[case("0o12_34_567", (0, 11))]
 fn integer_oct(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(INTEGER_OCT, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(INTEGER_OCT, span.into()))]);
 }
 
 #[rstest]
@@ -202,8 +202,8 @@ fn integer_oct(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("0x_1234_5678_90ab_cdef", (0, 22))]
 #[case("0x12_34_5678_90ab_cdef", (0, 22))]
 fn integer_hex(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(INTEGER_HEX, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(INTEGER_HEX, span.into()))]);
 }
 
 #[rstest]
@@ -215,8 +215,8 @@ fn integer_hex(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("-2E-2", (0, 5))]
 #[case("6.626e-34", (0, 9))]
 fn float(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(FLOAT, span.into()))]);
 }
 
 #[rstest]
@@ -227,6 +227,6 @@ fn float(#[case] source: &str, #[case] span: (Offset, Offset)) {
 #[case("-inf", (0, 4))]
 #[case("-nan", (0, 4))]
 fn special_float(#[case] source: &str, #[case] span: (Offset, Offset)) {
-    let tokens: Vec<Token> = tokenize(source).collect();
-    assert_eq!(tokens, vec![Token::new(FLOAT, span.into())]);
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    assert_eq!(tokens, vec![Ok(Token::new(FLOAT, span.into()))]);
 }
