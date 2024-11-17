@@ -6,9 +6,9 @@ mod relative_position;
 mod span;
 mod traits;
 
-pub type RawOffset = u32;
-pub type Line = u32;
-pub type Column = u32;
+type RawTextSize = u32;
+pub type Line = RawTextSize;
+pub type Column = RawTextSize;
 
 pub use crate::{
     offset::Offset, position::Position, range::Range, relative_position::RelativePosition,

@@ -1,5 +1,5 @@
 use {
-    crate::TextLen,
+    crate::{RawTextSize, TextLen},
     std::{
         convert::TryFrom,
         fmt, iter,
@@ -22,7 +22,7 @@ use {
 /// converting from UTF-8 size to another coordinate space, such as UTF-16.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Offset {
-    pub(crate) raw: u32,
+    pub(crate) raw: RawTextSize,
 }
 
 impl fmt::Debug for Offset {

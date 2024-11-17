@@ -2,8 +2,8 @@ pub struct Cursor<'a> {
     /// Iterator over chars. Slightly faster than a &str.
     chars: std::str::Chars<'a>,
     current: char,
-    offset: text::RawOffset,
-    token_start: text::RawOffset,
+    offset: text::Offset,
+    token_start: text::Offset,
 }
 
 pub(crate) const EOF_CHAR: char = '\0';
@@ -16,8 +16,8 @@ impl<'a> Cursor<'a> {
         Cursor {
             chars: input.chars(),
             current,
-            offset: 0,
-            token_start: 0,
+            offset: Default::default(),
+            token_start: Default::default(),
         }
     }
 
@@ -87,7 +87,7 @@ impl<'a> Cursor<'a> {
     /// Moves to the next character.
     pub(crate) fn bump(&mut self) -> Option<char> {
         if let Some(c) = self.chars.next() {
-            self.offset += 1;
+            self.offset += text::Offset::new(1);
             self.current = c;
             Some(c)
         } else {

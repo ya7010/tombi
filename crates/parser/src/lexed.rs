@@ -1,6 +1,5 @@
 use logos::Logos;
 use syntax::SyntaxKind::{self, *};
-use text::RawOffset;
 
 use crate::builder::{Builder, State};
 use crate::{input::Input, output};
@@ -9,7 +8,7 @@ use crate::{input::Input, output};
 pub struct LexedStr<'a> {
     pub text: &'a str,
     pub kind: Vec<SyntaxKind>,
-    pub start_offsets: Vec<RawOffset>,
+    pub start_offsets: Vec<text::Offset>,
     pub error: Vec<LexError>,
 }
 
@@ -60,21 +59,21 @@ impl<'a> LexedStr<'a> {
         let _p = tracing::info_span!("LexedStr::new").entered();
         let mut lexed = SyntaxKind::lexer(text);
         let mut kind = Vec::new();
-        let mut start_offsets: Vec<RawOffset> = Vec::new();
+        let mut start_offsets: Vec<text::Offset> = Vec::new();
         let mut error = Vec::new();
         let mut offset = 0;
         while let Some(token) = lexed.next() {
             match token {
                 Ok(k) => {
                     kind.push(k);
-                    start_offsets.push(lexed.span().start as RawOffset);
+                    start_offsets.push(text::Offset::new(lexed.span().start as u32));
                 }
                 Err(err) => error.push(LexError::new(offset, err)),
             }
             offset += 1;
         }
         kind.push(EOF);
-        start_offsets.push(text.len() as RawOffset);
+        start_offsets.push(text::Offset::new(text.len() as u32));
 
         Self {
             text,
@@ -115,20 +114,20 @@ impl<'a> LexedStr<'a> {
 
     pub fn range_text(&self, r: std::ops::Range<usize>) -> &str {
         assert!(r.start < r.end && r.end <= self.len());
-        let lo = self.start_offsets[r.start] as usize;
-        let hi = self.start_offsets[r.end] as usize;
+        let lo = self.start_offsets[r.start].into();
+        let hi = self.start_offsets[r.end].into();
         &self.text[lo..hi]
     }
 
     // Naming is hard.
     pub fn text_range(&self, i: usize) -> std::ops::Range<usize> {
         assert!(i < self.len());
-        let lo = self.start_offsets[i] as usize;
-        let hi = self.start_offsets[i + 1] as usize;
+        let lo = self.start_offsets[i].into();
+        let hi = self.start_offsets[i + 1].into();
         lo..hi
     }
 
-    pub fn text_start_offset(&self, i: usize) -> RawOffset {
+    pub fn text_start_offset(&self, i: usize) -> text::Offset {
         assert!(i <= self.len());
         self.start_offsets[i]
     }

@@ -382,9 +382,9 @@ impl RangeBounds<Offset> for Span {
     }
 }
 
-impl From<(crate::RawOffset, crate::RawOffset)> for Span {
+impl From<(crate::RawTextSize, crate::RawTextSize)> for Span {
     #[inline]
-    fn from((start, end): (crate::RawOffset, crate::RawOffset)) -> Self {
+    fn from((start, end): (crate::RawTextSize, crate::RawTextSize)) -> Self {
         Span::new(start.into(), end.into())
     }
 }
