@@ -56,7 +56,7 @@ key3 = 1
 key1 = "str"
 key2 = "invalid
 key3 = 1
-"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 8), (1, 15)))]
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
     )]
     #[case::literal_string_without_start_quote(r#"
 key1 = 'str'
@@ -68,7 +68,7 @@ key3 = 1
 key1 = 'str'
 key2 = 'invalid
 key3 = 1
-"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 8), (1, 15)))]
+"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
     )]
     #[case::without_equal(r#"
 key1 "value"

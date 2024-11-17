@@ -31,8 +31,8 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case(r#"key = "value\""#)]
-    #[case(r#"key    = "value\""#)]
+    #[case(r#"key = "value\"""#)]
+    #[case(r#"key    = "value\"""#)]
     fn barestring_key_value(#[case] source: &str) {
         let p = parser::parse(source);
         let ast = ast::Root::cast(p.syntax_node()).unwrap();
@@ -41,7 +41,7 @@ mod tests {
         ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
             .unwrap();
 
-        assert_eq!(formatted_text, r#"key = "value\""#);
+        assert_eq!(formatted_text, r#"key = "value\"""#);
         assert_eq!(p.errors(), []);
     }
 }

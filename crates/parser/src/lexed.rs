@@ -57,21 +57,21 @@ pub fn lex(source: &str) -> LexedStr<'_> {
 impl<'a> LexedStr<'a> {
     pub fn new(source: &'a str) -> Self {
         let _p = tracing::info_span!("LexedStr::new").entered();
-        let mut lexed = SyntaxKind::lexer(source);
+        let lexed = lexer::lex(source);
         let mut kind = Vec::new();
         let mut start_offsets: Vec<text::Offset> = Vec::new();
         let mut error = Vec::new();
-        let mut offset = 0;
-        while let Some(token) = lexed.next() {
+
+        for (i, token) in lexed.into_iter().enumerate() {
             match token {
-                Ok(k) => {
-                    kind.push(k);
-                    start_offsets.push(text::Offset::new(lexed.span().start as u32));
+                Ok(token) => {
+                    kind.push(token.kind());
+                    start_offsets.push(token.span().start());
                 }
-                Err(err) => error.push(LexError::new(offset, err)),
+                Err(_) => error.push(LexError::new(i, syntax::Error::InvalidToken)),
             }
-            offset += 1;
         }
+
         kind.push(EOF);
         start_offsets.push(text::Offset::new(source.len() as u32));
 
