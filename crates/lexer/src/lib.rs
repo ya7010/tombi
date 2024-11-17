@@ -156,7 +156,7 @@ impl Cursor<'_> {
 
     #[inline]
     fn is_keyword(&self, keyword: &str) -> bool {
-        self.matches(keyword) && is_token_separator(self.peek(keyword.len() + 1))
+        self.matches(keyword) && is_token_separator(self.peek(keyword.len()))
     }
 
     fn is_datetime(&self) -> bool {
