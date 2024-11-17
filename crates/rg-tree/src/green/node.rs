@@ -12,13 +12,13 @@ use crate::{
     arc::{Arc, HeaderSlice, ThinArc},
     green::{GreenElement, GreenElementRef, SyntaxKind},
     utility_types::static_assert,
-    GreenToken, NodeOrToken, Offset, Span,
+    GreenToken, NodeOrToken,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: SyntaxKind,
-    text_len: Offset,
+    text_len: text::Offset,
     text_rel_position: text::RelativePosition,
     _c: Count<GreenNode>,
 }
@@ -26,12 +26,12 @@ pub(super) struct GreenNodeHead {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GreenChild {
     Node {
-        rel_offset: Offset,
+        rel_offset: text::Offset,
         rel_position: text::RelativePosition,
         node: GreenNode,
     },
     Token {
-        rel_offset: Offset,
+        rel_offset: text::Offset,
         rel_position: text::RelativePosition,
         token: GreenToken,
     },
@@ -138,7 +138,7 @@ impl GreenNodeData {
 
     /// Returns the length of the text covered by this node.
     #[inline]
-    pub fn text_len(&self) -> Offset {
+    pub fn text_len(&self) -> text::Offset {
         self.header().text_len
     }
 
@@ -157,13 +157,18 @@ impl GreenNodeData {
 
     pub(crate) fn child_at_span(
         &self,
-        rel_span: Span,
-    ) -> Option<(usize, Offset, text::RelativePosition, GreenElementRef<'_>)> {
+        rel_span: text::Span,
+    ) -> Option<(
+        usize,
+        text::Offset,
+        text::RelativePosition,
+        GreenElementRef<'_>,
+    )> {
         let idx = self
             .slice()
             .binary_search_by(|it| {
                 let child_range = it.rel_span();
-                Span::ordering(child_range, rel_span)
+                text::Span::ordering(child_range, rel_span)
             })
             // XXX: this handles empty ranges
             .unwrap_or_else(|it| it.saturating_sub(1));
@@ -233,7 +238,7 @@ impl GreenNode {
         I: IntoIterator<Item = GreenElement>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: Offset = 0.into();
+        let mut text_len: text::Offset = 0.into();
         let mut text_rel_position = Default::default();
         let children = children.into_iter().map(|el| {
             let rel_offset = text_len;
@@ -301,7 +306,7 @@ impl GreenChild {
         }
     }
     #[inline]
-    pub(crate) fn rel_offset(&self) -> Offset {
+    pub(crate) fn rel_offset(&self) -> text::Offset {
         match self {
             GreenChild::Node { rel_offset, .. } | GreenChild::Token { rel_offset, .. } => {
                 *rel_offset
@@ -319,9 +324,9 @@ impl GreenChild {
     }
 
     #[inline]
-    fn rel_span(&self) -> Span {
+    fn rel_span(&self) -> text::Span {
         let len = self.as_ref().text_len();
-        Span::at(self.rel_offset(), len)
+        text::Span::at(self.rel_offset(), len)
     }
 }
 

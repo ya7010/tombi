@@ -98,7 +98,7 @@ use crate::{
     green::{GreenChild, GreenElementRef, GreenNodeData, GreenTokenData, SyntaxKind},
     sll,
     utility_types::Delta,
-    Direction, GreenNode, GreenToken, NodeOrToken, Span, SyntaxText, TokenAtOffset, WalkEvent,
+    Direction, GreenNode, GreenToken, NodeOrToken, SyntaxText, TokenAtOffset, WalkEvent,
 };
 
 enum Green {
@@ -403,10 +403,10 @@ impl NodeData {
     }
 
     #[inline]
-    fn text_span(&self) -> Span {
+    fn text_span(&self) -> text::Span {
         let offset = self.offset();
         let len = self.green().text_len();
-        Span::at(offset, len)
+        text::Span::at(offset, len)
     }
 
     #[inline]
@@ -679,7 +679,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn text_span(&self) -> Span {
+    pub fn text_span(&self) -> text::Span {
         self.data().text_span()
     }
 
@@ -893,7 +893,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn covering_element(&self, span: Span) -> SyntaxElement {
+    pub fn covering_element(&self, span: text::Span) -> SyntaxElement {
         let mut res: SyntaxElement = self.clone().into();
         loop {
             assert!(
@@ -912,7 +912,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn child_or_token_at_span(&self, span: Span) -> Option<SyntaxElement> {
+    pub fn child_or_token_at_span(&self, span: text::Span) -> Option<SyntaxElement> {
         self.green_ref().child_at_span(span - self.offset()).map(
             |(index, rel_offset, rel_position, green)| {
                 SyntaxElement::new(
@@ -993,7 +993,7 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn text_span(&self) -> Span {
+    pub fn text_span(&self) -> text::Span {
         self.data().text_span()
     }
 
@@ -1095,7 +1095,7 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn text_span(&self) -> Span {
+    pub fn text_span(&self) -> text::Span {
         match self {
             NodeOrToken::Node(it) => it.text_span(),
             NodeOrToken::Token(it) => it.text_span(),

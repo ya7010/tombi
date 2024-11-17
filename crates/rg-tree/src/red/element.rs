@@ -1,6 +1,6 @@
 use std::iter;
 
-use crate::{cursor, Language, NodeOrToken, Span};
+use crate::{cursor, Language, NodeOrToken};
 
 use super::{node::RedNode, token::RedToken};
 
@@ -19,7 +19,7 @@ impl<L: Language> From<RedToken<L>> for RedElement<L> {
 }
 
 impl<L: Language> RedElement<L> {
-    pub fn text_span(&self) -> Span {
+    pub fn text_span(&self) -> text::Span {
         match self {
             NodeOrToken::Node(it) => it.text_span(),
             NodeOrToken::Token(it) => it.text_span(),

@@ -1,14 +1,11 @@
 use std::fmt;
 
-use crate::{
-    cursor::{SyntaxNode, SyntaxToken},
-    Span, Offset,
-};
+use crate::cursor::{SyntaxNode, SyntaxToken};
 
 #[derive(Clone)]
 pub struct SyntaxText {
     node: SyntaxNode,
-    span: Span,
+    span: text::Span,
 }
 
 impl SyntaxText {
@@ -18,7 +15,7 @@ impl SyntaxText {
         SyntaxText { node, span }
     }
 
-    pub fn len(&self) -> Offset {
+    pub fn len(&self) -> text::Offset {
         self.span.len()
     }
 
@@ -31,23 +28,23 @@ impl SyntaxText {
             .is_err()
     }
 
-    pub fn find_char(&self, c: char) -> Option<Offset> {
-        let mut acc: Offset = 0.into();
+    pub fn find_char(&self, c: char) -> Option<text::Offset> {
+        let mut acc: text::Offset = 0.into();
         let res = self.try_for_each_chunk(|chunk| {
             if let Some(pos) = chunk.find(c) {
-                let pos: Offset = (pos as u32).into();
+                let pos: text::Offset = (pos as u32).into();
                 return Err(acc + pos);
             }
-            acc += Offset::of(chunk);
+            acc += text::Offset::of(chunk);
             Ok(())
         });
         found(res)
     }
 
-    pub fn char_at(&self, offset: Offset) -> Option<char> {
-        let mut start: Offset = 0.into();
+    pub fn char_at(&self, offset: text::Offset) -> Option<char> {
+        let mut start: text::Offset = 0.into();
         let res = self.try_for_each_chunk(|chunk| {
-            let end = start + Offset::of(chunk);
+            let end = start + text::Offset::of(chunk);
             if start <= offset && offset < end {
                 let off: usize = u32::from(offset - start) as usize;
                 return Err(chunk[off..].chars().next().unwrap());
@@ -71,7 +68,7 @@ impl SyntaxText {
             self.span,
             (span.start(), span.end()),
         );
-        let span = Span::new(start, end);
+        let span = text::Span::new(start, end);
         assert!(
             self.span.contains_span(span),
             "invalid slice, span: {:?}, slice: {:?}",
@@ -110,7 +107,7 @@ impl SyntaxText {
         }
     }
 
-    fn tokens_with_spans(&self) -> impl Iterator<Item = (SyntaxToken, Span)> {
+    fn tokens_with_spans(&self) -> impl Iterator<Item = (SyntaxToken, text::Span)> {
         let text_span = self.span;
         self.node
             .descendants_with_tokens()
@@ -193,7 +190,7 @@ impl PartialEq for SyntaxText {
     }
 }
 
-fn zip_texts<I: Iterator<Item = (SyntaxToken, Span)>>(xs: &mut I, ys: &mut I) -> Option<()> {
+fn zip_texts<I: Iterator<Item = (SyntaxToken, text::Span)>>(xs: &mut I, ys: &mut I) -> Option<()> {
     let mut x = xs.next()?;
     let mut y = ys.next()?;
     loop {
@@ -209,8 +206,8 @@ fn zip_texts<I: Iterator<Item = (SyntaxToken, Span)>>(xs: &mut I, ys: &mut I) ->
             return Some(());
         }
         let advance = std::cmp::min(x.1.len(), y.1.len());
-        x.1 = Span::new(x.1.start() + advance, x.1.end());
-        y.1 = Span::new(y.1.start() + advance, y.1.end());
+        x.1 = text::Span::new(x.1.start() + advance, x.1.end());
+        y.1 = text::Span::new(y.1.start() + advance, y.1.end());
     }
 }
 
@@ -219,54 +216,52 @@ impl Eq for SyntaxText {}
 mod private {
     use std::ops;
 
-    use crate::{Span, Offset};
-
     pub trait SyntaxTextSpan {
-        fn start(&self) -> Option<Offset>;
-        fn end(&self) -> Option<Offset>;
+        fn start(&self) -> Option<text::Offset>;
+        fn end(&self) -> Option<text::Offset>;
     }
 
-    impl SyntaxTextSpan for Span {
-        fn start(&self) -> Option<Offset> {
-            Some(Span::start(*self))
+    impl SyntaxTextSpan for text::Span {
+        fn start(&self) -> Option<text::Offset> {
+            Some(text::Span::start(*self))
         }
-        fn end(&self) -> Option<Offset> {
-            Some(Span::end(*self))
+        fn end(&self) -> Option<text::Offset> {
+            Some(text::Span::end(*self))
         }
     }
 
-    impl SyntaxTextSpan for ops::Range<Offset> {
-        fn start(&self) -> Option<Offset> {
+    impl SyntaxTextSpan for ops::Range<text::Offset> {
+        fn start(&self) -> Option<text::Offset> {
             Some(self.start)
         }
-        fn end(&self) -> Option<Offset> {
+        fn end(&self) -> Option<text::Offset> {
             Some(self.end)
         }
     }
 
-    impl SyntaxTextSpan for ops::RangeFrom<Offset> {
-        fn start(&self) -> Option<Offset> {
+    impl SyntaxTextSpan for ops::RangeFrom<text::Offset> {
+        fn start(&self) -> Option<text::Offset> {
             Some(self.start)
         }
-        fn end(&self) -> Option<Offset> {
+        fn end(&self) -> Option<text::Offset> {
             None
         }
     }
 
-    impl SyntaxTextSpan for ops::RangeTo<Offset> {
-        fn start(&self) -> Option<Offset> {
+    impl SyntaxTextSpan for ops::RangeTo<text::Offset> {
+        fn start(&self) -> Option<text::Offset> {
             None
         }
-        fn end(&self) -> Option<Offset> {
+        fn end(&self) -> Option<text::Offset> {
             Some(self.end)
         }
     }
 
     impl SyntaxTextSpan for ops::RangeFull {
-        fn start(&self) -> Option<Offset> {
+        fn start(&self) -> Option<text::Offset> {
             None
         }
-        fn end(&self) -> Option<Offset> {
+        fn end(&self) -> Option<text::Offset> {
             None
         }
     }

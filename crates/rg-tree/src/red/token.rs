@@ -4,7 +4,7 @@ use crate::{
     cursor,
     green::{GreenNode, GreenToken, GreenTokenData},
     red::{RedElement, RedNode},
-    Direction, Language, NodeOrToken, Span,
+    Direction, Language, NodeOrToken,
 };
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -48,7 +48,7 @@ impl<L: Language> RedToken<L> {
         L::kind_from_raw(self.raw.kind())
     }
 
-    pub fn text_span(&self) -> Span {
+    pub fn text_span(&self) -> text::Span {
         self.raw.text_span()
     }
 
