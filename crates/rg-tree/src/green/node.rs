@@ -12,13 +12,13 @@ use crate::{
     arc::{Arc, HeaderSlice, ThinArc},
     green::{GreenElement, GreenElementRef, SyntaxKind},
     utility_types::static_assert,
-    GreenToken, NodeOrToken, Span, TextSize,
+    GreenToken, NodeOrToken, Offset, Span,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: SyntaxKind,
-    text_len: TextSize,
+    text_len: Offset,
     text_rel_position: text::RelativePosition,
     _c: Count<GreenNode>,
 }
@@ -26,12 +26,12 @@ pub(super) struct GreenNodeHead {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GreenChild {
     Node {
-        rel_offset: TextSize,
+        rel_offset: Offset,
         rel_position: text::RelativePosition,
         node: GreenNode,
     },
     Token {
-        rel_offset: TextSize,
+        rel_offset: Offset,
         rel_position: text::RelativePosition,
         token: GreenToken,
     },
@@ -138,7 +138,7 @@ impl GreenNodeData {
 
     /// Returns the length of the text covered by this node.
     #[inline]
-    pub fn text_len(&self) -> TextSize {
+    pub fn text_len(&self) -> Offset {
         self.header().text_len
     }
 
@@ -158,7 +158,7 @@ impl GreenNodeData {
     pub(crate) fn child_at_span(
         &self,
         rel_span: Span,
-    ) -> Option<(usize, TextSize, text::RelativePosition, GreenElementRef<'_>)> {
+    ) -> Option<(usize, Offset, text::RelativePosition, GreenElementRef<'_>)> {
         let idx = self
             .slice()
             .binary_search_by(|it| {
@@ -233,7 +233,7 @@ impl GreenNode {
         I: IntoIterator<Item = GreenElement>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: TextSize = 0.into();
+        let mut text_len: Offset = 0.into();
         let mut text_rel_position = Default::default();
         let children = children.into_iter().map(|el| {
             let rel_offset = text_len;
@@ -301,7 +301,7 @@ impl GreenChild {
         }
     }
     #[inline]
-    pub(crate) fn rel_offset(&self) -> TextSize {
+    pub(crate) fn rel_offset(&self) -> Offset {
         match self {
             GreenChild::Node { rel_offset, .. } | GreenChild::Token { rel_offset, .. } => {
                 *rel_offset

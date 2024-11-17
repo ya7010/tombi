@@ -1,21 +1,21 @@
 use cmp::Ordering;
 
 use {
-    crate::TextSize,
+    crate::Offset,
     std::{
         cmp, fmt,
         ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign},
     },
 };
 
-/// A span in text, represented as a pair of [`TextSize`][struct@TextSize].
+/// A span in text, represented as a pair of [`Offset`][struct@Offset].
 ///
 /// It is a logic error for `start` to be greater than `end`.
 #[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Span {
     // Invariant: start <= end
-    start: TextSize,
-    end: TextSize,
+    start: Offset,
+    end: Offset,
 }
 
 impl fmt::Debug for Span {
@@ -35,8 +35,8 @@ impl Span {
     ///
     /// ```rust
     /// # use text::*;
-    /// let start = TextSize::from(5);
-    /// let end = TextSize::from(10);
+    /// let start = Offset::from(5);
+    /// let end = Offset::from(10);
     /// let span = Span::new(start, end);
     ///
     /// assert_eq!(span.start(), start);
@@ -44,7 +44,7 @@ impl Span {
     /// assert_eq!(span.len(), end - start);
     /// ```
     #[inline]
-    pub const fn new(start: TextSize, end: TextSize) -> Span {
+    pub const fn new(start: Offset, end: Offset) -> Span {
         assert!(start.raw <= end.raw);
         Span { start, end }
     }
@@ -57,16 +57,16 @@ impl Span {
     /// # use text::*;
     /// let text = "0123456789";
     ///
-    /// let offset = TextSize::from(2);
-    /// let length = TextSize::from(5);
+    /// let offset = Offset::from(2);
+    /// let length = Offset::from(5);
     /// let span = Span::at(offset, length);
     ///
     /// assert_eq!(span, Span::new(offset, offset + length));
     /// assert_eq!(&text[span], "23456")
     /// ```
     #[inline]
-    pub const fn at(offset: TextSize, len: TextSize) -> Span {
-        Span::new(offset, TextSize::new(offset.raw + len.raw))
+    pub const fn at(offset: Offset, len: Offset) -> Span {
+        Span::new(offset, Offset::new(offset.raw + len.raw))
     }
 
     /// Create a zero-length span at the specified offset (`offset..offset`).
@@ -75,14 +75,14 @@ impl Span {
     ///
     /// ```rust
     /// # use text::*;
-    /// let point: TextSize;
-    /// # point = TextSize::from(3);
+    /// let point: Offset;
+    /// # point = Offset::from(3);
     /// let span = Span::empty(point);
     /// assert!(span.is_empty());
     /// assert_eq!(span, Span::new(point, point));
     /// ```
     #[inline]
-    pub const fn empty(offset: TextSize) -> Span {
+    pub const fn empty(offset: Offset) -> Span {
         Span {
             start: offset,
             end: offset,
@@ -95,8 +95,8 @@ impl Span {
     ///
     /// ```rust
     /// # use text::*;
-    /// let point: TextSize;
-    /// # point = TextSize::from(12);
+    /// let point: Offset;
+    /// # point = Offset::from(12);
     /// let span = Span::up_to(point);
     ///
     /// assert_eq!(span.len(), point);
@@ -104,9 +104,9 @@ impl Span {
     /// assert_eq!(span, Span::at(0.into(), point));
     /// ```
     #[inline]
-    pub const fn up_to(end: TextSize) -> Span {
+    pub const fn up_to(end: Offset) -> Span {
         Span {
-            start: TextSize::new(0),
+            start: Offset::new(0),
             end,
         }
     }
@@ -116,21 +116,21 @@ impl Span {
 impl Span {
     /// The start point of this span.
     #[inline]
-    pub const fn start(self) -> TextSize {
+    pub const fn start(self) -> Offset {
         self.start
     }
 
     /// The end point of this span.
     #[inline]
-    pub const fn end(self) -> TextSize {
+    pub const fn end(self) -> Offset {
         self.end
     }
 
     /// The size of this span.
     #[inline]
-    pub const fn len(self) -> TextSize {
+    pub const fn len(self) -> Offset {
         // HACK for const fn: math on primitives only
-        TextSize {
+        Offset {
             raw: self.end().raw - self.start().raw,
         }
     }
@@ -153,14 +153,14 @@ impl Span {
     ///
     /// ```rust
     /// # use text::*;
-    /// let (start, end): (TextSize, TextSize);
+    /// let (start, end): (Offset, Offset);
     /// # start = 10.into(); end = 20.into();
     /// let span = Span::new(start, end);
     /// assert!(span.contains(start));
     /// assert!(!span.contains(end));
     /// ```
     #[inline]
-    pub fn contains(self, offset: TextSize) -> bool {
+    pub fn contains(self, offset: Offset) -> bool {
         self.start() <= offset && offset < self.end()
     }
 
@@ -172,14 +172,14 @@ impl Span {
     ///
     /// ```rust
     /// # use text::*;
-    /// let (start, end): (TextSize, TextSize);
+    /// let (start, end): (Offset, Offset);
     /// # start = 10.into(); end = 20.into();
     /// let span = Span::new(start, end);
     /// assert!(span.contains_inclusive(start));
     /// assert!(span.contains_inclusive(end));
     /// ```
     #[inline]
-    pub fn contains_inclusive(self, offset: TextSize) -> bool {
+    pub fn contains_inclusive(self, offset: Offset) -> bool {
         self.start() <= offset && offset <= self.end()
     }
 
@@ -261,7 +261,7 @@ impl Span {
     /// )
     /// ```
     #[inline]
-    pub fn cover_offset(self, offset: TextSize) -> Span {
+    pub fn cover_offset(self, offset: Offset) -> Span {
         self.cover(Span::empty(offset))
     }
 
@@ -274,7 +274,7 @@ impl Span {
     /// The unchecked version (`Add::add`) will _always_ panic on overflow,
     /// in contrast to primitive integers, which check in debug mode only.
     #[inline]
-    pub fn checked_add(self, offset: TextSize) -> Option<Span> {
+    pub fn checked_add(self, offset: Offset) -> Option<Span> {
         Some(Span {
             start: self.start.checked_add(offset)?,
             end: self.end.checked_add(offset)?,
@@ -290,7 +290,7 @@ impl Span {
     /// The unchecked version (`Sub::sub`) will _always_ panic on overflow,
     /// in contrast to primitive integers, which check in debug mode only.
     #[inline]
-    pub fn checked_sub(self, offset: TextSize) -> Option<Span> {
+    pub fn checked_sub(self, offset: Offset) -> Option<Span> {
         Some(Span {
             start: self.start.checked_sub(offset)?,
             end: self.end.checked_sub(offset)?,
@@ -372,12 +372,12 @@ impl IndexMut<Span> for String {
     }
 }
 
-impl RangeBounds<TextSize> for Span {
-    fn start_bound(&self) -> Bound<&TextSize> {
+impl RangeBounds<Offset> for Span {
+    fn start_bound(&self) -> Bound<&Offset> {
         Bound::Included(&self.start)
     }
 
-    fn end_bound(&self) -> Bound<&TextSize> {
+    fn end_bound(&self) -> Bound<&Offset> {
         Bound::Excluded(&self.end)
     }
 }
@@ -391,7 +391,7 @@ impl From<(crate::RawOffset, crate::RawOffset)> for Span {
 
 impl<T> From<Span> for Range<T>
 where
-    T: From<TextSize>,
+    T: From<Offset>,
 {
     #[inline]
     fn from(r: Span) -> Self {
@@ -401,10 +401,10 @@ where
 
 macro_rules! ops {
     (impl $Op:ident for Span by fn $f:ident = $op:tt) => {
-        impl $Op<&TextSize> for Span {
+        impl $Op<&Offset> for Span {
             type Output = Span;
             #[inline]
-            fn $f(self, other: &TextSize) -> Span {
+            fn $f(self, other: &Offset) -> Span {
                 self $op *other
             }
         }
@@ -421,18 +421,18 @@ macro_rules! ops {
     };
 }
 
-impl Add<TextSize> for Span {
+impl Add<Offset> for Span {
     type Output = Span;
     #[inline]
-    fn add(self, offset: TextSize) -> Span {
+    fn add(self, offset: Offset) -> Span {
         self.checked_add(offset).expect("Span +offset overflowed")
     }
 }
 
-impl Sub<TextSize> for Span {
+impl Sub<Offset> for Span {
     type Output = Span;
     #[inline]
-    fn sub(self, offset: TextSize) -> Span {
+    fn sub(self, offset: Offset) -> Span {
         self.checked_sub(offset).expect("Span -offset overflowed")
     }
 }

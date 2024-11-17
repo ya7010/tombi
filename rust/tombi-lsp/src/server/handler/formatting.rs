@@ -1,5 +1,4 @@
 use dashmap::try_result::TryResult;
-use text::TextSize;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
 use crate::server::backend::Backend;
@@ -31,7 +30,7 @@ pub async fn handle_formatting(
                     text::Position::new(0, 0).into(),
                     text::Position::from_source(
                         &document.source,
-                        TextSize::new(document.source.len() as u32),
+                        text::Offset::new(document.source.len() as u32),
                     )
                     .into(),
                 );

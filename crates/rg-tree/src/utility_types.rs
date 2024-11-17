@@ -2,7 +2,7 @@ use std::{
     fmt,
     ops::{AddAssign, Deref},
 };
-use text::TextSize;
+use text::Offset;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum NodeOrToken<N, T> {
@@ -177,4 +177,4 @@ macro_rules! impls {
         }
     )*};
 }
-impls!(u32 TextSize);
+impls!(u32 Offset);

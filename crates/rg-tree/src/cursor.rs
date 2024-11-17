@@ -98,8 +98,7 @@ use crate::{
     green::{GreenChild, GreenElementRef, GreenNodeData, GreenTokenData, SyntaxKind},
     sll,
     utility_types::Delta,
-    Direction, GreenNode, GreenToken, NodeOrToken, Span, SyntaxText, TextSize, TokenAtOffset,
-    WalkEvent,
+    Direction, GreenNode, GreenToken, NodeOrToken, Span, SyntaxText, TokenAtOffset, WalkEvent,
 };
 
 enum Green {
@@ -124,7 +123,7 @@ struct NodeData {
     /// Invariant: never changes after NodeData is created.
     mutable: bool,
     /// Absolute offset for immutable nodes, unused for mutable nodes.
-    offset: TextSize,
+    offset: text::Offset,
     position: text::Position,
     // The following links only have meaning when `mutable` is true.
     first: Cell<*const NodeData>,
@@ -229,7 +228,7 @@ impl NodeData {
     fn new(
         parent: Option<SyntaxNode>,
         index: u32,
-        offset: TextSize,
+        offset: text::Offset,
         position: text::Position,
         green: Green,
         mutable: bool,
@@ -305,7 +304,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn key(&self) -> (ptr::NonNull<()>, TextSize) {
+    fn key(&self) -> (ptr::NonNull<()>, text::Offset) {
         let ptr = match &self.green {
             Green::Node { ptr } => ptr.get().cast(),
             Green::Token { ptr } => ptr.cast(),
@@ -352,7 +351,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn offset(&self) -> TextSize {
+    fn offset(&self) -> text::Offset {
         if self.mutable {
             self.offset_mut()
         } else {
@@ -361,8 +360,8 @@ impl NodeData {
     }
 
     #[cold]
-    fn offset_mut(&self) -> TextSize {
-        let mut res = TextSize::from(0);
+    fn offset_mut(&self) -> text::Offset {
+        let mut res = text::Offset::from(0);
 
         let mut node = self;
         while let Some(parent) = node.parent() {
@@ -609,7 +608,7 @@ impl SyntaxNode {
         green: &GreenNodeData,
         parent: SyntaxNode,
         index: u32,
-        offset: TextSize,
+        offset: text::Offset,
         position: text::Position,
     ) -> SyntaxNode {
         let mutable = parent.data().mutable;
@@ -670,7 +669,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    fn offset(&self) -> TextSize {
+    fn offset(&self) -> text::Offset {
         self.data().offset()
     }
 
@@ -858,7 +857,7 @@ impl SyntaxNode {
         PreorderWithTokens::new(self.clone())
     }
 
-    pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
+    pub fn token_at_offset(&self, offset: text::Offset) -> TokenAtOffset<SyntaxToken> {
         // TODO: this could be faster if we first drill-down to node, and only
         // then switch to token search. We should also replace explicit
         // recursion with a loop.
@@ -962,7 +961,7 @@ impl SyntaxToken {
         green: &GreenTokenData,
         parent: SyntaxNode,
         index: u32,
-        offset: TextSize,
+        offset: text::Offset,
         position: text::Position,
     ) -> SyntaxToken {
         let mutable = parent.data().mutable;
@@ -1082,7 +1081,7 @@ impl SyntaxElement {
         element: GreenElementRef<'_>,
         parent: SyntaxNode,
         index: u32,
-        offset: TextSize,
+        offset: text::Offset,
         position: text::Position,
     ) -> SyntaxElement {
         match element {
@@ -1162,7 +1161,7 @@ impl SyntaxElement {
         }
     }
 
-    fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
+    fn token_at_offset(&self, offset: text::Offset) -> TokenAtOffset<SyntaxToken> {
         assert!(self.text_span().start() <= offset && offset <= self.text_span().end());
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),

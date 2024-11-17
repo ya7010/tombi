@@ -10,7 +10,7 @@ use countme::Count;
 use crate::{
     arc::{Arc, HeaderSlice, ThinArc},
     green::SyntaxKind,
-    TextSize,
+    Offset,
 };
 
 #[derive(PartialEq, Eq, Hash)]
@@ -101,8 +101,8 @@ impl GreenTokenData {
 
     /// Returns the length of the text covered by this token.
     #[inline]
-    pub fn text_len(&self) -> TextSize {
-        TextSize::of(self.text())
+    pub fn text_len(&self) -> Offset {
+        Offset::of(self.text())
     }
 
     #[inline]

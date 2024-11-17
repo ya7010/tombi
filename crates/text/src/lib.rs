@@ -1,9 +1,9 @@
 mod features;
+mod offset;
 mod position;
 mod range;
 mod relative_position;
 mod span;
-mod text_size;
 mod traits;
 
 pub type RawOffset = u32;
@@ -11,8 +11,8 @@ pub type Line = u32;
 pub type Column = u32;
 
 pub use crate::{
-    position::Position, range::Range, relative_position::RelativePosition, span::Span,
-    text_size::TextSize, traits::TextLen,
+    offset::Offset, position::Position, range::Range, relative_position::RelativePosition,
+    span::Span, traits::TextLen,
 };
 
 #[cfg(target_pointer_width = "16")]

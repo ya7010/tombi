@@ -28,7 +28,7 @@ impl From<tower_lsp::lsp_types::Range> for crate::Range {
     }
 }
 
-impl crate::TextSize {
+impl crate::Offset {
     pub fn from_source(source: &str, position: tower_lsp::lsp_types::Position) -> Self {
         let mut line = 0;
         let mut column = 0;

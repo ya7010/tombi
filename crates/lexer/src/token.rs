@@ -14,7 +14,7 @@ impl Token {
     pub const fn eof() -> Self {
         Self {
             kind: SyntaxKind::EOF,
-            span: text::Span::new(text::TextSize::new(0), text::TextSize::new(0)),
+            span: text::Span::new(text::Offset::new(0), text::Offset::new(0)),
         }
     }
 

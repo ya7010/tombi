@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use crate::{
     green::{GreenNode, GreenToken, SyntaxKind},
-    GreenNodeData, NodeOrToken, TextSize,
+    GreenNodeData, NodeOrToken, Offset,
 };
 
 use super::GreenTokenData;
@@ -63,7 +63,7 @@ impl GreenElement {
 
     /// Returns the length of the text covered by this element.
     #[inline]
-    pub fn text_len(&self) -> TextSize {
+    pub fn text_len(&self) -> Offset {
         self.as_deref().text_len()
     }
 
@@ -85,7 +85,7 @@ impl GreenElementRef<'_> {
 
     /// Returns the length of the text covered by this element.
     #[inline]
-    pub fn text_len(self) -> TextSize {
+    pub fn text_len(self) -> Offset {
         match self {
             NodeOrToken::Node(it) => it.text_len(),
             NodeOrToken::Token(it) => it.text_len(),

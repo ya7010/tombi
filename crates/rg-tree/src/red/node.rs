@@ -4,7 +4,7 @@ use crate::{
     cursor,
     green::{GreenNode, GreenNodeData},
     red::{Preorder, PreorderWithTokens, RedElementChildren, RedNodeChildren},
-    Direction, Language, NodeOrToken, Span, SyntaxText, TextSize, TokenAtOffset, WalkEvent,
+    Direction, Language, NodeOrToken, Span, SyntaxText, Offset, TokenAtOffset, WalkEvent,
 };
 
 use super::{RedElement, RedToken};
@@ -171,7 +171,7 @@ impl<L: Language> RedNode<L> {
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
     /// Precondition: offset must be within node's span.
-    pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<RedToken<L>> {
+    pub fn token_at_offset(&self, offset: Offset) -> TokenAtOffset<RedToken<L>> {
         self.raw.token_at_offset(offset).map(RedToken::from)
     }
 
