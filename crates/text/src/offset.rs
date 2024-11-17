@@ -1,5 +1,5 @@
 use {
-    crate::{RawTextSize, TextLen},
+    crate::RawTextSize,
     std::{
         convert::TryFrom,
         fmt, iter,
@@ -46,15 +46,15 @@ impl Offset {
     ///
     /// ```rust
     /// # use text::*;
-    /// let char_size = Offset::of('🦀');
+    /// let char_size = Offset::of("🦀");
     /// assert_eq!(char_size, Offset::from(4));
     ///
     /// let str_size = Offset::of("rust-analyzer");
     /// assert_eq!(str_size, Offset::from(13));
     /// ```
     #[inline]
-    pub fn of<T: TextLen>(text: T) -> Offset {
-        text.text_len()
+    pub fn of(text: &str) -> Offset {
+        Self::new(text.len() as RawTextSize)
     }
 }
 

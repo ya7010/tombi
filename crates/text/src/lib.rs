@@ -4,7 +4,6 @@ mod position;
 mod range;
 mod relative_position;
 mod span;
-mod traits;
 
 type RawTextSize = u32;
 pub type Line = RawTextSize;
@@ -12,7 +11,7 @@ pub type Column = RawTextSize;
 
 pub use crate::{
     offset::Offset, position::Position, range::Range, relative_position::RelativePosition,
-    span::Span, traits::TextLen,
+    span::Span,
 };
 
 #[cfg(target_pointer_width = "16")]
