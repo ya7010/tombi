@@ -6,7 +6,7 @@ mod span;
 mod text_size;
 mod traits;
 
-pub type Offset = u32;
+pub type RawOffset = u32;
 pub type Line = u32;
 pub type Column = u32;
 

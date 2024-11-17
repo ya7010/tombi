@@ -2,8 +2,8 @@ pub struct Cursor<'a> {
     /// Iterator over chars. Slightly faster than a &str.
     chars: std::str::Chars<'a>,
     current: char,
-    offset: text::Offset,
-    token_start: text::Offset,
+    offset: text::RawOffset,
+    token_start: text::RawOffset,
 }
 
 pub(crate) const EOF_CHAR: char = '\0';
