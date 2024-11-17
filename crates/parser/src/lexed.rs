@@ -1,4 +1,3 @@
-use logos::Logos;
 use syntax::SyntaxKind::{self, *};
 
 use crate::builder::{Builder, State};
@@ -81,14 +80,6 @@ impl<'a> LexedStr<'a> {
             start_offsets,
             error,
         }
-    }
-
-    pub fn single_token(text: &'a str) -> Option<Result<SyntaxKind, syntax::Error>> {
-        if text.is_empty() {
-            return None;
-        }
-
-        SyntaxKind::lexer(text).next()
     }
 
     pub fn as_str(&self) -> &str {

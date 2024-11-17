@@ -18,6 +18,5 @@ text = { workspace = true }
 diagnostics = { workspace = true }
 
 [dev-dependencies]
-logos = { workspace = true }
 assert_matches = { workspace = true }
 tracing-subscriber = { workspace = true }

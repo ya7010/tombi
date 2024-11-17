@@ -229,3 +229,260 @@ fn special_float(#[case] source: &str, #[case] span: impl Into<text::Span>) {
     let tokens = tokenize(source).collect::<Vec<_>>();
     assert_eq!(tokens, vec![Ok(Token::new(FLOAT, span.into()))]);
 }
+
+#[test]
+fn key_value_float_dot_key() {
+    let tokens = tokenize(r#"3.14159 = "pi""#).collect::<Vec<_>>();
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(FLOAT, (0, 7).into())),
+            Ok(Token::new(WHITESPACE, (7, 8).into())),
+            Ok(Token::new(EQUAL, (8, 9).into())),
+            Ok(Token::new(WHITESPACE, (9, 10).into())),
+            Ok(Token::new(BASIC_STRING, (10, 14).into()))
+        ]
+    );
+}
+
+#[rstest]
+#[case("odt1 = 1979-05-27T07:32:00Z")]
+#[case("odt2 = 1979-05-27T00:32:00-07:00")]
+#[case("odt3 = 1979-05-27T00:32:00.999999-07:00")]
+#[case("odt4 = 1979-05-27 07:32:00Z")]
+fn key_value_offset_date_time(#[case] source: &str) {
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 4).into())),
+            Ok(Token::new(WHITESPACE, (4, 5).into())),
+            Ok(Token::new(EQUAL, (5, 6).into())),
+            Ok(Token::new(WHITESPACE, (6, 7).into())),
+            Ok(Token::new(OFFSET_DATE_TIME, (7, end).into()))
+        ]
+    );
+}
+
+#[rstest]
+#[case("ldt1 = 1979-05-27T07:32:00")]
+#[case("ldt2 = 1979-05-27T00:32:00.999999")]
+fn key_value_local_date_time(#[case] source: &str) {
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 4).into())),
+            Ok(Token::new(WHITESPACE, (4, 5).into())),
+            Ok(Token::new(EQUAL, (5, 6).into())),
+            Ok(Token::new(WHITESPACE, (6, 7).into())),
+            Ok(Token::new(LOCAL_DATE_TIME, (7, end).into()))
+        ]
+    );
+}
+
+#[rstest]
+#[case("ld1 = 1979-05-27")]
+fn key_value_local_date(#[case] source: &str) {
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 3).into())),
+            Ok(Token::new(WHITESPACE, (3, 4).into())),
+            Ok(Token::new(EQUAL, (4, 5).into())),
+            Ok(Token::new(WHITESPACE, (5, 6).into())),
+            Ok(Token::new(LOCAL_DATE, (6, end).into()))
+        ]
+    );
+}
+
+#[rstest]
+#[case("lt1 = 07:32:00")]
+#[case("lt2 = 00:32:00.999999")]
+fn key_value_local_time(#[case] source: &str) {
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 3).into())),
+            Ok(Token::new(WHITESPACE, (3, 4).into())),
+            Ok(Token::new(EQUAL, (4, 5).into())),
+            Ok(Token::new(WHITESPACE, (5, 6).into())),
+            Ok(Token::new(LOCAL_TIME, (6, end).into()))
+        ]
+    );
+}
+
+#[rstest]
+#[case(r#"apple.type = "fruit""#)]
+fn key_value_dotted_keys(#[case] source: &str) {
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 5).into())),
+            Ok(Token::new(DOT, (5, 6).into())),
+            Ok(Token::new(BARE_KEY, (6, 10).into())),
+            Ok(Token::new(WHITESPACE, (10, 11).into())),
+            Ok(Token::new(EQUAL, (11, 12).into())),
+            Ok(Token::new(WHITESPACE, (12, 13).into())),
+            Ok(Token::new(BASIC_STRING, (13, end).into()))
+        ]
+    );
+}
+
+#[test]
+fn table() {
+    let source = r#"
+[package]
+name = "toml"
+version = "0.5.8"
+"#
+    .trim();
+
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BRACKET_START, (0, 1).into())),
+            Ok(Token::new(BARE_KEY, (1, 8).into())),
+            Ok(Token::new(BRACKET_END, (8, 9).into())),
+            Ok(Token::new(LINE_BREAK, (9, 10).into())),
+            Ok(Token::new(BARE_KEY, (10, 14).into())),
+            Ok(Token::new(WHITESPACE, (14, 15).into())),
+            Ok(Token::new(EQUAL, (15, 16).into())),
+            Ok(Token::new(WHITESPACE, (16, 17).into())),
+            Ok(Token::new(BASIC_STRING, (17, 23).into())),
+            Ok(Token::new(LINE_BREAK, (23, 24).into())),
+            Ok(Token::new(BARE_KEY, (24, 31).into())),
+            Ok(Token::new(WHITESPACE, (31, 32).into())),
+            Ok(Token::new(EQUAL, (32, 33).into())),
+            Ok(Token::new(WHITESPACE, (33, 34).into())),
+            Ok(Token::new(BASIC_STRING, (34, end).into())),
+        ]
+    );
+}
+
+#[test]
+fn inline_table() {
+    let source = r#"key1 = { key2 = "value" }"#;
+
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 4).into())),
+            Ok(Token::new(WHITESPACE, (4, 5).into())),
+            Ok(Token::new(EQUAL, (5, 6).into())),
+            Ok(Token::new(WHITESPACE, (6, 7).into())),
+            Ok(Token::new(BRACE_START, (7, 8).into())),
+            Ok(Token::new(WHITESPACE, (8, 9).into())),
+            Ok(Token::new(BARE_KEY, (9, 13).into())),
+            Ok(Token::new(WHITESPACE, (13, 14).into())),
+            Ok(Token::new(EQUAL, (14, 15).into())),
+            Ok(Token::new(WHITESPACE, (15, 16).into())),
+            Ok(Token::new(BASIC_STRING, (16, 23).into())),
+            Ok(Token::new(WHITESPACE, (23, 24).into())),
+            Ok(Token::new(BRACE_END, (24, end).into()))
+        ]
+    );
+}
+
+#[test]
+fn invalid_source() {
+    let source = "key1 = { key2 = 'value";
+
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BARE_KEY, (0, 4).into())),
+            Ok(Token::new(WHITESPACE, (4, 5).into())),
+            Ok(Token::new(EQUAL, (5, 6).into())),
+            Ok(Token::new(WHITESPACE, (6, 7).into())),
+            Ok(Token::new(BRACE_START, (7, 8).into())),
+            Ok(Token::new(WHITESPACE, (8, 9).into())),
+            Ok(Token::new(BARE_KEY, (9, 13).into())),
+            Ok(Token::new(WHITESPACE, (13, 14).into())),
+            Ok(Token::new(EQUAL, (14, 15).into())),
+            Ok(Token::new(WHITESPACE, (15, 16).into())),
+            Ok(Token::new(INVALID_TOKEN, (16, end).into())),
+        ]
+    );
+}
+
+#[test]
+fn array_of_table() {
+    let source = r#"
+[[package]]
+name = "toml"
+version = "0.5.8"
+
+[[package]]
+name = "json"
+version = "1.2.4"
+"#
+    .trim();
+
+    let tokens = tokenize(source).collect::<Vec<_>>();
+    let end = source.len() as u32;
+
+    assert_eq!(
+        tokens,
+        vec![
+            Ok(Token::new(BRACKET_START, (0, 1).into())),
+            Ok(Token::new(BRACKET_START, (1, 2).into())),
+            Ok(Token::new(BARE_KEY, (2, 9).into())),
+            Ok(Token::new(BRACKET_END, (9, 10).into())),
+            Ok(Token::new(BRACKET_END, (10, 11).into())),
+            Ok(Token::new(LINE_BREAK, (11, 12).into())),
+            Ok(Token::new(BARE_KEY, (12, 16).into())),
+            Ok(Token::new(WHITESPACE, (16, 17).into())),
+            Ok(Token::new(EQUAL, (17, 18).into())),
+            Ok(Token::new(WHITESPACE, (18, 19).into())),
+            Ok(Token::new(BASIC_STRING, (19, 25).into())),
+            Ok(Token::new(LINE_BREAK, (25, 26).into())),
+            Ok(Token::new(BARE_KEY, (26, 33).into())),
+            Ok(Token::new(WHITESPACE, (33, 34).into())),
+            Ok(Token::new(EQUAL, (34, 35).into())),
+            Ok(Token::new(WHITESPACE, (35, 36).into())),
+            Ok(Token::new(BASIC_STRING, (36, 43).into())),
+            Ok(Token::new(LINE_BREAK, (43, 44).into())),
+            Ok(Token::new(LINE_BREAK, (44, 45).into())),
+            Ok(Token::new(BRACKET_START, (45, 46).into())),
+            Ok(Token::new(BRACKET_START, (46, 47).into())),
+            Ok(Token::new(BARE_KEY, (47, 54).into())),
+            Ok(Token::new(BRACKET_END, (54, 55).into())),
+            Ok(Token::new(BRACKET_END, (55, 56).into())),
+            Ok(Token::new(LINE_BREAK, (56, 57).into())),
+            Ok(Token::new(BARE_KEY, (57, 61).into())),
+            Ok(Token::new(WHITESPACE, (61, 62).into())),
+            Ok(Token::new(EQUAL, (62, 63).into())),
+            Ok(Token::new(WHITESPACE, (63, 64).into())),
+            Ok(Token::new(BASIC_STRING, (64, 70).into())),
+            Ok(Token::new(LINE_BREAK, (70, 71).into())),
+            Ok(Token::new(BARE_KEY, (71, 78).into())),
+            Ok(Token::new(WHITESPACE, (78, 79).into())),
+            Ok(Token::new(EQUAL, (79, 80).into())),
+            Ok(Token::new(WHITESPACE, (80, 81).into())),
+            Ok(Token::new(BASIC_STRING, (81, end).into())),
+        ]
+    );
+}

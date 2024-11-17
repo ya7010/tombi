@@ -23,7 +23,6 @@ futures = "0.3.31"
 futures-util = "0.3.31"
 indexmap = "2.6.0"
 itertools = "0.13.0"
-logos = "0.14.2"
 linter = { path = "crates/linter" }
 nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }

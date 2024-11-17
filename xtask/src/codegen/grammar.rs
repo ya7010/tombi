@@ -14,7 +14,7 @@ pub fn lower(grammar: &Grammar) -> AstSrc {
     let mut res = AstSrc {
         tokens: TOKENS
             .iter()
-            .map(|token| token.name().to_case(Case::Pascal))
+            .map(|token| token.to_case(Case::Pascal))
             .collect::<Vec<_>>(),
         ..Default::default()
     };

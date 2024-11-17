@@ -9,7 +9,6 @@ license.workspace = true
 ast = { workspace = true }
 drop_bomb = "0.1.5"
 itertools = { workspace = true }
-logos = { workspace = true }
 rg-tree = { workspace = true }
 syntax = { workspace = true }
 thiserror = { workspace = true }
