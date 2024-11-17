@@ -437,6 +437,17 @@ impl Sub<Offset> for Span {
     }
 }
 
+impl Add<Span> for Span {
+    type Output = Span;
+    #[inline]
+    fn add(self, other: Span) -> Span {
+        Span {
+            start: self.start,
+            end: other.end,
+        }
+    }
+}
+
 ops!(impl Add for Span by fn add = +);
 ops!(impl Sub for Span by fn sub = -);
 
