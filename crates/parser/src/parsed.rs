@@ -7,15 +7,15 @@ use crate::validation;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Parsed<T> {
-    green: rg_tree::GreenNode,
+    green_tree: rg_tree::GreenNode,
     errors: Option<Arc<[syntax::SyntaxError]>>,
     _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> Parsed<T> {
-    pub fn new(green: rg_tree::GreenNode, errors: Vec<SyntaxError>) -> Parsed<T> {
+    pub fn new(green_tree: rg_tree::GreenNode, errors: Vec<SyntaxError>) -> Parsed<T> {
         Parsed {
-            green,
+            green_tree,
             errors: if errors.is_empty() {
                 None
             } else {
@@ -26,11 +26,11 @@ impl<T> Parsed<T> {
     }
 
     pub fn syntax_node(&self) -> SyntaxNode {
-        SyntaxNode::new_root(self.green.clone())
+        SyntaxNode::new_root(self.green_tree.clone())
     }
 
     pub fn into_syntax_node(self) -> SyntaxNode {
-        SyntaxNode::new_root(self.green)
+        SyntaxNode::new_root(self.green_tree)
     }
 
     pub fn errors(&self) -> Vec<SyntaxError> {
@@ -47,7 +47,7 @@ impl<T> Parsed<T> {
 impl<T> Clone for Parsed<T> {
     fn clone(&self) -> Parsed<T> {
         Parsed {
-            green: self.green.clone(),
+            green_tree: self.green_tree.clone(),
             errors: self.errors.clone(),
             _ty: PhantomData,
         }
@@ -58,7 +58,7 @@ impl<T: AstNode> Parsed<T> {
     /// Converts this parse result into a parse result for an untyped syntax tree.
     pub fn into_syntax(self) -> Parsed<SyntaxNode> {
         Parsed {
-            green: self.green,
+            green_tree: self.green_tree,
             errors: self.errors,
             _ty: PhantomData,
         }
@@ -87,7 +87,7 @@ impl Parsed<SyntaxNode> {
     pub fn cast<N: AstNode>(self) -> Option<Parsed<N>> {
         if N::cast(self.syntax_node()).is_some() {
             Some(Parsed {
-                green: self.green,
+                green_tree: self.green_tree,
                 errors: self.errors,
                 _ty: PhantomData,
             })

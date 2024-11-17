@@ -30,12 +30,12 @@ pub fn parse_as<G: Grammer>(source: &str) -> Parsed<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
     let output = grammar::parse::<G>(&input);
-    let (tree, errors) = build_tree(&lexed, output);
+    let (green_tree, errors) = build_green_tree(&lexed, output);
 
-    Parsed::new(tree, errors)
+    Parsed::new(green_tree, errors)
 }
 
-pub fn build_tree(
+pub fn build_green_tree(
     lexed: &LexedStr<'_>,
     parser_output: crate::Output,
 ) -> (rg_tree::GreenNode, Vec<syntax::SyntaxError>) {
