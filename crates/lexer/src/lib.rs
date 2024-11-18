@@ -6,9 +6,31 @@ mod token;
 use cursor::Cursor;
 pub use error::Error;
 pub use lexed::Lexed;
-use regex_macro::regex;
 use syntax::{SyntaxKind, T};
 pub use token::Token;
+
+macro_rules! regex {
+    ($($var:ident = $re:expr),+) => {
+        $(
+            static $var: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+                regex::Regex::new($re).unwrap()
+            });
+        )+
+    };
+}
+
+regex!(
+    REGEX_INTEGER_BIN = r"0b[0|1|_]+",
+    REGEX_INTEGER_OCT = r"0o[0-7_]+",
+    REGEX_INTEGER_HEX = r"0x[0-9A-Fa-f_]+",
+    REGEX_INTEGER_DEC = r"[0-9_]+",
+    REGEX_FLOAT = r"[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)",
+    REGEX_OFFSET_DATE_TIME =
+        r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})",
+    REGEX_LOCAL_DATE_TIME = r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?",
+    REGEX_LOCAL_DATE = r"\d{4}-\d{2}-\d{2}",
+    REGEX_LOCAL_TIME = r"\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?"
+);
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn lex(source: &str) -> Lexed {
@@ -162,18 +184,14 @@ impl Cursor<'_> {
     fn is_datetime(&self) -> bool {
         assert!(self.current().is_ascii_digit());
         assert!("2000-01-01".len() == 10);
-        regex!(r"\d{4}-\d{2}-\d{2}").is_match(&self.peeks_with_current(10))
+        REGEX_LOCAL_DATE.is_match(&self.peeks_with_current(10))
     }
 
     fn datetime(&mut self) -> Token {
         assert!(self.current().is_ascii_digit());
 
         let line = self.peek_with_current_while(|c| !is_line_break(c));
-        if let Some(m) = regex!(
-            r#"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})"#
-        )
-        .find(&line)
-        {
+        if let Some(m) = REGEX_OFFSET_DATE_TIME.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -181,16 +199,14 @@ impl Cursor<'_> {
             if is_token_separator(self.peek(1)) {
                 return Token::new(SyntaxKind::OFFSET_DATE_TIME, self.span());
             }
-        } else if let Some(m) =
-            regex!(r"\d{4}-\d{2}-\d{2}(?:T|t| )\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?").find(&line)
-        {
+        } else if let Some(m) = REGEX_LOCAL_DATE_TIME.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
             if is_token_separator(self.peek(1)) {
                 return Token::new(SyntaxKind::LOCAL_DATE_TIME, self.span());
             }
-        } else if let Some(m) = regex!(r"\d{4}-\d{2}-\d{2}").find(&line) {
+        } else if let Some(m) = REGEX_LOCAL_DATE.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -206,14 +222,14 @@ impl Cursor<'_> {
     fn is_time(&self) -> bool {
         assert!(self.current().is_ascii_digit());
         assert!("00:00:00".len() == 8);
-        regex!(r"\d{2}:\d{2}:\d{2}").is_match(&self.peeks_with_current(8))
+        REGEX_LOCAL_TIME.is_match(&self.peeks_with_current(8))
     }
 
     fn time(&mut self) -> Token {
         assert!(self.current().is_ascii_digit());
 
         let line = self.peek_with_current_while(|c| !is_line_break(c));
-        if let Some(m) = regex!(r"\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?").find(&line) {
+        if let Some(m) = REGEX_LOCAL_TIME.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -226,8 +242,7 @@ impl Cursor<'_> {
 
     fn number(&mut self) -> Token {
         let line = self.peek_with_current_while(|c| !is_line_break(c));
-        if let Some(m) = regex!(r"[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)").find(&line)
-        {
+        if let Some(m) = REGEX_FLOAT.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -235,7 +250,7 @@ impl Cursor<'_> {
             if is_token_separator(self.peek(1)) {
                 return Token::new(SyntaxKind::FLOAT, self.span());
             }
-        } else if let Some(m) = regex!(r"0b[0|1|_]+").find(&line) {
+        } else if let Some(m) = REGEX_INTEGER_BIN.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -243,7 +258,7 @@ impl Cursor<'_> {
             if is_token_separator(self.peek(1)) {
                 return Token::new(SyntaxKind::INTEGER_BIN, self.span());
             }
-        } else if let Some(m) = regex!(r"0o[0-7_]+").find(&line) {
+        } else if let Some(m) = REGEX_INTEGER_OCT.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -251,14 +266,14 @@ impl Cursor<'_> {
             if is_token_separator(self.peek(1)) {
                 return Token::new(SyntaxKind::INTEGER_OCT, self.span());
             }
-        } else if let Some(m) = regex!(r"0x[0-9A-Fa-f_]+").find(&line) {
+        } else if let Some(m) = REGEX_INTEGER_HEX.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
             if is_token_separator(self.peek(1)) {
                 return Token::new(SyntaxKind::INTEGER_HEX, self.span());
             }
-        } else if let Some(m) = regex!(r"[0-9_]+").find(&line) {
+        } else if let Some(m) = REGEX_INTEGER_DEC.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }

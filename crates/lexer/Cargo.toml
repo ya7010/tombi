@@ -7,7 +7,6 @@ license.workspace = true
 
 [dependencies]
 regex.workspace = true
-regex-macro.workspace = true
 syntax.workspace = true
 text.workspace = true
 thiserror.workspace = true
