@@ -31,48 +31,48 @@ mod tests {
 
     crate::test_format! {
         #[test]
-        fn integer_bin_key_value1("bin1 = 0b11010110");
+        fn integer_bin_key_value1("bin1 = 0b11010110") -> Ok;
 
         #[test]
-        fn integer_bin_key_value2("bin2 = 0b1101_0110");
+        fn integer_bin_key_value2("bin2 = 0b1101_0110") -> Ok;
 
         #[test]
-        fn integer_oct_key_value1("oct1 = 0o01234567");
+        fn integer_oct_key_value1("oct1 = 0o01234567") -> Ok;
 
         #[test]
-        fn integer_oct_key_value2("oct2 = 0o755");
+        fn integer_oct_key_value2("oct2 = 0o755") -> Ok;
 
         #[test]
-        fn integer_hex_key_value1("hex1 = 0xDEADBEEF");
+        fn integer_hex_key_value1("hex1 = 0xDEADBEEF") -> Ok;
 
         #[test]
-        fn integer_hex_key_value2("hex2 = 0xdeadbeef");
+        fn integer_hex_key_value2("hex2 = 0xdeadbeef") -> Ok;
 
         #[test]
-        fn integer_hex_key_value3("hex3 = 0xdead_beef");
+        fn integer_hex_key_value3("hex3 = 0xdead_beef") -> Ok;
 
         #[test]
-        fn integer_dec_key_value1("int1 = +99");
+        fn integer_dec_key_value1("int1 = +99") -> Ok;
 
         #[test]
-        fn integer_dec_key_value2("int2 = 42");
+        fn integer_dec_key_value2("int2 = 42") -> Ok;
 
         #[test]
-        fn integer_dec_key_value3("int3 = 0");
+        fn integer_dec_key_value3("int3 = 0") -> Ok;
 
         #[test]
-        fn integer_dec_key_value4("int4 = -17");
+        fn integer_dec_key_value4("int4 = -17") -> Ok;
 
         #[test]
-        fn integer_dec_key_value5("int5 = 1_000");
+        fn integer_dec_key_value5("int5 = 1_000") -> Ok;
 
         #[test]
-        fn integer_dec_key_value6("int6 = 5_349_221");
+        fn integer_dec_key_value6("int6 = 5_349_221") -> Ok;
 
         #[test]
-        fn integer_dec_key_value7("int7 = 53_49_221");
+        fn integer_dec_key_value7("int7 = 53_49_221") -> Ok;
 
         #[test]
-        fn integer_dec_key_value8("int8 = 1_2_3_4_5");
+        fn integer_dec_key_value8("int8 = 1_2_3_4_5") -> Ok;
     }
 }

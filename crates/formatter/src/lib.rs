@@ -41,17 +41,29 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
 #[cfg(test)]
 #[macro_export]
 macro_rules! test_format {
-    {$(#[test] fn $name:ident($source:expr) -> Err);+;} => {
-        $(#[test]
+    {$(#[test] fn $name:ident($source:expr) -> $res:tt;)+} => {
+        $(crate::test_format_item!(#[test] fn $name($source) -> $res);)+
+    };
+}
+
+#[cfg(test)]
+#[macro_export]
+macro_rules! test_format_item {
+    (#[test] fn $name:ident($source:expr) -> Err) => {
+        #[test]
         fn $name() {
             let p = parser::parse($source);
 
             assert_ne!(p.errors(), vec![]);
-        })+
+        }
     };
 
-    {$(#[test] fn $name:ident($source:expr) -> $expected:expr);+;} => {
-        $(#[test]
+    (#[test] fn $name:ident($source:expr) -> Ok) => {
+        crate::test_format_item!(#[test] fn $name($source) -> $source);
+    };
+
+    (#[test] fn $name:ident($source:expr) -> $expected:expr) => {
+        #[test]
         fn $name() {
             let p = parser::parse($source);
             let ast = ast::Root::cast(p.syntax_node()).unwrap();
@@ -62,10 +74,6 @@ macro_rules! test_format {
 
             assert_eq!(formatted_text, textwrap::dedent($expected).trim());
             assert_eq!(p.errors(), vec![]);
-        })+
-    };
-
-    {$(#[test] fn $name:ident($source:expr));+;} => {
-        crate::test_format!{$(#[test] fn $name($source) -> $source);+;}
+        }
     };
 }

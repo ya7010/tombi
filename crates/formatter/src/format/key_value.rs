@@ -86,14 +86,12 @@ mod tests {
 
         #[test]
         fn bare_key_value2(r#"key    = "value""#) -> "key = \"value\"";
-    }
-
-    crate::test_format! {
-        #[test]
-        fn dotted_keys_value1(r#"key1.key2.key3 = "value""#);
 
         #[test]
-        fn dotted_keys_value2(r#"site."google.com" = true"#);
+        fn dotted_keys_value1(r#"key1.key2.key3 = "value""#) -> Ok;
+
+        #[test]
+        fn dotted_keys_value2(r#"site."google.com" = true"#) -> Ok;
 
         #[test]
         fn key_value_with_comment(
@@ -102,6 +100,6 @@ mod tests {
             # leading comment2
             key = "value"  # tailing comment
             "#
-        );
+        ) -> Ok;
     }
 }

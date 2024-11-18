@@ -35,17 +35,17 @@ mod tests {
         #[test]
         fn array_of_table_only_header(
             r#"[[package]]"#
-        );
+        ) -> Ok;
 
         #[test]
         fn array_of_table_only_header_with_basic_string_key(
             r#"[[dependencies."unicase"]]"#
-        );
+        ) -> Ok;
 
         #[test]
         fn array_of_table_only_header_nexted_keys(
             r#"[[dependencies.unicase]]"#
-        );
+        ) -> Ok;
 
         #[test]
         fn array_of_table(
@@ -54,7 +54,7 @@ mod tests {
             name = "toml-rs"
             version = "0.4.0"
             "#
-        );
+        ) -> Ok;
 
         #[test]
         fn array_of_table_with_full_comment1(
@@ -66,6 +66,6 @@ mod tests {
             # key value leading comment2
             key = "value"  # key tailing comment
             "#
-        );
+        ) -> Ok;
     }
 }
