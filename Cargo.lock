@@ -564,6 +564,7 @@ dependencies = [
  "rstest",
  "syntax",
  "text",
+ "textwrap",
  "thiserror",
  "tracing",
 ]

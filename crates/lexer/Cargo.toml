@@ -14,3 +14,4 @@ tracing.workspace = true
 
 [dev-dependencies]
 rstest.workspace = true
+textwrap.workspace = true
