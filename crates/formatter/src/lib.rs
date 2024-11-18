@@ -37,3 +37,35 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
             .collect())
     }
 }
+
+#[cfg(test)]
+#[macro_export]
+macro_rules! test_format {
+    {$(#[test] fn $name:ident($source:expr) -> Err);+;} => {
+        $(#[test]
+        fn $name() {
+            let p = parser::parse($source);
+
+            assert_ne!(p.errors(), vec![]);
+        })+
+    };
+
+    {$(#[test] fn $name:ident($source:expr) -> $expected:expr);+;} => {
+        $(#[test]
+        fn $name() {
+            let p = parser::parse($source);
+            let ast = ast::Root::cast(p.syntax_node()).unwrap();
+
+            let mut formatted_text = String::new();
+            ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+                .unwrap();
+
+            assert_eq!(formatted_text, textwrap::dedent($expected).trim());
+            assert_eq!(p.errors(), vec![]);
+        })+
+    };
+
+    {$(#[test] fn $name:ident($source:expr));+;} => {
+        crate::test_format!{$(#[test] fn $name($source) -> $source);+;}
+    };
+}

@@ -28,81 +28,43 @@ impl Format for ast::Table {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_matches::assert_matches;
     use ast::AstNode;
-    use rstest::rstest;
 
-    #[rstest]
-    #[case(r#"[package]"#)]
-    #[case(r#"[dependencies."unicase"]"#)]
-    #[case(r#"[dependencies.unicase]"#)]
-    fn table_only_header(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+    crate::test_format! {
+        #[test]
+        fn table_only_header(
+            r#"[package]"#
+        );
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn table_only_header_with_basic_string_key(
+            r#"[dependencies."unicase"]"#
+        );
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn table_only_header_nexted_keys(
+            r#"[dependencies.unicase]"#
+        );
 
-    #[rstest]
-    #[case(
-        r#"
-[package]
-name = "toml-rs"
-cli.version = "0.4.0"
-"#.trim()
-    )]
-    fn table(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        #[test]
+        fn table(
+            r#"
+            [package]
+            name = "toml-rs"
+            version = "0.4.0"
+            "#
+        );
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
-
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
-
-    #[rstest]
-    #[case(
-        r#"
-# header leading comment1
-# header leading comment2
-[header]  # header tailing comment
-# key value leading comment1
-# key value leading comment2
-key = "value"  # key tailing comment
-"#.trim_start()
-    )]
-    #[case(
-        r#"
-  # header leading comment1
- # header leading comment2
-[header]# header tailing comment
-
-  # key value leading comment1
- # key value leading comment2
-key = "value" # key tailing comment
-"#.trim_start()
-    )]
-    fn table_comment(#[case] source: &str) {
-        let expected = r#"
-# header leading comment1
-# header leading comment2
-[header]  # header tailing comment
-# key value leading comment1
-# key value leading comment2
-key = "value"  # key tailing comment
-"#
-        .trim_start();
-
-        let result = crate::format(source);
-        assert_matches!(result, Ok(_));
-        assert_eq!(result.unwrap(), expected);
+        #[test]
+        fn table_with_full_comment(
+            r#"
+            # header leading comment1
+            # header leading comment2
+            [header]  # header tailing comment
+            # key value leading comment1
+            # key value leading comment2
+            key = "value"  # key tailing comment
+            "#
+        );
     }
 }

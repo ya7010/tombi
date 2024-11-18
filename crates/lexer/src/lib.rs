@@ -10,7 +10,7 @@ use syntax::{SyntaxKind, T};
 pub use token::Token;
 
 macro_rules! regex {
-    ($($var:ident = $re:expr),+) => {
+    ($($var:ident = $re:expr);+;) => {
         $(
             static $var: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
                 regex::Regex::new($re).unwrap()
@@ -20,16 +20,16 @@ macro_rules! regex {
 }
 
 regex!(
-    REGEX_INTEGER_BIN = r"0b[0|1|_]+",
-    REGEX_INTEGER_OCT = r"0o[0-7_]+",
-    REGEX_INTEGER_HEX = r"0x[0-9A-Fa-f_]+",
-    REGEX_INTEGER_DEC = r"[0-9_]+",
-    REGEX_FLOAT = r"[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)",
+    REGEX_INTEGER_BIN = r"0b[0|1|_]+";
+    REGEX_INTEGER_OCT = r"0o[0-7_]+";
+    REGEX_INTEGER_HEX = r"0x[0-9A-Fa-f_]+";
+    REGEX_INTEGER_DEC = r"[0-9_]+";
+    REGEX_FLOAT = r"[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)";
     REGEX_OFFSET_DATE_TIME =
-        r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})",
-    REGEX_LOCAL_DATE_TIME = r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?",
-    REGEX_LOCAL_DATE = r"\d{4}-\d{2}-\d{2}",
-    REGEX_LOCAL_TIME = r"\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?"
+        r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})";
+    REGEX_LOCAL_DATE_TIME = r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
+    REGEX_LOCAL_DATE = r"\d{4}-\d{2}-\d{2}";
+    REGEX_LOCAL_TIME = r"\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
 );
 
 #[tracing::instrument(level = "debug", skip_all)]

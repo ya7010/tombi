@@ -28,72 +28,51 @@ impl LiteralNode for ast::IntegerOct {
 mod tests {
     use crate::Format;
     use ast::AstNode;
-    use rstest::rstest;
 
-    #[rstest]
-    #[case("int1 = +99")]
-    #[case("int2 = 42")]
-    #[case("int3 = 0")]
-    #[case("int4 = -17")]
-    #[case("int5 = 1_000")]
-    #[case("int6 = 5_349_221")]
-    #[case("int7 = 53_49_221")]
-    #[case("int8 = 1_2_3_4_5")]
-    fn valid_integer_dec_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+    crate::test_format! {
+        #[test]
+        fn integer_bin_key_value1("bin1 = 0b11010110");
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn integer_bin_key_value2("bin2 = 0b1101_0110");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn integer_oct_key_value1("oct1 = 0o01234567");
 
-    #[rstest]
-    #[case("hex1 = 0xDEADBEEF")]
-    #[case("hex2 = 0xdeadbeef")]
-    #[case("hex3 = 0xdead_beef")]
-    fn valid_integer_hex_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        #[test]
+        fn integer_oct_key_value2("oct2 = 0o755");
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn integer_hex_key_value1("hex1 = 0xDEADBEEF");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn integer_hex_key_value2("hex2 = 0xdeadbeef");
 
-    #[rstest]
-    #[case("oct1 = 0o01234567")]
-    #[case("oct2 = 0o755")]
-    fn valid_integer_oct_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        #[test]
+        fn integer_hex_key_value3("hex3 = 0xdead_beef");
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn integer_dec_key_value1("int1 = +99");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn integer_dec_key_value2("int2 = 42");
 
-    #[rstest]
-    #[case("bin1 = 0b11010110")]
-    #[case("bin2 = 0b1101_0110")]
-    fn valid_integer_bin_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+        #[test]
+        fn integer_dec_key_value3("int3 = 0");
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn integer_dec_key_value4("int4 = -17");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
+        #[test]
+        fn integer_dec_key_value5("int5 = 1_000");
+
+        #[test]
+        fn integer_dec_key_value6("int6 = 5_349_221");
+
+        #[test]
+        fn integer_dec_key_value7("int7 = 53_49_221");
+
+        #[test]
+        fn integer_dec_key_value8("int8 = 1_2_3_4_5");
     }
 }

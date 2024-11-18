@@ -123,102 +123,165 @@ fn format_singleline_array(
 mod tests {
     use super::*;
 
-    use assert_matches::assert_matches;
     use rstest::rstest;
 
-    #[rstest]
-    #[case(
-        r#"array=[1,2,3]"#,
-        r#"array = [1, 2, 3]
-"#
-    )]
-    #[case(
-        r#"array=[ 1 ]"#,
-        r#"array = [1]
-"#
-    )]
-    #[case(
-        r#"integers = [ 1, 2, 3 ]"#,
-        r#"integers = [1, 2, 3]
-"#
-    )]
-    #[case(
-        r#"colors = [ "red", "yellow", "green" ]"#,
-        r#"colors = ["red", "yellow", "green"]
-"#
-    )]
-    #[case(
-        r#"nested_arrays_of_ints = [ [ 1, 2 ], [ 3, 4, 5 ] ]"#,
-        r#"nested_arrays_of_ints = [[1, 2], [3, 4, 5]]
-"#
-    )]
-    #[case(
-        r#"nested_mixed_array = [ [ 1, 2 ], [ "a", "b", "c" ] ]"#,
-        r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]
-"#
-    )]
-    #[case(
-        r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#,
-        r#"string_array = ["all", 'strings', """are the same""", '''type''']
-"#
-    )]
-    fn singleline_array(#[case] source: &str, #[case] expected: &str) {
-        let result = crate::format(source);
+    crate::test_format! {
+        #[test]
+        fn singleline_array1(
+            "array=[1,2,3]"
+        ) -> "array = [1, 2, 3]";
 
-        assert_matches!(result, Ok(_));
-        assert_eq!(result.unwrap(), expected);
-    }
+        #[test]
+        fn singleline_array2(
+            "array=[ 1 ]"
+        ) -> "array = [1]";
 
-    #[rstest]
-    #[case(
-"array = [1, 2, 3,]",
+        #[test]
+        fn singleline_array3(
+            "array=[ 1, 2, 3 ]"
+        ) -> "array = [1, 2, 3]";
 
-r#"
-array = [
-  1,
-  2,
-  3,
-]
-"#.trim_start())]
-    #[case(
-"array = [1, ]",
+        #[test]
+        fn singleline_array4(
+            r#"colors = [ "red", "yellow", "green" ]"#
+        ) -> r#"colors = ["red", "yellow", "green"]"#;
 
-r#"
-array = [
-  1,
-]
-"#.trim_start())]
-    #[case(
-r#"
-array = [
-  1  # comment
-]"#.trim_start(),
+        #[test]
+        fn singleline_array5(
+            "nested_arrays_of_ints = [ [ 1, 2 ], [ 3, 4, 5 ] ]"
+        ) -> "nested_arrays_of_ints = [[1, 2], [3, 4, 5]]";
 
-// NOTE: Currently, This test is collect.
-//       In the future, by inserting a layer that rewrites the ast before formatting,
-//       when there is no value tailing comment and there is a comma tailing comment,
-//       we will add logic to swap them.
-r#"
-array = [
-  1  # comment
-  ,
-]
-"#.trim_start())]
-    #[case(
-r#"
-array = [
-  1,  # comment
-]"#,
+        #[test]
+        fn singleline_array6(
+            r#"nested_mixed_array = [ [ 1, 2 ], [ "a", "b", "c" ] ]"#
+        ) -> r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]"#;
 
-r#"
-array = [
-  1,  # comment
-]
-"#.trim_start())]
-    fn multiline_array(#[case] source: &str, #[case] expected: &str) {
-        let result = crate::format(source);
-        assert_matches!(result, Ok(_));
-        assert_eq!(result.unwrap(), expected);
+        #[test]
+        fn singleline_array7(
+            r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#
+        ) -> r#"string_array = ["all", 'strings', """are the same""", '''type''']"#;
+
+        #[test]
+        fn multiline_array1(
+            "array = [1, 2, 3,]"
+        ) -> r#"
+            array = [
+              1,
+              2,
+              3,
+            ]
+            "#;
+
+        #[test]
+        fn multiline_array2(
+            "array = [1, ]"
+        ) -> r#"
+            array = [
+              1,
+            ]
+            "#;
+
+        #[test]
+        // NOTE: Currently, This test is collect.
+        //       In the future, by inserting a layer that rewrites the ast before formatting,
+        //       when there is no value tailing comment and there is a comma tailing comment,
+        //       we will add logic to swap them.
+        fn multiline_array3(
+            r#"
+            array = [
+              1  # comment
+            ]
+            "#
+        ) -> r#"
+            array = [
+              1  # comment
+              ,
+            ]
+            "#;
+
+        #[test]
+        fn multiline_array4(
+            r#"
+            array = [
+              1,  # comment
+            ]
+            "#
+        ) -> r#"
+            array = [
+              1,  # comment
+            ]
+            "#;
+
+        #[test]
+        fn multiline_array_with_full_comment(
+            r#"
+            # array leading comment1
+            # array leading comment2
+            array = [
+
+              # inner array begin dangling comment1
+              # inner array begin dangling comment2
+
+              # value1 leading comment1
+              # value1 leading comment2
+              1 # value1 trailing comment
+              , # value1 comma tailing comment
+              2 # value2 trailing comment
+              # value2 comma leading comment1
+              # value2 comma leading comment2
+              , # value2 comma tailing comment
+              # value3 leading comment1
+              # value3 leading comment2
+              3 # value3 trailing comment
+              # array end dangling comment1
+
+              # array end dangling comment2
+
+            ] # array tailing comment
+            "#
+        ) -> r#"
+            # array leading comment1
+            # array leading comment2
+            array = [
+              # inner array begin dangling comment1
+              # inner array begin dangling comment2
+
+              # value1 leading comment1
+              # value1 leading comment2
+              1  # value1 trailing comment
+              ,  # value1 comma tailing comment
+              2  # value2 trailing comment
+              # value2 comma leading comment1
+              # value2 comma leading comment2
+              ,  # value2 comma tailing comment
+              # value3 leading comment1
+              # value3 leading comment2
+              3  # value3 trailing comment
+              ,
+
+              # array end dangling comment1
+              # array end dangling comment2
+            ]  # array tailing comment
+            "#;
+
+        #[test]
+        fn nested_multiline_array(
+            "array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"
+        ) -> r#"
+            array = [
+              [
+                1,
+                2,
+                3,
+              ],
+              [4, 5, 6],
+              [
+                7,
+                8,
+                9,
+              ],
+            ]
+            "#;
     }
 
     #[rstest]
@@ -230,93 +293,5 @@ array = [
 
         let ast = ast::Array::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.has_tailing_comma_after_last_value(), expected);
-    }
-
-    #[test]
-    fn multiline_array_with_comment() {
-        let source = r#"
-# array leading comment1
-# array leading comment2
-array = [
-
-  # inner array begin dangling comment1
-  # inner array begin dangling comment2
-
-  # value1 leading comment1
-  # value1 leading comment2
-  1 # value1 trailing comment
-  , # value1 comma tailing comment
-  2 # value2 trailing comment
-  # value2 comma leading comment1
-  # value2 comma leading comment2
-  , # value2 comma tailing comment
-  # value3 leading comment1
-  # value3 leading comment2
-  3 # value3 trailing comment
-  # array end dangling comment1
-
-  # array end dangling comment2
-
-] # array tailing comment
-"#
-        .trim_start();
-
-        let expected = r#"
-# array leading comment1
-# array leading comment2
-array = [
-  # inner array begin dangling comment1
-  # inner array begin dangling comment2
-
-  # value1 leading comment1
-  # value1 leading comment2
-  1  # value1 trailing comment
-  ,  # value1 comma tailing comment
-  2  # value2 trailing comment
-  # value2 comma leading comment1
-  # value2 comma leading comment2
-  ,  # value2 comma tailing comment
-  # value3 leading comment1
-  # value3 leading comment2
-  3  # value3 trailing comment
-  ,
-
-  # array end dangling comment1
-  # array end dangling comment2
-]  # array tailing comment
-"#
-        .trim_start();
-
-        let result = crate::format(source);
-
-        assert_matches!(result, Ok(_));
-        assert_eq!(result.unwrap(), expected);
-    }
-
-    #[rstest]
-    #[case(
-        r#"
-array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"#.trim_start(),
-        r#"
-array = [
-  [
-    1,
-    2,
-    3,
-  ],
-  [4, 5, 6],
-  [
-    7,
-    8,
-    9,
-  ],
-]
-"#.trim_start()
-    )]
-    fn nested_multiline_array(#[case] source: &str, #[case] expected: &str) {
-        let result = crate::format(source);
-
-        assert_matches!(result, Ok(_));
-        assert_eq!(result.unwrap(), expected);
     }
 }

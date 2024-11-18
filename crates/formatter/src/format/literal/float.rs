@@ -10,34 +10,41 @@ impl LiteralNode for ast::Float {
 mod tests {
     use crate::Format;
     use ast::AstNode;
-    use rstest::rstest;
 
-    #[rstest]
-    #[case("key = +1.0")]
-    #[case("key = 3.1415")]
-    #[case("key = -0.01")]
-    #[case("key = 5e+22")]
-    #[case("key = 1e06")]
-    #[case("key = -2E-2")]
-    #[case("key = 6.626e-34")]
-    #[case("key = 224_617.445_991_228")]
-    fn valid_float_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+    crate::test_format! {
+        #[test]
+        fn float_key_value1("key = +1.0");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
+        #[test]
+        fn float_key_value2("key = 3.1415");
+
+        #[test]
+        fn float_key_value3("key = -0.01");
+
+        #[test]
+        fn float_key_value4("key = 5e+22");
+
+        #[test]
+        fn float_key_value5("key = 1e06");
+
+        #[test]
+        fn float_key_value6("key = -2E-2");
+
+        #[test]
+        fn float_key_value7("key = 6.626e-34");
+
+        #[test]
+        fn float_key_value8("key = 224_617.445_991_228");
     }
 
-    #[rstest]
-    #[case("invalid_float_1 = .7")]
-    #[case("invalid_float_2 = 7.")]
-    #[case("invalid_float_3 = 3.e+20")]
-    fn invalid_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        assert_ne!(p.errors(), vec![]);
+    crate::test_format! {
+        #[test]
+        fn invalid_key_value1("invalid_float_1 = .7") -> Err;
+
+        #[test]
+        fn invalid_key_value2("invalid_float_2 = 7.") -> Err;
+
+        #[test]
+        fn invalid_key_value3("invalid_float_3 = 3.e+20") -> Err;
     }
 }

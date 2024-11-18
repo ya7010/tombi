@@ -28,61 +28,30 @@ impl LiteralNode for ast::LocalTime {
 mod tests {
     use crate::Format;
     use ast::AstNode;
-    use rstest::rstest;
 
-    #[rstest]
-    #[case("odt1 = 1979-05-27T07:32:00Z")]
-    #[case("odt2 = 1979-05-27T00:32:00-07:00")]
-    #[case("odt3 = 1979-05-27T00:32:00.999999-07:00")]
-    fn valid_offset_datetime_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+    crate::test_format! {
+        #[test]
+        fn offset_datetime_key_value1("odt1 = 1979-05-27T07:32:00Z");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn offset_datetime_key_value2("odt2 = 1979-05-27T00:32:00-07:00");
 
-    #[rstest]
-    #[case("ldt1 = 1979-05-27T07:32:00")]
-    #[case("ldt2 = 1979-05-27T00:32:00.999999")]
-    fn valid_local_datetime_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn offset_datetime_key_value3("odt3 = 1979-05-27T00:32:00.999999-07:00");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn local_datetime_key_value1("ldt1 = 1979-05-27T07:32:00");
 
-    #[rstest]
-    #[case("ld1 = 1979-05-27")]
-    fn valid_local_date_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn local_datetime_key_value2("ldt2 = 1979-05-27T00:32:00.999999");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn valid_local_date_key_value("ld1 = 1979-05-27");
 
-    #[rstest]
-    #[case("lt1 = 07:32:00")]
-    #[case("lt2 = 00:32:00.999999")]
-    fn valid_local_time_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+        #[test]
+        fn valid_local_time_key_value1("lt1 = 07:32:00");
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
+        #[test]
+        fn valid_local_time_key_value2("lt2 = 00:32:00.999999");
     }
 }

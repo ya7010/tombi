@@ -77,57 +77,31 @@ impl Format for ast::Value {
 
 #[cfg(test)]
 mod tests {
+    use crate::Format;
     use ast::AstNode;
 
-    use rstest::rstest;
+    crate::test_format! {
+        #[test]
+        fn bare_key_value1(r#"key = "value""#) -> "key = \"value\"";
 
-    use crate::Format;
-
-    #[rstest]
-    #[case(r#"key = "value""#)]
-    #[case(r#"key    = "value""#)]
-    fn bare_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
-
-        assert_eq!(formatted_text, "key = \"value\"");
-        assert_eq!(p.errors(), []);
+        #[test]
+        fn bare_key_value2(r#"key    = "value""#) -> "key = \"value\"";
     }
 
-    #[rstest]
-    #[case(r#"key1.key2.key3 = "value""#)]
-    #[case(r#"site."google.com" = true"#)]
-    fn dotted_keys_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
+    crate::test_format! {
+        #[test]
+        fn dotted_keys_value1(r#"key1.key2.key3 = "value""#);
 
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
-    }
+        #[test]
+        fn dotted_keys_value2(r#"site."google.com" = true"#);
 
-    #[rstest]
-    #[case(
-        r#"
-# leading comment1
-# leading comment2
-key = "value"  # tailing comment
-"#.trim()
-    )]
-    fn key_value_with_comment(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
-
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
-
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
+        #[test]
+        fn key_value_with_comment(
+            r#"
+            # leading comment1
+            # leading comment2
+            key = "value"  # tailing comment
+            "#
+        );
     }
 }

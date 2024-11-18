@@ -12,20 +12,12 @@ impl LiteralNode for Boolean {
 mod tests {
     use crate::Format;
     use ast::AstNode;
-    use rstest::rstest;
 
-    #[rstest]
-    #[case("boolean = true")]
-    #[case("boolean = false")]
-    fn boolean_key_value(#[case] source: &str) {
-        let p = parser::parse(source);
-        let ast = ast::Root::cast(p.syntax_node()).unwrap();
+    crate::test_format! {
+        #[test]
+        fn boolean_true(r#"boolean = true"#);
 
-        let mut formatted_text = String::new();
-        ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
-            .unwrap();
-
-        assert_eq!(formatted_text, source);
-        assert_eq!(p.errors(), []);
+        #[test]
+        fn boolean_false(r#"boolean = false"#);
     }
 }
