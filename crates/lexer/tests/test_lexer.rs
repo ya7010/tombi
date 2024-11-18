@@ -1,19 +1,15 @@
 use lexer::{tokenize, Token};
-use rstest::rstest;
-use syntax::{
-    SyntaxKind::{self, *},
-    T,
-};
+use syntax::{SyntaxKind::*, T};
 
 macro_rules!  test_tokens {
-    {$(#[test]fn $name:ident($source:expr) -> vec![
+    {$(#[test]fn $name:ident($source:expr) -> [
         $(Token($kind:expr, ($line:expr, $column:expr)),)*
     ]);+;} => {
         $(
             #[test]
             fn $name() {
                 let tokens = tokenize($source).collect::<Vec<_>>();
-                let expected = vec![
+                let expected = [
                     $(
                         Ok(Token::new($kind, ($line, $column).into())),
                     )*
@@ -30,7 +26,7 @@ macro_rules! test_token {
             #[test]
             fn $name() {
                 let tokens = tokenize(&textwrap::dedent($source).trim()).collect::<Vec<_>>();
-                assert_eq!(tokens, vec![Ok(Token::new($kind, ($line, $column).into()))]);
+                assert_eq!(tokens, [Ok(Token::new($kind, ($line, $column).into()))]);
             }
         )+
     };
@@ -38,42 +34,42 @@ macro_rules! test_token {
 
 test_tokens! {
     #[test]
-    fn empty_source("") -> vec![];
+    fn empty_source("") -> [];
 
     #[test]
-    fn comment_line_break("# This is a comment\n") -> vec![
+    fn comment_line_break("# This is a comment\n") -> [
         Token(COMMENT, (0, 19)),
         Token(LINE_BREAK, (19, 20)),
     ];
 
     #[test]
-    fn comment_line_break_crlf("# This is a comment\r\n") -> vec![
+    fn comment_line_break_crlf("# This is a comment\r\n") -> [
         Token(COMMENT, (0, 19)),
         Token(LINE_BREAK, (19, 21)),
     ];
 
     #[test]
-    fn whitespace_comment_line_break("   # This is a comment\n") -> vec![
+    fn whitespace_comment_line_break("   # This is a comment\n") -> [
         Token(WHITESPACE, (0, 3)),
         Token(COMMENT, (3, 22)),
         Token(LINE_BREAK, (22, 23)),
     ];
 
     #[test]
-    fn whitespace_comment_line_break_crlf("   # This is a comment\r\n") -> vec![
+    fn whitespace_comment_line_break_crlf("   # This is a comment\r\n") -> [
         Token(WHITESPACE, (0, 3)),
         Token(COMMENT, (3, 22)),
         Token(LINE_BREAK, (22, 24)),
     ];
 
     #[test]
-    fn comment_whitespace_line_break("# This is a comment   \n") -> vec![
+    fn comment_whitespace_line_break("# This is a comment   \n") -> [
         Token(COMMENT, (0, 22)),
         Token(LINE_BREAK, (22, 23)),
     ];
 
     #[test]
-    fn tokens("{},.[]=") -> vec![
+    fn tokens("{},.[]=") -> [
         Token(T!('{'), (0, 1)),
         Token(T!('}'), (1, 2)),
         Token(T!(,), (2, 3)),
@@ -84,7 +80,7 @@ test_tokens! {
     ];
 
     #[test]
-    fn key_value_float_dot_key("3.14159 = \"pi\"") -> vec![
+    fn key_value_float_dot_key("3.14159 = \"pi\"") -> [
         Token(FLOAT, (0, 7)),
         Token(WHITESPACE, (7, 8)),
         Token(EQUAL, (8, 9)),
@@ -93,7 +89,7 @@ test_tokens! {
     ];
 
     #[test]
-    fn key_value_dotted_keys("apple.type = \"fruit\"") -> vec![
+    fn key_value_dotted_keys("apple.type = \"fruit\"") -> [
         Token(BARE_KEY, (0, 5)),
         Token(DOT, (5, 6)),
         Token(BARE_KEY, (6, 10)),
@@ -104,7 +100,7 @@ test_tokens! {
     ];
 
     #[test]
-    fn table_only_header(r#"[package]"#) -> vec![
+    fn table_only_header(r#"[package]"#) -> [
         Token(BRACKET_START, (0, 1)),
         Token(BARE_KEY, (1, 8)),
         Token(BRACKET_END, (8, 9)),
@@ -117,7 +113,7 @@ test_tokens! {
         name = "toml"
         version = "0.5.8"
         "#
-    ) -> vec![
+    ) -> [
             Token(LINE_BREAK, (0, 1)),
             Token(WHITESPACE, (1, 9)),
             Token(BRACKET_START, (9, 10)),
@@ -142,7 +138,7 @@ test_tokens! {
         ];
 
     #[test]
-    fn inline_table("key = { key2 = \"value\" }") -> vec![
+    fn inline_table("key = { key2 = \"value\" }") -> [
         Token(BARE_KEY, (0, 3)),
         Token(WHITESPACE, (3, 4)),
         Token(EQUAL, (4, 5)),
@@ -159,7 +155,7 @@ test_tokens! {
     ];
 
     #[test]
-    fn invalid_inline_table("key1 = { key2 = 'value") -> vec![
+    fn invalid_inline_table("key1 = { key2 = 'value") -> [
         Token(BARE_KEY, (0, 4)),
         Token(WHITESPACE, (4, 5)),
         Token(EQUAL, (5, 6)),
@@ -184,7 +180,7 @@ test_tokens! {
         name = "json"
         version = "1.2.4"
         "#
-    ) -> vec![
+    ) -> [
             Token(LINE_BREAK, (0, 1)),
             Token(WHITESPACE, (1, 9)),
             Token(BRACKET_START, (9, 10)),
