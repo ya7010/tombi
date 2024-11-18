@@ -1,6 +1,6 @@
 ![Logo](./docs/images/tombi.svg)
 
-Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and LSP server.
+Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and Language server.
 
 ## TODO
 ### Milestone 1
