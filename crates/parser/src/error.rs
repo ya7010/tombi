@@ -16,6 +16,9 @@ pub enum Error {
     #[error("expected '='")]
     ExpectedEqual,
 
+    #[error("expected ','")]
+    ExpectedComma,
+
     #[error("expected ']'")]
     ExpectedBracketEnd,
 

@@ -29,7 +29,13 @@ impl Parse for ast::Array {
 
             ast::Value::parse(p);
 
-            Option::<ast::Comma>::parse(p);
+            let n = peek_leading_comments(p);
+            if p.nth_at(n, T![,]) {
+                ast::Comma::parse(p);
+            } else if !p.nth_at(n, T![']']) {
+                p.error(crate::Error::ExpectedComma);
+                p.bump_any();
+            }
         }
 
         end_dangling_comments(p);
