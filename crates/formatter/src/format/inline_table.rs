@@ -130,12 +130,12 @@ mod tests {
 
     crate::test_format! {
         #[test]
-        fn inline_table_key_value1(r#"name = { first = "Tom", last = "Preston-Werner" }"#) -> Ok;
+        fn inline_table_key_value1(r#"name = { first = "Tom", last = "Preston-Werner" }"#) -> Ok(_);
 
         #[test]
-        fn inline_table_key_value2(r#"point = { x = 1, y = 2 }"#) -> Ok;
+        fn inline_table_key_value2(r#"point = { x = 1, y = 2 }"#) -> Ok(_);
 
         #[test]
-        fn inline_table_key_value3(r#"animal = { type.name = "pug" }"#) -> Ok;
+        fn inline_table_key_value3(r#"animal = { type.name = "pug" }"#) -> Ok(_);
     }
 }

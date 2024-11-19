@@ -31,9 +31,9 @@ mod tests {
 
     crate::test_format! {
         #[test]
-        fn basic_string_key_value1(r#"key = "value""#) -> r#"key = "value""#;
+        fn basic_string_key_value1(r#"key = "value""#) -> Ok(r#"key = "value""#);
 
         #[test]
-        fn basic_string_key_value2(r#"key    = "value""#) -> r#"key = "value""#;
+        fn basic_string_key_value2(r#"key    = "value""#) -> Ok(r#"key = "value""#);
     }
 }

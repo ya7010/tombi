@@ -15,9 +15,9 @@ mod tests {
 
     crate::test_format! {
         #[test]
-        fn boolean_true(r#"boolean = true"#) -> Ok;
+        fn boolean_true(r#"boolean = true"#) -> Ok(_);
 
         #[test]
-        fn boolean_false(r#"boolean = false"#) -> Ok;
+        fn boolean_false(r#"boolean = false"#) -> Ok(_);
     }
 }

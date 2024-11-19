@@ -129,57 +129,61 @@ mod tests {
         #[test]
         fn singleline_array1(
             "array=[1,2,3]"
-        ) -> "array = [1, 2, 3]";
+        ) -> Ok("array = [1, 2, 3]");
 
         #[test]
         fn singleline_array2(
             "array=[ 1 ]"
-        ) -> "array = [1]";
+        ) -> Ok("array = [1]");
 
         #[test]
         fn singleline_array3(
             "array=[ 1, 2, 3 ]"
-        ) -> "array = [1, 2, 3]";
+        ) -> Ok("array = [1, 2, 3]");
 
         #[test]
         fn singleline_array4(
             r#"colors = [ "red", "yellow", "green" ]"#
-        ) -> r#"colors = ["red", "yellow", "green"]"#;
+        ) -> Ok(r#"colors = ["red", "yellow", "green"]"#);
 
         #[test]
         fn singleline_array5(
             "nested_arrays_of_ints = [ [ 1, 2 ], [ 3, 4, 5 ] ]"
-        ) -> "nested_arrays_of_ints = [[1, 2], [3, 4, 5]]";
+        ) -> Ok("nested_arrays_of_ints = [[1, 2], [3, 4, 5]]");
 
         #[test]
         fn singleline_array6(
             r#"nested_mixed_array = [ [ 1, 2 ], [ "a", "b", "c" ] ]"#
-        ) -> r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]"#;
+        ) -> Ok(r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]"#);
 
         #[test]
         fn singleline_array7(
             r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#
-        ) -> r#"string_array = ["all", 'strings', """are the same""", '''type''']"#;
+        ) -> Ok(r#"string_array = ["all", 'strings', """are the same""", '''type''']"#);
 
         #[test]
         fn multiline_array1(
             "array = [1, 2, 3,]"
-        ) -> r#"
+        ) -> Ok(
+            r#"
             array = [
               1,
               2,
               3,
             ]
-            "#;
+            "#
+        );
 
         #[test]
         fn multiline_array2(
             "array = [1, ]"
-        ) -> r#"
+        ) -> Ok(
+            r#"
             array = [
               1,
             ]
-            "#;
+            "#
+        );
 
         #[test]
         // NOTE: Currently, This test is collect.
@@ -192,12 +196,14 @@ mod tests {
               1  # comment
             ]
             "#
-        ) -> r#"
+        ) -> Ok(
+            r#"
             array = [
               1  # comment
               ,
             ]
-            "#;
+            "#
+        );
 
         #[test]
         fn multiline_array4(
@@ -206,11 +212,13 @@ mod tests {
               1,  # comment
             ]
             "#
-        ) -> r#"
+        ) -> Ok(
+            r#"
             array = [
               1,  # comment
             ]
-            "#;
+            "#
+        );
 
         #[test]
         fn multiline_array_with_full_comment(
@@ -239,7 +247,8 @@ mod tests {
 
             ] # array tailing comment
             "#
-        ) -> r#"
+        ) -> Ok(
+            r#"
             # array leading comment1
             # array leading comment2
             array = [
@@ -262,12 +271,14 @@ mod tests {
               # array end dangling comment1
               # array end dangling comment2
             ]  # array tailing comment
-            "#;
+            "#
+        );
 
         #[test]
         fn nested_multiline_array(
             "array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"
-        ) -> r#"
+        ) -> Ok(
+            r#"
             array = [
               [
                 1,
@@ -281,7 +292,8 @@ mod tests {
                 9,
               ],
             ]
-            "#;
+            "#
+        );
     }
 
     #[rstest]
