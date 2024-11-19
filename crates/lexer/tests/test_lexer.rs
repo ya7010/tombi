@@ -1,5 +1,5 @@
 use lexer::{tokenize, Token};
-use syntax::{SyntaxKind::*, T};
+use syntax::SyntaxKind::*;
 
 macro_rules!  test_tokens {
     {#[test]fn $name:ident($source:expr) -> [
