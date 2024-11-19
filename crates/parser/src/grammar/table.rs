@@ -47,51 +47,79 @@ impl Grammer for ast::Table {
 
 #[cfg(test)]
 mod test {
-    use rstest::rstest;
-    use syntax::SyntaxError;
-    use text::{Column, Line};
+    use crate::test_parser;
+    use crate::Error::*;
 
-    #[rstest]
-    #[case(r#"
-[]
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedKey, ((0, 0), (0, 1)))]
-    #[case(r#"
-[aaa.]
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedKey, ((0, 4), (0, 5)))]
-    #[case(r#"
-[aaa.bbb
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedBracketEnd, ((0, 8), (1, 0)))]
-    #[case(r#"
-[aaa.bbb]
-key1 = 1
-key2 = 2
+    test_parser! {
+        #[test]
+        fn without_header_keys(
+            r#"
+                []
+                key1 = 1
+                key2 = 2
+                "#
+        ) -> Err([
+            SyntaxError(ExpectedKey, 0:0..0:1),
+        ])
+    }
 
-[aaa.ccc]
-key1 =
-key2 = 2
+    test_parser! {
+        #[test]
+        fn without_last_dot_key(
+            r#"
+            [aaa.]
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedKey, 0:4..0:5),
+        ])
+    }
 
-[aaa.ddd]
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedValue, ((5, 5), (5, 6)))]
-    #[case(r#"
-[aaa.bbb]
-key1 = 1 INVALID COMMENT
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedLineBreakOrComment, ((1, 9), (1, 16)))]
-    fn invalid_table(
-        #[case] source: &str,
-        #[case] error: crate::Error,
-        #[case] range: ((Line, Column), (Line, Column)),
-    ) {
-        let p = crate::parse(source);
+    test_parser! {
+        #[test]
+        fn without_last_bracket(
+            r#"
+            [aaa.bbb
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedBracketEnd, 0:8..1:0),
+        ])
+    }
 
-        assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
+    test_parser! {
+        #[test]
+        fn without_value(
+            r#"
+            [aaa.bbb]
+            key1 = 1
+            key2 = 2
+
+            [aaa.ccc]
+            key1 =
+            key2 = 2
+
+            [aaa.ddd]
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 5:5..5:6),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn invalid_key_value_tailing_comment(
+            r#"
+            [aaa.bbb]
+            key1 = 1 INVALID COMMENT
+            key2 = 2
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedLineBreakOrComment, 1:9..1:16),
+        ])
     }
 }

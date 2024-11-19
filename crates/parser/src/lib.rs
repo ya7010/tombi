@@ -63,3 +63,16 @@ pub fn build_green_tree(
 
     builder.finish()
 }
+
+#[cfg(test)]
+#[macro_export]
+macro_rules! test_parser {
+    {#[test] fn $name:ident($source:expr) -> Err([$(SyntaxError($error:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
+        #[test]
+        fn $name() {
+            let p = crate::parse(textwrap::dedent($source).trim());
+
+            assert_eq!(p.errors(), vec![$(syntax::SyntaxError::new($error, (($line1, $column1), ($line2, $column2)).into())),*])
+        }
+    };
+}

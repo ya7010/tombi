@@ -47,43 +47,61 @@ impl Grammer for ast::ArrayOfTable {
 
 #[cfg(test)]
 mod test {
-    use rstest::rstest;
-    use syntax::SyntaxError;
-    use text::{Column, Line};
+    use crate::test_parser;
+    use crate::Error::*;
 
-    #[rstest]
-    #[case(r#"
-[[]]
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedKey, ((0, 0), (0, 2)))]
-    #[case(r#"
-[[aaa.]]
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedKey, ((0, 5), (0, 6)))]
-    #[case(r#"
-[[aaa.bbb
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 9), (1, 0)))]
-    #[case(r#"
-[[aaa.bbb]
-key1 = 1
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedDoubleBracketEnd, ((0, 9), (0, 10)))]
-    #[case(r#"
-[[aaa.bbb]]
-key1 = 1 INVALID COMMENT
-key2 = 2
-"#.trim_start(), crate::Error::ExpectedLineBreakOrComment, ((1, 9), (1, 16)))]
-    fn invalid_array_of_table(
-        #[case] source: &str,
-        #[case] error: crate::Error,
-        #[case] range: ((Line, Column), (Line, Column)),
-    ) {
-        let p = crate::parse(source);
+    test_parser! {
+        #[test]
+        fn invalid_array_of_table1(
+            r#"
+            [[]]
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([SyntaxError(ExpectedKey, 0:0..0:2)])
+    }
 
-        assert_eq!(p.errors(), vec![SyntaxError::new(error, range.into())]);
+    test_parser! {
+        #[test]
+        fn invalid_array_of_table2(
+            r#"
+            [[aaa.]]
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([SyntaxError(ExpectedKey, 0:5..0:6)])
+    }
+
+    test_parser! {
+        #[test]
+        fn invalid_array_of_table3(
+            r#"
+            [[aaa.bbb
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([SyntaxError(ExpectedDoubleBracketEnd, 0:9..1:0)])
+    }
+
+    test_parser! {
+        #[test]
+        fn invalid_array_of_table4(
+            r#"
+            [[aaa.bbb]
+            key1 = 1
+            key2 = 2
+            "#
+        ) -> Err([SyntaxError(ExpectedDoubleBracketEnd, 0:9..0:10)])
+    }
+
+    test_parser! {
+        #[test]
+        fn invalid_array_of_table5(
+            r#"
+            [[aaa.bbb]]
+            key1 = 1 INVALID COMMENT
+            key2 = 2
+            "#
+        ) -> Err([SyntaxError(ExpectedLineBreakOrComment, 1:9..1:16)])
     }
 }

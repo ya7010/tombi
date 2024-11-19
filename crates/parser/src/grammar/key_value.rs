@@ -31,85 +31,136 @@ impl Grammer for ast::KeyValue {
 
 #[cfg(test)]
 mod test {
-    use rstest::rstest;
-    use syntax::SyntaxError;
-    use text::{Column, Line};
+    use crate::test_parser;
+    use crate::Error::*;
 
-    #[rstest]
-    #[case::only_key("key1", &[(crate::Error::ExpectedEqual, ((0, 0), (0, 4))), (crate::Error::ExpectedValue, ((0, 0), (0, 4)))])]
-    #[case::value_not_found("key1 = # INVALID", &[(crate::Error::ExpectedValue, ((0, 5), (0, 6)))])]
-    #[case::invalid_value("key1 = 2024-01-00T", &[(crate::Error::ExpectedValue, ((0, 7), (0, 18)))])]
-    #[case::value_not_found_in_multi_key_value(r#"
-key1 = 1
-key2 = # INVALID
-key3 = 3
-"#.trim_start(), &[
-    (crate::Error::ExpectedValue, ((1, 5), (1, 6))),
-])]
-    #[case::basic_string_without_begin_quote(r#"
-key1 = "str"
-key2 = invalid"
-key3 = 1
-"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
-)]
-    #[case::basic_string_without_end_quote(r#"
-key1 = "str"
-key2 = "invalid
-key3 = 1
-"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
-    )]
-    #[case::literal_string_without_start_quote(r#"
-key1 = 'str'
-key2 = invalid'
-key3 = 1
-"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
-    )]
-    #[case::literal_string_without_end_quote(r#"
-key1 = 'str'
-key2 = 'invalid
-key3 = 1
-"#.trim_start(), &[(crate::Error::ExpectedValue, ((1, 7), (1, 15)))]
-    )]
-    #[case::without_equal(r#"
-key1 "value"
-key2 = 1
-"#.trim_start(), &[
-    (crate::Error::ExpectedEqual, ((0, 5), (0, 12))),
-    (crate::Error::ExpectedValue, ((0, 5), (0, 12)))
-]
-    )]
-    #[case::without_equal_on_root_item_with_comment(r#"
-key value # comment
+    test_parser! {
+        #[test]
+        fn only_key("key1") -> Err([
+            SyntaxError(ExpectedEqual, 0:0..0:4),
+            SyntaxError(ExpectedValue, 0:0..0:4),
+        ])
+    }
 
-[aaa]
-key1 = 1
-"#.trim_start(), &[
-    (crate::Error::ExpectedEqual, ((0, 4), (0, 9))),
-    (crate::Error::ExpectedValue, ((0, 4), (0, 9)))
-]
-    )]
-    #[case::without_equal_on_root_item(r#"
-key value
+    test_parser! {
+        #[test]
+        fn value_not_found("key1 = # INVALID") -> Err([
+            SyntaxError(ExpectedValue, 0:5..0:6),
+        ])
+    }
 
-[aaa]
-key1 = 1
-"#.trim_start(), &[
-    (crate::Error::ExpectedEqual, ((0, 4), (0, 9))),
-    (crate::Error::ExpectedValue, ((0, 4), (0, 9)))
-]
-    )]
-    fn invalid_key_value(
-        #[case] source: &str,
-        #[case] errors: &[(crate::Error, ((Line, Column), (Line, Column)))],
-    ) {
-        let p = crate::parse(source);
+    test_parser! {
+        #[test]
+        fn invalid_value("key1 = 2024-01-00T") -> Err([
+            SyntaxError(ExpectedValue, 0:7..0:18),
+        ])
+    }
 
-        assert_eq!(
-            p.errors(),
-            errors
-                .into_iter()
-                .map(|(error, range)| SyntaxError::new(*error, (*range).into()))
-                .collect::<Vec<_>>()
-        );
+    test_parser! {
+        #[test]
+        fn value_not_found_in_multi_key_value(
+            r#"
+            key1 = 1
+            key2 = # INVALID
+            key3 = 3
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 1:5..1:6),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn basic_string_without_begin_quote(
+            r#"
+            key1 = "str"
+            key2 = invalid"
+            key3 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 1:7..1:15),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn basic_string_without_end_quote(
+            r#"
+            key1 = "str"
+            key2 = "invalid
+            key3 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 1:7..1:15),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn literal_string_without_start_quote(
+            r#"
+            key1 = 'str'
+            key2 = invalid'
+            key3 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 1:7..1:15),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn literal_string_without_end_quote(
+            r#"
+            key1 = 'str'
+            key2 = 'invalid
+            key3 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 1:7..1:15),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn without_equal(
+            r#"
+            key1 "value"
+            key2 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedEqual, 0:5..0:12),
+            SyntaxError(ExpectedValue, 0:5..0:12),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn without_equal_on_root_item_with_comment(
+            r#"
+            key value # comment
+
+            [aaa]
+            key1 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedEqual, 0:4..0:9),
+            SyntaxError(ExpectedValue, 0:4..0:9),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn without_equal_on_root_item(
+            r#"
+            key value
+
+            [aaa]
+            key1 = 1
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedEqual, 0:4..0:9),
+            SyntaxError(ExpectedValue, 0:4..0:9),
+        ])
     }
 }
