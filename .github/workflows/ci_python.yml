@@ -1,0 +1,29 @@
+name: CI Python
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - python/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - python/**
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: python
+
+jobs:
+  python-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv run ruff format --check
+      - run: uv run ruff lint --check
+      - run: uv run pytest
