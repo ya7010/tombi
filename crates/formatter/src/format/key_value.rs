@@ -77,22 +77,26 @@ impl Format for ast::Value {
 
 #[cfg(test)]
 mod tests {
-    use crate::Format;
+    use crate::{test_format, Format};
     use ast::AstNode;
 
-    crate::test_format! {
+    test_format! {
         #[test]
         fn bare_key_value1(r#"key = "value""#) -> Ok("key = \"value\"");
-
+    }
+    test_format! {
         #[test]
         fn bare_key_value2(r#"key    = "value""#) -> Ok("key = \"value\"");
-
+    }
+    test_format! {
         #[test]
         fn dotted_keys_value1(r#"key1.key2.key3 = "value""#) -> Ok(_);
-
+    }
+    test_format! {
         #[test]
         fn dotted_keys_value2(r#"site."google.com" = true"#) -> Ok(_);
-
+    }
+    test_format! {
         #[test]
         fn key_value_with_comment(
             r#"

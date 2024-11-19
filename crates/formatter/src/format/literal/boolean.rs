@@ -10,13 +10,15 @@ impl LiteralNode for Boolean {
 
 #[cfg(test)]
 mod tests {
-    use crate::Format;
+    use crate::{test_format, Format};
     use ast::AstNode;
 
-    crate::test_format! {
+    test_format! {
         #[test]
         fn boolean_true(r#"boolean = true"#) -> Ok(_);
+    }
 
+    test_format! {
         #[test]
         fn boolean_false(r#"boolean = false"#) -> Ok(_);
     }

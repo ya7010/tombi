@@ -41,19 +41,11 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
 #[cfg(test)]
 #[macro_export]
 macro_rules! test_format {
-    {$(#[test] fn $name:ident($source:expr) -> $res:tt($val:tt);)+} => {
-        $(crate::test_format_item!(#[test] fn $name($source) -> $res($val));)+
-    };
-}
-
-#[cfg(test)]
-#[macro_export]
-macro_rules! test_format_item {
-    (#[test] fn $name:ident($source:expr) -> Ok(_)) => {
-        crate::test_format_item!(#[test] fn $name($source) -> Ok($source));
+    (#[test] fn $name:ident($source:expr) -> Ok(_);) => {
+        crate::test_format!(#[test] fn $name($source) -> Ok($source););
     };
 
-    (#[test] fn $name:ident($source:expr) -> Ok($expected:expr)) => {
+    (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
             let p = parser::parse($source);
@@ -68,7 +60,7 @@ macro_rules! test_format_item {
         }
     };
 
-    (#[test] fn $name:ident($source:expr) -> Err(_)) => {
+    (#[test] fn $name:ident($source:expr) -> Err(_);) => {
         #[test]
         fn $name() {
             let p = parser::parse($source);

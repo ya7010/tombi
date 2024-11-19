@@ -125,16 +125,23 @@ fn format_singleline_inline_table(
 
 #[cfg(test)]
 mod tests {
+    use crate::test_format;
+
     use super::*;
     use ast::AstNode;
 
-    crate::test_format! {
+    test_format! {
         #[test]
         fn inline_table_key_value1(r#"name = { first = "Tom", last = "Preston-Werner" }"#) -> Ok(_);
+    }
 
+    test_format! {
         #[test]
         fn inline_table_key_value2(r#"point = { x = 1, y = 2 }"#) -> Ok(_);
 
+    }
+
+    test_format! {
         #[test]
         fn inline_table_key_value3(r#"animal = { type.name = "pug" }"#) -> Ok(_);
     }

@@ -121,46 +121,62 @@ fn format_singleline_array(
 
 #[cfg(test)]
 mod tests {
+    use crate::test_format;
+
     use super::*;
 
     use rstest::rstest;
 
-    crate::test_format! {
+    test_format! {
         #[test]
         fn singleline_array1(
             "array=[1,2,3]"
         ) -> Ok("array = [1, 2, 3]");
+    }
 
+    test_format! {
         #[test]
         fn singleline_array2(
             "array=[ 1 ]"
         ) -> Ok("array = [1]");
+    }
 
+    test_format! {
         #[test]
         fn singleline_array3(
             "array=[ 1, 2, 3 ]"
         ) -> Ok("array = [1, 2, 3]");
+    }
 
+    test_format! {
         #[test]
         fn singleline_array4(
             r#"colors = [ "red", "yellow", "green" ]"#
         ) -> Ok(r#"colors = ["red", "yellow", "green"]"#);
+    }
 
+    test_format! {
         #[test]
         fn singleline_array5(
             "nested_arrays_of_ints = [ [ 1, 2 ], [ 3, 4, 5 ] ]"
         ) -> Ok("nested_arrays_of_ints = [[1, 2], [3, 4, 5]]");
+    }
 
+    test_format! {
         #[test]
         fn singleline_array6(
             r#"nested_mixed_array = [ [ 1, 2 ], [ "a", "b", "c" ] ]"#
         ) -> Ok(r#"nested_mixed_array = [[1, 2], ["a", "b", "c"]]"#);
+    }
 
+    test_format! {
         #[test]
         fn singleline_array7(
             r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#
         ) -> Ok(r#"string_array = ["all", 'strings', """are the same""", '''type''']"#);
+    }
 
+    test_format! {
         #[test]
         fn multiline_array1(
             "array = [1, 2, 3,]"
@@ -173,7 +189,9 @@ mod tests {
             ]
             "#
         );
+    }
 
+    test_format! {
         #[test]
         fn multiline_array2(
             "array = [1, ]"
@@ -184,7 +202,9 @@ mod tests {
             ]
             "#
         );
+    }
 
+    test_format! {
         #[test]
         // NOTE: Currently, This test is collect.
         //       In the future, by inserting a layer that rewrites the ast before formatting,
@@ -204,7 +224,9 @@ mod tests {
             ]
             "#
         );
+    }
 
+    test_format! {
         #[test]
         fn multiline_array4(
             r#"
@@ -219,7 +241,9 @@ mod tests {
             ]
             "#
         );
+    }
 
+    test_format! {
         #[test]
         fn multiline_array_with_full_comment(
             r#"
@@ -273,7 +297,9 @@ mod tests {
             ]  # array tailing comment
             "#
         );
+    }
 
+    test_format! {
         #[test]
         fn nested_multiline_array(
             "array = [ [1,2,3,], [4,5,6], [7,8,9,] ]"

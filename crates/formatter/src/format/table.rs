@@ -27,25 +27,33 @@ impl Format for ast::Table {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_format;
+
     use super::*;
     use ast::AstNode;
 
-    crate::test_format! {
+    test_format! {
         #[test]
         fn table_only_header(
             r#"[package]"#
         ) -> Ok(_);
+    }
 
+    test_format! {
         #[test]
         fn table_only_header_with_basic_string_key(
             r#"[dependencies."unicase"]"#
         ) -> Ok(_);
+    }
 
+    test_format! {
         #[test]
         fn table_only_header_nexted_keys(
             r#"[dependencies.unicase]"#
         ) -> Ok(_);
+    }
 
+    test_format! {
         #[test]
         fn table(
             r#"
@@ -54,7 +62,9 @@ mod tests {
             version = "0.4.0"
             "#
         ) -> Ok(_);
+    }
 
+    test_format! {
         #[test]
         fn table_with_full_comment(
             r#"
