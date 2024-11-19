@@ -11,6 +11,12 @@
       "path": "rust/tombi-lsp"
     },
     {
+      "path": "crates/text"
+    },
+    {
+      "path": "crates/lexer"
+    },
+    {
       "path": "crates/syntax"
     },
     {
@@ -21,6 +27,9 @@
     },
     {
       "path": "crates/formatter"
+    },
+    {
+      "path": "crates/linter"
     },
     {
       "path": "xtask"
