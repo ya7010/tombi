@@ -2,11 +2,11 @@ use crate::parser::Parser;
 
 use super::{
     begin_dangling_comments, end_dangling_comments, key::KEY_FIRST, leading_comments,
-    peek_leading_comments, tailing_comment, Grammer, TS_LINE_END,
+    peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
 };
 use syntax::{SyntaxKind::*, T};
 
-impl Grammer for ast::Root {
+impl Parse for ast::Root {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 

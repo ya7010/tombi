@@ -1,8 +1,8 @@
-use super::{leading_comments, tailing_comment, Grammer, TS_COMMEMT_OR_LINE_END};
+use super::{leading_comments, tailing_comment, Parse, TS_COMMEMT_OR_LINE_END};
 use crate::parser::Parser;
 use syntax::{SyntaxKind::*, T};
 
-impl Grammer for ast::KeyValue {
+impl Parse for ast::KeyValue {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 

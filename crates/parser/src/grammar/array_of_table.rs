@@ -1,6 +1,6 @@
 use syntax::T;
 
-use super::Grammer;
+use super::Parse;
 use crate::{
     grammar::{
         invalid_line, leading_comments, peek_leading_comments, tailing_comment, TS_LINE_END,
@@ -10,7 +10,7 @@ use crate::{
 };
 use syntax::SyntaxKind::*;
 
-impl Grammer for ast::ArrayOfTable {
+impl Parse for ast::ArrayOfTable {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 

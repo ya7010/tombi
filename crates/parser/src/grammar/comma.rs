@@ -2,9 +2,9 @@ use syntax::T;
 
 use crate::grammar::{leading_comments, tailing_comment};
 
-use super::{Grammer, Parser};
+use super::{Parse, Parser};
 
-impl Grammer for Option<ast::Comma> {
+impl Parse for Option<ast::Comma> {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 

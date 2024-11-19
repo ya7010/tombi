@@ -13,7 +13,7 @@ mod validation;
 
 pub use error::Error;
 pub use event::Event;
-use grammar::Grammer;
+use grammar::Parse;
 use input::Input;
 use lexed::lex;
 pub use lexed::LexedStr;
@@ -26,7 +26,7 @@ pub fn parse(source: &str) -> Parsed<SyntaxNode> {
 }
 
 #[allow(private_bounds)]
-pub fn parse_as<G: Grammer>(source: &str) -> Parsed<SyntaxNode> {
+pub fn parse_as<G: Parse>(source: &str) -> Parsed<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
     let output = grammar::parse::<G>(&input);

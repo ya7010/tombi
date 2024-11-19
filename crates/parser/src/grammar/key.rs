@@ -5,7 +5,7 @@ use syntax::{
 
 use crate::{parser::Parser, token_set::TokenSet};
 
-use super::Grammer;
+use super::Parse;
 
 pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
@@ -22,7 +22,7 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     SyntaxKind::BOOLEAN,
 ]);
 
-impl Grammer for ast::Keys {
+impl Parse for ast::Keys {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
         if eat_keys(p).is_some() {

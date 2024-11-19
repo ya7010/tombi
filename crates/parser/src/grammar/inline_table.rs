@@ -3,12 +3,12 @@ use syntax::{SyntaxKind::*, T};
 use crate::{
     grammar::{
         begin_dangling_comments, end_dangling_comments, leading_comments, peek_leading_comments,
-        tailing_comment, Grammer,
+        tailing_comment, Parse,
     },
     parser::Parser,
 };
 
-impl Grammer for ast::InlineTable {
+impl Parse for ast::InlineTable {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 

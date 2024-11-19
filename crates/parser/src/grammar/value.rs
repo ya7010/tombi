@@ -1,10 +1,10 @@
 use super::{
-    leading_comments, peek_leading_comments, tailing_comment, Grammer, TS_COMMEMT_OR_LINE_END,
+    leading_comments, peek_leading_comments, tailing_comment, Parse, TS_COMMEMT_OR_LINE_END,
 };
 use crate::parser::Parser;
 use syntax::{SyntaxKind::*, T};
 
-impl Grammer for ast::Value {
+impl Parse for ast::Value {
     fn parse(p: &mut Parser<'_>) {
         let n = peek_leading_comments(p);
         match p.nth(n) {

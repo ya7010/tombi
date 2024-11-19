@@ -2,14 +2,14 @@ use syntax::T;
 
 use crate::{
     grammar::{
-        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Grammer,
-        TS_LINE_END, TS_NEXT_SECTION,
+        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
+        TS_NEXT_SECTION,
     },
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
 
-impl Grammer for ast::Table {
+impl Parse for ast::Table {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
