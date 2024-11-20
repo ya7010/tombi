@@ -2,15 +2,15 @@ mod arg;
 mod command;
 
 use clap::{
-    builder::styling::{AnsiColor, Color, Style},
+    builder::styling::{Ansi256Color, AnsiColor, Color, Style},
     Parser,
 };
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use tracing_subscriber::prelude::*;
 
-/// Tombi: TOML formatter and linter.
 #[derive(clap::Parser)]
-#[command(name="tombi", version, styles=app_styles(), disable_help_subcommand(true))]
+#[command()]
+#[command(name="tombi", about = styled_about(), version, styles=app_styles(), disable_help_subcommand(true))]
 pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
@@ -49,8 +49,18 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
     }
 }
 
+fn styled_about() -> String {
+    let name = " Tombi ";
+    let name_style = Style::new()
+        .bold()
+        .bg_color(Some(Color::Ansi(AnsiColor::Blue)))
+        .fg_color(Some(Color::Ansi(AnsiColor::White)));
+
+    format!("{name_style}{name}{name_style:#} TOML formatter and linter")
+}
+
 fn app_styles() -> clap::builder::Styles {
-    clap::builder::Styles::styled()
+    clap::builder::Styles::plain()
         .usage(
             Style::new()
                 .bold()
