@@ -2,7 +2,7 @@ mod arg;
 mod command;
 
 use clap::{
-    builder::styling::{Ansi256Color, AnsiColor, Color, Style},
+    builder::styling::{AnsiColor, Color, Style},
     Parser,
 };
 use clap_verbosity_flag::{InfoLevel, Verbosity};
