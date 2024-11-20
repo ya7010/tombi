@@ -1,6 +1,7 @@
 [project]
 name = "tombi"
 version = "0.0.1"
+readme = "python/README.md"
 description = "Reserved package for tombi"
 requires-python = ">=3.10"
 dependencies = []
@@ -20,6 +21,6 @@ dev = [
 
 [tool.maturin]
 bindings = "bin"
-manifest-path = "../rust/tombi-cli/Cargo.toml"
+manifest-path = "rust/tombi-cli/Cargo.toml"
 module-name = "tombi"
-python-source = "src"
+python-source = "python/src"

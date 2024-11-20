@@ -15,10 +15,6 @@ on:
       - .github/workflows/ci_python.yml
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: python
-
 jobs:
   python-ci:
     runs-on: ubuntu-latest
