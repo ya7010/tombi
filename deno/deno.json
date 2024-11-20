@@ -9,5 +9,14 @@
   "imports": {
     "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
     "@std/assert": "jsr:@std/assert@1"
+  },
+  "fmt": {
+    "exclude": ["npm/"]
+  },
+  "lint": {
+    "exclude": ["npm/"]
+  },
+  "test": {
+    "exclude": ["npm/"]
   }
 }
