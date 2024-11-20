@@ -65,7 +65,7 @@ fn styled_about() -> String {
     )
 }
 
-fn app_styles() -> clap::builder::Styles {
+const fn app_styles() -> clap::builder::Styles {
     clap::builder::Styles::plain()
         .usage(
             Style::new()
