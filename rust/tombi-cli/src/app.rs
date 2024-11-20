@@ -1,13 +1,16 @@
 mod arg;
 mod command;
 
-use clap::Parser;
+use clap::{
+    builder::styling::{AnsiColor, Color, Style},
+    Parser,
+};
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use tracing_subscriber::prelude::*;
 
-/// TOML: TOML linter and code formatter.
+/// Tombi: TOML formatter and linter.
 #[derive(clap::Parser)]
-#[command(name = "toml", version)]
+#[command(name="tombi", version, styles=app_styles(), disable_help_subcommand(true))]
 pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
@@ -44,4 +47,39 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
         command::TomlCommand::Format(args) => command::format::run(args),
         command::TomlCommand::Lint(args) => command::lint::run(args),
     }
+}
+
+fn app_styles() -> clap::builder::Styles {
+    clap::builder::Styles::styled()
+        .usage(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
+        )
+        .header(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
+        )
+        .literal(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Cyan))),
+        )
+        .valid(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Green))),
+        )
+        .invalid(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Red))),
+        )
+        .error(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Red))),
+        )
+        .placeholder(Style::new().fg_color(Some(Color::Ansi(AnsiColor::Cyan))))
 }
