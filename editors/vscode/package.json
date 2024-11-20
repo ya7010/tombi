@@ -19,9 +19,9 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node20",
-    "build": "npm run build-base -- --sourcemap",
-    "watch": "npm run build-base -- --sourcemap --watch",
-    "package": "vsce package --no-dependencies -o tombi.vsix",
+    "build": "pnpm run build-base --sourcemap",
+    "watch": "pnpm run build-base --sourcemap --watch",
+    "package": "pnpm run build && vsce package --no-dependencies -o tombi.vsix",
     "format": "biome format --write ./",
     "format:check": "biome format ./",
     "lint": "biome lint ./",
