@@ -1,9 +1,11 @@
 [package]
 name = "tombi-cli"
+description = "TOML Formatter/Linter CLI Tool."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [[bin]]
 name = "tombi"
