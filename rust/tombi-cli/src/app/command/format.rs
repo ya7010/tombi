@@ -21,9 +21,9 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     let (success_num, error_num) = inner_run(args, Pretty);
 
     match success_num {
-        0 => eprintln!("No files formatted."),
-        1 => eprintln!("1 file formatted."),
-        _ => eprintln!("{} files formatted.", success_num),
+        0 => eprintln!("No files formatted"),
+        1 => eprintln!("1 file formatted"),
+        _ => eprintln!("{} files formatted", success_num),
     }
 
     if error_num > 0 {
