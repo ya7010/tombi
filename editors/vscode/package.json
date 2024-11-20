@@ -40,6 +40,8 @@
     "esbuild": "^0.24.0"
   },
   "activationEvents": ["onLanguage:cargoLock"],
+  "icon": "icon.png",
+  "preview": true,
   "contributes": {
     "languages": [
       {
