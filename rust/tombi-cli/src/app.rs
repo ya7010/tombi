@@ -50,13 +50,19 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
 }
 
 fn styled_about() -> String {
-    let name = " Tombi ";
+    let name = "Tombi";
     let name_style = Style::new()
         .bold()
         .bg_color(Some(Color::Ansi(AnsiColor::Blue)))
         .fg_color(Some(Color::Ansi(AnsiColor::White)));
 
-    format!("{name_style}{name}{name_style:#} TOML formatter and linter")
+    let desc_style = Style::new()
+        .bg_color(Some(Color::Ansi(AnsiColor::Blue)))
+        .fg_color(Some(Color::Ansi(AnsiColor::White)));
+
+    format!(
+        "{name_style}      {name} {name_style:#}{desc_style}: TOML formatter and linter       {desc_style:#}"
+    )
 }
 
 fn app_styles() -> clap::builder::Styles {
