@@ -26,5 +26,7 @@
   "[toml]": {
     "editor.tabSize": 2,
     "editor.defaultFormatter": "yassun7010.tombi"
-  }
+  },
+  "deno.enablePaths": ["deno"],
+  "editor.defaultFormatter": "biomejs.biome"
 }
