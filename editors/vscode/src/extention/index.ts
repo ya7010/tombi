@@ -24,8 +24,8 @@ export class Extension {
   }
 
   static async activate(context: vscode.ExtensionContext): Promise<Extension> {
-    const serverPath = await bootstrap(context, {});
-    const server = new Server(serverPath);
+    const serverBinPath = await bootstrap(context, {});
+    const server = new Server(serverBinPath);
     const client = new node.LanguageClient(
       EXTENTION_ID,
       `${EXTENTION_NAME} LSP`,
