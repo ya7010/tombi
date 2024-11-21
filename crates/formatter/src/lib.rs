@@ -1,5 +1,5 @@
 mod format;
-mod formatter;
+pub mod formatter;
 
 use ast::AstNode;
 use diagnostic::Diagnostic;
