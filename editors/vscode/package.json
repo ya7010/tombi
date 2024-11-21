@@ -18,7 +18,7 @@
   "main": "./dist/main",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node20",
+    "build-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node18",
     "build": "pnpm run build-base --sourcemap",
     "watch": "pnpm run build-base --sourcemap --watch",
     "package": "pnpm run build && vsce package --no-dependencies -o tombi.vsix",
