@@ -1,7 +1,11 @@
+/// DateTime delimiter
 #[derive(Debug, Default, Clone, Copy, schemars::JsonSchema)]
 pub enum DateTimeDelimiter {
+    /// Example: `2021-01-01T00:00:00`
     #[default]
     T,
+
+    /// Example: `2021-01-01 00:00:00`
     Space,
 }
 
