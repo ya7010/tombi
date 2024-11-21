@@ -3,7 +3,7 @@ use syntax::SyntaxToken;
 use crate::Format;
 
 mod boolean;
-mod datetime;
+mod date_time;
 mod float;
 mod integer;
 mod string;
