@@ -1,3 +1,5 @@
+use super::DateTimeDelimiter;
+
 /// Definitions provides the definition of the format that does not have the freedom set by Options.
 ///
 /// NOTE: Some of the items defined in Definitions may be moved to Options in the future.
@@ -50,5 +52,10 @@ impl Definitions {
     #[inline]
     pub const fn inline_table_brace_inner_space(&self) -> &'static str {
         " "
+    }
+
+    #[inline]
+    pub const fn date_time_delimiter(&self) -> DateTimeDelimiter {
+        DateTimeDelimiter::T
     }
 }

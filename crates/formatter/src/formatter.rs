@@ -1,3 +1,11 @@
+mod date_time_delimiter;
+pub mod definitions;
+mod line_ending;
+pub mod options;
+
+pub use date_time_delimiter::DateTimeDelimiter;
+pub use line_ending::LineEnding;
+
 use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
@@ -42,8 +50,16 @@ impl<'a> Formatter<'a> {
     #[inline]
     pub fn line_ending(&self) -> &'static str {
         match self.options.line_ending.unwrap_or_default() {
-            crate::options::LineEnding::Lf => "\n",
-            crate::options::LineEnding::Crlf => "\r\n",
+            LineEnding::Lf => "\n",
+            LineEnding::Crlf => "\r\n",
+        }
+    }
+
+    #[inline]
+    pub const fn date_time_delimiter(&self) -> &'static str {
+        match self.defs.date_time_delimiter() {
+            DateTimeDelimiter::T => "T",
+            DateTimeDelimiter::Space => " ",
         }
     }
 

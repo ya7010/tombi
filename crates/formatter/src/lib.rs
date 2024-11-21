@@ -1,14 +1,12 @@
-mod definitions;
 mod format;
 mod formatter;
-mod options;
 
 use ast::AstNode;
-pub use definitions::Definitions;
 use diagnostics::Diagnostic;
 use format::Format;
+pub use formatter::definitions::Definitions;
+pub use formatter::options::Options;
 pub use formatter::Formatter;
-pub use options::Options;
 
 pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
     format_with_option(source, &Options::default())
