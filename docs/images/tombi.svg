@@ -5,24 +5,18 @@
         <rect x="1.897" y="-0.167" width="528.845" height="232.958" style="fill:rgb(0,0,102);"/>
     </g>
     <g transform="matrix(1,0,0,1,7.02996,2.41209)">
-        <g transform="matrix(0.503781,0,0,0.443457,77.97,36.309)">
-            <clipPath id="_clip1">
-                <rect x="0" y="0" width="300" height="300"/>
-            </clipPath>
-            <g clip-path="url(#_clip1)">
-                <g transform="matrix(1.98499,-0,-0,2.25501,-168.724,-87.3164)">
-                    <use xlink:href="#_Image2" x="85" y="38.721" width="152px" height="134px"/>
-                </g>
+        <g transform="matrix(10.3281,0,0,10.5452,381.243,154.298)">
+            <text x="0px" y="0px" style="font-family:'Helvetica-Bold', 'Helvetica';font-weight:700;font-size:12px;fill:rgb(156,66,33);">oi</text>
+        </g>
+        <g transform="matrix(11.8305,0,0,11.6341,67.0832,142.47)">
+            <g transform="matrix(12,0,0,12,14.6602,0)">
             </g>
+            <text x="0px" y="0px" style="font-family:'Helvetica-Bold', 'Helvetica';font-weight:700;font-size:12px;fill:rgb(156,66,33);">[  ]</text>
         </g>
-        <g transform="matrix(10.3281,0,0,10.5452,-1294.46,-2910.58)">
-            <text x="162.247px" y="290.642px" style="font-family:'Helvetica-Bold', 'Helvetica';font-weight:700;font-size:12px;fill:rgb(156,66,33);">oi</text>
-        </g>
-        <g transform="matrix(10.7472,0,0,10.5452,-1629.91,-2910.52)">
-            <text x="162.247px" y="290.642px" style="font-family:'Helvetica-Bold', 'Helvetica';font-weight:700;font-size:12px;fill:rgb(255,253,232);">T<tspan x="168.692px 176.022px " y="290.642px 290.642px ">om</tspan>l</text>
+        <g transform="matrix(10.7472,0,0,10.5452,113.791,154.358)">
+            <g transform="matrix(12,0,0,12,27.7793,0)">
+            </g>
+            <text x="0px" y="0px" style="font-family:'Helvetica-Bold', 'Helvetica';font-weight:700;font-size:12px;fill:rgb(255,253,232);">T<tspan x="6.445px 13.775px " y="0px 0px ">om</tspan>l</text>
         </g>
     </g>
-    <defs>
-        <image id="_Image2" width="152px" height="134px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJgAAACGCAYAAAAhHkPKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC1klEQVR4nO3cPW4TURiG0W9skx8JUBoEJRFiCUjUaZDYAA1tahbBBqDPAqjokKjSwxJoUkMDRPwmzAxlKCiQdV+Pcc7p7/Un57Gv7YzdHR3sjzWxa1vzOj3r54fHJ8PUs2yCFw/uvPtyPtydeo6qqtnUA7DZBEaUwIgSGFECI0pgRAmMKIERJTCiBEaUwIgSGFECI2rRaqOuqt9ZzL4us3Z3PqvT6luNcultz2df+7FOl1l71o87/ThutZqla3G5TldVQ9Wbw+OT+w1mYkJHB/vPZl33ZBjbXMXV8ojsGu7FRMaGp1qV12CECYwogRElMKIERpTAiBIYUQIjSmBENf3UtrGb5b8D/+p9VU3+Df2/WefA3lXV9amH+E/sVdXnqYf4G0fkZljLZ68qgREmMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQLbDGt73dw6Xw/2qKqurOi2hqp6XlV3Guz1qaoe12ofvEv96MwqrHNgr1d8e08b7fOzql412uu/54gkSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYwogRElMKIEdmHeaB/36R8WUw+wRu5VVTf1EJtGYBfOph5gE7V8Oh8b7sV0+pabdUcH+03C6Kp+bc9nH5dZe21rXh++n986PD4ZWsxy2b18ePftt/Ph9jJrz4fxaj+Ou61maXZEjlWLH/1wY5m1V3ovfVo664e9Zf8WrXnHQ5TAiBIYUQIjSmBECYwogRElMKIERpTAiBIYUQIjSmBECYyo3wPqV3MKya+oAAAAAElFTkSuQmCC"/>
-    </defs>
 </svg>
