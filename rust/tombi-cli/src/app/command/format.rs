@@ -1,4 +1,4 @@
-use diagnostics::{printer::Pretty, Diagnostic, Print};
+use diagnostic::{printer::Pretty, Diagnostic, Print};
 
 use crate::app::arg;
 use std::io::Read;

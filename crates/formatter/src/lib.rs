@@ -2,7 +2,7 @@ mod format;
 mod formatter;
 
 use ast::AstNode;
-use diagnostics::Diagnostic;
+use diagnostic::Diagnostic;
 use format::Format;
 pub use formatter::definitions::Definitions;
 pub use formatter::options::Options;

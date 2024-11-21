@@ -5,7 +5,7 @@
     - [x] Array のコメントサポート
     - [x] Inline Table のコメントサポート
 - [x] lexer の自作
-- [x] diagnostics のエラーメッセージの範囲の改善
+- [x] diagnostic のエラーメッセージの範囲の改善
 - [ ] Document のサポート。
 - [x] linter のサポート
 - [x] リリース

@@ -1,5 +1,5 @@
 mod options;
-use diagnostics::Diagnostic;
+use diagnostic::Diagnostic;
 pub use options::Options;
 
 pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {

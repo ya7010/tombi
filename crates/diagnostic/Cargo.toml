@@ -1,5 +1,5 @@
 [package]
-name = "diagnostics"
+name = "diagnostic"
 version = "0.0.0"
 edition = { workspace = true }
 authors = { workspace = true }

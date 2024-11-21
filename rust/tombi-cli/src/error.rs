@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use diagnostics::{
+use diagnostic::{
     printer::{Pretty, Simple},
     Level, Print,
 };
