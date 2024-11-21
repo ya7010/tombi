@@ -1,14 +1,13 @@
-use syntax::SyntaxToken;
-
-use crate::Format;
-
 mod boolean;
 mod date_time;
 mod float;
 mod integer;
 mod string;
-use super::comment::{LeadingComment, TailingComment};
+
+use crate::format::comment::{LeadingComment, TailingComment};
+use crate::Format;
 use std::fmt::Write;
+use syntax::SyntaxToken;
 
 trait LiteralNode {
     fn token(&self) -> Option<SyntaxToken>;
