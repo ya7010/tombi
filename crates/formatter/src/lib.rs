@@ -48,14 +48,22 @@ macro_rules! test_format {
         crate::test_format!(#[test] fn $name($source) -> Ok($source););
     };
 
+    (#[test] fn $name:ident($source:expr, $version:expr) -> Ok(_);) => {
+        crate::test_format!(#[test] fn $name($source, $version) -> Ok($source););
+    };
+
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
+        crate::test_format!(#[test] fn $name($source, Default::default()) -> Ok($source););
+    };
+
+    (#[test] fn $name:ident($source:expr, $version:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
             let p = parser::parse($source);
             let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
             let mut formatted_text = String::new();
-            ast.fmt(&mut crate::Formatter::new(syntax::TomlVersion::V1_1_0_Preview, &mut formatted_text))
+            ast.fmt(&mut crate::Formatter::new($version, &mut formatted_text))
                 .unwrap();
 
             assert_eq!(formatted_text, textwrap::dedent($expected).trim());
@@ -71,4 +79,39 @@ macro_rules! test_format {
             assert_ne!(p.errors(), vec![]);
         }
     };
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    test_format! {
+        #[test] fn test_key_values(r#"
+            array5 = [
+              1,
+              {
+                # inline begin dangling comment1
+                # inline begin dangling comment2
+
+                # key1 leading comment1
+                # key1 leading comment2
+                key1 = 1,  # key1 tailing comment
+                # key2 leading comment1
+                key2 = 2,  # key2 tailing comment
+
+                # inline end dangling comment1
+                # inline end dangling comment2
+              },
+
+              # comment
+            ]
+            "#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(r#"
+            key = "value"
+            bare_key = "value"
+            bare-key = "value"
+            1234 = "value"
+        "#);
+    }
 }

@@ -25,10 +25,10 @@ impl rg_tree::Language for TomlLanguage {
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
 pub enum TomlVersion {
-    #[default]
     /// TOML 1.0.0
     V1_0_0,
 
+    #[default]
     /// TOML 1.1.0-preview
     V1_1_0_Preview,
 }
