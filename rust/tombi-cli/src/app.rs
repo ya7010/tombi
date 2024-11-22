@@ -10,7 +10,13 @@ use tracing_subscriber::prelude::*;
 
 #[derive(clap::Parser)]
 #[command()]
-#[command(name="tombi", about = app_about(), version, styles=app_styles(), disable_help_subcommand(true))]
+#[command(
+    name="tombi",
+    about = app_about(),
+    version,
+    styles=app_styles(),
+    disable_help_subcommand(true)
+)]
 pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
