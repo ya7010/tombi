@@ -14,6 +14,7 @@ use tracing_subscriber::prelude::*;
 pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
+
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
 }
