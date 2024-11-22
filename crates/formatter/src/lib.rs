@@ -53,7 +53,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
-        crate::test_format!(#[test] fn $name($source, Default::default()) -> Ok($source););
+        crate::test_format!(#[test] fn $name($source, Default::default()) -> Ok($expected););
     };
 
     (#[test] fn $name:ident($source:expr, $version:expr) -> Ok($expected:expr);) => {
