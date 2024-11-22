@@ -47,9 +47,9 @@ pub const fn version() -> VersionInfo {
 
     let release_channel = option_env!("CFG_RELEASE_CHANNEL");
     let commit_info = match (
-        option_env!("TOML_TOOLKIT_COMMIT_SHORT_HASH"),
-        option_env!("TOML_TOOLKIT_COMMIT_HASH"),
-        option_env!("TOML_TOOLKIT_COMMIT_DATE"),
+        option_env!("TOMBI_COMMIT_SHORT_HASH"),
+        option_env!("TOMBI_COMMIT_HASH"),
+        option_env!("TOMBI_COMMIT_DATE"),
     ) {
         (Some(short_commit_hash), Some(commit_hash), Some(commit_date)) => Some(CommitInfo {
             short_commit_hash,

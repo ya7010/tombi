@@ -45,7 +45,7 @@ fn set_commit_info() {
     let stdout = String::from_utf8(output.stdout).unwrap();
     let mut parts = stdout.split_whitespace();
     let mut next = || parts.next().unwrap();
-    println!("cargo:rustc-env=TOML_TOOLKIT_COMMIT_HASH={}", next());
-    println!("cargo:rustc-env=TOML_TOOLKIT_COMMIT_SHORT_HASH={}", next());
-    println!("cargo:rustc-env=TOML_TOOLKIT_COMMIT_DATE={}", next())
+    println!("cargo:rustc-env=TOMBI_COMMIT_HASH={}", next());
+    println!("cargo:rustc-env=TOMBI_COMMIT_SHORT_HASH={}", next());
+    println!("cargo:rustc-env=TOMBI_COMMIT_DATE={}", next())
 }
