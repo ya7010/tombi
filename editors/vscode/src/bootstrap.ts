@@ -32,7 +32,7 @@ export async function getServerPath(
 
   const explicitPath =
     // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-    process.env["__TOMBI_LSP_SERVER_DEBUG"] ?? settings.server?.path;
+    process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] ?? settings.server?.path;
 
   if (explicitPath) {
     if (explicitPath.startsWith("~/")) {

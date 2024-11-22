@@ -28,11 +28,11 @@ export class Extension {
     const server = new Server(serverBinPath);
     const client = new node.LanguageClient(
       EXTENTION_ID,
-      `${EXTENTION_NAME} LSP`,
+      `${EXTENTION_NAME} Language Server`,
       serverOptions(server.binPath),
       clientOptions(),
       // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-      process.env["__TOMBI_LSP_SERVER_DEBUG"] !== undefined,
+      process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] !== undefined,
     );
 
     const extenstion = new Extension(context, client, server);
