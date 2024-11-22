@@ -1,4 +1,3 @@
-pub mod app;
 mod document;
 pub mod server;
 mod toml;
