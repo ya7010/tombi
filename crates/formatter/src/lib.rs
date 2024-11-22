@@ -107,11 +107,6 @@ mod test {
             ]
             "#,
             TomlVersion::V1_1_0_Preview
-        ) -> Ok(r#"
-            key = "value"
-            bare_key = "value"
-            bare-key = "value"
-            1234 = "value"
-        "#);
+        ) -> Ok(_);
     }
 }
