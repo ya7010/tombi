@@ -62,7 +62,7 @@ fn styled_about() -> String {
         .fg_color(Some(Color::Ansi(AnsiColor::White)));
 
     format!(
-        "{name_style}      {name} {name_style:#}{desc_style}: TOML formatter and linter       {desc_style:#}"
+        "{name_style}       {name} {name_style:#}{desc_style}: TOML formatter and linter       {desc_style:#}"
     )
 }
 
