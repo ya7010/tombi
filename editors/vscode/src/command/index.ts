@@ -1,3 +1,3 @@
-import { showServerVersion } from "./show-server-version";
+import { showLanguageServerVersion } from "./show-language-server-version";
 
-export { showServerVersion };
+export { showLanguageServerVersion };

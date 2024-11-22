@@ -23,9 +23,9 @@
     "watch": "pnpm run build-base --sourcemap --watch",
     "package": "pnpm run build && vsce package --no-dependencies -o tombi.vsix",
     "publish": "vsce publish --no-dependencies",
-    "format": "biome format --write ./",
-    "format:check": "biome format ./",
-    "lint": "biome lint ./",
+    "format": "biome format --write ./src",
+    "format:check": "biome format ./src",
+    "lint": "biome lint ./src",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -61,7 +61,7 @@
     ],
     "commands": [
       {
-        "command": "tombi.showServerVersion",
+        "command": "tombi.showLanguageServerVersion",
         "title": "Show Language Server Version",
         "category": "Tombi"
       }

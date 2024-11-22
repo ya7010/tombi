@@ -1,7 +1,7 @@
 export interface Settings {
-  server?: Server;
+  tombi?: Tombi;
 }
 
-export interface Server {
+export interface Tombi {
   path?: string;
 }

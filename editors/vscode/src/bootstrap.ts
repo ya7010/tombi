@@ -8,40 +8,52 @@ export type Env = {
   [name: string]: string;
 };
 
+export type TombiBin = {
+  source: "bundled" | "local";
+  path: string;
+};
+
 export async function bootstrap(
   context: vscode.ExtensionContext,
   settings: extention.Settings,
-): Promise<string> {
-  const path = await getServerPath(context, settings);
-  if (!path) {
+): Promise<TombiBin> {
+  const tombiBin = await getServerPath(context, settings);
+  if (!tombiBin) {
     throw new Error("tombi Language Server is not available.");
   }
 
-  log.info("Using Language Server binary at", path);
+  log.info("Using Language Server binary at", tombiBin.path);
 
-  return path;
+  return tombiBin;
 }
 
 export async function getServerPath(
   context: vscode.ExtensionContext,
   settings: extention.Settings,
-): Promise<string | undefined> {
+): Promise<TombiBin | undefined> {
   const packageJson: {
     releaseTag: string | null;
   } = context.extension.packageJSON;
 
-  const explicitPath =
+  let localPath =
     // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-    process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] ?? settings.server?.path;
+    process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] ?? settings.tombi?.path;
 
-  if (explicitPath) {
-    if (explicitPath.startsWith("~/")) {
-      return os.homedir() + explicitPath.slice("~".length);
+  if (localPath) {
+    if (localPath.startsWith("~/")) {
+      localPath = os.homedir() + localPath.slice("~".length);
     }
-    return explicitPath;
+    return {
+      source: "local",
+      path: localPath,
+    };
   }
 
-  if (packageJson.releaseTag === null) return LANGUAGE_SERVER_BIN_NAME;
+  if (packageJson.releaseTag === null)
+    return {
+      source: "local",
+      path: LANGUAGE_SERVER_BIN_NAME,
+    };
 
   // finally, use the bundled one
   const ext = process.platform === "win32" ? ".exe" : "";
@@ -50,8 +62,12 @@ export async function getServerPath(
     "server",
     LANGUAGE_SERVER_BIN_NAME + ext,
   );
+
   if (await fileExists(bundledUri)) {
-    return bundledUri.fsPath;
+    return {
+      source: "bundled",
+      path: bundledUri.fsPath,
+    };
   }
 
   await vscode.window.showErrorMessage(

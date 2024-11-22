@@ -24,12 +24,12 @@ export class Extension {
   }
 
   static async activate(context: vscode.ExtensionContext): Promise<Extension> {
-    const serverBinPath = await bootstrap(context, {});
-    const server = new Server(serverBinPath);
+    const tombiBin = await bootstrap(context, {});
+    const server = new Server(tombiBin);
     const client = new node.LanguageClient(
       EXTENTION_ID,
       `${EXTENTION_NAME} Language Server`,
-      serverOptions(server.binPath),
+      serverOptions(server.tombiBin.path),
       clientOptions(),
       // biome-ignore lint/complexity/useLiteralKeys: <explanation>
       process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] !== undefined,
@@ -48,9 +48,9 @@ export class Extension {
   private registerCommands(): void {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        `${EXTENTION_ID}.showServerVersion`,
+        `${EXTENTION_ID}.showLanguageServerVersion`,
         async () => {
-          await command.showServerVersion(this.server);
+          await command.showLanguageServerVersion(this.server);
         },
       ),
     );
