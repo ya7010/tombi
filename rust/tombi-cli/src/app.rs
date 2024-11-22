@@ -10,7 +10,7 @@ use tracing_subscriber::prelude::*;
 
 #[derive(clap::Parser)]
 #[command()]
-#[command(name="tombi", about = styled_about(), version, styles=app_styles(), disable_help_subcommand(true))]
+#[command(name="tombi", about = app_about(), version, styles=app_styles(), disable_help_subcommand(true))]
 pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
@@ -51,7 +51,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
     }
 }
 
-fn styled_about() -> String {
+fn app_about() -> String {
     let name = "Tombi";
     let name_style = Style::new()
         .bold()
