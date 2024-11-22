@@ -27,17 +27,17 @@
       }
     },
     {
-      "label": "Build Server",
+      "label": "Build CLI",
       "group": "build",
       "type": "shell",
-      "command": "cargo build --package tombi-lsp",
+      "command": "cargo build --package tombi-cli",
       "problemMatcher": "$rustc"
     },
     {
-      "label": "Build Server (Release)",
+      "label": "Build CLI (Release)",
       "group": "build",
       "type": "shell",
-      "command": "cargo build --release --package tombi-lsp",
+      "command": "cargo build --release --package tombi-cli",
       "problemMatcher": "$rustc"
     },
     {

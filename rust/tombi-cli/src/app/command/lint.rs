@@ -1,6 +1,7 @@
 use std::io::Read;
 
 use diagnostic::{printer::Pretty, Diagnostic, Print};
+use syntax::TomlVersion;
 
 use crate::app::arg;
 
@@ -11,6 +12,10 @@ pub struct Args {
     ///
     /// If the only argument is "-", the standard input is used.
     files: Vec<String>,
+
+    /// TOML version.
+    #[arg(long, value_enum, default_value_t = TomlVersion::default())]
+    toml_version: TomlVersion,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -84,7 +89,7 @@ where
     (success_num, error_num)
 }
 
-fn lint_file<R: Read, P>(mut reader: R, printer: P, _args: &Args) -> bool
+fn lint_file<R: Read, P>(mut reader: R, printer: P, args: &Args) -> bool
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -92,7 +97,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
-        match linter::lint_with_option(&source, &Default::default()) {
+        match linter::lint_with(&source, args.toml_version, &Default::default()) {
             Ok(()) => {
                 return true;
             }

@@ -70,11 +70,11 @@
       "title": "Tombi",
       "properties": {
         "tombi.path": {
-          "description": "Absolute path to tombi-lsp executable.",
+          "description": "Absolute path to tombi executable.",
           "type": ["string", "null"],
           "scope": "resource",
           "default": null,
-          "pattern": "^.*tombi-lsp(\\.exe)?$"
+          "pattern": "^.*tombi(\\.exe)?$"
         }
       }
     }

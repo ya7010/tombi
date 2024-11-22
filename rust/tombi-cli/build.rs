@@ -5,7 +5,7 @@ use std::{env, path::PathBuf, process::Command};
 fn main() {
     set_rerun();
     set_commit_info();
-    println!("cargo::rustc-check-cfg=cfg(toml_toolkit)");
+    println!("cargo::rustc-check-cfg=cfg(tombi-cli)");
     if option_env!("CFG_RELEASE").is_none() {
         println!("cargo:rustc-env=POKE_RA_DEVS=1");
     }
