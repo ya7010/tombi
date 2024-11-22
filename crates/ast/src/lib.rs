@@ -4,7 +4,7 @@ mod generated;
 pub use generated::*;
 use itertools::Itertools;
 use std::{fmt::Debug, marker::PhantomData};
-use syntax::{SyntaxElement, SyntaxKind::*, T};
+use syntax::{SyntaxElement, SyntaxKind::*, TomlVersion, T};
 
 pub trait AstNode
 where
@@ -297,10 +297,27 @@ impl InlineTable {
             })
     }
 
-    pub fn should_be_multiline(&self) -> bool {
-        self.has_multiline_values()
-            // || self.has_tailing_comma_after_last_value()
-            || self.has_inner_comments()
+    pub fn should_be_multiline(&self, version: TomlVersion) -> bool {
+        match version {
+            TomlVersion::V1_0_0 => false,
+            TomlVersion::V1_1_0_Preview => {
+                self.has_multiline_values()
+                    || self.has_tailing_comma_after_last_value()
+                    || self.has_inner_comments()
+            }
+        }
+    }
+
+    pub fn has_tailing_comma_after_last_value(&self) -> bool {
+        self.syntax()
+            .children_with_tokens()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .skip_while(|item| item.kind() != T!('}'))
+            .skip(1)
+            .find(|item| !matches!(item.kind(), WHITESPACE | COMMENT | LINE_BREAK))
+            .map_or(false, |it| it.kind() == T!(,))
     }
 
     pub fn has_multiline_values(&self) -> bool {

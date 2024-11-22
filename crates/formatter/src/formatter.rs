@@ -5,36 +5,48 @@ pub mod options;
 
 pub use date_time_delimiter::DateTimeDelimiter;
 pub use line_ending::LineEnding;
+use syntax::TomlVersion;
 
 use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
-    options: Cow<'a, crate::Options>,
-    defs: crate::Definitions,
+    version: TomlVersion,
     ident_depth: u8,
-
+    defs: crate::Definitions,
+    options: Cow<'a, crate::Options>,
     buf: &'a mut (dyn Write + 'a),
 }
 
 impl<'a> Formatter<'a> {
     #[inline]
-    pub fn new(buf: &'a mut (dyn Write + 'a)) -> Self {
+    pub fn new(version: TomlVersion, buf: &'a mut (dyn Write + 'a)) -> Self {
         Self {
-            options: Cow::Owned(crate::Options::default()),
-            defs: Default::default(),
+            version,
             ident_depth: 0,
+            defs: Default::default(),
+            options: Cow::Owned(crate::Options::default()),
             buf,
         }
     }
 
     #[inline]
-    pub fn new_with_options(buf: &'a mut (dyn Write + 'a), options: &'a crate::Options) -> Self {
+    pub fn new_with_options(
+        version: TomlVersion,
+        buf: &'a mut (dyn Write + 'a),
+        options: &'a crate::Options,
+    ) -> Self {
         Self {
-            options: Cow::Borrowed(options),
-            defs: Default::default(),
+            version,
             ident_depth: 0,
+            defs: Default::default(),
+            options: Cow::Borrowed(options),
             buf,
         }
+    }
+
+    #[inline]
+    pub fn version(&self) -> TomlVersion {
+        self.version
     }
 
     #[inline]
@@ -64,6 +76,11 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
+    pub fn reset(&mut self) {
+        self.reset_ident();
+    }
+
+    #[inline]
     pub fn ident(&self) -> String {
         self.defs.ident(self.ident_depth)
     }
@@ -76,6 +93,11 @@ impl<'a> Formatter<'a> {
     #[inline]
     pub fn dec_ident(&mut self) {
         self.ident_depth = self.ident_depth.saturating_sub(1);
+    }
+
+    #[inline]
+    fn reset_ident(&mut self) {
+        self.ident_depth = 0;
     }
 
     #[inline]
@@ -92,11 +114,6 @@ impl<'a> Formatter<'a> {
         self.ident_depth = depth;
 
         result
-    }
-
-    #[inline]
-    pub fn reset_ident(&mut self) {
-        self.ident_depth = 0;
     }
 }
 

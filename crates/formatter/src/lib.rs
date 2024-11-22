@@ -7,12 +7,17 @@ use format::Format;
 pub use formatter::definitions::Definitions;
 pub use formatter::options::Options;
 pub use formatter::Formatter;
+use syntax::TomlVersion;
 
 pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
-    format_with_option(source, &Options::default())
+    format_with(source, TomlVersion::default(), &Options::default())
 }
 
-pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec<Diagnostic>> {
+pub fn format_with(
+    source: &str,
+    version: TomlVersion,
+    options: &Options,
+) -> Result<String, Vec<Diagnostic>> {
     let p = parser::parse(source);
     let errors = p.errors();
 
@@ -22,7 +27,7 @@ pub fn format_with_option(source: &str, options: &Options) -> Result<String, Vec
     if errors.is_empty() {
         let mut formatted_text = String::new();
         let line_ending = {
-            let mut f = Formatter::new_with_options(&mut formatted_text, options);
+            let mut f = Formatter::new_with_options(version, &mut formatted_text, options);
             root.fmt(&mut f).unwrap();
             f.line_ending()
         };
@@ -50,7 +55,7 @@ macro_rules! test_format {
             let ast = ast::Root::cast(p.syntax_node()).unwrap();
 
             let mut formatted_text = String::new();
-            ast.fmt(&mut crate::Formatter::new(&mut formatted_text))
+            ast.fmt(&mut crate::Formatter::new(syntax::TomlVersion::V1_1_0_Preview, &mut formatted_text))
                 .unwrap();
 
             assert_eq!(formatted_text, textwrap::dedent($expected).trim());

@@ -1,4 +1,5 @@
 use diagnostic::{printer::Pretty, Diagnostic, Print};
+use syntax::TomlVersion;
 
 use crate::app::arg;
 use std::io::Read;
@@ -14,6 +15,10 @@ pub struct Args {
     /// Check if the input is formatted.
     #[arg(long, default_value_t = false)]
     check: bool,
+
+    /// TOML version.
+    #[arg(long, value_enum, default_value_t = TomlVersion::default())]
+    toml_version: TomlVersion,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -95,7 +100,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
-        match formatter::format_with_option(&source, &Default::default()) {
+        match formatter::format_with(&source, args.toml_version, &Default::default()) {
             Ok(formatted) => {
                 if args.check && source != formatted {
                     crate::error::NotFormattedError::from_input()

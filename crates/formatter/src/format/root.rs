@@ -8,7 +8,7 @@ use std::fmt::Write;
 
 impl Format for ast::Root {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        f.reset_ident();
+        f.reset();
 
         self.begin_dangling_comments()
             .map(BeginDanglingComment)

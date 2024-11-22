@@ -1205,6 +1205,7 @@ dependencies = [
 name = "syntax"
 version = "0.0.1"
 dependencies = [
+ "clap",
  "rg-tree",
  "rstest",
  "text",
@@ -1310,6 +1311,7 @@ dependencies = [
  "glob",
  "linter",
  "nu-ansi-term 0.50.1",
+ "syntax",
  "thiserror",
  "tokio",
  "tombi-lsp",
