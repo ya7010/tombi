@@ -15,7 +15,7 @@ use tracing_subscriber::prelude::*;
     about = app_about(),
     version,
     styles=app_styles(),
-    disable_help_subcommand(true)
+    disable_help_subcommand(true),
 )]
 pub struct Args {
     #[command(subcommand)]
