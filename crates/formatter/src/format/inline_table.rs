@@ -127,9 +127,6 @@ fn format_singleline_inline_table(
 mod tests {
     use crate::test_format;
 
-    use super::*;
-    use ast::AstNode;
-
     test_format! {
         #[test]
         fn inline_table_key_value1(r#"name = { first = "Tom", last = "Preston-Werner" }"#) -> Ok(_);

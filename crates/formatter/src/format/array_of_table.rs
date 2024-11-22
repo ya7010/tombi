@@ -30,9 +30,6 @@ impl Format for ast::ArrayOfTable {
 mod tests {
     use crate::test_format;
 
-    use super::*;
-    use ast::AstNode;
-
     test_format! {
         #[test]
         fn array_of_table_only_header(

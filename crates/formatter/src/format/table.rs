@@ -29,9 +29,6 @@ impl Format for ast::Table {
 mod tests {
     use crate::test_format;
 
-    use super::*;
-    use ast::AstNode;
-
     test_format! {
         #[test]
         fn table_only_header(

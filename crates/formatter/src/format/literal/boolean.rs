@@ -10,8 +10,7 @@ impl LiteralNode for Boolean {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_format, Format};
-    use ast::AstNode;
+    use crate::test_format;
 
     test_format! {
         #[test]
