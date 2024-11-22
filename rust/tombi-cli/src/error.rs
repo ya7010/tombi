@@ -16,6 +16,8 @@ pub enum Error {
     GlobPatternInvalid(String),
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    #[error(transparent)]
+    LSP(#[from] anyhow::Error),
 }
 
 #[derive(thiserror::Error, Debug)]

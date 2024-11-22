@@ -1,5 +1,6 @@
 pub mod format;
 pub mod lint;
+pub mod serve;
 
 #[derive(clap::Subcommand)]
 pub enum TomlCommand {
@@ -8,4 +9,6 @@ pub enum TomlCommand {
 
     #[command(alias = "check")]
     Lint(lint::Args),
+
+    Serve(serve::Args),
 }

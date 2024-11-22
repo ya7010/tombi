@@ -7,7 +7,11 @@ use tower_lsp::Server;
 
 use crate::version::version;
 
-pub async fn run() -> Result<(), anyhow::Error> {
+/// Run TOML Language Server
+#[derive(clap::Args, Debug)]
+pub struct Args {}
+
+pub async fn run(_args: impl Into<Args>) -> Result<(), anyhow::Error> {
     tracing::info!("Tombi LSP Server Version \"{}\" will start.", version());
 
     let stdin = tokio::io::stdin();

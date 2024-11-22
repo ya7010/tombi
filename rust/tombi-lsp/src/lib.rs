@@ -1,6 +1,6 @@
 pub mod app;
 mod document;
-mod server;
+pub mod server;
 mod toml;
 mod version;
 

@@ -2,7 +2,7 @@ use clap::Parser;
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use tracing_subscriber::prelude::*;
 
-/// TOML Language Server
+/// Run TOML Language Server
 #[derive(clap::Parser)]
 #[command(name = "tombi-lsp", version = crate::version())]
 pub struct Args {
@@ -43,5 +43,5 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
     tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()?
-        .block_on(crate::server::run())
+        .block_on(crate::server::run(crate::server::Args {}))
 }

@@ -1302,6 +1302,7 @@ version = "0.0.1"
 name = "tombi-cli"
 version = "0.0.1"
 dependencies = [
+ "anyhow",
  "clap",
  "clap-verbosity-flag",
  "diagnostic",
@@ -1310,6 +1311,8 @@ dependencies = [
  "linter",
  "nu-ansi-term 0.50.1",
  "thiserror",
+ "tokio",
+ "tombi-lsp",
  "tracing",
  "tracing-subscriber",
 ]

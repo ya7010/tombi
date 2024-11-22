@@ -46,6 +46,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
     match args.subcommand {
         command::TomlCommand::Format(args) => command::format::run(args),
         command::TomlCommand::Lint(args) => command::lint::run(args),
+        command::TomlCommand::Serve(args) => command::serve::run(args),
     }
 }
 
