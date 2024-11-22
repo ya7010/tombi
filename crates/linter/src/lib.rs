@@ -1,11 +1,16 @@
 mod options;
 use diagnostic::Diagnostic;
 pub use options::Options;
+use syntax::TomlVersion;
 
 pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
-    lint_with_option(source, &Options::default())
+    lint_with(source, TomlVersion::default(), &Options::default())
 }
-pub fn lint_with_option(source: &str, _options: &crate::Options) -> Result<(), Vec<Diagnostic>> {
+pub fn lint_with(
+    source: &str,
+    _version: TomlVersion,
+    _options: &crate::Options,
+) -> Result<(), Vec<Diagnostic>> {
     let p = parser::parse(source);
     let errors = p.errors();
 

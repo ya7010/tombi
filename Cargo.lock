@@ -723,6 +723,7 @@ dependencies = [
  "parser",
  "schemars",
  "serde",
+ "syntax",
 ]
 
 [[package]]

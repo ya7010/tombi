@@ -10,3 +10,4 @@ diagnostic.workspace = true
 parser.workspace = true
 schemars.workspace = true
 serde.workspace = true
+syntax.workspace = true
