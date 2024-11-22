@@ -1,4 +1,5 @@
 use dashmap::try_result::TryResult;
+use syntax::TomlVersion;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
 use crate::backend::Backend;
@@ -23,7 +24,11 @@ pub async fn handle_formatting(
         }
     };
 
-    match formatter::format(&document.source) {
+    match formatter::format_with(
+        &document.source,
+        TomlVersion::V1_1_0_Preview,
+        &Default::default(),
+    ) {
         Ok(new_text) => {
             if new_text != document.source {
                 let range = Range::new(
