@@ -1,3 +1,5 @@
+use crate::backend::Backend;
+use crate::toml;
 use ast::{AstNode, AstToken};
 use parser::{SyntaxNode, SyntaxToken};
 use text::Span;
@@ -5,8 +7,6 @@ use tower_lsp::lsp_types::{
     Position, Range, SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams,
     SemanticTokensResult,
 };
-
-use crate::{server::backend::Backend, toml};
 
 #[derive(Debug, Copy, Clone)]
 #[repr(u32)]

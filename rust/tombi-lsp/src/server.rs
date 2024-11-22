@@ -1,10 +1,7 @@
-mod backend;
-mod handler;
-
-use backend::Backend;
 use tower_lsp::LspService;
 use tower_lsp::Server;
 
+use crate::backend::Backend;
 use crate::version::version;
 
 /// Run TOML Language Server

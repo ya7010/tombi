@@ -3,7 +3,8 @@ use tower_lsp::lsp_types::{
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
 };
 
-use crate::{document::Document, server::backend::Backend};
+use crate::backend::Backend;
+use crate::document::Document;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_diagnostic(
