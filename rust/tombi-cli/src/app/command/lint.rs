@@ -23,9 +23,9 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     let (success_num, error_num) = inner_run(args, Pretty);
 
     match success_num {
-        0 => eprintln!("No files linted."),
-        1 => eprintln!("1 file linted."),
-        _ => eprintln!("{} files linted.", success_num),
+        0 => eprintln!("No files linted"),
+        1 => eprintln!("1 file linted"),
+        _ => eprintln!("{} files linted", success_num),
     }
 
     if error_num > 0 {
