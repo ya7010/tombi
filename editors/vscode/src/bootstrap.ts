@@ -9,7 +9,7 @@ export type Env = {
 };
 
 export type TombiBin = {
-  source: "bundled" | "debug" | "VSCode settings";
+  source: "bundled" | "develop" | "VSCode settings";
   path: string;
 };
 
@@ -46,7 +46,7 @@ export async function getTombiBin(
   const debugPath = process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"];
   if (debugPath) {
     return {
-      source: "debug",
+      source: "develop",
       path: debugPath,
     };
   }
