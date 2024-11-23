@@ -9,7 +9,7 @@ export type Env = {
 };
 
 export type TombiBin = {
-  source: "bundled" | "local";
+  source: "bundled" | "local" | "debug" | "settings";
   path: string;
 };
 
@@ -17,7 +17,7 @@ export async function bootstrap(
   context: vscode.ExtensionContext,
   settings: extention.Settings,
 ): Promise<TombiBin> {
-  const tombiBin = await getServerPath(context, settings);
+  const tombiBin = await getTombiBin(context, settings);
   if (!tombiBin) {
     throw new Error("tombi Language Server is not available.");
   }
@@ -27,7 +27,7 @@ export async function bootstrap(
   return tombiBin;
 }
 
-export async function getServerPath(
+export async function getTombiBin(
   context: vscode.ExtensionContext,
   settings: extention.Settings,
 ): Promise<TombiBin | undefined> {
@@ -35,25 +35,32 @@ export async function getServerPath(
     releaseTag: string | null;
   } = context.extension.packageJSON;
 
-  let localPath =
-    // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-    process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] ?? settings.tombi?.path;
-
-  if (localPath) {
-    if (localPath.startsWith("~/")) {
-      localPath = os.homedir() + localPath.slice("~".length);
+  let settingsPath = settings.tombi?.path;
+  if (settingsPath) {
+    if (settingsPath.startsWith("~/")) {
+      settingsPath = os.homedir() + settingsPath.slice("~".length);
     }
     return {
-      source: "local",
-      path: localPath,
+      source: "settings",
+      path: settingsPath,
     };
   }
 
-  if (packageJson.releaseTag === null)
+  if (packageJson.releaseTag === null) {
     return {
       source: "local",
       path: LANGUAGE_SERVER_BIN_NAME,
     };
+  }
+
+  // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+  const debugPath = process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"];
+  if (debugPath) {
+    return {
+      source: "debug",
+      path: debugPath,
+    };
+  }
 
   // finally, use the bundled one
   const ext = process.platform === "win32" ? ".exe" : "";
