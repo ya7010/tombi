@@ -41,12 +41,13 @@ token_types! {
         STRING,
         NUMBER,
         VARIABLE,
-        REGEXP,
         OPERATOR,
         COMMENT,
     }
     custom {
         (BOOLEAN, "boolean"),
+        // NOTE: "datetime" does not exist, so we will use "regexp" instead.
+        (DATETIME, "regexp"),
     }
 }
 
@@ -230,16 +231,16 @@ impl AppendSemanticTokens for ast::Value {
             Self::Float(n) => builder.add_token(TokenType::NUMBER, (&n.token().unwrap()).into()),
             Self::Boolean(n) => builder.add_token(TokenType::BOOLEAN, (&n.token().unwrap()).into()),
             Self::OffsetDateTime(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::DATETIME, (&n.token().unwrap()).into())
             }
             Self::LocalDateTime(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::DATETIME, (&n.token().unwrap()).into())
             }
             Self::LocalDate(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::DATETIME, (&n.token().unwrap()).into())
             }
             Self::LocalTime(n) => {
-                builder.add_token(TokenType::REGEXP, (&n.token().unwrap()).into())
+                builder.add_token(TokenType::DATETIME, (&n.token().unwrap()).into())
             }
             Self::Array(array) => array.append_semantic_tokens(builder),
             Self::InlineTable(inline_table) => inline_table.append_semantic_tokens(builder),
