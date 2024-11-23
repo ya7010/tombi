@@ -42,6 +42,9 @@ export class Extension {
 
     const extenstion = new Extension(context, client, server);
 
+    // NOTE: When VSCode starts, if a TOML document is open in a tab and the focus is not on it,
+    //       the Language Server will not start.
+    //       Therefore, send the notification to the Language Server for all open TOML documents.
     for (const document of vscode.workspace.textDocuments) {
       await extenstion.onDidOpenTextDocument(document);
     }
