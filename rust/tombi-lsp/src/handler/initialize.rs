@@ -6,7 +6,7 @@ use tower_lsp::lsp_types::{
     TextDocumentSyncKind, TextDocumentSyncOptions,
 };
 
-use super::semantic_tokens_full::TokenType;
+use super::semantic_tokens_full::SUPPORTED_TOKEN_TYPES;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn handle_initialize(
@@ -98,7 +98,7 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
         semantic_tokens_provider: Some(
             SemanticTokensOptions {
                 legend: SemanticTokensLegend {
-                    token_types: TokenType::LEGEND.to_vec(),
+                    token_types: SUPPORTED_TOKEN_TYPES.to_vec(),
                     token_modifiers: vec![SemanticTokenModifier::READONLY],
                 },
                 full: Some(SemanticTokensFullOptions::Bool(true)),
