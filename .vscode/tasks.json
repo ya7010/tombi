@@ -53,13 +53,13 @@
       }
     },
     {
-      "label": "Build Server and Extension",
-      "dependsOn": ["Build Server", "Build Extension"],
+      "label": "Build CLI and Extension",
+      "dependsOn": ["Build CLI", "Build Extension"],
       "problemMatcher": "$rustc"
     },
     {
-      "label": "Build Server (Release) and Extension",
-      "dependsOn": ["Build Server (Release)", "Build Extension"],
+      "label": "Build CLI (Release) and Extension",
+      "dependsOn": ["Build CLI (Release)", "Build Extension"],
       "problemMatcher": "$rustc"
     }
   ]
