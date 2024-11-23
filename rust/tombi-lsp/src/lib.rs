@@ -3,11 +3,8 @@ mod document;
 mod handler;
 pub mod server;
 mod toml;
-mod version;
 
 use serde::de::DeserializeOwned;
-
-pub use version::version;
 
 pub fn from_json<T: DeserializeOwned>(
     what: &'static str,

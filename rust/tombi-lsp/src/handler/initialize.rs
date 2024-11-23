@@ -26,7 +26,7 @@ pub fn handle_initialize(
     Ok(InitializeResult {
         server_info: Some(ServerInfo {
             name: String::from("Tombi LSP"),
-            version: Some(crate::version().to_string()),
+            version: Some(env!("CARGO_PKG_VERSION").to_string()),
         }),
         capabilities: server_capabilities(&client_capabilities),
     })

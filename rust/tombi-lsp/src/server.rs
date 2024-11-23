@@ -2,14 +2,16 @@ use tower_lsp::LspService;
 use tower_lsp::Server;
 
 use crate::backend::Backend;
-use crate::version::version;
 
 /// Run TOML Language Server
 #[derive(clap::Args, Debug)]
 pub struct Args {}
 
 pub async fn run(_args: impl Into<Args>) -> Result<(), anyhow::Error> {
-    tracing::info!("Tombi LSP Server Version \"{}\" will start.", version());
+    tracing::info!(
+        "Tombi LSP Server Version \"{}\" will start.",
+        env!("CARGO_PKG_VERSION")
+    );
 
     let stdin = tokio::io::stdin();
     let stdout = tokio::io::stdout();
