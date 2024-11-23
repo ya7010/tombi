@@ -43,11 +43,11 @@ export async function getTombiBin(
   }
 
   // biome-ignore lint/complexity/useLiteralKeys: <explanation>
-  const debugPath = process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"];
-  if (debugPath) {
+  const developPath = process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"];
+  if (developPath) {
     return {
       source: "develop",
-      path: debugPath,
+      path: developPath,
     };
   }
 
