@@ -1,7 +1,7 @@
 {
   "name": "tombi",
   "displayName": "Tombi",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "A TOML language support extention backed by Tombi.",
   "publisher": "yassun7010",
   "author": {
