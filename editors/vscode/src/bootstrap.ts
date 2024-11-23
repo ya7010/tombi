@@ -35,7 +35,7 @@ export async function getTombiBin(
     releaseTag: string | null;
   } = context.extension.packageJSON;
 
-  let settingsPath = settings.tombi?.path;
+  let settingsPath = settings.path;
   if (settingsPath) {
     if (settingsPath.startsWith("~/")) {
       settingsPath = os.homedir() + settingsPath.slice("~".length);

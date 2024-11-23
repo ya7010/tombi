@@ -24,7 +24,12 @@ export class Extension {
   }
 
   static async activate(context: vscode.ExtensionContext): Promise<Extension> {
-    const tombiBin = await bootstrap(context, {});
+    const settings = vscode.workspace.getConfiguration(
+      EXTENTION_ID,
+    ) as Settings;
+
+    const tombiBin = await bootstrap(context, settings);
+
     const server = new Server(tombiBin);
     const client = new node.LanguageClient(
       EXTENTION_ID,
