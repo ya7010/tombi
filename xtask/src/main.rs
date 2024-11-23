@@ -1,5 +1,6 @@
 mod app;
 mod codegen;
+mod command;
 mod glue;
 mod utils;
 
