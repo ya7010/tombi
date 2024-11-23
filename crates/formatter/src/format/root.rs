@@ -10,17 +10,23 @@ impl Format for ast::Root {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset();
 
-        for comment in self.begin_dangling_comments() {
-            BeginDanglingComment(comment).fmt(f)?;
-        }
+        self.begin_dangling_comments()
+            .map(BeginDanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
 
         self.items()
             .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
                 ast::RootItem::Table(table) => {
-                    let headers = table.header().unwrap().syntax().to_string();
+                    let header_text = table.header().unwrap().syntax().to_string();
+                    let item_size = table.key_values().count();
+
                     match pre_header {
-                        Some(Header::Table(pre_table_headers)) => {
-                            if !headers.starts_with(&pre_table_headers) {
+                        Some(Header::Table {
+                            header_text: pre_header_text,
+                            item_size,
+                        }) => {
+                            if !header_text.starts_with(&pre_header_text) || item_size > 0 {
                                 acc.push(ItemOrNewLine::NewLine);
                             }
                         }
@@ -31,7 +37,13 @@ impl Format for ast::Root {
                     };
 
                     acc.push(ItemOrNewLine::Item(item));
-                    (Some(Header::Table(headers)), acc)
+                    (
+                        Some(Header::Table {
+                            header_text,
+                            item_size,
+                        }),
+                        acc,
+                    )
                 }
                 ast::RootItem::ArrayOfTable(_) => {
                     if pre_header.is_some() {
@@ -55,9 +67,10 @@ impl Format for ast::Root {
                 item.fmt(f)
             })?;
 
-        for comment in self.end_dangling_comments() {
-            EndDanglingComment(comment).fmt(f)?;
-        }
+        self.end_dangling_comments()
+            .map(EndDanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
 
         Ok(())
     }
@@ -88,6 +101,9 @@ impl Format for ItemOrNewLine {
 }
 
 enum Header {
-    Table(String),
+    Table {
+        header_text: String,
+        item_size: usize,
+    },
     ArrayOfTable,
 }
