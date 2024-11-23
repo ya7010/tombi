@@ -45,7 +45,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux-${{ matrix.platform.target }}
+          name: tombi-py-wheels-linux-${{ matrix.platform.target }}
           path: dist
 
   musllinux:
@@ -73,7 +73,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-musllinux-${{ matrix.platform.target }}
+          name: tombi-py-wheels-musllinux-${{ matrix.platform.target }}
           path: dist
 
   windows:
@@ -96,7 +96,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-${{ matrix.platform.target }}
+          name: tombi-py-wheels-windows-${{ matrix.platform.target }}
           path: dist
 
   macos:
@@ -119,7 +119,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.platform.target }}
+          name: tombi-py-wheels-macos-${{ matrix.platform.target }}
           path: dist
 
   sdist:
@@ -134,7 +134,7 @@ jobs:
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-sdist
+          name: tombi-py-wheels-sdist
           path: dist
 
   release:
@@ -163,3 +163,11 @@ jobs:
         with:
           command: upload
           args: --non-interactive --skip-existing wheels-*/*
+
+  delete-artifacts:
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+      - uses: geekyeggo/delete-artifact@v5
+        with:
+            name: tombi-py-*
