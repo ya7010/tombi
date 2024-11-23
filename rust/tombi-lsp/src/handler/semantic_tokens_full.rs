@@ -368,7 +368,7 @@ impl<'a> From<&'a SyntaxNode> for TokenOrNode<'a> {
     }
 }
 
-pub fn relative_position(position: Position, to: Position) -> Position {
+fn relative_position(position: Position, to: Position) -> Position {
     if position.line == to.line {
         Position {
             line: 0,
@@ -382,7 +382,7 @@ pub fn relative_position(position: Position, to: Position) -> Position {
     }
 }
 
-pub fn relative_range(from: Range, to: Range) -> Range {
+fn relative_range(from: Range, to: Range) -> Range {
     let line_diff = from.end.line - from.start.line;
     let start = relative_position(from.start, to.start);
 
