@@ -41,64 +41,51 @@ export class Extension {
     );
 
     const extenstion = new Extension(context, client, server);
-    log.info("extension started");
+
+    for (const document of vscode.workspace.textDocuments) {
+      await extenstion.onDidOpenTextDocument(document);
+    }
+
+    log.info("extension activated");
 
     return extenstion;
   }
 
   async deactivate(): Promise<void> {
-    await this.client?.stop();
+    await this.client.stop();
+    log.info("extension deactivated");
   }
 
   private registerCommands(): void {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         `${EXTENTION_ID}.showLanguageServerVersion`,
-        async () => {
-          await command.showLanguageServerVersion(this.server);
-        },
+        async () => command.showLanguageServerVersion(this.server),
       ),
     );
   }
 
   private registerEvents(): void {
-    vscode.workspace.onDidChangeTextDocument(
-      async (event) => await this.onDidChangeTextDocument(event),
-    );
-    vscode.workspace.onDidSaveTextDocument(
-      async (event) => await this.onDidSaveTextDocument(event),
-    );
-    vscode.workspace.onDidChangeConfiguration(
-      async (event) => await this.onDidChangeConfiguration(event),
-      null,
-      this.context.subscriptions,
+    vscode.workspace.onDidOpenTextDocument(async (event) =>
+      this.onDidOpenTextDocument(event),
     );
   }
 
-  private async onDidChangeTextDocument({
-    document,
-  }: vscode.TextDocumentChangeEvent): Promise<void> {
-    if (!SUPPORT_LANGUAGES.includes(document.languageId)) {
-      return;
-    }
-  }
-
-  private async onDidChangeConfiguration(
-    _: vscode.ConfigurationChangeEvent,
-  ): Promise<void> {
-    this.client?.sendNotification(
-      node.DidChangeConfigurationNotification.type,
-      {
-        settings: EXTENTION_ID,
-      },
-    );
-  }
-
-  private async onDidSaveTextDocument(
+  private async onDidOpenTextDocument(
     document: vscode.TextDocument,
   ): Promise<void> {
-    log.info("onDidSaveTextDocument");
     if (SUPPORT_LANGUAGES.includes(document.languageId)) {
+      await this.client.sendNotification(
+        node.DidOpenTextDocumentNotification.type,
+        {
+          textDocument: node.TextDocumentItem.create(
+            document.uri.toString(),
+            document.languageId,
+            document.version,
+            document.getText(),
+          ),
+        },
+      );
     }
   }
 }
