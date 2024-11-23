@@ -9,14 +9,14 @@ license.workspace = true
 ast = { workspace = true }
 drop_bomb = "0.1.5"
 itertools = { workspace = true }
+lexer = { workspace = true }
 rg-tree = { workspace = true }
 syntax = { workspace = true }
+text = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-text.workspace = true
-lexer = { version = "0.0.1", path = "../lexer" }
 
 [dev-dependencies]
-rstest.workspace = true
-textwrap.workspace = true
+rstest = { workspace = true }
+textwrap = { workspace = true }
 tracing-subscriber = { workspace = true }
