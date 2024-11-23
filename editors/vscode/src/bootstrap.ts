@@ -9,7 +9,7 @@ export type Env = {
 };
 
 export type TombiBin = {
-  source: "bundled" | "local" | "debug" | "settings";
+  source: "bundled" | "debug" | "VSCode settings";
   path: string;
 };
 
@@ -31,25 +31,14 @@ export async function getTombiBin(
   context: vscode.ExtensionContext,
   settings: extention.Settings,
 ): Promise<TombiBin | undefined> {
-  const packageJson: {
-    releaseTag: string | null;
-  } = context.extension.packageJSON;
-
   let settingsPath = settings.path;
   if (settingsPath) {
     if (settingsPath.startsWith("~/")) {
       settingsPath = os.homedir() + settingsPath.slice("~".length);
     }
     return {
-      source: "settings",
+      source: "VSCode settings",
       path: settingsPath,
-    };
-  }
-
-  if (packageJson.releaseTag === null) {
-    return {
-      source: "local",
-      path: LANGUAGE_SERVER_BIN_NAME,
     };
   }
 
