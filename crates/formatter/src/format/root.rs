@@ -26,7 +26,7 @@ impl Format for ast::Root {
                             header_text: pre_header_text,
                             item_size,
                         }) => {
-                            if !header_text.starts_with(&pre_header_text) || item_size > 0 {
+                            if item_size > 0 || !header_text.starts_with(&pre_header_text) {
                                 acc.push(ItemOrNewLine::NewLine);
                             }
                         }
