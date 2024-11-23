@@ -9,7 +9,7 @@ export type Env = {
 };
 
 export type TombiBin = {
-  source: "bundled" | "develop" | "VSCode settings";
+  source: "bundled" | "develop" | "VSCode Settings";
   path: string;
 };
 
