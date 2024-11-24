@@ -47,8 +47,8 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     let mut patch = Patch::new(sh, project_root().join("Cargo.toml"))?;
     println!("{}", patch.contents());
     patch.replace(
-        &format!("version = \"{}\"\n", DEV_VERSION),
-        &format!("version = \"{}\"\n", target.version),
+        &format!(r#"version = "{}""#, DEV_VERSION),
+        &format!(r#"version = "{}""#, target.version),
     );
     patch.commit(sh)?;
 
