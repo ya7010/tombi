@@ -39,8 +39,8 @@ impl Target {
             }
         };
         let version = match std::env::var("GITHUB_REF") {
-            Ok(github_ref) if github_ref.starts_with("refs/tags/") => {
-                github_ref.trim_start_matches("refs/tags/").to_owned()
+            Ok(github_ref) if github_ref.starts_with("refs/tags/v") => {
+                github_ref.trim_start_matches("refs/tags/v").to_owned()
             }
             _ => "0.0.0".to_owned(),
         };
