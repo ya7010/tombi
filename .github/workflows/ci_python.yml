@@ -15,6 +15,9 @@ on:
       - .github/workflows/ci_python.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   ci-python:
     runs-on: ubuntu-latest

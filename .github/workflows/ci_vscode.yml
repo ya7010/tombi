@@ -15,6 +15,9 @@ on:
       - .github/workflows/ci_vscode.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   ci-vscode-extension:
     runs-on: ubuntu-latest
