@@ -18,11 +18,11 @@ clap-verbosity-flag = { workspace = true }
 diagnostic = { workspace = true }
 formatter = { workspace = true }
 glob = "0.3.1"
+lsp = { workspace = true }
 linter = { workspace = true }
 nu-ansi-term = { workspace = true }
 syntax = { workspace = true, features = ["clap"] }
 thiserror = { workspace = true }
 tokio.workspace = true
-tombi-lsp = { path = "../tombi-lsp" }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }

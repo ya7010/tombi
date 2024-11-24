@@ -809,6 +809,35 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "lsp"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ast",
+ "camino",
+ "clap",
+ "clap-verbosity-flag",
+ "crossbeam-channel",
+ "dashmap 6.1.0",
+ "document",
+ "formatter",
+ "futures",
+ "futures-util",
+ "parser",
+ "rustc-hash",
+ "semver",
+ "serde",
+ "serde_json",
+ "syntax",
+ "text",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower-lsp",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "lsp-types"
 version = "0.94.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1428,40 +1457,11 @@ dependencies = [
  "formatter",
  "glob",
  "linter",
+ "lsp",
  "nu-ansi-term 0.50.1",
  "syntax",
  "thiserror 1.0.69",
  "tokio",
- "tombi-lsp",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "tombi-lsp"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "ast",
- "camino",
- "clap",
- "clap-verbosity-flag",
- "crossbeam-channel",
- "dashmap 6.1.0",
- "document",
- "formatter",
- "futures",
- "futures-util",
- "parser",
- "rustc-hash",
- "semver",
- "serde",
- "serde_json",
- "syntax",
- "text",
- "thiserror 1.0.69",
- "tokio",
- "tower-lsp",
  "tracing",
  "tracing-subscriber",
 ]

@@ -3,7 +3,7 @@ resolver = "2"
 members = ["rust/*", "crates/*", "xtask"]
 
 [workspace.package]
-version = "0.0.0" # We use git tags for versioning. This is just a placeholder.
+version = "0.0.0"  # We use git tags for versioning. This is just a placeholder.
 edition = "2021"
 authors = ["yassun7010 <yassun7010@outlook.com>"]
 license = "MIT"
@@ -26,6 +26,7 @@ indexmap = "2.6.0"
 itertools = "0.13.0"
 lexer = { path = "crates/lexer" }
 linter = { path = "crates/linter" }
+lsp = { path = "crates/lsp" }
 nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
 proc-macro2 = "1.0.87"

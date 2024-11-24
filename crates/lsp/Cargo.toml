@@ -1,6 +1,6 @@
 [package]
-name = "tombi-lsp"
-version = { workspace = true }
+name = "lsp"
+version = "0.0.0"
 edition = { workspace = true }
 authors = { workspace = true }
 license = { workspace = true }
@@ -26,6 +26,6 @@ syntax = { workspace = true }
 text = { workspace = true, features = ["lsp"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["io-std", "rt"] }
-tower-lsp = { workspace = true}
+tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
