@@ -8,11 +8,7 @@ use crate::{
 use anyhow::Context;
 use ungrammar::Grammar;
 
-/// Codegen Grammar.
-#[derive(clap::Args)]
-pub struct Args {}
-
-pub fn run(_args: Args) -> Result<(), anyhow::Error> {
+pub fn run() -> Result<(), anyhow::Error> {
     let grammar = std::fs::read_to_string(project_root().join("toml.ungram"))
         .unwrap()
         .parse::<Grammar>()

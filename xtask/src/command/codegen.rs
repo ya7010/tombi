@@ -1,4 +1,6 @@
-#[derive(clap::Subcommand)]
+#[derive(Debug, clap::Subcommand, Default)]
 pub enum CodeGenCommand {
-    Grammar(super::codegen_grammar::Args),
+    #[default]
+    All,
+    Grammar,
 }

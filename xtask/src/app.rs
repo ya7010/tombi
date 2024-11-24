@@ -1,8 +1,8 @@
 use crate::command;
 use clap::Parser;
 
-#[derive(clap::Parser)]
-#[command(name = "toml", version)]
+#[derive(Debug, clap::Parser)]
+#[command(disable_help_subcommand(true))]
 pub struct Args {
     #[clap(subcommand)]
     pub subcommand: command::XTaskCommand,
@@ -21,9 +21,11 @@ where
 
 pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
     let args = args.into();
+
     match args.subcommand {
         command::XTaskCommand::Codegen(subcommand) => match subcommand {
-            command::CodeGenCommand::Grammar(args) => command::codegen_grammar::run(args)?,
+            command::CodeGenCommand::All => command::codegen_grammar::run()?,
+            command::CodeGenCommand::Grammar => command::codegen_grammar::run()?,
         },
         command::XTaskCommand::Dist(args) => command::dist::run(args)?,
     }

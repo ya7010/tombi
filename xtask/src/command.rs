@@ -3,7 +3,7 @@ pub mod codegen_grammar;
 pub mod dist;
 pub use codegen::CodeGenCommand;
 
-#[derive(clap::Subcommand)]
+#[derive(Debug, clap::Subcommand)]
 pub enum XTaskCommand {
     /// Generate code.
     #[clap(subcommand)]
