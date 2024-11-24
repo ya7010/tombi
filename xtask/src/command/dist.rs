@@ -30,7 +30,7 @@ pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
 }
 
 fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
-    let _e = sh.push_env("CARGO_PROFILE_RELEASE_LTO", "thin");
+    let _e = sh.push_env("CARGO_PROFILE_RELEASE_LTO", "true");
 
     let target_name = &target.name;
 
