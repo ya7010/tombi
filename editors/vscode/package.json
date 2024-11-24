@@ -13,7 +13,7 @@
   "keywords": ["toml", "formatter"],
   "categories": ["Programming Languages", "Formatters", "Linters"],
   "engines": {
-    "vscode": "^1.78.0"
+    "vscode": "^1.94.0"
   },
   "main": "./dist/main",
   "scripts": {
