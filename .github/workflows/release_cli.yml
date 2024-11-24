@@ -73,4 +73,4 @@ jobs:
         run: sudo apt-get install gcc-arm-linux-gnueabihf
 
       - name: Rub xtask dist
-        run: cargo xtask dist
+        run: RUST_BACKTRACE=1 cargo xtask dist
