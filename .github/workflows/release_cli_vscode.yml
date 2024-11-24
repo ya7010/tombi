@@ -50,6 +50,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       TOMBI_TARGET: ${{ matrix.target }}
+      VSCODE_TARGET: ${{ matrix.vscode_target }}
       GITHUB_REF: ${{ (github.ref) }}
     steps:
       - uses: actions/checkout@v4
@@ -82,6 +83,9 @@ jobs:
         if: matrix.target == 'arm-unknown-linux-gnueabihf'
         run: sudo apt-get install gcc-arm-linux-gnueabihf
 
+      - run: pnpm install && pnpm run build
+        working-directory: ./editors/vscode
+
       - name: Run xtask set-version
         run: cargo xtask set-version >> $GITHUB_ENV
 
@@ -93,28 +97,6 @@ jobs:
         env:
           RUST_BACKTRACE: "1"
 
-      - name: Print TOMBI_VERSION
-        run: echo $TOMBI_VERSION
-
-      - name: Upload tombi-cli artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: tombi-cli-${TOMBI_VERSION}-${{ matrix.target }}
-          path: ./dist
-
-      - name: Remove tombi-cli artifacts
-        run: rm -rf ./dist/*
-
-      - run: pnpm install
-        working-directory: ./editors/vscode
-
-      - run: pnpm run build
-        working-directory: ./editors/vscode
-
-      - name: Package VSCode Extension
-        run: pnpx vsce package --no-dependencies -o "../../dist/tombi-vscode-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix" --target ${{ matrix.vscode_target }}
-        working-directory: ./editors/vscode
-
       - name: Publish VSCode Extension
         run: pnpm run publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath "../../dist/tombi-vscode-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix"
         if: startsWith(github.ref, 'refs/tags/')
@@ -124,4 +106,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tombi-vscode-${TOMBI_VERSION}-${{ matrix.target }}
-          path: ./dist
+          path: |
+            dist/tombi-cli-*
+            dist/tombi-vscode-*

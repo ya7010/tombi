@@ -32,7 +32,7 @@ pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
 fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     let _e = sh.push_env("CARGO_PROFILE_RELEASE_LTO", "true");
 
-    let target_name = &target.name;
+    let target_name = &target.target_name;
 
     if target_name.contains("-linux-") {
         std::env::set_var("CC", "clang");
@@ -52,13 +52,13 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     let dist = project_root().join("dist");
     gzip(
         &target.server_path,
-        &dist.join(target.artifact_name.clone() + ".gz"),
+        &dist.join(target.cli_artifact_name.clone() + ".gz"),
     )?;
     if target_name.contains("-windows-") {
         zip(
             &target.server_path,
             target.symbols_path.as_ref(),
-            &dist.join(target.artifact_name.clone() + ".zip"),
+            &dist.join(target.cli_artifact_name.clone() + ".zip"),
         )?;
     }
 
@@ -87,15 +87,30 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
         sh.copy_file(symbols_path, &bundle_path)?;
     }
 
+    let vscode_target = &target.vscode_target_name;
+    let vscode_artifact_name = &target.vscode_artifact_name;
+
+    let _d = sh.push_dir(vscode_path);
+
+    // print pwd
+    xshell::cmd!(sh, "pwd").run()?;
+    xshell::cmd!(
+        sh,
+        "pnpx vsce package --no-dependencies -o ../../dist/{vscode_artifact_name} --target {vscode_target}"
+    )
+    .run()?;
+
     Ok(())
 }
 
 #[derive(Debug)]
 struct Target {
-    name: String,
+    target_name: String,
+    vscode_target_name: String,
     server_path: PathBuf,
     symbols_path: Option<PathBuf>,
-    artifact_name: String,
+    cli_artifact_name: String,
+    vscode_artifact_name: String,
 }
 
 impl Target {
@@ -114,6 +129,20 @@ impl Target {
                 }
             }
         };
+        let vscode_target_name = match std::env::var("VSCODE_TARGET") {
+            Ok(target) => target,
+            _ => {
+                if cfg!(target_os = "linux") {
+                    "linux-x64".to_owned()
+                } else if cfg!(target_os = "windows") {
+                    "win32-x64".to_owned()
+                } else if cfg!(target_os = "macos") {
+                    "darwin-arm64".to_owned()
+                } else {
+                    panic!("Unsupported OS, maybe try setting VSCODE_TARGET")
+                }
+            }
+        };
         let version = std::env::var("CARGO_PKG_VERSION").unwrap_or(DEV_VERSION.to_owned());
 
         let out_path = project_root
@@ -126,13 +155,16 @@ impl Target {
             (String::new(), None)
         };
         let server_path = out_path.join(format!("tombi{exe_suffix}"));
-        let artifact_name = format!("tombi-cli-{version}-{target_name}{exe_suffix}");
+        let cli_artifact_name = format!("tombi-cli-{version}-{target_name}{exe_suffix}");
+        let vscode_artifact_name = format!("tombi-vscode-{version}-{vscode_target_name}.vsix");
 
         Self {
-            name: target_name,
+            target_name,
+            vscode_target_name,
             server_path,
             symbols_path,
-            artifact_name,
+            cli_artifact_name,
+            vscode_artifact_name,
         }
     }
 }
