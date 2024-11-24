@@ -69,3 +69,6 @@ jobs:
 
       - name: Rub xtask dist
         run: RUST_BACKTRACE=1 cargo xtask dist
+
+      - name: Print TOMBI_VERSION
+        run: echo $TOMBI_VERSION
