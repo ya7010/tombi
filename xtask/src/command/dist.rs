@@ -49,13 +49,16 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     )
     .run()?;
 
-    let dist = project_root().join("dist").join(&target.artifact_name);
-    gzip(&target.server_path, &dist.with_extension("gz"))?;
+    let dist = project_root().join("dist");
+    gzip(
+        &target.server_path,
+        &dist.join(target.artifact_name.clone() + ".gz"),
+    )?;
     if target_name.contains("-windows-") {
         zip(
             &target.server_path,
             target.symbols_path.as_ref(),
-            &dist.with_extension("zip"),
+            &dist.join(target.artifact_name.clone() + ".zip"),
         )?;
     }
 
