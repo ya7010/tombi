@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  delete-tombi-cli-dev-artifacts:
+  delete-tombi-old-dev-artifacts:
     runs-on: ubuntu-latest
     steps:
       - uses: geekyeggo/delete-artifact@v5
@@ -18,7 +18,7 @@ jobs:
               tombi-vscode-0.0.0-*
 
   release-cli-and-vscode:
-    needs: [delete-tombi-cli-dev-artifacts]
+    needs: [delete-tombi-old-dev-artifacts]
     strategy:
       matrix:
         include:
