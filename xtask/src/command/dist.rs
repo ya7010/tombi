@@ -38,6 +38,13 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
         std::env::set_var("CC", "clang");
     }
 
+    let mut patch = Patch::new(sh, project_root().join("Cargo.toml"))?;
+    patch.replace(
+        &format!("version = \"{}\"\n", DEV_VERSION),
+        &format!("version = \"{}\"\n", target.version),
+    );
+    patch.commit(sh)?;
+
     let manifest_path = project_root()
         .join("rust")
         .join("tombi-cli")
