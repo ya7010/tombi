@@ -11,18 +11,10 @@ use zip::{write::FileOptions, DateTime, ZipWriter};
 
 use crate::utils::project_root;
 
-const DEV_VERSION: &str = "0.0.0";
-
 pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
     let project_root = project_root();
     let target = Target::get(&project_root);
     let dist = project_root.join("dist");
-
-    let github_env = std::env::var("GITHUB_ENV")?;
-    std::env::set_var(
-        "GITHUB_ENV",
-        format!("{}\nTOMBI_VERSION={}", github_env, target.version),
-    );
 
     println!("Target: {:#?}", target);
 
@@ -43,14 +35,6 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     if target_name.contains("-linux-") {
         std::env::set_var("CC", "clang");
     }
-
-    let mut patch = Patch::new(sh, project_root().join("Cargo.toml"))?;
-    println!("{}", patch.contents());
-    patch.replace(
-        &format!(r#"version = "{}""#, DEV_VERSION),
-        &format!(r#"version = "{}""#, target.version),
-    );
-    patch.commit(sh)?;
 
     let manifest_path = project_root()
         .join("rust")
@@ -98,21 +82,12 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
         sh.copy_file(symbols_path, &bundle_path)?;
     }
 
-    let _d: xshell::PushDir<'_> = sh.push_dir(vscode_path);
-    let mut patch = Patch::new(sh, "package.json")?;
-    patch.replace(
-        &format!(r#""version": "{}""#, DEV_VERSION),
-        &format!(r#""version": "{}""#, target.version),
-    );
-    patch.commit(sh)?;
-
     Ok(())
 }
 
 #[derive(Debug)]
 struct Target {
     name: String,
-    version: String,
     server_path: PathBuf,
     symbols_path: Option<PathBuf>,
     artifact_name: String,
@@ -134,12 +109,6 @@ impl Target {
                 }
             }
         };
-        let version = match std::env::var("GITHUB_REF") {
-            Ok(github_ref) if github_ref.starts_with("refs/tags/v") => {
-                github_ref.trim_start_matches("refs/tags/v").to_owned()
-            }
-            _ => DEV_VERSION.to_owned(),
-        };
         let out_path = project_root.join("target").join(&name).join("release");
         let (exe_suffix, symbols_path) = if name.contains("-windows-") {
             (".exe".into(), Some(out_path.join("tombi.pdb")))
@@ -151,39 +120,10 @@ impl Target {
 
         Self {
             name,
-            version,
             server_path,
             symbols_path,
             artifact_name,
         }
-    }
-}
-
-struct Patch {
-    path: PathBuf,
-    contents: String,
-}
-
-impl Patch {
-    fn new(sh: &Shell, path: impl Into<PathBuf>) -> anyhow::Result<Patch> {
-        let path = path.into();
-        let contents = sh.read_file(&path)?;
-        Ok(Patch { path, contents })
-    }
-
-    fn contents(&self) -> &str {
-        &self.contents
-    }
-
-    fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
-        assert!(self.contents.contains(from));
-        self.contents = self.contents.replace(from, to);
-        self
-    }
-
-    fn commit(&self, sh: &Shell) -> anyhow::Result<()> {
-        sh.write_file(&self.path, &self.contents)?;
-        Ok(())
     }
 }
 
