@@ -154,7 +154,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: 'wheels-*/*'
+          subject-path: 'tombi-py-wheels-*/*'
       - name: Publish to PyPI
         if: startsWith(github.ref, 'refs/tags/')
         uses: PyO3/maturin-action@v1
@@ -162,7 +162,7 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: --non-interactive --skip-existing wheels-*/*
+          args: --non-interactive --skip-existing tombi-py-wheels-*/*
 
   delete-artifacts:
     runs-on: ubuntu-latest
@@ -170,4 +170,4 @@ jobs:
     steps:
       - uses: geekyeggo/delete-artifact@v5
         with:
-            name: tombi-py-*
+            name: tombi-py-wheels-*
