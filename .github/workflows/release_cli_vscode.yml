@@ -86,11 +86,21 @@ jobs:
 
       - run: which pnpm
 
-      - name: Run xtask set-version
+      - name: Run xtask set-version on non-Windows
+        if: matrix.os != 'windows-latest'
         run: cargo xtask set-version >> $GITHUB_ENV
 
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${TOMBI_VERSION}"
+      - name: Run xtask set-version on Windows
+        if: matrix.os == 'windows-latest'
+        run: cargo xtask set-version >> $env:GITHUB_ENV
+
+      - name: Get TOMBI_VERSION on non-Windows
+        if: matrix.os != 'windows-latest'
+        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
+
+      - name: Get TOMBI_VERSION on Windows
+        if: matrix.os == 'windows-latest'
+        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
 
       - name: Rub xtask dist
         run: cargo xtask dist
