@@ -92,11 +92,10 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
 
     let _d = sh.push_dir(vscode_path);
 
-    // print pwd
-    xshell::cmd!(sh, "pwd").run()?;
+    let extension = cfg!(target_os = "windows").then(|| ".exe").unwrap_or("");
     xshell::cmd!(
         sh,
-        "pnpm exec vsce package --no-dependencies -o ../../dist/{vscode_artifact_name} --target {vscode_target}"
+        "pnpm{extension} exec vsce package --no-dependencies -o ../../dist/{vscode_artifact_name} --target {vscode_target}"
     )
     .run()?;
 
