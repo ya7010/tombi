@@ -20,9 +20,16 @@ pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
 }
 
 fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
-    let bundle_path = Path::new("editors").join("vscode").join("server");
+    let bundle_path = project_root().join("editors").join("vscode").join("server");
     sh.remove_path(&bundle_path)?;
     sh.create_dir(&bundle_path)?;
+
+    if !target.cli_path.exists() {
+        return Err(anyhow::anyhow!(
+            "CLI binary not found at {}. Please run `cargo build --package tombi-cli --release` first.",
+            target.cli_path.display()
+        ));
+    }
 
     sh.copy_file(&target.cli_path, &bundle_path.join("tombi"))?;
     if let Some(symbols_path) = &target.symbols_path {
@@ -32,7 +39,7 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
     let _d = sh.push_dir("./editors/vscode");
     let mut patch = Patch::new(sh, "./package.json")?;
     patch.replace(
-        &format!(r#""version": "0.0.0-dev""#),
+        &format!(r#""version": "0.0.0""#),
         &format!(r#""version": "{}""#, target.version),
     );
     patch.commit(sh)?;
@@ -71,7 +78,7 @@ impl Target {
             }
             _ => "0.0.0".to_owned(),
         };
-        let out_path = project_root.join("target").join(&name).join("release");
+        let out_path = project_root.join("target").join("release");
         let (exe_suffix, symbols_path) = if name.contains("-windows-") {
             (".exe".into(), Some(out_path.join("tombi.pdb")))
         } else {
