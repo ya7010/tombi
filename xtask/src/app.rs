@@ -27,7 +27,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
             command::CodeGenCommand::All => command::codegen_grammar::run()?,
             command::CodeGenCommand::Grammar => command::codegen_grammar::run()?,
         },
-        command::XTaskCommand::Dist(args) => command::dist::run(args)?,
+        command::XTaskCommand::Dist => command::dist::run(&xshell::Shell::new().unwrap())?,
     }
     Ok(())
 }

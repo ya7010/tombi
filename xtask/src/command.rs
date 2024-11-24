@@ -10,5 +10,5 @@ pub enum XTaskCommand {
     Codegen(CodeGenCommand),
 
     /// Prepare the distribution.
-    Dist(dist::Args),
+    Dist,
 }
