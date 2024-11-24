@@ -45,6 +45,7 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     }
 
     let mut patch = Patch::new(sh, project_root().join("Cargo.toml"))?;
+    println!("{}", patch.contents());
     patch.replace(
         &format!("version = \"{}\"\n", DEV_VERSION),
         &format!("version = \"{}\"\n", target.version),
@@ -168,6 +169,10 @@ impl Patch {
         let path = path.into();
         let contents = sh.read_file(&path)?;
         Ok(Patch { path, contents })
+    }
+
+    fn contents(&self) -> &str {
+        &self.contents
     }
 
     fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
