@@ -99,8 +99,8 @@ jobs:
         env:
           RUST_BACKTRACE: "1"
 
-      # pnpm cannot exec `cargo xtask dist` on windows.
-      # See https://github.com/matklad/xshell/issues/82
+      # FIXME: pnpm cannot exec `cargo xtask dist` on windows.
+      #        See https://github.com/matklad/xshell/issues/82
       - name: Package VSCode Extension for Windows
         if: matrix.os == 'windows-latest'
         run: pnpm exec vsce package --no-dependencies -o "../../dist/tombi-vscode-${{ env.TOMBI_VERSION }}-${{ matrix.vscode_target }}.vsix" --target ${{ matrix.vscode_target }}
