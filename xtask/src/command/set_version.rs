@@ -4,7 +4,7 @@ use xshell::Shell;
 
 use crate::utils::project_root;
 
-const DEV_VERSION: &str = "0.0.0";
+pub const DEV_VERSION: &str = "0.0.0";
 
 pub fn run(sh: &Shell) -> anyhow::Result<()> {
     let version = match std::env::var("GITHUB_REF") {

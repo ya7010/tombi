@@ -11,6 +11,8 @@ use zip::{write::FileOptions, DateTime, ZipWriter};
 
 use crate::utils::project_root;
 
+use super::set_version::DEV_VERSION;
+
 pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
     let project_root = project_root();
     let target = Target::get(&project_root);
@@ -95,7 +97,7 @@ struct Target {
 
 impl Target {
     fn get(project_root: &Path) -> Self {
-        let name = match std::env::var("TOMBI_TARGET") {
+        let target_name = match std::env::var("TOMBI_TARGET") {
             Ok(target) => target,
             _ => {
                 if cfg!(target_os = "linux") {
@@ -109,17 +111,22 @@ impl Target {
                 }
             }
         };
-        let out_path = project_root.join("target").join(&name).join("release");
-        let (exe_suffix, symbols_path) = if name.contains("-windows-") {
+        let version = std::env::var("CARGO_PKG_VERSION").unwrap_or(DEV_VERSION.to_owned());
+
+        let out_path = project_root
+            .join("target")
+            .join(&target_name)
+            .join("release");
+        let (exe_suffix, symbols_path) = if target_name.contains("-windows-") {
             (".exe".into(), Some(out_path.join("tombi.pdb")))
         } else {
             (String::new(), None)
         };
         let server_path = out_path.join(format!("tombi{exe_suffix}"));
-        let artifact_name = format!("tombi-{name}{exe_suffix}");
+        let artifact_name = format!("tombi-cli-{version}-{target_name}{exe_suffix}");
 
         Self {
-            name,
+            name: target_name,
             server_path,
             symbols_path,
             artifact_name,
