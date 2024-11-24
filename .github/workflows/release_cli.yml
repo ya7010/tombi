@@ -1,4 +1,4 @@
-name: Release CLI
+name: Release CLI and VSCode Extension
 
 on:
   push:
