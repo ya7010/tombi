@@ -13,12 +13,12 @@
   "keywords": ["toml", "formatter"],
   "categories": ["Programming Languages", "Formatters", "Linters"],
   "engines": {
-    "vscode": "^1.94.0"
+    "vscode": "^1.78.0"
   },
   "main": "./dist/main",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node18",
+    "build-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node20",
     "build": "pnpm run build-base --sourcemap",
     "watch": "pnpm run build-base --sourcemap --watch",
     "package": "pnpm run build && vsce package --no-dependencies -o tombi.vsix",
@@ -36,7 +36,7 @@
     "@types/minimatch": "^5.1.2",
     "@types/semver": "^7.5.8",
     "@types/vscode": "^1.94.0",
-    "@vscode/vsce": "^3.1.1",
+    "@vscode/vsce": "^3.2.1",
     "esbuild": "^0.24.0"
   },
   "activationEvents": ["onLanguage:cargoLock"],
