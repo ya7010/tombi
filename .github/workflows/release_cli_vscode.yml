@@ -29,21 +29,21 @@ jobs:
           # - os: ubuntu-20.04
           #   target: arm-unknown-linux-gnueabihf
           #   vscode_target: linux-armhf
-          # - os: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          #   vscode_target: win32-x64
-          # - os: windows-latest
-          #   target: i686-pc-windows-msvc
-          #   vscode_target: win32-ia32
-          # - os: windows-latest
-          #   target: aarch64-pc-windows-msvc
-          #   vscode_target: win32-arm64
-          # - os: macos-13
-          #   target: x86_64-apple-darwin
-          #   vscode_target: darwin-x64
-          # - os: macos-13
-          #   target: aarch64-apple-darwin
-          #   vscode_target: darwin-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            vscode_target: win32-x64
+          - os: windows-latest
+            target: i686-pc-windows-msvc
+            vscode_target: win32-ia32
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            vscode_target: win32-arm64
+          - os: macos-13
+            target: x86_64-apple-darwin
+            vscode_target: darwin-x64
+          - os: macos-13
+            target: aarch64-apple-darwin
+            vscode_target: darwin-arm64
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     env:
@@ -94,11 +94,11 @@ jobs:
       - name: Print TOMBI_VERSION
         run: echo $TOMBI_VERSION
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: tombi-cli-${TOMBI_VERSION}-${{ matrix.target }}
-          path: ./dist
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: tombi-cli-${TOMBI_VERSION}-${{ matrix.target }}
+      #     path: ./dist
 
       - run: pnpm install
         working-directory: ./editors/vscode
@@ -114,3 +114,9 @@ jobs:
         run: pnpm run publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath "../../dist/tombi-vscode-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix"
         if: startsWith(github.ref, 'refs/tags/')
         working-directory: ./editors/vscode
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tombi-vscode-${TOMBI_VERSION}-${{ matrix.target }}
+          path: ./dist
