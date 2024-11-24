@@ -35,7 +35,10 @@ jobs:
             target: ppc64le
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install
       - run: python python/set_version.py
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -65,7 +68,10 @@ jobs:
             target: armv7
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install
       - run: python python/set_version.py
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -91,7 +97,10 @@ jobs:
             target: x86
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install
       - run: python python/set_version.py
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -116,7 +125,10 @@ jobs:
             target: aarch64
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install
       - run: python python/set_version.py
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -134,7 +146,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install
       - run: python python/set_version.py
       - name: Build sdist
         uses: PyO3/maturin-action@v1
