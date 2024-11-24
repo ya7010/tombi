@@ -49,6 +49,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup target add ${{ matrix.target }}
+          rustup component add rust-src
 
       - name: Install Node.js
         uses: actions/setup-node@v4
