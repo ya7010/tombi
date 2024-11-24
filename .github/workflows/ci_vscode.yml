@@ -1,0 +1,38 @@
+name: CI VSCode Extensions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - editors/vscode/**
+      - .github/workflows/ci_vscode.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - editors/vscode/**
+      - .github/workflows/ci_vscode.yml
+  workflow_dispatch:
+
+jobs:
+  ci-vscode-extension:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install && pnpm run build
+        working-directory: ./editors/vscode
+      - run: pnpm run format:check
+        working-directory: ./editors/vscode
+      - run: pnpm run lint:check
+        working-directory: ./editors/vscode
+      - run: pnpm run typecheck
+        working-directory: ./editors/vscode
+      - run: pnpm run test
+        working-directory: ./editors/vscode
