@@ -94,12 +94,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: cargo xtask set-version >> $env:GITHUB_ENV
 
-      - name: Get TOMBI_VERSION on non-Windows
+      - name: Get TOMBI_VERSION
         if: matrix.os != 'windows-latest'
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
-
-      - name: Get TOMBI_VERSION on Windows
-        if: matrix.os == 'windows-latest'
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
 
       - name: Rub xtask dist
