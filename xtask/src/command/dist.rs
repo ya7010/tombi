@@ -32,10 +32,6 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
 
     let target_name = &target.name;
 
-    if target_name.contains("-linux-") {
-        std::env::set_var("CC", "clang");
-    }
-
     let manifest_path = project_root()
         .join("rust")
         .join("tombi-cli")
