@@ -107,10 +107,10 @@ jobs:
         working-directory: ./editors/vscode
 
       - name: Package VSCode Extension
-        run: pnpx vsce package --no-dependencies -o "../../dist/tombi-cli-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix" --target ${{ matrix.vscode_target }}
+        run: pnpx vsce package --no-dependencies -o "../../dist/tombi-vscode-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix" --target ${{ matrix.vscode_target }}
         working-directory: ./editors/vscode
 
       - name: Publish VSCode Extension
-        run: pnpm run publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath "../../dist/tombi-cli-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix"
+        run: pnpm run publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath "../../dist/tombi-vscode-${TOMBI_VERSION}-${{ matrix.vscode_target }}.vsix"
         if: startsWith(github.ref, 'refs/tags/')
         working-directory: ./editors/vscode
