@@ -96,7 +96,7 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
     xshell::cmd!(sh, "pwd").run()?;
     xshell::cmd!(
         sh,
-        "pnpx vsce package --no-dependencies -o ../../dist/{vscode_artifact_name} --target {vscode_target}"
+        "pnpm exec vsce package --no-dependencies -o ../../dist/{vscode_artifact_name} --target {vscode_target}"
     )
     .run()?;
 
