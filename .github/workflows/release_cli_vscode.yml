@@ -86,6 +86,8 @@ jobs:
       - run: pnpm install && pnpm run build
         working-directory: ./editors/vscode
 
+      - run: which pnpm
+
       - name: Run xtask set-version
         run: cargo xtask set-version >> $GITHUB_ENV
 
