@@ -13,7 +13,9 @@ jobs:
     steps:
       - uses: geekyeggo/delete-artifact@v5
         with:
-            name: tombi-cli-0.0.0-*
+            name: |
+              tombi-cli-0.0.0-*
+              tombi-vscode-0.0.0-*
 
   release-cli-and-vscode:
     needs: [delete-tombi-cli-dev-artifacts]
