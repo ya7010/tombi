@@ -23,14 +23,13 @@ jobs:
           - os: windows-latest
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-            container: rockylinux:8
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             target: arm-unknown-linux-gnueabihf
             code-target: linux-armhf
           - os: macos-13
@@ -41,7 +40,6 @@ jobs:
             code-target: darwin-arm64
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
     env:
       TOMBI_TARGET: ${{ matrix.target }}
       GITHUB_REF: ${{ (github.ref) }}
