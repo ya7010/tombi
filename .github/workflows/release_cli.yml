@@ -67,8 +67,8 @@ jobs:
         if: matrix.target == 'arm-unknown-linux-gnueabihf'
         run: sudo apt-get install gcc-arm-linux-gnueabihf
 
-      - name: Set TOMBI_VERSION
-        run: cargo xtask set-version
+      - name: Run xtask set-version
+        run: cargo xtask set-version >> $GITHUB_ENV
 
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${TOMBI_VERSION}"

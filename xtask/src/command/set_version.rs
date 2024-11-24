@@ -17,7 +17,8 @@ pub fn run(sh: &Shell) -> anyhow::Result<()> {
     set_cargo_toml_version(sh, &version)?;
     set_pyproject_toml_version(sh, &version)?;
     set_editors_vscode_package_json_version(sh, &version)?;
-    set_github_env_version(sh, &version)?;
+
+    println!("TOMBI_VERSION={}", version);
 
     Ok(())
 }
@@ -62,16 +63,6 @@ fn set_editors_vscode_package_json_version(sh: &Shell, version: &str) -> anyhow:
     Ok(())
 }
 
-fn set_github_env_version(_: &Shell, version: &str) -> anyhow::Result<()> {
-    if let Ok(github_env) = std::env::var("GITHUB_ENV") {
-        std::env::set_var(
-            "GITHUB_ENV",
-            format!("{}\nTOMBI_VERSION={}", github_env, version),
-        );
-    }
-    Ok(())
-}
-
 struct Patch {
     path: PathBuf,
     contents: String,
@@ -82,10 +73,6 @@ impl Patch {
         let path = path.into();
         let contents = sh.read_file(&path)?;
         Ok(Patch { path, contents })
-    }
-
-    fn contents(&self) -> &str {
-        &self.contents
     }
 
     fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
