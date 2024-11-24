@@ -48,9 +48,24 @@ jobs:
       - name: Install Rust toolchain
         run: |
           rustup update --no-self-update stable
+          rustup target add ${{ matrix.target }}
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
+      - name: Update apt repositories
+        if: matrix.target == 'aarch64-unknown-linux-gnu' || matrix.target == 'arm-unknown-linux-gnueabihf'
+        run: sudo apt-get update
+
+      - name: Install AArch64 target toolchain
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: sudo apt-get install gcc-aarch64-linux-gnu
+
+      - name: Install ARM target toolchain
+        if: matrix.target == 'arm-unknown-linux-gnueabihf'
+        run: sudo apt-get install gcc-arm-linux-gnueabihf
+
       - name: Rub xtask dist
         run: cargo xtask dist
