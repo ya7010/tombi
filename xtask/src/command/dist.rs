@@ -18,6 +18,12 @@ pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
     let target = Target::get(&project_root);
     let dist = project_root.join("dist");
 
+    let github_env = std::env::var("GITHUB_ENV")?;
+    std::env::set_var(
+        "GITHUB_ENV",
+        format!("{}\nTOMBI_VERSION={}", github_env, target.version),
+    );
+
     println!("Target: {:#?}", target);
 
     sh.remove_path(&dist)?;
