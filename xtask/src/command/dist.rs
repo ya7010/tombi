@@ -92,6 +92,8 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
 
     let _d = sh.push_dir(vscode_path);
 
+    // FIXME: pnpm cannot exec `cargo xtask dist` on windows.
+    //        See https://github.com/matklad/xshell/issues/82
     if !cfg!(target_os = "windows") {
         xshell::cmd!(
             sh,
