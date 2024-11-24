@@ -7,8 +7,35 @@ use crate::utils::project_root;
 pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
     let project_root = project_root();
     let target = Target::get(&project_root);
+    let dist = project_root.join("dist");
 
     println!("Target: {:#?}", target);
+
+    sh.remove_path(&dist)?;
+    sh.create_dir(&dist)?;
+
+    dist_editor_vscode(sh, &target)?;
+
+    Ok(())
+}
+
+fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
+    let bundle_path = Path::new("editors").join("vscode").join("server");
+    sh.remove_path(&bundle_path)?;
+    sh.create_dir(&bundle_path)?;
+
+    sh.copy_file(&target.cli_path, &bundle_path.join("tombi"))?;
+    if let Some(symbols_path) = &target.symbols_path {
+        sh.copy_file(symbols_path, &bundle_path)?;
+    }
+
+    let _d = sh.push_dir("./editors/vscode");
+    let mut patch = Patch::new(sh, "./package.json")?;
+    patch.replace(
+        &format!(r#""version": "0.0.0-dev""#),
+        &format!(r#""version": "{}""#, target.version),
+    );
+    patch.commit(sh)?;
 
     Ok(())
 }
@@ -65,7 +92,6 @@ impl Target {
 
 struct Patch {
     path: PathBuf,
-    original_contents: String,
     contents: String,
 }
 
@@ -73,11 +99,7 @@ impl Patch {
     fn new(sh: &Shell, path: impl Into<PathBuf>) -> anyhow::Result<Patch> {
         let path = path.into();
         let contents = sh.read_file(&path)?;
-        Ok(Patch {
-            path,
-            original_contents: contents.clone(),
-            contents,
-        })
+        Ok(Patch { path, contents })
     }
 
     fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
