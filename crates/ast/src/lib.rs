@@ -131,6 +131,16 @@ mod support {
     }
 
     #[inline]
+    pub(super) fn dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+        iter: I,
+    ) -> impl Iterator<Item = crate::Comment> {
+        iter.filter_map(|node_or_token| match node_or_token {
+            SyntaxElement::Token(token) => crate::Comment::cast(token),
+            SyntaxElement::Node(_) => None,
+        })
+    }
+
+    #[inline]
     pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         iter: I,
     ) -> impl Iterator<Item = crate::Comment> {
@@ -187,6 +197,10 @@ impl Root {
     pub fn end_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::end_dangling_comments(self.syntax().children_with_tokens())
     }
+
+    pub fn dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+        support::dangling_comments(self.syntax().children_with_tokens())
+    }
 }
 
 impl Table {
@@ -210,6 +224,7 @@ impl ArrayOfTable {
 }
 
 impl Array {
+    #[inline]
     pub fn inner_begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::begin_dangling_comments(
             self.syntax()
@@ -219,6 +234,7 @@ impl Array {
         )
     }
 
+    #[inline]
     pub fn inner_end_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::end_dangling_comments(
             self.syntax()
@@ -227,6 +243,12 @@ impl Array {
         )
     }
 
+    #[inline]
+    pub fn dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+        support::dangling_comments(self.syntax().children_with_tokens())
+    }
+
+    #[inline]
     pub fn values_with_comma(&self) -> impl Iterator<Item = (crate::Value, Option<crate::Comma>)> {
         self.values()
             .zip_longest(support::children::<crate::Comma>(self.syntax()))

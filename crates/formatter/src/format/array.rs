@@ -27,54 +27,58 @@ fn format_multiline_array(
 
     f.inc_ident();
 
-    array
-        .inner_begin_dangling_comments()
-        .map(BeginDanglingComment)
-        .collect::<Vec<_>>()
-        .fmt(f)?;
+    if !array.values().collect::<Vec<_>>().is_empty() {
+        array
+            .inner_begin_dangling_comments()
+            .map(BeginDanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
 
-    for (i, (value, comma)) in array.values_with_comma().enumerate() {
-        // value format
-        {
-            if i > 0 {
-                write!(f, "{}", f.line_ending())?;
-            }
-            value.fmt(f)?;
-        }
-
-        // comma format
-        {
-            let (comma_leading_comments, comma_tailing_comment) = match comma {
-                Some(comma) => (
-                    comma.leading_comments().collect::<Vec<_>>(),
-                    comma.tailing_comment(),
-                ),
-                None => (vec![], None),
-            };
-
-            if !comma_leading_comments.is_empty() {
-                write!(f, "{}", f.line_ending())?;
-                for comment in comma_leading_comments {
-                    LeadingComment(comment).fmt(f)?;
+        for (i, (value, comma)) in array.values_with_comma().enumerate() {
+            // value format
+            {
+                if i > 0 {
+                    write!(f, "{}", f.line_ending())?;
                 }
-                write!(f, "{},", f.ident())?;
-            } else if value.tailing_comment().is_some() {
-                write!(f, "{}{},", f.line_ending(), f.ident())?;
-            } else {
-                write!(f, ",")?;
+                value.fmt(f)?;
             }
 
-            if let Some(comment) = comma_tailing_comment {
-                TailingComment(comment).fmt(f)?;
+            // comma format
+            {
+                let (comma_leading_comments, comma_tailing_comment) = match comma {
+                    Some(comma) => (
+                        comma.leading_comments().collect::<Vec<_>>(),
+                        comma.tailing_comment(),
+                    ),
+                    None => (vec![], None),
+                };
+
+                if !comma_leading_comments.is_empty() {
+                    write!(f, "{}", f.line_ending())?;
+                    for comment in comma_leading_comments {
+                        LeadingComment(comment).fmt(f)?;
+                    }
+                    write!(f, "{},", f.ident())?;
+                } else if value.tailing_comment().is_some() {
+                    write!(f, "{}{},", f.line_ending(), f.ident())?;
+                } else {
+                    write!(f, ",")?;
+                }
+
+                if let Some(comment) = comma_tailing_comment {
+                    TailingComment(comment).fmt(f)?;
+                }
             }
         }
-    }
 
-    array
-        .inner_end_dangling_comments()
-        .map(EndDanglingComment)
-        .collect::<Vec<_>>()
-        .fmt(f)?;
+        array
+            .inner_end_dangling_comments()
+            .map(EndDanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
+    } else {
+        array.dangling_comments().collect::<Vec<_>>().fmt(f)?;
+    }
 
     f.dec_ident();
 
@@ -320,6 +324,16 @@ mod tests {
             ]
             "#
         );
+    }
+
+    test_format! {
+        #[test]
+        fn array_only_inner_comment(
+            r#"
+            array = [
+              # comment
+            ]"#
+        ) -> Ok(_);
     }
 
     #[rstest]
