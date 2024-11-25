@@ -5,7 +5,7 @@ impl Format for ast::Comment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let comment = self.to_string();
-        let mut iter = comment.chars();
+        let mut iter = comment.trim_ascii_end().chars();
         write!(f, "{}", iter.next().unwrap())?;
 
         if let Some(c) = iter.next() {
@@ -128,5 +128,20 @@ mod tests {
     test_format! {
         #[test]
         fn comment_without_space(r"#comment") -> Ok("# comment");
+    }
+
+    test_format! {
+        #[test]
+        fn empty_comment(r"#") -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn only_space_comment1(r"# ") -> Ok(r"#");
+    }
+
+    test_format! {
+        #[test]
+        fn only_space_comment2(r"#      ") -> Ok(r"#");
     }
 }
