@@ -14,11 +14,11 @@ mod tests {
 
     test_format! {
         #[test]
-        fn boolean_true(r#"boolean = true"#) -> Ok(_);
+        fn boolean_true(r#"boolean = true"#) -> Ok(source);
     }
 
     test_format! {
         #[test]
-        fn boolean_false(r#"boolean = false"#) -> Ok(_);
+        fn boolean_false(r#"boolean = false"#) -> Ok(source);
     }
 }

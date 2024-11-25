@@ -44,11 +44,11 @@ pub fn format_with(
 #[cfg(test)]
 #[macro_export]
 macro_rules! test_format {
-    (#[test] fn $name:ident($source:expr) -> Ok(_);) => {
+    (#[test] fn $name:ident($source:expr) -> Ok(source);) => {
         crate::test_format!(#[test] fn $name($source) -> Ok($source););
     };
 
-    (#[test] fn $name:ident($source:expr, $version:expr) -> Ok(_);) => {
+    (#[test] fn $name:ident($source:expr, $version:expr) -> Ok(source);) => {
         crate::test_format!(#[test] fn $name($source, $version) -> Ok($source););
     };
 
@@ -106,7 +106,7 @@ mod test {
             ]
             "#,
             TomlVersion::V1_1_0_Preview
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 
     test_format! {
@@ -217,6 +217,6 @@ key6 = 3  # key value tailing comment
 # end dangling comment1
 # end dangling comment2
 "#)
-        -> Ok(_);
+        -> Ok(source);
     }
 }

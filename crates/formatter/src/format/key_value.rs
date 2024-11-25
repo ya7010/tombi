@@ -89,11 +89,11 @@ mod tests {
     }
     test_format! {
         #[test]
-        fn dotted_keys_value1(r#"key1.key2.key3 = "value""#) -> Ok(_);
+        fn dotted_keys_value1(r#"key1.key2.key3 = "value""#) -> Ok(source);
     }
     test_format! {
         #[test]
-        fn dotted_keys_value2(r#"site."google.com" = true"#) -> Ok(_);
+        fn dotted_keys_value2(r#"site."google.com" = true"#) -> Ok(source);
     }
     test_format! {
         #[test]
@@ -103,6 +103,6 @@ mod tests {
             # leading comment2
             key = "value"  # tailing comment
             "#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 }

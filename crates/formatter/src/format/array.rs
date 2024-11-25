@@ -339,7 +339,7 @@ mod tests {
             array = [
               # comment
             ]"#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 
     test_format! {

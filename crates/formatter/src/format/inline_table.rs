@@ -129,17 +129,17 @@ mod tests {
 
     test_format! {
         #[test]
-        fn inline_table_key_value1(r#"name = { first = "Tom", last = "Preston-Werner" }"#) -> Ok(_);
+        fn inline_table_key_value1(r#"name = { first = "Tom", last = "Preston-Werner" }"#) -> Ok(source);
     }
 
     test_format! {
         #[test]
-        fn inline_table_key_value2(r#"point = { x = 1, y = 2 }"#) -> Ok(_);
+        fn inline_table_key_value2(r#"point = { x = 1, y = 2 }"#) -> Ok(source);
 
     }
 
     test_format! {
         #[test]
-        fn inline_table_key_value3(r#"animal = { type.name = "pug" }"#) -> Ok(_);
+        fn inline_table_key_value3(r#"animal = { type.name = "pug" }"#) -> Ok(source);
     }
 }

@@ -33,21 +33,21 @@ mod tests {
         #[test]
         fn table_only_header(
             r#"[package]"#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 
     test_format! {
         #[test]
         fn table_only_header_with_basic_string_key(
             r#"[dependencies."unicase"]"#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 
     test_format! {
         #[test]
         fn table_only_header_nexted_keys(
             r#"[dependencies.unicase]"#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 
     test_format! {
@@ -58,7 +58,7 @@ mod tests {
             name = "toml-rs"
             version = "0.4.0"
             "#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 
     test_format! {
@@ -72,6 +72,6 @@ mod tests {
             # key value leading comment2
             key = "value"  # key tailing comment
             "#
-        ) -> Ok(_);
+        ) -> Ok(source);
     }
 }
