@@ -3,7 +3,9 @@ use ast::AstNode;
 use crate::Format;
 use std::fmt::Write;
 
-use super::comment::{BeginDanglingComment, EndDanglingComment, LeadingComment, TailingComment};
+use super::comment::{
+    BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
+};
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -77,7 +79,11 @@ fn format_multiline_array(
             .collect::<Vec<_>>()
             .fmt(f)?;
     } else {
-        array.dangling_comments().collect::<Vec<_>>().fmt(f)?;
+        array
+            .dangling_comments()
+            .map(DanglingComment)
+            .collect::<Vec<_>>()
+            .fmt(f)?;
     }
 
     f.dec_ident();

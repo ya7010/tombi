@@ -19,20 +19,6 @@ impl Format for ast::Comment {
     }
 }
 
-impl Format for Vec<ast::Comment> {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        for (i, comment) in self.iter().enumerate() {
-            if i > 0 {
-                write!(f, "{}", f.line_ending())?;
-            }
-            write!(f, "{}", f.ident())?;
-            comment.fmt(f)?;
-        }
-        Ok(())
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BeginDanglingComment(pub ast::Comment);
 
@@ -84,6 +70,30 @@ impl Format for Vec<EndDanglingComment> {
             comment.fmt(f)?;
         }
 
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanglingComment(pub ast::Comment);
+
+impl Format for DanglingComment {
+    #[inline]
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", f.ident())?;
+        self.0.fmt(f)
+    }
+}
+
+impl Format for Vec<DanglingComment> {
+    #[inline]
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        for (i, comment) in self.iter().enumerate() {
+            if i > 0 {
+                write!(f, "{}", f.line_ending())?;
+            }
+            comment.fmt(f)?;
+        }
         Ok(())
     }
 }

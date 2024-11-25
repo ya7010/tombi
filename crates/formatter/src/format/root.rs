@@ -1,7 +1,7 @@
 use ast::AstNode;
 
 use super::{
-    comment::{BeginDanglingComment, EndDanglingComment},
+    comment::{BeginDanglingComment, DanglingComment, EndDanglingComment},
     Format,
 };
 use std::fmt::Write;
@@ -75,7 +75,10 @@ impl Format for ast::Root {
                 .collect::<Vec<_>>()
                 .fmt(f)?;
         } else {
-            self.dangling_comments().collect::<Vec<_>>().fmt(f)?;
+            self.dangling_comments()
+                .map(DanglingComment)
+                .collect::<Vec<_>>()
+                .fmt(f)?;
         }
 
         Ok(())
