@@ -342,6 +342,27 @@ mod tests {
         ) -> Ok(_);
     }
 
+    test_format! {
+        #[test]
+        fn array_only_inner_comment2(
+            r#"
+            array = [
+              #comment1
+
+              #comment2
+
+              #comment3
+            ]"#
+        ) -> Ok(
+            r#"
+            array = [
+              # comment1
+              # comment2
+              # comment3
+            ]"#
+        );
+    }
+
     #[rstest]
     #[case("[1, 2, 3,]", true)]
     #[case("[1, 2, 3]", false)]
