@@ -25,7 +25,7 @@ pub struct BeginDanglingComment(pub ast::Comment);
 impl Format for BeginDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", f.ident())?;
+        f.write_indent()?;
         self.0.fmt(f)?;
         write!(f, "{}", f.line_ending())
     }
@@ -52,7 +52,7 @@ impl Format for EndDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", f.line_ending())?;
-        write!(f, "{}", f.ident())?;
+        f.write_indent()?;
         self.0.fmt(f)
     }
 }
@@ -80,7 +80,7 @@ pub struct DanglingComment(pub ast::Comment);
 impl Format for DanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", f.ident())?;
+        f.write_indent()?;
         self.0.fmt(f)
     }
 }
@@ -104,7 +104,7 @@ pub struct LeadingComment(pub ast::Comment);
 impl Format for LeadingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", f.ident())?;
+        f.write_indent()?;
         self.0.fmt(f)?;
         write!(f, "{}", f.line_ending())
     }

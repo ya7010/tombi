@@ -22,7 +22,8 @@ where
             LeadingComment(comment).fmt(f)?;
         }
 
-        write!(f, "{}{}", f.ident(), self.token().unwrap())?;
+        f.write_indent()?;
+        write!(f, "{}", self.token().unwrap())?;
 
         if let Some(comment) = self.tailing_comment() {
             TailingComment(comment).fmt(f)?;

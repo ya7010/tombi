@@ -25,9 +25,10 @@ fn format_multiline_array(
         LeadingComment(comment).fmt(f)?;
     }
 
-    write!(f, "{}[{}", f.ident(), f.line_ending())?;
+    f.write_indent()?;
+    write!(f, "[{}", f.line_ending())?;
 
-    f.inc_ident();
+    f.inc_indent();
 
     if !array.values().collect::<Vec<_>>().is_empty() {
         array
@@ -60,9 +61,12 @@ fn format_multiline_array(
                     for comment in comma_leading_comments {
                         LeadingComment(comment).fmt(f)?;
                     }
-                    write!(f, "{},", f.ident())?;
+                    f.write_indent()?;
+                    write!(f, ",")?;
                 } else if value.tailing_comment().is_some() {
-                    write!(f, "{}{},", f.line_ending(), f.ident())?;
+                    write!(f, "{}", f.line_ending())?;
+                    f.write_indent()?;
+                    write!(f, ",")?;
                 } else {
                     write!(f, ",")?;
                 }
@@ -86,9 +90,11 @@ fn format_multiline_array(
             .fmt(f)?;
     }
 
-    f.dec_ident();
+    f.dec_indent();
 
-    write!(f, "{}{}]", f.line_ending(), f.ident())?;
+    write!(f, "{}", f.line_ending())?;
+    f.write_indent()?;
+    write!(f, "]")?;
 
     if let Some(comment) = array.tailing_comment() {
         TailingComment(comment).fmt(f)?;
@@ -101,24 +107,17 @@ fn format_singleline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    write!(
-        f,
-        "{}[{}",
-        f.ident(),
-        f.defs().singleline_array_bracket_inner_space()
-    )?;
+    f.write_indent()?;
+    write!(f, "[{}", f.defs().singleline_array_bracket_inner_space())?;
 
-    f.with_reset_ident(|f| {
-        let values = array.values().collect::<Vec<_>>();
-        for (i, value) in values.iter().enumerate() {
-            if i > 0 {
-                write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
-            }
-            value.fmt(f)?;
+    let values = array.values().collect::<Vec<_>>();
+    for (i, value) in values.iter().enumerate() {
+        if i > 0 {
+            write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
         }
-
-        Ok(())
-    })?;
+        f.skip_indent();
+        value.fmt(f)?;
+    }
 
     write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())?;
 

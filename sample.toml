@@ -66,6 +66,13 @@ array5 = [
 
   # comment
 ]
+array6 = {
+  key1 = [
+    1,
+    2,
+    3,
+  ],
+}
 date = 2024-01-01  # date tailing comment
 time = 10:11:00  # time tailing comment
 odt1 = 1979-05-27T07:32:00Z  # odt1 tailing comment

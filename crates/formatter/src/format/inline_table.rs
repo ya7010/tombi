@@ -25,9 +25,10 @@ fn format_multiline_inline_table(
         LeadingComment(comment).fmt(f)?;
     }
 
-    write!(f, "{}{{{}", f.ident(), f.line_ending())?;
+    f.write_indent()?;
+    write!(f, "{{{}", f.line_ending())?;
 
-    f.inc_ident();
+    f.inc_indent();
 
     table
         .inner_begin_dangling_comments()
@@ -59,9 +60,12 @@ fn format_multiline_inline_table(
                 for comment in comma_leading_comments {
                     LeadingComment(comment).fmt(f)?;
                 }
-                write!(f, "{},", f.ident())?;
+                f.write_indent()?;
+                write!(f, ",")?;
             } else if entry.tailing_comment().is_some() {
-                write!(f, "{}{},", f.line_ending(), f.ident())?;
+                write!(f, "{}", f.line_ending())?;
+                f.write_indent()?;
+                write!(f, ",")?;
             } else {
                 write!(f, ",")?;
             }
@@ -78,9 +82,11 @@ fn format_multiline_inline_table(
         .collect::<Vec<_>>()
         .fmt(f)?;
 
-    f.dec_ident();
+    f.dec_indent();
 
-    write!(f, "{}{}}}", f.line_ending(), f.ident())?;
+    write!(f, "{}", f.line_ending())?;
+    f.write_indent()?;
+    write!(f, "}}")?;
 
     if let Some(comment) = table.tailing_comment() {
         TailingComment(comment).fmt(f)?;
@@ -97,22 +103,16 @@ fn format_singleline_inline_table(
         LeadingComment(comment).fmt(f)?;
     }
 
-    write!(
-        f,
-        "{}{{{}",
-        f.ident(),
-        f.defs().inline_table_brace_inner_space()
-    )?;
+    f.write_indent()?;
+    write!(f, "{{{}", f.defs().inline_table_brace_inner_space())?;
 
-    f.with_reset_ident(|f| {
-        for (i, entry) in table.entries().enumerate() {
-            if i > 0 {
-                write!(f, ", ")?;
-            }
-            entry.fmt(f)?;
+    for (i, entry) in table.entries().enumerate() {
+        if i > 0 {
+            write!(f, ", ")?;
         }
-        Ok(())
-    })?;
+        f.skip_indent();
+        entry.fmt(f)?;
+    }
 
     write!(f, "{}}}", f.defs().inline_table_brace_inner_space())?;
 

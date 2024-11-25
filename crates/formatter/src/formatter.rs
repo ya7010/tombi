@@ -11,7 +11,8 @@ use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
     version: TomlVersion,
-    ident_depth: u8,
+    indent_depth: u8,
+    skip_indent: bool,
     defs: crate::Definitions,
     options: Cow<'a, crate::Options>,
     buf: &'a mut (dyn Write + 'a),
@@ -22,7 +23,8 @@ impl<'a> Formatter<'a> {
     pub fn new(version: TomlVersion, buf: &'a mut (dyn Write + 'a)) -> Self {
         Self {
             version,
-            ident_depth: 0,
+            indent_depth: 0,
+            skip_indent: false,
             defs: Default::default(),
             options: Cow::Owned(crate::Options::default()),
             buf,
@@ -37,7 +39,8 @@ impl<'a> Formatter<'a> {
     ) -> Self {
         Self {
             version,
-            ident_depth: 0,
+            indent_depth: 0,
+            skip_indent: false,
             defs: Default::default(),
             options: Cow::Borrowed(options),
             buf,
@@ -77,43 +80,38 @@ impl<'a> Formatter<'a> {
 
     #[inline]
     pub fn reset(&mut self) {
-        self.reset_ident();
+        self.reset_indent();
     }
 
     #[inline]
-    pub fn ident(&self) -> String {
-        self.defs.ident(self.ident_depth)
+    pub fn write_indent(&mut self) -> Result<(), std::fmt::Error> {
+        if self.skip_indent {
+            self.skip_indent = false;
+
+            Ok(())
+        } else {
+            write!(self, "{}", self.defs.ident(self.indent_depth))
+        }
     }
 
     #[inline]
-    pub fn inc_ident(&mut self) {
-        self.ident_depth += 1;
+    pub fn inc_indent(&mut self) {
+        self.indent_depth += 1;
     }
 
     #[inline]
-    pub fn dec_ident(&mut self) {
-        self.ident_depth = self.ident_depth.saturating_sub(1);
+    pub fn dec_indent(&mut self) {
+        self.indent_depth = self.indent_depth.saturating_sub(1);
     }
 
     #[inline]
-    fn reset_ident(&mut self) {
-        self.ident_depth = 0;
+    fn reset_indent(&mut self) {
+        self.indent_depth = 0;
     }
 
     #[inline]
-    pub fn with_reset_ident(
-        &mut self,
-        f: impl FnOnce(&mut Self) -> Result<(), std::fmt::Error>,
-    ) -> Result<(), std::fmt::Error> {
-        let depth = self.ident_depth;
-
-        self.reset_ident();
-
-        let result = f(self);
-
-        self.ident_depth = depth;
-
-        result
+    pub fn skip_indent(&mut self) {
+        self.skip_indent = true;
     }
 }
 

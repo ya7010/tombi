@@ -29,6 +29,7 @@ linter = { path = "crates/linter" }
 lsp = { path = "crates/lsp" }
 nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
+pretty_assertions = "1.4.1"
 proc-macro2 = "1.0.87"
 quote = "1.0.37"
 regex = "1.11.1"

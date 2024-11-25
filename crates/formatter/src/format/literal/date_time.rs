@@ -20,7 +20,8 @@ macro_rules! impl_date_time_format {
                 let mut text = token.text().to_string();
                 text.replace_range(10..11, &f.date_time_delimiter().to_string());
 
-                write!(f, "{}{}", f.ident(), text)?;
+                f.write_indent()?;
+                write!(f, "{}", text)?;
 
                 if let Some(comment) = self.tailing_comment() {
                     TailingComment(comment).fmt(f)?;

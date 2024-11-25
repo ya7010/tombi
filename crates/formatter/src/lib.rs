@@ -61,10 +61,10 @@ macro_rules! test_format {
         fn $name() {
             match crate::format_with($source, $version, &crate::Options::default()) {
                 Ok(formatted_text) => {
-                    assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
+                    pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }
                 Err(errors) => {
-                    assert_eq!(errors, vec![]);
+                    pretty_assertions::assert_eq!(errors, vec![]);
                 }
             }
         }

@@ -11,12 +11,13 @@ impl Format for ast::KeyValue {
             LeadingComment(comment).fmt(f)?;
         }
 
-        write!(f, "{}", f.ident())?;
+        f.write_indent()?;
         self.keys().unwrap().fmt(f)?;
 
         write!(f, " = ")?;
 
-        f.with_reset_ident(|f| self.value().unwrap().fmt(f))?;
+        f.skip_indent();
+        self.value().unwrap().fmt(f)?;
 
         // NOTE: tailing comment is output by `value.fmt(f)`.
 
