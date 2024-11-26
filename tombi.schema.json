@@ -7,19 +7,20 @@
     "toml_version"
   ],
   "properties": {
-    "format": {
-      "$ref": "#/definitions/Options"
-    },
     "toml_version": {
       "$ref": "#/definitions/TOML version"
+    },
+    "format": {
+      "$ref": "#/definitions/Options"
     }
   },
   "definitions": {
-    "LineEnding": {
+    "TOML version": {
+      "description": "TOML version",
       "type": "string",
       "enum": [
-        "Lf",
-        "Crlf"
+        "v1.0.0",
+        "v1.1.0-preview"
       ]
     },
     "Options": {
@@ -38,12 +39,11 @@
         }
       }
     },
-    "TOML version": {
-      "description": "TOML version",
+    "LineEnding": {
       "type": "string",
       "enum": [
-        "v1.0.0",
-        "v1.1.0-preview"
+        "Lf",
+        "Crlf"
       ]
     }
   }
