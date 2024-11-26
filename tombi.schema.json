@@ -46,8 +46,8 @@
     "LineEnding": {
       "type": "string",
       "enum": [
-        "Lf",
-        "Crlf"
+        "lf",
+        "crlf"
       ]
     },
     "LintOptions": {
