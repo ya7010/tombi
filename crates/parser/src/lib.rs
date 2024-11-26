@@ -11,6 +11,7 @@ mod parser;
 mod token_set;
 mod validation;
 
+use config::TomlVersion;
 pub use error::Error;
 pub use event::Event;
 use grammar::Parse;
@@ -19,7 +20,6 @@ use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
 use parsed::Parsed;
-use syntax::TomlVersion;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
@@ -71,7 +71,7 @@ macro_rules! test_parser {
     {#[test] fn $name:ident($source:expr) -> Err([$(SyntaxError($error:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
         #[test]
         fn $name() {
-            let p = crate::parse(textwrap::dedent($source).trim(), syntax::TomlVersion::default());
+            let p = crate::parse(textwrap::dedent($source).trim(), config::TomlVersion::default());
 
             assert_eq!(p.errors(), vec![$(syntax::SyntaxError::new($error, (($line1, $column1), ($line2, $column2)).into())),*])
         }

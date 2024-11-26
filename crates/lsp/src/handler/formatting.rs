@@ -1,5 +1,5 @@
+use config::TomlVersion;
 use dashmap::try_result::TryResult;
-use syntax::TomlVersion;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
 use crate::backend::Backend;

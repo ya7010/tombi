@@ -9,8 +9,9 @@ mod table;
 mod value;
 
 use crate::{output::Output, parser::Parser, token_set::TokenSet};
+use config::TomlVersion;
 use support::*;
-use syntax::{SyntaxKind::*, TomlVersion, T};
+use syntax::{SyntaxKind::*, T};
 
 const TS_LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
 const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EOF]);

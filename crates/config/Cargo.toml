@@ -1,14 +1,15 @@
 [package]
-name = "linter"
-version.workspace = true
+name = "config"
+version = "0.0.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
+
+[features]
+clap = ["dep:clap"]
 
 [dependencies]
-config.workspace = true
-diagnostic.workspace = true
-parser.workspace = true
 schemars.workspace = true
 serde.workspace = true
-syntax.workspace = true
+clap = {workspace = true, optional = true }

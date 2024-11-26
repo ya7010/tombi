@@ -16,6 +16,7 @@ ast = { path = "crates/ast" }
 camino = "1.1.9"
 clap = { version = "4.5.20", features = ["derive"] }
 clap-verbosity-flag = "2.2.2"
+config = { path = "crates/config" }
 diagnostic = { path = "crates/diagnostic" }
 document = { path = "crates/document" }
 either = "1.13.0"

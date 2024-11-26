@@ -1,10 +1,11 @@
 pub mod algo;
 mod generated;
 
+use config::TomlVersion;
 pub use generated::*;
 use itertools::Itertools;
 use std::{fmt::Debug, marker::PhantomData};
-use syntax::{SyntaxElement, SyntaxKind::*, TomlVersion, T};
+use syntax::{SyntaxElement, SyntaxKind::*, T};
 
 pub trait AstNode
 where

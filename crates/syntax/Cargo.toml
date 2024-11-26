@@ -5,12 +5,8 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
-[features]
-clap = ["dep:clap"]
-
 [dependencies]
 rg-tree = { workspace = true }
 thiserror = { workspace = true }
 text = { workspace = true }
 rstest = { workspace = true}
-clap = {workspace = true, optional = true }

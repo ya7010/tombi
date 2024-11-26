@@ -1,6 +1,7 @@
 use crate::backend::Backend;
 use crate::toml;
 use ast::{AstNode, AstToken};
+use config::TomlVersion;
 use parser::{SyntaxNode, SyntaxToken};
 use text::Span;
 use tower_lsp::lsp_types::{
@@ -60,7 +61,7 @@ pub async fn handle_semantic_tokens_full(
 
     let source = toml::try_load(&text_document.uri)?;
 
-    let p = parser::parse(&source, syntax::TomlVersion::default());
+    let p = parser::parse(&source, TomlVersion::default());
     let Some(ast) = ast::Root::cast(p.into_syntax_node()) else {
         return Ok(None);
     };

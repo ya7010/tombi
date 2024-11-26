@@ -1,5 +1,6 @@
 use crate::backend::Backend;
 use ast::AstNode;
+use config::TomlVersion;
 use document::{Node, Parse};
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
@@ -16,9 +17,9 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let Some(ast) = ast::Root::cast(
-        parser::parse(&document.source, syntax::TomlVersion::default()).into_syntax_node(),
-    ) else {
+    let Some(ast) =
+        ast::Root::cast(parser::parse(&document.source, TomlVersion::default()).into_syntax_node())
+    else {
         return Ok(None);
     };
 

@@ -366,7 +366,7 @@ mod tests {
     #[case("[1, 2, 3,]", true)]
     #[case("[1, 2, 3]", false)]
     fn has_tailing_comma_after_last_value(#[case] source: &str, #[case] expected: bool) {
-        let p = parser::parse_as::<ast::Array>(source, syntax::TomlVersion::default());
+        let p = parser::parse_as::<ast::Array>(source, config::TomlVersion::default());
         assert_eq!(p.errors(), []);
 
         let ast = ast::Array::cast(p.syntax_node()).unwrap();

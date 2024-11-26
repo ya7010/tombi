@@ -2,12 +2,12 @@ mod format;
 pub mod formatter;
 
 use ast::AstNode;
+pub use config::format::Options;
+use config::TomlVersion;
 use diagnostic::Diagnostic;
 use format::Format;
 pub use formatter::definitions::Definitions;
-pub use formatter::options::Options;
 pub use formatter::Formatter;
-use syntax::TomlVersion;
 
 pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
     format_with(source, TomlVersion::default(), &Options::default())

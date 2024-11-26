@@ -4,7 +4,7 @@ pub struct Options {
     ///
     /// - `lf`: Line Feed only (`\n`), common on Linux and macOS as well as inside git repos.
     /// - `crlf`: Carriage Return Line Feed (`\r\n`), common on Windows.
-    pub line_ending: Option<crate::formatter::LineEnding>,
+    pub line_ending: Option<crate::format::LineEnding>,
 }
 
 impl Options {

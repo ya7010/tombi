@@ -1,5 +1,5 @@
+use config::TomlVersion;
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-use syntax::TomlVersion;
 
 use crate::app::arg;
 use std::io::Read;

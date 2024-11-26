@@ -1,8 +1,9 @@
 use std::cell::Cell;
 
+use config::TomlVersion;
 use syntax::{
     SyntaxKind::{self, *},
-    TomlVersion, T,
+    T,
 };
 
 use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};

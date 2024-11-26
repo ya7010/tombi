@@ -1,11 +1,8 @@
 mod date_time_delimiter;
 pub mod definitions;
-mod line_ending;
-pub mod options;
 
+use config::{format::LineEnding, TomlVersion};
 pub use date_time_delimiter::DateTimeDelimiter;
-pub use line_ending::LineEnding;
-use syntax::TomlVersion;
 
 use std::{borrow::Cow, fmt::Write};
 

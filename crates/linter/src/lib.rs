@@ -1,7 +1,6 @@
-mod options;
+pub use config::lint::Options;
+use config::TomlVersion;
 use diagnostic::Diagnostic;
-pub use options::Options;
-use syntax::TomlVersion;
 
 pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
     lint_with(source, TomlVersion::default(), &Options::default())

@@ -27,3 +27,11 @@ impl clap::ValueEnum for TomlVersion {
         })
     }
 }
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn toml_version_comp() {
+        assert!(crate::TomlVersion::V1_0_0 < crate::TomlVersion::V1_1_0_Preview);
+    }
+}
