@@ -4,6 +4,7 @@
   "type": "object",
   "required": [
     "format",
+    "lint",
     "toml_version"
   ],
   "properties": {
@@ -12,6 +13,9 @@
     },
     "format": {
       "$ref": "#/definitions/Options"
+    },
+    "lint": {
+      "$ref": "#/definitions/Options2"
     }
   },
   "definitions": {
@@ -45,6 +49,9 @@
         "Lf",
         "Crlf"
       ]
+    },
+    "Options2": {
+      "type": "object"
     }
   }
 }

@@ -9,4 +9,5 @@ pub use toml_version::TomlVersion;
 pub struct Config {
     pub toml_version: TomlVersion,
     pub format: format::Options,
+    pub lint: lint::Options,
 }
