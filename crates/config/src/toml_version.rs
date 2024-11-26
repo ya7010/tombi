@@ -22,8 +22,10 @@ impl clap::ValueEnum for TomlVersion {
         use TomlVersion::*;
 
         Some(match self {
-            V1_0_0 => clap::builder::PossibleValue::new("1.0.0"),
-            V1_1_0_Preview => clap::builder::PossibleValue::new("1.1.0-preview"),
+            V1_0_0 => clap::builder::PossibleValue::new("1.0.0").help("TOML 1.0.0"),
+            V1_1_0_Preview => {
+                clap::builder::PossibleValue::new("1.1.0-preview").help("TOML 1.1.0-preview")
+            }
         })
     }
 }
