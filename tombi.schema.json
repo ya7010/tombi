@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Config",
+  "type": "object",
+  "required": [
+    "format",
+    "toml_version"
+  ],
+  "properties": {
+    "format": {
+      "$ref": "#/definitions/Options"
+    },
+    "toml_version": {
+      "$ref": "#/definitions/TOML version"
+    }
+  },
+  "definitions": {
+    "LineEnding": {
+      "type": "string",
+      "enum": [
+        "Lf",
+        "Crlf"
+      ]
+    },
+    "Options": {
+      "type": "object",
+      "properties": {
+        "line_ending": {
+          "description": "The type of line ending.\n\n- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/LineEnding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "TOML version": {
+      "description": "TOML version",
+      "type": "string",
+      "enum": [
+        "v1.0.0",
+        "v1.1.0-preview"
+      ]
+    }
+  }
+}
