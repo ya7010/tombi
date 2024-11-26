@@ -19,17 +19,18 @@ use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
 use parsed::Parsed;
+use syntax::TomlVersion;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
-pub fn parse(source: &str) -> Parsed<SyntaxNode> {
-    parse_as::<ast::Root>(source)
+pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
+    parse_as::<ast::Root>(source, toml_version)
 }
 
 #[allow(private_bounds)]
-pub fn parse_as<G: Parse>(source: &str) -> Parsed<SyntaxNode> {
+pub fn parse_as<G: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
-    let output = grammar::parse::<G>(&input);
+    let output = grammar::parse::<G>(&input, toml_version);
     let (green_tree, errors) = build_green_tree(&lexed, output);
 
     Parsed::new(green_tree, errors)
@@ -70,7 +71,7 @@ macro_rules! test_parser {
     {#[test] fn $name:ident($source:expr) -> Err([$(SyntaxError($error:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
         #[test]
         fn $name() {
-            let p = crate::parse(textwrap::dedent($source).trim());
+            let p = crate::parse(textwrap::dedent($source).trim(), syntax::TomlVersion::default());
 
             assert_eq!(p.errors(), vec![$(syntax::SyntaxError::new($error, (($line1, $column1), ($line2, $column2)).into())),*])
         }

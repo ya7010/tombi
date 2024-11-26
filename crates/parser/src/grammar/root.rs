@@ -62,7 +62,7 @@ mod test {
 [table]
         "#
         .trim();
-        let p = crate::parse(input);
+        let p = crate::parse(input, crate::TomlVersion::default());
 
         assert_eq!(p.errors(), vec![]);
     }

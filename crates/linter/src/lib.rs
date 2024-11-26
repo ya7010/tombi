@@ -8,10 +8,10 @@ pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
 }
 pub fn lint_with(
     source: &str,
-    _version: TomlVersion,
+    toml_version: TomlVersion,
     _options: &crate::Options,
 ) -> Result<(), Vec<Diagnostic>> {
-    let p = parser::parse(source);
+    let p = parser::parse(source, toml_version);
     let errors = p.errors();
 
     if errors.is_empty() {

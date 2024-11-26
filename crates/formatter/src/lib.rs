@@ -15,10 +15,10 @@ pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
 
 pub fn format_with(
     source: &str,
-    version: TomlVersion,
+    toml_version: TomlVersion,
     options: &Options,
 ) -> Result<String, Vec<Diagnostic>> {
-    let p = parser::parse(source);
+    let p = parser::parse(source, toml_version);
     let errors = p.errors();
 
     let root = ast::Root::cast(p.into_syntax_node()).unwrap();
@@ -27,7 +27,7 @@ pub fn format_with(
     if errors.is_empty() {
         let mut formatted_text = String::new();
         let line_ending = {
-            let mut f = Formatter::new_with_options(version, &mut formatted_text, options);
+            let mut f = Formatter::new_with_options(toml_version, &mut formatted_text, options);
             root.fmt(&mut f).unwrap();
             f.line_ending()
         };
@@ -73,9 +73,12 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr) -> Err(_);) => {
         #[test]
         fn $name() {
-            let p = parser::parse($source);
-
-            assert_ne!(p.errors(), vec![]);
+            match crate::format($source) {
+                Ok(_) => panic!("expected an error"),
+                Err(errors) => {
+                    pretty_assertions::assert_ne!(errors, vec![]);
+                }
+            }
         }
     };
 }

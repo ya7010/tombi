@@ -10,15 +10,15 @@ mod value;
 
 use crate::{output::Output, parser::Parser, token_set::TokenSet};
 use support::*;
-use syntax::{SyntaxKind::*, T};
+use syntax::{SyntaxKind::*, TomlVersion, T};
 
 const TS_LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
 const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EOF]);
 const TS_NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
-pub fn parse<P: Parse>(input: &crate::Input) -> Output {
+pub fn parse<P: Parse>(input: &crate::Input, toml_version: TomlVersion) -> Output {
     let _p = tracing::info_span!("grammar::parse").entered();
-    let mut p = crate::parser::Parser::new(input);
+    let mut p = crate::parser::Parser::new(input, toml_version);
 
     P::parse(&mut p);
 

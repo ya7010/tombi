@@ -60,7 +60,7 @@ pub async fn handle_semantic_tokens_full(
 
     let source = toml::try_load(&text_document.uri)?;
 
-    let p = parser::parse(&source);
+    let p = parser::parse(&source, syntax::TomlVersion::default());
     let Some(ast) = ast::Root::cast(p.into_syntax_node()) else {
         return Ok(None);
     };

@@ -2,7 +2,7 @@ use std::cell::Cell;
 
 use syntax::{
     SyntaxKind::{self, *},
-    T,
+    TomlVersion, T,
 };
 
 use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};
@@ -13,15 +13,17 @@ pub(crate) struct Parser<'t> {
     pos: usize,
     pub(crate) events: Vec<crate::Event>,
     steps: Cell<u32>,
+    toml_version: TomlVersion,
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(input: &'t Input) -> Self {
+    pub(crate) fn new(input: &'t Input, toml_version: TomlVersion) -> Self {
         Self {
             input,
             pos: 0,
             events: Vec::new(),
             steps: Cell::new(0),
+            toml_version,
         }
     }
 

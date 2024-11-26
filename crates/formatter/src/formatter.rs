@@ -10,7 +10,7 @@ use syntax::TomlVersion;
 use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
-    version: TomlVersion,
+    toml_version: TomlVersion,
     indent_depth: u8,
     skip_indent: bool,
     defs: crate::Definitions,
@@ -20,9 +20,9 @@ pub struct Formatter<'a> {
 
 impl<'a> Formatter<'a> {
     #[inline]
-    pub fn new(version: TomlVersion, buf: &'a mut (dyn Write + 'a)) -> Self {
+    pub fn new(toml_version: TomlVersion, buf: &'a mut (dyn Write + 'a)) -> Self {
         Self {
-            version,
+            toml_version,
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
@@ -33,12 +33,12 @@ impl<'a> Formatter<'a> {
 
     #[inline]
     pub fn new_with_options(
-        version: TomlVersion,
+        toml_version: TomlVersion,
         buf: &'a mut (dyn Write + 'a),
         options: &'a crate::Options,
     ) -> Self {
         Self {
-            version,
+            toml_version,
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
@@ -49,7 +49,7 @@ impl<'a> Formatter<'a> {
 
     #[inline]
     pub fn version(&self) -> TomlVersion {
-        self.version
+        self.toml_version
     }
 
     #[inline]

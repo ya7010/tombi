@@ -16,7 +16,9 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let Some(ast) = ast::Root::cast(parser::parse(&document.source).into_syntax_node()) else {
+    let Some(ast) = ast::Root::cast(
+        parser::parse(&document.source, syntax::TomlVersion::default()).into_syntax_node(),
+    ) else {
         return Ok(None);
     };
 

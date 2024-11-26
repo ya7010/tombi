@@ -1,7 +1,7 @@
 use crate::toml;
 use ast::{algo::ancestors_at_offset, AstNode};
 use parser::SyntaxKind;
-use text::{Span, Offset};
+use text::{Offset, Span};
 use tower_lsp::lsp_types::{
     Hover, HoverContents, HoverParams, MarkupContent, MarkupKind, Position, Range,
     TextDocumentPositionParams,
@@ -22,7 +22,9 @@ pub async fn handle_hover(
 
     let source = toml::try_load(&text_document.uri)?;
 
-    let Some(ast) = ast::Root::cast(parser::parse(&source).into_syntax_node()) else {
+    let Some(ast) =
+        ast::Root::cast(parser::parse(&source, syntax::TomlVersion::default()).into_syntax_node())
+    else {
         return Ok(None);
     };
 
