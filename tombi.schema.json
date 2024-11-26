@@ -23,14 +23,14 @@
       "description": "TOML version.",
       "oneOf": [
         {
-          "description": "TOML 1.0.0",
+          "description": "TOML v1.0.0",
           "type": "string",
           "enum": [
             "v1.0.0"
           ]
         },
         {
-          "description": "TOML 1.1.0-preview",
+          "description": "TOML v1.1.0-preview",
           "type": "string",
           "enum": [
             "v1.1.0-preview"

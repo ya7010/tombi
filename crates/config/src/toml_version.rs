@@ -5,12 +5,12 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[allow(non_camel_case_types)]
 pub enum TomlVersion {
-    /// TOML 1.0.0
+    /// TOML v1.0.0
     #[cfg_attr(feature = "serde", serde(rename = "v1.0.0"))]
     #[cfg_attr(feature = "clap", value(name = "v1.0.0"))]
     V1_0_0,
 
-    /// TOML 1.1.0-preview
+    /// TOML v1.1.0-preview
     #[default]
     #[cfg_attr(feature = "serde", serde(rename = "v1.1.0-preview"))]
     #[cfg_attr(feature = "clap", value(name = "v1.1.0-preview"))]
