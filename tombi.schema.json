@@ -6,10 +6,10 @@
   "required": [
     "format",
     "lint",
-    "toml_version"
+    "toml-version"
   ],
   "properties": {
-    "toml_version": {
+    "toml-version": {
       "$ref": "#/definitions/TomlVersion"
     },
     "format": {
@@ -42,7 +42,7 @@
     "FormatOptions": {
       "type": "object",
       "properties": {
-        "line_ending": {
+        "line-ending": {
           "description": "The type of line ending.\n\n- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
           "anyOf": [
             {
