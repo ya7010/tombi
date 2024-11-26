@@ -1,10 +1,12 @@
-#[derive(Debug, Default, Clone, Copy, schemars::JsonSchema)]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum LineEnding {
     #[default]
     Lf,
     Crlf,
 }
 
+#[cfg(feature = "serde")]
 impl serde::Serialize for LineEnding {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -17,6 +19,7 @@ impl serde::Serialize for LineEnding {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for LineEnding {
     fn deserialize<D>(deserializer: D) -> Result<LineEnding, D::Error>
     where

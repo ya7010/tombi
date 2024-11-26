@@ -8,8 +8,10 @@ repository.workspace = true
 
 [features]
 clap = ["dep:clap"]
+serde = ["dep:serde"]
+jsonschema = ["serde", "dep:schemars"]
 
 [dependencies]
-schemars.workspace = true
-serde.workspace = true
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
 clap = {workspace = true, optional = true }
