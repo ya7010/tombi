@@ -1,7 +1,7 @@
 mod date_time_delimiter;
 pub mod definitions;
 
-use config::{format::LineEnding, TomlVersion};
+use config::{LineEnding, TomlVersion};
 pub use date_time_delimiter::DateTimeDelimiter;
 
 use std::{borrow::Cow, fmt::Write};

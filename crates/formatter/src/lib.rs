@@ -2,7 +2,7 @@ mod format;
 pub mod formatter;
 
 use ast::AstNode;
-pub use config::format::FormatOptions;
+pub use config::FormatOptions;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
 use format::Format;
@@ -59,7 +59,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $version:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
-            match crate::format_with($source, $version, &crate::Options::default()) {
+            match crate::format_with($source, $version, &crate::FormatOptions::default()) {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }

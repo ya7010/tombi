@@ -1,4 +1,4 @@
-pub use config::lint::LintOptions;
+pub use config::LintOptions;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
 

@@ -1,6 +1,9 @@
-pub mod format;
-pub mod lint;
+mod format;
+mod lint;
 mod toml_version;
+pub use format::FormatOptions;
+pub use format::LineEnding;
+pub use lint::LintOptions;
 pub use toml_version::TomlVersion;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8,6 +11,6 @@ pub use toml_version::TomlVersion;
 #[derive(Debug, Default, Clone)]
 pub struct Config {
     pub toml_version: TomlVersion,
-    pub format: format::FormatOptions,
-    pub lint: lint::LintOptions,
+    pub format: FormatOptions,
+    pub lint: LintOptions,
 }
