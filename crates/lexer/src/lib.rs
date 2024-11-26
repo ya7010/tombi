@@ -55,13 +55,10 @@ pub fn lex(source: &str) -> Lexed {
 pub fn tokenize(source: &str) -> impl Iterator<Item = Result<Token, crate::Error>> + '_ {
     let mut cursor = Cursor::new(source);
     std::iter::from_fn(move || match cursor.advance_token() {
-        Ok(token) => {
-            if token.kind() != SyntaxKind::EOF {
-                Some(Ok(token))
-            } else {
-                None
-            }
-        }
+        Ok(token) => match token.kind() {
+            kind if kind != SyntaxKind::EOF => Some(Ok(token)),
+            _ => None,
+        },
         Err(error) => Some(Err(error)),
     })
 }
