@@ -31,7 +31,7 @@ lsp = { path = "crates/lsp" }
 nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
 pretty_assertions = "1.4.1"
-proc-macro2 = "1.0.87"
+proc-macro2 = "1.0.92"
 quote = "1.0.37"
 regex = "1.11.1"
 rg-tree = { path = "crates/rg-tree" }
@@ -44,7 +44,7 @@ serde_json = "1.0.130"
 syntax = { path = "crates/syntax" }
 text = { path = "crates/text" }
 textwrap = "0.16.1"
-thiserror = "1.0.64"
+thiserror = "2.0.3"
 tokio = "1.41.0"
 tower-lsp = "0.20.0"
 tracing = "0.1.40"

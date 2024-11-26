@@ -355,7 +355,7 @@ dependencies = [
  "nu-ansi-term 0.50.1",
  "serde",
  "text",
- "thiserror 1.0.69",
+ "thiserror",
  "tracing",
  "tracing-subscriber",
 ]
@@ -384,7 +384,7 @@ dependencies = [
  "ast",
  "indexmap 2.6.0",
  "text",
- "thiserror 1.0.69",
+ "thiserror",
  "tower-lsp",
 ]
 
@@ -795,7 +795,7 @@ dependencies = [
  "syntax",
  "text",
  "textwrap",
- "thiserror 1.0.69",
+ "thiserror",
  "tracing",
 ]
 
@@ -867,7 +867,7 @@ dependencies = [
  "serde",
  "serde_json",
  "text",
- "thiserror 1.0.69",
+ "thiserror",
  "tokio",
  "tower-lsp",
  "tracing",
@@ -984,7 +984,7 @@ dependencies = [
  "syntax",
  "text",
  "textwrap",
- "thiserror 1.0.69",
+ "thiserror",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1054,9 +1054,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.91"
+version = "1.0.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "307e3004becf10f5a6e0d59d20f3cd28231b0e0827a96cd3e0ce6d14bc1e4bb3"
+checksum = "37d3544b3f2748c54e147655edb5025752e2303145b5aefb3c3ea2c78b973bb0"
 dependencies = [
  "unicode-ident",
 ]
@@ -1365,7 +1365,7 @@ dependencies = [
  "rg-tree",
  "rstest",
  "text",
- "thiserror 1.0.69",
+ "thiserror",
 ]
 
 [[package]]
@@ -1390,31 +1390,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
-dependencies = [
- "thiserror-impl 1.0.69",
-]
-
-[[package]]
-name = "thiserror"
 version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c006c85c7651b3cf2ada4584faa36773bd07bac24acfb39f3c431b36d7e667aa"
 dependencies = [
- "thiserror-impl 2.0.3",
-]
-
-[[package]]
-name = "thiserror-impl"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
+ "thiserror-impl",
 ]
 
 [[package]]
@@ -1508,7 +1488,7 @@ dependencies = [
  "linter",
  "lsp",
  "nu-ansi-term 0.50.1",
- "thiserror 1.0.69",
+ "thiserror",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -1873,7 +1853,7 @@ dependencies = [
  "quote",
  "schemars",
  "serde_json",
- "thiserror 1.0.69",
+ "thiserror",
  "time",
  "ungrammar",
  "xshell",
@@ -1966,7 +1946,7 @@ dependencies = [
  "flate2",
  "indexmap 2.6.0",
  "memchr",
- "thiserror 2.0.3",
+ "thiserror",
  "time",
  "zopfli",
 ]
