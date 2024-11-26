@@ -1,3 +1,4 @@
 [alias]
 tombi = "run --package tombi-cli --bin tombi --"
 xtask = "run --package xtask --bin xtask --"
+jsonschema = "run --package config --bin jsonschema --all-features --"
