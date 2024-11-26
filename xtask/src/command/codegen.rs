@@ -3,4 +3,5 @@ pub enum CodeGenCommand {
     #[default]
     All,
     Grammar,
+    Jsonschema,
 }

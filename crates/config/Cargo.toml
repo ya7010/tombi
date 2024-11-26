@@ -6,18 +6,13 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
-[[bin]]
-name = "jsonschema"
-path = "src/bin/jsonschema.rs"
-default-features = ["jsonschema"]
-
 [features]
 clap = ["dep:clap"]
 serde = ["dep:serde"]
 jsonschema = ["serde", "dep:schemars", "dep:serde_json"]
 
 [dependencies]
-schemars = { workspace = true, optional = true, features = ["preserve_order"] }
+schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 clap = { workspace = true, optional = true }

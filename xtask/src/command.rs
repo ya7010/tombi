@@ -1,5 +1,6 @@
 pub mod codegen;
 pub mod codegen_grammar;
+pub mod codegen_jsonschema;
 pub mod dist;
 pub mod set_version;
 

@@ -24,8 +24,12 @@ pub fn run(args: impl Into<Args>) -> Result<(), anyhow::Error> {
 
     match args.subcommand {
         command::XTaskCommand::Codegen(subcommand) => match subcommand {
-            command::CodeGenCommand::All => command::codegen_grammar::run()?,
+            command::CodeGenCommand::All => {
+                command::codegen_grammar::run()?;
+                command::codegen_jsonschema::run()?
+            }
             command::CodeGenCommand::Grammar => command::codegen_grammar::run()?,
+            command::CodeGenCommand::Jsonschema => command::codegen_jsonschema::run()?,
         },
         command::XTaskCommand::SetVersion => {
             command::set_version::run(&xshell::Shell::new().unwrap())?

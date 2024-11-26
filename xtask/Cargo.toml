@@ -8,12 +8,15 @@ license = { workspace = true }
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true }
+config = { workspace = true, features = ["jsonschema"] }
 convert_case = "0.6.0"
 either = { workspace = true }
 flate2 = "1.0.35"
 itertools = { workspace = true }
 proc-macro2 = { workspace = true }
 quote = { workspace = true }
+schemars = { workspace = true, features = ["preserve_order"] }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 time = { version = "0.3.36", default-features = false }
 ungrammar = "1.16.1"
