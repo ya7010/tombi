@@ -1,7 +1,7 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone)]
-pub struct Options {
+pub struct FormatOptions {
     /// The type of line ending.
     ///
     /// - `lf`: Line Feed only (`\n`), common on Linux and macOS as well as inside git repos.
@@ -9,8 +9,8 @@ pub struct Options {
     pub line_ending: Option<crate::format::LineEnding>,
 }
 
-impl Options {
-    pub fn merge(&mut self, other: &Options) -> &mut Self {
+impl FormatOptions {
+    pub fn merge(&mut self, other: &FormatOptions) -> &mut Self {
         if let Some(line_ending) = other.line_ending {
             self.line_ending = Some(line_ending);
         }

@@ -2,7 +2,7 @@ mod format;
 pub mod formatter;
 
 use ast::AstNode;
-pub use config::format::Options;
+pub use config::format::FormatOptions;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
 use format::Format;
@@ -10,13 +10,13 @@ pub use formatter::definitions::Definitions;
 pub use formatter::Formatter;
 
 pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
-    format_with(source, TomlVersion::default(), &Options::default())
+    format_with(source, TomlVersion::default(), &FormatOptions::default())
 }
 
 pub fn format_with(
     source: &str,
     toml_version: TomlVersion,
-    options: &Options,
+    options: &FormatOptions,
 ) -> Result<String, Vec<Diagnostic>> {
     let p = parser::parse(source, toml_version);
     let errors = p.errors();

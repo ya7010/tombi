@@ -11,7 +11,7 @@ pub struct Formatter<'a> {
     indent_depth: u8,
     skip_indent: bool,
     defs: crate::Definitions,
-    options: Cow<'a, crate::Options>,
+    options: Cow<'a, crate::FormatOptions>,
     buf: &'a mut (dyn Write + 'a),
 }
 
@@ -23,7 +23,7 @@ impl<'a> Formatter<'a> {
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
-            options: Cow::Owned(crate::Options::default()),
+            options: Cow::Owned(crate::FormatOptions::default()),
             buf,
         }
     }
@@ -32,7 +32,7 @@ impl<'a> Formatter<'a> {
     pub fn new_with_options(
         toml_version: TomlVersion,
         buf: &'a mut (dyn Write + 'a),
-        options: &'a crate::Options,
+        options: &'a crate::FormatOptions,
     ) -> Self {
         Self {
             toml_version,
@@ -50,7 +50,7 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn options(&self) -> &crate::Options {
+    pub fn options(&self) -> &crate::FormatOptions {
         &self.options
     }
 

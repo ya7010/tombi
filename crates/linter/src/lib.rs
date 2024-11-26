@@ -1,14 +1,14 @@
-pub use config::lint::Options;
+pub use config::lint::LintOptions;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
 
 pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
-    lint_with(source, TomlVersion::default(), &Options::default())
+    lint_with(source, TomlVersion::default(), &LintOptions::default())
 }
 pub fn lint_with(
     source: &str,
     toml_version: TomlVersion,
-    _options: &crate::Options,
+    _options: &crate::LintOptions,
 ) -> Result<(), Vec<Diagnostic>> {
     let p = parser::parse(source, toml_version);
     let errors = p.errors();

@@ -8,6 +8,6 @@ pub use toml_version::TomlVersion;
 #[derive(Debug, Default, Clone)]
 pub struct Config {
     pub toml_version: TomlVersion,
-    pub format: format::Options,
-    pub lint: lint::Options,
+    pub format: format::FormatOptions,
+    pub lint: lint::LintOptions,
 }
