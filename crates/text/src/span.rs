@@ -1,12 +1,6 @@
-use cmp::Ordering;
-
-use {
-    crate::Offset,
-    std::{
-        cmp, fmt,
-        ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign},
-    },
-};
+use crate::{Offset, RawTextSize};
+use std::cmp::Ordering;
+use std::ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign};
 
 /// A span in text, represented as a pair of [`Offset`][struct@Offset].
 ///
@@ -18,8 +12,8 @@ pub struct Span {
     end: Offset,
 }
 
-impl fmt::Debug for Span {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for Span {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}..{}", self.start().raw, self.end().raw)
     }
 }
@@ -220,8 +214,8 @@ impl Span {
     /// ```
     #[inline]
     pub fn intersect(self, other: Span) -> Option<Span> {
-        let start = cmp::max(self.start(), other.start());
-        let end = cmp::min(self.end(), other.end());
+        let start = std::cmp::max(self.start(), other.start());
+        let end = std::cmp::min(self.end(), other.end());
         if end < start {
             return None;
         }
@@ -244,8 +238,8 @@ impl Span {
     /// ```
     #[inline]
     pub fn cover(self, other: Span) -> Span {
-        let start = cmp::min(self.start(), other.start());
-        let end = cmp::max(self.end(), other.end());
+        let start = std::cmp::min(self.start(), other.start());
+        let end = std::cmp::max(self.end(), other.end());
         Span::new(start, end)
     }
 
@@ -372,13 +366,13 @@ impl IndexMut<Span> for String {
     }
 }
 
-impl RangeBounds<Offset> for Span {
-    fn start_bound(&self) -> Bound<&Offset> {
-        Bound::Included(&self.start)
+impl RangeBounds<RawTextSize> for Span {
+    fn start_bound(&self) -> Bound<&RawTextSize> {
+        Bound::Included(&self.start.raw)
     }
 
-    fn end_bound(&self) -> Bound<&Offset> {
-        Bound::Excluded(&self.end)
+    fn end_bound(&self) -> Bound<&RawTextSize> {
+        Bound::Excluded(&self.end.raw)
     }
 }
 
