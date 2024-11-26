@@ -5,6 +5,7 @@ use diagnostic::Diagnostic;
 pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
     lint_with(source, TomlVersion::default(), &LintOptions::default())
 }
+
 pub fn lint_with(
     source: &str,
     toml_version: TomlVersion,
