@@ -44,7 +44,7 @@ pub fn build_green_tree(
     let mut enter_position = Default::default();
 
     let _ = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
-        lexed::Step::Token {
+        lexed::Step::AddToken {
             kind,
             text,
             position,
@@ -52,10 +52,10 @@ pub fn build_green_tree(
             builder.token(kind, text);
             enter_position = position;
         }
-        lexed::Step::Enter { kind } => {
+        lexed::Step::StartNode { kind } => {
             builder.start_node(kind);
         }
-        lexed::Step::Exit => builder.finish_node(),
+        lexed::Step::FinishNode => builder.finish_node(),
         lexed::Step::Error { error, position } => {
             builder.error(error.to_string(), (enter_position, position).into())
         }

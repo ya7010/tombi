@@ -12,15 +12,15 @@ pub struct LexedStr<'a> {
 
 #[derive(Debug)]
 pub enum Step<'a> {
-    Token {
+    AddToken {
         kind: SyntaxKind,
         text: &'a str,
         position: text::Position,
     },
-    Enter {
+    StartNode {
         kind: SyntaxKind,
     },
-    Exit,
+    FinishNode,
     Error {
         error: crate::Error,
         position: text::Position,
@@ -187,7 +187,7 @@ impl<'a> LexedStr<'a> {
         match std::mem::replace(&mut builder.state, State::Normal) {
             State::PendingExit => {
                 builder.eat_trivias();
-                (builder.sink)(Step::Exit);
+                (builder.sink)(Step::FinishNode);
             }
             State::PendingEnter | State::Normal => unreachable!(),
         }

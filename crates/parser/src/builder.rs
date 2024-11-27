@@ -41,7 +41,7 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn token(&mut self, kind: SyntaxKind, n_tokens: u8) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(lexed::Step::Exit),
+            State::PendingExit => (self.sink)(lexed::Step::FinishNode),
             State::Normal => (),
         }
         self.eat_trivias();
@@ -51,23 +51,23 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn enter(&mut self, kind: SyntaxKind) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => {
-                (self.sink)(lexed::Step::Enter { kind });
+                (self.sink)(lexed::Step::StartNode { kind });
                 // No need to attach trivias to previous node: there is no
                 // previous node.
                 return;
             }
-            State::PendingExit => (self.sink)(lexed::Step::Exit),
+            State::PendingExit => (self.sink)(lexed::Step::FinishNode),
             State::Normal => (),
         }
 
         self.eat_n_trivias();
-        (self.sink)(lexed::Step::Enter { kind });
+        (self.sink)(lexed::Step::StartNode { kind });
     }
 
     pub fn exit(&mut self) {
         match std::mem::replace(&mut self.state, State::PendingExit) {
             State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(lexed::Step::Exit),
+            State::PendingExit => (self.sink)(lexed::Step::FinishNode),
             State::Normal => (),
         }
     }
@@ -104,7 +104,7 @@ impl<'a, 'b> Builder<'a, 'b> {
         self.token_index += n_tokens;
         self.position = self.position.add_text(text);
 
-        (self.sink)(lexed::Step::Token {
+        (self.sink)(lexed::Step::AddToken {
             kind,
             text,
             position: start_position,
