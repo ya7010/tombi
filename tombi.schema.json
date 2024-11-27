@@ -5,6 +5,7 @@
   "type": "object",
   "properties": {
     "toml-version": {
+      "title": "TOML version.",
       "anyOf": [
         {
           "$ref": "#/definitions/TomlVersion"
@@ -15,6 +16,7 @@
       ]
     },
     "format": {
+      "title": "Formatter options.",
       "anyOf": [
         {
           "$ref": "#/definitions/FormatOptions"
@@ -25,6 +27,7 @@
       ]
     },
     "lint": {
+      "title": "Linter options.",
       "anyOf": [
         {
           "$ref": "#/definitions/LintOptions"
@@ -38,21 +41,10 @@
   "definitions": {
     "TomlVersion": {
       "description": "TOML version.",
-      "oneOf": [
-        {
-          "description": "TOML v1.0.0",
-          "type": "string",
-          "enum": [
-            "v1.0.0"
-          ]
-        },
-        {
-          "description": "TOML v1.1.0-preview",
-          "type": "string",
-          "enum": [
-            "v1.1.0-preview"
-          ]
-        }
+      "type": "string",
+      "enum": [
+        "v1.0.0",
+        "v1.1.0-preview"
       ]
     },
     "FormatOptions": {

@@ -15,7 +15,12 @@ pub use toml_version::TomlVersion;
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone)]
 pub struct Config {
+    /// # TOML version.
     pub toml_version: Option<TomlVersion>,
+
+    /// # Formatter options.
     pub format: Option<FormatOptions>,
+
+    /// # Linter options.
     pub lint: Option<LintOptions>,
 }
