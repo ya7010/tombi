@@ -40,7 +40,6 @@ pub fn build_green_tree(
     lexed: &LexedStr<'_>,
     parser_output: crate::Output,
 ) -> (rg_tree::GreenNode, Vec<syntax::SyntaxError>) {
-    let _p = tracing::info_span!("build_tree").entered();
     let mut builder = syntax::SyntaxTreeBuilder::default();
     let mut enter_position = Default::default();
 
