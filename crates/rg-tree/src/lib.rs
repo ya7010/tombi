@@ -21,8 +21,6 @@ mod utility_types;
 #[allow(unsafe_code)]
 mod arc;
 mod cow_mut;
-#[cfg(feature = "serde")]
-mod serde_impls;
 #[allow(unsafe_code)]
 mod sll;
 
