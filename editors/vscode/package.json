@@ -10,10 +10,10 @@
   },
   "repository": "https://github.com/yassun7010/tombi",
   "license": "MIT",
-  "keywords": ["toml", "formatter"],
+  "keywords": ["toml", "formatter", "linter"],
   "categories": ["Programming Languages", "Formatters", "Linters"],
   "engines": {
-    "vscode": "^1.94.0"
+    "vscode": "^1.93.0"
   },
   "main": "./dist/main",
   "scripts": {
@@ -37,10 +37,10 @@
     "@tsconfig/strictest": "^2.0.5",
     "@types/minimatch": "^5.1.2",
     "@types/semver": "^7.5.8",
-    "@types/vscode": "^1.94.0",
+    "@types/vscode": "^1.93.0",
     "@vscode/vsce": "^3.2.1",
     "esbuild": "^0.24.0",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.6"
   },
   "activationEvents": ["onLanguage:cargoLock"],
   "icon": "icon.png",
