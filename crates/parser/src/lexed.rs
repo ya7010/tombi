@@ -6,8 +6,7 @@ use crate::{input::Input, output};
 #[derive(Debug)]
 pub struct LexedStr<'a> {
     pub source: &'a str,
-    pub kinds: Vec<SyntaxKind>,
-    pub start_offsets: Vec<text::Offset>,
+    pub tokens: Vec<lexer::Token>,
     pub errors: Vec<LexError>,
 }
 
@@ -57,28 +56,29 @@ impl<'a> LexedStr<'a> {
     pub fn new(source: &'a str) -> Self {
         let _p = tracing::info_span!("LexedStr::new").entered();
         let lexed = lexer::lex(source);
-        let mut kind = Vec::new();
-        let mut start_offsets: Vec<text::Offset> = Vec::new();
-        let mut error = Vec::new();
+        let mut tokens = Vec::new();
+        let mut last_offset = text::Offset::default();
+        let mut errors = Vec::new();
 
         for (i, token) in lexed.into_iter().enumerate() {
             match token {
                 Ok(token) => {
-                    kind.push(token.kind());
-                    start_offsets.push(token.span().start());
+                    tokens.push(token);
+                    last_offset = token.span().end();
                 }
-                Err(_) => error.push(LexError::new(i, syntax::Error::InvalidToken)),
+                Err(_) => errors.push(LexError::new(i, syntax::Error::InvalidToken)),
             }
         }
 
-        kind.push(EOF);
-        start_offsets.push(text::Offset::new(source.len() as u32));
+        tokens.push(lexer::Token::new(
+            EOF,
+            text::Span::new(last_offset, text::Offset::new(source.len() as u32)),
+        ));
 
         Self {
             source,
-            kinds: kind,
-            start_offsets,
-            errors: error,
+            tokens,
+            errors,
         }
     }
 
@@ -87,7 +87,7 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn len(&self) -> usize {
-        self.kinds.len() - 1
+        self.tokens.len() - 1
     }
 
     pub fn is_empty(&self) -> bool {
@@ -96,7 +96,7 @@ impl<'a> LexedStr<'a> {
 
     pub fn kind(&self, i: usize) -> SyntaxKind {
         assert!(i < self.len());
-        self.kinds[i]
+        self.tokens[i].kind()
     }
 
     pub fn text(&self, i: usize) -> &str {
@@ -105,26 +105,19 @@ impl<'a> LexedStr<'a> {
 
     pub fn range_text(&self, r: std::ops::Range<usize>) -> &str {
         assert!(r.start < r.end && r.end <= self.len());
-        let lo = self.start_offsets[r.start].into();
-        let hi = self.start_offsets[r.end].into();
+        let lo = self.tokens[r.start].span().start().into();
+        let hi = self.tokens[r.end].span().start().into();
         &self.source[lo..hi]
     }
 
     // Naming is hard.
     pub fn text_range(&self, i: usize) -> std::ops::Range<usize> {
         assert!(i < self.len());
-        let lo = self.start_offsets[i].into();
-        let hi = self.start_offsets[i + 1].into();
-        lo..hi
+        self.tokens[i].span().into()
     }
 
-    pub fn text_start_offset(&self, i: usize) -> text::Offset {
-        assert!(i <= self.len());
-        self.start_offsets[i]
-    }
-
-    pub fn text_start_position(&self, i: usize) -> text::Position {
-        text::Position::from_source(&self.source, (self.text_start_offset(i)).into())
+    fn text_start_position(&self, i: usize) -> text::Position {
+        text::Position::from_source(&self.source, self.tokens[i].span().start())
     }
 
     pub fn text_len(&self, i: usize) -> usize {
@@ -151,14 +144,15 @@ impl<'a> LexedStr<'a> {
 
         let mut res = Input::default();
         let mut was_joint = false;
-        for kind in self.kinds.iter() {
+        for token in self.tokens.iter() {
+            let kind = token.kind();
             if kind.is_trivia() {
                 was_joint = false
             } else {
                 if was_joint {
                     res.was_joint();
                 }
-                res.push(*kind);
+                res.push(token.clone());
                 was_joint = true;
             }
         }

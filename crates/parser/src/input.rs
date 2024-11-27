@@ -14,19 +14,19 @@ type bits = u64;
 /// Struct of arrays internally, but this shouldn't really matter.
 #[derive(Debug, Default)]
 pub struct Input {
-    kinds: Vec<SyntaxKind>,
+    tokens: Vec<lexer::Token>,
     joints: Vec<bits>,
 }
 
 /// `pub` impl used by callers to create `Tokens`.
 impl Input {
     #[inline]
-    pub fn push(&mut self, kind: SyntaxKind) {
+    pub fn push(&mut self, token: lexer::Token) {
         let idx = self.len();
         if idx % (bits::BITS as usize) == 0 {
             self.joints.push(0);
         }
-        self.kinds.push(kind);
+        self.tokens.push(token);
     }
 
     /// Sets jointness for the last token we've pushed.
@@ -46,7 +46,7 @@ impl Input {
 /// pub(crate) impl used by the parser to consume `Tokens`.
 impl Input {
     pub(crate) fn kind(&self, idx: usize) -> SyntaxKind {
-        self.kinds.get(idx).copied().unwrap_or(EOF)
+        self.tokens.get(idx).map_or(EOF, |t| t.kind())
     }
 
     pub(crate) fn is_joint(&self, n: usize) -> bool {
@@ -62,6 +62,6 @@ impl Input {
         (idx, b_idx)
     }
     fn len(&self) -> usize {
-        self.kinds.len()
+        self.tokens.len()
     }
 }
