@@ -3,20 +3,36 @@
   "title": "Tombi",
   "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server. See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.",
   "type": "object",
-  "required": [
-    "format",
-    "lint",
-    "toml-version"
-  ],
   "properties": {
     "toml-version": {
-      "$ref": "#/definitions/TomlVersion"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/TomlVersion"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "format": {
-      "$ref": "#/definitions/FormatOptions"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/FormatOptions"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "lint": {
-      "$ref": "#/definitions/LintOptions"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/LintOptions"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "definitions": {
