@@ -6,9 +6,9 @@ use crate::{input::Input, output};
 #[derive(Debug)]
 pub struct LexedStr<'a> {
     pub source: &'a str,
-    pub kind: Vec<SyntaxKind>,
+    pub kinds: Vec<SyntaxKind>,
     pub start_offsets: Vec<text::Offset>,
-    pub error: Vec<LexError>,
+    pub errors: Vec<LexError>,
 }
 
 #[derive(Debug)]
@@ -76,9 +76,9 @@ impl<'a> LexedStr<'a> {
 
         Self {
             source,
-            kind,
+            kinds: kind,
             start_offsets,
-            error,
+            errors: error,
         }
     }
 
@@ -87,7 +87,7 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn len(&self) -> usize {
-        self.kind.len() - 1
+        self.kinds.len() - 1
     }
 
     pub fn is_empty(&self) -> bool {
@@ -96,7 +96,7 @@ impl<'a> LexedStr<'a> {
 
     pub fn kind(&self, i: usize) -> SyntaxKind {
         assert!(i < self.len());
-        self.kind[i]
+        self.kinds[i]
     }
 
     pub fn text(&self, i: usize) -> &str {
@@ -136,14 +136,14 @@ impl<'a> LexedStr<'a> {
     pub fn error(&self, i: usize) -> Option<&str> {
         assert!(i < self.len());
         let err = self
-            .error
+            .errors
             .binary_search_by_key(&(i as u32), |e| e.token() as u32)
             .ok()?;
-        Some(self.error[err].msg())
+        Some(self.errors[err].msg())
     }
 
     pub fn errors(&self) -> impl Iterator<Item = (usize, &str)> + '_ {
-        self.error.iter().map(|it| (it.token(), it.msg()))
+        self.errors.iter().map(|it| (it.token(), it.msg()))
     }
 
     pub fn to_input(&self) -> Input {
@@ -151,7 +151,7 @@ impl<'a> LexedStr<'a> {
 
         let mut res = Input::default();
         let mut was_joint = false;
-        for kind in self.kind.iter() {
+        for kind in self.kinds.iter() {
             if kind.is_trivia() {
                 was_joint = false
             } else {

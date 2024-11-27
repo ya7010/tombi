@@ -2,7 +2,7 @@ use rg_tree::Language;
 
 use crate::TomlLanguage;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct SyntaxTreeBuilder {
     errors: Vec<crate::SyntaxError>,
     inner: rg_tree::GreenNodeBuilder<'static>,
