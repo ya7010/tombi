@@ -3,7 +3,7 @@ use std::{
     ops::{Add, AddAssign},
 };
 
-use crate::{Column, Line, RelativePosition, Offset};
+use crate::{Column, Line, Offset, RelativePosition};
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Position {
@@ -22,6 +22,7 @@ impl Position {
         (*self) + RelativePosition::from(text)
     }
 
+    /// FIXME: This method will be unnecessary because parser holds the Position of each tokens.
     pub fn from_source(source: &str, offset: Offset) -> Self {
         let offset: usize = offset.into();
         let mut line = 0;
