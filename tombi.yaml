@@ -1,3 +1,4 @@
+# This file is for checking if the JsonSchema is correct.
 toml-version: v1.0.0
 
 format:
