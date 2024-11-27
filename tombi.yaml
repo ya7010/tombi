@@ -1,0 +1,6 @@
+toml-version: v1.0.0
+
+format:
+  line-ending: lf
+
+lint: {}

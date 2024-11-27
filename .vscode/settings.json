@@ -27,5 +27,8 @@
     "editor.tabSize": 2,
     "editor.defaultFormatter": "yassun7010.tombi"
   },
-  "deno.enablePaths": ["deno"]
+  "deno.enablePaths": ["deno"],
+  "yaml.schemas": {
+    "./tombi.schema.json": ["tombi.yaml"]
+  }
 }
