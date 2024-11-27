@@ -14,21 +14,21 @@ pub struct Diagnostic {
 
 impl Diagnostic {
     #[inline]
-    pub fn new_warning(message: impl Into<String>, range: text::Range) -> Self {
+    pub fn new_warning(message: impl Into<String>, range: impl Into<text::Range>) -> Self {
         Self {
             level: level::Level::Warning,
             message: message.into(),
-            range,
+            range: range.into(),
             source_file: None,
         }
     }
 
     #[inline]
-    pub fn new_error(message: impl Into<String>, range: text::Range) -> Self {
+    pub fn new_error(message: impl Into<String>, range: impl Into<text::Range>) -> Self {
         Self {
             level: level::Level::Error,
             message: message.into(),
-            range,
+            range: range.into(),
             source_file: None,
         }
     }
