@@ -1,11 +1,9 @@
 mod error;
 mod key;
-mod range;
 mod value;
 
 pub use error::Error;
 pub use key::Key;
-pub use range::Range;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, Table, TableKind, Value,
