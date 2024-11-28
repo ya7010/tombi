@@ -1,139 +1,467 @@
 mod error;
 mod key;
-mod node;
 mod range;
+mod value;
 
 pub use error::Error;
 pub use key::Key;
-use node::TableKind;
-pub use node::{Array, Boolean, Float, Integer, Node, String, Table};
 pub use range::Range;
+pub use value::{
+    Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
+    OffsetDateTime, String, Table, TableKind, Value,
+};
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Document {
     root: Table,
-    errors: Vec<crate::Error>,
 }
 
 impl Document {
-    pub fn document(&self) -> &Table {
+    pub fn root(&self) -> &Table {
         &self.root
     }
 
-    pub fn errors(&self) -> &[crate::Error] {
-        &self.errors
-    }
-
-    pub fn merge(mut self, other: Document) -> Self {
-        self.root.merge(other.root);
-        self.errors.extend(other.errors.clone());
-
-        self
+    pub fn merge(mut self, other: Document) -> Result<(), Vec<crate::Error>> {
+        self.root.merge(other.root)
     }
 }
 
-impl From<Document> for (Table, Vec<crate::Error>) {
-    fn from(val: Document) -> Self {
-        (val.root, val.errors)
+enum RootItem {
+    Table(Table),
+    ArrayOfTable(Table),
+    KeyValue(Table),
+}
+
+impl From<Document> for Table {
+    fn from(document: Document) -> Self {
+        document.root
     }
 }
 
-pub trait Load {
-    fn load(self, source: &str) -> Document;
-}
+impl TryFrom<ast::Root> for Document {
+    type Error = Vec<crate::Error>;
 
-impl Load for ast::Root {
-    fn load(self, source: &str) -> Document {
-        self.items()
-            .map(|item| item.load(source))
-            .reduce(|acc, item| acc.merge(item))
-            .unwrap_or_default()
+    fn try_from(root: ast::Root) -> Result<Self, Self::Error> {
+        let mut document = Document::default();
+        let mut errors = Vec::new();
+
+        for item in root.items() {
+            if let Err(err) = match item.try_into() {
+                Ok(RootItem::Table(table)) => document.root.merge(table),
+                Ok(RootItem::ArrayOfTable(table)) => document.root.merge(table),
+                Ok(RootItem::KeyValue(table)) => document.root.merge(table),
+                Err(errs) => Err(errs),
+            } {
+                errors.extend(err);
+            }
+        }
+        Ok(document)
     }
 }
 
-impl Load for ast::RootItem {
-    fn load(self, source: &str) -> Document {
-        match self {
-            ast::RootItem::Table(table) => table.load(source),
-            ast::RootItem::ArrayOfTable(array) => array.load(source),
-            ast::RootItem::KeyValue(key_value) => key_value.load(source),
+impl TryFrom<ast::RootItem> for RootItem {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::RootItem) -> Result<Self, Self::Error> {
+        match node {
+            ast::RootItem::Table(table) => table.try_into().map(Self::Table),
+            ast::RootItem::ArrayOfTable(array) => array.try_into().map(Self::ArrayOfTable),
+            ast::RootItem::KeyValue(key_value) => key_value.try_into().map(Self::KeyValue),
         }
     }
 }
 
-impl Load for ast::Table {
-    fn load(self, source: &str) -> Document {
-        let mut p = Document::default();
+impl TryFrom<ast::Table> for Table {
+    type Error = Vec<crate::Error>;
 
-        let mut node_cursor = &mut Node::Table(Table::new(TableKind::Table));
+    fn try_from(node: ast::Table) -> Result<Self, Self::Error> {
+        let mut table = Table::new(node.range());
+        let mut errors = Vec::new();
 
-        if let Some(header) = self.header() {
-            for key in header.keys() {
-                let key = crate::Key::new(source, key);
-                if let Node::Table(table) = node_cursor {
-                    node_cursor = table
-                        .entry(key)
-                        .or_insert_with(|| Node::Table(Table::new(TableKind::Table)));
-                } else {
-                    p.errors.push(crate::Error::DuplicateKey { key });
+        for key_value in node.key_values() {
+            match key_value.try_into() {
+                Ok(other) => {
+                    if let Err(errs) = table.merge(other) {
+                        errors.extend(errs)
+                    }
+                }
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        for key in node
+            .header()
+            .unwrap()
+            .keys()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+        {
+            if let Ok(k) = key.try_into() {
+                match Table::new(node.range()).insert(
+                    k,
+                    Value::Table(std::mem::replace(&mut table, Table::new(node.range()))),
+                ) {
+                    Ok(t) => table = t,
+                    Err(errs) => {
+                        errors.extend(errs);
+                    }
                 }
             }
         }
 
-        if let Node::Table(table) = node_cursor {
-            for kv in self.key_values() {
-                p.errors.extend(table.append_key_value(source, kv));
-            }
+        if errors.is_empty() {
+            Ok(table)
+        } else {
+            Err(errors)
         }
-
-        p
     }
 }
 
-impl Load for ast::ArrayOfTable {
-    fn load(self, source: &str) -> Document {
-        let mut p = Document::default();
+impl TryFrom<ast::ArrayOfTable> for Table {
+    type Error = Vec<crate::Error>;
 
-        let mut node_cursor = &mut Node::Table(Table::new(TableKind::ArrayOfTables));
+    fn try_from(node: ast::ArrayOfTable) -> Result<Self, Self::Error> {
+        let mut table = Table::new_array_of_tables(node.range());
+        let mut errors = Vec::new();
 
-        if let Some(header) = self.header() {
-            for key in header.keys() {
-                let key = crate::Key::new(source, key);
-                if let Node::Table(table) = node_cursor {
-                    node_cursor = table
-                        .entry(key)
-                        .or_insert_with(|| Node::Table(Table::new(TableKind::ArrayOfTables)));
-                } else {
-                    p.errors.push(crate::Error::DuplicateKey { key });
+        for key_value in node.key_values() {
+            match key_value.try_into() {
+                Ok(other) => {
+                    if let Err(errs) = table.merge(other) {
+                        errors.extend(errs)
+                    }
+                }
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        for key in node
+            .header()
+            .unwrap()
+            .keys()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+        {
+            if let Ok(k) = key.try_into() {
+                match Table::new_array_of_tables(node.range()).insert(
+                    k,
+                    Value::Table(std::mem::replace(
+                        &mut table,
+                        Table::new_array_of_tables(node.range()),
+                    )),
+                ) {
+                    Ok(t) => table = t,
+                    Err(errs) => {
+                        errors.extend(errs);
+                    }
                 }
             }
         }
 
-        if let Node::Table(table) = node_cursor {
-            if table.kind() == TableKind::ArrayOfTables && table.entries().is_empty() {
-                *node_cursor = Node::Array(Array::new_array_of_tables());
-            }
+        if errors.is_empty() {
+            Ok(table)
+        } else {
+            Err(errors)
         }
-
-        if let Node::Array(array) = node_cursor {
-            let mut table = Table::new(TableKind::ArrayOfTables);
-            for kv in self.key_values() {
-                p.errors.extend(table.append_key_value(source, kv));
-            }
-
-            array.push(Node::Table(table));
-        }
-
-        p
     }
 }
 
-impl Load for ast::KeyValue {
-    fn load(self, source: &str) -> Document {
-        let mut p = Document::default();
+impl TryFrom<ast::KeyValue> for Table {
+    type Error = Vec<crate::Error>;
 
-        p.root.append_key_value(source, self);
+    fn try_from(node: ast::KeyValue) -> Result<Table, Self::Error> {
+        let mut table = Table::new_dotted_keys_table(node.range());
+        let mut errors = Vec::new();
 
-        p
+        for key in node
+            .keys()
+            .unwrap()
+            .keys()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+        {
+            if let Ok(k) = key.try_into() {
+                match Table::new_dotted_keys_table(node.range()).insert(
+                    k,
+                    Value::Table(std::mem::replace(
+                        &mut table,
+                        Table::new_dotted_keys_table(node.range()),
+                    )),
+                ) {
+                    Ok(t) => table = t,
+                    Err(errs) => {
+                        errors.extend(errs);
+                    }
+                }
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(table)
+        } else {
+            Err(errors)
+        }
+    }
+}
+
+impl TryFrom<ast::Key> for Key {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Key) -> Result<Self, Self::Error> {
+        let token = match node {
+            ast::Key::BareKey(bare_key) => bare_key.token().unwrap(),
+            ast::Key::BasicString(basic_string) => basic_string.token().unwrap(),
+            ast::Key::LiteralString(literal_string) => literal_string.token().unwrap(),
+        };
+        Ok(Key::new(token.text(), token.text_range()))
+    }
+}
+
+impl TryFrom<ast::Value> for Value {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Value) -> Result<Self, Self::Error> {
+        match node {
+            ast::Value::BasicString(string) => string.try_into().map(Value::String),
+            ast::Value::LiteralString(string) => string.try_into().map(Value::String),
+            ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
+            ast::Value::MultiLineLiteralString(string) => string.try_into().map(Value::String),
+            ast::Value::IntegerBin(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::IntegerOct(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::IntegerDec(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::IntegerHex(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::Float(float) => float.try_into().map(Value::Float),
+            ast::Value::Boolean(boolean) => boolean.try_into().map(Value::Boolean),
+            ast::Value::OffsetDateTime(dt) => dt.try_into().map(Value::OffsetDateTime),
+            ast::Value::LocalDateTime(dt) => dt.try_into().map(Value::LocalDateTime),
+            ast::Value::LocalDate(date) => date.try_into().map(Value::LocalDate),
+            ast::Value::LocalTime(time) => time.try_into().map(Value::LocalTime),
+            ast::Value::Array(array) => array.try_into().map(Value::Array),
+            ast::Value::InlineTable(inline_table) => inline_table.try_into().map(Value::Table),
+        }
+    }
+}
+
+impl TryFrom<ast::Boolean> for Boolean {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Boolean) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Ok(Self::new(token.text(), token.text_range()))
+    }
+}
+
+impl TryFrom<ast::IntegerBin> for Integer {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::IntegerBin) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new_integer_bin(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseIntError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::IntegerOct> for Integer {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::IntegerOct) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new_integer_oct(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseIntError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::IntegerDec> for Integer {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::IntegerDec) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new_integer_dec(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseIntError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::IntegerHex> for Integer {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::IntegerHex) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new_integer_hex(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseIntError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::Float> for Float {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Float) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseFloatError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::BasicString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::BasicString) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Ok(Self::new_basic_string(token.text(), token.text_range()))
+    }
+}
+
+impl TryFrom<ast::LiteralString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::LiteralString) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Ok(Self::new_literal_string(token.text(), token.text_range()))
+    }
+}
+
+impl TryFrom<ast::MultiLineBasicString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::MultiLineBasicString) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Ok(Self::new_multi_line_basic_string(
+            token.text(),
+            token.text_range(),
+        ))
+    }
+}
+
+impl TryFrom<ast::MultiLineLiteralString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::MultiLineLiteralString) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Ok(Self::new_multi_line_literal_string(
+            token.text(),
+            token.text_range(),
+        ))
+    }
+}
+
+impl TryFrom<ast::OffsetDateTime> for OffsetDateTime {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::OffsetDateTime) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseOffsetDateTimeError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::LocalDateTime> for LocalDateTime {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::LocalDateTime) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseLocalDateTimeError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::LocalDate> for LocalDate {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::LocalDate) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new(token.text(), token.text_range()).map_err(|err| {
+            vec![crate::Error::ParseLocalDateError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::LocalTime> for LocalTime {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::LocalTime) -> Result<Self, Self::Error> {
+        let token = node.token().unwrap();
+        Self::try_new(token.text()).map_err(|err| {
+            vec![crate::Error::ParseLocalTimeError {
+                error: err,
+                range: token.text_range(),
+            }]
+        })
+    }
+}
+
+impl TryFrom<ast::Array> for Array {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Array) -> Result<Self, Self::Error> {
+        let mut array = Array::new(node.range());
+        let mut errors = Vec::new();
+
+        for value in node.values() {
+            match value.try_into() {
+                Ok(value) => array.push(value),
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        Ok(array)
+    }
+}
+
+impl TryFrom<ast::InlineTable> for Table {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::InlineTable) -> Result<Self, Self::Error> {
+        let mut table = Table::new_inline_table(node.range());
+        let mut errors = Vec::new();
+
+        for key_value in node.key_values() {
+            match key_value.try_into() {
+                Ok(other) => {
+                    if let Err(errs) = table.merge(other) {
+                        errors.extend(errs)
+                    }
+                }
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(table)
+        } else {
+            Err(errors)
+        }
     }
 }

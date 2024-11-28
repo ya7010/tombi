@@ -1,7 +1,7 @@
 use crate::backend::Backend;
 use ast::AstNode;
 use config::TomlVersion;
-use document::{Load, Node};
+use document::Value;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -23,7 +23,9 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let (document, _) = ast.load(&document.source).into();
+    let Ok(document) = ast.try_into() else {
+        return Ok(None);
+    };
 
     let symbols = create_symbols(&document);
 
@@ -32,11 +34,11 @@ pub async fn handle_document_symbol(
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-fn create_symbols(document: &document::Table) -> Vec<DocumentSymbol> {
+fn create_symbols(document: &document::Document) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
-    for (key, entry) in document.entries() {
-        symbols_for_value(key.to_string(), None, entry, &mut symbols);
+    for (key, value) in document.root().key_values() {
+        symbols_for_value(key.to_string(), Some(key.range()), value, &mut symbols);
     }
 
     symbols
@@ -45,21 +47,21 @@ fn create_symbols(document: &document::Table) -> Vec<DocumentSymbol> {
 #[allow(deprecated)]
 fn symbols_for_value(
     name: String,
-    key_range: Option<document::Range>,
-    node: &document::Node,
+    key_range: Option<text::Range>,
+    value: &document::Value,
     symbols: &mut Vec<DocumentSymbol>,
 ) {
-    let own_range = node.range();
-    let range = if let Some(key_r) = key_range {
-        key_r.merge(&own_range)
+    let value_range = value.range();
+    let range = if let Some(key_range) = key_range {
+        key_range + value_range
     } else {
-        own_range
+        value_range
     };
 
-    let selection_range = key_range.map_or(own_range, |range| range);
+    let selection_range = key_range.map_or(value_range, |range| range);
 
-    match node {
-        Node::Boolean(_) => {
+    match value {
+        Value::Boolean(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::BOOLEAN,
@@ -71,7 +73,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Node::Integer(_) => {
+        Value::Integer(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -83,7 +85,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Node::Float(_) => {
+        Value::Float(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -95,7 +97,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Node::String(_) => {
+        Value::String(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -107,7 +109,10 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Node::DateTime(_) => {
+        Value::OffsetDateTime(_)
+        | Value::LocalDateTime(_)
+        | Value::LocalDate(_)
+        | Value::LocalTime(_) => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -119,34 +124,10 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Node::Date(_) => {
-            symbols.push(DocumentSymbol {
-                name,
-                kind: SymbolKind::STRING,
-                range: range.into(),
-                selection_range: selection_range.into(),
-                children: None,
-                detail: None,
-                deprecated: None,
-                tags: None,
-            });
-        }
-        Node::Time(_) => {
-            symbols.push(DocumentSymbol {
-                name,
-                kind: SymbolKind::STRING,
-                range: range.into(),
-                selection_range: selection_range.into(),
-                children: None,
-                detail: None,
-                deprecated: None,
-                tags: None,
-            });
-        }
-        Node::Array(array) => {
+        Value::Array(array) => {
             let mut children = vec![];
-            for (index, element) in array.elements().iter().enumerate() {
-                symbols_for_value(index.to_string(), Some(range), element, &mut children);
+            for (index, value) in array.values().iter().enumerate() {
+                symbols_for_value(index.to_string(), Some(range), value, &mut children);
             }
 
             symbols.push(DocumentSymbol {
@@ -160,10 +141,10 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Node::Table(table) => {
+        Value::Table(table) => {
             let mut children = vec![];
-            for (key, entry) in table.entries() {
-                symbols_for_value(key.to_string(), Some(range), entry, &mut children);
+            for (key, value) in table.key_values() {
+                symbols_for_value(key.to_string(), Some(range), value, &mut children);
             }
 
             symbols.push(DocumentSymbol {

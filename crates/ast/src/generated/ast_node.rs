@@ -22,6 +22,10 @@ impl Array {
     pub fn bracket_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -45,6 +49,10 @@ impl ArrayOfTable {
     pub fn double_bracket_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!["]]"])
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -55,6 +63,10 @@ impl BareKey {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, BARE_KEY)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -67,6 +79,10 @@ impl BasicString {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, BASIC_STRING)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -77,6 +93,10 @@ impl Boolean {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, BOOLEAN)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -89,6 +109,10 @@ impl Comma {
     pub fn comma(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T ! [,])
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -100,6 +124,10 @@ impl Float {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, FLOAT)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -108,7 +136,7 @@ pub struct InlineTable {
 }
 impl InlineTable {
     #[inline]
-    pub fn entries(&self) -> AstChildren<KeyValue> {
+    pub fn key_values(&self) -> AstChildren<KeyValue> {
         support::children(&self.syntax)
     }
     #[inline]
@@ -118,6 +146,10 @@ impl InlineTable {
     #[inline]
     pub fn brace_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T!['}'])
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -130,6 +162,10 @@ impl IntegerBin {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_BIN)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -140,6 +176,10 @@ impl IntegerDec {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_DEC)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -152,6 +192,10 @@ impl IntegerHex {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_HEX)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -162,6 +206,10 @@ impl IntegerOct {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, INTEGER_OCT)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -182,6 +230,10 @@ impl KeyValue {
     pub fn eq(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T ! [=])
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -192,6 +244,10 @@ impl Keys {
     #[inline]
     pub fn keys(&self) -> AstChildren<Key> {
         support::children(&self.syntax)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -204,6 +260,10 @@ impl LiteralString {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LITERAL_STRING)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -214,6 +274,10 @@ impl LocalDate {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LOCAL_DATE)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -226,6 +290,10 @@ impl LocalDateTime {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LOCAL_DATE_TIME)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -236,6 +304,10 @@ impl LocalTime {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, LOCAL_TIME)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -248,6 +320,10 @@ impl MultiLineBasicString {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, MULTI_LINE_BASIC_STRING)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -258,6 +334,10 @@ impl MultiLineLiteralString {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -270,6 +350,10 @@ impl OffsetDateTime {
     pub fn token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, OFFSET_DATE_TIME)
     }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -280,6 +364,10 @@ impl Root {
     #[inline]
     pub fn items(&self) -> AstChildren<RootItem> {
         support::children(&self.syntax)
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 
@@ -303,6 +391,10 @@ impl Table {
     #[inline]
     pub fn bracket_end(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, T![']'])
+    }
+    #[inline]
+    pub fn range(&self) -> text::Range {
+        self.syntax.text_range()
     }
 }
 

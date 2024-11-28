@@ -71,6 +71,10 @@ impl<L: Language> RedNode<L> {
         self.raw.text_span()
     }
 
+    pub fn text_range(&self) -> text::Range {
+        self.raw.text_range()
+    }
+
     pub fn index(&self) -> usize {
         self.raw.index()
     }

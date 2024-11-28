@@ -308,10 +308,10 @@ impl InlineTable {
         )
     }
 
-    pub fn entries_with_comma(
+    pub fn key_values_with_comma(
         &self,
     ) -> impl Iterator<Item = (crate::KeyValue, Option<crate::Comma>)> {
-        self.entries()
+        self.key_values()
             .zip_longest(support::children::<crate::Comma>(self.syntax()))
             .map(|value_with_comma| match value_with_comma {
                 itertools::EitherOrBoth::Both(value, comma) => (value, Some(comma)),
@@ -344,7 +344,7 @@ impl InlineTable {
     }
 
     pub fn has_multiline_values(&self) -> bool {
-        self.entries().any(|entry| {
+        self.key_values().any(|entry| {
             entry.value().map_or(false, |value| match value {
                 crate::Value::Array(array) => array.should_be_multiline(),
                 _ => false,

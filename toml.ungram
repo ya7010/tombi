@@ -41,7 +41,7 @@ Key = BareKey | BasicString | LiteralString
 Keys = Key ('.' Key)*
 
 Array = '[' values: (Value (',' Value)* ','?) ']'
-InlineTable = '{' entries: (KeyValue (',' KeyValue)* ','?) '}'
+InlineTable = '{' key_values: (KeyValue (',' KeyValue)* ','?) '}'
 
 Value =
     BasicString | MultiLineBasicString | LiteralString | MultiLineLiteralString

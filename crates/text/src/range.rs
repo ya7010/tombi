@@ -1,4 +1,4 @@
-use std::ops::AddAssign;
+use std::ops::{Add, AddAssign};
 
 use crate::{Column, Line, Position, RelativePosition};
 
@@ -72,6 +72,18 @@ impl AddAssign<RelativePosition> for Range {
     #[inline]
     fn add_assign(&mut self, rhs: RelativePosition) {
         self.end += rhs;
+    }
+}
+
+impl Add<Range> for Range {
+    type Output = Range;
+
+    #[inline]
+    fn add(self, rhs: Range) -> Self::Output {
+        Range::new(
+            std::cmp::min(self.start, rhs.start),
+            std::cmp::max(self.end, rhs.end),
+        )
     }
 }
 

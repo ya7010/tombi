@@ -36,7 +36,7 @@ fn format_multiline_inline_table(
         .collect::<Vec<_>>()
         .fmt(f)?;
 
-    for (i, (entry, comma)) in table.entries_with_comma().enumerate() {
+    for (i, (entry, comma)) in table.key_values_with_comma().enumerate() {
         // value format
         {
             if i > 0 {
@@ -106,12 +106,12 @@ fn format_singleline_inline_table(
     f.write_indent()?;
     write!(f, "{{{}", f.defs().inline_table_brace_inner_space())?;
 
-    for (i, entry) in table.entries().enumerate() {
+    for (i, key_value) in table.key_values().enumerate() {
         if i > 0 {
             write!(f, ", ")?;
         }
         f.skip_indent();
-        entry.fmt(f)?;
+        key_value.fmt(f)?;
     }
 
     write!(f, "{}}}", f.defs().inline_table_brace_inner_space())?;

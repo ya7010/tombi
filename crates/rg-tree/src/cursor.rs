@@ -81,6 +81,8 @@
 //      when the tree is mutable.
 //    - TBD
 
+use countme::Count;
+use std::ops::Add;
 use std::{
     borrow::Cow,
     cell::Cell,
@@ -91,8 +93,6 @@ use std::{
     ops::Range,
     ptr, slice,
 };
-
-use countme::Count;
 
 use crate::{
     green::{GreenChild, GreenElementRef, GreenNodeData, GreenTokenData, SyntaxKind},
@@ -410,6 +410,13 @@ impl NodeData {
     }
 
     #[inline]
+    fn text_range(&self) -> text::Range {
+        let start = self.position();
+        let end = start + self.green().text_rel_position();
+        (start, end).into()
+    }
+
+    #[inline]
     fn kind(&self) -> SyntaxKind {
         self.green().kind()
     }
@@ -681,6 +688,11 @@ impl SyntaxNode {
     #[inline]
     pub fn text_span(&self) -> text::Span {
         self.data().text_span()
+    }
+
+    #[inline]
+    pub fn text_range(&self) -> text::Range {
+        self.data().text_range()
     }
 
     #[inline]
@@ -995,6 +1007,13 @@ impl SyntaxToken {
     #[inline]
     pub fn text_span(&self) -> text::Span {
         self.data().text_span()
+    }
+
+    #[inline]
+    pub fn test_range(&self) -> text::Range {
+        let start = self.data().position();
+        let end = start + self.text().into();
+        (start, end).into()
     }
 
     #[inline]

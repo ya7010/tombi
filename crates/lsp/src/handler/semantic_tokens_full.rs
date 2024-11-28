@@ -284,7 +284,7 @@ impl AppendSemanticTokens for ast::InlineTable {
             builder.add_token(TokenType::COMMENT, comment.syntax().into());
         }
 
-        for (entry, comma) in self.entries_with_comma() {
+        for (entry, comma) in self.key_values_with_comma() {
             entry.append_semantic_tokens(builder);
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {

@@ -1,16 +1,14 @@
-use crate::Range;
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Key {
     value: String,
-    range: crate::Range,
+    range: text::Range,
 }
 
 impl Key {
-    pub(crate) fn new(source: &str, key: ast::Key) -> Self {
+    pub(crate) fn new(text: &str, range: text::Range) -> Self {
         Self {
-            value: key.to_string(),
-            range: Range::from_source(source, key),
+            value: text.to_string(),
+            range,
         }
     }
 
@@ -18,7 +16,7 @@ impl Key {
         &self.value
     }
 
-    pub fn range(&self) -> Range {
+    pub fn range(&self) -> text::Range {
         self.range
     }
 }

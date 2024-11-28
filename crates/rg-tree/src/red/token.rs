@@ -52,6 +52,10 @@ impl<L: Language> RedToken<L> {
         self.raw.text_span()
     }
 
+    pub fn text_range(&self) -> text::Range {
+        self.raw.test_range()
+    }
+
     pub fn index(&self) -> usize {
         self.raw.index()
     }

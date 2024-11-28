@@ -56,6 +56,11 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
 
                     impl #name {
                         #(#methods)*
+
+                        #[inline]
+                        pub fn range(&self) -> text::Range {
+                            self.syntax.text_range()
+                        }
                     }
                 },
                 quote! {
