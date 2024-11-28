@@ -38,7 +38,7 @@ fn create_symbols(document: &document::Document) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
     for (key, value) in document.key_values() {
-        symbols_for_value(key.to_string(), Some(key.range()), value, &mut symbols);
+        symbols_for_value(key.to_string(), None, value, &mut symbols);
     }
 
     symbols
