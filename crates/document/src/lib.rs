@@ -10,60 +10,60 @@ pub use node::{Array, Boolean, Float, Integer, Node, String, Table};
 pub use range::Range;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct Parsed {
-    document: Table,
+pub struct Document {
+    root: Table,
     errors: Vec<crate::Error>,
 }
 
-impl Parsed {
+impl Document {
     pub fn document(&self) -> &Table {
-        &self.document
+        &self.root
     }
 
     pub fn errors(&self) -> &[crate::Error] {
         &self.errors
     }
 
-    pub fn merge(mut self, other: Parsed) -> Self {
-        self.document.merge(other.document);
+    pub fn merge(mut self, other: Document) -> Self {
+        self.root.merge(other.root);
         self.errors.extend(other.errors.clone());
 
         self
     }
 }
 
-impl From<Parsed> for (Table, Vec<crate::Error>) {
-    fn from(val: Parsed) -> Self {
-        (val.document, val.errors)
+impl From<Document> for (Table, Vec<crate::Error>) {
+    fn from(val: Document) -> Self {
+        (val.root, val.errors)
     }
 }
 
-pub trait Parse {
-    fn parse(self, source: &str) -> Parsed;
+pub trait Load {
+    fn load(self, source: &str) -> Document;
 }
 
-impl Parse for ast::Root {
-    fn parse(self, source: &str) -> Parsed {
+impl Load for ast::Root {
+    fn load(self, source: &str) -> Document {
         self.items()
-            .map(|item| item.parse(source))
+            .map(|item| item.load(source))
             .reduce(|acc, item| acc.merge(item))
             .unwrap_or_default()
     }
 }
 
-impl Parse for ast::RootItem {
-    fn parse(self, source: &str) -> Parsed {
+impl Load for ast::RootItem {
+    fn load(self, source: &str) -> Document {
         match self {
-            ast::RootItem::Table(table) => table.parse(source),
-            ast::RootItem::ArrayOfTable(array) => array.parse(source),
-            ast::RootItem::KeyValue(key_value) => key_value.parse(source),
+            ast::RootItem::Table(table) => table.load(source),
+            ast::RootItem::ArrayOfTable(array) => array.load(source),
+            ast::RootItem::KeyValue(key_value) => key_value.load(source),
         }
     }
 }
 
-impl Parse for ast::Table {
-    fn parse(self, source: &str) -> Parsed {
-        let mut p = Parsed::default();
+impl Load for ast::Table {
+    fn load(self, source: &str) -> Document {
+        let mut p = Document::default();
 
         let mut node_cursor = &mut Node::Table(Table::new(TableKind::Table));
 
@@ -90,9 +90,9 @@ impl Parse for ast::Table {
     }
 }
 
-impl Parse for ast::ArrayOfTable {
-    fn parse(self, source: &str) -> Parsed {
-        let mut p = Parsed::default();
+impl Load for ast::ArrayOfTable {
+    fn load(self, source: &str) -> Document {
+        let mut p = Document::default();
 
         let mut node_cursor = &mut Node::Table(Table::new(TableKind::ArrayOfTables));
 
@@ -128,11 +128,11 @@ impl Parse for ast::ArrayOfTable {
     }
 }
 
-impl Parse for ast::KeyValue {
-    fn parse(self, source: &str) -> Parsed {
-        let mut p = Parsed::default();
+impl Load for ast::KeyValue {
+    fn load(self, source: &str) -> Document {
+        let mut p = Document::default();
 
-        p.document.append_key_value(source, self);
+        p.root.append_key_value(source, self);
 
         p
     }

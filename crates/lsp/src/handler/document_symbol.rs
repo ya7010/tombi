@@ -1,7 +1,7 @@
 use crate::backend::Backend;
 use ast::AstNode;
 use config::TomlVersion;
-use document::{Node, Parse};
+use document::{Load, Node};
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -23,7 +23,7 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let (document, _) = ast.parse(&document.source).into();
+    let (document, _) = ast.load(&document.source).into();
 
     let symbols = create_symbols(&document);
 
