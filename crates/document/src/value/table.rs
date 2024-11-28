@@ -4,16 +4,16 @@ use indexmap::IndexMap;
 use crate::Key;
 use crate::Value;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
-    #[default]
+    Root,
     Table,
     InlineTable,
     ArrayOfTables,
     DottedKeys,
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Table {
     kind: TableKind,
     key_values: IndexMap<Key, Value>,
@@ -21,6 +21,14 @@ pub struct Table {
 }
 
 impl Table {
+    pub(crate) fn new_root(range: text::Range) -> Self {
+        Self {
+            kind: TableKind::Root,
+            key_values: Default::default(),
+            range,
+        }
+    }
+
     pub fn new(range: text::Range) -> Self {
         Self {
             kind: TableKind::Table,

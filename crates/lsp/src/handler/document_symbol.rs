@@ -37,7 +37,7 @@ pub async fn handle_document_symbol(
 fn create_symbols(document: &document::Document) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
-    for (key, value) in document.root().key_values() {
+    for (key, value) in document.key_values() {
         symbols_for_value(key.to_string(), Some(key.range()), value, &mut symbols);
     }
 

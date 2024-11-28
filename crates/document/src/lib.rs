@@ -2,6 +2,8 @@ mod error;
 mod key;
 mod value;
 
+use std::ops::Deref;
+
 pub use error::Error;
 pub use key::Key;
 pub use value::{
@@ -9,18 +11,26 @@ pub use value::{
     OffsetDateTime, String, Table, TableKind, Value,
 };
 
-#[derive(Debug, Default, Clone, PartialEq)]
-pub struct Document {
-    root: Table,
-}
+#[derive(Debug, Clone, PartialEq)]
+pub struct Document(Table);
 
 impl Document {
-    pub fn root(&self) -> &Table {
-        &self.root
+    fn new(range: text::Range) -> Self {
+        Self(Table::new_root(range))
     }
+}
 
-    pub fn merge(mut self, other: Document) -> Result<(), Vec<crate::Error>> {
-        self.root.merge(other.root)
+impl From<Document> for Table {
+    fn from(document: Document) -> Self {
+        document.0
+    }
+}
+
+impl Deref for Document {
+    type Target = Table;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -30,24 +40,18 @@ enum RootItem {
     KeyValue(Table),
 }
 
-impl From<Document> for Table {
-    fn from(document: Document) -> Self {
-        document.root
-    }
-}
-
 impl TryFrom<ast::Root> for Document {
     type Error = Vec<crate::Error>;
 
     fn try_from(root: ast::Root) -> Result<Self, Self::Error> {
-        let mut document = Document::default();
+        let mut document = Document::new(root.range());
         let mut errors = Vec::new();
 
         for item in root.items() {
             if let Err(err) = match item.try_into() {
-                Ok(RootItem::Table(table)) => document.root.merge(table),
-                Ok(RootItem::ArrayOfTable(table)) => document.root.merge(table),
-                Ok(RootItem::KeyValue(table)) => document.root.merge(table),
+                Ok(RootItem::Table(table)) => document.0.merge(table),
+                Ok(RootItem::ArrayOfTable(table)) => document.0.merge(table),
+                Ok(RootItem::KeyValue(table)) => document.0.merge(table),
                 Err(errs) => Err(errs),
             } {
                 errors.extend(err);
