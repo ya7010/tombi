@@ -6,7 +6,7 @@ authors = { workspace = true }
 license = { workspace = true }
 
 [features]
-lsp = ["tower-lsp", "text/lsp"]
+lsp = ["dep:tower-lsp", "text/lsp"]
 
 [dependencies]
 ast = { workspace = true }
