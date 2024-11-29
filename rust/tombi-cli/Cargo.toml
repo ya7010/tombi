@@ -20,8 +20,8 @@ diagnostic = { workspace = true }
 formatter = { workspace = true }
 glob = "0.3.1"
 linter = { workspace = true }
-lsp = { workspace = true }
 nu-ansi-term = { workspace = true }
+server = { workspace = true }
 thiserror = { workspace = true }
 tokio.workspace = true
 tracing = { workspace = true }

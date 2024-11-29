@@ -28,7 +28,6 @@ indexmap = "2.6.0"
 itertools = "0.13.0"
 lexer = { path = "crates/lexer" }
 linter = { path = "crates/linter" }
-lsp = { path = "crates/lsp" }
 nu-ansi-term = "0.50.1"
 parser = { path = "crates/parser" }
 pretty_assertions = "1.4.1"
@@ -42,6 +41,7 @@ schemars = "0.8.21"
 semver = "1.0.23"
 serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "1.0.130"
+server = { path = "crates/server" }
 syntax = { path = "crates/syntax" }
 text = { path = "crates/text" }
 textwrap = "0.16.1"
