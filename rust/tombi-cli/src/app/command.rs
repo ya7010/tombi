@@ -10,5 +10,6 @@ pub enum TomlCommand {
     #[command(alias = "check")]
     Lint(lint::Args),
 
+    #[command(alias = "lsp")]
     Serve(serve::Args),
 }
