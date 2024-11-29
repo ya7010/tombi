@@ -14,7 +14,7 @@ clap-verbosity-flag = { workspace = true }
 config.workspace = true
 crossbeam-channel = "0.5.13"
 dashmap = "6.1.0"
-document = { workspace = true, features = ["lsp"] }
+document = { workspace = true, features = ["lsp", "load"] }
 formatter.workspace = true
 futures = { workspace = true }
 futures-util = { workspace = true }

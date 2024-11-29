@@ -4,6 +4,7 @@ mod value;
 
 use std::ops::Deref;
 
+use ast::AstNode;
 pub use error::Error;
 pub use key::Key;
 pub use value::{
@@ -17,6 +18,24 @@ pub struct Document(Table);
 impl Document {
     fn new(range: text::Range) -> Self {
         Self(Table::new_root(range))
+    }
+
+    #[cfg(feature = "load")]
+    pub fn load(
+        source: &str,
+        toml_version: config::TomlVersion,
+    ) -> Result<Self, Vec<crate::Error>> {
+        let p = parser::parse(source, toml_version);
+        if !p.errors().is_empty() {
+            return Err(p
+                .errors()
+                .into_iter()
+                .map(|e| crate::Error::Syntax(e))
+                .collect());
+        }
+
+        let root = ast::Root::cast(p.into_syntax_node()).unwrap();
+        Self::try_from(root)
     }
 }
 

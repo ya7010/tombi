@@ -9,4 +9,4 @@ license.workspace = true
 rg-tree = { workspace = true }
 thiserror = { workspace = true }
 text = { workspace = true }
-rstest = { workspace = true}
+rstest = { workspace = true }
