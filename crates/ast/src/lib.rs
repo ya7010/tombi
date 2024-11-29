@@ -344,8 +344,8 @@ impl InlineTable {
     }
 
     pub fn has_multiline_values(&self) -> bool {
-        self.key_values().any(|entry| {
-            entry.value().map_or(false, |value| match value {
+        self.key_values().any(|key_value| {
+            key_value.value().map_or(false, |value| match value {
                 crate::Value::Array(array) => array.should_be_multiline(),
                 _ => false,
             })

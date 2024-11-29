@@ -16,9 +16,9 @@ impl Format for ast::Table {
             TailingComment(comment).fmt(f)?;
         }
 
-        for kv in self.key_values() {
+        for key_value in self.key_values() {
             write!(f, "{}", f.line_ending())?;
-            kv.fmt(f)?;
+            key_value.fmt(f)?;
         }
 
         Ok(())

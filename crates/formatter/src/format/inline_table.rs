@@ -36,13 +36,13 @@ fn format_multiline_inline_table(
         .collect::<Vec<_>>()
         .fmt(f)?;
 
-    for (i, (entry, comma)) in table.key_values_with_comma().enumerate() {
+    for (i, (key_value, comma)) in table.key_values_with_comma().enumerate() {
         // value format
         {
             if i > 0 {
                 write!(f, "{}", f.line_ending())?;
             }
-            entry.fmt(f)?;
+            key_value.fmt(f)?;
         }
 
         // comma format
@@ -62,7 +62,7 @@ fn format_multiline_inline_table(
                 }
                 f.write_indent()?;
                 write!(f, ",")?;
-            } else if entry.tailing_comment().is_some() {
+            } else if key_value.tailing_comment().is_some() {
                 write!(f, "{}", f.line_ending())?;
                 f.write_indent()?;
                 write!(f, ",")?;
