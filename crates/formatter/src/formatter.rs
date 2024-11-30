@@ -45,7 +45,7 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn version(&self) -> TomlVersion {
+    pub fn toml_version(&self) -> TomlVersion {
         self.toml_version
     }
 

@@ -9,7 +9,7 @@ use super::comment::{BeginDanglingComment, EndDanglingComment};
 
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.should_be_multiline(f.version()) {
+        if self.should_be_multiline(f.toml_version()) {
             format_multiline_inline_table(self, f)
         } else {
             format_singleline_inline_table(self, f)

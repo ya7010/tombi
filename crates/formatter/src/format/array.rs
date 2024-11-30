@@ -9,7 +9,7 @@ use super::comment::{
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.should_be_multiline(f.version()) {
+        if self.should_be_multiline(f.toml_version()) {
             format_multiline_array(self, f)
         } else {
             format_singleline_array(self, f)
