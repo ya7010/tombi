@@ -1,5 +1,4 @@
 use crate::backend::Backend;
-use ast::AstNode;
 use config::TomlVersion;
 use document::{Document, Value};
 use tower_lsp::lsp_types::{
