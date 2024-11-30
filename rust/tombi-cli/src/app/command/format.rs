@@ -25,7 +25,7 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     let (success_num, not_needed_num, error_num) = inner_run(args, Pretty);
 
     match (success_num, not_needed_num) {
-        (0, 0) => eprintln!("TOML file not found"),
+        (0, 0) => eprintln!("No files formatted"),
         (success_num, not_needed_num) => {
             match success_num {
                 0 => {}
