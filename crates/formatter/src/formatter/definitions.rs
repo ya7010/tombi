@@ -1,8 +1,8 @@
 use super::DateTimeDelimiter;
 
-/// Definitions provides the definition of the format that does not have the freedom set by Options.
+/// Definitions provides the definition of the format that does not have the freedom set by FormatOptions.
 ///
-/// NOTE: Some of the items defined in Definitions may be moved to Options in the future.
+/// NOTE: Some of the items defined in Definitions may be moved to FormatOptions in the future.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Definitions {}
 
