@@ -260,9 +260,9 @@ impl Array {
             })
     }
 
-    pub fn should_be_multiline(&self) -> bool {
+    pub fn should_be_multiline(&self, toml_version: TomlVersion) -> bool {
         self.has_tailing_comma_after_last_value()
-            || self.has_multiline_values()
+            || self.has_multiline_values(toml_version)
             || self.has_inner_comments()
     }
 
@@ -278,9 +278,18 @@ impl Array {
             .map_or(false, |it| it.kind() == T!(,))
     }
 
-    pub fn has_multiline_values(&self) -> bool {
+    pub fn has_multiline_values(&self, toml_version: TomlVersion) -> bool {
         self.values().any(|value| match value {
-            crate::Value::Array(array) => array.should_be_multiline(),
+            crate::Value::Array(array) => array.should_be_multiline(toml_version),
+            crate::Value::InlineTable(inline_table) => {
+                inline_table.should_be_multiline(toml_version)
+            }
+            crate::Value::MultiLineBasicString(string) => {
+                string.token().unwrap().text().contains('\n')
+            }
+            crate::Value::MultiLineLiteralString(string) => {
+                string.token().unwrap().text().contains('\n')
+            }
             _ => false,
         })
     }
@@ -320,11 +329,11 @@ impl InlineTable {
             })
     }
 
-    pub fn should_be_multiline(&self, version: TomlVersion) -> bool {
-        match version {
+    pub fn should_be_multiline(&self, toml_version: TomlVersion) -> bool {
+        match toml_version {
             TomlVersion::V1_0_0 => false,
             TomlVersion::V1_1_0_Preview => {
-                self.has_multiline_values()
+                self.has_multiline_values(toml_version)
                     || self.has_tailing_comma_after_last_value()
                     || self.has_inner_comments()
             }
@@ -343,10 +352,19 @@ impl InlineTable {
             .map_or(false, |it| it.kind() == T!(,))
     }
 
-    pub fn has_multiline_values(&self) -> bool {
+    pub fn has_multiline_values(&self, toml_version: TomlVersion) -> bool {
         self.key_values().any(|key_value| {
             key_value.value().map_or(false, |value| match value {
-                crate::Value::Array(array) => array.should_be_multiline(),
+                crate::Value::Array(array) => array.should_be_multiline(toml_version),
+                crate::Value::InlineTable(inline_table) => {
+                    inline_table.should_be_multiline(toml_version)
+                }
+                crate::Value::MultiLineBasicString(string) => {
+                    string.token().unwrap().text().contains('\n')
+                }
+                crate::Value::MultiLineLiteralString(string) => {
+                    string.token().unwrap().text().contains('\n')
+                }
                 _ => false,
             })
         })
