@@ -134,10 +134,12 @@ enum Header {
 }
 
 impl Header {
+    #[inline]
     fn is_root(&self) -> bool {
         matches!(self, Self::Root { .. })
     }
 
+    #[inline]
     fn inc_item(&mut self) {
         match self {
             Self::Root { item_size } => *item_size += 1,
