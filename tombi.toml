@@ -1,0 +1,7 @@
+# This file is for checking if the JsonSchema is correct.
+toml-version = "v1.1.0-preview"
+
+[format]
+line-ending = "lf"
+
+[lint]
