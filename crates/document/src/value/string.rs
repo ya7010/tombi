@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
-    Basic,
-    Literal,
-    MultiLineBasic,
-    MultiLineLiteral,
+    BasicString,
+    LiteralString,
+    MultiLineBasicString,
+    MultiLineLiteralString,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16,7 +16,7 @@ pub struct String {
 impl String {
     pub fn new_basic_string(text: &str, range: text::Range) -> Self {
         Self {
-            kind: StringKind::Basic,
+            kind: StringKind::BasicString,
             value: text.to_string(),
             range,
         }
@@ -24,7 +24,7 @@ impl String {
 
     pub fn new_literal_string(text: &str, range: text::Range) -> Self {
         Self {
-            kind: StringKind::Literal,
+            kind: StringKind::LiteralString,
             value: text.to_string(),
             range,
         }
@@ -32,7 +32,7 @@ impl String {
 
     pub fn new_multi_line_basic_string(text: &str, range: text::Range) -> Self {
         Self {
-            kind: StringKind::MultiLineBasic,
+            kind: StringKind::MultiLineBasicString,
             value: text.to_string(),
             range,
         }
@@ -40,7 +40,7 @@ impl String {
 
     pub fn new_multi_line_literal_string(text: &str, range: text::Range) -> Self {
         Self {
-            kind: StringKind::MultiLineLiteral,
+            kind: StringKind::MultiLineLiteralString,
             value: text.to_string(),
             range,
         }

@@ -1364,6 +1364,7 @@ dependencies = [
  "formatter",
  "futures",
  "futures-util",
+ "indexmap 2.6.0",
  "parser",
  "rustc-hash",
  "semver",

@@ -1,4 +1,5 @@
 use crate::backend::Backend;
+use ast::AstNode;
 use config::TomlVersion;
 use document::{Document, Value};
 use tower_lsp::lsp_types::{
@@ -16,7 +17,13 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let Ok(document) = Document::load(&document.source, TomlVersion::default()) else {
+    let p = parser::parse(&document.source, TomlVersion::default());
+    if !p.errors().is_empty() {
+        return Ok(None);
+    }
+
+    let root = ast::Root::cast(p.into_syntax_node()).unwrap();
+    let Ok(document) = document::Document::try_from(root) else {
         return Ok(None);
     };
 
@@ -27,11 +34,11 @@ pub async fn handle_document_symbol(
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-fn create_symbols(document: &document::Document) -> Vec<DocumentSymbol> {
+fn create_symbols(document: &Document) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
     for (key, value) in document.key_values() {
-        symbols_for_value(key.to_string(), None, value, &mut symbols);
+        symbols_for_value(key.to_string(), value, None, &mut symbols);
     }
 
     symbols
@@ -40,21 +47,21 @@ fn create_symbols(document: &document::Document) -> Vec<DocumentSymbol> {
 #[allow(deprecated)]
 fn symbols_for_value(
     name: String,
-    key_range: Option<text::Range>,
-    value: &document::Value,
+    value: &Value,
+    parent_key_range: Option<text::Range>,
     symbols: &mut Vec<DocumentSymbol>,
 ) {
     let value_range = value.range();
-    let range = if let Some(key_range) = key_range {
-        key_range + value_range
+    let range = if let Some(parent_key_range) = parent_key_range {
+        parent_key_range + value_range
     } else {
         value_range
     };
 
-    let selection_range = key_range.map_or(value_range, |range| range);
+    let selection_range = range;
 
     match value {
-        Value::Boolean(_) => {
+        Value::Boolean { .. } => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::BOOLEAN,
@@ -66,7 +73,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Integer(_) => {
+        Value::Integer { .. } => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -78,7 +85,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Float(_) => {
+        Value::Float { .. } => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -90,7 +97,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::String(_) => {
+        Value::String { .. } => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -102,10 +109,10 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::OffsetDateTime(_)
-        | Value::LocalDateTime(_)
-        | Value::LocalDate(_)
-        | Value::LocalTime(_) => {
+        Value::OffsetDateTime { .. }
+        | Value::LocalDateTime { .. }
+        | Value::LocalDate { .. }
+        | Value::LocalTime { .. } => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::STRING,
@@ -120,7 +127,7 @@ fn symbols_for_value(
         Value::Array(array) => {
             let mut children = vec![];
             for (index, value) in array.values().iter().enumerate() {
-                symbols_for_value(index.to_string(), Some(range), value, &mut children);
+                symbols_for_value(index.to_string(), value, Some(range), &mut children);
             }
 
             symbols.push(DocumentSymbol {
@@ -137,7 +144,7 @@ fn symbols_for_value(
         Value::Table(table) => {
             let mut children = vec![];
             for (key, value) in table.key_values() {
-                symbols_for_value(key.to_string(), Some(range), value, &mut children);
+                symbols_for_value(key.to_string(), value, Some(range), &mut children);
             }
 
             symbols.push(DocumentSymbol {

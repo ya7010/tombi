@@ -1,7 +1,5 @@
 use std::path::PathBuf;
 
-use document::Document;
-
 /// Returns the path to the root directory of `tombi` project.
 pub fn project_root() -> PathBuf {
     let dir = std::env::var("CARGO_MANIFEST_DIR")
@@ -18,6 +16,7 @@ pub fn project_root() -> PathBuf {
 #[test]
 fn load_tombi_toml() {
     use config::TomlVersion;
+    use document::Document;
 
     let toml_path = project_root().join("tombi.toml");
     dbg!(&toml_path);
