@@ -333,8 +333,8 @@ impl InlineTable {
         match toml_version {
             TomlVersion::V1_0_0 => false,
             TomlVersion::V1_1_0_Preview => {
-                self.has_multiline_values(toml_version)
-                    || self.has_tailing_comma_after_last_value()
+                self.has_tailing_comma_after_last_value()
+                    || self.has_multiline_values(toml_version)
                     || self.has_inner_comments()
             }
         }
