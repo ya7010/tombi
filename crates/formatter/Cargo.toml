@@ -11,7 +11,6 @@ parser = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
 syntax = { workspace = true }
-rstest = { workspace = true }
 tracing = { workspace = true }
 text = { workspace = true }
 diagnostic = { workspace = true }
@@ -20,5 +19,6 @@ config.workspace = true
 [dev-dependencies]
 assert_matches = { workspace = true }
 pretty_assertions.workspace = true
+rstest = { workspace = true }
 textwrap.workspace = true
 tracing-subscriber = { workspace = true }
