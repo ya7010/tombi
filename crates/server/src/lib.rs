@@ -1,11 +1,8 @@
 mod backend;
 mod document;
+mod document_symbol;
 mod handler;
 mod toml;
-
-use crate::backend::Backend;
-use tower_lsp::LspService;
-use tower_lsp::Server;
 
 /// Run TOML Language Server
 #[derive(clap::Args, Debug)]
@@ -20,9 +17,11 @@ pub async fn serve(_args: impl Into<Args>) -> Result<(), anyhow::Error> {
     let stdin = tokio::io::stdin();
     let stdout = tokio::io::stdout();
 
-    let (service, socket) = LspService::build(Backend::new).finish();
+    let (service, socket) = tower_lsp::LspService::build(crate::backend::Backend::new).finish();
 
-    Server::new(stdin, stdout, socket).serve(service).await;
+    tower_lsp::Server::new(stdin, stdout, socket)
+        .serve(service)
+        .await;
 
     tracing::info!("Tombi LSP Server did shut down.");
 
