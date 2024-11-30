@@ -63,11 +63,11 @@ enum RootItem {
 impl TryFrom<ast::Root> for Document {
     type Error = Vec<crate::Error>;
 
-    fn try_from(root: ast::Root) -> Result<Self, Self::Error> {
-        let mut document = Document::new(root.range());
+    fn try_from(node: ast::Root) -> Result<Self, Self::Error> {
+        let mut document = Document::new(node.range());
         let mut errors = Vec::new();
 
-        for item in root.items() {
+        for item in node.items() {
             if let Err(err) = match item.try_into() {
                 Ok(RootItem::Table(table)) => document.0.merge(table),
                 Ok(RootItem::ArrayOfTable(table)) => document.0.merge(table),
