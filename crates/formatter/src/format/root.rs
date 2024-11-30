@@ -19,47 +19,56 @@ impl Format for ast::Root {
 
             items
                 .into_iter()
-                .fold((None, vec![]), |(pre_header, mut acc), item| match &item {
-                    ast::RootItem::Table(table) => {
-                        let header_text = table.header().unwrap().syntax().to_string();
-                        let item_size = table.key_values().count();
+                .fold(
+                    (Header::Root { item_size: 0 }, vec![]),
+                    |(mut header, mut acc), item| match &item {
+                        ast::RootItem::Table(table) => {
+                            let header_text = table.header().unwrap().syntax().to_string();
 
-                        match pre_header {
-                            Some(Header::Table {
-                                header_text: pre_header_text,
-                                item_size,
-                            }) => {
-                                if item_size > 0 || !header_text.starts_with(&pre_header_text) {
+                            match header {
+                                Header::Root { item_size } => {
+                                    if item_size > 0 {
+                                        acc.push(ItemOrNewLine::NewLine);
+                                    }
+                                }
+                                Header::Table {
+                                    header_text: pre_header_text,
+                                    item_size,
+                                } => {
+                                    if item_size > 0 || !header_text.starts_with(&pre_header_text) {
+                                        acc.push(ItemOrNewLine::NewLine);
+                                    }
+                                }
+                                Header::ArrayOfTable { .. } => {
                                     acc.push(ItemOrNewLine::NewLine);
                                 }
-                            }
-                            Some(Header::ArrayOfTable) => {
+                            };
+                            acc.push(ItemOrNewLine::Item(item));
+
+                            (
+                                Header::Table {
+                                    header_text,
+                                    item_size: 0,
+                                },
+                                acc,
+                            )
+                        }
+                        ast::RootItem::ArrayOfTable(_) => {
+                            if !header.is_root() {
                                 acc.push(ItemOrNewLine::NewLine);
                             }
-                            None => {}
-                        };
+                            acc.push(ItemOrNewLine::Item(item));
 
-                        acc.push(ItemOrNewLine::Item(item));
-                        (
-                            Some(Header::Table {
-                                header_text,
-                                item_size,
-                            }),
-                            acc,
-                        )
-                    }
-                    ast::RootItem::ArrayOfTable(_) => {
-                        if pre_header.is_some() {
-                            acc.push(ItemOrNewLine::NewLine);
+                            (Header::ArrayOfTable { item_size: 0 }, acc)
                         }
-                        acc.push(ItemOrNewLine::Item(item));
-                        (Some(Header::ArrayOfTable), acc)
-                    }
-                    ast::RootItem::KeyValue(_) => {
-                        acc.push(ItemOrNewLine::Item(item));
-                        (None, acc)
-                    }
-                })
+                        ast::RootItem::KeyValue(_) => {
+                            acc.push(ItemOrNewLine::Item(item));
+                            header.inc_item();
+
+                            (header, acc)
+                        }
+                    },
+                )
                 .1
                 .into_iter()
                 .enumerate()
@@ -110,9 +119,30 @@ impl Format for ItemOrNewLine {
 }
 
 enum Header {
+    Root {
+        item_size: usize,
+    },
+
     Table {
         header_text: String,
         item_size: usize,
     },
-    ArrayOfTable,
+
+    ArrayOfTable {
+        item_size: usize,
+    },
+}
+
+impl Header {
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root { .. })
+    }
+
+    fn inc_item(&mut self) {
+        match self {
+            Self::Root { item_size } => *item_size += 1,
+            Self::Table { item_size, .. } => *item_size += 1,
+            Self::ArrayOfTable { item_size } => *item_size += 1,
+        }
+    }
 }
