@@ -4,7 +4,6 @@ mod value;
 
 use std::ops::Deref;
 
-use ast::AstNode;
 pub use error::Error;
 pub use key::Key;
 pub use value::{
@@ -25,6 +24,8 @@ impl Document {
         source: &str,
         toml_version: config::TomlVersion,
     ) -> Result<Self, Vec<crate::Error>> {
+        use ast::AstNode;
+
         let p = parser::parse(source, toml_version);
         if !p.errors().is_empty() {
             return Err(p
@@ -193,29 +194,51 @@ impl TryFrom<ast::KeyValue> for Table {
     type Error = Vec<crate::Error>;
 
     fn try_from(node: ast::KeyValue) -> Result<Table, Self::Error> {
-        let mut table = Table::new_dotted_keys_table(node.range());
         let mut errors = Vec::new();
-
-        for key in node
+        let mut keys = node
             .keys()
             .unwrap()
             .keys()
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-        {
-            if let Ok(k) = key.try_into() {
-                match Table::new_dotted_keys_table(node.range()).insert(
-                    k,
-                    Value::Table(std::mem::replace(
-                        &mut table,
-                        Table::new_dotted_keys_table(node.range()),
-                    )),
-                ) {
-                    Ok(t) => table = t,
-                    Err(errs) => {
-                        errors.extend(errs);
-                    }
+            .map(TryInto::<Key>::try_into)
+            .fold(Vec::new(), |mut acc, res| {
+                match res {
+                    Ok(key) => acc.push(key),
+                    Err(err) => errors.extend(err),
+                }
+                acc
+            });
+
+        let value: Value = match node.value().unwrap().try_into() {
+            Ok(value) => value,
+            Err(errs) => {
+                errors.extend(errs);
+                return Err(errors);
+            }
+        };
+
+        let mut table = if let Some(key) = keys.pop() {
+            match Table::new(key.range() + value.range()).insert(key, value) {
+                Ok(table) => table,
+                Err(errs) => {
+                    errors.extend(errs);
+                    return Err(errors);
+                }
+            }
+        } else {
+            return Err(errors);
+        };
+
+        for key in keys.into_iter().rev() {
+            match Table::new_dotted_keys_table(key.range() + table.range()).insert(
+                key,
+                Value::Table(std::mem::replace(
+                    &mut table,
+                    Table::new_dotted_keys_table(node.range()),
+                )),
+            ) {
+                Ok(t) => table = t,
+                Err(errs) => {
+                    errors.extend(errs);
                 }
             }
         }

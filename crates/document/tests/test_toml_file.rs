@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use config::TomlVersion;
 use document::Document;
 
 /// Returns the path to the root directory of `tombi` project.
@@ -18,6 +17,8 @@ pub fn project_root() -> PathBuf {
 #[cfg(feature = "load")]
 #[test]
 fn load_tombi_toml() {
+    use config::TomlVersion;
+
     let toml_path = project_root().join("tombi.toml");
     dbg!(&toml_path);
     assert!(toml_path.exists());
@@ -26,4 +27,5 @@ fn load_tombi_toml() {
     let document = Document::load(&toml_source, TomlVersion::default()).unwrap();
 
     dbg!(document);
+    assert!(false);
 }
