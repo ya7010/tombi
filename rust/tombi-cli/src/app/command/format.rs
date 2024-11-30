@@ -1,8 +1,7 @@
+use crate::app::arg;
 use config::TomlVersion;
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-
-use crate::app::arg;
-use std::io::Read;
+use std::io::Seek;
 
 /// Format TOML files.
 #[derive(clap::Args, Debug)]
@@ -53,7 +52,7 @@ where
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input formatting...");
-            if format_file(std::io::stdin(), printer, &args) {
+            if format_file(StdFile::new(), printer, &args) {
                 success_num += 1;
             } else {
                 error_num += 1;
@@ -64,7 +63,11 @@ where
                 match file {
                     Ok(path) => {
                         tracing::debug!("{:?} formatting...", path);
-                        match std::fs::File::open(&path) {
+                        match std::fs::OpenOptions::new()
+                            .read(true)
+                            .append(true)
+                            .open(&path)
+                        {
                             Ok(file) => {
                                 if format_file(file, printer, &args) {
                                     success_num += 1;
@@ -92,20 +95,32 @@ where
     (success_num, error_num)
 }
 
-fn format_file<R: Read, P>(mut reader: R, printer: P, args: &Args) -> bool
+fn format_file<F, P>(mut file: F, printer: P, args: &Args) -> bool
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
+    F: std::io::Read + std::io::Write + Reset,
     P: Copy,
 {
     let mut source = String::new();
-    if reader.read_to_string(&mut source).is_ok() {
+    if file.read_to_string(&mut source).is_ok() {
         match formatter::format_with(&source, args.toml_version, &Default::default()) {
             Ok(formatted) => {
-                if args.check && source != formatted {
-                    crate::error::NotFormattedError::from_input()
-                        .into_error()
-                        .print(printer);
+                if source != formatted {
+                    if args.check {
+                        crate::error::NotFormattedError::from_input()
+                            .into_error()
+                            .print(printer);
+                    }
+                    if let Err(err) = file.reset() {
+                        crate::Error::Io(err).print(printer);
+                    };
+                    match file.write_all(formatted.as_bytes()) {
+                        Ok(_) => return true,
+                        Err(err) => {
+                            crate::Error::Io(err).print(printer);
+                        }
+                    }
                 } else {
                     return true;
                 }
@@ -114,4 +129,48 @@ where
         }
     }
     false
+}
+
+struct StdFile(std::io::Stdin);
+
+impl StdFile {
+    fn new() -> Self {
+        Self(std::io::stdin())
+    }
+}
+
+impl std::io::Read for StdFile {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        self.0.read(buf)
+    }
+}
+
+impl std::io::Write for StdFile {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        std::io::stdout().write(buf)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+trait Reset {
+    fn reset(&mut self) -> std::io::Result<()>;
+}
+
+impl Reset for std::fs::File
+where
+    Self: std::io::Seek + std::io::Write,
+{
+    fn reset(&mut self) -> std::io::Result<()> {
+        self.seek(std::io::SeekFrom::Start(0))?;
+        self.set_len(0)
+    }
+}
+
+impl Reset for StdFile {
+    fn reset(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
 }
