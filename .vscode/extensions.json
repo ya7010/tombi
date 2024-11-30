@@ -4,7 +4,5 @@
     "rust-lang.rust-analyzer",
     "yassun7010.tombi"
   ],
-  "unwantedRecommendations": [
-    // "tamasfe.even-better-toml",
-  ]
+  "unwantedRecommendations": ["tamasfe.even-better-toml"]
 }
