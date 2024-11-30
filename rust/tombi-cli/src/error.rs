@@ -26,18 +26,31 @@ pub struct NotFormattedError {
 }
 
 impl NotFormattedError {
+    #[inline]
     pub fn from_source(source_path: impl Into<PathBuf>) -> Self {
         Self {
             source_path: Some(source_path.into()),
         }
     }
 
+    #[inline]
     pub fn from_input() -> Self {
         Self { source_path: None }
     }
 
+    #[inline]
     pub fn into_error(self) -> Error {
         Error::NotFormatted(self)
+    }
+}
+
+impl From<Option<&std::path::Path>> for NotFormattedError {
+    #[inline]
+    fn from(path: Option<&std::path::Path>) -> Self {
+        match path {
+            Some(path) => Self::from_source(path),
+            None => Self::from_input(),
+        }
     }
 }
 

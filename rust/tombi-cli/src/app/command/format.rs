@@ -1,7 +1,7 @@
 use crate::app::arg;
 use config::TomlVersion;
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-use std::io::Seek;
+use std::io::{Read, Seek, Write};
 
 /// Format TOML files.
 #[derive(clap::Args, Debug)]
@@ -52,7 +52,7 @@ where
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input formatting...");
-            if format_file(StdFile::new(), printer, &args) {
+            if format_file(FormatFile::from_stdin(), printer, &args) {
                 success_num += 1;
             } else {
                 error_num += 1;
@@ -63,11 +63,7 @@ where
                 match file {
                     Ok(path) => {
                         tracing::debug!("{:?} formatting...", path);
-                        match std::fs::OpenOptions::new()
-                            .read(true)
-                            .append(true)
-                            .open(&path)
-                        {
+                        match FormatFile::from_file(&path) {
                             Ok(file) => {
                                 if format_file(file, printer, &args) {
                                     success_num += 1;
@@ -95,11 +91,10 @@ where
     (success_num, error_num)
 }
 
-fn format_file<F, P>(mut file: F, printer: P, args: &Args) -> bool
+fn format_file<P>(mut file: FormatFile, printer: P, args: &Args) -> bool
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
-    F: std::io::Read + std::io::Write + Reset,
     P: Copy,
 {
     let mut source = String::new();
@@ -108,7 +103,7 @@ where
             Ok(formatted) => {
                 if source != formatted {
                     if args.check {
-                        crate::error::NotFormattedError::from_input()
+                        crate::error::NotFormattedError::from(file.source())
                             .into_error()
                             .print(printer);
                     }
@@ -131,46 +126,69 @@ where
     false
 }
 
-struct StdFile(std::io::Stdin);
+enum FormatFile {
+    Stdin(std::io::Stdin),
+    File {
+        path: std::path::PathBuf,
+        file: std::fs::File,
+    },
+}
 
-impl StdFile {
-    fn new() -> Self {
-        Self(std::io::stdin())
+impl FormatFile {
+    fn from_stdin() -> Self {
+        Self::Stdin(std::io::stdin())
+    }
+
+    fn from_file(path: &std::path::Path) -> std::io::Result<Self> {
+        Ok(Self::File {
+            path: path.to_owned(),
+            file: std::fs::OpenOptions::new()
+                .read(true)
+                .append(true)
+                .open(path)?,
+        })
+    }
+
+    #[inline]
+    fn source(&self) -> Option<&std::path::Path> {
+        match self {
+            Self::Stdin(_) => None,
+            Self::File { path, .. } => Some(path.as_ref()),
+        }
+    }
+
+    fn reset(&mut self) -> std::io::Result<()> {
+        match self {
+            Self::Stdin(_) => Ok(()),
+            Self::File { file, .. } => {
+                file.seek(std::io::SeekFrom::Start(0))?;
+                file.set_len(0)
+            }
+        }
     }
 }
 
-impl std::io::Read for StdFile {
+impl std::io::Read for FormatFile {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        self.0.read(buf)
+        match self {
+            Self::Stdin(stdin) => stdin.read(buf),
+            Self::File { file, .. } => file.read(buf),
+        }
     }
 }
 
-impl std::io::Write for StdFile {
+impl std::io::Write for FormatFile {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        std::io::stdout().write(buf)
+        match self {
+            Self::Stdin(_) => std::io::stdout().write(buf),
+            Self::File { file, .. } => file.write(buf),
+        }
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
-}
-
-trait Reset {
-    fn reset(&mut self) -> std::io::Result<()>;
-}
-
-impl Reset for std::fs::File
-where
-    Self: std::io::Seek + std::io::Write,
-{
-    fn reset(&mut self) -> std::io::Result<()> {
-        self.seek(std::io::SeekFrom::Start(0))?;
-        self.set_len(0)
-    }
-}
-
-impl Reset for StdFile {
-    fn reset(&mut self) -> std::io::Result<()> {
-        Ok(())
+        match self {
+            Self::Stdin(_) => std::io::stdout().flush(),
+            Self::File { file, .. } => file.flush(),
+        }
     }
 }
