@@ -20,22 +20,25 @@ impl Format for ast::Root {
             items
                 .into_iter()
                 .fold(
-                    (Header::Root { item_size: 0 }, vec![]),
+                    (Header::Root { key_value_size: 0 }, vec![]),
                     |(mut header, mut acc), item| match &item {
                         ast::RootItem::Table(table) => {
                             let header_text = table.header().unwrap().syntax().to_string();
+                            let key_value_size = table.key_values().into_iter().count();
 
                             match header {
-                                Header::Root { item_size } => {
-                                    if item_size > 0 {
+                                Header::Root { key_value_size } => {
+                                    if key_value_size > 0 {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
                                 }
                                 Header::Table {
                                     header_text: pre_header_text,
-                                    item_size,
+                                    key_value_size,
                                 } => {
-                                    if item_size > 0 || !header_text.starts_with(&pre_header_text) {
+                                    if key_value_size > 0
+                                        || !header_text.starts_with(&pre_header_text)
+                                    {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
                                 }
@@ -48,7 +51,7 @@ impl Format for ast::Root {
                             (
                                 Header::Table {
                                     header_text,
-                                    item_size: 0,
+                                    key_value_size,
                                 },
                                 acc,
                             )
@@ -59,12 +62,17 @@ impl Format for ast::Root {
                             }
                             acc.push(ItemOrNewLine::Item(item));
 
-                            (Header::ArrayOfTable { item_size: 0 }, acc)
+                            (Header::ArrayOfTable {}, acc)
                         }
                         ast::RootItem::KeyValue(_) => {
+                            header = if let Header::Root { key_value_size } = header {
+                                Header::Root {
+                                    key_value_size: key_value_size + 1,
+                                }
+                            } else {
+                                header
+                            };
                             acc.push(ItemOrNewLine::Item(item));
-                            header.inc_item();
-
                             (header, acc)
                         }
                     },
@@ -118,33 +126,23 @@ impl Format for ItemOrNewLine {
     }
 }
 
+#[derive(Debug)]
 enum Header {
     Root {
-        item_size: usize,
+        key_value_size: usize,
     },
 
     Table {
         header_text: String,
-        item_size: usize,
+        key_value_size: usize,
     },
 
-    ArrayOfTable {
-        item_size: usize,
-    },
+    ArrayOfTable {},
 }
 
 impl Header {
     #[inline]
     fn is_root(&self) -> bool {
         matches!(self, Self::Root { .. })
-    }
-
-    #[inline]
-    fn inc_item(&mut self) {
-        match self {
-            Self::Root { item_size } => *item_size += 1,
-            Self::Table { item_size, .. } => *item_size += 1,
-            Self::ArrayOfTable { item_size } => *item_size += 1,
-        }
     }
 }
