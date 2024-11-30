@@ -1,6 +1,6 @@
 [project]
 name = "tombi"
-version = "0.0.0" # We use git tags for versioning. This is just a placeholder.
+version = "0.0.0"  # We use git tags for versioning. This is just a placeholder.
 readme = "python/README.md"
 description = "Reserved package for tombi"
 requires-python = ">=3.10"
@@ -15,8 +15,8 @@ build-backend = "maturin"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.3",
-    "ruff>=0.7.4",
+  "pytest>=8.3.3",
+  "ruff>=0.7.4",
 ]
 
 [tool.maturin]
