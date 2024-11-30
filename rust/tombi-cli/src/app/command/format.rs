@@ -22,13 +22,28 @@ pub struct Args {
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn run(args: Args) -> Result<(), crate::Error> {
-    let (success_num, error_num) = inner_run(args, Pretty);
+    let (success_num, not_needed_num, error_num) = inner_run(args, Pretty);
 
-    match success_num {
-        0 => eprintln!("No files formatted"),
-        1 => eprintln!("1 file formatted"),
-        _ => eprintln!("{} files formatted", success_num),
-    }
+    match (success_num, not_needed_num) {
+        (0, 0) => eprintln!("No files formatted"),
+        (success_num, not_needed_num) => {
+            match success_num {
+                0 => eprintln!("No files formatted"),
+                1 => eprintln!("1 file formatted"),
+                _ => eprintln!("{success_num} files formatted"),
+            };
+            match not_needed_num {
+                0 => {}
+                1 => eprintln!("1 file not needed formatting"),
+                _ => eprintln!("{not_needed_num} files not needed formatting"),
+            }
+        }
+    };
+    match error_num {
+        0 => {}
+        1 => eprintln!("1 file failed to format"),
+        _ => eprintln!("{error_num} files failed to format"),
+    };
 
     if error_num > 0 {
         std::process::exit(1);
@@ -37,7 +52,7 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     Ok(())
 }
 
-fn inner_run<P>(args: Args, printer: P) -> (usize, usize)
+fn inner_run<P>(args: Args, printer: P) -> (usize, usize, usize)
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -47,15 +62,16 @@ where
 
     let total_num = input.len();
     let mut success_num = 0;
+    let mut not_needed_num = 0;
     let mut error_num = 0;
 
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input formatting...");
-            if format_file(FormatFile::from_stdin(), printer, &args) {
-                success_num += 1;
-            } else {
-                error_num += 1;
+            match format_file(FormatFile::from_stdin(), printer, &args) {
+                Ok(true) => success_num += 1,
+                Ok(false) => not_needed_num += 1,
+                Err(_) => error_num += 1,
             }
         }
         arg::FileInput::Files(files) => {
@@ -65,8 +81,11 @@ where
                         tracing::debug!("{:?} formatting...", path);
                         match FormatFile::from_file(&path) {
                             Ok(file) => {
-                                if format_file(file, printer, &args) {
-                                    success_num += 1;
+                                if let Ok(formatted) = format_file(file, printer, &args) {
+                                    match formatted {
+                                        true => success_num += 1,
+                                        false => not_needed_num += 1,
+                                    }
                                     continue;
                                 }
                             }
@@ -86,12 +105,12 @@ where
         }
     };
 
-    assert_eq!(success_num + error_num, total_num);
+    assert_eq!(success_num + not_needed_num + error_num, total_num);
 
-    (success_num, error_num)
+    (success_num, not_needed_num, error_num)
 }
 
-fn format_file<P>(mut file: FormatFile, printer: P, args: &Args) -> bool
+fn format_file<P>(mut file: FormatFile, printer: P, args: &Args) -> Result<bool, ()>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -106,24 +125,25 @@ where
                         crate::error::NotFormattedError::from(file.source())
                             .into_error()
                             .print(printer);
-                    }
-                    if let Err(err) = file.reset() {
-                        crate::Error::Io(err).print(printer);
-                    };
-                    match file.write_all(formatted.as_bytes()) {
-                        Ok(_) => return true,
-                        Err(err) => {
+                    } else {
+                        if let Err(err) = file.reset() {
                             crate::Error::Io(err).print(printer);
+                        };
+                        match file.write_all(formatted.as_bytes()) {
+                            Ok(_) => return Ok(true),
+                            Err(err) => {
+                                crate::Error::Io(err).print(printer);
+                            }
                         }
                     }
                 } else {
-                    return true;
+                    return Ok(false);
                 }
             }
             Err(diagnostics) => diagnostics.print(printer),
         }
     }
-    false
+    Err(())
 }
 
 enum FormatFile {
