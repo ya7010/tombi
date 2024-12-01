@@ -15,7 +15,7 @@ impl SyntaxText {
         SyntaxText { node, span }
     }
 
-    pub fn len(&self) -> text::Offset {
+    pub fn len(&self) -> text::RawOffset {
         self.span.len()
     }
 
@@ -57,7 +57,7 @@ impl SyntaxText {
 
     pub fn slice<S: private::SyntaxTextSpan>(&self, span: S) -> SyntaxText {
         let start = span.start().unwrap_or_default();
-        let end = span.end().unwrap_or(self.len());
+        let end = span.end().unwrap_or(text::Offset::new(self.len()));
         assert!(start <= end);
         let len = end - start;
         let start = self.span.start() + start;
@@ -205,7 +205,7 @@ fn zip_texts<I: Iterator<Item = (SyntaxToken, text::Span)>>(xs: &mut I, ys: &mut
         if !(x_text.starts_with(y_text) || y_text.starts_with(x_text)) {
             return Some(());
         }
-        let advance = std::cmp::min(x.1.len(), y.1.len());
+        let advance = text::Offset::new(std::cmp::min(x.1.len(), y.1.len()));
         x.1 = text::Span::new(x.1.start() + advance, x.1.end());
         y.1 = text::Span::new(y.1.start() + advance, y.1.end());
     }

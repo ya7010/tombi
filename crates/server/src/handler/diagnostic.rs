@@ -31,12 +31,15 @@ pub async fn get_diagnostics(document: Option<&Document>) -> Vec<tower_lsp::lsp_
         return vec![];
     };
 
-    if let Err(diagnostics) = formatter::format(&document.source) {
+    if let Err(diagnostics) = linter::lint(&document.source) {
         diagnostics
             .into_iter()
             .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
                 range: tower_lsp::lsp_types::Range::from(diagnostic.range()),
-                severity: Some(tower_lsp::lsp_types::DiagnosticSeverity::ERROR),
+                severity: Some(match diagnostic.level() {
+                    diagnostic::Level::Warning => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
+                    diagnostic::Level::Error => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
+                }),
                 message: diagnostic.message().to_string(),
                 ..Default::default()
             })

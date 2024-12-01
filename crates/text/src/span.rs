@@ -1,4 +1,4 @@
-use crate::{Offset, RawTextSize};
+use crate::{Offset, RawOffset, RawTextSize};
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign};
 
@@ -122,11 +122,9 @@ impl Span {
 
     /// The size of this span.
     #[inline]
-    pub const fn len(self) -> Offset {
+    pub const fn len(self) -> RawOffset {
         // HACK for const fn: math on primitives only
-        Offset {
-            raw: self.end().raw - self.start().raw,
-        }
+        self.end().raw - self.start().raw
     }
 
     /// Check if this span is empty.

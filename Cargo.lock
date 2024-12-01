@@ -889,6 +889,7 @@ checksum = "433bfe06b8c75da9b2e3fbea6e5329ff87748f0b144ef75306e674c3f6f7c13f"
 name = "linter"
 version = "0.0.0"
 dependencies = [
+ "ast",
  "config",
  "diagnostic",
  "parser",
@@ -1360,11 +1361,13 @@ dependencies = [
  "config",
  "crossbeam-channel",
  "dashmap 6.1.0",
+ "diagnostic",
  "document",
  "formatter",
  "futures",
  "futures-util",
  "indexmap 2.6.0",
+ "linter",
  "parser",
  "rustc-hash",
  "semver",

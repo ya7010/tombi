@@ -6,6 +6,7 @@ mod relative_position;
 mod span;
 
 type RawTextSize = u32;
+pub type RawOffset = RawTextSize;
 pub type Line = RawTextSize;
 pub type Column = RawTextSize;
 

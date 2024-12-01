@@ -6,6 +6,7 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
+ast.workspace = true
 config.workspace = true
 diagnostic.workspace = true
 parser.workspace = true
