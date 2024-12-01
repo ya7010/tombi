@@ -26,10 +26,17 @@ pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
 }
 
 #[allow(private_bounds)]
-pub fn parse_as<G: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
+pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
-    let output = parse::parse::<G>(&input, toml_version);
+    let mut p = crate::parser::Parser::new(&input, toml_version);
+
+    P::parse(&mut p);
+
+    let events = p.finish();
+
+    let output = crate::event::process(events);
+
     let (green_tree, errors) = build_green_tree(&lexed, output);
 
     Parsed::new(green_tree, errors)
