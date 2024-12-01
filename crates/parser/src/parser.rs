@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use config::TomlVersion;
 use syntax::{
     SyntaxKind::{self, *},
