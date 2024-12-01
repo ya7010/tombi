@@ -4,7 +4,6 @@ use tower_lsp::lsp_types::{
 };
 
 use crate::backend::Backend;
-use crate::document::Document;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_diagnostic(
@@ -13,7 +12,30 @@ pub async fn handle_diagnostic(
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_diagnostic");
 
-    let diagnostics = get_diagnostics(backend.documents.get(&text_document.uri).as_deref()).await;
+    let diagnostics = match backend.documents.get(&text_document.uri).as_deref() {
+        Some(document) => linter::lint(&document.source).map_or_else(
+            |diagnostics| {
+                diagnostics
+                    .into_iter()
+                    .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
+                        range: diagnostic.range().into(),
+                        severity: Some(match diagnostic.level() {
+                            diagnostic::Level::WARNING => {
+                                tower_lsp::lsp_types::DiagnosticSeverity::WARNING
+                            }
+                            diagnostic::Level::ERROR => {
+                                tower_lsp::lsp_types::DiagnosticSeverity::ERROR
+                            }
+                        }),
+                        message: diagnostic.message().to_string(),
+                        ..Default::default()
+                    })
+                    .collect()
+            },
+            |_| vec![],
+        ),
+        None => vec![],
+    };
 
     Ok(DocumentDiagnosticReportResult::Report(
         DocumentDiagnosticReport::Full(RelatedFullDocumentDiagnosticReport {
@@ -24,27 +46,4 @@ pub async fn handle_diagnostic(
             ..Default::default()
         }),
     ))
-}
-
-pub async fn get_diagnostics(document: Option<&Document>) -> Vec<tower_lsp::lsp_types::Diagnostic> {
-    let Some(document) = document else {
-        return vec![];
-    };
-
-    if let Err(diagnostics) = linter::lint(&document.source) {
-        diagnostics
-            .into_iter()
-            .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
-                range: tower_lsp::lsp_types::Range::from(diagnostic.range()),
-                severity: Some(match diagnostic.level() {
-                    diagnostic::Level::WARNING => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
-                    diagnostic::Level::ERROR => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
-                }),
-                message: diagnostic.message().to_string(),
-                ..Default::default()
-            })
-            .collect()
-    } else {
-        vec![]
-    }
 }
