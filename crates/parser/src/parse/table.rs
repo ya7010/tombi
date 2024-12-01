@@ -1,30 +1,29 @@
 use syntax::T;
 
-use super::Parse;
 use crate::ErrorKind::*;
 use crate::{
-    grammar::{
-        invalid_line, leading_comments, peek_leading_comments, tailing_comment, TS_LINE_END,
+    parse::{
+        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
         TS_NEXT_SECTION,
     },
     parser::Parser,
 };
 use syntax::SyntaxKind::*;
 
-impl Parse for ast::ArrayOfTable {
+impl Parse for ast::Table {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
         leading_comments(p);
 
-        assert!(p.at(T!("[[")));
+        assert!(p.at(T!['[']));
 
-        p.eat(T!("[["));
+        p.eat(T!['[']);
 
         ast::Keys::parse(p);
 
-        if !p.eat(T!("]]")) {
-            invalid_line(p, ExpectedDoubleBracketEnd);
+        if !p.eat(T![']']) {
+            invalid_line(p, ExpectedBracketEnd);
         }
 
         tailing_comment(p);
@@ -35,6 +34,7 @@ impl Parse for ast::ArrayOfTable {
             if p.nth_at_ts(n, TS_NEXT_SECTION) {
                 break;
             }
+
             ast::KeyValue::parse(p);
 
             if !p.at_ts(TS_LINE_END) {
@@ -42,7 +42,7 @@ impl Parse for ast::ArrayOfTable {
             }
         }
 
-        m.complete(p, ARRAY_OF_TABLE);
+        m.complete(p, TABLE);
     }
 }
 
@@ -53,56 +53,74 @@ mod test {
 
     test_parser! {
         #[test]
-        fn invalid_array_of_table1(
+        fn without_header_keys(
             r#"
-            [[]]
-            key1 = 1
-            key2 = 2
-            "#
-        ) -> Err([SyntaxError(ExpectedKey, 0:2..0:3)])
+                []
+                key1 = 1
+                key2 = 2
+                "#
+        ) -> Err([
+            SyntaxError(ExpectedKey, 0:1..0:2),
+        ])
     }
 
     test_parser! {
         #[test]
-        fn invalid_array_of_table2(
+        fn without_last_dot_key(
             r#"
-            [[aaa.]]
+            [aaa.]
             key1 = 1
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedKey, 0:6..0:7)])
+        ) -> Err([
+            SyntaxError(ExpectedKey, 0:5..0:6),
+        ])
     }
 
     test_parser! {
         #[test]
-        fn invalid_array_of_table3(
+        fn without_last_bracket(
             r#"
-            [[aaa.bbb
+            [aaa.bbb
             key1 = 1
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedDoubleBracketEnd, 0:9..1:0)])
+        ) -> Err([
+            SyntaxError(ExpectedBracketEnd, 0:8..1:0),
+        ])
     }
 
     test_parser! {
         #[test]
-        fn invalid_array_of_table4(
+        fn without_value(
             r#"
-            [[aaa.bbb]
+            [aaa.bbb]
+            key1 = 1
+            key2 = 2
+
+            [aaa.ccc]
+            key1 =
+            key2 = 2
+
+            [aaa.ddd]
             key1 = 1
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedDoubleBracketEnd, 0:9..0:10)])
+        ) -> Err([
+            SyntaxError(ExpectedValue, 5:6..6:0),
+        ])
     }
 
     test_parser! {
         #[test]
-        fn invalid_array_of_table5(
+        fn invalid_key_value_tailing_comment(
             r#"
-            [[aaa.bbb]]
+            [aaa.bbb]
             key1 = 1 INVALID COMMENT
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedLineBreakOrComment, 1:9..1:16)])
+        ) -> Err([
+            SyntaxError(ExpectedLineBreakOrComment, 1:9..1:16),
+        ])
     }
 }

@@ -1,11 +1,11 @@
 mod builder;
 mod error;
 mod event;
-mod grammar;
 mod input;
 mod lexed;
 mod marker;
 mod output;
+mod parse;
 mod parsed;
 mod parser;
 mod token_set;
@@ -13,11 +13,11 @@ mod token_set;
 use config::TomlVersion;
 pub use error::{Error, ErrorKind};
 pub use event::Event;
-use grammar::Parse;
 use input::Input;
 use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
+use parse::Parse;
 use parsed::Parsed;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -29,7 +29,7 @@ pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
 pub fn parse_as<G: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
     let lexed = lex(source);
     let input = lexed.to_input();
-    let output = grammar::parse::<G>(&input, toml_version);
+    let output = parse::parse::<G>(&input, toml_version);
     let (green_tree, errors) = build_green_tree(&lexed, output);
 
     Parsed::new(green_tree, errors)

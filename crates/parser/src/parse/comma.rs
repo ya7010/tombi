@@ -1,6 +1,6 @@
 use syntax::T;
 
-use crate::grammar::{leading_comments, tailing_comment};
+use crate::parse::{leading_comments, tailing_comment};
 
 use super::{Parse, Parser};
 

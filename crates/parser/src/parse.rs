@@ -18,7 +18,6 @@ const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EO
 const TS_NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
 pub fn parse<P: Parse>(input: &crate::Input, toml_version: TomlVersion) -> Output {
-    let _p = tracing::info_span!("grammar::parse").entered();
     let mut p = crate::parser::Parser::new(input, toml_version);
 
     P::parse(&mut p);
