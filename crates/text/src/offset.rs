@@ -32,6 +32,12 @@ impl fmt::Debug for Offset {
 }
 
 impl Offset {
+    pub const MAX: Offset = Offset {
+        raw: RawTextSize::MAX,
+    };
+
+    pub const MIN: Offset = Offset { raw: 0 };
+
     /// Creates a new instance of `Offset` from a raw `u32`.
     #[inline]
     pub const fn new(raw: u32) -> Offset {

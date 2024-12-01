@@ -10,6 +10,15 @@ pub struct Range {
 }
 
 impl Range {
+    pub const MAX: Range = Range {
+        start: Position::MAX,
+        end: Position::MAX,
+    };
+    pub const MIN: Range = Range {
+        start: Position::MIN,
+        end: Position::MIN,
+    };
+
     #[inline]
     pub fn new(start: Position, end: Position) -> Self {
         assert!(start <= end);

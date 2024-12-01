@@ -58,6 +58,7 @@ impl<'a> LexedStr<'a> {
         let lexed = lexer::lex(source);
         let mut tokens = Vec::new();
         let mut last_offset = text::Offset::default();
+        let mut last_position = text::Position::default();
         let mut errors = Vec::new();
 
         for (i, token) in lexed.into_iter().enumerate() {
@@ -65,6 +66,7 @@ impl<'a> LexedStr<'a> {
                 Ok(token) => {
                     tokens.push(token);
                     last_offset = token.span().end();
+                    last_position = token.range().end();
                 }
                 Err(_) => errors.push(LexError::new(i, syntax::Error::InvalidToken)),
             }
@@ -72,7 +74,13 @@ impl<'a> LexedStr<'a> {
 
         tokens.push(lexer::Token::new(
             EOF,
-            text::Span::new(last_offset, text::Offset::new(source.len() as u32)),
+            (
+                text::Span::new(last_offset, text::Offset::new(source.len() as u32)),
+                text::Range::new(
+                    last_position,
+                    last_position + text::RelativePosition::from(&source[last_offset.into()..]),
+                ),
+            ),
         ));
 
         Self {

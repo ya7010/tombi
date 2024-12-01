@@ -14,11 +14,22 @@ macro_rules!  test_tokens {
                 )*
             ]
             .into_iter()
-            .fold((vec![], 0), |(mut acc, start), (kind, text)| {
+            .fold((vec![], (0, text::Position::MIN)), |(mut acc, (start_offset, start_position)), (kind, text)| {
                 let text: &str = text;
-                let end = start + (text.len() as u32);
-                acc.push(Ok(Token::new(kind, (start, end).into())));
-                (acc, end)
+                let end_offset = start_offset + (text.len() as u32);
+                let end_position = start_position + text::RelativePosition::from(text);
+                acc.push(
+                    Ok(
+                        Token::new(
+                            kind,
+                            (
+                                (start_offset, end_offset).into(),
+                                (start_position, end_position).into()
+                            )
+                        )
+                    )
+                );
+                (acc, (end_offset, end_position))
             });
             assert_eq!(tokens, expected);
         }
@@ -26,11 +37,28 @@ macro_rules!  test_tokens {
 }
 
 macro_rules! test_token {
-    {#[test]fn $name:ident($source:expr) -> Token($kind:expr, ($line:expr, $column:expr));} => {
+    {#[test]fn $name:ident($source:expr) -> Token($kind:expr, ($start_offset:expr, $end_offset:expr));} => {
         #[test]
         fn $name() {
-            let tokens = tokenize(&textwrap::dedent($source).trim()).collect::<Vec<_>>();
-            assert_eq!(tokens, [Ok(Token::new($kind, ($line, $column).into()))]);
+            let source = textwrap::dedent($source);
+            let source = source.trim();
+            let tokens = tokenize(&source).collect::<Vec<_>>();
+            let start_position = text::Position::MIN;
+            let end_position = start_position + text::RelativePosition::from(source);
+            assert_eq!(
+                tokens,
+                [
+                    Ok(
+                        Token::new(
+                            $kind,
+                            (
+                                ($start_offset, $end_offset).into(),
+                                (start_position, end_position).into()
+                            )
+                        )
+                    )
+                ]
+            );
         }
     }
 }

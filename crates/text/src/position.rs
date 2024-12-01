@@ -12,6 +12,15 @@ pub struct Position {
 }
 
 impl Position {
+    pub const MAX: Position = Position {
+        line: Line::MAX,
+        column: Column::MAX,
+    };
+    pub const MIN: Position = Position {
+        line: Line::MIN,
+        column: Column::MIN,
+    };
+
     #[inline]
     pub fn new(line: Line, column: Column) -> Self {
         Self { line, column }

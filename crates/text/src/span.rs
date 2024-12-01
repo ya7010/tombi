@@ -19,6 +19,16 @@ impl std::fmt::Debug for Span {
 }
 
 impl Span {
+    pub const MAX: Span = Span {
+        start: Offset::MAX,
+        end: Offset::MAX,
+    };
+
+    pub const MIN: Span = Span {
+        start: Offset::MIN,
+        end: Offset::MIN,
+    };
+
     /// Creates a new `Span` with the given `start` and `end` (`start..end`).
     ///
     /// # Panics

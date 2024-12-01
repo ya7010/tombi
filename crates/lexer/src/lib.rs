@@ -101,38 +101,38 @@ impl Cursor<'_> {
                 self.bump();
                 if self.is_keyword("inf") || self.is_keyword("nan") {
                     self.eat_n(2);
-                    Token::new(SyntaxKind::FLOAT, self.span())
+                    Token::new(SyntaxKind::FLOAT, self.pop_span_range())
                 } else if self.current().is_ascii_digit() {
                     self.number()
                 } else {
                     self.eat_while(|c| !is_token_separator(c));
-                    Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+                    Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
                 }
             }
-            '{' => Token::new(T!('{'), self.span()),
-            '}' => Token::new(T!('}'), self.span()),
-            '[' => Token::new(T!('['), self.span()),
-            ']' => Token::new(T!(']'), self.span()),
-            ',' => Token::new(T!(,), self.span()),
-            '.' => Token::new(T!(.), self.span()),
-            '=' => Token::new(T!(=), self.span()),
+            '{' => Token::new(T!('{'), self.pop_span_range()),
+            '}' => Token::new(T!('}'), self.pop_span_range()),
+            '[' => Token::new(T!('['), self.pop_span_range()),
+            ']' => Token::new(T!(']'), self.pop_span_range()),
+            ',' => Token::new(T!(,), self.pop_span_range()),
+            '.' => Token::new(T!(.), self.pop_span_range()),
+            '=' => Token::new(T!(=), self.pop_span_range()),
             'A'..='Z' | 'a'..='z' | '_' => {
                 if self.is_keyword("inf") || self.is_keyword("nan") {
                     self.eat_n(2);
-                    Token::new(SyntaxKind::FLOAT, self.span())
+                    Token::new(SyntaxKind::FLOAT, self.pop_span_range())
                 } else if self.is_keyword("true") {
                     self.eat_n(3);
-                    Token::new(SyntaxKind::BOOLEAN, self.span())
+                    Token::new(SyntaxKind::BOOLEAN, self.pop_span_range())
                 } else if self.is_keyword("false") {
                     self.eat_n(4);
-                    Token::new(SyntaxKind::BOOLEAN, self.span())
+                    Token::new(SyntaxKind::BOOLEAN, self.pop_span_range())
                 } else {
                     self.key()
                 }
             }
             _ => {
                 self.eat_while(|c| !is_token_separator(c));
-                Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+                Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
             }
         };
 
@@ -145,14 +145,14 @@ impl Cursor<'_> {
 
     fn whitespace(&mut self) -> Token {
         self.eat_while(|c| is_whitespace(c));
-        Token::new(SyntaxKind::WHITESPACE, self.span())
+        Token::new(SyntaxKind::WHITESPACE, self.pop_span_range())
     }
 
     fn line_comment(&mut self) -> Token {
         assert!(self.current() == '#');
 
         self.eat_while(|c| !matches!(c, '\n' | '\r'));
-        Token::new(SyntaxKind::COMMENT, self.span())
+        Token::new(SyntaxKind::COMMENT, self.pop_span_range())
     }
 
     fn is_line_break(&self) -> bool {
@@ -170,7 +170,7 @@ impl Cursor<'_> {
             1
         };
 
-        Token::new(SyntaxKind::LINE_BREAK, self.span())
+        Token::new(SyntaxKind::LINE_BREAK, self.pop_span_range())
     }
 
     #[inline]
@@ -194,26 +194,26 @@ impl Cursor<'_> {
             }
 
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::OFFSET_DATE_TIME, self.span());
+                return Token::new(SyntaxKind::OFFSET_DATE_TIME, self.pop_span_range());
             }
         } else if let Some(m) = REGEX_LOCAL_DATE_TIME.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::LOCAL_DATE_TIME, self.span());
+                return Token::new(SyntaxKind::LOCAL_DATE_TIME, self.pop_span_range());
             }
         } else if let Some(m) = REGEX_LOCAL_DATE.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::LOCAL_DATE, self.span());
+                return Token::new(SyntaxKind::LOCAL_DATE, self.pop_span_range());
             }
         }
 
         self.eat_while(|c| !is_token_separator(c));
-        Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
     }
 
     fn is_time(&self) -> bool {
@@ -230,10 +230,10 @@ impl Cursor<'_> {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
-            Token::new(SyntaxKind::LOCAL_TIME, self.span())
+            Token::new(SyntaxKind::LOCAL_TIME, self.pop_span_range())
         } else {
             self.eat_while(|c| !is_line_break(c) && !is_whitespace(c));
-            Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+            Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
         }
     }
 
@@ -245,7 +245,7 @@ impl Cursor<'_> {
             }
 
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::FLOAT, self.span());
+                return Token::new(SyntaxKind::FLOAT, self.pop_span_range());
             }
         } else if let Some(m) = REGEX_INTEGER_BIN.find(&line) {
             if m.end() > 1 {
@@ -253,7 +253,7 @@ impl Cursor<'_> {
             }
 
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::INTEGER_BIN, self.span());
+                return Token::new(SyntaxKind::INTEGER_BIN, self.pop_span_range());
             }
         } else if let Some(m) = REGEX_INTEGER_OCT.find(&line) {
             if m.end() > 1 {
@@ -261,14 +261,14 @@ impl Cursor<'_> {
             }
 
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::INTEGER_OCT, self.span());
+                return Token::new(SyntaxKind::INTEGER_OCT, self.pop_span_range());
             }
         } else if let Some(m) = REGEX_INTEGER_HEX.find(&line) {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::INTEGER_HEX, self.span());
+                return Token::new(SyntaxKind::INTEGER_HEX, self.pop_span_range());
             }
         } else if let Some(m) = REGEX_INTEGER_DEC.find(&line) {
             if m.end() > 1 {
@@ -276,12 +276,12 @@ impl Cursor<'_> {
             }
 
             if is_token_separator(self.peek(1)) {
-                return Token::new(SyntaxKind::INTEGER_DEC, self.span());
+                return Token::new(SyntaxKind::INTEGER_DEC, self.pop_span_range());
             }
         }
 
         self.eat_while(|c| !is_token_separator(c));
-        Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
     }
 
     fn basic_string(&mut self) -> Token {
@@ -305,18 +305,18 @@ impl Cursor<'_> {
 
         while let Some(c) = self.bump() {
             match c {
-                _ if c == quote => return Token::new(kind, self.span()),
+                _ if c == quote => return Token::new(kind, self.pop_span_range()),
                 '\\' if self.peek(1) == quote => {
                     self.bump();
                 }
                 _ if is_line_break(self.peek(1)) => {
-                    return Token::new(SyntaxKind::INVALID_TOKEN, self.span());
+                    return Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range());
                 }
                 _ => (),
             }
         }
 
-        Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
     }
 
     fn multi_line_string(&mut self, kind: SyntaxKind, quote: char) -> Token {
@@ -326,22 +326,22 @@ impl Cursor<'_> {
             match c {
                 _ if self.current() == quote && self.peek(1) == quote && self.peek(2) == quote => {
                     self.eat_n(2);
-                    return Token::new(kind, self.span());
+                    return Token::new(kind, self.pop_span_range());
                 }
                 _ => (),
             }
         }
 
-        Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+        Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
     }
 
     fn key(&mut self) -> Token {
         self.eat_while(|c| matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-'));
         if is_token_separator(self.peek(1)) {
-            Token::new(SyntaxKind::BARE_KEY, self.span())
+            Token::new(SyntaxKind::BARE_KEY, self.pop_span_range())
         } else {
             self.eat_while(|c| !is_token_separator(c));
-            Token::new(SyntaxKind::INVALID_TOKEN, self.span())
+            Token::new(SyntaxKind::INVALID_TOKEN, self.pop_span_range())
         }
     }
 }

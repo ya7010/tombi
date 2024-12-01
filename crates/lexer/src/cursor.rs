@@ -1,9 +1,11 @@
 pub struct Cursor<'a> {
     /// Iterator over chars. Slightly faster than a &str.
     chars: std::str::Chars<'a>,
-    current: char,
-    offset: text::Offset,
-    token_start: text::Offset,
+    current_char: char,
+    current_offset: text::Offset,
+    current_position: text::Position,
+    token_start_offset: text::Offset,
+    token_start_position: text::Position,
 }
 
 pub(crate) const EOF_CHAR: char = '\0';
@@ -15,15 +17,17 @@ impl<'a> Cursor<'a> {
 
         Cursor {
             chars: input.chars(),
-            current,
-            offset: Default::default(),
-            token_start: Default::default(),
+            current_char: current,
+            current_offset: Default::default(),
+            current_position: Default::default(),
+            token_start_offset: Default::default(),
+            token_start_position: Default::default(),
         }
     }
 
     #[inline]
     pub(crate) fn current(&self) -> char {
-        self.current
+        self.current_char
     }
 
     pub fn peek(&self, i: usize) -> char {
@@ -40,7 +44,7 @@ impl<'a> Cursor<'a> {
     pub fn peeks_with_current(&self, size: usize) -> String {
         let mut iter = self.chars.clone();
         let mut s = String::with_capacity(size + 1);
-        s.push(self.current);
+        s.push(self.current_char);
         for _ in 0..size {
             if let Some(c) = iter.next() {
                 s.push(c);
@@ -54,7 +58,7 @@ impl<'a> Cursor<'a> {
     pub fn peek_with_current_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
         let mut iter = self.chars.clone();
         let mut s = String::new();
-        s.push(self.current);
+        s.push(self.current_char);
         while let Some(c) = iter.next() {
             if predicate(c) {
                 s.push(c);
@@ -68,7 +72,7 @@ impl<'a> Cursor<'a> {
     /// Checks if the charactor at the current position is a expected.
     pub fn matches(&self, expected: &str) -> bool {
         let mut iter = expected.chars();
-        if iter.next() != Some(self.current) {
+        if iter.next() != Some(self.current_char) {
             return false;
         }
         for (i, c) in iter.enumerate() {
@@ -87,11 +91,12 @@ impl<'a> Cursor<'a> {
     /// Moves to the next character.
     pub(crate) fn bump(&mut self) -> Option<char> {
         if let Some(c) = self.chars.next() {
-            self.offset += text::Offset::new(c.len_utf8() as u32);
-            self.current = c;
+            self.current_offset += text::Offset::new(c.len_utf8() as u32);
+            self.current_position += text::RelativePosition::from(c.to_string().as_str());
+            self.current_char = c;
             Some(c)
         } else {
-            self.current = EOF_CHAR;
+            self.current_char = EOF_CHAR;
             None
         }
     }
@@ -115,10 +120,18 @@ impl<'a> Cursor<'a> {
     }
 
     #[inline]
-    pub(crate) fn span(&mut self) -> text::Span {
-        let start = self.token_start;
-        let end = self.offset;
-        self.token_start = self.offset;
-        text::Span::new(start.into(), end.into())
+    pub(crate) fn pop_span_range(&mut self) -> (text::Span, text::Range) {
+        let start_offset = self.token_start_offset;
+        let end_offset = self.current_offset;
+        let start_position = self.token_start_position;
+        let end_position = self.current_position;
+
+        self.token_start_offset = self.current_offset;
+        self.token_start_position = self.current_position;
+
+        (
+            text::Span::new(start_offset, end_offset),
+            text::Range::new(start_position, end_position),
+        )
     }
 }
