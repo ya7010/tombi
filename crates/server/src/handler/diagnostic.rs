@@ -37,8 +37,8 @@ pub async fn get_diagnostics(document: Option<&Document>) -> Vec<tower_lsp::lsp_
             .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
                 range: tower_lsp::lsp_types::Range::from(diagnostic.range()),
                 severity: Some(match diagnostic.level() {
-                    diagnostic::Level::Warning => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
-                    diagnostic::Level::Error => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
+                    diagnostic::Level::WARNING => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
+                    diagnostic::Level::ERROR => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
                 }),
                 message: diagnostic.message().to_string(),
                 ..Default::default()

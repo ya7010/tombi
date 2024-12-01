@@ -2,29 +2,29 @@ use nu_ansi_term::{Color, Style};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum Level {
-    Error,
-    Warning,
+    ERROR,
+    WARNING,
 }
 
 impl Level {
     pub const fn as_str(&self) -> &'static str {
         match self {
-            Level::Error => "Error",
-            Level::Warning => "Warning",
+            Level::ERROR => "Error",
+            Level::WARNING => "Warning",
         }
     }
 
     pub fn as_padded_str(&self) -> &'static str {
         match self {
-            Level::Error => "  Error",
-            Level::Warning => "Warning",
+            Level::ERROR => "  Error",
+            Level::WARNING => "Warning",
         }
     }
 
     pub fn color(&self) -> Color {
         match self {
-            Level::Error => Color::Red,
-            Level::Warning => Color::Yellow,
+            Level::ERROR => Color::Red,
+            Level::WARNING => Color::Yellow,
         }
     }
 }
@@ -32,8 +32,8 @@ impl Level {
 impl From<Level> for Style {
     fn from(val: Level) -> Self {
         match val {
-            Level::Error => Style::new().bold().fg(Color::Red),
-            Level::Warning => Style::new().bold().fg(Color::Yellow),
+            Level::ERROR => Style::new().bold().fg(Color::Red),
+            Level::WARNING => Style::new().bold().fg(Color::Yellow),
         }
     }
 }

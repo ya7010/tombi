@@ -16,7 +16,7 @@ impl Diagnostic {
     #[inline]
     pub fn new_warning(message: impl Into<String>, range: impl Into<text::Range>) -> Self {
         Self {
-            level: level::Level::Warning,
+            level: level::Level::WARNING,
             message: message.into(),
             range: range.into(),
             source_file: None,
@@ -26,7 +26,7 @@ impl Diagnostic {
     #[inline]
     pub fn new_error(message: impl Into<String>, range: impl Into<text::Range>) -> Self {
         Self {
-            level: level::Level::Error,
+            level: level::Level::ERROR,
             message: message.into(),
             range: range.into(),
             source_file: None,

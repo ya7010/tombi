@@ -71,7 +71,7 @@ impl Print<Pretty> for Error {
 
 impl Print<Simple> for Error {
     fn print(&self, printer: Simple) {
-        Level::Error.print(printer);
+        Level::ERROR.print(printer);
         println!(": {}", Style::new().bold().paint(self.to_string()));
     }
 }
