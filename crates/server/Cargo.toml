@@ -6,7 +6,6 @@ authors = { workspace = true }
 license = { workspace = true }
 
 [dependencies]
-anyhow = { workspace = true, features = ["backtrace"] }
 ast = { workspace = true }
 camino = { workspace = true }
 clap = { workspace = true, features = ["string"] }

@@ -8,7 +8,7 @@ mod toml;
 #[derive(clap::Args, Debug)]
 pub struct Args {}
 
-pub async fn serve(_args: impl Into<Args>) -> Result<(), anyhow::Error> {
+pub async fn serve(_args: impl Into<Args>) {
     tracing::info!(
         "Tombi LSP Server Version \"{}\" will start.",
         env!("CARGO_PKG_VERSION")
@@ -24,6 +24,4 @@ pub async fn serve(_args: impl Into<Args>) -> Result<(), anyhow::Error> {
         .await;
 
     tracing::info!("Tombi LSP Server did shut down.");
-
-    Ok(())
 }

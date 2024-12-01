@@ -12,7 +12,6 @@ name = "tombi"
 path = "src/main.rs"
 
 [dependencies]
-anyhow.workspace = true
 clap = { workspace = true, features = ["derive"] }
 clap-verbosity-flag = { workspace = true }
 config = { workspace = true, features = ["clap"] }
