@@ -1,4 +1,3 @@
-mod inline_table_last_comma;
 mod key_empty;
 pub use key_empty::KeyEmptyRule;
 
