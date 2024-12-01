@@ -13,7 +13,6 @@ pub(crate) struct Parser<'t> {
     input: &'t Input,
     pos: usize,
     pub(crate) events: Vec<crate::Event>,
-    steps: Cell<u32>,
     toml_version: TomlVersion,
 }
 
@@ -23,7 +22,6 @@ impl<'t> Parser<'t> {
             input,
             pos: 0,
             events: Vec::new(),
-            steps: Cell::new(0),
             toml_version,
         }
     }
@@ -51,9 +49,6 @@ impl<'t> Parser<'t> {
     }
 
     pub(crate) fn nth(&self, n: usize) -> SyntaxKind {
-        let steps = self.steps.get();
-        self.steps.set(steps + 1);
-
         self.input.kind(self.pos + n)
     }
 
@@ -147,7 +142,6 @@ impl<'t> Parser<'t> {
 
     fn do_bump(&mut self, kind: SyntaxKind, n_raw_tokens: u8) {
         self.pos += n_raw_tokens as usize;
-        self.steps.set(0);
         self.push_event(Event::Token { kind, n_raw_tokens });
     }
 
