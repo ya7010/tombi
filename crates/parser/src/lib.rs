@@ -70,10 +70,32 @@ pub fn build_green_tree(
 #[cfg(test)]
 #[macro_export]
 macro_rules! test_parser {
-    {#[test] fn $name:ident($source:expr) -> Err([$(SyntaxError($error_kind:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
+    {#[test] fn $name:ident($source:expr) -> Ok(_)} => {
         #[test]
         fn $name() {
-            let p = crate::parse(textwrap::dedent($source).trim(), config::TomlVersion::default());
+            let p = crate::parse(textwrap::dedent($source).trim(), Default::default());
+
+            assert_eq!(p.errors(), vec![])
+        }
+    };
+
+    {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(_)} => {
+        #[test]
+        fn $name() {
+            let p = crate::parse(textwrap::dedent($source).trim(), $toml_version);
+
+            assert_eq!(p.errors(), vec![])
+        }
+    };
+
+    {#[test] fn $name:ident($source:expr) -> Err([$(SyntaxError($error_kind:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
+        crate::test_parser! {#[test] fn $name($source, Default::default()) -> Err([$(SyntaxError($error_kind, $line1:$column1..$line2:$column2)),*])}
+    };
+
+    {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err([$(SyntaxError($error_kind:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
+        #[test]
+        fn $name() {
+            let p = crate::parse(textwrap::dedent($source).trim(), $toml_version);
 
             assert_eq!(p.errors(), vec![$(crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*])
         }

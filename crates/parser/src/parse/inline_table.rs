@@ -74,3 +74,65 @@ impl Parse for ast::InlineTable {
         m.complete(p, INLINE_TABLE);
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::test_parser;
+    use crate::ErrorKind::*;
+    use config::TomlVersion;
+
+    test_parser! {
+        #[test]
+        fn empty_inline_table("key = {}") -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_single_key("key = { key = 1 }") -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_multi_keys("key = { key = 1, key = 2 }") -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_multi_keys_with_tailing_comma_v1_0_0("key = { key = 1, key = 2, }", TomlVersion::V1_0_0) -> Err([
+            SyntaxError(ForbiddenInlineTableLastComma, 0:24..0:25),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_multi_keys_with_tailing_comma_v1_1_0("key = { key = 1, key = 2, }", TomlVersion::V1_1_0_Preview) -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_multi_line_v1_0_0(r#"
+            key = {
+                key1 = 1,
+                key2 = 2,
+            }
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Err([
+            SyntaxError(InlineTableMustSingleLine, 0:6..3:1),
+            SyntaxError(ForbiddenInlineTableLastComma, 2:12..2:13),
+
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_multi_line_v1_1_0(r#"
+            key = {
+                key1 = 1,
+                key2 = 2,
+            }
+            "#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(_)
+    }
+}
