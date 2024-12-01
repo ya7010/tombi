@@ -1,3 +1,20 @@
+/// This module provides types to represent text positions in tombi.
+///
+/// We maintain two forms of source code position information.
+///
+/// - [`Position`][crate::Position] represents an absolute position in terms of line and column.
+/// - [`Offset`][crate::Offset] represents an absolute offset from the beginning of the text.
+///
+/// We also provide [`Range`] and [`Span`] to indicate text ranges.
+///
+/// - [`Range`][crate::Range] is a struct that represents a range of text as `(Position, Position)`.
+/// - [`Span`][crate::Span] is a struct that represents a range of text as `(Offset, Offset)`.
+///
+/// The biggest difference from Rust Analyzer's Red-Green Tree is that we preserve two representations,
+/// [`Position`][crate::Position] and [`Offset`][crate::Offset], in the tree.
+/// This increases the memory size of the tree,
+/// but makes it much easier to implement features that work with the tree.
+///
 mod features;
 mod offset;
 mod position;
