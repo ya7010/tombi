@@ -1,8 +1,3 @@
-use super::Table;
-
-#[derive(Debug)]
-pub struct Root(Table);
-
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Key {
     range: text::Range,

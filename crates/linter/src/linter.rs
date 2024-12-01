@@ -19,6 +19,7 @@ impl<'a> Linter<'a> {
     }
 
     #[inline]
+    #[allow(dead_code)]
     pub fn toml_version(&self) -> TomlVersion {
         self.toml_version
     }

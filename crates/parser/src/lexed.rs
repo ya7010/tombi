@@ -123,10 +123,6 @@ impl<'a> LexedStr<'a> {
         self.tokens[i].span().into()
     }
 
-    fn text_start_position(&self, i: usize) -> text::Position {
-        text::Position::from_source(&self.source, self.tokens[i].span().start())
-    }
-
     pub fn text_len(&self, i: usize) -> usize {
         assert!(i < self.len());
         let r = self.text_range(i);

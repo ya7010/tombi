@@ -1,4 +1,4 @@
-use super::{leading_comments, tailing_comment, Parse, TS_COMMEMT_OR_LINE_END};
+use super::{leading_comments, tailing_comment, Parse};
 use crate::parser::Parser;
 use crate::ErrorKind::*;
 use syntax::{SyntaxKind::*, T};

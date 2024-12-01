@@ -13,7 +13,6 @@ mod token_set;
 use config::TomlVersion;
 pub use error::{Error, ErrorKind};
 pub use event::Event;
-use input::Input;
 use lexed::lex;
 pub use lexed::LexedStr;
 use output::Output;
