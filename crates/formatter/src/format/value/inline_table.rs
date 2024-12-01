@@ -5,7 +5,7 @@ use crate::{
 use ast::AstNode;
 use std::fmt::Write;
 
-use super::comment::{BeginDanglingComment, EndDanglingComment};
+use crate::format::comment::{BeginDanglingComment, EndDanglingComment};
 
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {

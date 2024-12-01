@@ -1,6 +1,8 @@
+mod array;
 mod boolean;
 mod date_time;
 mod float;
+mod inline_table;
 mod integer;
 mod string;
 

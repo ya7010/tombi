@@ -3,7 +3,7 @@ use ast::AstNode;
 use crate::Format;
 use std::fmt::Write;
 
-use super::comment::{
+use crate::format::comment::{
     BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
 };
 
