@@ -28,20 +28,4 @@ impl Marker {
         }
         p.push_event(Event::Finish);
     }
-
-    /// Abandons the syntax tree node. All its children
-    /// are attached to its parent instead.
-    pub(crate) fn abandon(mut self, p: &mut Parser<'_>) {
-        self.bomb.defuse();
-        let idx = self.event_index as usize;
-        if idx == p.events.len() - 1 {
-            match p.events.pop() {
-                Some(Event::Start {
-                    kind: SyntaxKind::TOMBSTONE,
-                    forward_parent: None,
-                }) => (),
-                _ => unreachable!(),
-            }
-        }
-    }
 }
