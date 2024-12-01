@@ -33,6 +33,12 @@ pub enum ErrorKind {
 
     #[error("Invalid key")]
     InvalidKey,
+
+    #[error("Inline table must be single line")]
+    InlineTableMustSingleLine,
+
+    #[error("Forbidden last comma in inline table")]
+    ForbiddenInlineTableLastComma,
 }
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]

@@ -24,6 +24,10 @@ impl<'t> Parser<'t> {
         }
     }
 
+    pub fn toml_version(&self) -> TomlVersion {
+        self.toml_version
+    }
+
     pub(crate) fn finish(self) -> Vec<crate::Event> {
         self.events
     }
@@ -61,6 +65,10 @@ impl<'t> Parser<'t> {
             T!["]]"] => self.at_composite2(n, T![']'], T![']']),
             _ => self.input.kind(self.pos + n) == kind,
         }
+    }
+
+    pub(crate) fn nth_range(&self, n: usize) -> text::Range {
+        self.input.range(self.pos + n)
     }
 
     fn at_composite2(&self, n: usize, k1: SyntaxKind, k2: SyntaxKind) -> bool {
