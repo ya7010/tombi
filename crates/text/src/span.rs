@@ -35,7 +35,7 @@ impl Span {
     ///
     /// assert_eq!(span.start(), start);
     /// assert_eq!(span.end(), end);
-    /// assert_eq!(span.len(), end - start);
+    /// assert_eq!(Offset::new(span.len()), end - start);
     /// ```
     #[inline]
     pub const fn new(start: Offset, end: Offset) -> Span {
@@ -93,7 +93,7 @@ impl Span {
     /// # point = Offset::from(12);
     /// let span = Span::up_to(point);
     ///
-    /// assert_eq!(span.len(), point);
+    /// assert_eq!(Offset::new(span.len()), point);
     /// assert_eq!(span, Span::new(0.into(), point));
     /// assert_eq!(span, Span::at(0.into(), point));
     /// ```
