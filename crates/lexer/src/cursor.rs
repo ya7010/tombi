@@ -92,7 +92,7 @@ impl<'a> Cursor<'a> {
     pub(crate) fn bump(&mut self) -> Option<char> {
         if let Some(c) = self.chars.next() {
             self.current_offset += text::Offset::new(c.len_utf8() as u32);
-            self.current_position += text::RelativePosition::from(c.to_string().as_str());
+            self.current_position += text::RelativePosition::from(c);
             self.current_char = c;
             Some(c)
         } else {

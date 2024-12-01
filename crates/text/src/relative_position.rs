@@ -62,6 +62,17 @@ impl From<&str> for RelativePosition {
     }
 }
 
+impl From<char> for RelativePosition {
+    #[inline]
+    fn from(c: char) -> Self {
+        if c == '\n' {
+            Self { line: 1, column: 0 }
+        } else {
+            Self { line: 0, column: 1 }
+        }
+    }
+}
+
 impl Add for RelativePosition {
     type Output = RelativePosition;
 
