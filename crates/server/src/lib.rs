@@ -1,3 +1,5 @@
+use config::TomlVersion;
+
 mod backend;
 mod document;
 mod document_symbol;
@@ -6,9 +8,13 @@ mod toml;
 
 /// Run TOML Language Server
 #[derive(clap::Args, Debug)]
-pub struct Args {}
+pub struct Args {
+    /// TOML version.
+    #[arg(long, value_enum, default_value = None)]
+    toml_version: Option<TomlVersion>,
+}
 
-pub async fn serve(_args: impl Into<Args>) {
+pub async fn serve(args: impl Into<Args>) {
     tracing::info!(
         "Tombi LSP Server Version \"{}\" will start.",
         env!("CARGO_PKG_VERSION")
@@ -16,8 +22,12 @@ pub async fn serve(_args: impl Into<Args>) {
 
     let stdin = tokio::io::stdin();
     let stdout = tokio::io::stdout();
+    let args = args.into();
 
-    let (service, socket) = tower_lsp::LspService::build(crate::backend::Backend::new).finish();
+    let (service, socket) = tower_lsp::LspService::build(|client| {
+        crate::backend::Backend::new(client, args.toml_version)
+    })
+    .finish();
 
     tower_lsp::Server::new(stdin, stdout, socket)
         .serve(service)

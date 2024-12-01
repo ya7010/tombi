@@ -1,3 +1,4 @@
+use config::LintOptions;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
@@ -13,7 +14,12 @@ pub async fn handle_diagnostic(
     tracing::info!("handle_diagnostic");
 
     let diagnostics = match backend.documents.get(&text_document.uri).as_deref() {
-        Some(document) => linter::lint(&document.source).map_or_else(
+        Some(document) => linter::lint_with(
+            &document.source,
+            backend.toml_version.unwrap_or_default(),
+            &LintOptions::default(),
+        )
+        .map_or_else(
             |diagnostics| {
                 diagnostics
                     .into_iter()

@@ -78,6 +78,23 @@
           "scope": "resource",
           "default": null,
           "pattern": "^.*tombi(\\.exe)?$"
+        },
+        "tombi.args": {
+          "description": "Arguments to `tombi serve` command.",
+          "type": "array",
+          "scope": "resource",
+          "default": null,
+          "items": {
+            "type": "string",
+            "minItems": 1
+          }
+        },
+        "tombi.tomlVersion": {
+          "description": "Version of the TOML specification to use.",
+          "type": "string",
+          "scope": "resource",
+          "default": null,
+          "enum": ["v1.0.0", "v1.1.0-preview"]
         }
       }
     }

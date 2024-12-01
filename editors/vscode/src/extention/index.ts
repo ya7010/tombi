@@ -34,7 +34,7 @@ export class Extension {
     const client = new node.LanguageClient(
       EXTENTION_ID,
       `${EXTENTION_NAME} Language Server`,
-      serverOptions(server.tombiBin.path),
+      serverOptions(server.tombiBin.path, settings),
       clientOptions(),
       // biome-ignore lint/complexity/useLiteralKeys: <explanation>
       process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] !== undefined,

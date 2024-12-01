@@ -34,5 +34,8 @@
     {
       "path": "xtask"
     }
-  ]
+  ],
+  "settings": {
+    "tombi.tomlVersion": "v1.1.0-preview"
+  }
 }

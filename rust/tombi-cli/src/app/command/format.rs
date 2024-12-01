@@ -1,5 +1,5 @@
 use crate::app::arg;
-use config::TomlVersion;
+use config::{FormatOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
 use std::io::{Read, Seek, Write};
 
@@ -16,8 +16,8 @@ pub struct Args {
     check: bool,
 
     /// TOML version.
-    #[arg(long, value_enum, default_value_t = TomlVersion::default())]
-    toml_version: TomlVersion,
+    #[arg(long, value_enum, default_value = None)]
+    toml_version: Option<TomlVersion>,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -118,7 +118,11 @@ where
 {
     let mut source = String::new();
     if file.read_to_string(&mut source).is_ok() {
-        match formatter::format_with(&source, args.toml_version, &Default::default()) {
+        match formatter::format_with(
+            &source,
+            args.toml_version.unwrap_or_default(),
+            &FormatOptions::default(),
+        ) {
             Ok(formatted) => {
                 if source != formatted {
                     if args.check {

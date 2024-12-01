@@ -1,4 +1,3 @@
-use config::TomlVersion;
 use dashmap::try_result::TryResult;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
@@ -26,7 +25,7 @@ pub async fn handle_formatting(
 
     match formatter::format_with(
         &document.source,
-        TomlVersion::V1_1_0_Preview,
+        backend.toml_version.unwrap_or_default(),
         &Default::default(),
     ) {
         Ok(new_text) => {
