@@ -33,8 +33,8 @@ pub(crate) trait Parse {
 }
 
 pub fn invalid_line(p: &mut Parser<'_>, kind: crate::ErrorKind) {
+    p.error(crate::Error::new(kind, p.current_range()));
     p.bump_any();
-    p.error(crate::Error::new(kind, p.current_span()));
     while !p.at_ts(TS_LINE_END) {
         p.bump_any();
     }

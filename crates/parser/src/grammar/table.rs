@@ -60,7 +60,7 @@ mod test {
                 key2 = 2
                 "#
         ) -> Err([
-            SyntaxError(ExpectedKey, 0:0..0:1),
+            SyntaxError(ExpectedKey, 0:1..0:2),
         ])
     }
 
@@ -73,7 +73,7 @@ mod test {
             key2 = 2
             "#
         ) -> Err([
-            SyntaxError(ExpectedKey, 0:4..0:5),
+            SyntaxError(ExpectedKey, 0:5..0:6),
         ])
     }
 
@@ -107,7 +107,7 @@ mod test {
             key2 = 2
             "#
         ) -> Err([
-            SyntaxError(ExpectedValue, 5:5..5:6),
+            SyntaxError(ExpectedValue, 5:6..6:0),
         ])
     }
 

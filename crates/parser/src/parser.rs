@@ -38,8 +38,16 @@ impl<'t> Parser<'t> {
     }
 
     #[inline]
-    pub(crate) fn current_span(&self) -> text::Span {
-        self.input.span(self.pos)
+    pub(crate) fn current_range(&self) -> text::Range {
+        self.input.range(self.pos)
+    }
+
+    #[inline]
+    pub(crate) fn previous_range(&self) -> text::Range {
+        match self.pos.checked_sub(1) {
+            Some(pos) => self.input.range(pos),
+            None => text::Range::default(),
+        }
     }
 
     pub(crate) fn nth(&self, n: usize) -> SyntaxKind {

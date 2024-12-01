@@ -4,7 +4,7 @@ mod generated;
 mod language;
 
 pub use builder::SyntaxTreeBuilder;
-pub use error::{Error, SyntaxError};
+pub use error::Error;
 pub use generated::SyntaxKind;
 pub use language::TomlLanguage;
 

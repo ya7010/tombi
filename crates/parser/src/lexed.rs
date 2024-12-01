@@ -23,7 +23,6 @@ pub enum Step<'a> {
     FinishNode,
     Error {
         error: crate::Error,
-        position: text::Position,
     },
 }
 
@@ -183,11 +182,7 @@ impl<'a> LexedStr<'a> {
                 output::Step::Enter { kind } => builder.enter(kind),
                 output::Step::Exit => builder.exit(),
                 output::Step::Error { error } => {
-                    let start_position = builder.lexed.text_start_position(builder.token_index);
-                    (builder.sink)(Step::Error {
-                        error,
-                        position: start_position,
-                    });
+                    (builder.sink)(Step::Error { error });
                 }
             }
         }

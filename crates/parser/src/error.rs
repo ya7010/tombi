@@ -38,20 +38,24 @@ pub enum ErrorKind {
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub struct Error {
     kind: ErrorKind,
-    span: text::Span,
+    range: text::Range,
 }
 
 impl Error {
-    pub fn new(kind: ErrorKind, span: text::Span) -> Self {
-        Self { kind, span }
+    pub fn new(kind: ErrorKind, range: text::Range) -> Self {
+        Self { kind, range }
     }
 
     pub fn kind(&self) -> ErrorKind {
         self.kind
     }
 
-    pub fn span(&self) -> text::Span {
-        self.span
+    pub fn message(&self) -> String {
+        self.kind.to_string()
+    }
+
+    pub fn range(&self) -> text::Range {
+        self.range
     }
 }
 

@@ -51,10 +51,13 @@ fn parse_invalid_value(p: &mut Parser<'_>, n: usize) {
         leading_comments(p);
     }
 
+    let start_range = p.current_range();
+    let mut end_range = start_range;
     while !p.at_ts(TS_COMMEMT_OR_LINE_END) {
+        end_range = p.current_range();
         p.bump_any();
     }
-    p.error(crate::Error::new(ExpectedValue, p.current_span()));
+    p.error(crate::Error::new(ExpectedValue, start_range + end_range));
 
     tailing_comment(p);
 

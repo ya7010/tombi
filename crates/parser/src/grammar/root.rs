@@ -43,7 +43,7 @@ fn unknwon_line(p: &mut Parser<'_>) {
     while !p.at_ts(TS_LINE_END) {
         p.bump_any();
     }
-    p.error(crate::Error::new(UnknownLine, p.current_span()));
+    p.error(crate::Error::new(UnknownLine, p.current_range()));
 
     tailing_comment(p);
 

@@ -33,7 +33,7 @@ impl Parse for ast::InlineTable {
             if p.nth_at(n, T![,]) {
                 ast::Comma::parse(p);
             } else if !p.nth_at(n, T!['}']) {
-                p.error(crate::Error::new(ExpectedComma, p.current_span()));
+                p.error(crate::Error::new(ExpectedComma, p.current_range()));
                 p.bump_any();
             }
         }
@@ -41,7 +41,7 @@ impl Parse for ast::InlineTable {
         end_dangling_comments(p);
 
         if !p.eat(T!['}']) {
-            p.error(crate::Error::new(ExpectedBraceEnd, p.current_span()));
+            p.error(crate::Error::new(ExpectedBraceEnd, p.current_range()));
         }
 
         tailing_comment(p);

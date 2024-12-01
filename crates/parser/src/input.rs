@@ -49,8 +49,8 @@ impl Input {
         self.tokens.get(idx).map_or(EOF, |t| t.kind())
     }
 
-    pub(crate) fn span(&self, idx: usize) -> text::Span {
-        self.tokens.get(idx).unwrap_or(&lexer::Token::eof()).span()
+    pub(crate) fn range(&self, idx: usize) -> text::Range {
+        self.tokens.get(idx).unwrap_or(&lexer::Token::eof()).range()
     }
 
     pub(crate) fn is_joint(&self, n: usize) -> bool {

@@ -42,7 +42,7 @@ fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             if let Some(kind) = eat_key(p) {
                 m.complete(p, kind);
             } else {
-                p.error(crate::Error::new(ExpectedKey, p.current_span()));
+                p.error(crate::Error::new(ExpectedKey, p.current_range()));
                 m.complete(p, INVALID_TOKEN);
                 return None;
             }
@@ -57,7 +57,7 @@ fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             m.complete(p, kind);
             Some(kind)
         } else {
-            p.error(crate::Error::new(ExpectedKey, p.current_span()));
+            p.error(crate::Error::new(ExpectedKey, p.current_range()));
             m.complete(p, INVALID_TOKEN);
             None
         }

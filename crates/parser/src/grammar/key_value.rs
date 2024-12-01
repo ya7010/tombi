@@ -12,14 +12,11 @@ impl Parse for ast::KeyValue {
         ast::Keys::parse(p);
 
         if !p.eat(T![=]) {
-            if !p.at(LINE_BREAK) {
-                p.bump_remap(INVALID_TOKEN);
-            }
-            p.error(crate::Error::new(ExpectedEqual, p.current_span()));
+            p.error(crate::Error::new(ExpectedEqual, p.current_range()));
         }
 
-        if p.at_ts(TS_COMMEMT_OR_LINE_END) {
-            p.error(crate::Error::new(ExpectedValue, p.current_span()));
+        if p.at(COMMENT) {
+            p.error(crate::Error::new(ExpectedValue, p.previous_range()));
         } else {
             ast::Value::parse(p);
         }
@@ -38,8 +35,8 @@ mod test {
     test_parser! {
         #[test]
         fn only_key("key1") -> Err([
-            SyntaxError(ExpectedEqual, 0:0..0:4),
-            SyntaxError(ExpectedValue, 0:0..0:4),
+            SyntaxError(ExpectedEqual, 0:4..0:4),
+            SyntaxError(ExpectedValue, 0:4..0:4),
         ])
     }
 
@@ -131,7 +128,6 @@ mod test {
             "#
         ) -> Err([
             SyntaxError(ExpectedEqual, 0:5..0:12),
-            SyntaxError(ExpectedValue, 0:5..0:12),
         ])
     }
 

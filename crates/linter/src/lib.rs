@@ -26,6 +26,7 @@ pub fn lint_with(
         .into_iter()
         .map(|error| Diagnostic::new_error(error.message(), error.range()))
         .collect::<Vec<_>>();
+
     if let Some(root) = ast::Root::cast(p.into_syntax_node()) {
         let mut linter = Linter::new(toml_version, _options);
         root.lint(&mut linter);

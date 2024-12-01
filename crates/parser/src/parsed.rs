@@ -1,26 +1,20 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use ast::AstNode;
-use syntax::{SyntaxError, SyntaxNode};
-
-use crate::validation;
+use syntax::SyntaxNode;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Parsed<T> {
     green_tree: rg_tree::GreenNode,
-    errors: Option<Arc<[syntax::SyntaxError]>>,
+    errors: Vec<crate::Error>,
     _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> Parsed<T> {
-    pub fn new(green_tree: rg_tree::GreenNode, errors: Vec<SyntaxError>) -> Parsed<T> {
+    pub fn new(green_tree: rg_tree::GreenNode, errors: Vec<crate::Error>) -> Parsed<T> {
         Parsed {
             green_tree,
-            errors: if errors.is_empty() {
-                None
-            } else {
-                Some(errors.into())
-            },
+            errors,
             _ty: PhantomData,
         }
     }
@@ -33,14 +27,8 @@ impl<T> Parsed<T> {
         SyntaxNode::new_root(self.green_tree)
     }
 
-    pub fn errors(&self) -> Vec<SyntaxError> {
-        let mut errors = if let Some(e) = self.errors.as_deref() {
-            e.to_vec()
-        } else {
-            vec![]
-        };
-        validation::validate(&self.syntax_node(), &mut errors);
-        errors
+    pub fn errors(&self) -> &[crate::Error] {
+        &self.errors
     }
 }
 
@@ -75,10 +63,11 @@ impl<T: AstNode> Parsed<T> {
     }
 
     /// Converts from `Parse<T>` to [`Result<T, Vec<SyntaxError>>`].
-    pub fn ok(self) -> Result<T, Vec<SyntaxError>> {
-        match self.errors() {
-            errors if !errors.is_empty() => Err(errors),
-            _ => Ok(self.tree()),
+    pub fn ok(self) -> Result<T, Vec<crate::Error>> {
+        if self.errors.is_empty() {
+            Ok(self.tree())
+        } else {
+            Err(self.errors)
         }
     }
 }
@@ -93,6 +82,18 @@ impl Parsed<SyntaxNode> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn try_cast<N: AstNode>(self) -> Result<N, Vec<crate::Error>> {
+        if !self.errors.is_empty() {
+            return Err(self.errors);
+        }
+        match self.cast::<N>() {
+            Some(parsed) => parsed.ok(),
+            None => {
+                unreachable!("TOML Root node is always a valid AST node even if source is empty.")
+            }
         }
     }
 }

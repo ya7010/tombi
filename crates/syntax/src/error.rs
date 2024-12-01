@@ -12,36 +12,3 @@ impl Error {
         }
     }
 }
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SyntaxError {
-    message: String,
-    range: text::Range,
-}
-
-impl SyntaxError {
-    pub fn new(message: impl Into<String>, range: text::Range) -> Self {
-        Self {
-            message: message.into(),
-            range,
-        }
-    }
-
-    pub fn message(&self) -> &str {
-        &self.message
-    }
-
-    pub fn position(&self) -> text::Position {
-        self.range.start()
-    }
-
-    pub fn range(&self) -> text::Range {
-        self.range
-    }
-}
-
-impl std::fmt::Display for SyntaxError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}

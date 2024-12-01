@@ -59,7 +59,7 @@ mod test {
             key1 = 1
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedKey, 0:0..0:2)])
+        ) -> Err([SyntaxError(ExpectedKey, 0:2..0:3)])
     }
 
     test_parser! {
@@ -70,7 +70,7 @@ mod test {
             key1 = 1
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedKey, 0:5..0:6)])
+        ) -> Err([SyntaxError(ExpectedKey, 0:6..0:7)])
     }
 
     test_parser! {

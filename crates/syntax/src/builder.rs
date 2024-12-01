@@ -2,14 +2,14 @@ use rg_tree::Language;
 
 use crate::TomlLanguage;
 
-#[derive(Default, Debug)]
-pub struct SyntaxTreeBuilder {
-    errors: Vec<crate::SyntaxError>,
+#[derive(Debug)]
+pub struct SyntaxTreeBuilder<E> {
     inner: rg_tree::GreenNodeBuilder<'static>,
+    errors: Vec<E>,
 }
 
-impl SyntaxTreeBuilder {
-    pub fn finish(self) -> (rg_tree::GreenNode, Vec<crate::SyntaxError>) {
+impl<E> SyntaxTreeBuilder<E> {
+    pub fn finish(self) -> (rg_tree::GreenNode, Vec<E>) {
         let green = self.inner.finish();
         (green, self.errors)
     }
@@ -28,7 +28,16 @@ impl SyntaxTreeBuilder {
         self.inner.finish_node();
     }
 
-    pub fn error(&mut self, message: String, range: text::Range) {
-        self.errors.push(crate::SyntaxError::new(message, range));
+    pub fn error(&mut self, error: E) {
+        self.errors.push(error);
+    }
+}
+
+impl<E> Default for SyntaxTreeBuilder<E> {
+    fn default() -> SyntaxTreeBuilder<E> {
+        SyntaxTreeBuilder {
+            inner: rg_tree::GreenNodeBuilder::new(),
+            errors: Vec::new(),
+        }
     }
 }
