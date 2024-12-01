@@ -56,7 +56,7 @@ impl Output {
         self.events.iter().map(|&event| {
             if event & Self::EVENT_MASK == 0 {
                 return Step::Error {
-                    error: self.errors[(event as usize) >> Self::ERROR_SHIFT],
+                    error: self.errors[(event as usize) >> Self::ERROR_SHIFT].clone(),
                 };
             }
             let tag = ((event & Self::TAG_MASK) >> Self::TAG_SHIFT) as u8;

@@ -12,7 +12,7 @@ mod token_set;
 mod validation;
 
 use config::TomlVersion;
-pub use error::Error;
+pub use error::{Error, ErrorKind};
 pub use event::Event;
 use grammar::Parse;
 use input::Input;
@@ -72,7 +72,7 @@ macro_rules! test_parser {
         fn $name() {
             let p = crate::parse(textwrap::dedent($source).trim(), config::TomlVersion::default());
 
-            assert_eq!(p.errors(), vec![$(syntax::SyntaxError::new($error, (($line1, $column1), ($line2, $column2)).into())),*])
+            assert_eq!(p.errors(), vec![$(syntax::SyntaxError::new($error.to_string(), (($line1, $column1), ($line2, $column2)).into())),*])
         }
     };
 }

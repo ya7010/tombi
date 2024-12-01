@@ -1,5 +1,6 @@
 use syntax::{SyntaxKind::*, T};
 
+use crate::ErrorKind::*;
 use crate::{
     grammar::{
         begin_dangling_comments, end_dangling_comments, leading_comments, peek_leading_comments,
@@ -32,7 +33,7 @@ impl Parse for ast::InlineTable {
             if p.nth_at(n, T![,]) {
                 ast::Comma::parse(p);
             } else if !p.nth_at(n, T!['}']) {
-                p.error(crate::Error::ExpectedComma);
+                p.error(crate::Error::new(ExpectedComma, p.current_span()));
                 p.bump_any();
             }
         }
@@ -40,7 +41,7 @@ impl Parse for ast::InlineTable {
         end_dangling_comments(p);
 
         if !p.eat(T!['}']) {
-            p.error(crate::Error::ExpectedBraceEnd);
+            p.error(crate::Error::new(ExpectedBraceEnd, p.current_span()));
         }
 
         tailing_comment(p);

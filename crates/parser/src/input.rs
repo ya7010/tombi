@@ -49,6 +49,10 @@ impl Input {
         self.tokens.get(idx).map_or(EOF, |t| t.kind())
     }
 
+    pub(crate) fn span(&self, idx: usize) -> text::Span {
+        self.tokens.get(idx).unwrap_or(&lexer::Token::eof()).span()
+    }
+
     pub(crate) fn is_joint(&self, n: usize) -> bool {
         let (idx, b_idx) = self.bit_index(n);
         self.joints[idx] & 1 << b_idx != 0

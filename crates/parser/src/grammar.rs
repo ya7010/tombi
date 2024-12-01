@@ -32,11 +32,11 @@ pub(crate) trait Parse {
     fn parse(p: &mut Parser<'_>);
 }
 
-pub fn invalid_line(p: &mut Parser<'_>, error: crate::Error) {
+pub fn invalid_line(p: &mut Parser<'_>, kind: crate::ErrorKind) {
     p.bump_any();
-    p.error(error);
+    p.error(crate::Error::new(kind, p.current_span()));
     while !p.at_ts(TS_LINE_END) {
-        p.bump_any()
+        p.bump_any();
     }
 }
 

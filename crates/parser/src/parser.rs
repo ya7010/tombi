@@ -37,6 +37,11 @@ impl<'t> Parser<'t> {
         self.nth(0)
     }
 
+    #[inline]
+    pub(crate) fn current_span(&self) -> text::Span {
+        self.input.span(self.pos)
+    }
+
     pub(crate) fn nth(&self, n: usize) -> SyntaxKind {
         let steps = self.steps.get();
         self.steps.set(steps + 1);

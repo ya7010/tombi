@@ -1,6 +1,7 @@
 use syntax::T;
 
 use super::Parse;
+use crate::ErrorKind::*;
 use crate::{
     grammar::{
         invalid_line, leading_comments, peek_leading_comments, tailing_comment, TS_LINE_END,
@@ -23,7 +24,7 @@ impl Parse for ast::ArrayOfTable {
         ast::Keys::parse(p);
 
         if !p.eat(T!("]]")) {
-            invalid_line(p, crate::Error::ExpectedDoubleBracketEnd);
+            invalid_line(p, ExpectedDoubleBracketEnd);
         }
 
         tailing_comment(p);
@@ -37,7 +38,7 @@ impl Parse for ast::ArrayOfTable {
             ast::KeyValue::parse(p);
 
             if !p.at_ts(TS_LINE_END) {
-                invalid_line(p, crate::Error::ExpectedLineBreakOrComment);
+                invalid_line(p, ExpectedLineBreakOrComment);
             }
         }
 
@@ -48,7 +49,7 @@ impl Parse for ast::ArrayOfTable {
 #[cfg(test)]
 mod test {
     use crate::test_parser;
-    use crate::Error::*;
+    use crate::ErrorKind::*;
 
     test_parser! {
         #[test]

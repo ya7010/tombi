@@ -6,6 +6,7 @@ use syntax::{
 use crate::{parser::Parser, token_set::TokenSet};
 
 use super::Parse;
+use crate::ErrorKind::*;
 
 pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
@@ -41,7 +42,7 @@ fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             if let Some(kind) = eat_key(p) {
                 m.complete(p, kind);
             } else {
-                p.error(crate::Error::ExpectedKey);
+                p.error(crate::Error::new(ExpectedKey, p.current_span()));
                 m.complete(p, INVALID_TOKEN);
                 return None;
             }
@@ -56,7 +57,7 @@ fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
             m.complete(p, kind);
             Some(kind)
         } else {
-            p.error(crate::Error::ExpectedKey);
+            p.error(crate::Error::new(ExpectedKey, p.current_span()));
             m.complete(p, INVALID_TOKEN);
             None
         }

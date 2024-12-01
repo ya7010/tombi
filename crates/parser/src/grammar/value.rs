@@ -2,6 +2,7 @@ use super::{
     leading_comments, peek_leading_comments, tailing_comment, Parse, TS_COMMEMT_OR_LINE_END,
 };
 use crate::parser::Parser;
+use crate::ErrorKind::*;
 use syntax::{SyntaxKind::*, T};
 
 impl Parse for ast::Value {
@@ -53,7 +54,7 @@ fn parse_invalid_value(p: &mut Parser<'_>, n: usize) {
     while !p.at_ts(TS_COMMEMT_OR_LINE_END) {
         p.bump_any();
     }
-    p.error(crate::Error::ExpectedValue);
+    p.error(crate::Error::new(ExpectedValue, p.current_span()));
 
     tailing_comment(p);
 

@@ -1,9 +1,10 @@
 use super::{leading_comments, tailing_comment, Parse, TS_COMMEMT_OR_LINE_END};
 use crate::parser::Parser;
+use crate::ErrorKind::*;
 use syntax::{SyntaxKind::*, T};
 
 impl Parse for ast::KeyValue {
-    fn parse(p: &mut Parser<'_>) {
+    fn parse(p: &mut Parser) {
         let m = p.start();
 
         leading_comments(p);
@@ -14,11 +15,11 @@ impl Parse for ast::KeyValue {
             if !p.at(LINE_BREAK) {
                 p.bump_remap(INVALID_TOKEN);
             }
-            p.error(crate::Error::ExpectedEqual);
+            p.error(crate::Error::new(ExpectedEqual, p.current_span()));
         }
 
         if p.at_ts(TS_COMMEMT_OR_LINE_END) {
-            p.error(crate::Error::ExpectedValue);
+            p.error(crate::Error::new(ExpectedValue, p.current_span()));
         } else {
             ast::Value::parse(p);
         }
@@ -32,7 +33,7 @@ impl Parse for ast::KeyValue {
 #[cfg(test)]
 mod test {
     use crate::test_parser;
-    use crate::Error::*;
+    use crate::ErrorKind::*;
 
     test_parser! {
         #[test]

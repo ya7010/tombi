@@ -4,6 +4,7 @@ use super::{
     begin_dangling_comments, end_dangling_comments, key::KEY_FIRST, leading_comments,
     peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
 };
+use crate::ErrorKind::*;
 use syntax::{SyntaxKind::*, T};
 
 impl Parse for ast::Root {
@@ -42,7 +43,7 @@ fn unknwon_line(p: &mut Parser<'_>) {
     while !p.at_ts(TS_LINE_END) {
         p.bump_any();
     }
-    p.error(crate::Error::UnknownLine);
+    p.error(crate::Error::new(UnknownLine, p.current_span()));
 
     tailing_comment(p);
 

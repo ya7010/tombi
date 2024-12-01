@@ -1,6 +1,6 @@
 #[derive(thiserror::Error, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
-pub enum Error {
+pub enum ErrorKind {
     #[error("expected key")]
     ExpectedKey,
 
@@ -35,8 +35,28 @@ pub enum Error {
     InvalidKey,
 }
 
-impl From<Error> for String {
-    fn from(val: Error) -> Self {
-        val.to_string()
+#[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
+pub struct Error {
+    kind: ErrorKind,
+    span: text::Span,
+}
+
+impl Error {
+    pub fn new(kind: ErrorKind, span: text::Span) -> Self {
+        Self { kind, span }
+    }
+
+    pub fn kind(&self) -> ErrorKind {
+        self.kind
+    }
+
+    pub fn span(&self) -> text::Span {
+        self.span
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.kind.fmt(f)
     }
 }

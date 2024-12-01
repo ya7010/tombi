@@ -1,5 +1,6 @@
 use syntax::T;
 
+use crate::ErrorKind::*;
 use crate::{
     grammar::{
         begin_dangling_comments, end_dangling_comments, leading_comments, peek_leading_comments,
@@ -33,7 +34,7 @@ impl Parse for ast::Array {
             if p.nth_at(n, T![,]) {
                 ast::Comma::parse(p);
             } else if !p.nth_at(n, T![']']) {
-                p.error(crate::Error::ExpectedComma);
+                p.error(crate::Error::new(ExpectedComma, p.current_span()));
                 p.bump_any();
             }
         }
@@ -41,7 +42,7 @@ impl Parse for ast::Array {
         end_dangling_comments(p);
 
         if !p.eat(T![']']) {
-            p.error(crate::Error::ExpectedBracketEnd);
+            p.error(crate::Error::new(ExpectedBracketEnd, p.current_span()));
         }
 
         tailing_comment(p);
