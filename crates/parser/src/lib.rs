@@ -82,11 +82,29 @@ macro_rules! test_parser {
         }
     };
 
-    {#[test] fn $name:ident($source:expr) -> Err([$(SyntaxError($error_kind:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
+    {#[test] fn $name:ident($source:expr) -> Err(
+        [
+            $(
+                SyntaxError(
+                    $error_kind:ident,
+                    $line1:literal:$column1:literal..$line2:literal:$column2:literal
+                )
+            ),*$(,)*
+        ]
+    )} => {
         crate::test_parser! {#[test] fn $name($source, Default::default()) -> Err([$(SyntaxError($error_kind, $line1:$column1..$line2:$column2)),*])}
     };
 
-    {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err([$(SyntaxError($error_kind:ident, $line1:literal:$column1:literal..$line2:literal:$column2:literal)),*$(,)*])} => {
+    {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(
+        [
+            $(
+                SyntaxError(
+                    $error_kind:ident,
+                    $line1:literal:$column1:literal..$line2:literal:$column2:literal
+                )
+            ),*$(,)*
+        ]
+    )} => {
         #[test]
         fn $name() {
             let p = crate::parse(textwrap::dedent($source).trim(), $toml_version);
