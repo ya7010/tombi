@@ -64,9 +64,4 @@ impl Definitions {
     pub const fn singleline_inline_table_space_after_comma(&self) -> &'static str {
         " "
     }
-
-    #[inline]
-    pub const fn date_time_delimiter(&self) -> DateTimeDelimiter {
-        DateTimeDelimiter::T
-    }
 }

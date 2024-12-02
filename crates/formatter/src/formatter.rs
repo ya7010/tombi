@@ -1,9 +1,9 @@
-mod date_time_delimiter;
 pub mod definitions;
 
-use config::{LineEnding, TomlVersion};
-pub use date_time_delimiter::DateTimeDelimiter;
-
+use config::{
+    format::{DateTimeDelimiter, LineEnding},
+    TomlVersion,
+};
 use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
@@ -68,8 +68,8 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub const fn date_time_delimiter(&self) -> Option<&'static str> {
-        match self.defs.date_time_delimiter() {
+    pub fn date_time_delimiter(&self) -> Option<&'static str> {
+        match self.options.date_time_delimiter() {
             DateTimeDelimiter::T => Some("T"),
             DateTimeDelimiter::Space => Some(" "),
             DateTimeDelimiter::Preserve => None,

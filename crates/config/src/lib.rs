@@ -1,8 +1,7 @@
-mod format;
+pub mod format;
 mod lint;
 mod toml_version;
 pub use format::FormatOptions;
-pub use format::LineEnding;
 pub use lint::LintOptions;
 pub use toml_version::TomlVersion;
 

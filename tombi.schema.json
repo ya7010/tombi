@@ -51,10 +51,23 @@
       "type": "object",
       "properties": {
         "line-ending": {
-          "description": "The type of line ending.\n\n- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
+          "title": "The type of line ending.",
+          "description": "- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
           "anyOf": [
             {
               "$ref": "#/definitions/LineEnding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date-time-delimiter": {
+          "title": "The delimiter between date and time.",
+          "description": "- `T`: Example: `2021-01-01T00:00:00` - `space`: Example: `2021-01-01 00:00:00` - `preserve`: Preserve the original delimiter.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DateTimeDelimiter"
             },
             {
               "type": "null"
@@ -68,6 +81,32 @@
       "enum": [
         "lf",
         "crlf"
+      ]
+    },
+    "DateTimeDelimiter": {
+      "description": "DateTime delimiter",
+      "oneOf": [
+        {
+          "description": "Example: `2021-01-01T00:00:00`",
+          "type": "string",
+          "enum": [
+            "T"
+          ]
+        },
+        {
+          "description": "Example: `2021-01-01 00:00:00`",
+          "type": "string",
+          "enum": [
+            "space"
+          ]
+        },
+        {
+          "description": "Preserve the original delimiter",
+          "type": "string",
+          "enum": [
+            "preserve"
+          ]
+        }
       ]
     },
     "LintOptions": {
