@@ -68,10 +68,11 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub const fn date_time_delimiter(&self) -> &'static str {
+    pub const fn date_time_delimiter(&self) -> Option<&'static str> {
         match self.defs.date_time_delimiter() {
-            DateTimeDelimiter::T => "T",
-            DateTimeDelimiter::Space => " ",
+            DateTimeDelimiter::T => Some("T"),
+            DateTimeDelimiter::Space => Some(" "),
+            DateTimeDelimiter::Preserve => None,
         }
     }
 

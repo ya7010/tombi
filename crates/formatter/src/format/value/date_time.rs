@@ -18,7 +18,9 @@ macro_rules! impl_date_time_format {
 
                 let token = self.token().unwrap();
                 let mut text = token.text().to_string();
-                text.replace_range(10..11, &f.date_time_delimiter().to_string());
+                if let Some(delimiter) = f.date_time_delimiter() {
+                    text.replace_range(10..11, &delimiter.to_string());
+                }
 
                 f.write_indent()?;
                 write!(f, "{}", text)?;
