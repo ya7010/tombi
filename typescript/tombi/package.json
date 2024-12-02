@@ -1,5 +1,5 @@
 {
-  "name": "tombi",
+  "name": "@tombi/tombi",
   "version": "0.0.1",
   "description": "Reserved package for tombi",
   "main": "index.ts",
@@ -10,6 +10,14 @@
   "author": "yassun7010",
   "license": "MIT",
   "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yassun7010/tombi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yassun7010/tombi/issues"
+  },
+  "homepage": "https://github.com/yassun7010/tombi#readme",
   "devDependencies": {
     "@types/node": "^22.10.1",
     "typescript": "^5.7.2"
