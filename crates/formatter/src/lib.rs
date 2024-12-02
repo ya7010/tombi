@@ -215,7 +215,8 @@ key6 = 3  # key value tailing comment
 
 # end dangling comment1
 # end dangling comment2
-"#)
+"#,
+    TomlVersion::V1_1_0_Preview)
         -> Ok(source);
     }
 }
