@@ -46,16 +46,10 @@ pub fn build_green_tree(
     parser_output: crate::Output,
 ) -> (rg_tree::GreenNode, Vec<crate::Error>) {
     let mut builder = syntax::SyntaxTreeBuilder::<crate::Error>::default();
-    let mut enter_position = Default::default();
 
     let _ = lexed.intersperse_trivia(&parser_output, &mut |step| match step {
-        lexed::Step::AddToken {
-            kind,
-            text,
-            position,
-        } => {
+        lexed::Step::AddToken { kind, text } => {
             builder.token(kind, text);
-            enter_position = position;
         }
         lexed::Step::StartNode { kind } => {
             builder.start_node(kind);

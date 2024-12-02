@@ -97,17 +97,12 @@ impl<'a, 'b> Builder<'a, 'b> {
     }
 
     pub fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
-        let start_position = self.position;
         let text = &self
             .lexed
             .range_text(self.token_index..self.token_index + n_tokens);
         self.token_index += n_tokens;
         self.position = self.position.add_text(text);
 
-        (self.sink)(lexed::Step::AddToken {
-            kind,
-            text,
-            position: start_position,
-        });
+        (self.sink)(lexed::Step::AddToken { kind, text });
     }
 }
