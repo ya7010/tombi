@@ -88,7 +88,7 @@ impl<'a> Formatter<'a> {
 
             Ok(())
         } else {
-            write!(self, "{}", self.defs.ident(self.indent_depth))
+            write!(self, "{}", self.options().ident(self.indent_depth))
         }
     }
 

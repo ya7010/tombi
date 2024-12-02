@@ -50,6 +50,31 @@
     "FormatOptions": {
       "type": "object",
       "properties": {
+        "indent-style": {
+          "title": "The style of indentation.",
+          "description": "Whether to use spaces or tabs for indentation.",
+          "default": "space",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/IdentStyle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "indent-width": {
+          "title": "The number of spaces per indentation level.",
+          "default": 2,
+          "anyOf": [
+            {
+              "$ref": "#/definitions/IdentWidth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "line-ending": {
           "title": "The type of line ending.",
           "description": "In TOML, the line ending must be either `LF` or `CRLF`.\n\n- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
@@ -65,6 +90,7 @@
         "date-time-delimiter": {
           "title": "The delimiter between date and time.",
           "description": "In accordance with [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339), you can use `T` or space character between date and time.\n\n- `T`: Example: `2001-01-01T00:00:00` - `space`: Example: `2001-01-01 00:00:00` - `preserve`: Preserve the original delimiter.",
+          "default": "T",
           "anyOf": [
             {
               "$ref": "#/definitions/DateTimeDelimiter"
@@ -75,6 +101,18 @@
           ]
         }
       }
+    },
+    "IdentStyle": {
+      "type": "string",
+      "enum": [
+        "space",
+        "tab"
+      ]
+    },
+    "IdentWidth": {
+      "type": "integer",
+      "format": "uint8",
+      "minimum": 0.0
     },
     "LineEnding": {
       "type": "string",

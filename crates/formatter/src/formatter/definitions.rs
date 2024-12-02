@@ -5,11 +5,6 @@
 pub struct Definitions {}
 
 impl Definitions {
-    #[inline]
-    pub fn ident(&self, depth: u8) -> String {
-        " ".repeat((2 * depth) as usize)
-    }
-
     /// Returns the space before the tailing comment.
     ///
     /// ```toml
