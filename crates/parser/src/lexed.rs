@@ -114,10 +114,9 @@ impl<'a> LexedStr<'a> {
         self.tokens[i].span()
     }
 
-    pub fn text_len(&self, i: usize) -> usize {
+    pub fn text_len(&self, i: usize) -> text::RawOffset {
         assert!(i < self.len());
-        let r: std::ops::Range<usize> = self.text_span(i).into();
-        r.end - r.start
+        self.text_span(i).len()
     }
 
     pub fn error(&self, i: usize) -> Option<&str> {
