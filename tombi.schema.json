@@ -52,7 +52,7 @@
       "properties": {
         "line-ending": {
           "title": "The type of line ending.",
-          "description": "- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
+          "description": "In TOML, the line ending must be either `LF` or `CRLF`.\n\n- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
           "anyOf": [
             {
               "$ref": "#/definitions/LineEnding"
@@ -64,7 +64,7 @@
         },
         "date-time-delimiter": {
           "title": "The delimiter between date and time.",
-          "description": "- `T`: Example: `2021-01-01T00:00:00` - `space`: Example: `2021-01-01 00:00:00` - `preserve`: Preserve the original delimiter.",
+          "description": "In accordance with [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339), you can use `T` or space character between date and time.\n\n- `T`: Example: `2021-01-01T00:00:00` - `space`: Example: `2021-01-01 00:00:00` - `preserve`: Preserve the original delimiter.",
           "anyOf": [
             {
               "$ref": "#/definitions/DateTimeDelimiter"

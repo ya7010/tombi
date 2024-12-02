@@ -7,11 +7,15 @@ use crate::format::DateTimeDelimiter;
 pub struct FormatOptions {
     /// # The type of line ending.
     ///
+    /// In TOML, the line ending must be either `LF` or `CRLF`.
+    ///
     /// - `lf`: Line Feed only (`\n`), common on Linux and macOS as well as inside git repos.
     /// - `crlf`: Carriage Return Line Feed (`\r\n`), common on Windows.
     pub line_ending: Option<crate::format::LineEnding>,
 
     /// # The delimiter between date and time.
+    ///
+    /// In accordance with [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339), you can use `T` or space character between date and time.
     ///
     /// - `T`: Example: `2021-01-01T00:00:00`
     /// - `space`: Example: `2021-01-01 00:00:00`
