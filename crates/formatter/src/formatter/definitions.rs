@@ -1,5 +1,3 @@
-use super::DateTimeDelimiter;
-
 /// Definitions provides the definition of the format that does not have the freedom set by [`FormatOptions`][crate::FormatOptions].
 ///
 /// NOTE: Some of the items defined in Definitions may be moved to [`FormatOptions`][crate::FormatOptions] in the future.
