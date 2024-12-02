@@ -107,11 +107,14 @@ fn format_singleline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
+    for comment in array.leading_comments() {
+        LeadingComment(comment).fmt(f)?;
+    }
+
     f.write_indent()?;
     write!(f, "[{}", f.defs().singleline_array_bracket_inner_space())?;
 
-    let values = array.values().collect::<Vec<_>>();
-    for (i, value) in values.iter().enumerate() {
+    for (i, value) in array.values().enumerate() {
         if i > 0 {
             write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
         }

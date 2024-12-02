@@ -104,17 +104,29 @@ fn format_singleline_inline_table(
     }
 
     f.write_indent()?;
-    write!(f, "{{{}", f.defs().inline_table_brace_inner_space())?;
+    write!(
+        f,
+        "{{{}",
+        f.defs().singleline_inline_table_brace_inner_space()
+    )?;
 
     for (i, key_value) in table.key_values().enumerate() {
         if i > 0 {
-            write!(f, ", ")?;
+            write!(
+                f,
+                ",{}",
+                f.defs().singleline_inline_table_space_after_comma()
+            )?;
         }
         f.skip_indent();
         key_value.fmt(f)?;
     }
 
-    write!(f, "{}}}", f.defs().inline_table_brace_inner_space())?;
+    write!(
+        f,
+        "{}}}",
+        f.defs().singleline_inline_table_brace_inner_space()
+    )?;
 
     if let Some(comment) = table.tailing_comment() {
         TailingComment(comment).fmt(f)?;

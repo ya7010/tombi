@@ -50,7 +50,18 @@ impl Definitions {
     /// #      ^            ^  <- this space
     /// ```
     #[inline]
-    pub const fn inline_table_brace_inner_space(&self) -> &'static str {
+    pub const fn singleline_inline_table_brace_inner_space(&self) -> &'static str {
+        " "
+    }
+
+    /// Returns the space after the comma in an inline table.
+    ///
+    /// ```toml
+    /// key = { a = 1, b = 2 }
+    /// #             ^  <- this space
+    /// ```
+    #[inline]
+    pub const fn singleline_inline_table_space_after_comma(&self) -> &'static str {
         " "
     }
 
