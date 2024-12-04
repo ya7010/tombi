@@ -5,7 +5,6 @@ use crate::{lexed, LexedStr};
 pub struct Builder<'a, 'b> {
     pub(crate) lexed: &'a LexedStr<'a>,
     pub(crate) token_index: usize,
-    pub(crate) position: text::Position,
     pub(crate) state: State,
     pub(crate) sink: &'b mut dyn FnMut(lexed::Step<'_>),
 }
@@ -32,7 +31,6 @@ impl<'a, 'b> Builder<'a, 'b> {
         Self {
             lexed,
             token_index: 0,
-            position: Default::default(),
             state: State::PendingEnter,
             sink,
         }
@@ -101,7 +99,6 @@ impl<'a, 'b> Builder<'a, 'b> {
             .lexed
             .range_text(self.token_index..self.token_index + n_tokens);
         self.token_index += n_tokens;
-        self.position = self.position.add_text(text);
 
         (self.sink)(lexed::Step::AddToken { kind, text });
     }
