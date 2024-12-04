@@ -7,8 +7,9 @@
   - [ ] dotted keys のサポート
 
 ### Milestone 2
-- [ ] Document のサポート。
+- [x] Document のサポート。
 - [ ] JSON Schema のサポート
+- [ ] https://github.com/toml-lang/toml-test に対応
 
 ### Milestone 3
 - [ ] Linter の機能強化
@@ -23,8 +24,8 @@
 - [ ] Array
     - [ ] 複数行で最後にカンマがない場合、カンマを差し込む位置でコメントを考慮する
     - [ ] Array のカンマと要素の末尾コメントの関係を見て、カンマの位置を移動
-- [ ] Inline Table
-    - [ ] 現行の v1.0.0 では複数行の Inline Table がサポートされていないのでエラーを出力させる。
+- [x] Inline Table
+    - [x] 現行の v1.0.0 では複数行の Inline Table がサポートされていないのでエラーを出力させる。
 
 ### Refactor
 - [ ] 各crateのエラー型の整理
