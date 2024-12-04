@@ -893,6 +893,8 @@ dependencies = [
  "schemars",
  "serde",
  "syntax",
+ "text",
+ "thiserror",
 ]
 
 [[package]]

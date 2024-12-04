@@ -1,6 +1,8 @@
+mod error;
 mod lint;
 mod linter;
 mod rule;
+use error::ErrorKind;
 
 use ast::AstNode;
 pub use config::LintOptions;

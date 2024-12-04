@@ -13,3 +13,5 @@ parser.workspace = true
 schemars.workspace = true
 serde.workspace = true
 syntax.workspace = true
+text.workspace = true
+thiserror.workspace = true
