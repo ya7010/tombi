@@ -242,9 +242,9 @@ impl GreenNode {
         let mut text_rel_position = Default::default();
         let children = children.into_iter().map(|el| {
             let rel_offset = text_len;
-            let rel_position = el.text_rel_position();
+            let rel_position = text_rel_position;
             text_len += el.text_len();
-            text_rel_position += rel_position;
+            text_rel_position += el.text_rel_position();
 
             match el {
                 NodeOrToken::Node(node) => GreenChild::Node {
