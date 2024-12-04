@@ -105,7 +105,7 @@ impl GreenTokenData {
     }
 
     #[inline]
-    pub fn text_rel_position(&self) -> text::RelativePosition {
+    pub fn text_relative_position(&self) -> text::RelativePosition {
         text::RelativePosition::of(self.text())
     }
 }

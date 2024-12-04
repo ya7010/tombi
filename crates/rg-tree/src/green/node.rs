@@ -19,20 +19,20 @@ use crate::{
 pub(super) struct GreenNodeHead {
     kind: SyntaxKind,
     text_len: text::RelativeOffset,
-    text_rel_position: text::RelativePosition,
+    text_relative_position: text::RelativePosition,
     _c: Count<GreenNode>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GreenChild {
     Node {
-        rel_offset: text::RelativeOffset,
-        rel_position: text::RelativePosition,
+        relative_offset: text::RelativeOffset,
+        relative_position: text::RelativePosition,
         node: GreenNode,
     },
     Token {
-        rel_offset: text::RelativeOffset,
-        rel_position: text::RelativePosition,
+        relative_offset: text::RelativeOffset,
+        relative_position: text::RelativePosition,
         token: GreenToken,
     },
 }
@@ -143,8 +143,8 @@ impl GreenNodeData {
     }
 
     #[inline]
-    pub fn text_rel_position(&self) -> text::RelativePosition {
-        self.header().text_rel_position
+    pub fn text_relative_position(&self) -> text::RelativePosition {
+        self.header().text_relative_position
     }
 
     /// Children of this node.
@@ -178,8 +178,8 @@ impl GreenNodeData {
             .filter(|it| it.rel_span().contains_span(rel_span))?;
         Some((
             idx,
-            child.rel_offset(),
-            child.rel_position(),
+            child.relative_offset(),
+            child.relative_position(),
             child.as_ref(),
         ))
     }
@@ -239,22 +239,22 @@ impl GreenNode {
         I::IntoIter: ExactSizeIterator,
     {
         let mut text_len: text::RawOffset = 0;
-        let mut text_rel_position = Default::default();
+        let mut text_relative_position = Default::default();
         let children = children.into_iter().map(|el| {
-            let rel_offset = text_len;
-            let rel_position = text_rel_position;
+            let relative_offset = text_len;
+            let relative_position = text_relative_position;
             text_len += el.text_len();
-            text_rel_position += el.text_rel_position();
+            text_relative_position += el.text_relative_position();
 
             match el {
                 NodeOrToken::Node(node) => GreenChild::Node {
-                    rel_offset,
-                    rel_position,
+                    relative_offset,
+                    relative_position,
                     node,
                 },
                 NodeOrToken::Token(token) => GreenChild::Token {
-                    rel_offset,
-                    rel_position,
+                    relative_offset,
+                    relative_position,
                     token,
                 },
             }
@@ -264,7 +264,7 @@ impl GreenNode {
             GreenNodeHead {
                 kind,
                 text_len: 0,
-                text_rel_position: Default::default(),
+                text_relative_position: Default::default(),
                 _c: Count::new(),
             },
             children,
@@ -275,7 +275,10 @@ impl GreenNode {
         let data = {
             let mut data = Arc::from_thin(data);
             Arc::get_mut(&mut data).unwrap().header.text_len = text_len;
-            Arc::get_mut(&mut data).unwrap().header.text_rel_position = text_rel_position;
+            Arc::get_mut(&mut data)
+                .unwrap()
+                .header
+                .text_relative_position = text_relative_position;
             Arc::into_thin(data)
         };
 
@@ -306,27 +309,33 @@ impl GreenChild {
         }
     }
     #[inline]
-    pub(crate) fn rel_offset(&self) -> text::RelativeOffset {
+    pub(crate) fn relative_offset(&self) -> text::RelativeOffset {
         match self {
-            GreenChild::Node { rel_offset, .. } | GreenChild::Token { rel_offset, .. } => {
-                *rel_offset
+            GreenChild::Node {
+                relative_offset, ..
             }
+            | GreenChild::Token {
+                relative_offset, ..
+            } => *relative_offset,
         }
     }
 
     #[inline]
-    pub(crate) fn rel_position(&self) -> text::RelativePosition {
+    pub(crate) fn relative_position(&self) -> text::RelativePosition {
         match self {
-            GreenChild::Node { rel_position, .. } | GreenChild::Token { rel_position, .. } => {
-                *rel_position
+            GreenChild::Node {
+                relative_position, ..
             }
+            | GreenChild::Token {
+                relative_position, ..
+            } => *relative_position,
         }
     }
 
     #[inline]
     fn rel_span(&self) -> text::Span {
         let len = self.as_ref().text_len();
-        text::Span::at(text::Offset::new(self.rel_offset()), len)
+        text::Span::at(text::Offset::new(self.relative_offset()), len)
     }
 }
 

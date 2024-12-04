@@ -68,8 +68,8 @@ impl GreenElement {
     }
 
     #[inline]
-    pub fn text_rel_position(&self) -> text::RelativePosition {
-        self.as_deref().text_rel_position()
+    pub fn text_relative_position(&self) -> text::RelativePosition {
+        self.as_deref().text_relative_position()
     }
 }
 
@@ -93,10 +93,10 @@ impl GreenElementRef<'_> {
     }
 
     #[inline]
-    pub fn text_rel_position(self) -> text::RelativePosition {
+    pub fn text_relative_position(self) -> text::RelativePosition {
         match self {
-            NodeOrToken::Node(it) => it.text_rel_position(),
-            NodeOrToken::Token(it) => it.text_rel_position(),
+            NodeOrToken::Node(it) => it.text_relative_position(),
+            NodeOrToken::Token(it) => it.text_relative_position(),
         }
     }
 }

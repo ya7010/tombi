@@ -29,24 +29,6 @@ impl Span {
         end: Offset::MIN,
     };
 
-    /// Creates a new `Span` with the given `start` and `end` (`start..end`).
-    ///
-    /// # Panics
-    ///
-    /// Panics if `end < start`.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use text::*;
-    /// let start = Offset::from(5);
-    /// let end = Offset::from(10);
-    /// let span = Span::new(start, end);
-    ///
-    /// assert_eq!(span.start(), start);
-    /// assert_eq!(span.end(), end);
-    /// assert_eq!(Offset::new(span.len()), end - start);
-    /// ```
     #[inline]
     pub const fn new(start: Offset, end: Offset) -> Span {
         assert!(start.raw <= end.raw);
@@ -62,7 +44,7 @@ impl Span {
     /// let text = "0123456789";
     ///
     /// let offset = Offset::from(2);
-    /// let length = Offset::from(5);
+    /// let length = 5;
     /// let span = Span::at(offset, length);
     ///
     /// assert_eq!(span, Span::new(offset, offset + length));
@@ -90,28 +72,6 @@ impl Span {
         Span {
             start: offset,
             end: offset,
-        }
-    }
-
-    /// Create a span up to the given end (`..end`).
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use text::*;
-    /// let point: Offset;
-    /// # point = Offset::from(12);
-    /// let span = Span::up_to(point);
-    ///
-    /// assert_eq!(Offset::new(span.len()), point);
-    /// assert_eq!(span, Span::new(0.into(), point));
-    /// assert_eq!(span, Span::at(0.into(), point));
-    /// ```
-    #[inline]
-    pub const fn up_to(end: Offset) -> Span {
-        Span {
-            start: Offset::new(0),
-            end,
         }
     }
 }

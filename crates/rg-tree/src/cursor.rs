@@ -371,7 +371,7 @@ impl NodeData {
                 .raw
                 .nth(node.index() as usize)
                 .unwrap()
-                .rel_offset();
+                .relative_offset();
             node = parent;
         }
 
@@ -399,7 +399,7 @@ impl NodeData {
                 .raw
                 .nth(node.index() as usize)
                 .unwrap()
-                .rel_position();
+                .relative_position();
             node = parent;
         }
 
@@ -416,7 +416,7 @@ impl NodeData {
     #[inline]
     fn text_range(&self) -> text::Range {
         let start = self.position();
-        text::Range::at(start, self.green().text_rel_position())
+        text::Range::at(start, self.green().text_relative_position())
     }
 
     #[inline]
@@ -432,8 +432,8 @@ impl NodeData {
         siblings.find_map(|(index, child)| {
             child.as_ref().into_node().and_then(|green| {
                 let parent = self.parent_node()?;
-                let offset = parent.offset() + child.rel_offset();
-                let position = parent.position() + child.rel_position();
+                let offset = parent.offset() + child.relative_offset();
+                let position = parent.position() + child.relative_position();
                 Some(SyntaxNode::new_child(
                     green,
                     parent,
@@ -452,8 +452,8 @@ impl NodeData {
         rev_siblings.find_map(|(index, child)| {
             child.as_ref().into_node().and_then(|green| {
                 let parent = self.parent_node()?;
-                let offset = parent.offset() + child.rel_offset();
-                let position = parent.position() + child.rel_position();
+                let offset = parent.offset() + child.relative_offset();
+                let position = parent.position() + child.relative_position();
                 Some(SyntaxNode::new_child(
                     green,
                     parent,
@@ -471,8 +471,8 @@ impl NodeData {
 
         siblings.nth(index).and_then(|(index, child)| {
             let parent = self.parent_node()?;
-            let offset = parent.offset() + child.rel_offset();
-            let position = parent.position() + child.rel_position();
+            let offset = parent.offset() + child.relative_offset();
+            let position = parent.position() + child.relative_position();
             Some(SyntaxElement::new(
                 child.as_ref(),
                 parent,
@@ -488,8 +488,8 @@ impl NodeData {
 
         siblings.nth(index).and_then(|(index, child)| {
             let parent = self.parent_node()?;
-            let offset = parent.offset() + child.rel_offset();
-            let position = parent.position() + child.rel_position();
+            let offset = parent.offset() + child.relative_offset();
+            let position = parent.position() + child.relative_position();
             Some(SyntaxElement::new(
                 child.as_ref(),
                 parent,
@@ -766,8 +766,8 @@ impl SyntaxNode {
                         green,
                         self.clone(),
                         index as u32,
-                        self.offset() + child.rel_offset(),
-                        self.position() + child.rel_position(),
+                        self.offset() + child.relative_offset(),
+                        self.position() + child.relative_position(),
                     )
                 })
             })
@@ -784,8 +784,8 @@ impl SyntaxNode {
                         green,
                         self.clone(),
                         index as u32,
-                        self.offset() + child.rel_offset(),
-                        self.position() + child.rel_position(),
+                        self.offset() + child.relative_offset(),
+                        self.position() + child.relative_position(),
                     )
                 })
             })
@@ -797,8 +797,8 @@ impl SyntaxNode {
                 child.as_ref(),
                 self.clone(),
                 0,
-                self.offset() + child.rel_offset(),
-                self.position() + child.rel_position(),
+                self.offset() + child.relative_offset(),
+                self.position() + child.relative_position(),
             )
         })
     }
@@ -813,8 +813,8 @@ impl SyntaxNode {
                     child.as_ref(),
                     self.clone(),
                     index as u32,
-                    self.offset() + child.rel_offset(),
-                    self.position() + child.rel_position(),
+                    self.offset() + child.relative_offset(),
+                    self.position() + child.relative_position(),
                 )
             })
     }
@@ -943,13 +943,13 @@ impl SyntaxNode {
 
     pub fn child_or_token_at_span(&self, span: text::Span) -> Option<SyntaxElement> {
         self.green_ref().child_at_span(span - self.offset()).map(
-            |(index, rel_offset, rel_position, green)| {
+            |(index, relative_offset, relative_position, green)| {
                 SyntaxElement::new(
                     green,
                     self.clone(),
                     index as u32,
-                    self.offset() + rel_offset,
-                    self.position() + rel_position,
+                    self.offset() + relative_offset,
+                    self.position() + relative_position,
                 )
             },
         )
