@@ -374,3 +374,13 @@ impl InlineTable {
         support::has_inner_comments(self.syntax().children_with_tokens(), T!('{'), T!('}'))
     }
 }
+
+impl Key {
+    pub fn token(&self) -> Option<syntax::SyntaxToken> {
+        match self {
+            Key::BareKey(key) => key.token(),
+            Key::BasicString(key) => key.token(),
+            Key::LiteralString(key) => key.token(),
+        }
+    }
+}

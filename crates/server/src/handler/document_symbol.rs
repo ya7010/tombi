@@ -1,7 +1,8 @@
-use crate::backend::Backend;
+use crate::{
+    backend::Backend,
+    document_symbol::{Document, Value},
+};
 use ast::AstNode;
-use config::TomlVersion;
-use document::{Document, Value};
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -17,15 +18,15 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let p = parser::parse(&document.source, TomlVersion::default());
+    let p = parser::parse(&document.source, backend.toml_version.unwrap_or_default());
     if !p.errors().is_empty() {
         return Ok(None);
     }
 
-    let root = ast::Root::cast(p.into_syntax_node()).unwrap();
-    let Ok(document) = document::Document::try_from(root) else {
+    let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
         return Ok(None);
     };
+    let document = Document::from(root);
 
     let symbols = create_symbols(&document);
 
@@ -73,19 +74,7 @@ fn symbols_for_value(
                 tags: None,
             });
         }
-        Value::Integer { .. } => {
-            symbols.push(DocumentSymbol {
-                name,
-                kind: SymbolKind::NUMBER,
-                range: range.into(),
-                selection_range: selection_range.into(),
-                children: None,
-                detail: None,
-                deprecated: None,
-                tags: None,
-            });
-        }
-        Value::Float { .. } => {
+        Value::Integer { .. } | Value::Float { .. } => {
             symbols.push(DocumentSymbol {
                 name,
                 kind: SymbolKind::NUMBER,
@@ -127,7 +116,7 @@ fn symbols_for_value(
         Value::Array(array) => {
             let mut children = vec![];
             for (index, value) in array.values().iter().enumerate() {
-                symbols_for_value(index.to_string(), value, Some(range), &mut children);
+                symbols_for_value(format!("[{index}]"), value, Some(range), &mut children);
             }
 
             symbols.push(DocumentSymbol {
@@ -144,7 +133,7 @@ fn symbols_for_value(
         Value::Table(table) => {
             let mut children = vec![];
             for (key, value) in table.key_values() {
-                symbols_for_value(key.to_string(), value, Some(range), &mut children);
+                symbols_for_value(key.to_string(), value, Some(key.range()), &mut children);
             }
 
             symbols.push(DocumentSymbol {
