@@ -22,7 +22,7 @@ impl Position {
     };
 
     #[inline]
-    pub fn new(line: Line, column: Column) -> Self {
+    pub const fn new(line: Line, column: Column) -> Self {
         Self { line, column }
     }
 
