@@ -65,10 +65,22 @@ where
     let mut not_needed_num = 0;
     let mut error_num = 0;
 
+    let config = config::load();
+    let toml_version = args
+        .toml_version
+        .unwrap_or(config.toml_version.unwrap_or_default());
+    let options = config.format.unwrap_or_default();
+
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input formatting...");
-            match format_file(FormatFile::from_stdin(), printer, &args) {
+            match format_file(
+                FormatFile::from_stdin(),
+                printer,
+                &args,
+                toml_version,
+                &options,
+            ) {
                 Ok(true) => success_num += 1,
                 Ok(false) => not_needed_num += 1,
                 Err(_) => error_num += 1,
@@ -81,7 +93,9 @@ where
                         tracing::debug!("{:?} formatting...", path);
                         match FormatFile::from_file(&path) {
                             Ok(file) => {
-                                if let Ok(formatted) = format_file(file, printer, &args) {
+                                if let Ok(formatted) =
+                                    format_file(file, printer, &args, toml_version, &options)
+                                {
                                     match formatted {
                                         true => success_num += 1,
                                         false => not_needed_num += 1,
@@ -110,7 +124,13 @@ where
     (success_num, not_needed_num, error_num)
 }
 
-fn format_file<P>(mut file: FormatFile, printer: P, args: &Args) -> Result<bool, ()>
+fn format_file<P>(
+    mut file: FormatFile,
+    printer: P,
+    args: &Args,
+    toml_version: TomlVersion,
+    options: &FormatOptions,
+) -> Result<bool, ()>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -118,11 +138,7 @@ where
 {
     let mut source = String::new();
     if file.read_to_string(&mut source).is_ok() {
-        match formatter::format_with(
-            &source,
-            args.toml_version.unwrap_or_default(),
-            &FormatOptions::default(),
-        ) {
+        match formatter::format_with(&source, toml_version, options) {
             Ok(formatted) => {
                 if source != formatted {
                     if args.check {

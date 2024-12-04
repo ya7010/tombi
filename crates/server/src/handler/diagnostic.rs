@@ -1,4 +1,3 @@
-use config::LintOptions;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
@@ -17,7 +16,11 @@ pub async fn handle_diagnostic(
         Some(document) => linter::lint_with(
             &document.source,
             backend.toml_version.unwrap_or_default(),
-            &LintOptions::default(),
+            backend
+                .config
+                .lint
+                .as_ref()
+                .unwrap_or_else(|| &config::DEFAULT_LINT_OPTIONS),
         )
         .map_or_else(
             |diagnostics| {

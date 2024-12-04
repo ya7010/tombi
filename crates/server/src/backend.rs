@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use config::{Config, TomlVersion};
 use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
@@ -24,6 +24,7 @@ pub struct Backend {
     pub client: tower_lsp::Client,
     pub documents: DashMap<Url, Document>,
     pub toml_version: Option<TomlVersion>,
+    pub config: Config,
 }
 
 impl Backend {
@@ -32,6 +33,7 @@ impl Backend {
             client,
             documents: Default::default(),
             toml_version,
+            config: config::load(),
         }
     }
 }

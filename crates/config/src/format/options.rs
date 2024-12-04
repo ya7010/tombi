@@ -38,6 +38,15 @@ pub struct FormatOptions {
 }
 
 impl FormatOptions {
+    pub const fn default() -> Self {
+        Self {
+            indent_style: None,
+            indent_width: None,
+            line_ending: None,
+            date_time_delimiter: None,
+        }
+    }
+
     pub fn merge(&mut self, other: &FormatOptions) -> &mut Self {
         if let Some(line_ending) = other.line_ending {
             self.line_ending = Some(line_ending);

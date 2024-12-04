@@ -47,10 +47,16 @@ where
     let mut success_num = 0;
     let mut error_num = 0;
 
+    let config = config::load();
+    let toml_version = args
+        .toml_version
+        .unwrap_or(config.toml_version.unwrap_or_default());
+    let options = config.lint.unwrap_or_default();
+
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input linting...");
-            if lint_file(std::io::stdin(), printer, &args) {
+            if lint_file(std::io::stdin(), printer, toml_version, &options) {
                 success_num += 1;
             } else {
                 error_num += 1;
@@ -63,7 +69,7 @@ where
                         tracing::debug!("{:?} linting...", path);
                         match std::fs::File::open(&path) {
                             Ok(file) => {
-                                if lint_file(file, printer, &args) {
+                                if lint_file(file, printer, toml_version, &options) {
                                     success_num += 1;
                                     continue;
                                 }
@@ -89,7 +95,12 @@ where
     (success_num, error_num)
 }
 
-fn lint_file<R: Read, P>(mut reader: R, printer: P, args: &Args) -> bool
+fn lint_file<R: Read, P>(
+    mut reader: R,
+    printer: P,
+    toml_version: TomlVersion,
+    options: &LintOptions,
+) -> bool
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -97,11 +108,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
-        match linter::lint_with(
-            &source,
-            args.toml_version.unwrap_or_default(),
-            &LintOptions::default(),
-        ) {
+        match linter::lint_with(&source, toml_version, &options) {
             Ok(()) => {
                 return true;
             }

@@ -3,3 +3,9 @@
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone)]
 pub struct LintOptions {}
+
+impl LintOptions {
+    pub const fn default() -> Self {
+        Self {}
+    }
+}

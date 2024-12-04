@@ -16,3 +16,5 @@ schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 clap = { workspace = true, optional = true }
+toml = { workspace = true }
+tracing = { workspace = true }

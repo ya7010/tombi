@@ -26,7 +26,11 @@ pub async fn handle_formatting(
     match formatter::format_with(
         &document.source,
         backend.toml_version.unwrap_or_default(),
-        &Default::default(),
+        &backend
+            .config
+            .format
+            .as_ref()
+            .unwrap_or_else(|| &config::DEFAULT_FORMAT_OPTIONS),
     ) {
         Ok(new_text) => {
             if new_text != document.source {
