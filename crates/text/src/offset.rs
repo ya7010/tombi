@@ -115,37 +115,41 @@ impl From<Offset> for usize {
     }
 }
 
-macro_rules! ops {
-    (impl $Op:ident for Offset by fn $f:ident = $op:tt) => {
-        impl $Op<Offset> for Offset {
-            type Output = Offset;
-            #[inline]
-            fn $f(self, other: Offset) -> Offset {
-                Offset { raw: self.raw $op other.raw }
-            }
-        }
-        impl $Op<&Offset> for Offset {
-            type Output = Offset;
-            #[inline]
-            fn $f(self, other: &Offset) -> Offset {
-                self $op *other
-            }
-        }
-        impl<T> $Op<T> for &Offset
-        where
-            Offset: $Op<T, Output=Offset>,
-        {
-            type Output = Offset;
-            #[inline]
-            fn $f(self, other: T) -> Offset {
-                *self $op other
-            }
-        }
-    };
+impl Add<crate::RawOffset> for Offset {
+    type Output = Offset;
+
+    #[inline]
+    fn add(self, rhs: crate::RawOffset) -> Self::Output {
+        Offset::new(self.raw + rhs)
+    }
 }
 
-ops!(impl Add for Offset by fn add = +);
-ops!(impl Sub for Offset by fn sub = -);
+impl Add for Offset {
+    type Output = Offset;
+
+    #[inline]
+    fn add(self, rhs: crate::Offset) -> Self::Output {
+        Offset::new(self.raw + rhs.raw)
+    }
+}
+
+impl Sub for Offset {
+    type Output = Offset;
+
+    #[inline]
+    fn sub(self, rhs: crate::Offset) -> Self::Output {
+        Offset::new(self.raw - rhs.raw)
+    }
+}
+
+impl Sub<crate::RawOffset> for Offset {
+    type Output = Offset;
+
+    #[inline]
+    fn sub(self, rhs: crate::RawOffset) -> Self::Output {
+        Offset::new(self.raw - rhs)
+    }
+}
 
 impl<A> AddAssign<A> for Offset
 where

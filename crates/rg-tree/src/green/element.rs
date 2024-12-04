@@ -63,7 +63,7 @@ impl GreenElement {
 
     /// Returns the length of the text covered by this element.
     #[inline]
-    pub fn text_len(&self) -> text::Offset {
+    pub fn text_len(&self) -> text::RelativeOffset {
         self.as_deref().text_len()
     }
 
@@ -85,7 +85,7 @@ impl GreenElementRef<'_> {
 
     /// Returns the length of the text covered by this element.
     #[inline]
-    pub fn text_len(self) -> text::Offset {
+    pub fn text_len(self) -> text::RawOffset {
         match self {
             NodeOrToken::Node(it) => it.text_len(),
             NodeOrToken::Token(it) => it.text_len(),

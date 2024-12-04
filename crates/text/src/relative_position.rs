@@ -12,6 +12,20 @@ pub struct RelativePosition {
 }
 
 impl RelativePosition {
+    pub fn of(text: &str) -> Self {
+        let mut line = 0;
+        let mut column = 0;
+        for c in text.chars() {
+            if c == '\n' {
+                line += 1;
+                column = 0;
+            } else {
+                column += 1;
+            }
+        }
+        Self { line, column }
+    }
+
     #[inline]
     pub fn line(&self) -> Line {
         self.line
@@ -41,23 +55,6 @@ impl PartialOrd for RelativePosition {
 impl From<(Line, Column)> for RelativePosition {
     #[inline]
     fn from((line, column): (Line, Column)) -> Self {
-        Self { line, column }
-    }
-}
-
-impl From<&str> for RelativePosition {
-    #[inline]
-    fn from(text: &str) -> Self {
-        let mut line = 0;
-        let mut column = 0;
-        for c in text.chars() {
-            if c == '\n' {
-                line += 1;
-                column = 0;
-            } else {
-                column += 1;
-            }
-        }
         Self { line, column }
     }
 }
@@ -108,6 +105,6 @@ mod test {
     #[case("abc\ndef\nghi", (2, 3))]
     #[case("abc\r\ndef\r\nghi", (2, 3))]
     fn test_position(#[case] source: &str, #[case] expected: (Line, Column)) {
-        assert_eq!(RelativePosition::from(source), expected.into());
+        assert_eq!(RelativePosition::of(source), expected.into());
     }
 }

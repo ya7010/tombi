@@ -18,7 +18,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: SyntaxKind,
-    text_len: text::Offset,
+    text_len: text::RelativeOffset,
     text_rel_position: text::RelativePosition,
     _c: Count<GreenNode>,
 }
@@ -26,12 +26,12 @@ pub(super) struct GreenNodeHead {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GreenChild {
     Node {
-        rel_offset: text::Offset,
+        rel_offset: text::RelativeOffset,
         rel_position: text::RelativePosition,
         node: GreenNode,
     },
     Token {
-        rel_offset: text::Offset,
+        rel_offset: text::RelativeOffset,
         rel_position: text::RelativePosition,
         token: GreenToken,
     },
@@ -138,7 +138,7 @@ impl GreenNodeData {
 
     /// Returns the length of the text covered by this node.
     #[inline]
-    pub fn text_len(&self) -> text::Offset {
+    pub fn text_len(&self) -> text::RawOffset {
         self.header().text_len
     }
 
@@ -160,7 +160,7 @@ impl GreenNodeData {
         rel_span: text::Span,
     ) -> Option<(
         usize,
-        text::Offset,
+        text::RelativeOffset,
         text::RelativePosition,
         GreenElementRef<'_>,
     )> {
@@ -238,7 +238,7 @@ impl GreenNode {
         I: IntoIterator<Item = GreenElement>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: text::Offset = 0.into();
+        let mut text_len: text::RawOffset = 0;
         let mut text_rel_position = Default::default();
         let children = children.into_iter().map(|el| {
             let rel_offset = text_len;
@@ -263,7 +263,7 @@ impl GreenNode {
         let data = ThinArc::from_header_and_iter(
             GreenNodeHead {
                 kind,
-                text_len: 0.into(),
+                text_len: 0,
                 text_rel_position: Default::default(),
                 _c: Count::new(),
             },
@@ -306,7 +306,7 @@ impl GreenChild {
         }
     }
     #[inline]
-    pub(crate) fn rel_offset(&self) -> text::Offset {
+    pub(crate) fn rel_offset(&self) -> text::RelativeOffset {
         match self {
             GreenChild::Node { rel_offset, .. } | GreenChild::Token { rel_offset, .. } => {
                 *rel_offset
@@ -326,7 +326,7 @@ impl GreenChild {
     #[inline]
     fn rel_span(&self) -> text::Span {
         let len = self.as_ref().text_len();
-        text::Span::at(self.rel_offset(), len)
+        text::Span::at(text::Offset::new(self.rel_offset()), len)
     }
 }
 

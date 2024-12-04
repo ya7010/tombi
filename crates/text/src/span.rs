@@ -69,8 +69,8 @@ impl Span {
     /// assert_eq!(&text[span], "23456")
     /// ```
     #[inline]
-    pub const fn at(offset: Offset, len: Offset) -> Span {
-        Span::new(offset, Offset::new(offset.raw + len.raw))
+    pub const fn at(offset: Offset, len: RawOffset) -> Span {
+        Span::new(offset, Offset::new(offset.raw + len))
     }
 
     /// Create a zero-length span at the specified offset (`offset..offset`).

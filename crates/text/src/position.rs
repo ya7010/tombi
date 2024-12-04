@@ -28,7 +28,7 @@ impl Position {
 
     #[inline]
     pub fn add_text(&self, text: &str) -> Self {
-        (*self) + RelativePosition::from(text)
+        (*self) + RelativePosition::of(text)
     }
 
     /// FIXME: This method will be unnecessary because parser holds the Position of each tokens.

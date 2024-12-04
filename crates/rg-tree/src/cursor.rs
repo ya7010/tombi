@@ -394,8 +394,12 @@ impl NodeData {
         let mut node = self;
         while let Some(parent) = node.parent() {
             let green = parent.green().into_node().unwrap();
-            let child = green.children().raw.nth(node.index() as usize).unwrap();
-            res += child.rel_position();
+            res += green
+                .children()
+                .raw
+                .nth(node.index() as usize)
+                .unwrap()
+                .rel_position();
             node = parent;
         }
 
@@ -412,8 +416,7 @@ impl NodeData {
     #[inline]
     fn text_range(&self) -> text::Range {
         let start = self.position();
-        let end = start + self.green().text_rel_position();
-        (start, end).into()
+        text::Range::at(start, self.green().text_rel_position())
     }
 
     #[inline]
@@ -1011,9 +1014,7 @@ impl SyntaxToken {
 
     #[inline]
     pub fn test_range(&self) -> text::Range {
-        let start = self.data().position();
-        let end = start + self.text().into();
-        (start, end).into()
+        self.data().text_range()
     }
 
     #[inline]

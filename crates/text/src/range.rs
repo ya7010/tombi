@@ -26,6 +26,11 @@ impl Range {
     }
 
     #[inline]
+    pub fn at(position: Position, relative_position: RelativePosition) -> Self {
+        Self::new(position, position + relative_position)
+    }
+
+    #[inline]
     pub fn start(&self) -> Position {
         self.start
     }
@@ -131,7 +136,7 @@ mod test {
         #[case] expected: ((Line, Column), (Line, Column)),
     ) {
         let mut range = Range::from(range);
-        range += text.into();
+        range += RelativePosition::of(text);
         assert_eq!(range, expected.into());
     }
 }

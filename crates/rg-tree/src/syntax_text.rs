@@ -32,8 +32,7 @@ impl SyntaxText {
         let mut acc: text::Offset = 0.into();
         let res = self.try_for_each_chunk(|chunk| {
             if let Some(pos) = chunk.find(c) {
-                let pos: text::Offset = (pos as u32).into();
-                return Err(acc + pos);
+                return Err(acc + pos as text::RelativeOffset);
             }
             acc += text::Offset::of(chunk);
             Ok(())

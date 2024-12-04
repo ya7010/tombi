@@ -17,7 +17,7 @@ macro_rules!  test_tokens {
             .fold((vec![], (0, text::Position::MIN)), |(mut acc, (start_offset, start_position)), (kind, text)| {
                 let text: &str = text;
                 let end_offset = start_offset + (text.len() as u32);
-                let end_position = start_position + text::RelativePosition::from(text);
+                let end_position = start_position + text::RelativePosition::of(text);
                 acc.push(
                     Ok(
                         Token::new(
@@ -44,7 +44,7 @@ macro_rules! test_token {
             let source = source.trim();
             let tokens = tokenize(&source).collect::<Vec<_>>();
             let start_position = text::Position::MIN;
-            let end_position = start_position + text::RelativePosition::from(source);
+            let end_position = start_position + text::RelativePosition::of(source);
             assert_eq!(
                 tokens,
                 [

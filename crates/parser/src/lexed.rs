@@ -69,7 +69,7 @@ impl<'a> LexedStr<'a> {
                 text::Span::new(last_offset, text::Offset::new(source.len() as u32)),
                 text::Range::new(
                     last_position,
-                    last_position + text::RelativePosition::from(&source[last_offset.into()..]),
+                    last_position + text::RelativePosition::of(&source[last_offset.into()..]),
                 ),
             ),
         ));
