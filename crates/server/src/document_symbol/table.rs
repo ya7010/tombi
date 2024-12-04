@@ -1,4 +1,4 @@
-use super::{Key, Value};
+use super::{Array, Key, Value};
 use indexmap::{map::Entry, IndexMap};
 
 #[derive(Debug)]
@@ -39,6 +39,7 @@ impl Table {
                     let value1 = entry1.get_mut();
                     match (value1, value2) {
                         (Value::Table(table1), Value::Table(table2)) => table1.merge(table2),
+                        (Value::Array(array1), Value::Array(array2)) => array1.merge(array2),
                         _ => {}
                     }
                 }
@@ -93,6 +94,10 @@ impl From<ast::ArrayOfTable> for Table {
             table.merge(key_value.into())
         }
 
+        let mut array = Array::new(node.range());
+        array.push(Value::Table(table));
+        let mut value = Value::Array(array);
+
         for key in node
             .header()
             .unwrap()
@@ -102,13 +107,14 @@ impl From<ast::ArrayOfTable> for Table {
             .into_iter()
             .rev()
         {
-            table = Table::new(key.range()).insert(
-                key,
-                Value::Table(std::mem::replace(&mut table, Table::new(node.range()))),
-            );
+            value = Value::Table(Table::new(key.range()).insert(key, value));
         }
 
-        table
+        if let Value::Table(table) = value {
+            table
+        } else {
+            unreachable!()
+        }
     }
 }
 

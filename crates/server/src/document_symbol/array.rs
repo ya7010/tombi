@@ -7,6 +7,21 @@ pub struct Array {
 }
 
 impl Array {
+    pub(crate) fn new(range: text::Range) -> Self {
+        Self {
+            range,
+            values: Vec::new(),
+        }
+    }
+
+    pub(crate) fn push(&mut self, value: Value) {
+        self.values.push(value);
+    }
+
+    pub fn merge(&mut self, other: Self) {
+        self.values.extend(other.values);
+    }
+
     pub fn range(&self) -> text::Range {
         self.range
     }
