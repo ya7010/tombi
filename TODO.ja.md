@@ -1,4 +1,11 @@
 ## TODO
+### TODO
+- [ ] parser を書き直す
+  - [x] エラー出力のロジックの改善
+  - [ ] Red-Tree のPosition, Range のバグ修正
+  - [ ] Lexed の切り離し（events を inputs ではなく outputs の配列を参照させる）。
+  - [ ] dotted keys のサポート
+
 ### Milestone 2
 - [ ] Document のサポート。
 - [ ] JSON Schema のサポート
