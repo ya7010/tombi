@@ -37,7 +37,13 @@ impl<L: Language> fmt::Debug for RedNode<L> {
             assert_eq!(level, 0);
             Ok(())
         } else {
-            write!(f, "{:?}@{:?}", self.kind(), self.text_span())
+            write!(
+                f,
+                "{:?} @{:?} @{:?}",
+                self.kind(),
+                self.text_span(),
+                self.text_range()
+            )
         }
     }
 }
