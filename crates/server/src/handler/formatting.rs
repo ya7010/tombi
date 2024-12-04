@@ -25,7 +25,9 @@ pub async fn handle_formatting(
 
     match formatter::format_with(
         &document.source,
-        backend.toml_version.unwrap_or_default(),
+        backend
+            .toml_version
+            .unwrap_or(backend.config.toml_version.unwrap_or_default()),
         &backend
             .config
             .format

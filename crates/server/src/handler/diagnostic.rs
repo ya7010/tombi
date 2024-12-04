@@ -15,7 +15,9 @@ pub async fn handle_diagnostic(
     let diagnostics = match backend.documents.get(&text_document.uri).as_deref() {
         Some(document) => linter::lint_with(
             &document.source,
-            backend.toml_version.unwrap_or_default(),
+            backend
+                .toml_version
+                .unwrap_or(backend.config.toml_version.unwrap_or_default()),
             backend
                 .config
                 .lint
