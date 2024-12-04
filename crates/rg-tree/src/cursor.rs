@@ -600,7 +600,14 @@ impl SyntaxNode {
             ptr: Cell::new(green),
         };
         SyntaxNode {
-            ptr: NodeData::new(None, 0, 0.into(), Default::default(), green, false),
+            ptr: NodeData::new(
+                None,
+                0,
+                text::Offset::new(0),
+                text::Position::new(0, 0),
+                green,
+                false,
+            ),
         }
     }
 
@@ -610,7 +617,14 @@ impl SyntaxNode {
             ptr: Cell::new(green),
         };
         SyntaxNode {
-            ptr: NodeData::new(None, 0, 0.into(), Default::default(), green, true),
+            ptr: NodeData::new(
+                None,
+                0,
+                text::Offset::new(0),
+                text::Position::new(0, 0),
+                green,
+                true,
+            ),
         }
     }
 
@@ -1221,6 +1235,7 @@ impl fmt::Debug for SyntaxNode {
         f.debug_struct("SyntaxNode")
             .field("kind", &self.kind())
             .field("text_span", &self.text_span())
+            .field("text_range", &self.text_range())
             .finish()
     }
 }
