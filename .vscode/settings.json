@@ -29,6 +29,5 @@
   },
   "yaml.schemas": {
     "./tombi.schema.json": ["tombi.yaml"]
-  },
-  "tombi.tomlVersion": "v1.1.0-preview"
+  }
 }
