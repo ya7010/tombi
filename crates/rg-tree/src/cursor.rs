@@ -123,6 +123,7 @@ struct NodeData {
     mutable: bool,
     /// Absolute offset for immutable nodes, unused for mutable nodes.
     offset: text::Offset,
+    /// Absolute position for immutable nodes, unused for mutable nodes.
     position: text::Position,
     // The following links only have meaning when `mutable` is true.
     first: Cell<*const NodeData>,
