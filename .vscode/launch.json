@@ -21,6 +21,15 @@
       "env": {
         "__TOMBI_LANGUAGE_SERVER_DEBUG": "${workspaceFolder}/target/debug/tombi"
       }
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Rust Debug Launch",
+      "program": "${workspaceRoot}/target/debug/${workspaceRootFolderName}",
+      "args": [],
+      "cwd": "${workspaceRoot}/target/debug/",
+      "sourceLanguages": ["rust"]
     }
   ]
 }
