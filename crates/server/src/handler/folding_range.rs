@@ -38,10 +38,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
     for node in root.syntax().descendants() {
         if let Some(table) = ast::Table::cast(node.to_owned()) {
             let start_position = table.header().unwrap().range().start();
-            let end_position = table
-                .key_values()
-                .last()
-                .map_or(start_position, |last| last.syntax().text_range().end());
+            let end_position = table.range().end();
 
             ranges.push(FoldingRange {
                 start_line: start_position.line(),
@@ -53,10 +50,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
             });
         } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
             let start_position = array_of_table.header().unwrap().range().start();
-            let end_position = array_of_table
-                .key_values()
-                .last()
-                .map_or(start_position, |last| last.syntax().text_range().end());
+            let end_position = array_of_table.range().end();
 
             ranges.push(FoldingRange {
                 start_line: start_position.line(),
