@@ -32,6 +32,9 @@
       "path": "crates/linter"
     },
     {
+      "path": "crates/json-schema-store"
+    },
+    {
       "path": "xtask"
     }
   ]
