@@ -40,8 +40,9 @@ fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent>
     let mut is_key_value = false;
     for node in ancestors_at_position(ast.syntax(), position.into()) {
         if let Some(key) = ast::Key::cast(node.to_owned()) {
-            let keys = key.syntax().ancestors();
-            let keys = keys
+            let keys = key
+                .syntax()
+                .ancestors()
                 .filter_map(|node| match node.kind() {
                     KEYS => ast::Keys::cast(node).map(|keys| {
                         keys.keys()
