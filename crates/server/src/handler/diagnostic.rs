@@ -16,11 +16,7 @@ pub async fn handle_diagnostic(
         Some(document) => linter::lint_with(
             &document.source,
             backend.toml_version(),
-            backend
-                .config
-                .lint
-                .as_ref()
-                .unwrap_or_else(|| &config::DEFAULT_LINT_OPTIONS),
+            backend.lint_options(),
         )
         .map_or_else(
             |diagnostics| {

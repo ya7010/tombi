@@ -25,7 +25,7 @@ pub struct Backend {
     pub client: tower_lsp::Client,
     pub documents: DashMap<Url, Document>,
     toml_version: Option<TomlVersion>,
-    pub config: Config,
+    config: Config,
 }
 
 impl Backend {
@@ -41,6 +41,20 @@ impl Backend {
     pub fn toml_version(&self) -> TomlVersion {
         self.toml_version
             .unwrap_or(self.config.toml_version.unwrap_or_default())
+    }
+
+    pub fn format_options(&self) -> &config::FormatOptions {
+        self.config
+            .format
+            .as_ref()
+            .unwrap_or_else(|| &config::DEFAULT_FORMAT_OPTIONS)
+    }
+
+    pub fn lint_options(&self) -> &config::LintOptions {
+        self.config
+            .lint
+            .as_ref()
+            .unwrap_or_else(|| &config::DEFAULT_LINT_OPTIONS)
     }
 }
 
