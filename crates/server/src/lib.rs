@@ -8,10 +8,11 @@ mod hover;
 mod toml;
 
 /// Run TOML Language Server
-#[derive(clap::Args, Debug)]
+#[derive(Debug)]
+#[cfg_attr(feature = "clap", derive(clap::Args))]
 pub struct Args {
     /// TOML version.
-    #[arg(long, value_enum, default_value = None)]
+    #[cfg_attr(feature = "clap", arg(long, value_enum, default_value = None))]
     toml_version: Option<TomlVersion>,
 }
 

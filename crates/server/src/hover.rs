@@ -12,7 +12,12 @@ pub struct HoverContent {
 
 impl std::fmt::Display for HoverContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "`{}`", self.keys)?;
+        writeln!(f, "`{}`\n", self.keys)?;
+        if let Some(schema_url) = &self.schema_url {
+            if let Some(schema_filename) = get_schema_name(schema_url) {
+                writeln!(f, "Source: [{schema_filename}]({schema_url})\n",)?;
+            }
+        }
         Ok(())
     }
 }
@@ -28,5 +33,31 @@ impl HoverContent {
             ),
             range: Some(self.range.into()),
         }
+    }
+}
+
+fn get_schema_name(schema_url: &tower_lsp::lsp_types::Url) -> Option<&str> {
+    if let Some(path) = schema_url.path().split('/').last() {
+        if !path.is_empty() {
+            return Some(path);
+        }
+    }
+    schema_url.host_str()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rstest::rstest;
+    use tower_lsp::lsp_types::Url;
+
+    #[rstest]
+    #[case("https://json.schemastore.org/tombi.schema.json")]
+    #[case("file://./folder/tombi.schema.json")]
+    #[case("file://./tombi.schema.json")]
+    #[case("file://tombi.schema.json")]
+    fn url_content(#[case] url: &str) {
+        let url = Url::parse(url).unwrap();
+        assert_eq!(get_schema_name(&url).unwrap(), "tombi.schema.json");
     }
 }

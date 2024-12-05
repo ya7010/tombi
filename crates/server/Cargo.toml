@@ -5,11 +5,13 @@ edition = { workspace = true }
 authors = { workspace = true }
 license = { workspace = true }
 
+[features]
+clap = ["dep:clap"]
+
 [dependencies]
 ast = { workspace = true }
 camino = { workspace = true }
-clap = { workspace = true, features = ["string"] }
-clap-verbosity-flag = { workspace = true }
+clap = { workspace = true, features = ["derive", "string"], optional = true }
 config = { workspace = true, features = ["serde"] }
 crossbeam-channel = "0.5.13"
 dashmap = { workspace = true }
@@ -32,3 +34,6 @@ tokio = { workspace = true, features = ["io-std", "rt"] }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
+
+[dev-dependencies]
+rstest.workspace = true
