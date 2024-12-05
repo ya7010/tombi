@@ -57,9 +57,21 @@ impl Format for ast::Root {
                             )
                         }
                         ast::RootItem::ArrayOfTable(_) => {
-                            if !header.is_root() {
-                                acc.push(ItemOrNewLine::NewLine);
-                            }
+                            match header {
+                                Header::Root { key_value_size } => {
+                                    if key_value_size > 0 {
+                                        acc.push(ItemOrNewLine::NewLine);
+                                    }
+                                }
+                                Header::Table { key_value_size, .. } => {
+                                    if key_value_size > 0 {
+                                        acc.push(ItemOrNewLine::NewLine);
+                                    }
+                                }
+                                Header::ArrayOfTable { .. } => {
+                                    acc.push(ItemOrNewLine::NewLine);
+                                }
+                            };
                             acc.push(ItemOrNewLine::Item(item));
 
                             (Header::ArrayOfTable {}, acc)
@@ -138,11 +150,4 @@ enum Header {
     },
 
     ArrayOfTable {},
-}
-
-impl Header {
-    #[inline]
-    fn is_root(&self) -> bool {
-        matches!(self, Self::Root { .. })
-    }
 }
