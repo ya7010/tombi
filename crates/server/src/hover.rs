@@ -1,18 +1,37 @@
 use std::fmt::Debug;
 
+use itertools::Itertools;
+
 #[derive(Debug, Default)]
 pub struct HoverContent {
-    pub keys: String,
     pub title: Option<String>,
     pub description: Option<String>,
-    pub enumerate: Vec<String>,
+    pub keys: String,
+    pub enumerated_values: Vec<String>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
     pub range: text::Range,
 }
 
 impl std::fmt::Display for HoverContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "`{}`\n", self.keys)?;
+        if let Some(title) = &self.title {
+            writeln!(f, "## {}\n", title)?;
+        }
+
+        if let Some(description) = &self.description {
+            writeln!(f, "{}\n", description.split("\n").join("\n\n"))?;
+        }
+
+        writeln!(f, "Keys: `{}`\n", self.keys)?;
+
+        if !self.enumerated_values.is_empty() {
+            writeln!(f, "Allowed Values:\n")?;
+            for value in &self.enumerated_values {
+                writeln!(f, "- `{}`", value)?;
+            }
+            writeln!(f)?;
+        }
+
         if let Some(schema_url) = &self.schema_url {
             if let Some(schema_filename) = get_schema_name(schema_url) {
                 writeln!(f, "Source: [{schema_filename}]({schema_url})\n",)?;
