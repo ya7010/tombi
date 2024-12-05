@@ -75,7 +75,7 @@ impl Table {
                         _ => {
                             errors.push(crate::Error::DuplicateKey {
                                 key: key.value().to_string(),
-                                range: key.range,
+                                range: key.range(),
                             });
                         }
                     }
@@ -108,7 +108,7 @@ impl Table {
                     _ => {
                         errors.push(crate::Error::DuplicateKey {
                             key: entry.key().value().to_string(),
-                            range: entry.key().range,
+                            range: entry.key().range(),
                         });
                     }
                 }

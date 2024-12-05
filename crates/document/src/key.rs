@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Key {
     value: String,
-    pub(crate) range: text::Range,
+    range: text::Range,
 }
 
 impl Key {
@@ -14,6 +14,10 @@ impl Key {
 
     pub fn value(&self) -> &str {
         &self.value
+    }
+
+    pub(crate) fn range(&self) -> text::Range {
+        self.range
     }
 }
 
