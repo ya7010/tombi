@@ -5,8 +5,6 @@ pub use format::FormatOptions;
 pub use lint::LintOptions;
 pub use toml_version::TomlVersion;
 
-const CONFIG_FILENAME: &str = "tombi.toml";
-const PYPROJECT_FILENAME: &str = "pyproject.toml";
 pub const DEFAULT_FORMAT_OPTIONS: FormatOptions = FormatOptions::default();
 pub const DEFAULT_LINT_OPTIONS: LintOptions = LintOptions::default();
 
@@ -30,6 +28,7 @@ pub struct Config {
 }
 
 #[doc(hidden)]
+#[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Default)]
 struct PyProjectToml {
@@ -37,14 +36,19 @@ struct PyProjectToml {
 }
 
 #[doc(hidden)]
+#[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Default)]
 struct Tool {
     tombi: Option<Config>,
 }
 
+/// Load the config from the current directory.
 #[cfg(feature = "serde")]
 pub fn load() -> Config {
+    const CONFIG_FILENAME: &str = "tombi.toml";
+    const PYPROJECT_FILENAME: &str = "pyproject.toml";
+
     let mut current_dir = std::env::current_dir().unwrap();
     loop {
         let config_path = current_dir.join(CONFIG_FILENAME);

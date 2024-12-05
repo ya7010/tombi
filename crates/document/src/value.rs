@@ -28,20 +28,48 @@ pub enum Value {
     Table(Table),
 }
 
-impl Value {
-    #[inline]
-    pub fn range(&self) -> text::Range {
+impl TryFrom<ast::Value> for Value {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Value) -> Result<Self, Self::Error> {
+        match node {
+            ast::Value::BasicString(string) => string.try_into().map(Value::String),
+            ast::Value::LiteralString(string) => string.try_into().map(Value::String),
+            ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
+            ast::Value::MultiLineLiteralString(string) => string.try_into().map(Value::String),
+            ast::Value::IntegerBin(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::IntegerOct(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::IntegerDec(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::IntegerHex(integer) => integer.try_into().map(Value::Integer),
+            ast::Value::Float(float) => float.try_into().map(Value::Float),
+            ast::Value::Boolean(boolean) => boolean.try_into().map(Value::Boolean),
+            ast::Value::OffsetDateTime(dt) => dt.try_into().map(Value::OffsetDateTime),
+            ast::Value::LocalDateTime(dt) => dt.try_into().map(Value::LocalDateTime),
+            ast::Value::LocalDate(date) => date.try_into().map(Value::LocalDate),
+            ast::Value::LocalTime(time) => time.try_into().map(Value::LocalTime),
+            ast::Value::Array(array) => array.try_into().map(Value::Array),
+            ast::Value::InlineTable(inline_table) => inline_table.try_into().map(Value::Table),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Value {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
         match self {
-            Self::Boolean(value) => value.range(),
-            Self::Integer(value) => value.range(),
-            Self::Float(value) => value.range(),
-            Self::String(value) => value.range(),
-            Self::OffsetDateTime(value) => value.range(),
-            Self::LocalDateTime(value) => value.range(),
-            Self::LocalDate(value) => value.range(),
-            Self::LocalTime(value) => value.range(),
-            Self::Array(value) => value.range(),
-            Self::Table(value) => value.range(),
+            Value::Boolean(value) => value.serialize(serializer),
+            Value::Integer(value) => value.serialize(serializer),
+            Value::Float(value) => value.serialize(serializer),
+            Value::String(value) => value.serialize(serializer),
+            Value::OffsetDateTime(value) => value.serialize(serializer),
+            Value::LocalDateTime(value) => value.serialize(serializer),
+            Value::LocalDate(value) => value.serialize(serializer),
+            Value::LocalTime(value) => value.serialize(serializer),
+            Value::Array(value) => value.serialize(serializer),
+            Value::Table(value) => value.serialize(serializer),
         }
     }
 }

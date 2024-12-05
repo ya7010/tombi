@@ -22,23 +22,20 @@ pub enum ArrayKind {
 pub struct Array {
     kind: ArrayKind,
     values: Vec<Value>,
-    range: text::Range,
 }
 
 impl Array {
-    pub fn new(range: text::Range) -> Self {
+    pub fn new() -> Self {
         Self {
             kind: ArrayKind::Array,
             values: vec![],
-            range,
         }
     }
 
-    pub fn new_array_of_tables(range: text::Range) -> Self {
+    pub fn new_array_of_tables() -> Self {
         Self {
             kind: ArrayKind::ArrayOfTables,
             values: vec![],
-            range,
         }
     }
 
@@ -53,8 +50,32 @@ impl Array {
     pub fn values(&self) -> &[Value] {
         &self.values
     }
+}
 
-    pub fn range(&self) -> text::Range {
-        self.range
+impl TryFrom<ast::Array> for Array {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::Array) -> Result<Self, Self::Error> {
+        let mut array = Array::new();
+        let mut errors = Vec::new();
+
+        for value in node.values() {
+            match value.try_into() {
+                Ok(value) => array.push(value),
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        Ok(array)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Array {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.values.serialize(serializer)
     }
 }

@@ -1,9 +1,5 @@
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum Error {
-    #[cfg(feature = "load")]
-    #[error("syntax error: {0}")]
-    Syntax(syntax::SyntaxError),
-
     #[error("duplicate key: {key}")]
     DuplicateKey { key: String, range: text::Range },
 

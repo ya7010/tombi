@@ -6,16 +6,20 @@ authors = { workspace = true }
 license = { workspace = true }
 
 [features]
+default = ["serde"]
 lsp = ["dep:tower-lsp", "text/lsp"]
-load = ["dep:parser", "dep:config", "dep:syntax"]
+serde = ["dep:serde", "indexmap/serde", "chrono/serde"]
 
 [dependencies]
 ast = { workspace = true }
 chrono = { workspace = true }
-config = { workspace = true, optional = true }
 indexmap = { workspace = true }
-parser = { workspace = true, optional = true }
-syntax = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
 text = { workspace = true }
 thiserror.workspace = true
 tower-lsp = { workspace = true, optional = true }
+
+[dev-dependencies]
+config.workspace = true
+parser.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
