@@ -51,12 +51,12 @@ impl Position {
     }
 
     #[inline]
-    pub fn line(&self) -> Line {
+    pub const fn line(&self) -> Line {
         self.line
     }
 
     #[inline]
-    pub fn column(&self) -> Column {
+    pub const fn column(&self) -> Column {
         self.column
     }
 }

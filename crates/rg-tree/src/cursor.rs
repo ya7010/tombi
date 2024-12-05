@@ -922,6 +922,43 @@ impl SyntaxNode {
         }
     }
 
+    pub fn token_at_position(&self, position: text::Position) -> TokenAtOffset<SyntaxToken> {
+        let range = self.text_range();
+        assert!(
+            range.start() <= position && position <= range.end(),
+            "Bad position: range {:?} position {:?}",
+            range,
+            position
+        );
+        if range.is_empty() {
+            return TokenAtOffset::None;
+        }
+
+        let mut children = self.children_with_tokens().filter(|child| {
+            let child_range = child.text_range();
+            !child_range.is_empty()
+                && (child_range.start() <= position && position <= child_range.end())
+        });
+
+        let left = children.next().unwrap();
+        let right = children.next();
+        assert!(children.next().is_none());
+
+        if let Some(right) = right {
+            match (
+                left.token_at_position(position),
+                right.token_at_position(position),
+            ) {
+                (TokenAtOffset::Single(left), TokenAtOffset::Single(right)) => {
+                    TokenAtOffset::Between(left, right)
+                }
+                _ => unreachable!(),
+            }
+        } else {
+            left.token_at_position(position)
+        }
+    }
+
     pub fn covering_element(&self, span: text::Span) -> SyntaxElement {
         let mut res: SyntaxElement = self.clone().into();
         loop {
@@ -1027,7 +1064,7 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn test_range(&self) -> text::Range {
+    pub fn text_range(&self) -> text::Range {
         self.data().text_range()
     }
 
@@ -1137,6 +1174,14 @@ impl SyntaxElement {
     }
 
     #[inline]
+    pub fn text_range(&self) -> text::Range {
+        match self {
+            NodeOrToken::Node(it) => it.text_range(),
+            NodeOrToken::Token(it) => it.text_range(),
+        }
+    }
+
+    #[inline]
     pub fn index(&self) -> usize {
         match self {
             NodeOrToken::Node(it) => it.index(),
@@ -1200,6 +1245,14 @@ impl SyntaxElement {
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
             NodeOrToken::Node(node) => node.token_at_offset(offset),
+        }
+    }
+
+    fn token_at_position(&self, position: text::Position) -> TokenAtOffset<SyntaxToken> {
+        assert!(self.text_range().start() <= position && position <= self.text_range().end());
+        match self {
+            NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
+            NodeOrToken::Node(node) => node.token_at_position(position),
         }
     }
 

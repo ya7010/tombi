@@ -31,13 +31,18 @@ impl Range {
     }
 
     #[inline]
-    pub fn start(&self) -> Position {
+    pub const fn start(&self) -> Position {
         self.start
     }
 
     #[inline]
-    pub fn end(&self) -> Position {
+    pub const fn end(&self) -> Position {
         self.end
+    }
+
+    #[inline]
+    pub const fn is_empty(self) -> bool {
+        self.start().line() == self.end().line() && self.start().column() == self.end().column()
     }
 }
 

@@ -59,7 +59,7 @@ impl<L: Language> RedToken<L> {
     }
 
     pub fn text_range(&self) -> text::Range {
-        self.raw.test_range()
+        self.raw.text_range()
     }
 
     pub fn index(&self) -> usize {

@@ -185,6 +185,10 @@ impl<L: Language> RedNode<L> {
         self.raw.token_at_offset(offset).map(RedToken::from)
     }
 
+    pub fn token_at_position(&self, position: text::Position) -> TokenAtOffset<RedToken<L>> {
+        self.raw.token_at_position(position).map(RedToken::from)
+    }
+
     /// Return the deepest node or token in the current subtree that fully
     /// contains the span. If the span is empty and is contained in two leaf
     /// nodes, either one can be returned. Precondition: span must be contained

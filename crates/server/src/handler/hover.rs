@@ -1,10 +1,9 @@
 use crate::toml;
-use ast::{algo::ancestors_at_offset, AstNode};
+use ast::{algo::ancestors_at_position, AstNode};
 use config::TomlVersion;
 use parser::SyntaxKind;
-use text::{Offset, Span};
 use tower_lsp::lsp_types::{
-    Hover, HoverContents, HoverParams, MarkupContent, MarkupKind, Position, Range,
+    Hover, HoverContents, HoverParams, MarkupContent, MarkupKind, Position,
     TextDocumentPositionParams,
 };
 
@@ -29,11 +28,8 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    if let Some((value, range)) = get_hover(ast, &source, position) {
-        let range = Some(Range::new(
-            text::Position::from_source(&source, range.start()).into(),
-            text::Position::from_source(&source, range.end()).into(),
-        ));
+    if let Some((value, range)) = get_hover(ast, position) {
+        let range = Some(range.into());
 
         Ok(Some(Hover {
             contents: HoverContents::Markup(MarkupContent {
@@ -47,58 +43,59 @@ pub async fn handle_hover(
     }
 }
 
-fn get_hover(ast: ast::Root, source: &str, position: Position) -> Option<(String, Span)> {
-    let offset = Offset::from_source(source, position);
-
+fn get_hover(ast: ast::Root, position: Position) -> Option<(String, text::Range)> {
     // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.
 
-    for node in ancestors_at_offset(ast.syntax(), offset) {
+    for node in ancestors_at_position(ast.syntax(), position.into()) {
         if let Some(node) = ast::IntegerDec::cast(node.to_owned()) {
-            return Some(("IntegerDec".to_owned(), node.syntax().text_span()));
+            return Some(("IntegerDec".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::IntegerBin::cast(node.to_owned()) {
-            return Some(("IntegerBin".to_owned(), node.syntax().text_span()));
+            return Some(("IntegerBin".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::IntegerOct::cast(node.to_owned()) {
-            return Some(("IntegerOct".to_owned(), node.syntax().text_span()));
+            return Some(("IntegerOct".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::IntegerHex::cast(node.to_owned()) {
-            return Some(("IntegerHex".to_owned(), node.syntax().text_span()));
+            return Some(("IntegerHex".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::BasicString::cast(node.to_owned()) {
-            return Some(("BasicString".to_owned(), node.syntax().text_span()));
+            return Some(("BasicString".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::LiteralString::cast(node.to_owned()) {
-            return Some(("LiteralString".to_owned(), node.syntax().text_span()));
+            return Some(("LiteralString".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::MultiLineBasicString::cast(node.to_owned()) {
-            return Some(("MultiLineBasicString".to_owned(), node.syntax().text_span()));
+            return Some((
+                "MultiLineBasicString".to_owned(),
+                node.syntax().text_range(),
+            ));
         } else if let Some(node) = ast::MultiLineLiteralString::cast(node.to_owned()) {
             return Some((
                 "MultiLineLiteralString".to_owned(),
-                node.syntax().text_span(),
+                node.syntax().text_range(),
             ));
         } else if let Some(node) = ast::Float::cast(node.to_owned()) {
-            return Some(("Float".to_owned(), node.syntax().text_span()));
+            return Some(("Float".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::Boolean::cast(node.to_owned()) {
-            return Some(("Boolean".to_owned(), node.syntax().text_span()));
+            return Some(("Boolean".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::OffsetDateTime::cast(node.to_owned()) {
-            return Some(("OffsetDateTime".to_owned(), node.syntax().text_span()));
+            return Some(("OffsetDateTime".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::LocalDateTime::cast(node.to_owned()) {
-            return Some(("LocalDateTime".to_owned(), node.syntax().text_span()));
+            return Some(("LocalDateTime".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::LocalDate::cast(node.to_owned()) {
-            return Some(("LocalDate".to_owned(), node.syntax().text_span()));
+            return Some(("LocalDate".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::LocalTime::cast(node.to_owned()) {
-            return Some(("LocalTime".to_owned(), node.syntax().text_span()));
+            return Some(("LocalTime".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::Array::cast(node.to_owned()) {
-            return Some(("Array".to_owned(), node.syntax().text_span()));
+            return Some(("Array".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::InlineTable::cast(node.to_owned()) {
-            return Some(("InlineTable".to_owned(), node.syntax().text_span()));
+            return Some(("InlineTable".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::Keys::cast(node.to_owned()) {
-            return Some(("Keys".to_owned(), node.syntax().text_span()));
+            return Some(("Keys".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::KeyValue::cast(node.to_owned()) {
-            return Some(("KeyValue".to_owned(), node.syntax().text_span()));
+            return Some(("KeyValue".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::Table::cast(node.to_owned()) {
-            return Some(("Table".to_owned(), node.syntax().text_span()));
+            return Some(("Table".to_owned(), node.syntax().text_range()));
         } else if let Some(node) = ast::ArrayOfTable::cast(node.to_owned()) {
-            return Some(("ArrayOfTable".to_owned(), node.syntax().text_span()));
+            return Some(("ArrayOfTable".to_owned(), node.syntax().text_range()));
         } else if node.kind() == SyntaxKind::INVALID_TOKEN {
-            return Some(("INVALID_TOKEN".to_owned(), node.text_span()));
+            return Some(("INVALID_TOKEN".to_owned(), node.text_range()));
         }
     }
     None
