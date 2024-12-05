@@ -772,6 +772,7 @@ impl SyntaxNode {
                 })
             })
     }
+
     pub fn last_child(&self) -> Option<SyntaxNode> {
         self.green_ref()
             .children()
@@ -802,6 +803,7 @@ impl SyntaxNode {
             )
         })
     }
+
     pub fn last_child_or_token(&self) -> Option<SyntaxElement> {
         self.green_ref()
             .children()
@@ -822,6 +824,7 @@ impl SyntaxNode {
     pub fn next_sibling(&self) -> Option<SyntaxNode> {
         self.data().next_sibling()
     }
+
     pub fn prev_sibling(&self) -> Option<SyntaxNode> {
         self.data().prev_sibling()
     }
@@ -829,6 +832,7 @@ impl SyntaxNode {
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().next_sibling_or_token()
     }
+
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().prev_sibling_or_token()
     }
@@ -836,6 +840,7 @@ impl SyntaxNode {
     pub fn first_token(&self) -> Option<SyntaxToken> {
         self.first_child_or_token()?.first_token()
     }
+
     pub fn last_token(&self) -> Option<SyntaxToken> {
         self.last_child_or_token()?.last_token()
     }
