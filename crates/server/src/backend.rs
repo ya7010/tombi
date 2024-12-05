@@ -3,7 +3,7 @@ use super::handler::{
     handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
     handle_semantic_tokens_full, handle_shutdown,
 };
-use crate::{document::Document, handler::handle_folding_range};
+use crate::{document::DocumentInfo, handler::handle_folding_range};
 use ast::AstNode;
 use config::{Config, TomlVersion};
 use dashmap::{
@@ -26,7 +26,7 @@ use tower_lsp::{
 pub struct Backend {
     #[allow(dead_code)]
     client: tower_lsp::Client,
-    documents: DashMap<Url, Document>,
+    document_infos: DashMap<Url, DocumentInfo>,
     toml_version: Option<TomlVersion>,
     config: Config,
 }
@@ -35,32 +35,32 @@ impl Backend {
     pub fn new(client: tower_lsp::Client, toml_version: Option<TomlVersion>) -> Self {
         Self {
             client,
-            documents: Default::default(),
+            document_infos: Default::default(),
             toml_version,
             config: config::load(),
         }
     }
 
-    pub fn insert_document(&self, uri: Url, document: Document) {
-        self.documents.insert(uri, document);
+    pub fn insert_document_info(&self, uri: Url, document_info: DocumentInfo) {
+        self.document_infos.insert(uri, document_info);
     }
 
-    pub fn get_document(&self, uri: &Url) -> Option<Ref<Url, Document>> {
-        self.documents.get(uri)
+    pub fn get_document_info(&self, uri: &Url) -> Option<Ref<Url, DocumentInfo>> {
+        self.document_infos.get(uri)
     }
 
-    pub fn get_mut_document(&self, uri: &Url) -> Option<RefMut<Url, Document>> {
-        self.documents.get_mut(uri)
+    pub fn get_mut_document_info(&self, uri: &Url) -> Option<RefMut<Url, DocumentInfo>> {
+        self.document_infos.get_mut(uri)
     }
 
-    pub fn try_get_mut_document(&self, uri: &Url) -> TryResult<RefMut<Url, Document>> {
-        self.documents.try_get_mut(uri)
+    pub fn try_get_mut_document_info(&self, uri: &Url) -> TryResult<RefMut<Url, DocumentInfo>> {
+        self.document_infos.try_get_mut(uri)
     }
 
     pub fn get_ast(&self, uri: &Url) -> Option<ast::Root> {
-        self.get_document(uri)
-            .map(|document| {
-                let p = parser::parse(&document.source, self.toml_version());
+        self.get_document_info(uri)
+            .map(|document_info| {
+                let p = parser::parse(&document_info.source, self.toml_version());
                 if !p.errors().is_empty() {
                     return None;
                 }

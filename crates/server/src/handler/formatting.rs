@@ -11,8 +11,8 @@ pub async fn handle_formatting(
     tracing::info!("handle_formatting: {}", text_document.uri);
 
     let uri = &text_document.uri;
-    let mut document = match backend.try_get_mut_document(uri) {
-        TryResult::Present(document) => document,
+    let mut document_info = match backend.try_get_mut_document_info(uri) {
+        TryResult::Present(document_info) => document_info,
         TryResult::Absent => {
             tracing::warn!("document not found: {}", uri);
             return Ok(None);
@@ -24,21 +24,21 @@ pub async fn handle_formatting(
     };
 
     match formatter::format_with(
-        &document.source,
+        &document_info.source,
         backend.toml_version(),
         &backend.format_options(),
     ) {
         Ok(new_text) => {
-            if new_text != document.source {
+            if new_text != document_info.source {
                 let range = Range::new(
                     text::Position::new(0, 0).into(),
                     text::Position::from_source(
-                        &document.source,
-                        text::Offset::new(document.source.len() as u32),
+                        &document_info.source,
+                        text::Offset::new(document_info.source.len() as u32),
                     )
                     .into(),
                 );
-                document.source = new_text.clone();
+                document_info.source = new_text.clone();
 
                 return Ok(Some(vec![TextEdit { range, new_text }]));
             } else {

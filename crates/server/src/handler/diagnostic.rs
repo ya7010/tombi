@@ -12,7 +12,7 @@ pub async fn handle_diagnostic(
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_diagnostic");
 
-    let diagnostics = match backend.get_document(&text_document.uri).as_deref() {
+    let diagnostics = match backend.get_document_info(&text_document.uri).as_deref() {
         Some(document) => linter::lint_with(
             &document.source,
             backend.toml_version(),
