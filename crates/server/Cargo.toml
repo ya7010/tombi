@@ -13,12 +13,13 @@ clap-verbosity-flag = { workspace = true }
 config = { workspace = true, features = ["serde"] }
 crossbeam-channel = "0.5.13"
 dashmap = { workspace = true }
-diagnostic.workspace = true
+diagnostic = { workspace = true }
 document = { workspace = true }
 formatter = { workspace = true }
 futures = { workspace = true }
 futures-util = { workspace = true }
 indexmap = { workspace = true }
+itertools = { workspace = true }
 linter = { workspace = true }
 parser = { workspace = true }
 rustc-hash = { workspace = true }

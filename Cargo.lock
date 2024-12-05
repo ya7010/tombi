@@ -2178,6 +2178,7 @@ dependencies = [
  "futures",
  "futures-util",
  "indexmap 2.6.0",
+ "itertools",
  "linter",
  "parser",
  "rustc-hash",
