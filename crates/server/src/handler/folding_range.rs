@@ -15,7 +15,6 @@ pub async fn handle_folding_range(
 
     let folding_ranges = create_folding_ranges(root);
 
-    dbg!(&folding_ranges);
     if !folding_ranges.is_empty() {
         Ok(Some(folding_ranges))
     } else {
@@ -29,7 +28,16 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
     for node in root.syntax().descendants() {
         if let Some(table) = ast::Table::cast(node.to_owned()) {
             let start_position = table.header().unwrap().range().start();
-            let end_position = table.range().end();
+            let end_position = table
+                .tailing_table_or_inline_tables()
+                .take_while(|t| {
+                    t.header()
+                        .unwrap()
+                        .to_string()
+                        .starts_with(&table.header().unwrap().to_string())
+                })
+                .last()
+                .map_or(table.range().end(), |t| t.range().end());
 
             ranges.push(FoldingRange {
                 start_line: start_position.line(),

@@ -70,6 +70,54 @@ impl<N: AstNode> Iterator for AstChildren<N> {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum TableOrArrayOfTable {
+    Table(Table),
+    ArrayOfTable(ArrayOfTable),
+}
+
+impl TableOrArrayOfTable {
+    pub fn header(&self) -> Option<Keys> {
+        match self {
+            TableOrArrayOfTable::Table(table) => table.header(),
+            TableOrArrayOfTable::ArrayOfTable(array_of_table) => array_of_table.header(),
+        }
+    }
+
+    pub fn range(&self) -> text::Range {
+        match self {
+            TableOrArrayOfTable::Table(table) => table.range(),
+            TableOrArrayOfTable::ArrayOfTable(array_of_table) => array_of_table.range(),
+        }
+    }
+}
+
+impl AstNode for TableOrArrayOfTable {
+    #[inline]
+    fn can_cast(kind: syntax::SyntaxKind) -> bool {
+        Table::can_cast(kind) || ArrayOfTable::can_cast(kind)
+    }
+
+    #[inline]
+    fn cast(syntax: syntax::SyntaxNode) -> Option<Self> {
+        if Table::can_cast(syntax.kind()) {
+            Table::cast(syntax).map(TableOrArrayOfTable::Table)
+        } else if ArrayOfTable::can_cast(syntax.kind()) {
+            ArrayOfTable::cast(syntax).map(TableOrArrayOfTable::ArrayOfTable)
+        } else {
+            None
+        }
+    }
+
+    #[inline]
+    fn syntax(&self) -> &syntax::SyntaxNode {
+        match self {
+            TableOrArrayOfTable::Table(table) => table.syntax(),
+            TableOrArrayOfTable::ArrayOfTable(array_of_table) => array_of_table.syntax(),
+        }
+    }
+}
+
 #[allow(dead_code)]
 mod support {
     use syntax::SyntaxKind;
@@ -188,6 +236,25 @@ mod support {
                     }
             })
     }
+
+    pub fn leading_table_or_inline_tables<N: AstNode>(
+        node: &N,
+    ) -> impl Iterator<Item = TableOrArrayOfTable> {
+        support::children::<TableOrArrayOfTable>(&node.syntax().parent().unwrap())
+            .into_iter()
+            .take_while(|n| n.range() < node.syntax().text_range())
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+    }
+
+    pub fn tailing_table_or_inline_tables<'a, N: AstNode>(
+        node: &'a N,
+    ) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
+        support::children::<TableOrArrayOfTable>(&node.syntax().parent().unwrap())
+            .into_iter()
+            .skip_while(|n| n.range() <= node.syntax().text_range())
+    }
 }
 
 impl Root {
@@ -212,6 +279,16 @@ impl Table {
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
         support::tailing_comment(self.syntax().children_with_tokens(), T!(']'))
     }
+
+    pub fn leading_table_or_inline_tables(&self) -> impl Iterator<Item = TableOrArrayOfTable> {
+        support::leading_table_or_inline_tables(self)
+    }
+
+    pub fn tailing_table_or_inline_tables<'a>(
+        &'a self,
+    ) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
+        support::tailing_table_or_inline_tables(self)
+    }
 }
 
 impl ArrayOfTable {
@@ -221,6 +298,16 @@ impl ArrayOfTable {
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
         support::tailing_comment(self.syntax().children_with_tokens(), T!("]]"))
+    }
+
+    pub fn leading_table_or_inline_tables(&self) -> impl Iterator<Item = TableOrArrayOfTable> {
+        support::leading_table_or_inline_tables(self)
+    }
+
+    pub fn tailing_table_or_inline_tables<'a>(
+        &'a self,
+    ) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
+        support::tailing_table_or_inline_tables(self)
     }
 }
 
