@@ -66,6 +66,30 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
                 kind: Some(FoldingRangeKind::Region),
                 collapsed_text: None,
             });
+        } else if let Some(array) = ast::Array::cast(node.to_owned()) {
+            let start_position = array.bracket_start().unwrap().text_range().start();
+            let end_position = array.bracket_end().unwrap().text_range().end();
+
+            ranges.push(FoldingRange {
+                start_line: start_position.line(),
+                start_character: Some(start_position.column()),
+                end_line: end_position.line(),
+                end_character: Some(end_position.column()),
+                kind: Some(FoldingRangeKind::Region),
+                collapsed_text: None,
+            });
+        } else if let Some(inline_table) = ast::InlineTable::cast(node.to_owned()) {
+            let start_position = inline_table.brace_start().unwrap().text_range().start();
+            let end_position = inline_table.brace_end().unwrap().text_range().end();
+
+            ranges.push(FoldingRange {
+                start_line: start_position.line(),
+                start_character: Some(start_position.column()),
+                end_line: end_position.line(),
+                end_character: Some(end_position.column()),
+                kind: Some(FoldingRangeKind::Region),
+                collapsed_text: None,
+            });
         }
     }
 
