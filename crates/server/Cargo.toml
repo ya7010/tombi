@@ -12,7 +12,7 @@ clap = { workspace = true, features = ["string"] }
 clap-verbosity-flag = { workspace = true }
 config = { workspace = true, features = ["serde"] }
 crossbeam-channel = "0.5.13"
-dashmap = "6.1.0"
+dashmap = { workspace = true }
 diagnostic.workspace = true
 document = { workspace = true }
 formatter = { workspace = true }

@@ -18,6 +18,7 @@ chrono = "0.4.38"
 clap = { version = "4.5.20", features = ["derive"] }
 clap-verbosity-flag = "3.0.1"
 config = { path = "crates/config" }
+dashmap = "6.1.0"
 diagnostic = { path = "crates/diagnostic" }
 document = { path = "crates/document" }
 either = "1.13.0"
