@@ -1,11 +1,9 @@
-use crate::toml;
+use crate::{hover::HoverContent, toml};
 use ast::{algo::ancestors_at_position, AstNode};
 use config::TomlVersion;
-use parser::SyntaxKind;
-use tower_lsp::lsp_types::{
-    Hover, HoverContents, HoverParams, MarkupContent, MarkupKind, Position,
-    TextDocumentPositionParams,
-};
+use itertools::Itertools;
+use parser::SyntaxKind::*;
+use tower_lsp::lsp_types::{Hover, HoverParams, Position, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_hover(
@@ -28,74 +26,66 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    if let Some((value, range)) = get_hover(ast, position) {
-        let range = Some(range.into());
-
-        Ok(Some(Hover {
-            contents: HoverContents::Markup(MarkupContent {
-                kind: MarkupKind::Markdown,
-                value,
-            }),
-            range,
-        }))
+    if let Some(hover_content) = get_hover_content(ast, position) {
+        Ok(Some(hover_content.into_hover()))
     } else {
         Ok(None)
     }
 }
 
-fn get_hover(ast: ast::Root, position: Position) -> Option<(String, text::Range)> {
+fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent> {
     // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.
 
+    let mut is_key_value = false;
     for node in ancestors_at_position(ast.syntax(), position.into()) {
-        if let Some(node) = ast::IntegerDec::cast(node.to_owned()) {
-            return Some(("IntegerDec".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::IntegerBin::cast(node.to_owned()) {
-            return Some(("IntegerBin".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::IntegerOct::cast(node.to_owned()) {
-            return Some(("IntegerOct".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::IntegerHex::cast(node.to_owned()) {
-            return Some(("IntegerHex".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::BasicString::cast(node.to_owned()) {
-            return Some(("BasicString".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::LiteralString::cast(node.to_owned()) {
-            return Some(("LiteralString".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::MultiLineBasicString::cast(node.to_owned()) {
-            return Some((
-                "MultiLineBasicString".to_owned(),
-                node.syntax().text_range(),
-            ));
-        } else if let Some(node) = ast::MultiLineLiteralString::cast(node.to_owned()) {
-            return Some((
-                "MultiLineLiteralString".to_owned(),
-                node.syntax().text_range(),
-            ));
-        } else if let Some(node) = ast::Float::cast(node.to_owned()) {
-            return Some(("Float".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::Boolean::cast(node.to_owned()) {
-            return Some(("Boolean".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::OffsetDateTime::cast(node.to_owned()) {
-            return Some(("OffsetDateTime".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::LocalDateTime::cast(node.to_owned()) {
-            return Some(("LocalDateTime".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::LocalDate::cast(node.to_owned()) {
-            return Some(("LocalDate".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::LocalTime::cast(node.to_owned()) {
-            return Some(("LocalTime".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::Array::cast(node.to_owned()) {
-            return Some(("Array".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::InlineTable::cast(node.to_owned()) {
-            return Some(("InlineTable".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::Keys::cast(node.to_owned()) {
-            return Some(("Keys".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::KeyValue::cast(node.to_owned()) {
-            return Some(("KeyValue".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::Table::cast(node.to_owned()) {
-            return Some(("Table".to_owned(), node.syntax().text_range()));
-        } else if let Some(node) = ast::ArrayOfTable::cast(node.to_owned()) {
-            return Some(("ArrayOfTable".to_owned(), node.syntax().text_range()));
-        } else if node.kind() == SyntaxKind::INVALID_TOKEN {
-            return Some(("INVALID_TOKEN".to_owned(), node.text_range()));
+        if let Some(key) = ast::Key::cast(node.to_owned()) {
+            let keys = key.syntax().ancestors();
+            let keys = keys
+                .filter_map(|node| match node.kind() {
+                    KEYS => ast::Keys::cast(node).map(|keys| {
+                        keys.keys()
+                            .filter(|k| {
+                                k.syntax().text_range().start() <= key.syntax().text_range().start()
+                            })
+                            .collect::<Vec<_>>()
+                    }),
+                    KEY_VALUE => {
+                        is_key_value = true;
+                        None
+                    }
+                    TABLE => is_key_value
+                        .then(|| {
+                            ast::Table::cast(node)
+                                .map(|table| {
+                                    table.header().map(|keys| keys.keys().collect::<Vec<_>>())
+                                })
+                                .flatten()
+                        })
+                        .flatten(),
+                    ARRAY_OF_TABLE => is_key_value
+                        .then(|| {
+                            ast::ArrayOfTable::cast(node)
+                                .map(|array| {
+                                    array.header().map(|keys| keys.keys().collect::<Vec<_>>())
+                                })
+                                .flatten()
+                        })
+                        .flatten(),
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+                .into_iter()
+                .rev()
+                .flatten()
+                .map(|key| key.syntax().text().to_string())
+                .join(".");
+
+            return Some(HoverContent {
+                keys,
+                range: key.syntax().text_range(),
+                ..Default::default()
+            });
         }
     }
     None
