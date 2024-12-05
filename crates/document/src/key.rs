@@ -64,3 +64,24 @@ impl serde::Serialize for Key {
         self.value.serialize(serializer)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::test_serialize;
+    use serde_json::json;
+
+    test_serialize! {
+        #[test]
+        fn bare_key(r#"key = 1"#) -> Ok(json!({"key": 1}))
+    }
+
+    test_serialize! {
+        #[test]
+        fn basic_string_key(r#""key" = 1"#) -> Ok(json!({"key": 1}))
+    }
+
+    test_serialize! {
+        #[test]
+        fn literal_string_key(r#"'key' = 'value'"#) -> Ok(json!({"key": "value"}))
+    }
+}

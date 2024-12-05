@@ -84,26 +84,39 @@ impl TryFrom<ast::RootItem> for RootItem {
 }
 
 #[cfg(test)]
+#[macro_export]
+macro_rules! test_serialize {
+    {#[test] fn $name:ident($source:expr) -> Ok($json:expr)} => {
+        #[cfg(feature = "serde")]
+        #[test]
+        fn $name() {
+            use ast::AstNode;
+
+            let p = parser::parse($source, config::TomlVersion::V1_0_0);
+            let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
+            let document = crate::Document::try_from(ast).unwrap();
+            let serialized = serde_json::to_string(&document).unwrap();
+            assert_eq!(serialized, $json.to_string());
+        }
+    };
+}
+
+#[cfg(test)]
 mod test {
-    use ast::AstNode;
     use serde_json::json;
 
-    #[cfg(feature = "serde")]
-    #[test]
-    fn serde_serialize() {
-        let p = parser::parse(
+    test_serialize! {
+        #[test]
+        fn empty("") -> Ok(json!({}))
+    }
+
+    test_serialize! {
+        #[test]
+        fn key_values(
             r#"
             key = "value"
             flag = true
-            "#,
-            config::TomlVersion::V1_0_0,
-        );
-        let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
-        let document = crate::Document::try_from(ast).unwrap();
-        let serialized = serde_json::to_string(&document).unwrap();
-        assert_eq!(
-            serialized,
-            json!({"key": "value", "flag": true}).to_string()
-        );
+            "#
+        ) -> Ok(json!({"key": "value", "flag": true}))
     }
 }
