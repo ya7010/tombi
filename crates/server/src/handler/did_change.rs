@@ -14,7 +14,7 @@ pub async fn handle_did_change(
     tracing::info!("handle_did_change");
 
     let uri = &text_document.uri;
-    let mut document = match backend.documents.try_get_mut(uri) {
+    let mut document = match backend.try_get_mut_document(uri) {
         TryResult::Present(document) => document,
         TryResult::Absent => {
             tracing::warn!("document not found: {}", uri);

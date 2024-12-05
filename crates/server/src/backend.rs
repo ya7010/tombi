@@ -1,5 +1,16 @@
+use super::handler::{
+    handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
+    handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
+    handle_semantic_tokens_full, handle_shutdown,
+};
+use crate::{document::Document, handler::handle_folding_range};
+use ast::AstNode;
 use config::{Config, TomlVersion};
-use dashmap::DashMap;
+use dashmap::{
+    mapref::one::{Ref, RefMut},
+    try_result::TryResult,
+    DashMap,
+};
 use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
@@ -11,19 +22,11 @@ use tower_lsp::{
     LanguageServer,
 };
 
-use crate::{document::Document, handler::handle_folding_range};
-
-use super::handler::{
-    handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
-    handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
-    handle_semantic_tokens_full, handle_shutdown,
-};
-
 #[derive(Debug)]
 pub struct Backend {
     #[allow(dead_code)]
-    pub client: tower_lsp::Client,
-    pub documents: DashMap<Url, Document>,
+    client: tower_lsp::Client,
+    documents: DashMap<Url, Document>,
     toml_version: Option<TomlVersion>,
     config: Config,
 }
@@ -36,6 +39,35 @@ impl Backend {
             toml_version,
             config: config::load(),
         }
+    }
+
+    pub fn insert_document(&self, uri: Url, document: Document) {
+        self.documents.insert(uri, document);
+    }
+
+    pub fn get_document(&self, uri: &Url) -> Option<Ref<Url, Document>> {
+        self.documents.get(uri)
+    }
+
+    pub fn get_mut_document(&self, uri: &Url) -> Option<RefMut<Url, Document>> {
+        self.documents.get_mut(uri)
+    }
+
+    pub fn try_get_mut_document(&self, uri: &Url) -> TryResult<RefMut<Url, Document>> {
+        self.documents.try_get_mut(uri)
+    }
+
+    pub fn get_ast(&self, uri: &Url) -> Option<ast::Root> {
+        self.get_document(uri)
+            .map(|document| {
+                let p = parser::parse(&document.source, self.toml_version());
+                if !p.errors().is_empty() {
+                    return None;
+                }
+
+                ast::Root::cast(p.into_syntax_node())
+            })
+            .flatten()
     }
 
     pub fn toml_version(&self) -> TomlVersion {

@@ -2,7 +2,6 @@ use crate::{
     backend::Backend,
     document_symbol::{Document, Value},
 };
-use ast::AstNode;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -14,18 +13,10 @@ pub async fn handle_document_symbol(
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_document_symbol");
 
-    let Some(document) = backend.documents.get(&text_document.uri) else {
+    let Some(root) = backend.get_ast(&text_document.uri) else {
         return Ok(None);
     };
 
-    let p = parser::parse(&document.source, backend.toml_version());
-    if !p.errors().is_empty() {
-        return Ok(None);
-    }
-
-    let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
-        return Ok(None);
-    };
     let document = Document::from(root);
 
     let symbols = create_symbols(&document);

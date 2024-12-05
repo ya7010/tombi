@@ -11,7 +11,7 @@ pub async fn handle_formatting(
     tracing::info!("handle_formatting: {}", text_document.uri);
 
     let uri = &text_document.uri;
-    let mut document = match backend.documents.try_get_mut(uri) {
+    let mut document = match backend.try_get_mut_document(uri) {
         TryResult::Present(document) => document,
         TryResult::Absent => {
             tracing::warn!("document not found: {}", uri);
