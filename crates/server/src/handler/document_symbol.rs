@@ -18,7 +18,7 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let p = parser::parse(&document.source, backend.toml_version.unwrap_or_default());
+    let p = parser::parse(&document.source, backend.toml_version());
     if !p.errors().is_empty() {
         return Ok(None);
     }

@@ -4,13 +4,14 @@ use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
         DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
-        DocumentSymbolParams, DocumentSymbolResponse, Hover, HoverParams, InitializeParams,
-        InitializeResult, SemanticTokensParams, SemanticTokensResult, Url,
+        DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
+        HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
+        SemanticTokensResult, Url,
     },
     LanguageServer,
 };
 
-use crate::document::Document;
+use crate::{document::Document, handler::handle_folding_range};
 
 use super::handler::{
     handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
@@ -23,7 +24,7 @@ pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
     pub documents: DashMap<Url, Document>,
-    pub toml_version: Option<TomlVersion>,
+    toml_version: Option<TomlVersion>,
     pub config: Config,
 }
 
@@ -35,6 +36,11 @@ impl Backend {
             toml_version,
             config: config::load(),
         }
+    }
+
+    pub fn toml_version(&self) -> TomlVersion {
+        self.toml_version
+            .unwrap_or(self.config.toml_version.unwrap_or_default())
     }
 }
 
@@ -83,6 +89,13 @@ impl LanguageServer for Backend {
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
         handle_hover(params).await
+    }
+
+    async fn folding_range(
+        &self,
+        params: FoldingRangeParams,
+    ) -> Result<Option<Vec<FoldingRange>>, tower_lsp::jsonrpc::Error> {
+        handle_folding_range(self, params).await
     }
 
     async fn formatting(

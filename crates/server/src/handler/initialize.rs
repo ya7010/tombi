@@ -1,9 +1,9 @@
 use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, DiagnosticOptions, DiagnosticServerCapabilities,
-    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, PositionEncodingKind,
-    SaveOptions, SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions,
+    FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
+    OneOf, PositionEncodingKind, SaveOptions, SemanticTokenModifier, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
 };
 
 use super::semantic_tokens_full::SUPPORTED_TOKEN_TYPES;
@@ -80,7 +80,7 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
         // }),
         document_formatting_provider: Some(OneOf::Left(true)),
         // selection_range_provider: Some(SelectionRangeProviderCapability::Simple(true)),
-        // folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
+        folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
         // rename_provider: Some(OneOf::Right(RenameOptions {
         //     prepare_provider: Some(true),
         //     work_done_progress_options: WorkDoneProgressOptions {
