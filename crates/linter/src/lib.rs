@@ -29,14 +29,16 @@ pub fn lint_with(
         err.to_diagnostics(&mut errors);
     }
 
-    if let Some(root) = ast::Root::cast(p.into_syntax_node()) {
-        let mut linter = Linter::new(toml_version, _options);
-        root.lint(&mut linter);
-        errors.extend(linter.into_diagnostics());
+    if errors.is_empty() {
+        if let Some(root) = ast::Root::cast(p.into_syntax_node()) {
+            let mut linter = Linter::new(toml_version, _options);
+            root.lint(&mut linter);
+            errors.extend(linter.into_diagnostics());
 
-        if let Err(errs) = document_tree::DocumentTree::try_from(root) {
-            for err in errs {
-                err.to_diagnostics(&mut errors);
+            if let Err(errs) = document_tree::DocumentTree::try_from(root) {
+                for err in errs {
+                    err.to_diagnostics(&mut errors);
+                }
             }
         }
     }
