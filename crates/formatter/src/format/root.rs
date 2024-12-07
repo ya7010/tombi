@@ -56,15 +56,22 @@ impl Format for ast::Root {
                                 acc,
                             )
                         }
-                        ast::RootItem::ArrayOfTable(_) => {
+                        ast::RootItem::ArrayOfTable(array_of_table) => {
+                            let header_text = array_of_table.header().unwrap().syntax().to_string();
+
                             match header {
                                 Header::Root { key_value_size } => {
                                     if key_value_size > 0 {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
                                 }
-                                Header::Table { key_value_size, .. } => {
-                                    if key_value_size > 0 {
+                                Header::Table {
+                                    header_text: pre_header_text,
+                                    key_value_size,
+                                } => {
+                                    if key_value_size > 0
+                                        || !header_text.starts_with(&pre_header_text)
+                                    {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
                                 }
@@ -150,4 +157,51 @@ enum Header {
     },
 
     ArrayOfTable {},
+}
+
+#[cfg(test)]
+mod test {
+    use crate::test_format;
+
+    test_format! {
+        #[test]
+        fn empty_table_space_when_subtable(
+            r#"
+            [foo]
+            [foo.bar]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_table_space_when_table(
+            r#"
+            [foo]
+
+            [bar.baz]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_table_space_when_array_of_subtable(
+            r#"
+            [foo]
+            [[foo.bar]]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_table_space_when_array_of_table(
+            r#"
+            [foo]
+
+            [[bar.baz]]
+            "#
+        ) -> Ok(source);
+    }
 }
