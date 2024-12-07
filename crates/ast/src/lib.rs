@@ -283,8 +283,8 @@ impl Table {
     /// [[foo.bar.baz]]  # <- This is also a subtable
     /// key = true
     /// ```
-    pub fn subtables(&self) -> impl Iterator<Item = TableOrArrayOfTable> {
-        support::next_siblings_nodes(self).take_while(|t| {
+    pub fn subtables<'a>(&'a self) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
+        support::next_siblings_nodes(self).take_while(|t: &TableOrArrayOfTable| {
             t.header()
                 .unwrap()
                 .to_string()
