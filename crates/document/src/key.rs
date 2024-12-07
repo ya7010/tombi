@@ -1,23 +1,29 @@
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KeyKind {
+    BareKey,
+    BasicString,
+    LiteralString,
+}
+
+impl From<document_tree::KeyKind> for KeyKind {
+    fn from(kind: document_tree::KeyKind) -> Self {
+        match kind {
+            document_tree::KeyKind::BareKey => Self::BareKey,
+            document_tree::KeyKind::BasicString => Self::BasicString,
+            document_tree::KeyKind::LiteralString => Self::LiteralString,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Key {
+    kind: KeyKind,
     value: String,
-    range: text::Range,
 }
 
 impl Key {
-    pub(crate) fn new(text: impl ToString, range: text::Range) -> Self {
-        Self {
-            value: text.to_string(),
-            range,
-        }
-    }
-
     pub fn value(&self) -> &str {
         &self.value
-    }
-
-    pub(crate) fn range(&self) -> text::Range {
-        self.range
     }
 }
 
@@ -41,9 +47,12 @@ impl std::fmt::Display for Key {
     }
 }
 
-impl From<ast::Key> for Key {
-    fn from(node: ast::Key) -> Self {
-        Self::new(node.raw_text(), node.token().unwrap().text_range())
+impl From<document_tree::Key> for Key {
+    fn from(node: document_tree::Key) -> Self {
+        Self {
+            kind: node.kind().into(),
+            value: node.into(),
+        }
     }
 }
 

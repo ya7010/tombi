@@ -28,27 +28,19 @@ pub enum Value {
     Table(Table),
 }
 
-impl TryFrom<ast::Value> for Value {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Value) -> Result<Self, Self::Error> {
+impl From<document_tree::Value> for Value {
+    fn from(node: document_tree::Value) -> Self {
         match node {
-            ast::Value::BasicString(string) => string.try_into().map(Value::String),
-            ast::Value::LiteralString(string) => string.try_into().map(Value::String),
-            ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
-            ast::Value::MultiLineLiteralString(string) => string.try_into().map(Value::String),
-            ast::Value::IntegerBin(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::IntegerOct(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::IntegerDec(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::IntegerHex(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::Float(float) => float.try_into().map(Value::Float),
-            ast::Value::Boolean(boolean) => boolean.try_into().map(Value::Boolean),
-            ast::Value::OffsetDateTime(dt) => dt.try_into().map(Value::OffsetDateTime),
-            ast::Value::LocalDateTime(dt) => dt.try_into().map(Value::LocalDateTime),
-            ast::Value::LocalDate(date) => date.try_into().map(Value::LocalDate),
-            ast::Value::LocalTime(time) => time.try_into().map(Value::LocalTime),
-            ast::Value::Array(array) => array.try_into().map(Value::Array),
-            ast::Value::InlineTable(inline_table) => inline_table.try_into().map(Value::Table),
+            document_tree::Value::Boolean(value) => Self::Boolean(value.into()),
+            document_tree::Value::Integer(value) => Self::Integer(value.into()),
+            document_tree::Value::Float(value) => Self::Float(value.into()),
+            document_tree::Value::String(value) => Self::String(value.into()),
+            document_tree::Value::OffsetDateTime(value) => Self::OffsetDateTime(value.into()),
+            document_tree::Value::LocalDateTime(value) => Self::LocalDateTime(value.into()),
+            document_tree::Value::LocalDate(value) => Self::LocalDate(value.into()),
+            document_tree::Value::LocalTime(value) => Self::LocalTime(value.into()),
+            document_tree::Value::Array(value) => Self::Array(value.into()),
+            document_tree::Value::Table(value) => Self::Table(value.into()),
         }
     }
 }

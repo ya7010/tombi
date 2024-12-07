@@ -4,28 +4,16 @@ pub struct Float {
 }
 
 impl Float {
-    pub fn try_new(text: &str) -> Result<Self, std::num::ParseFloatError> {
-        Ok(Self {
-            value: text.parse()?,
-        })
-    }
-
     pub fn value(&self) -> f64 {
         self.value
     }
 }
 
-impl TryFrom<ast::Float> for Float {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Float) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Self::try_new(token.text()).map_err(|err| {
-            vec![crate::Error::ParseFloatError {
-                error: err,
-                range: token.text_range(),
-            }]
-        })
+impl From<document_tree::Float> for Float {
+    fn from(node: document_tree::Float) -> Self {
+        Self {
+            value: node.value(),
+        }
     }
 }
 
@@ -41,6 +29,16 @@ impl serde::Serialize for Float {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+
+    impl Float {
+        fn try_new(value: &str) -> Result<Self, Box<dyn std::error::Error>> {
+            Ok(Self {
+                value: value.parse()?,
+            })
+        }
+    }
+
     #[test]
     fn inf() {
         let float = crate::value::Float::try_new("inf").unwrap();

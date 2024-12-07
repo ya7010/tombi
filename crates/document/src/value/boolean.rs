@@ -4,28 +4,17 @@ pub struct Boolean {
 }
 
 impl Boolean {
-    pub(crate) fn new(text: &str) -> Self {
-        Self {
-            value: match text {
-                "true" => true,
-                "false" => false,
-                _ => unreachable!(),
-            },
-        }
-    }
-
     #[inline]
     pub fn value(&self) -> bool {
         self.value
     }
 }
 
-impl TryFrom<ast::Boolean> for Boolean {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Boolean) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Ok(Self::new(token.text()))
+impl From<document_tree::Boolean> for Boolean {
+    fn from(node: document_tree::Boolean) -> Self {
+        Self {
+            value: node.value(),
+        }
     }
 }
 

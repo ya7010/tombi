@@ -35,11 +35,10 @@ impl TryFrom<ast::BasicString> for String {
 
     fn try_from(node: ast::BasicString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let text = token.text();
 
         Ok(Self {
             kind: StringKind::BasicString,
-            value: text[1..text.len() - 1].replace(r#"\""#, "\""),
+            value: token.text().to_string(),
             range: token.text_range(),
         })
     }
@@ -50,11 +49,10 @@ impl TryFrom<ast::LiteralString> for String {
 
     fn try_from(node: ast::LiteralString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let text = token.text();
 
         Ok(Self {
             kind: StringKind::LiteralString,
-            value: text[1..text.len() - 1].replace(r#"\'"#, "'"),
+            value: token.text().to_string(),
             range: token.text_range(),
         })
     }
@@ -65,11 +63,10 @@ impl TryFrom<ast::MultiLineBasicString> for String {
 
     fn try_from(node: ast::MultiLineBasicString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let text = token.text();
 
         Ok(Self {
             kind: StringKind::MultiLineBasicString,
-            value: text[3..text.len() - 3].to_string(),
+            value: token.text().to_string(),
             range: token.text_range(),
         })
     }
@@ -80,11 +77,10 @@ impl TryFrom<ast::MultiLineLiteralString> for String {
 
     fn try_from(node: ast::MultiLineLiteralString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let text = token.text();
 
         Ok(Self {
             kind: StringKind::MultiLineLiteralString,
-            value: text[3..text.len() - 3].to_string(),
+            value: token.text().to_string(),
             range: token.text_range(),
         })
     }

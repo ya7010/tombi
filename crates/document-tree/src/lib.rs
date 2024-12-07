@@ -5,10 +5,10 @@ mod value;
 use std::ops::Deref;
 
 pub use error::Error;
-pub use key::Key;
+pub use key::{Key, KeyKind};
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
-    OffsetDateTime, String, Table, TableKind, Value,
+    OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
 
 #[derive(Debug, Clone, PartialEq)]

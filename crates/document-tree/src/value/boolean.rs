@@ -5,17 +5,6 @@ pub struct Boolean {
 }
 
 impl Boolean {
-    pub(crate) fn new(text: &str, range: text::Range) -> Self {
-        Self {
-            value: match text {
-                "true" => true,
-                "false" => false,
-                _ => unreachable!(),
-            },
-            range,
-        }
-    }
-
     #[inline]
     pub fn value(&self) -> bool {
         self.value

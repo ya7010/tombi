@@ -73,8 +73,7 @@ impl Array {
 
     pub fn merge(&mut self, other: Self) -> Result<(), Vec<crate::Error>> {
         let mut errors = Vec::new();
-        dbg!((self.kind(), other.kind()));
-        dbg!((self.values(), other.values()));
+
         match (self.kind(), other.kind()) {
             (ArrayKind::ArrayOfTables, ArrayKind::Table) => {
                 match (

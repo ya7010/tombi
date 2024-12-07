@@ -1,10 +1,22 @@
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KeyKind {
+    BareKey,
+    BasicString,
+    LiteralString,
+}
+
 #[derive(Debug, Clone)]
 pub struct Key {
+    kind: KeyKind,
     value: String,
     range: text::Range,
 }
 
 impl Key {
+    pub fn kind(&self) -> KeyKind {
+        self.kind
+    }
+
     pub fn value(&self) -> &str {
         &self.value
     }
@@ -37,8 +49,19 @@ impl std::fmt::Display for Key {
 impl From<ast::Key> for Key {
     fn from(node: ast::Key) -> Self {
         Self {
+            kind: match node {
+                ast::Key::BareKey(_) => KeyKind::BareKey,
+                ast::Key::BasicString(_) => KeyKind::BasicString,
+                ast::Key::LiteralString(_) => KeyKind::LiteralString,
+            },
             value: node.raw_text(),
             range: node.token().unwrap().text_range(),
         }
+    }
+}
+
+impl From<Key> for String {
+    fn from(key: Key) -> Self {
+        key.value
     }
 }

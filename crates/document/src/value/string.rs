@@ -6,6 +6,17 @@ pub enum StringKind {
     MultiLineLiteralString,
 }
 
+impl From<document_tree::StringKind> for StringKind {
+    fn from(kind: document_tree::StringKind) -> Self {
+        match kind {
+            document_tree::StringKind::BasicString => Self::BasicString,
+            document_tree::StringKind::LiteralString => Self::LiteralString,
+            document_tree::StringKind::MultiLineBasicString => Self::MultiLineBasicString,
+            document_tree::StringKind::MultiLineLiteralString => Self::MultiLineLiteralString,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct String {
     kind: StringKind,
@@ -13,34 +24,6 @@ pub struct String {
 }
 
 impl String {
-    pub fn new_basic_string(text: &str) -> Self {
-        Self {
-            kind: StringKind::BasicString,
-            value: text.to_string(),
-        }
-    }
-
-    pub fn new_literal_string(text: &str) -> Self {
-        Self {
-            kind: StringKind::LiteralString,
-            value: text.to_string(),
-        }
-    }
-
-    pub fn new_multi_line_basic_string(text: &str) -> Self {
-        Self {
-            kind: StringKind::MultiLineBasicString,
-            value: text.to_string(),
-        }
-    }
-
-    pub fn new_multi_line_literal_string(text: &str) -> Self {
-        Self {
-            kind: StringKind::MultiLineLiteralString,
-            value: text.to_string(),
-        }
-    }
-
     #[inline]
     pub fn kind(&self) -> StringKind {
         self.kind
@@ -52,39 +35,12 @@ impl String {
     }
 }
 
-impl TryFrom<ast::BasicString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::BasicString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Ok(Self::new_basic_string(token.text()))
-    }
-}
-
-impl TryFrom<ast::LiteralString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::LiteralString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Ok(Self::new_literal_string(token.text()))
-    }
-}
-
-impl TryFrom<ast::MultiLineBasicString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::MultiLineBasicString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Ok(Self::new_multi_line_basic_string(token.text()))
-    }
-}
-
-impl TryFrom<ast::MultiLineLiteralString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::MultiLineLiteralString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Ok(Self::new_multi_line_literal_string(token.text()))
+impl From<document_tree::String> for String {
+    fn from(node: document_tree::String) -> Self {
+        Self {
+            kind: node.kind().into(),
+            value: node.value().to_string(),
+        }
     }
 }
 

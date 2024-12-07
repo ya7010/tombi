@@ -11,7 +11,7 @@ pub use boolean::Boolean;
 pub use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime};
 pub use float::Float;
 pub use integer::{Integer, IntegerKind};
-pub use string::String;
+pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
 #[derive(Debug, Clone, PartialEq)]

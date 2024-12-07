@@ -186,6 +186,12 @@ impl Table {
     }
 }
 
+impl From<Table> for IndexMap<Key, Value> {
+    fn from(table: Table) -> IndexMap<Key, Value> {
+        table.key_values
+    }
+}
+
 impl TryFrom<ast::Table> for Table {
     type Error = Vec<crate::Error>;
 

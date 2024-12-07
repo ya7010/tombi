@@ -10,20 +10,22 @@ pub enum ArrayKind {
     /// ```
     ArrayOfTables,
 
-    /// An table.
-    ///
-    /// ```toml
-    /// [[array]]
-    /// [[array.table]]  # <- Here
-    /// ```
-    Table,
-
     /// An array.
     ///
     /// ```toml
     /// key = [1, 2, 3]
     /// ```
     Array,
+}
+
+impl From<document_tree::ArrayKind> for ArrayKind {
+    fn from(kind: document_tree::ArrayKind) -> Self {
+        match kind {
+            document_tree::ArrayKind::ArrayOfTables => Self::ArrayOfTables,
+            document_tree::ArrayKind::Table => Self::ArrayOfTables,
+            document_tree::ArrayKind::Array => Self::Array,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -33,65 +35,8 @@ pub struct Array {
 }
 
 impl Array {
-    pub fn new_array() -> Self {
-        Self {
-            kind: ArrayKind::Array,
-            values: vec![],
-        }
-    }
-
-    pub fn new_array_of_tables() -> Self {
-        Self {
-            kind: ArrayKind::ArrayOfTables,
-            values: vec![],
-        }
-    }
-
-    pub fn new_table() -> Self {
-        Self {
-            kind: ArrayKind::Table,
-            values: vec![],
-        }
-    }
-
     pub fn push(&mut self, value: Value) {
         self.values.push(value);
-    }
-
-    pub fn merge(&mut self, other: Self) -> Result<(), Vec<crate::Error>> {
-        let mut errors = Vec::new();
-        dbg!((self.kind(), other.kind()));
-        dbg!((self.values(), other.values()));
-        match (self.kind(), other.kind()) {
-            (ArrayKind::ArrayOfTables, ArrayKind::Table) => {
-                match (
-                    self.values_mut().last_mut().unwrap(),
-                    Into::<Vec<Value>>::into(other).pop().unwrap(),
-                ) {
-                    (Value::Table(table1), Value::Table(table2)) => {
-                        if let Err(errs) = table1.merge(table2) {
-                            errors.extend(errs);
-                        }
-                    }
-                    _ => {
-                        unreachable!()
-                    }
-                }
-            }
-            (ArrayKind::ArrayOfTables, ArrayKind::ArrayOfTables)
-            | (ArrayKind::Array, ArrayKind::Array) => {
-                self.values.extend(other.values);
-            }
-            _ => {
-                errors.push(crate::Error::ConflictArray {});
-            }
-        }
-
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            Err(errors)
-        }
     }
 
     pub fn kind(&self) -> ArrayKind {
@@ -107,27 +52,21 @@ impl Array {
     }
 }
 
-impl TryFrom<ast::Array> for Array {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Array) -> Result<Self, Self::Error> {
-        let mut array = Array::new_array();
-        let mut errors = Vec::new();
-
-        for value in node.values() {
-            match value.try_into() {
-                Ok(value) => array.push(value),
-                Err(errs) => errors.extend(errs),
-            }
-        }
-
-        Ok(array)
-    }
-}
-
 impl Into<Vec<Value>> for Array {
     fn into(self) -> Vec<Value> {
         self.values
+    }
+}
+
+impl From<document_tree::Array> for Array {
+    fn from(array: document_tree::Array) -> Self {
+        Self {
+            kind: array.kind().into(),
+            values: Vec::<document_tree::Value>::from(array.values())
+                .into_iter()
+                .map(Value::from)
+                .collect(),
+        }
     }
 }
 
