@@ -14,50 +14,6 @@ pub struct Integer {
 }
 
 impl Integer {
-    pub(crate) fn try_new_integer_bin(
-        text: &str,
-        range: text::Range,
-    ) -> Result<Self, std::num::ParseIntError> {
-        isize::from_str_radix(&text[2..], 2).map(|value| Self {
-            kind: IntegerKind::Binary,
-            value,
-            range,
-        })
-    }
-
-    pub(crate) fn try_new_integer_dec(
-        text: &str,
-        range: text::Range,
-    ) -> Result<Self, std::num::ParseIntError> {
-        isize::from_str_radix(text, 10).map(|value| Self {
-            kind: IntegerKind::Decimal,
-            value,
-            range,
-        })
-    }
-
-    pub(crate) fn try_new_integer_oct(
-        text: &str,
-        range: text::Range,
-    ) -> Result<Self, std::num::ParseIntError> {
-        isize::from_str_radix(&text[2..], 8).map(|value| Self {
-            kind: IntegerKind::Octal,
-            value,
-            range,
-        })
-    }
-
-    pub(crate) fn try_new_integer_hex(
-        text: &str,
-        range: text::Range,
-    ) -> Result<Self, std::num::ParseIntError> {
-        isize::from_str_radix(&text[2..], 16).map(|value| Self {
-            kind: IntegerKind::Hexadecimal,
-            value,
-            range,
-        })
-    }
-
     #[inline]
     pub fn kind(&self) -> IntegerKind {
         self.kind
@@ -79,12 +35,16 @@ impl TryFrom<ast::IntegerBin> for Integer {
 
     fn try_from(node: ast::IntegerBin) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        Self::try_new_integer_bin(token.text(), token.text_range()).map_err(|err| {
-            vec![crate::Error::ParseIntError {
-                error: err,
-                range: token.text_range(),
-            }]
-        })
+        let range = token.text_range();
+
+        match isize::from_str_radix(&token.text()[2..], 2) {
+            Ok(value) => Ok(Self {
+                kind: IntegerKind::Binary,
+                value,
+                range,
+            }),
+            Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
+        }
     }
 }
 
@@ -93,12 +53,16 @@ impl TryFrom<ast::IntegerOct> for Integer {
 
     fn try_from(node: ast::IntegerOct) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        Self::try_new_integer_oct(token.text(), token.text_range()).map_err(|err| {
-            vec![crate::Error::ParseIntError {
-                error: err,
-                range: token.text_range(),
-            }]
-        })
+        let range = token.text_range();
+
+        match isize::from_str_radix(&token.text()[2..], 8) {
+            Ok(value) => Ok(Self {
+                kind: IntegerKind::Octal,
+                value,
+                range,
+            }),
+            Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
+        }
     }
 }
 
@@ -107,12 +71,16 @@ impl TryFrom<ast::IntegerDec> for Integer {
 
     fn try_from(node: ast::IntegerDec) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        Self::try_new_integer_dec(token.text(), token.text_range()).map_err(|err| {
-            vec![crate::Error::ParseIntError {
-                error: err,
-                range: token.text_range(),
-            }]
-        })
+        let range = token.text_range();
+
+        match isize::from_str_radix(token.text(), 10) {
+            Ok(value) => Ok(Self {
+                kind: IntegerKind::Decimal,
+                value,
+                range,
+            }),
+            Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
+        }
     }
 }
 
@@ -121,11 +89,15 @@ impl TryFrom<ast::IntegerHex> for Integer {
 
     fn try_from(node: ast::IntegerHex) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        Self::try_new_integer_hex(token.text(), token.text_range()).map_err(|err| {
-            vec![crate::Error::ParseIntError {
-                error: err,
-                range: token.text_range(),
-            }]
-        })
+        let range = token.text_range();
+
+        match isize::from_str_radix(&token.text()[2..], 16) {
+            Ok(value) => Ok(Self {
+                kind: IntegerKind::Hexadecimal,
+                value,
+                range,
+            }),
+            Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
+        }
     }
 }

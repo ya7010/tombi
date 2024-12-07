@@ -32,6 +32,13 @@ impl TryFrom<ast::Boolean> for Boolean {
 
     fn try_from(node: ast::Boolean) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        Ok(Self::new(token.text(), token.text_range()))
+        Ok(Self {
+            value: match token.text() {
+                "true" => true,
+                "false" => false,
+                _ => unreachable!(),
+            },
+            range: token.text_range(),
+        })
     }
 }

@@ -14,38 +14,6 @@ pub struct String {
 }
 
 impl String {
-    pub(crate) fn new_basic_string(text: &str, range: text::Range) -> Self {
-        Self {
-            kind: StringKind::BasicString,
-            value: text.to_string(),
-            range,
-        }
-    }
-
-    pub(crate) fn new_literal_string(text: &str, range: text::Range) -> Self {
-        Self {
-            kind: StringKind::LiteralString,
-            value: text.to_string(),
-            range,
-        }
-    }
-
-    pub(crate) fn new_multi_line_basic_string(text: &str, range: text::Range) -> Self {
-        Self {
-            kind: StringKind::MultiLineBasicString,
-            value: text.to_string(),
-            range,
-        }
-    }
-
-    pub(crate) fn new_multi_line_literal_string(text: &str, range: text::Range) -> Self {
-        Self {
-            kind: StringKind::MultiLineLiteralString,
-            value: text.to_string(),
-            range,
-        }
-    }
-
     #[inline]
     pub fn kind(&self) -> StringKind {
         self.kind
@@ -62,44 +30,54 @@ impl String {
     }
 }
 
-impl TryFrom<ast::BasicString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::BasicString) -> Result<Self, Self::Error> {
+impl From<ast::BasicString> for String {
+    fn from(node: ast::BasicString) -> Self {
         let token = node.token().unwrap();
-        Ok(Self::new_basic_string(token.text(), token.text_range()))
+        let text = token.text();
+
+        Self {
+            kind: StringKind::BasicString,
+            value: text[1..text.len() - 1].replace(r#"\""#, "\""),
+            range: token.text_range(),
+        }
     }
 }
 
-impl TryFrom<ast::LiteralString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::LiteralString) -> Result<Self, Self::Error> {
+impl From<ast::LiteralString> for String {
+    fn from(node: ast::LiteralString) -> Self {
         let token = node.token().unwrap();
-        Ok(Self::new_literal_string(token.text(), token.text_range()))
+        let text = token.text();
+
+        Self {
+            kind: StringKind::LiteralString,
+            value: text[1..text.len() - 1].replace(r#"\'"#, "'"),
+            range: token.text_range(),
+        }
     }
 }
 
-impl TryFrom<ast::MultiLineBasicString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::MultiLineBasicString) -> Result<Self, Self::Error> {
+impl From<ast::MultiLineBasicString> for String {
+    fn from(node: ast::MultiLineBasicString) -> Self {
         let token = node.token().unwrap();
-        Ok(Self::new_multi_line_basic_string(
-            token.text(),
-            token.text_range(),
-        ))
+        let text = token.text();
+
+        Self {
+            kind: StringKind::MultiLineBasicString,
+            value: text[3..text.len() - 3].to_string(),
+            range: token.text_range(),
+        }
     }
 }
 
-impl TryFrom<ast::MultiLineLiteralString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::MultiLineLiteralString) -> Result<Self, Self::Error> {
+impl From<ast::MultiLineLiteralString> for String {
+    fn from(node: ast::MultiLineLiteralString) -> Self {
         let token = node.token().unwrap();
-        Ok(Self::new_multi_line_literal_string(
-            token.text(),
-            token.text_range(),
-        ))
+        let text = token.text();
+
+        Self {
+            kind: StringKind::MultiLineLiteralString,
+            value: text[3..text.len() - 3].to_string(),
+            range: token.text_range(),
+        }
     }
 }
