@@ -46,37 +46,44 @@ pub enum Error {
     },
 }
 
+impl Error {
+    pub fn to_message(&self) -> String {
+        self.to_string()
+    }
+
+    pub fn range(&self) -> text::Range {
+        match self {
+            Self::DuplicateKey { range, .. } => *range,
+            Self::ConflictArray { range2, .. } => *range2,
+            Self::ParseIntError { range, .. } => *range,
+            Self::ParseFloatError { range, .. } => *range,
+            Self::ParseOffsetDateTimeError { range, .. } => *range,
+            Self::ParseLocalDateTimeError { range, .. } => *range,
+            Self::ParseLocalDateError { range, .. } => *range,
+            Self::ParseLocalTimeError { range, .. } => *range,
+        }
+    }
+}
+
 #[cfg(feature = "diagnostic")]
 impl diagnostic::ToDiagnostics for Error {
     fn to_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
         match self {
-            Self::DuplicateKey { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
-            }
             Self::ConflictArray { range1, range2 } => {
-                let diagnostic1 = diagnostic::Diagnostic::new_error(self.to_string(), *range1);
+                let diagnostic1 = diagnostic::Diagnostic::new_error(self.to_message(), *range1);
                 if !diagnostics.contains(&diagnostic1) {
                     diagnostics.push(diagnostic1);
                 }
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range2));
+                diagnostics.push(diagnostic::Diagnostic::new_error(
+                    self.to_message(),
+                    *range2,
+                ));
             }
-            Self::ParseIntError { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
-            }
-            Self::ParseFloatError { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
-            }
-            Self::ParseOffsetDateTimeError { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
-            }
-            Self::ParseLocalDateTimeError { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
-            }
-            Self::ParseLocalDateError { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
-            }
-            Self::ParseLocalTimeError { range, .. } => {
-                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            _ => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(
+                    self.to_message(),
+                    self.range(),
+                ));
             }
         }
     }

@@ -56,7 +56,7 @@ impl Error {
         self.kind
     }
 
-    pub fn message(&self) -> String {
+    pub fn to_message(&self) -> String {
         self.kind.to_string()
     }
 
@@ -71,10 +71,11 @@ impl std::fmt::Display for Error {
     }
 }
 
+#[cfg(feature = "diagnostic")]
 impl diagnostic::ToDiagnostics for Error {
     fn to_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
         diagnostics.push(diagnostic::Diagnostic::new_error(
-            self.message(),
+            self.to_message(),
             self.range(),
         ));
     }

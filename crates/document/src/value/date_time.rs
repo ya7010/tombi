@@ -117,3 +117,15 @@ impl serde::Serialize for LocalTime {
         self.value.serialize(serializer)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::test_serialize;
+
+    test_serialize! {
+        #[test]
+        fn invalid_date(r#"date = 0000-00-00"#) -> Err([
+            ("invalid local date: input is out of range", ((0, 7), (0, 17)))
+        ])
+    }
+}

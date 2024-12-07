@@ -48,16 +48,21 @@ impl TryFrom<ast::Root> for DocumentTree {
         let mut errors = Vec::new();
 
         for item in node.items() {
-            if let Err(err) = match item.try_into() {
+            if let Err(errs) = match item.try_into() {
                 Ok(RootItem::Table(table)) => document.0.merge(table),
                 Ok(RootItem::ArrayOfTable(table)) => document.0.merge(table),
                 Ok(RootItem::KeyValue(table)) => document.0.merge(table),
                 Err(errs) => Err(errs),
             } {
-                errors.extend(err);
+                errors.extend(errs);
             }
         }
-        Ok(document)
+
+        if errors.is_empty() {
+            Ok(document)
+        } else {
+            Err(errors)
+        }
     }
 }
 
