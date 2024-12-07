@@ -97,12 +97,8 @@ impl serde::Serialize for String {
         match self.kind {
             StringKind::BasicString => self.value[1..self.value.len() - 1].replace(r#"\""#, r#"""#),
             StringKind::LiteralString => self.value[1..self.value.len() - 1].replace(r#"\'"#, "'"),
-            StringKind::MultiLineBasicString => {
-                self.value[3..self.value.len() - 3].replace(r#"\""#, r#"""#)
-            }
-            StringKind::MultiLineLiteralString => {
-                self.value[3..self.value.len() - 3].replace(r#"\'"#, "'")
-            }
+            StringKind::MultiLineBasicString => self.value[3..self.value.len() - 3].to_string(),
+            StringKind::MultiLineLiteralString => self.value[3..self.value.len() - 3].to_string(),
         }
         .serialize(serializer)
     }

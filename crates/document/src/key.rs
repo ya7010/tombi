@@ -31,27 +31,10 @@ impl TryFrom<ast::Key> for Key {
     type Error = Vec<crate::Error>;
 
     fn try_from(node: ast::Key) -> Result<Self, Self::Error> {
-        let (text, range) = match node {
-            ast::Key::BareKey(bare_key) => {
-                let token = bare_key.token().unwrap();
-                (token.text().to_string(), token.text_range())
-            }
-            ast::Key::BasicString(basic_string) => {
-                let token = basic_string.token().unwrap();
-                (
-                    token.text()[1..token.text().len() - 1].replace(r#"\""#, "\""),
-                    token.text_range(),
-                )
-            }
-            ast::Key::LiteralString(literal_string) => {
-                let token = literal_string.token().unwrap();
-                (
-                    token.text()[1..token.text().len() - 1].replace(r#"\'"#, "'"),
-                    token.text_range(),
-                )
-            }
-        };
-        Ok(Key::new(text, range))
+        Ok(Key::new(
+            node.raw_text(),
+            node.token().unwrap().text_range(),
+        ))
     }
 }
 
