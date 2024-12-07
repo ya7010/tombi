@@ -503,6 +503,7 @@ dependencies = [
  "ast",
  "chrono",
  "config",
+ "document-tree",
  "indexmap 2.6.0",
  "itertools",
  "parser",
@@ -512,6 +513,18 @@ dependencies = [
  "text",
  "thiserror",
  "tower-lsp",
+]
+
+[[package]]
+name = "document-tree"
+version = "0.0.0"
+dependencies = [
+ "ast",
+ "chrono",
+ "indexmap 2.6.0",
+ "itertools",
+ "text",
+ "thiserror",
 ]
 
 [[package]]
@@ -1547,6 +1560,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "config",
+ "document-tree",
  "drop_bomb",
  "itertools",
  "lexer",

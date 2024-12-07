@@ -23,6 +23,12 @@
       "path": "crates/ast"
     },
     {
+      "path": "crates/document-tree"
+    },
+    {
+      "path": "crates/document"
+    },
+    {
       "path": "crates/parser"
     },
     {
