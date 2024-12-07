@@ -153,14 +153,7 @@ impl TryFrom<ast::Table> for Table {
             }
         }
 
-        for key in node
-            .header()
-            .unwrap()
-            .keys()
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-        {
+        for key in node.header().unwrap().keys().rev() {
             if let Ok(k) = key.try_into() {
                 match Table::new()
                     .insert(k, Value::Table(std::mem::replace(&mut table, Table::new())))
@@ -199,14 +192,7 @@ impl TryFrom<ast::ArrayOfTable> for Table {
             }
         }
 
-        for key in node
-            .header()
-            .unwrap()
-            .keys()
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-        {
+        for key in node.header().unwrap().keys().rev() {
             if let Ok(k) = key.try_into() {
                 match Table::new_array_of_tables().insert(
                     k,

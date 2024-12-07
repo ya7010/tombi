@@ -1,5 +1,3 @@
-use ast::AstNode;
-
 use super::{
     comment::{BeginDanglingComment, DanglingComment, EndDanglingComment},
     Format,
@@ -23,7 +21,7 @@ impl Format for ast::Root {
                     (Header::Root { key_value_size: 0 }, vec![]),
                     |(mut header, mut acc), item| match &item {
                         ast::RootItem::Table(table) => {
-                            let header_text = table.header().unwrap().syntax().to_string();
+                            let header_keys = table.header().unwrap().keys();
                             let key_value_size = table.key_values().into_iter().count();
 
                             match header {
@@ -33,11 +31,11 @@ impl Format for ast::Root {
                                     }
                                 }
                                 Header::Table {
-                                    header_text: pre_header_text,
+                                    header_keys: pre_header_keys,
                                     key_value_size,
                                 } => {
                                     if key_value_size > 0
-                                        || !header_text.starts_with(&pre_header_text)
+                                        || !header_keys.starts_with(&pre_header_keys)
                                     {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
@@ -50,14 +48,14 @@ impl Format for ast::Root {
 
                             (
                                 Header::Table {
-                                    header_text,
+                                    header_keys,
                                     key_value_size,
                                 },
                                 acc,
                             )
                         }
                         ast::RootItem::ArrayOfTable(array_of_table) => {
-                            let header_text = array_of_table.header().unwrap().syntax().to_string();
+                            let header_keys = array_of_table.header().unwrap().keys();
 
                             match header {
                                 Header::Root { key_value_size } => {
@@ -66,11 +64,11 @@ impl Format for ast::Root {
                                     }
                                 }
                                 Header::Table {
-                                    header_text: pre_header_text,
+                                    header_keys: pre_header_keys,
                                     key_value_size,
                                 } => {
                                     if key_value_size > 0
-                                        || !header_text.starts_with(&pre_header_text)
+                                        || !header_keys.starts_with(&pre_header_keys)
                                     {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
@@ -152,7 +150,7 @@ enum Header {
     },
 
     Table {
-        header_text: String,
+        header_keys: ast::AstChildren<ast::Key>,
         key_value_size: usize,
     },
 

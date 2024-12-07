@@ -24,8 +24,8 @@ impl crate::Table {
         support::next_siblings_nodes(self).take_while(|t: &TableOrArrayOfTable| {
             t.header()
                 .unwrap()
-                .to_string()
-                .starts_with(&self.header().unwrap().to_string())
+                .keys()
+                .starts_with(&self.header().unwrap().keys())
         })
     }
 
@@ -33,8 +33,8 @@ impl crate::Table {
         support::prev_siblings_nodes(self).take_while(|t: &TableOrArrayOfTable| {
             self.header()
                 .unwrap()
-                .to_string()
-                .starts_with(&t.header().unwrap().to_string())
+                .keys()
+                .starts_with(&t.header().unwrap().keys())
         })
     }
 }

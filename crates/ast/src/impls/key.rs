@@ -1,3 +1,5 @@
+use crate::AstChildren;
+
 impl crate::Key {
     pub fn token(&self) -> Option<syntax::SyntaxToken> {
         match self {
@@ -19,5 +21,23 @@ impl crate::Key {
                 .replace(r#"\'"#, "'")
                 .to_string(),
         }
+    }
+}
+
+impl AstChildren<crate::Key> {
+    pub fn starts_with(&self, other: &AstChildren<crate::Key>) -> bool {
+        self.clone()
+            .into_iter()
+            .zip(other.clone().into_iter())
+            .all(|(a, b)| a.raw_text() == b.raw_text())
+    }
+
+    #[inline]
+    pub fn into_vec(self) -> Vec<crate::Key> {
+        self.collect()
+    }
+
+    pub fn rev(self) -> impl Iterator<Item = crate::Key> {
+        self.into_vec().into_iter().rev()
     }
 }
