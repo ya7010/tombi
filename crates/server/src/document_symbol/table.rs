@@ -33,6 +33,7 @@ impl Table {
     }
 
     pub fn merge(&mut self, other: Self) {
+        self.range = self.range + other.range;
         for (key2, value2) in other.key_values {
             match self.key_values.entry(key2) {
                 Entry::Occupied(mut entry1) => {
@@ -61,7 +62,10 @@ impl Table {
 
 impl From<ast::Table> for Table {
     fn from(node: ast::Table) -> Self {
-        let mut table = Table::new(node.range());
+        let mut table = Table::new(text::Range::new(
+            node.header().unwrap().range().start(),
+            node.range().end(),
+        ));
 
         for key_value in node.key_values() {
             table.merge(key_value.into())
@@ -76,9 +80,10 @@ impl From<ast::Table> for Table {
             .into_iter()
             .rev()
         {
+            let table_range = table.range();
             table = Table::new(key.range()).insert(
                 key,
-                Value::Table(std::mem::replace(&mut table, Table::new(node.range()))),
+                Value::Table(std::mem::replace(&mut table, Table::new(table_range))),
             );
         }
 
@@ -88,7 +93,10 @@ impl From<ast::Table> for Table {
 
 impl From<ast::ArrayOfTable> for Table {
     fn from(node: ast::ArrayOfTable) -> Self {
-        let mut table = Table::new(node.range());
+        let mut table = Table::new(text::Range::new(
+            node.header().unwrap().range().start(),
+            node.range().end(),
+        ));
 
         for key_value in node.key_values() {
             table.merge(key_value.into())
@@ -136,9 +144,10 @@ impl From<ast::KeyValue> for Table {
         };
 
         for key in keys.into_iter().rev() {
-            table = Table::new(key.range() + table.range()).insert(
+            let table_range = table.range();
+            table = Table::new(key.range() + table_range).insert(
                 key,
-                Value::Table(std::mem::replace(&mut table, Table::new(node.range()))),
+                Value::Table(std::mem::replace(&mut table, Table::new(table_range))),
             );
         }
 
