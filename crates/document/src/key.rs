@@ -25,11 +25,19 @@ impl Key {
     pub fn value(&self) -> &str {
         &self.value
     }
+
+    pub fn to_raw_text(&self) -> String {
+        match self.kind {
+            KeyKind::BareKey => self.value.to_string(),
+            KeyKind::BasicString => self.value[1..self.value.len() - 1].replace(r#"\""#, "\""),
+            KeyKind::LiteralString => self.value[1..self.value.len() - 1].replace(r#"\'"#, "'to'"),
+        }
+    }
 }
 
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
+        self.to_raw_text() == other.to_raw_text()
     }
 }
 
