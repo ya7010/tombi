@@ -7,6 +7,7 @@ pub use builder::SyntaxTreeBuilder;
 pub use error::Error;
 pub use generated::SyntaxKind;
 pub use language::TomlLanguage;
+pub use rg_tree::Direction;
 
 pub type SyntaxNode = rg_tree::RedNode<TomlLanguage>;
 pub type SyntaxToken = rg_tree::RedToken<TomlLanguage>;

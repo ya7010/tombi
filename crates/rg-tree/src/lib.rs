@@ -24,7 +24,8 @@ mod cow_mut;
 #[allow(unsafe_code)]
 mod sll;
 
-use crate::utility_types::{Direction, NodeOrToken, TokenAtOffset, WalkEvent};
+pub use crate::utility_types::Direction;
+use crate::utility_types::{NodeOrToken, TokenAtOffset, WalkEvent};
 pub use crate::{
     green::{
         Checkpoint, Children, GreenNode, GreenNodeBuilder, GreenNodeData, GreenToken,

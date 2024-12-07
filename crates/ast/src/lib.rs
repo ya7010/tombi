@@ -237,23 +237,16 @@ mod support {
             })
     }
 
-    pub fn leading_table_or_inline_tables<N: AstNode>(
-        node: &N,
-    ) -> impl Iterator<Item = TableOrArrayOfTable> {
-        support::children::<TableOrArrayOfTable>(&node.syntax().parent().unwrap())
-            .into_iter()
-            .take_while(|n| n.range() < node.syntax().text_range())
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
+    pub fn prev_siblings_nodes<N: AstNode, T: AstNode>(node: &N) -> impl Iterator<Item = T> {
+        node.syntax()
+            .siblings(syntax::Direction::Prev)
+            .filter_map(T::cast)
     }
 
-    pub fn tailing_table_or_inline_tables<'a, N: AstNode>(
-        node: &'a N,
-    ) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
-        support::children::<TableOrArrayOfTable>(&node.syntax().parent().unwrap())
-            .into_iter()
-            .skip_while(|n| n.range() <= node.syntax().text_range())
+    pub fn next_siblings_nodes<N: AstNode, T: AstNode>(node: &N) -> impl Iterator<Item = T> {
+        node.syntax()
+            .siblings(syntax::Direction::Next)
+            .filter_map(T::cast)
     }
 }
 
@@ -280,14 +273,12 @@ impl Table {
         support::tailing_comment(self.syntax().children_with_tokens(), T!(']'))
     }
 
-    pub fn leading_table_or_inline_tables(&self) -> impl Iterator<Item = TableOrArrayOfTable> {
-        support::leading_table_or_inline_tables(self)
+    pub fn prev_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
+        support::prev_siblings_nodes(self)
     }
 
-    pub fn tailing_table_or_inline_tables<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
-        support::tailing_table_or_inline_tables(self)
+    pub fn next_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
+        support::next_siblings_nodes(self)
     }
 }
 
@@ -300,14 +291,12 @@ impl ArrayOfTable {
         support::tailing_comment(self.syntax().children_with_tokens(), T!("]]"))
     }
 
-    pub fn leading_table_or_inline_tables(&self) -> impl Iterator<Item = TableOrArrayOfTable> {
-        support::leading_table_or_inline_tables(self)
+    pub fn prev_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
+        support::prev_siblings_nodes(self)
     }
 
-    pub fn tailing_table_or_inline_tables<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
-        support::tailing_table_or_inline_tables(self)
+    pub fn next_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
+        support::next_siblings_nodes(self)
     }
 }
 

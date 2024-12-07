@@ -29,7 +29,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
         if let Some(table) = ast::Table::cast(node.to_owned()) {
             let start_position = table.header().unwrap().range().start();
             let end_position = table
-                .tailing_table_or_inline_tables()
+                .next_siblings_nodes::<ast::TableOrArrayOfTable>()
                 .take_while(|t| {
                     t.header()
                         .unwrap()
