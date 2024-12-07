@@ -14,7 +14,7 @@ pub struct String {
 }
 
 impl String {
-    pub fn new_basic_string(text: &str, range: text::Range) -> Self {
+    pub(crate) fn new_basic_string(text: &str, range: text::Range) -> Self {
         Self {
             kind: StringKind::BasicString,
             value: text.to_string(),
@@ -22,7 +22,7 @@ impl String {
         }
     }
 
-    pub fn new_literal_string(text: &str, range: text::Range) -> Self {
+    pub(crate) fn new_literal_string(text: &str, range: text::Range) -> Self {
         Self {
             kind: StringKind::LiteralString,
             value: text.to_string(),
@@ -30,7 +30,7 @@ impl String {
         }
     }
 
-    pub fn new_multi_line_basic_string(text: &str, range: text::Range) -> Self {
+    pub(crate) fn new_multi_line_basic_string(text: &str, range: text::Range) -> Self {
         Self {
             kind: StringKind::MultiLineBasicString,
             value: text.to_string(),
@@ -38,7 +38,7 @@ impl String {
         }
     }
 
-    pub fn new_multi_line_literal_string(text: &str, range: text::Range) -> Self {
+    pub(crate) fn new_multi_line_literal_string(text: &str, range: text::Range) -> Self {
         Self {
             kind: StringKind::MultiLineLiteralString,
             value: text.to_string(),

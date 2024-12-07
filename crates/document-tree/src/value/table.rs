@@ -39,7 +39,7 @@ impl Table {
         }
     }
 
-    pub fn new_table(node: &ast::Table) -> Self {
+    pub(crate) fn new_table(node: &ast::Table) -> Self {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
@@ -50,7 +50,7 @@ impl Table {
         }
     }
 
-    pub fn new_array_of_tables(node: &ast::ArrayOfTable) -> Self {
+    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTable) -> Self {
         Self {
             kind: TableKind::ArrayOfTables,
             key_values: Default::default(),
@@ -61,7 +61,7 @@ impl Table {
         }
     }
 
-    pub fn new_inline_table(node: &ast::InlineTable) -> Self {
+    pub(crate) fn new_inline_table(node: &ast::InlineTable) -> Self {
         Self {
             kind: TableKind::InlineTable,
             key_values: Default::default(),
@@ -72,7 +72,7 @@ impl Table {
         }
     }
 
-    pub fn new_key_value(node: &ast::KeyValue) -> Self {
+    pub(crate) fn new_key_value(node: &ast::KeyValue) -> Self {
         Self {
             kind: TableKind::KeyValue,
             key_values: Default::default(),
@@ -83,7 +83,7 @@ impl Table {
         }
     }
 
-    pub fn new_parent(&self) -> Self {
+    pub(crate) fn new_parent(&self) -> Self {
         Self {
             kind: self.kind,
             key_values: Default::default(),

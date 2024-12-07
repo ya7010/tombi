@@ -14,7 +14,7 @@ pub struct Integer {
 }
 
 impl Integer {
-    pub fn try_new_integer_bin(
+    pub(crate) fn try_new_integer_bin(
         text: &str,
         range: text::Range,
     ) -> Result<Self, std::num::ParseIntError> {
@@ -25,7 +25,7 @@ impl Integer {
         })
     }
 
-    pub fn try_new_integer_dec(
+    pub(crate) fn try_new_integer_dec(
         text: &str,
         range: text::Range,
     ) -> Result<Self, std::num::ParseIntError> {
@@ -36,7 +36,7 @@ impl Integer {
         })
     }
 
-    pub fn try_new_integer_oct(
+    pub(crate) fn try_new_integer_oct(
         text: &str,
         range: text::Range,
     ) -> Result<Self, std::num::ParseIntError> {
@@ -47,7 +47,7 @@ impl Integer {
         })
     }
 
-    pub fn try_new_integer_hex(
+    pub(crate) fn try_new_integer_hex(
         text: &str,
         range: text::Range,
     ) -> Result<Self, std::num::ParseIntError> {

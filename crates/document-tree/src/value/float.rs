@@ -5,7 +5,10 @@ pub struct Float {
 }
 
 impl Float {
-    pub fn try_new(text: &str, range: text::Range) -> Result<Self, std::num::ParseFloatError> {
+    pub(crate) fn try_new(
+        text: &str,
+        range: text::Range,
+    ) -> Result<Self, std::num::ParseFloatError> {
         Ok(Self {
             value: text.parse()?,
             range,

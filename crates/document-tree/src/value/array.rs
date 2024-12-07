@@ -34,7 +34,7 @@ pub struct Array {
 }
 
 impl Array {
-    pub fn new_array(node: &ast::Array) -> Self {
+    pub(crate) fn new_array(node: &ast::Array) -> Self {
         Self {
             kind: ArrayKind::Array,
             values: vec![],
@@ -45,7 +45,7 @@ impl Array {
         }
     }
 
-    pub fn new_array_of_tables(node: &ast::ArrayOfTable) -> Self {
+    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTable) -> Self {
         Self {
             kind: ArrayKind::ArrayOfTables,
             values: vec![],
@@ -56,7 +56,7 @@ impl Array {
         }
     }
 
-    pub fn new_table(node: &ast::Table) -> Self {
+    pub(crate) fn new_table(node: &ast::Table) -> Self {
         Self {
             kind: ArrayKind::Table,
             values: vec![],

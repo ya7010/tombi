@@ -5,10 +5,10 @@ pub struct Key {
 }
 
 impl Key {
-    pub(crate) fn new(text: impl ToString, range: text::Range) -> Self {
+    pub(crate) fn new(node: &ast::Key) -> Self {
         Self {
-            value: text.to_string(),
-            range,
+            value: node.raw_text(),
+            range: node.token().unwrap().text_range(),
         }
     }
 
@@ -43,6 +43,6 @@ impl std::fmt::Display for Key {
 
 impl From<ast::Key> for Key {
     fn from(node: ast::Key) -> Self {
-        Self::new(node.raw_text(), node.token().unwrap().text_range())
+        Self::new(&node)
     }
 }

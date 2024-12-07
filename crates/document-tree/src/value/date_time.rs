@@ -5,7 +5,7 @@ pub struct OffsetDateTime {
 }
 
 impl OffsetDateTime {
-    pub fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
+    pub(crate) fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
         Ok(Self {
             value: chrono::DateTime::parse_from_rfc3339(text)?,
             range,
@@ -30,7 +30,7 @@ pub struct LocalDateTime {
 }
 
 impl LocalDateTime {
-    pub fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
+    pub(crate) fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
         chrono::DateTime::parse_from_rfc3339(text).map(|value| Self {
             value: value.with_timezone(&chrono::Local),
             range,
@@ -55,7 +55,7 @@ pub struct LocalDate {
 }
 
 impl LocalDate {
-    pub fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
+    pub(crate) fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
         Ok(Self {
             value: chrono::NaiveDate::parse_from_str(text, "%Y-%m-%d")?,
             range,
@@ -80,7 +80,7 @@ pub struct LocalTime {
 }
 
 impl LocalTime {
-    pub fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
+    pub(crate) fn try_new(text: &str, range: text::Range) -> Result<Self, chrono::ParseError> {
         Ok(Self {
             value: chrono::NaiveTime::parse_from_str(text, "%H:%M:%S%.f")?,
             range,
