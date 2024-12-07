@@ -240,6 +240,7 @@ mod support {
     pub fn prev_siblings_nodes<N: AstNode, T: AstNode>(node: &N) -> impl Iterator<Item = T> {
         node.syntax()
             .siblings(syntax::Direction::Prev)
+            .skip(1)
             .filter_map(T::cast)
     }
 
@@ -289,6 +290,15 @@ impl Table {
                 .unwrap()
                 .to_string()
                 .starts_with(&self.header().unwrap().to_string())
+        })
+    }
+
+    pub fn parent_tables<'a>(&'a self) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
+        support::prev_siblings_nodes(self).take_while(|t: &TableOrArrayOfTable| {
+            self.header()
+                .unwrap()
+                .to_string()
+                .starts_with(&t.header().unwrap().to_string())
         })
     }
 }
