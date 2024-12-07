@@ -107,7 +107,12 @@ fn symbols_for_value(
         Value::Array(array) => {
             let mut children = vec![];
             for (index, value) in array.values().iter().enumerate() {
-                symbols_for_value(format!("[{index}]"), value, Some(range), &mut children);
+                symbols_for_value(
+                    format!("[{index}]"),
+                    value,
+                    Some(value.range()),
+                    &mut children,
+                );
             }
 
             symbols.push(DocumentSymbol {
