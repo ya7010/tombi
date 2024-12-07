@@ -93,16 +93,15 @@ impl From<ast::Table> for Table {
 
 impl From<ast::ArrayOfTable> for Table {
     fn from(node: ast::ArrayOfTable) -> Self {
-        let mut table = Table::new(text::Range::new(
-            node.header().unwrap().range().start(),
-            node.range().end(),
-        ));
+        let array_range =
+            text::Range::new(node.header().unwrap().range().start(), node.range().end());
+        let mut table = Table::new(array_range);
 
         for key_value in node.key_values() {
             table.merge(key_value.into())
         }
 
-        let mut array = Array::new(node.range());
+        let mut array = Array::new(array_range);
         array.push(Value::Table(table));
         let mut value = Value::Array(array);
 
