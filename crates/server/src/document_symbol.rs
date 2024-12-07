@@ -11,9 +11,9 @@ pub use table::Table;
 pub use value::Value;
 
 #[derive(Debug)]
-pub struct Document(Table);
+pub struct Root(Table);
 
-impl Deref for Document {
+impl Deref for Root {
     type Target = Table;
 
     fn deref(&self) -> &Self::Target {
@@ -21,7 +21,7 @@ impl Deref for Document {
     }
 }
 
-impl From<ast::Root> for Document {
+impl From<ast::Root> for Root {
     fn from(node: ast::Root) -> Self {
         let mut table = Table::new(node.range());
 
@@ -33,7 +33,7 @@ impl From<ast::Root> for Document {
                 Err(_) => {}
             }
         }
-        Document(table)
+        Root(table)
     }
 }
 
