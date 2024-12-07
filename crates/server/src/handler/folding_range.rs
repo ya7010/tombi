@@ -29,13 +29,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
         if let Some(table) = ast::Table::cast(node.to_owned()) {
             let start_position = table.header().unwrap().range().start();
             let end_position = table
-                .next_siblings_nodes::<ast::TableOrArrayOfTable>()
-                .take_while(|t| {
-                    t.header()
-                        .unwrap()
-                        .to_string()
-                        .starts_with(&table.header().unwrap().to_string())
-                })
+                .subtables()
                 .last()
                 .map_or(table.range().end(), |t| t.range().end());
 

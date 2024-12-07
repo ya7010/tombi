@@ -273,12 +273,23 @@ impl Table {
         support::tailing_comment(self.syntax().children_with_tokens(), T!(']'))
     }
 
-    pub fn prev_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
-        support::prev_siblings_nodes(self)
-    }
-
-    pub fn next_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
-        support::next_siblings_nodes(self)
+    /// Returns an iterator over the subtables of this table.
+    ///
+    /// ```toml
+    /// [foo]  # <- This is a self table
+    /// [foo.bar]  # <- This is a subtable
+    /// key = "value"
+    ///
+    /// [[foo.bar.baz]]  # <- This is also a subtable
+    /// key = true
+    /// ```
+    pub fn subtables(&self) -> impl Iterator<Item = TableOrArrayOfTable> {
+        support::next_siblings_nodes(self).take_while(|t| {
+            t.header()
+                .unwrap()
+                .to_string()
+                .starts_with(&self.header().unwrap().to_string())
+        })
     }
 }
 
@@ -289,14 +300,6 @@ impl ArrayOfTable {
 
     pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
         support::tailing_comment(self.syntax().children_with_tokens(), T!("]]"))
-    }
-
-    pub fn prev_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
-        support::prev_siblings_nodes(self)
-    }
-
-    pub fn next_siblings_nodes<N: AstNode>(&self) -> impl Iterator<Item = N> {
-        support::next_siblings_nodes(self)
     }
 }
 
