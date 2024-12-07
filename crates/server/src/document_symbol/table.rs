@@ -33,7 +33,7 @@ impl Table {
     }
 
     pub fn merge(&mut self, other: Self) {
-        self.range = self.range + other.range;
+        self.range += other.range;
         for (key2, value2) in other.key_values {
             match self.key_values.entry(key2) {
                 Entry::Occupied(mut entry1) => {

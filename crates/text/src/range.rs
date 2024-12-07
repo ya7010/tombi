@@ -94,6 +94,16 @@ impl AddAssign<RelativePosition> for Range {
     }
 }
 
+impl AddAssign for Range {
+    #[inline]
+    fn add_assign(&mut self, rhs: Range) {
+        *self = Range::new(
+            std::cmp::min(self.start, rhs.start),
+            std::cmp::max(self.end, rhs.end),
+        );
+    }
+}
+
 impl Add<Range> for Range {
     type Output = Range;
 

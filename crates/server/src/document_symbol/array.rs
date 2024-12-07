@@ -19,6 +19,7 @@ impl Array {
     }
 
     pub fn merge(&mut self, other: Self) {
+        self.range += other.range;
         self.values.extend(other.values);
     }
 
