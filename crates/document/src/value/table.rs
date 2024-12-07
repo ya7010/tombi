@@ -4,8 +4,6 @@ use itertools::Itertools;
 
 use crate::{Array, Key, Value};
 
-use super::ArrayKind;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
     Root,
@@ -29,7 +27,7 @@ impl Table {
         }
     }
 
-    pub fn new() -> Self {
+    pub fn new_table() -> Self {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
@@ -75,30 +73,8 @@ impl Table {
                             };
                         }
                         (Value::Array(array1), Value::Array(array2)) => {
-                            match (array1.kind(), array2.kind()) {
-                                (ArrayKind::ArrayOfTables, ArrayKind::ArrayOfTables) => {
-                                    match (
-                                        array1.values_mut().first_mut().unwrap(),
-                                        array2.into_values().pop().unwrap(),
-                                    ) {
-                                        (Value::Table(table1), Value::Table(table2)) => {
-                                            if let Err(errs) = table1.merge(table2) {
-                                                errors.extend(errs);
-                                            }
-                                        }
-                                        _ => {
-                                            unreachable!()
-                                        }
-                                    }
-                                }
-                                (ArrayKind::Array, ArrayKind::Array) => {
-                                    array1.merge(array2);
-                                }
-                                _ => {
-                                    dbg!(&array1);
-                                    dbg!(&array2);
-                                    unimplemented!()
-                                }
+                            if let Err(errs) = array1.merge(array2) {
+                                errors.extend(errs);
                             }
                         }
                         _ => {
@@ -134,7 +110,11 @@ impl Table {
                             errors.extend(errs);
                         }
                     }
-                    (Value::Array(array1), Value::Array(array2)) => array1.merge(array2),
+                    (Value::Array(array1), Value::Array(array2)) => {
+                        if let Err(errs) = array1.merge(array2) {
+                            errors.extend(errs);
+                        }
+                    }
                     _ => {
                         errors.push(crate::Error::DuplicateKey {
                             key: entry.key().value().to_string(),
@@ -169,7 +149,7 @@ impl TryFrom<ast::Table> for Table {
     type Error = Vec<crate::Error>;
 
     fn try_from(node: ast::Table) -> Result<Self, Self::Error> {
-        let mut table = Table::new();
+        let mut table = Table::new_table();
         let mut errors = Vec::new();
 
         let array_of_table_keys = node
@@ -208,14 +188,17 @@ impl TryFrom<ast::Table> for Table {
             .collect::<Vec<_>>();
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
-                let mut array = Array::new_array_of_tables();
-                array.push(Value::Table(std::mem::replace(&mut table, Table::new())));
+                let mut array = Array::new_table();
+                array.push(Value::Table(std::mem::replace(
+                    &mut table,
+                    Table::new_table(),
+                )));
 
-                Table::new().insert(key.clone(), Value::Array(array))
+                Table::new_table().insert(key.clone(), Value::Array(array))
             } else {
-                Table::new().insert(
+                Table::new_table().insert(
                     key.clone(),
-                    Value::Table(std::mem::replace(&mut table, Table::new())),
+                    Value::Table(std::mem::replace(&mut table, Table::new_table())),
                 )
             };
 
@@ -262,7 +245,7 @@ impl TryFrom<ast::ArrayOfTable> for Table {
                 &mut table,
                 Table::new_array_of_tables(),
             )));
-            table = Table::new().insert(key, Value::Array(array)).unwrap();
+            table = Table::new_table().insert(key, Value::Array(array)).unwrap();
         }
 
         for key in keys {
@@ -306,7 +289,7 @@ impl TryFrom<ast::KeyValue> for Table {
         };
 
         let mut table = if let Some(key) = keys.pop() {
-            match Table::new().insert(key, value) {
+            match Table::new_table().insert(key, value) {
                 Ok(table) => table,
                 Err(errs) => {
                     errors.extend(errs);
@@ -399,6 +382,39 @@ mod test {
                         "key": "value",
                         "bbb": {
                             "ccc": true
+                        }
+                    }
+                ]
+            })
+        )
+    }
+
+    test_serialize! {
+        #[test]
+        fn array_of_table_table_twice(
+            r#"
+            [[aaa]]
+            key = "value"
+
+            [aaa.bbb]
+            ccc = true
+
+            [[aaa]]
+            [aaa.bbb]
+            ccc = false
+            "#
+        ) -> Ok(
+            json!({
+                "aaa": [
+                    {
+                        "key": "value",
+                        "bbb": {
+                            "ccc": true
+                        }
+                    },
+                    {
+                        "bbb": {
+                            "ccc": false
                         }
                     }
                 ]

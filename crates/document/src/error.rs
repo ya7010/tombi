@@ -3,6 +3,9 @@ pub enum Error {
     #[error("duplicate key: {key}")]
     DuplicateKey { key: String, range: text::Range },
 
+    #[error("conflicting array.")]
+    ConflictArray {},
+
     #[error("invalid integer: {error}")]
     ParseIntError {
         error: std::num::ParseIntError,
