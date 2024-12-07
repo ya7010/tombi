@@ -43,12 +43,24 @@ impl Array {
         self.values.push(value);
     }
 
+    pub fn merge(&mut self, other: Self) {
+        self.values.extend(other.values);
+    }
+
     pub fn kind(&self) -> ArrayKind {
         self.kind
     }
 
     pub fn values(&self) -> &[Value] {
         &self.values
+    }
+
+    pub fn values_mut(&mut self) -> &mut Vec<Value> {
+        &mut self.values
+    }
+
+    pub fn into_values(self) -> Vec<Value> {
+        self.values
     }
 }
 

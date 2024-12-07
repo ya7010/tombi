@@ -1,8 +1,10 @@
 use indexmap::map::Entry;
 use indexmap::IndexMap;
+use itertools::Itertools;
 
-use crate::Key;
-use crate::Value;
+use crate::{Array, Key, Value};
+
+use super::ArrayKind;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
@@ -72,6 +74,33 @@ impl Table {
                                 errors.extend(errs);
                             };
                         }
+                        (Value::Array(array1), Value::Array(array2)) => {
+                            match (array1.kind(), array2.kind()) {
+                                (ArrayKind::ArrayOfTables, ArrayKind::ArrayOfTables) => {
+                                    match (
+                                        array1.values_mut().first_mut().unwrap(),
+                                        array2.into_values().pop().unwrap(),
+                                    ) {
+                                        (Value::Table(table1), Value::Table(table2)) => {
+                                            if let Err(errs) = table1.merge(table2) {
+                                                errors.extend(errs);
+                                            }
+                                        }
+                                        _ => {
+                                            unreachable!()
+                                        }
+                                    }
+                                }
+                                (ArrayKind::Array, ArrayKind::Array) => {
+                                    array1.merge(array2);
+                                }
+                                _ => {
+                                    dbg!(&array1);
+                                    dbg!(&array2);
+                                    unimplemented!()
+                                }
+                            }
+                        }
                         _ => {
                             errors.push(crate::Error::DuplicateKey {
                                 key: key.value().to_string(),
@@ -105,6 +134,7 @@ impl Table {
                             errors.extend(errs);
                         }
                     }
+                    (Value::Array(array1), Value::Array(array2)) => array1.merge(array2),
                     _ => {
                         errors.push(crate::Error::DuplicateKey {
                             key: entry.key().value().to_string(),
@@ -142,6 +172,22 @@ impl TryFrom<ast::Table> for Table {
         let mut table = Table::new();
         let mut errors = Vec::new();
 
+        let array_of_table_keys = node
+            .parent_tables()
+            .filter_map(|parent_table| match parent_table {
+                ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => Some(
+                    array_of_table
+                        .header()
+                        .unwrap()
+                        .keys()
+                        .map(|key| Key::from(key))
+                        .collect::<Vec<_>>(),
+                ),
+                _ => None,
+            })
+            .unique()
+            .collect::<Vec<_>>();
+
         for key_value in node.key_values() {
             match key_value.try_into() {
                 Ok(other) => {
@@ -153,15 +199,32 @@ impl TryFrom<ast::Table> for Table {
             }
         }
 
-        for key in node.header().unwrap().keys().rev() {
-            if let Ok(k) = key.try_into() {
-                match Table::new()
-                    .insert(k, Value::Table(std::mem::replace(&mut table, Table::new())))
-                {
-                    Ok(t) => table = t,
-                    Err(errs) => {
-                        errors.extend(errs);
-                    }
+        let mut is_array_of_table = false;
+        let mut keys = node
+            .header()
+            .unwrap()
+            .keys()
+            .map(|key| Key::from(key))
+            .collect::<Vec<_>>();
+        while let Some(key) = keys.pop() {
+            let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
+                let mut array = Array::new_array_of_tables();
+                array.push(Value::Table(std::mem::replace(&mut table, Table::new())));
+
+                Table::new().insert(key.clone(), Value::Array(array))
+            } else {
+                Table::new().insert(
+                    key.clone(),
+                    Value::Table(std::mem::replace(&mut table, Table::new())),
+                )
+            };
+
+            is_array_of_table = array_of_table_keys.contains(&keys);
+
+            match result {
+                Ok(t) => table = t,
+                Err(errs) => {
+                    errors.extend(errs);
                 }
             }
         }
@@ -191,17 +254,25 @@ impl TryFrom<ast::ArrayOfTable> for Table {
                 Err(errs) => errors.extend(errs),
             }
         }
+        let mut keys = node.header().unwrap().keys().rev().map(Key::from);
 
-        for key in node.header().unwrap().keys().rev() {
-            if let Ok(k) = key.try_into() {
-                match Table::new_array_of_tables().insert(
-                    k,
-                    Value::Table(std::mem::replace(&mut table, Table::new_array_of_tables())),
-                ) {
-                    Ok(t) => table = t,
-                    Err(errs) => {
-                        errors.extend(errs);
-                    }
+        if let Some(key) = keys.next() {
+            let mut array = Array::new_array_of_tables();
+            array.push(Value::Table(std::mem::replace(
+                &mut table,
+                Table::new_array_of_tables(),
+            )));
+            table = Table::new().insert(key, Value::Array(array)).unwrap();
+        }
+
+        for key in keys {
+            match Table::new_array_of_tables().insert(
+                key,
+                Value::Table(std::mem::replace(&mut table, Table::new_array_of_tables())),
+            ) {
+                Ok(t) => table = t,
+                Err(errs) => {
+                    errors.extend(errs);
                 }
             }
         }
@@ -223,14 +294,8 @@ impl TryFrom<ast::KeyValue> for Table {
             .keys()
             .unwrap()
             .keys()
-            .map(TryInto::<Key>::try_into)
-            .fold(Vec::new(), |mut acc, res| {
-                match res {
-                    Ok(key) => acc.push(key),
-                    Err(err) => errors.extend(err),
-                }
-                acc
-            });
+            .map(Key::from)
+            .collect::<Vec<_>>();
 
         let value: Value = match node.value().unwrap().try_into() {
             Ok(value) => value,
@@ -308,5 +373,36 @@ impl serde::Serialize for Table {
         S: serde::Serializer,
     {
         self.key_values.serialize(serializer)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use serde_json::json;
+
+    use crate::test_serialize;
+
+    test_serialize! {
+        #[test]
+        fn array_of_table_table(
+            r#"
+            [[aaa]]
+            key = "value"
+
+            [aaa.bbb]
+            ccc = true
+            "#
+        ) -> Ok(
+            json!({
+                "aaa": [
+                    {
+                        "key": "value",
+                        "bbb": {
+                            "ccc": true
+                        }
+                    }
+                ]
+            })
+        )
     }
 }

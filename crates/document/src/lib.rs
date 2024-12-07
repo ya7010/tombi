@@ -96,7 +96,7 @@ macro_rules! test_serialize {
             let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
             let document = crate::Document::try_from(ast).unwrap();
             let serialized = serde_json::to_string(&document).unwrap();
-            assert_eq!(serialized, $json.to_string());
+            pretty_assertions::assert_eq!(serialized, $json.to_string());
         }
     };
 }
