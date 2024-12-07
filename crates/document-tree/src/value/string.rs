@@ -30,54 +30,62 @@ impl String {
     }
 }
 
-impl From<ast::BasicString> for String {
-    fn from(node: ast::BasicString) -> Self {
+impl TryFrom<ast::BasicString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::BasicString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let text = token.text();
 
-        Self {
+        Ok(Self {
             kind: StringKind::BasicString,
             value: text[1..text.len() - 1].replace(r#"\""#, "\""),
             range: token.text_range(),
-        }
+        })
     }
 }
 
-impl From<ast::LiteralString> for String {
-    fn from(node: ast::LiteralString) -> Self {
+impl TryFrom<ast::LiteralString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::LiteralString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let text = token.text();
 
-        Self {
+        Ok(Self {
             kind: StringKind::LiteralString,
             value: text[1..text.len() - 1].replace(r#"\'"#, "'"),
             range: token.text_range(),
-        }
+        })
     }
 }
 
-impl From<ast::MultiLineBasicString> for String {
-    fn from(node: ast::MultiLineBasicString) -> Self {
+impl TryFrom<ast::MultiLineBasicString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::MultiLineBasicString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let text = token.text();
 
-        Self {
+        Ok(Self {
             kind: StringKind::MultiLineBasicString,
             value: text[3..text.len() - 3].to_string(),
             range: token.text_range(),
-        }
+        })
     }
 }
 
-impl From<ast::MultiLineLiteralString> for String {
-    fn from(node: ast::MultiLineLiteralString) -> Self {
+impl TryFrom<ast::MultiLineLiteralString> for String {
+    type Error = Vec<crate::Error>;
+
+    fn try_from(node: ast::MultiLineLiteralString) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let text = token.text();
 
-        Self {
+        Ok(Self {
             kind: StringKind::MultiLineLiteralString,
             value: text[3..text.len() - 3].to_string(),
             range: token.text_range(),
-        }
+        })
     }
 }

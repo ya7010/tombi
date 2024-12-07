@@ -50,14 +50,10 @@ impl TryFrom<ast::Value> for Value {
 
     fn try_from(node: ast::Value) -> Result<Self, Self::Error> {
         match node {
-            ast::Value::BasicString(string) => Ok(Value::String(crate::String::from(string))),
-            ast::Value::LiteralString(string) => Ok(Value::String(crate::String::from(string))),
-            ast::Value::MultiLineBasicString(string) => {
-                Ok(Value::String(crate::String::from(string)))
-            }
-            ast::Value::MultiLineLiteralString(string) => {
-                Ok(Value::String(crate::String::from(string)))
-            }
+            ast::Value::BasicString(string) => string.try_into().map(Value::String),
+            ast::Value::LiteralString(string) => string.try_into().map(Value::String),
+            ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
+            ast::Value::MultiLineLiteralString(string) => string.try_into().map(Value::String),
             ast::Value::IntegerBin(integer) => integer.try_into().map(Value::Integer),
             ast::Value::IntegerOct(integer) => integer.try_into().map(Value::Integer),
             ast::Value::IntegerDec(integer) => integer.try_into().map(Value::Integer),
