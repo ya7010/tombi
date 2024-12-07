@@ -1,17 +1,18 @@
 [package]
 name = "linter"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+license = { workspace = true }
 
 [dependencies]
-ast.workspace = true
-config.workspace = true
-diagnostic.workspace = true
-parser.workspace = true
-schemars.workspace = true
-serde.workspace = true
-syntax.workspace = true
-text.workspace = true
-thiserror.workspace = true
+ast = { workspace = true }
+config = { workspace = true }
+diagnostic = { workspace = true }
+document-tree = { workspace = true, features = ["diagnostic"] }
+parser = { workspace = true, features = ["diagnostic"] }
+schemars = { workspace = true }
+serde = { workspace = true }
+syntax = { workspace = true }
+text = { workspace = true }
+thiserror = { workspace = true }

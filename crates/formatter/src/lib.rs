@@ -4,6 +4,7 @@ pub mod formatter;
 pub use config::FormatOptions;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
+use diagnostic::ToDiagnostics;
 use format::Format;
 pub use formatter::definitions::Definitions;
 pub use formatter::Formatter;
@@ -30,10 +31,13 @@ pub fn format_with(
 
             Ok(formatted_text + line_ending)
         }
-        Err(errors) => Err(errors
-            .into_iter()
-            .map(|error| Diagnostic::new_error(error.message(), error.range()))
-            .collect()),
+        Err(errors) => {
+            let mut diagnostics = Vec::new();
+            for error in errors {
+                error.to_diagnostics(&mut diagnostics);
+            }
+            Err(diagnostics)
+        }
     }
 }
 

@@ -7,7 +7,7 @@ license = { workspace = true }
 
 [dependencies]
 ast = { workspace = true }
-parser = { workspace = true }
+parser = { workspace = true, features = ["diagnostic"] }
 schemars = { workspace = true }
 serde = { workspace = true }
 syntax = { workspace = true }

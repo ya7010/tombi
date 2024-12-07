@@ -1,15 +1,19 @@
 [package]
 name = "document-tree"
 version = "0.0.0"
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
-repository.workspace = true
+edition = { workspace = true }
+authors = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[features]
+diagnostic = ["dep:diagnostic"]
 
 [dependencies]
-ast.workspace = true
-chrono.workspace = true
-indexmap.workspace = true
-itertools.workspace = true
-text.workspace = true
-thiserror.workspace = true
+ast = { workspace = true }
+chrono = { workspace = true }
+diagnostic = { workspace = true, optional = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
+text = { workspace = true }
+thiserror = { workspace = true }

@@ -5,9 +5,13 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[features]
+diagnostic = ["dep:diagnostic"]
+
 [dependencies]
 ast = { workspace = true }
 config.workspace = true
+diagnostic = { workspace = true, optional = true }
 document-tree = { workspace = true }
 drop_bomb = "0.1.5"
 itertools = { workspace = true }

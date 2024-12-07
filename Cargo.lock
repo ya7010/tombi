@@ -521,6 +521,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "chrono",
+ "diagnostic",
  "indexmap 2.6.0",
  "itertools",
  "text",
@@ -1253,6 +1254,7 @@ dependencies = [
  "ast",
  "config",
  "diagnostic",
+ "document-tree",
  "parser",
  "schemars",
  "serde",
@@ -1560,6 +1562,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "config",
+ "diagnostic",
  "document-tree",
  "drop_bomb",
  "itertools",

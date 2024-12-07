@@ -70,3 +70,12 @@ impl std::fmt::Display for Error {
         self.kind.fmt(f)
     }
 }
+
+impl diagnostic::ToDiagnostics for Error {
+    fn to_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
+        diagnostics.push(diagnostic::Diagnostic::new_error(
+            self.message(),
+            self.range(),
+        ));
+    }
+}

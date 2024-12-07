@@ -45,3 +45,39 @@ pub enum Error {
         range: text::Range,
     },
 }
+
+#[cfg(feature = "diagnostic")]
+impl diagnostic::ToDiagnostics for Error {
+    fn to_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
+        match self {
+            Self::DuplicateKey { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+            Self::ConflictArray { range1, range2 } => {
+                let diagnostic1 = diagnostic::Diagnostic::new_error(self.to_string(), *range1);
+                if !diagnostics.contains(&diagnostic1) {
+                    diagnostics.push(diagnostic1);
+                }
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range2));
+            }
+            Self::ParseIntError { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+            Self::ParseFloatError { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+            Self::ParseOffsetDateTimeError { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+            Self::ParseLocalDateTimeError { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+            Self::ParseLocalDateError { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+            Self::ParseLocalTimeError { range, .. } => {
+                diagnostics.push(diagnostic::Diagnostic::new_error(self.to_string(), *range));
+            }
+        }
+    }
+}

@@ -63,3 +63,7 @@ impl Diagnostic {
         self.source_file.as_deref()
     }
 }
+
+pub trait ToDiagnostics {
+    fn to_diagnostics(&self, diagnostics: &mut Vec<Diagnostic>);
+}
