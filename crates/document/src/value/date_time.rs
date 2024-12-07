@@ -12,12 +12,12 @@ impl OffsetDateTime {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDateTime {
-    value: chrono::DateTime<chrono::Local>,
+    value: chrono::NaiveDateTime,
 }
 
 impl LocalDateTime {
     #[inline]
-    pub fn value(&self) -> &chrono::DateTime<chrono::Local> {
+    pub fn value(&self) -> &chrono::NaiveDateTime {
         &self.value
     }
 }
@@ -120,7 +120,30 @@ impl serde::Serialize for LocalTime {
 
 #[cfg(test)]
 mod test {
+    use serde_json::json;
+
     use crate::test_serialize;
+
+    test_serialize! {
+        #[test]
+        fn local_date_time(r#"ldt = 1979-05-27 07:32:00"#) -> Ok(json!({
+            "ldt": "1979-05-27T07:32:00"
+        }))
+    }
+
+    test_serialize! {
+        #[test]
+        fn local_date_time2(r#"ldt = 1979-05-27 07:32:00.9999"#) -> Ok(json!({
+            "ldt": "1979-05-27T07:32:00.999900"
+        }))
+    }
+
+    test_serialize! {
+        #[test]
+        fn local_date_time3(r#"ldt = 1979-05-27 07:32:00.99999999"#) -> Ok(json!({
+            "ldt": "1979-05-27T07:32:00.999999990"
+        }))
+    }
 
     test_serialize! {
         #[test]

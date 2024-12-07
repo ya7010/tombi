@@ -18,13 +18,15 @@ impl OffsetDateTime {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDateTime {
-    value: chrono::DateTime<chrono::Local>,
+    // NOTE: `chrono::DateTime<chrono::Local>` is not enough to represent local date time.
+    //       `chrono::Local.from_local_datetime(native_date_time)` cannot uniquely determine the time zone in some cases, so we handle NativeDateTime.
+    value: chrono::NaiveDateTime,
     range: text::Range,
 }
 
 impl LocalDateTime {
     #[inline]
-    pub fn value(&self) -> &chrono::DateTime<chrono::Local> {
+    pub fn value(&self) -> &chrono::NaiveDateTime {
         &self.value
     }
 
@@ -92,11 +94,13 @@ impl TryFrom<ast::LocalDateTime> for LocalDateTime {
     fn try_from(node: ast::LocalDateTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let range = token.text_range();
-        match chrono::DateTime::parse_from_rfc3339(token.text()) {
-            Ok(value) => Ok(Self {
-                value: value.with_timezone(&chrono::Local),
-                range,
-            }),
+        let mut text = token.text().to_string();
+        if text.chars().nth(10) == Some('T') {
+            text.replace_range(10..11, " ");
+        }
+
+        match chrono::NaiveDateTime::parse_from_str(&text, "%Y-%m-%d %H:%M:%S%.f") {
+            Ok(value) => Ok(Self { value, range }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateTimeError { error, range }]),
         }
     }
