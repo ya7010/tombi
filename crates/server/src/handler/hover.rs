@@ -34,7 +34,7 @@ pub async fn handle_hover(
 }
 
 fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent> {
-    // NOTE: Eventually, only KeyValue, Table, ArrayOfTable may be shown in the hover.
+    // NOTE: Eventually, only KeyValue, Table, ArrayOfTables may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.
 
     let mut is_key_value = false;
