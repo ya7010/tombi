@@ -46,13 +46,12 @@ pub fn lex(source: &str) -> LexedStr<'_> {
 impl<'a> LexedStr<'a> {
     pub fn new(source: &'a str) -> Self {
         let _p = tracing::info_span!("LexedStr::new").entered();
-        let lexed = lexer::lex(source);
         let mut tokens = Vec::new();
         let mut last_offset = text::Offset::default();
         let mut last_position = text::Position::default();
         let mut errors = Vec::new();
 
-        for (i, result_token) in lexed.into_iter().enumerate() {
+        for (i, result_token) in lexer::lex(source).into_iter().enumerate() {
             let token = match result_token {
                 Ok(token) => token,
                 Err(error) => {
