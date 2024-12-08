@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use lexer::ErrorKind::*;
 use lexer::{tokenize, Token};
 use syntax::SyntaxKind::*;
@@ -8,7 +9,7 @@ macro_rules!  test_tokens {
     ];} => {
         #[test]
         fn $name() {
-            let tokens = tokenize($source).collect::<Vec<_>>();
+            let tokens = tokenize($source).collect_vec();
             let (expected, _) = [
                 $(
                     ($kind, $text),
@@ -43,7 +44,7 @@ macro_rules! test_token {
         fn $name() {
             let source = textwrap::dedent($source);
             let source = source.trim();
-            let tokens = tokenize(&source).collect::<Vec<_>>();
+            let tokens = tokenize(&source).collect_vec();
             let start_position = text::Position::MIN;
             let end_position = start_position + text::RelativePosition::of(source);
 
@@ -69,7 +70,7 @@ macro_rules! test_token {
         fn $name() {
             let source = textwrap::dedent($source);
             let source = source.trim();
-            let tokens = tokenize(&source).collect::<Vec<_>>();
+            let tokens = tokenize(&source).collect_vec();
             let start_position = text::Position::MIN;
             let end_position = start_position + text::RelativePosition::of(source);
 

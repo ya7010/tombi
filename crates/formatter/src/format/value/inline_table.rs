@@ -1,11 +1,11 @@
+use crate::format::comment::{BeginDanglingComment, EndDanglingComment};
 use crate::{
     format::comment::{LeadingComment, TailingComment},
     Format,
 };
 use ast::AstNode;
+use itertools::Itertools;
 use std::fmt::Write;
-
-use crate::format::comment::{BeginDanglingComment, EndDanglingComment};
 
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -33,7 +33,7 @@ fn format_multiline_inline_table(
     table
         .inner_begin_dangling_comments()
         .map(BeginDanglingComment)
-        .collect::<Vec<_>>()
+        .collect_vec()
         .fmt(f)?;
 
     for (i, (key_value, comma)) in table.key_values_with_comma().enumerate() {
@@ -49,7 +49,7 @@ fn format_multiline_inline_table(
         {
             let (comma_leading_comments, comma_tailing_comment) = match comma {
                 Some(comma) => (
-                    comma.leading_comments().collect::<Vec<_>>(),
+                    comma.leading_comments().collect_vec(),
                     comma.tailing_comment(),
                 ),
                 None => (vec![], None),
@@ -79,7 +79,7 @@ fn format_multiline_inline_table(
     table
         .inner_end_dangling_comments()
         .map(EndDanglingComment)
-        .collect::<Vec<_>>()
+        .collect_vec()
         .fmt(f)?;
 
     f.dec_indent();

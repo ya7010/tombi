@@ -214,7 +214,7 @@ impl TryFrom<ast::Table> for Table {
             .unwrap()
             .keys()
             .map(|key| Key::from(key))
-            .collect::<Vec<_>>();
+            .collect_vec();
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
                 let mut array = Array::new_table(&node);
@@ -307,7 +307,7 @@ impl TryFrom<ast::KeyValue> for Table {
             .unwrap()
             .keys()
             .map(Key::from)
-            .collect::<Vec<_>>();
+            .collect_vec();
 
         let value: Value = match node.value().unwrap().try_into() {
             Ok(value) => value,

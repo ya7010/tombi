@@ -49,7 +49,7 @@ fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent>
                             .filter(|k| {
                                 k.syntax().text_range().start() <= key.syntax().text_range().start()
                             })
-                            .collect::<Vec<_>>()
+                            .collect_vec()
                     }),
                     KEY_VALUE => {
                         is_key_value = true;
@@ -58,24 +58,20 @@ fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent>
                     TABLE => is_key_value
                         .then(|| {
                             ast::Table::cast(node)
-                                .map(|table| {
-                                    table.header().map(|keys| keys.keys().collect::<Vec<_>>())
-                                })
+                                .map(|table| table.header().map(|keys| keys.keys().collect_vec()))
                                 .flatten()
                         })
                         .flatten(),
                     ARRAY_OF_TABLES => is_key_value
                         .then(|| {
                             ast::ArrayOfTables::cast(node)
-                                .map(|array| {
-                                    array.header().map(|keys| keys.keys().collect::<Vec<_>>())
-                                })
+                                .map(|array| array.header().map(|keys| keys.keys().collect_vec()))
                                 .flatten()
                         })
                         .flatten(),
                     _ => None,
                 })
-                .collect::<Vec<_>>()
+                .collect_vec()
                 .into_iter()
                 .rev()
                 .flatten()

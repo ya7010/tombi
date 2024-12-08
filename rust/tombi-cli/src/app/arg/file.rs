@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::path::PathBuf;
 
 /// Input source for TOML files.
@@ -29,7 +30,7 @@ where
                     glob::glob("**/*.toml")
                         .unwrap() // No Probrem. grob pattern is const.
                         .filter_map(|x| Result::<_, crate::Error>::Ok(x.ok()).transpose())
-                        .collect::<Vec<_>>(),
+                        .collect_vec(),
                 )
             }
             1 if files[0].as_ref() == "-" => FileInput::Stdin,
@@ -43,7 +44,7 @@ where
                                     .filter_map(|x| {
                                         Result::<_, crate::Error>::Ok(x.ok()).transpose()
                                     })
-                                    .collect::<Vec<_>>(),
+                                    .collect_vec(),
                             );
                         } else {
                             results

@@ -73,19 +73,21 @@ macro_rules! test_serialize {
         #[test]
         fn $name() {
             use ast::AstNode;
+            use itertools::Itertools;
+
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), config::TomlVersion::default());
             let errors = $errors
                 .into_iter()
                 .map(|(m, r)| (m.to_string(), text::Range::from(r)))
-                .collect::<Vec<_>>();
+                .collect_vec();
 
             if !p.errors().is_empty() {
                 pretty_assertions::assert_eq!(
                     p.errors()
                         .iter()
                         .map(|e| (e.to_message(), e.range()))
-                        .collect::<Vec<_>>(),
+                        .collect_vec(),
                     errors,
                 );
             }
@@ -99,7 +101,7 @@ macro_rules! test_serialize {
                         errs
                             .iter()
                             .map(|e| (e.to_message(), e.range()))
-                            .collect::<Vec<_>>(),
+                            .collect_vec(),
                         errors
                     );
                 }

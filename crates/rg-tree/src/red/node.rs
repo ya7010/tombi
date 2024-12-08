@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::{borrow::Cow, fmt, marker::PhantomData, ops::Range};
 
 use crate::{
@@ -230,7 +231,7 @@ impl<L: Language> RedNode<L> {
         let to_insert = to_insert
             .into_iter()
             .map(cursor::SyntaxElement::from)
-            .collect::<Vec<_>>();
+            .collect_vec();
         self.raw.splice_children(to_delete, to_insert)
     }
 }

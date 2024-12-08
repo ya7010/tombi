@@ -663,6 +663,7 @@ dependencies = [
  "ast",
  "config",
  "diagnostic",
+ "itertools",
  "parser",
  "pretty_assertions",
  "rstest",
@@ -1233,6 +1234,7 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 name = "lexer"
 version = "0.0.0"
 dependencies = [
+ "itertools",
  "pretty_assertions",
  "regex",
  "rstest",
@@ -1904,6 +1906,7 @@ version = "0.0.0"
 dependencies = [
  "countme",
  "hashbrown 0.15.1",
+ "itertools",
  "rustc-hash",
  "serde",
  "text",
@@ -2523,6 +2526,7 @@ dependencies = [
  "diagnostic",
  "formatter",
  "glob",
+ "itertools",
  "linter",
  "nu-ansi-term 0.50.1",
  "server",

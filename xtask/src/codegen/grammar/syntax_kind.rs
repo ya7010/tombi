@@ -1,7 +1,7 @@
+use super::syntax_kind_src::{LITERALS, NODES, PUNCTUATIONS, TOKENS};
+use itertools::Itertools;
 use proc_macro2::{Punct, Spacing};
 use quote::{format_ident, quote};
-
-use super::syntax_kind_src::{LITERALS, NODES, PUNCTUATIONS, TOKENS};
 
 pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
     let punctuation_values = PUNCTUATIONS.iter().map(|item| {
@@ -23,26 +23,26 @@ pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
     let punctuations = PUNCTUATIONS
         .iter()
         .map(|item| format_ident!("{}", item.name))
-        .collect::<Vec<_>>();
+        .collect_vec();
     let attr_punctuations = PUNCTUATIONS
         .iter()
         .map(|item| item.to_attr_token())
-        .collect::<Vec<_>>();
+        .collect_vec();
 
     let attr_literals = LITERALS
         .iter()
         .map(|literal| format_ident!("{}", literal))
-        .collect::<Vec<_>>();
+        .collect_vec();
 
     let attr_tokens = TOKENS
         .iter()
         .map(|token| format_ident!("{}", token))
-        .collect::<Vec<_>>();
+        .collect_vec();
 
     let nodes = NODES
         .iter()
         .map(|name| format_ident!("{}", name))
-        .collect::<Vec<_>>();
+        .collect_vec();
 
     let token = quote! {
         #[doc = r" The kind of syntax node, e.g. `WHITESPACE`, `COMMENT`, or `TABLE`."]

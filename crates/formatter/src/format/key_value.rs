@@ -1,4 +1,5 @@
 use ast::AstNode;
+use itertools::Itertools;
 
 use crate::Format;
 use std::fmt::Write;
@@ -30,7 +31,7 @@ impl Format for ast::Keys {
         let keys = self
             .keys()
             .map(|key| key.syntax().text().to_string())
-            .collect::<Vec<_>>()
+            .collect_vec()
             .join(".");
 
         write!(f, "{}", keys)

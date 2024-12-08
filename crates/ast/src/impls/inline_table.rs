@@ -47,7 +47,7 @@ impl crate::InlineTable {
     pub fn has_tailing_comma_after_last_value(&self) -> bool {
         self.syntax()
             .children_with_tokens()
-            .collect::<Vec<_>>()
+            .collect_vec()
             .into_iter()
             .rev()
             .skip_while(|item| item.kind() != T!('}'))

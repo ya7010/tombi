@@ -15,6 +15,7 @@ tracing = { workspace = true }
 text = { workspace = true }
 diagnostic = { workspace = true }
 config = { workspace = true }
+itertools.workspace = true
 
 [dev-dependencies]
 assert_matches = { workspace = true }

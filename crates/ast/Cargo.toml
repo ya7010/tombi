@@ -8,5 +8,5 @@ license.workspace = true
 [dependencies]
 syntax.workspace = true
 text = { workspace = true }
-itertools = { workspace = true }
+itertools.workspace = true
 config.workspace = true

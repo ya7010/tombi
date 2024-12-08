@@ -1,11 +1,10 @@
-use ast::AstNode;
-
-use crate::Format;
-use std::fmt::Write;
-
 use crate::format::comment::{
     BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
 };
+use crate::Format;
+use ast::AstNode;
+use itertools::Itertools;
+use std::fmt::Write;
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -30,11 +29,11 @@ fn format_multiline_array(
 
     f.inc_indent();
 
-    if !array.values().collect::<Vec<_>>().is_empty() {
+    if !array.values().collect_vec().is_empty() {
         array
             .inner_begin_dangling_comments()
             .map(BeginDanglingComment)
-            .collect::<Vec<_>>()
+            .collect_vec()
             .fmt(f)?;
 
         for (i, (value, comma)) in array.values_with_comma().enumerate() {
@@ -50,7 +49,7 @@ fn format_multiline_array(
             {
                 let (comma_leading_comments, comma_tailing_comment) = match comma {
                     Some(comma) => (
-                        comma.leading_comments().collect::<Vec<_>>(),
+                        comma.leading_comments().collect_vec(),
                         comma.tailing_comment(),
                     ),
                     None => (vec![], None),
@@ -80,13 +79,13 @@ fn format_multiline_array(
         array
             .inner_end_dangling_comments()
             .map(EndDanglingComment)
-            .collect::<Vec<_>>()
+            .collect_vec()
             .fmt(f)?;
     } else {
         array
             .dangling_comments()
             .map(DanglingComment)
-            .collect::<Vec<_>>()
+            .collect_vec()
             .fmt(f)?;
     }
 

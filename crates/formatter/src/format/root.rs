@@ -2,17 +2,18 @@ use super::{
     comment::{BeginDanglingComment, DanglingComment, EndDanglingComment},
     Format,
 };
+use itertools::Itertools;
 use std::fmt::Write;
 
 impl Format for ast::Root {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset();
 
-        let items = self.items().collect::<Vec<_>>();
+        let items = self.items().collect_vec();
         if !items.is_empty() {
             self.begin_dangling_comments()
                 .map(BeginDanglingComment)
-                .collect::<Vec<_>>()
+                .collect_vec()
                 .fmt(f)?;
 
             items
@@ -122,12 +123,12 @@ impl Format for ast::Root {
 
             self.end_dangling_comments()
                 .map(EndDanglingComment)
-                .collect::<Vec<_>>()
+                .collect_vec()
                 .fmt(f)?;
         } else {
             self.dangling_comments()
                 .map(DanglingComment)
-                .collect::<Vec<_>>()
+                .collect_vec()
                 .fmt(f)?;
         }
 

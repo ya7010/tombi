@@ -1,24 +1,25 @@
-use ast_src::{AstEnumSrc, AstNodeSrc, AstSrc, Cardinality, Field};
-use convert_case::{Case, Casing};
-use either::Either;
-use syntax_kind_src::TOKENS;
-use ungrammar::{Grammar, Rule};
-
 pub mod ast_node;
 pub mod ast_src;
 pub mod ast_token;
 pub mod syntax_kind;
 pub mod syntax_kind_src;
 
+use ast_src::{AstEnumSrc, AstNodeSrc, AstSrc, Cardinality, Field};
+use convert_case::{Case, Casing};
+use either::Either;
+use itertools::Itertools;
+use syntax_kind_src::TOKENS;
+use ungrammar::{Grammar, Rule};
+
 pub fn lower(grammar: &Grammar) -> AstSrc {
     let mut res = AstSrc {
         tokens: TOKENS
             .iter()
             .map(|token| token.to_case(Case::Pascal))
-            .collect::<Vec<_>>(),
+            .collect_vec(),
         ..Default::default()
     };
-    let nodes = grammar.iter().collect::<Vec<_>>();
+    let nodes = grammar.iter().collect_vec();
 
     for &node in &nodes {
         let name = grammar[node].name.clone();
