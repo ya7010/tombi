@@ -236,7 +236,7 @@ impl Cursor<'_> {
                 self.pop_span_range(),
             ))
         } else {
-            Err(crate::Error::new(InvalidToken, self.pop_span_range()))
+            Err(crate::Error::new(InvalidLocalDate, self.pop_span_range()))
         }
     }
 

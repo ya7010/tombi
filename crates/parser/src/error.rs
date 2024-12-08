@@ -11,39 +11,68 @@ pub enum ErrorKind {
     #[error("invalid literal string")]
     InvalidLiteralString,
 
-    #[error("invalid multiline basic string")]
+    #[error("invalid multi-line basic strings")]
     InvalidMultilineBasicString,
 
-    #[error("invalid multiline literal string")]
+    #[error("invalid multi-line literal strings")]
     InvalidMultilineLiteralString,
 
     #[error("invalid number")]
     InvalidNumber,
 
-    #[error("invalid offset date-time")]
+    #[error(
+        r#"invalid offset date-time
+
+Examples:
+  - 1979-05-27T07:32:00Z
+  - 1979-05-27 07:32:00Z
+  - 1979-05-27T00:32:00-07:00
+  - 1979-05-27T00:32:00.999999-07:00
+"#
+    )]
     InvalidOffsetDateTime,
 
-    #[error("invalid local date-time")]
+    #[error(
+        r#"invalid local date-time
+
+Examples:
+  - 1979-05-27T07:32:00
+  - 1979-05-27T07:32:00.9999
+"#
+    )]
     InvalidLocalDateTime,
 
-    #[error("invalid local date")]
+    #[error(
+        r#"invalid local date
+
+Examples:
+  - 1979-05-27
+"#
+    )]
     InvalidLocalDate,
 
-    #[error("invalid local time")]
+    #[error(
+        r#"invalid local time
+
+Examples:
+  - 07:32:00
+  - 07:32:00.9999
+"#
+    )]
     InvalidLocalTime,
 
     #[error("invalid token")]
     InvalidToken,
 
     // Grammar error
+    #[error("unknown line")]
+    UnknownLine,
+
     #[error("expected key")]
     ExpectedKey,
 
     #[error("expected value")]
     ExpectedValue,
-
-    #[error("unknown line")]
-    UnknownLine,
 
     #[error("expected '='")]
     ExpectedEqual,
@@ -63,10 +92,10 @@ pub enum ErrorKind {
     #[error("expected '\\n' or comment")]
     ExpectedLineBreakOrComment,
 
-    #[error("Inline table must be single line")]
+    #[error("inline table must be single line")]
     InlineTableMustSingleLine,
 
-    #[error("Forbidden last comma in inline table")]
+    #[error("forbidden last comma in inline table")]
     ForbiddenInlineTableLastComma,
 }
 
