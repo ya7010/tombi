@@ -45,7 +45,7 @@ impl Array {
         }
     }
 
-    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTable) -> Self {
+    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTables) -> Self {
         Self {
             kind: ArrayKind::ArrayOfTables,
             values: vec![],

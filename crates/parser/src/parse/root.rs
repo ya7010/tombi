@@ -21,7 +21,7 @@ impl Parse for ast::Root {
             if p.nth_at_ts(n, KEY_FIRST) {
                 ast::KeyValue::parse(p);
             } else if p.nth_at(n, T!("[[")) {
-                ast::ArrayOfTable::parse(p);
+                ast::ArrayOfTables::parse(p);
             } else if p.nth_at(n, T!['[']) {
                 ast::Table::parse(p);
             } else {

@@ -41,9 +41,9 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
                 kind: Some(FoldingRangeKind::Region),
                 collapsed_text: None,
             });
-        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
-            let start_position = array_of_table.header().unwrap().range().start();
-            let end_position = array_of_table.range().end();
+        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
+            let start_position = array_of_tables.header().unwrap().range().start();
+            let end_position = array_of_tables.range().end();
 
             ranges.push(FoldingRange {
                 start_line: start_position.line(),

@@ -50,7 +50,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTable) -> Self {
+    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTables) -> Self {
         Self {
             kind: TableKind::ArrayOfTables,
             key_values: Default::default(),
@@ -203,8 +203,8 @@ impl TryFrom<ast::Table> for Table {
         let array_of_table_keys = node
             .parent_tables()
             .filter_map(|parent_table| match parent_table {
-                ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => Some(
-                    array_of_table
+                ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => Some(
+                    array_of_tables
                         .header()
                         .unwrap()
                         .keys()
@@ -268,10 +268,10 @@ impl TryFrom<ast::Table> for Table {
     }
 }
 
-impl TryFrom<ast::ArrayOfTable> for Table {
+impl TryFrom<ast::ArrayOfTables> for Table {
     type Error = Vec<crate::Error>;
 
-    fn try_from(node: ast::ArrayOfTable) -> Result<Self, Self::Error> {
+    fn try_from(node: ast::ArrayOfTables) -> Result<Self, Self::Error> {
         let mut table = Table::new_array_of_tables(&node);
         let mut errors = Vec::new();
 

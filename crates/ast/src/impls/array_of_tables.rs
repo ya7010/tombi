@@ -1,7 +1,7 @@
 use crate::{support, AstNode};
 use syntax::T;
 
-impl crate::ArrayOfTable {
+impl crate::ArrayOfTables {
     pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
         support::leading_comments(self.syntax().children_with_tokens())
     }

@@ -54,11 +54,11 @@ Value =
 
 KeyValue = Keys '=' Value
 Table = '[' header: Keys ']' KeyValue*
-ArrayOfTable = '[[' header: Keys ']]' KeyValue*
+ArrayOfTables = '[[' header: Keys ']]' KeyValue*
 
 Root = RootItem*
 
 RootItem =
     KeyValue
     | Table
-    | ArrayOfTable
+    | ArrayOfTables

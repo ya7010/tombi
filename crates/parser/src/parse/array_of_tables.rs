@@ -11,7 +11,7 @@ use crate::{
 };
 use syntax::SyntaxKind::*;
 
-impl Parse for ast::ArrayOfTable {
+impl Parse for ast::ArrayOfTables {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
@@ -42,7 +42,7 @@ impl Parse for ast::ArrayOfTable {
             }
         }
 
-        m.complete(p, ARRAY_OF_TABLE);
+        m.complete(p, ARRAY_OF_TABLES);
     }
 }
 

@@ -3,7 +3,7 @@ use std::fmt::Write;
 
 use super::comment::{LeadingComment, TailingComment};
 
-impl Format for ast::ArrayOfTable {
+impl Format for ast::ArrayOfTables {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 

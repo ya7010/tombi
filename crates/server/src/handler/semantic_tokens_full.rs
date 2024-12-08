@@ -138,7 +138,7 @@ impl AppendSemanticTokens for ast::Table {
     }
 }
 
-impl AppendSemanticTokens for ast::ArrayOfTable {
+impl AppendSemanticTokens for ast::ArrayOfTables {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
             builder.add_token(TokenType::COMMENT, comment.syntax().into());

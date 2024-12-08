@@ -64,9 +64,9 @@ fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent>
                                 .flatten()
                         })
                         .flatten(),
-                    ARRAY_OF_TABLE => is_key_value
+                    ARRAY_OF_TABLES => is_key_value
                         .then(|| {
-                            ast::ArrayOfTable::cast(node)
+                            ast::ArrayOfTables::cast(node)
                                 .map(|array| {
                                     array.header().map(|keys| keys.keys().collect::<Vec<_>>())
                                 })
