@@ -111,19 +111,6 @@ impl<'a> LexedStr<'a> {
         &self.source[lo..hi]
     }
 
-    pub fn error(&self, i: usize) -> Option<&str> {
-        assert!(i < self.len());
-        let err = self
-            .errors
-            .binary_search_by_key(&(i as u32), |e| e.token() as u32)
-            .ok()?;
-        Some(self.errors[err].msg())
-    }
-
-    pub fn errors(&self) -> impl Iterator<Item = (usize, &str)> + '_ {
-        self.errors.iter().map(|it| (it.token(), it.msg()))
-    }
-
     pub fn to_input(&self) -> Input {
         let _p = tracing::info_span!("Lexer<'a, SyntaxKind>::to_input").entered();
 
