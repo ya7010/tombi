@@ -111,16 +111,6 @@ impl<'a> LexedStr<'a> {
         &self.source[lo..hi]
     }
 
-    pub fn text_span(&self, i: usize) -> text::Span {
-        assert!(i < self.len());
-        self.tokens[i].span()
-    }
-
-    pub fn text_len(&self, i: usize) -> text::RawOffset {
-        assert!(i < self.len());
-        self.text_span(i).len()
-    }
-
     pub fn error(&self, i: usize) -> Option<&str> {
         assert!(i < self.len());
         let err = self
