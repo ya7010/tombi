@@ -1,3 +1,4 @@
+use lexer::ErrorKind::*;
 use lexer::{tokenize, Token};
 use syntax::SyntaxKind::*;
 
@@ -31,7 +32,7 @@ macro_rules!  test_tokens {
                 );
                 (acc, (end_offset, end_position))
             });
-            assert_eq!(tokens, expected);
+            pretty_assertions::assert_eq!(tokens, expected);
         }
     };
 }
@@ -45,11 +46,38 @@ macro_rules! test_token {
             let tokens = tokenize(&source).collect::<Vec<_>>();
             let start_position = text::Position::MIN;
             let end_position = start_position + text::RelativePosition::of(source);
-            assert_eq!(
+
+            pretty_assertions::assert_eq!(
                 tokens,
                 [
                     Ok(
                         Token::new(
+                            $kind,
+                            (
+                                ($start_offset, $end_offset).into(),
+                                (start_position, end_position).into()
+                            )
+                        )
+                    )
+                ]
+            );
+        }
+    };
+
+    {#[test]fn $name:ident($source:expr) -> Err($kind:expr, ($start_offset:expr, $end_offset:expr));} => {
+        #[test]
+        fn $name() {
+            let source = textwrap::dedent($source);
+            let source = source.trim();
+            let tokens = tokenize(&source).collect::<Vec<_>>();
+            let start_position = text::Position::MIN;
+            let end_position = start_position + text::RelativePosition::of(source);
+
+            pretty_assertions::assert_eq!(
+                tokens,
+                [
+                    Err(
+                        lexer::Error::new(
                             $kind,
                             (
                                 ($start_offset, $end_offset).into(),
@@ -201,23 +229,6 @@ test_tokens! {
         Token(BASIC_STRING, "\"value\""),
         Token(WHITESPACE, " "),
         Token(BRACE_END, "}"),
-    ];
-}
-
-test_tokens! {
-    #[test]
-    fn invalid_inline_table("key1 = { key2 = 'value") -> [
-        Token(BARE_KEY, "key1"),
-        Token(WHITESPACE, " "),
-        Token(EQUAL, "="),
-        Token(WHITESPACE, " "),
-        Token(BRACE_START, "{"),
-        Token(WHITESPACE, " "),
-        Token(BARE_KEY, "key2"),
-        Token(WHITESPACE, " "),
-        Token(EQUAL, "="),
-        Token(WHITESPACE, " "),
-        Token(INVALID_TOKEN, "'value"),
     ];
 }
 
@@ -448,12 +459,12 @@ test_token! {
 
 test_token! {
     #[test]
-    fn invalid_integer_dec1("+_1234567890") -> Token(INVALID_TOKEN, (0, 12));
+    fn invalid_integer_dec1("+_1234567890") -> Err(InvalidNumber, (0, 12));
 }
 
 test_token! {
     #[test]
-    fn invalid_integer_dec2("-_1234567890") -> Token(INVALID_TOKEN, (0, 12));
+    fn invalid_integer_dec2("-_1234567890") -> Err(InvalidNumber, (0, 12));
 }
 
 test_token! {

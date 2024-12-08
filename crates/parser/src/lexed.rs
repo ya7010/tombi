@@ -52,15 +52,17 @@ impl<'a> LexedStr<'a> {
         let mut last_position = text::Position::default();
         let mut errors = Vec::new();
 
-        for (i, token) in lexed.into_iter().enumerate() {
-            match token {
-                Ok(token) => {
-                    tokens.push(token);
-                    last_offset = token.span().end();
-                    last_position = token.range().end();
+        for (i, result_token) in lexed.into_iter().enumerate() {
+            let token = match result_token {
+                Ok(token) => token,
+                Err(error) => {
+                    errors.push(LexError::new(i, syntax::Error::InvalidToken));
+                    lexer::Token::new(SyntaxKind::INVALID_TOKEN, (error.span(), error.range()))
                 }
-                Err(_) => errors.push(LexError::new(i, syntax::Error::InvalidToken)),
-            }
+            };
+            tokens.push(token);
+            last_offset = token.span().end();
+            last_position = token.range().end();
         }
 
         tokens.push(lexer::Token::new(
