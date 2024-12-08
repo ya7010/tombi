@@ -302,12 +302,7 @@ impl TryFrom<ast::KeyValue> for Table {
 
     fn try_from(node: ast::KeyValue) -> Result<Table, Self::Error> {
         let mut errors = Vec::new();
-        let mut keys = node
-            .keys()
-            .unwrap()
-            .keys()
-            .map(Key::from)
-            .collect_vec();
+        let mut keys = node.keys().unwrap().keys().map(Key::from).collect_vec();
 
         let value: Value = match node.value().unwrap().try_into() {
             Ok(value) => value,
