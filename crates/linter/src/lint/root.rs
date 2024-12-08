@@ -12,7 +12,7 @@ impl Lint for ast::RootItem {
     fn lint(&self, l: &mut crate::Linter) {
         match self {
             Self::Table(t) => t.lint(l),
-            Self::ArrayOfTable(t) => t.lint(l),
+            Self::ArrayOfTables(t) => t.lint(l),
             Self::KeyValue(k) => k.lint(l),
         }
     }

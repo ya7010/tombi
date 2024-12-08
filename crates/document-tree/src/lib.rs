@@ -66,7 +66,7 @@ impl TryFrom<ast::RootItem> for RootItem {
     fn try_from(node: ast::RootItem) -> Result<Self, Self::Error> {
         match node {
             ast::RootItem::Table(table) => table.try_into().map(Self::Table),
-            ast::RootItem::ArrayOfTable(array) => array.try_into().map(Self::ArrayOfTable),
+            ast::RootItem::ArrayOfTables(array) => array.try_into().map(Self::ArrayOfTable),
             ast::RootItem::KeyValue(key_value) => key_value.try_into().map(Self::KeyValue),
         }
     }

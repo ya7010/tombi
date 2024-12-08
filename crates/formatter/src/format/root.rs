@@ -33,15 +33,16 @@ impl Format for ast::Root {
                                 Header::Table {
                                     header_keys: pre_header_keys,
                                     key_value_size,
+                                }
+                                | Header::ArrayOfTables {
+                                    header_keys: pre_header_keys,
+                                    key_value_size,
                                 } => {
                                     if key_value_size > 0
                                         || !header_keys.starts_with(&pre_header_keys)
                                     {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
-                                }
-                                Header::ArrayOfTable { .. } => {
-                                    acc.push(ItemOrNewLine::NewLine);
                                 }
                             };
                             acc.push(ItemOrNewLine::Item(item));
@@ -54,8 +55,9 @@ impl Format for ast::Root {
                                 acc,
                             )
                         }
-                        ast::RootItem::ArrayOfTable(array_of_table) => {
-                            let header_keys = array_of_table.header().unwrap().keys();
+                        ast::RootItem::ArrayOfTables(array_of_tables) => {
+                            let header_keys = array_of_tables.header().unwrap().keys();
+                            let key_value_size = array_of_tables.key_values().into_iter().count();
 
                             match header {
                                 Header::Root { key_value_size } => {
@@ -73,13 +75,27 @@ impl Format for ast::Root {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
                                 }
-                                Header::ArrayOfTable { .. } => {
-                                    acc.push(ItemOrNewLine::NewLine);
+                                Header::ArrayOfTables {
+                                    header_keys: pre_header_keys,
+                                    key_value_size,
+                                } => {
+                                    if key_value_size > 0
+                                        || !header_keys.starts_with(&pre_header_keys)
+                                        || pre_header_keys.same_as(&header_keys)
+                                    {
+                                        acc.push(ItemOrNewLine::NewLine);
+                                    }
                                 }
                             };
                             acc.push(ItemOrNewLine::Item(item));
 
-                            (Header::ArrayOfTable {}, acc)
+                            (
+                                Header::ArrayOfTables {
+                                    header_keys,
+                                    key_value_size,
+                                },
+                                acc,
+                            )
                         }
                         ast::RootItem::KeyValue(_) => {
                             header = if let Header::Root { key_value_size } = header {
@@ -123,7 +139,7 @@ impl Format for ast::RootItem {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             ast::RootItem::Table(it) => it.fmt(f),
-            ast::RootItem::ArrayOfTable(it) => it.fmt(f),
+            ast::RootItem::ArrayOfTables(it) => it.fmt(f),
             ast::RootItem::KeyValue(it) => it.fmt(f),
         }
     }
@@ -154,7 +170,10 @@ enum Header {
         key_value_size: usize,
     },
 
-    ArrayOfTable {},
+    ArrayOfTables {
+        header_keys: ast::AstChildren<ast::Key>,
+        key_value_size: usize,
+    },
 }
 
 #[cfg(test)]
@@ -163,7 +182,7 @@ mod test {
 
     test_format! {
         #[test]
-        fn empty_table_space_when_subtable(
+        fn empty_table_space_on_own_subtable(
             r#"
             [foo]
             [foo.bar]
@@ -173,7 +192,7 @@ mod test {
 
     test_format! {
         #[test]
-        fn empty_table_space_when_table(
+        fn empty_table_space_on_other_table(
             r#"
             [foo]
 
@@ -184,7 +203,7 @@ mod test {
 
     test_format! {
         #[test]
-        fn empty_table_space_when_array_of_subtable(
+        fn empty_table_space_on_own_array_of_subtables(
             r#"
             [foo]
             [[foo.bar]]
@@ -194,11 +213,43 @@ mod test {
 
     test_format! {
         #[test]
-        fn empty_table_space_when_array_of_table(
+        fn empty_table_space_on_other_array_of_tables(
             r#"
             [foo]
 
             [[bar.baz]]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_array_of_tables_space_on_own_subtable(
+            r#"
+            [[foo]]
+            [foo.bar]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_array_of_tables_space_on_other_subtable(
+            r#"
+            [[foo]]
+
+            [bar.baz]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_array_of_tables_space_on_same_array_of_tables(
+            r#"
+            [[foo]]
+
+            [[foo]]
             "#
         ) -> Ok(source);
     }

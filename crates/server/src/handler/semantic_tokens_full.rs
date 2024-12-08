@@ -102,7 +102,7 @@ impl AppendSemanticTokens for ast::RootItem {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         match self {
             Self::Table(table) => table.append_semantic_tokens(builder),
-            Self::ArrayOfTable(array) => array.append_semantic_tokens(builder),
+            Self::ArrayOfTables(array) => array.append_semantic_tokens(builder),
             Self::KeyValue(key_value) => key_value.append_semantic_tokens(builder),
         }
     }

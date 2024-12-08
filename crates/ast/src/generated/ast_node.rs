@@ -407,7 +407,7 @@ pub enum Key {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum RootItem {
-    ArrayOfTable(ArrayOfTable),
+    ArrayOfTables(ArrayOfTable),
     KeyValue(KeyValue),
     Table(Table),
 }
@@ -893,7 +893,7 @@ impl AstNode for Key {
 impl From<ArrayOfTable> for RootItem {
     #[inline]
     fn from(node: ArrayOfTable) -> RootItem {
-        RootItem::ArrayOfTable(node)
+        RootItem::ArrayOfTables(node)
     }
 }
 impl From<KeyValue> for RootItem {
@@ -919,7 +919,7 @@ impl AstNode for RootItem {
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            SyntaxKind::ARRAY_OF_TABLE => RootItem::ArrayOfTable(ArrayOfTable { syntax }),
+            SyntaxKind::ARRAY_OF_TABLE => RootItem::ArrayOfTables(ArrayOfTable { syntax }),
             SyntaxKind::KEY_VALUE => RootItem::KeyValue(KeyValue { syntax }),
             SyntaxKind::TABLE => RootItem::Table(Table { syntax }),
             _ => return None,
@@ -929,7 +929,7 @@ impl AstNode for RootItem {
     #[inline]
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            RootItem::ArrayOfTable(it) => &it.syntax,
+            RootItem::ArrayOfTables(it) => &it.syntax,
             RootItem::KeyValue(it) => &it.syntax,
             RootItem::Table(it) => &it.syntax,
         }
