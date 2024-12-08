@@ -17,6 +17,7 @@ crossbeam-channel = "0.5.13"
 dashmap = { workspace = true }
 diagnostic = { workspace = true }
 document = { workspace = true }
+document-tree.workspace = true
 formatter = { workspace = true }
 futures = { workspace = true }
 futures-util = { workspace = true }

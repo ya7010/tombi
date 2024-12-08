@@ -45,7 +45,7 @@ impl Table {
             key_values: Default::default(),
             range: text::Range::new(
                 node.bracket_start().unwrap().text_range().start(),
-                node.bracket_end().unwrap().text_range().end(),
+                node.range().end(),
             ),
         }
     }
@@ -56,7 +56,7 @@ impl Table {
             key_values: Default::default(),
             range: text::Range::new(
                 node.double_bracket_start().unwrap().text_range().start(),
-                node.double_bracket_end().unwrap().text_range().end(),
+                node.range().end(),
             ),
         }
     }
@@ -97,6 +97,7 @@ impl Table {
 
     pub fn merge(&mut self, other: Self) -> Result<(), Vec<crate::Error>> {
         let mut errors = vec![];
+        self.range += other.range;
         // Merge the key_values of the two tables recursively
         for (key, value2) in other.key_values {
             match self.key_values.entry(key.clone()) {

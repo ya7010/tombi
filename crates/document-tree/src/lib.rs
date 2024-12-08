@@ -14,12 +14,6 @@ pub use value::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct DocumentTree(Table);
 
-impl DocumentTree {
-    fn new(node: &ast::Root) -> Self {
-        Self(Table::new_root(node))
-    }
-}
-
 impl From<DocumentTree> for Table {
     fn from(document: DocumentTree) -> Self {
         document.0
@@ -44,7 +38,7 @@ impl TryFrom<ast::Root> for DocumentTree {
     type Error = Vec<crate::Error>;
 
     fn try_from(node: ast::Root) -> Result<Self, Self::Error> {
-        let mut document = DocumentTree::new(&node);
+        let mut document = Self(Table::new_root(&node));
         let mut errors = Vec::new();
 
         for item in node.items() {

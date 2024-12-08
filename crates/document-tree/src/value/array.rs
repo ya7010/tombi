@@ -51,7 +51,7 @@ impl Array {
             values: vec![],
             range: text::Range::new(
                 node.double_bracket_start().unwrap().text_range().start(),
-                node.double_bracket_end().unwrap().text_range().end(),
+                node.range().end(),
             ),
         }
     }
@@ -73,6 +73,7 @@ impl Array {
 
     pub fn merge(&mut self, other: Self) -> Result<(), Vec<crate::Error>> {
         let mut errors = Vec::new();
+        self.range += other.range;
 
         match (self.kind(), other.kind()) {
             (ArrayKind::ArrayOfTables, ArrayKind::Table) => {

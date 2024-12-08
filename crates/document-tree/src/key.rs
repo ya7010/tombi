@@ -21,7 +21,7 @@ impl Key {
         &self.value
     }
 
-    pub(crate) fn range(&self) -> text::Range {
+    pub fn range(&self) -> text::Range {
         self.range
     }
 }

@@ -1,4 +1,4 @@
-use crate::{backend::Backend, document_symbol};
+use crate::backend::Backend;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -14,7 +14,9 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let root = document_symbol::Root::from(root);
+    let Ok(root) = document_tree::DocumentTree::try_from(root) else {
+        return Ok(None);
+    };
 
     let symbols = create_symbols(&root);
 
@@ -23,7 +25,7 @@ pub async fn handle_document_symbol(
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-fn create_symbols(root: &document_symbol::Root) -> Vec<DocumentSymbol> {
+fn create_symbols(root: &document_tree::DocumentTree) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
     for (key, value) in root.key_values() {
@@ -36,11 +38,11 @@ fn create_symbols(root: &document_symbol::Root) -> Vec<DocumentSymbol> {
 #[allow(deprecated)]
 fn symbols_for_value(
     name: String,
-    value: &document_symbol::Value,
+    value: &document_tree::Value,
     parent_key_range: Option<text::Range>,
     symbols: &mut Vec<DocumentSymbol>,
 ) {
-    use document_symbol::Value::*;
+    use document_tree::Value::*;
 
     let value_range = value.range();
     let range = if let Some(parent_key_range) = parent_key_range {
