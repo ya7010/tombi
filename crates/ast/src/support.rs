@@ -1,7 +1,8 @@
+use itertools::Itertools;
 use syntax::SyntaxKind;
+use syntax::{SyntaxElement, SyntaxKind::*};
 
 use crate::{AstChildren, AstNode, AstToken};
-use syntax::{SyntaxElement, SyntaxKind::*};
 
 #[inline]
 pub(super) fn child<N: AstNode>(parent: &syntax::SyntaxNode) -> Option<N> {
@@ -83,7 +84,7 @@ pub(super) fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>
 pub(super) fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
 ) -> impl Iterator<Item = crate::Comment> {
-    iter.collect::<Vec<_>>()
+    iter.collect_vec()
         .into_iter()
         .rev()
         .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
@@ -91,7 +92,7 @@ pub(super) fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
             SyntaxElement::Token(token) => crate::Comment::cast(token),
             SyntaxElement::Node(_) => None,
         })
-        .collect::<Vec<_>>()
+        .collect_vec()
         .into_iter()
         .rev()
 }
