@@ -50,6 +50,7 @@ mod test {
     test_parser! {
         #[test]
         fn invalid_value("key1 = 2024-01-00T") -> Err([
+            SyntaxError(InvalidLocalDateTime, 0:7..0:18),
             SyntaxError(ExpectedValue, 0:7..0:18),
         ])
     }
@@ -76,6 +77,7 @@ mod test {
             key3 = 1
             "#
         ) -> Err([
+            SyntaxError(InvalidKey, 1:7..1:15),
             SyntaxError(ExpectedValue, 1:7..1:15),
         ])
     }
@@ -89,6 +91,7 @@ mod test {
             key3 = 1
             "#
         ) -> Err([
+            SyntaxError(InvalidBasicString, 1:7..1:15),
             SyntaxError(ExpectedValue, 1:7..1:15),
         ])
     }
@@ -102,6 +105,7 @@ mod test {
             key3 = 1
             "#
         ) -> Err([
+            SyntaxError(InvalidKey, 1:7..1:15),
             SyntaxError(ExpectedValue, 1:7..1:15),
         ])
     }
@@ -115,6 +119,7 @@ mod test {
             key3 = 1
             "#
         ) -> Err([
+            SyntaxError(InvalidLiteralString, 1:7..1:15),
             SyntaxError(ExpectedValue, 1:7..1:15),
         ])
     }

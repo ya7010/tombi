@@ -7,7 +7,7 @@ use crate::{input::Input, output};
 pub struct LexedStr<'a> {
     pub source: &'a str,
     pub tokens: Vec<lexer::Token>,
-    pub errors: Vec<LexError>,
+    pub errors: Vec<crate::Error>,
 }
 
 #[derive(Debug)]
@@ -16,26 +16,6 @@ pub enum Step<'a> {
     StartNode { kind: SyntaxKind },
     FinishNode,
     Error { error: crate::Error },
-}
-
-#[derive(Debug)]
-pub struct LexError {
-    token_index: usize,
-    error: syntax::Error,
-}
-
-impl LexError {
-    pub fn new(token_index: usize, error: syntax::Error) -> Self {
-        Self { token_index, error }
-    }
-
-    pub fn token(&self) -> usize {
-        self.token_index
-    }
-
-    pub fn msg(&self) -> &str {
-        self.error.as_str()
-    }
 }
 
 pub fn lex(source: &str) -> LexedStr<'_> {
@@ -51,12 +31,13 @@ impl<'a> LexedStr<'a> {
         let mut last_position = text::Position::default();
         let mut errors = Vec::new();
 
-        for (i, result_token) in lexer::lex(source).into_iter().enumerate() {
+        for result_token in lexer::lex(source).into_iter() {
             let token = match result_token {
                 Ok(token) => token,
                 Err(error) => {
-                    errors.push(LexError::new(i, syntax::Error::InvalidToken));
-                    lexer::Token::new(SyntaxKind::INVALID_TOKEN, (error.span(), error.range()))
+                    let span_range = (error.span(), error.range());
+                    errors.push(error.into());
+                    lexer::Token::new(SyntaxKind::INVALID_TOKEN, span_range)
                 }
             };
             tokens.push(token);
