@@ -12,7 +12,6 @@ pub enum TableKind {
     InlineTable,
     ArrayOfTables,
     KeyValue,
-    Tombstone,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -28,14 +27,6 @@ impl Table {
             kind: TableKind::Root,
             key_values: Default::default(),
             range: node.syntax().text_range(),
-        }
-    }
-
-    pub(crate) fn new_tombstone() -> Self {
-        Self {
-            kind: TableKind::Tombstone,
-            key_values: Default::default(),
-            range: text::Range::default(),
         }
     }
 
@@ -78,7 +69,7 @@ impl Table {
             key_values: Default::default(),
             range: text::Range::new(
                 node.keys().unwrap().range().start(),
-                node.value().unwrap().syntax().text_range().end(),
+                node.syntax().text_range().end(),
             ),
         }
     }
@@ -201,20 +192,10 @@ impl TryFrom<ast::Table> for Table {
         let mut errors = Vec::new();
 
         let array_of_table_keys = node
-            .parent_tables()
-            .filter_map(|parent_table| match parent_table {
-                ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => Some(
-                    array_of_tables
-                        .header()
-                        .unwrap()
-                        .keys()
-                        .map(|key| Key::from(key))
-                        .collect::<Vec<_>>(),
-                ),
-                _ => None,
-            })
+            .array_of_tables_keys()
+            .map(|keys| keys.map(|key| Key::from(key)).collect_vec())
             .unique()
-            .collect::<Vec<_>>();
+            .collect_vec();
 
         for key_value in node.key_values() {
             match key_value.try_into() {
@@ -237,17 +218,15 @@ impl TryFrom<ast::Table> for Table {
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
                 let mut array = Array::new_table(&node);
-                array.push(Value::Table(std::mem::replace(
-                    &mut table,
-                    Table::new_tombstone(),
-                )));
+                let new_table = table.new_parent();
+                array.push(Value::Table(std::mem::replace(&mut table, new_table)));
 
                 table.new_parent().insert(key, Value::Array(array))
             } else {
-                table.new_parent().insert(
-                    key,
-                    Value::Table(std::mem::replace(&mut table, Table::new_tombstone())),
-                )
+                let new_table = table.new_parent();
+                table
+                    .new_parent()
+                    .insert(key, Value::Table(std::mem::replace(&mut table, new_table)))
             };
 
             is_array_of_table = array_of_table_keys.contains(&keys);
@@ -290,17 +269,18 @@ impl TryFrom<ast::ArrayOfTables> for Table {
         if let Some(key) = keys.next() {
             let mut array = Array::new_array_of_tables(&node);
 
-            array.push(Value::Table(std::mem::replace(
-                &mut table,
-                Table::new_tombstone(),
-            )));
+            let new_table = table.new_parent();
+            array.push(Value::Table(std::mem::replace(&mut table, new_table)));
             table = table.new_parent().insert(key, Value::Array(array)).unwrap();
         }
 
         for key in keys {
             match table.new_parent().insert(
                 key,
-                Value::Table(std::mem::replace(&mut table, Table::new_tombstone())),
+                Value::Table(std::mem::replace(
+                    &mut table,
+                    Table::new_array_of_tables(&node),
+                )),
             ) {
                 Ok(t) => table = t,
                 Err(errs) => {
@@ -352,7 +332,7 @@ impl TryFrom<ast::KeyValue> for Table {
         for key in keys.into_iter().rev() {
             match table.new_parent().insert(
                 key,
-                Value::Table(std::mem::replace(&mut table, Table::new_tombstone())),
+                Value::Table(std::mem::replace(&mut table, Table::new_key_value(&node))),
             ) {
                 Ok(t) => table = t,
                 Err(errs) => {

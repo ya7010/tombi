@@ -18,7 +18,6 @@ impl From<document_tree::TableKind> for TableKind {
             document_tree::TableKind::InlineTable => Self::InlineTable,
             document_tree::TableKind::ArrayOfTables => Self::Table,
             document_tree::TableKind::KeyValue => Self::KeyValue,
-            document_tree::TableKind::Tombstone => unreachable!("Tombstone is not supported"),
         }
     }
 }

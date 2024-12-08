@@ -511,6 +511,7 @@ dependencies = [
  "serde",
  "serde_json",
  "text",
+ "textwrap",
  "thiserror",
  "tower-lsp",
 ]

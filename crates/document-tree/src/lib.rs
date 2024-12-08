@@ -43,9 +43,11 @@ impl TryFrom<ast::Root> for DocumentTree {
 
         for item in node.items() {
             if let Err(errs) = match item.try_into() {
-                Ok(RootItem::Table(table)) => document.0.merge(table),
-                Ok(RootItem::ArrayOfTables(table)) => document.0.merge(table),
-                Ok(RootItem::KeyValue(table)) => document.0.merge(table),
+                Ok(
+                    RootItem::Table(table)
+                    | RootItem::ArrayOfTables(table)
+                    | RootItem::KeyValue(table),
+                ) => document.0.merge(table),
                 Err(errs) => Err(errs),
             } {
                 errors.extend(errs);

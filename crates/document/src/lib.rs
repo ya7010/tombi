@@ -51,13 +51,13 @@ macro_rules! test_serialize {
         fn $name() {
             use ast::AstNode;
 
-            let p = parser::parse($source, config::TomlVersion::V1_0_0);
+            let source = textwrap::dedent($source);
+            let p = parser::parse(&source.trim(), config::TomlVersion::default());
             pretty_assertions::assert_eq!(p.errors(), &[]);
             let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
             match document_tree::DocumentTree::try_from(ast) {
                 Ok(document_tree) => {
                     let document: crate::Document = document_tree.into();
-                    dbg!(&document);
                     let serialized = serde_json::to_string(&document).unwrap();
                     pretty_assertions::assert_eq!(serialized, $json.to_string());
                 }
@@ -73,8 +73,8 @@ macro_rules! test_serialize {
         #[test]
         fn $name() {
             use ast::AstNode;
-
-            let p = parser::parse($source, config::TomlVersion::V1_0_0);
+            let source = textwrap::dedent($source);
+            let p = parser::parse(&source.trim(), config::TomlVersion::default());
             let errors = $errors
                 .into_iter()
                 .map(|(m, r)| (m.to_string(), text::Range::from(r)))
