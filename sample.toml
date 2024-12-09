@@ -99,8 +99,14 @@ key5 = true
 [[ffff.ggg]]
 key6 = 1
 
+[ffff.ggg.kkk]
+b = 2
+
 [[ffff.ggg]]
 key6 = 2
+
+[ffff.ggg.kkk]
+b = 3
 
 [[ffff.ggg]]  # header tailing comment
 # key value leading comment1
