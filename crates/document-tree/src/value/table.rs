@@ -209,12 +209,7 @@ impl TryFrom<ast::Table> for Table {
         }
 
         let mut is_array_of_table = false;
-        let mut keys = node
-            .header()
-            .unwrap()
-            .keys()
-            .map(|key| Key::from(key))
-            .collect_vec();
+        let mut keys = node.header().unwrap().keys().map(Key::from).collect_vec();
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
                 let mut array = Array::new_table(&node);
@@ -254,6 +249,12 @@ impl TryFrom<ast::ArrayOfTables> for Table {
         let mut table = Table::new_array_of_tables(&node);
         let mut errors = Vec::new();
 
+        let array_of_table_keys = node
+            .array_of_tables_keys()
+            .map(|keys| keys.map(Key::from).collect_vec())
+            .unique()
+            .collect_vec();
+
         for key_value in node.key_values() {
             match key_value.try_into() {
                 Ok(other) => {
@@ -264,24 +265,26 @@ impl TryFrom<ast::ArrayOfTables> for Table {
                 Err(errs) => errors.extend(errs),
             }
         }
-        let mut keys = node.header().unwrap().keys().rev().map(Key::from);
 
-        if let Some(key) = keys.next() {
-            let mut array = Array::new_array_of_tables(&node);
+        let mut is_array_of_table = true;
+        let mut keys = node.header().unwrap().keys().map(Key::from).collect_vec();
+        while let Some(key) = keys.pop() {
+            let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
+                let mut array = Array::new_array_of_tables(&node);
+                let new_table = table.new_parent();
+                array.push(Value::Table(std::mem::replace(&mut table, new_table)));
 
-            let new_table = table.new_parent();
-            array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-            table = table.new_parent().insert(key, Value::Array(array)).unwrap();
-        }
+                table.new_parent().insert(key, Value::Array(array))
+            } else {
+                let new_table = table.new_parent();
+                table
+                    .new_parent()
+                    .insert(key, Value::Table(std::mem::replace(&mut table, new_table)))
+            };
 
-        for key in keys {
-            match table.new_parent().insert(
-                key,
-                Value::Table(std::mem::replace(
-                    &mut table,
-                    Table::new_array_of_tables(&node),
-                )),
-            ) {
+            is_array_of_table = array_of_table_keys.contains(&keys);
+
+            match result {
                 Ok(t) => table = t,
                 Err(errs) => {
                     errors.extend(errs);
