@@ -20,25 +20,25 @@ pub async fn handle_hover(
 
     let source = toml::try_load(&text_document.uri)?;
 
-    let Some(ast) =
+    let Some(root) =
         ast::Root::cast(parser::parse(&source, TomlVersion::default()).into_syntax_node())
     else {
         return Ok(None);
     };
 
-    if let Some(hover_content) = get_hover_content(ast, position) {
+    if let Some(hover_content) = get_hover_content(root, position) {
         Ok(Some(hover_content.into_hover()))
     } else {
         Ok(None)
     }
 }
 
-fn get_hover_content(ast: ast::Root, position: Position) -> Option<HoverContent> {
+fn get_hover_content(root: ast::Root, position: Position) -> Option<HoverContent> {
     // NOTE: Eventually, only KeyValue, Table, ArrayOfTables may be shown in the hover.
     //       For now, all nodes are displayed for debugging purposes.
 
     let mut is_key_value = false;
-    for node in ancestors_at_position(ast.syntax(), position.into()) {
+    for node in ancestors_at_position(root.syntax(), position.into()) {
         if let Some(key) = ast::Key::cast(node.to_owned()) {
             let keys = key
                 .syntax()
