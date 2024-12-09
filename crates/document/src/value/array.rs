@@ -20,10 +20,11 @@ pub enum ArrayKind {
 
 impl From<document_tree::ArrayKind> for ArrayKind {
     fn from(kind: document_tree::ArrayKind) -> Self {
+        use document_tree::ArrayKind::*;
+
         match kind {
-            document_tree::ArrayKind::ArrayOfTables => Self::ArrayOfTables,
-            document_tree::ArrayKind::Table => Self::ArrayOfTables,
-            document_tree::ArrayKind::Array => Self::Array,
+            ArrayOfTables | ParentArrayOfTable => Self::ArrayOfTables,
+            Array => Self::Array,
         }
     }
 }

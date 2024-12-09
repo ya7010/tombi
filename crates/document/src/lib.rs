@@ -128,4 +128,54 @@ mod test {
             "#
         ) -> Ok(json!({"key": "value", "flag": true}))
     }
+
+    test_serialize! {
+        #[test]
+        fn array_of_tables_sample(
+            r#"
+            [[fruits]]
+            name = "apple"
+
+            [fruits.physical]  # subtable
+            color = "red"
+            shape = "round"
+
+            [[fruits.varieties]]  # nested array of tables
+            name = "red delicious"
+
+            [[fruits.varieties]]
+            name = "granny smith"
+
+            [[fruits]]
+            name = "banana"
+
+            [[fruits.varieties]]
+            name = "plantain"
+            "#
+        ) -> Ok(
+            json!(
+                {
+                    "fruits": [
+                        {
+                            "name": "apple",
+                            "physical": {
+                                "color": "red",
+                                "shape": "round"
+                            },
+                            "varieties": [
+                                { "name": "red delicious" },
+                                { "name": "granny smith" }
+                            ]
+                        },
+                        {
+                            "name": "banana",
+                            "varieties": [
+                                { "name": "plantain" }
+                            ]
+                        }
+                    ]
+                }
+            )
+        )
+    }
 }

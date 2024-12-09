@@ -10,13 +10,13 @@ pub enum ArrayKind {
     /// ```
     ArrayOfTables,
 
-    /// An table.
+    /// An array of tables of parent.
     ///
     /// ```toml
     /// [[array]]
     /// [[array.table]]  # <- Here
     /// ```
-    Table,
+    ParentArrayOfTable,
 
     /// An array.
     ///
@@ -45,25 +45,19 @@ impl Array {
         }
     }
 
-    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTables) -> Self {
+    pub(crate) fn new_array_of_tables(table: &crate::Table) -> Self {
         Self {
             kind: ArrayKind::ArrayOfTables,
             values: vec![],
-            range: text::Range::new(
-                node.double_bracket_start().unwrap().text_range().start(),
-                node.range().end(),
-            ),
+            range: table.range(),
         }
     }
 
-    pub(crate) fn new_table(node: &ast::Table) -> Self {
+    pub(crate) fn new_parent_array_of_tables(table: &crate::Table) -> Self {
         Self {
-            kind: ArrayKind::Table,
+            kind: ArrayKind::ParentArrayOfTable,
             values: vec![],
-            range: text::Range::new(
-                node.bracket_start().unwrap().text_range().start(),
-                node.bracket_end().unwrap().text_range().end(),
-            ),
+            range: table.range(),
         }
     }
 
@@ -71,31 +65,41 @@ impl Array {
         self.values.push(value);
     }
 
-    pub fn merge(&mut self, other: Self) -> Result<(), Vec<crate::Error>> {
+    pub fn merge(&mut self, mut other: Self) -> Result<(), Vec<crate::Error>> {
+        use ArrayKind::*;
+
         let mut errors = Vec::new();
         self.range += other.range;
 
         match (self.kind(), other.kind()) {
-            (ArrayKind::ArrayOfTables, ArrayKind::Table) => {
-                match (
-                    self.values_mut().last_mut().unwrap(),
-                    Into::<Vec<Value>>::into(other).pop().unwrap(),
-                ) {
-                    (Value::Table(table1), Value::Table(table2)) => {
-                        if let Err(errs) = table1.merge(table2) {
-                            errors.extend(errs);
-                        }
+            (ParentArrayOfTable, ArrayOfTables) => {
+                let Some(Value::Table(table2)) = Into::<Vec<Value>>::into(other).pop() else {
+                    unreachable!("Array of tables must have one table.")
+                };
+                if let Some(Value::Table(table1)) = self.values.last_mut() {
+                    if let Err(errs) = table1.merge(table2) {
+                        errors.extend(errs);
                     }
-                    _ => {
-                        unreachable!()
-                    }
+                } else {
+                    self.values.push(Value::Table(table2));
                 }
             }
-            (ArrayKind::ArrayOfTables, ArrayKind::ArrayOfTables)
-            | (ArrayKind::Array, ArrayKind::Array) => {
+            (ArrayOfTables, ParentArrayOfTable) | (ParentArrayOfTable, ParentArrayOfTable) => {
+                let Some(Value::Table(table2)) = other.values.pop() else {
+                    unreachable!("Parent of array of tables must have one table.")
+                };
+                if let Some(Value::Table(table1)) = self.values.last_mut() {
+                    if let Err(errs) = table1.merge(table2) {
+                        errors.extend(errs);
+                    }
+                } else {
+                    self.values.push(Value::Table(table2));
+                }
+            }
+            (ArrayOfTables, ArrayOfTables) | (Array, Array) => {
                 self.values.extend(other.values);
             }
-            _ => {
+            (Array, _) | (_, Array) => {
                 errors.push(crate::Error::ConflictArray {
                     range1: self.range,
                     range2: other.range,

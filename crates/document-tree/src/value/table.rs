@@ -212,7 +212,7 @@ impl TryFrom<ast::Table> for Table {
         let mut keys = node.header().unwrap().keys().map(Key::from).collect_vec();
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
-                let mut array = Array::new_table(&node);
+                let mut array = Array::new_parent_array_of_tables(&table);
                 let new_table = table.new_parent();
                 array.push(Value::Table(std::mem::replace(&mut table, new_table)));
 
@@ -266,11 +266,18 @@ impl TryFrom<ast::ArrayOfTables> for Table {
             }
         }
 
-        let mut is_array_of_table = true;
         let mut keys = node.header().unwrap().keys().map(Key::from).collect_vec();
+        if let Some(key) = keys.pop() {
+            let mut array = Array::new_array_of_tables(&table);
+            let new_table = table.new_parent();
+            array.push(Value::Table(std::mem::replace(&mut table, new_table)));
+            table = table.new_parent().insert(key, Value::Array(array))?;
+        }
+
+        let mut is_array_of_table = array_of_table_keys.contains(&keys);
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
-                let mut array = Array::new_array_of_tables(&node);
+                let mut array = Array::new_parent_array_of_tables(&table);
                 let new_table = table.new_parent();
                 array.push(Value::Table(std::mem::replace(&mut table, new_table)));
 
