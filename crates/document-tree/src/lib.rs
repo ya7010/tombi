@@ -12,15 +12,15 @@ pub use value::{
 };
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct DocumentTree(Table);
+pub struct Root(Table);
 
-impl From<DocumentTree> for Table {
-    fn from(document: DocumentTree) -> Self {
-        document.0
+impl From<Root> for Table {
+    fn from(root: Root) -> Self {
+        root.0
     }
 }
 
-impl Deref for DocumentTree {
+impl Deref for Root {
     type Target = Table;
 
     fn deref(&self) -> &Self::Target {
@@ -34,11 +34,11 @@ enum RootItem {
     KeyValue(Table),
 }
 
-impl TryFrom<ast::Root> for DocumentTree {
+impl TryFrom<ast::Root> for Root {
     type Error = Vec<crate::Error>;
 
     fn try_from(node: ast::Root) -> Result<Self, Self::Error> {
-        let mut document = Self(Table::new_root(&node));
+        let mut root = Self(Table::new_root(&node));
         let mut errors = Vec::new();
 
         for item in node.items() {
@@ -47,7 +47,7 @@ impl TryFrom<ast::Root> for DocumentTree {
                     RootItem::Table(table)
                     | RootItem::ArrayOfTables(table)
                     | RootItem::KeyValue(table),
-                ) => document.0.merge(table),
+                ) => root.0.merge(table),
                 Err(errs) => Err(errs),
             } {
                 errors.extend(errs);
@@ -55,7 +55,7 @@ impl TryFrom<ast::Root> for DocumentTree {
         }
 
         if errors.is_empty() {
-            Ok(document)
+            Ok(root)
         } else {
             Err(errors)
         }

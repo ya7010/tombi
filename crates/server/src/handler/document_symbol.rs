@@ -14,7 +14,7 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let Ok(root) = document_tree::DocumentTree::try_from(root) else {
+    let Ok(root) = document_tree::Root::try_from(root) else {
         return Ok(None);
     };
 
@@ -25,7 +25,7 @@ pub async fn handle_document_symbol(
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-fn create_symbols(root: &document_tree::DocumentTree) -> Vec<DocumentSymbol> {
+fn create_symbols(root: &document_tree::Root) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
     for (key, value) in root.key_values() {

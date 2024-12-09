@@ -35,7 +35,7 @@ pub fn lint_with(
             root.lint(&mut linter);
             errors.extend(linter.into_diagnostics());
 
-            if let Err(errs) = document_tree::DocumentTree::try_from(root) {
+            if let Err(errs) = document_tree::Root::try_from(root) {
                 for err in errs {
                     err.to_diagnostics(&mut errors);
                 }

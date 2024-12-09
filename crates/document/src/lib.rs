@@ -18,8 +18,8 @@ impl From<Document> for Table {
     }
 }
 
-impl From<document_tree::DocumentTree> for Document {
-    fn from(document: document_tree::DocumentTree) -> Self {
+impl From<document_tree::Root> for Document {
+    fn from(document: document_tree::Root) -> Self {
         Self(document_tree::Table::from(document).into())
     }
 }
@@ -55,7 +55,7 @@ macro_rules! test_serialize {
             let p = parser::parse(&source.trim(), config::TomlVersion::default());
             pretty_assertions::assert_eq!(p.errors(), &[]);
             let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
-            match document_tree::DocumentTree::try_from(ast) {
+            match document_tree::Root::try_from(ast) {
                 Ok(document_tree) => {
                     let document: crate::Document = document_tree.into();
                     let serialized = serde_json::to_string(&document).unwrap();
@@ -92,7 +92,7 @@ macro_rules! test_serialize {
                 );
             }
             let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
-            match document_tree::DocumentTree::try_from(ast) {
+            match document_tree::Root::try_from(ast) {
                 Ok(_) => {
                     pretty_assertions::assert_eq!(Vec::<(String, text::Range)>::new(), errors);
                 }
