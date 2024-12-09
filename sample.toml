@@ -85,6 +85,7 @@ ld1 = 1979-05-27  # ld1 tailing comment
 lt1 = 07:32:00  # lt1 tailing comment
 # lt2 leading tailing comment
 lt2 = 00:32:00.999999  # lt2 tailing comment
+inline_table = { aaa = 1 }
 
 [aaaa.ccc]
 key1 = 11

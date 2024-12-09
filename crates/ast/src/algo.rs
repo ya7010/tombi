@@ -7,6 +7,13 @@ pub fn find_node_at_offset<N: AstNode>(syntax: &SyntaxNode, offset: text::Offset
     ancestors_at_offset(syntax, offset).find_map(N::cast)
 }
 
+pub fn find_node_at_position<N: AstNode>(
+    syntax: &SyntaxNode,
+    position: text::Position,
+) -> Option<N> {
+    ancestors_at_position(syntax, position).find_map(N::cast)
+}
+
 pub fn ancestors_at_offset(
     node: &SyntaxNode,
     offset: text::Offset,

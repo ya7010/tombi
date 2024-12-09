@@ -38,22 +38,33 @@ fn get_hover_content(root: ast::Root, position: Position) -> Option<HoverContent
     //       For now, all nodes are displayed for debugging purposes.
 
     let mut is_key_value = false;
+    let mut is_keys = false;
     for node in ancestors_at_position(root.syntax(), position.into()) {
         if let Some(key) = ast::Key::cast(node.to_owned()) {
             let keys = key
                 .syntax()
                 .ancestors()
                 .filter_map(|node| match node.kind() {
-                    KEYS => ast::Keys::cast(node).map(|keys| {
-                        keys.keys()
-                            .filter(|k| {
-                                k.syntax().text_range().start() <= key.syntax().text_range().start()
-                            })
-                            .collect_vec()
-                    }),
+                    KEYS => {
+                        is_key_value = false;
+                        is_keys = true;
+                        ast::Keys::cast(node).map(|keys| {
+                            keys.keys()
+                                .filter(|k| {
+                                    k.syntax().text_range().start()
+                                        <= key.syntax().text_range().start()
+                                })
+                                .collect_vec()
+                        })
+                    }
                     KEY_VALUE => {
                         is_key_value = true;
-                        None
+                        if !is_keys {
+                            ast::KeyValue::cast(node)
+                                .map(|kv| kv.keys().unwrap().keys().collect_vec())
+                        } else {
+                            None
+                        }
                     }
                     TABLE => is_key_value
                         .then(|| {
@@ -69,7 +80,10 @@ fn get_hover_content(root: ast::Root, position: Position) -> Option<HoverContent
                                 .flatten()
                         })
                         .flatten(),
-                    _ => None,
+                    _ => {
+                        is_keys = false;
+                        None
+                    }
                 })
                 .collect_vec()
                 .into_iter()
