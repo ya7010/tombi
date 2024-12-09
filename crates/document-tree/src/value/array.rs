@@ -29,8 +29,8 @@ pub enum ArrayKind {
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Array {
     kind: ArrayKind,
-    values: Vec<Value>,
     range: text::Range,
+    values: Vec<Value>,
 }
 
 impl Array {
@@ -62,6 +62,7 @@ impl Array {
     }
 
     pub fn push(&mut self, value: Value) {
+        self.range += value.range();
         self.values.push(value);
     }
 
@@ -69,7 +70,6 @@ impl Array {
         use ArrayKind::*;
 
         let mut errors = Vec::new();
-        self.range += other.range;
 
         match (self.kind(), other.kind()) {
             (ParentArrayOfTable, ArrayOfTables) => {
@@ -81,7 +81,7 @@ impl Array {
                         errors.extend(errs);
                     }
                 } else {
-                    self.values.push(Value::Table(table2));
+                    self.push(Value::Table(table2));
                 }
             }
             (ArrayOfTables, ParentArrayOfTable) | (ParentArrayOfTable, ParentArrayOfTable) => {
@@ -93,7 +93,7 @@ impl Array {
                         errors.extend(errs);
                     }
                 } else {
-                    self.values.push(Value::Table(table2));
+                    self.push(Value::Table(table2));
                 }
             }
             (ArrayOfTables, ArrayOfTables) | (Array, Array) => {

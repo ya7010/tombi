@@ -17,8 +17,8 @@ pub enum TableKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Table {
     kind: TableKind,
-    key_values: IndexMap<Key, Value>,
     range: text::Range,
+    key_values: IndexMap<Key, Value>,
 }
 
 impl Table {
