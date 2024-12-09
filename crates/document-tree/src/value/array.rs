@@ -66,25 +66,19 @@ impl Array {
         self.values.push(value);
     }
 
+    pub fn extend(&mut self, values: Vec<Value>) {
+        for value in values {
+            self.push(value);
+        }
+    }
+
     pub fn merge(&mut self, mut other: Self) -> Result<(), Vec<crate::Error>> {
         use ArrayKind::*;
 
         let mut errors = Vec::new();
 
         match (self.kind(), other.kind()) {
-            (ParentArrayOfTable, ArrayOfTables) => {
-                let Some(Value::Table(table2)) = Into::<Vec<Value>>::into(other).pop() else {
-                    unreachable!("Array of tables must have one table.")
-                };
-                if let Some(Value::Table(table1)) = self.values.last_mut() {
-                    if let Err(errs) = table1.merge(table2) {
-                        errors.extend(errs);
-                    }
-                } else {
-                    self.push(Value::Table(table2));
-                }
-            }
-            (ArrayOfTables, ParentArrayOfTable) | (ParentArrayOfTable, ParentArrayOfTable) => {
+            (ArrayOfTables | ParentArrayOfTable, ParentArrayOfTable) => {
                 let Some(Value::Table(table2)) = other.values.pop() else {
                     unreachable!("Parent of array of tables must have one table.")
                 };
@@ -96,8 +90,8 @@ impl Array {
                     self.push(Value::Table(table2));
                 }
             }
-            (ArrayOfTables, ArrayOfTables) | (Array, Array) => {
-                self.values.extend(other.values);
+            (ParentArrayOfTable | ArrayOfTables, ArrayOfTables) | (Array, Array) => {
+                self.extend(other.values);
             }
             (Array, _) | (_, Array) => {
                 errors.push(crate::Error::ConflictArray {
@@ -147,11 +141,5 @@ impl TryFrom<ast::Array> for Array {
         }
 
         Ok(array)
-    }
-}
-
-impl Into<Vec<Value>> for Array {
-    fn into(self) -> Vec<Value> {
-        self.values
     }
 }
