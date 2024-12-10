@@ -97,7 +97,7 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
         let text = &self
             .lexed
-            .range_text(self.token_index..self.token_index + n_tokens);
+            .text_in(self.token_index..self.token_index + n_tokens);
         self.token_index += n_tokens;
 
         (self.sink)(lexed::Step::AddToken { kind, text });

@@ -81,10 +81,10 @@ impl<'a> LexedStr<'a> {
     }
 
     pub fn text(&self, i: usize) -> &str {
-        self.range_text(i..i + 1)
+        self.text_in(i..i + 1)
     }
 
-    pub fn range_text(&self, r: std::ops::Range<usize>) -> &str {
+    pub fn text_in(&self, r: std::ops::Range<usize>) -> &str {
         assert!(r.start < r.end && r.end <= self.len());
         let lo = self.tokens[r.start].span().start().into();
         let hi = self.tokens[r.end].span().start().into();
