@@ -23,7 +23,7 @@ impl From<document_tree::ArrayKind> for ArrayKind {
         use document_tree::ArrayKind::*;
 
         match kind {
-            ArrayOfTables | ParentArrayOfTable => Self::ArrayOfTables,
+            ArrayOfTables | ParentArrayOfTables => Self::ArrayOfTables,
             Array => Self::Array,
         }
     }
