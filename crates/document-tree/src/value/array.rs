@@ -98,7 +98,7 @@ impl Array {
                     self.push(Value::Table(table2));
                 }
             }
-            (ParentArrayOfTables | ArrayOfTables, ArrayOfTables) | (Array, Array) => {
+            (ArrayOfTables | ParentArrayOfTables, ArrayOfTables) | (Array, Array) => {
                 self.extend(other.values);
             }
             (Array, _) | (_, Array) => {
