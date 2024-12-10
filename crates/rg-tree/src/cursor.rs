@@ -407,7 +407,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn text_span(&self) -> text::Span {
+    fn span(&self) -> text::Span {
         let offset = self.offset();
         let len = self.green().text_len();
         text::Span::at(offset, len)
@@ -703,8 +703,8 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn text_span(&self) -> text::Span {
-        self.data().text_span()
+    pub fn span(&self) -> text::Span {
+        self.data().span()
     }
 
     #[inline]
@@ -895,7 +895,7 @@ impl SyntaxNode {
         // TODO: this could be faster if we first drill-down to node, and only
         // then switch to token search. We should also replace explicit
         // recursion with a loop.
-        let span = self.text_span();
+        let span = self.span();
         assert!(
             span.start() <= offset && offset <= span.end(),
             "Bad offset: span {:?} offset {:?}",
@@ -907,7 +907,7 @@ impl SyntaxNode {
         }
 
         let mut children = self.children_with_tokens().filter(|child| {
-            let child_span = child.text_span();
+            let child_span = child.span();
             !child_span.is_empty() && (child_span.start() <= offset && offset <= child_span.end())
         });
 
@@ -968,9 +968,9 @@ impl SyntaxNode {
         let mut res: SyntaxElement = self.clone().into();
         loop {
             assert!(
-                res.text_span().contains_span(span),
+                res.span().contains_span(span),
                 "Bad span: node span {:?}, span {:?}",
-                res.text_span(),
+                res.span(),
                 span,
             );
             res = match &res {
@@ -1064,8 +1064,8 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn text_span(&self) -> text::Span {
-        self.data().text_span()
+    pub fn span(&self) -> text::Span {
+        self.data().span()
     }
 
     #[inline]
@@ -1171,10 +1171,10 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn text_span(&self) -> text::Span {
+    pub fn span(&self) -> text::Span {
         match self {
-            NodeOrToken::Node(it) => it.text_span(),
-            NodeOrToken::Token(it) => it.text_span(),
+            NodeOrToken::Node(it) => it.span(),
+            NodeOrToken::Token(it) => it.span(),
         }
     }
 
@@ -1246,7 +1246,7 @@ impl SyntaxElement {
     }
 
     fn token_at_offset(&self, offset: text::Offset) -> TokenAtOffset<SyntaxToken> {
-        assert!(self.text_span().start() <= offset && offset <= self.text_span().end());
+        assert!(self.span().start() <= offset && offset <= self.span().end());
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
             NodeOrToken::Node(node) => node.token_at_offset(offset),
@@ -1292,7 +1292,7 @@ impl fmt::Debug for SyntaxNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SyntaxNode")
             .field("kind", &self.kind())
-            .field("text_span", &self.text_span())
+            .field("span", &self.span())
             .field("range", &self.range())
             .finish()
     }

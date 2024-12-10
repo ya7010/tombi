@@ -11,7 +11,7 @@ pub struct SyntaxText {
 impl SyntaxText {
     #[inline]
     pub(crate) fn new(node: SyntaxNode) -> SyntaxText {
-        let span = node.text_span();
+        let span = node.span();
         SyntaxText { node, span }
     }
 
@@ -107,13 +107,13 @@ impl SyntaxText {
     }
 
     fn tokens_with_spans(&self) -> impl Iterator<Item = (SyntaxToken, text::Span)> {
-        let text_span = self.span;
+        let span = self.span;
         self.node
             .descendants_with_tokens()
             .filter_map(|element| element.into_token())
             .filter_map(move |token| {
-                let token_span = token.text_span();
-                let span = text_span.intersect(token_span)?;
+                let token_span = token.span();
+                let span = span.intersect(token_span)?;
                 Some((token, span - token_span.start()))
             })
     }

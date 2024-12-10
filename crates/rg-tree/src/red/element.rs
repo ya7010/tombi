@@ -19,10 +19,10 @@ impl<L: Language> From<RedToken<L>> for RedElement<L> {
 }
 
 impl<L: Language> RedElement<L> {
-    pub fn text_span(&self) -> text::Span {
+    pub fn span(&self) -> text::Span {
         match self {
-            NodeOrToken::Node(it) => it.text_span(),
-            NodeOrToken::Token(it) => it.text_span(),
+            NodeOrToken::Node(it) => it.span(),
+            NodeOrToken::Token(it) => it.span(),
         }
     }
 

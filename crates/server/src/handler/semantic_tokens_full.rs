@@ -320,8 +320,8 @@ impl<'a> SemanticTokensBuilder<'a> {
 
     fn add_token(&mut self, token_type: TokenType, node: TokenOrNode) {
         let range = Range::new(
-            text::Position::from_source(self.source, node.text_span().start()).into(),
-            text::Position::from_source(self.source, node.text_span().end()).into(),
+            text::Position::from_source(self.source, node.span().start()).into(),
+            text::Position::from_source(self.source, node.span().end()).into(),
         );
 
         let relative = relative_range(range, self.last_range);
@@ -349,10 +349,10 @@ enum TokenOrNode<'a> {
 }
 
 impl<'a> TokenOrNode<'a> {
-    fn text_span(&self) -> Span {
+    fn span(&self) -> Span {
         match self {
-            Self::Token(token) => token.text_span(),
-            Self::Node(node) => node.text_span(),
+            Self::Token(token) => token.span(),
+            Self::Node(node) => node.span(),
         }
     }
 }

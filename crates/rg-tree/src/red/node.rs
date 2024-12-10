@@ -42,7 +42,7 @@ impl<L: Language> fmt::Debug for RedNode<L> {
                 f,
                 "{:?} @{:?} @{:?}",
                 self.kind(),
-                self.text_span(),
+                self.span(),
                 self.range()
             )
         }
@@ -74,8 +74,8 @@ impl<L: Language> RedNode<L> {
         L::kind_from_raw(self.raw.kind())
     }
 
-    pub fn text_span(&self) -> text::Span {
-        self.raw.text_span()
+    pub fn span(&self) -> text::Span {
+        self.raw.span()
     }
 
     pub fn range(&self) -> text::Range {
