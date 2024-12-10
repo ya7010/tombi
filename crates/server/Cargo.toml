@@ -17,12 +17,13 @@ crossbeam-channel = "0.5.13"
 dashmap = { workspace = true }
 diagnostic = { workspace = true }
 document = { workspace = true }
-document-tree.workspace = true
+document-tree = { workspace = true }
 formatter = { workspace = true }
 futures = { workspace = true }
 futures-util = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
+json-schema-store = { workspace = true }
 linter = { workspace = true }
 parser = { workspace = true }
 rustc-hash = { workspace = true }

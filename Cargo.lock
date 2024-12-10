@@ -1191,11 +1191,14 @@ dependencies = [
 name = "json-schema-store"
 version = "0.0.0"
 dependencies = [
+ "ast",
  "dashmap 6.1.0",
  "document",
+ "document-tree",
  "jsonschema",
  "reqwest",
  "serde_json",
+ "text",
  "url",
 ]
 
@@ -2203,6 +2206,7 @@ dependencies = [
  "futures-util",
  "indexmap 2.6.0",
  "itertools",
+ "json-schema-store",
  "linter",
  "parser",
  "rstest",

@@ -44,6 +44,11 @@ impl Range {
     pub const fn is_empty(self) -> bool {
         self.start().line() == self.end().line() && self.start().column() == self.end().column()
     }
+
+    #[inline]
+    pub fn contains(&self, position: Position) -> bool {
+        self.start <= position && position < self.end
+    }
 }
 
 impl std::fmt::Debug for Range {

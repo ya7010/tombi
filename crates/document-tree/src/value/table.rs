@@ -167,6 +167,14 @@ impl Table {
         self.key_values.entry(key)
     }
 
+    pub fn get(&self, key: &Key) -> Option<&Value> {
+        self.key_values.get(key)
+    }
+
+    pub fn get_mut(&mut self, key: &Key) -> Option<&mut Value> {
+        self.key_values.get_mut(key)
+    }
+
     #[inline]
     pub fn kind(&self) -> TableKind {
         self.kind

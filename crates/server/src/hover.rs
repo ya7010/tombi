@@ -41,8 +41,8 @@ impl std::fmt::Display for HoverContent {
     }
 }
 
-impl HoverContent {
-    pub fn into_hover(self) -> tower_lsp::lsp_types::Hover {
+impl Into<tower_lsp::lsp_types::Hover> for HoverContent {
+    fn into(self) -> tower_lsp::lsp_types::Hover {
         tower_lsp::lsp_types::Hover {
             contents: tower_lsp::lsp_types::HoverContents::Markup(
                 tower_lsp::lsp_types::MarkupContent {

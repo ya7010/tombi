@@ -1,12 +1,12 @@
-use crate::{hover::HoverContent, toml};
+use crate::{backend, hover::HoverContent, toml};
 use ast::{algo::ancestors_at_position, AstNode};
-use config::TomlVersion;
 use itertools::Itertools;
-use parser::SyntaxKind::*;
-use tower_lsp::lsp_types::{Hover, HoverParams, Position, TextDocumentPositionParams};
+use json_schema_store::{get_accessors, Accessors};
+use tower_lsp::lsp_types::{Hover, HoverParams, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_hover(
+    backend: &backend::Backend,
     HoverParams {
         text_document_position_params:
             TextDocumentPositionParams {
@@ -19,85 +19,62 @@ pub async fn handle_hover(
     tracing::info!("handle_hover");
 
     let source = toml::try_load(&text_document.uri)?;
+    let position = position.into();
 
     let Some(root) =
-        ast::Root::cast(parser::parse(&source, TomlVersion::default()).into_syntax_node())
+        ast::Root::cast(parser::parse(&source, backend.toml_version()).into_syntax_node())
     else {
         return Ok(None);
     };
 
-    if let Some(hover_content) = get_hover_content(root, position) {
-        Ok(Some(hover_content.into_hover()))
+    let Some(keys) = get_keys(&root, position) else {
+        return Ok(None);
+    };
+
+    let Ok(root) = document_tree::Root::try_from(root) else {
+        return Ok(None);
+    };
+
+    let accessors = get_accessors(root, &keys, position);
+
+    if !accessors.is_empty() {
+        let hover_content = HoverContent {
+            keys: Accessors::new(accessors).to_string(),
+            ..Default::default()
+        };
+        return Ok(Some(hover_content.into()));
     } else {
-        Ok(None)
+        return Ok(None);
     }
 }
 
-fn get_hover_content(root: ast::Root, position: Position) -> Option<HoverContent> {
-    // NOTE: Eventually, only KeyValue, Table, ArrayOfTables may be shown in the hover.
-    //       For now, all nodes are displayed for debugging purposes.
-
-    let mut is_key_value = false;
-    let mut is_keys = false;
-    for node in ancestors_at_position(root.syntax(), position.into()) {
-        if let Some(key) = ast::Key::cast(node.to_owned()) {
-            let keys = key
-                .syntax()
-                .ancestors()
-                .filter_map(|node| match node.kind() {
-                    KEYS => {
-                        is_key_value = false;
-                        is_keys = true;
-                        ast::Keys::cast(node).map(|keys| {
-                            keys.keys()
-                                .filter(|k| {
-                                    k.syntax().text_range().start()
-                                        <= key.syntax().text_range().start()
-                                })
-                                .collect_vec()
-                        })
-                    }
-                    KEY_VALUE => {
-                        is_key_value = true;
-                        if !is_keys {
-                            ast::KeyValue::cast(node)
-                                .map(|kv| kv.keys().unwrap().keys().collect_vec())
-                        } else {
-                            None
-                        }
-                    }
-                    TABLE => is_key_value
-                        .then(|| {
-                            ast::Table::cast(node)
-                                .map(|table| table.header().map(|keys| keys.keys().collect_vec()))
-                                .flatten()
-                        })
-                        .flatten(),
-                    ARRAY_OF_TABLES => is_key_value
-                        .then(|| {
-                            ast::ArrayOfTables::cast(node)
-                                .map(|array| array.header().map(|keys| keys.keys().collect_vec()))
-                                .flatten()
-                        })
-                        .flatten(),
-                    _ => {
-                        is_keys = false;
-                        None
-                    }
-                })
-                .collect_vec()
-                .into_iter()
-                .rev()
-                .flatten()
-                .map(|key| key.syntax().text().to_string())
-                .join(".");
-
-            return Some(HoverContent {
-                keys,
-                range: key.syntax().text_range(),
-                ..Default::default()
-            });
+fn get_keys(root: &ast::Root, position: text::Position) -> Option<Vec<document_tree::Key>> {
+    let mut keys_vec = vec![];
+    for node in ancestors_at_position(root.syntax(), position) {
+        dbg!(&node.kind());
+        if let Some(keys) = ast::Keys::cast(node.to_owned()) {
+            keys_vec.push(
+                keys.keys()
+                    .take_while(|key| key.token().unwrap().text_range().start() <= position)
+                    .map(document_tree::Key::from)
+                    .collect_vec(),
+            );
+        } else if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+            let keys = kv.keys().unwrap();
+            if !keys.range().contains(position) {
+                keys_vec.push(keys.keys().map(document_tree::Key::from).collect_vec());
+            }
+        } else if let Some(table) = ast::Table::cast(node.to_owned()) {
+            let header = table.header().unwrap();
+            if !header.range().contains(position) {
+                keys_vec.push(header.keys().map(document_tree::Key::from).collect_vec());
+            }
+        } else if let Some(array) = ast::ArrayOfTables::cast(node.to_owned()) {
+            let header = array.header().unwrap();
+            if !header.range().contains(position) {
+                keys_vec.push(header.keys().map(document_tree::Key::from).collect_vec());
+            }
         }
     }
-    None
+    Some(keys_vec.into_iter().rev().flatten().collect_vec())
 }

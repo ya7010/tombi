@@ -69,6 +69,14 @@ impl Array {
         }
     }
 
+    pub fn get(&self, index: usize) -> Option<&Value> {
+        self.values.get(index)
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Value> {
+        self.values.get_mut(index)
+    }
+
     pub fn push(&mut self, value: Value) {
         self.range += value.range();
         self.values.push(value);

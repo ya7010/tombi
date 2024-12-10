@@ -134,7 +134,7 @@ impl LanguageServer for Backend {
     }
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
-        handle_hover(params).await
+        handle_hover(self, params).await
     }
 
     async fn folding_range(
