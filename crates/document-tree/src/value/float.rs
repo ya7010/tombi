@@ -19,7 +19,7 @@ impl TryFrom<ast::Float> for Float {
 
     fn try_from(node: ast::Float) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
         match token.text().parse() {
             Ok(value) => Ok(Self { value, range }),
             Err(error) => Err(vec![crate::Error::ParseFloatError { error, range }]),

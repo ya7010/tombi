@@ -47,8 +47,8 @@ impl Array {
             kind: ArrayKind::Array,
             values: vec![],
             range: text::Range::new(
-                node.bracket_start().unwrap().text_range().start(),
-                node.bracket_end().unwrap().text_range().end(),
+                node.bracket_start().unwrap().range().start(),
+                node.bracket_end().unwrap().range().end(),
             ),
         }
     }

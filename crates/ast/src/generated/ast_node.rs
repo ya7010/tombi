@@ -24,7 +24,7 @@ impl Array {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -51,7 +51,7 @@ impl ArrayOfTables {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -66,7 +66,7 @@ impl BareKey {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -81,7 +81,7 @@ impl BasicString {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -96,7 +96,7 @@ impl Boolean {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -111,7 +111,7 @@ impl Comma {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -126,7 +126,7 @@ impl Float {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -149,7 +149,7 @@ impl InlineTable {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -164,7 +164,7 @@ impl IntegerBin {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -179,7 +179,7 @@ impl IntegerDec {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -194,7 +194,7 @@ impl IntegerHex {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -209,7 +209,7 @@ impl IntegerOct {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -232,7 +232,7 @@ impl KeyValue {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -247,7 +247,7 @@ impl Keys {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -262,7 +262,7 @@ impl LiteralString {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -277,7 +277,7 @@ impl LocalDate {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -292,7 +292,7 @@ impl LocalDateTime {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -307,7 +307,7 @@ impl LocalTime {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -322,7 +322,7 @@ impl MultiLineBasicString {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -337,7 +337,7 @@ impl MultiLineLiteralString {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -352,7 +352,7 @@ impl OffsetDateTime {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -367,7 +367,7 @@ impl Root {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 
@@ -394,7 +394,7 @@ impl Table {
     }
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.syntax.text_range()
+        self.syntax.range()
     }
 }
 

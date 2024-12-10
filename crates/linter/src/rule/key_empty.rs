@@ -12,7 +12,7 @@ impl Rule<ast::Key> for KeyEmptyRule {
         } {
             l.add_diagnostic(diagnostic::Diagnostic::new_warning(
                 crate::ErrorKind::KeyEmpty.to_string(),
-                node.syntax().text_range(),
+                node.syntax().range(),
             ));
         };
     }

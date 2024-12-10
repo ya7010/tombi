@@ -26,7 +26,7 @@ impl Table {
         Self {
             kind: TableKind::Root,
             key_values: Default::default(),
-            range: node.syntax().text_range(),
+            range: node.syntax().range(),
         }
     }
 
@@ -35,7 +35,7 @@ impl Table {
             kind: TableKind::Table,
             key_values: Default::default(),
             range: text::Range::new(
-                node.bracket_start().unwrap().text_range().start(),
+                node.bracket_start().unwrap().range().start(),
                 node.range().end(),
             ),
         }
@@ -46,7 +46,7 @@ impl Table {
             kind: TableKind::ArrayOfTables,
             key_values: Default::default(),
             range: text::Range::new(
-                node.double_bracket_start().unwrap().text_range().start(),
+                node.double_bracket_start().unwrap().range().start(),
                 node.range().end(),
             ),
         }
@@ -57,8 +57,8 @@ impl Table {
             kind: TableKind::InlineTable,
             key_values: Default::default(),
             range: text::Range::new(
-                node.brace_start().unwrap().text_range().start(),
-                node.brace_end().unwrap().text_range().end(),
+                node.brace_start().unwrap().range().start(),
+                node.brace_end().unwrap().range().end(),
             ),
         }
     }
@@ -69,7 +69,7 @@ impl Table {
             key_values: Default::default(),
             range: text::Range::new(
                 node.keys().unwrap().range().start(),
-                node.syntax().text_range().end(),
+                node.syntax().range().end(),
             ),
         }
     }

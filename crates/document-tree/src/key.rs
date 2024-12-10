@@ -55,7 +55,7 @@ impl From<ast::Key> for Key {
                 ast::Key::LiteralString(_) => KeyKind::LiteralString,
             },
             value: node.raw_text(),
-            range: node.token().unwrap().text_range(),
+            range: node.token().unwrap().range(),
         }
     }
 }

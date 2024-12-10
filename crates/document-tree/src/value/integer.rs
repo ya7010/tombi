@@ -35,7 +35,7 @@ impl TryFrom<ast::IntegerBin> for Integer {
 
     fn try_from(node: ast::IntegerBin) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
 
         match isize::from_str_radix(&token.text()[2..], 2) {
             Ok(value) => Ok(Self {
@@ -53,7 +53,7 @@ impl TryFrom<ast::IntegerOct> for Integer {
 
     fn try_from(node: ast::IntegerOct) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
 
         match isize::from_str_radix(&token.text()[2..], 8) {
             Ok(value) => Ok(Self {
@@ -71,7 +71,7 @@ impl TryFrom<ast::IntegerDec> for Integer {
 
     fn try_from(node: ast::IntegerDec) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
 
         match isize::from_str_radix(token.text(), 10) {
             Ok(value) => Ok(Self {
@@ -89,7 +89,7 @@ impl TryFrom<ast::IntegerHex> for Integer {
 
     fn try_from(node: ast::IntegerHex) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
 
         match isize::from_str_radix(&token.text()[2..], 16) {
             Ok(value) => Ok(Self {

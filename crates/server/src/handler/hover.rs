@@ -55,7 +55,7 @@ fn get_keys(root: &ast::Root, position: text::Position) -> Option<Vec<document_t
         if let Some(keys) = ast::Keys::cast(node.to_owned()) {
             keys_vec.push(
                 keys.keys()
-                    .take_while(|key| key.token().unwrap().text_range().start() <= position)
+                    .take_while(|key| key.token().unwrap().range().start() <= position)
                     .map(document_tree::Key::from)
                     .collect_vec(),
             );

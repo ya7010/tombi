@@ -39,7 +39,7 @@ impl TryFrom<ast::BasicString> for String {
         Ok(Self {
             kind: StringKind::BasicString,
             value: token.text().to_string(),
-            range: token.text_range(),
+            range: token.range(),
         })
     }
 }
@@ -53,7 +53,7 @@ impl TryFrom<ast::LiteralString> for String {
         Ok(Self {
             kind: StringKind::LiteralString,
             value: token.text().to_string(),
-            range: token.text_range(),
+            range: token.range(),
         })
     }
 }
@@ -67,7 +67,7 @@ impl TryFrom<ast::MultiLineBasicString> for String {
         Ok(Self {
             kind: StringKind::MultiLineBasicString,
             value: token.text().to_string(),
-            range: token.text_range(),
+            range: token.range(),
         })
     }
 }
@@ -81,7 +81,7 @@ impl TryFrom<ast::MultiLineLiteralString> for String {
         Ok(Self {
             kind: StringKind::MultiLineLiteralString,
             value: token.text().to_string(),
-            range: token.text_range(),
+            range: token.range(),
         })
     }
 }

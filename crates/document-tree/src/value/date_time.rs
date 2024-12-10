@@ -77,7 +77,7 @@ impl TryFrom<ast::OffsetDateTime> for OffsetDateTime {
 
     fn try_from(node: ast::OffsetDateTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
         match chrono::DateTime::parse_from_rfc3339(token.text()) {
             Ok(value) => Ok(Self { value, range }),
             Err(error) => Err(vec![crate::Error::ParseOffsetDateTimeError {
@@ -93,7 +93,7 @@ impl TryFrom<ast::LocalDateTime> for LocalDateTime {
 
     fn try_from(node: ast::LocalDateTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
         let mut text = token.text().to_string();
         if text.chars().nth(10) == Some('T') {
             text.replace_range(10..11, " ");
@@ -111,7 +111,7 @@ impl TryFrom<ast::LocalDate> for LocalDate {
 
     fn try_from(node: ast::LocalDate) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
         match chrono::NaiveDate::parse_from_str(token.text(), "%Y-%m-%d") {
             Ok(value) => Ok(Self { value, range }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateError { error, range }]),
@@ -124,7 +124,7 @@ impl TryFrom<ast::LocalTime> for LocalTime {
 
     fn try_from(node: ast::LocalTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
-        let range = token.text_range();
+        let range = token.range();
         match chrono::NaiveTime::parse_from_str(token.text(), "%H:%M:%S%.f") {
             Ok(value) => Ok(Self { value, range }),
             Err(error) => Err(vec![crate::Error::ParseLocalTimeError { error, range }]),

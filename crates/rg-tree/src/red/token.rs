@@ -20,7 +20,7 @@ impl<L: Language> fmt::Debug for RedToken<L> {
             "{:?} @{:?} @{:?}",
             self.kind(),
             self.text_span(),
-            self.text_range()
+            self.range()
         )?;
         if self.text().len() < 25 {
             return write!(f, " {:?}", self.text());
@@ -58,8 +58,8 @@ impl<L: Language> RedToken<L> {
         self.raw.text_span()
     }
 
-    pub fn text_range(&self) -> text::Range {
-        self.raw.text_range()
+    pub fn range(&self) -> text::Range {
+        self.raw.range()
     }
 
     pub fn index(&self) -> usize {

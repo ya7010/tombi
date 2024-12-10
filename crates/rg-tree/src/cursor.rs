@@ -414,7 +414,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn text_range(&self) -> text::Range {
+    fn range(&self) -> text::Range {
         let start = self.position();
         text::Range::at(start, self.green().text_relative_position())
     }
@@ -708,8 +708,8 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn text_range(&self) -> text::Range {
-        self.data().text_range()
+    pub fn range(&self) -> text::Range {
+        self.data().range()
     }
 
     #[inline]
@@ -928,7 +928,7 @@ impl SyntaxNode {
     }
 
     pub fn token_at_position(&self, position: text::Position) -> TokenAtOffset<SyntaxToken> {
-        let range = self.text_range();
+        let range = self.range();
         assert!(
             range.start() <= position && position <= range.end(),
             "Bad position: range {:?} position {:?}",
@@ -940,7 +940,7 @@ impl SyntaxNode {
         }
 
         let mut children = self.children_with_tokens().filter(|child| {
-            let child_range = child.text_range();
+            let child_range = child.range();
             !child_range.is_empty()
                 && (child_range.start() <= position && position <= child_range.end())
         });
@@ -1069,8 +1069,8 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn text_range(&self) -> text::Range {
-        self.data().text_range()
+    pub fn range(&self) -> text::Range {
+        self.data().range()
     }
 
     #[inline]
@@ -1179,10 +1179,10 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn text_range(&self) -> text::Range {
+    pub fn range(&self) -> text::Range {
         match self {
-            NodeOrToken::Node(it) => it.text_range(),
-            NodeOrToken::Token(it) => it.text_range(),
+            NodeOrToken::Node(it) => it.range(),
+            NodeOrToken::Token(it) => it.range(),
         }
     }
 
@@ -1254,7 +1254,7 @@ impl SyntaxElement {
     }
 
     fn token_at_position(&self, position: text::Position) -> TokenAtOffset<SyntaxToken> {
-        assert!(self.text_range().start() <= position && position <= self.text_range().end());
+        assert!(self.range().start() <= position && position <= self.range().end());
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
             NodeOrToken::Node(node) => node.token_at_position(position),
@@ -1293,7 +1293,7 @@ impl fmt::Debug for SyntaxNode {
         f.debug_struct("SyntaxNode")
             .field("kind", &self.kind())
             .field("text_span", &self.text_span())
-            .field("text_range", &self.text_range())
+            .field("range", &self.range())
             .finish()
     }
 }

@@ -27,7 +27,7 @@ impl TryFrom<ast::Boolean> for Boolean {
                 "false" => false,
                 _ => unreachable!(),
             },
-            range: token.text_range(),
+            range: token.range(),
         })
     }
 }
