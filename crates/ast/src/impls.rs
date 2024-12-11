@@ -4,3 +4,4 @@ mod inline_table;
 mod key;
 mod root;
 mod table;
+mod value;

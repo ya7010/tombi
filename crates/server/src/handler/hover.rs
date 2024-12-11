@@ -27,7 +27,7 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let keys = get_keys(&root, position);
+    let (keys, range) = get_hover_range(&root, position);
 
     if keys.is_empty() {
         return Ok(None);
@@ -44,16 +44,40 @@ pub async fn handle_hover(
     return Ok(Some(
         HoverContent {
             keys_value_info: Some(keys_value_info),
+            range,
             ..Default::default()
         }
         .into(),
     ));
 }
 
-fn get_keys(root: &ast::Root, position: text::Position) -> Vec<document_tree::Key> {
+fn get_hover_range(
+    root: &ast::Root,
+    position: text::Position,
+) -> (Vec<document_tree::Key>, Option<text::Range>) {
     let mut keys_vec = vec![];
+    let mut hover_range = None;
+
     for node in ancestors_at_position(root.syntax(), position) {
+        if let Some(array) = ast::Array::cast(node.to_owned()) {
+            for (value, comma) in array.values_with_comma() {
+                if hover_range.is_none() {
+                    let mut range = value.range();
+                    if let Some(comma) = comma {
+                        range += comma.range()
+                    };
+                    if range.contains(position) {
+                        hover_range = Some(value.token_range());
+                    }
+                }
+            }
+        };
+
         let keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+            if hover_range.is_none() {
+                hover_range =
+                    Some(kv.keys().unwrap().syntax().range() + kv.value().unwrap().token_range());
+            }
             kv.keys().unwrap()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
             table.header().unwrap()
@@ -63,16 +87,24 @@ fn get_keys(root: &ast::Root, position: text::Position) -> Vec<document_tree::Ke
             continue;
         };
 
-        if keys.range().contains(position) {
-            keys_vec.push(
-                keys.keys()
-                    .take_while(|key| key.token().unwrap().range().start() <= position)
-                    .map(document_tree::Key::from)
-                    .collect_vec(),
-            )
+        let keys = if keys.range().contains(position) {
+            keys.keys()
+                .take_while(|key| key.token().unwrap().range().start() <= position)
+                .map(document_tree::Key::from)
+                .collect_vec()
         } else {
-            keys_vec.push(keys.keys().map(document_tree::Key::from).collect_vec())
+            keys.keys().map(document_tree::Key::from).collect_vec()
+        };
+
+        if hover_range.is_none() {
+            hover_range = keys.iter().map(|key| key.range()).reduce(|k1, k2| k1 + k2);
         }
+
+        keys_vec.push(keys);
     }
-    keys_vec.into_iter().rev().flatten().collect_vec()
+
+    (
+        keys_vec.into_iter().rev().flatten().collect_vec(),
+        hover_range,
+    )
 }

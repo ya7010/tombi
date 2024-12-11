@@ -10,7 +10,7 @@ pub struct HoverContent {
     pub keys_value_info: Option<KeysValueInfo>,
     pub enumerated_values: Vec<String>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
-    pub range: text::Range,
+    pub range: Option<text::Range>,
 }
 
 impl std::fmt::Display for HoverContent {
@@ -54,7 +54,7 @@ impl Into<tower_lsp::lsp_types::Hover> for HoverContent {
                     value: self.to_string(),
                 },
             ),
-            range: Some(self.range.into()),
+            range: self.range.map(Into::into),
         }
     }
 }
