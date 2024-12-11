@@ -1,7 +1,7 @@
 use crate::{backend, hover::HoverContent, toml};
 use ast::{algo::ancestors_at_position, AstNode};
 use itertools::Itertools;
-use json_schema_store::{get_accessors, Accessors};
+use json_schema_store::get_keys_value_info;
 use tower_lsp::lsp_types::{Hover, HoverParams, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -37,17 +37,18 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let accessors = get_accessors(root, &keys, position);
-
-    if !accessors.is_empty() {
-        let hover_content = HoverContent {
-            accessor: Accessors::new(accessors),
-            ..Default::default()
-        };
-        return Ok(Some(hover_content.into()));
-    } else {
+    let Some((accessors, value_type)) = get_keys_value_info(root, &keys, position) else {
         return Ok(None);
-    }
+    };
+
+    return Ok(Some(
+        HoverContent {
+            keys_info: Some(accessors),
+            value_info: Some(value_type),
+            ..Default::default()
+        }
+        .into(),
+    ));
 }
 
 fn get_keys(root: &ast::Root, position: text::Position) -> Vec<document_tree::Key> {

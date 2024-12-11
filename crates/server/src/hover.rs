@@ -1,13 +1,14 @@
 use std::fmt::Debug;
 
 use itertools::Itertools;
-use json_schema_store::Accessors;
+use json_schema_store::{Accessors, ValueType};
 
 #[derive(Debug, Default)]
 pub struct HoverContent {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub accessor: Accessors,
+    pub keys_info: Option<Accessors>,
+    pub value_info: Option<ValueType>,
     pub enumerated_values: Vec<String>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
     pub range: text::Range,
@@ -23,7 +24,12 @@ impl std::fmt::Display for HoverContent {
             writeln!(f, "{}\n", description.split("\n").join("\n\n"))?;
         }
 
-        writeln!(f, "Keys: `{}`\n", self.accessor.to_string())?;
+        if let Some(keys_info) = &self.keys_info {
+            writeln!(f, "Keys: `{}`\n", keys_info.to_string())?;
+        }
+        if let Some(value_type) = &self.value_info {
+            writeln!(f, "Value: `{:?}`\n", value_type)?;
+        }
 
         if !self.enumerated_values.is_empty() {
             writeln!(f, "Allowed Values:\n")?;
