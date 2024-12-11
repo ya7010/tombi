@@ -4,14 +4,14 @@ use url::Url;
 use crate::Schema;
 
 pub struct Store {
-    http_client: reqwest::Client,
+    // http_client: reqwest::Client,
     schemas: DashMap<Url, Schema>,
 }
 
 impl Store {
     pub fn new() -> Self {
         Self {
-            http_client: reqwest::Client::new(),
+            // http_client: reqwest::Client::new(),
             schemas: DashMap::new(),
         }
     }
