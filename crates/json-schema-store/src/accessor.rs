@@ -13,6 +13,7 @@ impl std::fmt::Display for Accessor {
     }
 }
 
+#[derive(Debug, Default)]
 pub struct Accessors(Vec<Accessor>);
 
 impl Accessors {

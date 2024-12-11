@@ -41,7 +41,7 @@ pub async fn handle_hover(
 
     if !accessors.is_empty() {
         let hover_content = HoverContent {
-            keys: Accessors::new(accessors).to_string(),
+            accessor: Accessors::new(accessors),
             ..Default::default()
         };
         return Ok(Some(hover_content.into()));
