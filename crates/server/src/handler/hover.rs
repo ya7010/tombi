@@ -67,7 +67,7 @@ fn get_hover_range(
                         range += comma.range()
                     };
                     if range.contains(position) {
-                        hover_range = Some(value.token_range());
+                        hover_range = Some(range);
                     }
                 }
             }
@@ -75,8 +75,7 @@ fn get_hover_range(
 
         let keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
             if hover_range.is_none() {
-                hover_range =
-                    Some(kv.keys().unwrap().syntax().range() + kv.value().unwrap().token_range());
+                hover_range = Some(kv.range());
             }
             kv.keys().unwrap()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
