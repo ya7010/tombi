@@ -21,6 +21,7 @@ pub fn ancestors_at_offset(
     node.token_at_offset(offset)
         .map(|token| token.parent_ancestors())
         .kmerge_by(|node1, node2| node1.span().len() < node2.span().len())
+        .dedup_by(|node1, node2| node1 == node2)
 }
 
 pub fn ancestors_at_position(
@@ -29,5 +30,6 @@ pub fn ancestors_at_position(
 ) -> impl Iterator<Item = SyntaxNode> {
     node.token_at_position(position)
         .map(|token| token.parent_ancestors())
-        .kmerge_by(|node1, node2| node1.span().len() < node2.span().len())
+        .kmerge_by(|node1, node2| node1.span().len() <= node2.span().len())
+        .dedup_by(|node1, node2| node1 == node2)
 }
