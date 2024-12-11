@@ -75,7 +75,22 @@ fn get_hover_range(
 
         let keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
             if hover_range.is_none() {
-                hover_range = Some(kv.range());
+                if let Some(inline_table) = ast::InlineTable::cast(node.parent().unwrap()) {
+                    for (key_value, comma) in inline_table.key_values_with_comma() {
+                        if hover_range.is_none() {
+                            let mut range = key_value.range();
+                            if let Some(comma) = comma {
+                                range += comma.range()
+                            };
+                            if range.contains(position) {
+                                hover_range = Some(range);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    hover_range = Some(kv.range());
+                }
             }
             kv.keys().unwrap()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
