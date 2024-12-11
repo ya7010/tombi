@@ -104,9 +104,13 @@ fn get_item_table<'a>(
                     accessors.push(Accessor::Index(index));
                     let table_ref = get_item_table(value, accessors, value_type, position);
 
-                    if matches!(array.kind(), ArrayOfTables | ParentArrayOfTables) {
-                        *value_type = Some(ValueType::Array);
+                    match array.kind() {
+                        ArrayOfTables | ParentArrayOfTables => {
+                            *value_type = Some(ValueType::Array);
+                        }
+                        Array => {}
                     }
+
                     return table_ref;
                 }
                 index += 1;
