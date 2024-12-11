@@ -1,3 +1,5 @@
+/// Represents an accessor to a value in a TOML-like structure.
+/// It can either be a key (for objects) or an index (for arrays).
 #[derive(Debug)]
 pub enum Accessor {
     Key(String),
@@ -13,6 +15,7 @@ impl std::fmt::Display for Accessor {
     }
 }
 
+/// A collection of `Accessor`.
 #[derive(Debug, Default)]
 pub struct Accessors(Vec<Accessor>);
 
