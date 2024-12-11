@@ -59,6 +59,7 @@ fn get_item_table<'a>(
     value_type: &mut Option<ValueType>,
     position: text::Position,
 ) -> Option<&'a document_tree::Table> {
+    use document_tree::ArrayKind::*;
     use document_tree::Value;
 
     match value {
@@ -103,6 +104,9 @@ fn get_item_table<'a>(
                     accessors.push(Accessor::Index(index));
                     let table_ref = get_item_table(value, accessors, value_type, position);
 
+                    if matches!(array.kind(), ArrayOfTables | ParentArrayOfTables) {
+                        *value_type = Some(ValueType::Array);
+                    }
                     return table_ref;
                 }
                 index += 1;
