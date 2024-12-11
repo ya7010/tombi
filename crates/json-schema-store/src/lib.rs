@@ -8,11 +8,27 @@ pub use schema::Schema;
 pub use store::Store;
 pub use value_type::ValueType;
 
+#[derive(Debug)]
+pub struct KeysValueInfo {
+    accessors: Accessors,
+    value_type: ValueType,
+}
+
+impl KeysValueInfo {
+    pub fn accessors(&self) -> &Accessors {
+        &self.accessors
+    }
+
+    pub fn value_type(&self) -> &ValueType {
+        &self.value_type
+    }
+}
+
 pub fn get_keys_value_info(
     root: document_tree::Root,
     keys: &[document_tree::Key],
     position: text::Position,
-) -> Option<(Accessors, ValueType)> {
+) -> Option<KeysValueInfo> {
     let mut accessors = Vec::new();
     let mut value_type = None;
     let table: document_tree::Table = root.into();
@@ -28,7 +44,10 @@ pub fn get_keys_value_info(
     }
 
     if let Some(value_type) = value_type {
-        Some((Accessors::new(accessors), value_type))
+        Some(KeysValueInfo {
+            accessors: Accessors::new(accessors),
+            value_type,
+        })
     } else {
         None
     }

@@ -37,14 +37,13 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let Some((accessors, value_type)) = get_keys_value_info(root, &keys, position) else {
+    let Some(keys_value_info) = get_keys_value_info(root, &keys, position) else {
         return Ok(None);
     };
 
     return Ok(Some(
         HoverContent {
-            keys_info: Some(accessors),
-            value_info: Some(value_type),
+            keys_value_info: Some(keys_value_info),
             ..Default::default()
         }
         .into(),
