@@ -27,9 +27,11 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let Some(keys) = get_keys(&root, position) else {
+    let keys = get_keys(&root, position);
+
+    if keys.is_empty() {
         return Ok(None);
-    };
+    }
 
     let Ok(root) = document_tree::Root::try_from(root) else {
         return Ok(None);
@@ -48,33 +50,29 @@ pub async fn handle_hover(
     }
 }
 
-fn get_keys(root: &ast::Root, position: text::Position) -> Option<Vec<document_tree::Key>> {
+fn get_keys(root: &ast::Root, position: text::Position) -> Vec<document_tree::Key> {
     let mut keys_vec = vec![];
     for node in ancestors_at_position(root.syntax(), position) {
-        dbg!(&node.kind());
-        if let Some(keys) = ast::Keys::cast(node.to_owned()) {
+        let keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+            kv.keys().unwrap()
+        } else if let Some(table) = ast::Table::cast(node.to_owned()) {
+            table.header().unwrap()
+        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
+            array_of_tables.header().unwrap()
+        } else {
+            continue;
+        };
+
+        if keys.range().contains(position) {
             keys_vec.push(
                 keys.keys()
                     .take_while(|key| key.token().unwrap().range().start() <= position)
                     .map(document_tree::Key::from)
                     .collect_vec(),
-            );
-        } else if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
-            let keys = kv.keys().unwrap();
-            if !keys.range().contains(position) {
-                keys_vec.push(keys.keys().map(document_tree::Key::from).collect_vec());
-            }
-        } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            let header = table.header().unwrap();
-            if !header.range().contains(position) {
-                keys_vec.push(header.keys().map(document_tree::Key::from).collect_vec());
-            }
-        } else if let Some(array) = ast::ArrayOfTables::cast(node.to_owned()) {
-            let header = array.header().unwrap();
-            if !header.range().contains(position) {
-                keys_vec.push(header.keys().map(document_tree::Key::from).collect_vec());
-            }
+            )
+        } else {
+            keys_vec.push(keys.keys().map(document_tree::Key::from).collect_vec())
         }
     }
-    Some(keys_vec.into_iter().rev().flatten().collect_vec())
+    keys_vec.into_iter().rev().flatten().collect_vec()
 }
