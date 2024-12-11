@@ -29,6 +29,7 @@ pub enum Value {
 }
 
 impl Value {
+    #[inline]
     pub fn range(&self) -> text::Range {
         match self {
             Value::Boolean(value) => value.range(),
@@ -41,6 +42,22 @@ impl Value {
             Value::LocalTime(value) => value.range(),
             Value::Array(value) => value.range(),
             Value::Table(value) => value.range(),
+        }
+    }
+
+    #[inline]
+    pub fn symbol_range(&self) -> text::Range {
+        match self {
+            Value::Boolean(value) => value.symbol_range(),
+            Value::Integer(value) => value.symbol_range(),
+            Value::Float(value) => value.symbol_range(),
+            Value::String(value) => value.symbol_range(),
+            Value::OffsetDateTime(value) => value.symbol_range(),
+            Value::LocalDateTime(value) => value.symbol_range(),
+            Value::LocalDate(value) => value.symbol_range(),
+            Value::LocalTime(value) => value.symbol_range(),
+            Value::Array(value) => value.symbol_range(),
+            Value::Table(value) => value.symbol_range(),
         }
     }
 }

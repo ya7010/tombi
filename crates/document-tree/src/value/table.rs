@@ -18,6 +18,7 @@ pub enum TableKind {
 pub struct Table {
     kind: TableKind,
     range: text::Range,
+    symbol_range: text::Range,
     key_values: IndexMap<Key, Value>,
 }
 
@@ -27,6 +28,7 @@ impl Table {
             kind: TableKind::Root,
             key_values: Default::default(),
             range: node.syntax().range(),
+            symbol_range: node.syntax().range(),
         }
     }
 
@@ -34,7 +36,8 @@ impl Table {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
-            range: text::Range::new(
+            range: node.syntax().range(),
+            symbol_range: text::Range::new(
                 node.bracket_start().unwrap().range().start(),
                 node.range().end(),
             ),
@@ -45,7 +48,8 @@ impl Table {
         Self {
             kind: TableKind::ArrayOfTables,
             key_values: Default::default(),
-            range: text::Range::new(
+            range: node.syntax().range(),
+            symbol_range: text::Range::new(
                 node.double_bracket_start().unwrap().range().start(),
                 node.range().end(),
             ),
@@ -56,7 +60,8 @@ impl Table {
         Self {
             kind: TableKind::InlineTable,
             key_values: Default::default(),
-            range: text::Range::new(
+            range: node.syntax().range(),
+            symbol_range: text::Range::new(
                 node.brace_start().unwrap().range().start(),
                 node.brace_end().unwrap().range().end(),
             ),
@@ -67,7 +72,8 @@ impl Table {
         Self {
             kind: TableKind::KeyValue,
             key_values: Default::default(),
-            range: text::Range::new(
+            range: node.syntax().range(),
+            symbol_range: text::Range::new(
                 node.keys().unwrap().range().start(),
                 node.syntax().range().end(),
             ),
@@ -79,6 +85,7 @@ impl Table {
             kind: self.kind,
             key_values: Default::default(),
             range: self.range,
+            symbol_range: self.symbol_range,
         }
     }
 
@@ -89,6 +96,8 @@ impl Table {
     pub fn merge(&mut self, other: Self) -> Result<(), Vec<crate::Error>> {
         let mut errors = vec![];
         self.range += other.range;
+        self.symbol_range += other.symbol_range;
+
         // Merge the key_values of the two tables recursively
         for (key, value2) in other.key_values {
             match self.key_values.entry(key.clone()) {
@@ -183,6 +192,11 @@ impl Table {
     #[inline]
     pub fn range(&self) -> text::Range {
         self.range
+    }
+
+    #[inline]
+    pub fn symbol_range(&self) -> text::Range {
+        self.symbol_range
     }
 }
 

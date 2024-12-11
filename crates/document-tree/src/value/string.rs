@@ -11,6 +11,7 @@ pub struct String {
     kind: StringKind,
     value: std::string::String,
     range: text::Range,
+    symbol_range: text::Range,
 }
 
 impl String {
@@ -28,6 +29,11 @@ impl String {
     pub fn range(&self) -> text::Range {
         self.range
     }
+
+    #[inline]
+    pub fn symbol_range(&self) -> text::Range {
+        self.symbol_range
+    }
 }
 
 impl TryFrom<ast::BasicString> for String {
@@ -40,6 +46,7 @@ impl TryFrom<ast::BasicString> for String {
             kind: StringKind::BasicString,
             value: token.text().to_string(),
             range: token.range(),
+            symbol_range: token.range(),
         })
     }
 }
@@ -54,6 +61,7 @@ impl TryFrom<ast::LiteralString> for String {
             kind: StringKind::LiteralString,
             value: token.text().to_string(),
             range: token.range(),
+            symbol_range: token.range(),
         })
     }
 }
@@ -68,6 +76,7 @@ impl TryFrom<ast::MultiLineBasicString> for String {
             kind: StringKind::MultiLineBasicString,
             value: token.text().to_string(),
             range: token.range(),
+            symbol_range: token.range(),
         })
     }
 }
@@ -82,6 +91,7 @@ impl TryFrom<ast::MultiLineLiteralString> for String {
             kind: StringKind::MultiLineLiteralString,
             value: token.text().to_string(),
             range: token.range(),
+            symbol_range: token.range(),
         })
     }
 }

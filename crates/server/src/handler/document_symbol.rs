@@ -44,7 +44,7 @@ fn symbols_for_value(
 ) {
     use document_tree::Value::*;
 
-    let value_range = value.range();
+    let value_range = value.symbol_range();
     let range = if let Some(parent_key_range) = parent_key_range {
         parent_key_range + value_range
     } else {
@@ -108,7 +108,7 @@ fn symbols_for_value(
                 symbols_for_value(
                     format!("[{index}]"),
                     value,
-                    Some(value.range()),
+                    Some(value.symbol_range()),
                     &mut children,
                 );
             }

@@ -38,6 +38,7 @@ pub enum ArrayKind {
 pub struct Array {
     kind: ArrayKind,
     range: text::Range,
+    symbol_range: text::Range,
     values: Vec<Value>,
 }
 
@@ -46,7 +47,8 @@ impl Array {
         Self {
             kind: ArrayKind::Array,
             values: vec![],
-            range: text::Range::new(
+            range: node.range(),
+            symbol_range: text::Range::new(
                 node.bracket_start().unwrap().range().start(),
                 node.bracket_end().unwrap().range().end(),
             ),
@@ -58,6 +60,7 @@ impl Array {
             kind: ArrayKind::ArrayOfTables,
             values: vec![],
             range: table.range(),
+            symbol_range: table.symbol_range(),
         }
     }
 
@@ -66,6 +69,7 @@ impl Array {
             kind: ArrayKind::ParentArrayOfTables,
             values: vec![],
             range: table.range(),
+            symbol_range: table.symbol_range(),
         }
     }
 
@@ -79,6 +83,8 @@ impl Array {
 
     pub fn push(&mut self, value: Value) {
         self.range += value.range();
+        self.symbol_range += value.symbol_range();
+
         self.values.push(value);
     }
 
@@ -111,8 +117,8 @@ impl Array {
             }
             (Array, _) | (_, Array) => {
                 errors.push(crate::Error::ConflictArray {
-                    range1: self.range,
-                    range2: other.range,
+                    range1: self.symbol_range,
+                    range2: other.symbol_range,
                 });
             }
         }
@@ -138,6 +144,10 @@ impl Array {
 
     pub fn range(&self) -> text::Range {
         self.range
+    }
+
+    pub fn symbol_range(&self) -> text::Range {
+        self.symbol_range
     }
 }
 
