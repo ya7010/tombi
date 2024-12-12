@@ -1,5 +1,5 @@
 [alias]
 tombi = "run --quiet --package tombi-cli --bin tombi --"
-decoder = "run --quiet --package toml-test --bin decoder --"
+decode = "run --quiet --package toml-test --bin decode --"
 jsonschema = "run --package config --bin jsonschema --all-features --"
 xtask = "run --package xtask --bin xtask --"

@@ -7,8 +7,8 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [[bin]]
-name = "decoder"
-path = "bin/decoder.rs"
+name = "decode"
+path = "bin/decode.rs"
 
 [dependencies]
 anyhow = { workspace = true }
