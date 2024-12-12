@@ -20,17 +20,25 @@ impl From<document_tree::IntegerKind> for IntegerKind {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Integer {
     kind: IntegerKind,
-    value: isize,
+    value: i64,
 }
 
 impl Integer {
+    #[inline]
+    pub(crate) fn new(value: i64) -> Self {
+        Self {
+            kind: IntegerKind::Decimal,
+            value,
+        }
+    }
+
     #[inline]
     pub fn kind(&self) -> IntegerKind {
         self.kind
     }
 
     #[inline]
-    pub fn value(&self) -> isize {
+    pub fn value(&self) -> i64 {
         self.value
     }
 }
@@ -51,5 +59,19 @@ impl serde::Serialize for Integer {
         S: serde::Serializer,
     {
         self.value.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Integer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = i64::deserialize(deserializer)?;
+        Ok(Self {
+            kind: IntegerKind::Decimal,
+            value,
+        })
     }
 }

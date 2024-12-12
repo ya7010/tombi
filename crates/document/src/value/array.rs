@@ -36,6 +36,12 @@ pub struct Array {
 }
 
 impl Array {
+    pub(crate) fn new(kind: ArrayKind) -> Self {
+        Self {
+            kind,
+            values: Vec::new(),
+        }
+    }
     pub fn push(&mut self, value: Value) {
         self.values.push(value);
     }
@@ -78,5 +84,19 @@ impl serde::Serialize for Array {
         S: serde::Serializer,
     {
         self.values.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Array {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let values = Vec::<Value>::deserialize(deserializer)?;
+        Ok(Self {
+            kind: ArrayKind::ArrayOfTables,
+            values,
+        })
     }
 }

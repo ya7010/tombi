@@ -29,6 +29,19 @@ pub struct Table {
 }
 
 impl Table {
+    pub(crate) fn new(kind: TableKind) -> Self {
+        Self {
+            kind,
+            key_values: IndexMap::new(),
+        }
+    }
+
+    #[inline]
+    pub fn kind(&self) -> TableKind {
+        self.kind
+    }
+
+    #[inline]
     pub fn key_values(&self) -> &IndexMap<Key, Value> {
         &self.key_values
     }
@@ -37,9 +50,8 @@ impl Table {
         self.key_values.entry(key)
     }
 
-    #[inline]
-    pub fn kind(&self) -> TableKind {
-        self.kind
+    pub fn insert(&mut self, key: Key, value: Value) {
+        self.key_values.insert(key, value);
     }
 }
 
@@ -62,6 +74,20 @@ impl serde::Serialize for Table {
         S: serde::Serializer,
     {
         self.key_values.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Table {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let key_values = IndexMap::<Key, Value>::deserialize(deserializer)?;
+        Ok(Self {
+            kind: TableKind::Table,
+            key_values,
+        })
     }
 }
 

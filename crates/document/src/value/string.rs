@@ -25,6 +25,11 @@ pub struct String {
 
 impl String {
     #[inline]
+    pub fn new(kind: StringKind, value: std::string::String) -> Self {
+        Self { kind, value }
+    }
+
+    #[inline]
     pub fn kind(&self) -> StringKind {
         self.kind
     }

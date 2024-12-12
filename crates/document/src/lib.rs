@@ -42,6 +42,17 @@ impl serde::Serialize for Document {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Document {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let table = Table::deserialize(deserializer)?;
+        Ok(Document(table))
+    }
+}
+
 #[cfg(test)]
 #[macro_export]
 macro_rules! test_serialize {

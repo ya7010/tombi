@@ -9,7 +9,7 @@ pub enum IntegerKind {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Integer {
     kind: IntegerKind,
-    value: isize,
+    value: i64,
     range: text::Range,
     symbol_range: text::Range,
 }
@@ -21,7 +21,7 @@ impl Integer {
     }
 
     #[inline]
-    pub fn value(&self) -> isize {
+    pub fn value(&self) -> i64 {
         self.value
     }
 
@@ -43,7 +43,7 @@ impl TryFrom<ast::IntegerBin> for Integer {
         let token = node.token().unwrap();
         let range: text::Range = token.range();
 
-        match isize::from_str_radix(&token.text()[2..], 2) {
+        match i64::from_str_radix(&token.text()[2..], 2) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Binary,
                 value,
@@ -62,7 +62,7 @@ impl TryFrom<ast::IntegerOct> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match isize::from_str_radix(&token.text()[2..], 8) {
+        match i64::from_str_radix(&token.text()[2..], 8) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Octal,
                 value,
@@ -81,7 +81,7 @@ impl TryFrom<ast::IntegerDec> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match isize::from_str_radix(token.text(), 10) {
+        match i64::from_str_radix(token.text(), 10) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Decimal,
                 value,
@@ -100,7 +100,7 @@ impl TryFrom<ast::IntegerHex> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match isize::from_str_radix(&token.text()[2..], 16) {
+        match i64::from_str_radix(&token.text()[2..], 16) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Hexadecimal,
                 value,

@@ -118,6 +118,46 @@ impl serde::Serialize for LocalTime {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for OffsetDateTime {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        chrono::DateTime::deserialize(deserializer).map(|value| Self { value })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for LocalDateTime {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        chrono::NaiveDateTime::deserialize(deserializer).map(|value| Self { value })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for LocalDate {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        chrono::NaiveDate::deserialize(deserializer).map(|value| Self { value })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for LocalTime {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        chrono::NaiveTime::deserialize(deserializer).map(|value| Self { value })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use serde_json::json;

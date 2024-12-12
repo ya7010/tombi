@@ -74,6 +74,32 @@ impl serde::Serialize for Key {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Key {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        if !value.contains("'") && !value.contains("\"") {
+            Ok(Self {
+                kind: KeyKind::BareKey,
+                value,
+            })
+        } else if value.contains('"') && !value.contains('\'') {
+            Ok(Self {
+                kind: KeyKind::LiteralString,
+                value: format!("'{}'", value.replace("'", "\'")),
+            })
+        } else {
+            Ok(Self {
+                kind: KeyKind::BasicString,
+                value: format!(r#""{}""#, value.replace("\"", r#"\""#)),
+            })
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::test_serialize;

@@ -4,6 +4,12 @@ pub struct Float {
 }
 
 impl Float {
+    #[inline]
+    pub fn new(value: f64) -> Self {
+        Self { value }
+    }
+
+    #[inline]
     pub fn value(&self) -> f64 {
         self.value
     }
@@ -24,6 +30,16 @@ impl serde::Serialize for Float {
         S: serde::Serializer,
     {
         self.value.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Float {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        f64::deserialize(deserializer).map(|value| Self { value })
     }
 }
 
