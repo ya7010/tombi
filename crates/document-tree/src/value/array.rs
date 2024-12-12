@@ -169,3 +169,12 @@ impl TryFrom<ast::Array> for Array {
         Ok(array)
     }
 }
+
+impl IntoIterator for Array {
+    type Item = Value;
+    type IntoIter = std::vec::IntoIter<Value>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.values.into_iter()
+    }
+}

@@ -1,3 +1,5 @@
+use text::raw_string;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
     BareKey,
@@ -19,6 +21,14 @@ impl Key {
 
     pub fn value(&self) -> &str {
         &self.value
+    }
+
+    pub fn raw_string(&self) -> std::string::String {
+        match self.kind {
+            KeyKind::BareKey => raw_string::from_bare_key(&self.value),
+            KeyKind::BasicString => raw_string::from_basic_string(&self.value),
+            KeyKind::LiteralString => raw_string::from_literal_string(&self.value),
+        }
     }
 
     pub fn range(&self) -> text::Range {
@@ -62,6 +72,6 @@ impl From<ast::Key> for Key {
 
 impl From<Key> for String {
     fn from(key: Key) -> Self {
-        key.value
+        key.raw_string()
     }
 }

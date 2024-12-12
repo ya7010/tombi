@@ -1,3 +1,5 @@
+use text::raw_string;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
     BasicString,
@@ -23,6 +25,20 @@ impl String {
     #[inline]
     pub fn value(&self) -> &str {
         &self.value
+    }
+
+    #[inline]
+    pub fn raw_string(&self) -> std::string::String {
+        match self.kind {
+            StringKind::BasicString => raw_string::from_basic_string(&self.value),
+            StringKind::LiteralString => raw_string::from_literal_string(&self.value),
+            StringKind::MultiLineBasicString => {
+                raw_string::from_multi_line_basic_string(&self.value)
+            }
+            StringKind::MultiLineLiteralString => {
+                raw_string::from_multi_line_literal_string(&self.value)
+            }
+        }
     }
 
     #[inline]

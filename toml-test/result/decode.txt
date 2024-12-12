@@ -1,7 +1,5 @@
 FAIL valid/array/array
-     Key "comments" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        ints = [1, 2, 3, ]
@@ -18,46 +16,13 @@ FAIL valid/array/array
        ]
 
      output from parser-cmd (stdout):
-       {
-         "comments": [1, 2],
-         "dates":    ["1987-07-05T17:45:00Z", "1979-05-27T07:32:00Z", "2006-06-01T11:00:00Z"],
-         "floats":   [1, 2, 3],
-         "ints":     [1, 2, 3],
-         "strings":  ["a", "b", "c"]
-       }
+
 
      want:
-       {
-           "comments": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"}
-           ],
-           "dates": [
-               {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-               {"type": "datetime", "value": "1979-05-27T07:32:00Z"},
-               {"type": "datetime", "value": "2006-06-01T11:00:00Z"}
-           ],
-           "floats": [
-               {"type": "float", "value": "1.1"},
-               {"type": "float", "value": "2.1"},
-               {"type": "float", "value": "3.1"}
-           ],
-           "ints": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ],
-           "strings": [
-               {"type": "string", "value": "a"},
-               {"type": "string", "value": "b"},
-               {"type": "string", "value": "c"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/array-subtables
-     Key "arr.subtab.val" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [[arr]]
@@ -69,155 +34,85 @@ FAIL valid/array/array-subtables
        val=2
 
      output from parser-cmd (stdout):
-       {
-         "arr": [
-           {
-             "subtab": {"val": 1}
-           },
-           {
-             "subtab": {"val": 2}
-           }
-         ]
-       }
+
 
      want:
-       {
-           "arr": [
-               {
-                   "subtab": {
-                       "val": {"type": "integer", "value": "1"}
-                   }
-               },
-               {
-                   "subtab": {
-                       "val": {"type": "integer", "value": "2"}
-                   }
-               }
-           ]
-       }
+          <empty>
 
 FAIL valid/array/bool
-     Key "a" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        a = [true, false]
 
      output from parser-cmd (stdout):
-       {
-         "a": [true, false]
-       }
+
 
      want:
-       {
-           "a": [
-               {"type": "bool", "value": "true"},
-               {"type": "bool", "value": "false"}
-           ]
-       }
+          <empty>
+
+FAIL valid/array/empty
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+
+     input sent to parser-cmd:
+       thevoid = [[[[[]]]]]
+
+     output from parser-cmd (stdout):
+
+
+     want:
+          <empty>
 
 FAIL valid/array/hetergeneous
-     Array lengths differ for key "mixed":
-       Expected:     3
-       Your encoder: 1
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        mixed = [[1, 2], ["a", "b"], [1.1, 2.1]]
 
      output from parser-cmd (stdout):
-       {
-         "mixed": [[2]]
-       }
+
 
      want:
-       {
-           "mixed": [
-               [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"}
-               ],
-               [
-                   {"type": "string", "value": "a"},
-                   {"type": "string", "value": "b"}
-               ],
-               [
-                   {"type": "float", "value": "1.1"},
-                   {"type": "float", "value": "2.1"}
-               ]
-           ]
-       }
+          <empty>
 
 FAIL valid/array/mixed-int-array
-     Key "arrays-and-ints" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        arrays-and-ints =  [1, ["Arrays are not integers."]]
 
      output from parser-cmd (stdout):
-       {
-         "arrays-and-ints": [
-           1,
-           ["Arrays are not integers."]
-         ]
-       }
+
 
      want:
-       {
-           "arrays-and-ints": [
-               {"type": "integer", "value": "1"},
-               [{"type": "string", "value": "Arrays are not integers."}]
-           ]
-       }
+          <empty>
 
 FAIL valid/array/mixed-int-float
-     Array lengths differ for key "ints-and-floats":
-       Expected:     2
-       Your encoder: 0
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        ints-and-floats = [1, 1.1]
 
      output from parser-cmd (stdout):
-       {
-         "ints-and-floats": []
-       }
+
 
      want:
-       {
-           "ints-and-floats": [
-               {"type": "integer", "value": "1"},
-               {"type": "float", "value": "1.1"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/mixed-int-string
-     Key "strings-and-ints" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        strings-and-ints = ["hi", 42]
 
      output from parser-cmd (stdout):
-       {
-         "strings-and-ints": ["hi", 42]
-       }
+
 
      want:
-       {
-           "strings-and-ints": [
-               {"type": "string", "value": "hi"},
-               {"type": "integer", "value": "42"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/mixed-string-table
-     Key "contributors" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        contributors = [
@@ -233,65 +128,25 @@ FAIL valid/array/mixed-string-table
        mixed = [{k="a"}, "b", 1]
 
      output from parser-cmd (stdout):
-       {
-         "contributors": [
-           "Foo Bar \u003cfoo@example.com\u003e",
-           {"email": "bazqux@example.com", "name": "Baz Qux", "url": "https://example.com/bazqux"}
-         ],
-         "mixed": [
-           {"k": "a"},
-           "b",
-           1
-         ]
-       }
+
 
      want:
-       {
-           "contributors": [
-               {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
-               {
-                   "email": {"type": "string", "value": "bazqux@example.com"},
-                   "name":  {"type": "string", "value": "Baz Qux"},
-                   "url":   {"type": "string", "value": "https://example.com/bazqux"}
-               }
-           ],
-           "mixed": [
-               {
-                   "k": {"type": "string", "value": "a"}
-               },
-               {"type": "string", "value": "b"},
-               {"type": "integer", "value": "1"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/nested
-     Key "nest" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        nest = [["a"], ["b"]]
 
      output from parser-cmd (stdout):
-       {
-         "nest": [
-           ["a"],
-           ["b"]
-         ]
-       }
+
 
      want:
-       {
-           "nest": [
-               [{"type": "string", "value": "a"}],
-               [{"type": "string", "value": "b"}]
-           ]
-       }
+          <empty>
 
 FAIL valid/array/nested-double
-     Key "nest" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        nest = [
@@ -302,55 +157,37 @@ FAIL valid/array/nested-double
        ]
 
      output from parser-cmd (stdout):
-       {
-         "nest": [[
-           ["a"],
-           [
-             1,
-             2,
-             [3]
-           ]
-         ]]
-       }
+
 
      want:
-       {
-           "nest": [[
-               [{"type": "string", "value": "a"}],
-               [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"},
-                   [{"type": "integer", "value": "3"}]
-               ]
-           ]]
-       }
+          <empty>
+
+FAIL valid/array/nested-inline-table
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+
+     input sent to parser-cmd:
+       a = [ { b = {} } ]
+
+     output from parser-cmd (stdout):
+
+
+     want:
+          <empty>
 
 FAIL valid/array/nospaces
-     Key "ints" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        ints = [1,2,3]
 
      output from parser-cmd (stdout):
-       {
-         "ints": [1, 2, 3]
-       }
+
 
      want:
-       {
-           "ints": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/open-parent-table
-     Key "parent-table.not-arr" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [[parent-table.arr]]
@@ -359,28 +196,13 @@ FAIL valid/array/open-parent-table
        not-arr = 1
 
      output from parser-cmd (stdout):
-       {
-         "parent-table": {"arr": [
-           {},
-           {}
-         ], "not-arr": 1}
-       }
+
 
      want:
-       {
-           "parent-table": {
-               "not-arr": {"type": "integer", "value": "1"},
-               "arr": [
-                   {},
-                   {}
-               ]
-           }
-       }
+          <empty>
 
 FAIL valid/array/string-quote-comma
-     Key "title" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        title = [
@@ -389,40 +211,25 @@ FAIL valid/array/string-quote-comma
        ]
 
      output from parser-cmd (stdout):
-       {
-         "title": ["Client: \"XXXX\", Job: XXXX", "Code: XXXX"]
-       }
+
 
      want:
-       {
-           "title": [
-               {"type": "string", "value": "Client: \"XXXX\", Job: XXXX"},
-               {"type": "string", "value": "Code: XXXX"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/string-quote-comma-2
-     Key "title" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        title = [ " \", ",]
 
      output from parser-cmd (stdout):
-       {
-         "title": [" \", "]
-       }
+
 
      want:
-       {
-           "title": [{"type": "string", "value": " \", "}]
-       }
+          <empty>
 
 FAIL valid/array/string-with-comma
-     Key "title" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        title = [
@@ -431,22 +238,13 @@ FAIL valid/array/string-with-comma
        ]
 
      output from parser-cmd (stdout):
-       {
-         "title": ["Client: XXXX, Job: XXXX", "Code: XXXX"]
-       }
+
 
      want:
-       {
-           "title": [
-               {"type": "string", "value": "Client: XXXX, Job: XXXX"},
-               {"type": "string", "value": "Code: XXXX"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/string-with-comma-2
-     Key "title" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        title = [
@@ -456,65 +254,37 @@ FAIL valid/array/string-with-comma-2
        ]
 
      output from parser-cmd (stdout):
-       {
-         "title": ["Client: XXXX,\nJob: XXXX", "Code: XXXX"]
-       }
+
 
      want:
-       {
-           "title": [
-               {"type": "string", "value": "Client: XXXX,\nJob: XXXX"},
-               {"type": "string", "value": "Code: XXXX"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/strings
-     Key "string_array" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        string_array = [ "all", 'strings', """are the same""", '''type''']
 
      output from parser-cmd (stdout):
-       {
-         "string_array": ["all", "strings", "are the same", "type"]
-       }
+
 
      want:
-       {
-           "string_array": [
-               {"type": "string", "value": "all"},
-               {"type": "string", "value": "strings"},
-               {"type": "string", "value": "are the same"},
-               {"type": "string", "value": "type"}
-           ]
-       }
+          <empty>
 
 FAIL valid/array/table-array-string-backslash
-     Key "foo.bar" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        foo = [ { bar="\"{{baz}}\""} ]
 
      output from parser-cmd (stdout):
-       {
-         "foo": [{"bar": "\"{{baz}}\""}]
-       }
+
 
      want:
-       {
-           "foo": [{
-               "bar": {"type": "string", "value": "\"{{baz}}\""}
-           }]
-       }
+          <empty>
 
 FAIL valid/array/trailing-comma
-     Key "arr-1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        arr-1 = [1,]
@@ -530,50 +300,26 @@ FAIL valid/array/trailing-comma
        ]
 
      output from parser-cmd (stdout):
-       {
-         "arr-1": [1],
-         "arr-2": [2, 3],
-         "arr-3": [4],
-         "arr-4": [5, 6]
-       }
+
 
      want:
-       {
-           "arr-1": [{"type": "integer", "value": "1"}],
-           "arr-3": [{"type": "integer", "value": "4"}],
-           "arr-2": [
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ],
-           "arr-4": [
-               {"type": "integer", "value": "5"},
-               {"type": "integer", "value": "6"}
-           ]
-       }
+          <empty>
 
 FAIL valid/bool/bool
-     Key "f" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        t = true
        f = false
 
      output from parser-cmd (stdout):
-       {
-         "f": false,
-         "t": true
-       }
+
 
      want:
-       {
-           "f": {"type": "bool", "value": "false"},
-           "t": {"type": "bool", "value": "true"}
-       }
+          <empty>
 
 FAIL valid/comment/after-literal-no-ws
-     Could not find key "inf" in parser output.
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        inf=inf#infinity
@@ -582,61 +328,39 @@ FAIL valid/comment/after-literal-no-ws
        false=false#false
 
      output from parser-cmd (stdout):
-       {
-         "false": false,
-         "true":  true
-       }
+
 
      want:
-       {
-           "false": {"type": "bool", "value": "false"},
-           "inf":   {"type": "float", "value": "inf"},
-           "nan":   {"type": "float", "value": "nan"},
-           "true":  {"type": "bool", "value": "true"}
-       }
+          <empty>
 
 FAIL valid/comment/at-eof
-     Key "key" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        # This is a full-line comment
        key = "value" # This is a comment at the end of a line
 
      output from parser-cmd (stdout):
-       {
-         "key": "value"
-       }
+
 
      want:
-       {
-           "key": {"type": "string", "value": "value"}
-       }
+          <empty>
 
 FAIL valid/comment/at-eof2
-     Key "key" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        # This is a full-line comment
        key = "value" # This is a comment at the end of a line
 
      output from parser-cmd (stdout):
-       {
-         "key": "value"
-       }
+
 
      want:
-       {
-           "key": {"type": "string", "value": "value"}
-       }
+          <empty>
 
 FAIL valid/comment/everywhere
-     Key "group.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        # Top comment.
@@ -669,27 +393,37 @@ FAIL valid/comment/everywhere
        d = 1979-05-27 # Comment
 
      output from parser-cmd (stdout):
-       {
-         "group": {"answer": 42, "d": "1979-05-27", "dt": "1979-05-27T07:32:12-07:00", "more": [42, 42]}
-       }
+
 
      want:
-       {
-           "group": {
-               "answer": {"type": "integer", "value": "42"},
-               "d":      {"type": "date-local", "value": "1979-05-27"},
-               "dt":     {"type": "datetime", "value": "1979-05-27T07:32:12-07:00"},
-               "more": [
-                   {"type": "integer", "value": "42"},
-                   {"type": "integer", "value": "42"}
-               ]
-           }
-       }
+          <empty>
+
+FAIL valid/comment/noeol
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+
+     input sent to parser-cmd:
+       # single comment without any eol characters
+
+     output from parser-cmd (stdout):
+
+
+     want:
+          <empty>
+
+FAIL valid/comment/nonascii
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+
+     input sent to parser-cmd:
+       # ~  ÿ ퟿  ￿ 𐀀 􏿿
+
+     output from parser-cmd (stdout):
+
+
+     want:
+          <empty>
 
 FAIL valid/comment/tricky
-     Key "hash#tag.#!" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [section]#attached comment
@@ -723,64 +457,13 @@ FAIL valid/comment/tricky
        tbl1 = { "#" = '}#'}#}}
 
      output from parser-cmd (stdout):
-       {
-         "hash#tag": {
-           "#!":   "hash bang",
-           "arr3": ["#", "#", "###"],
-           "arr4": [1, 2, 3, 4],
-           "arr5": [[[[["#"]]]]],
-           "tbl1": {"#": "}#"}
-         },
-         "section": {
-           "8":      "eight",
-           "eleven": 11,
-           "five":   6,
-           "four":   "# no comment\n# nor this\n#also not comment",
-           "one":    "11",
-           "six":    6,
-           "ten":    1000,
-           "three":  "#",
-           "two":    "22#"
-         }
-       }
+
 
      want:
-       {
-           "hash#tag": {
-               "#!":   {"type": "string", "value": "hash bang"},
-               "arr5": [[[[[{"type": "string", "value": "#"}]]]]],
-               "arr3": [
-                   {"type": "string", "value": "#"},
-                   {"type": "string", "value": "#"},
-                   {"type": "string", "value": "###"}
-               ],
-               "arr4": [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"},
-                   {"type": "integer", "value": "3"},
-                   {"type": "integer", "value": "4"}
-               ],
-               "tbl1": {
-                   "#": {"type": "string", "value": "}#"}
-               }
-           },
-           "section": {
-               "8":      {"type": "string", "value": "eight"},
-               "eleven": {"type": "float", "value": "11.1"},
-               "five":   {"type": "float", "value": "5.5"},
-               "four":   {"type": "string", "value": "# no comment\n# nor this\n#also not comment"},
-               "one":    {"type": "string", "value": "11"},
-               "six":    {"type": "integer", "value": "6"},
-               "ten":    {"type": "float", "value": "1000.0"},
-               "three":  {"type": "string", "value": "#"},
-               "two":    {"type": "string", "value": "22#"}
-           }
-       }
+          <empty>
 
 FAIL valid/datetime/datetime
-     Key "lower" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        space = 1987-07-05 17:45:00Z
@@ -789,21 +472,13 @@ FAIL valid/datetime/datetime
        lower = 1987-07-05t17:45:00z
 
      output from parser-cmd (stdout):
-       {
-         "lower": "1987-07-05T17:45:00Z",
-         "space": "1987-07-05T17:45:00Z"
-       }
+
 
      want:
-       {
-           "lower": {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-           "space": {"type": "datetime", "value": "1987-07-05T17:45:00Z"}
-       }
+          <empty>
 
 FAIL valid/datetime/edge
-     Key "first-date" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        first-offset = 0001-01-01 00:00:00Z
@@ -815,41 +490,13 @@ FAIL valid/datetime/edge
        last-date   = 9999-12-31
 
      output from parser-cmd (stdout):
-       {
-         "first-date":   "0001-01-01",
-         "first-local":  "0001-01-01T00:00:00",
-         "first-offset": "0001-01-01T00:00:00Z",
-         "last-date":    "9999-12-31",
-         "last-local":   "9999-12-31T23:59:59",
-         "last-offset":  "9999-12-31T23:59:59Z"
-       }
+
 
      want:
-       {
-           "first-date":   {"type": "date-local", "value": "0001-01-01"},
-           "first-local":  {"type": "datetime-local", "value": "0001-01-01T00:00:00"},
-           "first-offset": {"type": "datetime", "value": "0001-01-01T00:00:00Z"},
-           "last-date":    {"type": "date-local", "value": "9999-12-31"},
-           "last-local":   {"type": "datetime-local", "value": "9999-12-31T23:59:59"},
-           "last-offset":  {"type": "datetime", "value": "9999-12-31T23:59:59Z"}
-       }
+          <empty>
 
 FAIL valid/datetime/leap-year
-     invalid number
-     invalid number
-     invalid number
-     invalid number
-     invalid number
-     invalid number
-     unknown line
-     unknown line
-     unknown line
-     unknown line
-     unknown line
-     unknown line
-     Error: invalid toml
- 
-     Exit 1
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        2000-datetime       = 2000-02-29 15:15:15Z
@@ -860,30 +507,14 @@ FAIL valid/datetime/leap-year
        2024-datetime-local = 2024-02-29 15:15:15
        2024-date           = 2024-02-29
 
-     output from parser-cmd (stderr):
-       invalid number
-       invalid number
-       invalid number
-       invalid number
-       invalid number
-       invalid number
-       unknown line
-       unknown line
-       unknown line
-       unknown line
-       unknown line
-       unknown line
-       Error: invalid toml
+     output from parser-cmd (stdout):
 
-       Exit 1
 
      want:
           <empty>
 
 FAIL valid/datetime/local
-     Key "local" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        local = 1987-07-05T17:45:00
@@ -891,62 +522,38 @@ FAIL valid/datetime/local
        space = 1987-07-05 17:45:00
 
      output from parser-cmd (stdout):
-       {
-         "local": "1987-07-05T17:45:00",
-         "milli": "1977-12-21T10:32:00.555",
-         "space": "1987-07-05T17:45:00"
-       }
+
 
      want:
-       {
-           "local": {"type": "datetime-local", "value": "1987-07-05T17:45:00"},
-           "milli": {"type": "datetime-local", "value": "1977-12-21T10:32:00.555"},
-           "space": {"type": "datetime-local", "value": "1987-07-05T17:45:00"}
-       }
+          <empty>
 
 FAIL valid/datetime/local-date
-     Key "bestdayever" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        bestdayever = 1987-07-05
 
      output from parser-cmd (stdout):
-       {
-         "bestdayever": "1987-07-05"
-       }
+
 
      want:
-       {
-           "bestdayever": {"type": "date-local", "value": "1987-07-05"}
-       }
+          <empty>
 
 FAIL valid/datetime/local-time
-     Key "besttimeever" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        besttimeever = 17:45:00
        milliseconds = 10:32:00.555
 
      output from parser-cmd (stdout):
-       {
-         "besttimeever": "17:45:00",
-         "milliseconds": "10:32:00.555"
-       }
+
 
      want:
-       {
-           "besttimeever": {"type": "time-local", "value": "17:45:00"},
-           "milliseconds": {"type": "time-local", "value": "10:32:00.555"}
-       }
+          <empty>
 
 FAIL valid/datetime/milliseconds
-     Key "utc1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        utc1  = 1987-07-05T17:45:56.123Z
@@ -955,25 +562,13 @@ FAIL valid/datetime/milliseconds
        wita2 = 1987-07-05T17:45:56.6+08:00
 
      output from parser-cmd (stdout):
-       {
-         "utc1":  "1987-07-05T17:45:56.123Z",
-         "utc2":  "1987-07-05T17:45:56.600Z",
-         "wita1": "1987-07-05T17:45:56.123+08:00",
-         "wita2": "1987-07-05T17:45:56.600+08:00"
-       }
+
 
      want:
-       {
-           "utc1":  {"type": "datetime", "value": "1987-07-05T17:45:56.123Z"},
-           "utc2":  {"type": "datetime", "value": "1987-07-05T17:45:56.600Z"},
-           "wita1": {"type": "datetime", "value": "1987-07-05T17:45:56.123+08:00"},
-           "wita2": {"type": "datetime", "value": "1987-07-05T17:45:56.600+08:00"}
-       }
+          <empty>
 
 FAIL valid/datetime/timezone
-     Key "nzdt" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        utc  = 1987-07-05T17:45:56Z
@@ -982,25 +577,25 @@ FAIL valid/datetime/timezone
        nzdt = 1987-07-05T17:45:56+13:00  # DST
 
      output from parser-cmd (stdout):
-       {
-         "nzdt": "1987-07-05T17:45:56+13:00",
-         "nzst": "1987-07-05T17:45:56+12:00",
-         "pdt":  "1987-07-05T17:45:56-05:00",
-         "utc":  "1987-07-05T17:45:56Z"
-       }
+
 
      want:
-       {
-           "nzdt": {"type": "datetime", "value": "1987-07-05T17:45:56+13:00"},
-           "nzst": {"type": "datetime", "value": "1987-07-05T17:45:56+12:00"},
-           "pdt":  {"type": "datetime", "value": "1987-07-05T17:45:56-05:00"},
-           "utc":  {"type": "datetime", "value": "1987-07-05T17:45:56Z"}
-       }
+          <empty>
+
+FAIL valid/empty-file
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+
+     input sent to parser-cmd:
+          <empty>
+
+     output from parser-cmd (stdout):
+
+
+     want:
+          <empty>
 
 FAIL valid/example
-     Key "best-day-ever" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        best-day-ever = 1987-07-05T17:45:00Z
@@ -1010,28 +605,13 @@ FAIL valid/example
        perfection = [6, 28, 496]
 
      output from parser-cmd (stdout):
-       {
-         "best-day-ever": "1987-07-05T17:45:00Z",
-         "numtheory":     {"boring": false, "perfection": [6, 28, 496]}
-       }
+
 
      want:
-       {
-           "best-day-ever": {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-           "numtheory": {
-               "boring": {"type": "bool", "value": "false"},
-               "perfection": [
-                   {"type": "integer", "value": "6"},
-                   {"type": "integer", "value": "28"},
-                   {"type": "integer", "value": "496"}
-               ]
-           }
-       }
+          <empty>
 
 FAIL valid/float/exponent
-     Key "lower" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        lower = 3e2
@@ -1044,33 +624,13 @@ FAIL valid/float/exponent
        minustenth = -1E-1
 
      output from parser-cmd (stdout):
-       {
-         "lower":      300,
-         "minustenth": -0,
-         "neg":        0,
-         "pointlower": 310,
-         "pointupper": 310,
-         "pos":        300,
-         "upper":      300,
-         "zero":       3
-       }
+
 
      want:
-       {
-           "lower":      {"type": "float", "value": "300.0"},
-           "minustenth": {"type": "float", "value": "-0.1"},
-           "neg":        {"type": "float", "value": "0.03"},
-           "pointlower": {"type": "float", "value": "310.0"},
-           "pointupper": {"type": "float", "value": "310.0"},
-           "pos":        {"type": "float", "value": "300.0"},
-           "upper":      {"type": "float", "value": "300.0"},
-           "zero":       {"type": "float", "value": "3.0"}
-       }
+          <empty>
 
 FAIL valid/float/float
-     Key "negpi" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        pi = 3.14
@@ -1079,23 +639,13 @@ FAIL valid/float/float
        zero-intpart = 0.123
 
      output from parser-cmd (stdout):
-       {
-         "negpi":        -3,
-         "pi":           3,
-         "pospi":        3,
-         "zero-intpart": 0
-       }
+
 
      want:
-       {
-           "negpi":        {"type": "float", "value": "-3.14"},
-           "pi":           {"type": "float", "value": "3.14"},
-           "pospi":        {"type": "float", "value": "3.14"},
-           "zero-intpart": {"type": "float", "value": "0.123"}
-       }
+          <empty>
 
 FAIL valid/float/inf-and-nan
-     Could not find key "nan" in parser output.
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        # We don't encode +nan and -nan back with the signs; many languages don't
@@ -1108,95 +658,54 @@ FAIL valid/float/inf-and-nan
        infinity_plus = +inf
 
      output from parser-cmd (stdout):
-       {
-         "infinity":      null,
-         "infinity_neg":  null,
-         "infinity_plus": null,
-         "nan_neg":       null,
-         "nan_plus":      null
-       }
+
 
      want:
-       {
-           "infinity":      {"type": "float", "value": "inf"},
-           "infinity_neg":  {"type": "float", "value": "-inf"},
-           "infinity_plus": {"type": "float", "value": "inf"},
-           "nan":           {"type": "float", "value": "nan"},
-           "nan_neg":       {"type": "float", "value": "nan"},
-           "nan_plus":      {"type": "float", "value": "nan"}
-       }
+          <empty>
 
 FAIL valid/float/long
-     Key "longpi" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        longpi = 3.141592653589793
        neglongpi = -3.141592653589793
 
      output from parser-cmd (stdout):
-       {
-         "longpi":    3,
-         "neglongpi": -3
-       }
+
 
      want:
-       {
-           "longpi":    {"type": "float", "value": "3.141592653589793"},
-           "neglongpi": {"type": "float", "value": "-3.141592653589793"}
-       }
+          <empty>
 
 FAIL valid/float/max-int
-     invalid float: invalid float literal
-     invalid float: invalid float literal
-     Error: invalid toml
- 
-     Exit 1
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        # Maximum and minimum safe natural numbers.
        max_float =  9_007_199_254_740_991.0
        min_float = -9_007_199_254_740_991.0
 
-     output from parser-cmd (stderr):
-       invalid float: invalid float literal
-       invalid float: invalid float literal
-       Error: invalid toml
+     output from parser-cmd (stdout):
 
-       Exit 1
 
      want:
           <empty>
 
 FAIL valid/float/underscore
-     invalid float: invalid float literal
-     invalid float: invalid float literal
-     invalid float: invalid float literal
-     Error: invalid toml
- 
-     Exit 1
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        before = 3_141.5927
        after = 3141.592_7
        exponent = 3e1_4
 
-     output from parser-cmd (stderr):
-       invalid float: invalid float literal
-       invalid float: invalid float literal
-       invalid float: invalid float literal
-       Error: invalid toml
+     output from parser-cmd (stdout):
 
-       Exit 1
 
      want:
           <empty>
 
 FAIL valid/float/zero
-     Key "exponent" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        zero = 0.0
@@ -1208,31 +717,13 @@ FAIL valid/float/zero
        exponent-signed-neg = -0e0
 
      output from parser-cmd (stdout):
-       {
-         "exponent":            0,
-         "exponent-signed-neg": -0,
-         "exponent-signed-pos": 0,
-         "exponent-two-0":      0,
-         "signed-neg":          -0,
-         "signed-pos":          0,
-         "zero":                0
-       }
+
 
      want:
-       {
-           "exponent":            {"type": "float", "value": "0"},
-           "exponent-signed-neg": {"type": "float", "value": "-0"},
-           "exponent-signed-pos": {"type": "float", "value": "0"},
-           "exponent-two-0":      {"type": "float", "value": "0"},
-           "signed-neg":          {"type": "float", "value": "-0"},
-           "signed-pos":          {"type": "float", "value": "0"},
-           "zero":                {"type": "float", "value": "0"}
-       }
+          <empty>
 
 FAIL valid/implicit-and-explicit-after
-     Key "a.b.c.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [a.b.c]
@@ -1242,31 +733,13 @@ FAIL valid/implicit-and-explicit-after
        better = 43
 
      output from parser-cmd (stdout):
-       {
-         "a": {
-           "better": 43,
-           "b": {
-             "c": {"answer": 42}
-           }
-         }
-       }
+
 
      want:
-       {
-           "a": {
-               "better": {"type": "integer", "value": "43"},
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/implicit-and-explicit-before
-     Key "a.b.c.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [a]
@@ -1276,60 +749,26 @@ FAIL valid/implicit-and-explicit-before
        answer = 42
 
      output from parser-cmd (stdout):
-       {
-         "a": {
-           "better": 43,
-           "b": {
-             "c": {"answer": 42}
-           }
-         }
-       }
+
 
      want:
-       {
-           "a": {
-               "better": {"type": "integer", "value": "43"},
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/implicit-groups
-     Key "a.b.c.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [a.b.c]
        answer = 42
 
      output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {
-             "c": {"answer": 42}
-           }
-         }
-       }
+
 
      want:
-       {
-           "a": {
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/array
-     Key "arr.a" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        arr = [ {'a'= 1}, {'a'= 2} ]
@@ -1339,50 +778,13 @@ FAIL valid/inline-table/array
                  {first_name = "Bob", last_name = "Seger"}]
 
      output from parser-cmd (stdout):
-       {
-         "arr": [
-           {"a": 1},
-           {"a": 2}
-         ],
-         "people": [
-           {"first_name": "Bruce", "last_name": "Springsteen"},
-           {"first_name": "Eric", "last_name": "Clapton"},
-           {"first_name": "Bob", "last_name": "Seger"}
-         ]
-       }
+
 
      want:
-       {
-           "arr": [
-               {
-                   "a": {"type": "integer", "value": "1"}
-               },
-               {
-                   "a": {"type": "integer", "value": "2"}
-               }
-           ],
-           "people": [
-               {
-                   "first_name": {"type": "string", "value": "Bruce"},
-                   "last_name":  {"type": "string", "value": "Springsteen"}
-               },
-               {
-                   "first_name": {"type": "string", "value": "Eric"},
-                   "last_name":  {"type": "string", "value": "Clapton"}
-               },
-               {
-                   "first_name": {"type": "string", "value": "Bob"},
-                   "last_name":  {"type": "string", "value": "Seger"}
-               }
-           ]
-       }
+          <empty>
 
 FAIL valid/inline-table/array-values
-     inline table must be single line
-     inline table must be single line
-     Error: invalid toml
- 
-     Exit 1
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        # "No newlines are allowed between the curly braces unless they are valid within
@@ -1399,41 +801,26 @@ FAIL valid/inline-table/array-values
        		4,
        	]}
 
-     output from parser-cmd (stderr):
-       inline table must be single line
-       inline table must be single line
-       Error: invalid toml
+     output from parser-cmd (stdout):
 
-       Exit 1
 
      want:
           <empty>
 
 FAIL valid/inline-table/bool
-     Key "a.a" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        a = {a = true, b = false}
 
      output from parser-cmd (stdout):
-       {
-         "a": {"a": true, "b": false}
-       }
+
 
      want:
-       {
-           "a": {
-               "a": {"type": "bool", "value": "true"},
-               "b": {"type": "bool", "value": "false"}
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/empty
-     Key "empty_in_array.not_empty" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        empty1 = {}
@@ -1445,81 +832,25 @@ FAIL valid/inline-table/empty
        with_cmt ={            }#nothing here
 
      output from parser-cmd (stdout):
-       {
-         "empty1":   {},
-         "empty2":   {},
-         "with_cmt": {},
-         "empty_in_array": [
-           {"not_empty": 1},
-           {}
-         ],
-         "empty_in_array2": [
-           {},
-           {"not_empty": 1}
-         ],
-         "many_empty": [
-           {},
-           {},
-           {}
-         ],
-         "nested_empty": {
-           "empty": {}
-         }
-       }
+
 
      want:
-       {
-           "empty1":   {},
-           "empty2":   {},
-           "with_cmt": {},
-           "empty_in_array": [
-               {
-                   "not_empty": {"type": "integer", "value": "1"}
-               },
-               {}
-           ],
-           "empty_in_array2": [
-               {},
-               {
-                   "not_empty": {"type": "integer", "value": "1"}
-               }
-           ],
-           "many_empty": [
-               {},
-               {},
-               {}
-           ],
-           "nested_empty": {
-               "empty": {}
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/end-in-bool
-     Key "black.allow_prereleases" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        black = { python=">3.6", version=">=18.9b0", allow_prereleases=true }
 
      output from parser-cmd (stdout):
-       {
-         "black": {"allow_prereleases": true, "python": "\u003e3.6", "version": "\u003e=18.9b0"}
-       }
+
 
      want:
-       {
-           "black": {
-               "allow_prereleases": {"type": "bool", "value": "true"},
-               "python":            {"type": "string", "value": "\u003e3.6"},
-               "version":           {"type": "string", "value": "\u003e=18.9b0"}
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/inline-table
-     Key "name.first" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        name        = { first = "Tom", last = "Preston-Werner" }
@@ -1529,47 +860,13 @@ FAIL valid/inline-table/inline-table
        table-array = [{ "a" = 1 }, { "b" = 2 }]
 
      output from parser-cmd (stdout):
-       {
-         "name":    {"first": "Tom", "last": "Preston-Werner"},
-         "point":   {"x": 1, "y": 2},
-         "simple":  {"a": 1},
-         "str-key": {"a": 1},
-         "table-array": [
-           {"a": 1},
-           {"b": 2}
-         ]
-       }
+
 
      want:
-       {
-           "name": {
-               "first": {"type": "string", "value": "Tom"},
-               "last":  {"type": "string", "value": "Preston-Werner"}
-           },
-           "point": {
-               "x": {"type": "integer", "value": "1"},
-               "y": {"type": "integer", "value": "2"}
-           },
-           "simple": {
-               "a": {"type": "integer", "value": "1"}
-           },
-           "str-key": {
-               "a": {"type": "integer", "value": "1"}
-           },
-           "table-array": [
-               {
-                   "a": {"type": "integer", "value": "1"}
-               },
-               {
-                   "b": {"type": "integer", "value": "2"}
-               }
-           ]
-       }
+          <empty>
 
 FAIL valid/inline-table/key-dotted-1
-     Key "a.a.b" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        a = {   a.b  =  1   }
@@ -1579,106 +876,25 @@ FAIL valid/inline-table/key-dotted-1
        e = {a.b=1}
 
      output from parser-cmd (stdout):
-       {
-         "a": {
-           "a": {"b": 1}
-         },
-         "b": {
-           "a": {"b": 1}
-         },
-         "c": {
-           "a": {"b": 1}
-         },
-         "d": {
-           "a": {"b": 1}
-         },
-         "e": {
-           "a": {"b": 1}
-         }
-       }
+
 
      want:
-       {
-           "a": {
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           },
-           "b": {
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           },
-           "c": {
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           },
-           "d": {
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           },
-           "e": {
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/key-dotted-2
-     Key "many.dots.here.dot.dot.dot.a.b.c" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        many.dots.here.dot.dot.dot = {a.b.c = 1, a.b.d = 2}
 
      output from parser-cmd (stdout):
-       {
-         "many": {
-           "dots": {
-             "here": {
-               "dot": {
-                 "dot": {
-                   "dot": {
-                     "a": {
-                       "b": {"c": 1, "d": 2}
-                     }
-                   }
-                 }
-               }
-             }
-           }
-         }
-       }
+
 
      want:
-       {
-           "many": {
-               "dots": {
-                   "here": {
-                       "dot": {
-                           "dot": {
-                               "dot": {
-                                   "a": {
-                                       "b": {
-                                           "c": {"type": "integer", "value": "1"},
-                                           "d": {"type": "integer", "value": "2"}
-                                       }
-                                   }
-                               }
-                           }
-                       }
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/key-dotted-3
-     Key "tbl.a.b.c.d.e" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [tbl]
@@ -1688,57 +904,13 @@ FAIL valid/inline-table/key-dotted-3
        a.b.c = {d.e=1}
 
      output from parser-cmd (stdout):
-       {
-         "tbl": {
-           "a": {
-             "b": {
-               "c": {
-                 "d": {"e": 1}
-               }
-             }
-           },
-           "x": {
-             "a": {
-               "b": {
-                 "c": {
-                   "d": {"e": 1}
-                 }
-               }
-             }
-           }
-         }
-       }
+
 
      want:
-       {
-           "tbl": {
-               "a": {
-                   "b": {
-                       "c": {
-                           "d": {
-                               "e": {"type": "integer", "value": "1"}
-                           }
-                       }
-                   }
-               },
-               "x": {
-                   "a": {
-                       "b": {
-                           "c": {
-                               "d": {
-                                   "e": {"type": "integer", "value": "1"}
-                               }
-                           }
-                       }
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/inline-table/key-dotted-4
-     Key "arr.T.a.b" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        [[arr]]
@@ -1750,61 +922,13 @@ FAIL valid/inline-table/key-dotted-4
        T = {a.b=2}
 
      output from parser-cmd (stdout):
-       {
-         "arr": [
-           {
-             "T": {
-               "a": {"b": 1}
-             },
-             "t": {
-               "a": {"b": 1}
-             }
-           },
-           {
-             "T": {
-               "a": {"b": 2}
-             },
-             "t": {
-               "a": {"b": 2}
-             }
-           }
-         ]
-       }
+
 
      want:
-       {
-           "arr": [
-               {
-                   "T": {
-                       "a": {
-                           "b": {"type": "integer", "value": "1"}
-                       }
-                   },
-                   "t": {
-                       "a": {
-                           "b": {"type": "integer", "value": "1"}
-                       }
-                   }
-               },
-               {
-                   "T": {
-                       "a": {
-                           "b": {"type": "integer", "value": "2"}
-                       }
-                   },
-                   "t": {
-                       "a": {
-                           "b": {"type": "integer", "value": "2"}
-                       }
-                   }
-               }
-           ]
-       }
+          <empty>
 
 FAIL valid/inline-table/key-dotted-5
-     Key "arr-1.a.b" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
 
      input sent to parser-cmd:
        arr-1 = [{a.b = 1}]
@@ -1814,81 +938,13 @@ FAIL valid/inline-table/key-dotted-5
        arr-4 = ["str", {a.b = 1}, {a.b = 2}]
 
      output from parser-cmd (stdout):
-       {
-         "arr-1": [{
-           "a": {"b": 1}
-         }],
-         "arr-2": [
-           "str",
-           {
-             "a": {"b": 1}
-           }
-         ],
-         "arr-3": [
-           {
-             "a": {"b": 1}
-           },
-           {
-             "a": {"b": 2}
-           }
-         ],
-         "arr-4": [
-           "str",
-           {
-             "a": {"b": 1}
-           },
-           {
-             "a": {"b": 2}
-           }
-         ]
-       }
+
 
      want:
-       {
-           "arr-1": [{
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           }],
-           "arr-2": [
-               {"type": "string", "value": "str"},
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "1"}
-                   }
-               }
-           ],
-           "arr-3": [
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "1"}
-                   }
-               },
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "2"}
-                   }
-               }
-           ],
-           "arr-4": [
-               {"type": "string", "value": "str"},
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "1"}
-                   }
-               },
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "2"}
-                   }
-               }
-           ]
-       }
+          <empty>
 
 FAIL valid/inline-table/key-dotted-6
-     Key "top.dot.dot.dot.dot.dot" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        top.dot.dot = [
@@ -1903,12 +959,16 @@ FAIL valid/inline-table/key-dotted-6
              "dot": [
                {
                  "dot": {
-                   "dot": {"dot": 1}
+                   "dot": {
+                     "dot": {"type": "integer", "value": 1}
+                   }
                  }
                },
                {
                  "dot": {
-                   "dot": {"dot": 2}
+                   "dot": {
+                     "dot": {"type": "integer", "value": 2}
+                   }
                  }
                }
              ]
@@ -1941,9 +1001,7 @@ FAIL valid/inline-table/key-dotted-6
        }
 
 FAIL valid/inline-table/key-dotted-7
-     Key "arr.a.b.c.d" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        arr = [
@@ -1954,7 +1012,9 @@ FAIL valid/inline-table/key-dotted-7
        {
          "arr": [{
            "a": {"b": [{
-             "c": {"d": 1}
+             "c": {
+               "d": {"type": "integer", "value": 1}
+             }
            }]}
          }]
        }
@@ -1992,9 +1052,7 @@ FAIL valid/inline-table/multiline
           <empty>
 
 FAIL valid/inline-table/nest
-     Key "arr_arr_tbl_val.one" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        tbl_tbl_empty = { tbl_0 = {} }
@@ -2011,20 +1069,32 @@ FAIL valid/inline-table/nest
      output from parser-cmd (stdout):
        {
          "arr_arr_tbl_empty": [[{}]],
-         "arr_arr_tbl_val":   [[{"one": 1}]],
+         "arr_arr_tbl_val":   [[{
+           "one": {"type": "integer", "value": 1}
+         }]],
          "arr_arr_tbls":      [[
-           {"one": 1},
-           {"two": 2}
+           {
+             "one": {"type": "integer", "value": 1}
+           },
+           {
+             "two": {"type": "integer", "value": 2}
+           }
          ]],
          "arr_tbl_tbl":       [{
-           "tbl": {"one": 1}
+           "tbl": {
+             "one": {"type": "integer", "value": 1}
+           }
          }],
-         "tbl_arr_tbl":       {"arr_tbl": [{"one": 1}]},
+         "tbl_arr_tbl":       {"arr_tbl": [{
+           "one": {"type": "integer", "value": 1}
+         }]},
          "tbl_tbl_empty": {
            "tbl_0": {}
          },
          "tbl_tbl_val": {
-           "tbl_1": {"one": 1}
+           "tbl_1": {
+             "one": {"type": "integer", "value": 1}
+           }
          }
        }
 
@@ -2061,9 +1131,7 @@ FAIL valid/inline-table/nest
        }
 
 FAIL valid/inline-table/spaces
-     Key "clap-1.features" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        # https://github.com/toml-lang/toml-test/issues/146
@@ -2072,40 +1140,13 @@ FAIL valid/inline-table/spaces
        # Contains some literal tabs!
        clap-2 = { version = "4"	   	,	  	features = [   "derive" 	  ,  	  "cargo"   ]   , nest   =   {  	  "a"   =   'x'  , 	  'b'   = [ 1.5    ,   9.0  ]  }  }
 
-     output from parser-cmd (stdout):
-       {
-         "clap-1": {"features": ["derive", "cargo"], "version": "4"},
-         "clap-2": {
-           "features": ["derive", "cargo"],
-           "nest":     {"a": "x", "b": [2, 9]},
-           "version":  "4"
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       begin <= end (1 <= 0) when slicing `a`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "clap-1": {
-               "version": {"type": "string", "value": "4"},
-               "features": [
-                   {"type": "string", "value": "derive"},
-                   {"type": "string", "value": "cargo"}
-               ]
-           },
-           "clap-2": {
-               "version": {"type": "string", "value": "4"},
-               "features": [
-                   {"type": "string", "value": "derive"},
-                   {"type": "string", "value": "cargo"}
-               ],
-               "nest": {
-                   "a": {"type": "string", "value": "x"},
-                   "b": [
-                       {"type": "float", "value": "1.5"},
-                       {"type": "float", "value": "9"}
-                   ]
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/integer/float64-max
      invalid integer: invalid digit found in string
@@ -2131,9 +1172,7 @@ FAIL valid/integer/float64-max
           <empty>
 
 FAIL valid/integer/integer
-     Key "answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        answer = 42
@@ -2143,10 +1182,10 @@ FAIL valid/integer/integer
 
      output from parser-cmd (stdout):
        {
-         "answer":    42,
-         "neganswer": -42,
-         "posanswer": 42,
-         "zero":      0
+         "answer":    {"type": "integer", "value": 42},
+         "neganswer": {"type": "integer", "value": -42},
+         "posanswer": {"type": "integer", "value": 42},
+         "zero":      {"type": "integer", "value": 0}
        }
 
      want:
@@ -2190,9 +1229,7 @@ FAIL valid/integer/literals
           <empty>
 
 FAIL valid/integer/long
-     Key "int64-max" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        # int64 "should" be supported, but is not mandatory. It's fine to skip this
@@ -2202,8 +1239,8 @@ FAIL valid/integer/long
 
      output from parser-cmd (stdout):
        {
-         "int64-max":     9223372036854775808,
-         "int64-max-neg": -9223372036854775808
+         "int64-max":     {"type": "integer", "value": 9223372036854775808},
+         "int64-max-neg": {"type": "integer", "value": -9223372036854775808}
        }
 
      want:
@@ -2234,9 +1271,7 @@ FAIL valid/integer/underscore
           <empty>
 
 FAIL valid/integer/zero
-     Key "a2" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        d1 = 0
@@ -2257,18 +1292,18 @@ FAIL valid/integer/zero
 
      output from parser-cmd (stdout):
        {
-         "a2": 0,
-         "a3": 0,
-         "b1": 0,
-         "b2": 0,
-         "b3": 0,
-         "d1": 0,
-         "d2": 0,
-         "d3": 0,
-         "h1": 0,
-         "h2": 0,
-         "h3": 0,
-         "o1": 0
+         "a2": {"type": "integer", "value": 0},
+         "a3": {"type": "integer", "value": 0},
+         "b1": {"type": "integer", "value": 0},
+         "b2": {"type": "integer", "value": 0},
+         "b3": {"type": "integer", "value": 0},
+         "d1": {"type": "integer", "value": 0},
+         "d2": {"type": "integer", "value": 0},
+         "d3": {"type": "integer", "value": 0},
+         "h1": {"type": "integer", "value": 0},
+         "h2": {"type": "integer", "value": 0},
+         "h3": {"type": "integer", "value": 0},
+         "o1": {"type": "integer", "value": 0}
        }
 
      want:
@@ -2321,9 +1356,7 @@ FAIL valid/key/alphanum
           <empty>
 
 FAIL valid/key/case-sensitive
-     Key "Section.M" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        sectioN = "NN"
@@ -2339,38 +1372,16 @@ FAIL valid/key/case-sensitive
        "Μ" = "greek capital letter MU"
        M = "latin letter M"
 
-     output from parser-cmd (stdout):
-       {
-         "sectioN": "NN",
-         "section": {"NAME": "upper", "Name": "capitalized", "name": "lower"},
-         "Section": {
-           "M":    "latin letter M",
-           "name": "different section!!",
-           "Μ":    "greek capital letter MU",
-           "μ":    "greek small letter mu"
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       byte index 1 is not a char boundary; it is inside 'μ' (bytes 0..2) of `μ`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "sectioN": {"type": "string", "value": "NN"},
-           "Section": {
-               "M":    {"type": "string", "value": "latin letter M"},
-               "name": {"type": "string", "value": "different section!!"},
-               "Μ":    {"type": "string", "value": "greek capital letter MU"},
-               "μ":    {"type": "string", "value": "greek small letter mu"}
-           },
-           "section": {
-               "NAME": {"type": "string", "value": "upper"},
-               "Name": {"type": "string", "value": "capitalized"},
-               "name": {"type": "string", "value": "lower"}
-           }
-       }
+          <empty>
 
 FAIL valid/key/dotted-1
-     Key "many.dots.dot.dot.dot" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        name.first = "Arthur"
@@ -2380,13 +1391,18 @@ FAIL valid/key/dotted-1
 
      output from parser-cmd (stdout):
        {
-         "name": {"first": "Arthur", "last": "Dent"},
          "many": {
            "dots": {
              "dot": {
-               "dot": {"dot": 42}
+               "dot": {
+                 "dot": {"type": "integer", "value": 42}
+               }
              }
            }
+         },
+         "name": {
+           "as":    {"type": "string", "value": "Dent"},
+           "first": {"type": "string", "value": "Arthur"}
          }
        }
 
@@ -2408,9 +1424,7 @@ FAIL valid/key/dotted-1
        }
 
 FAIL valid/key/dotted-2
-     Key "count.a" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        # Note: this file contains literal tab characters.
@@ -2429,33 +1443,16 @@ FAIL valid/key/dotted-2
        "count".k     = 11
        "count" . l   = 12
 
-     output from parser-cmd (stdout):
-       {
-         "count": {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9, "j": 10, "k": 11, "l": 12}
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       begin <= end (1 <= 0) when slicing `c`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "count": {
-               "a": {"type": "integer", "value": "1"},
-               "b": {"type": "integer", "value": "2"},
-               "c": {"type": "integer", "value": "3"},
-               "d": {"type": "integer", "value": "4"},
-               "e": {"type": "integer", "value": "5"},
-               "f": {"type": "integer", "value": "6"},
-               "g": {"type": "integer", "value": "7"},
-               "h": {"type": "integer", "value": "8"},
-               "i": {"type": "integer", "value": "9"},
-               "j": {"type": "integer", "value": "10"},
-               "k": {"type": "integer", "value": "11"},
-               "l": {"type": "integer", "value": "12"}
-           }
-       }
+          <empty>
 
 FAIL valid/key/dotted-3
-     Key "a.few.dots.polka.dance-with" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        top.key = 1
@@ -2469,18 +1466,25 @@ FAIL valid/key/dotted-3
 
      output from parser-cmd (stdout):
        {
-         "top": {"key": 1},
          "a": {
            "few": {
              "dots": {
-               "polka": {"dance-with": "Dot", "dot": "again?"}
+               "polka": {
+                 "dance-with": {"type": "string", "value": "Dot"},
+                 "dot":        {"type": "string", "value": "again?"}
+               }
              }
            }
          },
          "tbl": {
            "a": {
-             "b": {"c": 43}
+             "b": {
+               "c": {"type": "float", "value": 43}
+             }
            }
+         },
+         "top": {
+           "key": {"type": "integer", "value": 1}
          }
        }
 
@@ -2509,9 +1513,7 @@ FAIL valid/key/dotted-3
        }
 
 FAIL valid/key/dotted-4
-     Key "arr.a.b.c" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        top.key = 1
@@ -2526,19 +1528,27 @@ FAIL valid/key/dotted-4
 
      output from parser-cmd (stdout):
        {
-         "top": {"key": 1},
          "arr": [
            {
              "a": {
-               "b": {"c": 1, "d": 2}
+               "b": {
+                 "c": {"type": "integer", "value": 1},
+                 "d": {"type": "integer", "value": 2}
+               }
              }
            },
            {
              "a": {
-               "b": {"c": 3, "d": 4}
+               "b": {
+                 "c": {"type": "integer", "value": 3},
+                 "d": {"type": "integer", "value": 4}
+               }
              }
            }
-         ]
+         ],
+         "top": {
+           "key": {"type": "integer", "value": 1}
+         }
        }
 
      want:
@@ -2567,9 +1577,7 @@ FAIL valid/key/dotted-4
        }
 
 FAIL valid/key/dotted-empty
-     Key "x" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        ''.x = "empty.x"
@@ -2577,95 +1585,65 @@ FAIL valid/key/dotted-empty
        [a]
        "".'' = "empty.empty"
 
-     output from parser-cmd (stdout):
-       {
-         "":  {"x": "empty.x"},
-         "x": {"": "x.empty"},
-         "a": {
-           "": {"": "empty.empty"}
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:18:
+       attempt to subtract with overflow
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "": {
-               "x": {"type": "string", "value": "empty.x"}
-           },
-           "a": {
-               "": {
-                   "": {"type": "string", "value": "empty.empty"}
-               }
-           },
-           "x": {
-               "": {"type": "string", "value": "x.empty"}
-           }
-       }
+          <empty>
 
 FAIL valid/key/empty-1
-     Key "" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        "" = "blank"
 
-     output from parser-cmd (stdout):
-       {
-         "": "blank"
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:18:
+       attempt to subtract with overflow
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "": {"type": "string", "value": "blank"}
-       }
+          <empty>
 
 FAIL valid/key/empty-2
-     Key "" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        '' = "blank"
 
-     output from parser-cmd (stdout):
-       {
-         "": "blank"
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:18:
+       attempt to subtract with overflow
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "": {"type": "string", "value": "blank"}
-       }
+          <empty>
 
 FAIL valid/key/empty-3
-     Key "" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        ''=0
 
-     output from parser-cmd (stdout):
-       {
-         "": 0
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:18:
+       attempt to subtract with overflow
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "": {"type": "integer", "value": "0"}
-       }
+          <empty>
 
 FAIL valid/key/equals-nospace
-     Key "answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        answer=42
 
      output from parser-cmd (stdout):
        {
-         "answer": 42
+         "answer": {"type": "integer", "value": 42}
        }
 
      want:
@@ -2674,7 +1652,7 @@ FAIL valid/key/equals-nospace
        }
 
 FAIL valid/key/escapes
-     Could not find key "\b" in parser output.
+     exit status 101
 
      input sent to parser-cmd:
        "\n" = "newline"
@@ -2689,45 +1667,23 @@ FAIL valid/key/escapes
 
        ["a.b"."\u00c0"]
 
-     output from parser-cmd (stdout):
-       {
-         "\"":         "just a quote",
-         "\"quoted\"": {"quote": true},
-         "\\b":        "bell",
-         "\\n":        "newline",
-         "\\u00c0":    "latin capital letter A with grave",
-         "backsp\\b\\b": {},
-         "a.b": {
-           "\\u00c0": {}
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       begin <= end (1 <= 0) when slicing `"`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "\b":         {"type": "string", "value": "bell"},
-           "\n":         {"type": "string", "value": "newline"},
-           "\"":         {"type": "string", "value": "just a quote"},
-           "backsp\b\b": {},
-           "À":          {"type": "string", "value": "latin capital letter A with grave"},
-           "\"quoted\"": {
-               "quote": {"type": "bool", "value": "true"}
-           },
-           "a.b": {
-               "À": {}
-           }
-       }
+          <empty>
 
 FAIL valid/key/numeric
-     Key "1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        1 = 1
 
      output from parser-cmd (stdout):
        {
-         "1": 1
+         "1": {"type": "integer", "value": 1}
        }
 
      want:
@@ -2752,9 +1708,7 @@ FAIL valid/key/numeric-dotted
        }
 
 FAIL valid/key/quoted-dots
-     Key "plain" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Could not find key "with.dot" in parser output.
 
      input sent to parser-cmd:
        plain = 1
@@ -2770,11 +1724,17 @@ FAIL valid/key/quoted-dots
 
      output from parser-cmd (stdout):
        {
-         "plain":       1,
-         "plain_table": {"plain": 3, "with.dot": 4},
-         "with.dot":    2,
+         "ith.do": {"type": "integer", "value": 2},
+         "plain":  {"type": "integer", "value": 1},
+         "plain_table": {
+           "ith.do": {"type": "integer", "value": 4},
+           "plain":  {"type": "integer", "value": 3}
+         },
          "table": {
-           "withdot": {"key.with.dots": 6, "plain": 5}
+           "withdot": {
+             "ey.with.dot": {"type": "integer", "value": 6},
+             "plain":       {"type": "integer", "value": 5}
+           }
          }
        }
 
@@ -2819,9 +1779,7 @@ FAIL valid/key/quoted-unicode
           <empty>
 
 FAIL valid/key/space
-     Key " c d " (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Could not find key " c d " in parser output.
 
      input sent to parser-cmd:
        # Keep whitespace inside quotes keys at all positions.
@@ -2833,9 +1791,11 @@ FAIL valid/key/space
 
      output from parser-cmd (stdout):
        {
-         " c d ": 2,
-         " tbl ": {"\\ttab\\ttab\\t": "tab"},
-         "a b":   1
+         " ":   {"type": "integer", "value": 1},
+         "c d": {"type": "integer", "value": 2},
+         "tbl": {
+           "ttab\\ttab\\": {"type": "string", "value": "tab"}
+         }
        }
 
      want:
@@ -2848,16 +1808,14 @@ FAIL valid/key/space
        }
 
 FAIL valid/key/special-chars
-     Key "=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Could not find key "=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" in parser output.
 
      input sent to parser-cmd:
        "=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" = 1
 
      output from parser-cmd (stdout):
        {
-         "=~!@$^\u0026*()_+-`1234567890[]|/?\u003e\u003c.,;:'=": 1
+         "~!@$^\u0026*()_+-`1234567890[]|/?\u003e\u003c.,;:'": {"type": "integer", "value": 1}
        }
 
      want:
@@ -2876,8 +1834,8 @@ FAIL valid/key/special-word
 
      output from parser-cmd (stdout):
        {
-         "false": false,
-         "true":  1
+         "false": {"type": "bool", "value": false},
+         "true":  {"type": "integer", "value": 1}
        }
 
      want:
@@ -3002,16 +1960,14 @@ FAIL valid/key/start
           <empty>
 
 FAIL valid/key/zero
-     Key "0" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        0=0
 
      output from parser-cmd (stdout):
        {
-         "0": 0
+         "0": {"type": "integer", "value": 0}
        }
 
      want:
@@ -3019,52 +1975,8 @@ FAIL valid/key/zero
            "0": {"type": "integer", "value": "0"}
        }
 
-FAIL valid/newline-crlf
-     Key "newline" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       os = "DOS"
-       newline = "crlf"
-
-     output from parser-cmd (stdout):
-       {
-         "newline": "crlf",
-         "os":      "DOS"
-       }
-
-     want:
-       {
-           "newline": {"type": "string", "value": "crlf"},
-           "os":      {"type": "string", "value": "DOS"}
-       }
-
-FAIL valid/newline-lf
-     Key "newline" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       os = "unix"
-       newline = "lf"
-
-     output from parser-cmd (stdout):
-       {
-         "newline": "lf",
-         "os":      "unix"
-       }
-
-     want:
-       {
-           "newline": {"type": "string", "value": "lf"},
-           "os":      {"type": "string", "value": "unix"}
-       }
-
 FAIL valid/spec-example-1
-     Key "clients.data" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        # This is a TOML document. Boom.
@@ -3103,16 +2015,46 @@ FAIL valid/spec-example-1
 
      output from parser-cmd (stdout):
        {
-         "clients":  {"data": [
-           ["gamma", "delta"],
-           [1, 2]
-         ], "hosts": ["alpha", "omega"]},
-         "database": {"connection_max": 5000, "enabled": true, "ports": [8001, 8001, 8002], "server": "192.168.1.1"},
-         "owner":    {"dob": "1979-05-27T07:32:00-08:00", "name": "Lance Uppercut"},
-         "title":    "TOML Example",
+         "title": {"type": "string", "value": "TOML Example"},
+         "clients": {
+           "data": [
+             [
+               {"type": "string", "value": "gamma"},
+               {"type": "string", "value": "delta"}
+             ],
+             [
+               {"type": "integer", "value": 1},
+               {"type": "integer", "value": 2}
+             ]
+           ],
+           "hosts": [
+             {"type": "string", "value": "alpha"},
+             {"type": "string", "value": "omega"}
+           ]
+         },
+         "database": {
+           "connection_max": {"type": "integer", "value": 5000},
+           "enabled":        {"type": "bool", "value": true},
+           "server":         {"type": "string", "value": "192.168.1.1"},
+           "ports": [
+             {"type": "integer", "value": 8001},
+             {"type": "integer", "value": 8001},
+             {"type": "integer", "value": 8002}
+           ]
+         },
+         "owner": {
+           "dob":  {"type": "datetime", "value": "1979-05-27T07:32:00-08:00"},
+           "name": {"type": "string", "value": "Lance Uppercut"}
+         },
          "servers": {
-           "alpha": {"dc": "eqdc10", "ip": "10.0.0.1"},
-           "beta":  {"dc": "eqdc10", "ip": "10.0.0.2"}
+           "alpha": {
+             "dc": {"type": "string", "value": "eqdc10"},
+             "ip": {"type": "string", "value": "10.0.0.1"}
+           },
+           "beta": {
+             "dc": {"type": "string", "value": "eqdc10"},
+             "ip": {"type": "string", "value": "10.0.0.2"}
+           }
          }
        }
 
@@ -3162,9 +2104,7 @@ FAIL valid/spec-example-1
        }
 
 FAIL valid/spec-example-1-compact
-     Key "clients.data" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        #Useless spaces eliminated.
@@ -3193,16 +2133,46 @@ FAIL valid/spec-example-1-compact
 
      output from parser-cmd (stdout):
        {
-         "clients":  {"data": [
-           ["gamma", "delta"],
-           [1, 2]
-         ], "hosts": ["alpha", "omega"]},
-         "database": {"connection_max": 5000, "enabled": true, "ports": [8001, 8001, 8002], "server": "192.168.1.1"},
-         "owner":    {"dob": "1979-05-27T07:32:00-08:00", "name": "Lance Uppercut"},
-         "title":    "TOML Example",
+         "title": {"type": "string", "value": "TOML Example"},
+         "clients": {
+           "data": [
+             [
+               {"type": "string", "value": "gamma"},
+               {"type": "string", "value": "delta"}
+             ],
+             [
+               {"type": "integer", "value": 1},
+               {"type": "integer", "value": 2}
+             ]
+           ],
+           "hosts": [
+             {"type": "string", "value": "alpha"},
+             {"type": "string", "value": "omega"}
+           ]
+         },
+         "database": {
+           "connection_max": {"type": "integer", "value": 5000},
+           "enabled":        {"type": "bool", "value": true},
+           "server":         {"type": "string", "value": "192.168.1.1"},
+           "ports": [
+             {"type": "integer", "value": 8001},
+             {"type": "integer", "value": 8001},
+             {"type": "integer", "value": 8002}
+           ]
+         },
+         "owner": {
+           "dob":  {"type": "datetime", "value": "1979-05-27T07:32:00-08:00"},
+           "name": {"type": "string", "value": "Lance Uppercut"}
+         },
          "servers": {
-           "alpha": {"dc": "eqdc10", "ip": "10.0.0.1"},
-           "beta":  {"dc": "eqdc10", "ip": "10.0.0.2"}
+           "alpha": {
+             "dc": {"type": "string", "value": "eqdc10"},
+             "ip": {"type": "string", "value": "10.0.0.1"}
+           },
+           "beta": {
+             "dc": {"type": "string", "value": "eqdc10"},
+             "ip": {"type": "string", "value": "10.0.0.2"}
+           }
          }
        }
 
@@ -3252,9 +2222,7 @@ FAIL valid/spec-example-1-compact
        }
 
 FAIL valid/spec/array-0
-     Key "colors" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        integers = [ 1, 2, 3 ]
@@ -3272,21 +2240,59 @@ FAIL valid/spec/array-0
 
      output from parser-cmd (stdout):
        {
-         "colors":       ["red", "yellow", "green"],
-         "integers":     [1, 2, 3],
-         "numbers":      [0, 0, 0, 1, 2, 5],
-         "string_array": ["all", "strings", "are the same", "type"],
+         "colors": [
+           {"type": "string", "value": "red"},
+           {"type": "string", "value": "yellow"},
+           {"type": "string", "value": "green"}
+         ],
          "contributors": [
-           "Foo Bar \u003cfoo@example.com\u003e",
-           {"email": "bazqux@example.com", "name": "Baz Qux", "url": "https://example.com/bazqux"}
+           {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
+           {
+             "email": {"type": "string", "value": "bazqux@example.com"},
+             "name":  {"type": "string", "value": "Baz Qux"},
+             "url":   {"type": "string", "value": "https://example.com/bazqux"}
+           }
+         ],
+         "integers": [
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2},
+           {"type": "integer", "value": 3}
          ],
          "nested_arrays_of_ints": [
-           [1, 2],
-           [3, 4, 5]
+           [
+             {"type": "integer", "value": 1},
+             {"type": "integer", "value": 2}
+           ],
+           [
+             {"type": "integer", "value": 3},
+             {"type": "integer", "value": 4},
+             {"type": "integer", "value": 5}
+           ]
          ],
          "nested_mixed_array": [
-           [1, 2],
-           ["a", "b", "c"]
+           [
+             {"type": "integer", "value": 1},
+             {"type": "integer", "value": 2}
+           ],
+           [
+             {"type": "string", "value": "a"},
+             {"type": "string", "value": "b"},
+             {"type": "string", "value": "c"}
+           ]
+         ],
+         "numbers": [
+           {"type": "float", "value": 0},
+           {"type": "float", "value": 0},
+           {"type": "float", "value": 0},
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2},
+           {"type": "integer", "value": 5}
+         ],
+         "string_array": [
+           {"type": "string", "value": "all"},
+           {"type": "string", "value": "strings"},
+           {"type": "string", "value": "are the same"},
+           {"type": "string", "value": "type"}
          ]
        }
 
@@ -3349,9 +2355,7 @@ FAIL valid/spec/array-0
        }
 
 FAIL valid/spec/array-1
-     Key "integers2" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        integers2 = [
@@ -3365,8 +2369,15 @@ FAIL valid/spec/array-1
 
      output from parser-cmd (stdout):
        {
-         "integers2": [1, 2, 3],
-         "integers3": [1, 2]
+         "integers2": [
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2},
+           {"type": "integer", "value": 3}
+         ],
+         "integers3": [
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2}
+         ]
        }
 
      want:
@@ -3383,9 +2394,7 @@ FAIL valid/spec/array-1
        }
 
 FAIL valid/spec/array-of-tables-0
-     Key "products.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [[products]]
@@ -3403,9 +2412,16 @@ FAIL valid/spec/array-of-tables-0
      output from parser-cmd (stdout):
        {
          "products": [
-           {"name": "Hammer", "sku": 738594937},
+           {
+             "name": {"type": "string", "value": "Hammer"},
+             "sku":  {"type": "integer", "value": 738594937}
+           },
            {},
-           {"color": "gray", "name": "Nail", "sku": 284758393}
+           {
+             "color": {"type": "string", "value": "gray"},
+             "name":  {"type": "string", "value": "Nail"},
+             "sku":   {"type": "integer", "value": 284758393}
+           }
          ]
        }
 
@@ -3425,78 +2441,8 @@ FAIL valid/spec/array-of-tables-0
            ]
        }
 
-FAIL valid/spec/array-of-tables-1
-     Key "fruits.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [[fruits]]
-       name = "apple"
-
-       [fruits.physical]  # subtable
-       color = "red"
-       shape = "round"
-
-       [[fruits.varieties]]  # nested array of tables
-       name = "red delicious"
-
-       [[fruits.varieties]]
-       name = "granny smith"
-
-
-       [[fruits]]
-       name = "banana"
-
-       [[fruits.varieties]]
-       name = "plantain"
-
-     output from parser-cmd (stdout):
-       {
-         "fruits": [
-           {
-             "name":     "apple",
-             "physical": {"color": "red", "shape": "round"},
-             "varieties": [
-               {"name": "red delicious"},
-               {"name": "granny smith"}
-             ]
-           },
-           {"name": "banana", "varieties": [{"name": "plantain"}]}
-         ]
-       }
-
-     want:
-       {
-           "fruits": [
-               {
-                   "name": {"type": "string", "value": "apple"},
-                   "physical": {
-                       "color": {"type": "string", "value": "red"},
-                       "shape": {"type": "string", "value": "round"}
-                   },
-                   "varieties": [
-                       {
-                           "name": {"type": "string", "value": "red delicious"}
-                       },
-                       {
-                           "name": {"type": "string", "value": "granny smith"}
-                       }
-                   ]
-               },
-               {
-                   "name":      {"type": "string", "value": "banana"},
-                   "varieties": [{
-                       "name": {"type": "string", "value": "plantain"}
-                   }]
-               }
-           ]
-       }
-
 FAIL valid/spec/array-of-tables-2
-     Key "points.x" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        points = [ { x = 1, y = 2, z = 3 },
@@ -3506,9 +2452,21 @@ FAIL valid/spec/array-of-tables-2
      output from parser-cmd (stdout):
        {
          "points": [
-           {"x": 1, "y": 2, "z": 3},
-           {"x": 7, "y": 8, "z": 9},
-           {"x": 2, "y": 4, "z": 8}
+           {
+             "x": {"type": "integer", "value": 1},
+             "y": {"type": "integer", "value": 2},
+             "z": {"type": "integer", "value": 3}
+           },
+           {
+             "x": {"type": "integer", "value": 7},
+             "y": {"type": "integer", "value": 8},
+             "z": {"type": "integer", "value": 9}
+           },
+           {
+             "x": {"type": "integer", "value": 2},
+             "y": {"type": "integer", "value": 4},
+             "z": {"type": "integer", "value": 8}
+           }
          ]
        }
 
@@ -3534,9 +2492,7 @@ FAIL valid/spec/array-of-tables-2
        }
 
 FAIL valid/spec/boolean-0
-     Key "bool1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        bool1 = true
@@ -3544,8 +2500,8 @@ FAIL valid/spec/boolean-0
 
      output from parser-cmd (stdout):
        {
-         "bool1": true,
-         "bool2": false
+         "bool1": {"type": "bool", "value": true},
+         "bool2": {"type": "bool", "value": false}
        }
 
      want:
@@ -3554,32 +2510,8 @@ FAIL valid/spec/boolean-0
            "bool2": {"type": "bool", "value": "false"}
        }
 
-FAIL valid/spec/comment-0
-     Key "another" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       # This is a full-line comment
-       key = "value"  # This is a comment at the end of a line
-       another = "# This is not a comment"
-
-     output from parser-cmd (stdout):
-       {
-         "another": "# This is not a comment",
-         "key":     "value"
-       }
-
-     want:
-       {
-           "another": {"type": "string", "value": "# This is not a comment"},
-           "key":     {"type": "string", "value": "value"}
-       }
-
 FAIL valid/spec/float-0
-     Key "flt1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        # fractional
@@ -3597,13 +2529,13 @@ FAIL valid/spec/float-0
 
      output from parser-cmd (stdout):
        {
-         "flt1": 1,
-         "flt2": 3,
-         "flt3": -0,
-         "flt4": 49999999999999995805696,
-         "flt5": 1000000,
-         "flt6": -0,
-         "flt7": 0
+         "flt1": {"type": "float", "value": 1},
+         "flt2": {"type": "float", "value": 3},
+         "flt3": {"type": "float", "value": -0},
+         "flt4": {"type": "float", "value": 49999999999999995805696},
+         "flt5": {"type": "float", "value": 1000000},
+         "flt6": {"type": "float", "value": -0},
+         "flt7": {"type": "float", "value": 0}
        }
 
      want:
@@ -3636,9 +2568,7 @@ FAIL valid/spec/float-1
           <empty>
 
 FAIL valid/spec/float-2
-     Key "sf1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: <nil> is not a string
 
      input sent to parser-cmd:
        # infinity
@@ -3653,12 +2583,12 @@ FAIL valid/spec/float-2
 
      output from parser-cmd (stdout):
        {
-         "sf1": null,
-         "sf2": null,
-         "sf3": null,
-         "sf4": null,
-         "sf5": null,
-         "sf6": null
+         "sf1": {"type": "float", "value": null},
+         "sf2": {"type": "float", "value": null},
+         "sf3": {"type": "float", "value": null},
+         "sf4": {"type": "float", "value": null},
+         "sf5": {"type": "float", "value": null},
+         "sf6": {"type": "float", "value": null}
        }
 
      want:
@@ -3672,9 +2602,7 @@ FAIL valid/spec/float-2
        }
 
 FAIL valid/spec/inline-table-0
-     Key "animal.type.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        name = { first = "Tom", last = "Preston-Werner" }
@@ -3683,10 +2611,18 @@ FAIL valid/spec/inline-table-0
 
      output from parser-cmd (stdout):
        {
-         "name":  {"first": "Tom", "last": "Preston-Werner"},
-         "point": {"x": 1, "y": 2},
          "animal": {
-           "type": {"name": "pug"}
+           "type": {
+             "name": {"type": "string", "value": "pug"}
+           }
+         },
+         "name": {
+           "first": {"type": "string", "value": "Tom"},
+           "last":  {"type": "string", "value": "Preston-Werner"}
+         },
+         "point": {
+           "x": {"type": "integer", "value": 1},
+           "y": {"type": "integer", "value": 2}
          }
        }
 
@@ -3708,9 +2644,7 @@ FAIL valid/spec/inline-table-0
        }
 
 FAIL valid/spec/inline-table-1
-     Key "animal.type.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [name]
@@ -3726,10 +2660,18 @@ FAIL valid/spec/inline-table-1
 
      output from parser-cmd (stdout):
        {
-         "name":  {"first": "Tom", "last": "Preston-Werner"},
-         "point": {"x": 1, "y": 2},
          "animal": {
-           "type": {"name": "pug"}
+           "type": {
+             "name": {"type": "string", "value": "pug"}
+           }
+         },
+         "name": {
+           "first": {"type": "string", "value": "Tom"},
+           "last":  {"type": "string", "value": "Preston-Werner"}
+         },
+         "point": {
+           "x": {"type": "integer", "value": 1},
+           "y": {"type": "integer", "value": 2}
          }
        }
 
@@ -3750,62 +2692,8 @@ FAIL valid/spec/inline-table-1
            }
        }
 
-FAIL valid/spec/inline-table-2
-     Key "product.type.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [product]
-       type = { name = "Nail" }
-       # type.edible = false  # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "product": {
-           "type": {"name": "Nail"}
-         }
-       }
-
-     want:
-       {
-           "product": {
-               "type": {
-                   "name": {"type": "string", "value": "Nail"}
-               }
-           }
-       }
-
-FAIL valid/spec/inline-table-3
-     Key "product.type.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [product]
-       type.name = "Nail"
-       # type = { edible = false }  # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "product": {
-           "type": {"name": "Nail"}
-         }
-       }
-
-     want:
-       {
-           "product": {
-               "type": {
-                   "name": {"type": "string", "value": "Nail"}
-               }
-           }
-       }
-
 FAIL valid/spec/integer-0
-     Key "int1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        int1 = +99
@@ -3815,10 +2703,10 @@ FAIL valid/spec/integer-0
 
      output from parser-cmd (stdout):
        {
-         "int1": 99,
-         "int2": 42,
-         "int3": 0,
-         "int4": -17
+         "int1": {"type": "integer", "value": 99},
+         "int2": {"type": "integer", "value": 42},
+         "int3": {"type": "integer", "value": 0},
+         "int4": {"type": "integer", "value": -17}
        }
 
      want:
@@ -3884,55 +2772,8 @@ FAIL valid/spec/integer-2
      want:
           <empty>
 
-FAIL valid/spec/key-value-pair-0
-     Key "key" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       key = "value"
-
-     output from parser-cmd (stdout):
-       {
-         "key": "value"
-       }
-
-     want:
-       {
-           "key": {"type": "string", "value": "value"}
-       }
-
-FAIL valid/spec/keys-0
-     Key "1234" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       key = "value"
-       bare_key = "value"
-       bare-key = "value"
-       1234 = "value"
-
-     output from parser-cmd (stdout):
-       {
-         "1234":     "value",
-         "bare-key": "value",
-         "bare_key": "value",
-         "key":      "value"
-       }
-
-     want:
-       {
-           "1234":     {"type": "string", "value": "value"},
-           "bare-key": {"type": "string", "value": "value"},
-           "bare_key": {"type": "string", "value": "value"},
-           "key":      {"type": "string", "value": "value"}
-       }
-
 FAIL valid/spec/keys-1
-     Key "127.0.0.1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        "127.0.0.1" = "value"
@@ -3941,28 +2782,16 @@ FAIL valid/spec/keys-1
        'key2' = "value"
        'quoted "value"' = "value"
 
-     output from parser-cmd (stdout):
-       {
-         "127.0.0.1":          "value",
-         "character encoding": "value",
-         "key2":               "value",
-         "quoted \"value\"":   "value",
-         "ʎǝʞ":                "value"
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       byte index 1 is not a char boundary; it is inside 'ʎ' (bytes 0..2) of `ʎǝʞ`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "127.0.0.1":          {"type": "string", "value": "value"},
-           "character encoding": {"type": "string", "value": "value"},
-           "key2":               {"type": "string", "value": "value"},
-           "quoted \"value\"":   {"type": "string", "value": "value"},
-           "ʎǝʞ":                {"type": "string", "value": "value"}
-       }
+          <empty>
 
 FAIL valid/spec/keys-3
-     Key "name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Could not find key "site.google.com" in parser output.
 
      input sent to parser-cmd:
        name = "Orange"
@@ -3972,9 +2801,14 @@ FAIL valid/spec/keys-3
 
      output from parser-cmd (stdout):
        {
-         "name":     "Orange",
-         "physical": {"color": "orange", "shape": "round"},
-         "site":     {"google.com": true}
+         "name": {"type": "string", "value": "Orange"},
+         "physical": {
+           "color": {"type": "string", "value": "orange"},
+           "shape": {"type": "string", "value": "round"}
+         },
+         "site": {
+           "oogle.co": {"type": "bool", "value": true}
+         }
        }
 
      want:
@@ -3986,103 +2820,6 @@ FAIL valid/spec/keys-3
            },
            "site": {
                "google.com": {"type": "bool", "value": "true"}
-           }
-       }
-
-FAIL valid/spec/keys-4
-     Key "fruit.color" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       fruit.name = "banana"     # this is best practice
-       fruit. color = "yellow"    # same as fruit.color
-       fruit . flavor = "banana"   # same as fruit.flavor
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {"color": "yellow", "flavor": "banana", "name": "banana"}
-       }
-
-     want:
-       {
-           "fruit": {
-               "color":  {"type": "string", "value": "yellow"},
-               "flavor": {"type": "string", "value": "banana"},
-               "name":   {"type": "string", "value": "banana"}
-           }
-       }
-
-FAIL valid/spec/keys-5
-     Key "apple.color" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       # VALID BUT DISCOURAGED
-
-       apple.type = "fruit"
-       orange.type = "fruit"
-
-       apple.skin = "thin"
-       orange.skin = "thick"
-
-       apple.color = "red"
-       orange.color = "orange"
-
-     output from parser-cmd (stdout):
-       {
-         "apple":  {"color": "red", "skin": "thin", "type": "fruit"},
-         "orange": {"color": "orange", "skin": "thick", "type": "fruit"}
-       }
-
-     want:
-       {
-           "apple": {
-               "color": {"type": "string", "value": "red"},
-               "skin":  {"type": "string", "value": "thin"},
-               "type":  {"type": "string", "value": "fruit"}
-           },
-           "orange": {
-               "color": {"type": "string", "value": "orange"},
-               "skin":  {"type": "string", "value": "thick"},
-               "type":  {"type": "string", "value": "fruit"}
-           }
-       }
-
-FAIL valid/spec/keys-6
-     Key "apple.color" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       # RECOMMENDED
-
-       apple.type = "fruit"
-       apple.skin = "thin"
-       apple.color = "red"
-
-       orange.type = "fruit"
-       orange.skin = "thick"
-       orange.color = "orange"
-
-     output from parser-cmd (stdout):
-       {
-         "apple":  {"color": "red", "skin": "thin", "type": "fruit"},
-         "orange": {"color": "orange", "skin": "thick", "type": "fruit"}
-       }
-
-     want:
-       {
-           "apple": {
-               "color": {"type": "string", "value": "red"},
-               "skin":  {"type": "string", "value": "thin"},
-               "type":  {"type": "string", "value": "fruit"}
-           },
-           "orange": {
-               "color": {"type": "string", "value": "orange"},
-               "skin":  {"type": "string", "value": "thick"},
-               "type":  {"type": "string", "value": "fruit"}
            }
        }
 
@@ -4102,119 +2839,21 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/spec/local-date-0
-     Key "ld1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       ld1 = 1979-05-27
-
-     output from parser-cmd (stdout):
-       {
-         "ld1": "1979-05-27"
-       }
-
-     want:
-       {
-           "ld1": {"type": "date-local", "value": "1979-05-27"}
-       }
-
-FAIL valid/spec/local-date-time-0
-     Key "ldt1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       ldt1 = 1979-05-27T07:32:00
-       ldt2 = 1979-05-27T00:32:00.999
-
-     output from parser-cmd (stdout):
-       {
-         "ldt1": "1979-05-27T07:32:00",
-         "ldt2": "1979-05-27T00:32:00.999"
-       }
-
-     want:
-       {
-           "ldt1": {"type": "datetime-local", "value": "1979-05-27T07:32:00"},
-           "ldt2": {"type": "datetime-local", "value": "1979-05-27T00:32:00.999"}
-       }
-
-FAIL valid/spec/local-time-0
-     Key "lt1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       lt1 = 07:32:00
-       lt2 = 00:32:00.999
-
-     output from parser-cmd (stdout):
-       {
-         "lt1": "07:32:00",
-         "lt2": "00:32:00.999"
-       }
-
-     want:
-       {
-           "lt1": {"type": "time-local", "value": "07:32:00"},
-           "lt2": {"type": "time-local", "value": "00:32:00.999"}
-       }
-
-FAIL valid/spec/offset-date-time-0
-     Key "odt1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       odt1 = 1979-05-27T07:32:00Z
-       odt2 = 1979-05-27T00:32:00-07:00
-       odt3 = 1979-05-27T00:32:00.999-07:00
-
-     output from parser-cmd (stdout):
-       {
-         "odt1": "1979-05-27T07:32:00Z",
-         "odt2": "1979-05-27T00:32:00-07:00",
-         "odt3": "1979-05-27T00:32:00.999-07:00"
-       }
-
-     want:
-       {
-           "odt1": {"type": "datetime", "value": "1979-05-27T07:32:00Z"},
-           "odt2": {"type": "datetime", "value": "1979-05-27T00:32:00-07:00"},
-           "odt3": {"type": "datetime", "value": "1979-05-27T00:32:00.999-07:00"}
-       }
-
-FAIL valid/spec/offset-date-time-1
-     Key "odt4" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       odt4 = 1979-05-27 07:32:00Z
-
-     output from parser-cmd (stdout):
-       {
-         "odt4": "1979-05-27T07:32:00Z"
-       }
-
-     want:
-       {
-           "odt4": {"type": "datetime", "value": "1979-05-27T07:32:00Z"}
-       }
-
 FAIL valid/spec/string-0
-     Key "str" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "str" don't match:
+       Expected:     I'm a string. "You can quote me". Name	José
+     Location	SF.
+       Your encoder: I'm a string. "You can quote me". Name\tJos\u00E9\nLocation\tSF.
 
      input sent to parser-cmd:
        str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
 
      output from parser-cmd (stdout):
        {
-         "str": "I'm a string. \"You can quote me\". Name\\tJos\\u00E9\\nLocation\\tSF."
+         "str": {
+           "type":  "string",
+           "value": "I'm a string. \"You can quote me\". Name\\tJos\\u00E9\\nLocation\\tSF."
+         }
        }
 
      want:
@@ -4223,9 +2862,12 @@ FAIL valid/spec/string-0
        }
 
 FAIL valid/spec/string-1
-     Key "str1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "str1" don't match:
+       Expected:     Roses are red
+     Violets are blue
+       Your encoder:
+     Roses are red
+     Violets are blue
 
      input sent to parser-cmd:
        str1 = """
@@ -4234,7 +2876,7 @@ FAIL valid/spec/string-1
 
      output from parser-cmd (stdout):
        {
-         "str1": "\nRoses are red\nViolets are blue"
+         "str1": {"type": "string", "value": "\nRoses are red\nViolets are blue"}
        }
 
      want:
@@ -4243,9 +2885,10 @@ FAIL valid/spec/string-1
        }
 
 FAIL valid/spec/string-2
-     Key "str2" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "str2" don't match:
+       Expected:     Roses are red
+     Violets are blue
+       Your encoder: Roses are red\nViolets are blue
 
      input sent to parser-cmd:
        # On a Unix system, the above multi-line string will most likely be the same as:
@@ -4256,8 +2899,8 @@ FAIL valid/spec/string-2
 
      output from parser-cmd (stdout):
        {
-         "str2": "Roses are red\\nViolets are blue",
-         "str3": "Roses are red\\r\\nViolets are blue"
+         "str2": {"type": "string", "value": "Roses are red\\nViolets are blue"},
+         "str3": {"type": "string", "value": "Roses are red\\r\\nViolets are blue"}
        }
 
      want:
@@ -4267,9 +2910,14 @@ FAIL valid/spec/string-2
        }
 
 FAIL valid/spec/string-3
-     Key "str1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "str2" don't match:
+       Expected:     The quick brown fox jumps over the lazy dog.
+       Your encoder:
+     The quick brown \
+ 
+ 
+       fox jumps over \
+         the lazy dog.
 
      input sent to parser-cmd:
        # The following strings are byte-for-byte equivalent:
@@ -4290,9 +2938,12 @@ FAIL valid/spec/string-3
 
      output from parser-cmd (stdout):
        {
-         "str1": "The quick brown fox jumps over the lazy dog.",
-         "str2": "\nThe quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog.",
-         "str3": "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       "
+         "str1": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
+         "str2": {"type": "string", "value": "\nThe quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
+         "str3": {
+           "type":  "string",
+           "value": "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       "
+         }
        }
 
      want:
@@ -4357,9 +3008,17 @@ FAIL valid/spec/string-5
           <empty>
 
 FAIL valid/spec/string-6
-     Key "lines" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "lines" don't match:
+       Expected:     The first newline is
+     trimmed in raw strings.
+        All other whitespace
+        is preserved.
+ 
+       Your encoder:
+     The first newline is
+     trimmed in raw strings.
+        All other whitespace
+        is preserved.
 
      input sent to parser-cmd:
        regex2 = '''I [dw]on't need \d{2} apples'''
@@ -4372,8 +3031,11 @@ FAIL valid/spec/string-6
 
      output from parser-cmd (stdout):
        {
-         "lines":  "\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n",
-         "regex2": "I [dw]on't need \\d{2} apples"
+         "regex2": {"type": "string", "value": "I [dw]on't need \\d{2} apples"},
+         "lines": {
+           "type":  "string",
+           "value": "\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n"
+         }
        }
 
      want:
@@ -4409,9 +3071,7 @@ FAIL valid/spec/string-7
           <empty>
 
 FAIL valid/spec/table-1
-     Key "table-1.key1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [table-1]
@@ -4424,8 +3084,14 @@ FAIL valid/spec/table-1
 
      output from parser-cmd (stdout):
        {
-         "table-1": {"key1": "some string", "key2": 123},
-         "table-2": {"key1": "another string", "key2": 456}
+         "table-1": {
+           "key1": {"type": "string", "value": "some string"},
+           "key2": {"type": "integer", "value": 123}
+         },
+         "table-2": {
+           "key1": {"type": "string", "value": "another string"},
+           "key2": {"type": "integer", "value": 456}
+         }
        }
 
      want:
@@ -4441,9 +3107,7 @@ FAIL valid/spec/table-1
        }
 
 FAIL valid/spec/table-2
-     Key "dog.tater.man.type.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Could not find key "dog.tater.man" in parser output.
 
      input sent to parser-cmd:
        [dog."tater.man"]
@@ -4452,8 +3116,10 @@ FAIL valid/spec/table-2
      output from parser-cmd (stdout):
        {
          "dog": {
-           "tater.man": {
-             "type": {"name": "pug"}
+           "ater.ma": {
+             "type": {
+               "name": {"type": "string", "value": "pug"}
+             }
            }
          }
        }
@@ -4469,42 +3135,25 @@ FAIL valid/spec/table-2
            }
        }
 
-FAIL valid/spec/table-7
-     Key "breed" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+FAIL valid/spec/table-3
+     exit status 101
 
      input sent to parser-cmd:
-       # Top-level table begins.
-       name = "Fido"
-       breed = "pug"
+       [a.b.c]            # this is best practice
+       [ d.e.f ]          # same as [d.e.f]
+       [ g .  h  . i ]    # same as [g.h.i]
+       [ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l']
 
-       # Top-level table ends.
-       [owner]
-       name = "Regina Dogman"
-       member_since = 1999-08-04
-
-     output from parser-cmd (stdout):
-       {
-         "breed": "pug",
-         "name":  "Fido",
-         "owner": {"member_since": "1999-08-04", "name": "Regina Dogman"}
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       byte index 1 is not a char boundary; it is inside 'ʞ' (bytes 0..2) of `ʞ`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "breed": {"type": "string", "value": "pug"},
-           "name":  {"type": "string", "value": "Fido"},
-           "owner": {
-               "member_since": {"type": "date-local", "value": "1999-08-04"},
-               "name":         {"type": "string", "value": "Regina Dogman"}
-           }
-       }
+          <empty>
 
 FAIL valid/spec/table-8
-     Key "fruit.apple.color" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        fruit.apple.color = "red"
@@ -4519,8 +3168,10 @@ FAIL valid/spec/table-8
        {
          "fruit": {
            "apple": {
-             "color": "red",
-             "taste": {"sweet": true}
+             "color": {"type": "string", "value": "red"},
+             "taste": {
+               "sweet": {"type": "bool", "value": true}
+             }
            }
          }
        }
@@ -4538,9 +3189,7 @@ FAIL valid/spec/table-8
        }
 
 FAIL valid/spec/table-9
-     Key "fruit.apple.color" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        [fruit]
@@ -4557,9 +3206,13 @@ FAIL valid/spec/table-9
        {
          "fruit": {
            "apple": {
-             "color":   "red",
-             "taste":   {"sweet": true},
-             "texture": {"smooth": true}
+             "color": {"type": "string", "value": "red"},
+             "taste": {
+               "sweet": {"type": "bool", "value": true}
+             },
+             "texture": {
+               "smooth": {"type": "bool", "value": true}
+             }
            }
          }
        }
@@ -4579,46 +3232,13 @@ FAIL valid/spec/table-9
            }
        }
 
-FAIL valid/string/double-quote-escape
-     Key "test" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       test = "\"one\""
-
-     output from parser-cmd (stdout):
-       {
-         "test": "\"one\""
-       }
-
-     want:
-       {
-           "test": {"type": "string", "value": "\"one\""}
-       }
-
-FAIL valid/string/empty
-     Key "answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       answer = ""
-
-     output from parser-cmd (stdout):
-       {
-         "answer": ""
-       }
-
-     want:
-       {
-           "answer": {"type": "string", "value": ""}
-       }
-
 FAIL valid/string/ends-in-whitespace-escape
-     Key "beee" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "beee" don't match:
+       Expected:     heeee
+     geeee
+       Your encoder:
+     heeee
+     geeee\
 
      input sent to parser-cmd:
        beee = """
@@ -4630,7 +3250,7 @@ FAIL valid/string/ends-in-whitespace-escape
 
      output from parser-cmd (stdout):
        {
-         "beee": "\nheeee\ngeeee\\  \n\n\n      "
+         "beee": {"type": "string", "value": "\nheeee\ngeeee\\  \n\n\n      "}
        }
 
      want:
@@ -4679,16 +3299,16 @@ FAIL valid/string/escape-tricky
           <empty>
 
 FAIL valid/string/escaped-escape
-     Key "answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "answer" don't match:
+       Expected:     \x64
+       Your encoder: \\x64
 
      input sent to parser-cmd:
        answer = "\\x64"
 
      output from parser-cmd (stdout):
        {
-         "answer": "\\\\x64"
+         "answer": {"type": "string", "value": "\\\\x64"}
        }
 
      want:
@@ -4697,9 +3317,9 @@ FAIL valid/string/escaped-escape
        }
 
 FAIL valid/string/escapes
-     Key "backslash" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "backslash" don't match:
+       Expected:     |\.
+       Your encoder: |\\.
 
      input sent to parser-cmd:
        backspace     = "|\b."
@@ -4720,19 +3340,19 @@ FAIL valid/string/escapes
 
      output from parser-cmd (stdout):
        {
-         "backslash":     "|\\\\.",
-         "backspace":     "|\\b.",
-         "carriage":      "|\\r.",
-         "delete":        "|\\u007F.",
-         "formfeed":      "|\\f.",
-         "newline":       "|\\n.",
-         "notunicode1":   "|\\\\u.",
-         "notunicode2":   "|\\u005Cu.",
-         "notunicode3":   "|\\\\u0075.",
-         "notunicode4":   "|\\\\\\u0075.",
-         "quote":         "|\".",
-         "tab":           "|\\t.",
-         "unitseparator": "|\\u001F."
+         "backslash":     {"type": "string", "value": "|\\\\."},
+         "backspace":     {"type": "string", "value": "|\\b."},
+         "carriage":      {"type": "string", "value": "|\\r."},
+         "delete":        {"type": "string", "value": "|\\u007F."},
+         "formfeed":      {"type": "string", "value": "|\\f."},
+         "newline":       {"type": "string", "value": "|\\n."},
+         "notunicode1":   {"type": "string", "value": "|\\\\u."},
+         "notunicode2":   {"type": "string", "value": "|\\u005Cu."},
+         "notunicode3":   {"type": "string", "value": "|\\\\u0075."},
+         "notunicode4":   {"type": "string", "value": "|\\\\\\u0075."},
+         "quote":         {"type": "string", "value": "|\"."},
+         "tab":           {"type": "string", "value": "|\\t."},
+         "unitseparator": {"type": "string", "value": "|\\u001F."}
        }
 
      want:
@@ -4753,9 +3373,12 @@ FAIL valid/string/escapes
        }
 
 FAIL valid/string/multiline
-     Key "equivalent_one" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "equivalent_three" don't match:
+       Expected:     The quick brown fox jumps over the lazy dog.
+       Your encoder: \
+            The quick brown \
+            fox jumps over \
+            the lazy dog.\
 
      input sent to parser-cmd:
        # NOTE: this file includes some literal tab characters.
@@ -4798,15 +3421,21 @@ FAIL valid/string/multiline
 
      output from parser-cmd (stdout):
        {
-         "equivalent_one":      "The quick brown fox jumps over the lazy dog.",
-         "equivalent_three":    "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       ",
-         "equivalent_two":      "\nThe quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog.",
-         "escape-bs-1":         "a \\\\\nb",
-         "escape-bs-2":         "a \\\\\\\nb",
-         "escape-bs-3":         "a \\\\\\\\\n  b",
-         "keep-ws-before":      "a   \t\\\n   b",
-         "no-space":            "a\\\n    b",
-         "whitespace-after-bs": "\\\n       The quick brown \\\n       fox jumps over \\   \n       the lazy dog.\\\t\n       "
+         "equivalent_one": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
+         "equivalent_two": {"type": "string", "value": "\nThe quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
+         "escape-bs-1":    {"type": "string", "value": "a \\\\\nb"},
+         "escape-bs-2":    {"type": "string", "value": "a \\\\\\\nb"},
+         "escape-bs-3":    {"type": "string", "value": "a \\\\\\\\\n  b"},
+         "keep-ws-before": {"type": "string", "value": "a   \t\\\n   b"},
+         "no-space":       {"type": "string", "value": "a\\\n    b"},
+         "equivalent_three": {
+           "type":  "string",
+           "value": "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       "
+         },
+         "whitespace-after-bs": {
+           "type":  "string",
+           "value": "\\\n       The quick brown \\\n       fox jumps over \\   \n       the lazy dog.\\\t\n       "
+         }
        }
 
      want:
@@ -4856,9 +3485,9 @@ FAIL valid/string/multiline-empty
           <empty>
 
 FAIL valid/string/multiline-escaped-crlf
-     Key "0" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "0" don't match:
+       Expected:
+       Your encoder: \
 
      input sent to parser-cmd:
        # The following line should be an unescaped backslash followed by a Windows
@@ -4868,7 +3497,7 @@ FAIL valid/string/multiline-escaped-crlf
 
      output from parser-cmd (stdout):
        {
-         "0": "\\\r\n"
+         "0": {"type": "string", "value": "\\\r\n"}
        }
 
      want:
@@ -4948,9 +3577,10 @@ FAIL valid/string/multiline-quotes
           <empty>
 
 FAIL valid/string/nl
-     Key "lit_nl_end" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "nl_end" don't match:
+       Expected:     value
+ 
+       Your encoder: value\n
 
      input sent to parser-cmd:
        nl_mid = "val\nue"
@@ -4962,11 +3592,11 @@ FAIL valid/string/nl
 
      output from parser-cmd (stdout):
        {
-         "lit_nl_end": "value\\n",
-         "lit_nl_mid": "val\\nue",
-         "lit_nl_uni": "val\\ue",
-         "nl_end":     "value\\n",
-         "nl_mid":     "val\\nue"
+         "lit_nl_end": {"type": "string", "value": "value\\n"},
+         "lit_nl_mid": {"type": "string", "value": "val\\nue"},
+         "lit_nl_uni": {"type": "string", "value": "val\\ue"},
+         "nl_end":     {"type": "string", "value": "value\\n"},
+         "nl_mid":     {"type": "string", "value": "val\\nue"}
        }
 
      want:
@@ -4979,9 +3609,9 @@ FAIL valid/string/nl
        }
 
 FAIL valid/string/quoted-unicode
-     Key "basic_string" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "escaped_string" don't match:
+       Expected:         A   ÿ ퟿  ￿ 𐀀 􏿿
+       Your encoder: \u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff
 
      input sent to parser-cmd:
 
@@ -4993,10 +3623,16 @@ FAIL valid/string/quoted-unicode
 
      output from parser-cmd (stdout):
        {
-         "basic_string":       "~  ÿ ퟿  ￿ 𐀀 􏿿",
-         "escaped_string":     "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff",
-         "literal_string":     "~  ÿ ퟿  ￿ 𐀀 􏿿",
-         "not_escaped_string": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
+         "basic_string":   {"type": "string", "value": "~  ÿ ퟿  ￿ 𐀀 􏿿"},
+         "literal_string": {"type": "string", "value": "~  ÿ ퟿  ￿ 𐀀 􏿿"},
+         "escaped_string": {
+           "type":  "string",
+           "value": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
+         },
+         "not_escaped_string": {
+           "type":  "string",
+           "value": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
+         }
        }
 
      want:
@@ -5008,45 +3644,6 @@ FAIL valid/string/quoted-unicode
                "type":  "string",
                "value": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
            }
-       }
-
-FAIL valid/string/raw
-     Key "backslash" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       backspace = 'This string has a \b backspace character.'
-       tab = 'This string has a \t tab character.'
-       unescaped_tab = 'This string has an 	 unescaped tab character.'
-       newline = 'This string has a \n new line character.'
-       formfeed = 'This string has a \f form feed character.'
-       carriage = 'This string has a \r carriage return character.'
-       slash = 'This string has a \/ slash character.'
-       backslash = 'This string has a \\ backslash character.'
-
-     output from parser-cmd (stdout):
-       {
-         "backslash":     "This string has a \\\\ backslash character.",
-         "backspace":     "This string has a \\b backspace character.",
-         "carriage":      "This string has a \\r carriage return character.",
-         "formfeed":      "This string has a \\f form feed character.",
-         "newline":       "This string has a \\n new line character.",
-         "slash":         "This string has a \\/ slash character.",
-         "tab":           "This string has a \\t tab character.",
-         "unescaped_tab": "This string has an \t unescaped tab character."
-       }
-
-     want:
-       {
-           "backslash":     {"type": "string", "value": "This string has a \\\\ backslash character."},
-           "backspace":     {"type": "string", "value": "This string has a \\b backspace character."},
-           "carriage":      {"type": "string", "value": "This string has a \\r carriage return character."},
-           "formfeed":      {"type": "string", "value": "This string has a \\f form feed character."},
-           "newline":       {"type": "string", "value": "This string has a \\n new line character."},
-           "slash":         {"type": "string", "value": "This string has a \\/ slash character."},
-           "tab":           {"type": "string", "value": "This string has a \\t tab character."},
-           "unescaped_tab": {"type": "string", "value": "This string has an \t unescaped tab character."}
        }
 
 FAIL valid/string/raw-multiline
@@ -5098,28 +3695,11 @@ FAIL valid/string/raw-multiline
      want:
           <empty>
 
-FAIL valid/string/simple
-     Key "answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       answer = "You are not drinking enough whisky."
-
-     output from parser-cmd (stdout):
-       {
-         "answer": "You are not drinking enough whisky."
-       }
-
-     want:
-       {
-           "answer": {"type": "string", "value": "You are not drinking enough whisky."}
-       }
-
 FAIL valid/string/start-mb
-     Key "s1" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "s3" don't match:
+       Expected:     §
+       Your encoder: \
+     §
 
      input sent to parser-cmd:
        # Start first line with a multibyte character.
@@ -5138,13 +3718,13 @@ FAIL valid/string/start-mb
 
      output from parser-cmd (stdout):
        {
-         "s1": "§",
-         "s2": "§",
-         "s3": "\\\n§",
-         "s4": "\n§",
-         "s5": "§",
-         "s6": "\n§",
-         "s7": "§"
+         "s1": {"type": "string", "value": "§"},
+         "s2": {"type": "string", "value": "§"},
+         "s3": {"type": "string", "value": "\\\n§"},
+         "s4": {"type": "string", "value": "\n§"},
+         "s5": {"type": "string", "value": "§"},
+         "s6": {"type": "string", "value": "\n§"},
+         "s7": {"type": "string", "value": "§"}
        }
 
      want:
@@ -5159,9 +3739,9 @@ FAIL valid/string/start-mb
        }
 
 FAIL valid/string/unicode-escape
-     Key "a" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Values for key "a" don't match:
+       Expected:     a
+       Your encoder: \u0061
 
      input sent to parser-cmd:
        delta-1 = "\u03B4"
@@ -5182,20 +3762,20 @@ FAIL valid/string/unicode-escape
 
      output from parser-cmd (stdout):
        {
-         "a":          "\\u0061",
-         "b":          "\\u0062",
-         "c":          "\\U00000063",
-         "delta-1":    "\\u03B4",
-         "delta-2":    "\\U000003B4",
-         "ml-a":       "\\u0061",
-         "ml-b":       "\\u0062",
-         "ml-c":       "\\U00000063",
-         "ml-delta-1": "\\u03B4",
-         "ml-delta-2": "\\U000003B4",
-         "ml-null-1":  "\\u0000",
-         "ml-null-2":  "\\U00000000",
-         "null-1":     "\\u0000",
-         "null-2":     "\\U00000000"
+         "a":          {"type": "string", "value": "\\u0061"},
+         "b":          {"type": "string", "value": "\\u0062"},
+         "c":          {"type": "string", "value": "\\U00000063"},
+         "delta-1":    {"type": "string", "value": "\\u03B4"},
+         "delta-2":    {"type": "string", "value": "\\U000003B4"},
+         "ml-a":       {"type": "string", "value": "\\u0061"},
+         "ml-b":       {"type": "string", "value": "\\u0062"},
+         "ml-c":       {"type": "string", "value": "\\U00000063"},
+         "ml-delta-1": {"type": "string", "value": "\\u03B4"},
+         "ml-delta-2": {"type": "string", "value": "\\U000003B4"},
+         "ml-null-1":  {"type": "string", "value": "\\u0000"},
+         "ml-null-2":  {"type": "string", "value": "\\U00000000"},
+         "null-1":     {"type": "string", "value": "\\u0000"},
+         "null-2":     {"type": "string", "value": "\\U00000000"}
        }
 
      want:
@@ -5216,68 +3796,8 @@ FAIL valid/string/unicode-escape
            "null-2":     {"type": "string", "value": "\u0000"}
        }
 
-FAIL valid/string/unicode-literal
-     Key "answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       answer = "δ"
-
-     output from parser-cmd (stdout):
-       {
-         "answer": "δ"
-       }
-
-     want:
-       {
-           "answer": {"type": "string", "value": "δ"}
-       }
-
-FAIL valid/string/with-pound
-     Key "pound" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       pound = "We see no # comments here."
-       poundcomment = "But there are # some comments here." # Did I # mess you up?
-
-     output from parser-cmd (stdout):
-       {
-         "pound":        "We see no # comments here.",
-         "poundcomment": "But there are # some comments here."
-       }
-
-     want:
-       {
-           "pound":        {"type": "string", "value": "We see no # comments here."},
-           "poundcomment": {"type": "string", "value": "But there are # some comments here."}
-       }
-
-FAIL valid/table/array-implicit
-     Key "albums.songs.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [[albums.songs]]
-       name = "Glory Days"
-
-     output from parser-cmd (stdout):
-       {
-         "albums": {"songs": [{"name": "Glory Days"}]}
-       }
-
-     want:
-       {
-           "albums": {"songs": [{
-               "name": {"type": "string", "value": "Glory Days"}
-           }]}
-       }
-
 FAIL valid/table/array-implicit-and-explicit-after
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [[a.b]]
@@ -5287,199 +3807,27 @@ FAIL valid/table/array-implicit-and-explicit-after
        y = 2
 
      output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/table/array-many
-     Key "people.first_name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [[people]]
-       first_name = "Bruce"
-       last_name = "Springsteen"
-
-       [[people]]
-       first_name = "Eric"
-       last_name = "Clapton"
-
-       [[people]]
-       first_name = "Bob"
-       last_name = "Seger"
-
-     output from parser-cmd (stdout):
        {
-         "people": [
-           {"first_name": "Bruce", "last_name": "Springsteen"},
-           {"first_name": "Eric", "last_name": "Clapton"},
-           {"first_name": "Bob", "last_name": "Seger"}
-         ]
+         "a": {
+           "b": [{
+             "x": {"type": "integer", "value": 1}
+           }],
+           "y": {"type": "integer", "value": 2}
+         }
        }
 
      want:
        {
-           "people": [
-               {
-                   "first_name": {"type": "string", "value": "Bruce"},
-                   "last_name":  {"type": "string", "value": "Springsteen"}
-               },
-               {
-                   "first_name": {"type": "string", "value": "Eric"},
-                   "last_name":  {"type": "string", "value": "Clapton"}
-               },
-               {
-                   "first_name": {"type": "string", "value": "Bob"},
-                   "last_name":  {"type": "string", "value": "Seger"}
-               }
-           ]
-       }
-
-FAIL valid/table/array-nest
-     Key "albums.name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [[albums]]
-       name = "Born to Run"
-
-         [[albums.songs]]
-         name = "Jungleland"
-
-         [[albums.songs]]
-         name = "Meeting Across the River"
-
-       [[albums]]
-       name = "Born in the USA"
-
-         [[albums.songs]]
-         name = "Glory Days"
-
-         [[albums.songs]]
-         name = "Dancing in the Dark"
-
-     output from parser-cmd (stdout):
-       {
-         "albums": [
-           {
-             "name": "Born to Run",
-             "songs": [
-               {"name": "Jungleland"},
-               {"name": "Meeting Across the River"}
-             ]
-           },
-           {
-             "name": "Born in the USA",
-             "songs": [
-               {"name": "Glory Days"},
-               {"name": "Dancing in the Dark"}
-             ]
+           "a": {
+               "b": [{
+                   "x": {"type": "integer", "value": "1"}
+               }],
+               "y": {"type": "integer", "value": "2"}
            }
-         ]
-       }
-
-     want:
-       {
-           "albums": [
-               {
-                   "name": {"type": "string", "value": "Born to Run"},
-                   "songs": [
-                       {
-                           "name": {"type": "string", "value": "Jungleland"}
-                       },
-                       {
-                           "name": {"type": "string", "value": "Meeting Across the River"}
-                       }
-                   ]
-               },
-               {
-                   "name": {"type": "string", "value": "Born in the USA"},
-                   "songs": [
-                       {
-                           "name": {"type": "string", "value": "Glory Days"}
-                       },
-                       {
-                           "name": {"type": "string", "value": "Dancing in the Dark"}
-                       }
-                   ]
-               }
-           ]
-       }
-
-FAIL valid/table/array-one
-     Key "people.first_name" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [[people]]
-       first_name = "Bruce"
-       last_name = "Springsteen"
-
-     output from parser-cmd (stdout):
-       {
-         "people": [{"first_name": "Bruce", "last_name": "Springsteen"}]
-       }
-
-     want:
-       {
-           "people": [{
-               "first_name": {"type": "string", "value": "Bruce"},
-               "last_name":  {"type": "string", "value": "Springsteen"}
-           }]
-       }
-
-FAIL valid/table/array-table-array
-     Key "a.b.c.d" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
-
-     input sent to parser-cmd:
-       [[a]]
-           [[a.b]]
-               [a.b.c]
-                   d = "val0"
-           [[a.b]]
-               [a.b.c]
-                   d = "val1"
-
-     output from parser-cmd (stdout):
-       {
-         "a": [{"b": [
-           {
-             "c": {"d": "val0"}
-           },
-           {
-             "c": {"d": "val1"}
-           }
-         ]}]
-       }
-
-     want:
-       {
-           "a": [{
-               "b": [
-                   {
-                       "c": {
-                           "d": {"type": "string", "value": "val0"}
-                       }
-                   },
-                   {
-                       "c": {
-                           "d": {"type": "string", "value": "val1"}
-                       }
-                   }
-               ]
-           }]
        }
 
 FAIL valid/table/array-within-dotted
-     Key "fruit.apple.color" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [fruit]
@@ -5491,7 +3839,12 @@ FAIL valid/table/array-within-dotted
      output from parser-cmd (stdout):
        {
          "fruit": {
-           "apple": {"color": "red", "seeds": [{"size": 2}]}
+           "apple": {
+             "color": {"type": "string", "value": "red"},
+             "seeds": [{
+               "size": {"type": "integer", "value": 2}
+             }]
+           }
          }
        }
 
@@ -5508,9 +3861,7 @@ FAIL valid/table/array-within-dotted
        }
 
 FAIL valid/table/empty-name
-     Key "a.x" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        ['']
@@ -5522,31 +3873,13 @@ FAIL valid/table/empty-name
        [a.'']
        x = 3
 
-     output from parser-cmd (stdout):
-       {
-         "": {
-           "a": {"x": 2},
-           "x": 1
-         },
-         "a": {
-           "": {"x": 3}
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:18:
+       attempt to subtract with overflow
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "": {
-               "x": {"type": "integer", "value": "1"},
-               "a": {
-                   "x": {"type": "integer", "value": "2"}
-               }
-           },
-           "a": {
-               "": {
-                   "x": {"type": "integer", "value": "3"}
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/table/keyword
      Could not find key "inf" in parser output.
@@ -5575,7 +3908,7 @@ FAIL valid/table/keyword
        }
 
 FAIL valid/table/names
-     Could not find key "x.1" in parser output.
+     exit status 101
 
      input sent to parser-cmd:
        [a.b.c]
@@ -5588,70 +3921,16 @@ FAIL valid/table/names
 
        [x.1.2]
 
-     output from parser-cmd (stdout):
-       {
-         "x": {},
-         "a": {
-           " x ": {},
-           "b.c": {},
-           "d.e": {},
-           "b": {
-             "c": {}
-           }
-         },
-         "d": {
-           "e": {
-             "f": {}
-           }
-         },
-         "g": {
-           "h": {
-             "i": {}
-           }
-         },
-         "j": {
-           "ʞ": {
-             "l": {}
-           }
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       byte index 1 is not a char boundary; it is inside 'ʞ' (bytes 0..2) of `ʞ`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "a": {
-               " x ": {},
-               "b.c": {},
-               "d.e": {},
-               "b": {
-                   "c": {}
-               }
-           },
-           "d": {
-               "e": {
-                   "f": {}
-               }
-           },
-           "g": {
-               "h": {
-                   "i": {}
-               }
-           },
-           "j": {
-               "ʞ": {
-                   "l": {}
-               }
-           },
-           "x": {
-               "1": {
-                   "2": {}
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/table/sub
-     Key "a.extend.key" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [a]
@@ -5667,10 +3946,12 @@ FAIL valid/table/sub
      output from parser-cmd (stdout):
        {
          "a": {
-           "key": 1,
+           "key": {"type": "integer", "value": 1},
            "extend": {
-             "key":  2,
-             "more": {"key": 3}
+             "key": {"type": "integer", "value": 2},
+             "more": {
+               "key": {"type": "integer", "value": 3}
+             }
            }
          }
        }
@@ -5688,10 +3969,24 @@ FAIL valid/table/sub
            }
        }
 
+FAIL valid/table/whitespace
+     Could not find key "valid key" in parser output.
+
+     input sent to parser-cmd:
+       ["valid key"]
+
+     output from parser-cmd (stdout):
+       {
+         "alid ke": {}
+       }
+
+     want:
+       {
+           "valid key": {}
+       }
+
 FAIL valid/table/with-literal-string
-     Key "a.\"b\".c.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        ['a']
@@ -5699,30 +3994,16 @@ FAIL valid/table/with-literal-string
        [a.'"b"'.c]
        answer = 42
 
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "\"b\"": {
-             "c": {"answer": 42}
-           }
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:14:
+       begin <= end (1 <= 0) when slicing `a`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "a": {
-               "\"b\"": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL valid/table/with-pound
-     Key "key#group.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     Could not find key "key#group" in parser output.
 
      input sent to parser-cmd:
        ["key#group"]
@@ -5730,7 +4011,9 @@ FAIL valid/table/with-pound
 
      output from parser-cmd (stdout):
        {
-         "key#group": {"answer": 42}
+         "ey#grou": {
+           "answer": {"type": "integer", "value": 42}
+         }
        }
 
      want:
@@ -5741,9 +4024,7 @@ FAIL valid/table/with-pound
        }
 
 FAIL valid/table/with-single-quotes
-     Key "a.b.c.answer" (type "table"):
-       Expected:     map[string]any(nil)
-       Your encoder: map[string]any
+     exit status 101
 
      input sent to parser-cmd:
        ['a']
@@ -5751,25 +4032,13 @@ FAIL valid/table/with-single-quotes
        [a.'b'.c]
        answer = 42
 
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {
-             "c": {"answer": 42}
-           }
-         }
-       }
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:14:
+       begin <= end (1 <= 0) when slicing `a`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
-       {
-           "a": {
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
+          <empty>
 
 FAIL invalid/control/bare-cr
      Expected an error, but no error was reported.
@@ -5792,8 +4061,8 @@ FAIL invalid/control/comment-cr
 
      output from parser-cmd (stdout):
        {
-         "a":          1,
-         "comment-cr": "Carriage return in comment"
+         "a":          {"type": "integer", "value": 1},
+         "comment-cr": {"type": "string", "value": "Carriage return in comment"}
        }
 
      want:
@@ -5807,7 +4076,7 @@ FAIL invalid/control/comment-del
 
      output from parser-cmd (stdout):
        {
-         "comment-del": "0x7f"
+         "comment-del": {"type": "string", "value": "0x7f"}
        }
 
      want:
@@ -5821,7 +4090,7 @@ FAIL invalid/control/comment-ff
 
      output from parser-cmd (stdout):
        {
-         "comment-ff": "0x7f"
+         "comment-ff": {"type": "string", "value": "0x7f"}
        }
 
      want:
@@ -5835,7 +4104,7 @@ FAIL invalid/control/comment-lf
 
      output from parser-cmd (stdout):
        {
-         "comment-lf": "ctrl-P"
+         "comment-lf": {"type": "string", "value": "ctrl-P"}
        }
 
      want:
@@ -5849,7 +4118,7 @@ FAIL invalid/control/comment-null
 
      output from parser-cmd (stdout):
        {
-         "comment-null": "null"
+         "comment-null": {"type": "string", "value": "null"}
        }
 
      want:
@@ -5863,7 +4132,7 @@ FAIL invalid/control/comment-us
 
      output from parser-cmd (stdout):
        {
-         "comment-us": "ctrl-_"
+         "comment-us": {"type": "string", "value": "ctrl-_"}
        }
 
      want:
@@ -5877,7 +4146,7 @@ FAIL invalid/control/multi-cr
 
      output from parser-cmd (stdout):
        {
-         "multi-cr": "null\r"
+         "multi-cr": {"type": "string", "value": "null\r"}
        }
 
      want:
@@ -5891,7 +4160,7 @@ FAIL invalid/control/multi-del
 
      output from parser-cmd (stdout):
        {
-         "multi-del": "null"
+         "multi-del": {"type": "string", "value": "null"}
        }
 
      want:
@@ -5905,7 +4174,7 @@ FAIL invalid/control/multi-lf
 
      output from parser-cmd (stdout):
        {
-         "multi-lf": "null\u0010"
+         "multi-lf": {"type": "string", "value": "null\u0010"}
        }
 
      want:
@@ -5919,7 +4188,7 @@ FAIL invalid/control/multi-null
 
      output from parser-cmd (stdout):
        {
-         "multi-null": "null\u0000"
+         "multi-null": {"type": "string", "value": "null\u0000"}
        }
 
      want:
@@ -5933,7 +4202,7 @@ FAIL invalid/control/multi-us
 
      output from parser-cmd (stdout):
        {
-         "multi-us": "null\u001f"
+         "multi-us": {"type": "string", "value": "null\u001f"}
        }
 
      want:
@@ -5947,7 +4216,7 @@ FAIL invalid/control/rawmulti-cd
 
      output from parser-cmd (stdout):
        {
-         "rawmulti-cd": "null\r"
+         "rawmulti-cd": {"type": "string", "value": "null\r"}
        }
 
      want:
@@ -5961,7 +4230,7 @@ FAIL invalid/control/rawmulti-del
 
      output from parser-cmd (stdout):
        {
-         "rawmulti-del": "null"
+         "rawmulti-del": {"type": "string", "value": "null"}
        }
 
      want:
@@ -5975,7 +4244,7 @@ FAIL invalid/control/rawmulti-lf
 
      output from parser-cmd (stdout):
        {
-         "rawmulti-lf": "null\u0010"
+         "rawmulti-lf": {"type": "string", "value": "null\u0010"}
        }
 
      want:
@@ -5989,7 +4258,7 @@ FAIL invalid/control/rawmulti-null
 
      output from parser-cmd (stdout):
        {
-         "rawmulti-null": "null\u0000"
+         "rawmulti-null": {"type": "string", "value": "null\u0000"}
        }
 
      want:
@@ -6003,7 +4272,7 @@ FAIL invalid/control/rawmulti-us
 
      output from parser-cmd (stdout):
        {
-         "rawmulti-us": "null\u001f"
+         "rawmulti-us": {"type": "string", "value": "null\u001f"}
        }
 
      want:
@@ -6017,7 +4286,7 @@ FAIL invalid/control/rawstring-del
 
      output from parser-cmd (stdout):
        {
-         "rawstring-del": "null"
+         "rawstring-del": {"type": "string", "value": "null"}
        }
 
      want:
@@ -6031,7 +4300,7 @@ FAIL invalid/control/rawstring-lf
 
      output from parser-cmd (stdout):
        {
-         "rawstring-lf": "null\u0010"
+         "rawstring-lf": {"type": "string", "value": "null\u0010"}
        }
 
      want:
@@ -6045,7 +4314,7 @@ FAIL invalid/control/rawstring-null
 
      output from parser-cmd (stdout):
        {
-         "rawstring-null": "null\u0000"
+         "rawstring-null": {"type": "string", "value": "null\u0000"}
        }
 
      want:
@@ -6059,7 +4328,7 @@ FAIL invalid/control/rawstring-us
 
      output from parser-cmd (stdout):
        {
-         "rawstring-us": "null\u001f"
+         "rawstring-us": {"type": "string", "value": "null\u001f"}
        }
 
      want:
@@ -6073,7 +4342,7 @@ FAIL invalid/control/string-bs
 
      output from parser-cmd (stdout):
        {
-         "string-bs": "backspace\b"
+         "string-bs": {"type": "string", "value": "backspace\b"}
        }
 
      want:
@@ -6087,7 +4356,7 @@ FAIL invalid/control/string-del
 
      output from parser-cmd (stdout):
        {
-         "string-del": "null"
+         "string-del": {"type": "string", "value": "null"}
        }
 
      want:
@@ -6101,7 +4370,7 @@ FAIL invalid/control/string-lf
 
      output from parser-cmd (stdout):
        {
-         "string-lf": "null\u0010"
+         "string-lf": {"type": "string", "value": "null\u0010"}
        }
 
      want:
@@ -6115,7 +4384,7 @@ FAIL invalid/control/string-null
 
      output from parser-cmd (stdout):
        {
-         "string-null": "null\u0000"
+         "string-null": {"type": "string", "value": "null\u0000"}
        }
 
      want:
@@ -6129,302 +4398,8 @@ FAIL invalid/control/string-us
 
      output from parser-cmd (stdout):
        {
-         "string-us": "null\u001f"
+         "string-us": {"type": "string", "value": "null\u001f"}
        }
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/no-leads
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # Month "7" instead of "07"; the leading zero is required.
-       no-leads = 1987-7-05T17:45:00Z
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/no-secs
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # No seconds in time.
-       no-secs = 1987-07-05T17:45Z
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/no-t
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # No "t" or "T" between the date and time.
-       no-t = 1987-07-0517:45:00Z
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/offset-overflow-hour
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # Hour must be 00-24
-       d = 1985-06-18 17:04:07+25:00
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/offset-overflow-minute
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # Minute must be 00-59; we allow 60 too because some people do write offsets of
-       # 60 minutes
-       d = 1985-06-18 17:04:07+12:61
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/second-over
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
-       #                           ; rules
-       d = 2006-01-01T00:00:61-00:00
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/time-no-leads
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # Leading 0 is always required.
-       d = 2023-10-01T1:32:00Z
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/datetime/y10k
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # Maximum RFC3399 year is 9999.
-       d = 10000-01-01 00:00:00z
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bad-utf8-at-end
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # There is a 0xda at after the quotes, and no EOL at the end of the file.
-       #
-       # This is a bit of an edge case: This indicates there should be two bytes
-       # (0b1101_1010) but there is no byte to follow because it's the end of the file.
-       x = """"""�
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bad-utf8-in-comment
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # �
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bad-utf8-in-multiline
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # The following line contains an invalid UTF-8 sequence.
-       bad = """�"""
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bad-utf8-in-multiline-literal
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # The following line contains an invalid UTF-8 sequence.
-       bad = '''�'''
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bad-utf8-in-string
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # The following line contains an invalid UTF-8 sequence.
-       bad = "�"
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bad-utf8-in-string-literal
-     signal: killed
-
-     input sent to parser-cmd:
-       # The following line contains an invalid UTF-8 sequence.
-       bad = '�'
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bom-not-at-start-1
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       bom-not-at-start ��
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/bom-not-at-start-2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       bom-not-at-start= ��
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/utf16-bom
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       �� #   U T F - 1 6   w i t h   B O M 
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/utf16-comment
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-        #   U T F - 1 6   w i t h o u t   B O M 
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/encoding/utf16-key
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-        k   =   " v " 
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/float/double-point-1
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       double-point-1 = 0..1
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/float/double-point-2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       double-point-2 = 0.1.2
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/float/exp-double-e-1
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       exp-double-e-1 = 1ee2
-
-     output from parser-cmd (stdout):
-
-
-     want:
-       Exit code 1
-
-FAIL invalid/float/exp-double-e-2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       exp-double-e-2 = 1e2e3
-
-     output from parser-cmd (stdout):
-
 
      want:
        Exit code 1
@@ -6437,7 +4412,7 @@ FAIL invalid/float/leading-zero
 
      output from parser-cmd (stdout):
        {
-         "leading-zero": 3
+         "leading-zero": {"type": "float", "value": 3}
        }
 
      want:
@@ -6451,7 +4426,7 @@ FAIL invalid/float/leading-zero-neg
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-neg": -3
+         "leading-zero-neg": {"type": "float", "value": -3}
        }
 
      want:
@@ -6465,7 +4440,7 @@ FAIL invalid/float/leading-zero-plus
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-plus": 3
+         "leading-zero-plus": {"type": "float", "value": 3}
        }
 
      want:
@@ -6482,8 +4457,10 @@ FAIL invalid/inline-table/duplicate-key-3
          "tbl": {
            "fruit": {
              "apple": {
-               "color":   "red",
-               "texture": {"smooth": true}
+               "color": {"type": "string", "value": "red"},
+               "texture": {
+                 "smooth": {"type": "bool", "value": true}
+               }
              }
            }
          }
@@ -6502,7 +4479,9 @@ FAIL invalid/inline-table/overwrite-01
 
      output from parser-cmd (stdout):
        {
-         "a": {"b": 0}
+         "a": {
+           "b": {"type": "integer", "value": 0}
+         }
        }
 
      want:
@@ -6553,7 +4532,10 @@ FAIL invalid/inline-table/overwrite-08
      output from parser-cmd (stdout):
        {
          "tab": {
-           "inner": {"cat": "worst", "dog": "best"}
+           "inner": {
+             "cat": {"type": "string", "value": "worst"},
+             "dog": {"type": "string", "value": "best"}
+           }
          }
        }
 
@@ -6568,7 +4550,7 @@ FAIL invalid/integer/leading-zero-1
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-1": 1
+         "leading-zero-1": {"type": "integer", "value": 1}
        }
 
      want:
@@ -6582,7 +4564,7 @@ FAIL invalid/integer/leading-zero-2
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-2": 0
+         "leading-zero-2": {"type": "integer", "value": 0}
        }
 
      want:
@@ -6596,7 +4578,7 @@ FAIL invalid/integer/leading-zero-sign-1
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-sign-1": -1
+         "leading-zero-sign-1": {"type": "integer", "value": -1}
        }
 
      want:
@@ -6610,7 +4592,7 @@ FAIL invalid/integer/leading-zero-sign-2
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-sign-2": 1
+         "leading-zero-sign-2": {"type": "integer", "value": 1}
        }
 
      want:
@@ -6624,7 +4606,9 @@ FAIL invalid/key/after-array
 
      output from parser-cmd (stdout):
        {
-         "agencies": [{"owner": "S Cjelli"}]
+         "agencies": [{
+           "owner": {"type": "string", "value": "S Cjelli"}
+         }]
        }
 
      want:
@@ -6638,7 +4622,9 @@ FAIL invalid/key/after-table
 
      output from parser-cmd (stdout):
        {
-         "error": {"this": "should not be here"}
+         "error": {
+           "this": {"type": "string", "value": "should not be here"}
+         }
        }
 
      want:
@@ -6652,8 +4638,8 @@ FAIL invalid/key/after-value
 
      output from parser-cmd (stdout):
        {
-         "first": "Tom",
-         "last":  "Preston-Werner"
+         "first": {"type": "string", "value": "Tom"},
+         "last":  {"type": "string", "value": "Preston-Werner"}
        }
 
      want:
@@ -6667,8 +4653,8 @@ FAIL invalid/key/no-eol
 
      output from parser-cmd (stdout):
        {
-         "a": 1,
-         "b": 2
+         "a": {"type": "integer", "value": 1},
+         "b": {"type": "integer", "value": 2}
        }
 
      want:
@@ -6685,7 +4671,10 @@ FAIL invalid/spec/inline-table-2-0
      output from parser-cmd (stdout):
        {
          "product": {
-           "type": {"edible": false, "name": "Nail"}
+           "type": {
+             "edible": {"type": "bool", "value": false},
+             "name":   {"type": "string", "value": "Nail"}
+           }
          }
        }
 
@@ -6703,7 +4692,10 @@ FAIL invalid/spec/inline-table-3-0
      output from parser-cmd (stdout):
        {
          "product": {
-           "type": {"edible": false, "name": "Nail"}
+           "type": {
+             "edible": {"type": "bool", "value": false},
+             "name":   {"type": "string", "value": "Nail"}
+           }
          }
        }
 
@@ -6728,9 +4720,13 @@ FAIL invalid/spec/table-9-0
        {
          "fruit": {
            "apple": {
-             "color":   "red",
-             "taste":   {"sweet": true},
-             "texture": {"smooth": true}
+             "color": {"type": "string", "value": "red"},
+             "taste": {
+               "sweet": {"type": "bool", "value": true}
+             },
+             "texture": {
+               "smooth": {"type": "bool", "value": true}
+             }
            }
          }
        }
@@ -6756,9 +4752,13 @@ FAIL invalid/spec/table-9-1
        {
          "fruit": {
            "apple": {
-             "color":   "red",
-             "taste":   {"sweet": true},
-             "texture": {"smooth": true}
+             "color": {"type": "string", "value": "red"},
+             "taste": {
+               "sweet": {"type": "bool", "value": true}
+             },
+             "texture": {
+               "smooth": {"type": "bool", "value": true}
+             }
            }
          }
        }
@@ -6774,7 +4774,7 @@ FAIL invalid/string/bad-byte-escape
 
      output from parser-cmd (stdout):
        {
-         "naughty": "\\xAg"
+         "naughty": {"type": "string", "value": "\\xAg"}
        }
 
      want:
@@ -6788,7 +4788,7 @@ FAIL invalid/string/bad-escape-1
 
      output from parser-cmd (stdout):
        {
-         "invalid-escape": "This string has a bad \\a escape character."
+         "invalid-escape": {"type": "string", "value": "This string has a bad \\a escape character."}
        }
 
      want:
@@ -6802,7 +4802,7 @@ FAIL invalid/string/bad-escape-2
 
      output from parser-cmd (stdout):
        {
-         "invalid-escape": "This string has a bad \\  escape character."
+         "invalid-escape": {"type": "string", "value": "This string has a bad \\  escape character."}
        }
 
      want:
@@ -6816,7 +4816,7 @@ FAIL invalid/string/bad-hex-esc-1
 
      output from parser-cmd (stdout):
        {
-         "bad-hex-esc-1": "\\x0g"
+         "bad-hex-esc-1": {"type": "string", "value": "\\x0g"}
        }
 
      want:
@@ -6830,7 +4830,7 @@ FAIL invalid/string/bad-hex-esc-2
 
      output from parser-cmd (stdout):
        {
-         "bad-hex-esc-2": "\\xG0"
+         "bad-hex-esc-2": {"type": "string", "value": "\\xG0"}
        }
 
      want:
@@ -6844,7 +4844,7 @@ FAIL invalid/string/bad-hex-esc-3
 
      output from parser-cmd (stdout):
        {
-         "bad-hex-esc-3": "\\x"
+         "bad-hex-esc-3": {"type": "string", "value": "\\x"}
        }
 
      want:
@@ -6858,7 +4858,7 @@ FAIL invalid/string/bad-hex-esc-4
 
      output from parser-cmd (stdout):
        {
-         "bad-hex-esc-4": "\\x 50"
+         "bad-hex-esc-4": {"type": "string", "value": "\\x 50"}
        }
 
      want:
@@ -6872,7 +4872,7 @@ FAIL invalid/string/bad-hex-esc-5
 
      output from parser-cmd (stdout):
        {
-         "bad-hex-esc-5": "\\x 50"
+         "bad-hex-esc-5": {"type": "string", "value": "\\x 50"}
        }
 
      want:
@@ -6886,7 +4886,7 @@ FAIL invalid/string/bad-slash-escape
 
      output from parser-cmd (stdout):
        {
-         "invalid-escape": "This string has a bad \\/ escape character."
+         "invalid-escape": {"type": "string", "value": "This string has a bad \\/ escape character."}
        }
 
      want:
@@ -6900,7 +4900,7 @@ FAIL invalid/string/bad-uni-esc-1
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-1": "val\\ue"
+         "bad-uni-esc-1": {"type": "string", "value": "val\\ue"}
        }
 
      want:
@@ -6914,7 +4914,7 @@ FAIL invalid/string/bad-uni-esc-2
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-2": "val\\Ux"
+         "bad-uni-esc-2": {"type": "string", "value": "val\\Ux"}
        }
 
      want:
@@ -6928,7 +4928,7 @@ FAIL invalid/string/bad-uni-esc-3
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-3": "val\\U0000000"
+         "bad-uni-esc-3": {"type": "string", "value": "val\\U0000000"}
        }
 
      want:
@@ -6942,7 +4942,7 @@ FAIL invalid/string/bad-uni-esc-4
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-4": "val\\U0000"
+         "bad-uni-esc-4": {"type": "string", "value": "val\\U0000"}
        }
 
      want:
@@ -6956,7 +4956,7 @@ FAIL invalid/string/bad-uni-esc-5
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-5": "val\\Ugggggggg"
+         "bad-uni-esc-5": {"type": "string", "value": "val\\Ugggggggg"}
        }
 
      want:
@@ -6970,7 +4970,7 @@ FAIL invalid/string/bad-uni-esc-6
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-6": "This string contains a non scalar unicode codepoint \\uD801"
+         "bad-uni-esc-6": {"type": "string", "value": "This string contains a non scalar unicode codepoint \\uD801"}
        }
 
      want:
@@ -6984,7 +4984,7 @@ FAIL invalid/string/bad-uni-esc-7
 
      output from parser-cmd (stdout):
        {
-         "bad-uni-esc-7": "\\uabag"
+         "bad-uni-esc-7": {"type": "string", "value": "\\uabag"}
        }
 
      want:
@@ -6998,7 +4998,7 @@ FAIL invalid/string/basic-byte-escapes
 
      output from parser-cmd (stdout):
        {
-         "answer": "\\x33"
+         "answer": {"type": "string", "value": "\\x33"}
        }
 
      want:
@@ -7012,7 +5012,7 @@ FAIL invalid/string/basic-multiline-out-of-range-unicode-escape-1
 
      output from parser-cmd (stdout):
        {
-         "a": "\\UFFFFFFFF"
+         "a": {"type": "string", "value": "\\UFFFFFFFF"}
        }
 
      want:
@@ -7026,7 +5026,7 @@ FAIL invalid/string/basic-multiline-out-of-range-unicode-escape-2
 
      output from parser-cmd (stdout):
        {
-         "a": "\\U00D80000"
+         "a": {"type": "string", "value": "\\U00D80000"}
        }
 
      want:
@@ -7040,7 +5040,7 @@ FAIL invalid/string/basic-multiline-unknown-escape
 
      output from parser-cmd (stdout):
        {
-         "a": "\\@"
+         "a": {"type": "string", "value": "\\@"}
        }
 
      want:
@@ -7054,7 +5054,7 @@ FAIL invalid/string/basic-out-of-range-unicode-escape-1
 
      output from parser-cmd (stdout):
        {
-         "a": "\\UFFFFFFFF"
+         "a": {"type": "string", "value": "\\UFFFFFFFF"}
        }
 
      want:
@@ -7068,7 +5068,7 @@ FAIL invalid/string/basic-out-of-range-unicode-escape-2
 
      output from parser-cmd (stdout):
        {
-         "a": "\\U00D80000"
+         "a": {"type": "string", "value": "\\U00D80000"}
        }
 
      want:
@@ -7082,7 +5082,7 @@ FAIL invalid/string/basic-unknown-escape
 
      output from parser-cmd (stdout):
        {
-         "a": "\\@"
+         "a": {"type": "string", "value": "\\@"}
        }
 
      want:
@@ -7096,7 +5096,7 @@ FAIL invalid/string/multiline-bad-escape-1
 
      output from parser-cmd (stdout):
        {
-         "k": "t\\a"
+         "k": {"type": "string", "value": "t\\a"}
        }
 
      want:
@@ -7111,7 +5111,7 @@ FAIL invalid/string/multiline-bad-escape-2
 
      output from parser-cmd (stdout):
        {
-         "k": "t\\ t"
+         "k": {"type": "string", "value": "t\\ t"}
        }
 
      want:
@@ -7126,7 +5126,7 @@ FAIL invalid/string/multiline-bad-escape-3
 
      output from parser-cmd (stdout):
        {
-         "k": "t\\ "
+         "k": {"type": "string", "value": "t\\ "}
        }
 
      want:
@@ -7140,7 +5140,7 @@ FAIL invalid/string/multiline-bad-escape-4
 
      output from parser-cmd (stdout):
        {
-         "backslash": "\\"
+         "backslash": {"type": "string", "value": "\\"}
        }
 
      want:
@@ -7156,7 +5156,7 @@ FAIL invalid/string/multiline-escape-space-1
 
      output from parser-cmd (stdout):
        {
-         "a": "\n  foo \\ \\n\n  bar"
+         "a": {"type": "string", "value": "\n  foo \\ \\n\n  bar"}
        }
 
      want:
@@ -7173,7 +5173,7 @@ FAIL invalid/string/multiline-escape-space-2
 
      output from parser-cmd (stdout):
        {
-         "bee": "\nhee \\\n\ngee \\   "
+         "bee": {"type": "string", "value": "\nhee \\\n\ngee \\   "}
        }
 
      want:
@@ -7206,8 +5206,11 @@ FAIL invalid/table/append-with-dotted-keys-1
          "a": {
            "b": {
              "c": {
-               "t": "Using dotted keys to add to [a.b.c] after explicitly defining it above is not allowed",
-               "z": 9
+               "z": {"type": "integer", "value": 9},
+               "t": {
+                 "type":  "string",
+                 "value": "Using dotted keys to add to [a.b.c] after explicitly defining it above is not allowed"
+               }
              }
            }
          }
@@ -7235,9 +5238,12 @@ FAIL invalid/table/append-with-dotted-keys-2
            "b": {
              "c": {
                "d": {
-                 "z": 9,
+                 "z": {"type": "integer", "value": 9},
                  "k": {
-                   "t": "Using dotted keys to add to [a.b.c.d] after explicitly defining it above is not allowed"
+                   "t": {
+                     "type":  "string",
+                     "value": "Using dotted keys to add to [a.b.c.d] after explicitly defining it above is not allowed"
+                   }
                  }
                }
              }
@@ -7260,7 +5266,10 @@ FAIL invalid/table/duplicate
 
      output from parser-cmd (stdout):
        {
-         "a": {"b": 1, "c": 2}
+         "a": {
+           "b": {"type": "integer", "value": 1},
+           "c": {"type": "integer", "value": 2}
+         }
        }
 
      want:
@@ -7278,7 +5287,9 @@ FAIL invalid/table/duplicate-key-dotted-table
      output from parser-cmd (stdout):
        {
          "fruit": {
-           "apple": {"color": "red"}
+           "apple": {
+             "color": {"type": "string", "value": "red"}
+           }
          }
        }
 
@@ -7298,7 +5309,9 @@ FAIL invalid/table/duplicate-key-dotted-table2
        {
          "fruit": {
            "apple": {
-             "taste": {"sweet": true}
+             "taste": {
+               "sweet": {"type": "bool", "value": true}
+             }
            }
          }
        }
@@ -7318,7 +5331,9 @@ FAIL invalid/table/redefine-2
        {
          "t1": {
            "t2": {
-             "t3": {"v": 0}
+             "t3": {
+               "v": {"type": "integer", "value": 0}
+             }
            }
          }
        }
@@ -7338,7 +5353,9 @@ FAIL invalid/table/redefine-3
        {
          "t1": {
            "t2": {
-             "t3": {"v": 0}
+             "t3": {
+               "v": {"type": "integer", "value": 0}
+             }
            }
          }
        }
@@ -7365,5 +5382,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [cargo decode]: using embedded tests
-  valid tests:  15 passed, 167 failed
-invalid tests: 265 passed, 106 failed
+  valid tests:  36 passed, 146 failed
+invalid tests: 288 passed, 83 failed

@@ -401,3 +401,12 @@ impl TryFrom<ast::InlineTable> for Table {
         }
     }
 }
+
+impl IntoIterator for Table {
+    type Item = (Key, Value);
+    type IntoIter = indexmap::map::IntoIter<Key, Value>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.key_values.into_iter()
+    }
+}

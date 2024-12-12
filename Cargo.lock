@@ -2558,11 +2558,14 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "ast",
+ "chrono",
  "config",
- "document",
  "document-tree",
+ "indexmap 2.6.0",
  "parser",
+ "serde",
  "serde_json",
+ "text",
 ]
 
 [[package]]
