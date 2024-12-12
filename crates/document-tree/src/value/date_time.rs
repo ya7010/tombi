@@ -1,8 +1,7 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OffsetDateTime {
     value: chrono::DateTime<chrono::FixedOffset>,
-    range: text::Range,
-    symbol_range: text::Range,
+    node: ast::OffsetDateTime,
 }
 
 impl OffsetDateTime {
@@ -12,13 +11,18 @@ impl OffsetDateTime {
     }
 
     #[inline]
+    pub fn node(&self) -> &ast::OffsetDateTime {
+        &self.node
+    }
+
+    #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        self.node.token().unwrap().range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
@@ -27,8 +31,7 @@ pub struct LocalDateTime {
     // NOTE: `chrono::DateTime<chrono::Local>` is not enough to represent local date time.
     //       `chrono::Local.from_local_datetime(native_date_time)` cannot uniquely determine the time zone in some cases, so we handle NativeDateTime.
     value: chrono::NaiveDateTime,
-    range: text::Range,
-    symbol_range: text::Range,
+    node: ast::LocalDateTime,
 }
 
 impl LocalDateTime {
@@ -38,21 +41,25 @@ impl LocalDateTime {
     }
 
     #[inline]
+    pub fn node(&self) -> &ast::LocalDateTime {
+        &self.node
+    }
+
+    #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        self.node.token().unwrap().range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDate {
     value: chrono::NaiveDate,
-    range: text::Range,
-    symbol_range: text::Range,
+    node: ast::LocalDate,
 }
 
 impl LocalDate {
@@ -62,21 +69,25 @@ impl LocalDate {
     }
 
     #[inline]
+    pub fn node(&self) -> &ast::LocalDate {
+        &self.node
+    }
+
+    #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        self.node.token().unwrap().range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalTime {
     value: chrono::NaiveTime,
-    range: text::Range,
-    symbol_range: text::Range,
+    node: ast::LocalTime,
 }
 
 impl LocalTime {
@@ -86,13 +97,18 @@ impl LocalTime {
     }
 
     #[inline]
+    pub fn node(&self) -> &ast::LocalTime {
+        &self.node
+    }
+
+    #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        self.node.token().unwrap().range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
@@ -103,11 +119,7 @@ impl TryFrom<ast::OffsetDateTime> for OffsetDateTime {
         let token = node.token().unwrap();
         let range = token.range();
         match chrono::DateTime::parse_from_rfc3339(token.text()) {
-            Ok(value) => Ok(Self {
-                value,
-                range,
-                symbol_range: range,
-            }),
+            Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseOffsetDateTimeError {
                 error,
                 range,
@@ -128,11 +140,7 @@ impl TryFrom<ast::LocalDateTime> for LocalDateTime {
         }
 
         match chrono::NaiveDateTime::parse_from_str(&text, "%Y-%m-%d %H:%M:%S%.f") {
-            Ok(value) => Ok(Self {
-                value,
-                range,
-                symbol_range: range,
-            }),
+            Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateTimeError { error, range }]),
         }
     }
@@ -145,11 +153,7 @@ impl TryFrom<ast::LocalDate> for LocalDate {
         let token = node.token().unwrap();
         let range = token.range();
         match chrono::NaiveDate::parse_from_str(token.text(), "%Y-%m-%d") {
-            Ok(value) => Ok(Self {
-                value,
-                range,
-                symbol_range: range,
-            }),
+            Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateError { error, range }]),
         }
     }
@@ -162,11 +166,7 @@ impl TryFrom<ast::LocalTime> for LocalTime {
         let token = node.token().unwrap();
         let range = token.range();
         match chrono::NaiveTime::parse_from_str(token.text(), "%H:%M:%S%.f") {
-            Ok(value) => Ok(Self {
-                value,
-                range,
-                symbol_range: range,
-            }),
+            Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseLocalTimeError { error, range }]),
         }
     }

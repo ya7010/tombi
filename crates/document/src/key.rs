@@ -1,3 +1,5 @@
+use text::raw_string;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
     BareKey,
@@ -22,15 +24,16 @@ pub struct Key {
 }
 
 impl Key {
+    #[inline]
     pub fn value(&self) -> &str {
         &self.value
     }
 
     pub fn to_raw_text(&self) -> String {
         match self.kind {
-            KeyKind::BareKey => self.value.to_string(),
-            KeyKind::BasicString => self.value[1..self.value.len() - 1].replace(r#"\""#, "\""),
-            KeyKind::LiteralString => self.value[1..self.value.len() - 1].replace(r#"\'"#, "'to'"),
+            KeyKind::BareKey => raw_string::from_bare_key(self.value()),
+            KeyKind::BasicString => raw_string::from_basic_string(self.value()),
+            KeyKind::LiteralString => raw_string::from_literal_string(self.value()),
         }
     }
 }

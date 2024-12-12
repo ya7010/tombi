@@ -9,10 +9,21 @@ pub enum StringKind {
 impl From<document_tree::StringKind> for StringKind {
     fn from(kind: document_tree::StringKind) -> Self {
         match kind {
-            document_tree::StringKind::BasicString => Self::BasicString,
-            document_tree::StringKind::LiteralString => Self::LiteralString,
-            document_tree::StringKind::MultiLineBasicString => Self::MultiLineBasicString,
-            document_tree::StringKind::MultiLineLiteralString => Self::MultiLineLiteralString,
+            document_tree::StringKind::BasicString(_) => Self::BasicString,
+            document_tree::StringKind::LiteralString(_) => Self::LiteralString,
+            document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
+            document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
+        }
+    }
+}
+
+impl From<&document_tree::StringKind> for StringKind {
+    fn from(kind: &document_tree::StringKind) -> Self {
+        match kind {
+            document_tree::StringKind::BasicString(_) => Self::BasicString,
+            document_tree::StringKind::LiteralString(_) => Self::LiteralString,
+            document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
+            document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
         }
     }
 }

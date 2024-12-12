@@ -1,25 +1,23 @@
 use text::raw_string;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StringKind {
-    BasicString,
-    LiteralString,
-    MultiLineBasicString,
-    MultiLineLiteralString,
+    BasicString(ast::BasicString),
+    LiteralString(ast::LiteralString),
+    MultiLineBasicString(ast::MultiLineBasicString),
+    MultiLineLiteralString(ast::MultiLineLiteralString),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct String {
     kind: StringKind,
     value: std::string::String,
-    range: text::Range,
-    symbol_range: text::Range,
 }
 
 impl String {
     #[inline]
-    pub fn kind(&self) -> StringKind {
-        self.kind
+    pub fn kind(&self) -> &StringKind {
+        &self.kind
     }
 
     #[inline]
@@ -30,12 +28,12 @@ impl String {
     #[inline]
     pub fn raw_string(&self) -> std::string::String {
         match self.kind {
-            StringKind::BasicString => raw_string::from_basic_string(&self.value),
-            StringKind::LiteralString => raw_string::from_literal_string(&self.value),
-            StringKind::MultiLineBasicString => {
+            StringKind::BasicString(_) => raw_string::from_basic_string(&self.value),
+            StringKind::LiteralString(_) => raw_string::from_literal_string(&self.value),
+            StringKind::MultiLineBasicString(_) => {
                 raw_string::from_multi_line_basic_string(&self.value)
             }
-            StringKind::MultiLineLiteralString => {
+            StringKind::MultiLineLiteralString(_) => {
                 raw_string::from_multi_line_literal_string(&self.value)
             }
         }
@@ -43,12 +41,19 @@ impl String {
 
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        match self.kind() {
+            StringKind::BasicString(node) => node.token(),
+            StringKind::LiteralString(node) => node.token(),
+            StringKind::MultiLineBasicString(node) => node.token(),
+            StringKind::MultiLineLiteralString(node) => node.token(),
+        }
+        .unwrap()
+        .range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
@@ -59,10 +64,8 @@ impl TryFrom<ast::BasicString> for String {
         let token = node.token().unwrap();
 
         Ok(Self {
-            kind: StringKind::BasicString,
+            kind: StringKind::BasicString(node),
             value: token.text().to_string(),
-            range: token.range(),
-            symbol_range: token.range(),
         })
     }
 }
@@ -74,10 +77,8 @@ impl TryFrom<ast::LiteralString> for String {
         let token = node.token().unwrap();
 
         Ok(Self {
-            kind: StringKind::LiteralString,
+            kind: StringKind::LiteralString(node),
             value: token.text().to_string(),
-            range: token.range(),
-            symbol_range: token.range(),
         })
     }
 }
@@ -89,10 +90,8 @@ impl TryFrom<ast::MultiLineBasicString> for String {
         let token = node.token().unwrap();
 
         Ok(Self {
-            kind: StringKind::MultiLineBasicString,
+            kind: StringKind::MultiLineBasicString(node),
             value: token.text().to_string(),
-            range: token.range(),
-            symbol_range: token.range(),
         })
     }
 }
@@ -104,10 +103,8 @@ impl TryFrom<ast::MultiLineLiteralString> for String {
         let token = node.token().unwrap();
 
         Ok(Self {
-            kind: StringKind::MultiLineLiteralString,
+            kind: StringKind::MultiLineLiteralString(node),
             value: token.text().to_string(),
-            range: token.range(),
-            symbol_range: token.range(),
         })
     }
 }

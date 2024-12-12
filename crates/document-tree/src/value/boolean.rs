@@ -1,8 +1,7 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
     value: bool,
-    range: text::Range,
-    symbol_range: text::Range,
+    node: ast::Boolean,
 }
 
 impl Boolean {
@@ -12,13 +11,18 @@ impl Boolean {
     }
 
     #[inline]
+    pub fn node(&self) -> &ast::Boolean {
+        &self.node
+    }
+
+    #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        self.node.token().unwrap().range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
@@ -33,8 +37,7 @@ impl TryFrom<ast::Boolean> for Boolean {
                 "false" => false,
                 _ => unreachable!(),
             },
-            range: token.range(),
-            symbol_range: token.range(),
+            node,
         })
     }
 }

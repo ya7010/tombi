@@ -9,10 +9,21 @@ pub enum IntegerKind {
 impl From<document_tree::IntegerKind> for IntegerKind {
     fn from(kind: document_tree::IntegerKind) -> Self {
         match kind {
-            document_tree::IntegerKind::Binary => Self::Binary,
-            document_tree::IntegerKind::Decimal => Self::Decimal,
-            document_tree::IntegerKind::Octal => Self::Octal,
-            document_tree::IntegerKind::Hexadecimal => Self::Hexadecimal,
+            document_tree::IntegerKind::Binary(_) => Self::Binary,
+            document_tree::IntegerKind::Decimal(_) => Self::Decimal,
+            document_tree::IntegerKind::Octal(_) => Self::Octal,
+            document_tree::IntegerKind::Hexadecimal(_) => Self::Hexadecimal,
+        }
+    }
+}
+
+impl From<&document_tree::IntegerKind> for IntegerKind {
+    fn from(kind: &document_tree::IntegerKind) -> Self {
+        match kind {
+            document_tree::IntegerKind::Binary(_) => Self::Binary,
+            document_tree::IntegerKind::Decimal(_) => Self::Decimal,
+            document_tree::IntegerKind::Octal(_) => Self::Octal,
+            document_tree::IntegerKind::Hexadecimal(_) => Self::Hexadecimal,
         }
     }
 }

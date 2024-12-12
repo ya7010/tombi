@@ -1,142 +1,3 @@
-FAIL valid/array/array
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       ints = [1, 2, 3, ]
-       floats = [1.1, 2.1, 3.1]
-       strings = ["a", "b", "c"]
-       dates = [
-         1987-07-05T17:45:00Z,
-         1979-05-27T07:32:00Z,
-         2006-06-01T11:00:00Z,
-       ]
-       comments = [
-                1,
-                2, #this is ok
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "comments": [
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2}
-         ],
-         "dates": [
-           {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-           {"type": "datetime", "value": "1979-05-27T07:32:00Z"},
-           {"type": "datetime", "value": "2006-06-01T11:00:00Z"}
-         ],
-         "floats": [
-           {"type": "float", "value": 1},
-           {"type": "float", "value": 2},
-           {"type": "float", "value": 3}
-         ],
-         "ints": [
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2},
-           {"type": "integer", "value": 3}
-         ],
-         "strings": [
-           {"type": "string", "value": "a"},
-           {"type": "string", "value": "b"},
-           {"type": "string", "value": "c"}
-         ]
-       }
-
-     want:
-       {
-           "comments": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"}
-           ],
-           "dates": [
-               {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-               {"type": "datetime", "value": "1979-05-27T07:32:00Z"},
-               {"type": "datetime", "value": "2006-06-01T11:00:00Z"}
-           ],
-           "floats": [
-               {"type": "float", "value": "1.1"},
-               {"type": "float", "value": "2.1"},
-               {"type": "float", "value": "3.1"}
-           ],
-           "ints": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ],
-           "strings": [
-               {"type": "string", "value": "a"},
-               {"type": "string", "value": "b"},
-               {"type": "string", "value": "c"}
-           ]
-       }
-
-FAIL valid/array/array-subtables
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [[arr]]
-       [arr.subtab]
-       val=1
-
-       [[arr]]
-       [arr.subtab]
-       val=2
-
-     output from parser-cmd (stdout):
-       {
-         "arr": [
-           {
-             "subtab": {
-               "val": {"type": "integer", "value": 1}
-             }
-           },
-           {
-             "subtab": {
-               "val": {"type": "integer", "value": 2}
-             }
-           }
-         ]
-       }
-
-     want:
-       {
-           "arr": [
-               {
-                   "subtab": {
-                       "val": {"type": "integer", "value": "1"}
-                   }
-               },
-               {
-                   "subtab": {
-                       "val": {"type": "integer", "value": "2"}
-                   }
-               }
-           ]
-       }
-
-FAIL valid/array/bool
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       a = [true, false]
-
-     output from parser-cmd (stdout):
-       {
-         "a": [
-           {"type": "bool", "value": true},
-           {"type": "bool", "value": false}
-         ]
-       }
-
-     want:
-       {
-           "a": [
-               {"type": "bool", "value": "true"},
-               {"type": "bool", "value": "false"}
-           ]
-       }
-
 FAIL valid/array/hetergeneous
      Array lengths differ for key "mixed":
        Expected:     3
@@ -147,7 +8,7 @@ FAIL valid/array/hetergeneous
 
      output from parser-cmd (stdout):
        {
-         "mixed": [[{"type": "float", "value": 2}]]
+         "mixed": [[{"type": "float", "value": "2.1"}]]
        }
 
      want:
@@ -165,28 +26,6 @@ FAIL valid/array/hetergeneous
                    {"type": "float", "value": "1.1"},
                    {"type": "float", "value": "2.1"}
                ]
-           ]
-       }
-
-FAIL valid/array/mixed-int-array
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       arrays-and-ints =  [1, ["Arrays are not integers."]]
-
-     output from parser-cmd (stdout):
-       {
-         "arrays-and-ints": [
-           {"type": "integer", "value": 1},
-           [{"type": "string", "value": "Arrays are not integers."}]
-         ]
-       }
-
-     want:
-       {
-           "arrays-and-ints": [
-               {"type": "integer", "value": "1"},
-               [{"type": "string", "value": "Arrays are not integers."}]
            ]
        }
 
@@ -211,235 +50,6 @@ FAIL valid/array/mixed-int-float
            ]
        }
 
-FAIL valid/array/mixed-int-string
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       strings-and-ints = ["hi", 42]
-
-     output from parser-cmd (stdout):
-       {
-         "strings-and-ints": [
-           {"type": "string", "value": "hi"},
-           {"type": "integer", "value": 42}
-         ]
-       }
-
-     want:
-       {
-           "strings-and-ints": [
-               {"type": "string", "value": "hi"},
-               {"type": "integer", "value": "42"}
-           ]
-       }
-
-FAIL valid/array/mixed-string-table
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       contributors = [
-         "Foo Bar <foo@example.com>",
-         { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
-       ]
-
-       # Start with a table as the first element. This tests a case that some libraries
-       # might have where they will check if the first entry is a table/map/hash/assoc
-       # array and then encode it as a table array. This was a reasonable thing to do
-       # before TOML 1.0 since arrays could only contain one type, but now it's no
-       # longer.
-       mixed = [{k="a"}, "b", 1]
-
-     output from parser-cmd (stdout):
-       {
-         "contributors": [
-           {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
-           {
-             "email": {"type": "string", "value": "bazqux@example.com"},
-             "name":  {"type": "string", "value": "Baz Qux"},
-             "url":   {"type": "string", "value": "https://example.com/bazqux"}
-           }
-         ],
-         "mixed": [
-           {
-             "k": {"type": "string", "value": "a"}
-           },
-           {"type": "string", "value": "b"},
-           {"type": "integer", "value": 1}
-         ]
-       }
-
-     want:
-       {
-           "contributors": [
-               {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
-               {
-                   "email": {"type": "string", "value": "bazqux@example.com"},
-                   "name":  {"type": "string", "value": "Baz Qux"},
-                   "url":   {"type": "string", "value": "https://example.com/bazqux"}
-               }
-           ],
-           "mixed": [
-               {
-                   "k": {"type": "string", "value": "a"}
-               },
-               {"type": "string", "value": "b"},
-               {"type": "integer", "value": "1"}
-           ]
-       }
-
-FAIL valid/array/nested-double
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       nest = [
-       	[
-       		["a"],
-       		[1, 2, [3]]
-       	]
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "nest": [[
-           [{"type": "string", "value": "a"}],
-           [
-             {"type": "integer", "value": 1},
-             {"type": "integer", "value": 2},
-             [{"type": "integer", "value": 3}]
-           ]
-         ]]
-       }
-
-     want:
-       {
-           "nest": [[
-               [{"type": "string", "value": "a"}],
-               [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"},
-                   [{"type": "integer", "value": "3"}]
-               ]
-           ]]
-       }
-
-FAIL valid/array/nospaces
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       ints = [1,2,3]
-
-     output from parser-cmd (stdout):
-       {
-         "ints": [
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2},
-           {"type": "integer", "value": 3}
-         ]
-       }
-
-     want:
-       {
-           "ints": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ]
-       }
-
-FAIL valid/array/open-parent-table
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [[parent-table.arr]]
-       [[parent-table.arr]]
-       [parent-table]
-       not-arr = 1
-
-     output from parser-cmd (stdout):
-       {
-         "parent-table": {
-           "not-arr": {"type": "integer", "value": 1},
-           "arr": [
-             {},
-             {}
-           ]
-         }
-       }
-
-     want:
-       {
-           "parent-table": {
-               "not-arr": {"type": "integer", "value": "1"},
-               "arr": [
-                   {},
-                   {}
-               ]
-           }
-       }
-
-FAIL valid/array/trailing-comma
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       arr-1 = [1,]
-
-       arr-2 = [2,3,]
-
-       arr-3 = [4,
-       ]
-
-       arr-4 = [
-       	5,
-       	6,
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "arr-1": [{"type": "integer", "value": 1}],
-         "arr-3": [{"type": "integer", "value": 4}],
-         "arr-2": [
-           {"type": "integer", "value": 2},
-           {"type": "integer", "value": 3}
-         ],
-         "arr-4": [
-           {"type": "integer", "value": 5},
-           {"type": "integer", "value": 6}
-         ]
-       }
-
-     want:
-       {
-           "arr-1": [{"type": "integer", "value": "1"}],
-           "arr-3": [{"type": "integer", "value": "4"}],
-           "arr-2": [
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ],
-           "arr-4": [
-               {"type": "integer", "value": "5"},
-               {"type": "integer", "value": "6"}
-           ]
-       }
-
-FAIL valid/bool/bool
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       t = true
-       f = false
-
-     output from parser-cmd (stdout):
-       {
-         "f": {"type": "bool", "value": false},
-         "t": {"type": "bool", "value": true}
-       }
-
-     want:
-       {
-           "f": {"type": "bool", "value": "false"},
-           "t": {"type": "bool", "value": "true"}
-       }
-
 FAIL valid/comment/after-literal-no-ws
      Could not find key "inf" in parser output.
 
@@ -451,8 +61,8 @@ FAIL valid/comment/after-literal-no-ws
 
      output from parser-cmd (stdout):
        {
-         "false": {"type": "bool", "value": false},
-         "true":  {"type": "bool", "value": true}
+         "false": {"type": "bool", "value": "false"},
+         "true":  {"type": "bool", "value": "true"}
        }
 
      want:
@@ -461,65 +71,6 @@ FAIL valid/comment/after-literal-no-ws
            "inf":   {"type": "float", "value": "inf"},
            "nan":   {"type": "float", "value": "nan"},
            "true":  {"type": "bool", "value": "true"}
-       }
-
-FAIL valid/comment/everywhere
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       # Top comment.
-         # Top comment.
-       # Top comment.
-
-       # [no-extraneous-groups-please]
-
-       [group] # Comment
-       answer = 42 # Comment
-       # no-extraneous-keys-please = 999
-       # Inbetween comment.
-       more = [ # Comment
-         # What about multiple # comments?
-         # Can you handle it?
-         #
-                 # Evil.
-       # Evil.
-         42, 42, # Comments within arrays are fun.
-         # What about multiple # comments?
-         # Can you handle it?
-         #
-                 # Evil.
-       # Evil.
-       # ] Did I fool you?
-       ] # Hopefully not.
-
-       # Make sure the space between the datetime and "#" isn't lexed.
-       dt = 1979-05-27T07:32:12-07:00  # c
-       d = 1979-05-27 # Comment
-
-     output from parser-cmd (stdout):
-       {
-         "group": {
-           "answer": {"type": "integer", "value": 42},
-           "d":      {"type": "date-local", "value": "1979-05-27"},
-           "dt":     {"type": "datetime", "value": "1979-05-27T07:32:12-07:00"},
-           "more": [
-             {"type": "integer", "value": 42},
-             {"type": "integer", "value": 42}
-           ]
-         }
-       }
-
-     want:
-       {
-           "group": {
-               "answer": {"type": "integer", "value": "42"},
-               "d":      {"type": "date-local", "value": "1979-05-27"},
-               "dt":     {"type": "datetime", "value": "1979-05-27T07:32:12-07:00"},
-               "more": [
-                   {"type": "integer", "value": "42"},
-                   {"type": "integer", "value": "42"}
-               ]
-           }
        }
 
 FAIL valid/comment/tricky
@@ -610,104 +161,6 @@ FAIL valid/datetime/leap-year
      want:
           <empty>
 
-FAIL valid/example
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       best-day-ever = 1987-07-05T17:45:00Z
-
-       [numtheory]
-       boring = false
-       perfection = [6, 28, 496]
-
-     output from parser-cmd (stdout):
-       {
-         "best-day-ever": {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-         "numtheory": {
-           "boring": {"type": "bool", "value": false},
-           "perfection": [
-             {"type": "integer", "value": 6},
-             {"type": "integer", "value": 28},
-             {"type": "integer", "value": 496}
-           ]
-         }
-       }
-
-     want:
-       {
-           "best-day-ever": {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
-           "numtheory": {
-               "boring": {"type": "bool", "value": "false"},
-               "perfection": [
-                   {"type": "integer", "value": "6"},
-                   {"type": "integer", "value": "28"},
-                   {"type": "integer", "value": "496"}
-               ]
-           }
-       }
-
-FAIL valid/float/exponent
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       lower = 3e2
-       upper = 3E2
-       neg = 3e-2
-       pos = 3E+2
-       zero = 3e0
-       pointlower = 3.1e2
-       pointupper = 3.1E2
-       minustenth = -1E-1
-
-     output from parser-cmd (stdout):
-       {
-         "lower":      {"type": "float", "value": 300},
-         "minustenth": {"type": "float", "value": -0},
-         "neg":        {"type": "float", "value": 0},
-         "pointlower": {"type": "float", "value": 310},
-         "pointupper": {"type": "float", "value": 310},
-         "pos":        {"type": "float", "value": 300},
-         "upper":      {"type": "float", "value": 300},
-         "zero":       {"type": "float", "value": 3}
-       }
-
-     want:
-       {
-           "lower":      {"type": "float", "value": "300.0"},
-           "minustenth": {"type": "float", "value": "-0.1"},
-           "neg":        {"type": "float", "value": "0.03"},
-           "pointlower": {"type": "float", "value": "310.0"},
-           "pointupper": {"type": "float", "value": "310.0"},
-           "pos":        {"type": "float", "value": "300.0"},
-           "upper":      {"type": "float", "value": "300.0"},
-           "zero":       {"type": "float", "value": "3.0"}
-       }
-
-FAIL valid/float/float
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       pi = 3.14
-       pospi = +3.14
-       negpi = -3.14
-       zero-intpart = 0.123
-
-     output from parser-cmd (stdout):
-       {
-         "negpi":        {"type": "float", "value": -3},
-         "pi":           {"type": "float", "value": 3},
-         "pospi":        {"type": "float", "value": 3},
-         "zero-intpart": {"type": "float", "value": 0}
-       }
-
-     want:
-       {
-           "negpi":        {"type": "float", "value": "-3.14"},
-           "pi":           {"type": "float", "value": "3.14"},
-           "pospi":        {"type": "float", "value": "3.14"},
-           "zero-intpart": {"type": "float", "value": "0.123"}
-       }
-
 FAIL valid/float/inf-and-nan
      Could not find key "nan" in parser output.
 
@@ -723,11 +176,11 @@ FAIL valid/float/inf-and-nan
 
      output from parser-cmd (stdout):
        {
-         "infinity":      {"type": "float", "value": null},
-         "infinity_neg":  {"type": "float", "value": null},
-         "infinity_plus": {"type": "float", "value": null},
-         "nan_neg":       {"type": "float", "value": null},
-         "nan_plus":      {"type": "float", "value": null}
+         "infinity":      {"type": "float", "value": "inf"},
+         "infinity_neg":  {"type": "float", "value": "-inf"},
+         "infinity_plus": {"type": "float", "value": "+inf"},
+         "nan_neg":       {"type": "float", "value": "-nan"},
+         "nan_plus":      {"type": "float", "value": "+nan"}
        }
 
      want:
@@ -738,25 +191,6 @@ FAIL valid/float/inf-and-nan
            "nan":           {"type": "float", "value": "nan"},
            "nan_neg":       {"type": "float", "value": "nan"},
            "nan_plus":      {"type": "float", "value": "nan"}
-       }
-
-FAIL valid/float/long
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       longpi = 3.141592653589793
-       neglongpi = -3.141592653589793
-
-     output from parser-cmd (stdout):
-       {
-         "longpi":    {"type": "float", "value": 3},
-         "neglongpi": {"type": "float", "value": -3}
-       }
-
-     want:
-       {
-           "longpi":    {"type": "float", "value": "3.141592653589793"},
-           "neglongpi": {"type": "float", "value": "-3.141592653589793"}
        }
 
 FAIL valid/float/max-int
@@ -804,137 +238,6 @@ FAIL valid/float/underscore
 
      want:
           <empty>
-
-FAIL valid/float/zero
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       zero = 0.0
-       signed-pos = +0.0
-       signed-neg = -0.0
-       exponent = 0e0
-       exponent-two-0 = 0e00
-       exponent-signed-pos = +0e0
-       exponent-signed-neg = -0e0
-
-     output from parser-cmd (stdout):
-       {
-         "exponent":            {"type": "float", "value": 0},
-         "exponent-signed-neg": {"type": "float", "value": -0},
-         "exponent-signed-pos": {"type": "float", "value": 0},
-         "exponent-two-0":      {"type": "float", "value": 0},
-         "signed-neg":          {"type": "float", "value": -0},
-         "signed-pos":          {"type": "float", "value": 0},
-         "zero":                {"type": "float", "value": 0}
-       }
-
-     want:
-       {
-           "exponent":            {"type": "float", "value": "0"},
-           "exponent-signed-neg": {"type": "float", "value": "-0"},
-           "exponent-signed-pos": {"type": "float", "value": "0"},
-           "exponent-two-0":      {"type": "float", "value": "0"},
-           "signed-neg":          {"type": "float", "value": "-0"},
-           "signed-pos":          {"type": "float", "value": "0"},
-           "zero":                {"type": "float", "value": "0"}
-       }
-
-FAIL valid/implicit-and-explicit-after
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [a.b.c]
-       answer = 42
-
-       [a]
-       better = 43
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "better": {"type": "integer", "value": 43},
-           "b": {
-             "c": {
-               "answer": {"type": "integer", "value": 42}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "better": {"type": "integer", "value": "43"},
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
-
-FAIL valid/implicit-and-explicit-before
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [a]
-       better = 43
-
-       [a.b.c]
-       answer = 42
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "better": {"type": "integer", "value": 43},
-           "b": {
-             "c": {
-               "answer": {"type": "integer", "value": 42}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "better": {"type": "integer", "value": "43"},
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
-
-FAIL valid/implicit-groups
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [a.b.c]
-       answer = 42
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {
-             "c": {
-               "answer": {"type": "integer", "value": 42}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "b": {
-                   "c": {
-                       "answer": {"type": "integer", "value": "42"}
-                   }
-               }
-           }
-       }
 
 FAIL valid/inline-table/array
      exit status 101
@@ -986,30 +289,8 @@ FAIL valid/inline-table/array-values
      want:
           <empty>
 
-FAIL valid/inline-table/bool
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       a = {a = true, b = false}
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "a": {"type": "bool", "value": true},
-           "b": {"type": "bool", "value": false}
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "a": {"type": "bool", "value": "true"},
-               "b": {"type": "bool", "value": "false"}
-           }
-       }
-
 FAIL valid/inline-table/empty
-     Malformed output from your encoder: float64 is not a string
+     Could not find key "nested_empty.empty" in parser output.
 
      input sent to parser-cmd:
        empty1 = {}
@@ -1027,14 +308,14 @@ FAIL valid/inline-table/empty
          "with_cmt": {},
          "empty_in_array": [
            {
-             "not_empty": {"type": "integer", "value": 1}
+             "not_empty": {"type": "integer", "value": "1"}
            },
            {}
          ],
          "empty_in_array2": [
            {},
            {
-             "not_empty": {"type": "integer", "value": 1}
+             "not_empty": {"type": "integer", "value": "1"}
            }
          ],
          "many_empty": [
@@ -1074,30 +355,6 @@ FAIL valid/inline-table/empty
            }
        }
 
-FAIL valid/inline-table/end-in-bool
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       black = { python=">3.6", version=">=18.9b0", allow_prereleases=true }
-
-     output from parser-cmd (stdout):
-       {
-         "black": {
-           "allow_prereleases": {"type": "bool", "value": true},
-           "python":            {"type": "string", "value": "\u003e3.6"},
-           "version":           {"type": "string", "value": "\u003e=18.9b0"}
-         }
-       }
-
-     want:
-       {
-           "black": {
-               "allow_prereleases": {"type": "bool", "value": "true"},
-               "python":            {"type": "string", "value": "\u003e3.6"},
-               "version":           {"type": "string", "value": "\u003e=18.9b0"}
-           }
-       }
-
 FAIL valid/inline-table/inline-table
      exit status 101
 
@@ -1134,371 +391,6 @@ FAIL valid/inline-table/key-dotted-1
      want:
           <empty>
 
-FAIL valid/inline-table/key-dotted-2
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       many.dots.here.dot.dot.dot = {a.b.c = 1, a.b.d = 2}
-
-     output from parser-cmd (stdout):
-       {
-         "many": {
-           "dots": {
-             "here": {
-               "dot": {
-                 "dot": {
-                   "dot": {
-                     "a": {
-                       "b": {
-                         "c": {"type": "integer", "value": 1},
-                         "d": {"type": "integer", "value": 2}
-                       }
-                     }
-                   }
-                 }
-               }
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "many": {
-               "dots": {
-                   "here": {
-                       "dot": {
-                           "dot": {
-                               "dot": {
-                                   "a": {
-                                       "b": {
-                                           "c": {"type": "integer", "value": "1"},
-                                           "d": {"type": "integer", "value": "2"}
-                                       }
-                                   }
-                               }
-                           }
-                       }
-                   }
-               }
-           }
-       }
-
-FAIL valid/inline-table/key-dotted-3
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [tbl]
-       a.b.c = {d.e=1}
-
-       [tbl.x]
-       a.b.c = {d.e=1}
-
-     output from parser-cmd (stdout):
-       {
-         "tbl": {
-           "a": {
-             "b": {
-               "c": {
-                 "d": {
-                   "e": {"type": "integer", "value": 1}
-                 }
-               }
-             }
-           },
-           "x": {
-             "a": {
-               "b": {
-                 "c": {
-                   "d": {
-                     "e": {"type": "integer", "value": 1}
-                   }
-                 }
-               }
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "tbl": {
-               "a": {
-                   "b": {
-                       "c": {
-                           "d": {
-                               "e": {"type": "integer", "value": "1"}
-                           }
-                       }
-                   }
-               },
-               "x": {
-                   "a": {
-                       "b": {
-                           "c": {
-                               "d": {
-                                   "e": {"type": "integer", "value": "1"}
-                               }
-                           }
-                       }
-                   }
-               }
-           }
-       }
-
-FAIL valid/inline-table/key-dotted-4
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [[arr]]
-       t = {a.b=1}
-       T = {a.b=1}
-
-       [[arr]]
-       t = {a.b=2}
-       T = {a.b=2}
-
-     output from parser-cmd (stdout):
-       {
-         "arr": [
-           {
-             "T": {
-               "a": {
-                 "b": {"type": "integer", "value": 1}
-               }
-             },
-             "t": {
-               "a": {
-                 "b": {"type": "integer", "value": 1}
-               }
-             }
-           },
-           {
-             "T": {
-               "a": {
-                 "b": {"type": "integer", "value": 2}
-               }
-             },
-             "t": {
-               "a": {
-                 "b": {"type": "integer", "value": 2}
-               }
-             }
-           }
-         ]
-       }
-
-     want:
-       {
-           "arr": [
-               {
-                   "T": {
-                       "a": {
-                           "b": {"type": "integer", "value": "1"}
-                       }
-                   },
-                   "t": {
-                       "a": {
-                           "b": {"type": "integer", "value": "1"}
-                       }
-                   }
-               },
-               {
-                   "T": {
-                       "a": {
-                           "b": {"type": "integer", "value": "2"}
-                       }
-                   },
-                   "t": {
-                       "a": {
-                           "b": {"type": "integer", "value": "2"}
-                       }
-                   }
-               }
-           ]
-       }
-
-FAIL valid/inline-table/key-dotted-5
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       arr-1 = [{a.b = 1}]
-       arr-2 = ["str", {a.b = 1}]
-
-       arr-3 = [{a.b = 1}, {a.b = 2}]
-       arr-4 = ["str", {a.b = 1}, {a.b = 2}]
-
-     output from parser-cmd (stdout):
-       {
-         "arr-1": [{
-           "a": {
-             "b": {"type": "integer", "value": 1}
-           }
-         }],
-         "arr-2": [
-           {"type": "string", "value": "str"},
-           {
-             "a": {
-               "b": {"type": "integer", "value": 1}
-             }
-           }
-         ],
-         "arr-3": [
-           {
-             "a": {
-               "b": {"type": "integer", "value": 1}
-             }
-           },
-           {
-             "a": {
-               "b": {"type": "integer", "value": 2}
-             }
-           }
-         ],
-         "arr-4": [
-           {"type": "string", "value": "str"},
-           {
-             "a": {
-               "b": {"type": "integer", "value": 1}
-             }
-           },
-           {
-             "a": {
-               "b": {"type": "integer", "value": 2}
-             }
-           }
-         ]
-       }
-
-     want:
-       {
-           "arr-1": [{
-               "a": {
-                   "b": {"type": "integer", "value": "1"}
-               }
-           }],
-           "arr-2": [
-               {"type": "string", "value": "str"},
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "1"}
-                   }
-               }
-           ],
-           "arr-3": [
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "1"}
-                   }
-               },
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "2"}
-                   }
-               }
-           ],
-           "arr-4": [
-               {"type": "string", "value": "str"},
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "1"}
-                   }
-               },
-               {
-                   "a": {
-                       "b": {"type": "integer", "value": "2"}
-                   }
-               }
-           ]
-       }
-
-FAIL valid/inline-table/key-dotted-6
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       top.dot.dot = [
-       	{dot.dot.dot = 1},
-       	{dot.dot.dot = 2},
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "top": {
-           "dot": {
-             "dot": [
-               {
-                 "dot": {
-                   "dot": {
-                     "dot": {"type": "integer", "value": 1}
-                   }
-                 }
-               },
-               {
-                 "dot": {
-                   "dot": {
-                     "dot": {"type": "integer", "value": 2}
-                   }
-                 }
-               }
-             ]
-           }
-         }
-       }
-
-     want:
-       {
-           "top": {
-               "dot": {
-                   "dot": [
-                       {
-                           "dot": {
-                               "dot": {
-                                   "dot": {"type": "integer", "value": "1"}
-                               }
-                           }
-                       },
-                       {
-                           "dot": {
-                               "dot": {
-                                   "dot": {"type": "integer", "value": "2"}
-                               }
-                           }
-                       }
-                   ]
-               }
-           }
-       }
-
-FAIL valid/inline-table/key-dotted-7
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       arr = [
-       	{a.b = [{c.d = 1}]}
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "arr": [{
-           "a": {"b": [{
-             "c": {
-               "d": {"type": "integer", "value": 1}
-             }
-           }]}
-         }]
-       }
-
-     want:
-       {
-           "arr": [{
-               "a": {"b": [{
-                   "c": {
-                       "d": {"type": "integer", "value": "1"}
-                   }
-               }]}
-           }]
-       }
-
 FAIL valid/inline-table/multiline
      inline table must be single line
      Error: invalid toml
@@ -1519,85 +411,6 @@ FAIL valid/inline-table/multiline
 
      want:
           <empty>
-
-FAIL valid/inline-table/nest
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       tbl_tbl_empty = { tbl_0 = {} }
-       tbl_tbl_val   = { tbl_1 = { one = 1 } }
-       tbl_arr_tbl   = { arr_tbl = [ { one = 1 } ] }
-       arr_tbl_tbl   = [ { tbl = { one = 1 } } ]
-
-       # Array-of-array-of-table is interesting because it can only
-       # be represented in inline form.
-       arr_arr_tbl_empty = [ [ {} ] ]
-       arr_arr_tbl_val = [ [ { one = 1 } ] ]
-       arr_arr_tbls  = [ [ { one = 1 }, { two = 2 } ] ]
-
-     output from parser-cmd (stdout):
-       {
-         "arr_arr_tbl_empty": [[{}]],
-         "arr_arr_tbl_val":   [[{
-           "one": {"type": "integer", "value": 1}
-         }]],
-         "arr_arr_tbls":      [[
-           {
-             "one": {"type": "integer", "value": 1}
-           },
-           {
-             "two": {"type": "integer", "value": 2}
-           }
-         ]],
-         "arr_tbl_tbl":       [{
-           "tbl": {
-             "one": {"type": "integer", "value": 1}
-           }
-         }],
-         "tbl_arr_tbl":       {"arr_tbl": [{
-           "one": {"type": "integer", "value": 1}
-         }]},
-         "tbl_tbl_empty": {
-           "tbl_0": {}
-         },
-         "tbl_tbl_val": {
-           "tbl_1": {
-             "one": {"type": "integer", "value": 1}
-           }
-         }
-       }
-
-     want:
-       {
-           "arr_arr_tbl_empty": [[{}]],
-           "arr_arr_tbl_val":   [[{
-               "one": {"type": "integer", "value": "1"}
-           }]],
-           "arr_arr_tbls":      [[
-               {
-                   "one": {"type": "integer", "value": "1"}
-               },
-               {
-                   "two": {"type": "integer", "value": "2"}
-               }
-           ]],
-           "arr_tbl_tbl":       [{
-               "tbl": {
-                   "one": {"type": "integer", "value": "1"}
-               }
-           }],
-           "tbl_arr_tbl":       {"arr_tbl": [{
-               "one": {"type": "integer", "value": "1"}
-           }]},
-           "tbl_tbl_empty": {
-               "tbl_0": {}
-           },
-           "tbl_tbl_val": {
-               "tbl_1": {
-                   "one": {"type": "integer", "value": "1"}
-               }
-           }
-       }
 
 FAIL valid/inline-table/spaces
      exit status 101
@@ -1641,7 +454,9 @@ FAIL valid/integer/float64-max
           <empty>
 
 FAIL valid/integer/integer
-     Malformed output from your encoder: float64 is not a string
+     Values for key "posanswer" don't match:
+       Expected:     42
+       Your encoder: +42
 
      input sent to parser-cmd:
        answer = 42
@@ -1651,10 +466,10 @@ FAIL valid/integer/integer
 
      output from parser-cmd (stdout):
        {
-         "answer":    {"type": "integer", "value": 42},
-         "neganswer": {"type": "integer", "value": -42},
-         "posanswer": {"type": "integer", "value": 42},
-         "zero":      {"type": "integer", "value": 0}
+         "answer":    {"type": "integer", "value": "42"},
+         "neganswer": {"type": "integer", "value": "-42"},
+         "posanswer": {"type": "integer", "value": "+42"},
+         "zero":      {"type": "integer", "value": "0"}
        }
 
      want:
@@ -1697,27 +512,6 @@ FAIL valid/integer/literals
      want:
           <empty>
 
-FAIL valid/integer/long
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       # int64 "should" be supported, but is not mandatory. It's fine to skip this
-       # test.
-       int64-max     = 9223372036854775807
-       int64-max-neg = -9223372036854775808
-
-     output from parser-cmd (stdout):
-       {
-         "int64-max":     {"type": "integer", "value": 9223372036854775808},
-         "int64-max-neg": {"type": "integer", "value": -9223372036854775808}
-       }
-
-     want:
-       {
-           "int64-max":     {"type": "integer", "value": "9223372036854775807"},
-           "int64-max-neg": {"type": "integer", "value": "-9223372036854775808"}
-       }
-
 FAIL valid/integer/underscore
      invalid integer: invalid digit found in string
      invalid integer: invalid digit found in string
@@ -1740,7 +534,9 @@ FAIL valid/integer/underscore
           <empty>
 
 FAIL valid/integer/zero
-     Malformed output from your encoder: float64 is not a string
+     Values for key "a2" don't match:
+       Expected:     0
+       Your encoder: 0o00
 
      input sent to parser-cmd:
        d1 = 0
@@ -1761,18 +557,18 @@ FAIL valid/integer/zero
 
      output from parser-cmd (stdout):
        {
-         "a2": {"type": "integer", "value": 0},
-         "a3": {"type": "integer", "value": 0},
-         "b1": {"type": "integer", "value": 0},
-         "b2": {"type": "integer", "value": 0},
-         "b3": {"type": "integer", "value": 0},
-         "d1": {"type": "integer", "value": 0},
-         "d2": {"type": "integer", "value": 0},
-         "d3": {"type": "integer", "value": 0},
-         "h1": {"type": "integer", "value": 0},
-         "h2": {"type": "integer", "value": 0},
-         "h3": {"type": "integer", "value": 0},
-         "o1": {"type": "integer", "value": 0}
+         "a2": {"type": "integer", "value": "0o00"},
+         "a3": {"type": "integer", "value": "0o00000"},
+         "b1": {"type": "integer", "value": "0b0"},
+         "b2": {"type": "integer", "value": "0b00"},
+         "b3": {"type": "integer", "value": "0b00000"},
+         "d1": {"type": "integer", "value": "0"},
+         "d2": {"type": "integer", "value": "+0"},
+         "d3": {"type": "integer", "value": "-0"},
+         "h1": {"type": "integer", "value": "0x0"},
+         "h2": {"type": "integer", "value": "0x00"},
+         "h3": {"type": "integer", "value": "0x00000"},
+         "o1": {"type": "integer", "value": "0o0"}
        }
 
      want:
@@ -1850,7 +646,7 @@ FAIL valid/key/case-sensitive
           <empty>
 
 FAIL valid/key/dotted-1
-     Malformed output from your encoder: float64 is not a string
+     Could not find key "name.last" in parser output.
 
      input sent to parser-cmd:
        name.first = "Arthur"
@@ -1864,7 +660,7 @@ FAIL valid/key/dotted-1
            "dots": {
              "dot": {
                "dot": {
-                 "dot": {"type": "integer", "value": 42}
+                 "dot": {"type": "integer", "value": "42"}
                }
              }
            }
@@ -1919,131 +715,6 @@ FAIL valid/key/dotted-2
 
      want:
           <empty>
-
-FAIL valid/key/dotted-3
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       top.key = 1
-
-       [tbl]
-       a.b.c = 42.666
-
-       [a.few.dots]
-       polka.dot = "again?"
-       polka.dance-with = "Dot"
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "few": {
-             "dots": {
-               "polka": {
-                 "dance-with": {"type": "string", "value": "Dot"},
-                 "dot":        {"type": "string", "value": "again?"}
-               }
-             }
-           }
-         },
-         "tbl": {
-           "a": {
-             "b": {
-               "c": {"type": "float", "value": 43}
-             }
-           }
-         },
-         "top": {
-           "key": {"type": "integer", "value": 1}
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "few": {
-                   "dots": {
-                       "polka": {
-                           "dance-with": {"type": "string", "value": "Dot"},
-                           "dot":        {"type": "string", "value": "again?"}
-                       }
-                   }
-               }
-           },
-           "tbl": {
-               "a": {
-                   "b": {
-                       "c": {"type": "float", "value": "42.666"}
-                   }
-               }
-           },
-           "top": {
-               "key": {"type": "integer", "value": "1"}
-           }
-       }
-
-FAIL valid/key/dotted-4
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       top.key = 1
-
-       [[arr]]
-       a.b.c=1
-       a.b.d=2
-
-       [[arr]]
-       a.b.c=3
-       a.b.d=4
-
-     output from parser-cmd (stdout):
-       {
-         "arr": [
-           {
-             "a": {
-               "b": {
-                 "c": {"type": "integer", "value": 1},
-                 "d": {"type": "integer", "value": 2}
-               }
-             }
-           },
-           {
-             "a": {
-               "b": {
-                 "c": {"type": "integer", "value": 3},
-                 "d": {"type": "integer", "value": 4}
-               }
-             }
-           }
-         ],
-         "top": {
-           "key": {"type": "integer", "value": 1}
-         }
-       }
-
-     want:
-       {
-           "arr": [
-               {
-                   "a": {
-                       "b": {
-                           "c": {"type": "integer", "value": "1"},
-                           "d": {"type": "integer", "value": "2"}
-                       }
-                   }
-               },
-               {
-                   "a": {
-                       "b": {
-                           "c": {"type": "integer", "value": "3"},
-                           "d": {"type": "integer", "value": "4"}
-                       }
-                   }
-               }
-           ],
-           "top": {
-               "key": {"type": "integer", "value": "1"}
-           }
-       }
 
 FAIL valid/key/dotted-empty
      exit status 101
@@ -2104,22 +775,6 @@ FAIL valid/key/empty-3
      want:
           <empty>
 
-FAIL valid/key/equals-nospace
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       answer=42
-
-     output from parser-cmd (stdout):
-       {
-         "answer": {"type": "integer", "value": 42}
-       }
-
-     want:
-       {
-           "answer": {"type": "integer", "value": "42"}
-       }
-
 FAIL valid/key/escapes
      exit status 101
 
@@ -2143,22 +798,6 @@ FAIL valid/key/escapes
 
      want:
           <empty>
-
-FAIL valid/key/numeric
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       1 = 1
-
-     output from parser-cmd (stdout):
-       {
-         "1": {"type": "integer", "value": 1}
-       }
-
-     want:
-       {
-           "1": {"type": "integer", "value": "1"}
-       }
 
 FAIL valid/key/numeric-dotted
      Could not find key "1" in parser output.
@@ -2193,16 +832,16 @@ FAIL valid/key/quoted-dots
 
      output from parser-cmd (stdout):
        {
-         "ith.do": {"type": "integer", "value": 2},
-         "plain":  {"type": "integer", "value": 1},
+         "ith.do": {"type": "integer", "value": "2"},
+         "plain":  {"type": "integer", "value": "1"},
          "plain_table": {
-           "ith.do": {"type": "integer", "value": 4},
-           "plain":  {"type": "integer", "value": 3}
+           "ith.do": {"type": "integer", "value": "4"},
+           "plain":  {"type": "integer", "value": "3"}
          },
          "table": {
            "withdot": {
-             "ey.with.dot": {"type": "integer", "value": 6},
-             "plain":       {"type": "integer", "value": 5}
+             "ey.with.dot": {"type": "integer", "value": "6"},
+             "plain":       {"type": "integer", "value": "5"}
            }
          }
        }
@@ -2260,8 +899,8 @@ FAIL valid/key/space
 
      output from parser-cmd (stdout):
        {
-         " ":   {"type": "integer", "value": 1},
-         "c d": {"type": "integer", "value": 2},
+         " ":   {"type": "integer", "value": "1"},
+         "c d": {"type": "integer", "value": "2"},
          "tbl": {
            "ttab\\ttab\\": {"type": "string", "value": "tab"}
          }
@@ -2284,7 +923,7 @@ FAIL valid/key/special-chars
 
      output from parser-cmd (stdout):
        {
-         "~!@$^\u0026*()_+-`1234567890[]|/?\u003e\u003c.,;:'": {"type": "integer", "value": 1}
+         "~!@$^\u0026*()_+-`1234567890[]|/?\u003e\u003c.,;:'": {"type": "integer", "value": "1"}
        }
 
      want:
@@ -2303,8 +942,8 @@ FAIL valid/key/special-word
 
      output from parser-cmd (stdout):
        {
-         "false": {"type": "bool", "value": false},
-         "true":  {"type": "integer", "value": 1}
+         "false": {"type": "bool", "value": "false"},
+         "true":  {"type": "integer", "value": "1"}
        }
 
      want:
@@ -2428,596 +1067,6 @@ FAIL valid/key/start
      want:
           <empty>
 
-FAIL valid/key/zero
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       0=0
-
-     output from parser-cmd (stdout):
-       {
-         "0": {"type": "integer", "value": 0}
-       }
-
-     want:
-       {
-           "0": {"type": "integer", "value": "0"}
-       }
-
-FAIL valid/spec-example-1
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       # This is a TOML document. Boom.
-
-       title = "TOML Example"
-
-       [owner]
-       name = "Lance Uppercut"
-       dob = 1979-05-27T07:32:00-08:00 # First class dates? Why not?
-
-       [database]
-       server = "192.168.1.1"
-       ports = [ 8001, 8001, 8002 ]
-       connection_max = 5000
-       enabled = true
-
-       [servers]
-
-         # You can indent as you please. Tabs or spaces. TOML don't care.
-         [servers.alpha]
-         ip = "10.0.0.1"
-         dc = "eqdc10"
-
-         [servers.beta]
-         ip = "10.0.0.2"
-         dc = "eqdc10"
-
-       [clients]
-       data = [ ["gamma", "delta"], [1, 2] ]
-
-       # Line breaks are OK when inside arrays
-       hosts = [
-         "alpha",
-         "omega"
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "title": {"type": "string", "value": "TOML Example"},
-         "clients": {
-           "data": [
-             [
-               {"type": "string", "value": "gamma"},
-               {"type": "string", "value": "delta"}
-             ],
-             [
-               {"type": "integer", "value": 1},
-               {"type": "integer", "value": 2}
-             ]
-           ],
-           "hosts": [
-             {"type": "string", "value": "alpha"},
-             {"type": "string", "value": "omega"}
-           ]
-         },
-         "database": {
-           "connection_max": {"type": "integer", "value": 5000},
-           "enabled":        {"type": "bool", "value": true},
-           "server":         {"type": "string", "value": "192.168.1.1"},
-           "ports": [
-             {"type": "integer", "value": 8001},
-             {"type": "integer", "value": 8001},
-             {"type": "integer", "value": 8002}
-           ]
-         },
-         "owner": {
-           "dob":  {"type": "datetime", "value": "1979-05-27T07:32:00-08:00"},
-           "name": {"type": "string", "value": "Lance Uppercut"}
-         },
-         "servers": {
-           "alpha": {
-             "dc": {"type": "string", "value": "eqdc10"},
-             "ip": {"type": "string", "value": "10.0.0.1"}
-           },
-           "beta": {
-             "dc": {"type": "string", "value": "eqdc10"},
-             "ip": {"type": "string", "value": "10.0.0.2"}
-           }
-         }
-       }
-
-     want:
-       {
-           "title": {"type": "string", "value": "TOML Example"},
-           "clients": {
-               "data": [
-                   [
-                       {"type": "string", "value": "gamma"},
-                       {"type": "string", "value": "delta"}
-                   ],
-                   [
-                       {"type": "integer", "value": "1"},
-                       {"type": "integer", "value": "2"}
-                   ]
-               ],
-               "hosts": [
-                   {"type": "string", "value": "alpha"},
-                   {"type": "string", "value": "omega"}
-               ]
-           },
-           "database": {
-               "connection_max": {"type": "integer", "value": "5000"},
-               "enabled":        {"type": "bool", "value": "true"},
-               "server":         {"type": "string", "value": "192.168.1.1"},
-               "ports": [
-                   {"type": "integer", "value": "8001"},
-                   {"type": "integer", "value": "8001"},
-                   {"type": "integer", "value": "8002"}
-               ]
-           },
-           "owner": {
-               "dob":  {"type": "datetime", "value": "1979-05-27T07:32:00-08:00"},
-               "name": {"type": "string", "value": "Lance Uppercut"}
-           },
-           "servers": {
-               "alpha": {
-                   "dc": {"type": "string", "value": "eqdc10"},
-                   "ip": {"type": "string", "value": "10.0.0.1"}
-               },
-               "beta": {
-                   "dc": {"type": "string", "value": "eqdc10"},
-                   "ip": {"type": "string", "value": "10.0.0.2"}
-               }
-           }
-       }
-
-FAIL valid/spec-example-1-compact
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       #Useless spaces eliminated.
-       title="TOML Example"
-       [owner]
-       name="Lance Uppercut"
-       dob=1979-05-27T07:32:00-08:00#First class dates
-       [database]
-       server="192.168.1.1"
-       ports=[8001,8001,8002]
-       connection_max=5000
-       enabled=true
-       [servers]
-       [servers.alpha]
-       ip="10.0.0.1"
-       dc="eqdc10"
-       [servers.beta]
-       ip="10.0.0.2"
-       dc="eqdc10"
-       [clients]
-       data=[["gamma","delta"],[1,2]]
-       hosts=[
-       "alpha",
-       "omega"
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "title": {"type": "string", "value": "TOML Example"},
-         "clients": {
-           "data": [
-             [
-               {"type": "string", "value": "gamma"},
-               {"type": "string", "value": "delta"}
-             ],
-             [
-               {"type": "integer", "value": 1},
-               {"type": "integer", "value": 2}
-             ]
-           ],
-           "hosts": [
-             {"type": "string", "value": "alpha"},
-             {"type": "string", "value": "omega"}
-           ]
-         },
-         "database": {
-           "connection_max": {"type": "integer", "value": 5000},
-           "enabled":        {"type": "bool", "value": true},
-           "server":         {"type": "string", "value": "192.168.1.1"},
-           "ports": [
-             {"type": "integer", "value": 8001},
-             {"type": "integer", "value": 8001},
-             {"type": "integer", "value": 8002}
-           ]
-         },
-         "owner": {
-           "dob":  {"type": "datetime", "value": "1979-05-27T07:32:00-08:00"},
-           "name": {"type": "string", "value": "Lance Uppercut"}
-         },
-         "servers": {
-           "alpha": {
-             "dc": {"type": "string", "value": "eqdc10"},
-             "ip": {"type": "string", "value": "10.0.0.1"}
-           },
-           "beta": {
-             "dc": {"type": "string", "value": "eqdc10"},
-             "ip": {"type": "string", "value": "10.0.0.2"}
-           }
-         }
-       }
-
-     want:
-       {
-           "title": {"type": "string", "value": "TOML Example"},
-           "clients": {
-               "data": [
-                   [
-                       {"type": "string", "value": "gamma"},
-                       {"type": "string", "value": "delta"}
-                   ],
-                   [
-                       {"type": "integer", "value": "1"},
-                       {"type": "integer", "value": "2"}
-                   ]
-               ],
-               "hosts": [
-                   {"type": "string", "value": "alpha"},
-                   {"type": "string", "value": "omega"}
-               ]
-           },
-           "database": {
-               "connection_max": {"type": "integer", "value": "5000"},
-               "enabled":        {"type": "bool", "value": "true"},
-               "server":         {"type": "string", "value": "192.168.1.1"},
-               "ports": [
-                   {"type": "integer", "value": "8001"},
-                   {"type": "integer", "value": "8001"},
-                   {"type": "integer", "value": "8002"}
-               ]
-           },
-           "owner": {
-               "dob":  {"type": "datetime", "value": "1979-05-27T07:32:00-08:00"},
-               "name": {"type": "string", "value": "Lance Uppercut"}
-           },
-           "servers": {
-               "alpha": {
-                   "dc": {"type": "string", "value": "eqdc10"},
-                   "ip": {"type": "string", "value": "10.0.0.1"}
-               },
-               "beta": {
-                   "dc": {"type": "string", "value": "eqdc10"},
-                   "ip": {"type": "string", "value": "10.0.0.2"}
-               }
-           }
-       }
-
-FAIL valid/spec/array-0
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       integers = [ 1, 2, 3 ]
-       colors = [ "red", "yellow", "green" ]
-       nested_arrays_of_ints = [ [ 1, 2 ], [3, 4, 5] ]
-       nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
-       string_array = [ "all", 'strings', """are the same""", '''type''' ]
-
-       # Mixed-type arrays are allowed
-       numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
-       contributors = [
-         "Foo Bar <foo@example.com>",
-         { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "colors": [
-           {"type": "string", "value": "red"},
-           {"type": "string", "value": "yellow"},
-           {"type": "string", "value": "green"}
-         ],
-         "contributors": [
-           {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
-           {
-             "email": {"type": "string", "value": "bazqux@example.com"},
-             "name":  {"type": "string", "value": "Baz Qux"},
-             "url":   {"type": "string", "value": "https://example.com/bazqux"}
-           }
-         ],
-         "integers": [
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2},
-           {"type": "integer", "value": 3}
-         ],
-         "nested_arrays_of_ints": [
-           [
-             {"type": "integer", "value": 1},
-             {"type": "integer", "value": 2}
-           ],
-           [
-             {"type": "integer", "value": 3},
-             {"type": "integer", "value": 4},
-             {"type": "integer", "value": 5}
-           ]
-         ],
-         "nested_mixed_array": [
-           [
-             {"type": "integer", "value": 1},
-             {"type": "integer", "value": 2}
-           ],
-           [
-             {"type": "string", "value": "a"},
-             {"type": "string", "value": "b"},
-             {"type": "string", "value": "c"}
-           ]
-         ],
-         "numbers": [
-           {"type": "float", "value": 0},
-           {"type": "float", "value": 0},
-           {"type": "float", "value": 0},
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2},
-           {"type": "integer", "value": 5}
-         ],
-         "string_array": [
-           {"type": "string", "value": "all"},
-           {"type": "string", "value": "strings"},
-           {"type": "string", "value": "are the same"},
-           {"type": "string", "value": "type"}
-         ]
-       }
-
-     want:
-       {
-           "colors": [
-               {"type": "string", "value": "red"},
-               {"type": "string", "value": "yellow"},
-               {"type": "string", "value": "green"}
-           ],
-           "contributors": [
-               {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
-               {
-                   "email": {"type": "string", "value": "bazqux@example.com"},
-                   "name":  {"type": "string", "value": "Baz Qux"},
-                   "url":   {"type": "string", "value": "https://example.com/bazqux"}
-               }
-           ],
-           "integers": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ],
-           "nested_arrays_of_ints": [
-               [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"}
-               ],
-               [
-                   {"type": "integer", "value": "3"},
-                   {"type": "integer", "value": "4"},
-                   {"type": "integer", "value": "5"}
-               ]
-           ],
-           "nested_mixed_array": [
-               [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"}
-               ],
-               [
-                   {"type": "string", "value": "a"},
-                   {"type": "string", "value": "b"},
-                   {"type": "string", "value": "c"}
-               ]
-           ],
-           "numbers": [
-               {"type": "float", "value": "0.1"},
-               {"type": "float", "value": "0.2"},
-               {"type": "float", "value": "0.5"},
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "5"}
-           ],
-           "string_array": [
-               {"type": "string", "value": "all"},
-               {"type": "string", "value": "strings"},
-               {"type": "string", "value": "are the same"},
-               {"type": "string", "value": "type"}
-           ]
-       }
-
-FAIL valid/spec/array-1
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       integers2 = [
-         1, 2, 3
-       ]
-
-       integers3 = [
-         1,
-         2, # this is ok
-       ]
-
-     output from parser-cmd (stdout):
-       {
-         "integers2": [
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2},
-           {"type": "integer", "value": 3}
-         ],
-         "integers3": [
-           {"type": "integer", "value": 1},
-           {"type": "integer", "value": 2}
-         ]
-       }
-
-     want:
-       {
-           "integers2": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"},
-               {"type": "integer", "value": "3"}
-           ],
-           "integers3": [
-               {"type": "integer", "value": "1"},
-               {"type": "integer", "value": "2"}
-           ]
-       }
-
-FAIL valid/spec/array-of-tables-0
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [[products]]
-       name = "Hammer"
-       sku = 738594937
-
-       [[products]]  # empty table within the array
-
-       [[products]]
-       name = "Nail"
-       sku = 284758393
-
-       color = "gray"
-
-     output from parser-cmd (stdout):
-       {
-         "products": [
-           {
-             "name": {"type": "string", "value": "Hammer"},
-             "sku":  {"type": "integer", "value": 738594937}
-           },
-           {},
-           {
-             "color": {"type": "string", "value": "gray"},
-             "name":  {"type": "string", "value": "Nail"},
-             "sku":   {"type": "integer", "value": 284758393}
-           }
-         ]
-       }
-
-     want:
-       {
-           "products": [
-               {
-                   "name": {"type": "string", "value": "Hammer"},
-                   "sku":  {"type": "integer", "value": "738594937"}
-               },
-               {},
-               {
-                   "color": {"type": "string", "value": "gray"},
-                   "name":  {"type": "string", "value": "Nail"},
-                   "sku":   {"type": "integer", "value": "284758393"}
-               }
-           ]
-       }
-
-FAIL valid/spec/array-of-tables-2
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       points = [ { x = 1, y = 2, z = 3 },
-                  { x = 7, y = 8, z = 9 },
-                  { x = 2, y = 4, z = 8 } ]
-
-     output from parser-cmd (stdout):
-       {
-         "points": [
-           {
-             "x": {"type": "integer", "value": 1},
-             "y": {"type": "integer", "value": 2},
-             "z": {"type": "integer", "value": 3}
-           },
-           {
-             "x": {"type": "integer", "value": 7},
-             "y": {"type": "integer", "value": 8},
-             "z": {"type": "integer", "value": 9}
-           },
-           {
-             "x": {"type": "integer", "value": 2},
-             "y": {"type": "integer", "value": 4},
-             "z": {"type": "integer", "value": 8}
-           }
-         ]
-       }
-
-     want:
-       {
-           "points": [
-               {
-                   "x": {"type": "integer", "value": "1"},
-                   "y": {"type": "integer", "value": "2"},
-                   "z": {"type": "integer", "value": "3"}
-               },
-               {
-                   "x": {"type": "integer", "value": "7"},
-                   "y": {"type": "integer", "value": "8"},
-                   "z": {"type": "integer", "value": "9"}
-               },
-               {
-                   "x": {"type": "integer", "value": "2"},
-                   "y": {"type": "integer", "value": "4"},
-                   "z": {"type": "integer", "value": "8"}
-               }
-           ]
-       }
-
-FAIL valid/spec/boolean-0
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       bool1 = true
-       bool2 = false
-
-     output from parser-cmd (stdout):
-       {
-         "bool1": {"type": "bool", "value": true},
-         "bool2": {"type": "bool", "value": false}
-       }
-
-     want:
-       {
-           "bool1": {"type": "bool", "value": "true"},
-           "bool2": {"type": "bool", "value": "false"}
-       }
-
-FAIL valid/spec/float-0
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       # fractional
-       flt1 = +1.0
-       flt2 = 3.1415
-       flt3 = -0.01
-
-       # exponent
-       flt4 = 5e+22
-       flt5 = 1e06
-       flt6 = -2E-2
-
-       # both
-       flt7 = 6.626e-34
-
-     output from parser-cmd (stdout):
-       {
-         "flt1": {"type": "float", "value": 1},
-         "flt2": {"type": "float", "value": 3},
-         "flt3": {"type": "float", "value": -0},
-         "flt4": {"type": "float", "value": 49999999999999995805696},
-         "flt5": {"type": "float", "value": 1000000},
-         "flt6": {"type": "float", "value": -0},
-         "flt7": {"type": "float", "value": 0}
-       }
-
-     want:
-       {
-           "flt1": {"type": "float", "value": "1"},
-           "flt2": {"type": "float", "value": "3.1415"},
-           "flt3": {"type": "float", "value": "-0.01"},
-           "flt4": {"type": "float", "value": "5e+22"},
-           "flt5": {"type": "float", "value": "1e+06"},
-           "flt6": {"type": "float", "value": "-0.02"},
-           "flt7": {"type": "float", "value": "6.626e-34"}
-       }
-
 FAIL valid/spec/float-1
      invalid float: invalid float literal
      Error: invalid toml
@@ -3036,133 +1085,10 @@ FAIL valid/spec/float-1
      want:
           <empty>
 
-FAIL valid/spec/float-2
-     Malformed output from your encoder: <nil> is not a string
-
-     input sent to parser-cmd:
-       # infinity
-       sf1 = inf  # positive infinity
-       sf2 = +inf # positive infinity
-       sf3 = -inf # negative infinity
-
-       # not a number
-       sf4 = nan  # actual sNaN/qNaN encoding is implementation-specific
-       sf5 = +nan # same as `nan`
-       sf6 = -nan # valid, actual encoding is implementation-specific
-
-     output from parser-cmd (stdout):
-       {
-         "sf1": {"type": "float", "value": null},
-         "sf2": {"type": "float", "value": null},
-         "sf3": {"type": "float", "value": null},
-         "sf4": {"type": "float", "value": null},
-         "sf5": {"type": "float", "value": null},
-         "sf6": {"type": "float", "value": null}
-       }
-
-     want:
-       {
-           "sf1": {"type": "float", "value": "inf"},
-           "sf2": {"type": "float", "value": "inf"},
-           "sf3": {"type": "float", "value": "-inf"},
-           "sf4": {"type": "float", "value": "nan"},
-           "sf5": {"type": "float", "value": "nan"},
-           "sf6": {"type": "float", "value": "nan"}
-       }
-
-FAIL valid/spec/inline-table-0
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       name = { first = "Tom", last = "Preston-Werner" }
-       point = { x = 1, y = 2 }
-       animal = { type.name = "pug" }
-
-     output from parser-cmd (stdout):
-       {
-         "animal": {
-           "type": {
-             "name": {"type": "string", "value": "pug"}
-           }
-         },
-         "name": {
-           "first": {"type": "string", "value": "Tom"},
-           "last":  {"type": "string", "value": "Preston-Werner"}
-         },
-         "point": {
-           "x": {"type": "integer", "value": 1},
-           "y": {"type": "integer", "value": 2}
-         }
-       }
-
-     want:
-       {
-           "animal": {
-               "type": {
-                   "name": {"type": "string", "value": "pug"}
-               }
-           },
-           "name": {
-               "first": {"type": "string", "value": "Tom"},
-               "last":  {"type": "string", "value": "Preston-Werner"}
-           },
-           "point": {
-               "x": {"type": "integer", "value": "1"},
-               "y": {"type": "integer", "value": "2"}
-           }
-       }
-
-FAIL valid/spec/inline-table-1
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [name]
-       first = "Tom"
-       last = "Preston-Werner"
-
-       [point]
-       x = 1
-       y = 2
-
-       [animal]
-       type.name = "pug"
-
-     output from parser-cmd (stdout):
-       {
-         "animal": {
-           "type": {
-             "name": {"type": "string", "value": "pug"}
-           }
-         },
-         "name": {
-           "first": {"type": "string", "value": "Tom"},
-           "last":  {"type": "string", "value": "Preston-Werner"}
-         },
-         "point": {
-           "x": {"type": "integer", "value": 1},
-           "y": {"type": "integer", "value": 2}
-         }
-       }
-
-     want:
-       {
-           "animal": {
-               "type": {
-                   "name": {"type": "string", "value": "pug"}
-               }
-           },
-           "name": {
-               "first": {"type": "string", "value": "Tom"},
-               "last":  {"type": "string", "value": "Preston-Werner"}
-           },
-           "point": {
-               "x": {"type": "integer", "value": "1"},
-               "y": {"type": "integer", "value": "2"}
-           }
-       }
-
 FAIL valid/spec/integer-0
-     Malformed output from your encoder: float64 is not a string
+     Values for key "int1" don't match:
+       Expected:     99
+       Your encoder: +99
 
      input sent to parser-cmd:
        int1 = +99
@@ -3172,10 +1098,10 @@ FAIL valid/spec/integer-0
 
      output from parser-cmd (stdout):
        {
-         "int1": {"type": "integer", "value": 99},
-         "int2": {"type": "integer", "value": 42},
-         "int3": {"type": "integer", "value": 0},
-         "int4": {"type": "integer", "value": -17}
+         "int1": {"type": "integer", "value": "+99"},
+         "int2": {"type": "integer", "value": "42"},
+         "int3": {"type": "integer", "value": "0"},
+         "int4": {"type": "integer", "value": "-17"}
        }
 
      want:
@@ -3276,7 +1202,7 @@ FAIL valid/spec/keys-3
            "shape": {"type": "string", "value": "round"}
          },
          "site": {
-           "oogle.co": {"type": "bool", "value": true}
+           "oogle.co": {"type": "bool", "value": "true"}
          }
        }
 
@@ -3539,42 +1465,6 @@ FAIL valid/spec/string-7
      want:
           <empty>
 
-FAIL valid/spec/table-1
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [table-1]
-       key1 = "some string"
-       key2 = 123
-
-       [table-2]
-       key1 = "another string"
-       key2 = 456
-
-     output from parser-cmd (stdout):
-       {
-         "table-1": {
-           "key1": {"type": "string", "value": "some string"},
-           "key2": {"type": "integer", "value": 123}
-         },
-         "table-2": {
-           "key1": {"type": "string", "value": "another string"},
-           "key2": {"type": "integer", "value": 456}
-         }
-       }
-
-     want:
-       {
-           "table-1": {
-               "key1": {"type": "string", "value": "some string"},
-               "key2": {"type": "integer", "value": "123"}
-           },
-           "table-2": {
-               "key1": {"type": "string", "value": "another string"},
-               "key2": {"type": "integer", "value": "456"}
-           }
-       }
-
 FAIL valid/spec/table-2
      Could not find key "dog.tater.man" in parser output.
 
@@ -3620,86 +1510,6 @@ FAIL valid/spec/table-3
 
      want:
           <empty>
-
-FAIL valid/spec/table-8
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       fruit.apple.color = "red"
-       # Defines a table named fruit
-       # Defines a table named fruit.apple
-
-       fruit.apple.taste.sweet = true
-       # Defines a table named fruit.apple.taste
-       # fruit and fruit.apple were already created
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "color": {"type": "string", "value": "red"},
-             "taste": {
-               "sweet": {"type": "bool", "value": true}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "fruit": {
-               "apple": {
-                   "color": {"type": "string", "value": "red"},
-                   "taste": {
-                       "sweet": {"type": "bool", "value": "true"}
-                   }
-               }
-           }
-       }
-
-FAIL valid/spec/table-9
-     Malformed output from your encoder: bool is not a string
-
-     input sent to parser-cmd:
-       [fruit]
-       apple.color = "red"
-       apple.taste.sweet = true
-
-       # [fruit.apple]  # INVALID
-       # [fruit.apple.taste]  # INVALID
-
-       [fruit.apple.texture]  # you can add sub-tables
-       smooth = true
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "color": {"type": "string", "value": "red"},
-             "taste": {
-               "sweet": {"type": "bool", "value": true}
-             },
-             "texture": {
-               "smooth": {"type": "bool", "value": true}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "fruit": {
-               "apple": {
-                   "color": {"type": "string", "value": "red"},
-                   "taste": {
-                       "sweet": {"type": "bool", "value": "true"}
-                   },
-                   "texture": {
-                       "smooth": {"type": "bool", "value": "true"}
-                   }
-               }
-           }
-       }
 
 FAIL valid/string/ends-in-whitespace-escape
      Values for key "beee" don't match:
@@ -4265,70 +2075,6 @@ FAIL valid/string/unicode-escape
            "null-2":     {"type": "string", "value": "\u0000"}
        }
 
-FAIL valid/table/array-implicit-and-explicit-after
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [[a.b]]
-       x = 1
-
-       [a]
-       y = 2
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": [{
-             "x": {"type": "integer", "value": 1}
-           }],
-           "y": {"type": "integer", "value": 2}
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "b": [{
-                   "x": {"type": "integer", "value": "1"}
-               }],
-               "y": {"type": "integer", "value": "2"}
-           }
-       }
-
-FAIL valid/table/array-within-dotted
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [fruit]
-       apple.color = "red"
-
-       [[fruit.apple.seeds]]
-       size = 2
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "color": {"type": "string", "value": "red"},
-             "seeds": [{
-               "size": {"type": "integer", "value": 2}
-             }]
-           }
-         }
-       }
-
-     want:
-       {
-           "fruit": {
-               "apple": {
-                   "color": {"type": "string", "value": "red"},
-                   "seeds": [{
-                       "size": {"type": "integer", "value": "2"}
-                   }]
-               }
-           }
-       }
-
 FAIL valid/table/empty-name
      exit status 101
 
@@ -4398,46 +2144,6 @@ FAIL valid/table/names
      want:
           <empty>
 
-FAIL valid/table/sub
-     Malformed output from your encoder: float64 is not a string
-
-     input sent to parser-cmd:
-       [a]
-       key = 1
-
-       # a.extend is a key inside the "a" table.
-       [a.extend]
-       key = 2
-
-       [a.extend.more]
-       key = 3
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "key": {"type": "integer", "value": 1},
-           "extend": {
-             "key": {"type": "integer", "value": 2},
-             "more": {
-               "key": {"type": "integer", "value": 3}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "a": {
-               "key": {"type": "integer", "value": "1"},
-               "extend": {
-                   "key": {"type": "integer", "value": "2"},
-                   "more": {
-                       "key": {"type": "integer", "value": "3"}
-                   }
-               }
-           }
-       }
-
 FAIL valid/table/whitespace
      Could not find key "valid key" in parser output.
 
@@ -4481,7 +2187,7 @@ FAIL valid/table/with-pound
      output from parser-cmd (stdout):
        {
          "ey#grou": {
-           "answer": {"type": "integer", "value": 42}
+           "answer": {"type": "integer", "value": "42"}
          }
        }
 
@@ -4530,7 +2236,7 @@ FAIL invalid/control/comment-cr
 
      output from parser-cmd (stdout):
        {
-         "a":          {"type": "integer", "value": 1},
+         "a":          {"type": "integer", "value": "1"},
          "comment-cr": {"type": "string", "value": "Carriage return in comment"}
        }
 
@@ -4881,7 +2587,7 @@ FAIL invalid/float/leading-zero
 
      output from parser-cmd (stdout):
        {
-         "leading-zero": {"type": "float", "value": 3}
+         "leading-zero": {"type": "float", "value": "03.14"}
        }
 
      want:
@@ -4895,7 +2601,7 @@ FAIL invalid/float/leading-zero-neg
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-neg": {"type": "float", "value": -3}
+         "leading-zero-neg": {"type": "float", "value": "-03.14"}
        }
 
      want:
@@ -4909,7 +2615,7 @@ FAIL invalid/float/leading-zero-plus
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-plus": {"type": "float", "value": 3}
+         "leading-zero-plus": {"type": "float", "value": "+03.14"}
        }
 
      want:
@@ -4928,7 +2634,7 @@ FAIL invalid/inline-table/duplicate-key-3
              "apple": {
                "color": {"type": "string", "value": "red"},
                "texture": {
-                 "smooth": {"type": "bool", "value": true}
+                 "smooth": {"type": "bool", "value": "true"}
                }
              }
            }
@@ -4949,7 +2655,7 @@ FAIL invalid/inline-table/overwrite-01
      output from parser-cmd (stdout):
        {
          "a": {
-           "b": {"type": "integer", "value": 0}
+           "b": {"type": "integer", "value": "0"}
          }
        }
 
@@ -5019,7 +2725,7 @@ FAIL invalid/integer/leading-zero-1
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-1": {"type": "integer", "value": 1}
+         "leading-zero-1": {"type": "integer", "value": "01"}
        }
 
      want:
@@ -5033,7 +2739,7 @@ FAIL invalid/integer/leading-zero-2
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-2": {"type": "integer", "value": 0}
+         "leading-zero-2": {"type": "integer", "value": "00"}
        }
 
      want:
@@ -5047,7 +2753,7 @@ FAIL invalid/integer/leading-zero-sign-1
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-sign-1": {"type": "integer", "value": -1}
+         "leading-zero-sign-1": {"type": "integer", "value": "-01"}
        }
 
      want:
@@ -5061,7 +2767,7 @@ FAIL invalid/integer/leading-zero-sign-2
 
      output from parser-cmd (stdout):
        {
-         "leading-zero-sign-2": {"type": "integer", "value": 1}
+         "leading-zero-sign-2": {"type": "integer", "value": "+01"}
        }
 
      want:
@@ -5122,8 +2828,8 @@ FAIL invalid/key/no-eol
 
      output from parser-cmd (stdout):
        {
-         "a": {"type": "integer", "value": 1},
-         "b": {"type": "integer", "value": 2}
+         "a": {"type": "integer", "value": "1"},
+         "b": {"type": "integer", "value": "2"}
        }
 
      want:
@@ -5141,7 +2847,7 @@ FAIL invalid/spec/inline-table-2-0
        {
          "product": {
            "type": {
-             "edible": {"type": "bool", "value": false},
+             "edible": {"type": "bool", "value": "false"},
              "name":   {"type": "string", "value": "Nail"}
            }
          }
@@ -5162,7 +2868,7 @@ FAIL invalid/spec/inline-table-3-0
        {
          "product": {
            "type": {
-             "edible": {"type": "bool", "value": false},
+             "edible": {"type": "bool", "value": "false"},
              "name":   {"type": "string", "value": "Nail"}
            }
          }
@@ -5191,10 +2897,10 @@ FAIL invalid/spec/table-9-0
            "apple": {
              "color": {"type": "string", "value": "red"},
              "taste": {
-               "sweet": {"type": "bool", "value": true}
+               "sweet": {"type": "bool", "value": "true"}
              },
              "texture": {
-               "smooth": {"type": "bool", "value": true}
+               "smooth": {"type": "bool", "value": "true"}
              }
            }
          }
@@ -5223,10 +2929,10 @@ FAIL invalid/spec/table-9-1
            "apple": {
              "color": {"type": "string", "value": "red"},
              "taste": {
-               "sweet": {"type": "bool", "value": true}
+               "sweet": {"type": "bool", "value": "true"}
              },
              "texture": {
-               "smooth": {"type": "bool", "value": true}
+               "smooth": {"type": "bool", "value": "true"}
              }
            }
          }
@@ -5675,7 +3381,7 @@ FAIL invalid/table/append-with-dotted-keys-1
          "a": {
            "b": {
              "c": {
-               "z": {"type": "integer", "value": 9},
+               "z": {"type": "integer", "value": "9"},
                "t": {
                  "type":  "string",
                  "value": "Using dotted keys to add to [a.b.c] after explicitly defining it above is not allowed"
@@ -5707,7 +3413,7 @@ FAIL invalid/table/append-with-dotted-keys-2
            "b": {
              "c": {
                "d": {
-                 "z": {"type": "integer", "value": 9},
+                 "z": {"type": "integer", "value": "9"},
                  "k": {
                    "t": {
                      "type":  "string",
@@ -5736,8 +3442,8 @@ FAIL invalid/table/duplicate
      output from parser-cmd (stdout):
        {
          "a": {
-           "b": {"type": "integer", "value": 1},
-           "c": {"type": "integer", "value": 2}
+           "b": {"type": "integer", "value": "1"},
+           "c": {"type": "integer", "value": "2"}
          }
        }
 
@@ -5779,7 +3485,7 @@ FAIL invalid/table/duplicate-key-dotted-table2
          "fruit": {
            "apple": {
              "taste": {
-               "sweet": {"type": "bool", "value": true}
+               "sweet": {"type": "bool", "value": "true"}
              }
            }
          }
@@ -5801,7 +3507,7 @@ FAIL invalid/table/redefine-2
          "t1": {
            "t2": {
              "t3": {
-               "v": {"type": "integer", "value": 0}
+               "v": {"type": "integer", "value": "0"}
              }
            }
          }
@@ -5823,7 +3529,7 @@ FAIL invalid/table/redefine-3
          "t1": {
            "t2": {
              "t3": {
-               "v": {"type": "integer", "value": 0}
+               "v": {"type": "integer", "value": "0"}
              }
            }
          }
@@ -5851,5 +3557,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [./target/debug/decode]: using embedded tests
-  valid tests:  57 passed, 125 failed
+  valid tests: 109 passed, 73 failed
 invalid tests: 288 passed, 83 failed

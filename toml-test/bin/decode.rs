@@ -57,38 +57,7 @@ pub enum Type {
 #[derive(Debug, serde::Serialize)]
 #[serde(untagged)]
 enum Value {
-    Boolean {
-        r#type: Type,
-        value: bool,
-    },
-    Integer {
-        r#type: Type,
-        value: i64,
-    },
-    Float {
-        r#type: Type,
-        value: f64,
-    },
-    String {
-        r#type: Type,
-        value: String,
-    },
-    OffsetDateTime {
-        r#type: Type,
-        value: chrono::DateTime<chrono::FixedOffset>,
-    },
-    LocalDateTime {
-        r#type: Type,
-        value: chrono::NaiveDateTime,
-    },
-    LocalDate {
-        r#type: Type,
-        value: chrono::NaiveDate,
-    },
-    LocalTime {
-        r#type: Type,
-        value: chrono::NaiveTime,
-    },
+    Literal { r#type: Type, value: String },
     Array(Vec<Value>),
     Table(indexmap::IndexMap<String, Value>),
 }
@@ -96,37 +65,45 @@ enum Value {
 impl From<document_tree::Value> for Value {
     fn from(node: document_tree::Value) -> Self {
         match node {
-            document_tree::Value::Boolean(value) => Self::Boolean {
+            document_tree::Value::Boolean(value) => Self::Literal {
                 r#type: Type::Bool,
-                value: value.value(),
+                value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::Integer(value) => Self::Integer {
+            document_tree::Value::Integer(value) => Self::Literal {
                 r#type: Type::Integer,
-                value: value.value(),
+                value: match value.kind() {
+                    document_tree::IntegerKind::Decimal(node) => node.token(),
+                    document_tree::IntegerKind::Hexadecimal(node) => node.token(),
+                    document_tree::IntegerKind::Octal(node) => node.token(),
+                    document_tree::IntegerKind::Binary(node) => node.token(),
+                }
+                .unwrap()
+                .text()
+                .to_string(),
             },
-            document_tree::Value::Float(value) => Self::Float {
+            document_tree::Value::Float(value) => Self::Literal {
                 r#type: Type::Float,
-                value: value.value(),
+                value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::String(value) => Self::String {
+            document_tree::Value::String(value) => Self::Literal {
                 r#type: Type::String,
                 value: value.raw_string(),
             },
-            document_tree::Value::OffsetDateTime(value) => Self::OffsetDateTime {
+            document_tree::Value::OffsetDateTime(value) => Self::Literal {
                 r#type: Type::Datetime,
-                value: *value.value(),
+                value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalDateTime(value) => Self::LocalDateTime {
+            document_tree::Value::LocalDateTime(value) => Self::Literal {
                 r#type: Type::DatetimeLocal,
-                value: *value.value(),
+                value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalDate(value) => Self::LocalDate {
+            document_tree::Value::LocalDate(value) => Self::Literal {
                 r#type: Type::DateLocal,
-                value: *value.value(),
+                value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalTime(value) => Self::LocalTime {
+            document_tree::Value::LocalTime(value) => Self::Literal {
                 r#type: Type::TimeLocal,
-                value: *value.value(),
+                value: value.node().token().unwrap().text().to_string(),
             },
             document_tree::Value::Array(value) => {
                 Self::Array(value.into_iter().map(Value::from).collect())
@@ -195,14 +172,14 @@ mod test {
         ) -> Ok(json!(
                 {
                     "ints":[
-                        { "type": "integer", "value": 1 },
-                        { "type": "integer", "value": 2 },
-                        { "type": "integer", "value": 3 }
+                        { "type": "integer", "value": "1" },
+                        { "type": "integer", "value": "2" },
+                        { "type": "integer", "value": "3" }
                     ],
                     "floats":[
-                        { "type": "float", "value": 1.1 },
-                        { "type": "float", "value": 2.1 },
-                        { "type": "float", "value": 3.1 }
+                        { "type": "float", "value": "1.1" },
+                        { "type": "float", "value": "2.1" },
+                        { "type": "float", "value": "3.1" }
                     ],
                     "strings":[
                         { "type": "string", "value": "a" },
@@ -215,8 +192,8 @@ mod test {
                         { "type": "datetime", "value": "2006-06-01T11:00:00Z" }
                     ],
                     "comments":[
-                        { "type": "integer", "value": 1 },
-                        { "type": "integer", "value": 2 }
+                        { "type": "integer", "value": "1" },
+                        { "type": "integer", "value": "2" }
                     ]
                 }
             )

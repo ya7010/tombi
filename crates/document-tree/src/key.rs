@@ -23,7 +23,7 @@ impl Key {
         &self.value
     }
 
-    pub fn raw_string(&self) -> std::string::String {
+    pub fn to_raw_string(&self) -> std::string::String {
         match self.kind {
             KeyKind::BareKey => raw_string::from_bare_key(&self.value),
             KeyKind::BasicString => raw_string::from_basic_string(&self.value),
@@ -58,20 +58,21 @@ impl std::fmt::Display for Key {
 
 impl From<ast::Key> for Key {
     fn from(node: ast::Key) -> Self {
+        let token = node.token().unwrap();
         Self {
             kind: match node {
                 ast::Key::BareKey(_) => KeyKind::BareKey,
                 ast::Key::BasicString(_) => KeyKind::BasicString,
                 ast::Key::LiteralString(_) => KeyKind::LiteralString,
             },
-            value: node.raw_text(),
-            range: node.token().unwrap().range(),
+            value: token.text().to_string(),
+            range: token.range(),
         }
     }
 }
 
 impl From<Key> for String {
     fn from(key: Key) -> Self {
-        key.raw_string()
+        key.to_raw_string()
     }
 }

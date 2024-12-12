@@ -9,7 +9,7 @@ impl crate::Key {
         }
     }
 
-    pub fn raw_text(&self) -> String {
+    pub fn to_raw_text(&self) -> String {
         match self {
             Self::BareKey(key) => key.token().unwrap().text().to_string(),
             Self::BasicString(key) => key.token().unwrap().text()
@@ -29,14 +29,14 @@ impl AstChildren<crate::Key> {
         self.clone()
             .into_iter()
             .zip(other.clone().into_iter())
-            .all(|(a, b)| a.raw_text() == b.raw_text())
+            .all(|(a, b)| a.to_raw_text() == b.to_raw_text())
     }
 
     pub fn same_as(&self, other: &AstChildren<crate::Key>) -> bool {
         self.clone()
             .into_iter()
-            .map(|key| key.raw_text())
-            .eq(other.clone().into_iter().map(|key| key.raw_text()))
+            .map(|key| key.to_raw_text())
+            .eq(other.clone().into_iter().map(|key| key.to_raw_text()))
     }
 
     #[inline]

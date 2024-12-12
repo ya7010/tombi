@@ -17,7 +17,7 @@ impl crate::ArrayOfTables {
             .map(|node: ArrayOfTables| node.header().unwrap().keys())
             .take_while(
                 |keys| match (self.header().unwrap().keys().next(), keys.clone().next()) {
-                    (Some(a), Some(b)) => a.raw_text() == b.raw_text(),
+                    (Some(a), Some(b)) => a.to_raw_text() == b.to_raw_text(),
                     _ => false,
                 },
             )

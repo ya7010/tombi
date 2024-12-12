@@ -1,8 +1,7 @@
 #[derive(Debug, Clone, PartialEq)]
 pub struct Float {
     value: f64,
-    range: text::Range,
-    symbol_range: text::Range,
+    node: ast::Float,
 }
 
 impl Float {
@@ -12,13 +11,18 @@ impl Float {
     }
 
     #[inline]
+    pub fn node(&self) -> &ast::Float {
+        &self.node
+    }
+
+    #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        self.node.token().unwrap().range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
@@ -29,11 +33,7 @@ impl TryFrom<ast::Float> for Float {
         let token = node.token().unwrap();
         let range = token.range();
         match token.text().parse() {
-            Ok(value) => Ok(Self {
-                value,
-                range,
-                symbol_range: range,
-            }),
+            Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseFloatError { error, range }]),
         }
     }

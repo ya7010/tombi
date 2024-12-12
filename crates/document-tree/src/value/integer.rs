@@ -1,23 +1,21 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IntegerKind {
-    Binary,
-    Decimal,
-    Octal,
-    Hexadecimal,
+    Binary(ast::IntegerBin),
+    Decimal(ast::IntegerDec),
+    Octal(ast::IntegerOct),
+    Hexadecimal(ast::IntegerHex),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Integer {
     kind: IntegerKind,
     value: i64,
-    range: text::Range,
-    symbol_range: text::Range,
 }
 
 impl Integer {
     #[inline]
-    pub fn kind(&self) -> IntegerKind {
-        self.kind
+    pub fn kind(&self) -> &IntegerKind {
+        &self.kind
     }
 
     #[inline]
@@ -27,12 +25,19 @@ impl Integer {
 
     #[inline]
     pub fn range(&self) -> text::Range {
-        self.range
+        match self.kind() {
+            IntegerKind::Binary(node) => node.token(),
+            IntegerKind::Decimal(node) => node.token(),
+            IntegerKind::Octal(node) => node.token(),
+            IntegerKind::Hexadecimal(node) => node.token(),
+        }
+        .unwrap()
+        .range()
     }
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
-        self.symbol_range
+        self.range()
     }
 }
 
@@ -45,10 +50,8 @@ impl TryFrom<ast::IntegerBin> for Integer {
 
         match i64::from_str_radix(&token.text()[2..], 2) {
             Ok(value) => Ok(Self {
-                kind: IntegerKind::Binary,
+                kind: IntegerKind::Binary(node),
                 value,
-                range,
-                symbol_range: range,
             }),
             Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
         }
@@ -64,10 +67,8 @@ impl TryFrom<ast::IntegerOct> for Integer {
 
         match i64::from_str_radix(&token.text()[2..], 8) {
             Ok(value) => Ok(Self {
-                kind: IntegerKind::Octal,
+                kind: IntegerKind::Octal(node),
                 value,
-                range,
-                symbol_range: range,
             }),
             Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
         }
@@ -83,10 +84,8 @@ impl TryFrom<ast::IntegerDec> for Integer {
 
         match i64::from_str_radix(token.text(), 10) {
             Ok(value) => Ok(Self {
-                kind: IntegerKind::Decimal,
+                kind: IntegerKind::Decimal(node),
                 value,
-                range,
-                symbol_range: range,
             }),
             Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
         }
@@ -102,10 +101,8 @@ impl TryFrom<ast::IntegerHex> for Integer {
 
         match i64::from_str_radix(&token.text()[2..], 16) {
             Ok(value) => Ok(Self {
-                kind: IntegerKind::Hexadecimal,
+                kind: IntegerKind::Hexadecimal(node),
                 value,
-                range,
-                symbol_range: range,
             }),
             Err(error) => Err(vec![crate::Error::ParseIntError { error, range }]),
         }
