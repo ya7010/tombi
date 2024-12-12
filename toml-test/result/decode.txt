@@ -73,48 +73,6 @@ FAIL valid/comment/after-literal-no-ws
            "true":  {"type": "bool", "value": "true"}
        }
 
-FAIL valid/comment/tricky
-     exit status 101
-
-     input sent to parser-cmd:
-       [section]#attached comment
-       #[notsection]
-       one = "11"#cmt
-       two = "22#"
-       three = '#'
-
-       four = """# no comment
-       # nor this
-       #also not comment"""#is_comment
-
-       five = 5.5#66
-       six = 6#7
-       8 = "eight"
-       #nine = 99
-       ten = 10e2#1
-       eleven = 1.11e1#23
-
-       ["hash#tag"]
-       "#!" = "hash bang"
-       arr3 = [ "#", '#', """###""" ]
-       arr4 = [ 1,# 9, 9,
-       2#,9
-       ,#9
-       3#]
-       ,4]
-       arr5 = [[[[#["#"],
-       ["#"]]]]#]
-       ]
-       tbl1 = { "#" = '}#'}#}}
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       begin <= end (1 <= 0) when slicing `#`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
 FAIL valid/datetime/leap-year
      invalid number
      invalid number
@@ -239,24 +197,6 @@ FAIL valid/float/underscore
      want:
           <empty>
 
-FAIL valid/inline-table/array
-     exit status 101
-
-     input sent to parser-cmd:
-       arr = [ {'a'= 1}, {'a'= 2} ]
-
-       people = [{first_name = "Bruce", last_name = "Springsteen"},
-                 {first_name = "Eric", last_name = "Clapton"},
-                 {first_name = "Bob", last_name = "Seger"}]
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:14:
-       begin <= end (1 <= 0) when slicing `a`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
 FAIL valid/inline-table/array-values
      inline table must be single line
      inline table must be single line
@@ -289,108 +229,6 @@ FAIL valid/inline-table/array-values
      want:
           <empty>
 
-FAIL valid/inline-table/empty
-     Could not find key "nested_empty.empty" in parser output.
-
-     input sent to parser-cmd:
-       empty1 = {}
-       empty2 = { }
-       empty_in_array = [ { not_empty = 1 }, {} ]
-       empty_in_array2 = [{},{not_empty=1}]
-       many_empty = [{},{},{}]
-       nested_empty = {"empty"={}}
-       with_cmt ={            }#nothing here
-
-     output from parser-cmd (stdout):
-       {
-         "empty1":   {},
-         "empty2":   {},
-         "with_cmt": {},
-         "empty_in_array": [
-           {
-             "not_empty": {"type": "integer", "value": "1"}
-           },
-           {}
-         ],
-         "empty_in_array2": [
-           {},
-           {
-             "not_empty": {"type": "integer", "value": "1"}
-           }
-         ],
-         "many_empty": [
-           {},
-           {},
-           {}
-         ],
-         "nested_empty": {
-           "mpt": {}
-         }
-       }
-
-     want:
-       {
-           "empty1":   {},
-           "empty2":   {},
-           "with_cmt": {},
-           "empty_in_array": [
-               {
-                   "not_empty": {"type": "integer", "value": "1"}
-               },
-               {}
-           ],
-           "empty_in_array2": [
-               {},
-               {
-                   "not_empty": {"type": "integer", "value": "1"}
-               }
-           ],
-           "many_empty": [
-               {},
-               {},
-               {}
-           ],
-           "nested_empty": {
-               "empty": {}
-           }
-       }
-
-FAIL valid/inline-table/inline-table
-     exit status 101
-
-     input sent to parser-cmd:
-       name        = { first = "Tom", last = "Preston-Werner" }
-       point       = { x = 1, y = 2 }
-       simple      = { a = 1 }
-       str-key     = { "a" = 1 }
-       table-array = [{ "a" = 1 }, { "b" = 2 }]
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       begin <= end (1 <= 0) when slicing `a`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/inline-table/key-dotted-1
-     exit status 101
-
-     input sent to parser-cmd:
-       a = {   a.b  =  1   }
-       b = {   "a"."b"  =  1   }
-       c = {   a   .   b  =  1   }
-       d = {   'a'   .   "b"  =  1   }
-       e = {a.b=1}
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       begin <= end (1 <= 0) when slicing `a`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
 FAIL valid/inline-table/multiline
      inline table must be single line
      Error: invalid toml
@@ -408,24 +246,6 @@ FAIL valid/inline-table/multiline
        Error: invalid toml
 
        Exit 1
-
-     want:
-          <empty>
-
-FAIL valid/inline-table/spaces
-     exit status 101
-
-     input sent to parser-cmd:
-       # https://github.com/toml-lang/toml-test/issues/146
-       clap-1 = { version = "4"  , features = ["derive", "cargo"] }
-
-       # Contains some literal tabs!
-       clap-2 = { version = "4"	   	,	  	features = [   "derive" 	  ,  	  "cargo"   ]   , nest   =   {  	  "a"   =   'x'  , 	  'b'   = [ 1.5    ,   9.0  ]  }  }
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       begin <= end (1 <= 0) when slicing `a`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
           <empty>
@@ -620,33 +440,8 @@ FAIL valid/key/alphanum
      want:
           <empty>
 
-FAIL valid/key/case-sensitive
-     exit status 101
-
-     input sent to parser-cmd:
-       sectioN = "NN"
-
-       [section]
-       name = "lower"
-       NAME = "upper"
-       Name = "capitalized"
-
-       [Section]
-       name = "different section!!"
-       "μ" = "greek small letter mu"
-       "Μ" = "greek capital letter MU"
-       M = "latin letter M"
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       byte index 1 is not a char boundary; it is inside 'μ' (bytes 0..2) of `μ`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
 FAIL valid/key/dotted-1
-     Could not find key "name.last" in parser output.
+     Could not find key "name.first" in parser output.
 
      input sent to parser-cmd:
        name.first = "Arthur"
@@ -666,8 +461,7 @@ FAIL valid/key/dotted-1
            }
          },
          "name": {
-           "as":    {"type": "string", "value": "Dent"},
-           "first": {"type": "string", "value": "Arthur"}
+           "last": {"type": "string", "value": "Dent"}
          }
        }
 
@@ -689,7 +483,7 @@ FAIL valid/key/dotted-1
        }
 
 FAIL valid/key/dotted-2
-     exit status 101
+     Could not find key "count.a" in parser output.
 
      input sent to parser-cmd:
        # Note: this file contains literal tab characters.
@@ -708,75 +502,34 @@ FAIL valid/key/dotted-2
        "count".k     = 11
        "count" . l   = 12
 
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       begin <= end (1 <= 0) when slicing `c`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+     output from parser-cmd (stdout):
+       {
+         "count": {
+           "e": {"type": "integer", "value": "5"},
+           "f": {"type": "integer", "value": "6"}
+         }
+       }
 
      want:
-          <empty>
-
-FAIL valid/key/dotted-empty
-     exit status 101
-
-     input sent to parser-cmd:
-       ''.x = "empty.x"
-       x."" = "x.empty"
-       [a]
-       "".'' = "empty.empty"
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:18:
-       attempt to subtract with overflow
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/key/empty-1
-     exit status 101
-
-     input sent to parser-cmd:
-       "" = "blank"
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:18:
-       attempt to subtract with overflow
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/key/empty-2
-     exit status 101
-
-     input sent to parser-cmd:
-       '' = "blank"
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:18:
-       attempt to subtract with overflow
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/key/empty-3
-     exit status 101
-
-     input sent to parser-cmd:
-       ''=0
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:18:
-       attempt to subtract with overflow
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
+       {
+           "count": {
+               "a": {"type": "integer", "value": "1"},
+               "b": {"type": "integer", "value": "2"},
+               "c": {"type": "integer", "value": "3"},
+               "d": {"type": "integer", "value": "4"},
+               "e": {"type": "integer", "value": "5"},
+               "f": {"type": "integer", "value": "6"},
+               "g": {"type": "integer", "value": "7"},
+               "h": {"type": "integer", "value": "8"},
+               "i": {"type": "integer", "value": "9"},
+               "j": {"type": "integer", "value": "10"},
+               "k": {"type": "integer", "value": "11"},
+               "l": {"type": "integer", "value": "12"}
+           }
+       }
 
 FAIL valid/key/escapes
-     exit status 101
+     Could not find key "\b" in parser output.
 
      input sent to parser-cmd:
        "\n" = "newline"
@@ -791,13 +544,35 @@ FAIL valid/key/escapes
 
        ["a.b"."\u00c0"]
 
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       begin <= end (1 <= 0) when slicing `"`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+     output from parser-cmd (stdout):
+       {
+         "\"":         {"type": "string", "value": "just a quote"},
+         "\\b":        {"type": "string", "value": "bell"},
+         "\\n":        {"type": "string", "value": "newline"},
+         "\\u00c0":    {"type": "string", "value": "latin capital letter A with grave"},
+         "backsp\\b\\b": {},
+         "\"quoted\"": {
+           "quote": {"type": "bool", "value": "true"}
+         },
+         "a.b": {
+           "\\u00c0": {}
+         }
+       }
 
      want:
-          <empty>
+       {
+           "\b":         {"type": "string", "value": "bell"},
+           "\n":         {"type": "string", "value": "newline"},
+           "\"":         {"type": "string", "value": "just a quote"},
+           "backsp\b\b": {},
+           "À":          {"type": "string", "value": "latin capital letter A with grave"},
+           "\"quoted\"": {
+               "quote": {"type": "bool", "value": "true"}
+           },
+           "a.b": {
+               "À": {}
+           }
+       }
 
 FAIL valid/key/numeric-dotted
      Could not find key "1" in parser output.
@@ -815,58 +590,8 @@ FAIL valid/key/numeric-dotted
            }
        }
 
-FAIL valid/key/quoted-dots
-     Could not find key "with.dot" in parser output.
-
-     input sent to parser-cmd:
-       plain = 1
-       "with.dot" = 2
-
-       [plain_table]
-       plain = 3
-       "with.dot" = 4
-
-       [table.withdot]
-       plain = 5
-       "key.with.dots" = 6
-
-     output from parser-cmd (stdout):
-       {
-         "ith.do": {"type": "integer", "value": "2"},
-         "plain":  {"type": "integer", "value": "1"},
-         "plain_table": {
-           "ith.do": {"type": "integer", "value": "4"},
-           "plain":  {"type": "integer", "value": "3"}
-         },
-         "table": {
-           "withdot": {
-             "ey.with.dot": {"type": "integer", "value": "6"},
-             "plain":       {"type": "integer", "value": "5"}
-           }
-         }
-       }
-
-     want:
-       {
-           "plain":    {"type": "integer", "value": "1"},
-           "with.dot": {"type": "integer", "value": "2"},
-           "plain_table": {
-               "plain":    {"type": "integer", "value": "3"},
-               "with.dot": {"type": "integer", "value": "4"}
-           },
-           "table": {
-               "withdot": {
-                   "key.with.dots": {"type": "integer", "value": "6"},
-                   "plain":         {"type": "integer", "value": "5"}
-               }
-           }
-       }
-
 FAIL valid/key/quoted-unicode
-     duplicate key: \u0000
-     Error: invalid toml
- 
-     Exit 1
+     Could not find key "\x00" in parser output.
 
      input sent to parser-cmd:
 
@@ -877,17 +602,25 @@ FAIL valid/key/quoted-unicode
        "~  ÿ ퟿  ￿ 𐀀 􏿿" = "basic key"
        'l ~  ÿ ퟿  ￿ 𐀀 􏿿' = "literal key"
 
-     output from parser-cmd (stderr):
-       duplicate key: \u0000
-       Error: invalid toml
-
-       Exit 1
+     output from parser-cmd (stdout):
+       {
+         "\\u0000":                                                                                  {"type": "string", "value": "different key"},
+         "\\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff": {"type": "string", "value": "escaped key"},
+         "l ~  ÿ ퟿  ￿ 𐀀 􏿿":                                                                          {"type": "string", "value": "literal key"},
+         "~  ÿ ퟿  ￿ 𐀀 􏿿":                                                                            {"type": "string", "value": "basic key"}
+       }
 
      want:
-          <empty>
+       {
+           "\u0000":               {"type": "string", "value": "null"},
+           "\b \f A   ÿ ퟿  ￿ 𐀀 􏿿": {"type": "string", "value": "escaped key"},
+           "\\u0000":              {"type": "string", "value": "different key"},
+           "l ~  ÿ ퟿  ￿ 𐀀 􏿿":      {"type": "string", "value": "literal key"},
+           "~  ÿ ퟿  ￿ 𐀀 􏿿":        {"type": "string", "value": "basic key"}
+       }
 
 FAIL valid/key/space
-     Could not find key " c d " in parser output.
+     Could not find key " tbl .\ttab\ttab\t" in parser output.
 
      input sent to parser-cmd:
        # Keep whitespace inside quotes keys at all positions.
@@ -899,10 +632,10 @@ FAIL valid/key/space
 
      output from parser-cmd (stdout):
        {
-         " ":   {"type": "integer", "value": "1"},
-         "c d": {"type": "integer", "value": "2"},
-         "tbl": {
-           "ttab\\ttab\\": {"type": "string", "value": "tab"}
+         " c d ": {"type": "integer", "value": "2"},
+         "a b":   {"type": "integer", "value": "1"},
+         " tbl ": {
+           "\\ttab\\ttab\\t": {"type": "string", "value": "tab"}
          }
        }
 
@@ -913,22 +646,6 @@ FAIL valid/key/space
            " tbl ": {
                "\ttab\ttab\t": {"type": "string", "value": "tab"}
            }
-       }
-
-FAIL valid/key/special-chars
-     Could not find key "=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" in parser output.
-
-     input sent to parser-cmd:
-       "=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" = 1
-
-     output from parser-cmd (stdout):
-       {
-         "~!@$^\u0026*()_+-`1234567890[]|/?\u003e\u003c.,;:'": {"type": "integer", "value": "1"}
-       }
-
-     want:
-       {
-           "=~!@$^\u0026*()_+-`1234567890[]|/?\u003e\u003c.,;:'=": {"type": "integer", "value": "1"}
        }
 
 FAIL valid/key/special-word
@@ -1166,57 +883,6 @@ FAIL valid/spec/integer-2
 
      want:
           <empty>
-
-FAIL valid/spec/keys-1
-     exit status 101
-
-     input sent to parser-cmd:
-       "127.0.0.1" = "value"
-       "character encoding" = "value"
-       "ʎǝʞ" = "value"
-       'key2' = "value"
-       'quoted "value"' = "value"
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       byte index 1 is not a char boundary; it is inside 'ʎ' (bytes 0..2) of `ʎǝʞ`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/spec/keys-3
-     Could not find key "site.google.com" in parser output.
-
-     input sent to parser-cmd:
-       name = "Orange"
-       physical.color = "orange"
-       physical.shape = "round"
-       site."google.com" = true
-
-     output from parser-cmd (stdout):
-       {
-         "name": {"type": "string", "value": "Orange"},
-         "physical": {
-           "color": {"type": "string", "value": "orange"},
-           "shape": {"type": "string", "value": "round"}
-         },
-         "site": {
-           "oogle.co": {"type": "bool", "value": "true"}
-         }
-       }
-
-     want:
-       {
-           "name": {"type": "string", "value": "Orange"},
-           "physical": {
-               "color": {"type": "string", "value": "orange"},
-               "shape": {"type": "string", "value": "round"}
-           },
-           "site": {
-               "google.com": {"type": "bool", "value": "true"}
-           }
-       }
 
 FAIL valid/spec/keys-7
      Could not find key "3" in parser output.
@@ -1461,52 +1127,6 @@ FAIL valid/spec/string-7
        Error: invalid toml
 
        Exit 1
-
-     want:
-          <empty>
-
-FAIL valid/spec/table-2
-     Could not find key "dog.tater.man" in parser output.
-
-     input sent to parser-cmd:
-       [dog."tater.man"]
-       type.name = "pug"
-
-     output from parser-cmd (stdout):
-       {
-         "dog": {
-           "ater.ma": {
-             "type": {
-               "name": {"type": "string", "value": "pug"}
-             }
-           }
-         }
-       }
-
-     want:
-       {
-           "dog": {
-               "tater.man": {
-                   "type": {
-                       "name": {"type": "string", "value": "pug"}
-                   }
-               }
-           }
-       }
-
-FAIL valid/spec/table-3
-     exit status 101
-
-     input sent to parser-cmd:
-       [a.b.c]            # this is best practice
-       [ d.e.f ]          # same as [d.e.f]
-       [ g .  h  . i ]    # same as [g.h.i]
-       [ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l']
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       byte index 1 is not a char boundary; it is inside 'ʞ' (bytes 0..2) of `ʞ`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
           <empty>
@@ -2076,7 +1696,7 @@ FAIL valid/string/unicode-escape
        }
 
 FAIL valid/table/empty-name
-     exit status 101
+     Could not find key "x" in parser output.
 
      input sent to parser-cmd:
        ['']
@@ -2088,13 +1708,34 @@ FAIL valid/table/empty-name
        [a.'']
        x = 3
 
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:18:
-       attempt to subtract with overflow
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+     output from parser-cmd (stdout):
+       {
+         "": {
+           "a": {
+             "x": {"type": "integer", "value": "2"}
+           }
+         },
+         "a": {
+           "": {
+             "x": {"type": "integer", "value": "3"}
+           }
+         }
+       }
 
      want:
-          <empty>
+       {
+           "": {
+               "x": {"type": "integer", "value": "1"},
+               "a": {
+                   "x": {"type": "integer", "value": "2"}
+               }
+           },
+           "a": {
+               "": {
+                   "x": {"type": "integer", "value": "3"}
+               }
+           }
+       }
 
 FAIL valid/table/keyword
      Could not find key "inf" in parser output.
@@ -2123,7 +1764,7 @@ FAIL valid/table/keyword
        }
 
 FAIL valid/table/names
-     exit status 101
+     Could not find key "x.1" in parser output.
 
      input sent to parser-cmd:
        [a.b.c]
@@ -2136,84 +1777,65 @@ FAIL valid/table/names
 
        [x.1.2]
 
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:45:14:
-       byte index 1 is not a char boundary; it is inside 'ʞ' (bytes 0..2) of `ʞ`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/table/whitespace
-     Could not find key "valid key" in parser output.
-
-     input sent to parser-cmd:
-       ["valid key"]
-
      output from parser-cmd (stdout):
        {
-         "alid ke": {}
-       }
-
-     want:
-       {
-           "valid key": {}
-       }
-
-FAIL valid/table/with-literal-string
-     exit status 101
-
-     input sent to parser-cmd:
-       ['a']
-       [a.'"b"']
-       [a.'"b"'.c]
-       answer = 42
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:14:
-       begin <= end (1 <= 0) when slicing `a`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
-
-FAIL valid/table/with-pound
-     Could not find key "key#group" in parser output.
-
-     input sent to parser-cmd:
-       ["key#group"]
-       answer = 42
-
-     output from parser-cmd (stdout):
-       {
-         "ey#grou": {
-           "answer": {"type": "integer", "value": "42"}
+         "x": {},
+         "a": {
+           " x ": {},
+           "b.c": {},
+           "d.e": {},
+           "b": {
+             "c": {}
+           }
+         },
+         "d": {
+           "e": {
+             "f": {}
+           }
+         },
+         "g": {
+           "h": {
+             "i": {}
+           }
+         },
+         "j": {
+           "ʞ": {
+             "l": {}
+           }
          }
        }
 
      want:
        {
-           "key#group": {
-               "answer": {"type": "integer", "value": "42"}
+           "a": {
+               " x ": {},
+               "b.c": {},
+               "d.e": {},
+               "b": {
+                   "c": {}
+               }
+           },
+           "d": {
+               "e": {
+                   "f": {}
+               }
+           },
+           "g": {
+               "h": {
+                   "i": {}
+               }
+           },
+           "j": {
+               "ʞ": {
+                   "l": {}
+               }
+           },
+           "x": {
+               "1": {
+                   "2": {}
+               }
            }
        }
-
-FAIL valid/table/with-single-quotes
-     exit status 101
-
-     input sent to parser-cmd:
-       ['a']
-       [a.'b']
-       [a.'b'.c]
-       answer = 42
-
-     output from parser-cmd (stderr):
-       thread 'main' panicked at crates/text/src/lib.rs:49:14:
-       begin <= end (1 <= 0) when slicing `a`
-       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-     want:
-          <empty>
 
 FAIL invalid/control/bare-cr
      Expected an error, but no error was reported.
@@ -2815,6 +2437,36 @@ FAIL invalid/key/after-value
        {
          "first": {"type": "string", "value": "Tom"},
          "last":  {"type": "string", "value": "Preston-Werner"}
+       }
+
+     want:
+       Exit code 1
+
+FAIL invalid/key/duplicate-keys-3
+     Expected an error, but no error was reported.
+
+     input sent to parser-cmd:
+       spelling   = "favorite"
+       "spelling" = "favourite"
+
+     output from parser-cmd (stdout):
+       {
+         "spelling": {"type": "string", "value": "favourite"}
+       }
+
+     want:
+       Exit code 1
+
+FAIL invalid/key/duplicate-keys-4
+     Expected an error, but no error was reported.
+
+     input sent to parser-cmd:
+       spelling   = "favorite"
+       'spelling' = "favourite"
+
+     output from parser-cmd (stdout):
+       {
+         "spelling": {"type": "string", "value": "favourite"}
        }
 
      want:
@@ -3557,5 +3209,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [./target/debug/decode]: using embedded tests
-  valid tests: 109 passed, 73 failed
-invalid tests: 288 passed, 83 failed
+  valid tests: 130 passed, 52 failed
+invalid tests: 286 passed, 85 failed
