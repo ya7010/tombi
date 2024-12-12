@@ -1,5 +1,5 @@
 FAIL valid/array/array
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        ints = [1, 2, 3, ]
@@ -16,13 +16,63 @@ FAIL valid/array/array
        ]
 
      output from parser-cmd (stdout):
-
+       {
+         "comments": [
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2}
+         ],
+         "dates": [
+           {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
+           {"type": "datetime", "value": "1979-05-27T07:32:00Z"},
+           {"type": "datetime", "value": "2006-06-01T11:00:00Z"}
+         ],
+         "floats": [
+           {"type": "float", "value": 1},
+           {"type": "float", "value": 2},
+           {"type": "float", "value": 3}
+         ],
+         "ints": [
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2},
+           {"type": "integer", "value": 3}
+         ],
+         "strings": [
+           {"type": "string", "value": "a"},
+           {"type": "string", "value": "b"},
+           {"type": "string", "value": "c"}
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "comments": [
+               {"type": "integer", "value": "1"},
+               {"type": "integer", "value": "2"}
+           ],
+           "dates": [
+               {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
+               {"type": "datetime", "value": "1979-05-27T07:32:00Z"},
+               {"type": "datetime", "value": "2006-06-01T11:00:00Z"}
+           ],
+           "floats": [
+               {"type": "float", "value": "1.1"},
+               {"type": "float", "value": "2.1"},
+               {"type": "float", "value": "3.1"}
+           ],
+           "ints": [
+               {"type": "integer", "value": "1"},
+               {"type": "integer", "value": "2"},
+               {"type": "integer", "value": "3"}
+           ],
+           "strings": [
+               {"type": "string", "value": "a"},
+               {"type": "string", "value": "b"},
+               {"type": "string", "value": "c"}
+           ]
+       }
 
 FAIL valid/array/array-subtables
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [[arr]]
@@ -34,85 +84,157 @@ FAIL valid/array/array-subtables
        val=2
 
      output from parser-cmd (stdout):
-
+       {
+         "arr": [
+           {
+             "subtab": {
+               "val": {"type": "integer", "value": 1}
+             }
+           },
+           {
+             "subtab": {
+               "val": {"type": "integer", "value": 2}
+             }
+           }
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "arr": [
+               {
+                   "subtab": {
+                       "val": {"type": "integer", "value": "1"}
+                   }
+               },
+               {
+                   "subtab": {
+                       "val": {"type": "integer", "value": "2"}
+                   }
+               }
+           ]
+       }
 
 FAIL valid/array/bool
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        a = [true, false]
 
      output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/empty
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       thevoid = [[[[[]]]]]
-
-     output from parser-cmd (stdout):
-
+       {
+         "a": [
+           {"type": "bool", "value": true},
+           {"type": "bool", "value": false}
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "a": [
+               {"type": "bool", "value": "true"},
+               {"type": "bool", "value": "false"}
+           ]
+       }
 
 FAIL valid/array/hetergeneous
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Array lengths differ for key "mixed":
+       Expected:     3
+       Your encoder: 1
 
      input sent to parser-cmd:
        mixed = [[1, 2], ["a", "b"], [1.1, 2.1]]
 
      output from parser-cmd (stdout):
-
+       {
+         "mixed": [[{"type": "float", "value": 2}]]
+       }
 
      want:
-          <empty>
+       {
+           "mixed": [
+               [
+                   {"type": "integer", "value": "1"},
+                   {"type": "integer", "value": "2"}
+               ],
+               [
+                   {"type": "string", "value": "a"},
+                   {"type": "string", "value": "b"}
+               ],
+               [
+                   {"type": "float", "value": "1.1"},
+                   {"type": "float", "value": "2.1"}
+               ]
+           ]
+       }
 
 FAIL valid/array/mixed-int-array
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        arrays-and-ints =  [1, ["Arrays are not integers."]]
 
      output from parser-cmd (stdout):
-
+       {
+         "arrays-and-ints": [
+           {"type": "integer", "value": 1},
+           [{"type": "string", "value": "Arrays are not integers."}]
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "arrays-and-ints": [
+               {"type": "integer", "value": "1"},
+               [{"type": "string", "value": "Arrays are not integers."}]
+           ]
+       }
 
 FAIL valid/array/mixed-int-float
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Array lengths differ for key "ints-and-floats":
+       Expected:     2
+       Your encoder: 0
 
      input sent to parser-cmd:
        ints-and-floats = [1, 1.1]
 
      output from parser-cmd (stdout):
-
+       {
+         "ints-and-floats": []
+       }
 
      want:
-          <empty>
+       {
+           "ints-and-floats": [
+               {"type": "integer", "value": "1"},
+               {"type": "float", "value": "1.1"}
+           ]
+       }
 
 FAIL valid/array/mixed-int-string
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        strings-and-ints = ["hi", 42]
 
      output from parser-cmd (stdout):
-
+       {
+         "strings-and-ints": [
+           {"type": "string", "value": "hi"},
+           {"type": "integer", "value": 42}
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "strings-and-ints": [
+               {"type": "string", "value": "hi"},
+               {"type": "integer", "value": "42"}
+           ]
+       }
 
 FAIL valid/array/mixed-string-table
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        contributors = [
@@ -128,25 +250,45 @@ FAIL valid/array/mixed-string-table
        mixed = [{k="a"}, "b", 1]
 
      output from parser-cmd (stdout):
-
+       {
+         "contributors": [
+           {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
+           {
+             "email": {"type": "string", "value": "bazqux@example.com"},
+             "name":  {"type": "string", "value": "Baz Qux"},
+             "url":   {"type": "string", "value": "https://example.com/bazqux"}
+           }
+         ],
+         "mixed": [
+           {
+             "k": {"type": "string", "value": "a"}
+           },
+           {"type": "string", "value": "b"},
+           {"type": "integer", "value": 1}
+         ]
+       }
 
      want:
-          <empty>
-
-FAIL valid/array/nested
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       nest = [["a"], ["b"]]
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
+       {
+           "contributors": [
+               {"type": "string", "value": "Foo Bar \u003cfoo@example.com\u003e"},
+               {
+                   "email": {"type": "string", "value": "bazqux@example.com"},
+                   "name":  {"type": "string", "value": "Baz Qux"},
+                   "url":   {"type": "string", "value": "https://example.com/bazqux"}
+               }
+           ],
+           "mixed": [
+               {
+                   "k": {"type": "string", "value": "a"}
+               },
+               {"type": "string", "value": "b"},
+               {"type": "integer", "value": "1"}
+           ]
+       }
 
 FAIL valid/array/nested-double
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        nest = [
@@ -157,37 +299,55 @@ FAIL valid/array/nested-double
        ]
 
      output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/nested-inline-table
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       a = [ { b = {} } ]
-
-     output from parser-cmd (stdout):
-
+       {
+         "nest": [[
+           [{"type": "string", "value": "a"}],
+           [
+             {"type": "integer", "value": 1},
+             {"type": "integer", "value": 2},
+             [{"type": "integer", "value": 3}]
+           ]
+         ]]
+       }
 
      want:
-          <empty>
+       {
+           "nest": [[
+               [{"type": "string", "value": "a"}],
+               [
+                   {"type": "integer", "value": "1"},
+                   {"type": "integer", "value": "2"},
+                   [{"type": "integer", "value": "3"}]
+               ]
+           ]]
+       }
 
 FAIL valid/array/nospaces
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        ints = [1,2,3]
 
      output from parser-cmd (stdout):
-
+       {
+         "ints": [
+           {"type": "integer", "value": 1},
+           {"type": "integer", "value": 2},
+           {"type": "integer", "value": 3}
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "ints": [
+               {"type": "integer", "value": "1"},
+               {"type": "integer", "value": "2"},
+               {"type": "integer", "value": "3"}
+           ]
+       }
 
 FAIL valid/array/open-parent-table
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [[parent-table.arr]]
@@ -196,95 +356,29 @@ FAIL valid/array/open-parent-table
        not-arr = 1
 
      output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/string-quote-comma
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       title = [
-       "Client: \"XXXX\", Job: XXXX",
-       "Code: XXXX"
-       ]
-
-     output from parser-cmd (stdout):
-
+       {
+         "parent-table": {
+           "not-arr": {"type": "integer", "value": 1},
+           "arr": [
+             {},
+             {}
+           ]
+         }
+       }
 
      want:
-          <empty>
-
-FAIL valid/array/string-quote-comma-2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       title = [ " \", ",]
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/string-with-comma
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       title = [
-       "Client: XXXX, Job: XXXX",
-       "Code: XXXX"
-       ]
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/string-with-comma-2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       title = [
-       """Client: XXXX,
-       Job: XXXX""",
-       "Code: XXXX"
-       ]
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/strings
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       string_array = [ "all", 'strings', """are the same""", '''type''']
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/array/table-array-string-backslash
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       foo = [ { bar="\"{{baz}}\""} ]
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
+       {
+           "parent-table": {
+               "not-arr": {"type": "integer", "value": "1"},
+               "arr": [
+                   {},
+                   {}
+               ]
+           }
+       }
 
 FAIL valid/array/trailing-comma
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        arr-1 = [1,]
@@ -300,26 +394,54 @@ FAIL valid/array/trailing-comma
        ]
 
      output from parser-cmd (stdout):
-
+       {
+         "arr-1": [{"type": "integer", "value": 1}],
+         "arr-3": [{"type": "integer", "value": 4}],
+         "arr-2": [
+           {"type": "integer", "value": 2},
+           {"type": "integer", "value": 3}
+         ],
+         "arr-4": [
+           {"type": "integer", "value": 5},
+           {"type": "integer", "value": 6}
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "arr-1": [{"type": "integer", "value": "1"}],
+           "arr-3": [{"type": "integer", "value": "4"}],
+           "arr-2": [
+               {"type": "integer", "value": "2"},
+               {"type": "integer", "value": "3"}
+           ],
+           "arr-4": [
+               {"type": "integer", "value": "5"},
+               {"type": "integer", "value": "6"}
+           ]
+       }
 
 FAIL valid/bool/bool
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        t = true
        f = false
 
      output from parser-cmd (stdout):
-
+       {
+         "f": {"type": "bool", "value": false},
+         "t": {"type": "bool", "value": true}
+       }
 
      want:
-          <empty>
+       {
+           "f": {"type": "bool", "value": "false"},
+           "t": {"type": "bool", "value": "true"}
+       }
 
 FAIL valid/comment/after-literal-no-ws
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Could not find key "inf" in parser output.
 
      input sent to parser-cmd:
        inf=inf#infinity
@@ -328,39 +450,21 @@ FAIL valid/comment/after-literal-no-ws
        false=false#false
 
      output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/comment/at-eof
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # This is a full-line comment
-       key = "value" # This is a comment at the end of a line
-
-     output from parser-cmd (stdout):
-
+       {
+         "false": {"type": "bool", "value": false},
+         "true":  {"type": "bool", "value": true}
+       }
 
      want:
-          <empty>
-
-FAIL valid/comment/at-eof2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # This is a full-line comment
-       key = "value" # This is a comment at the end of a line
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
+       {
+           "false": {"type": "bool", "value": "false"},
+           "inf":   {"type": "float", "value": "inf"},
+           "nan":   {"type": "float", "value": "nan"},
+           "true":  {"type": "bool", "value": "true"}
+       }
 
 FAIL valid/comment/everywhere
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        # Top comment.
@@ -393,37 +497,33 @@ FAIL valid/comment/everywhere
        d = 1979-05-27 # Comment
 
      output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/comment/noeol
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # single comment without any eol characters
-
-     output from parser-cmd (stdout):
-
+       {
+         "group": {
+           "answer": {"type": "integer", "value": 42},
+           "d":      {"type": "date-local", "value": "1979-05-27"},
+           "dt":     {"type": "datetime", "value": "1979-05-27T07:32:12-07:00"},
+           "more": [
+             {"type": "integer", "value": 42},
+             {"type": "integer", "value": 42}
+           ]
+         }
+       }
 
      want:
-          <empty>
-
-FAIL valid/comment/nonascii
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       # ~  ÿ ퟿  ￿ 𐀀 􏿿
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
+       {
+           "group": {
+               "answer": {"type": "integer", "value": "42"},
+               "d":      {"type": "date-local", "value": "1979-05-27"},
+               "dt":     {"type": "datetime", "value": "1979-05-27T07:32:12-07:00"},
+               "more": [
+                   {"type": "integer", "value": "42"},
+                   {"type": "integer", "value": "42"}
+               ]
+           }
+       }
 
 FAIL valid/comment/tricky
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     exit status 101
 
      input sent to parser-cmd:
        [section]#attached comment
@@ -456,47 +556,30 @@ FAIL valid/comment/tricky
        ]
        tbl1 = { "#" = '}#'}#}}
 
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/datetime/datetime
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       space = 1987-07-05 17:45:00Z
-
-       # ABNF is case-insensitive, both "Z" and "z" must be supported.
-       lower = 1987-07-05t17:45:00z
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/datetime/edge
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       first-offset = 0001-01-01 00:00:00Z
-       first-local  = 0001-01-01 00:00:00
-       first-date   = 0001-01-01
-
-       last-offset = 9999-12-31 23:59:59Z
-       last-local  = 9999-12-31 23:59:59
-       last-date   = 9999-12-31
-
-     output from parser-cmd (stdout):
-
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       begin <= end (1 <= 0) when slicing `#`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
           <empty>
 
 FAIL valid/datetime/leap-year
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     unknown line
+     unknown line
+     unknown line
+     unknown line
+     unknown line
+     unknown line
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        2000-datetime       = 2000-02-29 15:15:15Z
@@ -507,95 +590,28 @@ FAIL valid/datetime/leap-year
        2024-datetime-local = 2024-02-29 15:15:15
        2024-date           = 2024-02-29
 
-     output from parser-cmd (stdout):
+     output from parser-cmd (stderr):
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       unknown line
+       unknown line
+       unknown line
+       unknown line
+       unknown line
+       unknown line
+       Error: invalid toml
 
-
-     want:
-          <empty>
-
-FAIL valid/datetime/local
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       local = 1987-07-05T17:45:00
-       milli = 1977-12-21T10:32:00.555
-       space = 1987-07-05 17:45:00
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/datetime/local-date
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       bestdayever = 1987-07-05
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/datetime/local-time
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       besttimeever = 17:45:00
-       milliseconds = 10:32:00.555
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/datetime/milliseconds
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       utc1  = 1987-07-05T17:45:56.123Z
-       utc2  = 1987-07-05T17:45:56.6Z
-       wita1 = 1987-07-05T17:45:56.123+08:00
-       wita2 = 1987-07-05T17:45:56.6+08:00
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/datetime/timezone
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-       utc  = 1987-07-05T17:45:56Z
-       pdt  = 1987-07-05T17:45:56-05:00
-       nzst = 1987-07-05T17:45:56+12:00
-       nzdt = 1987-07-05T17:45:56+13:00  # DST
-
-     output from parser-cmd (stdout):
-
-
-     want:
-          <empty>
-
-FAIL valid/empty-file
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
-
-     input sent to parser-cmd:
-          <empty>
-
-     output from parser-cmd (stdout):
-
+       Exit 1
 
      want:
           <empty>
 
 FAIL valid/example
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        best-day-ever = 1987-07-05T17:45:00Z
@@ -605,13 +621,33 @@ FAIL valid/example
        perfection = [6, 28, 496]
 
      output from parser-cmd (stdout):
-
+       {
+         "best-day-ever": {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
+         "numtheory": {
+           "boring": {"type": "bool", "value": false},
+           "perfection": [
+             {"type": "integer", "value": 6},
+             {"type": "integer", "value": 28},
+             {"type": "integer", "value": 496}
+           ]
+         }
+       }
 
      want:
-          <empty>
+       {
+           "best-day-ever": {"type": "datetime", "value": "1987-07-05T17:45:00Z"},
+           "numtheory": {
+               "boring": {"type": "bool", "value": "false"},
+               "perfection": [
+                   {"type": "integer", "value": "6"},
+                   {"type": "integer", "value": "28"},
+                   {"type": "integer", "value": "496"}
+               ]
+           }
+       }
 
 FAIL valid/float/exponent
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        lower = 3e2
@@ -624,13 +660,31 @@ FAIL valid/float/exponent
        minustenth = -1E-1
 
      output from parser-cmd (stdout):
-
+       {
+         "lower":      {"type": "float", "value": 300},
+         "minustenth": {"type": "float", "value": -0},
+         "neg":        {"type": "float", "value": 0},
+         "pointlower": {"type": "float", "value": 310},
+         "pointupper": {"type": "float", "value": 310},
+         "pos":        {"type": "float", "value": 300},
+         "upper":      {"type": "float", "value": 300},
+         "zero":       {"type": "float", "value": 3}
+       }
 
      want:
-          <empty>
+       {
+           "lower":      {"type": "float", "value": "300.0"},
+           "minustenth": {"type": "float", "value": "-0.1"},
+           "neg":        {"type": "float", "value": "0.03"},
+           "pointlower": {"type": "float", "value": "310.0"},
+           "pointupper": {"type": "float", "value": "310.0"},
+           "pos":        {"type": "float", "value": "300.0"},
+           "upper":      {"type": "float", "value": "300.0"},
+           "zero":       {"type": "float", "value": "3.0"}
+       }
 
 FAIL valid/float/float
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        pi = 3.14
@@ -639,13 +693,23 @@ FAIL valid/float/float
        zero-intpart = 0.123
 
      output from parser-cmd (stdout):
-
+       {
+         "negpi":        {"type": "float", "value": -3},
+         "pi":           {"type": "float", "value": 3},
+         "pospi":        {"type": "float", "value": 3},
+         "zero-intpart": {"type": "float", "value": 0}
+       }
 
      want:
-          <empty>
+       {
+           "negpi":        {"type": "float", "value": "-3.14"},
+           "pi":           {"type": "float", "value": "3.14"},
+           "pospi":        {"type": "float", "value": "3.14"},
+           "zero-intpart": {"type": "float", "value": "0.123"}
+       }
 
 FAIL valid/float/inf-and-nan
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Could not find key "nan" in parser output.
 
      input sent to parser-cmd:
        # We don't encode +nan and -nan back with the signs; many languages don't
@@ -658,54 +722,91 @@ FAIL valid/float/inf-and-nan
        infinity_plus = +inf
 
      output from parser-cmd (stdout):
-
+       {
+         "infinity":      {"type": "float", "value": null},
+         "infinity_neg":  {"type": "float", "value": null},
+         "infinity_plus": {"type": "float", "value": null},
+         "nan_neg":       {"type": "float", "value": null},
+         "nan_plus":      {"type": "float", "value": null}
+       }
 
      want:
-          <empty>
+       {
+           "infinity":      {"type": "float", "value": "inf"},
+           "infinity_neg":  {"type": "float", "value": "-inf"},
+           "infinity_plus": {"type": "float", "value": "inf"},
+           "nan":           {"type": "float", "value": "nan"},
+           "nan_neg":       {"type": "float", "value": "nan"},
+           "nan_plus":      {"type": "float", "value": "nan"}
+       }
 
 FAIL valid/float/long
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        longpi = 3.141592653589793
        neglongpi = -3.141592653589793
 
      output from parser-cmd (stdout):
-
+       {
+         "longpi":    {"type": "float", "value": 3},
+         "neglongpi": {"type": "float", "value": -3}
+       }
 
      want:
-          <empty>
+       {
+           "longpi":    {"type": "float", "value": "3.141592653589793"},
+           "neglongpi": {"type": "float", "value": "-3.141592653589793"}
+       }
 
 FAIL valid/float/max-int
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     invalid float: invalid float literal
+     invalid float: invalid float literal
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        # Maximum and minimum safe natural numbers.
        max_float =  9_007_199_254_740_991.0
        min_float = -9_007_199_254_740_991.0
 
-     output from parser-cmd (stdout):
+     output from parser-cmd (stderr):
+       invalid float: invalid float literal
+       invalid float: invalid float literal
+       Error: invalid toml
 
+       Exit 1
 
      want:
           <empty>
 
 FAIL valid/float/underscore
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     invalid float: invalid float literal
+     invalid float: invalid float literal
+     invalid float: invalid float literal
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        before = 3_141.5927
        after = 3141.592_7
        exponent = 3e1_4
 
-     output from parser-cmd (stdout):
+     output from parser-cmd (stderr):
+       invalid float: invalid float literal
+       invalid float: invalid float literal
+       invalid float: invalid float literal
+       Error: invalid toml
 
+       Exit 1
 
      want:
           <empty>
 
 FAIL valid/float/zero
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        zero = 0.0
@@ -717,13 +818,29 @@ FAIL valid/float/zero
        exponent-signed-neg = -0e0
 
      output from parser-cmd (stdout):
-
+       {
+         "exponent":            {"type": "float", "value": 0},
+         "exponent-signed-neg": {"type": "float", "value": -0},
+         "exponent-signed-pos": {"type": "float", "value": 0},
+         "exponent-two-0":      {"type": "float", "value": 0},
+         "signed-neg":          {"type": "float", "value": -0},
+         "signed-pos":          {"type": "float", "value": 0},
+         "zero":                {"type": "float", "value": 0}
+       }
 
      want:
-          <empty>
+       {
+           "exponent":            {"type": "float", "value": "0"},
+           "exponent-signed-neg": {"type": "float", "value": "-0"},
+           "exponent-signed-pos": {"type": "float", "value": "0"},
+           "exponent-two-0":      {"type": "float", "value": "0"},
+           "signed-neg":          {"type": "float", "value": "-0"},
+           "signed-pos":          {"type": "float", "value": "0"},
+           "zero":                {"type": "float", "value": "0"}
+       }
 
 FAIL valid/implicit-and-explicit-after
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [a.b.c]
@@ -733,13 +850,31 @@ FAIL valid/implicit-and-explicit-after
        better = 43
 
      output from parser-cmd (stdout):
-
+       {
+         "a": {
+           "better": {"type": "integer", "value": 43},
+           "b": {
+             "c": {
+               "answer": {"type": "integer", "value": 42}
+             }
+           }
+         }
+       }
 
      want:
-          <empty>
+       {
+           "a": {
+               "better": {"type": "integer", "value": "43"},
+               "b": {
+                   "c": {
+                       "answer": {"type": "integer", "value": "42"}
+                   }
+               }
+           }
+       }
 
 FAIL valid/implicit-and-explicit-before
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [a]
@@ -749,26 +884,60 @@ FAIL valid/implicit-and-explicit-before
        answer = 42
 
      output from parser-cmd (stdout):
-
+       {
+         "a": {
+           "better": {"type": "integer", "value": 43},
+           "b": {
+             "c": {
+               "answer": {"type": "integer", "value": 42}
+             }
+           }
+         }
+       }
 
      want:
-          <empty>
+       {
+           "a": {
+               "better": {"type": "integer", "value": "43"},
+               "b": {
+                   "c": {
+                       "answer": {"type": "integer", "value": "42"}
+                   }
+               }
+           }
+       }
 
 FAIL valid/implicit-groups
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [a.b.c]
        answer = 42
 
      output from parser-cmd (stdout):
-
+       {
+         "a": {
+           "b": {
+             "c": {
+               "answer": {"type": "integer", "value": 42}
+             }
+           }
+         }
+       }
 
      want:
-          <empty>
+       {
+           "a": {
+               "b": {
+                   "c": {
+                       "answer": {"type": "integer", "value": "42"}
+                   }
+               }
+           }
+       }
 
 FAIL valid/inline-table/array
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     exit status 101
 
      input sent to parser-cmd:
        arr = [ {'a'= 1}, {'a'= 2} ]
@@ -777,14 +946,20 @@ FAIL valid/inline-table/array
                  {first_name = "Eric", last_name = "Clapton"},
                  {first_name = "Bob", last_name = "Seger"}]
 
-     output from parser-cmd (stdout):
-
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:49:14:
+       begin <= end (1 <= 0) when slicing `a`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
           <empty>
 
 FAIL valid/inline-table/array-values
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     inline table must be single line
+     inline table must be single line
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        # "No newlines are allowed between the curly braces unless they are valid within
@@ -801,26 +976,40 @@ FAIL valid/inline-table/array-values
        		4,
        	]}
 
-     output from parser-cmd (stdout):
+     output from parser-cmd (stderr):
+       inline table must be single line
+       inline table must be single line
+       Error: invalid toml
 
+       Exit 1
 
      want:
           <empty>
 
 FAIL valid/inline-table/bool
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        a = {a = true, b = false}
 
      output from parser-cmd (stdout):
-
+       {
+         "a": {
+           "a": {"type": "bool", "value": true},
+           "b": {"type": "bool", "value": false}
+         }
+       }
 
      want:
-          <empty>
+       {
+           "a": {
+               "a": {"type": "bool", "value": "true"},
+               "b": {"type": "bool", "value": "false"}
+           }
+       }
 
 FAIL valid/inline-table/empty
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        empty1 = {}
@@ -832,25 +1021,85 @@ FAIL valid/inline-table/empty
        with_cmt ={            }#nothing here
 
      output from parser-cmd (stdout):
-
+       {
+         "empty1":   {},
+         "empty2":   {},
+         "with_cmt": {},
+         "empty_in_array": [
+           {
+             "not_empty": {"type": "integer", "value": 1}
+           },
+           {}
+         ],
+         "empty_in_array2": [
+           {},
+           {
+             "not_empty": {"type": "integer", "value": 1}
+           }
+         ],
+         "many_empty": [
+           {},
+           {},
+           {}
+         ],
+         "nested_empty": {
+           "mpt": {}
+         }
+       }
 
      want:
-          <empty>
+       {
+           "empty1":   {},
+           "empty2":   {},
+           "with_cmt": {},
+           "empty_in_array": [
+               {
+                   "not_empty": {"type": "integer", "value": "1"}
+               },
+               {}
+           ],
+           "empty_in_array2": [
+               {},
+               {
+                   "not_empty": {"type": "integer", "value": "1"}
+               }
+           ],
+           "many_empty": [
+               {},
+               {},
+               {}
+           ],
+           "nested_empty": {
+               "empty": {}
+           }
+       }
 
 FAIL valid/inline-table/end-in-bool
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: bool is not a string
 
      input sent to parser-cmd:
        black = { python=">3.6", version=">=18.9b0", allow_prereleases=true }
 
      output from parser-cmd (stdout):
-
+       {
+         "black": {
+           "allow_prereleases": {"type": "bool", "value": true},
+           "python":            {"type": "string", "value": "\u003e3.6"},
+           "version":           {"type": "string", "value": "\u003e=18.9b0"}
+         }
+       }
 
      want:
-          <empty>
+       {
+           "black": {
+               "allow_prereleases": {"type": "bool", "value": "true"},
+               "python":            {"type": "string", "value": "\u003e3.6"},
+               "version":           {"type": "string", "value": "\u003e=18.9b0"}
+           }
+       }
 
 FAIL valid/inline-table/inline-table
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     exit status 101
 
      input sent to parser-cmd:
        name        = { first = "Tom", last = "Preston-Werner" }
@@ -859,14 +1108,16 @@ FAIL valid/inline-table/inline-table
        str-key     = { "a" = 1 }
        table-array = [{ "a" = 1 }, { "b" = 2 }]
 
-     output from parser-cmd (stdout):
-
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       begin <= end (1 <= 0) when slicing `a`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
           <empty>
 
 FAIL valid/inline-table/key-dotted-1
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     exit status 101
 
      input sent to parser-cmd:
        a = {   a.b  =  1   }
@@ -875,26 +1126,66 @@ FAIL valid/inline-table/key-dotted-1
        d = {   'a'   .   "b"  =  1   }
        e = {a.b=1}
 
-     output from parser-cmd (stdout):
-
+     output from parser-cmd (stderr):
+       thread 'main' panicked at crates/text/src/lib.rs:45:14:
+       begin <= end (1 <= 0) when slicing `a`
+       note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
      want:
           <empty>
 
 FAIL valid/inline-table/key-dotted-2
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        many.dots.here.dot.dot.dot = {a.b.c = 1, a.b.d = 2}
 
      output from parser-cmd (stdout):
-
+       {
+         "many": {
+           "dots": {
+             "here": {
+               "dot": {
+                 "dot": {
+                   "dot": {
+                     "a": {
+                       "b": {
+                         "c": {"type": "integer", "value": 1},
+                         "d": {"type": "integer", "value": 2}
+                       }
+                     }
+                   }
+                 }
+               }
+             }
+           }
+         }
+       }
 
      want:
-          <empty>
+       {
+           "many": {
+               "dots": {
+                   "here": {
+                       "dot": {
+                           "dot": {
+                               "dot": {
+                                   "a": {
+                                       "b": {
+                                           "c": {"type": "integer", "value": "1"},
+                                           "d": {"type": "integer", "value": "2"}
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+       }
 
 FAIL valid/inline-table/key-dotted-3
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [tbl]
@@ -904,13 +1195,59 @@ FAIL valid/inline-table/key-dotted-3
        a.b.c = {d.e=1}
 
      output from parser-cmd (stdout):
-
+       {
+         "tbl": {
+           "a": {
+             "b": {
+               "c": {
+                 "d": {
+                   "e": {"type": "integer", "value": 1}
+                 }
+               }
+             }
+           },
+           "x": {
+             "a": {
+               "b": {
+                 "c": {
+                   "d": {
+                     "e": {"type": "integer", "value": 1}
+                   }
+                 }
+               }
+             }
+           }
+         }
+       }
 
      want:
-          <empty>
+       {
+           "tbl": {
+               "a": {
+                   "b": {
+                       "c": {
+                           "d": {
+                               "e": {"type": "integer", "value": "1"}
+                           }
+                       }
+                   }
+               },
+               "x": {
+                   "a": {
+                       "b": {
+                           "c": {
+                               "d": {
+                                   "e": {"type": "integer", "value": "1"}
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+       }
 
 FAIL valid/inline-table/key-dotted-4
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        [[arr]]
@@ -922,13 +1259,67 @@ FAIL valid/inline-table/key-dotted-4
        T = {a.b=2}
 
      output from parser-cmd (stdout):
-
+       {
+         "arr": [
+           {
+             "T": {
+               "a": {
+                 "b": {"type": "integer", "value": 1}
+               }
+             },
+             "t": {
+               "a": {
+                 "b": {"type": "integer", "value": 1}
+               }
+             }
+           },
+           {
+             "T": {
+               "a": {
+                 "b": {"type": "integer", "value": 2}
+               }
+             },
+             "t": {
+               "a": {
+                 "b": {"type": "integer", "value": 2}
+               }
+             }
+           }
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "arr": [
+               {
+                   "T": {
+                       "a": {
+                           "b": {"type": "integer", "value": "1"}
+                       }
+                   },
+                   "t": {
+                       "a": {
+                           "b": {"type": "integer", "value": "1"}
+                       }
+                   }
+               },
+               {
+                   "T": {
+                       "a": {
+                           "b": {"type": "integer", "value": "2"}
+                       }
+                   },
+                   "t": {
+                       "a": {
+                           "b": {"type": "integer", "value": "2"}
+                       }
+                   }
+               }
+           ]
+       }
 
 FAIL valid/inline-table/key-dotted-5
-     command timed out after 1s; increase -timeout if this isn't an infinite loop or pathological behaviour
+     Malformed output from your encoder: float64 is not a string
 
      input sent to parser-cmd:
        arr-1 = [{a.b = 1}]
@@ -938,10 +1329,88 @@ FAIL valid/inline-table/key-dotted-5
        arr-4 = ["str", {a.b = 1}, {a.b = 2}]
 
      output from parser-cmd (stdout):
-
+       {
+         "arr-1": [{
+           "a": {
+             "b": {"type": "integer", "value": 1}
+           }
+         }],
+         "arr-2": [
+           {"type": "string", "value": "str"},
+           {
+             "a": {
+               "b": {"type": "integer", "value": 1}
+             }
+           }
+         ],
+         "arr-3": [
+           {
+             "a": {
+               "b": {"type": "integer", "value": 1}
+             }
+           },
+           {
+             "a": {
+               "b": {"type": "integer", "value": 2}
+             }
+           }
+         ],
+         "arr-4": [
+           {"type": "string", "value": "str"},
+           {
+             "a": {
+               "b": {"type": "integer", "value": 1}
+             }
+           },
+           {
+             "a": {
+               "b": {"type": "integer", "value": 2}
+             }
+           }
+         ]
+       }
 
      want:
-          <empty>
+       {
+           "arr-1": [{
+               "a": {
+                   "b": {"type": "integer", "value": "1"}
+               }
+           }],
+           "arr-2": [
+               {"type": "string", "value": "str"},
+               {
+                   "a": {
+                       "b": {"type": "integer", "value": "1"}
+                   }
+               }
+           ],
+           "arr-3": [
+               {
+                   "a": {
+                       "b": {"type": "integer", "value": "1"}
+                   }
+               },
+               {
+                   "a": {
+                       "b": {"type": "integer", "value": "2"}
+                   }
+               }
+           ],
+           "arr-4": [
+               {"type": "string", "value": "str"},
+               {
+                   "a": {
+                       "b": {"type": "integer", "value": "1"}
+                   }
+               },
+               {
+                   "a": {
+                       "b": {"type": "integer", "value": "2"}
+                   }
+               }
+           ]
+       }
 
 FAIL valid/inline-table/key-dotted-6
      Malformed output from your encoder: float64 is not a string
@@ -5381,6 +5850,6 @@ FAIL invalid/table/super-twice
      want:
        Exit code 1
 
-toml-test v0001-01-01 [cargo decode]: using embedded tests
-  valid tests:  36 passed, 146 failed
+toml-test v0001-01-01 [./target/debug/decode]: using embedded tests
+  valid tests:  57 passed, 125 failed
 invalid tests: 288 passed, 83 failed

@@ -7,7 +7,14 @@ fn main() -> Result<(), anyhow::Error> {
     let mut source = String::new();
     std::io::stdin().read_to_string(&mut source)?;
 
-    let p = parser::parse(&source, TomlVersion::default());
+    let value = decode(&source)?;
+    println!("{}", serde_json::to_string_pretty(&value).unwrap());
+
+    Ok(())
+}
+
+fn decode(source: &str) -> Result<Value, anyhow::Error> {
+    let p = parser::parse(source, TomlVersion::default());
 
     if !p.errors().is_empty() {
         for error in p.errors() {
@@ -31,11 +38,7 @@ fn main() -> Result<(), anyhow::Error> {
         }
     };
 
-    let document = Value::from(root);
-
-    println!("{}", serde_json::to_string_pretty(&document).unwrap());
-
-    Ok(())
+    Ok(Value::from(root))
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -145,6 +148,78 @@ impl From<document_tree::Root> for Value {
                 .into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
+        )
+    }
+}
+
+#[cfg(test)]
+macro_rules! test_decode {
+    {
+        #[test]
+        fn $name:ident($source:expr) -> Ok($expected:expr)
+    } => {
+        #[test]
+        fn $name()
+        {
+        let source = textwrap::dedent($source);
+        let value = crate::decode(source.trim()).unwrap();
+        pretty_assertions::assert_eq!(
+            serde_json::to_string(&value).unwrap(),
+            serde_json::to_string(&$expected).unwrap()
+        );
+    }
+    };
+}
+
+#[cfg(test)]
+mod test {
+    use serde_json::json;
+
+    test_decode! {
+        #[test]
+        fn valid_array_array(
+            r#"
+            ints = [1, 2, 3, ]
+            floats = [1.1, 2.1, 3.1]
+            strings = ["a", "b", "c"]
+            dates = [
+                1987-07-05T17:45:00Z,
+                1979-05-27T07:32:00Z,
+                2006-06-01T11:00:00Z,
+            ]
+            comments = [
+                        1,
+                        2, #this is ok
+            ]
+            "#
+        ) -> Ok(json!(
+                {
+                    "ints":[
+                        { "type": "integer", "value": 1 },
+                        { "type": "integer", "value": 2 },
+                        { "type": "integer", "value": 3 }
+                    ],
+                    "floats":[
+                        { "type": "float", "value": 1.1 },
+                        { "type": "float", "value": 2.1 },
+                        { "type": "float", "value": 3.1 }
+                    ],
+                    "strings":[
+                        { "type": "string", "value": "a" },
+                        { "type": "string", "value": "b" },
+                        { "type": "string", "value": "c" }
+                    ],
+                    "dates":[
+                        { "type": "datetime", "value": "1987-07-05T17:45:00Z" },
+                        { "type": "datetime", "value": "1979-05-27T07:32:00Z" },
+                        { "type": "datetime", "value": "2006-06-01T11:00:00Z" }
+                    ],
+                    "comments":[
+                        { "type": "integer", "value": 1 },
+                        { "type": "integer", "value": 2 }
+                    ]
+                }
+            )
         )
     }
 }

@@ -2563,9 +2563,11 @@ dependencies = [
  "document-tree",
  "indexmap 2.6.0",
  "parser",
+ "pretty_assertions",
  "serde",
  "serde_json",
  "text",
+ "textwrap",
 ]
 
 [[package]]

@@ -21,3 +21,7 @@ parser = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true, features = ["preserve_order"] }
 text = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+textwrap.workspace = true
