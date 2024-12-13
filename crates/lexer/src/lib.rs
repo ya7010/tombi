@@ -21,16 +21,16 @@ macro_rules! regex {
 }
 
 regex!(
-    REGEX_INTEGER_BIN = r"0b[0|1|_]+";
-    REGEX_INTEGER_OCT = r"0o[0-7_]+";
-    REGEX_INTEGER_HEX = r"0x[0-9A-Fa-f_]+";
-    REGEX_INTEGER_DEC = r"[0-9_]+";
-    REGEX_FLOAT = r"[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)";
+    REGEX_INTEGER_BIN = r"^0b[0|1|_]+";
+    REGEX_INTEGER_OCT = r"^0o[0-7_]+";
+    REGEX_INTEGER_HEX = r"^0x[0-9A-Fa-f_]+";
+    REGEX_INTEGER_DEC = r"^[0-9_]+";
+    REGEX_FLOAT = r"^[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)";
     REGEX_OFFSET_DATE_TIME =
-        r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})";
-    REGEX_LOCAL_DATE_TIME = r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
-    REGEX_LOCAL_DATE = r"\d{4}-\d{2}-\d{2}";
-    REGEX_LOCAL_TIME = r"\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
+        r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})";
+    REGEX_LOCAL_DATE_TIME = r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
+    REGEX_LOCAL_DATE = r"^\d{4}-\d{2}-\d{2}";
+    REGEX_LOCAL_TIME = r"^\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
 );
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -191,6 +191,8 @@ impl Cursor<'_> {
 
         let line = self.peek_with_current_while(|c| !is_line_break(c));
         if let Some(m) = REGEX_OFFSET_DATE_TIME.find(&line) {
+            assert!(m.start() == 0);
+
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -202,6 +204,8 @@ impl Cursor<'_> {
                 ));
             }
         } else if let Some(m) = REGEX_LOCAL_DATE_TIME.find(&line) {
+            assert!(m.start() == 0);
+
             pass_local_date_time = true;
 
             if m.end() > 1 {
@@ -214,6 +218,8 @@ impl Cursor<'_> {
                 ));
             }
         } else if let Some(m) = REGEX_LOCAL_DATE.find(&line) {
+            assert!(m.start() == 0);
+
             pass_local_date = true;
 
             if m.end() > 1 {
@@ -251,6 +257,7 @@ impl Cursor<'_> {
 
         let line = self.peek_with_current_while(|c| !is_line_break(c));
         if let Some(m) = REGEX_LOCAL_TIME.find(&line) {
+            assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -266,6 +273,7 @@ impl Cursor<'_> {
     fn number(&mut self) -> Result<Token, crate::Error> {
         let line = self.peek_with_current_while(|c| !is_line_break(c));
         if let Some(m) = REGEX_FLOAT.find(&line) {
+            assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -274,6 +282,7 @@ impl Cursor<'_> {
                 return Ok(Token::new(SyntaxKind::FLOAT, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_BIN.find(&line) {
+            assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -282,6 +291,7 @@ impl Cursor<'_> {
                 return Ok(Token::new(SyntaxKind::INTEGER_BIN, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_OCT.find(&line) {
+            assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -290,6 +300,7 @@ impl Cursor<'_> {
                 return Ok(Token::new(SyntaxKind::INTEGER_OCT, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_HEX.find(&line) {
+            assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
@@ -297,6 +308,7 @@ impl Cursor<'_> {
                 return Ok(Token::new(SyntaxKind::INTEGER_HEX, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_DEC.find(&line) {
+            assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
