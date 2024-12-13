@@ -48,7 +48,7 @@ impl TryFrom<ast::IntegerBin> for Integer {
         let token = node.token().unwrap();
         let range: text::Range = token.range();
 
-        match i64::from_str_radix(&token.text()[2..], 2) {
+        match i64::from_str_radix(&token.text()[2..].replace('_', ""), 2) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Binary(node),
                 value,
@@ -65,7 +65,7 @@ impl TryFrom<ast::IntegerOct> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match i64::from_str_radix(&token.text()[2..], 8) {
+        match i64::from_str_radix(&token.text()[2..].replace('_', ""), 8) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Octal(node),
                 value,
@@ -82,7 +82,7 @@ impl TryFrom<ast::IntegerDec> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match i64::from_str_radix(token.text(), 10) {
+        match i64::from_str_radix(&token.text().replace('_', ""), 10) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Decimal(node),
                 value,
@@ -99,7 +99,7 @@ impl TryFrom<ast::IntegerHex> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match i64::from_str_radix(&token.text()[2..], 16) {
+        match i64::from_str_radix(&token.text()[2..].replace('_', ""), 16) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Hexadecimal(node),
                 value,

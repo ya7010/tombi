@@ -36,6 +36,7 @@ impl From<document_tree::Value> for Value {
                 }
                 .unwrap()
                 .text()
+                .replace('_', "")
                 .to_string(),
             },
             document_tree::Value::Float(value) => Self::Literal {
