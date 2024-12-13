@@ -1,55 +1,3 @@
-FAIL valid/array/hetergeneous
-     Array lengths differ for key "mixed":
-       Expected:     3
-       Your encoder: 1
-
-     input sent to parser-cmd:
-       mixed = [[1, 2], ["a", "b"], [1.1, 2.1]]
-
-     output from parser-cmd (stdout):
-       {
-         "mixed": [[{"type": "float", "value": "2.1"}]]
-       }
-
-     want:
-       {
-           "mixed": [
-               [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"}
-               ],
-               [
-                   {"type": "string", "value": "a"},
-                   {"type": "string", "value": "b"}
-               ],
-               [
-                   {"type": "float", "value": "1.1"},
-                   {"type": "float", "value": "2.1"}
-               ]
-           ]
-       }
-
-FAIL valid/array/mixed-int-float
-     Array lengths differ for key "ints-and-floats":
-       Expected:     2
-       Your encoder: 0
-
-     input sent to parser-cmd:
-       ints-and-floats = [1, 1.1]
-
-     output from parser-cmd (stdout):
-       {
-         "ints-and-floats": []
-       }
-
-     want:
-       {
-           "ints-and-floats": [
-               {"type": "integer", "value": "1"},
-               {"type": "float", "value": "1.1"}
-           ]
-       }
-
 FAIL valid/comment/after-literal-no-ws
      Could not find key "inf" in parser output.
 
@@ -3209,5 +3157,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [./target/debug/decode]: using embedded tests
-  valid tests: 130 passed, 52 failed
+  valid tests: 132 passed, 50 failed
 invalid tests: 286 passed, 85 failed
