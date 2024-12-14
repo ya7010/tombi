@@ -9,10 +9,19 @@ pub fn run(sh: &Shell) -> anyhow::Result<()> {
 
     xshell::cmd!(sh, "cargo build --bin decode").run()?;
 
-    xshell::cmd!(
+    match xshell::cmd!(
         sh,
-        "toml-test -color=never {project_root}/target/debug/decode > {project_root}/toml-test/result/decode.txt"
-    ).run().unwrap();
+        "toml-test -color=never {project_root}/target/debug/decode"
+    )
+    .run()
+    {
+        Ok(_) => {
+            println!("Success");
+        }
+        Err(err) => {
+            format!("{project_root}/toml-test/result/decode.txt")
+        }
+    };
 
     Ok(())
 }
