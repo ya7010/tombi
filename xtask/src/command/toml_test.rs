@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use xshell::Shell;
 
 use crate::utils::project_root;
@@ -13,14 +15,18 @@ pub fn run(sh: &Shell) -> anyhow::Result<()> {
         sh,
         "toml-test -color=never {project_root}/target/debug/decode"
     )
-    .run()
+    .ignore_status()
+    .output()
     {
-        Ok(_) => {
-            println!("Success");
+        Ok(output) => {
+            let output_path = project_root.join("toml-test/result/decode.txt");
+            let mut file = std::fs::File::create(output_path)?;
+            file.write_all(&output.stdout)?;
+            if !output.status.success() {
+                std::process::exit(output.status.code().unwrap_or(1));
+            }
         }
-        Err(err) => {
-            format!("{project_root}/toml-test/result/decode.txt")
-        }
+        Err(_) => unreachable!("ignore_status() should prevent this"),
     };
 
     Ok(())

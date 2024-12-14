@@ -35,7 +35,7 @@ FAIL valid/datetime/leap-year
      unknown line
      unknown line
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -80,12 +80,642 @@ FAIL valid/float/inf-and-nan
        infinity_neg = -inf
        infinity_plus = +inf
 
+     output from parser-cmd (stdout):
+       {
+         "infinity":      {"type": "float", "value": "inf"},
+         "infinity_neg":  {"type": "float", "value": "-inf"},
+         "infinity_plus": {"type": "float", "value": "+inf"},
+         "nan_neg":       {"type": "float", "value": "-nan"},
+         "nan_plus":      {"type": "float", "value": "+nan"}
+       }
+
+     want:
+       {
+           "infinity":      {"type": "float", "value": "inf"},
+           "infinity_neg":  {"type": "float", "value": "-inf"},
+           "infinity_plus": {"type": "float", "value": "inf"},
+           "nan":           {"type": "float", "value": "nan"},
+           "nan_neg":       {"type": "float", "value": "nan"},
+           "nan_plus":      {"type": "float", "value": "nan"}
+       }
+
+FAIL valid/float/max-int
+     invalid float: invalid float literal
+     invalid float: invalid float literal
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       # Maximum and minimum safe natural numbers.
+       max_float =  9_007_199_254_740_991.0
+       min_float = -9_007_199_254_740_991.0
+
+     output from parser-cmd (stderr):
+       invalid float: invalid float literal
+       invalid float: invalid float literal
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
+
+FAIL valid/float/underscore
+     invalid float: invalid float literal
+     invalid float: invalid float literal
+     invalid float: invalid float literal
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       before = 3_141.5927
+       after = 3141.592_7
+       exponent = 3e1_4
+
+     output from parser-cmd (stderr):
+       invalid float: invalid float literal
+       invalid float: invalid float literal
+       invalid float: invalid float literal
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
+
+FAIL valid/inline-table/array-values
+     inline table must be single line
+     inline table must be single line
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       # "No newlines are allowed between the curly braces unless they are valid within
+       # a value"
+
+       a = { a = [
+       ]}
+
+       b = { a = [
+       		1,
+       		2,
+       	], b = [
+       		3,
+       		4,
+       	]}
+
+     output from parser-cmd (stderr):
+       inline table must be single line
+       inline table must be single line
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
+
+FAIL valid/inline-table/multiline
+     inline table must be single line
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       tbl_multiline = { a = 1, b = """
+       multiline
+       """, c = """and yet
+       another line""", d = 4 }
+
+     output from parser-cmd (stderr):
+       inline table must be single line
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
+
+FAIL valid/integer/integer
+     Values for key "posanswer" don't match:
+       Expected:     42
+       Your encoder: +42
+
+     input sent to parser-cmd:
+       answer = 42
+       posanswer = +42
+       neganswer = -42
+       zero = 0
+
+     output from parser-cmd (stdout):
+       {
+         "answer":    {"type": "integer", "value": "42"},
+         "neganswer": {"type": "integer", "value": "-42"},
+         "posanswer": {"type": "integer", "value": "+42"},
+         "zero":      {"type": "integer", "value": "0"}
+       }
+
+     want:
+       {
+           "answer":    {"type": "integer", "value": "42"},
+           "neganswer": {"type": "integer", "value": "-42"},
+           "posanswer": {"type": "integer", "value": "42"},
+           "zero":      {"type": "integer", "value": "0"}
+       }
+
+FAIL valid/integer/literals
+     Values for key "bin1" don't match:
+       Expected:     214
+       Your encoder: 0b11010110
+
+     input sent to parser-cmd:
+       bin1 = 0b11010110
+       bin2 = 0b1_0_1
+
+       oct1 = 0o01234567
+       oct2 = 0o755
+       oct3 = 0o7_6_5
+
+       hex1 = 0xDEADBEEF
+       hex2 = 0xdeadbeef
+       hex3 = 0xdead_beef
+       hex4 = 0x00987
+
+     output from parser-cmd (stdout):
+       {
+         "bin1": {"type": "integer", "value": "0b11010110"},
+         "bin2": {"type": "integer", "value": "0b101"},
+         "hex1": {"type": "integer", "value": "0xDEADBEEF"},
+         "hex2": {"type": "integer", "value": "0xdeadbeef"},
+         "hex3": {"type": "integer", "value": "0xdeadbeef"},
+         "hex4": {"type": "integer", "value": "0x00987"},
+         "oct1": {"type": "integer", "value": "0o01234567"},
+         "oct2": {"type": "integer", "value": "0o755"},
+         "oct3": {"type": "integer", "value": "0o765"}
+       }
+
+     want:
+       {
+           "bin1": {"type": "integer", "value": "214"},
+           "bin2": {"type": "integer", "value": "5"},
+           "hex1": {"type": "integer", "value": "3735928559"},
+           "hex2": {"type": "integer", "value": "3735928559"},
+           "hex3": {"type": "integer", "value": "3735928559"},
+           "hex4": {"type": "integer", "value": "2439"},
+           "oct1": {"type": "integer", "value": "342391"},
+           "oct2": {"type": "integer", "value": "493"},
+           "oct3": {"type": "integer", "value": "501"}
+       }
+
+FAIL valid/integer/zero
+     Values for key "a2" don't match:
+       Expected:     0
+       Your encoder: 0o00
+
+     input sent to parser-cmd:
+       d1 = 0
+       d2 = +0
+       d3 = -0
+
+       h1 = 0x0
+       h2 = 0x00
+       h3 = 0x00000
+
+       o1 = 0o0
+       a2 = 0o00
+       a3 = 0o00000
+
+       b1 = 0b0
+       b2 = 0b00
+       b3 = 0b00000
+
+     output from parser-cmd (stdout):
+       {
+         "a2": {"type": "integer", "value": "0o00"},
+         "a3": {"type": "integer", "value": "0o00000"},
+         "b1": {"type": "integer", "value": "0b0"},
+         "b2": {"type": "integer", "value": "0b00"},
+         "b3": {"type": "integer", "value": "0b00000"},
+         "d1": {"type": "integer", "value": "0"},
+         "d2": {"type": "integer", "value": "+0"},
+         "d3": {"type": "integer", "value": "-0"},
+         "h1": {"type": "integer", "value": "0x0"},
+         "h2": {"type": "integer", "value": "0x00"},
+         "h3": {"type": "integer", "value": "0x00000"},
+         "o1": {"type": "integer", "value": "0o0"}
+       }
+
+     want:
+       {
+           "a2": {"type": "integer", "value": "0"},
+           "a3": {"type": "integer", "value": "0"},
+           "b1": {"type": "integer", "value": "0"},
+           "b2": {"type": "integer", "value": "0"},
+           "b3": {"type": "integer", "value": "0"},
+           "d1": {"type": "integer", "value": "0"},
+           "d2": {"type": "integer", "value": "0"},
+           "d3": {"type": "integer", "value": "0"},
+           "h1": {"type": "integer", "value": "0"},
+           "h2": {"type": "integer", "value": "0"},
+           "h3": {"type": "integer", "value": "0"},
+           "o1": {"type": "integer", "value": "0"}
+       }
+
+FAIL valid/key/alphanum
+     invalid number
+     invalid number
+     invalid number
+     unknown line
+     unknown line
+     expected key
+     expected '='
+     expected value
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       alpha = "a"
+       123 = "num"
+       000111 = "leading"
+       10e3 = "false float"
+       one1two2 = "mixed"
+       with-dash = "dashed"
+       under_score = "___"
+       34-11 = 23
+
+       [2018_10]
+       001 = 1
+
+       [a-a-a]
+       _ = false
+
+     output from parser-cmd (stderr):
+       invalid number
+       invalid number
+       invalid number
+       unknown line
+       unknown line
+       expected key
+       expected '='
+       expected value
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
+
+FAIL valid/key/dotted-1
+     Could not find key "name.first" in parser output.
+
+     input sent to parser-cmd:
+       name.first = "Arthur"
+       "name".'last' = "Dent"
+
+       many.dots.dot.dot.dot = 42
+
+     output from parser-cmd (stdout):
+       {
+         "many": {
+           "dots": {
+             "dot": {
+               "dot": {
+                 "dot": {"type": "integer", "value": "42"}
+               }
+             }
+           }
+         },
+         "name": {
+           "last": {"type": "string", "value": "Dent"}
+         }
+       }
+
+     want:
+       {
+           "many": {
+               "dots": {
+                   "dot": {
+                       "dot": {
+                           "dot": {"type": "integer", "value": "42"}
+                       }
+                   }
+               }
+           },
+           "name": {
+               "first": {"type": "string", "value": "Arthur"},
+               "last":  {"type": "string", "value": "Dent"}
+           }
+       }
+
+FAIL valid/key/dotted-2
+     Could not find key "count.a" in parser output.
+
+     input sent to parser-cmd:
+       # Note: this file contains literal tab characters.
+
+       # Space are ignored, and key parts can be quoted.
+       count.a       = 1
+       count . b     = 2
+       "count"."c"   = 3
+       "count" . "d" = 4
+       'count'.'e'   = 5
+       'count' . 'f' = 6
+       "count".'g'   = 7
+       "count" . 'h' = 8
+       count.'i'     = 9
+       count 	.	 'j'	   = 10
+       "count".k     = 11
+       "count" . l   = 12
+
+     output from parser-cmd (stdout):
+       {
+         "count": {
+           "e": {"type": "integer", "value": "5"},
+           "f": {"type": "integer", "value": "6"}
+         }
+       }
+
+     want:
+       {
+           "count": {
+               "a": {"type": "integer", "value": "1"},
+               "b": {"type": "integer", "value": "2"},
+               "c": {"type": "integer", "value": "3"},
+               "d": {"type": "integer", "value": "4"},
+               "e": {"type": "integer", "value": "5"},
+               "f": {"type": "integer", "value": "6"},
+               "g": {"type": "integer", "value": "7"},
+               "h": {"type": "integer", "value": "8"},
+               "i": {"type": "integer", "value": "9"},
+               "j": {"type": "integer", "value": "10"},
+               "k": {"type": "integer", "value": "11"},
+               "l": {"type": "integer", "value": "12"}
+           }
+       }
+
+FAIL valid/key/escapes
+     Could not find key "\b" in parser output.
+
+     input sent to parser-cmd:
+       "\n" = "newline"
+       "\b" = "bell"
+       "\u00c0" = "latin capital letter A with grave"
+       "\"" = "just a quote"
+
+       ["backsp\b\b"]
+
+       ["\"quoted\""]
+       quote = true
+
+       ["a.b"."\u00c0"]
+
+     output from parser-cmd (stdout):
+       {
+         "\"":         {"type": "string", "value": "just a quote"},
+         "\\b":        {"type": "string", "value": "bell"},
+         "\\n":        {"type": "string", "value": "newline"},
+         "\\u00c0":    {"type": "string", "value": "latin capital letter A with grave"},
+         "backsp\\b\\b": {},
+         "\"quoted\"": {
+           "quote": {"type": "bool", "value": "true"}
+         },
+         "a.b": {
+           "\\u00c0": {}
+         }
+       }
+
+     want:
+       {
+           "\b":         {"type": "string", "value": "bell"},
+           "\n":         {"type": "string", "value": "newline"},
+           "\"":         {"type": "string", "value": "just a quote"},
+           "backsp\b\b": {},
+           "À":          {"type": "string", "value": "latin capital letter A with grave"},
+           "\"quoted\"": {
+               "quote": {"type": "bool", "value": "true"}
+           },
+           "a.b": {
+               "À": {}
+           }
+       }
+
+FAIL valid/key/numeric-dotted
+     Could not find key "1" in parser output.
+
+     input sent to parser-cmd:
+       1.2 = 3
+
+     output from parser-cmd (stdout):
+       {}
+
+     want:
+       {
+           "1": {
+               "2": {"type": "integer", "value": "3"}
+           }
+       }
+
+FAIL valid/key/quoted-unicode
+     Could not find key "\x00" in parser output.
+
+     input sent to parser-cmd:
+
+       "\u0000" = "null"
+       '\u0000' = "different key"
+       "\u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff" = "escaped key"
+
+       "~  ÿ ퟿  ￿ 𐀀 􏿿" = "basic key"
+       'l ~  ÿ ퟿  ￿ 𐀀 􏿿' = "literal key"
+
+     output from parser-cmd (stdout):
+       {
+         "\\u0000":                                                                                  {"type": "string", "value": "different key"},
+         "\\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff": {"type": "string", "value": "escaped key"},
+         "l ~  ÿ ퟿  ￿ 𐀀 􏿿":                                                                          {"type": "string", "value": "literal key"},
+         "~  ÿ ퟿  ￿ 𐀀 􏿿":                                                                            {"type": "string", "value": "basic key"}
+       }
+
+     want:
+       {
+           "\u0000":               {"type": "string", "value": "null"},
+           "\b \f A   ÿ ퟿  ￿ 𐀀 􏿿": {"type": "string", "value": "escaped key"},
+           "\\u0000":              {"type": "string", "value": "different key"},
+           "l ~  ÿ ퟿  ￿ 𐀀 􏿿":      {"type": "string", "value": "literal key"},
+           "~  ÿ ퟿  ￿ 𐀀 􏿿":        {"type": "string", "value": "basic key"}
+       }
+
+FAIL valid/key/space
+     Could not find key " tbl .\ttab\ttab\t" in parser output.
+
+     input sent to parser-cmd:
+       # Keep whitespace inside quotes keys at all positions.
+       "a b"   = 1
+       " c d " = 2
+
+       [ " tbl " ]
+       "\ttab\ttab\t" = "tab"
+
+     output from parser-cmd (stdout):
+       {
+         " c d ": {"type": "integer", "value": "2"},
+         "a b":   {"type": "integer", "value": "1"},
+         " tbl ": {
+           "\\ttab\\ttab\\t": {"type": "string", "value": "tab"}
+         }
+       }
+
+     want:
+       {
+           " c d ": {"type": "integer", "value": "2"},
+           "a b":   {"type": "integer", "value": "1"},
+           " tbl ": {
+               "\ttab\ttab\t": {"type": "string", "value": "tab"}
+           }
+       }
+
+FAIL valid/key/special-word
+     Could not find key "inf" in parser output.
+
+     input sent to parser-cmd:
+       false = false
+       true = 1
+       inf = 100000000
+       nan = "ceci n'est pas un nombre"
+
+     output from parser-cmd (stdout):
+       {
+         "false": {"type": "bool", "value": "false"},
+         "true":  {"type": "integer", "value": "1"}
+       }
+
+     want:
+       {
+           "false": {"type": "bool", "value": "false"},
+           "inf":   {"type": "integer", "value": "100000000"},
+           "nan":   {"type": "string", "value": "ceci n'est pas un nombre"},
+           "true":  {"type": "integer", "value": "1"}
+       }
+
+FAIL valid/key/start
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     invalid number
+     expected key
+     expected ']'
+     expected key
+     expected '='
+     expected value
+     expected key
+     expected ']'
+     expected key
+     expected '='
+     expected value
+     expected key
+     expected ']'
+     expected key
+     expected '='
+     expected value
+     expected key
+     expected ']'
+     expected key
+     expected '='
+     expected value
+     expected key
+     expected '='
+     expected value
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       # Table and keys can start with any character; there is no requirement for it to
+       # start with a letter.
+
+       [-key]
+       -key = 1
+
+       [_key]
+       _key = 2
+
+       [1key]
+       1key = 3
+
+       [-]
+       - = 4
+
+       [_]
+       _ = 5
+
+       [1]
+       1 = 6
+
+       [---]
+       --- = 7
+
+       [___]
+       ___ = 8
+
+       [111]
+       111 = 9
+
+       [inline]
+       --- = {--- = 10, ___ = 11, 111 = 12}
+
+     output from parser-cmd (stderr):
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       invalid number
+       expected key
+       expected ']'
+       expected key
+       expected '='
+       expected value
+       expected key
+       expected ']'
+       expected key
+       expected '='
+       expected value
+       expected key
+       expected ']'
+       expected key
+       expected '='
+       expected value
+       expected key
+       expected ']'
+       expected key
+       expected '='
+       expected value
+       expected key
+       expected '='
+       expected value
+       Error: invalid toml
+
+       Exit 1
+
+     want:
           <empty>
 
 FAIL valid/spec/float-1
      invalid float: invalid float literal
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -256,8 +886,8 @@ FAIL valid/spec/string-3
        Expected:     The quick brown fox jumps over the lazy dog.
        Your encoder:
      The quick brown \
-
-
+ 
+ 
        fox jumps over \
          the lazy dog.
 
@@ -300,7 +930,7 @@ FAIL valid/spec/string-4
      invalid multi-line basic strings
      unknown line
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -328,7 +958,7 @@ FAIL valid/spec/string-5
      expected '='
      unknown line
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -355,7 +985,7 @@ FAIL valid/spec/string-6
      trimmed in raw strings.
         All other whitespace
         is preserved.
-
+ 
        Your encoder:
      The first newline is
      trimmed in raw strings.
@@ -390,7 +1020,7 @@ FAIL valid/spec/string-7
      expected '='
      expected value
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -445,7 +1075,7 @@ FAIL valid/string/escape-tricky
      expected value
      unknown line
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -635,7 +1265,7 @@ FAIL valid/string/multiline-empty
      expected '='
      expected value
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -702,7 +1332,7 @@ FAIL valid/string/multiline-quotes
      expected value
      unknown line
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -759,7 +1389,7 @@ FAIL valid/string/multiline-quotes
 FAIL valid/string/nl
      Values for key "nl_end" don't match:
        Expected:     value
-
+ 
        Your encoder: value\n
 
      input sent to parser-cmd:
@@ -834,7 +1464,7 @@ FAIL valid/string/raw-multiline
      expected value
      unknown line
      Error: invalid toml
-
+ 
      Exit 1
 
      input sent to parser-cmd:
@@ -1123,7 +1753,7 @@ FAIL invalid/control/bare-cr
 
      input sent to parser-cmd:
        # The following line contains a single carriage return control character
-
+       
 
      output from parser-cmd (stdout):
        {}
@@ -1135,8 +1765,7 @@ FAIL invalid/control/comment-cr
      Expected an error, but no error was reported.
 
      input sent to parser-cmd:
-       comment-cr   = "Carriage return in comment" #
-a=1
+       comment-cr   = "Carriage return in comment" # a=1
 
      output from parser-cmd (stdout):
        {
@@ -1221,8 +1850,7 @@ FAIL invalid/control/multi-cr
      Expected an error, but no error was reported.
 
      input sent to parser-cmd:
-       multi-cr   = """null
-"""
+       multi-cr   = """null"""
 
      output from parser-cmd (stdout):
        {
@@ -1292,8 +1920,7 @@ FAIL invalid/control/rawmulti-cd
      Expected an error, but no error was reported.
 
      input sent to parser-cmd:
-       rawmulti-cd   = '''null
-'''
+       rawmulti-cd   = '''null'''
 
      output from parser-cmd (stdout):
        {
@@ -2436,6 +3063,6 @@ FAIL invalid/table/super-twice
      want:
        Exit code 1
 
-toml-test v0001-01-01 [./target/debug/decode]: using embedded tests
+toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode]: using embedded tests
   valid tests: 135 passed, 47 failed
 invalid tests: 290 passed, 81 failed
