@@ -65,7 +65,7 @@ macro_rules! test_token {
         }
     };
 
-    {#[test]fn $name:ident($source:expr) -> Err($kind:expr, ($start_offset:expr, $end_offset:expr));} => {
+    {#[test]fn $name:ident($source:expr) -> Err(Token($kind:expr, ($start_offset:expr, $end_offset:expr)));} => {
         #[test]
         fn $name() {
             let source = textwrap::dedent($source);
@@ -460,12 +460,12 @@ test_token! {
 
 test_token! {
     #[test]
-    fn invalid_integer_dec1("+_1234567890") -> Err(InvalidNumber, (0, 12));
+    fn invalid_integer_dec1("+_1234567890") -> Err(Token(InvalidNumber, (0, 12)));
 }
 
 test_token! {
     #[test]
-    fn invalid_integer_dec2("-_1234567890") -> Err(InvalidNumber, (0, 12));
+    fn invalid_integer_dec2("-_1234567890") -> Err(Token(InvalidNumber, (0, 12)));
 }
 
 test_token! {
@@ -495,7 +495,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_bin6("0b_1010_10") -> Err(InvalidNumber, (0, 10));
+    fn integer_bin6("0b_1010_10") -> Err(Token(InvalidNumber, (0, 10)));
 }
 
 test_token! {
@@ -530,7 +530,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_oct6("0o_1234_567") -> Err(InvalidNumber, (0, 11));
+    fn integer_oct6("0o_1234_567") -> Err(Token(InvalidNumber, (0, 11)));
 }
 
 test_token! {
@@ -565,7 +565,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_hex6("0x_1234_5678_90ab_cdef") -> Err(InvalidNumber, (0, 22));
+    fn integer_hex6("0x_1234_5678_90ab_cdef") -> Err(Token(InvalidNumber, (0, 22)));
 }
 
 test_token! {
