@@ -3,7 +3,7 @@ use lexer::ErrorKind::*;
 use lexer::{tokenize, Token};
 use syntax::SyntaxKind::*;
 
-macro_rules!  test_tokens {
+macro_rules! test_tokens {
     {#[test]fn $name:ident($source:expr) -> [
         $(Token($kind:expr, $text:literal),)*
     ];} => {
@@ -39,7 +39,7 @@ macro_rules!  test_tokens {
 }
 
 macro_rules! test_token {
-    {#[test]fn $name:ident($source:expr) -> Token($kind:expr, ($start_offset:expr, $end_offset:expr));} => {
+    {#[test]fn $name:ident($source:expr) -> Ok(Token($kind:expr, ($start_offset:expr, $end_offset:expr)));} => {
         #[test]
         fn $name() {
             let source = textwrap::dedent($source);
@@ -289,22 +289,22 @@ test_tokens! {
 
 test_token! {
     #[test]
-    fn only_comment("# This is a comment") -> Token(COMMENT, (0, 19));
+    fn only_comment("# This is a comment") -> Ok(Token(COMMENT, (0, 19)));
 }
 
 test_token! {
     #[test]
-    fn basic_string1(r#""Hello, World!""#) -> Token(BASIC_STRING, (0, 15));
+    fn basic_string1(r#""Hello, World!""#) -> Ok(Token(BASIC_STRING, (0, 15)));
 }
 
 test_token! {
     #[test]
-    fn basic_string2(r#""Hello, \"Taro\"!""#) -> Token(BASIC_STRING, (0, 18));
+    fn basic_string2(r#""Hello, \"Taro\"!""#) -> Ok(Token(BASIC_STRING, (0, 18)));
 }
 
 test_token! {
     #[test]
-    fn multi_line_basic_string1(r#""""aaaa""""#) -> Token(MULTI_LINE_BASIC_STRING, (0, 10));
+    fn multi_line_basic_string1(r#""""aaaa""""#) -> Ok(Token(MULTI_LINE_BASIC_STRING, (0, 10)));
 }
 
 test_token! {
@@ -315,147 +315,147 @@ test_token! {
         aaaa
         """
         "#
-    ) -> Token(MULTI_LINE_BASIC_STRING, (0, 12));
+    ) -> Ok(Token(MULTI_LINE_BASIC_STRING, (0, 12)));
 }
 
 test_token! {
     #[test]
-    fn literal_string1("'Hello, World!'") -> Token(LITERAL_STRING, (0, 15));
+    fn literal_string1("'Hello, World!'") -> Ok(Token(LITERAL_STRING, (0, 15)));
 }
 
 test_token! {
     #[test]
-    fn literal_string2("'Hello, \\'Taro\\'!'") -> Token(LITERAL_STRING, (0, 18));
+    fn literal_string2("'Hello, \\'Taro\\'!'") -> Ok(Token(LITERAL_STRING, (0, 18)));
 }
 
 test_token! {
     #[test]
-    fn offset_date_time1("2021-01-01T00:00:00Z") -> Token(OFFSET_DATE_TIME, (0, 20));
+    fn offset_date_time1("2021-01-01T00:00:00Z") -> Ok(Token(OFFSET_DATE_TIME, (0, 20)));
 }
 
 test_token! {
     #[test]
-    fn offset_date_time2("2021-01-01T00:00:00+09:00") -> Token(OFFSET_DATE_TIME, (0, 25));
+    fn offset_date_time2("2021-01-01T00:00:00+09:00") -> Ok(Token(OFFSET_DATE_TIME, (0, 25)));
 }
 
 test_token! {
     #[test]
-    fn offset_date_time3("2021-01-01T00:00:00-09:00") -> Token(OFFSET_DATE_TIME, (0, 25));
+    fn offset_date_time3("2021-01-01T00:00:00-09:00") -> Ok(Token(OFFSET_DATE_TIME, (0, 25)));
 }
 
 test_token! {
     #[test]
-    fn offset_date_time4("2021-01-01T00:00:00.123456Z") -> Token(OFFSET_DATE_TIME, (0, 27));
+    fn offset_date_time4("2021-01-01T00:00:00.123456Z") -> Ok(Token(OFFSET_DATE_TIME, (0, 27)));
 }
 
 test_token! {
     #[test]
-    fn offset_date_time5("2021-01-01T00:00:00.123456+09:00") -> Token(OFFSET_DATE_TIME, (0, 32));
+    fn offset_date_time5("2021-01-01T00:00:00.123456+09:00") -> Ok(Token(OFFSET_DATE_TIME, (0, 32)));
 }
 
 test_token! {
     #[test]
-    fn offset_date_time6("2021-01-01T00:00:00.123456-09:00") -> Token(OFFSET_DATE_TIME, (0, 32));
+    fn offset_date_time6("2021-01-01T00:00:00.123456-09:00") -> Ok(Token(OFFSET_DATE_TIME, (0, 32)));
 }
 
 test_token! {
     #[test]
-    fn local_date_time1("2021-01-01 00:00:00") -> Token(LOCAL_DATE_TIME, (0, 19));
+    fn local_date_time1("2021-01-01 00:00:00") -> Ok(Token(LOCAL_DATE_TIME, (0, 19)));
 }
 
 test_token! {
     #[test]
-    fn local_date_time2("2021-01-01 00:00:00.123456") -> Token(LOCAL_DATE_TIME, (0, 26));
+    fn local_date_time2("2021-01-01 00:00:00.123456") -> Ok(Token(LOCAL_DATE_TIME, (0, 26)));
 }
 
 test_token! {
     #[test]
-    fn local_date_time3("2021-01-01T00:00:00") -> Token(LOCAL_DATE_TIME, (0, 19));
+    fn local_date_time3("2021-01-01T00:00:00") -> Ok(Token(LOCAL_DATE_TIME, (0, 19)));
 }
 
 test_token! {
     #[test]
-    fn local_date_time4("2021-01-01T00:00:00.123456") -> Token(LOCAL_DATE_TIME, (0, 26));
+    fn local_date_time4("2021-01-01T00:00:00.123456") -> Ok(Token(LOCAL_DATE_TIME, (0, 26)));
 }
 
 test_token! {
     #[test]
-    fn local_date1("2021-01-01") -> Token(LOCAL_DATE, (0, 10));
+    fn local_date1("2021-01-01") -> Ok(Token(LOCAL_DATE, (0, 10)));
 }
 
 test_token! {
     #[test]
-    fn local_time1("00:00:00") -> Token(LOCAL_TIME, (0, 8));
+    fn local_time1("00:00:00") -> Ok(Token(LOCAL_TIME, (0, 8)));
 }
 
 test_token! {
     #[test]
-    fn local_time2("00:00:00.123456") -> Token(LOCAL_TIME, (0, 15));
+    fn local_time2("00:00:00.123456") -> Ok(Token(LOCAL_TIME, (0, 15)));
 }
 
 test_token! {
     #[test]
-    fn boolean1("true") -> Token(BOOLEAN, (0, 4));
+    fn boolean1("true") -> Ok(Token(BOOLEAN, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn boolean2("false") -> Token(BOOLEAN, (0, 5));
+    fn boolean2("false") -> Ok(Token(BOOLEAN, (0, 5)));
 }
 
 test_token! {
     #[test]
-    fn key1("key") -> Token(BARE_KEY, (0, 3));
+    fn key1("key") -> Ok(Token(BARE_KEY, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn key2("_1234567890") -> Token(BARE_KEY, (0, 11));
+    fn key2("_1234567890") -> Ok(Token(BARE_KEY, (0, 11)));
 }
 
 test_token! {
     #[test]
-    fn key3("key_123") -> Token(BARE_KEY, (0, 7));
+    fn key3("key_123") -> Ok(Token(BARE_KEY, (0, 7)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec1("0") -> Token(INTEGER_DEC, (0, 1));
+    fn integer_dec1("0") -> Ok(Token(INTEGER_DEC, (0, 1)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec2("1") -> Token(INTEGER_DEC, (0, 1));
+    fn integer_dec2("1") -> Ok(Token(INTEGER_DEC, (0, 1)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec3("1234567890") -> Token(INTEGER_DEC, (0, 10));
+    fn integer_dec3("1234567890") -> Ok(Token(INTEGER_DEC, (0, 10)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec4("+1234567890") -> Token(INTEGER_DEC, (0, 11));
+    fn integer_dec4("+1234567890") -> Ok(Token(INTEGER_DEC, (0, 11)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec5("-1234567890") -> Token(INTEGER_DEC, (0, 11));
+    fn integer_dec5("-1234567890") -> Ok(Token(INTEGER_DEC, (0, 11)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec6("1_234_567_890") -> Token(INTEGER_DEC, (0, 13));
+    fn integer_dec6("1_234_567_890") -> Ok(Token(INTEGER_DEC, (0, 13)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec7("+1_234_567_890") -> Token(INTEGER_DEC, (0, 14));
+    fn integer_dec7("+1_234_567_890") -> Ok(Token(INTEGER_DEC, (0, 14)));
 }
 
 test_token! {
     #[test]
-    fn integer_dec8("-1_234_567_890") -> Token(INTEGER_DEC, (0, 14));
+    fn integer_dec8("-1_234_567_890") -> Ok(Token(INTEGER_DEC, (0, 14)));
 }
 
 test_token! {
@@ -470,27 +470,27 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_bin1("0b0") -> Token(INTEGER_BIN, (0, 3));
+    fn integer_bin1("0b0") -> Ok(Token(INTEGER_BIN, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn integer_bin2("0b1") -> Token(INTEGER_BIN, (0, 3));
+    fn integer_bin2("0b1") -> Ok(Token(INTEGER_BIN, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn integer_bin3("0b01") -> Token(INTEGER_BIN, (0, 4));
+    fn integer_bin3("0b01") -> Ok(Token(INTEGER_BIN, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn integer_bin4("0b10") -> Token(INTEGER_BIN, (0, 4));
+    fn integer_bin4("0b10") -> Ok(Token(INTEGER_BIN, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn integer_bin5("0b101010") -> Token(INTEGER_BIN, (0, 8));
+    fn integer_bin5("0b101010") -> Ok(Token(INTEGER_BIN, (0, 8)));
 }
 
 test_token! {
@@ -500,32 +500,32 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_bin7("0b10_101_010") -> Token(INTEGER_BIN, (0, 12));
+    fn integer_bin7("0b10_101_010") -> Ok(Token(INTEGER_BIN, (0, 12)));
 }
 
 test_token! {
     #[test]
-    fn integer_oct1("0o0") -> Token(INTEGER_OCT, (0, 3));
+    fn integer_oct1("0o0") -> Ok(Token(INTEGER_OCT, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn integer_oct2("0o1") -> Token(INTEGER_OCT, (0, 3));
+    fn integer_oct2("0o1") -> Ok(Token(INTEGER_OCT, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn integer_oct3("0o01") -> Token(INTEGER_OCT, (0, 4));
+    fn integer_oct3("0o01") -> Ok(Token(INTEGER_OCT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn integer_oct4("0o10") -> Token(INTEGER_OCT, (0, 4));
+    fn integer_oct4("0o10") -> Ok(Token(INTEGER_OCT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn integer_oct5("0o1234567") -> Token(INTEGER_OCT, (0, 9));
+    fn integer_oct5("0o1234567") -> Ok(Token(INTEGER_OCT, (0, 9)));
 }
 
 test_token! {
@@ -535,32 +535,32 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_oct7("0o12_34_567") -> Token(INTEGER_OCT, (0, 11));
+    fn integer_oct7("0o12_34_567") -> Ok(Token(INTEGER_OCT, (0, 11)));
 }
 
 test_token! {
     #[test]
-    fn integer_hex1("0x0") -> Token(INTEGER_HEX, (0, 3));
+    fn integer_hex1("0x0") -> Ok(Token(INTEGER_HEX, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn integer_hex2("0x1") -> Token(INTEGER_HEX, (0, 3));
+    fn integer_hex2("0x1") -> Ok(Token(INTEGER_HEX, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn integer_hex3("0x01") -> Token(INTEGER_HEX, (0, 4));
+    fn integer_hex3("0x01") -> Ok(Token(INTEGER_HEX, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn integer_hex4("0x10") -> Token(INTEGER_HEX, (0, 4));
+    fn integer_hex4("0x10") -> Ok(Token(INTEGER_HEX, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn integer_hex5("0x1234567890abcdef") -> Token(INTEGER_HEX, (0, 18));
+    fn integer_hex5("0x1234567890abcdef") -> Ok(Token(INTEGER_HEX, (0, 18)));
 }
 
 test_token! {
@@ -570,75 +570,75 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_hex7("0x12_34_5678_90ab_cdef") -> Token(INTEGER_HEX, (0, 22));
+    fn integer_hex7("0x12_34_5678_90ab_cdef") -> Ok(Token(INTEGER_HEX, (0, 22)));
 }
 
 test_token! {
     #[test]
-    fn float1("+1.0") -> Token(FLOAT, (0, 4));
+    fn float1("+1.0") -> Ok(Token(FLOAT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn float2("3.1415") -> Token(FLOAT, (0, 6));
+    fn float2("3.1415") -> Ok(Token(FLOAT, (0, 6)));
 }
 
 test_token! {
     #[test]
-    fn float3("-0.01") -> Token(FLOAT, (0, 5));
+    fn float3("-0.01") -> Ok(Token(FLOAT, (0, 5)));
 }
 
 test_token! {
     #[test]
-    fn float4("5e+22") -> Token(FLOAT, (0, 5));
+    fn float4("5e+22") -> Ok(Token(FLOAT, (0, 5)));
 }
 
 test_token! {
     #[test]
-    fn float5("1e06") -> Token(FLOAT, (0, 4));
+    fn float5("1e06") -> Ok(Token(FLOAT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn float6("-2E-2") -> Token(FLOAT, (0, 5));
+    fn float6("-2E-2") -> Ok(Token(FLOAT, (0, 5)));
 }
 
 test_token! {
     #[test]
-    fn float7("6.626e-34") -> Token(FLOAT, (0, 9));
+    fn float7("6.626e-34") -> Ok(Token(FLOAT, (0, 9)));
 }
 
 test_token! {
     #[test]
-    fn float8("224_617.445_991_228") -> Token(FLOAT, (0, 19));
+    fn float8("224_617.445_991_228") -> Ok(Token(FLOAT, (0, 19)));
 }
 
 test_token! {
     #[test]
-    fn special_float1("inf") -> Token(FLOAT, (0, 3));
+    fn special_float1("inf") -> Ok(Token(FLOAT, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn special_float2("nan") -> Token(FLOAT, (0, 3));
+    fn special_float2("nan") -> Ok(Token(FLOAT, (0, 3)));
 }
 
 test_token! {
     #[test]
-    fn special_float3("+inf") -> Token(FLOAT, (0, 4));
+    fn special_float3("+inf") -> Ok(Token(FLOAT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn special_float4("+nan") -> Token(FLOAT, (0, 4));
+    fn special_float4("+nan") -> Ok(Token(FLOAT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn special_float5("-inf") -> Token(FLOAT, (0, 4));
+    fn special_float5("-inf") -> Ok(Token(FLOAT, (0, 4)));
 }
 
 test_token! {
     #[test]
-    fn special_float6("-nan") -> Token(FLOAT, (0, 4));
+    fn special_float6("-nan") -> Ok(Token(FLOAT, (0, 4)));
 }
