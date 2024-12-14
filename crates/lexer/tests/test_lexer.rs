@@ -495,7 +495,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_bin6("0b_1010_10") -> Token(INTEGER_BIN, (0, 10));
+    fn integer_bin6("0b_1010_10") -> Err(InvalidNumber, (0, 10));
 }
 
 test_token! {
@@ -530,7 +530,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_oct6("0o_1234_567") -> Token(INTEGER_OCT, (0, 11));
+    fn integer_oct6("0o_1234_567") -> Err(InvalidNumber, (0, 11));
 }
 
 test_token! {
@@ -565,7 +565,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn integer_hex6("0x_1234_5678_90ab_cdef") -> Token(INTEGER_HEX, (0, 22));
+    fn integer_hex6("0x_1234_5678_90ab_cdef") -> Err(InvalidNumber, (0, 22));
 }
 
 test_token! {

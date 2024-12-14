@@ -1,3 +1,7 @@
+use crate::support::integer::{
+    try_from_binary, try_from_decimal, try_from_hexadecimal, try_from_octal,
+};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IntegerKind {
     Binary(ast::IntegerBin),
@@ -48,7 +52,7 @@ impl TryFrom<ast::IntegerBin> for Integer {
         let token = node.token().unwrap();
         let range: text::Range = token.range();
 
-        match i64::from_str_radix(&token.text()[2..].replace('_', ""), 2) {
+        match try_from_binary(&token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Binary(node),
                 value,
@@ -65,7 +69,7 @@ impl TryFrom<ast::IntegerOct> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match i64::from_str_radix(&token.text()[2..].replace('_', ""), 8) {
+        match try_from_octal(&token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Octal(node),
                 value,
@@ -82,7 +86,7 @@ impl TryFrom<ast::IntegerDec> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match i64::from_str_radix(&token.text().replace('_', ""), 10) {
+        match try_from_decimal(&token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Decimal(node),
                 value,
@@ -99,7 +103,7 @@ impl TryFrom<ast::IntegerHex> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match i64::from_str_radix(&token.text()[2..].replace('_', ""), 16) {
+        match try_from_hexadecimal(&token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Hexadecimal(node),
                 value,
