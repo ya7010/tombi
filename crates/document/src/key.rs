@@ -1,4 +1,4 @@
-use text::raw_string;
+use document_tree::support;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
@@ -31,9 +31,9 @@ impl Key {
 
     pub fn to_raw_text(&self) -> String {
         match self.kind {
-            KeyKind::BareKey => raw_string::from_bare_key(self.value()),
-            KeyKind::BasicString => raw_string::from_basic_string(self.value()),
-            KeyKind::LiteralString => raw_string::from_literal_string(self.value()),
+            KeyKind::BareKey => support::string::from_bare_key(self.value()),
+            KeyKind::BasicString => support::string::from_basic_string(self.value()),
+            KeyKind::LiteralString => support::string::from_literal_string(self.value()),
         }
     }
 }

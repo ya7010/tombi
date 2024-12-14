@@ -1,5 +1,3 @@
-use text::raw_string;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
     BareKey,
@@ -25,9 +23,9 @@ impl Key {
 
     pub fn to_raw_string(&self) -> std::string::String {
         match self.kind {
-            KeyKind::BareKey => raw_string::from_bare_key(&self.value),
-            KeyKind::BasicString => raw_string::from_basic_string(&self.value),
-            KeyKind::LiteralString => raw_string::from_literal_string(&self.value),
+            KeyKind::BareKey => crate::support::string::from_bare_key(&self.value),
+            KeyKind::BasicString => crate::support::string::from_basic_string(&self.value),
+            KeyKind::LiteralString => crate::support::string::from_literal_string(&self.value),
         }
     }
 

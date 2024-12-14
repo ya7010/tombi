@@ -1,5 +1,6 @@
 mod error;
 mod key;
+pub mod support;
 mod value;
 
 use std::ops::Deref;

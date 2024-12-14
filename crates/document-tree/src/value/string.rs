@@ -1,5 +1,3 @@
-use text::raw_string;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StringKind {
     BasicString(ast::BasicString),
@@ -28,13 +26,15 @@ impl String {
     #[inline]
     pub fn raw_string(&self) -> std::string::String {
         match self.kind {
-            StringKind::BasicString(_) => raw_string::from_basic_string(&self.value),
-            StringKind::LiteralString(_) => raw_string::from_literal_string(&self.value),
+            StringKind::BasicString(_) => crate::support::string::from_basic_string(&self.value),
+            StringKind::LiteralString(_) => {
+                crate::support::string::from_literal_string(&self.value)
+            }
             StringKind::MultiLineBasicString(_) => {
-                raw_string::from_multi_line_basic_string(&self.value)
+                crate::support::string::from_multi_line_basic_string(&self.value)
             }
             StringKind::MultiLineLiteralString(_) => {
-                raw_string::from_multi_line_literal_string(&self.value)
+                crate::support::string::from_multi_line_literal_string(&self.value)
             }
         }
     }
