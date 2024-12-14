@@ -3,6 +3,7 @@ pub mod codegen_grammar;
 pub mod codegen_jsonschema;
 pub mod dist;
 pub mod set_version;
+pub mod toml_test;
 
 pub use codegen::CodeGenCommand;
 
@@ -14,6 +15,9 @@ pub enum XTaskCommand {
 
     /// Set Git Tag version.
     SetVersion,
+
+    /// Run toml-test.
+    TomlTest,
 
     /// Prepare the distribution.
     Dist,
