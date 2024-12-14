@@ -1,3 +1,5 @@
+use document_tree::support;
+
 #[derive(Debug, serde::Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Type {
@@ -29,14 +31,20 @@ impl From<document_tree::Value> for Value {
             document_tree::Value::Integer(value) => Self::Literal {
                 r#type: Type::Integer,
                 value: match value.kind() {
-                    document_tree::IntegerKind::Decimal(node) => node.token(),
-                    document_tree::IntegerKind::Hexadecimal(node) => node.token(),
-                    document_tree::IntegerKind::Octal(node) => node.token(),
-                    document_tree::IntegerKind::Binary(node) => node.token(),
+                    document_tree::IntegerKind::Binary(node) => {
+                        support::integer::try_from_binary(node.token().unwrap().text())
+                    }
+                    document_tree::IntegerKind::Octal(node) => {
+                        support::integer::try_from_octal(node.token().unwrap().text())
+                    }
+                    document_tree::IntegerKind::Decimal(node) => {
+                        support::integer::try_from_decimal(node.token().unwrap().text())
+                    }
+                    document_tree::IntegerKind::Hexadecimal(node) => {
+                        support::integer::try_from_hexadecimal(node.token().unwrap().text())
+                    }
                 }
                 .unwrap()
-                .text()
-                .replace('_', "")
                 .to_string(),
             },
             document_tree::Value::Float(value) => Self::Literal {
