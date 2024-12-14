@@ -77,7 +77,7 @@ pub fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
         }
         FLOAT => {
             p.bump_remap(BARE_KEY);
-            Some(DOTTED_KEYS)
+            Some(BARE_KEY)
         }
         BOOLEAN => {
             p.bump_remap(BARE_KEY);

@@ -1,26 +1,3 @@
-FAIL valid/comment/after-literal-no-ws
-     Could not find key "inf" in parser output.
-
-     input sent to parser-cmd:
-       inf=inf#infinity
-       nan=nan#not a number
-       true=true#true
-       false=false#false
-
-     output from parser-cmd (stdout):
-       {
-         "false": {"type": "bool", "value": "false"},
-         "true":  {"type": "bool", "value": "true"}
-       }
-
-     want:
-       {
-           "false": {"type": "bool", "value": "false"},
-           "inf":   {"type": "float", "value": "inf"},
-           "nan":   {"type": "float", "value": "nan"},
-           "true":  {"type": "bool", "value": "true"}
-       }
-
 FAIL valid/datetime/leap-year
      invalid number
      invalid number
@@ -66,38 +43,6 @@ FAIL valid/datetime/leap-year
 
      want:
           <empty>
-
-FAIL valid/float/inf-and-nan
-     Could not find key "nan" in parser output.
-
-     input sent to parser-cmd:
-       # We don't encode +nan and -nan back with the signs; many languages don't
-       # support a sign on NaN (it doesn't really make much sense).
-       nan = nan
-       nan_neg = -nan
-       nan_plus = +nan
-       infinity = inf
-       infinity_neg = -inf
-       infinity_plus = +inf
-
-     output from parser-cmd (stdout):
-       {
-         "infinity":      {"type": "float", "value": "inf"},
-         "infinity_neg":  {"type": "float", "value": "-inf"},
-         "infinity_plus": {"type": "float", "value": "+inf"},
-         "nan_neg":       {"type": "float", "value": "-nan"},
-         "nan_plus":      {"type": "float", "value": "+nan"}
-       }
-
-     want:
-       {
-           "infinity":      {"type": "float", "value": "inf"},
-           "infinity_neg":  {"type": "float", "value": "-inf"},
-           "infinity_plus": {"type": "float", "value": "inf"},
-           "nan":           {"type": "float", "value": "nan"},
-           "nan_neg":       {"type": "float", "value": "nan"},
-           "nan_plus":      {"type": "float", "value": "nan"}
-       }
 
 FAIL valid/float/max-int
      invalid float: invalid float literal
@@ -509,7 +454,9 @@ FAIL valid/key/numeric-dotted
        1.2 = 3
 
      output from parser-cmd (stdout):
-       {}
+       {
+         "1.2": {"type": "integer", "value": "3"}
+       }
 
      want:
        {
@@ -574,29 +521,6 @@ FAIL valid/key/space
            " tbl ": {
                "\ttab\ttab\t": {"type": "string", "value": "tab"}
            }
-       }
-
-FAIL valid/key/special-word
-     Could not find key "inf" in parser output.
-
-     input sent to parser-cmd:
-       false = false
-       true = 1
-       inf = 100000000
-       nan = "ceci n'est pas un nombre"
-
-     output from parser-cmd (stdout):
-       {
-         "false": {"type": "bool", "value": "false"},
-         "true":  {"type": "integer", "value": "1"}
-       }
-
-     want:
-       {
-           "false": {"type": "bool", "value": "false"},
-           "inf":   {"type": "integer", "value": "100000000"},
-           "nan":   {"type": "string", "value": "ceci n'est pas un nombre"},
-           "true":  {"type": "integer", "value": "1"}
        }
 
 FAIL valid/key/start
@@ -802,7 +726,9 @@ FAIL valid/spec/keys-7
        3.14159 = "pi"
 
      output from parser-cmd (stdout):
-       {}
+       {
+         "3.14159": {"type": "string", "value": "pi"}
+       }
 
      want:
        {
@@ -1648,32 +1574,6 @@ FAIL valid/table/empty-name
            }
        }
 
-FAIL valid/table/keyword
-     Could not find key "inf" in parser output.
-
-     input sent to parser-cmd:
-       [true]
-
-       [false]
-
-       [inf]
-
-       [nan]
-
-     output from parser-cmd (stdout):
-       {
-         "false": {},
-         "true":  {}
-       }
-
-     want:
-       {
-           "false": {},
-           "inf":   {},
-           "nan":   {},
-           "true":  {}
-       }
-
 FAIL valid/table/names
      Could not find key "x.1" in parser output.
 
@@ -1690,7 +1590,6 @@ FAIL valid/table/names
 
      output from parser-cmd (stdout):
        {
-         "x": {},
          "a": {
            " x ": {},
            "b.c": {},
@@ -1713,6 +1612,9 @@ FAIL valid/table/names
            "ʞ": {
              "l": {}
            }
+         },
+         "x": {
+           "1.2": {}
          }
        }
 
@@ -3064,5 +2966,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode]: using embedded tests
-  valid tests: 135 passed, 47 failed
+  valid tests: 139 passed, 43 failed
 invalid tests: 290 passed, 81 failed
