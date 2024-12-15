@@ -21,32 +21,32 @@ pub fn from_bare_key(value: &str) -> String {
 }
 
 pub fn try_from_basic_string(value: &str) -> Result<String, ParseError> {
-    parse_string(&value[1..value.len() - 1])
+    escape_basic_string(&value[1..value.len() - 1])
 }
 
 pub fn try_from_literal_string(value: &str) -> Result<String, ParseError> {
-    parse_string(&value[1..value.len() - 1])
+    // NOTE: Literal strings are not escaped.
+    Ok(value[1..value.len() - 1].to_string())
 }
 
 pub fn try_from_multi_line_basic_string(value: &str) -> Result<String, ParseError> {
-    parse_string(
+    escape_basic_string(
         &value[3..value.len() - 3]
             .chars()
+            .peekable()
             .skip_while(|c| matches!(c, '\r' | '\n'))
             .collect::<String>(),
     )
 }
 
 pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseError> {
-    parse_string(
-        &value[3..value.len() - 3]
-            .chars()
-            .skip_while(|c| matches!(c, '\r' | '\n'))
-            .collect::<String>(),
-    )
+    Ok(value[3..value.len() - 3]
+        .chars()
+        .skip_while(|c| matches!(c, '\r' | '\n'))
+        .collect::<String>())
 }
 
-fn parse_string(input: &str) -> Result<String, ParseError> {
+fn escape_basic_string(input: &str) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
     let mut unicode_buf = String::new();
@@ -76,10 +76,6 @@ fn parse_string(input: &str) -> Result<String, ParseError> {
                     }
                     '"' => {
                         output.push('\"');
-                        chars.next();
-                    }
-                    '\'' => {
-                        output.push('\'');
                         chars.next();
                     }
                     '\\' => {
