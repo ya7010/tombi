@@ -1,3 +1,5 @@
+use crate::support::float::try_from_float;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Float {
     value: f64,
@@ -32,7 +34,7 @@ impl TryFrom<ast::Float> for Float {
     fn try_from(node: ast::Float) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let range = token.range();
-        match token.text().parse() {
+        match try_from_float(token.text()) {
             Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseFloatError { error, range }]),
         }

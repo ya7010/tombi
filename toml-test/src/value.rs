@@ -49,7 +49,9 @@ impl From<document_tree::Value> for Value {
             },
             document_tree::Value::Float(value) => Self::Literal {
                 r#type: Type::Float,
-                value: value.node().token().unwrap().text().to_string(),
+                value: support::float::try_from_float(value.node().token().unwrap().text())
+                    .unwrap()
+                    .to_string(),
             },
             document_tree::Value::String(value) => Self::Literal {
                 r#type: Type::String,
