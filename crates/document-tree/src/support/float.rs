@@ -2,9 +2,9 @@
 pub enum ParseError {
     #[error(transparent)]
     Std(#[from] std::num::ParseFloatError),
-    #[error("Both sides of the underscore must be numbers.")]
+    #[error("Both sides of the underscore must be numbers")]
     Underscore,
-    #[error("Leading zeros are not allowed.")]
+    #[error("Leading zeros are not allowed")]
     LeadingZero,
 }
 

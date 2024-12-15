@@ -23,25 +23,25 @@ pub enum Error {
 
     #[error("invalid offset date time: {error}")]
     ParseOffsetDateTimeError {
-        error: chrono::ParseError,
+        error: crate::support::chrono::ParseError,
         range: text::Range,
     },
 
     #[error("invalid local date time: {error}")]
     ParseLocalDateTimeError {
-        error: chrono::ParseError,
+        error: crate::support::chrono::ParseError,
         range: text::Range,
     },
 
     #[error("invalid local date: {error}")]
     ParseLocalDateError {
-        error: chrono::format::ParseError,
+        error: crate::support::chrono::ParseError,
         range: text::Range,
     },
 
     #[error("invalid local time: {error}")]
     ParseLocalTimeError {
-        error: chrono::format::ParseError,
+        error: crate::support::chrono::ParseError,
         range: text::Range,
     },
 }

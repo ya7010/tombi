@@ -86,8 +86,12 @@ impl TryIntoDocumentTree<Value> for ast::Value {
             ast::Value::LocalDateTime(dt) => dt
                 .try_into_document_tree(toml_version)
                 .map(Value::LocalDateTime),
-            ast::Value::LocalDate(date) => date.try_into().map(Value::LocalDate),
-            ast::Value::LocalTime(time) => time.try_into().map(Value::LocalTime),
+            ast::Value::LocalDate(date) => date
+                .try_into_document_tree(toml_version)
+                .map(Value::LocalDate),
+            ast::Value::LocalTime(time) => time
+                .try_into_document_tree(toml_version)
+                .map(Value::LocalTime),
             ast::Value::Array(array) => {
                 array.try_into_document_tree(toml_version).map(Value::Array)
             }

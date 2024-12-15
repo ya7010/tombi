@@ -1,5 +1,5 @@
 use crate::{
-    support::datetime::{
+    support::chrono::{
         try_from_local_date, try_from_local_date_time, try_from_local_time,
         try_from_offset_date_time,
     },
@@ -152,27 +152,29 @@ impl TryIntoDocumentTree<LocalDateTime> for ast::LocalDateTime {
     }
 }
 
-impl TryFrom<ast::LocalDate> for LocalDate {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::LocalDate) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
+impl TryIntoDocumentTree<LocalDate> for ast::LocalDate {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<LocalDate, Vec<crate::Error>> {
+        let token = self.token().unwrap();
         let range = token.range();
-        match try_from_local_date(token.text()) {
-            Ok(value) => Ok(Self { value, node }),
+        match try_from_local_date(token.text(), toml_version) {
+            Ok(value) => Ok(LocalDate { value, node: self }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateError { error, range }]),
         }
     }
 }
 
-impl TryFrom<ast::LocalTime> for LocalTime {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::LocalTime) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
+impl TryIntoDocumentTree<LocalTime> for ast::LocalTime {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<LocalTime, Vec<crate::Error>> {
+        let token = self.token().unwrap();
         let range = token.range();
-        match try_from_local_time(token.text()) {
-            Ok(value) => Ok(Self { value, node }),
+        match try_from_local_time(token.text(), toml_version) {
+            Ok(value) => Ok(LocalTime { value, node: self }),
             Err(error) => Err(vec![crate::Error::ParseLocalTimeError { error, range }]),
         }
     }

@@ -1843,36 +1843,6 @@ FAIL invalid/key/no-eol
      want:
        Exit code 1
 
-FAIL invalid/local-datetime/no-secs
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       # No seconds in time.
-       no-secs = 1987-07-05T17:45
-
-     output from parser-cmd (stdout):
-       {
-         "no-secs": {"type": "datetime-local", "value": "1987-07-05T17:45"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/local-time/no-secs
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       # No seconds in time.
-       no-secs = 17:45
-
-     output from parser-cmd (stdout):
-       {
-         "no-secs": {"type": "time-local", "value": "17:45"}
-       }
-
-     want:
-       Exit code 1
-
 FAIL invalid/spec/inline-table-2-0
      Expected an error, but no error was reported.
 
@@ -2596,4 +2566,4 @@ FAIL invalid/table/super-twice
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.0.0]: using embedded tests
   valid tests: 149 passed, 33 failed
-invalid tests: 291 passed, 80 failed
+invalid tests: 293 passed, 78 failed
