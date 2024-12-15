@@ -36,7 +36,10 @@ impl crate::Table {
             .map(|node: ArrayOfTables| node.header().unwrap().keys())
             .take_while(
                 |keys| match (self.header().unwrap().keys().next(), keys.clone().next()) {
-                    (Some(a), Some(b)) => a.to_raw_text() == b.to_raw_text(),
+                    (Some(a), Some(b)) => match (a.try_to_raw_text(), b.try_to_raw_text()) {
+                        (Ok(a), Ok(b)) => a == b,
+                        _ => false,
+                    },
                     _ => false,
                 },
             )
