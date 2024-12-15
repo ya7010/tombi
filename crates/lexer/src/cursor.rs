@@ -41,6 +41,19 @@ impl<'a> Cursor<'a> {
             .unwrap_or(EOF_CHAR)
     }
 
+    pub fn peek_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
+        let mut iter = self.chars.clone();
+        let mut s = String::new();
+        while let Some(c) = iter.next() {
+            if predicate(c) {
+                s.push(c);
+            } else {
+                break;
+            }
+        }
+        s
+    }
+
     pub fn peeks_with_current(&self, size: usize) -> String {
         assert!(size > 0);
         let mut iter = self.chars.clone();

@@ -320,12 +320,57 @@ test_token! {
 
 test_token! {
     #[test]
+    fn multi_line_basic_string3(r#""""Here are fifteen quotation marks: ""\"""\"""\"""\"""\".""""#) -> Ok(
+        Token(MULTI_LINE_BASIC_STRING, (0, 61))
+    );
+}
+
+test_token! {
+    #[test]
+    fn multi_line_basic_string4(r#""""""""#) -> Ok(Token(MULTI_LINE_BASIC_STRING, (0, 6)));
+}
+
+test_token! {
+    #[test]
+    fn multi_line_basic_string5(r#""""""""""#) -> Ok(Token(MULTI_LINE_BASIC_STRING, (0, 8)));
+}
+
+test_token! {
+    #[test]
+    fn invalid_multi_line_basic_string  (r#"""""""""""#) -> Err(
+        Token(InvalidMultilineBasicString, (0, 9))
+    );
+}
+
+test_token! {
+    #[test]
+    fn invalid_multi_line_basic_string2(r#""""6 quotes: """""""#) -> Err(
+        Token(InvalidMultilineBasicString, (0, 19))
+    );
+}
+
+test_token! {
+    #[test]
     fn literal_string1("'Hello, World!'") -> Ok(Token(LITERAL_STRING, (0, 15)));
 }
 
 test_token! {
     #[test]
     fn literal_string2("'Hello, \\'Taro\\'!'") -> Ok(Token(LITERAL_STRING, (0, 18)));
+}
+
+test_token! {
+    #[test]
+    fn multi_line_literal_string("'''Here are fifteen apostrophes: '''''") -> Ok(
+        Token(MULTI_LINE_LITERAL_STRING, (0, 38))
+    );
+}
+
+test_token! {
+    #[test]
+    fn invalid_multi_line_literal_string("'''Here are fifteen apostrophes: ''''''") -> Err(
+        Token(InvalidMultilineLiteralString, (0, 39))
+    );
 }
 
 test_token! {

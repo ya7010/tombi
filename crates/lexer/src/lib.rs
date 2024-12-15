@@ -348,11 +348,44 @@ impl Cursor<'_> {
     }
 
     fn multi_line_basic_string(&mut self) -> Result<Token, crate::Error> {
-        self.multi_line_string(
-            SyntaxKind::MULTI_LINE_BASIC_STRING,
-            '"',
+        assert!(self.current() == '"' && self.peek(1) == '"');
+
+        self.eat_n(2);
+
+        let mut was_quote = false;
+        while let Some(c) = self.bump() {
+            match c {
+                _ if !was_quote
+                    && self.current() == '"'
+                    && self.peek(1) == '"'
+                    && self.peek(2) == '"' =>
+                {
+                    let last_quotes = self.peek_while(|c| c == '"');
+
+                    self.eat_while(|c| c == '"');
+
+                    if last_quotes.len() > 4 {
+                        break;
+                    }
+
+                    return Ok(Token::new(
+                        SyntaxKind::MULTI_LINE_BASIC_STRING,
+                        self.pop_span_range(),
+                    ));
+                }
+                '\\' => {
+                    was_quote = true;
+                }
+                _ => {
+                    was_quote = false;
+                }
+            }
+        }
+
+        Err(crate::Error::new(
             InvalidMultilineBasicString,
-        )
+            self.pop_span_range(),
+        ))
     }
 
     fn literal_string(&mut self) -> Result<Token, crate::Error> {
@@ -360,11 +393,33 @@ impl Cursor<'_> {
     }
 
     fn multi_line_literal_string(&mut self) -> Result<Token, crate::Error> {
-        self.multi_line_string(
-            SyntaxKind::MULTI_LINE_LITERAL_STRING,
-            '\'',
+        assert!(self.current() == '\'' && self.peek(1) == '\'');
+
+        self.eat_n(2);
+
+        while let Some(c) = self.bump() {
+            match c {
+                _ if self.current() == '\'' && self.peek(1) == '\'' && self.peek(2) == '\'' => {
+                    let last_quotes = self.peek_while(|c| c == '\'');
+                    self.eat_while(|c| c == '\'');
+
+                    if last_quotes.len() > 4 {
+                        break;
+                    }
+
+                    return Ok(Token::new(
+                        SyntaxKind::MULTI_LINE_LITERAL_STRING,
+                        self.pop_span_range(),
+                    ));
+                }
+                _ => {}
+            }
+        }
+
+        Err(crate::Error::new(
             InvalidMultilineLiteralString,
-        )
+            self.pop_span_range(),
+        ))
     }
 
     fn single_line_string(
@@ -382,27 +437,6 @@ impl Cursor<'_> {
                     self.bump();
                 }
                 _ if is_line_break(self.peek(1)) => break,
-                _ => (),
-            }
-        }
-
-        Err(crate::Error::new(error_kind, self.pop_span_range()))
-    }
-
-    fn multi_line_string(
-        &mut self,
-        kind: SyntaxKind,
-        quote: char,
-        error_kind: crate::ErrorKind,
-    ) -> Result<Token, crate::Error> {
-        assert!(self.current() == quote && self.peek(1) == quote);
-
-        while let Some(c) = self.bump() {
-            match c {
-                _ if self.current() == quote && self.peek(1) == quote && self.peek(2) == quote => {
-                    self.eat_n(2);
-                    return Ok(Token::new(kind, self.pop_span_range()));
-                }
                 _ => (),
             }
         }

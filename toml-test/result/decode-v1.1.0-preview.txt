@@ -227,34 +227,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/spec/string-4
-     invalid token in 3:50..3:64
-     invalid multi-line basic strings in 6:60..7:0
-     unknown line in 7:0..7:0
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       str4 = """Here are two quotation marks: "". Simple enough."""
-       # str5 = """Here are three quotation marks: """."""  # INVALID
-       str5 = """Here are three quotation marks: ""\"."""
-       str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
-
-       # "This," she said, "is just a pointless statement."
-       str7 = """"This," she said, "is just a pointless statement.""""
-
-     output from parser-cmd (stderr):
-       invalid token in 3:50..3:64
-       invalid multi-line basic strings in 6:60..7:0
-       unknown line in 7:0..7:0
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/spec/string-5
      invalid key in 3:23..3:38
      expected '=' in 3:16..3:22
@@ -274,32 +246,6 @@ FAIL valid/spec/string-5
        invalid key in 3:23..3:38
        expected '=' in 3:16..3:22
        unknown line in 3:38..4:0
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
-FAIL valid/spec/string-7
-     expected '=' in 6:14..6:15
-     expected value in 6:14..6:51
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
-
-       # apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
-       apos15 = "Here are fifteen apostrophes: '''''''''''''''"
-
-       # 'That,' she said, 'is still pointless.'
-       str = ''''That,' she said, 'is still pointless.''''
-
-     output from parser-cmd (stderr):
-       expected '=' in 6:14..6:15
-       expected value in 6:14..6:51
        Error: invalid toml
 
        Exit 1
@@ -350,10 +296,7 @@ FAIL valid/string/escape-esc
 
 FAIL valid/string/escape-tricky
      invalid basic string in 0:10..1:33
-     invalid token in 9:50..9:52
-     invalid key in 9:63..9:72
      expected value in 0:10..1:33
-     unknown line in 9:72..10:0
      Error: invalid toml
  
      Exit 1
@@ -377,10 +320,7 @@ FAIL valid/string/escape-tricky
 
      output from parser-cmd (stderr):
        invalid basic string in 0:10..1:33
-       invalid token in 9:50..9:52
-       invalid key in 9:63..9:72
        expected value in 0:10..1:33
-       unknown line in 9:72..10:0
        Error: invalid toml
 
        Exit 1
@@ -491,8 +431,7 @@ FAIL valid/string/multiline
           <empty>
 
 FAIL valid/string/multiline-empty
-     expected '=' in 0:16..1:0
-     expected value in 0:16..1:0
+     invalid string: invalid escape sequence
      Error: invalid toml
  
      Exit 1
@@ -514,128 +453,7 @@ FAIL valid/string/multiline-empty
           """
 
      output from parser-cmd (stderr):
-       expected '=' in 0:16..1:0
-       expected value in 0:16..1:0
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
-FAIL valid/string/multiline-quotes
-     invalid key in 3:18..3:27
-     invalid key in 8:14..8:23
-     expected '=' in 3:18..3:27
-     expected value in 3:18..3:27
-     expected '=' in 4:26..4:30
-     expected '=' in 8:14..8:23
-     expected value in 8:14..8:23
-     expected '=' in 9:22..9:26
-     unknown line in 20:17..21:0
-     expected '=' in 21:8..21:12
-     expected value in 21:8..21:24
-     unknown line in 23:17..24:0
-     expected '=' in 24:8..24:12
-     expected value in 24:8..24:24
-     unknown line in 25:4..26:0
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       # Make sure that quotes inside multiline strings are allowed, including right
-       # after the opening '''/""" and before the closing '''/"""
-
-       lit_one = ''''one quote''''
-       lit_two = '''''two quotes'''''
-       lit_one_space = ''' 'one quote' '''
-       lit_two_space = ''' ''two quotes'' '''
-
-       one = """"one quote""""
-       two = """""two quotes"""""
-       one_space = """ "one quote" """
-       two_space = """ ""two quotes"" """
-
-       mismatch1 = """aaa'''bbb"""
-       mismatch2 = '''aaa"""bbb'''
-
-       # Three opening """, then one escaped ", then two "" (allowed), and then three
-       # closing """
-       escaped = """lol\""""""
-
-       five-quotes = """
-       Closing with five quotes
-       """""
-       four-quotes = """
-       Closing with four quotes
-       """"
-
-     output from parser-cmd (stderr):
-       invalid key in 3:18..3:27
-       invalid key in 8:14..8:23
-       expected '=' in 3:18..3:27
-       expected value in 3:18..3:27
-       expected '=' in 4:26..4:30
-       expected '=' in 8:14..8:23
-       expected value in 8:14..8:23
-       expected '=' in 9:22..9:26
-       unknown line in 20:17..21:0
-       expected '=' in 21:8..21:12
-       expected value in 21:8..21:24
-       unknown line in 23:17..24:0
-       expected '=' in 24:8..24:12
-       expected value in 24:8..24:24
-       unknown line in 25:4..26:0
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
-FAIL valid/string/raw-multiline
-     invalid key in 19:30..19:37
-     invalid literal string in 21:4..22:0
-     unknown line in 19:49..20:0
-     expected '=' in 20:3..20:6
-     expected value in 20:3..20:11
-     unknown line in 22:0..22:0
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       # Single ' should be allowed.
-       oneline = '''This string has a ' quote character.'''
-
-       # A newline immediately following the opening delimiter will be trimmed.
-       firstnl = '''
-       This string has a ' quote character.'''
-
-       # All other whitespace and newline characters remain intact.
-       multiline = '''
-       This string
-       has ' a quote character
-       and more than
-       one newline
-       in it.'''
-
-       # Tab character in literal string does not need to be escaped
-       multiline_with_tab = '''First line
-       	 Followed by a tab'''
-
-       this-str-has-apostrophes='''' there's one already
-       '' two more
-       '''''
-
-     output from parser-cmd (stderr):
-       invalid key in 19:30..19:37
-       invalid literal string in 21:4..22:0
-       unknown line in 19:49..20:0
-       expected '=' in 20:3..20:6
-       expected value in 20:3..20:11
-       unknown line in 22:0..22:0
+       invalid string: invalid escape sequence
        Error: invalid toml
 
        Exit 1
@@ -1550,5 +1368,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 171 passed, 16 failed
+  valid tests: 175 passed, 12 failed
 invalid tests: 314 passed, 47 failed
