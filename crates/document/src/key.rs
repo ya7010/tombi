@@ -32,8 +32,10 @@ impl Key {
     pub fn to_raw_text(&self) -> String {
         match self.kind {
             KeyKind::BareKey => support::string::from_bare_key(self.value()),
-            KeyKind::BasicString => support::string::from_basic_string(self.value()),
-            KeyKind::LiteralString => support::string::from_literal_string(self.value()),
+            KeyKind::BasicString => support::string::try_from_basic_string(self.value()).unwrap(),
+            KeyKind::LiteralString => {
+                support::string::try_from_literal_string(self.value()).unwrap()
+            }
         }
     }
 }

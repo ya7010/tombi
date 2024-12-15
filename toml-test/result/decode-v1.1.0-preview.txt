@@ -1,49 +1,3 @@
-FAIL valid/key/escapes
-     Could not find key "\b" in parser output.
-
-     input sent to parser-cmd:
-       "\n" = "newline"
-       "\b" = "bell"
-       "\u00c0" = "latin capital letter A with grave"
-       "\"" = "just a quote"
-
-       ["backsp\b\b"]
-
-       ["\"quoted\""]
-       quote = true
-
-       ["a.b"."\u00c0"]
-
-     output from parser-cmd (stdout):
-       {
-         "\"":         {"type": "string", "value": "just a quote"},
-         "\\b":        {"type": "string", "value": "bell"},
-         "\\n":        {"type": "string", "value": "newline"},
-         "\\u00c0":    {"type": "string", "value": "latin capital letter A with grave"},
-         "backsp\\b\\b": {},
-         "\"quoted\"": {
-           "quote": {"type": "bool", "value": "true"}
-         },
-         "a.b": {
-           "\\u00c0": {}
-         }
-       }
-
-     want:
-       {
-           "\b":         {"type": "string", "value": "bell"},
-           "\n":         {"type": "string", "value": "newline"},
-           "\"":         {"type": "string", "value": "just a quote"},
-           "backsp\b\b": {},
-           "À":          {"type": "string", "value": "latin capital letter A with grave"},
-           "\"quoted\"": {
-               "quote": {"type": "bool", "value": "true"}
-           },
-           "a.b": {
-               "À": {}
-           }
-       }
-
 FAIL valid/key/numeric-dotted
      Could not find key "1" in parser output.
 
@@ -85,35 +39,6 @@ FAIL valid/key/quoted-unicode
 
      want:
           <empty>
-
-FAIL valid/key/space
-     Could not find key " tbl .\ttab\ttab\t" in parser output.
-
-     input sent to parser-cmd:
-       # Keep whitespace inside quotes keys at all positions.
-       "a b"   = 1
-       " c d " = 2
-
-       [ " tbl " ]
-       "\ttab\ttab\t" = "tab"
-
-     output from parser-cmd (stdout):
-       {
-         " c d ": {"type": "integer", "value": "2"},
-         "a b":   {"type": "integer", "value": "1"},
-         " tbl ": {
-           "\\ttab\\ttab\\t": {"type": "string", "value": "tab"}
-         }
-       }
-
-     want:
-       {
-           " c d ": {"type": "integer", "value": "2"},
-           "a b":   {"type": "integer", "value": "1"},
-           " tbl ": {
-               "\ttab\ttab\t": {"type": "string", "value": "tab"}
-           }
-       }
 
 FAIL valid/key/start
      invalid token
@@ -326,96 +251,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/spec/string-0
-     Values for key "str" don't match:
-       Expected:     I'm a string. "You can quote me". Name	José
-     Location	SF.
-       Your encoder: I'm a string. "You can quote me". Name\tJos\u00E9\nLocation\tSF.
-
-     input sent to parser-cmd:
-       str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
-
-     output from parser-cmd (stdout):
-       {
-         "str": {
-           "type":  "string",
-           "value": "I'm a string. \"You can quote me\". Name\\tJos\\u00E9\\nLocation\\tSF."
-         }
-       }
-
-     want:
-       {
-           "str": {"type": "string", "value": "I'm a string. \"You can quote me\". Name\tJosé\nLocation\tSF."}
-       }
-
-FAIL valid/spec/string-2
-     Values for key "str2" don't match:
-       Expected:     Roses are red
-     Violets are blue
-       Your encoder: Roses are red\nViolets are blue
-
-     input sent to parser-cmd:
-       # On a Unix system, the above multi-line string will most likely be the same as:
-       str2 = "Roses are red\nViolets are blue"
-
-       # On a Windows system, it will most likely be equivalent to:
-       str3 = "Roses are red\r\nViolets are blue"
-
-     output from parser-cmd (stdout):
-       {
-         "str2": {"type": "string", "value": "Roses are red\\nViolets are blue"},
-         "str3": {"type": "string", "value": "Roses are red\\r\\nViolets are blue"}
-       }
-
-     want:
-       {
-           "str2": {"type": "string", "value": "Roses are red\nViolets are blue"},
-           "str3": {"type": "string", "value": "Roses are red\r\nViolets are blue"}
-       }
-
-FAIL valid/spec/string-3
-     Values for key "str2" don't match:
-       Expected:     The quick brown fox jumps over the lazy dog.
-       Your encoder: The quick brown \
- 
- 
-       fox jumps over \
-         the lazy dog.
-
-     input sent to parser-cmd:
-       # The following strings are byte-for-byte equivalent:
-       str1 = "The quick brown fox jumps over the lazy dog."
-
-       str2 = """
-       The quick brown \
-
-
-         fox jumps over \
-           the lazy dog."""
-
-       str3 = """\
-              The quick brown \
-              fox jumps over \
-              the lazy dog.\
-              """
-
-     output from parser-cmd (stdout):
-       {
-         "str1": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-         "str2": {"type": "string", "value": "The quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
-         "str3": {
-           "type":  "string",
-           "value": "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       "
-         }
-       }
-
-     want:
-       {
-           "str1": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-           "str2": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-           "str3": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."}
-       }
-
 FAIL valid/spec/string-4
      invalid token
      invalid multi-line basic strings
@@ -470,6 +305,30 @@ FAIL valid/spec/string-5
      want:
           <empty>
 
+FAIL valid/spec/string-6
+     invalid string: invalid escape sequence
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       regex2 = '''I [dw]on't need \d{2} apples'''
+       lines  = '''
+       The first newline is
+       trimmed in raw strings.
+          All other whitespace
+          is preserved.
+       '''
+
+     output from parser-cmd (stderr):
+       invalid string: invalid escape sequence
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
+
 FAIL valid/spec/string-7
      expected '='
      expected value
@@ -497,11 +356,10 @@ FAIL valid/spec/string-7
           <empty>
 
 FAIL valid/string/ends-in-whitespace-escape
-     Values for key "beee" don't match:
-       Expected:     heeee
-     geeee
-       Your encoder: heeee
-     geeee\
+     invalid string: invalid escape sequence
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        beee = """
@@ -511,33 +369,32 @@ FAIL valid/string/ends-in-whitespace-escape
 
              """
 
-     output from parser-cmd (stdout):
-       {
-         "beee": {"type": "string", "value": "heeee\ngeeee\\  \n\n\n      "}
-       }
+     output from parser-cmd (stderr):
+       invalid string: invalid escape sequence
+       Error: invalid toml
+
+       Exit 1
 
      want:
-       {
-           "beee": {"type": "string", "value": "heeee\ngeeee"}
-       }
+          <empty>
 
 FAIL valid/string/escape-esc
-     Values for key "esc" don't match:
-       Expected:      There is no escape! 
-       Your encoder: \e There is no escape! \e
+     invalid string: invalid escape sequence
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        esc = "\e There is no escape! \e"
 
-     output from parser-cmd (stdout):
-       {
-         "esc": {"type": "string", "value": "\\e There is no escape! \\e"}
-       }
+     output from parser-cmd (stderr):
+       invalid string: invalid escape sequence
+       Error: invalid toml
+
+       Exit 1
 
      want:
-       {
-           "esc": {"type": "string", "value": "\u001b There is no escape! \u001b"}
-       }
+          <empty>
 
 FAIL valid/string/escape-tricky
      invalid basic string
@@ -579,84 +436,18 @@ FAIL valid/string/escape-tricky
      want:
           <empty>
 
-FAIL valid/string/escaped-escape
-     Values for key "answer" don't match:
-       Expected:     \x64
-       Your encoder: \\x64
-
-     input sent to parser-cmd:
-       answer = "\\x64"
-
-     output from parser-cmd (stdout):
-       {
-         "answer": {"type": "string", "value": "\\\\x64"}
-       }
-
-     want:
-       {
-           "answer": {"type": "string", "value": "\\x64"}
-       }
-
-FAIL valid/string/escapes
-     Values for key "backslash" don't match:
-       Expected:     |\.
-       Your encoder: |\\.
-
-     input sent to parser-cmd:
-       backspace     = "|\b."
-       tab           = "|\t."
-       newline       = "|\n."
-       formfeed      = "|\f."
-       carriage      = "|\r."
-       quote         = "|\"."
-       backslash     = "|\\."
-       delete        = "|\u007F."
-       unitseparator = "|\u001F."
-
-       # \u is escaped, so should NOT be interperted as a \u escape.
-       notunicode1   = "|\\u."
-       notunicode2   = "|\u005Cu."
-       notunicode3   = "|\\u0075."
-       notunicode4   = "|\\\u0075."
-
-     output from parser-cmd (stdout):
-       {
-         "backslash":     {"type": "string", "value": "|\\\\."},
-         "backspace":     {"type": "string", "value": "|\\b."},
-         "carriage":      {"type": "string", "value": "|\\r."},
-         "delete":        {"type": "string", "value": "|\\u007F."},
-         "formfeed":      {"type": "string", "value": "|\\f."},
-         "newline":       {"type": "string", "value": "|\\n."},
-         "notunicode1":   {"type": "string", "value": "|\\\\u."},
-         "notunicode2":   {"type": "string", "value": "|\\u005Cu."},
-         "notunicode3":   {"type": "string", "value": "|\\\\u0075."},
-         "notunicode4":   {"type": "string", "value": "|\\\\\\u0075."},
-         "quote":         {"type": "string", "value": "|\"."},
-         "tab":           {"type": "string", "value": "|\\t."},
-         "unitseparator": {"type": "string", "value": "|\\u001F."}
-       }
-
-     want:
-       {
-           "backslash":     {"type": "string", "value": "|\\."},
-           "backspace":     {"type": "string", "value": "|\b."},
-           "carriage":      {"type": "string", "value": "|\r."},
-           "delete":        {"type": "string", "value": "|."},
-           "formfeed":      {"type": "string", "value": "|\f."},
-           "newline":       {"type": "string", "value": "|\n."},
-           "notunicode1":   {"type": "string", "value": "|\\u."},
-           "notunicode2":   {"type": "string", "value": "|\\u."},
-           "notunicode3":   {"type": "string", "value": "|\\u0075."},
-           "notunicode4":   {"type": "string", "value": "|\\u."},
-           "quote":         {"type": "string", "value": "|\"."},
-           "tab":           {"type": "string", "value": "|\t."},
-           "unitseparator": {"type": "string", "value": "|\u001f."}
-       }
-
 FAIL valid/string/hex-escape
-     Values for key "bs" don't match:
-       Expected:     
-       Your encoder: \x7f
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     invalid string: invalid escape sequence
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        # \x for the first 255 codepoints
@@ -681,40 +472,27 @@ FAIL valid/string/hex-escape
        \x20 \x09 \x0d\x0a
        '''
 
-     output from parser-cmd (stdout):
-       {
-         "bs":                {"type": "string", "value": "\\x7f"},
-         "hello":             {"type": "string", "value": "\\x68\\x65\\x6c\\x6c\\x6f\\x0a"},
-         "higher-than-127":   {"type": "string", "value": "S\\xf8rmirb\\xe6ren"},
-         "literal":           {"type": "string", "value": "\\x20 \\x09 \\x0d\\x0a"},
-         "multiline-literal": {"type": "string", "value": "\\x20 \\x09 \\x0d\\x0a\n"},
-         "nul":               {"type": "string", "value": "\\x00"},
-         "whitespace":        {"type": "string", "value": "\\x20 \\x09 \\x1b \\x0d\\x0a"},
-         "multiline": {
-           "type":  "string",
-           "value": "\\x20 \\x09 \\x1b \\x0d\\x0a\n\\x7f\n\\x00\n\\x68\\x65\\x6c\\x6c\\x6f\\x0a\n\\x53\\xF8\\x72\\x6D\\x69\\x72\\x62\\xE6\\x72\\x65\\x6E\n"
-         }
-       }
+     output from parser-cmd (stderr):
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       invalid string: invalid escape sequence
+       Error: invalid toml
+
+       Exit 1
 
      want:
-       {
-           "bs":                {"type": "string", "value": ""},
-           "hello":             {"type": "string", "value": "hello\n"},
-           "higher-than-127":   {"type": "string", "value": "Sørmirbæren"},
-           "literal":           {"type": "string", "value": "\\x20 \\x09 \\x0d\\x0a"},
-           "multiline":         {"type": "string", "value": "  \t \u001b \r\n\n\n\u0000\nhello\n\nSørmirbæren\n"},
-           "multiline-literal": {"type": "string", "value": "\\x20 \\x09 \\x0d\\x0a\n"},
-           "nul":               {"type": "string", "value": "\u0000"},
-           "whitespace":        {"type": "string", "value": "  \t \u001b \r\n"}
-       }
+          <empty>
 
 FAIL valid/string/multiline
-     Values for key "equivalent_three" don't match:
-       Expected:     The quick brown fox jumps over the lazy dog.
-       Your encoder: \
-            The quick brown \
-            fox jumps over \
-            the lazy dog.\
+     invalid string: invalid escape sequence
+     Error: invalid toml
+ 
+     Exit 1
 
      input sent to parser-cmd:
        # NOTE: this file includes some literal tab characters.
@@ -755,37 +533,14 @@ FAIL valid/string/multiline
        escape-bs-3 = """a \\\\
          b"""
 
-     output from parser-cmd (stdout):
-       {
-         "equivalent_one": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-         "equivalent_two": {"type": "string", "value": "The quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
-         "escape-bs-1":    {"type": "string", "value": "a \\\\\nb"},
-         "escape-bs-2":    {"type": "string", "value": "a \\\\\\\nb"},
-         "escape-bs-3":    {"type": "string", "value": "a \\\\\\\\\n  b"},
-         "keep-ws-before": {"type": "string", "value": "a   \t\\\n   b"},
-         "no-space":       {"type": "string", "value": "a\\\n    b"},
-         "equivalent_three": {
-           "type":  "string",
-           "value": "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       "
-         },
-         "whitespace-after-bs": {
-           "type":  "string",
-           "value": "\\\n       The quick brown \\\n       fox jumps over \\   \n       the lazy dog.\\\t\n       "
-         }
-       }
+     output from parser-cmd (stderr):
+       invalid string: invalid escape sequence
+       Error: invalid toml
+
+       Exit 1
 
      want:
-       {
-           "equivalent_one":      {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-           "equivalent_three":    {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-           "equivalent_two":      {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-           "escape-bs-1":         {"type": "string", "value": "a \\\nb"},
-           "escape-bs-2":         {"type": "string", "value": "a \\b"},
-           "escape-bs-3":         {"type": "string", "value": "a \\\\\n  b"},
-           "keep-ws-before":      {"type": "string", "value": "a   \tb"},
-           "no-space":            {"type": "string", "value": "ab"},
-           "whitespace-after-bs": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."}
-       }
+          <empty>
 
 FAIL valid/string/multiline-empty
      expected '='
@@ -819,27 +574,6 @@ FAIL valid/string/multiline-empty
 
      want:
           <empty>
-
-FAIL valid/string/multiline-escaped-crlf
-     Values for key "0" don't match:
-       Expected:
-       Your encoder: \
-
-     input sent to parser-cmd:
-       # The following line should be an unescaped backslash followed by a Windows
-       # newline sequence ("\r\n")
-       0="""\
-       """
-
-     output from parser-cmd (stdout):
-       {
-         "0": {"type": "string", "value": "\\\r\n"}
-       }
-
-     want:
-       {
-           "0": {"type": "string", "value": ""}
-       }
 
 FAIL valid/string/multiline-quotes
      invalid key
@@ -913,10 +647,10 @@ FAIL valid/string/multiline-quotes
           <empty>
 
 FAIL valid/string/nl
-     Values for key "nl_end" don't match:
-       Expected:     value
+     invalid string: invalid Unicode escape sequence
+     Error: invalid toml
  
-       Your encoder: value\n
+     Exit 1
 
      input sent to parser-cmd:
        nl_mid = "val\nue"
@@ -926,28 +660,19 @@ FAIL valid/string/nl
        lit_nl_mid = 'val\nue'
        lit_nl_uni = 'val\ue'
 
-     output from parser-cmd (stdout):
-       {
-         "lit_nl_end": {"type": "string", "value": "value\\n"},
-         "lit_nl_mid": {"type": "string", "value": "val\\nue"},
-         "lit_nl_uni": {"type": "string", "value": "val\\ue"},
-         "nl_end":     {"type": "string", "value": "value\\n"},
-         "nl_mid":     {"type": "string", "value": "val\\nue"}
-       }
+     output from parser-cmd (stderr):
+       invalid string: invalid Unicode escape sequence
+       Error: invalid toml
+
+       Exit 1
 
      want:
-       {
-           "lit_nl_end": {"type": "string", "value": "value\\n"},
-           "lit_nl_mid": {"type": "string", "value": "val\\nue"},
-           "lit_nl_uni": {"type": "string", "value": "val\\ue"},
-           "nl_end":     {"type": "string", "value": "value\n"},
-           "nl_mid":     {"type": "string", "value": "val\nue"}
-       }
+          <empty>
 
 FAIL valid/string/quoted-unicode
-     Values for key "escaped_string" don't match:
-       Expected:         A   ÿ ퟿  ￿ 𐀀 􏿿
-       Your encoder: \u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff
+     Values for key "not_escaped_string" don't match:
+       Expected:     \u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff
+       Your encoder:     A   ÿ ퟿  ￿ 𐀀 􏿿
 
      input sent to parser-cmd:
 
@@ -959,16 +684,10 @@ FAIL valid/string/quoted-unicode
 
      output from parser-cmd (stdout):
        {
-         "basic_string":   {"type": "string", "value": "~  ÿ ퟿  ￿ 𐀀 􏿿"},
-         "literal_string": {"type": "string", "value": "~  ÿ ퟿  ￿ 𐀀 􏿿"},
-         "escaped_string": {
-           "type":  "string",
-           "value": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
-         },
-         "not_escaped_string": {
-           "type":  "string",
-           "value": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
-         }
+         "basic_string":       {"type": "string", "value": "~  ÿ ퟿  ￿ 𐀀 􏿿"},
+         "escaped_string":     {"type": "string", "value": "\u0000 \b \f A   ÿ ퟿  ￿ 𐀀 􏿿"},
+         "literal_string":     {"type": "string", "value": "~  ÿ ퟿  ￿ 𐀀 􏿿"},
+         "not_escaped_string": {"type": "string", "value": "\u0000 \b \f A   ÿ ퟿  ￿ 𐀀 􏿿"}
        }
 
      want:
@@ -981,6 +700,31 @@ FAIL valid/string/quoted-unicode
                "value": "\\u0000 \\u0008 \\u000c \\U00000041 \\u007f \\u0080 \\u00ff \\ud7ff \\ue000 \\uffff \\U00010000 \\U0010ffff"
            }
        }
+
+FAIL valid/string/raw
+     invalid string: invalid escape sequence
+     Error: invalid toml
+ 
+     Exit 1
+
+     input sent to parser-cmd:
+       backspace = 'This string has a \b backspace character.'
+       tab = 'This string has a \t tab character.'
+       unescaped_tab = 'This string has an 	 unescaped tab character.'
+       newline = 'This string has a \n new line character.'
+       formfeed = 'This string has a \f form feed character.'
+       carriage = 'This string has a \r carriage return character.'
+       slash = 'This string has a \/ slash character.'
+       backslash = 'This string has a \\ backslash character.'
+
+     output from parser-cmd (stderr):
+       invalid string: invalid escape sequence
+       Error: invalid toml
+
+       Exit 1
+
+     want:
+          <empty>
 
 FAIL valid/string/raw-multiline
      invalid key
@@ -1030,107 +774,6 @@ FAIL valid/string/raw-multiline
 
      want:
           <empty>
-
-FAIL valid/string/start-mb
-     Values for key "s3" don't match:
-       Expected:     §
-       Your encoder: \
-     §
-
-     input sent to parser-cmd:
-       # Start first line with a multibyte character.
-       #
-       # https://github.com/marzer/tomlplusplus/issues/190
-       s1 = "§"
-       s2 = '§'
-       s3 = """\
-       §"""
-       s4 = """
-       §"""
-       s5 = """§"""
-       s6 = '''
-       §'''
-       s7 = '''§'''
-
-     output from parser-cmd (stdout):
-       {
-         "s1": {"type": "string", "value": "§"},
-         "s2": {"type": "string", "value": "§"},
-         "s3": {"type": "string", "value": "\\\n§"},
-         "s4": {"type": "string", "value": "§"},
-         "s5": {"type": "string", "value": "§"},
-         "s6": {"type": "string", "value": "§"},
-         "s7": {"type": "string", "value": "§"}
-       }
-
-     want:
-       {
-           "s1": {"type": "string", "value": "§"},
-           "s2": {"type": "string", "value": "§"},
-           "s3": {"type": "string", "value": "§"},
-           "s4": {"type": "string", "value": "§"},
-           "s5": {"type": "string", "value": "§"},
-           "s6": {"type": "string", "value": "§"},
-           "s7": {"type": "string", "value": "§"}
-       }
-
-FAIL valid/string/unicode-escape
-     Values for key "a" don't match:
-       Expected:     a
-       Your encoder: \u0061
-
-     input sent to parser-cmd:
-       delta-1 = "\u03B4"
-       delta-2 = "\U000003B4"
-       a       = "\u0061"
-       b       = "\u0062"
-       c       = "\U00000063"
-       null-1  = "\u0000"
-       null-2  = "\U00000000"
-
-       ml-delta-1 = """\u03B4"""
-       ml-delta-2 = """\U000003B4"""
-       ml-a       = """\u0061"""
-       ml-b       = """\u0062"""
-       ml-c       = """\U00000063"""
-       ml-null-1  = """\u0000"""
-       ml-null-2  = """\U00000000"""
-
-     output from parser-cmd (stdout):
-       {
-         "a":          {"type": "string", "value": "\\u0061"},
-         "b":          {"type": "string", "value": "\\u0062"},
-         "c":          {"type": "string", "value": "\\U00000063"},
-         "delta-1":    {"type": "string", "value": "\\u03B4"},
-         "delta-2":    {"type": "string", "value": "\\U000003B4"},
-         "ml-a":       {"type": "string", "value": "\\u0061"},
-         "ml-b":       {"type": "string", "value": "\\u0062"},
-         "ml-c":       {"type": "string", "value": "\\U00000063"},
-         "ml-delta-1": {"type": "string", "value": "\\u03B4"},
-         "ml-delta-2": {"type": "string", "value": "\\U000003B4"},
-         "ml-null-1":  {"type": "string", "value": "\\u0000"},
-         "ml-null-2":  {"type": "string", "value": "\\U00000000"},
-         "null-1":     {"type": "string", "value": "\\u0000"},
-         "null-2":     {"type": "string", "value": "\\U00000000"}
-       }
-
-     want:
-       {
-           "a":          {"type": "string", "value": "a"},
-           "b":          {"type": "string", "value": "b"},
-           "c":          {"type": "string", "value": "c"},
-           "delta-1":    {"type": "string", "value": "δ"},
-           "delta-2":    {"type": "string", "value": "δ"},
-           "ml-a":       {"type": "string", "value": "a"},
-           "ml-b":       {"type": "string", "value": "b"},
-           "ml-c":       {"type": "string", "value": "c"},
-           "ml-delta-1": {"type": "string", "value": "δ"},
-           "ml-delta-2": {"type": "string", "value": "δ"},
-           "ml-null-1":  {"type": "string", "value": "\u0000"},
-           "ml-null-2":  {"type": "string", "value": "\u0000"},
-           "null-1":     {"type": "string", "value": "\u0000"},
-           "null-2":     {"type": "string", "value": "\u0000"}
-       }
 
 FAIL valid/table/names
      Could not find key "x.1" in parser output.
@@ -1836,405 +1479,6 @@ FAIL invalid/spec/table-9-1
      want:
        Exit code 1
 
-FAIL invalid/string/bad-byte-escape
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       naughty = "\xAg"
-
-     output from parser-cmd (stdout):
-       {
-         "naughty": {"type": "string", "value": "\\xAg"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-escape-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       invalid-escape = "This string has a bad \a escape character."
-
-     output from parser-cmd (stdout):
-       {
-         "invalid-escape": {"type": "string", "value": "This string has a bad \\a escape character."}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-escape-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       invalid-escape = "This string has a bad \  escape character."
-
-     output from parser-cmd (stdout):
-       {
-         "invalid-escape": {"type": "string", "value": "This string has a bad \\  escape character."}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-hex-esc-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-hex-esc-1 = "\x0g"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-hex-esc-1": {"type": "string", "value": "\\x0g"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-hex-esc-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-hex-esc-2 = "\xG0"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-hex-esc-2": {"type": "string", "value": "\\xG0"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-hex-esc-3
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-hex-esc-3 = "\x"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-hex-esc-3": {"type": "string", "value": "\\x"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-hex-esc-4
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-hex-esc-4 = "\x 50"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-hex-esc-4": {"type": "string", "value": "\\x 50"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-hex-esc-5
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-hex-esc-5 = "\x 50"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-hex-esc-5": {"type": "string", "value": "\\x 50"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-slash-escape
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       invalid-escape = "This string has a bad \/ escape character."
-
-     output from parser-cmd (stdout):
-       {
-         "invalid-escape": {"type": "string", "value": "This string has a bad \\/ escape character."}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-1 = "val\ue"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-1": {"type": "string", "value": "val\\ue"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-2 = "val\Ux"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-2": {"type": "string", "value": "val\\Ux"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-3
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-3 = "val\U0000000"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-3": {"type": "string", "value": "val\\U0000000"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-4
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-4 = "val\U0000"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-4": {"type": "string", "value": "val\\U0000"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-5
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-5 = "val\Ugggggggg"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-5": {"type": "string", "value": "val\\Ugggggggg"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-6
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-6 = "This string contains a non scalar unicode codepoint \uD801"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-6": {"type": "string", "value": "This string contains a non scalar unicode codepoint \\uD801"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/bad-uni-esc-7
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bad-uni-esc-7 = "\uabag"
-
-     output from parser-cmd (stdout):
-       {
-         "bad-uni-esc-7": {"type": "string", "value": "\\uabag"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/basic-multiline-out-of-range-unicode-escape-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = """\UFFFFFFFF"""
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "\\UFFFFFFFF"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/basic-multiline-out-of-range-unicode-escape-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = """\U00D80000"""
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "\\U00D80000"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/basic-multiline-unknown-escape
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = """\@"""
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "\\@"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/basic-out-of-range-unicode-escape-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = "\UFFFFFFFF"
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "\\UFFFFFFFF"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/basic-out-of-range-unicode-escape-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = "\U00D80000"
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "\\U00D80000"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/basic-unknown-escape
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = "\@"
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "\\@"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/multiline-bad-escape-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       k = """t\a"""
-
-     output from parser-cmd (stdout):
-       {
-         "k": {"type": "string", "value": "t\\a"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/multiline-bad-escape-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       # \<Space> is not a valid escape.
-       k = """t\ t"""
-
-     output from parser-cmd (stdout):
-       {
-         "k": {"type": "string", "value": "t\\ t"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/multiline-bad-escape-3
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       # \<Space> is not a valid escape.
-       k = """t\ """
-
-     output from parser-cmd (stdout):
-       {
-         "k": {"type": "string", "value": "t\\ "}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/multiline-bad-escape-4
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       backslash = """\"""
-
-     output from parser-cmd (stdout):
-       {
-         "backslash": {"type": "string", "value": "\\"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/multiline-escape-space-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = """
-         foo \ \n
-         bar"""
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "string", "value": "  foo \\ \\n\n  bar"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/string/multiline-escape-space-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       bee = """
-       hee \
-
-       gee \   """
-
-     output from parser-cmd (stdout):
-       {
-         "bee": {"type": "string", "value": "hee \\\n\ngee \\   "}
-       }
-
-     want:
-       Exit code 1
-
 FAIL invalid/table/append-with-dotted-keys-1
      Expected an error, but no error was reported.
 
@@ -2438,5 +1682,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 158 passed, 29 failed
-invalid tests: 286 passed, 75 failed
+  valid tests: 166 passed, 21 failed
+invalid tests: 314 passed, 47 failed

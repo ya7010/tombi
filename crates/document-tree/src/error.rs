@@ -21,6 +21,12 @@ pub enum Error {
         range: text::Range,
     },
 
+    #[error("invalid string: {error}")]
+    ParseStringError {
+        error: crate::support::string::ParseError,
+        range: text::Range,
+    },
+
     #[error("invalid offset date time: {error}")]
     ParseOffsetDateTimeError {
         error: crate::support::chrono::ParseError,
@@ -57,6 +63,7 @@ impl Error {
             Self::ConflictArray { range2, .. } => *range2,
             Self::ParseIntError { range, .. } => *range,
             Self::ParseFloatError { range, .. } => *range,
+            Self::ParseStringError { range, .. } => *range,
             Self::ParseOffsetDateTimeError { range, .. } => *range,
             Self::ParseLocalDateTimeError { range, .. } => *range,
             Self::ParseLocalDateError { range, .. } => *range,

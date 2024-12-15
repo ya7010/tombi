@@ -69,15 +69,16 @@ impl serde::Serialize for String {
         S: serde::Serializer,
     {
         match self.kind {
-            StringKind::BasicString => support::string::from_basic_string(&self.value),
-            StringKind::LiteralString => support::string::from_literal_string(&self.value),
+            StringKind::BasicString => support::string::try_from_basic_string(&self.value),
+            StringKind::LiteralString => support::string::try_from_literal_string(&self.value),
             StringKind::MultiLineBasicString => {
-                support::string::from_multi_line_basic_string(&self.value)
+                support::string::try_from_multi_line_basic_string(&self.value)
             }
             StringKind::MultiLineLiteralString => {
-                support::string::from_multi_line_literal_string(&self.value)
+                support::string::try_from_multi_line_literal_string(&self.value)
             }
         }
+        .map_err(|err| serde::ser::Error::custom(err))?
         .serialize(serializer)
     }
 }

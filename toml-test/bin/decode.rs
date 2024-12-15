@@ -90,27 +90,17 @@ mod test {
         #[test]
         fn check_test_case(
             r#"
-            name.first = "Arthur"
-            "name".'last' = "Dent"
+            beee = """
+            heeee
+            geeee\
 
-            many.dots.dot.dot.dot = 42
+
+                    """
             "#
         ) -> Ok(json!(
-                {
-                    "name": {
-                        "first": {"type": "string", "value": "Arthur"},
-                        "last":  {"type": "string", "value": "Dent"}
-                    },
-                    "many": {
-                        "dots": {
-                            "dot": {
-                                "dot": {
-                                    "dot": {"type": "integer", "value": "42"}
-                                }
-                            }
-                        }
-                    }
-                }
+                        {
+           "beee": {"type": "string", "value": "heeee\ngeeee"}
+       }
             )
         )
     }

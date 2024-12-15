@@ -55,7 +55,7 @@ impl From<document_tree::Value> for Value {
             },
             document_tree::Value::String(value) => Self::Literal {
                 r#type: Type::String,
-                value: value.raw_string(),
+                value: value.to_raw_string(),
             },
             document_tree::Value::OffsetDateTime(value) => Self::Literal {
                 r#type: Type::Datetime,

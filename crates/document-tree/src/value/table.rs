@@ -216,7 +216,16 @@ impl TryIntoDocumentTree<Table> for ast::Table {
 
         let array_of_table_keys = self
             .array_of_tables_keys()
-            .map(|keys| keys.map(|key| Key::from(key)).collect_vec())
+            .map(|keys| {
+                keys.filter_map(|key| match key.try_into_document_tree(toml_version) {
+                    Ok(key) => Some(key),
+                    Err(errs) => {
+                        errors.extend(errs);
+                        None
+                    }
+                })
+                .collect_vec()
+            })
             .unique()
             .collect_vec();
 
@@ -232,7 +241,18 @@ impl TryIntoDocumentTree<Table> for ast::Table {
         }
 
         let mut is_array_of_table = false;
-        let mut keys = self.header().unwrap().keys().map(Key::from).collect_vec();
+        let mut keys = self
+            .header()
+            .unwrap()
+            .keys()
+            .filter_map(|key| match key.try_into_document_tree(toml_version) {
+                Ok(key) => Some(key),
+                Err(errs) => {
+                    errors.extend(errs);
+                    None
+                }
+            })
+            .collect_vec();
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
                 let mut array = Array::new_parent_array_of_tables(&table);
@@ -275,7 +295,16 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
 
         let array_of_table_keys = self
             .array_of_tables_keys()
-            .map(|keys| keys.map(Key::from).collect_vec())
+            .map(|keys| {
+                keys.filter_map(|key| match key.try_into_document_tree(toml_version) {
+                    Ok(key) => Some(key),
+                    Err(errs) => {
+                        errors.extend(errs);
+                        None
+                    }
+                })
+                .collect_vec()
+            })
             .unique()
             .collect_vec();
 
@@ -290,7 +319,18 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
             }
         }
 
-        let mut keys = self.header().unwrap().keys().map(Key::from).collect_vec();
+        let mut keys = self
+            .header()
+            .unwrap()
+            .keys()
+            .filter_map(|key| match key.try_into_document_tree(toml_version) {
+                Ok(key) => Some(key),
+                Err(errs) => {
+                    errors.extend(errs);
+                    None
+                }
+            })
+            .collect_vec();
         if let Some(key) = keys.pop() {
             let mut array = Array::new_array_of_tables(&table);
             let new_table = table.new_parent();
@@ -337,7 +377,18 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
         toml_version: config::TomlVersion,
     ) -> Result<Table, Vec<crate::Error>> {
         let mut errors = Vec::new();
-        let mut keys = self.keys().unwrap().keys().map(Key::from).collect_vec();
+        let mut keys = self
+            .keys()
+            .unwrap()
+            .keys()
+            .filter_map(|key| match key.try_into_document_tree(toml_version) {
+                Ok(key) => Some(key),
+                Err(errs) => {
+                    errors.extend(errs);
+                    None
+                }
+            })
+            .collect_vec();
 
         let value: Value = match self.value().unwrap().try_into_document_tree(toml_version) {
             Ok(value) => value,

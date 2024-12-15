@@ -28,7 +28,9 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let (keys, range) = get_hover_range(&root, position);
+    let Some((keys, range)) = get_hover_range(&root, position, toml_version) else {
+        return Ok(None);
+    };
 
     if keys.is_empty() {
         return Ok(None);
@@ -55,7 +57,8 @@ pub async fn handle_hover(
 fn get_hover_range(
     root: &ast::Root,
     position: text::Position,
-) -> (Vec<document_tree::Key>, Option<text::Range>) {
+    toml_version: config::TomlVersion,
+) -> Option<(Vec<document_tree::Key>, Option<text::Range>)> {
     let mut keys_vec = vec![];
     let mut hover_range = None;
 
@@ -103,12 +106,26 @@ fn get_hover_range(
         };
 
         let keys = if keys.range().contains(position) {
-            keys.keys()
+            let mut new_keys = Vec::with_capacity(keys.keys().count());
+            for key in keys
+                .keys()
                 .take_while(|key| key.token().unwrap().range().start() <= position)
-                .map(document_tree::Key::from)
-                .collect_vec()
+            {
+                match key.try_into_document_tree(toml_version) {
+                    Ok(key) => new_keys.push(key),
+                    Err(_) => return None,
+                }
+            }
+            new_keys
         } else {
-            keys.keys().map(document_tree::Key::from).collect_vec()
+            let mut new_keys = Vec::with_capacity(keys.keys().count());
+            for key in keys.keys() {
+                match key.try_into_document_tree(toml_version) {
+                    Ok(key) => new_keys.push(key),
+                    Err(_) => return None,
+                }
+            }
+            new_keys
         };
 
         if hover_range.is_none() {
@@ -118,8 +135,8 @@ fn get_hover_range(
         keys_vec.push(keys);
     }
 
-    (
+    Some((
         keys_vec.into_iter().rev().flatten().collect_vec(),
         hover_range,
-    )
+    ))
 }
