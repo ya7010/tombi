@@ -188,6 +188,13 @@ mod test {
 
     test_serialize! {
         #[test]
+        fn offset_date_time4(r#"odt = 1979-05-27t07:32:00.9999z"#) -> Ok(json!({
+            "odt": "1979-05-27T07:32:00.999900Z"
+        }))
+    }
+
+    test_serialize! {
+        #[test]
         fn offset_date_time_optional_seconds1_in_toml_v1_0_0(r#"odt = 1979-05-27T07:32Z"#, TomlVersion::V1_0_0) -> Err([
             ("invalid offset date time: optional seconds are allowed in TOML v1.1.0 or later", ((0, 6), (0, 23)))
         ])
