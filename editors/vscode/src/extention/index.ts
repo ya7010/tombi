@@ -68,11 +68,7 @@ export class Extension {
     );
   }
 
-  private registerEvents(): void {
-    vscode.workspace.onDidOpenTextDocument(async (event) =>
-      this.onDidOpenTextDocument(event),
-    );
-  }
+  private registerEvents(): void {}
 
   private async onDidOpenTextDocument(
     document: vscode.TextDocument,
