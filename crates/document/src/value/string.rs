@@ -1,3 +1,5 @@
+use document_tree::support;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
     BasicString,
@@ -67,10 +69,14 @@ impl serde::Serialize for String {
         S: serde::Serializer,
     {
         match self.kind {
-            StringKind::BasicString => self.value[1..self.value.len() - 1].replace(r#"\""#, r#"""#),
-            StringKind::LiteralString => self.value[1..self.value.len() - 1].replace(r#"\'"#, "'"),
-            StringKind::MultiLineBasicString => self.value[3..self.value.len() - 3].to_string(),
-            StringKind::MultiLineLiteralString => self.value[3..self.value.len() - 3].to_string(),
+            StringKind::BasicString => support::string::from_basic_string(&self.value),
+            StringKind::LiteralString => support::string::from_literal_string(&self.value),
+            StringKind::MultiLineBasicString => {
+                support::string::from_multi_line_basic_string(&self.value)
+            }
+            StringKind::MultiLineLiteralString => {
+                support::string::from_multi_line_literal_string(&self.value)
+            }
         }
         .serialize(serializer)
     }
