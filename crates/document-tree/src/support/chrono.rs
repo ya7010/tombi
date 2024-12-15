@@ -81,6 +81,8 @@ fn make_datetime_str(value: &str, toml_version: TomlVersion) -> Result<String, P
     }
 
     if datetime_str.len() == DATE_TIME_WITHOUT_SECONDS_SIZE {
+        // NOTE: Support optional seconds.
+        //       See more infomation: https://github.com/toml-lang/toml/issues/671
         if toml_version >= TomlVersion::V1_1_0_Preview {
             datetime_str.push_str(DEFAULT_SECONDS);
         } else {
