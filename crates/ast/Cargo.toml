@@ -10,3 +10,5 @@ syntax.workspace = true
 text = { workspace = true }
 itertools.workspace = true
 config.workspace = true
+thiserror.workspace = true
+chrono.workspace = true

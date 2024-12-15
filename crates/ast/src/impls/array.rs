@@ -6,7 +6,7 @@ use syntax::{SyntaxKind::*, T};
 impl crate::Array {
     #[inline]
     pub fn inner_begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
-        support::begin_dangling_comments(
+        support::node::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
                 .skip_while(|node| node.kind() != T!('['))
@@ -16,7 +16,7 @@ impl crate::Array {
 
     #[inline]
     pub fn inner_end_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
-        support::end_dangling_comments(
+        support::node::end_dangling_comments(
             self.syntax()
                 .children_with_tokens()
                 .take_while(|node| node.kind() != T!(']')),
@@ -25,13 +25,13 @@ impl crate::Array {
 
     #[inline]
     pub fn dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
-        support::dangling_comments(self.syntax().children_with_tokens())
+        support::node::dangling_comments(self.syntax().children_with_tokens())
     }
 
     #[inline]
     pub fn values_with_comma(&self) -> impl Iterator<Item = (crate::Value, Option<crate::Comma>)> {
         self.values()
-            .zip_longest(support::children::<crate::Comma>(self.syntax()))
+            .zip_longest(support::node::children::<crate::Comma>(self.syntax()))
             .map(|value_with_comma| match value_with_comma {
                 itertools::EitherOrBoth::Both(value, comma) => (value, Some(comma)),
                 itertools::EitherOrBoth::Left(value) => (value, None),
@@ -74,6 +74,6 @@ impl crate::Array {
     }
 
     pub fn has_inner_comments(&self) -> bool {
-        support::has_inner_comments(self.syntax().children_with_tokens(), T!('['), T!(']'))
+        support::node::has_inner_comments(self.syntax().children_with_tokens(), T!('['), T!(']'))
     }
 }

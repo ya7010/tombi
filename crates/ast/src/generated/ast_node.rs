@@ -12,15 +12,15 @@ pub struct Array {
 impl Array {
     #[inline]
     pub fn values(&self) -> AstChildren<Value> {
-        support::children(&self.syntax)
+        support::node::children(&self.syntax)
     }
     #[inline]
     pub fn bracket_start(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T!['['])
+        support::node::token(&self.syntax, T!['['])
     }
     #[inline]
     pub fn bracket_end(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![']'])
+        support::node::token(&self.syntax, T![']'])
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -35,19 +35,19 @@ pub struct ArrayOfTables {
 impl ArrayOfTables {
     #[inline]
     pub fn header(&self) -> Option<Keys> {
-        support::child(&self.syntax)
+        support::node::child(&self.syntax)
     }
     #[inline]
     pub fn key_values(&self) -> AstChildren<KeyValue> {
-        support::children(&self.syntax)
+        support::node::children(&self.syntax)
     }
     #[inline]
     pub fn double_bracket_start(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T!["[["])
+        support::node::token(&self.syntax, T!["[["])
     }
     #[inline]
     pub fn double_bracket_end(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T!["]]"])
+        support::node::token(&self.syntax, T!["]]"])
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -62,7 +62,7 @@ pub struct BareKey {
 impl BareKey {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, BARE_KEY)
+        support::node::token(&self.syntax, BARE_KEY)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -77,7 +77,7 @@ pub struct BasicString {
 impl BasicString {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, BASIC_STRING)
+        support::node::token(&self.syntax, BASIC_STRING)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -92,7 +92,7 @@ pub struct Boolean {
 impl Boolean {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, BOOLEAN)
+        support::node::token(&self.syntax, BOOLEAN)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -107,7 +107,7 @@ pub struct Comma {
 impl Comma {
     #[inline]
     pub fn comma(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T ! [,])
+        support::node::token(&self.syntax, T ! [,])
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -122,7 +122,7 @@ pub struct Float {
 impl Float {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, FLOAT)
+        support::node::token(&self.syntax, FLOAT)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -137,15 +137,15 @@ pub struct InlineTable {
 impl InlineTable {
     #[inline]
     pub fn key_values(&self) -> AstChildren<KeyValue> {
-        support::children(&self.syntax)
+        support::node::children(&self.syntax)
     }
     #[inline]
     pub fn brace_start(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T!['{'])
+        support::node::token(&self.syntax, T!['{'])
     }
     #[inline]
     pub fn brace_end(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T!['}'])
+        support::node::token(&self.syntax, T!['}'])
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -160,7 +160,7 @@ pub struct IntegerBin {
 impl IntegerBin {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, INTEGER_BIN)
+        support::node::token(&self.syntax, INTEGER_BIN)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -175,7 +175,7 @@ pub struct IntegerDec {
 impl IntegerDec {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, INTEGER_DEC)
+        support::node::token(&self.syntax, INTEGER_DEC)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -190,7 +190,7 @@ pub struct IntegerHex {
 impl IntegerHex {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, INTEGER_HEX)
+        support::node::token(&self.syntax, INTEGER_HEX)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -205,7 +205,7 @@ pub struct IntegerOct {
 impl IntegerOct {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, INTEGER_OCT)
+        support::node::token(&self.syntax, INTEGER_OCT)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -220,15 +220,15 @@ pub struct KeyValue {
 impl KeyValue {
     #[inline]
     pub fn keys(&self) -> Option<Keys> {
-        support::child(&self.syntax)
+        support::node::child(&self.syntax)
     }
     #[inline]
     pub fn value(&self) -> Option<Value> {
-        support::child(&self.syntax)
+        support::node::child(&self.syntax)
     }
     #[inline]
     pub fn eq(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T ! [=])
+        support::node::token(&self.syntax, T ! [=])
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -243,7 +243,7 @@ pub struct Keys {
 impl Keys {
     #[inline]
     pub fn keys(&self) -> AstChildren<Key> {
-        support::children(&self.syntax)
+        support::node::children(&self.syntax)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -258,7 +258,7 @@ pub struct LiteralString {
 impl LiteralString {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, LITERAL_STRING)
+        support::node::token(&self.syntax, LITERAL_STRING)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -273,7 +273,7 @@ pub struct LocalDate {
 impl LocalDate {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, LOCAL_DATE)
+        support::node::token(&self.syntax, LOCAL_DATE)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -288,7 +288,7 @@ pub struct LocalDateTime {
 impl LocalDateTime {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, LOCAL_DATE_TIME)
+        support::node::token(&self.syntax, LOCAL_DATE_TIME)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -303,7 +303,7 @@ pub struct LocalTime {
 impl LocalTime {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, LOCAL_TIME)
+        support::node::token(&self.syntax, LOCAL_TIME)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -318,7 +318,7 @@ pub struct MultiLineBasicString {
 impl MultiLineBasicString {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, MULTI_LINE_BASIC_STRING)
+        support::node::token(&self.syntax, MULTI_LINE_BASIC_STRING)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -333,7 +333,7 @@ pub struct MultiLineLiteralString {
 impl MultiLineLiteralString {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
+        support::node::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -348,7 +348,7 @@ pub struct OffsetDateTime {
 impl OffsetDateTime {
     #[inline]
     pub fn token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, OFFSET_DATE_TIME)
+        support::node::token(&self.syntax, OFFSET_DATE_TIME)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -363,7 +363,7 @@ pub struct Root {
 impl Root {
     #[inline]
     pub fn items(&self) -> AstChildren<RootItem> {
-        support::children(&self.syntax)
+        support::node::children(&self.syntax)
     }
     #[inline]
     pub fn range(&self) -> text::Range {
@@ -378,19 +378,19 @@ pub struct Table {
 impl Table {
     #[inline]
     pub fn header(&self) -> Option<Keys> {
-        support::child(&self.syntax)
+        support::node::child(&self.syntax)
     }
     #[inline]
     pub fn key_values(&self) -> AstChildren<KeyValue> {
-        support::children(&self.syntax)
+        support::node::children(&self.syntax)
     }
     #[inline]
     pub fn bracket_start(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T!['['])
+        support::node::token(&self.syntax, T!['['])
     }
     #[inline]
     pub fn bracket_end(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, T![']'])
+        support::node::token(&self.syntax, T![']'])
     }
     #[inline]
     pub fn range(&self) -> text::Range {

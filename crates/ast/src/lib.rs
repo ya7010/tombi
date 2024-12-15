@@ -2,7 +2,7 @@ pub mod algo;
 mod generated;
 mod impls;
 mod node;
-pub(crate) mod support;
+pub mod support;
 
 pub use generated::*;
 pub use node::*;
@@ -13,7 +13,7 @@ where
     Self: Debug,
 {
     fn leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
-        support::leading_comments(self.syntax().children_with_tokens())
+        support::node::leading_comments(self.syntax().children_with_tokens())
     }
 
     fn tailing_comment(&self) -> Option<crate::Comment> {

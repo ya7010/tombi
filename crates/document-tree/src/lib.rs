@@ -1,13 +1,12 @@
 mod error;
 mod key;
-pub mod support;
 mod value;
 
-use std::ops::Deref;
-
+pub use ast::support;
 use config::TomlVersion;
 pub use error::Error;
 pub use key::{Key, KeyKind};
+use std::ops::Deref;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, StringKind, Table, TableKind, Value,
