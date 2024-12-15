@@ -8,7 +8,7 @@ license = { workspace = true }
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true }
-config = { workspace = true, features = ["jsonschema"] }
+config = { workspace = true, features = ["jsonschema", "serde"] }
 convert_case = "0.6.0"
 either = { workspace = true }
 flate2 = "1.0.35"

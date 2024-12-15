@@ -2564,6 +2564,6 @@ FAIL invalid/table/super-twice
      want:
        Exit code 1
 
-toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode]: using embedded tests
+toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.0.0]: using embedded tests
   valid tests: 149 passed, 33 failed
 invalid tests: 293 passed, 78 failed

@@ -2559,6 +2559,7 @@ dependencies = [
  "anyhow",
  "ast",
  "chrono",
+ "clap",
  "config",
  "document-tree",
  "indexmap 2.6.0",
