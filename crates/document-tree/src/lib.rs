@@ -1,8 +1,8 @@
 mod error;
 mod key;
+pub mod support;
 mod value;
 
-pub use ast::support;
 use config::TomlVersion;
 pub use error::Error;
 pub use key::{Key, KeyKind};
