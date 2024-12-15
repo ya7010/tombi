@@ -28,10 +28,10 @@ regex!(
     REGEX_FLOAT = r"^[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)$";
     REGEX_IS_DATE_TIME = r"^\d{4}-\d{2}-\d{2}";
     REGEX_OFFSET_DATE_TIME =
-        r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$";
-    REGEX_LOCAL_DATE_TIME = r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?$";
+        r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$";
+    REGEX_LOCAL_DATE_TIME = r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:[\.,]\d+)?$";
     REGEX_LOCAL_DATE = r"^\d{4}-\d{2}-\d{2}$";
-    REGEX_LOCAL_TIME = r"^\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?$";
+    REGEX_LOCAL_TIME = r"^\d{2}:\d{2}(?::\d{2})?(?:[\.,]\d+)?$";
 );
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -258,8 +258,8 @@ impl Cursor<'_> {
 
     fn is_time(&self) -> bool {
         assert!(self.current().is_ascii_digit());
-        assert!("00:00:00".len() == 8);
-        REGEX_LOCAL_TIME.is_match(&self.peeks_with_current(8))
+        assert!("00:00".len() == 5);
+        REGEX_LOCAL_TIME.is_match(&self.peeks_with_current(5))
     }
 
     fn time(&mut self) -> Result<Token, crate::Error> {

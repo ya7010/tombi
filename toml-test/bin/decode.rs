@@ -57,14 +57,16 @@ macro_rules! test_decode {
         fn $name:ident($source:expr, $toml_version:expr) -> Ok($expected:expr)
     } => {
         #[test]
-        fn $name()
+        fn $name() -> Result<(), Box<dyn std::error::Error>>
         {
             let source = textwrap::dedent($source);
-            let value = crate::decode(source.trim(), $toml_version).unwrap();
+            let value = crate::decode(source.trim(), $toml_version)?;
             pretty_assertions::assert_eq!(
-                serde_json::to_string(&value).unwrap(),
-                serde_json::to_string(&$expected).unwrap()
+                serde_json::to_string(&value)?,
+                serde_json::to_string(&$expected)?
             );
+
+            Ok(())
         }
     };
 

@@ -1,35 +1,3 @@
-FAIL valid/datetime/no-seconds
-     invalid key
-     invalid key
-     invalid local date-time
-     unknown line
-     unknown line
-     expected value
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       # Seconds are optional in date-time and time.
-       without-seconds-1 = 13:37
-       without-seconds-2 = 1979-05-27 07:32Z
-       without-seconds-3 = 1979-05-27 07:32-07:00
-       without-seconds-4 = 1979-05-27T07:32
-
-     output from parser-cmd (stderr):
-       invalid key
-       invalid key
-       invalid local date-time
-       unknown line
-       unknown line
-       expected value
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/inline-table/multiline
      Values for key "tbl_multiline.b" don't match:
        Expected:     multiline
@@ -2813,5 +2781,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 150 passed, 37 failed
+  valid tests: 151 passed, 36 failed
 invalid tests: 284 passed, 77 failed

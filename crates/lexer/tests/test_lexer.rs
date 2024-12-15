@@ -395,6 +395,11 @@ test_token! {
 
 test_token! {
     #[test]
+    fn local_time_without_seconds("00:00") -> Ok(Token(LOCAL_TIME, (0, 5)));
+}
+
+test_token! {
+    #[test]
     fn boolean1("true") -> Ok(Token(BOOLEAN, (0, 4)));
 }
 

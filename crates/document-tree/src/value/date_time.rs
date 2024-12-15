@@ -1,3 +1,7 @@
+use crate::support::datetime::{
+    try_from_local_date, try_from_local_date_time, try_from_local_time, try_from_offset_date_time,
+};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OffsetDateTime {
     value: chrono::DateTime<chrono::FixedOffset>,
@@ -118,7 +122,7 @@ impl TryFrom<ast::OffsetDateTime> for OffsetDateTime {
     fn try_from(node: ast::OffsetDateTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let range = token.range();
-        match chrono::DateTime::parse_from_rfc3339(token.text()) {
+        match try_from_offset_date_time(token.text()) {
             Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseOffsetDateTimeError {
                 error,
@@ -134,12 +138,8 @@ impl TryFrom<ast::LocalDateTime> for LocalDateTime {
     fn try_from(node: ast::LocalDateTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let range = token.range();
-        let mut text = token.text().to_string();
-        if text.chars().nth(10) == Some('T') {
-            text.replace_range(10..11, " ");
-        }
 
-        match chrono::NaiveDateTime::parse_from_str(&text, "%Y-%m-%d %H:%M:%S%.f") {
+        match try_from_local_date_time(&token.text()) {
             Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateTimeError { error, range }]),
         }
@@ -152,7 +152,7 @@ impl TryFrom<ast::LocalDate> for LocalDate {
     fn try_from(node: ast::LocalDate) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let range = token.range();
-        match chrono::NaiveDate::parse_from_str(token.text(), "%Y-%m-%d") {
+        match try_from_local_date(token.text()) {
             Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateError { error, range }]),
         }
@@ -165,7 +165,7 @@ impl TryFrom<ast::LocalTime> for LocalTime {
     fn try_from(node: ast::LocalTime) -> Result<Self, Self::Error> {
         let token = node.token().unwrap();
         let range = token.range();
-        match chrono::NaiveTime::parse_from_str(token.text(), "%H:%M:%S%.f") {
+        match try_from_local_time(token.text()) {
             Ok(value) => Ok(Self { value, node }),
             Err(error) => Err(vec![crate::Error::ParseLocalTimeError { error, range }]),
         }
