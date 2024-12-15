@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
-pub enum ParseFloatError {
+pub enum ParseError {
     #[error(transparent)]
     Std(#[from] std::num::ParseFloatError),
     #[error("Both sides of the underscore must be numbers.")]
@@ -8,7 +8,7 @@ pub enum ParseFloatError {
     LeadingZero,
 }
 
-pub fn try_from_float(value: &str) -> Result<f64, self::ParseFloatError> {
+pub fn try_from_float(value: &str) -> Result<f64, self::ParseError> {
     if value.chars().enumerate().any(|(i, c)| {
         if c == '_' {
             match (value.chars().nth(i - 1), value.chars().nth(i + 1)) {
@@ -19,7 +19,7 @@ pub fn try_from_float(value: &str) -> Result<f64, self::ParseFloatError> {
             false
         }
     }) {
-        return Err(self::ParseFloatError::Underscore);
+        return Err(self::ParseError::Underscore);
     }
 
     let int_slice = if value.contains('.') {
@@ -35,7 +35,7 @@ pub fn try_from_float(value: &str) -> Result<f64, self::ParseFloatError> {
     };
 
     if int_number.len() > 1 && int_number.starts_with('0') {
-        return Err(self::ParseFloatError::LeadingZero);
+        return Err(self::ParseError::LeadingZero);
     }
 
     Ok(value.replace("_", "").parse()?)
