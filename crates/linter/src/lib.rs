@@ -2,6 +2,7 @@ mod error;
 mod lint;
 mod linter;
 mod rule;
+use document_tree::TryIntoDocumentTree;
 use error::ErrorKind;
 
 use ast::AstNode;
@@ -35,7 +36,7 @@ pub fn lint_with(
             root.lint(&mut linter);
             errors.extend(linter.into_diagnostics());
 
-            if let Err(errs) = document_tree::Root::try_from(root) {
+            if let Err(errs) = root.try_into_document_tree(toml_version) {
                 for err in errs {
                     err.to_diagnostics(&mut errors);
                 }

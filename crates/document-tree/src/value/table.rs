@@ -3,7 +3,7 @@ use indexmap::map::Entry;
 use indexmap::IndexMap;
 use itertools::Itertools;
 
-use crate::{Array, Key, Value};
+use crate::{Array, Key, TryIntoDocumentTree, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
@@ -206,21 +206,22 @@ impl From<Table> for IndexMap<Key, Value> {
     }
 }
 
-impl TryFrom<ast::Table> for Table {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Table) -> Result<Self, Self::Error> {
-        let mut table = Table::new_table(&node);
+impl TryIntoDocumentTree<Table> for ast::Table {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<Table, Vec<crate::Error>> {
+        let mut table = Table::new_table(&self);
         let mut errors = Vec::new();
 
-        let array_of_table_keys = node
+        let array_of_table_keys = self
             .array_of_tables_keys()
             .map(|keys| keys.map(|key| Key::from(key)).collect_vec())
             .unique()
             .collect_vec();
 
-        for key_value in node.key_values() {
-            match key_value.try_into() {
+        for key_value in self.key_values() {
+            match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
                     if let Err(errs) = table.merge(other) {
                         errors.extend(errs)
@@ -231,7 +232,7 @@ impl TryFrom<ast::Table> for Table {
         }
 
         let mut is_array_of_table = false;
-        let mut keys = node.header().unwrap().keys().map(Key::from).collect_vec();
+        let mut keys = self.header().unwrap().keys().map(Key::from).collect_vec();
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
                 let mut array = Array::new_parent_array_of_tables(&table);
@@ -264,21 +265,22 @@ impl TryFrom<ast::Table> for Table {
     }
 }
 
-impl TryFrom<ast::ArrayOfTables> for Table {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::ArrayOfTables) -> Result<Self, Self::Error> {
-        let mut table = Table::new_array_of_tables(&node);
+impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<Table, Vec<crate::Error>> {
+        let mut table = Table::new_array_of_tables(&self);
         let mut errors = Vec::new();
 
-        let array_of_table_keys = node
+        let array_of_table_keys = self
             .array_of_tables_keys()
             .map(|keys| keys.map(Key::from).collect_vec())
             .unique()
             .collect_vec();
 
-        for key_value in node.key_values() {
-            match key_value.try_into() {
+        for key_value in self.key_values() {
+            match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
                     if let Err(errs) = table.merge(other) {
                         errors.extend(errs)
@@ -288,7 +290,7 @@ impl TryFrom<ast::ArrayOfTables> for Table {
             }
         }
 
-        let mut keys = node.header().unwrap().keys().map(Key::from).collect_vec();
+        let mut keys = self.header().unwrap().keys().map(Key::from).collect_vec();
         if let Some(key) = keys.pop() {
             let mut array = Array::new_array_of_tables(&table);
             let new_table = table.new_parent();
@@ -329,14 +331,15 @@ impl TryFrom<ast::ArrayOfTables> for Table {
     }
 }
 
-impl TryFrom<ast::KeyValue> for Table {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::KeyValue) -> Result<Table, Self::Error> {
+impl TryIntoDocumentTree<Table> for ast::KeyValue {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<Table, Vec<crate::Error>> {
         let mut errors = Vec::new();
-        let mut keys = node.keys().unwrap().keys().map(Key::from).collect_vec();
+        let mut keys = self.keys().unwrap().keys().map(Key::from).collect_vec();
 
-        let value: Value = match node.value().unwrap().try_into() {
+        let value: Value = match self.value().unwrap().try_into_document_tree(toml_version) {
             Ok(value) => value,
             Err(errs) => {
                 errors.extend(errs);
@@ -345,7 +348,7 @@ impl TryFrom<ast::KeyValue> for Table {
         };
 
         let mut table = if let Some(key) = keys.pop() {
-            match Table::new_key_value(&node).insert(key, value) {
+            match Table::new_key_value(&self).insert(key, value) {
                 Ok(table) => table,
                 Err(errs) => {
                     errors.extend(errs);
@@ -359,7 +362,7 @@ impl TryFrom<ast::KeyValue> for Table {
         for key in keys.into_iter().rev() {
             match table.new_parent().insert(
                 key,
-                Value::Table(std::mem::replace(&mut table, Table::new_key_value(&node))),
+                Value::Table(std::mem::replace(&mut table, Table::new_key_value(&self))),
             ) {
                 Ok(t) => table = t,
                 Err(errs) => {
@@ -376,15 +379,16 @@ impl TryFrom<ast::KeyValue> for Table {
     }
 }
 
-impl TryFrom<ast::InlineTable> for Table {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::InlineTable) -> Result<Self, Self::Error> {
-        let mut table = Table::new_inline_table(&node);
+impl TryIntoDocumentTree<Table> for ast::InlineTable {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<Table, Vec<crate::Error>> {
+        let mut table = Table::new_inline_table(&self);
         let mut errors = Vec::new();
 
-        for key_value in node.key_values() {
-            match key_value.try_into() {
+        for key_value in self.key_values() {
+            match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
                     if let Err(errs) = table.merge(other) {
                         errors.extend(errs)

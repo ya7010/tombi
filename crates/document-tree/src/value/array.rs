@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{TryIntoDocumentTree, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -151,16 +151,17 @@ impl Array {
     }
 }
 
-impl TryFrom<ast::Array> for Array {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Array) -> Result<Self, Self::Error> {
-        let mut array = Array::new_array(&node);
+impl TryIntoDocumentTree<Array> for ast::Array {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<Array, Vec<crate::Error>> {
+        let mut array = Array::new_array(&self);
 
         let mut errors = Vec::new();
 
-        for value in node.values() {
-            match value.try_into() {
+        for value in self.values() {
+            match value.try_into_document_tree(toml_version) {
                 Ok(value) => array.push(value),
                 Err(errs) => errors.extend(errs),
             }

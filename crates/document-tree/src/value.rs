@@ -14,6 +14,8 @@ pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
+use crate::TryIntoDocumentTree;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Boolean(Boolean),
@@ -62,11 +64,12 @@ impl Value {
     }
 }
 
-impl TryFrom<ast::Value> for Value {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::Value) -> Result<Self, Self::Error> {
-        match node {
+impl TryIntoDocumentTree<Value> for ast::Value {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<Value, Vec<crate::Error>> {
+        match self {
             ast::Value::BasicString(string) => string.try_into().map(Value::String),
             ast::Value::LiteralString(string) => string.try_into().map(Value::String),
             ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
@@ -77,12 +80,20 @@ impl TryFrom<ast::Value> for Value {
             ast::Value::IntegerHex(integer) => integer.try_into().map(Value::Integer),
             ast::Value::Float(float) => float.try_into().map(Value::Float),
             ast::Value::Boolean(boolean) => boolean.try_into().map(Value::Boolean),
-            ast::Value::OffsetDateTime(dt) => dt.try_into().map(Value::OffsetDateTime),
-            ast::Value::LocalDateTime(dt) => dt.try_into().map(Value::LocalDateTime),
+            ast::Value::OffsetDateTime(dt) => dt
+                .try_into_document_tree(toml_version)
+                .map(Value::OffsetDateTime),
+            ast::Value::LocalDateTime(dt) => dt
+                .try_into_document_tree(toml_version)
+                .map(Value::LocalDateTime),
             ast::Value::LocalDate(date) => date.try_into().map(Value::LocalDate),
             ast::Value::LocalTime(time) => time.try_into().map(Value::LocalTime),
-            ast::Value::Array(array) => array.try_into().map(Value::Array),
-            ast::Value::InlineTable(inline_table) => inline_table.try_into().map(Value::Table),
+            ast::Value::Array(array) => {
+                array.try_into_document_tree(toml_version).map(Value::Array)
+            }
+            ast::Value::InlineTable(inline_table) => inline_table
+                .try_into_document_tree(toml_version)
+                .map(Value::Table),
         }
     }
 }

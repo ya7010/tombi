@@ -57,16 +57,21 @@ impl<'de> serde::Deserialize<'de> for Document {
 #[macro_export]
 macro_rules! test_serialize {
     {#[test] fn $name:ident($source:expr) -> Ok($json:expr)} => {
+        test_serialize! {#[test] fn $name($source, config::TomlVersion::default()) -> Ok($json)}
+    };
+
+    {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($json:expr)} => {
         #[cfg(feature = "serde")]
         #[test]
         fn $name() {
             use ast::AstNode;
+            use document_tree::TryIntoDocumentTree;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), config::TomlVersion::default());
             pretty_assertions::assert_eq!(p.errors(), &[]);
-            let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
-            match document_tree::Root::try_from(ast) {
+            let root = ast::Root::cast(p.into_syntax_node()).unwrap();
+            match root.try_into_document_tree($toml_version) {
                 Ok(document_tree) => {
                     let document: crate::Document = document_tree.into();
                     let serialized = serde_json::to_string(&document).unwrap();
@@ -80,11 +85,16 @@ macro_rules! test_serialize {
     };
 
     {#[test] fn $name:ident($source:expr) -> Err($errors:expr)} => {
+        test_serialize! {#[test] fn $name($source, config::TomlVersion::default()) -> Err($errors)}
+    };
+
+    {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err($errors:expr)} => {
         #[cfg(feature = "serde")]
         #[test]
         fn $name() {
             use ast::AstNode;
             use itertools::Itertools;
+            use document_tree::TryIntoDocumentTree;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), config::TomlVersion::default());
@@ -102,8 +112,8 @@ macro_rules! test_serialize {
                     errors,
                 );
             }
-            let ast = ast::Root::cast(p.into_syntax_node()).unwrap();
-            match document_tree::Root::try_from(ast) {
+            let root = ast::Root::cast(p.into_syntax_node()).unwrap();
+            match root.try_into_document_tree($toml_version) {
                 Ok(_) => {
                     pretty_assertions::assert_eq!(Vec::<(String, text::Range)>::new(), errors);
                 }

@@ -1,6 +1,7 @@
 use ast::AstNode;
 use clap::Parser;
 use config::TomlVersion;
+use document_tree::TryIntoDocumentTree;
 use std::io::Read;
 use toml_test::{Value, INVALID_MESSAGE};
 
@@ -37,7 +38,7 @@ fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Erro
         return Err(anyhow::anyhow!(INVALID_MESSAGE));
     };
 
-    let root = match document_tree::Root::try_from(root) {
+    let root = match root.try_into_document_tree(toml_version) {
         Ok(root) => root,
         Err(errors) => {
             for error in errors {

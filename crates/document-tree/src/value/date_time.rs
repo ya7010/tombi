@@ -1,5 +1,9 @@
-use crate::support::datetime::{
-    try_from_local_date, try_from_local_date_time, try_from_local_time, try_from_offset_date_time,
+use crate::{
+    support::datetime::{
+        try_from_local_date, try_from_local_date_time, try_from_local_time,
+        try_from_offset_date_time,
+    },
+    TryIntoDocumentTree,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -116,14 +120,15 @@ impl LocalTime {
     }
 }
 
-impl TryFrom<ast::OffsetDateTime> for OffsetDateTime {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::OffsetDateTime) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
+impl TryIntoDocumentTree<OffsetDateTime> for ast::OffsetDateTime {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<OffsetDateTime, Vec<crate::Error>> {
+        let token = self.token().unwrap();
         let range = token.range();
-        match try_from_offset_date_time(token.text()) {
-            Ok(value) => Ok(Self { value, node }),
+        match try_from_offset_date_time(token.text(), toml_version) {
+            Ok(value) => Ok(OffsetDateTime { value, node: self }),
             Err(error) => Err(vec![crate::Error::ParseOffsetDateTimeError {
                 error,
                 range,
@@ -132,15 +137,16 @@ impl TryFrom<ast::OffsetDateTime> for OffsetDateTime {
     }
 }
 
-impl TryFrom<ast::LocalDateTime> for LocalDateTime {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::LocalDateTime) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
+impl TryIntoDocumentTree<LocalDateTime> for ast::LocalDateTime {
+    fn try_into_document_tree(
+        self,
+        toml_version: config::TomlVersion,
+    ) -> Result<LocalDateTime, Vec<crate::Error>> {
+        let token = self.token().unwrap();
         let range = token.range();
 
-        match try_from_local_date_time(&token.text()) {
-            Ok(value) => Ok(Self { value, node }),
+        match try_from_local_date_time(&token.text(), toml_version) {
+            Ok(value) => Ok(LocalDateTime { value, node: self }),
             Err(error) => Err(vec![crate::Error::ParseLocalDateTimeError { error, range }]),
         }
     }

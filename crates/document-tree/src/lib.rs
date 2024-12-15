@@ -5,6 +5,7 @@ mod value;
 
 use std::ops::Deref;
 
+use config::TomlVersion;
 pub use error::Error;
 pub use key::{Key, KeyKind};
 pub use value::{
@@ -35,15 +36,17 @@ enum RootItem {
     KeyValue(Table),
 }
 
-impl TryFrom<ast::Root> for Root {
-    type Error = Vec<crate::Error>;
+pub trait TryIntoDocumentTree<T> {
+    fn try_into_document_tree(self, toml_version: TomlVersion) -> Result<T, Vec<crate::Error>>;
+}
 
-    fn try_from(node: ast::Root) -> Result<Self, Self::Error> {
-        let mut root = Self(Table::new_root(&node));
+impl TryIntoDocumentTree<Root> for ast::Root {
+    fn try_into_document_tree(self, toml_version: TomlVersion) -> Result<Root, Vec<crate::Error>> {
+        let mut root = Root(Table::new_root(&self));
         let mut errors = Vec::new();
 
-        for item in node.items() {
-            if let Err(errs) = match item.try_into() {
+        for item in self.items() {
+            if let Err(errs) = match item.try_into_document_tree(toml_version) {
                 Ok(
                     RootItem::Table(table)
                     | RootItem::ArrayOfTables(table)
@@ -63,14 +66,21 @@ impl TryFrom<ast::Root> for Root {
     }
 }
 
-impl TryFrom<ast::RootItem> for RootItem {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::RootItem) -> Result<Self, Self::Error> {
-        match node {
-            ast::RootItem::Table(table) => table.try_into().map(Self::Table),
-            ast::RootItem::ArrayOfTables(array) => array.try_into().map(Self::ArrayOfTables),
-            ast::RootItem::KeyValue(key_value) => key_value.try_into().map(Self::KeyValue),
+impl TryIntoDocumentTree<RootItem> for ast::RootItem {
+    fn try_into_document_tree(
+        self,
+        toml_version: TomlVersion,
+    ) -> Result<RootItem, Vec<crate::Error>> {
+        match self {
+            ast::RootItem::Table(table) => table
+                .try_into_document_tree(toml_version)
+                .map(RootItem::Table),
+            ast::RootItem::ArrayOfTables(array) => array
+                .try_into_document_tree(toml_version)
+                .map(RootItem::ArrayOfTables),
+            ast::RootItem::KeyValue(key_value) => key_value
+                .try_into_document_tree(toml_version)
+                .map(RootItem::KeyValue),
         }
     }
 }
