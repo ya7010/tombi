@@ -41,32 +41,32 @@ FAIL valid/key/quoted-unicode
           <empty>
 
 FAIL valid/key/start
-     invalid token
-     invalid token
-     invalid token
-     invalid token
-     invalid token
-     invalid token
-     invalid token
-     invalid token
-     expected key
-     expected ']'
-     expected key
-     expected '='
-     expected value
-     expected key
-     expected ']'
-     expected key
-     expected '='
-     expected value
-     expected key
-     expected ']'
-     expected key
-     expected '='
-     expected value
-     expected key
-     expected '='
-     expected value
+     invalid token in 3:1..3:5
+     invalid token in 4:0..4:4
+     invalid token in 12:1..12:3
+     invalid token in 13:0..13:2
+     invalid token in 21:1..21:4
+     invalid token in 22:0..22:3
+     invalid token in 31:0..31:3
+     invalid token in 31:7..31:10
+     expected key in 3:1..3:5
+     expected ']' in 3:1..3:5
+     expected key in 4:0..4:4
+     expected '=' in 4:0..4:4
+     expected value in 4:0..4:8
+     expected key in 12:1..12:3
+     expected ']' in 12:1..12:3
+     expected key in 13:0..13:2
+     expected '=' in 13:0..13:2
+     expected value in 13:0..13:5
+     expected key in 21:1..21:4
+     expected ']' in 21:1..21:4
+     expected key in 22:0..22:3
+     expected '=' in 22:0..22:3
+     expected value in 22:0..22:7
+     expected key in 31:0..31:3
+     expected '=' in 31:0..31:3
+     expected value in 31:0..31:36
      Error: invalid toml
  
      Exit 1
@@ -106,32 +106,32 @@ FAIL valid/key/start
        --- = {--- = 10, ___ = 11, 111 = 12}
 
      output from parser-cmd (stderr):
-       invalid token
-       invalid token
-       invalid token
-       invalid token
-       invalid token
-       invalid token
-       invalid token
-       invalid token
-       expected key
-       expected ']'
-       expected key
-       expected '='
-       expected value
-       expected key
-       expected ']'
-       expected key
-       expected '='
-       expected value
-       expected key
-       expected ']'
-       expected key
-       expected '='
-       expected value
-       expected key
-       expected '='
-       expected value
+       invalid token in 3:1..3:5
+       invalid token in 4:0..4:4
+       invalid token in 12:1..12:3
+       invalid token in 13:0..13:2
+       invalid token in 21:1..21:4
+       invalid token in 22:0..22:3
+       invalid token in 31:0..31:3
+       invalid token in 31:7..31:10
+       expected key in 3:1..3:5
+       expected ']' in 3:1..3:5
+       expected key in 4:0..4:4
+       expected '=' in 4:0..4:4
+       expected value in 4:0..4:8
+       expected key in 12:1..12:3
+       expected ']' in 12:1..12:3
+       expected key in 13:0..13:2
+       expected '=' in 13:0..13:2
+       expected value in 13:0..13:5
+       expected key in 21:1..21:4
+       expected ']' in 21:1..21:4
+       expected key in 22:0..22:3
+       expected '=' in 22:0..22:3
+       expected value in 22:0..22:7
+       expected key in 31:0..31:3
+       expected '=' in 31:0..31:3
+       expected value in 31:0..31:36
        Error: invalid toml
 
        Exit 1
@@ -140,38 +140,38 @@ FAIL valid/key/start
           <empty>
 
 FAIL valid/key/unicode
-     invalid token
-     invalid token
-     invalid key
-     invalid token
-     invalid token
-     invalid token
-     invalid token
-     invalid key
-     invalid key
-     invalid key
-     invalid key
-     invalid key
-     invalid key
-     unknown line
-     unknown line
-     unknown line
-     unknown line
-     expected key
-     expected ']'
-     expected key
-     expected '='
-     expected value
-     expected key
-     expected ']]'
-     expected key
-     expected '='
-     expected value
-     expected key
-     expected ']]'
-     expected key
-     expected '='
-     expected value
+     invalid token in 2:0..2:1
+     invalid token in 3:0..3:1
+     invalid key in 4:0..4:3
+     invalid token in 5:0..5:3
+     invalid token in 7:1..7:3
+     invalid token in 8:0..8:2
+     invalid token in 8:6..8:8
+     invalid key in 10:2..10:12
+     invalid key in 11:0..11:6
+     invalid key in 11:7..11:15
+     invalid key in 13:2..13:12
+     invalid key in 14:0..14:7
+     invalid key in 14:8..14:16
+     unknown line in 2:10..3:0
+     unknown line in 3:10..4:0
+     unknown line in 4:11..5:0
+     unknown line in 5:28..6:0
+     expected key in 7:1..7:3
+     expected ']' in 7:1..7:3
+     expected key in 8:0..8:2
+     expected '=' in 8:0..8:2
+     expected value in 8:0..8:30
+     expected key in 10:2..10:12
+     expected ']]' in 10:2..10:12
+     expected key in 11:0..11:6
+     expected '=' in 11:0..11:6
+     expected value in 11:0..11:25
+     expected key in 13:2..13:12
+     expected ']]' in 13:2..13:12
+     expected key in 14:0..14:7
+     expected '=' in 14:0..14:7
+     expected value in 14:0..14:28
      Error: invalid toml
  
      Exit 1
@@ -194,38 +194,38 @@ FAIL valid/key/unicode
        tiəŋ˦˧˥.viək̚˨˩ʔ = "central"
 
      output from parser-cmd (stderr):
-       invalid token
-       invalid token
-       invalid key
-       invalid token
-       invalid token
-       invalid token
-       invalid token
-       invalid key
-       invalid key
-       invalid key
-       invalid key
-       invalid key
-       invalid key
-       unknown line
-       unknown line
-       unknown line
-       unknown line
-       expected key
-       expected ']'
-       expected key
-       expected '='
-       expected value
-       expected key
-       expected ']]'
-       expected key
-       expected '='
-       expected value
-       expected key
-       expected ']]'
-       expected key
-       expected '='
-       expected value
+       invalid token in 2:0..2:1
+       invalid token in 3:0..3:1
+       invalid key in 4:0..4:3
+       invalid token in 5:0..5:3
+       invalid token in 7:1..7:3
+       invalid token in 8:0..8:2
+       invalid token in 8:6..8:8
+       invalid key in 10:2..10:12
+       invalid key in 11:0..11:6
+       invalid key in 11:7..11:15
+       invalid key in 13:2..13:12
+       invalid key in 14:0..14:7
+       invalid key in 14:8..14:16
+       unknown line in 2:10..3:0
+       unknown line in 3:10..4:0
+       unknown line in 4:11..5:0
+       unknown line in 5:28..6:0
+       expected key in 7:1..7:3
+       expected ']' in 7:1..7:3
+       expected key in 8:0..8:2
+       expected '=' in 8:0..8:2
+       expected value in 8:0..8:30
+       expected key in 10:2..10:12
+       expected ']]' in 10:2..10:12
+       expected key in 11:0..11:6
+       expected '=' in 11:0..11:6
+       expected value in 11:0..11:25
+       expected key in 13:2..13:12
+       expected ']]' in 13:2..13:12
+       expected key in 14:0..14:7
+       expected '=' in 14:0..14:7
+       expected value in 14:0..14:28
        Error: invalid toml
 
        Exit 1
@@ -252,9 +252,9 @@ FAIL valid/spec/keys-7
        }
 
 FAIL valid/spec/string-4
-     invalid token
-     invalid multi-line basic strings
-     unknown line
+     invalid token in 3:50..3:64
+     invalid multi-line basic strings in 6:60..7:0
+     unknown line in 7:0..7:0
      Error: invalid toml
  
      Exit 1
@@ -269,9 +269,9 @@ FAIL valid/spec/string-4
        str7 = """"This," she said, "is just a pointless statement.""""
 
      output from parser-cmd (stderr):
-       invalid token
-       invalid multi-line basic strings
-       unknown line
+       invalid token in 3:50..3:64
+       invalid multi-line basic strings in 6:60..7:0
+       unknown line in 7:0..7:0
        Error: invalid toml
 
        Exit 1
@@ -280,9 +280,9 @@ FAIL valid/spec/string-4
           <empty>
 
 FAIL valid/spec/string-5
-     invalid key
-     expected '='
-     unknown line
+     invalid key in 3:23..3:38
+     expected '=' in 3:16..3:22
+     unknown line in 3:38..4:0
      Error: invalid toml
  
      Exit 1
@@ -295,9 +295,9 @@ FAIL valid/spec/string-5
        regex    = '<\i\c*\s*>'
 
      output from parser-cmd (stderr):
-       invalid key
-       expected '='
-       unknown line
+       invalid key in 3:23..3:38
+       expected '=' in 3:16..3:22
+       unknown line in 3:38..4:0
        Error: invalid toml
 
        Exit 1
@@ -330,8 +330,8 @@ FAIL valid/spec/string-6
           <empty>
 
 FAIL valid/spec/string-7
-     expected '='
-     expected value
+     expected '=' in 6:14..6:15
+     expected value in 6:14..6:51
      Error: invalid toml
  
      Exit 1
@@ -346,8 +346,8 @@ FAIL valid/spec/string-7
        str = ''''That,' she said, 'is still pointless.''''
 
      output from parser-cmd (stderr):
-       expected '='
-       expected value
+       expected '=' in 6:14..6:15
+       expected value in 6:14..6:51
        Error: invalid toml
 
        Exit 1
@@ -397,11 +397,11 @@ FAIL valid/string/escape-esc
           <empty>
 
 FAIL valid/string/escape-tricky
-     invalid basic string
-     invalid token
-     invalid key
-     expected value
-     unknown line
+     invalid basic string in 0:10..1:33
+     invalid token in 9:50..9:52
+     invalid key in 9:63..9:72
+     expected value in 0:10..1:33
+     unknown line in 9:72..10:0
      Error: invalid toml
  
      Exit 1
@@ -424,11 +424,11 @@ FAIL valid/string/escape-tricky
        lit_multiline_end = '''There is no escape\'''
 
      output from parser-cmd (stderr):
-       invalid basic string
-       invalid token
-       invalid key
-       expected value
-       unknown line
+       invalid basic string in 0:10..1:33
+       invalid token in 9:50..9:52
+       invalid key in 9:63..9:72
+       expected value in 0:10..1:33
+       unknown line in 9:72..10:0
        Error: invalid toml
 
        Exit 1
@@ -543,8 +543,8 @@ FAIL valid/string/multiline
           <empty>
 
 FAIL valid/string/multiline-empty
-     expected '='
-     expected value
+     expected '=' in 0:16..1:0
+     expected value in 0:16..1:0
      Error: invalid toml
  
      Exit 1
@@ -566,8 +566,8 @@ FAIL valid/string/multiline-empty
           """
 
      output from parser-cmd (stderr):
-       expected '='
-       expected value
+       expected '=' in 0:16..1:0
+       expected value in 0:16..1:0
        Error: invalid toml
 
        Exit 1
@@ -576,21 +576,21 @@ FAIL valid/string/multiline-empty
           <empty>
 
 FAIL valid/string/multiline-quotes
-     invalid key
-     invalid key
-     expected '='
-     expected value
-     expected '='
-     expected '='
-     expected value
-     expected '='
-     unknown line
-     expected '='
-     expected value
-     unknown line
-     expected '='
-     expected value
-     unknown line
+     invalid key in 3:18..3:27
+     invalid key in 8:14..8:23
+     expected '=' in 3:18..3:27
+     expected value in 3:18..3:27
+     expected '=' in 4:26..4:30
+     expected '=' in 8:14..8:23
+     expected value in 8:14..8:23
+     expected '=' in 9:22..9:26
+     unknown line in 20:17..21:0
+     expected '=' in 21:8..21:12
+     expected value in 21:8..21:24
+     unknown line in 23:17..24:0
+     expected '=' in 24:8..24:12
+     expected value in 24:8..24:24
+     unknown line in 25:4..26:0
      Error: invalid toml
  
      Exit 1
@@ -624,21 +624,21 @@ FAIL valid/string/multiline-quotes
        """"
 
      output from parser-cmd (stderr):
-       invalid key
-       invalid key
-       expected '='
-       expected value
-       expected '='
-       expected '='
-       expected value
-       expected '='
-       unknown line
-       expected '='
-       expected value
-       unknown line
-       expected '='
-       expected value
-       unknown line
+       invalid key in 3:18..3:27
+       invalid key in 8:14..8:23
+       expected '=' in 3:18..3:27
+       expected value in 3:18..3:27
+       expected '=' in 4:26..4:30
+       expected '=' in 8:14..8:23
+       expected value in 8:14..8:23
+       expected '=' in 9:22..9:26
+       unknown line in 20:17..21:0
+       expected '=' in 21:8..21:12
+       expected value in 21:8..21:24
+       unknown line in 23:17..24:0
+       expected '=' in 24:8..24:12
+       expected value in 24:8..24:24
+       unknown line in 25:4..26:0
        Error: invalid toml
 
        Exit 1
@@ -727,12 +727,12 @@ FAIL valid/string/raw
           <empty>
 
 FAIL valid/string/raw-multiline
-     invalid key
-     invalid literal string
-     unknown line
-     expected '='
-     expected value
-     unknown line
+     invalid key in 19:30..19:37
+     invalid literal string in 21:4..22:0
+     unknown line in 19:49..20:0
+     expected '=' in 20:3..20:6
+     expected value in 20:3..20:11
+     unknown line in 22:0..22:0
      Error: invalid toml
  
      Exit 1
@@ -762,12 +762,12 @@ FAIL valid/string/raw-multiline
        '''''
 
      output from parser-cmd (stderr):
-       invalid key
-       invalid literal string
-       unknown line
-       expected '='
-       expected value
-       unknown line
+       invalid key in 19:30..19:37
+       invalid literal string in 21:4..22:0
+       unknown line in 19:49..20:0
+       expected '=' in 20:3..20:6
+       expected value in 20:3..20:11
+       unknown line in 22:0..22:0
        Error: invalid toml
 
        Exit 1
