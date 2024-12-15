@@ -36,7 +36,7 @@ impl Key {
 
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
+        self.to_raw_string() == other.to_raw_string()
     }
 }
 
@@ -44,7 +44,7 @@ impl Eq for Key {}
 
 impl std::hash::Hash for Key {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.value.hash(state);
+        self.to_raw_string().hash(state);
     }
 }
 

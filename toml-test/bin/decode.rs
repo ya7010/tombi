@@ -90,17 +90,26 @@ mod test {
         #[test]
         fn check_test_case(
             r#"
-            utc  = 1987-07-05T17:45:56Z
-            pdt  = 1987-07-05T17:45:56-05:00
-            nzst = 1987-07-05T17:45:56+12:00
-            nzdt = 1987-07-05T17:45:56+13:00  # DST
+            name.first = "Arthur"
+            "name".'last' = "Dent"
+
+            many.dots.dot.dot.dot = 42
             "#
         ) -> Ok(json!(
                 {
-                    "utc":{"type":"datetime","value":"1987-07-05T17:45:56Z"},
-                    "pdt":{"type":"datetime","value":"1987-07-05T17:45:56-05:00"},
-                    "nzst":{"type":"datetime","value":"1987-07-05T17:45:56+12:00"},
-                    "nzdt":{"type":"datetime","value":"1987-07-05T17:45:56+13:00"}
+                    "name": {
+                        "first": {"type": "string", "value": "Arthur"},
+                        "last":  {"type": "string", "value": "Dent"}
+                    },
+                    "many": {
+                        "dots": {
+                            "dot": {
+                                "dot": {
+                                    "dot": {"type": "integer", "value": "42"}
+                                }
+                            }
+                        }
+                    }
                 }
             )
         )
