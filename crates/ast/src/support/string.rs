@@ -33,7 +33,6 @@ pub fn try_from_multi_line_basic_string(value: &str) -> Result<String, ParseErro
     escape_basic_string(
         &value[3..value.len() - 3]
             .chars()
-            .peekable()
             .skip_while(|c| matches!(c, '\r' | '\n'))
             .collect::<String>(),
     )
@@ -43,7 +42,7 @@ pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseEr
     Ok(value[3..value.len() - 3]
         .chars()
         .skip_while(|c| matches!(c, '\r' | '\n'))
-        .collect::<String>())
+        .collect())
 }
 
 fn escape_basic_string(input: &str) -> Result<String, ParseError> {
