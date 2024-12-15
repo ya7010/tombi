@@ -1,9 +1,9 @@
 #[derive(Debug, Clone)]
-pub struct DocumentInfo {
+pub struct DocumentSource {
     pub source: String,
 }
 
-impl DocumentInfo {
+impl DocumentSource {
     pub fn new(source: impl Into<String>) -> Self {
         let source = source.into();
         Self { source }
