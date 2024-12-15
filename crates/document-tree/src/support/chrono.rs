@@ -63,7 +63,7 @@ fn make_datetime_str(value: &str, toml_version: TomlVersion) -> Result<String, P
     let mut datetime_str = String::with_capacity(value.len() + SECONDS_SIZE);
 
     for (i, c) in value.char_indices() {
-        if i == DATE_SIZE && c == 'T' {
+        if i == DATE_SIZE && matches!(c, 'T' | 't') {
             datetime_str.push(' ');
         } else if i == DATE_TIME_WITHOUT_SECONDS_SIZE && c != ':' {
             // NOTE: Support optional seconds.

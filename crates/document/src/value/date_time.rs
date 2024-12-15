@@ -230,6 +230,20 @@ mod test {
 
     test_serialize! {
         #[test]
+        fn local_date_time4(r#"ldt = 1979-05-27T07:32:00"#) -> Ok(json!({
+            "ldt": "1979-05-27T07:32:00"
+        }))
+    }
+
+    test_serialize! {
+        #[test]
+        fn local_date_time5(r#"ldt = 1979-05-27t07:32:00"#) -> Ok(json!({
+            "ldt": "1979-05-27T07:32:00"
+        }))
+    }
+
+    test_serialize! {
+        #[test]
         fn local_date_time_optional_seconds_in_toml_v1_0_0(r#"ldt = 1979-05-27 07:32"#, TomlVersion::V1_0_0) -> Err([
             ("invalid local date time: optional seconds are allowed in TOML v1.1.0 or later", ((0, 6), (0, 22)))
         ])
