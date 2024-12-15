@@ -20,45 +20,16 @@ pub enum ErrorKind {
     #[error("invalid number")]
     InvalidNumber,
 
-    #[error(
-        r#"invalid offset date-time
-
-Examples:
-  - 1979-05-27T07:32:00Z
-  - 1979-05-27 07:32:00Z
-  - 1979-05-27T00:32:00-07:00
-  - 1979-05-27T00:32:00.999999-07:00
-"#
-    )]
+    #[error("invalid offset date-time")]
     InvalidOffsetDateTime,
 
-    #[error(
-        r#"invalid local date-time
-
-Examples:
-  - 1979-05-27T07:32:00
-  - 1979-05-27T07:32:00.9999
-"#
-    )]
+    #[error("invalid local date-time")]
     InvalidLocalDateTime,
 
-    #[error(
-        r#"invalid local date
-
-Examples:
-  - 1979-05-27
-"#
-    )]
+    #[error("invalid local date")]
     InvalidLocalDate,
 
-    #[error(
-        r#"invalid local time
-
-Examples:
-  - 07:32:00
-  - 07:32:00.9999
-"#
-    )]
+    #[error("invalid local time")]
     InvalidLocalTime,
 
     #[error("invalid token")]

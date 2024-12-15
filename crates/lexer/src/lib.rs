@@ -21,16 +21,17 @@ macro_rules! regex {
 }
 
 regex!(
-    REGEX_INTEGER_BIN = r"^0b[0|1](:?_?[0|1])*";
-    REGEX_INTEGER_OCT = r"^0o[0-7](:?_?[0-7])*";
-    REGEX_INTEGER_HEX = r"^0x[0-9A-Fa-f](:?_?[0-9A-Fa-f])*";
-    REGEX_INTEGER_DEC = r"^(:?[1-9](:?_?[0-9])*|0)";
-    REGEX_FLOAT = r"^[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)";
+    REGEX_INTEGER_BIN = r"^0b[0|1](:?_?[0|1])*$";
+    REGEX_INTEGER_OCT = r"^0o[0-7](:?_?[0-7])*$";
+    REGEX_INTEGER_HEX = r"^0x[0-9A-Fa-f](:?_?[0-9A-Fa-f])*$";
+    REGEX_INTEGER_DEC = r"^(:?[1-9](:?_?[0-9])*|0)$";
+    REGEX_FLOAT = r"^[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)$";
+    REGEX_IS_DATE_TIME = r"^\d{4}-\d{2}-\d{2}";
     REGEX_OFFSET_DATE_TIME =
-        r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})";
-    REGEX_LOCAL_DATE_TIME = r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
-    REGEX_LOCAL_DATE = r"^\d{4}-\d{2}-\d{2}";
-    REGEX_LOCAL_TIME = r"^\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?";
+        r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$";
+    REGEX_LOCAL_DATE_TIME = r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?$";
+    REGEX_LOCAL_DATE = r"^\d{4}-\d{2}-\d{2}$";
+    REGEX_LOCAL_TIME = r"^\d{2}:\d{2}:\d{2}(?:[\.,]\d+)?$";
 );
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -49,6 +50,8 @@ pub fn lex(source: &str) -> Lexed {
         }
         lexed.push_token_result(res);
     }
+
+    tracing::debug!("{:?}", &lexed.token_results);
 
     lexed
 }
@@ -87,8 +90,10 @@ impl Cursor<'_> {
                     self.datetime()
                 } else if self.is_time() {
                     self.time()
-                } else {
+                } else if self.is_number() {
                     self.number()
+                } else {
+                    self.key()
                 }
             }
             '\'' => {
@@ -106,8 +111,8 @@ impl Cursor<'_> {
                 } else if self.current().is_ascii_digit() {
                     self.number()
                 } else {
-                    self.eat_while(|c| !is_token_separator(c));
-                    Err(crate::Error::new(InvalidNumber, self.pop_span_range()))
+                    self.eat_while(|c| !is_token_separator_with_dot(c));
+                    Err(crate::Error::new(InvalidToken, self.pop_span_range()))
                 }
             }
             '{' => Ok(Token::new(T!('{'), self.pop_span_range())),
@@ -132,7 +137,7 @@ impl Cursor<'_> {
                 }
             }
             _ => {
-                self.eat_while(|c| !is_token_separator(c));
+                self.eat_while(|c| !is_token_separator_with_dot(c));
                 Err(crate::Error::new(InvalidToken, self.pop_span_range()))
             }
         }
@@ -174,13 +179,13 @@ impl Cursor<'_> {
 
     #[inline]
     fn is_keyword(&self, keyword: &str) -> bool {
-        self.matches(keyword) && is_token_separator(self.peek(keyword.len()))
+        self.matches(keyword) && is_token_separator_with_dot(self.peek(keyword.len()))
     }
 
     fn is_datetime(&self) -> bool {
         assert!(self.current().is_ascii_digit());
         assert!("2000-01-01".len() == 10);
-        REGEX_LOCAL_DATE.is_match(&self.peeks_with_current(10))
+        REGEX_IS_DATE_TIME.is_match(&self.peeks_with_current(10))
     }
 
     fn datetime(&mut self) -> Result<Token, crate::Error> {
@@ -188,8 +193,12 @@ impl Cursor<'_> {
 
         let mut pass_local_date_time = false;
         let mut pass_local_date = false;
+        let mut index = 0;
 
-        let line = self.peek_with_current_while(|c| !is_line_break(c));
+        let line = self.peek_with_current_while(|c| {
+            index += 1;
+            (index == 10 && c == ' ') || !is_token_separator(c)
+        });
         if let Some(m) = REGEX_OFFSET_DATE_TIME.find(&line) {
             assert!(m.start() == 0);
 
@@ -197,7 +206,7 @@ impl Cursor<'_> {
                 self.eat_n(m.end() - 1);
             }
 
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(
                     SyntaxKind::OFFSET_DATE_TIME,
                     self.pop_span_range(),
@@ -211,13 +220,13 @@ impl Cursor<'_> {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(
                     SyntaxKind::LOCAL_DATE_TIME,
                     self.pop_span_range(),
                 ));
             }
-        } else if let Some(m) = REGEX_LOCAL_DATE.find(&line) {
+        } else if let Some(m) = REGEX_LOCAL_DATE.find(&line[..10]) {
             assert!(m.start() == 0);
 
             pass_local_date = true;
@@ -225,12 +234,12 @@ impl Cursor<'_> {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(SyntaxKind::LOCAL_DATE, self.pop_span_range()));
             }
         }
 
-        self.eat_while(|c| !is_token_separator(c));
+        self.eat_while(|c| !is_token_separator_with_dot(c));
         if pass_local_date_time {
             Err(crate::Error::new(
                 InvalidOffsetDateTime,
@@ -255,7 +264,7 @@ impl Cursor<'_> {
     fn time(&mut self) -> Result<Token, crate::Error> {
         assert!(self.current().is_ascii_digit());
 
-        let line = self.peek_with_current_while(|c| !is_line_break(c));
+        let line = self.peek_with_current_while(|c| !is_token_separator(c));
         if let Some(m) = REGEX_LOCAL_TIME.find(&line) {
             assert!(m.start() == 0);
             if m.end() > 1 {
@@ -270,15 +279,25 @@ impl Cursor<'_> {
         }
     }
 
+    fn is_number(&self) -> bool {
+        let line = self.peek_with_current_while(|c| !is_token_separator(c));
+
+        REGEX_FLOAT.is_match(&line)
+            || REGEX_INTEGER_BIN.is_match(&line)
+            || REGEX_INTEGER_OCT.is_match(&line)
+            || REGEX_INTEGER_HEX.is_match(&line)
+            || REGEX_INTEGER_DEC.is_match(&line)
+    }
+
     fn number(&mut self) -> Result<Token, crate::Error> {
-        let line = self.peek_with_current_while(|c| !is_line_break(c));
+        let line = self.peek_with_current_while(|c| !is_token_separator(c));
         if let Some(m) = REGEX_FLOAT.find(&line) {
             assert!(m.start() == 0);
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
 
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(SyntaxKind::FLOAT, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_BIN.find(&line) {
@@ -287,7 +306,7 @@ impl Cursor<'_> {
                 self.eat_n(m.end() - 1);
             }
 
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(SyntaxKind::INTEGER_BIN, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_OCT.find(&line) {
@@ -296,7 +315,7 @@ impl Cursor<'_> {
                 self.eat_n(m.end() - 1);
             }
 
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(SyntaxKind::INTEGER_OCT, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_HEX.find(&line) {
@@ -304,7 +323,7 @@ impl Cursor<'_> {
             if m.end() > 1 {
                 self.eat_n(m.end() - 1);
             }
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(SyntaxKind::INTEGER_HEX, self.pop_span_range()));
             }
         } else if let Some(m) = REGEX_INTEGER_DEC.find(&line) {
@@ -313,12 +332,12 @@ impl Cursor<'_> {
                 self.eat_n(m.end() - 1);
             }
 
-            if is_token_separator(self.peek(1)) {
+            if is_token_separator_with_dot(self.peek(1)) {
                 return Ok(Token::new(SyntaxKind::INTEGER_DEC, self.pop_span_range()));
             }
         }
 
-        self.eat_while(|c| !is_token_separator(c));
+        self.eat_while(|c| !is_token_separator_with_dot(c));
 
         Err(crate::Error::new(InvalidNumber, self.pop_span_range()))
     }
@@ -392,10 +411,10 @@ impl Cursor<'_> {
 
     fn key(&mut self) -> Result<Token, crate::Error> {
         self.eat_while(|c| matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-'));
-        if is_token_separator(self.peek(1)) {
+        if is_token_separator_with_dot(self.peek(1)) {
             Ok(Token::new(SyntaxKind::BARE_KEY, self.pop_span_range()))
         } else {
-            self.eat_while(|c| !is_token_separator(c));
+            self.eat_while(|c| !is_token_separator_with_dot(c));
             Err(crate::Error::new(InvalidKey, self.pop_span_range()))
         }
     }
@@ -413,6 +432,14 @@ fn is_line_break(c: char) -> bool {
 
 #[inline]
 fn is_token_separator(c: char) -> bool {
+    matches!(
+        c,
+        '{' | '}' | '[' | ']' | ',' | '=' | ' ' | '\t' | '\r' | '\n' | '#' | '\0'
+    )
+}
+
+#[inline]
+fn is_token_separator_with_dot(c: char) -> bool {
     matches!(
         c,
         '{' | '}' | '[' | ']' | ',' | '.' | '=' | ' ' | '\t' | '\r' | '\n' | '#' | '\0'

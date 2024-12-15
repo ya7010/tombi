@@ -66,26 +66,19 @@ mod test {
 
     test_decode! {
         #[test]
-        fn valid_array_array(
+        fn check_test_case(
             r#"
-            mixed = [[1, 2], ["a", "b"], [1.1, 2.1]]
+            utc  = 1987-07-05T17:45:56Z
+            pdt  = 1987-07-05T17:45:56-05:00
+            nzst = 1987-07-05T17:45:56+12:00
+            nzdt = 1987-07-05T17:45:56+13:00  # DST
             "#
         ) -> Ok(json!(
                 {
-                    "mixed": [
-                        [
-                            {"type": "integer", "value": "1"},
-                            {"type": "integer", "value": "2"}
-                        ],
-                        [
-                            {"type": "string", "value": "a"},
-                            {"type": "string", "value": "b"}
-                        ],
-                        [
-                            {"type": "float", "value": "1.1"},
-                            {"type": "float", "value": "2.1"}
-                        ]
-                    ]
+                    "utc":{"type":"datetime","value":"1987-07-05T17:45:56Z"},
+                    "pdt":{"type":"datetime","value":"1987-07-05T17:45:56-05:00"},
+                    "nzst":{"type":"datetime","value":"1987-07-05T17:45:56+12:00"},
+                    "nzdt":{"type":"datetime","value":"1987-07-05T17:45:56+13:00"}
                 }
             )
         )
