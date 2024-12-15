@@ -1,119 +1,3 @@
-FAIL valid/inline-table/multiline
-     Values for key "tbl_multiline.b" don't match:
-       Expected:     multiline
- 
-       Your encoder:
-     multiline
-
-     input sent to parser-cmd:
-       tbl_multiline = { a = 1, b = """
-       multiline
-       """, c = """and yet
-       another line""", d = 4 }
-
-     output from parser-cmd (stdout):
-       {
-         "tbl_multiline": {
-           "a": {"type": "integer", "value": "1"},
-           "b": {"type": "string", "value": "\nmultiline\n"},
-           "c": {"type": "string", "value": "and yet\nanother line"},
-           "d": {"type": "integer", "value": "4"}
-         }
-       }
-
-     want:
-       {
-           "tbl_multiline": {
-               "a": {"type": "integer", "value": "1"},
-               "b": {"type": "string", "value": "multiline\n"},
-               "c": {"type": "string", "value": "and yet\nanother line"},
-               "d": {"type": "integer", "value": "4"}
-           }
-       }
-
-FAIL valid/inline-table/newline
-     Values for key "tbl-2.k" don't match:
-       Expected:     	Hello
- 
-       Your encoder:
-     	Hello
-
-     input sent to parser-cmd:
-       # TOML 1.1 supports newlines in inline tables and trailing commas.
-
-       trailing-comma-1 = {
-       	c = 1,
-       }
-       trailing-comma-2 = { c = 1, }
-
-       tbl-1 = {
-       	hello = "world",
-       	1     = 2,
-       	arr   = [1,
-       	         2,
-       	         3,
-       	        ],
-       	tbl = {
-       		 k = 1,
-       	}
-       }
-
-       tbl-2 = {
-       	k = """
-       	Hello
-       	"""
-       }
-
-     output from parser-cmd (stdout):
-       {
-         "tbl-1": {
-           "1":     {"type": "integer", "value": "2"},
-           "hello": {"type": "string", "value": "world"},
-           "arr": [
-             {"type": "integer", "value": "1"},
-             {"type": "integer", "value": "2"},
-             {"type": "integer", "value": "3"}
-           ],
-           "tbl": {
-             "k": {"type": "integer", "value": "1"}
-           }
-         },
-         "tbl-2": {
-           "k": {"type": "string", "value": "\n\tHello\n\t"}
-         },
-         "trailing-comma-1": {
-           "c": {"type": "integer", "value": "1"}
-         },
-         "trailing-comma-2": {
-           "c": {"type": "integer", "value": "1"}
-         }
-       }
-
-     want:
-       {
-           "tbl-1": {
-               "1":     {"type": "integer", "value": "2"},
-               "hello": {"type": "string", "value": "world"},
-               "arr": [
-                   {"type": "integer", "value": "1"},
-                   {"type": "integer", "value": "2"},
-                   {"type": "integer", "value": "3"}
-               ],
-               "tbl": {
-                   "k": {"type": "integer", "value": "1"}
-               }
-           },
-           "tbl-2": {
-               "k": {"type": "string", "value": "\tHello\n\t"}
-           },
-           "trailing-comma-1": {
-               "c": {"type": "integer", "value": "1"}
-           },
-           "trailing-comma-2": {
-               "c": {"type": "integer", "value": "1"}
-           }
-       }
-
 FAIL valid/key/dotted-1
      Could not find key "name.first" in parser output.
 
@@ -557,29 +441,6 @@ FAIL valid/spec/string-0
            "str": {"type": "string", "value": "I'm a string. \"You can quote me\". Name\tJosé\nLocation\tSF."}
        }
 
-FAIL valid/spec/string-1
-     Values for key "str1" don't match:
-       Expected:     Roses are red
-     Violets are blue
-       Your encoder:
-     Roses are red
-     Violets are blue
-
-     input sent to parser-cmd:
-       str1 = """
-       Roses are red
-       Violets are blue"""
-
-     output from parser-cmd (stdout):
-       {
-         "str1": {"type": "string", "value": "\nRoses are red\nViolets are blue"}
-       }
-
-     want:
-       {
-           "str1": {"type": "string", "value": "Roses are red\nViolets are blue"}
-       }
-
 FAIL valid/spec/string-2
      Values for key "str2" don't match:
        Expected:     Roses are red
@@ -608,8 +469,7 @@ FAIL valid/spec/string-2
 FAIL valid/spec/string-3
      Values for key "str2" don't match:
        Expected:     The quick brown fox jumps over the lazy dog.
-       Your encoder:
-     The quick brown \
+       Your encoder: The quick brown \
  
  
        fox jumps over \
@@ -635,7 +495,7 @@ FAIL valid/spec/string-3
      output from parser-cmd (stdout):
        {
          "str1": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-         "str2": {"type": "string", "value": "\nThe quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
+         "str2": {"type": "string", "value": "The quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
          "str3": {
            "type":  "string",
            "value": "\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       "
@@ -703,43 +563,6 @@ FAIL valid/spec/string-5
      want:
           <empty>
 
-FAIL valid/spec/string-6
-     Values for key "lines" don't match:
-       Expected:     The first newline is
-     trimmed in raw strings.
-        All other whitespace
-        is preserved.
- 
-       Your encoder:
-     The first newline is
-     trimmed in raw strings.
-        All other whitespace
-        is preserved.
-
-     input sent to parser-cmd:
-       regex2 = '''I [dw]on't need \d{2} apples'''
-       lines  = '''
-       The first newline is
-       trimmed in raw strings.
-          All other whitespace
-          is preserved.
-       '''
-
-     output from parser-cmd (stdout):
-       {
-         "regex2": {"type": "string", "value": "I [dw]on't need \\d{2} apples"},
-         "lines": {
-           "type":  "string",
-           "value": "\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n"
-         }
-       }
-
-     want:
-       {
-           "lines":  {"type": "string", "value": "The first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n"},
-           "regex2": {"type": "string", "value": "I [dw]on't need \\d{2} apples"}
-       }
-
 FAIL valid/spec/string-7
      expected '='
      expected value
@@ -770,8 +593,7 @@ FAIL valid/string/ends-in-whitespace-escape
      Values for key "beee" don't match:
        Expected:     heeee
      geeee
-       Your encoder:
-     heeee
+       Your encoder: heeee
      geeee\
 
      input sent to parser-cmd:
@@ -784,7 +606,7 @@ FAIL valid/string/ends-in-whitespace-escape
 
      output from parser-cmd (stdout):
        {
-         "beee": {"type": "string", "value": "\nheeee\ngeeee\\  \n\n\n      "}
+         "beee": {"type": "string", "value": "heeee\ngeeee\\  \n\n\n      "}
        }
 
      want:
@@ -958,12 +780,12 @@ FAIL valid/string/hex-escape
          "hello":             {"type": "string", "value": "\\x68\\x65\\x6c\\x6c\\x6f\\x0a"},
          "higher-than-127":   {"type": "string", "value": "S\\xf8rmirb\\xe6ren"},
          "literal":           {"type": "string", "value": "\\x20 \\x09 \\x0d\\x0a"},
-         "multiline-literal": {"type": "string", "value": "\n\\x20 \\x09 \\x0d\\x0a\n"},
+         "multiline-literal": {"type": "string", "value": "\\x20 \\x09 \\x0d\\x0a\n"},
          "nul":               {"type": "string", "value": "\\x00"},
          "whitespace":        {"type": "string", "value": "\\x20 \\x09 \\x1b \\x0d\\x0a"},
          "multiline": {
            "type":  "string",
-           "value": "\n\\x20 \\x09 \\x1b \\x0d\\x0a\n\\x7f\n\\x00\n\\x68\\x65\\x6c\\x6c\\x6f\\x0a\n\\x53\\xF8\\x72\\x6D\\x69\\x72\\x62\\xE6\\x72\\x65\\x6E\n"
+           "value": "\\x20 \\x09 \\x1b \\x0d\\x0a\n\\x7f\n\\x00\n\\x68\\x65\\x6c\\x6c\\x6f\\x0a\n\\x53\\xF8\\x72\\x6D\\x69\\x72\\x62\\xE6\\x72\\x65\\x6E\n"
          }
        }
 
@@ -1029,7 +851,7 @@ FAIL valid/string/multiline
      output from parser-cmd (stdout):
        {
          "equivalent_one": {"type": "string", "value": "The quick brown fox jumps over the lazy dog."},
-         "equivalent_two": {"type": "string", "value": "\nThe quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
+         "equivalent_two": {"type": "string", "value": "The quick brown \\\n\n\n  fox jumps over \\\n    the lazy dog."},
          "escape-bs-1":    {"type": "string", "value": "a \\\\\nb"},
          "escape-bs-2":    {"type": "string", "value": "a \\\\\\\nb"},
          "escape-bs-3":    {"type": "string", "value": "a \\\\\\\\\n  b"},
@@ -1328,9 +1150,9 @@ FAIL valid/string/start-mb
          "s1": {"type": "string", "value": "§"},
          "s2": {"type": "string", "value": "§"},
          "s3": {"type": "string", "value": "\\\n§"},
-         "s4": {"type": "string", "value": "\n§"},
+         "s4": {"type": "string", "value": "§"},
          "s5": {"type": "string", "value": "§"},
-         "s6": {"type": "string", "value": "\n§"},
+         "s6": {"type": "string", "value": "§"},
          "s7": {"type": "string", "value": "§"}
        }
 
@@ -2555,7 +2377,7 @@ FAIL invalid/string/multiline-escape-space-1
 
      output from parser-cmd (stdout):
        {
-         "a": {"type": "string", "value": "\n  foo \\ \\n\n  bar"}
+         "a": {"type": "string", "value": "  foo \\ \\n\n  bar"}
        }
 
      want:
@@ -2572,7 +2394,7 @@ FAIL invalid/string/multiline-escape-space-2
 
      output from parser-cmd (stdout):
        {
-         "bee": {"type": "string", "value": "\nhee \\\n\ngee \\   "}
+         "bee": {"type": "string", "value": "hee \\\n\ngee \\   "}
        }
 
      want:
@@ -2781,5 +2603,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 151 passed, 36 failed
+  valid tests: 155 passed, 32 failed
 invalid tests: 284 passed, 77 failed

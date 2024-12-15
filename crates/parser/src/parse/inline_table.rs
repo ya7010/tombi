@@ -24,6 +24,7 @@ impl Parse for ast::InlineTable {
 
         begin_dangling_comments(p);
 
+        let mut key_value_lines = 0;
         let mut last_comma_range = None;
         loop {
             let n = peek_leading_comments(p);
@@ -31,7 +32,11 @@ impl Parse for ast::InlineTable {
                 break;
             }
 
+            let start_line = p.nth_range(n).start().line();
+
             ast::KeyValue::parse(p);
+
+            key_value_lines += p.previous_range().end().line() - start_line;
 
             let n = peek_leading_comments(p);
             if p.nth_at(n, T![,]) {
@@ -55,7 +60,7 @@ impl Parse for ast::InlineTable {
         }
 
         if p.toml_version() == TomlVersion::V1_0_0 {
-            if begin_range.start().line() != end_range.start().line() {
+            if (end_range.start().line() - begin_range.start().line()) != key_value_lines {
                 p.error(crate::Error::new(
                     InlineTableMustSingleLine,
                     begin_range + end_range,
@@ -126,7 +131,50 @@ mod test {
 
     test_parser! {
         #[test]
-        fn inline_table_multi_line_v1_1_0(r#"
+        fn inline_table_multi_line_in_multi_line_value_v1_0_0(r#"
+            a = { a = [
+            ]}
+            b = { a = [
+              1,
+              2,
+       	    ], b = [
+              3,
+              4,
+       	    ]}
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn invalid_inline_table_multi_line_in_v1_0_0(r#"
+            json_like = {
+                first = "Tom",
+                last = "Preston-Werner"
+            }
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Err([
+            SyntaxError(InlineTableMustSingleLine, 0:12..3:1),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn invalid_inline_table_multi_line2_in_v1_0_0(r#"
+            t = {a=1,
+            b=2}
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Err([
+            SyntaxError(InlineTableMustSingleLine, 0:4..1:4),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn inline_table_multi_line_in_v1_1_0(r#"
             key = {
                 key1 = 1,
                 key2 = 2,
