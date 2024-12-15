@@ -133,32 +133,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/spec/string-5
-     invalid key in 3:23..3:38
-     expected '=' in 3:16..3:22
-     unknown line in 3:38..4:0
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       # What you see is what you get.
-       winpath  = 'C:\Users\nodejs\templates'
-       winpath2 = '\\ServerX\admin$\system32\'
-       quoted   = 'Tom "Dubs" Preston-Werner'
-       regex    = '<\i\c*\s*>'
-
-     output from parser-cmd (stderr):
-       invalid key in 3:23..3:38
-       expected '=' in 3:16..3:22
-       unknown line in 3:38..4:0
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/string/ends-in-whitespace-escape
      invalid string: invalid escape sequence
      Error: invalid toml
@@ -1208,5 +1182,5 @@ FAIL invalid/table/super-twice
        Exit code 1
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.0.0]: using embedded tests
-  valid tests: 173 passed,  9 failed
+  valid tests: 174 passed,  8 failed
 invalid tests: 324 passed, 47 failed

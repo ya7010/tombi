@@ -344,7 +344,22 @@ impl Cursor<'_> {
     }
 
     fn basic_string(&mut self) -> Result<Token, crate::Error> {
-        self.single_line_string(SyntaxKind::BASIC_STRING, '"', InvalidBasicString)
+        assert!(self.current() == '"');
+
+        while let Some(c) = self.bump() {
+            match c {
+                _ if c == '"' => {
+                    return Ok(Token::new(SyntaxKind::BASIC_STRING, self.pop_span_range()))
+                }
+                '\\' if self.peek(1) == '"' => {
+                    self.bump();
+                }
+                _ if is_line_break(self.peek(1)) => break,
+                _ => (),
+            }
+        }
+
+        Err(crate::Error::new(InvalidBasicString, self.pop_span_range()))
     }
 
     fn multi_line_basic_string(&mut self) -> Result<Token, crate::Error> {
@@ -389,7 +404,25 @@ impl Cursor<'_> {
     }
 
     fn literal_string(&mut self) -> Result<Token, crate::Error> {
-        self.single_line_string(SyntaxKind::LITERAL_STRING, '\'', InvalidLiteralString)
+        assert!(self.current() == '\'');
+
+        while let Some(c) = self.bump() {
+            match c {
+                '\'' => {
+                    return Ok(Token::new(
+                        SyntaxKind::LITERAL_STRING,
+                        self.pop_span_range(),
+                    ))
+                }
+                c if is_line_break(c) => break,
+                _ => {}
+            }
+        }
+
+        Err(crate::Error::new(
+            InvalidLiteralString,
+            self.pop_span_range(),
+        ))
     }
 
     fn multi_line_literal_string(&mut self) -> Result<Token, crate::Error> {
@@ -420,28 +453,6 @@ impl Cursor<'_> {
             InvalidMultilineLiteralString,
             self.pop_span_range(),
         ))
-    }
-
-    fn single_line_string(
-        &mut self,
-        kind: SyntaxKind,
-        quote: char,
-        error_kind: crate::ErrorKind,
-    ) -> Result<Token, crate::Error> {
-        assert!(self.current() == quote);
-
-        while let Some(c) = self.bump() {
-            match c {
-                _ if c == quote => return Ok(Token::new(kind, self.pop_span_range())),
-                '\\' if self.peek(1) == quote => {
-                    self.bump();
-                }
-                _ if is_line_break(self.peek(1)) => break,
-                _ => (),
-            }
-        }
-
-        Err(crate::Error::new(error_kind, self.pop_span_range()))
     }
 
     fn key(&mut self) -> Result<Token, crate::Error> {
