@@ -187,6 +187,23 @@ test_tokens! {
 
 test_tokens! {
     #[test]
+    fn table_empty_header(r#"[]"#) -> [
+        Token(BRACKET_START, "["),
+        Token(BRACKET_END, "]"),
+    ];
+}
+
+test_tokens! {
+    #[test]
+    fn table_hyphen_header(r#"[-]"#) -> [
+        Token(BRACKET_START, "["),
+        Token(BARE_KEY, "-"),
+        Token(BRACKET_END, "]"),
+    ];
+}
+
+test_tokens! {
+    #[test]
     fn table(
         textwrap::dedent(
             r#"
@@ -356,7 +373,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn literal_string2("'Hello, \\'Taro\\'!'") -> Ok(Token(LITERAL_STRING, (0, 18)));
+    fn literal_string2(r#"'C:\Users\nodejs\templates'"#) -> Ok(Token(LITERAL_STRING, (0, 27)));
 }
 
 test_token! {
@@ -515,7 +532,7 @@ test_token! {
 
 test_token! {
     #[test]
-    fn invalid_integer_dec2("-_1234567890") -> Err(Token(InvalidToken, (0, 12)));
+    fn invalid_integer_dec2("-_1234567890") -> Ok(Token(BARE_KEY, (0, 12)));
 }
 
 test_token! {

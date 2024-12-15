@@ -54,6 +54,20 @@ impl<'a> Cursor<'a> {
         s
     }
 
+    pub fn peeks(&self, size: usize) -> String {
+        assert!(size > 0);
+        let mut iter = self.chars.clone();
+        let mut s = String::with_capacity(size);
+        for _ in 0..size {
+            if let Some(c) = iter.next() {
+                s.push(c);
+            } else {
+                break;
+            }
+        }
+        s
+    }
+
     pub fn peeks_with_current(&self, size: usize) -> String {
         assert!(size > 0);
         let mut iter = self.chars.clone();

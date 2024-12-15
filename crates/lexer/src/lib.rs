@@ -104,7 +104,7 @@ impl Cursor<'_> {
                     self.literal_string()
                 }
             }
-            '+' | '-' => {
+            '+' => {
                 self.bump();
                 if self.is_keyword("inf") || self.is_keyword("nan") {
                     self.eat_n(2);
@@ -114,6 +114,19 @@ impl Cursor<'_> {
                 } else {
                     self.eat_while(|c| !is_token_separator_with_dot(c));
                     Err(crate::Error::new(InvalidToken, self.pop_span_range()))
+                }
+            }
+            '-' => {
+                if ["inf", "nan"].contains(&self.peeks(3).as_str())
+                    && is_token_separator_with_dot(self.peek(4))
+                {
+                    self.eat_n(3);
+                    Ok(Token::new(SyntaxKind::FLOAT, self.pop_span_range()))
+                } else if self.peek(1).is_ascii_digit() {
+                    self.bump();
+                    self.number()
+                } else {
+                    self.key()
                 }
             }
             '{' => Ok(Token::new(T!('{'), self.pop_span_range())),
@@ -414,7 +427,7 @@ impl Cursor<'_> {
                         self.pop_span_range(),
                     ))
                 }
-                c if is_line_break(c) => break,
+                _ if is_line_break(self.peek(1)) => break,
                 _ => {}
             }
         }
