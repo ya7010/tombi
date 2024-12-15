@@ -153,7 +153,7 @@ fn parse_string(input: &str) -> Result<String, ParseError> {
                             }
                         }
                     }
-                    c => {
+                    _ => {
                         return Err(ParseError::InvalidEscapeSequence);
                     }
                 }
