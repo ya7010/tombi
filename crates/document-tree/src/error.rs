@@ -17,7 +17,7 @@ pub enum Error {
 
     #[error("invalid float: {error}")]
     ParseFloatError {
-        error: crate::support::float::ParseError,
+        error: crate::support::float::ParseFloatError,
         range: text::Range,
     },
 
