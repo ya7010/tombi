@@ -228,40 +228,24 @@ impl TryIntoDocumentTree<Table> for ast::Table {
             get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
         if let Some(key) = keys.pop() {
-            let new_table = table.new_parent();
-            let result = table
-                .new_parent()
-                .insert(key, Value::Table(std::mem::replace(&mut table, new_table)));
-            match result {
-                Ok(t) => table = t,
-                Err(errs) => {
-                    errors.extend(errs);
-                }
-            }
+            insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
         }
 
         let mut is_array_of_table = array_of_table_keys.contains(&keys);
         while let Some(key) = keys.pop() {
-            let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
-                let mut array = Array::new_parent_array_of_tables(&table);
-                let new_table = table.new_parent();
-                array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-                table.new_parent().insert(key, Value::Array(array))
+            if is_array_of_table {
+                insert_array_of_tables(
+                    &mut table,
+                    key,
+                    |table| table.new_parent(),
+                    Array::new_parent_array_of_tables,
+                    &mut errors,
+                );
             } else {
-                let new_table = table.new_parent();
-                table
-                    .new_parent()
-                    .insert(key, Value::Table(std::mem::replace(&mut table, new_table)))
+                insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
             };
 
             is_array_of_table = array_of_table_keys.contains(&keys);
-
-            match result {
-                Ok(t) => table = t,
-                Err(errs) => {
-                    errors.extend(errs);
-                }
-            }
         }
 
         if errors.is_empty() {
@@ -296,41 +280,30 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
             get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
         if let Some(key) = keys.pop() {
-            let mut array = Array::new_array_of_tables(&table);
-            let new_table = table.new_parent();
-            array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-            let result = table.new_parent().insert(key, Value::Array(array));
-
-            match result {
-                Ok(t) => table = t,
-                Err(errs) => {
-                    errors.extend(errs);
-                }
-            }
+            insert_array_of_tables(
+                &mut table,
+                key,
+                |table| table.new_parent(),
+                Array::new_array_of_tables,
+                &mut errors,
+            );
         }
 
         let mut is_array_of_table = array_of_table_keys.contains(&keys);
         while let Some(key) = keys.pop() {
-            let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
-                let mut array = Array::new_parent_array_of_tables(&table);
-                let new_table = table.new_parent();
-                array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-                table.new_parent().insert(key, Value::Array(array))
+            if is_array_of_table {
+                insert_array_of_tables(
+                    &mut table,
+                    key,
+                    |table| table.new_parent(),
+                    Array::new_parent_array_of_tables,
+                    &mut errors,
+                );
             } else {
-                let new_table = table.new_parent();
-                table
-                    .new_parent()
-                    .insert(key, Value::Table(std::mem::replace(&mut table, new_table)))
+                insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
             };
 
             is_array_of_table = array_of_table_keys.contains(&keys);
-
-            match result {
-                Ok(t) => table = t,
-                Err(errs) => {
-                    errors.extend(errs);
-                }
-            }
         }
 
         if errors.is_empty() {
@@ -462,4 +435,36 @@ fn get_header_keys(
             }
         })
         .collect_vec()
+}
+
+fn insert_table(
+    table: &mut Table,
+    key: Key,
+    new_table_fn: impl FnOnce(&Table) -> Table,
+    errors: &mut Vec<crate::Error>,
+) {
+    let new_table = new_table_fn(&table);
+    match table
+        .new_parent()
+        .insert(key, Value::Table(std::mem::replace(table, new_table)))
+    {
+        Ok(t) => *table = t,
+        Err(errs) => errors.extend(errs),
+    };
+}
+
+fn insert_array_of_tables(
+    table: &mut Table,
+    key: Key,
+    new_tables_fn: impl FnOnce(&Table) -> Table,
+    new_array_of_tables_fn: impl FnOnce(&Table) -> Array,
+    errors: &mut Vec<crate::Error>,
+) {
+    let mut array = new_array_of_tables_fn(&table);
+    let new_table = new_tables_fn(&table);
+    array.push(Value::Table(std::mem::replace(table, new_table)));
+    match table.new_parent().insert(key, Value::Array(array)) {
+        Ok(t) => *table = t,
+        Err(errs) => errors.extend(errs),
+    };
 }
