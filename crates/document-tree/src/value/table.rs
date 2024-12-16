@@ -240,7 +240,6 @@ impl TryIntoDocumentTree<Table> for ast::Table {
             }
         }
 
-        let mut is_array_of_table = false;
         let mut keys = self
             .header()
             .unwrap()
@@ -253,12 +252,26 @@ impl TryIntoDocumentTree<Table> for ast::Table {
                 }
             })
             .collect_vec();
+
+        if let Some(key) = keys.pop() {
+            let new_table = table.new_parent();
+            let result = table
+                .new_parent()
+                .insert(key, Value::Table(std::mem::replace(&mut table, new_table)));
+            match result {
+                Ok(t) => table = t,
+                Err(errs) => {
+                    errors.extend(errs);
+                }
+            }
+        }
+
+        let mut is_array_of_table = array_of_table_keys.contains(&keys);
         while let Some(key) = keys.pop() {
             let result: Result<Table, Vec<crate::Error>> = if is_array_of_table {
                 let mut array = Array::new_parent_array_of_tables(&table);
                 let new_table = table.new_parent();
                 array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-
                 table.new_parent().insert(key, Value::Array(array))
             } else {
                 let new_table = table.new_parent();
@@ -331,11 +344,19 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
                 }
             })
             .collect_vec();
+
         if let Some(key) = keys.pop() {
             let mut array = Array::new_array_of_tables(&table);
             let new_table = table.new_parent();
             array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-            table = table.new_parent().insert(key, Value::Array(array))?;
+            let result = table.new_parent().insert(key, Value::Array(array));
+
+            match result {
+                Ok(t) => table = t,
+                Err(errs) => {
+                    errors.extend(errs);
+                }
+            }
         }
 
         let mut is_array_of_table = array_of_table_keys.contains(&keys);
@@ -344,7 +365,6 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
                 let mut array = Array::new_parent_array_of_tables(&table);
                 let new_table = table.new_parent();
                 array.push(Value::Table(std::mem::replace(&mut table, new_table)));
-
                 table.new_parent().insert(key, Value::Array(array))
             } else {
                 let new_table = table.new_parent();
