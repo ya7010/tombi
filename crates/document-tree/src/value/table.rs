@@ -1,4 +1,5 @@
-use ast::AstNode;
+use ast::{AstChildren, AstNode};
+use config::TomlVersion;
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -207,27 +208,9 @@ impl From<Table> for IndexMap<Key, Value> {
 }
 
 impl TryIntoDocumentTree<Table> for ast::Table {
-    fn try_into_document_tree(
-        self,
-        toml_version: config::TomlVersion,
-    ) -> Result<Table, Vec<crate::Error>> {
+    fn try_into_document_tree(self, toml_version: TomlVersion) -> Result<Table, Vec<crate::Error>> {
         let mut table = Table::new_table(&self);
         let mut errors = Vec::new();
-
-        let array_of_table_keys = self
-            .array_of_tables_keys()
-            .map(|keys| {
-                keys.filter_map(|key| match key.try_into_document_tree(toml_version) {
-                    Ok(key) => Some(key),
-                    Err(errs) => {
-                        errors.extend(errs);
-                        None
-                    }
-                })
-                .collect_vec()
-            })
-            .unique()
-            .collect_vec();
 
         for key_value in self.key_values() {
             match key_value.try_into_document_tree(toml_version) {
@@ -240,18 +223,9 @@ impl TryIntoDocumentTree<Table> for ast::Table {
             }
         }
 
-        let mut keys = self
-            .header()
-            .unwrap()
-            .keys()
-            .filter_map(|key| match key.try_into_document_tree(toml_version) {
-                Ok(key) => Some(key),
-                Err(errs) => {
-                    errors.extend(errs);
-                    None
-                }
-            })
-            .collect_vec();
+        let mut keys = get_header_keys(self.header(), toml_version, &mut errors);
+        let array_of_table_keys =
+            get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
         if let Some(key) = keys.pop() {
             let new_table = table.new_parent();
@@ -306,21 +280,6 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
         let mut table = Table::new_array_of_tables(&self);
         let mut errors = Vec::new();
 
-        let array_of_table_keys = self
-            .array_of_tables_keys()
-            .map(|keys| {
-                keys.filter_map(|key| match key.try_into_document_tree(toml_version) {
-                    Ok(key) => Some(key),
-                    Err(errs) => {
-                        errors.extend(errs);
-                        None
-                    }
-                })
-                .collect_vec()
-            })
-            .unique()
-            .collect_vec();
-
         for key_value in self.key_values() {
             match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
@@ -332,18 +291,9 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
             }
         }
 
-        let mut keys = self
-            .header()
-            .unwrap()
-            .keys()
-            .filter_map(|key| match key.try_into_document_tree(toml_version) {
-                Ok(key) => Some(key),
-                Err(errs) => {
-                    errors.extend(errs);
-                    None
-                }
-            })
-            .collect_vec();
+        let mut keys = get_header_keys(self.header(), toml_version, &mut errors);
+        let array_of_table_keys =
+            get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
         if let Some(key) = keys.pop() {
             let mut array = Array::new_array_of_tables(&table);
@@ -397,18 +347,8 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
         toml_version: config::TomlVersion,
     ) -> Result<Table, Vec<crate::Error>> {
         let mut errors = Vec::new();
-        let mut keys = self
-            .keys()
-            .unwrap()
-            .keys()
-            .filter_map(|key| match key.try_into_document_tree(toml_version) {
-                Ok(key) => Some(key),
-                Err(errs) => {
-                    errors.extend(errs);
-                    None
-                }
-            })
-            .collect_vec();
+
+        let mut keys = get_header_keys(self.keys(), toml_version, &mut errors);
 
         let value: Value = match self.value().unwrap().try_into_document_tree(toml_version) {
             Ok(value) => value,
@@ -484,4 +424,42 @@ impl IntoIterator for Table {
     fn into_iter(self) -> Self::IntoIter {
         self.key_values.into_iter()
     }
+}
+
+fn get_array_of_tables_keys(
+    keys_iter: impl Iterator<Item = AstChildren<ast::Key>>,
+    toml_version: TomlVersion,
+    errors: &mut Vec<crate::Error>,
+) -> Vec<Vec<Key>> {
+    keys_iter
+        .map(|keys| {
+            keys.filter_map(|key| match key.try_into_document_tree(toml_version) {
+                Ok(key) => Some(key),
+                Err(errs) => {
+                    errors.extend(errs);
+                    None
+                }
+            })
+            .collect_vec()
+        })
+        .unique()
+        .collect_vec()
+}
+
+fn get_header_keys(
+    header: Option<ast::Keys>,
+    toml_version: TomlVersion,
+    errors: &mut Vec<crate::Error>,
+) -> Vec<Key> {
+    header
+        .unwrap()
+        .keys()
+        .filter_map(|key| match key.try_into_document_tree(toml_version) {
+            Ok(key) => Some(key),
+            Err(errs) => {
+                errors.extend(errs);
+                None
+            }
+        })
+        .collect_vec()
 }
