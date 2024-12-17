@@ -10,8 +10,8 @@ use crate::{Array, Key, TryIntoDocumentTree, Value};
 pub enum TableKind {
     Root,
     Table,
+    ParentTable,
     InlineTable,
-    ArrayOfTables,
     KeyValue,
 }
 
@@ -47,7 +47,7 @@ impl Table {
 
     pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTables) -> Self {
         Self {
-            kind: TableKind::ArrayOfTables,
+            kind: TableKind::Table,
             key_values: Default::default(),
             range: node.syntax().range(),
             symbol_range: text::Range::new(
@@ -81,9 +81,12 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_parent(&self) -> Self {
+    pub(crate) fn new_parent(&self, kind: TableKind) -> Self {
         Self {
-            kind: self.kind,
+            kind: match kind {
+                TableKind::Table | TableKind::ParentTable => kind,
+                _ => unreachable!("Parent table can only be created from Table or ParentTable"),
+            },
             key_values: Default::default(),
             range: self.range,
             symbol_range: self.symbol_range,
@@ -228,7 +231,12 @@ impl TryIntoDocumentTree<Table> for ast::Table {
             get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
         if let Some(key) = keys.pop() {
-            insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
+            insert_table(
+                &mut table,
+                key,
+                |table| table.new_parent(TableKind::Table),
+                &mut errors,
+            );
         }
 
         let mut is_array_of_table = array_of_table_keys.contains(&keys);
@@ -237,12 +245,16 @@ impl TryIntoDocumentTree<Table> for ast::Table {
                 insert_array_of_tables(
                     &mut table,
                     key,
-                    |table| table.new_parent(),
                     Array::new_parent_array_of_tables,
                     &mut errors,
                 );
             } else {
-                insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
+                insert_table(
+                    &mut table,
+                    key,
+                    |table| table.new_parent(TableKind::ParentTable),
+                    &mut errors,
+                );
             };
 
             is_array_of_table = array_of_table_keys.contains(&keys);
@@ -280,13 +292,7 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
             get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
         if let Some(key) = keys.pop() {
-            insert_array_of_tables(
-                &mut table,
-                key,
-                |table| table.new_parent(),
-                Array::new_array_of_tables,
-                &mut errors,
-            );
+            insert_array_of_tables(&mut table, key, Array::new_array_of_tables, &mut errors);
         }
 
         let mut is_array_of_table = array_of_table_keys.contains(&keys);
@@ -295,12 +301,16 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
                 insert_array_of_tables(
                     &mut table,
                     key,
-                    |table| table.new_parent(),
                     Array::new_parent_array_of_tables,
                     &mut errors,
                 );
             } else {
-                insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
+                insert_table(
+                    &mut table,
+                    key,
+                    |table| table.new_parent(TableKind::ParentTable),
+                    &mut errors,
+                );
             };
 
             is_array_of_table = array_of_table_keys.contains(&keys);
@@ -344,7 +354,7 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
         };
 
         for key in keys.into_iter().rev() {
-            match table.new_parent().insert(
+            match table.new_parent(TableKind::ParentTable).insert(
                 key,
                 Value::Table(std::mem::replace(&mut table, Table::new_key_value(&self))),
             ) {
@@ -440,14 +450,11 @@ fn get_header_keys(
 fn insert_table(
     table: &mut Table,
     key: Key,
-    new_table_fn: impl FnOnce(&Table) -> Table,
+    new_table_fn: impl Fn(&Table) -> Table,
     errors: &mut Vec<crate::Error>,
 ) {
     let new_table = new_table_fn(&table);
-    match table
-        .new_parent()
-        .insert(key, Value::Table(std::mem::replace(table, new_table)))
-    {
+    match new_table_fn(&table).insert(key, Value::Table(std::mem::replace(table, new_table))) {
         Ok(t) => *table = t,
         Err(errs) => errors.extend(errs),
     };
@@ -456,14 +463,16 @@ fn insert_table(
 fn insert_array_of_tables(
     table: &mut Table,
     key: Key,
-    new_tables_fn: impl FnOnce(&Table) -> Table,
-    new_array_of_tables_fn: impl FnOnce(&Table) -> Array,
+    new_array_of_tables_fn: impl Fn(&Table) -> Array,
     errors: &mut Vec<crate::Error>,
 ) {
     let mut array = new_array_of_tables_fn(&table);
-    let new_table = new_tables_fn(&table);
+    let new_table = table.new_parent(TableKind::ParentTable);
     array.push(Value::Table(std::mem::replace(table, new_table)));
-    match table.new_parent().insert(key, Value::Array(array)) {
+    match table
+        .new_parent(TableKind::ParentTable)
+        .insert(key, Value::Array(array))
+    {
         Ok(t) => *table = t,
         Err(errs) => errors.extend(errs),
     };

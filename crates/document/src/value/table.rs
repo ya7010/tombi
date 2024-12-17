@@ -15,8 +15,8 @@ impl From<document_tree::TableKind> for TableKind {
         match kind {
             document_tree::TableKind::Root => Self::Table,
             document_tree::TableKind::Table => Self::Table,
+            document_tree::TableKind::ParentTable => Self::Table,
             document_tree::TableKind::InlineTable => Self::InlineTable,
-            document_tree::TableKind::ArrayOfTables => Self::Table,
             document_tree::TableKind::KeyValue => Self::KeyValue,
         }
     }
