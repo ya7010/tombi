@@ -18,6 +18,7 @@ pub const DEFAULT_LINT_OPTIONS: LintOptions = LintOptions::default();
 #[derive(Debug, Default, Clone)]
 pub struct Config {
     /// # TOML version.
+    #[cfg_attr(feature = "jsonschema", schemars(default = "TomlVersion::default"))]
     pub toml_version: Option<TomlVersion>,
 
     /// # Formatter options.
