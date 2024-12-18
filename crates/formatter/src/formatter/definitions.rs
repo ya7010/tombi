@@ -9,7 +9,7 @@ impl Definitions {
     ///
     /// ```toml
     /// key = "value"  # tailing comment
-    /// #            ^^  <-this space
+    /// #            ^^  <- this
     /// ```
     #[inline]
     pub const fn tailing_comment_space(&self) -> &'static str {
@@ -20,7 +20,7 @@ impl Definitions {
     ///
     /// ```toml
     /// key = [ 1, 2, 3 ]
-    /// #      ^       ^  <- this space
+    /// #      ^       ^  <- this
     #[inline]
     pub const fn singleline_array_bracket_inner_space(&self) -> &'static str {
         ""
@@ -30,7 +30,7 @@ impl Definitions {
     ///
     /// ```toml
     /// key = [ 1, 2, 3 ]
-    /// #         ^  ^    <- this space
+    /// #         ^  ^    <- this
     #[inline]
     pub const fn singleline_array_space_after_comma(&self) -> &'static str {
         " "
@@ -40,7 +40,7 @@ impl Definitions {
     ///
     /// ```toml
     /// key = { a = 1, b = 2 }
-    /// #      ^            ^  <- this space
+    /// #      ^            ^  <- this
     /// ```
     #[inline]
     pub const fn singleline_inline_table_brace_inner_space(&self) -> &'static str {
@@ -51,7 +51,7 @@ impl Definitions {
     ///
     /// ```toml
     /// key = { a = 1, b = 2 }
-    /// #             ^  <- this space
+    /// #             ^  <- this
     /// ```
     #[inline]
     pub const fn singleline_inline_table_space_after_comma(&self) -> &'static str {
