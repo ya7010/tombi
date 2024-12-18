@@ -21,6 +21,7 @@ pub struct FormatOptions {
     ///
     /// - `lf`: Line Feed only (`\n`), common on Linux and macOS as well as inside git repos.
     /// - `crlf`: Carriage Return Line Feed (`\r\n`), common on Windows.
+    #[cfg_attr(feature = "jsonschema", schemars(default = "LineEnding::default"))]
     pub line_ending: Option<LineEnding>,
 
     /// # The delimiter between date and time.
