@@ -1,5 +1,5 @@
-# begin dangling comment1
-# begin dangling comment2
+# root begin dangling comment1
+# root begin dangling comment2
 
 # table leading comment1
 # table leading comment2
@@ -117,5 +117,5 @@ b = 3
 # key value leading comment2
 key6 = 3  # key value tailing comment
 
-# end dangling comment1
-# end dangling comment2
+# root end dangling comment1
+# root end dangling comment2
