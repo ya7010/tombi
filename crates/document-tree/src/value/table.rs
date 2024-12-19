@@ -253,11 +253,7 @@ impl TryIntoDocumentTree<Table> for ast::Table {
         let array_of_table_keys =
             get_array_of_tables_keys(self.array_of_tables_keys(), toml_version, &mut errors);
 
-        if let Some(key) = keys.pop() {
-            insert_table(&mut table, key, |table| table.new_parent(), &mut errors);
-        }
-
-        let mut is_array_of_table = array_of_table_keys.contains(&keys);
+        let mut is_array_of_table = false;
         while let Some(key) = keys.pop() {
             if is_array_of_table {
                 insert_array_of_tables(
