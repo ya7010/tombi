@@ -105,7 +105,7 @@ impl Table {
         let mut errors = vec![];
 
         match (self.kind, other.kind) {
-            (LastHeader | InlineTable, LastHeader | InlineTable) => {
+            (LastHeader | InlineTable | KeyValue, LastHeader | InlineTable) => {
                 errors.push(crate::Error::ConflictTable {
                     range1: self.symbol_range,
                     range2: self.symbol_range,

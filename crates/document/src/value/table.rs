@@ -237,4 +237,17 @@ mod test {
             })
         )
     }
+
+    test_serialize! {
+        #[test]
+        fn array_of_table_table_twice_with_key(
+            r#"
+            a.b=0
+            # Since table "a" is already defined, it can't be replaced by an inline table.
+            a={}
+       "#
+        ) -> Err([
+            ("conflicting table", ((0, 0), (0, 5)))
+        ])
+    }
 }

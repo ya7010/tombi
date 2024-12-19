@@ -799,24 +799,6 @@ FAIL invalid/inline-table/duplicate-key-3
      want:
        Exit code 1
 
-FAIL invalid/inline-table/overwrite-01
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a.b=0
-       # Since table "a" is already defined, it can't be replaced by an inline table.
-       a={}
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {"type": "integer", "value": "0"}
-         }
-       }
-
-     want:
-       Exit code 1
-
 FAIL invalid/inline-table/overwrite-02
      Expected an error, but no error was reported.
 
@@ -941,27 +923,6 @@ FAIL invalid/spec/inline-table-2-0
        [product]
        type = { name = "Nail" }
        type.edible = false  # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "product": {
-           "type": {
-             "edible": {"type": "bool", "value": "false"},
-             "name":   {"type": "string", "value": "Nail"}
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/spec/inline-table-3-0
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [product]
-       type.name = "Nail"
-       type = { edible = false }  # INVALID
 
      output from parser-cmd (stdout):
        {
@@ -1244,4 +1205,4 @@ FAIL invalid/table/super-twice
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 314 passed, 47 failed
+invalid tests: 316 passed, 45 failed

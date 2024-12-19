@@ -3,13 +3,13 @@ pub enum Error {
     #[error("duplicate key: {key}")]
     DuplicateKey { key: String, range: text::Range },
 
-    #[error("conflicting table.")]
+    #[error("conflicting table")]
     ConflictTable {
         range1: text::Range,
         range2: text::Range,
     },
 
-    #[error("conflicting array.")]
+    #[error("conflicting array")]
     ConflictArray {
         range1: text::Range,
         range2: text::Range,
