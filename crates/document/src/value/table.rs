@@ -12,13 +12,11 @@ pub enum TableKind {
 
 impl From<document_tree::TableKind> for TableKind {
     fn from(kind: document_tree::TableKind) -> Self {
+        use document_tree::TableKind::*;
         match kind {
-            document_tree::TableKind::Root => Self::Table,
-            document_tree::TableKind::Table => Self::Table,
-            document_tree::TableKind::ParentHeader => Self::Table,
-            document_tree::TableKind::LastHeader => Self::Table,
-            document_tree::TableKind::InlineTable => Self::InlineTable,
-            document_tree::TableKind::KeyValue => Self::KeyValue,
+            Root | Table | ParentTable => Self::Table,
+            InlineTable => Self::InlineTable,
+            KeyValue => Self::KeyValue,
         }
     }
 }
@@ -163,6 +161,34 @@ mod test {
 
     test_serialize! {
         #[test]
+        fn key_dotted_2(
+            r#"many.dots.here.dot.dot.dot = {a.b.c = 1, a.b.d = 2}"#
+        ) -> Ok(json!(
+            {
+                "many": {
+                    "dots": {
+                        "here": {
+                            "dot": {
+                                "dot": {
+                                    "dot": {
+                                        "a": {
+                                            "b": {
+                                                "c": 1,
+                                                "d": 2
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ))
+    }
+
+    test_serialize! {
+        #[test]
         fn key_dotted_3(
             r#"
             [tbl]
@@ -240,14 +266,52 @@ mod test {
 
     test_serialize! {
         #[test]
-        fn array_of_table_table_twice_with_key(
+        fn duplicate(
+            r#"
+            [a]
+            b = 1
+
+            [a]
+            c = 2
+            "#
+        ) -> Err([
+            ("conflicting table", ((3, 0), (4, 5)))
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn duplicate_key_2(
             r#"
             a.b=0
             # Since table "a" is already defined, it can't be replaced by an inline table.
             a={}
        "#
         ) -> Err([
-            ("conflicting table", ((0, 0), (0, 5)))
+            ("conflicting table", ((2, 2), (2, 4)))
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn duplicate_key_3(
+            r#"tbl = { fruit = { apple.color = "red" }, fruit.apple.texture = { smooth = true } }"#
+        ) -> Err([
+            ("conflicting table", ((0, 41), (0, 80)))
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn duplicate_key_dotted_table2(
+            r#"
+            [fruit]
+            apple.taste.sweet = true
+
+            [fruit.apple.taste] # INVALID
+            "#
+        ) -> Err([
+            ("conflicting table", ((3, 0), (3, 29)))
         ])
     }
 }

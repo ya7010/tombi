@@ -10,8 +10,7 @@ use crate::{Array, Key, TryIntoDocumentTree, Value};
 pub enum TableKind {
     Root,
     Table,
-    ParentHeader,
-    LastHeader,
+    ParentTable,
     InlineTable,
     KeyValue,
 }
@@ -85,7 +84,7 @@ impl Table {
     pub(crate) fn new_parent(&self, kind: TableKind) -> Self {
         Self {
             kind: match kind {
-                TableKind::ParentHeader | TableKind::LastHeader | TableKind::Table => kind,
+                TableKind::ParentTable | TableKind::Table => kind,
                 _ => {
                     unreachable!()
                 }
@@ -104,14 +103,28 @@ impl Table {
         use TableKind::*;
         let mut errors = vec![];
 
-        match (self.kind, other.kind) {
-            (LastHeader | InlineTable | KeyValue, LastHeader | InlineTable) => {
-                errors.push(crate::Error::ConflictTable {
-                    range1: self.symbol_range,
-                    range2: self.symbol_range,
-                });
+        let is_conflict = match (self.kind, other.kind) {
+            (KeyValue, KeyValue) => {
+                match self
+                    .key_values
+                    .values()
+                    .zip(other.key_values.values())
+                    .next()
+                {
+                    Some((Value::Table(table1), _)) => table1.kind() == InlineTable,
+                    Some((_, Value::Table(table2))) => table2.kind() == InlineTable,
+                    _ => false,
+                }
             }
-            _ => {}
+            (Table | InlineTable | KeyValue, Table | InlineTable) | (InlineTable, KeyValue) => true,
+            _ => false,
+        };
+
+        if is_conflict {
+            errors.push(crate::Error::ConflictTable {
+                range1: self.symbol_range,
+                range2: other.symbol_range,
+            })
         }
 
         self.range += other.range;
@@ -249,7 +262,7 @@ impl TryIntoDocumentTree<Table> for ast::Table {
             insert_table(
                 &mut table,
                 key,
-                |table| table.new_parent(TableKind::Table),
+                |table| table.new_parent(TableKind::ParentTable),
                 &mut errors,
             );
         }
@@ -267,7 +280,7 @@ impl TryIntoDocumentTree<Table> for ast::Table {
                 insert_table(
                     &mut table,
                     key,
-                    |table| table.new_parent(TableKind::ParentHeader),
+                    |table| table.new_parent(TableKind::ParentTable),
                     &mut errors,
                 );
             };
@@ -323,7 +336,7 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
                 insert_table(
                     &mut table,
                     key,
-                    |table| table.new_parent(TableKind::ParentHeader),
+                    |table| table.new_parent(TableKind::ParentTable),
                     &mut errors,
                 );
             };
@@ -369,7 +382,7 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
         };
 
         for key in keys.into_iter().rev() {
-            match table.new_parent(TableKind::ParentHeader).insert(
+            match table.new_parent(TableKind::ParentTable).insert(
                 key,
                 Value::Table(std::mem::replace(&mut table, Table::new_key_value(&self))),
             ) {
@@ -396,6 +409,8 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
         let mut table = Table::new_inline_table(&self);
         let mut errors = Vec::new();
 
+        table.kind = TableKind::Table;
+
         for key_value in self.key_values() {
             match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
@@ -406,6 +421,8 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
                 Err(errs) => errors.extend(errs),
             }
         }
+
+        table.kind = TableKind::InlineTable;
 
         if errors.is_empty() {
             Ok(table)
@@ -482,10 +499,10 @@ fn insert_array_of_tables(
     errors: &mut Vec<crate::Error>,
 ) {
     let mut array = new_array_of_tables_fn(&table);
-    let new_table = table.new_parent(TableKind::ParentHeader);
+    let new_table = table.new_parent(TableKind::ParentTable);
     array.push(Value::Table(std::mem::replace(table, new_table)));
     match table
-        .new_parent(TableKind::ParentHeader)
+        .new_parent(TableKind::ParentTable)
         .insert(key, Value::Array(array))
     {
         Ok(t) => *table = t,

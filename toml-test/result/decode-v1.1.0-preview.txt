@@ -776,29 +776,6 @@ FAIL invalid/control/string-us
      want:
        Exit code 1
 
-FAIL invalid/inline-table/duplicate-key-3
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       tbl = { fruit = { apple.color = "red" }, fruit.apple.texture = { smooth = true } }
-
-     output from parser-cmd (stdout):
-       {
-         "tbl": {
-           "fruit": {
-             "apple": {
-               "color": {"type": "string", "value": "red"},
-               "texture": {
-                 "smooth": {"type": "bool", "value": "true"}
-               }
-             }
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
 FAIL invalid/inline-table/overwrite-02
      Expected an error, but no error was reported.
 
@@ -811,43 +788,6 @@ FAIL invalid/inline-table/overwrite-02
        {
          "a": {
            "b": {}
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/inline-table/overwrite-05
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       inline-t = { nest = {} }
-
-       [inline-t.nest]
-
-     output from parser-cmd (stdout):
-       {
-         "inline-t": {
-           "nest": {}
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/inline-table/overwrite-08
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       tab = { inner = { dog = "best" }, inner.cat = "worst" }
-
-     output from parser-cmd (stdout):
-       {
-         "tab": {
-           "inner": {
-             "cat": {"type": "string", "value": "worst"},
-             "dog": {"type": "string", "value": "best"}
-           }
          }
        }
 
@@ -911,91 +851,6 @@ FAIL invalid/key/no-eol
        {
          "a": {"type": "integer", "value": "1"},
          "b": {"type": "integer", "value": "2"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/spec/inline-table-2-0
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [product]
-       type = { name = "Nail" }
-       type.edible = false  # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "product": {
-           "type": {
-             "edible": {"type": "bool", "value": "false"},
-             "name":   {"type": "string", "value": "Nail"}
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/spec/table-9-0
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [fruit]
-       apple.color = "red"
-       apple.taste.sweet = true
-
-       [fruit.apple]  # INVALID
-       # [fruit.apple.taste]  # INVALID
-
-       [fruit.apple.texture]  # you can add sub-tables
-       smooth = true
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "color": {"type": "string", "value": "red"},
-             "taste": {
-               "sweet": {"type": "bool", "value": "true"}
-             },
-             "texture": {
-               "smooth": {"type": "bool", "value": "true"}
-             }
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/spec/table-9-1
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [fruit]
-       apple.color = "red"
-       apple.taste.sweet = true
-
-       # [fruit.apple]  # INVALID
-       [fruit.apple.taste]  # INVALID
-
-       [fruit.apple.texture]  # you can add sub-tables
-       smooth = true
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "color": {"type": "string", "value": "red"},
-             "taste": {
-               "sweet": {"type": "bool", "value": "true"}
-             },
-             "texture": {
-               "smooth": {"type": "bool", "value": "true"}
-             }
-           }
-         }
        }
 
      want:
@@ -1076,71 +931,6 @@ FAIL invalid/table/append-with-dotted-keys-2
      want:
        Exit code 1
 
-FAIL invalid/table/duplicate
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [a]
-       b = 1
-
-       [a]
-       c = 2
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {"type": "integer", "value": "1"},
-           "c": {"type": "integer", "value": "2"}
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/table/duplicate-key-dotted-table
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [fruit]
-       apple.color = "red"
-
-       [fruit.apple] # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "color": {"type": "string", "value": "red"}
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/table/duplicate-key-dotted-table2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [fruit]
-       apple.taste.sweet = true
-
-       [fruit.apple.taste] # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "fruit": {
-           "apple": {
-             "taste": {
-               "sweet": {"type": "bool", "value": "true"}
-             }
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
 FAIL invalid/table/redefine-2
      Expected an error, but no error was reported.
 
@@ -1148,28 +938,6 @@ FAIL invalid/table/redefine-2
        [t1]
        t2.t3.v = 0
        [t1.t2]
-
-     output from parser-cmd (stdout):
-       {
-         "t1": {
-           "t2": {
-             "t3": {
-               "v": {"type": "integer", "value": "0"}
-             }
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/table/redefine-3
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [t1]
-       t2.t3.v = 0
-       [t1.t2.t3]
 
      output from parser-cmd (stdout):
        {
@@ -1205,4 +973,4 @@ FAIL invalid/table/super-twice
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 316 passed, 45 failed
+invalid tests: 326 passed, 35 failed
