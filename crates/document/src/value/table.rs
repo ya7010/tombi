@@ -15,7 +15,8 @@ impl From<document_tree::TableKind> for TableKind {
         match kind {
             document_tree::TableKind::Root => Self::Table,
             document_tree::TableKind::Table => Self::Table,
-            document_tree::TableKind::ParentTable => Self::Table,
+            document_tree::TableKind::ParentHeader => Self::Table,
+            document_tree::TableKind::LastHeader => Self::Table,
             document_tree::TableKind::InlineTable => Self::InlineTable,
             document_tree::TableKind::KeyValue => Self::KeyValue,
         }
@@ -96,6 +97,89 @@ mod test {
     use serde_json::json;
 
     use crate::test_serialize;
+
+    test_serialize!(
+        #[test]
+        fn key_value(
+            r#"
+            key = "value"
+            "#
+        ) -> Ok(json!({"key": "value"}))
+    );
+
+    test_serialize!(
+        #[test]
+        fn keys_value(
+            r#"
+            foo.bar.baz = "value"
+            "#
+        ) -> Ok(json!(
+            {
+                "foo": {
+                    "bar": {
+                        "baz": "value"
+                    }
+                }
+            }
+        ))
+    );
+
+    test_serialize!(
+        #[test]
+        fn table(
+            r#"
+            [foo]
+            bar = "value"
+            baz = 42
+            "#
+        ) -> Ok(json!({"foo": {"bar": "value", "baz": 42}}))
+    );
+
+    test_serialize! {
+        #[test]
+        fn tables(
+            r#"
+            [foo1]
+            bar = 1
+
+            [foo2]
+            bar = 2
+            "#
+        ) -> Ok(json!({
+            "foo1": {"bar": 1},
+            "foo2": {"bar": 2}
+        }))
+    }
+
+    test_serialize! {
+        #[test]
+        fn sub_empty(
+            r#"
+            [a]
+            [a.b]
+            "#
+        ) -> Ok(json!({ "a": { "b": {} } }))
+    }
+
+    test_serialize! {
+        #[test]
+        fn key_dotted_3(
+            r#"
+            [tbl]
+            a.b.c = {d.e=1}
+
+            [tbl.x]
+            a.b.c = {d.e=1}
+            "#
+        ) -> Ok(json!(
+            {
+                "tbl": {
+                    "a": { "b": { "c": { "d": { "e": 1 } } } },
+                    "x": { "a": { "b": { "c": { "d": { "e": 1 } } } } }
+                }
+            }
+        ))
+    }
 
     test_serialize! {
         #[test]

@@ -3,6 +3,12 @@ pub enum Error {
     #[error("duplicate key: {key}")]
     DuplicateKey { key: String, range: text::Range },
 
+    #[error("conflicting table.")]
+    ConflictTable {
+        range1: text::Range,
+        range2: text::Range,
+    },
+
     #[error("conflicting array.")]
     ConflictArray {
         range1: text::Range,
@@ -60,6 +66,7 @@ impl Error {
     pub fn range(&self) -> text::Range {
         match self {
             Self::DuplicateKey { range, .. } => *range,
+            Self::ConflictTable { range2, .. } => *range2,
             Self::ConflictArray { range2, .. } => *range2,
             Self::ParseIntError { range, .. } => *range,
             Self::ParseFloatError { range, .. } => *range,
