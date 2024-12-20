@@ -5,11 +5,11 @@
   - [x] Red-Tree のPosition, Range のバグ修正
   - [ ] Lexed の切り離し（events を inputs ではなく outputs の配列を参照させる）。
   - [ ] dotted keys のサポート
+- [ ] https://github.com/toml-lang/toml-test に対応
 
 ### Milestone 2
 - [x] Document のサポート。
 - [ ] JSON Schema のサポート
-- [ ] https://github.com/toml-lang/toml-test に対応
 
 ### Milestone 3
 - [ ] Linter の機能強化
