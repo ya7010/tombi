@@ -52,7 +52,7 @@ pub fn lex(source: &str) -> Lexed {
     }
 
     // dbg!(&lexed.token_results);
-    tracing::debug!("{:?}", &lexed.token_results);
+    tracing::trace!("lexed token resuls: {:#?}", &lexed.token_results);
 
     lexed
 }

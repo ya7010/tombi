@@ -1,6 +1,6 @@
 use syntax::SyntaxKind;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Token {
     kind: SyntaxKind,
     span: text::Span,
@@ -38,5 +38,11 @@ impl Token {
     #[inline]
     pub fn range(&self) -> text::Range {
         self.range
+    }
+}
+
+impl std::fmt::Debug for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} @{:?} @{:?}", self.kind, self.span, self.range)
     }
 }
