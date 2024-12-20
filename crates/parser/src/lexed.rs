@@ -1,21 +1,12 @@
 use syntax::SyntaxKind::{self, *};
 
-use crate::builder::{Builder, State};
-use crate::{input::Input, output};
+use crate::input::Input;
 
 #[derive(Debug)]
 pub struct LexedStr<'a> {
     pub source: &'a str,
     pub tokens: Vec<lexer::Token>,
     pub errors: Vec<crate::Error>,
-}
-
-#[derive(Debug)]
-pub enum Step<'a> {
-    AddToken { kind: SyntaxKind, text: &'a str },
-    StartNode { kind: SyntaxKind },
-    FinishNode,
-    Error { error: crate::Error },
 }
 
 pub fn lex(source: &str) -> LexedStr<'_> {
@@ -109,38 +100,5 @@ impl<'a> LexedStr<'a> {
             }
         }
         res
-    }
-
-    pub fn intersperse_trivia(
-        &self,
-        output: &crate::Output,
-        sink: &mut dyn FnMut(Step<'_>),
-    ) -> bool {
-        let mut builder = Builder::new(self, sink);
-
-        for event in output.iter() {
-            match event {
-                output::Step::Token {
-                    kind,
-                    n_input_tokens: n_raw_tokens,
-                } => builder.token(kind, n_raw_tokens),
-                output::Step::Enter { kind } => builder.enter(kind),
-                output::Step::Exit => builder.exit(),
-                output::Step::Error { error } => {
-                    (builder.sink)(Step::Error { error });
-                }
-            }
-        }
-
-        match std::mem::replace(&mut builder.state, State::Normal) {
-            State::PendingExit => {
-                builder.eat_trivias();
-                (builder.sink)(Step::FinishNode);
-            }
-            State::PendingEnter | State::Normal => unreachable!(),
-        }
-
-        // is_eof?
-        builder.token_index == builder.lexed.len()
     }
 }

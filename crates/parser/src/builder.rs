@@ -1,12 +1,12 @@
 use syntax::SyntaxKind;
 
-use crate::{lexed, LexedStr};
+use crate::{output, LexedStr};
 
 pub struct Builder<'a, 'b> {
     pub(crate) lexed: &'a LexedStr<'a>,
     pub(crate) token_index: usize,
     pub(crate) state: State,
-    pub(crate) sink: &'b mut dyn FnMut(lexed::Step<'_>),
+    pub(crate) sink: &'b mut dyn FnMut(Step<'_>),
 }
 
 impl std::fmt::Debug for Builder<'_, '_> {
@@ -27,7 +27,7 @@ pub enum State {
 }
 
 impl<'a, 'b> Builder<'a, 'b> {
-    pub fn new(lexed: &'a LexedStr<'a>, sink: &'b mut dyn FnMut(lexed::Step<'_>)) -> Self {
+    pub fn new(lexed: &'a LexedStr<'a>, sink: &'b mut dyn FnMut(Step<'_>)) -> Self {
         Self {
             lexed,
             token_index: 0,
@@ -39,7 +39,7 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn token(&mut self, kind: SyntaxKind, n_tokens: u8) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(lexed::Step::FinishNode),
+            State::PendingExit => (self.sink)(Step::FinishNode),
             State::Normal => (),
         }
         self.eat_trivias();
@@ -49,23 +49,23 @@ impl<'a, 'b> Builder<'a, 'b> {
     pub fn enter(&mut self, kind: SyntaxKind) {
         match std::mem::replace(&mut self.state, State::Normal) {
             State::PendingEnter => {
-                (self.sink)(lexed::Step::StartNode { kind });
+                (self.sink)(Step::StartNode { kind });
                 // No need to attach trivias to previous node: there is no
                 // previous node.
                 return;
             }
-            State::PendingExit => (self.sink)(lexed::Step::FinishNode),
+            State::PendingExit => (self.sink)(Step::FinishNode),
             State::Normal => (),
         }
 
         self.eat_n_trivias();
-        (self.sink)(lexed::Step::StartNode { kind });
+        (self.sink)(Step::StartNode { kind });
     }
 
     pub fn exit(&mut self) {
         match std::mem::replace(&mut self.state, State::PendingExit) {
             State::PendingEnter => unreachable!(),
-            State::PendingExit => (self.sink)(lexed::Step::FinishNode),
+            State::PendingExit => (self.sink)(Step::FinishNode),
             State::Normal => (),
         }
     }
@@ -100,6 +100,47 @@ impl<'a, 'b> Builder<'a, 'b> {
             .text_in(self.token_index..self.token_index + n_tokens);
         self.token_index += n_tokens;
 
-        (self.sink)(lexed::Step::AddToken { kind, text });
+        (self.sink)(Step::AddToken { kind, text });
     }
+}
+
+#[derive(Debug)]
+pub enum Step<'a> {
+    AddToken { kind: SyntaxKind, text: &'a str },
+    StartNode { kind: SyntaxKind },
+    FinishNode,
+    Error { error: crate::Error },
+}
+
+pub fn intersperse_trivia(
+    lexed: &LexedStr,
+    output: &crate::Output,
+    sink: &mut dyn FnMut(Step<'_>),
+) -> bool {
+    let mut builder = Builder::new(lexed, sink);
+
+    for event in output.iter() {
+        match event {
+            output::Step::Token {
+                kind,
+                n_input_tokens: n_raw_tokens,
+            } => builder.token(kind, n_raw_tokens),
+            output::Step::Enter { kind } => builder.enter(kind),
+            output::Step::Exit => builder.exit(),
+            output::Step::Error { error } => {
+                (builder.sink)(Step::Error { error });
+            }
+        }
+    }
+
+    match std::mem::replace(&mut builder.state, State::Normal) {
+        State::PendingExit => {
+            builder.eat_trivias();
+            (builder.sink)(Step::FinishNode);
+        }
+        State::PendingEnter | State::Normal => unreachable!(),
+    }
+
+    // is_eof?
+    builder.token_index == builder.lexed.len()
 }
