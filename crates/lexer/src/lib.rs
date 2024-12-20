@@ -51,9 +51,6 @@ pub fn lex(source: &str) -> Lexed {
         lexed.push_token_result(res);
     }
 
-    // dbg!(&lexed.token_results);
-    tracing::trace!("lexed token resuls: {:#?}", &lexed.token_results);
-
     lexed
 }
 
