@@ -4,7 +4,7 @@ use indexmap::map::Entry;
 use indexmap::IndexMap;
 use itertools::Itertools;
 
-use crate::{Array, Key, TryIntoDocumentTree, Value};
+use crate::{support::string::try_new_comment, Array, Key, TryIntoDocumentTree, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
@@ -260,6 +260,18 @@ impl TryIntoDocumentTree<Table> for ast::Table {
         let mut table = Table::new_table(&self);
         let mut errors = Vec::new();
 
+        for comment in self.header_leading_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
+        if let Some(comment) = self.header_tailing_comment() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
         for key_value in self.key_values() {
             match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
@@ -311,6 +323,18 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
     ) -> Result<Table, Vec<crate::Error>> {
         let mut table = Table::new_array_of_tables(&self);
         let mut errors = Vec::new();
+
+        for comment in self.header_leading_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
+        if let Some(comment) = self.header_tailing_comment() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
 
         for key_value in self.key_values() {
             match key_value.try_into_document_tree(toml_version) {
@@ -367,6 +391,12 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
     ) -> Result<Table, Vec<crate::Error>> {
         let mut errors = Vec::new();
 
+        for comment in self.leading_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
         let mut keys = get_header_keys(self.keys(), toml_version, &mut errors);
 
         let value: Value = match self.value().unwrap().try_into_document_tree(toml_version) {
@@ -417,9 +447,15 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
         let mut table = Table::new_inline_table(&self);
         let mut errors = Vec::new();
 
+        for comment in self.inner_begin_dangling_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
         table.kind = TableKind::Table;
 
-        for key_value in self.key_values() {
+        for (key_value, comma) in self.key_values_with_comma() {
             match key_value.try_into_document_tree(toml_version) {
                 Ok(other) => {
                     if let Err(errs) = table.merge(other) {
@@ -428,9 +464,27 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
                 }
                 Err(errs) => errors.extend(errs),
             }
+            if let Some(comma) = comma {
+                for comment in comma.leading_comments() {
+                    if let Err(error) = try_new_comment(&comment) {
+                        errors.push(error);
+                    }
+                }
+                if let Some(comment) = comma.tailing_comment() {
+                    if let Err(error) = try_new_comment(&comment) {
+                        errors.push(error);
+                    }
+                }
+            }
         }
 
         table.kind = TableKind::InlineTable;
+
+        for comment in self.inner_end_dangling_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
 
         if errors.is_empty() {
             Ok(table)

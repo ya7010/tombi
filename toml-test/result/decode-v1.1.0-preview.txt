@@ -440,76 +440,6 @@ FAIL invalid/control/comment-cr
      want:
        Exit code 1
 
-FAIL invalid/control/comment-del
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       comment-del  = "0x7f"   # 
-
-     output from parser-cmd (stdout):
-       {
-         "comment-del": {"type": "string", "value": "0x7f"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/control/comment-ff
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       comment-ff   = "0x7f"   # 
-
-     output from parser-cmd (stdout):
-       {
-         "comment-ff": {"type": "string", "value": "0x7f"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/control/comment-lf
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       comment-lf   = "ctrl-P" # 
-
-     output from parser-cmd (stdout):
-       {
-         "comment-lf": {"type": "string", "value": "ctrl-P"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/control/comment-null
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       comment-null = "null"   #  
-
-     output from parser-cmd (stdout):
-       {
-         "comment-null": {"type": "string", "value": "null"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/control/comment-us
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       comment-us   = "ctrl-_" # 
-
-     output from parser-cmd (stdout):
-       {
-         "comment-us": {"type": "string", "value": "ctrl-_"}
-       }
-
-     want:
-       Exit code 1
-
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 354 passed,  7 failed
+invalid tests: 359 passed,  2 failed

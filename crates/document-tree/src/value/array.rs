@@ -1,4 +1,6 @@
-use crate::{TryIntoDocumentTree, Value};
+use ast::AstNode;
+
+use crate::{support::string::try_new_comment, TryIntoDocumentTree, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -160,14 +162,42 @@ impl TryIntoDocumentTree<Array> for ast::Array {
 
         let mut errors = Vec::new();
 
-        for value in self.values() {
+        for comment in self.inner_begin_dangling_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
+        for (value, comma) in self.values_with_comma() {
             match value.try_into_document_tree(toml_version) {
                 Ok(value) => array.push(value),
                 Err(errs) => errors.extend(errs),
             }
+            if let Some(comma) = comma {
+                for comment in comma.leading_comments() {
+                    if let Err(error) = try_new_comment(&comment) {
+                        errors.push(error);
+                    }
+                }
+                if let Some(comment) = comma.tailing_comment() {
+                    if let Err(error) = try_new_comment(&comment) {
+                        errors.push(error);
+                    }
+                }
+            }
         }
 
-        Ok(array)
+        for comment in self.inner_end_dangling_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(array)
+        } else {
+            Err(errors)
+        }
     }
 }
 

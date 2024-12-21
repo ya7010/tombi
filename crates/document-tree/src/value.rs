@@ -7,6 +7,7 @@ mod string;
 mod table;
 
 pub use array::{Array, ArrayKind};
+use ast::AstNode;
 pub use boolean::Boolean;
 pub use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime};
 pub use float::Float;
@@ -14,7 +15,7 @@ pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
-use crate::TryIntoDocumentTree;
+use crate::{support::string::try_new_comment, TryIntoDocumentTree};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -69,7 +70,20 @@ impl TryIntoDocumentTree<Value> for ast::Value {
         self,
         toml_version: config::TomlVersion,
     ) -> Result<Value, Vec<crate::Error>> {
-        match self {
+        let mut errors = Vec::new();
+        for comment in self.leading_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
+        if let Some(comment) = self.tailing_comment() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
+        let result = match self {
             ast::Value::BasicString(string) => string.try_into().map(Value::String),
             ast::Value::LiteralString(string) => string.try_into().map(Value::String),
             ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
@@ -98,6 +112,20 @@ impl TryIntoDocumentTree<Value> for ast::Value {
             ast::Value::InlineTable(inline_table) => inline_table
                 .try_into_document_tree(toml_version)
                 .map(Value::Table),
+        };
+
+        match result {
+            Ok(value) => {
+                if errors.is_empty() {
+                    Ok(value)
+                } else {
+                    Err(errors)
+                }
+            }
+            Err(errs) => {
+                errors.extend(errs);
+                Err(errors)
+            }
         }
     }
 }

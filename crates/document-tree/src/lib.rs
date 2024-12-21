@@ -7,6 +7,7 @@ use config::TomlVersion;
 pub use error::Error;
 pub use key::{Key, KeyKind};
 use std::ops::Deref;
+use support::string::try_new_comment;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, StringKind, Table, TableKind, Value,
@@ -44,6 +45,12 @@ impl TryIntoDocumentTree<Root> for ast::Root {
         let mut root = Root(Table::new_root(&self));
         let mut errors = Vec::new();
 
+        for comment in self.begin_dangling_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
+            }
+        }
+
         for item in self.items() {
             if let Err(errs) = match item.try_into_document_tree(toml_version) {
                 Ok(
@@ -54,6 +61,12 @@ impl TryIntoDocumentTree<Root> for ast::Root {
                 Err(errs) => Err(errs),
             } {
                 errors.extend(errs);
+            }
+        }
+
+        for comment in self.end_dangling_comments() {
+            if let Err(error) = try_new_comment(&comment) {
+                errors.push(error);
             }
         }
 

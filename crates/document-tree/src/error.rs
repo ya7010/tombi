@@ -56,6 +56,12 @@ pub enum Error {
         error: crate::support::chrono::ParseError,
         range: text::Range,
     },
+
+    #[error("invalid comment: {error}")]
+    ParseCommentError {
+        error: crate::support::string::ParseError,
+        range: text::Range,
+    },
 }
 
 impl Error {
@@ -75,6 +81,7 @@ impl Error {
             Self::ParseLocalDateTimeError { range, .. } => *range,
             Self::ParseLocalDateError { range, .. } => *range,
             Self::ParseLocalTimeError { range, .. } => *range,
+            Self::ParseCommentError { range, .. } => *range,
         }
     }
 }

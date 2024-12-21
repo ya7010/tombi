@@ -54,11 +54,7 @@ pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseEr
     )
 }
 
-pub fn try_from_comment(value: &str) -> Result<String, ParseError> {
-    parse_literal_string(&value[1..], false)
-}
-
-fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
+pub fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
     let mut unicode_buf = String::new();
@@ -191,7 +187,7 @@ fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseE
     Ok(output)
 }
 
-fn parse_literal_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
+pub fn parse_literal_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
 
