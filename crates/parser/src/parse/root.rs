@@ -1,7 +1,7 @@
 use crate::parser::Parser;
 
 use super::{
-    begin_dangling_comments, end_dangling_comments, key::KEY_FIRST, leading_comments,
+    begin_dangling_comments, end_dangling_comments, invalid_line, key::KEY_FIRST, leading_comments,
     peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
 };
 use crate::ErrorKind::*;
@@ -17,9 +17,11 @@ impl Parse for ast::Root {
             let n = peek_leading_comments(p);
             if p.nth_at(n, EOF) {
                 break;
-            }
-            if p.nth_at_ts(n, KEY_FIRST) {
+            } else if p.nth_at_ts(n, KEY_FIRST) {
                 ast::KeyValue::parse(p);
+                if !p.at_ts(TS_LINE_END) {
+                    invalid_line(p, ExpectedLineBreak);
+                }
             } else if p.nth_at(n, T!("[[")) {
                 ast::ArrayOfTables::parse(p);
             } else if p.nth_at(n, T!['[']) {

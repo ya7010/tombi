@@ -794,36 +794,6 @@ FAIL invalid/inline-table/overwrite-02
      want:
        Exit code 1
 
-FAIL invalid/key/after-value
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       first = "Tom" last = "Preston-Werner" # INVALID
-
-     output from parser-cmd (stdout):
-       {
-         "first": {"type": "string", "value": "Tom"},
-         "last":  {"type": "string", "value": "Preston-Werner"}
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/key/no-eol
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a = 1 b = 2
-
-     output from parser-cmd (stdout):
-       {
-         "a": {"type": "integer", "value": "1"},
-         "b": {"type": "integer", "value": "2"}
-       }
-
-     want:
-       Exit code 1
-
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 332 passed, 29 failed
+invalid tests: 334 passed, 27 failed
