@@ -12,6 +12,9 @@ pub enum ParseError {
     #[error("invalid newline character in input")]
     InvalidNewline,
 
+    #[error("LineBreak allows only LF or CRLF")]
+    InvalidLineBreak,
+
     #[error("invalid control character in input")]
     InvalidControlCharacter,
 
@@ -24,7 +27,7 @@ pub fn from_bare_key(value: &str) -> String {
 }
 
 pub fn try_from_basic_string(value: &str) -> Result<String, ParseError> {
-    escape_basic_string(&value[1..value.len() - 1])
+    escape_basic_string(&value[1..value.len() - 1], false)
 }
 
 pub fn try_from_literal_string(value: &str) -> Result<String, ParseError> {
@@ -38,6 +41,7 @@ pub fn try_from_multi_line_basic_string(value: &str) -> Result<String, ParseErro
             .chars()
             .skip_while(|c| matches!(c, '\r' | '\n'))
             .collect::<String>(),
+        true,
     )
 }
 
@@ -48,7 +52,7 @@ pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseEr
         .collect())
 }
 
-fn escape_basic_string(input: &str) -> Result<String, ParseError> {
+fn escape_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
     let mut unicode_buf = String::new();
@@ -160,7 +164,17 @@ fn escape_basic_string(input: &str) -> Result<String, ParseError> {
                     return Err(ParseError::TrailingBackslash);
                 }
             }
-            '\u{0000}'..='\u{0008}' | '\u{000B}'..='\u{001F}' | '\u{007F}' => {
+            '\r' | '\n' if is_multi_line => {
+                output.push(c);
+                if c == '\r' {
+                    if let Some(&'\n') = chars.peek() {
+                        output.push(chars.next().unwrap());
+                    } else {
+                        return Err(ParseError::InvalidLineBreak);
+                    }
+                }
+            }
+            '\u{0000}'..='\u{0008}' | '\u{000A}'..='\u{001F}' | '\u{007F}' => {
                 return Err(ParseError::InvalidControlCharacter);
             }
             _ => {
