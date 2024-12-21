@@ -53,115 +53,119 @@ fn escape_basic_string(input: &str) -> Result<String, ParseError> {
     let mut chars = input.chars().peekable();
     let mut unicode_buf = String::new();
     while let Some(c) = chars.next() {
-        if c == '\\' {
-            if let Some(&next_c) = chars.peek() {
-                match next_c {
-                    'b' => {
-                        output.push('\u{0008}');
-                        chars.next();
-                    }
-                    't' => {
-                        output.push('\t');
-                        chars.next();
-                    }
-                    'n' => {
-                        output.push('\n');
-                        chars.next();
-                    }
-                    'f' => {
-                        output.push('\u{000C}');
-                        chars.next();
-                    }
-                    'r' => {
-                        output.push('\r');
-                        chars.next();
-                    }
-                    '"' => {
-                        output.push('\"');
-                        chars.next();
-                    }
-                    '\\' => {
-                        output.push('\\');
-                        chars.next();
-                    }
-                    'u' => {
-                        chars.next(); // consume 'u'
-                        unicode_buf.clear();
-                        for _ in 0..4 {
-                            if let Some(hex_digit) = chars.next() {
-                                unicode_buf.push(hex_digit);
-                            } else {
-                                return Err(ParseError::InvalidUnicodeEscapeSequence);
-                            }
-                        }
-                        if let Ok(code_point) = u32::from_str_radix(&unicode_buf, 16) {
-                            if let Some(unicode_char) = std::char::from_u32(code_point) {
-                                output.push(unicode_char);
-                            } else {
-                                return Err(ParseError::InvalidUnicodeCodePoint);
-                            }
-                        } else {
-                            return Err(ParseError::InvalidUnicodeEscapeSequence);
-                        }
-                    }
-                    'U' => {
-                        chars.next(); // consume 'U'
-                        unicode_buf.clear();
-                        for _ in 0..8 {
-                            if let Some(hex_digit) = chars.next() {
-                                unicode_buf.push(hex_digit);
-                            } else {
-                                return Err(ParseError::InvalidUnicodeEscapeSequence);
-                            }
-                        }
-                        if let Ok(code_point) = u32::from_str_radix(&unicode_buf, 16) {
-                            if let Some(unicode_char) = std::char::from_u32(code_point) {
-                                output.push(unicode_char);
-                            } else {
-                                return Err(ParseError::InvalidUnicodeCodePoint);
-                            }
-                        } else {
-                            return Err(ParseError::InvalidUnicodeEscapeSequence);
-                        }
-                    }
-                    '\n' => {
-                        // Skip newline characters
-                        chars.next();
-                        while let Some(&c) = chars.peek() {
-                            if c.is_whitespace() {
-                                chars.next();
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                    '\r' => {
-                        // Skip newline characters
-                        chars.next();
-                        if let Some(&'\n') = chars.peek() {
+        match c {
+            '\\' => {
+                if let Some(&next_c) = chars.peek() {
+                    match next_c {
+                        'b' => {
+                            output.push('\u{0008}');
                             chars.next();
-                        } else {
-                            return Err(ParseError::InvalidNewline);
                         }
-                        while let Some(&c) = chars.peek() {
-                            if c.is_whitespace() {
-                                chars.next();
+                        't' => {
+                            output.push('\t');
+                            chars.next();
+                        }
+                        'n' => {
+                            output.push('\n');
+                            chars.next();
+                        }
+                        'f' => {
+                            output.push('\u{000C}');
+                            chars.next();
+                        }
+                        'r' => {
+                            output.push('\r');
+                            chars.next();
+                        }
+                        '"' => {
+                            output.push('\"');
+                            chars.next();
+                        }
+                        '\\' => {
+                            output.push('\\');
+                            chars.next();
+                        }
+                        'u' => {
+                            chars.next(); // consume 'u'
+                            unicode_buf.clear();
+                            for _ in 0..4 {
+                                if let Some(hex_digit) = chars.next() {
+                                    unicode_buf.push(hex_digit);
+                                } else {
+                                    return Err(ParseError::InvalidUnicodeEscapeSequence);
+                                }
+                            }
+                            if let Ok(code_point) = u32::from_str_radix(&unicode_buf, 16) {
+                                if let Some(unicode_char) = std::char::from_u32(code_point) {
+                                    output.push(unicode_char);
+                                } else {
+                                    return Err(ParseError::InvalidUnicodeCodePoint);
+                                }
                             } else {
-                                break;
+                                return Err(ParseError::InvalidUnicodeEscapeSequence);
                             }
                         }
+                        'U' => {
+                            chars.next(); // consume 'U'
+                            unicode_buf.clear();
+                            for _ in 0..8 {
+                                if let Some(hex_digit) = chars.next() {
+                                    unicode_buf.push(hex_digit);
+                                } else {
+                                    return Err(ParseError::InvalidUnicodeEscapeSequence);
+                                }
+                            }
+                            if let Ok(code_point) = u32::from_str_radix(&unicode_buf, 16) {
+                                if let Some(unicode_char) = std::char::from_u32(code_point) {
+                                    output.push(unicode_char);
+                                } else {
+                                    return Err(ParseError::InvalidUnicodeCodePoint);
+                                }
+                            } else {
+                                return Err(ParseError::InvalidUnicodeEscapeSequence);
+                            }
+                        }
+                        '\n' => {
+                            // Skip newline characters
+                            chars.next();
+                            while let Some(&c) = chars.peek() {
+                                if c.is_whitespace() {
+                                    chars.next();
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        '\r' => {
+                            // Skip newline characters
+                            chars.next();
+                            if let Some(&'\n') = chars.peek() {
+                                chars.next();
+                            } else {
+                                return Err(ParseError::InvalidNewline);
+                            }
+                            while let Some(&c) = chars.peek() {
+                                if c.is_whitespace() {
+                                    chars.next();
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        _ => {
+                            return Err(ParseError::InvalidEscapeSequence);
+                        }
                     }
-                    _ => {
-                        return Err(ParseError::InvalidEscapeSequence);
-                    }
+                } else {
+                    return Err(ParseError::TrailingBackslash);
                 }
-            } else {
-                return Err(ParseError::TrailingBackslash);
             }
-        } else if matches!(c, '\u{0000}'..='\u{0008}' | '\u{000B}'..='\u{001F}' | '\u{007F}') {
-            return Err(ParseError::InvalidControlCharacter);
-        } else {
-            output.push(c);
+            '\u{0000}'..='\u{0008}' | '\u{000B}'..='\u{001F}' | '\u{007F}' => {
+                return Err(ParseError::InvalidControlCharacter);
+            }
+            _ => {
+                output.push(c);
+            }
         }
     }
     Ok(output)
