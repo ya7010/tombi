@@ -1,5 +1,4 @@
 use ast::AstNode;
-use itertools::Itertools;
 
 use crate::Format;
 use std::fmt::Write;
@@ -23,57 +22,6 @@ impl Format for ast::KeyValue {
         // NOTE: tailing comment is output by `value.fmt(f)`.
 
         Ok(())
-    }
-}
-
-impl Format for ast::Keys {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        let keys = self
-            .keys()
-            .map(|key| key.syntax().text().to_string())
-            .collect_vec()
-            .join(".");
-
-        write!(f, "{}", keys)
-    }
-}
-
-impl Format for ast::BareKey {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.syntax().text())
-    }
-}
-
-impl Format for ast::Key {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        match self {
-            Self::BareKey(it) => it.fmt(f),
-            Self::BasicString(it) => it.fmt(f),
-            Self::LiteralString(it) => it.fmt(f),
-        }
-    }
-}
-
-impl Format for ast::Value {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        match self {
-            Self::Array(it) => it.fmt(f),
-            Self::BasicString(it) => it.fmt(f),
-            Self::Boolean(it) => it.fmt(f),
-            Self::Float(it) => it.fmt(f),
-            Self::InlineTable(it) => it.fmt(f),
-            Self::IntegerBin(it) => it.fmt(f),
-            Self::IntegerDec(it) => it.fmt(f),
-            Self::IntegerHex(it) => it.fmt(f),
-            Self::IntegerOct(it) => it.fmt(f),
-            Self::LiteralString(it) => it.fmt(f),
-            Self::LocalDate(it) => it.fmt(f),
-            Self::LocalDateTime(it) => it.fmt(f),
-            Self::LocalTime(it) => it.fmt(f),
-            Self::MultiLineBasicString(it) => it.fmt(f),
-            Self::MultiLineLiteralString(it) => it.fmt(f),
-            Self::OffsetDateTime(it) => it.fmt(f),
-        }
     }
 }
 
