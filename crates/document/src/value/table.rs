@@ -14,7 +14,7 @@ impl From<document_tree::TableKind> for TableKind {
     fn from(kind: document_tree::TableKind) -> Self {
         use document_tree::TableKind::*;
         match kind {
-            Root | Table | ParentTable => Self::Table,
+            Root | Table | ParentTable | ParentKey => Self::Table,
             InlineTable => Self::InlineTable,
             KeyValue => Self::KeyValue,
         }
