@@ -12,6 +12,9 @@ pub enum ParseError {
     #[error("invalid newline character in input")]
     InvalidNewline,
 
+    #[error("invalid control character in input")]
+    InvalidControlCharacter,
+
     #[error("trailing backslash in input")]
     TrailingBackslash,
 }
@@ -155,6 +158,8 @@ fn escape_basic_string(input: &str) -> Result<String, ParseError> {
             } else {
                 return Err(ParseError::TrailingBackslash);
             }
+        } else if matches!(c, '\u{0000}'..='\u{0008}' | '\u{000B}'..='\u{001F}' | '\u{007F}') {
+            return Err(ParseError::InvalidControlCharacter);
         } else {
             output.push(c);
         }

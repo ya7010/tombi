@@ -82,3 +82,19 @@ impl serde::Serialize for String {
         .serialize(serializer)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::test_serialize;
+
+    test_serialize!(
+        #[test]
+        fn string_us(
+            r#"
+            string-us   = "null"
+            "#
+        ) -> Err([
+            ("invalid string: invalid control character in input", ((0, 14), (0, 21)))
+        ])
+    );
+}
