@@ -63,9 +63,6 @@ pub enum ErrorKind {
     #[error("expected line break")]
     ExpectedLineBreak,
 
-    #[error("expected '\\n' or comment")]
-    ExpectedLineBreakOrComment,
-
     #[error("inline table must be single line")]
     InlineTableMustSingleLine,
 

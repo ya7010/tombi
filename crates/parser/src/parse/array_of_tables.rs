@@ -29,7 +29,7 @@ impl Parse for ast::ArrayOfTables {
 
         tailing_comment(p);
 
-        if !p.eat(LINE_BREAK) {
+        if !p.at_ts(TS_LINE_END) {
             invalid_line(p, ExpectedLineBreak);
         }
 
@@ -42,7 +42,7 @@ impl Parse for ast::ArrayOfTables {
             ast::KeyValue::parse(p);
 
             if !p.at_ts(TS_LINE_END) {
-                invalid_line(p, ExpectedLineBreakOrComment);
+                invalid_line(p, ExpectedLineBreak);
             }
         }
 
@@ -107,6 +107,6 @@ mod test {
             key1 = 1 INVALID COMMENT
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedLineBreakOrComment, 1:9..1:16)])
+        ) -> Err([SyntaxError(ExpectedLineBreak, 1:9..1:16)])
     }
 }
