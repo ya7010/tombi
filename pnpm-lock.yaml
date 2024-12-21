@@ -15,7 +15,7 @@ importers:
         specifier: ^22.10.2
         version: 22.10.2
       '@types/vscode':
-        specifier: ^1.96.0
+        specifier: ^1.93.0
         version: 1.96.0
       typescript:
         specifier: ^5.7.2
