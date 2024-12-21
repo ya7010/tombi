@@ -776,24 +776,6 @@ FAIL invalid/control/string-us
      want:
        Exit code 1
 
-FAIL invalid/inline-table/overwrite-02
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       a={}
-       # Inline tables are immutable and can't be extended
-       [a.b]
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {}
-         }
-       }
-
-     want:
-       Exit code 1
-
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 334 passed, 27 failed
+invalid tests: 335 passed, 26 failed

@@ -123,7 +123,7 @@ impl Table {
                 }
             }
             (Table | InlineTable | KeyValue, Table | InlineTable)
-            | (InlineTable, KeyValue)
+            | (InlineTable, ParentTable | ParentKey | KeyValue)
             | (ParentTable, ParentKey) => true,
             (ParentTable, Table | InlineTable) => {
                 self.kind = other.kind;
