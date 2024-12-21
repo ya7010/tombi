@@ -59,7 +59,7 @@ pub enum Error {
 
     #[error("invalid comment: {error}")]
     ParseCommentError {
-        error: crate::support::string::ParseError,
+        error: crate::support::comment::ParseError,
         range: text::Range,
     },
 }

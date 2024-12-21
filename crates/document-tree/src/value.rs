@@ -15,7 +15,7 @@ pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
-use crate::{support::string::try_new_comment, TryIntoDocumentTree};
+use crate::{support::comment::try_new_comment, TryIntoDocumentTree};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {

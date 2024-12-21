@@ -4,7 +4,7 @@ use indexmap::map::Entry;
 use indexmap::IndexMap;
 use itertools::Itertools;
 
-use crate::{support::string::try_new_comment, Array, Key, TryIntoDocumentTree, Value};
+use crate::{support::comment::try_new_comment, Array, Key, TryIntoDocumentTree, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
