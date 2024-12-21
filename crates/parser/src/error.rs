@@ -60,6 +60,9 @@ pub enum ErrorKind {
     #[error("expected '}}'")]
     ExpectedBraceEnd,
 
+    #[error("expected line break")]
+    ExpectedLineBreak,
+
     #[error("expected '\\n' or comment")]
     ExpectedLineBreakOrComment,
 

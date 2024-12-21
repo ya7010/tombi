@@ -29,6 +29,10 @@ impl Parse for ast::ArrayOfTables {
 
         tailing_comment(p);
 
+        if !p.eat(LINE_BREAK) {
+            invalid_line(p, ExpectedLineBreak);
+        }
+
         loop {
             let n = peek_leading_comments(p);
 

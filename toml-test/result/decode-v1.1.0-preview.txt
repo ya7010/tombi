@@ -794,38 +794,6 @@ FAIL invalid/inline-table/overwrite-02
      want:
        Exit code 1
 
-FAIL invalid/key/after-array
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [[agencies]] owner = "S Cjelli"
-
-     output from parser-cmd (stdout):
-       {
-         "agencies": [{
-           "owner": {"type": "string", "value": "S Cjelli"}
-         }]
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/key/after-table
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [error] this = "should not be here"
-
-     output from parser-cmd (stdout):
-       {
-         "error": {
-           "this": {"type": "string", "value": "should not be here"}
-         }
-       }
-
-     want:
-       Exit code 1
-
 FAIL invalid/key/after-value
      Expected an error, but no error was reported.
 
@@ -858,4 +826,4 @@ FAIL invalid/key/no-eol
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 330 passed, 31 failed
+invalid tests: 332 passed, 29 failed
