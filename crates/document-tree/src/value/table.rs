@@ -121,7 +121,9 @@ impl Table {
                     _ => false,
                 }
             }
-            (Table | InlineTable | KeyValue, Table | InlineTable) | (InlineTable, KeyValue) => true,
+            (Table | InlineTable | KeyValue, Table | InlineTable)
+            | (InlineTable, KeyValue)
+            | (ParentTable, ParentKey) => true,
             (ParentTable, Table | InlineTable) => {
                 self.kind = other.kind;
                 false
