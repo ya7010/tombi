@@ -54,6 +54,10 @@ pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseEr
     )
 }
 
+pub fn try_from_comment(value: &str) -> Result<String, ParseError> {
+    parse_literal_string(&value[1..], false)
+}
+
 fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
