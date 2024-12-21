@@ -118,7 +118,8 @@ impl Table {
                 {
                     Some((Value::Table(table1), _)) => table1.kind() == InlineTable,
                     Some((_, Value::Table(table2))) => table2.kind() == InlineTable,
-                    _ => false,
+                    Some(_) => false,
+                    None => unreachable!("key value must have one value."),
                 }
             }
             (Table | InlineTable | KeyValue, Table | InlineTable)
