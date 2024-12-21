@@ -931,46 +931,6 @@ FAIL invalid/table/append-with-dotted-keys-2
      want:
        Exit code 1
 
-FAIL invalid/table/redefine-2
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [t1]
-       t2.t3.v = 0
-       [t1.t2]
-
-     output from parser-cmd (stdout):
-       {
-         "t1": {
-           "t2": {
-             "t3": {
-               "v": {"type": "integer", "value": "0"}
-             }
-           }
-         }
-       }
-
-     want:
-       Exit code 1
-
-FAIL invalid/table/super-twice
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       [a.b]
-       [a]
-       [a]
-
-     output from parser-cmd (stdout):
-       {
-         "a": {
-           "b": {}
-         }
-       }
-
-     want:
-       Exit code 1
-
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 326 passed, 35 failed
+invalid tests: 328 passed, 33 failed

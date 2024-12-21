@@ -314,4 +314,17 @@ mod test {
             ("conflicting table", ((3, 0), (3, 29)))
         ])
     }
+
+    test_serialize! {
+        #[test]
+        fn redefine_2(
+            r#"
+            [t1]
+            t2.t3.v = 0
+            [t1.t2]
+            "#
+        ) -> Err([
+            ("conflicting table", ((2, 0), (2, 7)))
+        ])
+    }
 }
