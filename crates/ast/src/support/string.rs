@@ -27,32 +27,34 @@ pub fn from_bare_key(value: &str) -> String {
 }
 
 pub fn try_from_basic_string(value: &str) -> Result<String, ParseError> {
-    escape_basic_string(&value[1..value.len() - 1], false)
+    parse_basic_string(&value[1..value.len() - 1], false)
 }
 
 pub fn try_from_literal_string(value: &str) -> Result<String, ParseError> {
-    // NOTE: Literal strings are not escaped.
-    Ok(value[1..value.len() - 1].to_string())
+    parse_literal_string(&value[1..value.len() - 1], false)
 }
 
 pub fn try_from_multi_line_basic_string(value: &str) -> Result<String, ParseError> {
-    escape_basic_string(
+    parse_basic_string(
         &value[3..value.len() - 3]
             .chars()
-            .skip_while(|c| matches!(c, '\r' | '\n'))
+            .skip_while(|c| matches!(c, '\n'))
             .collect::<String>(),
         true,
     )
 }
 
 pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseError> {
-    Ok(value[3..value.len() - 3]
-        .chars()
-        .skip_while(|c| matches!(c, '\r' | '\n'))
-        .collect())
+    parse_literal_string(
+        &value[3..value.len() - 3]
+            .chars()
+            .skip_while(|c| matches!(c, '\n'))
+            .collect::<String>(),
+        true,
+    )
 }
 
-fn escape_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
+fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
     let mut unicode_buf = String::new();
@@ -164,6 +166,33 @@ fn escape_basic_string(input: &str, is_multi_line: bool) -> Result<String, Parse
                     return Err(ParseError::TrailingBackslash);
                 }
             }
+            '\r' | '\n' if is_multi_line => {
+                output.push(c);
+                if c == '\r' {
+                    if let Some(&'\n') = chars.peek() {
+                        output.push(chars.next().unwrap());
+                    } else {
+                        return Err(ParseError::InvalidLineBreak);
+                    }
+                }
+            }
+            '\u{0000}'..='\u{0008}' | '\u{000A}'..='\u{001F}' | '\u{007F}' => {
+                return Err(ParseError::InvalidControlCharacter);
+            }
+            _ => {
+                output.push(c);
+            }
+        }
+    }
+    Ok(output)
+}
+
+fn parse_literal_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
+    let mut output = String::with_capacity(input.len());
+    let mut chars = input.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        match c {
             '\r' | '\n' if is_multi_line => {
                 output.push(c);
                 if c == '\r' {

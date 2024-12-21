@@ -115,7 +115,7 @@ macro_rules! test_serialize {
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
             match root.try_into_document_tree($toml_version) {
                 Ok(_) => {
-                    pretty_assertions::assert_eq!(Vec::<(String, text::Range)>::new(), errors);
+                    pretty_assertions::assert_eq!("expected error", "but got success");
                 }
                 Err(errs) => {
                     pretty_assertions::assert_eq!(

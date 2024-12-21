@@ -97,4 +97,15 @@ mod test {
             ("invalid string: invalid control character in input", ((0, 14), (0, 21)))
         ])
     );
+
+    test_serialize!(
+        #[test]
+        fn rawstring_us(
+            r#"
+            rawstring-us   = 'null'
+            "#
+        ) -> Err([
+            ("invalid string: invalid control character in input", ((0, 17), (0, 24)))
+        ])
+    );
 }
