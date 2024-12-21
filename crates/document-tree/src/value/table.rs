@@ -140,7 +140,8 @@ impl Table {
             errors.push(crate::Error::ConflictTable {
                 range1: self.symbol_range,
                 range2: other.symbol_range,
-            })
+            });
+            return Err(errors);
         }
 
         self.range += other.range;
