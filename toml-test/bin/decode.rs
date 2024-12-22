@@ -3,7 +3,7 @@ use clap::Parser;
 use config::TomlVersion;
 use document_tree::TryIntoDocumentTree;
 use std::io::Read;
-use toml_test::{Value, INVALID_MESSAGE};
+use toml_test::{IntoValue, Value, INVALID_MESSAGE};
 
 #[derive(Debug, clap::Parser, Default)]
 #[command(disable_help_subcommand(true))]
@@ -48,7 +48,7 @@ fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Erro
         }
     };
 
-    Ok(Value::from(root))
+    Ok(root.into_value(toml_version))
 }
 
 #[cfg(test)]

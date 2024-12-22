@@ -84,10 +84,18 @@ impl TryIntoDocumentTree<Value> for ast::Value {
         }
 
         let result = match self {
-            ast::Value::BasicString(string) => string.try_into().map(Value::String),
-            ast::Value::LiteralString(string) => string.try_into().map(Value::String),
-            ast::Value::MultiLineBasicString(string) => string.try_into().map(Value::String),
-            ast::Value::MultiLineLiteralString(string) => string.try_into().map(Value::String),
+            ast::Value::BasicString(string) => string
+                .try_into_document_tree(toml_version)
+                .map(Value::String),
+            ast::Value::LiteralString(string) => string
+                .try_into_document_tree(toml_version)
+                .map(Value::String),
+            ast::Value::MultiLineBasicString(string) => string
+                .try_into_document_tree(toml_version)
+                .map(Value::String),
+            ast::Value::MultiLineLiteralString(string) => string
+                .try_into_document_tree(toml_version)
+                .map(Value::String),
             ast::Value::IntegerBin(integer) => integer.try_into().map(Value::Integer),
             ast::Value::IntegerOct(integer) => integer.try_into().map(Value::Integer),
             ast::Value::IntegerDec(integer) => integer.try_into().map(Value::Integer),

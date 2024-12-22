@@ -1,3 +1,5 @@
+use config::TomlVersion;
+
 use crate::{support, AstChildren};
 
 impl crate::Key {
@@ -9,11 +11,14 @@ impl crate::Key {
         }
     }
 
-    pub fn try_to_raw_text(&self) -> Result<String, support::string::ParseError> {
+    pub fn try_to_raw_text(
+        &self,
+        toml_version: TomlVersion,
+    ) -> Result<String, support::string::ParseError> {
         match self {
             Self::BareKey(key) => Ok(key.token().unwrap().text().to_string()),
             Self::BasicString(key) => {
-                support::string::try_from_basic_string(key.token().unwrap().text())
+                support::string::try_from_basic_string(key.token().unwrap().text(), toml_version)
             }
             Self::LiteralString(key) => {
                 support::string::try_from_literal_string(key.token().unwrap().text())
@@ -27,9 +32,14 @@ impl AstChildren<crate::Key> {
         self.clone()
             .into_iter()
             .zip(other.clone().into_iter())
-            .all(|(a, b)| match (a.try_to_raw_text(), b.try_to_raw_text()) {
-                (Ok(a), Ok(b)) => a == b,
-                _ => false,
+            .all(|(a, b)| {
+                match (
+                    a.try_to_raw_text(TomlVersion::latest()),
+                    b.try_to_raw_text(TomlVersion::latest()),
+                ) {
+                    (Ok(a), Ok(b)) => a == b,
+                    _ => false,
+                }
             })
     }
 

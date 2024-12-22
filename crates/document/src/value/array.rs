@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{IntoDocument, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -65,13 +65,13 @@ impl Into<Vec<Value>> for Array {
     }
 }
 
-impl From<document_tree::Array> for Array {
-    fn from(array: document_tree::Array) -> Self {
-        Self {
-            kind: array.kind().into(),
-            values: Vec::<document_tree::Value>::from(array.values())
+impl IntoDocument<Array> for document_tree::Array {
+    fn into_document(self, toml_version: config::TomlVersion) -> Array {
+        Array {
+            kind: self.kind().into(),
+            values: Vec::<document_tree::Value>::from(self.values())
                 .into_iter()
-                .map(Value::from)
+                .map(|value| value.into_document(toml_version))
                 .collect(),
         }
     }

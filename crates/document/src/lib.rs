@@ -3,6 +3,7 @@ mod value;
 
 use std::ops::Deref;
 
+use config::TomlVersion;
 pub use key::Key;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
@@ -10,7 +11,7 @@ pub use value::{
 };
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Document(Table);
+pub struct Document(pub(crate) Table);
 
 impl From<Document> for Table {
     fn from(document: Document) -> Self {
@@ -18,9 +19,12 @@ impl From<Document> for Table {
     }
 }
 
-impl From<document_tree::Root> for Document {
-    fn from(document: document_tree::Root) -> Self {
-        Self(document_tree::Table::from(document).into())
+pub trait IntoDocument<T> {
+    fn into_document(self, toml_version: TomlVersion) -> T;
+}
+impl IntoDocument<Document> for document_tree::Root {
+    fn into_document(self, toml_version: TomlVersion) -> Document {
+        Document(document_tree::Table::from(self).into_document(toml_version))
     }
 }
 
@@ -66,6 +70,7 @@ macro_rules! test_serialize {
         fn $name() {
             use ast::AstNode;
             use document_tree::TryIntoDocumentTree;
+            use crate::IntoDocument;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), config::TomlVersion::default());
@@ -73,7 +78,7 @@ macro_rules! test_serialize {
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
             match root.try_into_document_tree($toml_version) {
                 Ok(document_tree) => {
-                    let document: crate::Document = document_tree.into();
+                    let document: crate::Document = document_tree.into_document($toml_version);
                     let serialized = serde_json::to_string(&document).unwrap();
                     pretty_assertions::assert_eq!(serialized, $json.to_string());
                 }

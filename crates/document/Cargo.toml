@@ -13,6 +13,7 @@ serde = ["dep:serde", "indexmap/serde", "chrono/serde"]
 [dependencies]
 ast = { workspace = true }
 chrono = { workspace = true }
+config = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }

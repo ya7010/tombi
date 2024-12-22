@@ -1,4 +1,5 @@
 use crate::{support, ArrayOfTables, AstChildren, AstNode, TableOrArrayOfTable};
+use config::TomlVersion;
 use syntax::T;
 
 impl crate::Table {
@@ -36,7 +37,10 @@ impl crate::Table {
             .map(|node: ArrayOfTables| node.header().unwrap().keys())
             .take_while(
                 |keys| match (self.header().unwrap().keys().next(), keys.clone().next()) {
-                    (Some(a), Some(b)) => match (a.try_to_raw_text(), b.try_to_raw_text()) {
+                    (Some(a), Some(b)) => match (
+                        a.try_to_raw_text(TomlVersion::latest()),
+                        b.try_to_raw_text(TomlVersion::latest()),
+                    ) {
                         (Ok(a), Ok(b)) => a == b,
                         _ => false,
                     },

@@ -15,6 +15,8 @@ pub use string::String;
 use string::StringKind;
 pub use table::{Table, TableKind};
 
+use crate::IntoDocument;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Boolean(Boolean),
@@ -29,19 +31,19 @@ pub enum Value {
     Table(Table),
 }
 
-impl From<document_tree::Value> for Value {
-    fn from(node: document_tree::Value) -> Self {
-        match node {
-            document_tree::Value::Boolean(value) => Self::Boolean(value.into()),
-            document_tree::Value::Integer(value) => Self::Integer(value.into()),
-            document_tree::Value::Float(value) => Self::Float(value.into()),
-            document_tree::Value::String(value) => Self::String(value.into()),
-            document_tree::Value::OffsetDateTime(value) => Self::OffsetDateTime(value.into()),
-            document_tree::Value::LocalDateTime(value) => Self::LocalDateTime(value.into()),
-            document_tree::Value::LocalDate(value) => Self::LocalDate(value.into()),
-            document_tree::Value::LocalTime(value) => Self::LocalTime(value.into()),
-            document_tree::Value::Array(value) => Self::Array(value.into()),
-            document_tree::Value::Table(value) => Self::Table(value.into()),
+impl IntoDocument<Value> for document_tree::Value {
+    fn into_document(self, toml_version: crate::TomlVersion) -> Value {
+        match self {
+            document_tree::Value::Boolean(value) => Value::Boolean(value.into()),
+            document_tree::Value::Integer(value) => Value::Integer(value.into()),
+            document_tree::Value::Float(value) => Value::Float(value.into()),
+            document_tree::Value::String(value) => Value::String(value.into()),
+            document_tree::Value::OffsetDateTime(value) => Value::OffsetDateTime(value.into()),
+            document_tree::Value::LocalDateTime(value) => Value::LocalDateTime(value.into()),
+            document_tree::Value::LocalDate(value) => Value::LocalDate(value.into()),
+            document_tree::Value::LocalTime(value) => Value::LocalTime(value.into()),
+            document_tree::Value::Array(value) => Value::Array(value.into_document(toml_version)),
+            document_tree::Value::Table(value) => Value::Table(value.into_document(toml_version)),
         }
     }
 }

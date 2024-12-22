@@ -1,3 +1,4 @@
+use config::TomlVersion;
 use document_tree::support;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -69,11 +70,14 @@ impl serde::Serialize for String {
         S: serde::Serializer,
     {
         match self.kind {
-            StringKind::BasicString => support::string::try_from_basic_string(&self.value),
-            StringKind::LiteralString => support::string::try_from_literal_string(&self.value),
-            StringKind::MultiLineBasicString => {
-                support::string::try_from_multi_line_basic_string(&self.value)
+            StringKind::BasicString => {
+                support::string::try_from_basic_string(&self.value, TomlVersion::latest())
             }
+            StringKind::LiteralString => support::string::try_from_literal_string(&self.value),
+            StringKind::MultiLineBasicString => support::string::try_from_multi_line_basic_string(
+                &self.value,
+                TomlVersion::latest(),
+            ),
             StringKind::MultiLineLiteralString => {
                 support::string::try_from_multi_line_literal_string(&self.value)
             }
@@ -85,9 +89,32 @@ impl serde::Serialize for String {
 
 #[cfg(test)]
 mod test {
+    use config::TomlVersion;
     use serde_json::json;
 
     use crate::test_serialize;
+
+    test_serialize! {
+        #[test]
+        fn escape_esc_v1_0_0(
+            r#"
+            esc = "\e There is no escape! \e"
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Err([
+            ("invalid string: invalid escape sequence", ((0, 6), (0, 33)))
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn escape_esc_v1_1_0(
+            r#"
+            esc = "\e There is no escape! \e"
+            "#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(json!({"esc":"\u{001b} There is no escape! \u{001b}"}))
+    }
 
     test_serialize!(
         #[test]

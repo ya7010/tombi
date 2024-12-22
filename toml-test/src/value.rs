@@ -1,3 +1,4 @@
+use config::TomlVersion;
 use document_tree::support;
 
 #[derive(Debug, serde::Serialize)]
@@ -21,14 +22,18 @@ pub enum Value {
     Table(indexmap::IndexMap<String, Value>),
 }
 
-impl From<document_tree::Value> for Value {
-    fn from(node: document_tree::Value) -> Self {
-        match node {
-            document_tree::Value::Boolean(value) => Self::Literal {
+pub trait IntoValue {
+    fn into_value(self, toml_version: TomlVersion) -> Value;
+}
+
+impl IntoValue for document_tree::Value {
+    fn into_value(self, toml_version: TomlVersion) -> Value {
+        match self {
+            document_tree::Value::Boolean(value) => Value::Literal {
                 r#type: Type::Bool,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::Integer(value) => Self::Literal {
+            document_tree::Value::Integer(value) => Value::Literal {
                 r#type: Type::Integer,
                 value: match value.kind() {
                     document_tree::IntegerKind::Binary(node) => {
@@ -47,51 +52,54 @@ impl From<document_tree::Value> for Value {
                 .unwrap()
                 .to_string(),
             },
-            document_tree::Value::Float(value) => Self::Literal {
+            document_tree::Value::Float(value) => Value::Literal {
                 r#type: Type::Float,
                 value: support::float::try_from_float(value.node().token().unwrap().text())
                     .unwrap()
                     .to_string(),
             },
-            document_tree::Value::String(value) => Self::Literal {
+            document_tree::Value::String(value) => Value::Literal {
                 r#type: Type::String,
-                value: value.to_raw_string(),
+                value: value.to_raw_string(toml_version),
             },
-            document_tree::Value::OffsetDateTime(value) => Self::Literal {
+            document_tree::Value::OffsetDateTime(value) => Value::Literal {
                 r#type: Type::Datetime,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalDateTime(value) => Self::Literal {
+            document_tree::Value::LocalDateTime(value) => Value::Literal {
                 r#type: Type::DatetimeLocal,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalDate(value) => Self::Literal {
+            document_tree::Value::LocalDate(value) => Value::Literal {
                 r#type: Type::DateLocal,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalTime(value) => Self::Literal {
+            document_tree::Value::LocalTime(value) => Value::Literal {
                 r#type: Type::TimeLocal,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::Array(value) => {
-                Self::Array(value.into_iter().map(Value::from).collect())
-            }
-            document_tree::Value::Table(value) => Self::Table(
+            document_tree::Value::Array(array) => Value::Array(
+                array
+                    .into_iter()
+                    .map(|value| value.into_value(toml_version))
+                    .collect(),
+            ),
+            document_tree::Value::Table(value) => Value::Table(
                 value
                     .into_iter()
-                    .map(|(k, v)| (k.into(), v.into()))
+                    .map(|(k, v)| (k.to_raw_text(toml_version), v.into_value(toml_version)))
                     .collect(),
             ),
         }
     }
 }
 
-impl From<document_tree::Root> for Value {
-    fn from(node: document_tree::Root) -> Self {
-        Self::Table(
-            document_tree::Table::from(node)
+impl IntoValue for document_tree::Root {
+    fn into_value(self, toml_version: TomlVersion) -> Value {
+        Value::Table(
+            document_tree::Table::from(self)
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into()))
+                .map(|(k, v)| (k.to_raw_text(toml_version), v.into_value(toml_version)))
                 .collect(),
         )
     }

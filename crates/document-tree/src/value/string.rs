@@ -1,3 +1,7 @@
+use config::TomlVersion;
+
+use crate::TryIntoDocumentTree;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StringKind {
     BasicString(ast::BasicString),
@@ -16,9 +20,10 @@ impl String {
     pub fn try_new(
         kind: StringKind,
         value: std::string::String,
+        toml_version: TomlVersion,
     ) -> Result<Self, crate::support::string::ParseError> {
         let string = Self { kind, value };
-        string.try_to_raw_string()?;
+        string.try_to_raw_string(toml_version)?;
 
         Ok(string)
     }
@@ -34,23 +39,26 @@ impl String {
     }
 
     #[inline]
-    pub fn to_raw_string(&self) -> std::string::String {
+    pub fn to_raw_string(&self, toml_version: TomlVersion) -> std::string::String {
         // NOTE: String has already been validated by `impl TryIntoDocumentTree<String>`,
         //       so it's safe to unwrap.
-        self.try_to_raw_string().unwrap()
+        self.try_to_raw_string(toml_version).unwrap()
     }
 
     #[inline]
-    fn try_to_raw_string(&self) -> Result<std::string::String, crate::support::string::ParseError> {
+    fn try_to_raw_string(
+        &self,
+        toml_version: TomlVersion,
+    ) -> Result<std::string::String, crate::support::string::ParseError> {
         match self.kind {
             StringKind::BasicString(_) => {
-                crate::support::string::try_from_basic_string(&self.value)
+                crate::support::string::try_from_basic_string(&self.value, toml_version)
             }
             StringKind::LiteralString(_) => {
                 crate::support::string::try_from_literal_string(&self.value)
             }
             StringKind::MultiLineBasicString(_) => {
-                crate::support::string::try_from_multi_line_basic_string(&self.value)
+                crate::support::string::try_from_multi_line_basic_string(&self.value, toml_version)
             }
             StringKind::MultiLineLiteralString(_) => {
                 crate::support::string::try_from_multi_line_literal_string(&self.value)
@@ -76,45 +84,17 @@ impl String {
     }
 }
 
-impl TryFrom<ast::BasicString> for String {
-    type Error = Vec<crate::Error>;
+impl TryIntoDocumentTree<String> for ast::BasicString {
+    fn try_into_document_tree(
+        self,
+        toml_version: TomlVersion,
+    ) -> Result<String, Vec<crate::Error>> {
+        let token = self.token().unwrap();
 
-    fn try_from(node: ast::BasicString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-
-        Self::try_new(StringKind::BasicString(node), token.text().to_string()).map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
-    }
-}
-
-impl TryFrom<ast::LiteralString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::LiteralString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-
-        Self::try_new(StringKind::LiteralString(node), token.text().to_string()).map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
-    }
-}
-
-impl TryFrom<ast::MultiLineBasicString> for String {
-    type Error = Vec<crate::Error>;
-
-    fn try_from(node: ast::MultiLineBasicString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-
-        Self::try_new(
-            StringKind::MultiLineBasicString(node),
+        String::try_new(
+            StringKind::BasicString(self),
             token.text().to_string(),
+            toml_version,
         )
         .map_err(|error| {
             vec![crate::Error::ParseStringError {
@@ -125,15 +105,59 @@ impl TryFrom<ast::MultiLineBasicString> for String {
     }
 }
 
-impl TryFrom<ast::MultiLineLiteralString> for String {
-    type Error = Vec<crate::Error>;
+impl TryIntoDocumentTree<String> for ast::LiteralString {
+    fn try_into_document_tree(
+        self,
+        toml_version: TomlVersion,
+    ) -> Result<String, Vec<crate::Error>> {
+        let token = self.token().unwrap();
 
-    fn try_from(node: ast::MultiLineLiteralString) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-
-        Self::try_new(
-            StringKind::MultiLineLiteralString(node),
+        String::try_new(
+            StringKind::LiteralString(self),
             token.text().to_string(),
+            toml_version,
+        )
+        .map_err(|error| {
+            vec![crate::Error::ParseStringError {
+                error,
+                range: token.range(),
+            }]
+        })
+    }
+}
+
+impl TryIntoDocumentTree<String> for ast::MultiLineBasicString {
+    fn try_into_document_tree(
+        self,
+        toml_version: TomlVersion,
+    ) -> Result<String, Vec<crate::Error>> {
+        let token = self.token().unwrap();
+
+        String::try_new(
+            StringKind::MultiLineBasicString(self),
+            token.text().to_string(),
+            toml_version,
+        )
+        .map_err(|error| {
+            vec![crate::Error::ParseStringError {
+                error,
+                range: token.range(),
+            }]
+        })
+    }
+}
+
+impl TryIntoDocumentTree<String> for ast::MultiLineLiteralString {
+    fn try_into_document_tree(
+        self,
+        toml_version: TomlVersion,
+    ) -> Result<String, Vec<crate::Error>> {
+        let token = self.token().unwrap();
+
+        String::try_new(
+            StringKind::MultiLineLiteralString(self),
+            token.text().to_string(),
+            toml_version,
         )
         .map_err(|error| {
             vec![crate::Error::ParseStringError {

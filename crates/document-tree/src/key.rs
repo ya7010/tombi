@@ -1,3 +1,5 @@
+use config::TomlVersion;
+
 use crate::TryIntoDocumentTree;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -19,9 +21,10 @@ impl Key {
         kind: KeyKind,
         value: String,
         range: text::Range,
-    ) -> Result<Self, crate::support::string::ParseError> {
+        toml_version: TomlVersion,
+    ) -> Result<Self, crate::Error> {
         let key = Self { kind, value, range };
-        key.try_to_raw_string()?;
+        key.try_to_raw_string(toml_version)?;
 
         Ok(key)
     }
@@ -33,18 +36,27 @@ impl Key {
         &self.value
     }
 
-    pub fn to_raw_text(&self) -> String {
+    pub fn to_raw_text(&self, toml_version: TomlVersion) -> String {
         // NOTE: Key has already been validated by `impl TryIntoDocumentTree<Key>`,
         //       so it's safe to unwrap.
-        self.try_to_raw_string().unwrap()
+        self.try_to_raw_string(toml_version).unwrap()
     }
 
-    fn try_to_raw_string(&self) -> Result<std::string::String, crate::support::string::ParseError> {
+    fn try_to_raw_string(
+        &self,
+        toml_version: TomlVersion,
+    ) -> Result<std::string::String, crate::Error> {
         match self.kind {
             KeyKind::BareKey => Ok(crate::support::string::from_bare_key(&self.value)),
-            KeyKind::BasicString => crate::support::string::try_from_basic_string(&self.value),
+            KeyKind::BasicString => {
+                crate::support::string::try_from_basic_string(&self.value, toml_version)
+            }
             KeyKind::LiteralString => crate::support::string::try_from_literal_string(&self.value),
         }
+        .map_err(|error| crate::Error::ParseStringError {
+            error,
+            range: self.range,
+        })
     }
 
     pub fn range(&self) -> text::Range {
@@ -54,7 +66,8 @@ impl Key {
 
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
-        self.try_to_raw_string() == other.try_to_raw_string()
+        self.try_to_raw_string(TomlVersion::latest())
+            == other.try_to_raw_string(TomlVersion::latest())
     }
 }
 
@@ -62,7 +75,7 @@ impl Eq for Key {}
 
 impl std::hash::Hash for Key {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.try_to_raw_string()
+        self.try_to_raw_string(TomlVersion::latest())
             .unwrap_or_else(|_| self.value.to_string())
             .hash(state);
     }
@@ -77,7 +90,7 @@ impl std::fmt::Display for Key {
 impl TryIntoDocumentTree<Key> for ast::Key {
     fn try_into_document_tree(
         self,
-        _toml_version: config::TomlVersion,
+        toml_version: config::TomlVersion,
     ) -> Result<Key, Vec<crate::Error>> {
         let token = self.token().unwrap();
 
@@ -89,18 +102,18 @@ impl TryIntoDocumentTree<Key> for ast::Key {
             },
             token.text().to_string(),
             token.range(),
+            toml_version,
         )
-        .map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
+        .map_err(|error| vec![error])
     }
 }
 
-impl From<Key> for String {
-    fn from(value: Key) -> Self {
-        value.try_to_raw_string().unwrap()
+impl TryIntoDocumentTree<String> for Key {
+    fn try_into_document_tree(
+        self,
+        toml_version: TomlVersion,
+    ) -> Result<String, Vec<crate::Error>> {
+        self.try_to_raw_string(toml_version)
+            .map_err(|error| vec![error])
     }
 }

@@ -1,4 +1,7 @@
+use config::TomlVersion;
 use document_tree::support;
+
+use crate::IntoDocument;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
@@ -29,10 +32,12 @@ impl Key {
         &self.value
     }
 
-    pub fn to_raw_text(&self) -> String {
+    pub fn to_raw_text(&self, toml_version: TomlVersion) -> String {
         match self.kind {
             KeyKind::BareKey => support::string::from_bare_key(self.value()),
-            KeyKind::BasicString => support::string::try_from_basic_string(self.value()).unwrap(),
+            KeyKind::BasicString => {
+                support::string::try_from_basic_string(self.value(), toml_version).unwrap()
+            }
             KeyKind::LiteralString => {
                 support::string::try_from_literal_string(self.value()).unwrap()
             }
@@ -42,7 +47,7 @@ impl Key {
 
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
-        self.to_raw_text() == other.to_raw_text()
+        self.to_raw_text(TomlVersion::latest()) == other.to_raw_text(TomlVersion::latest())
     }
 }
 
@@ -50,7 +55,7 @@ impl Eq for Key {}
 
 impl std::hash::Hash for Key {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.value.hash(state);
+        self.to_raw_text(TomlVersion::latest()).hash(state)
     }
 }
 
@@ -60,11 +65,11 @@ impl std::fmt::Display for Key {
     }
 }
 
-impl From<document_tree::Key> for Key {
-    fn from(node: document_tree::Key) -> Self {
-        Self {
-            kind: node.kind().into(),
-            value: node.into(),
+impl IntoDocument<Key> for document_tree::Key {
+    fn into_document(self, toml_version: TomlVersion) -> Key {
+        Key {
+            kind: self.kind().into(),
+            value: self.to_raw_text(toml_version),
         }
     }
 }

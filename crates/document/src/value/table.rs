@@ -1,7 +1,7 @@
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 
-use crate::{Key, Value};
+use crate::{IntoDocument, Key, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
@@ -54,15 +54,20 @@ impl Table {
     }
 }
 
-impl From<document_tree::Table> for Table {
-    fn from(table: document_tree::Table) -> Self {
-        let kind = table.kind().into();
-        let key_values = IndexMap::<document_tree::Key, document_tree::Value>::from(table)
+impl IntoDocument<Table> for document_tree::Table {
+    fn into_document(self, toml_version: crate::TomlVersion) -> Table {
+        let kind = self.kind().into();
+        let key_values = IndexMap::<document_tree::Key, document_tree::Value>::from(self)
             .into_iter()
-            .map(|(key, value)| (Key::from(key), Value::from(value)))
+            .map(|(key, value)| {
+                (
+                    key.into_document(toml_version),
+                    value.into_document(toml_version),
+                )
+            })
             .collect();
 
-        Self { kind, key_values }
+        Table { kind, key_values }
     }
 }
 

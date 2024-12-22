@@ -1,3 +1,5 @@
+use config::TomlVersion;
+
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {
     #[error("invalid escape sequence")]
@@ -29,20 +31,24 @@ pub fn from_bare_key(value: &str) -> String {
     value.to_string()
 }
 
-pub fn try_from_basic_string(value: &str) -> Result<String, ParseError> {
-    parse_basic_string(&value[1..value.len() - 1], false)
+pub fn try_from_basic_string(value: &str, toml_version: TomlVersion) -> Result<String, ParseError> {
+    parse_basic_string(&value[1..value.len() - 1], toml_version, false)
 }
 
 pub fn try_from_literal_string(value: &str) -> Result<String, ParseError> {
     parse_literal_string(&value[1..value.len() - 1], false)
 }
 
-pub fn try_from_multi_line_basic_string(value: &str) -> Result<String, ParseError> {
+pub fn try_from_multi_line_basic_string(
+    value: &str,
+    toml_version: TomlVersion,
+) -> Result<String, ParseError> {
     parse_basic_string(
         &value[3..value.len() - 3]
             .chars()
             .skip_while(|c| matches!(c, '\n'))
             .collect::<String>(),
+        toml_version,
         true,
     )
 }
@@ -57,7 +63,11 @@ pub fn try_from_multi_line_literal_string(value: &str) -> Result<String, ParseEr
     )
 }
 
-pub fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, ParseError> {
+pub fn parse_basic_string(
+    input: &str,
+    toml_version: TomlVersion,
+    is_multi_line: bool,
+) -> Result<String, ParseError> {
     let mut output = String::with_capacity(input.len());
     let mut chars = input.chars().peekable();
     let mut unicode_buf = String::new();
@@ -68,6 +78,10 @@ pub fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, Pa
                     match next_c {
                         'b' => {
                             output.push('\u{0008}');
+                            chars.next();
+                        }
+                        'e' if toml_version >= TomlVersion::V1_1_0_Preview => {
+                            output.push('\u{001B}');
                             chars.next();
                         }
                         't' => {

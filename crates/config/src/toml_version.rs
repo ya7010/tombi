@@ -15,6 +15,12 @@ pub enum TomlVersion {
     V1_1_0_Preview,
 }
 
+impl TomlVersion {
+    pub const fn latest() -> Self {
+        Self::V1_1_0_Preview
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[test]

@@ -128,24 +128,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/string/escape-esc
-     invalid string: invalid escape sequence
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       esc = "\e There is no escape! \e"
-
-     output from parser-cmd (stderr):
-       invalid string: invalid escape sequence
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/string/escape-tricky
      invalid basic string in 0:10..1:33
      expected value in 0:10..1:33
@@ -305,5 +287,5 @@ FAIL valid/table/names
        }
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 180 passed,  7 failed
+  valid tests: 181 passed,  6 failed
 invalid tests: 361 passed,  0 failed
