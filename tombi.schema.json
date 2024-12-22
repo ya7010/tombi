@@ -37,6 +37,16 @@
           "type": "null"
         }
       ]
+    },
+    "schemas": {
+      "title": "Schema options array.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/definitions/SchemaOptions"
+      }
     }
   },
   "definitions": {
@@ -151,6 +161,50 @@
     },
     "LintOptions": {
       "type": "object"
+    },
+    "SchemaOptions": {
+      "type": "object",
+      "required": [
+        "file-match",
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "title": "The schema URL.",
+          "type": "string"
+        },
+        "file-match": {
+          "title": "The file match condition to apply the schema.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/FileMatch"
+            }
+          ]
+        }
+      }
+    },
+    "FileMatch": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/FilePattern"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FilePattern"
+          }
+        }
+      ]
+    },
+    "FilePattern": {
+      "title": "File match pattern of the schema.",
+      "description": "Supports glob pattern.",
+      "anyOf": [
+        {
+          "description": "A glob pattern.",
+          "type": "string"
+        }
+      ]
     }
   }
 }

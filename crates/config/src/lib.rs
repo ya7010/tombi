@@ -1,8 +1,11 @@
 pub mod format;
 mod lint;
+mod schema;
 mod toml_version;
+
 pub use format::FormatOptions;
 pub use lint::LintOptions;
+pub use schema::{FileMatch, FilePattern, SchemaOptions};
 pub use toml_version::TomlVersion;
 
 pub const DEFAULT_FORMAT_OPTIONS: FormatOptions = FormatOptions::default();
@@ -26,6 +29,9 @@ pub struct Config {
 
     /// # Linter options.
     pub lint: Option<LintOptions>,
+
+    /// # Schema options array.
+    pub schemas: Option<Vec<SchemaOptions>>,
 }
 
 #[doc(hidden)]

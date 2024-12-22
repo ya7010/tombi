@@ -5,3 +5,7 @@ format:
   line-ending: lf
 
 lint: {}
+
+schemas:
+  - url: "tombi.schema.json"
+    file-match: "tombi.toml"
