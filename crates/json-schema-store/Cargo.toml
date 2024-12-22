@@ -7,6 +7,7 @@ license = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
+ahash = { workspace = true }
 ast = { workspace = true }
 dashmap = { workspace = true }
 document = { workspace = true }
@@ -14,3 +15,6 @@ document-tree = { workspace = true }
 serde_json = { workspace = true }
 text = { workspace = true }
 url = "2.5.4"
+
+[dev-dependencies]
+pretty_assertions.workspace = true

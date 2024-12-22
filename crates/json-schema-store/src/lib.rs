@@ -4,7 +4,8 @@ mod store;
 mod value_type;
 
 pub use accessor::{Accessor, Accessors};
-pub use schema::Schema;
+pub use schema::ValueSchema;
+use schema::{DocumentSchema, SchemaType};
 pub use store::Store;
 pub use value_type::ValueType;
 
@@ -121,5 +122,84 @@ fn get_item_table<'a>(
             *value_type = Some(ValueType::Table);
             Some(tbl)
         }
+    }
+}
+
+pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
+    let mut schema = DocumentSchema::default();
+
+    if content.get("properties").is_some() {
+        if let serde_json::Value::Object(object) = content["properties"].take() {
+            for (key, value) in object.into_iter() {
+                if let Some(value_schema) = parse_value_schema(value) {
+                    schema.insert_property(Accessor::Key(key.to_string()), value_schema);
+                }
+            }
+        }
+    }
+    if content.get("definitions").is_some() {
+        if let serde_json::Value::Object(object) = content["definitions"].take() {
+            for (key, value) in object.into_iter() {
+                if let Some(value_schema) = parse_value_schema(value) {
+                    schema.insert_definition(key, value_schema);
+                }
+            }
+        }
+    }
+    schema
+}
+
+fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
+    match object {
+        serde_json::Value::Object(object) => {
+            let mut schema = ValueSchema::default();
+
+            for (key, value) in object {
+                match key.as_str() {
+                    "title" => {
+                        if let serde_json::Value::String(title) = value {
+                            schema.title = Some(title);
+                        }
+                    }
+                    "description" => {
+                        if let serde_json::Value::String(description) = value {
+                            schema.description = Some(description);
+                        }
+                    }
+                    "type" => {
+                        if let serde_json::Value::String(type_str) = value {
+                            let schema_type = match type_str.as_str() {
+                                "null" => SchemaType::Null,
+                                "boolean" => SchemaType::Boolean,
+                                "number" => SchemaType::Numeric,
+                                "string" => SchemaType::String,
+                                "array" => SchemaType::Array,
+                                "object" => SchemaType::Object,
+                                _ => continue,
+                            };
+                            schema.types.push(schema_type);
+                        }
+                    }
+                    "default" => {
+                        if let serde_json::Value::String(default) = value {
+                            schema.default = Some(default);
+                        }
+                    }
+                    "enum" => {
+                        if let serde_json::Value::Array(array) = value {
+                            for value in array {
+                                if let serde_json::Value::String(enum_value) = value {
+                                    schema.enum_values.push(enum_value);
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            Some(schema)
+        }
+        _ => None,
     }
 }

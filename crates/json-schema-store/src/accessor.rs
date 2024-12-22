@@ -1,6 +1,6 @@
 /// Represents an accessor to a value in a TOML-like structure.
 /// It can either be a key (for objects) or an index (for arrays).
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Accessor {
     Key(String),
     Index(usize),
