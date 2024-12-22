@@ -181,7 +181,7 @@ pub fn parse_basic_string(
                                     return Err(ParseError::InvalidUnicodeEscapeSequence);
                                 }
                             } else {
-                                return Err(ParseError::EscapeCharacter);
+                                return Err(ParseError::HexEscapeSequence);
                             }
                         }
                         c if c.is_whitespace() => {

@@ -147,9 +147,46 @@ mod test {
         }))
     );
 
-    test_serialize!(
+    test_serialize! {
         #[test]
-        fn hex_escape(
+        fn hex_escape_v1_0_0(
+            r#"
+            # \x for the first 255 codepoints
+
+            whitespace      = "\x20 \x09 \x1b \x0d\x0a"
+            bs              = "\x7f"
+            nul             = "\x00"
+            hello           = "\x68\x65\x6c\x6c\x6f\x0a"
+            higher-than-127 = "S\xf8rmirb\xe6ren"
+
+            multiline = """
+            \x20 \x09 \x1b \x0d\x0a
+            \x7f
+            \x00
+            \x68\x65\x6c\x6c\x6f\x0a
+            \x53\xF8\x72\x6D\x69\x72\x62\xE6\x72\x65\x6E
+            """
+
+            # Not inside literals.
+            literal = '\x20 \x09 \x0d\x0a'
+            multiline-literal = '''
+            \x20 \x09 \x0d\x0a
+            '''
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Err([
+            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((2, 18), (2, 43))),
+            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((3, 18), (3, 24))),
+            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((4, 18), (4, 24))),
+            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((5, 18), (5, 44))),
+            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((6, 18), (6, 37))),
+            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((8, 12), (14, 3))),
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn hex_escape_v1_1_0(
             r#"
             # \x for the first 255 codepoints
 
@@ -184,7 +221,7 @@ mod test {
             "literal": "\\x20 \\x09 \\x0d\\x0a",
             "multiline-literal": "\\x20 \\x09 \\x0d\\x0a\n"
         }))
-    );
+    }
 
     test_serialize!(
         #[test]
