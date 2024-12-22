@@ -362,7 +362,7 @@ impl Cursor<'_> {
                 _ if c == '"' => {
                     return Ok(Token::new(SyntaxKind::BASIC_STRING, self.pop_span_range()))
                 }
-                '\\' if self.peek(1) == '"' => {
+                '\\' if matches!(self.peek(1), '"' | '\\') => {
                     self.bump();
                 }
                 _ if is_line_break(self.peek(1)) => break,

@@ -128,40 +128,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/string/escape-tricky
-     invalid basic string in 0:10..1:33
-     expected value in 0:10..1:33
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       end_esc = "String does not end here\" but ends here\\"
-       lit_end_esc = 'String ends here\'
-
-       multiline_unicode = """
-       \u00a0"""
-
-       multiline_not_unicode = """
-       \\u0041"""
-
-       multiline_end_esc = """When will it end? \"""...""\" should be here\""""
-
-       lit_multiline_not_unicode = '''
-       \u007f'''
-
-       lit_multiline_end = '''There is no escape\'''
-
-     output from parser-cmd (stderr):
-       invalid basic string in 0:10..1:33
-       expected value in 0:10..1:33
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/string/hex-escape
      invalid string: invalid escape sequence
      invalid string: invalid escape sequence
@@ -287,5 +253,5 @@ FAIL valid/table/names
        }
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 181 passed,  6 failed
+  valid tests: 182 passed,  5 failed
 invalid tests: 361 passed,  0 failed
