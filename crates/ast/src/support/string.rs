@@ -28,6 +28,9 @@ pub enum ParseError {
 
     #[error("\\e is allowed in TOML v1.1.0 or later")]
     EscapeCharacter,
+
+    #[error("\\xXX is allowed in TOML v1.0.0 or earlier")]
+    HexEscapeSequence,
 }
 
 pub fn from_bare_key(value: &str) -> String {
@@ -153,6 +156,32 @@ pub fn parse_basic_string(
                                 }
                             } else {
                                 return Err(ParseError::InvalidUnicodeEscapeSequence);
+                            }
+                        }
+                        'x' => {
+                            if toml_version >= TomlVersion::V1_1_0_Preview {
+                                chars.next(); // consume 'x'
+
+                                unicode_buf.clear();
+                                for _ in 0..2 {
+                                    if let Some(hex_digit) = chars.next() {
+                                        unicode_buf.push(hex_digit);
+                                    } else {
+                                        return Err(ParseError::InvalidUnicodeEscapeSequence);
+                                    }
+                                }
+
+                                if let Ok(code_point) = u32::from_str_radix(&unicode_buf, 16) {
+                                    if let Some(unicode_char) = std::char::from_u32(code_point) {
+                                        output.push(unicode_char);
+                                    } else {
+                                        return Err(ParseError::InvalidUnicodeCodePoint);
+                                    }
+                                } else {
+                                    return Err(ParseError::InvalidUnicodeEscapeSequence);
+                                }
+                            } else {
+                                return Err(ParseError::EscapeCharacter);
                             }
                         }
                         c if c.is_whitespace() => {

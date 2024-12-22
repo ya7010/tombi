@@ -149,6 +149,45 @@ mod test {
 
     test_serialize!(
         #[test]
+        fn hex_escape(
+            r#"
+            # \x for the first 255 codepoints
+
+            whitespace      = "\x20 \x09 \x1b \x0d\x0a"
+            bs              = "\x7f"
+            nul             = "\x00"
+            hello           = "\x68\x65\x6c\x6c\x6f\x0a"
+            higher-than-127 = "S\xf8rmirb\xe6ren"
+
+            multiline = """
+            \x20 \x09 \x1b \x0d\x0a
+            \x7f
+            \x00
+            \x68\x65\x6c\x6c\x6f\x0a
+            \x53\xF8\x72\x6D\x69\x72\x62\xE6\x72\x65\x6E
+            """
+
+            # Not inside literals.
+            literal = '\x20 \x09 \x0d\x0a'
+            multiline-literal = '''
+            \x20 \x09 \x0d\x0a
+            '''
+            "#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(json!({
+            "whitespace": "  \t \u{001b} \r\n",
+            "bs": "\u{007f}",
+            "nul": "\u{0000}",
+            "hello": "hello\n",
+            "higher-than-127": "Sørmirbæren",
+            "multiline": "  \t \x1b \r\n\n\x7f\n\x00\nhello\n\nSørmirbæren\n",
+            "literal": "\\x20 \\x09 \\x0d\\x0a",
+            "multiline-literal": "\\x20 \\x09 \\x0d\\x0a\n"
+        }))
+    );
+
+    test_serialize!(
+        #[test]
         fn multiline_empty(
             r#"
             empty-1 = """"""

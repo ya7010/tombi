@@ -128,54 +128,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/string/hex-escape
-     invalid string: invalid escape sequence
-     invalid string: invalid escape sequence
-     invalid string: invalid escape sequence
-     invalid string: invalid escape sequence
-     invalid string: invalid escape sequence
-     invalid string: invalid escape sequence
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       # \x for the first 255 codepoints
-
-       whitespace      = "\x20 \x09 \x1b \x0d\x0a"
-       bs              = "\x7f"
-       nul             = "\x00"
-       hello           = "\x68\x65\x6c\x6c\x6f\x0a"
-       higher-than-127 = "S\xf8rmirb\xe6ren"
-
-       multiline = """
-       \x20 \x09 \x1b \x0d\x0a
-       \x7f
-       \x00
-       \x68\x65\x6c\x6c\x6f\x0a
-       \x53\xF8\x72\x6D\x69\x72\x62\xE6\x72\x65\x6E
-       """
-
-       # Not inside literals.
-       literal = '\x20 \x09 \x0d\x0a'
-       multiline-literal = '''
-       \x20 \x09 \x0d\x0a
-       '''
-
-     output from parser-cmd (stderr):
-       invalid string: invalid escape sequence
-       invalid string: invalid escape sequence
-       invalid string: invalid escape sequence
-       invalid string: invalid escape sequence
-       invalid string: invalid escape sequence
-       invalid string: invalid escape sequence
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/table/names
      Could not find key "x.1" in parser output.
 
@@ -253,5 +205,5 @@ FAIL valid/table/names
        }
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 182 passed,  5 failed
+  valid tests: 183 passed,  4 failed
 invalid tests: 361 passed,  0 failed
