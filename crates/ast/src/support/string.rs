@@ -25,6 +25,9 @@ pub enum ParseError {
 
     #[error("trailing backslash in input")]
     TrailingBackslash,
+
+    #[error("\\e is allowed in TOML v1.1.0 or later")]
+    EscapeCharacter,
 }
 
 pub fn from_bare_key(value: &str) -> String {
@@ -80,9 +83,13 @@ pub fn parse_basic_string(
                             output.push('\u{0008}');
                             chars.next();
                         }
-                        'e' if toml_version >= TomlVersion::V1_1_0_Preview => {
-                            output.push('\u{001B}');
-                            chars.next();
+                        'e' => {
+                            if toml_version >= TomlVersion::V1_1_0_Preview {
+                                output.push('\u{001B}');
+                                chars.next();
+                            } else {
+                                return Err(ParseError::EscapeCharacter);
+                            }
                         }
                         't' => {
                             output.push('\t');

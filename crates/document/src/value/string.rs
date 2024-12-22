@@ -102,7 +102,7 @@ mod test {
             "#,
             TomlVersion::V1_0_0
         ) -> Err([
-            ("invalid string: invalid escape sequence", ((0, 6), (0, 33)))
+            ("invalid string: \\e is allowed in TOML v1.1.0 or later", ((0, 6), (0, 33)))
         ])
     }
 
