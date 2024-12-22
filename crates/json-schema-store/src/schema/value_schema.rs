@@ -1,10 +1,10 @@
-use super::{default_value::DefaultValue, schema_type::SchemaComposition};
+use super::{schema_type::SchemaComposition, value::Value};
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct ValueSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub types: Option<SchemaComposition>,
-    pub default: Option<DefaultValue>,
-    pub enum_values: Vec<String>,
+    pub default: Option<Value>,
+    pub enum_values: Vec<Value>,
 }

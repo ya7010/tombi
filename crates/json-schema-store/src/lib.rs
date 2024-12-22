@@ -5,7 +5,7 @@ mod value_type;
 
 pub use accessor::{Accessor, Accessors};
 use schema::SchemaComposition;
-pub use schema::{DocumentSchema, SchemaType, ValueSchema};
+pub use schema::{DocumentSchema, SchemaType, Value, ValueSchema};
 pub use store::Store;
 pub use value_type::ValueType;
 
@@ -152,18 +152,18 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
 fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
     match object {
         serde_json::Value::Object(object) => {
-            let mut schema = ValueSchema::default();
+            let mut value_schema = ValueSchema::default();
 
             for (key, value) in object {
                 match key.as_str() {
                     "title" => {
                         if let serde_json::Value::String(title) = value {
-                            schema.title = Some(title);
+                            value_schema.title = Some(title);
                         }
                     }
                     "description" => {
                         if let serde_json::Value::String(description) = value {
-                            schema.description = Some(description);
+                            value_schema.description = Some(description);
                         }
                     }
                     "type" => {
@@ -177,34 +177,16 @@ fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
                                 "object" => SchemaType::Object,
                                 _ => continue,
                             };
-                            schema.types = Some(SchemaComposition::Type(schema_type));
+                            value_schema.types = Some(SchemaComposition::Type(schema_type));
                         }
                     }
-                    "default" => match value {
-                        serde_json::Value::Null => {
-                            schema.default = Some(schema::DefaultValue::Null);
-                        }
-                        serde_json::Value::Bool(b) => {
-                            schema.default = Some(schema::DefaultValue::Boolean(b));
-                        }
-                        serde_json::Value::Number(n) => {
-                            if let Some(v) = n.as_i64() {
-                                schema.default = Some(schema::DefaultValue::Integer(v));
-                            } else if let Some(v) = n.as_f64() {
-                                schema.default = Some(schema::DefaultValue::Float(v));
-                            }
-                        }
-                        serde_json::Value::String(s) => {
-                            schema.default = Some(schema::DefaultValue::String(s));
-                        }
-                        serde_json::Value::Array(_) | serde_json::Value::Object(_) => {}
-                    },
+                    "default" => {
+                        value_schema.default = Some(value.into());
+                    }
                     "enum" => {
                         if let serde_json::Value::Array(array) = value {
                             for value in array {
-                                if let serde_json::Value::String(enum_value) = value {
-                                    schema.enum_values.push(enum_value);
-                                }
+                                value_schema.enum_values.push(value.into());
                             }
                         }
                     }
@@ -212,7 +194,7 @@ fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
                 }
             }
 
-            Some(schema)
+            Some(value_schema)
         }
         _ => None,
     }

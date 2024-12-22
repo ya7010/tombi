@@ -915,6 +915,7 @@ dependencies = [
  "dashmap 6.1.0",
  "document",
  "document-tree",
+ "indexmap 2.6.0",
  "pretty_assertions",
  "serde_json",
  "text",
