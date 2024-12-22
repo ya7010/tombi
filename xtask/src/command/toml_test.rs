@@ -33,7 +33,7 @@ fn decode_test(
     toml_version: TomlVersion,
 ) -> anyhow::Result<bool> {
     let toml_test_version = toml_test_version(toml_version);
-    let toml_version_str = serde_json::to_string(&toml_version).unwrap();
+    let toml_version_str = serde_json::to_string(&toml_version).unwrap_or_default();
     let toml_version_str = toml_version_str.trim_matches('"');
 
     match xshell::cmd!(
