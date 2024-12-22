@@ -4,8 +4,8 @@ mod store;
 mod value_type;
 
 pub use accessor::{Accessor, Accessors};
-pub use schema::ValueSchema;
-use schema::{DocumentSchema, SchemaType};
+use schema::SchemaComposition;
+pub use schema::{DocumentSchema, SchemaType, ValueSchema};
 pub use store::Store;
 pub use value_type::ValueType;
 
@@ -177,14 +177,28 @@ fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
                                 "object" => SchemaType::Object,
                                 _ => continue,
                             };
-                            schema.types.push(schema_type);
+                            schema.types = Some(SchemaComposition::Type(schema_type));
                         }
                     }
-                    "default" => {
-                        if let serde_json::Value::String(default) = value {
-                            schema.default = Some(default);
+                    "default" => match value {
+                        serde_json::Value::Null => {
+                            schema.default = Some(schema::DefaultValue::Null);
                         }
-                    }
+                        serde_json::Value::Bool(b) => {
+                            schema.default = Some(schema::DefaultValue::Boolean(b));
+                        }
+                        serde_json::Value::Number(n) => {
+                            if let Some(v) = n.as_i64() {
+                                schema.default = Some(schema::DefaultValue::Integer(v));
+                            } else if let Some(v) = n.as_f64() {
+                                schema.default = Some(schema::DefaultValue::Float(v));
+                            }
+                        }
+                        serde_json::Value::String(s) => {
+                            schema.default = Some(schema::DefaultValue::String(s));
+                        }
+                        serde_json::Value::Array(_) | serde_json::Value::Object(_) => {}
+                    },
                     "enum" => {
                         if let serde_json::Value::Array(array) = value {
                             for value in array {
