@@ -2,55 +2,129 @@ use config::TomlVersion;
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {
-    #[error(transparent)]
-    Chrono(#[from] chrono::ParseError),
+    #[error("input is out of range")]
+    OutOfRange,
+
+    #[error("no possible date and time matching input")]
+    Impossible,
+
+    #[error("input is not enough for unique date and time")]
+    NotEnough,
+
+    #[error("input contains invalid characters")]
+    Invalid,
+
+    #[error("premature end of input")]
+    TooShort,
+
+    #[error("trailing input")]
+    TooLong,
+
+    #[error("bad or unsupported format string")]
+    BadFormat,
+
     #[error("optional seconds are allowed in TOML v1.1.0 or later")]
     OptionalSeconds,
 }
 
-pub fn try_from_offset_date_time(
-    value: &str,
-    toml_version: TomlVersion,
-) -> Result<chrono::DateTime<chrono::FixedOffset>, ParseError> {
-    Ok(chrono::DateTime::parse_from_rfc3339(&make_datetime_str(
-        value,
-        toml_version,
-    )?)?)
+impl From<chrono::format::ParseErrorKind> for ParseError {
+    fn from(kind: chrono::format::ParseErrorKind) -> Self {
+        match kind {
+            chrono::format::ParseErrorKind::OutOfRange => Self::OutOfRange,
+            chrono::format::ParseErrorKind::Impossible => Self::Impossible,
+            chrono::format::ParseErrorKind::NotEnough => Self::NotEnough,
+            chrono::format::ParseErrorKind::Invalid => Self::Invalid,
+            chrono::format::ParseErrorKind::TooShort => Self::TooShort,
+            chrono::format::ParseErrorKind::TooLong => Self::TooLong,
+            chrono::format::ParseErrorKind::BadFormat => Self::BadFormat,
+            chrono::format::ParseErrorKind::__Nonexhaustive => unreachable!(),
+        }
+    }
 }
 
-pub fn try_from_local_date_time(
-    value: &str,
+pub fn try_new_offset_date_time(
+    node: &ast::OffsetDateTime,
     toml_version: TomlVersion,
-) -> Result<chrono::NaiveDateTime, ParseError> {
-    Ok(chrono::NaiveDateTime::parse_from_str(
-        &make_datetime_str(value, toml_version)?,
-        "%Y-%m-%d %H:%M:%S%.f",
-    )?)
+) -> Result<chrono::DateTime<chrono::FixedOffset>, crate::Error> {
+    let token = node.token().unwrap();
+    let Ok(datetime_str) = make_datetime_str(token.text(), toml_version) else {
+        return Err(crate::Error::ParseOffsetDateTimeError {
+            error: ParseError::OptionalSeconds,
+            range: token.range(),
+        });
+    };
+
+    match chrono::DateTime::parse_from_rfc3339(&datetime_str) {
+        Ok(value) => Ok(value),
+        Err(error) => Err(crate::Error::ParseOffsetDateTimeError {
+            error: error.kind().into(),
+            range: token.range(),
+        }),
+    }
 }
 
-pub fn try_from_local_date(
-    value: &str,
+pub fn try_new_local_date_time(
+    node: &ast::LocalDateTime,
+    toml_version: TomlVersion,
+) -> Result<chrono::NaiveDateTime, crate::Error> {
+    let token = node.token().unwrap();
+    let Ok(datetime_str) = make_datetime_str(token.text(), toml_version) else {
+        return Err(crate::Error::ParseLocalDateTimeError {
+            error: ParseError::OptionalSeconds,
+            range: token.range(),
+        });
+    };
+
+    match chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S%.f") {
+        Ok(value) => Ok(value),
+        Err(error) => Err(crate::Error::ParseLocalDateTimeError {
+            error: error.kind().into(),
+            range: token.range(),
+        }),
+    }
+}
+
+pub fn try_new_local_date(
+    node: &ast::LocalDate,
     _toml_version: TomlVersion,
-) -> Result<chrono::NaiveDate, ParseError> {
-    Ok(chrono::NaiveDate::parse_from_str(value, "%Y-%m-%d")?)
+) -> Result<chrono::NaiveDate, crate::Error> {
+    let token = node.token().unwrap();
+
+    match chrono::NaiveDate::parse_from_str(token.text(), "%Y-%m-%d") {
+        Ok(value) => Ok(value),
+        Err(error) => Err(crate::Error::ParseLocalDateError {
+            error: error.kind().into(),
+            range: token.range(),
+        }),
+    }
 }
 
-pub fn try_from_local_time(
-    value: &str,
+pub fn try_new_local_time(
+    node: &ast::LocalTime,
     toml_version: TomlVersion,
-) -> Result<chrono::NaiveTime, ParseError> {
+) -> Result<chrono::NaiveTime, crate::Error> {
     const HOUR_MINUTE_SIZE: usize = "00:00".len();
+
+    let token = node.token().unwrap();
+    let text = token.text();
 
     // NOTE: Support optional seconds.
     //       See more infomation: https://github.com/toml-lang/toml/issues/671
-    if value.chars().nth(HOUR_MINUTE_SIZE) == Some(':') {
-        Ok(chrono::NaiveTime::parse_from_str(value, "%H:%M:%S%.f")?)
+    if text.chars().nth(HOUR_MINUTE_SIZE) == Some(':') {
+        chrono::NaiveTime::parse_from_str(text, "%H:%M:%S%.f")
     } else {
         if toml_version < TomlVersion::V1_1_0_Preview {
-            return Err(ParseError::OptionalSeconds);
+            return Err(crate::Error::ParseLocalTimeError {
+                error: ParseError::OptionalSeconds,
+                range: token.range(),
+            });
         }
-        Ok(chrono::NaiveTime::parse_from_str(value, "%H:%M%.f")?)
+        chrono::NaiveTime::parse_from_str(text, "%H:%M%.f")
     }
+    .map_err(|error| crate::Error::ParseLocalTimeError {
+        error: error.kind().into(),
+        range: token.range(),
+    })
 }
 
 #[inline]
