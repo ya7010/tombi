@@ -11,8 +11,6 @@ ast = { workspace = true }
 dashmap = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
-jsonschema = "0.26.1"
-reqwest = { workspace = true, features = ["rustls-tls"] }
 serde_json = { workspace = true }
 text = { workspace = true }
 url = "2.5.4"
