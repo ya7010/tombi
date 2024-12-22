@@ -12,6 +12,9 @@ pub enum ParseError {
     #[error("invalid newline character in input")]
     InvalidNewline,
 
+    #[error("invalid whitespace escape sequence")]
+    InvalidWhitespaceEscapeSequence,
+
     #[error("LineBreak allows only LF or CRLF")]
     InvalidLineBreak,
 
@@ -131,17 +134,6 @@ pub fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, Pa
                                 return Err(ParseError::InvalidUnicodeEscapeSequence);
                             }
                         }
-                        '\n' => {
-                            // Skip newline characters
-                            chars.next();
-                            while let Some(&c) = chars.peek() {
-                                if c.is_whitespace() {
-                                    chars.next();
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
                         '\r' => {
                             // Skip newline characters
                             chars.next();
@@ -156,6 +148,23 @@ pub fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, Pa
                                 } else {
                                     break;
                                 }
+                            }
+                        }
+                        c if c.is_whitespace() => {
+                            // Skip newline characters
+                            let mut has_whitespace = c == '\n';
+
+                            chars.next();
+                            while let Some(&c) = chars.peek() {
+                                if c.is_whitespace() {
+                                    has_whitespace = has_whitespace || c == '\n';
+                                    chars.next();
+                                } else {
+                                    break;
+                                }
+                            }
+                            if !has_whitespace {
+                                return Err(ParseError::InvalidWhitespaceEscapeSequence);
                             }
                         }
                         _ => {

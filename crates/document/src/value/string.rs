@@ -85,7 +85,31 @@ impl serde::Serialize for String {
 
 #[cfg(test)]
 mod test {
+    use serde_json::json;
+
     use crate::test_serialize;
+
+    test_serialize!(
+        #[test]
+        fn multiline_empty(
+            r#"
+            empty-1 = """"""
+
+            # A newline immediately following the opening delimiter will be trimmed.
+            empty-2 = """
+            """
+
+            # \ at the end of line trims newlines as well; note that last \ is followed by
+            # two spaces, which are ignored.
+            empty-3 = """\
+                """
+            empty-4 = """\
+                \
+                \
+                """
+            "#
+        ) -> Ok(json!({"empty-1":"","empty-2":"","empty-3":"","empty-4":""}))
+    );
 
     test_serialize!(
         #[test]

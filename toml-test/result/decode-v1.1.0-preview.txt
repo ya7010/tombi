@@ -128,29 +128,6 @@ FAIL valid/spec/keys-7
            }
        }
 
-FAIL valid/string/ends-in-whitespace-escape
-     invalid string: invalid escape sequence
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       beee = """
-       heeee
-       geeee\
-
-
-             """
-
-     output from parser-cmd (stderr):
-       invalid string: invalid escape sequence
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/string/escape-esc
      invalid string: invalid escape sequence
      Error: invalid toml
@@ -251,91 +228,6 @@ FAIL valid/string/hex-escape
      want:
           <empty>
 
-FAIL valid/string/multiline
-     invalid string: invalid escape sequence
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       # NOTE: this file includes some literal tab characters.
-
-       equivalent_one = "The quick brown fox jumps over the lazy dog."
-       equivalent_two = """
-       The quick brown \
-
-
-         fox jumps over \
-           the lazy dog."""
-
-       equivalent_three = """\
-              The quick brown \
-              fox jumps over \
-              the lazy dog.\
-              """
-
-       whitespace-after-bs = """\
-              The quick brown \
-              fox jumps over \
-              the lazy dog.\
-              """
-
-       no-space = """a\
-           b"""
-
-       # Has tab character.
-       keep-ws-before = """a   	\
-          b"""
-
-       escape-bs-1 = """a \\
-       b"""
-
-       escape-bs-2 = """a \\\
-       b"""
-
-       escape-bs-3 = """a \\\\
-         b"""
-
-     output from parser-cmd (stderr):
-       invalid string: invalid escape sequence
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
-FAIL valid/string/multiline-empty
-     invalid string: invalid escape sequence
-     Error: invalid toml
- 
-     Exit 1
-
-     input sent to parser-cmd:
-       empty-1 = """"""
-
-       # A newline immediately following the opening delimiter will be trimmed.
-       empty-2 = """
-       """
-
-       # \ at the end of line trims newlines as well; note that last \ is followed by
-       # two spaces, which are ignored.
-       empty-3 = """\
-           """
-       empty-4 = """\
-          \
-          \
-          """
-
-     output from parser-cmd (stderr):
-       invalid string: invalid escape sequence
-       Error: invalid toml
-
-       Exit 1
-
-     want:
-          <empty>
-
 FAIL valid/table/names
      Could not find key "x.1" in parser output.
 
@@ -413,5 +305,5 @@ FAIL valid/table/names
        }
 
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
-  valid tests: 177 passed, 10 failed
+  valid tests: 180 passed,  7 failed
 invalid tests: 361 passed,  0 failed
