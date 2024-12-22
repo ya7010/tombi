@@ -5,7 +5,7 @@ mod value_type;
 
 pub use accessor::{Accessor, Accessors};
 use schema::SchemaComposition;
-pub use schema::{DocumentSchema, SchemaType, Value, ValueSchema};
+pub use schema::{DocumentSchema, ObjectSchema, SchemaType, Value};
 pub use store::Store;
 pub use value_type::ValueType;
 
@@ -132,7 +132,9 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
         if let serde_json::Value::Object(object) = content["properties"].take() {
             for (key, value) in object.into_iter() {
                 if let Some(value_schema) = parse_value_schema(value) {
-                    schema.insert_property(Accessor::Key(key.to_string()), value_schema);
+                    schema
+                        .properties
+                        .insert(Accessor::Key(key.to_string()), value_schema);
                 }
             }
         }
@@ -141,7 +143,7 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
         if let serde_json::Value::Object(object) = content["definitions"].take() {
             for (key, value) in object.into_iter() {
                 if let Some(value_schema) = parse_value_schema(value) {
-                    schema.insert_definition(key, value_schema);
+                    schema.definitions.insert(key, value_schema);
                 }
             }
         }
@@ -149,10 +151,10 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     schema
 }
 
-fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
+fn parse_value_schema(object: serde_json::Value) -> Option<ObjectSchema> {
     match object {
         serde_json::Value::Object(object) => {
-            let mut value_schema = ValueSchema::default();
+            let mut value_schema = ObjectSchema::default();
 
             for (key, value) in object {
                 match key.as_str() {
@@ -177,7 +179,7 @@ fn parse_value_schema(object: serde_json::Value) -> Option<ValueSchema> {
                                 "object" => SchemaType::Object,
                                 _ => continue,
                             };
-                            value_schema.types = Some(SchemaComposition::Type(schema_type));
+                            value_schema.r#type = Some(SchemaComposition::Type(schema_type).into());
                         }
                     }
                     "default" => {

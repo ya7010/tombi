@@ -1,9 +1,11 @@
 mod document_schema;
+mod object_schema;
+mod reference;
 mod schema_type;
 mod value;
-mod value_schema;
 
 pub use document_schema::DocumentSchema;
+pub use object_schema::ObjectSchema;
+pub use reference::Referable;
 pub use schema_type::{SchemaComposition, SchemaType};
 pub use value::Value;
-pub use value_schema::ValueSchema;
