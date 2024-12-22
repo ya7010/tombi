@@ -6,6 +6,7 @@ use super::object_schema::ObjectSchema;
 pub struct DocumentSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub schema: Option<ObjectSchema>,
     pub properties: ahash::HashMap<Accessor, ObjectSchema>,
     pub definitions: ahash::HashMap<String, ObjectSchema>,
 }

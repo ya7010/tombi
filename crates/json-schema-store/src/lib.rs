@@ -179,7 +179,7 @@ fn parse_value_schema(object: serde_json::Value) -> Option<ObjectSchema> {
                                 "object" => SchemaType::Object,
                                 _ => continue,
                             };
-                            value_schema.r#type = Some(SchemaComposition::Type(schema_type).into());
+                            value_schema.schema = Some(SchemaComposition::Type(schema_type).into());
                         }
                     }
                     "default" => {

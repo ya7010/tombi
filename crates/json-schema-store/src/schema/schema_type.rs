@@ -1,4 +1,4 @@
-use super::ObjectSchema;
+use super::{ObjectSchema, Referable};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SchemaType {
@@ -13,7 +13,7 @@ pub enum SchemaType {
 #[derive(Debug, Clone, PartialEq)]
 pub enum SchemaComposition {
     Type(SchemaType),
-    OneOf(Vec<ObjectSchema>),
-    AnyOf(Vec<ObjectSchema>),
-    AllOf(Vec<ObjectSchema>),
+    OneOf(Vec<Referable<ObjectSchema>>),
+    AnyOf(Vec<Referable<ObjectSchema>>),
+    AllOf(Vec<Referable<ObjectSchema>>),
 }
