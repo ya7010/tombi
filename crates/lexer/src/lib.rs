@@ -133,7 +133,7 @@ impl Cursor<'_> {
             ',' => Ok(Token::new(T!(,), self.pop_span_range())),
             '.' => Ok(Token::new(T!(.), self.pop_span_range())),
             '=' => Ok(Token::new(T!(=), self.pop_span_range())),
-            'A'..='Z' | 'a'..='z' | '_' => {
+            'A'..='Z' | 'a'..='z' | '_' | '\u{A0}'..='\u{10FFFF}' => {
                 if self.is_keyword("inf") || self.is_keyword("nan") {
                     self.eat_n(2);
                     Ok(Token::new(SyntaxKind::FLOAT, self.pop_span_range()))
@@ -467,7 +467,25 @@ impl Cursor<'_> {
     }
 
     fn key(&mut self) -> Result<Token, crate::Error> {
-        self.eat_while(|c| matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-'));
+        self.eat_while(|c| {
+            matches!(
+                c,
+                // ASCII characters
+                'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' |
+
+                // ==============================================
+                // TOML v1.1.0 supports Unicode for bare keys
+                // ==============================================
+                //
+                // TODO: The exact specification is not yet known, but it is provisionally implemented to pass toml-test.
+                //       When the use of v1.1.0 is officially confirmed, it will be implemented.
+                //
+                // See discussion: https://github.com/toml-lang/toml/discussions/941
+
+                // Unicode characters from non-breaking space onwards
+                '\u{A0}'..='\u{10FFFF}'
+            )
+        });
         if is_token_separator_with_dot(self.peek(1)) {
             Ok(Token::new(SyntaxKind::BARE_KEY, self.pop_span_range()))
         } else {

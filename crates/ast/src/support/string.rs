@@ -31,10 +31,26 @@ pub enum ParseError {
 
     #[error("\\xXX is allowed in TOML v1.0.0 or earlier")]
     HexEscapeSequence,
+
+    #[error("unicode key is allowed in TOML v1.1.0 or later")]
+    UnicodeKey,
 }
 
-pub fn from_bare_key(value: &str) -> String {
-    value.to_string()
+pub fn try_from_bare_key(value: &str, toml_version: TomlVersion) -> Result<String, ParseError> {
+    if toml_version >= TomlVersion::V1_1_0_Preview
+        || value.chars().all(|c| {
+            matches!(
+                c,
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-'
+                // FIXME: This code can be removed if we can handle keys of floats correctly.
+                | '.'
+            )
+        })
+    {
+        Ok(value.to_string())
+    } else {
+        Err(ParseError::UnicodeKey)
+    }
 }
 
 pub fn try_from_basic_string(value: &str, toml_version: TomlVersion) -> Result<String, ParseError> {

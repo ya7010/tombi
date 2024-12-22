@@ -116,6 +116,54 @@ mod test {
         ) -> Ok(json!({"esc":"\u{001b} There is no escape! \u{001b}"}))
     }
 
+    test_serialize! {
+        #[test]
+        fn escape_unicode_v1_0_0(
+            r#"
+            € = 'Euro'
+            😂 = "rofl"
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Err([
+            ("invalid string: unicode key is allowed in TOML v1.1.0 or later", ((0, 0), (0, 1))),
+            ("invalid string: unicode key is allowed in TOML v1.1.0 or later", ((1, 0), (1, 1))),
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn escape_unicode_v1_1_0(
+            r#"
+            # TOML 1.1 supports Unicode for bare keys.
+
+            € = 'Euro'
+            😂 = "rofl"
+            a‍b = "zwj"
+            ÅÅ = "U+00C5 U+0041 U+030A"
+
+            [中文]
+            中文 = {中文 = "Chinese language"}
+
+            [[tiếng-Việt]]
+            tiəŋ˧˦.viət̚˧˨ʔ = "north"
+
+            [[tiếng-Việt]]
+            tiəŋ˦˧˥.viək̚˨˩ʔ = "central"
+            "#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(json!({
+            "€": "Euro",
+            "😂": "rofl",
+            "a‍b": "zwj",
+            "ÅÅ": "U+00C5 U+0041 U+030A",
+            "中文": {"中文": {"中文": "Chinese language"}},
+            "tiếng-Việt": [
+                {"tiəŋ˧˦": {"viət̚˧˨ʔ": "north"}},
+                {"tiəŋ˦˧˥": {"viək̚˨˩ʔ": "central"}}
+            ]
+        }))
+    }
+
     test_serialize!(
         #[test]
         fn escape_tricky(

@@ -34,14 +34,13 @@ impl Key {
 
     pub fn to_raw_text(&self, toml_version: TomlVersion) -> String {
         match self.kind {
-            KeyKind::BareKey => support::string::from_bare_key(self.value()),
+            KeyKind::BareKey => support::string::try_from_bare_key(self.value(), toml_version),
             KeyKind::BasicString => {
-                support::string::try_from_basic_string(self.value(), toml_version).unwrap()
+                support::string::try_from_basic_string(self.value(), toml_version)
             }
-            KeyKind::LiteralString => {
-                support::string::try_from_literal_string(self.value()).unwrap()
-            }
+            KeyKind::LiteralString => support::string::try_from_literal_string(self.value()),
         }
+        .unwrap()
     }
 }
 
