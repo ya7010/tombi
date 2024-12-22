@@ -32,6 +32,9 @@ pub enum ErrorKind {
     #[error("invalid local time")]
     InvalidLocalTime,
 
+    #[error("invalid line break")]
+    InvalidLineBreak,
+
     #[error("invalid token")]
     InvalidToken,
 
@@ -121,6 +124,7 @@ impl From<lexer::Error> for Error {
             lexer::ErrorKind::InvalidLocalDateTime => ErrorKind::InvalidLocalDateTime,
             lexer::ErrorKind::InvalidLocalDate => ErrorKind::InvalidLocalDate,
             lexer::ErrorKind::InvalidLocalTime => ErrorKind::InvalidLocalTime,
+            lexer::ErrorKind::InvalidLineBreak => ErrorKind::InvalidLineBreak,
             lexer::ErrorKind::InvalidToken => ErrorKind::InvalidToken,
         };
 

@@ -177,13 +177,14 @@ impl Cursor<'_> {
     fn line_break(&mut self) -> Result<Token, crate::Error> {
         let c = self.current();
 
-        assert!(matches!(c, '\n' | '\r'));
-        if self.matches("\r\n") {
-            self.eat_n(1);
-            2
-        } else {
-            1
-        };
+        assert!(matches!(c, '\r' | '\n'));
+        if c == '\r' {
+            if self.peek(1) == '\n' {
+                self.eat_n(1);
+            } else {
+                return Err(crate::Error::new(InvalidLineBreak, self.pop_span_range()));
+            }
+        }
 
         Ok(Token::new(SyntaxKind::LINE_BREAK, self.pop_span_range()))
     }

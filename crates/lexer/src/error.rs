@@ -17,6 +17,7 @@ pub enum ErrorKind {
     InvalidLocalDateTime,
     InvalidLocalDate,
     InvalidLocalTime,
+    InvalidLineBreak,
     InvalidToken,
 }
 

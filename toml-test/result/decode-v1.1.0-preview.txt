@@ -412,34 +412,6 @@ FAIL valid/table/names
            }
        }
 
-FAIL invalid/control/bare-cr
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       # The following line contains a single carriage return control character
-       
-
-     output from parser-cmd (stdout):
-       {}
-
-     want:
-       Exit code 1
-
-FAIL invalid/control/comment-cr
-     Expected an error, but no error was reported.
-
-     input sent to parser-cmd:
-       comment-cr   = "Carriage return in comment" # a=1
-
-     output from parser-cmd (stdout):
-       {
-         "a":          {"type": "integer", "value": "1"},
-         "comment-cr": {"type": "string", "value": "Carriage return in comment"}
-       }
-
-     want:
-       Exit code 1
-
 toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.1.0-preview]: using embedded tests
   valid tests: 177 passed, 10 failed
-invalid tests: 359 passed,  2 failed
+invalid tests: 361 passed,  0 failed
