@@ -134,22 +134,6 @@ pub fn parse_basic_string(input: &str, is_multi_line: bool) -> Result<String, Pa
                                 return Err(ParseError::InvalidUnicodeEscapeSequence);
                             }
                         }
-                        '\r' => {
-                            // Skip newline characters
-                            chars.next();
-                            if let Some(&'\n') = chars.peek() {
-                                chars.next();
-                            } else {
-                                return Err(ParseError::InvalidNewline);
-                            }
-                            while let Some(&c) = chars.peek() {
-                                if c.is_whitespace() {
-                                    chars.next();
-                                } else {
-                                    break;
-                                }
-                            }
-                        }
                         c if c.is_whitespace() => {
                             // Skip newline characters
                             let mut has_whitespace = c == '\n';
