@@ -108,7 +108,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
-        match linter::lint_with(&source, toml_version, &options) {
+        match linter::Linter::new(toml_version, &options).lint(&source) {
             Ok(()) => {
                 return true;
             }

@@ -13,32 +13,29 @@ pub async fn handle_diagnostic(
     tracing::info!("handle_diagnostic");
 
     let diagnostics = match backend.get_document_info(&text_document.uri).as_deref() {
-        Some(document) => linter::lint_with(
-            &document.source,
-            backend.toml_version(),
-            backend.lint_options(),
-        )
-        .map_or_else(
-            |diagnostics| {
-                diagnostics
-                    .into_iter()
-                    .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
-                        range: diagnostic.range().into(),
-                        severity: Some(match diagnostic.level() {
-                            diagnostic::Level::WARNING => {
-                                tower_lsp::lsp_types::DiagnosticSeverity::WARNING
-                            }
-                            diagnostic::Level::ERROR => {
-                                tower_lsp::lsp_types::DiagnosticSeverity::ERROR
-                            }
-                        }),
-                        message: diagnostic.message().to_string(),
-                        ..Default::default()
-                    })
-                    .collect()
-            },
-            |_| vec![],
-        ),
+        Some(document) => linter::Linter::new(backend.toml_version(), backend.lint_options())
+            .lint(&document.source)
+            .map_or_else(
+                |diagnostics| {
+                    diagnostics
+                        .into_iter()
+                        .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
+                            range: diagnostic.range().into(),
+                            severity: Some(match diagnostic.level() {
+                                diagnostic::Level::WARNING => {
+                                    tower_lsp::lsp_types::DiagnosticSeverity::WARNING
+                                }
+                                diagnostic::Level::ERROR => {
+                                    tower_lsp::lsp_types::DiagnosticSeverity::ERROR
+                                }
+                            }),
+                            message: diagnostic.message().to_string(),
+                            ..Default::default()
+                        })
+                        .collect()
+                },
+                |_| vec![],
+            ),
         None => vec![],
     };
 
