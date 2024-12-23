@@ -6,7 +6,7 @@ pub struct SchemaOptions {
     /// # The schema path.
     path: String,
 
-    /// # File match pattern of the schema.
+    /// # The file match pattern of the schema.
     ///
     /// Supports glob pattern.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
