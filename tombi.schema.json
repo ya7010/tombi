@@ -165,46 +165,26 @@
     "SchemaOptions": {
       "type": "object",
       "required": [
-        "file-match",
-        "url"
+        "path"
       ],
       "properties": {
-        "url": {
-          "title": "The schema URL.",
+        "path": {
+          "title": "The schema path.",
           "type": "string"
         },
-        "file-match": {
-          "title": "The file match condition to apply the schema.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/FileMatch"
-            }
-          ]
+        "include": {
+          "title": "File match pattern of the schema.",
+          "description": "Supports glob pattern.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
         }
       }
-    },
-    "FileMatch": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/FilePattern"
-        },
-        {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/FilePattern"
-          }
-        }
-      ]
-    },
-    "FilePattern": {
-      "title": "File match pattern of the schema.",
-      "description": "Supports glob pattern.",
-      "anyOf": [
-        {
-          "description": "A glob pattern.",
-          "type": "string"
-        }
-      ]
     }
   }
 }

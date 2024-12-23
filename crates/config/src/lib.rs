@@ -5,7 +5,7 @@ mod toml_version;
 
 pub use format::FormatOptions;
 pub use lint::LintOptions;
-pub use schema::{FileMatch, FilePattern, SchemaOptions};
+pub use schema::SchemaOptions;
 pub use toml_version::TomlVersion;
 
 pub const DEFAULT_FORMAT_OPTIONS: FormatOptions = FormatOptions::default();

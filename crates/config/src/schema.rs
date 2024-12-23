@@ -1,3 +1,3 @@
 mod options;
 
-pub use options::{FileMatch, FilePattern, SchemaOptions};
+pub use options::SchemaOptions;

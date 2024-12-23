@@ -7,5 +7,5 @@ format:
 lint: {}
 
 schemas:
-  - url: "tombi.schema.json"
-    file-match: "tombi.toml"
+  - path: "tombi.schema.json"
+    include: ["**/tombi.toml"]
