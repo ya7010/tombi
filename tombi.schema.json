@@ -51,7 +51,7 @@
   },
   "definitions": {
     "TomlVersion": {
-      "description": "TOML version.",
+      "title": "TOML version.",
       "type": "string",
       "enum": [
         "v1.0.0",
@@ -173,7 +173,7 @@
           "type": "string"
         },
         "include": {
-          "title": "File match pattern of the schema.",
+          "title": "The file match pattern of the schema.",
           "description": "Supports glob pattern.",
           "type": [
             "array",
