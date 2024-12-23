@@ -23,11 +23,9 @@ pub async fn handle_formatting(
         }
     };
 
-    match formatter::format_with(
-        &document_info.source,
-        backend.toml_version(),
-        &backend.format_options(),
-    ) {
+    match formatter::Formatter::new(backend.toml_version(), &backend.format_options())
+        .format(&document_info.source)
+    {
         Ok(new_text) => {
             if new_text != document_info.source {
                 let range = Range::new(

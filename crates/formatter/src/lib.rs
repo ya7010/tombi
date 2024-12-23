@@ -2,43 +2,15 @@ mod format;
 pub mod formatter;
 
 pub use config::FormatOptions;
-use config::TomlVersion;
-use diagnostic::Diagnostic;
-use diagnostic::ToDiagnostics;
-use format::Format;
-pub use formatter::definitions::Definitions;
 pub use formatter::Formatter;
 
+use config::TomlVersion;
+use diagnostic::Diagnostic;
+use format::Format;
+use formatter::definitions::Definitions;
+
 pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
-    format_with(source, TomlVersion::default(), &FormatOptions::default())
-}
-
-pub fn format_with(
-    source: &str,
-    toml_version: TomlVersion,
-    options: &FormatOptions,
-) -> Result<String, Vec<Diagnostic>> {
-    match parser::parse(source, toml_version).try_cast::<ast::Root>() {
-        Ok(root) => {
-            tracing::trace!("ast: {:#?}", root);
-
-            let mut formatted_text = String::new();
-            let line_ending = {
-                let mut f = Formatter::new_with_options(toml_version, &mut formatted_text, options);
-                root.fmt(&mut f).unwrap();
-                f.line_ending()
-            };
-
-            Ok(formatted_text + line_ending)
-        }
-        Err(errors) => {
-            let mut diagnostics = Vec::new();
-            for error in errors {
-                error.to_diagnostics(&mut diagnostics);
-            }
-            Err(diagnostics)
-        }
-    }
+    Formatter::new(TomlVersion::default(), &FormatOptions::default()).format(source)
 }
 
 #[cfg(test)]
@@ -59,7 +31,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $version:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
-            match crate::format_with($source, $version, &crate::FormatOptions::default()) {
+            match crate::Formatter::new($version, &crate::FormatOptions::default()).format($source) {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }

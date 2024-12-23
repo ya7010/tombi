@@ -23,8 +23,9 @@ impl<'a> Linter<'a> {
         }
     }
 
-    pub fn lint(self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let p = parser::parse(source, self.toml_version);
+    pub fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
+        let toml_version = self.toml_version;
+        let p = parser::parse(source, toml_version);
         let mut errors = vec![];
 
         for err in p.errors() {
@@ -33,11 +34,10 @@ impl<'a> Linter<'a> {
 
         if errors.is_empty() {
             if let Some(root) = ast::Root::cast(p.into_syntax_node()) {
-                let mut linter = Linter::new(self.toml_version, &self.options);
-                root.lint(&mut linter);
-                errors.extend(linter.into_diagnostics());
+                root.lint(&mut self);
+                errors.extend(self.into_diagnostics());
 
-                if let Err(errs) = root.try_into_document_tree(self.toml_version) {
+                if let Err(errs) = root.try_into_document_tree(toml_version) {
                     for err in errs {
                         err.to_diagnostics(&mut errors);
                     }

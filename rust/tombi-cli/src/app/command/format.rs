@@ -138,7 +138,7 @@ where
 {
     let mut source = String::new();
     if file.read_to_string(&mut source).is_ok() {
-        match formatter::format_with(&source, toml_version, options) {
+        match formatter::Formatter::new(toml_version, options).format(&source) {
             Ok(formatted) => {
                 if source != formatted {
                     if args.check {

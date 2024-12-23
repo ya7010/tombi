@@ -1,9 +1,12 @@
 pub mod definitions;
 
+use crate::Format;
 use config::{
     format::{DateTimeDelimiter, LineEnding},
     TomlVersion,
 };
+use diagnostic::Diagnostic;
+use diagnostic::ToDiagnostics;
 use std::{borrow::Cow, fmt::Write};
 
 pub struct Formatter<'a> {
@@ -12,55 +15,62 @@ pub struct Formatter<'a> {
     skip_indent: bool,
     defs: crate::Definitions,
     options: Cow<'a, crate::FormatOptions>,
-    buf: &'a mut (dyn Write + 'a),
+    buf: String,
 }
 
 impl<'a> Formatter<'a> {
     #[inline]
-    pub fn new(toml_version: TomlVersion, buf: &'a mut (dyn Write + 'a)) -> Self {
-        Self {
-            toml_version,
-            indent_depth: 0,
-            skip_indent: false,
-            defs: Default::default(),
-            options: Cow::Owned(crate::FormatOptions::default()),
-            buf,
-        }
-    }
-
-    #[inline]
-    pub fn new_with_options(
-        toml_version: TomlVersion,
-        buf: &'a mut (dyn Write + 'a),
-        options: &'a crate::FormatOptions,
-    ) -> Self {
+    pub fn new(toml_version: TomlVersion, options: &'a crate::FormatOptions) -> Self {
         Self {
             toml_version,
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
             options: Cow::Borrowed(options),
-            buf,
+            buf: String::new(),
+        }
+    }
+
+    pub fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
+        let toml_version = self.toml_version;
+        match parser::parse(source, toml_version).try_cast::<ast::Root>() {
+            Ok(root) => {
+                tracing::trace!("ast: {:#?}", root);
+
+                let line_ending = {
+                    root.fmt(&mut self).unwrap();
+                    self.line_ending()
+                };
+
+                Ok(self.buf + line_ending)
+            }
+            Err(errors) => {
+                let mut diagnostics = Vec::new();
+                for error in errors {
+                    error.to_diagnostics(&mut diagnostics);
+                }
+                Err(diagnostics)
+            }
         }
     }
 
     #[inline]
-    pub fn toml_version(&self) -> TomlVersion {
+    pub(crate) fn toml_version(&self) -> TomlVersion {
         self.toml_version
     }
 
     #[inline]
-    pub fn options(&self) -> &crate::FormatOptions {
+    pub(crate) fn options(&self) -> &crate::FormatOptions {
         &self.options
     }
 
     #[inline]
-    pub fn defs(&self) -> &crate::Definitions {
+    pub(crate) fn defs(&self) -> &crate::Definitions {
         &self.defs
     }
 
     #[inline]
-    pub fn line_ending(&self) -> &'static str {
+    pub(crate) fn line_ending(&self) -> &'static str {
         match self.options.line_ending.unwrap_or_default() {
             LineEnding::Lf => "\n",
             LineEnding::Crlf => "\r\n",
@@ -68,7 +78,7 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn date_time_delimiter(&self) -> Option<&'static str> {
+    pub(crate) fn date_time_delimiter(&self) -> Option<&'static str> {
         match self.options.date_time_delimiter() {
             DateTimeDelimiter::T => Some("T"),
             DateTimeDelimiter::Space => Some(" "),
@@ -77,12 +87,12 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn reset(&mut self) {
+    pub(crate) fn reset(&mut self) {
         self.reset_indent();
     }
 
     #[inline]
-    pub fn write_indent(&mut self) -> Result<(), std::fmt::Error> {
+    pub(crate) fn write_indent(&mut self) -> Result<(), std::fmt::Error> {
         if self.skip_indent {
             self.skip_indent = false;
 
@@ -93,12 +103,12 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn inc_indent(&mut self) {
+    pub(crate) fn inc_indent(&mut self) {
         self.indent_depth += 1;
     }
 
     #[inline]
-    pub fn dec_indent(&mut self) {
+    pub(crate) fn dec_indent(&mut self) {
         self.indent_depth = self.indent_depth.saturating_sub(1);
     }
 
@@ -108,7 +118,7 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub fn skip_indent(&mut self) {
+    pub(crate) fn skip_indent(&mut self) {
         self.skip_indent = true;
     }
 }
