@@ -12,6 +12,6 @@ pub enum DateTimeDelimiter {
     /// Example: `2021-01-01 00:00:00`
     Space,
 
-    /// Preserve the original delimiter
+    /// Preserve the source delimiter
     Preserve,
 }
