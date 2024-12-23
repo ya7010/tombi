@@ -4,13 +4,18 @@ pub mod formatter;
 pub use config::FormatOptions;
 pub use formatter::Formatter;
 
-use config::TomlVersion;
 use diagnostic::Diagnostic;
 use format::Format;
 use formatter::definitions::Definitions;
 
 pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
-    Formatter::new(TomlVersion::default(), &FormatOptions::default()).format(source)
+    let config = config::load();
+
+    Formatter::new(
+        config.toml_version.unwrap_or_default(),
+        &config.format.unwrap_or_default(),
+    )
+    .format(source)
 }
 
 #[cfg(test)]
@@ -31,6 +36,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $version:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
+
             match crate::Formatter::new($version, &crate::FormatOptions::default()).format($source) {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
@@ -57,6 +63,8 @@ macro_rules! test_format {
 
 #[cfg(test)]
 mod test {
+    use config::TomlVersion;
+
     use super::*;
 
     test_format! {
