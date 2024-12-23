@@ -12,4 +12,4 @@ line-ending = "lf"
 
 [[schemas]]
 path = "tombi.schema.json"
-include = ["**/*.json"]
+include = ["**/tombi.toml"]
