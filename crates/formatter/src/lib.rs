@@ -25,19 +25,19 @@ macro_rules! test_format {
         crate::test_format!(#[test] fn $name($source) -> Ok($source););
     };
 
-    (#[test] fn $name:ident($source:expr, $version:expr) -> Ok(source);) => {
-        crate::test_format!(#[test] fn $name($source, $version) -> Ok($source););
+    (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(source);) => {
+        crate::test_format!(#[test] fn $name($source, $toml_version) -> Ok($source););
     };
 
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
-        crate::test_format!(#[test] fn $name($source, Default::default()) -> Ok($expected););
+        crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Ok($expected););
     };
 
-    (#[test] fn $name:ident($source:expr, $version:expr) -> Ok($expected:expr);) => {
+    (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
 
-            match crate::Formatter::new($version, &crate::FormatOptions::default()).format($source) {
+            match crate::Formatter::new($toml_version, &crate::FormatOptions::default()).format($source) {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }
@@ -49,9 +49,13 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr) -> Err(_);) => {
+        crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Err(_););
+    };
+
+    (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
         #[test]
         fn $name() {
-            match crate::format($source) {
+            match crate::Formatter::new($toml_version, &crate::FormatOptions::default()).format($source) {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {
                     pretty_assertions::assert_ne!(errors, vec![]);
