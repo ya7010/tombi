@@ -9,3 +9,7 @@ toml-version = "v1.1.0-preview"
 line-ending = "lf"
 
 [lint]
+
+[[schemas]]
+path = "tombi.schema.json"
+include = ["**/*.json"]
