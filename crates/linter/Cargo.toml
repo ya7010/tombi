@@ -7,7 +7,7 @@ license = { workspace = true }
 
 [dependencies]
 ast = { workspace = true }
-config = { workspace = true }
+config = { workspace = true, features = ["serde"] }
 diagnostic = { workspace = true }
 document-tree = { workspace = true, features = ["diagnostic"] }
 parser = { workspace = true, features = ["diagnostic"] }
