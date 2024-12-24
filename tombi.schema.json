@@ -49,6 +49,7 @@
       }
     }
   },
+  "additionalProperties": false,
   "definitions": {
     "TomlVersion": {
       "title": "TOML version.",
@@ -112,7 +113,8 @@
             }
           ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "IdentStyle": {
       "type": "string",
@@ -160,7 +162,8 @@
       ]
     },
     "LintOptions": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "SchemaOptions": {
       "type": "object",
@@ -184,7 +187,8 @@
           },
           "minItems": 1
         }
-      }
+      },
+      "additionalProperties": false
     }
   }
 }
