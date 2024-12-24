@@ -1,6 +1,6 @@
 [package]
-name = "config"
-version = "0.0.0"
+name = "toml-version"
+version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
@@ -8,14 +8,11 @@ repository.workspace = true
 
 [features]
 default = ["serde", "clap"]
-clap = ["dep:clap"]
 serde = ["dep:serde"]
-jsonschema = ["serde", "dep:schemars", "toml-version/jsonschema"]
+clap = ["dep:clap"]
+jsonschema = ["dep:schemars"]
 
 [dependencies]
-clap = { workspace = true, optional = true }
 schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-toml = { workspace = true }
-toml-version = { workspace = true }
-tracing = { workspace = true }
+clap = { workspace = true, optional = true }

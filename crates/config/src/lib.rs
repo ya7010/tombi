@@ -1,7 +1,6 @@
 pub mod format;
 mod lint;
 mod schema;
-mod toml_version;
 
 pub use format::FormatOptions;
 pub use lint::LintOptions;
