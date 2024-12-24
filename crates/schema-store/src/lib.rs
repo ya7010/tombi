@@ -1,11 +1,11 @@
 mod accessor;
-mod schema;
+mod json_schema;
 mod store;
 mod value_type;
 
 pub use accessor::{Accessor, Accessors};
-use schema::SchemaComposition;
-pub use schema::{DocumentSchema, ObjectSchema, SchemaType, Value};
+use json_schema::SchemaComposition;
+pub use json_schema::{DocumentSchema, ObjectSchema, SchemaType, Value};
 pub use store::SchemaStore;
 pub use value_type::ValueType;
 
