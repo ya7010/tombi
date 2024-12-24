@@ -14,4 +14,4 @@ pub type SyntaxToken = rg_tree::RedToken<TomlLanguage>;
 pub type SyntaxElement = rg_tree::RedElement<TomlLanguage>;
 pub type SyntaxNodeChildren = rg_tree::RedNodeChildren<TomlLanguage>;
 pub type SyntaxElementChildren = rg_tree::RedElementChildren<TomlLanguage>;
-pub type PreorderWithTokens = rg_tree::PreorderWithTokens<TomlLanguage>;
+pub type PreorderWithTokens = rg_tree::RedPreorderWithTokens<TomlLanguage>;

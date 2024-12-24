@@ -10,6 +10,6 @@ pub use self::{
     element_children::RedElementChildren,
     node::RedNode,
     node_children::RedNodeChildren,
-    preorder::{Preorder, PreorderWithTokens},
+    preorder::{Preorder, RedPreorderWithTokens},
     token::RedToken,
 };

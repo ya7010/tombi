@@ -29,25 +29,25 @@ impl<L: Language> From<cursor::Preorder> for Preorder<L> {
     }
 }
 
-pub struct PreorderWithTokens<L: Language> {
+pub struct RedPreorderWithTokens<L: Language> {
     raw: cursor::PreorderWithTokens,
     _p: PhantomData<L>,
 }
 
-impl<L: Language> PreorderWithTokens<L> {
+impl<L: Language> RedPreorderWithTokens<L> {
     pub fn skip_subtree(&mut self) {
         self.raw.skip_subtree()
     }
 }
 
-impl<L: Language> Iterator for PreorderWithTokens<L> {
+impl<L: Language> Iterator for RedPreorderWithTokens<L> {
     type Item = WalkEvent<RedElement<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(RedElement::from))
     }
 }
 
-impl<L: Language> From<cursor::PreorderWithTokens> for PreorderWithTokens<L> {
+impl<L: Language> From<cursor::PreorderWithTokens> for RedPreorderWithTokens<L> {
     fn from(raw: cursor::PreorderWithTokens) -> Self {
         Self {
             raw,

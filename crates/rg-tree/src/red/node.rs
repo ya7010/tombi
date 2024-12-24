@@ -4,7 +4,7 @@ use std::{borrow::Cow, fmt, marker::PhantomData, ops::Range};
 use crate::{
     cursor,
     green::{GreenNode, GreenNodeData},
-    red::{Preorder, PreorderWithTokens, RedElementChildren, RedNodeChildren},
+    red::{Preorder, RedPreorderWithTokens, RedElementChildren, RedNodeChildren},
     Direction, Language, NodeOrToken, SyntaxText, TokenAtOffset, WalkEvent,
 };
 
@@ -176,7 +176,7 @@ impl<L: Language> RedNode<L> {
 
     /// Traverse the subtree rooted at the current node (including the current
     /// node) in preorder, including tokens.
-    pub fn preorder_with_tokens(&self) -> PreorderWithTokens<L> {
+    pub fn preorder_with_tokens(&self) -> RedPreorderWithTokens<L> {
         self.raw.preorder_with_tokens().into()
     }
 

@@ -32,6 +32,8 @@ pub use crate::{
         GreenTokenData, NodeCache, SyntaxKind,
     },
     language::Language,
-    red::{PreorderWithTokens, RedElement, RedElementChildren, RedNode, RedNodeChildren, RedToken},
+    red::{
+        RedElement, RedElementChildren, RedNode, RedNodeChildren, RedPreorderWithTokens, RedToken,
+    },
     syntax_text::SyntaxText,
 };
