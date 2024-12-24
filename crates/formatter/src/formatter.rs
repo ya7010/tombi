@@ -7,14 +7,14 @@ use config::{
 };
 use diagnostic::Diagnostic;
 use diagnostic::ToDiagnostics;
-use std::{borrow::Cow, fmt::Write};
+use std::fmt::Write;
 
 pub struct Formatter<'a> {
     toml_version: TomlVersion,
     indent_depth: u8,
     skip_indent: bool,
     defs: crate::Definitions,
-    options: Cow<'a, crate::FormatOptions>,
+    options: &'a crate::FormatOptions,
     buf: String,
 }
 
@@ -26,7 +26,7 @@ impl<'a> Formatter<'a> {
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
-            options: Cow::Borrowed(options),
+            options: options,
             buf: String::new(),
         }
     }
