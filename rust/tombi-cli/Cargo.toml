@@ -12,7 +12,7 @@ name = "tombi"
 path = "src/main.rs"
 
 [dependencies]
-clap = { workspace = true, features = ["derive"] }
+clap = { workspace = true }
 clap-verbosity-flag = { workspace = true }
 config = { workspace = true }
 diagnostic = { workspace = true }
@@ -22,8 +22,8 @@ itertools.workspace = true
 linter = { workspace = true }
 nu-ansi-term = { workspace = true }
 schema-store.workspace = true
-server = { workspace = true, features = ["clap"] }
+server = { workspace = true }
 thiserror = { workspace = true }
 tokio.workspace = true
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-subscriber = { workspace = true }

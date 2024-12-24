@@ -13,7 +13,7 @@ dashmap = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }
-serde_json = { workspace = true, features = ["preserve_order"] }
+serde_json = { workspace = true }
 text = { workspace = true }
 url = "2.5.4"
 

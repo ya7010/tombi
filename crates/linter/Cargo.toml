@@ -9,8 +9,8 @@ license = { workspace = true }
 ast = { workspace = true }
 config = { workspace = true }
 diagnostic = { workspace = true }
-document-tree = { workspace = true, features = ["diagnostic"] }
-parser = { workspace = true, features = ["diagnostic"] }
+document-tree = { workspace = true }
+parser = { workspace = true }
 schema-store.workspace = true
 schemars = { workspace = true }
 serde = { workspace = true }

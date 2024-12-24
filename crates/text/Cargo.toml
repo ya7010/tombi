@@ -6,8 +6,9 @@ authors.workspace = true
 license.workspace = true
 
 [features]
-default = []
+default = ["serde", "lsp"]
 lsp = ["dep:tower-lsp"]
+serde = ["dep:serde"]
 
 [dependencies]
 serde = { workspace = true, optional = true }

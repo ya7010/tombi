@@ -16,7 +16,7 @@ assert_matches = "1.5.0"
 ast = { path = "crates/ast" }
 camino = "1.1.9"
 chrono = "0.4.38"
-clap = { version = "4.5.20", features = ["derive"] }
+clap = { version = "4.5.20", features = ["derive", "string"] }
 clap-verbosity-flag = "3.0.1"
 config = { path = "crates/config" }
 dashmap = "6.1.0"
@@ -27,7 +27,7 @@ either = "1.13.0"
 formatter = { path = "crates/formatter" }
 futures = "0.3.31"
 futures-util = "0.3.31"
-indexmap = "2.6.0"
+indexmap = { version = "2.6.0", features = ["serde"] }
 itertools = "0.13.0"
 schema-store = { path = "crates/schema-store" }
 lexer = { path = "crates/lexer" }
@@ -44,15 +44,15 @@ rustc-hash = "2.0.0"
 schemars = "0.8.21"
 semver = "1.0.23"
 serde = { version = "^1.0.0", features = ["derive"] }
-serde_json = "1.0.130"
+serde_json = { version = "1.0.130", features = ["preserve_order"] }
 server = { path = "crates/server" }
 syntax = { path = "crates/syntax" }
 text = { path = "crates/text" }
 textwrap = "0.16.1"
 thiserror = "2.0.3"
-tokio = "1.41.0"
+tokio = { version = "1.41.0", features = ["io-std", "rt"] }
 toml = "0.8.19"
 toml-version = { path = "crates/toml-version" }
 tower-lsp = "0.20.0"
 tracing = "0.1.41"
-tracing-subscriber = "0.3.18"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

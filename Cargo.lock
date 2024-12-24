@@ -1252,7 +1252,6 @@ dependencies = [
  "hashbrown 0.15.1",
  "itertools",
  "rustc-hash",
- "serde",
  "text",
 ]
 

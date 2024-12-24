@@ -16,7 +16,7 @@ chrono = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-serde = { workspace = true, features = ["derive"], optional = true }
+serde = { workspace = true, optional = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 toml-version = { workspace = true }
@@ -25,5 +25,5 @@ tower-lsp = { workspace = true, optional = true }
 [dev-dependencies]
 parser = { workspace = true }
 pretty_assertions = { workspace = true }
-serde_json = { workspace = true, features = ["preserve_order"] }
+serde_json = { workspace = true }
 textwrap = { workspace = true }
