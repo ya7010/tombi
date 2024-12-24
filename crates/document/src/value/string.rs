@@ -1,5 +1,5 @@
-use config::TomlVersion;
 use document_tree::support;
+use toml_version::TomlVersion;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
@@ -89,8 +89,8 @@ impl serde::Serialize for String {
 
 #[cfg(test)]
 mod test {
-    use config::TomlVersion;
     use serde_json::json;
+    use toml_version::TomlVersion;
 
     use crate::test_serialize;
 

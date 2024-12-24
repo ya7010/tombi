@@ -3,8 +3,8 @@ mod value;
 
 use std::ops::Deref;
 
-use config::TomlVersion;
 pub use key::Key;
+use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, Table, TableKind, Value,
@@ -62,7 +62,7 @@ impl<'de> serde::Deserialize<'de> for Document {
 #[macro_export]
 macro_rules! test_serialize {
     {#[test] fn $name:ident($source:expr) -> Ok($json:expr)} => {
-        test_serialize! {#[test] fn $name($source, config::TomlVersion::default()) -> Ok($json)}
+        test_serialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Ok($json)}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($json:expr)} => {
@@ -74,7 +74,7 @@ macro_rules! test_serialize {
             use crate::IntoDocument;
 
             let source = textwrap::dedent($source);
-            let p = parser::parse(&source.trim(), config::TomlVersion::default());
+            let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
             pretty_assertions::assert_eq!(p.errors(), &[]);
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
             match root.try_into_document_tree($toml_version) {
@@ -91,7 +91,7 @@ macro_rules! test_serialize {
     };
 
     {#[test] fn $name:ident($source:expr) -> Err($errors:expr)} => {
-        test_serialize! {#[test] fn $name($source, config::TomlVersion::default()) -> Err($errors)}
+        test_serialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Err($errors)}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err($errors:expr)} => {
@@ -103,7 +103,7 @@ macro_rules! test_serialize {
             use document_tree::TryIntoDocumentTree;
 
             let source = textwrap::dedent($source);
-            let p = parser::parse(&source.trim(), config::TomlVersion::default());
+            let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
             let errors = $errors
                 .into_iter()
                 .map(|(m, r)| (m.to_string(), text::Range::from(r)))

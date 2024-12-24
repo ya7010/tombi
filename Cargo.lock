@@ -441,7 +441,6 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "chrono",
- "config",
  "document-tree",
  "indexmap 2.6.0",
  "itertools",
@@ -452,6 +451,7 @@ dependencies = [
  "text",
  "textwrap",
  "thiserror",
+ "toml-version",
  "tower-lsp",
 ]
 

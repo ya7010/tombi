@@ -66,7 +66,7 @@ impl Into<Vec<Value>> for Array {
 }
 
 impl IntoDocument<Array> for document_tree::Array {
-    fn into_document(self, toml_version: config::TomlVersion) -> Array {
+    fn into_document(self, toml_version: toml_version::TomlVersion) -> Array {
         Array {
             kind: self.kind().into(),
             values: Vec::<document_tree::Value>::from(self.values())

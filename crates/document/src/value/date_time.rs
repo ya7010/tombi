@@ -160,8 +160,8 @@ impl<'de> serde::Deserialize<'de> for LocalTime {
 
 #[cfg(test)]
 mod test {
-    use config::TomlVersion;
     use serde_json::json;
+    use toml_version::TomlVersion;
 
     use crate::test_serialize;
 
