@@ -11,13 +11,13 @@ pub struct Args {
     /// If the only argument is "-", the standard input will be used.
     files: Vec<String>,
 
-    /// Check if the input is formatted.
-    #[arg(long, default_value_t = false)]
-    check: bool,
-
     /// TOML version.
     #[arg(long, value_enum, default_value = None)]
     toml_version: Option<TomlVersion>,
+
+    /// Check if the input is formatted.
+    #[arg(long, default_value_t = false)]
+    check: bool,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
