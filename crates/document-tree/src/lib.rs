@@ -3,11 +3,11 @@ mod key;
 pub mod support;
 mod value;
 
-use config::TomlVersion;
 pub use error::Error;
 pub use key::{Key, KeyKind};
 use std::ops::Deref;
 use support::comment::try_new_comment;
+use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, StringKind, Table, TableKind, Value,

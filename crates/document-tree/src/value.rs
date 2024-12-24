@@ -68,7 +68,7 @@ impl Value {
 impl TryIntoDocumentTree<Value> for ast::Value {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<Value, Vec<crate::Error>> {
         let mut errors = Vec::new();
         for comment in self.leading_comments() {

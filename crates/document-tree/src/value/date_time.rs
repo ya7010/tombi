@@ -122,7 +122,7 @@ impl LocalTime {
 impl TryIntoDocumentTree<OffsetDateTime> for ast::OffsetDateTime {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<OffsetDateTime, Vec<crate::Error>> {
         match try_new_offset_date_time(&self, toml_version) {
             Ok(value) => Ok(OffsetDateTime { value, node: self }),
@@ -134,7 +134,7 @@ impl TryIntoDocumentTree<OffsetDateTime> for ast::OffsetDateTime {
 impl TryIntoDocumentTree<LocalDateTime> for ast::LocalDateTime {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<LocalDateTime, Vec<crate::Error>> {
         match try_new_local_date_time(&self, toml_version) {
             Ok(value) => Ok(LocalDateTime { value, node: self }),
@@ -146,7 +146,7 @@ impl TryIntoDocumentTree<LocalDateTime> for ast::LocalDateTime {
 impl TryIntoDocumentTree<LocalDate> for ast::LocalDate {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<LocalDate, Vec<crate::Error>> {
         match try_new_local_date(&self, toml_version) {
             Ok(value) => Ok(LocalDate { value, node: self }),
@@ -158,7 +158,7 @@ impl TryIntoDocumentTree<LocalDate> for ast::LocalDate {
 impl TryIntoDocumentTree<LocalTime> for ast::LocalTime {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<LocalTime, Vec<crate::Error>> {
         match try_new_local_time(&self, toml_version) {
             Ok(value) => Ok(LocalTime { value, node: self }),

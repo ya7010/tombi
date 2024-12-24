@@ -156,7 +156,7 @@ impl Array {
 impl TryIntoDocumentTree<Array> for ast::Array {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<Array, Vec<crate::Error>> {
         let mut array = Array::new_array(&self);
 

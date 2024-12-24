@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use toml_version::TomlVersion;
 
 use crate::TryIntoDocumentTree;
 
@@ -92,7 +92,7 @@ impl std::fmt::Display for Key {
 impl TryIntoDocumentTree<Key> for ast::Key {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<Key, Vec<crate::Error>> {
         let token = self.token().unwrap();
 

@@ -1,8 +1,8 @@
 use ast::{AstChildren, AstNode};
-use config::TomlVersion;
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use itertools::Itertools;
+use toml_version::TomlVersion;
 
 use crate::{support::comment::try_new_comment, Array, Key, TryIntoDocumentTree, Value};
 
@@ -319,7 +319,7 @@ impl TryIntoDocumentTree<Table> for ast::Table {
 impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<Table, Vec<crate::Error>> {
         let mut table = Table::new_array_of_tables(&self);
         let mut errors = Vec::new();
@@ -387,7 +387,7 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
 impl TryIntoDocumentTree<Table> for ast::KeyValue {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<Table, Vec<crate::Error>> {
         let mut errors = Vec::new();
 
@@ -442,7 +442,7 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
 impl TryIntoDocumentTree<Table> for ast::InlineTable {
     fn try_into_document_tree(
         self,
-        toml_version: config::TomlVersion,
+        toml_version: toml_version::TomlVersion,
     ) -> Result<Table, Vec<crate::Error>> {
         let mut table = Table::new_inline_table(&self);
         let mut errors = Vec::new();
