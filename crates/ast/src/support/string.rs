@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use toml_version::TomlVersion;
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {

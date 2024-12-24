@@ -9,5 +9,5 @@ license = { workspace = true }
 syntax = { workspace = true }
 text = { workspace = true }
 itertools = { workspace = true }
-config = { workspace = true }
+toml-version = { workspace = true }
 thiserror = { workspace = true }

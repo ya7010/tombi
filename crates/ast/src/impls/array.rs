@@ -1,7 +1,7 @@
 use crate::{support, AstNode};
-use config::TomlVersion;
 use itertools::Itertools;
 use syntax::{SyntaxKind::*, T};
+use toml_version::TomlVersion;
 
 impl crate::Array {
     #[inline]

@@ -1,6 +1,6 @@
 use crate::{support, ArrayOfTables, AstChildren, AstNode, TableOrArrayOfTable};
-use config::TomlVersion;
 use syntax::T;
+use toml_version::TomlVersion;
 
 impl crate::Table {
     pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::Comment> {

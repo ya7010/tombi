@@ -134,11 +134,11 @@ checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
 name = "ast"
 version = "0.0.0"
 dependencies = [
- "config",
  "itertools",
  "syntax",
  "text",
  "thiserror",
+ "toml-version",
 ]
 
 [[package]]

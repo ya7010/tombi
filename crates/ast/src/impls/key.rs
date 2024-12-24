@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use toml_version::TomlVersion;
 
 use crate::{support, AstChildren};
 
