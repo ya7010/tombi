@@ -1,9 +1,7 @@
-use std::io::Read;
-
+use crate::app::arg;
 use config::{LintOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-
-use crate::app::arg;
+use std::io::Read;
 
 /// Lint TOML files.
 #[derive(clap::Args, Debug)]
@@ -39,7 +37,7 @@ fn inner_run<P>(args: Args, printer: P) -> (usize, usize)
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
-    P: Copy,
+    P: Copy + Clone + Send + 'static,
 {
     let input = arg::FileInput::from(args.files.as_ref());
     let total_num = input.len();
@@ -53,20 +51,19 @@ where
     let options = config.lint.unwrap_or_default();
     let mut schema_store = schema_store::SchemaStore::default();
 
-    let Ok(runtime) = tokio::runtime::Builder::new_current_thread()
+    let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
     else {
         tracing::error!("Failed to create tokio runtime");
-
         std::process::exit(1);
     };
 
-    match input {
-        arg::FileInput::Stdin => {
-            tracing::debug!("stdin input linting...");
-            if runtime.block_on(async {
-                lint_file(
+    runtime.block_on(async {
+        match input {
+            arg::FileInput::Stdin => {
+                tracing::debug!("stdin input linting...");
+                if lint_file(
                     std::io::stdin(),
                     printer,
                     toml_version,
@@ -74,51 +71,75 @@ where
                     &mut schema_store,
                 )
                 .await
-            }) {
-                success_num += 1;
-            } else {
-                error_num += 1;
+                {
+                    success_num += 1;
+                } else {
+                    error_num += 1;
+                }
             }
-        }
-        arg::FileInput::Files(files) => {
-            for file in files {
-                match file {
-                    Ok(path) => {
-                        tracing::debug!("{:?} linting...", path);
-                        match std::fs::File::open(&path) {
-                            Ok(file) => {
-                                if runtime.block_on(async {
-                                    lint_file(
-                                        file,
-                                        printer,
-                                        toml_version,
-                                        &options,
-                                        &mut schema_store,
-                                    )
-                                    .await
-                                }) {
-                                    success_num += 1;
-                                    continue;
+            arg::FileInput::Files(files) => {
+                let mut tasks = tokio::task::JoinSet::new();
+
+                for file in files {
+                    match file {
+                        Ok(path) => {
+                            tracing::debug!("{:?} linting...", path);
+                            match std::fs::File::open(&path) {
+                                Ok(file) => {
+                                    let options = options.clone();
+                                    tasks.spawn(async move {
+                                        let mut schema_store = schema_store::SchemaStore::default();
+                                        (
+                                            path,
+                                            lint_file(
+                                                file,
+                                                printer,
+                                                toml_version,
+                                                &options,
+                                                &mut schema_store,
+                                            )
+                                            .await,
+                                        )
+                                    });
                                 }
-                            }
-                            Err(err) => {
-                                if err.kind() == std::io::ErrorKind::NotFound {
-                                    crate::Error::FileNotFound(path).print(printer);
-                                } else {
-                                    crate::Error::Io(err).print(printer);
+                                Err(err) => {
+                                    if err.kind() == std::io::ErrorKind::NotFound {
+                                        crate::Error::FileNotFound(path).print(printer);
+                                    } else {
+                                        crate::Error::Io(err).print(printer);
+                                    }
+                                    error_num += 1;
                                 }
                             }
                         }
+                        Err(err) => {
+                            err.print(printer);
+                            error_num += 1;
+                        }
                     }
-                    Err(err) => err.print(printer),
                 }
-                error_num += 1;
+
+                while let Some(result) = tasks.join_next().await {
+                    match result {
+                        Ok((path, success)) => {
+                            if success {
+                                success_num += 1;
+                            } else {
+                                tracing::debug!("{:?} lint failed", path);
+                                error_num += 1;
+                            }
+                        }
+                        Err(e) => {
+                            tracing::error!("Task failed: {}", e);
+                            error_num += 1;
+                        }
+                    }
+                }
             }
         }
-    };
+    });
 
     assert_eq!(success_num + error_num, total_num);
-
     (success_num, error_num)
 }
 
@@ -132,7 +153,8 @@ async fn lint_file<R: Read, P>(
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
-    P: Copy,
+    P: Copy + Send,
+    R: Send,
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
