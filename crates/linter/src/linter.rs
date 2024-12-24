@@ -10,15 +10,22 @@ use document_tree::TryIntoDocumentTree;
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
+    #[allow(dead_code)]
+    schema_store: &'a mut schema_store::SchemaStore,
     diagnostics: Vec<crate::Diagnostic>,
 }
 
 impl<'a> Linter<'a> {
     #[inline]
-    pub fn new(toml_version: TomlVersion, options: &'a crate::LintOptions) -> Self {
+    pub fn new(
+        toml_version: TomlVersion,
+        options: &'a crate::LintOptions,
+        schema_store: &'a mut schema_store::SchemaStore,
+    ) -> Self {
         Self {
             toml_version,
             options: Cow::Borrowed(options),
+            schema_store,
             diagnostics: Vec::new(),
         }
     }

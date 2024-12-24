@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use itertools::Itertools;
-use json_schema_store::KeysValueInfo;
+use schema_store::KeysValueInfo;
 
 #[derive(Debug, Default)]
 pub struct HoverContent {

@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
-use json_schema_store::parse_document_schema;
+use schema_store::parse_document_schema;
 
 fn project_root() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let cargo_manifest_dir = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);
 
-    if cargo_manifest_dir.ends_with("json-schema-store") {
+    if cargo_manifest_dir.ends_with("schema-store") {
         Ok(cargo_manifest_dir
             .parent()
             .unwrap()

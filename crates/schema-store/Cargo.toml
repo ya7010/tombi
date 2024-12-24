@@ -1,5 +1,5 @@
 [package]
-name = "json-schema-store"
+name = "schema-store"
 version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }

@@ -3,12 +3,13 @@ use url::Url;
 
 use crate::DocumentSchema;
 
-pub struct Store {
+#[derive(Debug, Default)]
+pub struct SchemaStore {
     // http_client: reqwest::Client,
     schemas: DashMap<Url, DocumentSchema>,
 }
 
-impl Store {
+impl SchemaStore {
     pub fn new() -> Self {
         Self {
             // http_client: reqwest::Client::new(),

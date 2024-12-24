@@ -1,4 +1,4 @@
-use crate::Store;
+use crate::SchemaStore;
 
 use super::DocumentSchema;
 
@@ -9,7 +9,11 @@ pub enum Referable<T> {
 }
 
 impl<T> Referable<T> {
-    pub fn take_schema(&mut self, _document: &DocumentSchema, _store: &Store) -> Result<&T, &()> {
+    pub fn take_schema(
+        &mut self,
+        _document: &DocumentSchema,
+        _store: &SchemaStore,
+    ) -> Result<&T, &()> {
         match self {
             Referable::Schema(s) => s.as_ref(),
             Referable::Ref(_) => Err(&()),

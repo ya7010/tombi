@@ -6,7 +6,7 @@ mod value_type;
 pub use accessor::{Accessor, Accessors};
 use schema::SchemaComposition;
 pub use schema::{DocumentSchema, ObjectSchema, SchemaType, Value};
-pub use store::Store;
+pub use store::SchemaStore;
 pub use value_type::ValueType;
 
 #[derive(Debug)]

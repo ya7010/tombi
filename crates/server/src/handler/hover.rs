@@ -2,7 +2,7 @@ use crate::{backend, hover::HoverContent, toml};
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use json_schema_store::get_keys_value_info;
+use schema_store::get_keys_value_info;
 use tower_lsp::lsp_types::{Hover, HoverParams, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]

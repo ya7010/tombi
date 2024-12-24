@@ -11,6 +11,7 @@ config = { workspace = true, features = ["serde"] }
 diagnostic = { workspace = true }
 document-tree = { workspace = true, features = ["diagnostic"] }
 parser = { workspace = true, features = ["diagnostic"] }
+schema-store.workspace = true
 schemars = { workspace = true }
 serde = { workspace = true }
 syntax = { workspace = true }

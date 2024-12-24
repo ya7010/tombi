@@ -907,22 +907,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json-schema-store"
-version = "0.0.0"
-dependencies = [
- "ahash",
- "ast",
- "dashmap 6.1.0",
- "document",
- "document-tree",
- "indexmap 2.6.0",
- "pretty_assertions",
- "serde_json",
- "text",
- "url",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -958,6 +942,7 @@ dependencies = [
  "diagnostic",
  "document-tree",
  "parser",
+ "schema-store",
  "schemars",
  "serde",
  "syntax",
@@ -1329,6 +1314,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
+name = "schema-store"
+version = "0.0.0"
+dependencies = [
+ "ahash",
+ "ast",
+ "dashmap 6.1.0",
+ "document",
+ "document-tree",
+ "indexmap 2.6.0",
+ "pretty_assertions",
+ "serde_json",
+ "text",
+ "url",
+]
+
+[[package]]
 name = "schemars"
 version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1447,11 +1448,11 @@ dependencies = [
  "futures-util",
  "indexmap 2.6.0",
  "itertools",
- "json-schema-store",
  "linter",
  "parser",
  "rstest",
  "rustc-hash",
+ "schema-store",
  "semver",
  "serde",
  "serde_json",
@@ -1668,6 +1669,7 @@ dependencies = [
  "itertools",
  "linter",
  "nu-ansi-term 0.50.1",
+ "schema-store",
  "server",
  "thiserror",
  "tokio",

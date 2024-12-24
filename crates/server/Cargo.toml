@@ -23,7 +23,7 @@ futures = { workspace = true }
 futures-util = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-json-schema-store = { workspace = true }
+schema-store = { workspace = true }
 linter = { workspace = true }
 parser = { workspace = true }
 rustc-hash = { workspace = true }
