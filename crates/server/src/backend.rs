@@ -6,11 +6,7 @@ use super::handler::{
 use crate::{document::DocumentSource, handler::handle_folding_range};
 use ast::AstNode;
 use config::{Config, TomlVersion};
-use dashmap::{
-    mapref::one::{Ref, RefMut},
-    try_result::TryResult,
-    DashMap,
-};
+use dashmap::DashMap;
 use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
@@ -25,10 +21,10 @@ use tower_lsp::{
 #[derive(Debug)]
 pub struct Backend {
     #[allow(dead_code)]
-    client: tower_lsp::Client,
-    document_sources: DashMap<Url, DocumentSource>,
+    pub client: tower_lsp::Client,
+    pub document_sources: DashMap<Url, DocumentSource>,
     toml_version: Option<TomlVersion>,
-    config: Config,
+    pub config: Config,
     pub schema_store: schema_store::SchemaStore,
 }
 
@@ -43,24 +39,9 @@ impl Backend {
         }
     }
 
-    pub fn insert_document_info(&self, uri: Url, document_info: DocumentSource) {
-        self.document_sources.insert(uri, document_info);
-    }
-
-    pub fn get_document_info(&self, uri: &Url) -> Option<Ref<Url, DocumentSource>> {
-        self.document_sources.get(uri)
-    }
-
-    pub fn get_mut_document_info(&self, uri: &Url) -> Option<RefMut<Url, DocumentSource>> {
-        self.document_sources.get_mut(uri)
-    }
-
-    pub fn try_get_mut_document_info(&self, uri: &Url) -> TryResult<RefMut<Url, DocumentSource>> {
-        self.document_sources.try_get_mut(uri)
-    }
-
     pub fn get_ast(&self, uri: &Url) -> Option<ast::Root> {
-        self.get_document_info(uri)
+        self.document_sources
+            .get(uri)
             .map(|document_info| {
                 let p = parser::parse(&document_info.source, self.toml_version());
                 if !p.errors().is_empty() {
@@ -75,20 +56,6 @@ impl Backend {
     pub fn toml_version(&self) -> TomlVersion {
         self.toml_version
             .unwrap_or(self.config.toml_version.unwrap_or_default())
-    }
-
-    pub fn format_options(&self) -> &config::FormatOptions {
-        self.config
-            .format
-            .as_ref()
-            .unwrap_or_else(|| &config::DEFAULT_FORMAT_OPTIONS)
-    }
-
-    pub fn lint_options(&self) -> &config::LintOptions {
-        self.config
-            .lint
-            .as_ref()
-            .unwrap_or_else(|| &config::DEFAULT_LINT_OPTIONS)
     }
 }
 

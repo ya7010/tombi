@@ -7,9 +7,6 @@ pub use lint::LintOptions;
 pub use schema::SchemaOptions;
 pub use toml_version::TomlVersion;
 
-pub const DEFAULT_FORMAT_OPTIONS: FormatOptions = FormatOptions::default();
-pub const DEFAULT_LINT_OPTIONS: LintOptions = LintOptions::default();
-
 /// # Tombi
 ///
 /// **Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.

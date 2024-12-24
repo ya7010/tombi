@@ -10,5 +10,7 @@ pub async fn handle_did_open(backend: &Backend, params: DidOpenTextDocumentParam
     let uri = params.text_document.uri.clone();
     let source = params.text_document.text;
 
-    backend.insert_document_info(uri, DocumentSource::new(source));
+    backend
+        .document_sources
+        .insert(uri, DocumentSource::new(source));
 }

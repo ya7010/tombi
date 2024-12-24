@@ -13,7 +13,7 @@ pub async fn handle_did_save(
     tracing::info!("handle_did_save");
 
     if let Some(text) = text {
-        if let Some(mut document_info) = backend.get_mut_document_info(&text_document.uri) {
+        if let Some(mut document_info) = backend.document_sources.get_mut(&text_document.uri) {
             document_info.source = text;
         }
     }

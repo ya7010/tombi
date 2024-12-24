@@ -1,3 +1,4 @@
+use config::FormatOptions;
 use dashmap::try_result::TryResult;
 use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
 
@@ -11,7 +12,7 @@ pub async fn handle_formatting(
     tracing::info!("handle_formatting: {}", text_document.uri);
 
     let uri = &text_document.uri;
-    let mut document_info = match backend.try_get_mut_document_info(uri) {
+    let mut document_info = match backend.document_sources.try_get_mut(uri) {
         TryResult::Present(document_info) => document_info,
         TryResult::Absent => {
             tracing::warn!("document not found: {}", uri);
@@ -23,8 +24,15 @@ pub async fn handle_formatting(
         }
     };
 
-    match formatter::Formatter::new(backend.toml_version(), &backend.format_options())
-        .format(&document_info.source)
+    match formatter::Formatter::new(
+        backend.toml_version(),
+        &backend
+            .config
+            .format
+            .as_ref()
+            .unwrap_or(&FormatOptions::default()),
+    )
+    .format(&document_info.source)
     {
         Ok(new_text) => {
             if new_text != document_info.source {

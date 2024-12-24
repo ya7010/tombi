@@ -1,3 +1,4 @@
+use config::LintOptions;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
@@ -12,11 +13,14 @@ pub async fn handle_diagnostic(
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_diagnostic");
 
-    let diagnostics = match backend.get_document_info(&text_document.uri).as_deref() {
+    let diagnostics = match backend.document_sources.get(&text_document.uri).as_deref() {
         Some(document) => linter::Linter::new(
             backend.toml_version(),
-            backend.lint_options(),
-            // FIXME: use schema store from backend
+            &backend
+                .config
+                .lint
+                .as_ref()
+                .unwrap_or(&LintOptions::default()),
             &backend.schema_store,
         )
         .lint(&document.source)
