@@ -29,6 +29,7 @@ pub struct Backend {
     document_sources: DashMap<Url, DocumentSource>,
     toml_version: Option<TomlVersion>,
     config: Config,
+    pub schema_store: schema_store::SchemaStore,
 }
 
 impl Backend {
@@ -38,6 +39,7 @@ impl Backend {
             document_sources: Default::default(),
             toml_version,
             config: config::load(),
+            schema_store: schema_store::SchemaStore::new(),
         }
     }
 

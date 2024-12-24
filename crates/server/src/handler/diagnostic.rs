@@ -17,7 +17,7 @@ pub async fn handle_diagnostic(
             backend.toml_version(),
             backend.lint_options(),
             // FIXME: use schema store from backend
-            &mut schema_store::SchemaStore::default(),
+            &backend.schema_store,
         )
         .lint(&document.source)
         .map_or_else(
