@@ -1,5 +1,5 @@
-use config::TomlVersion;
 use document_tree::support;
+use toml_version::TomlVersion;
 
 #[derive(Debug, serde::Serialize)]
 #[serde(rename_all = "kebab-case")]

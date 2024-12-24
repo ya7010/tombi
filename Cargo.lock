@@ -1697,7 +1697,6 @@ dependencies = [
  "ast",
  "chrono",
  "clap",
- "config",
  "document-tree",
  "indexmap 2.6.0",
  "parser",
@@ -1706,6 +1705,7 @@ dependencies = [
  "serde_json",
  "text",
  "textwrap",
+ "toml-version",
 ]
 
 [[package]]

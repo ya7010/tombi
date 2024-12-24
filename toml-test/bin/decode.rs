@@ -1,9 +1,9 @@
 use ast::AstNode;
 use clap::Parser;
-use config::TomlVersion;
 use document_tree::TryIntoDocumentTree;
 use std::io::Read;
 use toml_test::{IntoValue, Value, INVALID_MESSAGE};
+use toml_version::TomlVersion;
 
 #[derive(Debug, clap::Parser, Default)]
 #[command(disable_help_subcommand(true))]
@@ -77,7 +77,7 @@ macro_rules! test_decode {
     } => {
         test_decode! {
             #[test]
-            fn $name($source, config::TomlVersion::default()) -> Ok($expected)
+            fn $name($source, toml_version::TomlVersion::default()) -> Ok($expected)
         }
     };
 }

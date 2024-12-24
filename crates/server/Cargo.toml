@@ -12,7 +12,7 @@ clap = ["dep:clap"]
 ast = { workspace = true }
 camino = { workspace = true }
 clap = { workspace = true, features = ["derive", "string"], optional = true }
-config = { workspace = true, features = ["serde"] }
+config = { workspace = true }
 crossbeam-channel = "0.5.13"
 dashmap = { workspace = true }
 diagnostic = { workspace = true }
