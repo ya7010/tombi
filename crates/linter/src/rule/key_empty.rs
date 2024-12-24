@@ -22,9 +22,9 @@ impl Rule<ast::Key> for KeyEmptyRule {
 mod tests {
     use std::vec;
 
-    #[test]
-    fn test_key_empty() {
-        let err = crate::lint("'' = 1").unwrap_err();
+    #[tokio::test]
+    async fn test_key_empty() {
+        let err = crate::lint("'' = 1").await.unwrap_err();
         assert_eq!(
             err,
             vec![diagnostic::Diagnostic::new_warning(

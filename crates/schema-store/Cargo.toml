@@ -13,9 +13,12 @@ dashmap = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
 text = { workspace = true }
+tracing = { workspace = true }
 url = "2.5.4"
 
 [dev-dependencies]
-pretty_assertions.workspace = true
+pretty_assertions = { workspace = true }

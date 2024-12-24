@@ -24,6 +24,7 @@ pub async fn handle_diagnostic(
             &backend.schema_store,
         )
         .lint(&document.source)
+        .await
         .map_or_else(
             |diagnostics| {
                 diagnostics

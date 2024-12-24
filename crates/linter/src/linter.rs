@@ -30,7 +30,7 @@ impl<'a> Linter<'a> {
         }
     }
 
-    pub fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
+    pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
         let toml_version = self.toml_version;
         let p = parser::parse(source, toml_version);
         let mut errors = vec![];

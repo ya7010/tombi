@@ -11,7 +11,7 @@ use error::ErrorKind;
 use lint::Lint;
 use rule::Rule;
 
-pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
+pub async fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
     let config = config::load();
 
     Linter::new(
@@ -20,4 +20,5 @@ pub fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
         &schema_store::SchemaStore::default(),
     )
     .lint(source)
+    .await
 }

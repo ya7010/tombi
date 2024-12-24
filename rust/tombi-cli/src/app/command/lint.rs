@@ -57,13 +57,18 @@ where
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input linting...");
-            if lint_file(
-                std::io::stdin(),
-                printer,
-                toml_version,
-                &options,
-                &mut schema_store,
-            ) {
+            if tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(lint_file(
+                    std::io::stdin(),
+                    printer,
+                    toml_version,
+                    &options,
+                    &mut schema_store,
+                ))
+            {
                 success_num += 1;
             } else {
                 error_num += 1;
@@ -76,13 +81,19 @@ where
                         tracing::debug!("{:?} linting...", path);
                         match std::fs::File::open(&path) {
                             Ok(file) => {
-                                if lint_file(
-                                    file,
-                                    printer,
-                                    toml_version,
-                                    &options,
-                                    &mut schema_store,
-                                ) {
+                                // FIXME: Use async more effectively
+                                if tokio::runtime::Builder::new_current_thread()
+                                    .enable_all()
+                                    .build()
+                                    .unwrap()
+                                    .block_on(lint_file(
+                                        file,
+                                        printer,
+                                        toml_version,
+                                        &options,
+                                        &mut schema_store,
+                                    ))
+                                {
                                     success_num += 1;
                                     continue;
                                 }
@@ -108,7 +119,7 @@ where
     (success_num, error_num)
 }
 
-fn lint_file<R: Read, P>(
+async fn lint_file<R: Read, P>(
     mut reader: R,
     printer: P,
     toml_version: TomlVersion,
@@ -122,7 +133,10 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).is_ok() {
-        match linter::Linter::new(toml_version, &options, schema_store).lint(&source) {
+        match linter::Linter::new(toml_version, &options, schema_store)
+            .lint(&source)
+            .await
+        {
             Ok(()) => {
                 return true;
             }
