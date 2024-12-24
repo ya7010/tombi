@@ -1,5 +1,10 @@
 # Developer Documentation
 
+## Debug CLI
+```sh
+cargo tombi
+```
+
 ## Debug VSCode Extension
 1. Select `Run and Debug` from the sidebar
 2. Select `Run Extension (Debug Build)` from the dropdown
