@@ -42,7 +42,6 @@ where
     P: Copy,
 {
     let input = arg::FileInput::from(args.files.as_ref());
-
     let total_num = input.len();
     let mut success_num = 0;
     let mut error_num = 0;
@@ -54,21 +53,28 @@ where
     let options = config.lint.unwrap_or_default();
     let mut schema_store = schema_store::SchemaStore::default();
 
+    let Ok(runtime) = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+    else {
+        tracing::error!("Failed to create tokio runtime");
+
+        std::process::exit(1);
+    };
+
     match input {
         arg::FileInput::Stdin => {
             tracing::debug!("stdin input linting...");
-            if tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build()
-                .unwrap()
-                .block_on(lint_file(
+            if runtime.block_on(async {
+                lint_file(
                     std::io::stdin(),
                     printer,
                     toml_version,
                     &options,
                     &mut schema_store,
-                ))
-            {
+                )
+                .await
+            }) {
                 success_num += 1;
             } else {
                 error_num += 1;
@@ -81,19 +87,16 @@ where
                         tracing::debug!("{:?} linting...", path);
                         match std::fs::File::open(&path) {
                             Ok(file) => {
-                                // FIXME: Use async more effectively
-                                if tokio::runtime::Builder::new_current_thread()
-                                    .enable_all()
-                                    .build()
-                                    .unwrap()
-                                    .block_on(lint_file(
+                                if runtime.block_on(async {
+                                    lint_file(
                                         file,
                                         printer,
                                         toml_version,
                                         &options,
                                         &mut schema_store,
-                                    ))
-                                {
+                                    )
+                                    .await
+                                }) {
                                     success_num += 1;
                                     continue;
                                 }
