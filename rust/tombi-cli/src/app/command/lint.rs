@@ -1,7 +1,7 @@
 use crate::app::arg;
 use config::{LintOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-use std::io::Read;
+use tokio::io::AsyncReadExt;
 
 /// Lint TOML files.
 #[derive(clap::Args, Debug)]
@@ -64,7 +64,7 @@ where
             arg::FileInput::Stdin => {
                 tracing::debug!("stdin input linting...");
                 if lint_file(
-                    std::io::stdin(),
+                    tokio::io::stdin(),
                     printer,
                     toml_version,
                     &options,
@@ -84,7 +84,7 @@ where
                     match file {
                         Ok(path) => {
                             tracing::debug!("{:?} linting...", path);
-                            match std::fs::File::open(&path) {
+                            match tokio::fs::File::open(&path).await {
                                 Ok(file) => {
                                     let options = options.clone();
                                     tasks.spawn(async move {
@@ -143,7 +143,7 @@ where
     (success_num, error_num)
 }
 
-async fn lint_file<R: Read, P>(
+async fn lint_file<R, P>(
     mut reader: R,
     printer: P,
     toml_version: TomlVersion,
@@ -154,10 +154,10 @@ where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
     P: Copy + Send,
-    R: Send,
+    R: AsyncReadExt + Unpin + Send,
 {
     let mut source = String::new();
-    if reader.read_to_string(&mut source).is_ok() {
+    if reader.read_to_string(&mut source).await.is_ok() {
         match linter::Linter::new(toml_version, &options, schema_store)
             .lint(&source)
             .await
