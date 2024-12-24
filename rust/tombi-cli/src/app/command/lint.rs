@@ -49,7 +49,7 @@ where
         .toml_version
         .unwrap_or(config.toml_version.unwrap_or_default());
     let options = config.lint.unwrap_or_default();
-    let mut schema_store = schema_store::SchemaStore::default();
+    let schema_store = schema_store::SchemaStore::default();
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -68,7 +68,7 @@ where
                     printer,
                     toml_version,
                     &options,
-                    &mut schema_store,
+                    &schema_store,
                 )
                 .await
                 {
@@ -87,8 +87,9 @@ where
                             match tokio::fs::File::open(&path).await {
                                 Ok(file) => {
                                     let options = options.clone();
+                                    let schema_store = schema_store.clone();
+
                                     tasks.spawn(async move {
-                                        let mut schema_store = schema_store::SchemaStore::default();
                                         (
                                             path,
                                             lint_file(
@@ -96,7 +97,7 @@ where
                                                 printer,
                                                 toml_version,
                                                 &options,
-                                                &mut schema_store,
+                                                &schema_store,
                                             )
                                             .await,
                                         )
@@ -148,7 +149,7 @@ async fn lint_file<R, P>(
     printer: P,
     toml_version: TomlVersion,
     options: &LintOptions,
-    schema_store: &mut schema_store::SchemaStore,
+    schema_store: &schema_store::SchemaStore,
 ) -> bool
 where
     Diagnostic: Print<P>,
