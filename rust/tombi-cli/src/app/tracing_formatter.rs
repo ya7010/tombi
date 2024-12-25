@@ -20,6 +20,7 @@ impl TombiFormatter {
                 tracing::Level::DEBUG => Style::new().bold().fg(nu_ansi_term::Color::Blue),
                 tracing::Level::TRACE => Style::new().bold().fg(nu_ansi_term::Color::Magenta),
             }
+            .bold()
         } else {
             return Style::new();
         }
@@ -69,24 +70,21 @@ where
         event: &Event<'_>,
     ) -> std::fmt::Result {
         let ansi = std::env::var("NO_COLOR").map_or(true, |v| v.is_empty());
-
         let metadata = event.metadata();
 
         write!(
             writer,
             "{}: ",
-            Self::level_style_for(metadata.level(), ansi)
-                .bold()
-                .paint(format!(
-                    "{:>7}",
-                    match *metadata.level() {
-                        tracing::Level::ERROR => "Error",
-                        tracing::Level::WARN => "Warning",
-                        tracing::Level::INFO => "Info",
-                        tracing::Level::DEBUG => "Debug",
-                        tracing::Level::TRACE => "Trace",
-                    }
-                ))
+            Self::level_style_for(metadata.level(), ansi).paint(format!(
+                "{:>7}",
+                match *metadata.level() {
+                    tracing::Level::ERROR => "Error",
+                    tracing::Level::WARN => "Warning",
+                    tracing::Level::INFO => "Info",
+                    tracing::Level::DEBUG => "Debug",
+                    tracing::Level::TRACE => "Trace",
+                }
+            ))
         )?;
 
         ctx.field_format().format_fields(writer.by_ref(), event)?;
