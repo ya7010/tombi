@@ -51,8 +51,8 @@ pub async fn handle_formatting(
                 tracing::info!("no change");
             }
         }
-        Err(e) => {
-            tracing::error!("failed to format: {:?}", e);
+        Err(_) => {
+            tracing::error!("failed to format");
         }
     }
 
