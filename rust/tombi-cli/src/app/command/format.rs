@@ -34,15 +34,15 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
             };
             match not_needed_num {
                 0 => {}
-                1 => eprintln!("1 file not needed formatting"),
-                _ => eprintln!("{not_needed_num} files not needed formatting"),
+                1 => eprintln!("1 file did not need formatting"),
+                _ => eprintln!("{not_needed_num} files did not need formatting"),
             }
         }
     };
     match error_num {
         0 => {}
-        1 => eprintln!("1 file failed to format"),
-        _ => eprintln!("{error_num} files failed to format"),
+        1 => eprintln!("1 file failed to be formatted"),
+        _ => eprintln!("{error_num} files failed to be formatted"),
     };
 
     if error_num > 0 {
@@ -147,7 +147,7 @@ where
                             }
                         }
                         Ok((path, Err(_))) => {
-                            tracing::debug!("{:?} format failed", path);
+                            tracing::debug!("formatting failed for {:?}", path);
                             error_num += 1;
                         }
                         Err(e) => {
