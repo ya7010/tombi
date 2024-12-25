@@ -35,7 +35,7 @@ impl<'a> Formatter<'a> {
         let toml_version = self.toml_version;
         match parser::parse(source, toml_version).try_cast::<ast::Root>() {
             Ok(root) => {
-                tracing::trace!("ast: {:#?}", root);
+                tracing::trace!("TOML AST: {:#?}", root);
 
                 let line_ending = {
                     root.fmt(&mut self).unwrap();
