@@ -1,7 +1,7 @@
 use crate::app::arg;
 use config::{FormatOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-use std::io::{Read, Seek, Write};
+use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 /// Format TOML files.
 #[derive(clap::Args, Debug)]
@@ -56,79 +56,120 @@ fn inner_run<P>(args: Args, printer: P) -> (usize, usize, usize)
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
-    P: Copy,
+    P: Copy + Send + 'static,
 {
-    let input = arg::FileInput::from(args.files.as_ref());
+    let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+    else {
+        tracing::error!("Failed to create tokio runtime");
+        std::process::exit(1);
+    };
 
-    let total_num = input.len();
-    let mut success_num = 0;
-    let mut not_needed_num = 0;
-    let mut error_num = 0;
+    runtime.block_on(async {
+        let input = arg::FileInput::from(args.files.as_ref());
+        let total_num = input.len();
+        let mut success_num = 0;
+        let mut not_needed_num = 0;
+        let mut error_num = 0;
 
-    let config = config::load();
-    let toml_version = args
-        .toml_version
-        .unwrap_or(config.toml_version.unwrap_or_default());
-    let options = config.format.unwrap_or_default();
+        let config = config::load();
+        let toml_version = args
+            .toml_version
+            .unwrap_or(config.toml_version.unwrap_or_default());
+        let options = config.format.unwrap_or_default();
 
-    match input {
-        arg::FileInput::Stdin => {
-            tracing::debug!("stdin input formatting...");
-            match format_file(
-                FormatFile::from_stdin(),
-                printer,
-                &args,
-                toml_version,
-                &options,
-            ) {
-                Ok(true) => success_num += 1,
-                Ok(false) => not_needed_num += 1,
-                Err(_) => error_num += 1,
+        match input {
+            arg::FileInput::Stdin => {
+                tracing::debug!("stdin input formatting...");
+                match format_file(
+                    FormatFile::from_stdin(),
+                    printer,
+                    toml_version,
+                    args.check,
+                    &options,
+                )
+                .await
+                {
+                    Ok(true) => success_num += 1,
+                    Ok(false) => not_needed_num += 1,
+                    Err(_) => error_num += 1,
+                }
             }
-        }
-        arg::FileInput::Files(files) => {
-            for file in files {
-                match file {
-                    Ok(path) => {
-                        tracing::debug!("{:?} formatting...", path);
-                        match FormatFile::from_file(&path) {
-                            Ok(file) => {
-                                if let Ok(formatted) =
-                                    format_file(file, printer, &args, toml_version, &options)
-                                {
-                                    match formatted {
-                                        true => success_num += 1,
-                                        false => not_needed_num += 1,
-                                    }
-                                    continue;
+            arg::FileInput::Files(files) => {
+                let mut tasks = tokio::task::JoinSet::new();
+
+                for file in files {
+                    match file {
+                        Ok(path) => {
+                            tracing::debug!("{:?} formatting...", &path);
+                            match FormatFile::from_file(&path).await {
+                                Ok(file) => {
+                                    let options = options.clone();
+                                    tasks.spawn(async move {
+                                        (
+                                            path,
+                                            format_file(
+                                                file,
+                                                printer,
+                                                toml_version,
+                                                args.check,
+                                                &options,
+                                            )
+                                            .await,
+                                        )
+                                    });
                                 }
-                            }
-                            Err(err) => {
-                                if err.kind() == std::io::ErrorKind::NotFound {
-                                    crate::Error::FileNotFound(path).print(printer);
-                                } else {
-                                    crate::Error::Io(err).print(printer);
+                                Err(err) => {
+                                    if err.kind() == std::io::ErrorKind::NotFound {
+                                        crate::Error::FileNotFound(path).print(printer);
+                                    } else {
+                                        crate::Error::Io(err).print(printer);
+                                    }
+                                    error_num += 1;
                                 }
                             }
                         }
+                        Err(err) => {
+                            err.print(printer);
+                            error_num += 1;
+                        }
                     }
-                    Err(err) => err.print(printer),
                 }
-                error_num += 1;
+
+                while let Some(result) = tasks.join_next().await {
+                    match result {
+                        Ok((_, Ok(formatted))) => {
+                            if formatted {
+                                success_num += 1;
+                            } else {
+                                not_needed_num += 1;
+                            }
+                        }
+                        Ok((path, Err(_))) => {
+                            tracing::debug!("{:?} format failed", path);
+                            error_num += 1;
+                        }
+                        Err(e) => {
+                            tracing::error!("Task failed: {}", e);
+                            error_num += 1;
+                        }
+                    }
+                }
             }
-        }
-    };
+        };
 
-    assert_eq!(success_num + not_needed_num + error_num, total_num);
+        assert_eq!(success_num + not_needed_num + error_num, total_num);
 
-    (success_num, not_needed_num, error_num)
+        (success_num, not_needed_num, error_num)
+    })
 }
 
-fn format_file<P>(
+async fn format_file<P>(
     mut file: FormatFile,
     printer: P,
-    args: &Args,
     toml_version: TomlVersion,
+    check: bool,
     options: &FormatOptions,
 ) -> Result<bool, ()>
 where
@@ -137,19 +178,20 @@ where
     P: Copy,
 {
     let mut source = String::new();
-    if file.read_to_string(&mut source).is_ok() {
+    if file.read_to_string(&mut source).await.is_ok() {
         match formatter::Formatter::new(toml_version, options).format(&source) {
             Ok(formatted) => {
                 if source != formatted {
-                    if args.check {
+                    if check {
                         crate::error::NotFormattedError::from(file.source())
                             .into_error()
                             .print(printer);
                     } else {
-                        if let Err(err) = file.reset() {
+                        if let Err(err) = file.reset().await {
                             crate::Error::Io(err).print(printer);
-                        };
-                        match file.write_all(formatted.as_bytes()) {
+                            return Err(());
+                        }
+                        match file.write_all(formatted.as_bytes()).await {
                             Ok(_) => return Ok(true),
                             Err(err) => {
                                 crate::Error::Io(err).print(printer);
@@ -167,25 +209,26 @@ where
 }
 
 enum FormatFile {
-    Stdin(std::io::Stdin),
+    Stdin(tokio::io::Stdin),
     File {
         path: std::path::PathBuf,
-        file: std::fs::File,
+        file: tokio::fs::File,
     },
 }
 
 impl FormatFile {
     fn from_stdin() -> Self {
-        Self::Stdin(std::io::stdin())
+        Self::Stdin(tokio::io::stdin())
     }
 
-    fn from_file(path: &std::path::Path) -> std::io::Result<Self> {
+    async fn from_file(path: &std::path::Path) -> std::io::Result<Self> {
         Ok(Self::File {
             path: path.to_owned(),
-            file: std::fs::OpenOptions::new()
+            file: tokio::fs::OpenOptions::new()
                 .read(true)
-                .append(true)
-                .open(path)?,
+                .write(true)
+                .open(path)
+                .await?,
         })
     }
 
@@ -197,38 +240,27 @@ impl FormatFile {
         }
     }
 
-    fn reset(&mut self) -> std::io::Result<()> {
+    async fn reset(&mut self) -> std::io::Result<()> {
         match self {
             Self::Stdin(_) => Ok(()),
             Self::File { file, .. } => {
-                file.seek(std::io::SeekFrom::Start(0))?;
-                file.set_len(0)
+                file.seek(std::io::SeekFrom::Start(0)).await?;
+                file.set_len(0).await
             }
         }
     }
-}
 
-impl std::io::Read for FormatFile {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    async fn read_to_string(&mut self, buf: &mut String) -> std::io::Result<usize> {
         match self {
-            Self::Stdin(stdin) => stdin.read(buf),
-            Self::File { file, .. } => file.read(buf),
-        }
-    }
-}
-
-impl std::io::Write for FormatFile {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        match self {
-            Self::Stdin(_) => std::io::stdout().write(buf),
-            Self::File { file, .. } => file.write(buf),
+            Self::Stdin(stdin) => stdin.read_to_string(buf).await,
+            Self::File { file, .. } => file.read_to_string(buf).await,
         }
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    async fn write_all(&mut self, buf: &[u8]) -> std::io::Result<()> {
         match self {
-            Self::Stdin(_) => std::io::stdout().flush(),
-            Self::File { file, .. } => file.flush(),
+            Self::Stdin(_) => tokio::io::stdout().write_all(buf).await,
+            Self::File { file, .. } => file.write_all(buf).await,
         }
     }
 }

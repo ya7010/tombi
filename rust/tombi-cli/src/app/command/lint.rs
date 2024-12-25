@@ -39,11 +39,6 @@ where
     crate::Error: Print<P>,
     P: Copy + Clone + Send + 'static,
 {
-    let input = arg::FileInput::from(args.files.as_ref());
-    let total_num = input.len();
-    let mut success_num = 0;
-    let mut error_num = 0;
-
     let config = config::load();
     let toml_version = args
         .toml_version
@@ -60,6 +55,11 @@ where
     };
 
     runtime.block_on(async {
+        let input = arg::FileInput::from(args.files.as_ref());
+        let total_num = input.len();
+        let mut success_num = 0;
+        let mut error_num = 0;
+
         match input {
             arg::FileInput::Stdin => {
                 tracing::debug!("stdin input linting...");
@@ -138,10 +138,11 @@ where
                 }
             }
         }
-    });
 
-    assert_eq!(success_num + error_num, total_num);
-    (success_num, error_num)
+        assert_eq!(success_num + error_num, total_num);
+
+        (success_num, error_num)
+    })
 }
 
 async fn lint_file<R, P>(
