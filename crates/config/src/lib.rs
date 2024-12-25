@@ -60,16 +60,12 @@ pub fn load() -> Config {
             tracing::debug!("{} found: {:?}", CONFIG_FILENAME, &config_path);
 
             let Ok(config_str) = std::fs::read_to_string(&config_path) else {
-                tracing::error!("Failed to read {}: {:?}", CONFIG_FILENAME, &config_path);
-                continue;
+                tracing::error!("Failed to read {:?}", &config_path);
+                std::process::exit(1);
             };
             let Ok(config) = toml::from_str::<Config>(&config_str) else {
-                tracing::error!(
-                    "Failed to parse {} file: {:?}",
-                    CONFIG_FILENAME,
-                    &config_path
-                );
-                continue;
+                tracing::error!("Failed to parse {:?}", &config_path);
+                std::process::exit(1);
             };
             return config;
         }
@@ -83,25 +79,17 @@ pub fn load() -> Config {
             );
 
             let Ok(pyproject_toml_str) = std::fs::read_to_string(&pyproject_toml_path) else {
-                tracing::error!(
-                    "Failed to read {} file: {:?}",
-                    PYPROJECT_FILENAME,
-                    &pyproject_toml_path
-                );
-                continue;
+                tracing::error!("Failed to read {:?}", &pyproject_toml_path);
+                std::process::exit(1);
             };
             let Ok(config) = toml::from_str::<PyProjectToml>(&pyproject_toml_str) else {
-                tracing::error!(
-                    "Failed to parse {} file: {:?}",
-                    PYPROJECT_FILENAME,
-                    &config_path
-                );
-                continue;
+                tracing::error!("Failed to parse {:?}", &config_path);
+                std::process::exit(1);
             };
             if let Some(Tool { tombi: Some(tombi) }) = config.tool {
                 return tombi;
             } else {
-                tracing::debug!("No [tool.tombi] found in \"{:?}\".", &config_path);
+                tracing::debug!("No [tool.tombi] found in {:?}", &config_path);
                 continue;
             }
         }
