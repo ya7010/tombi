@@ -62,7 +62,7 @@ where
 
         match input {
             arg::FileInput::Stdin => {
-                tracing::debug!("stdin input linting...");
+                tracing::debug!("linting... stdin input");
                 if lint_file(
                     tokio::io::stdin(),
                     printer,
@@ -84,7 +84,7 @@ where
                 for file in files {
                     match file {
                         Ok(source_path) => {
-                            tracing::debug!("{:?} linting...", source_path);
+                            tracing::debug!("linting... {:?}", source_path);
                             match tokio::fs::File::open(&source_path).await {
                                 Ok(file) => {
                                     let options = options.clone();

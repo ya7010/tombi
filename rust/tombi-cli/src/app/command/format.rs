@@ -81,7 +81,7 @@ where
 
         match input {
             arg::FileInput::Stdin => {
-                tracing::debug!("stdin input formatting...");
+                tracing::debug!("formatting... stdin input");
                 match format_file(
                     FormatFile::from_stdin(),
                     printer,
@@ -102,7 +102,7 @@ where
                 for file in files {
                     match file {
                         Ok(source_path) => {
-                            tracing::debug!("{:?} formatting...", &source_path);
+                            tracing::debug!("formatting... {:?}", &source_path);
                             match FormatFile::from_file(&source_path).await {
                                 Ok(file) => {
                                     let options = options.clone();
