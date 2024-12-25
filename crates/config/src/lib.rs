@@ -57,7 +57,7 @@ pub fn load() -> Config {
     loop {
         let config_path = current_dir.join(CONFIG_FILENAME);
         if config_path.exists() {
-            tracing::debug!("{} found at {:?}", CONFIG_FILENAME, &config_path);
+            tracing::debug!("\"{}\" found at {:?}", CONFIG_FILENAME, &config_path);
 
             let Ok(config_str) = std::fs::read_to_string(&config_path) else {
                 tracing::error!("Failed to read {:?}", &config_path);
