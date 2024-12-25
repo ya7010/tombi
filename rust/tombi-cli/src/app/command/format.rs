@@ -15,7 +15,7 @@ pub struct Args {
     #[arg(long, value_enum, default_value = None)]
     toml_version: Option<TomlVersion>,
 
-    /// Check if the input is formatted.
+    /// Check only and don't overwrite files.
     #[arg(long, default_value_t = false)]
     check: bool,
 }
@@ -101,14 +101,14 @@ where
 
                 for file in files {
                     match file {
-                        Ok(path) => {
-                            tracing::debug!("{:?} formatting...", &path);
-                            match FormatFile::from_file(&path).await {
+                        Ok(source_path) => {
+                            tracing::debug!("{:?} formatting...", &source_path);
+                            match FormatFile::from_file(&source_path).await {
                                 Ok(file) => {
                                     let options = options.clone();
                                     tasks.spawn(async move {
                                         (
-                                            path,
+                                            source_path,
                                             format_file(
                                                 file,
                                                 printer,
@@ -122,7 +122,7 @@ where
                                 }
                                 Err(err) => {
                                     if err.kind() == std::io::ErrorKind::NotFound {
-                                        crate::Error::FileNotFound(path).print(printer);
+                                        crate::Error::FileNotFound(source_path).print(printer);
                                     } else {
                                         crate::Error::Io(err).print(printer);
                                     }

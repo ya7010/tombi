@@ -66,6 +66,7 @@ where
                 if lint_file(
                     tokio::io::stdin(),
                     printer,
+                    None,
                     toml_version,
                     &options,
                     &schema_store,
@@ -82,30 +83,29 @@ where
 
                 for file in files {
                     match file {
-                        Ok(path) => {
-                            tracing::debug!("{:?} linting...", path);
-                            match tokio::fs::File::open(&path).await {
+                        Ok(source_path) => {
+                            tracing::debug!("{:?} linting...", source_path);
+                            match tokio::fs::File::open(&source_path).await {
                                 Ok(file) => {
                                     let options = options.clone();
                                     let schema_store = schema_store.clone();
 
                                     tasks.spawn(async move {
-                                        (
-                                            path,
-                                            lint_file(
-                                                file,
-                                                printer,
-                                                toml_version,
-                                                &options,
-                                                &schema_store,
-                                            )
-                                            .await,
+                                        let is_success = lint_file(
+                                            file,
+                                            printer,
+                                            Some(source_path.as_ref()),
+                                            toml_version,
+                                            &options,
+                                            &schema_store,
                                         )
+                                        .await;
+                                        (source_path, is_success)
                                     });
                                 }
                                 Err(err) => {
                                     if err.kind() == std::io::ErrorKind::NotFound {
-                                        crate::Error::FileNotFound(path).print(printer);
+                                        crate::Error::FileNotFound(source_path).print(printer);
                                     } else {
                                         crate::Error::Io(err).print(printer);
                                     }
@@ -148,6 +148,7 @@ where
 async fn lint_file<R, P>(
     mut reader: R,
     printer: P,
+    source_path: Option<&std::path::Path>,
     toml_version: TomlVersion,
     options: &LintOptions,
     schema_store: &schema_store::SchemaStore,
@@ -167,7 +168,15 @@ where
             Ok(()) => {
                 return true;
             }
-            Err(diagnostics) => diagnostics.print(printer),
+            Err(diagnostics) => if let Some(source_path) = source_path {
+                diagnostics
+                    .into_iter()
+                    .map(|diagnostic| diagnostic.with_source_file(source_path))
+                    .collect()
+            } else {
+                diagnostics
+            }
+            .print(printer),
         }
     }
     false
