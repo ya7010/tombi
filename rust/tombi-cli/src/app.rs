@@ -1,11 +1,13 @@
 mod arg;
 mod command;
+mod tracing_formatter;
 
 use clap::{
     builder::styling::{AnsiColor, Color, Style},
     Parser,
 };
 use clap_verbosity_flag::{InfoLevel, Verbosity};
+use tracing_formatter::TombiFormatter;
 use tracing_subscriber::prelude::*;
 
 #[derive(clap::Parser)]
@@ -44,9 +46,8 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
         ))
         .with(
             tracing_subscriber::fmt::layer()
-                .pretty()
-                .with_writer(std::io::stderr)
-                .without_time(),
+                .event_format(TombiFormatter::from(args.verbose.log_level_filter()))
+                .with_writer(std::io::stderr),
         )
         .init();
 
