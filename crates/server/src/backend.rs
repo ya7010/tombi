@@ -95,13 +95,6 @@ impl LanguageServer for Backend {
         handle_semantic_tokens_full(self, params).await
     }
 
-    async fn semantic_tokens_range(
-        &self,
-        _params: SemanticTokensRangeParams,
-    ) -> Result<Option<SemanticTokensRangeResult>, tower_lsp::jsonrpc::Error> {
-        Ok(None)
-    }
-
     async fn document_symbol(
         &self,
         params: DocumentSymbolParams,
