@@ -40,14 +40,16 @@ impl<'a> Linter<'a> {
         }
 
         if errors.is_empty() {
-            if let Some(root) = ast::Root::cast(p.into_syntax_node()) {
-                root.lint(&mut self);
-                errors.extend(self.into_diagnostics());
+            let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
+                unreachable!("Root node is always present");
+            };
 
-                if let Err(errs) = root.try_into_document_tree(toml_version) {
-                    for err in errs {
-                        err.to_diagnostics(&mut errors);
-                    }
+            root.lint(&mut self);
+            errors.extend(self.into_diagnostics());
+
+            if let Err(errs) = root.try_into_document_tree(toml_version) {
+                for err in errs {
+                    err.to_diagnostics(&mut errors);
                 }
             }
         }
