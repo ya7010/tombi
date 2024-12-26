@@ -2,26 +2,21 @@ use tower_lsp::lsp_types::{Position, Range, SemanticToken};
 
 use super::token_type::TokenType;
 
-pub struct SemanticTokensBuilder<'a> {
+pub struct SemanticTokensBuilder {
     tokens: Vec<SemanticToken>,
-    last_range: Range,
-    source: &'a str,
+    last_range: text::Range,
 }
 
-impl<'a> SemanticTokensBuilder<'a> {
-    pub fn new(source: &'a str) -> Self {
+impl SemanticTokensBuilder {
+    pub fn new() -> Self {
         Self {
             tokens: Vec::new(),
-            last_range: Range::default(),
-            source,
+            last_range: text::Range::default(),
         }
     }
 
     pub fn add_token(&mut self, token_type: TokenType, elem: syntax::SyntaxElement) {
-        let range = Range::new(
-            text::Position::from_source(self.source, elem.span().start()).into(),
-            text::Position::from_source(self.source, elem.span().end()).into(),
-        );
+        let range = elem.range();
 
         let relative = relative_range(range, self.last_range);
 
@@ -42,33 +37,23 @@ impl<'a> SemanticTokensBuilder<'a> {
     }
 }
 
-fn relative_position(position: Position, to: Position) -> Position {
-    if position.line == to.line {
-        Position {
-            line: 0,
-            character: position.character - to.character,
-        }
-    } else {
-        Position {
-            line: position.line - to.line,
-            character: position.character,
-        }
-    }
-}
-
-fn relative_range(from: Range, to: Range) -> Range {
-    let line_diff = from.end.line - from.start.line;
-    let start = relative_position(from.start, to.start);
+fn relative_range(from: text::Range, to: text::Range) -> Range {
+    let line_diff = from.end().line() - from.start().line();
+    let start = from.start() - to.start();
+    let start = Position {
+        line: start.line(),
+        character: start.column(),
+    };
 
     let end = if line_diff == 0 {
         Position {
             line: start.line,
-            character: start.character + from.end.character - from.start.character,
+            character: start.character + from.end().column() - from.start().column(),
         }
     } else {
         Position {
             line: start.line + line_diff,
-            character: from.end.character,
+            character: from.end().column(),
         }
     };
 

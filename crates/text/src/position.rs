@@ -1,6 +1,6 @@
 use std::{
     cmp::Ordering,
-    ops::{Add, AddAssign},
+    ops::{Add, AddAssign, Sub},
 };
 
 use crate::{Column, Line, Offset, RelativePosition};
@@ -113,6 +113,22 @@ impl AddAssign<RelativePosition> for Position {
         } else {
             self.column = rhs.column();
         }
+    }
+}
+
+impl Sub<Position> for Position {
+    type Output = RelativePosition;
+
+    #[inline]
+    fn sub(self, rhs: Position) -> Self::Output {
+        assert!(rhs <= self);
+        let line = self.line - rhs.line;
+        let column = if line == 0 {
+            self.column - rhs.column
+        } else {
+            self.column
+        };
+        RelativePosition { line, column }
     }
 }
 

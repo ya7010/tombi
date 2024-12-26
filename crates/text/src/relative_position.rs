@@ -7,8 +7,8 @@ use crate::{Column, Line};
 
 #[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct RelativePosition {
-    line: Line,
-    column: Column,
+    pub(crate) line: Line,
+    pub(crate) column: Column,
 }
 
 impl RelativePosition {

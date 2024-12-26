@@ -19,7 +19,7 @@ pub async fn handle_semantic_tokens_full(
         return Ok(None);
     };
 
-    let mut tokens_builder = SemanticTokensBuilder::new(&source);
+    let mut tokens_builder = SemanticTokensBuilder::new();
     ast.append_semantic_tokens(&mut tokens_builder);
     let tokens = tokens_builder.build();
 

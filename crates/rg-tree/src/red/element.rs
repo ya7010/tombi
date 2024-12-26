@@ -26,6 +26,13 @@ impl<L: Language> RedElement<L> {
         }
     }
 
+    pub fn range(&self) -> text::Range {
+        match self {
+            NodeOrToken::Node(it) => it.range(),
+            NodeOrToken::Token(it) => it.range(),
+        }
+    }
+
     pub fn index(&self) -> usize {
         match self {
             NodeOrToken::Node(it) => it.index(),
