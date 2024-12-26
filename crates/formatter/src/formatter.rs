@@ -6,7 +6,7 @@ use config::{
     TomlVersion,
 };
 use diagnostic::Diagnostic;
-use diagnostic::ToDiagnostics;
+use diagnostic::SetDiagnostics;
 use std::fmt::Write;
 
 pub struct Formatter<'a> {
@@ -47,7 +47,7 @@ impl<'a> Formatter<'a> {
             Err(errors) => {
                 let mut diagnostics = Vec::new();
                 for error in errors {
-                    error.to_diagnostics(&mut diagnostics);
+                    error.set_diagnostic(&mut diagnostics);
                 }
                 Err(diagnostics)
             }

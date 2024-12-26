@@ -4,7 +4,7 @@ use crate::lint::Lint;
 use ast::AstNode;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
-use diagnostic::ToDiagnostics;
+use diagnostic::SetDiagnostics;
 use document_tree::TryIntoDocumentTree;
 
 pub struct Linter<'a> {
@@ -36,7 +36,7 @@ impl<'a> Linter<'a> {
         let mut errors = vec![];
 
         for err in p.errors() {
-            err.to_diagnostics(&mut errors);
+            err.set_diagnostic(&mut errors);
         }
 
         if errors.is_empty() {
@@ -49,7 +49,7 @@ impl<'a> Linter<'a> {
 
             if let Err(errs) = root.try_into_document_tree(toml_version) {
                 for err in errs {
-                    err.to_diagnostics(&mut errors);
+                    err.set_diagnostic(&mut errors);
                 }
             }
         }

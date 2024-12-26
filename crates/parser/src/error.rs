@@ -133,8 +133,8 @@ impl From<lexer::Error> for Error {
 }
 
 #[cfg(feature = "diagnostic")]
-impl diagnostic::ToDiagnostics for Error {
-    fn to_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
+impl diagnostic::SetDiagnostics for Error {
+    fn set_diagnostic(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
         diagnostics.push(diagnostic::Diagnostic::new_error(
             self.to_message(),
             self.range(),

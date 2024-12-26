@@ -64,6 +64,6 @@ impl Diagnostic {
     }
 }
 
-pub trait ToDiagnostics {
-    fn to_diagnostics(&self, diagnostics: &mut Vec<Diagnostic>);
+pub trait SetDiagnostics {
+    fn set_diagnostic(&self, diagnostics: &mut Vec<Diagnostic>);
 }
