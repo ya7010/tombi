@@ -13,7 +13,7 @@ use tower_lsp::{
         DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
         DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
         HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensRangeParams, SemanticTokensRangeResult, SemanticTokensResult, Url,
+        SemanticTokensResult, Url,
     },
     LanguageServer,
 };
