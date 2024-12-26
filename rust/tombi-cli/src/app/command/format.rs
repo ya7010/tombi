@@ -85,6 +85,7 @@ where
                 match format_file(
                     FormatFile::from_stdin(),
                     printer,
+                    None,
                     toml_version,
                     args.check,
                     &options,
@@ -110,6 +111,7 @@ where
                                         format_file(
                                             file,
                                             printer,
+                                            Some(&source_path),
                                             toml_version,
                                             args.check,
                                             &options,
@@ -164,6 +166,7 @@ where
 async fn format_file<P>(
     mut file: FormatFile,
     printer: P,
+    source_path: Option<&std::path::Path>,
     toml_version: TomlVersion,
     check: bool,
     options: &FormatOptions,
@@ -198,7 +201,15 @@ where
                     return Ok(false);
                 }
             }
-            Err(diagnostics) => diagnostics.print(printer),
+            Err(diagnostics) => if let Some(source_path) = source_path {
+                diagnostics
+                    .into_iter()
+                    .map(|diagnostic| diagnostic.with_source_file(source_path))
+                    .collect()
+            } else {
+                diagnostics
+            }
+            .print(printer),
         }
     }
     Err(())
