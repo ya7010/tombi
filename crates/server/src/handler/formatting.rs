@@ -1,6 +1,6 @@
 use config::FormatOptions;
 use dashmap::try_result::TryResult;
-use tower_lsp::lsp_types::{DocumentFormattingParams, Range, TextEdit};
+use tower_lsp::lsp_types::{DocumentFormattingParams, TextEdit};
 
 use crate::backend::Backend;
 
@@ -36,17 +36,12 @@ pub async fn handle_formatting(
     {
         Ok(new_text) => {
             if new_text != document_info.source {
-                let range = Range::new(
-                    text::Position::new(0, 0).into(),
-                    text::Position::from_source(
-                        &document_info.source,
-                        text::Offset::new(document_info.source.len() as u32),
-                    )
-                    .into(),
-                );
                 document_info.source = new_text.clone();
 
-                return Ok(Some(vec![TextEdit { range, new_text }]));
+                return Ok(Some(vec![TextEdit {
+                    range: text::Range::new(text::Position::MIN, text::Position::MAX).into(),
+                    new_text,
+                }]));
             } else {
                 tracing::info!("no change");
             }
