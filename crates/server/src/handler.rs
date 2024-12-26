@@ -8,6 +8,7 @@ mod formatting;
 mod hover;
 mod initialize;
 mod semantic_tokens_full;
+mod semantic_tokens_range;
 mod shutdown;
 
 mod did_save;

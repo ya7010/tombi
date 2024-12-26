@@ -37,6 +37,7 @@ tokio = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+syntax.workspace = true
 
 [dev-dependencies]
 rstest = { workspace = true }

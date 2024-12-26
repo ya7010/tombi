@@ -4,6 +4,7 @@ mod backend;
 mod document;
 mod handler;
 mod hover;
+mod semantic_tokens;
 mod toml;
 
 /// Run TOML Language Server

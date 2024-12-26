@@ -6,7 +6,7 @@ use tower_lsp::lsp_types::{
     TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
 };
 
-use super::semantic_tokens_full::SUPPORTED_TOKEN_TYPES;
+use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn handle_initialize(
