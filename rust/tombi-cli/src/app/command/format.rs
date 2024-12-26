@@ -107,17 +107,14 @@ where
                                 Ok(file) => {
                                     let options = options.clone();
                                     tasks.spawn(async move {
-                                        (
-                                            source_path,
-                                            format_file(
-                                                file,
-                                                printer,
-                                                toml_version,
-                                                args.check,
-                                                &options,
-                                            )
-                                            .await,
+                                        format_file(
+                                            file,
+                                            printer,
+                                            toml_version,
+                                            args.check,
+                                            &options,
                                         )
+                                        .await
                                     });
                                 }
                                 Err(err) => {
@@ -139,19 +136,18 @@ where
 
                 while let Some(result) = tasks.join_next().await {
                     match result {
-                        Ok((_, Ok(formatted))) => {
+                        Ok(Ok(formatted)) => {
                             if formatted {
                                 success_num += 1;
                             } else {
                                 not_needed_num += 1;
                             }
                         }
-                        Ok((path, Err(_))) => {
-                            tracing::debug!("formatting failed for {:?}", path);
+                        Ok(Err(_)) => {
                             error_num += 1;
                         }
                         Err(e) => {
-                            tracing::error!("Task failed: {}", e);
+                            tracing::error!("task failed {}", e);
                             error_num += 1;
                         }
                     }

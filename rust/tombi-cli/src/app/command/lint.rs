@@ -91,7 +91,7 @@ where
                                     let schema_store = schema_store.clone();
 
                                     tasks.spawn(async move {
-                                        let is_success = lint_file(
+                                        lint_file(
                                             file,
                                             printer,
                                             Some(source_path.as_ref()),
@@ -99,8 +99,7 @@ where
                                             &options,
                                             &schema_store,
                                         )
-                                        .await;
-                                        (source_path, is_success)
+                                        .await
                                     });
                                 }
                                 Err(err) => {
@@ -122,16 +121,15 @@ where
 
                 while let Some(result) = tasks.join_next().await {
                     match result {
-                        Ok((path, success)) => {
+                        Ok(success) => {
                             if success {
                                 success_num += 1;
                             } else {
-                                tracing::debug!("{:?} lint failed", path);
                                 error_num += 1;
                             }
                         }
                         Err(e) => {
-                            tracing::error!("Task failed: {}", e);
+                            tracing::error!("task failed {}", e);
                             error_num += 1;
                         }
                     }
