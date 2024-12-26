@@ -13,7 +13,7 @@ use tower_lsp::{
         DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
         DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
         HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
-        SemanticTokensResult, Url,
+        SemanticTokensRangeParams, SemanticTokensRangeResult, SemanticTokensResult, Url,
     },
     LanguageServer,
 };
@@ -93,6 +93,13 @@ impl LanguageServer for Backend {
         params: SemanticTokensParams,
     ) -> Result<Option<SemanticTokensResult>, tower_lsp::jsonrpc::Error> {
         handle_semantic_tokens_full(self, params).await
+    }
+
+    async fn semantic_tokens_range(
+        &self,
+        _params: SemanticTokensRangeParams,
+    ) -> Result<Option<SemanticTokensRangeResult>, tower_lsp::jsonrpc::Error> {
+        Ok(None)
     }
 
     async fn document_symbol(
