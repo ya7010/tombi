@@ -13,11 +13,12 @@ pub use types::*;
 ///
 /// **Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.
 /// See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.
+#[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
-#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-toml-version" = TomlVersion::V1_1_0_Preview)))]
 pub struct Config {
     /// # TOML version.
     #[cfg_attr(feature = "jsonschema", schemars(default = "TomlVersion::default"))]

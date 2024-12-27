@@ -1,37 +1,37 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Tombi",
-  "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server. See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.",
+  "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.\n See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.",
   "type": "object",
   "properties": {
-    "toml-version": {
-      "title": "TOML version.",
-      "default": "v1.0.0",
+    "format": {
+      "title": "Formatter options.",
       "anyOf": [
         {
-          "$ref": "#/definitions/TomlVersion"
+          "$ref": "#/$defs/FormatOptions"
         },
         {
           "type": "null"
         }
       ]
     },
-    "format": {
-      "title": "Formatter options.",
+    "toml-version": {
+      "title": "TOML version.",
       "anyOf": [
         {
-          "$ref": "#/definitions/FormatOptions"
+          "$ref": "#/$defs/TomlVersion"
         },
         {
           "type": "null"
         }
-      ]
+      ],
+      "default": "v1.0.0"
     },
     "lint": {
       "title": "Linter options.",
       "anyOf": [
         {
-          "$ref": "#/definitions/LintOptions"
+          "$ref": "#/$defs/LintOptions"
         },
         {
           "type": "null"
@@ -45,12 +45,13 @@
         "null"
       ],
       "items": {
-        "$ref": "#/definitions/SchemaOptions"
+        "$ref": "#/$defs/SchemaOptions"
       }
     }
   },
   "additionalProperties": false,
-  "definitions": {
+  "x-tombi-toml-version": "v1.1.0-preview",
+  "$defs": {
     "TomlVersion": {
       "title": "TOML version.",
       "type": "string",
@@ -65,53 +66,53 @@
         "indent-style": {
           "title": "The style of indentation.",
           "description": "Whether to use spaces or tabs for indentation.",
-          "default": "space",
           "anyOf": [
             {
-              "$ref": "#/definitions/IdentStyle"
+              "$ref": "#/$defs/IdentStyle"
             },
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": "space"
         },
         "indent-width": {
           "title": "The number of spaces per indentation level.",
-          "default": 2,
           "anyOf": [
             {
-              "$ref": "#/definitions/IdentWidth"
+              "$ref": "#/$defs/IdentWidth"
             },
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": 2
         },
         "line-ending": {
           "title": "The type of line ending.",
-          "description": "In TOML, the line ending must be either `LF` or `CRLF`.\n\n- `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos. - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
-          "default": "lf",
+          "description": "In TOML, the line ending must be either `LF` or `CRLF`.\n\n - `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos.\n - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
           "anyOf": [
             {
-              "$ref": "#/definitions/LineEnding"
+              "$ref": "#/$defs/LineEnding"
             },
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": "lf"
         },
         "date-time-delimiter": {
           "title": "The delimiter between date and time.",
-          "description": "In accordance with [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339), you can use `T` or space character between date and time.\n\n- `T`: Example: `2001-01-01T00:00:00` - `space`: Example: `2001-01-01 00:00:00` - `preserve`: Preserve the original delimiter.",
-          "default": "T",
+          "description": "In accordance with [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339), you can use `T` or space character between date and time.\n\n - `T`: Example: `2001-01-01T00:00:00`\n - `space`: Example: `2001-01-01 00:00:00`\n - `preserve`: Preserve the original delimiter.",
           "anyOf": [
             {
-              "$ref": "#/definitions/DateTimeDelimiter"
+              "$ref": "#/$defs/DateTimeDelimiter"
             },
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": "T"
         }
       },
       "additionalProperties": false
@@ -126,7 +127,7 @@
     "IdentWidth": {
       "type": "integer",
       "format": "uint8",
-      "minimum": 0.0
+      "minimum": 0
     },
     "LineEnding": {
       "type": "string",
@@ -141,23 +142,17 @@
         {
           "description": "Example: `2021-01-01T00:00:00`",
           "type": "string",
-          "enum": [
-            "T"
-          ]
+          "const": "T"
         },
         {
           "description": "Example: `2021-01-01 00:00:00`",
           "type": "string",
-          "enum": [
-            "space"
-          ]
+          "const": "space"
         },
         {
           "description": "Preserve the source delimiter",
           "type": "string",
-          "enum": [
-            "preserve"
-          ]
+          "const": "preserve"
         }
       ]
     },
@@ -166,15 +161,15 @@
       "properties": {
         "use-schema-catalog": {
           "title": "Use schema catalog.",
-          "default": true,
           "anyOf": [
             {
-              "$ref": "#/definitions/UseSchemaCatalog"
+              "$ref": "#/$defs/UseSchemaCatalog"
             },
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": true
         }
       },
       "additionalProperties": false
@@ -184,15 +179,12 @@
     },
     "SchemaOptions": {
       "type": "object",
-      "required": [
-        "path"
-      ],
       "properties": {
         "toml-version": {
           "title": "The TOML version that the schema is available.",
           "anyOf": [
             {
-              "$ref": "#/definitions/TomlVersion"
+              "$ref": "#/$defs/TomlVersion"
             },
             {
               "type": "null"
@@ -216,7 +208,10 @@
           "minItems": 1
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ]
     }
   }
 }
