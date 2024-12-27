@@ -1,10 +1,7 @@
 pub mod definitions;
 
 use crate::Format;
-use config::{
-    format::{DateTimeDelimiter, LineEnding},
-    TomlVersion,
-};
+use config::{DateTimeDelimiter, LineEnding, TomlVersion};
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use std::fmt::Write;

@@ -63,9 +63,18 @@ impl LanguageServer for Backend {
         &self,
         params: InitializeParams,
     ) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
-        self.schema_store
-            .load_catalog(&DEFAULT_CATALOG_URL.parse().unwrap())
-            .await;
+        if self
+            .config
+            .lint
+            .as_ref()
+            .map(|options| options.use_schema_catalog.unwrap_or_default())
+            .unwrap_or_default()
+            .value()
+        {
+            self.schema_store
+                .load_catalog(&DEFAULT_CATALOG_URL.parse().unwrap())
+                .await;
+        }
 
         handle_initialize(params).await
     }

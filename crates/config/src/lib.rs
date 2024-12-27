@@ -1,11 +1,13 @@
 pub mod format;
 mod lint;
 mod schema;
+mod types;
 
 pub use format::FormatOptions;
 pub use lint::LintOptions;
 pub use schema::SchemaOptions;
 pub use toml_version::TomlVersion;
+pub use types::*;
 
 /// # Tombi
 ///

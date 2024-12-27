@@ -17,7 +17,7 @@ pub struct Args {
 
     /// Do not use the schema store's JSON file catalog.
     #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
-    use_schema_catalog: bool,
+    use_schema_catalog: Option<bool>,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -59,7 +59,10 @@ where
     };
 
     runtime.block_on(async {
-        if args.use_schema_catalog {
+        if args
+            .use_schema_catalog
+            .unwrap_or_else(|| options.use_schema_catalog.unwrap_or_default().value())
+        {
             let catalog_url = schema_store::DEFAULT_CATALOG_URL.parse().unwrap();
             schema_store.load_catalog(&catalog_url).await;
         }

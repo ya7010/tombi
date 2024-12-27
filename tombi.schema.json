@@ -163,7 +163,24 @@
     },
     "LintOptions": {
       "type": "object",
+      "properties": {
+        "use-schema-catalog": {
+          "title": "Use schema catalog.",
+          "default": true,
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UseSchemaCatalog"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
+    },
+    "UseSchemaCatalog": {
+      "type": "boolean"
     },
     "SchemaOptions": {
       "type": "object",
