@@ -93,10 +93,9 @@ fn get_item_table<'a>(
             None
         }
         Value::Array(array) => {
-            let mut index = 0;
             *value_type = Some(ValueType::Array);
 
-            for value in array.values() {
+            for (index, value) in array.values().iter().enumerate() {
                 if value.range().contains(position) {
                     accessors.push(Accessor::Index(index));
                     let table_ref = get_item_table(value, accessors, value_type, position);
@@ -110,7 +109,6 @@ fn get_item_table<'a>(
 
                     return table_ref;
                 }
-                index += 1;
             }
             None
         }
