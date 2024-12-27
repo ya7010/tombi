@@ -12,6 +12,7 @@ ast = { workspace = true }
 dashmap = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
+glob = { workspace = true }
 indexmap = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true }

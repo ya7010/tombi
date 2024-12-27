@@ -1,4 +1,4 @@
-use dashmap::DashMap;
+use dashmap::{mapref::one::Ref, DashMap};
 use url::Url;
 
 use crate::{
@@ -22,6 +22,7 @@ impl SchemaStore {
     }
 
     pub async fn load_catalog(&mut self, catalog_url: &url::Url) {
+        tracing::debug!("loading schema catalog: {}", catalog_url);
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
             if let Ok(catalog) = response.json::<Catalog>().await {
                 for schema in catalog.schemas {
@@ -43,7 +44,26 @@ impl SchemaStore {
         self.schemas.insert(url, schema);
     }
 
-    pub fn get_schema(&self, url: &Url) -> Option<DocumentSchema> {
-        self.schemas.get(url).map(|schema| schema.clone())
+    pub fn get_schema_from_url(&self, url: &Url) -> Option<Ref<'_, Url, DocumentSchema>> {
+        self.schemas.get(url)
+    }
+
+    pub fn get_schema_from_source(
+        &self,
+        source_path: &std::path::Path,
+    ) -> Option<Ref<'_, Url, DocumentSchema>> {
+        for catalog in &self.catalogs {
+            if catalog.file_match.iter().any(|pat| {
+                glob::Pattern::new(pat)
+                    .ok()
+                    .map(|glob_pat| glob_pat.matches_path(source_path))
+                    .unwrap_or(false)
+            }) {
+                if let Some(schema) = self.get_schema_from_url(&catalog.url) {
+                    return Some(schema);
+                }
+            }
+        }
+        None
     }
 }

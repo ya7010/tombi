@@ -14,6 +14,10 @@ pub struct Args {
     /// TOML version.
     #[arg(long, value_enum, default_value = None)]
     toml_version: Option<TomlVersion>,
+
+    /// Do not use the schema store's JSON file catalog.
+    #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
+    use_schema_catalog: bool,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -44,7 +48,7 @@ where
         .toml_version
         .unwrap_or(config.toml_version.unwrap_or_default());
     let options = config.lint.unwrap_or_default();
-    let schema_store = schema_store::SchemaStore::default();
+    let mut schema_store = schema_store::SchemaStore::default();
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -55,6 +59,11 @@ where
     };
 
     runtime.block_on(async {
+        if args.use_schema_catalog {
+            let catalog_url = schema_store::DEFAULT_CATALOG_URL.parse().unwrap();
+            schema_store.load_catalog(&catalog_url).await;
+        }
+
         let input = arg::FileInput::from(args.files.as_ref());
         let total_num = input.len();
         let mut success_num = 0;
