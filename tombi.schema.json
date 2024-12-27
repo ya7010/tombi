@@ -171,6 +171,17 @@
         "path"
       ],
       "properties": {
+        "toml-version": {
+          "title": "The TOML version that the schema is available.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TomlVersion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "path": {
           "title": "The schema path.",
           "type": "string"
