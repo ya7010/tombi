@@ -27,6 +27,7 @@ where
         match files.len() {
             0 => {
                 tracing::debug!("Searching for all TOML files in the current directory...");
+
                 FileInput::Files(
                     glob::glob("**/*.toml")
                         .unwrap() // No Probrem. grob pattern is const.
