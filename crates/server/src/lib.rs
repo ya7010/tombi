@@ -1,11 +1,11 @@
-use config::TomlVersion;
-
 mod backend;
 mod document;
 mod handler;
 mod hover;
 mod semantic_tokens;
 mod toml;
+
+use config::TomlVersion;
 
 /// Run TOML Language Server
 #[derive(Debug)]

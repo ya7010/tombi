@@ -10,7 +10,7 @@ use crate::{
 pub struct SchemaStore {
     http_client: reqwest::Client,
     schemas: DashMap<Url, DocumentSchema>,
-    catalogs: Vec<CatalogSchema>,
+    catalogs: DashMap<Url, CatalogSchema>,
 }
 
 impl SchemaStore {
@@ -21,8 +21,9 @@ impl SchemaStore {
         }
     }
 
-    pub async fn load_catalog(&mut self, catalog_url: &url::Url) {
+    pub async fn load_catalog(&self, catalog_url: &url::Url) {
         tracing::debug!("loading schema catalog: {}", catalog_url);
+
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
             if let Ok(catalog) = response.json::<Catalog>().await {
                 for schema in catalog.schemas {
@@ -31,7 +32,7 @@ impl SchemaStore {
                         .iter()
                         .any(|pattern| pattern.ends_with(".toml"))
                     {
-                        self.catalogs.push(schema);
+                        self.catalogs.insert(schema.url.clone(), schema);
                     }
                 }
             }

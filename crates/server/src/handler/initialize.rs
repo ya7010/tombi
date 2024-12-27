@@ -9,7 +9,7 @@ use tower_lsp::lsp_types::{
 use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
 
 #[tracing::instrument(level = "debug", skip_all)]
-pub fn handle_initialize(
+pub async fn handle_initialize(
     InitializeParams {
         capabilities: client_capabilities,
         client_info,

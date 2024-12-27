@@ -48,7 +48,7 @@ where
         .toml_version
         .unwrap_or(config.toml_version.unwrap_or_default());
     let options = config.lint.unwrap_or_default();
-    let mut schema_store = schema_store::SchemaStore::default();
+    let schema_store = schema_store::SchemaStore::default();
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()

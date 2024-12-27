@@ -7,6 +7,7 @@ use crate::{document::DocumentSource, handler::handle_folding_range};
 use ast::AstNode;
 use config::{Config, TomlVersion};
 use dashmap::DashMap;
+use schema_store::DEFAULT_CATALOG_URL;
 use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
@@ -62,7 +63,11 @@ impl LanguageServer for Backend {
         &self,
         params: InitializeParams,
     ) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
-        handle_initialize(params)
+        self.schema_store
+            .load_catalog(&DEFAULT_CATALOG_URL.parse().unwrap())
+            .await;
+
+        handle_initialize(params).await
     }
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {
