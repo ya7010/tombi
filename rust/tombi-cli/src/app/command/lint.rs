@@ -15,7 +15,7 @@ pub struct Args {
     #[arg(long, value_enum, default_value = None)]
     toml_version: Option<TomlVersion>,
 
-    /// Do not use the schema store's JSON file catalog.
+    /// Use schema catalog.
     #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
     use_schema_catalog: Option<bool>,
 }
