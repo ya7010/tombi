@@ -5,7 +5,7 @@ mod value_type;
 
 pub use accessor::{Accessor, Accessors};
 use json_schema::SchemaComposition;
-pub use json_schema::{DocumentSchema, ObjectSchema, SchemaType, Value};
+pub use json_schema::{DocumentSchema, ObjectSchema, SchemaType, Value, DEFAULT_CATALOG_URL};
 pub use store::SchemaStore;
 pub use value_type::ValueType;
 

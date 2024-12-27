@@ -1,13 +1,16 @@
 use dashmap::DashMap;
 use url::Url;
 
-use crate::{json_schema::Catalog, DocumentSchema};
+use crate::{
+    json_schema::{Catalog, CatalogSchema},
+    DocumentSchema,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
     schemas: DashMap<Url, DocumentSchema>,
-    catalogs: Vec<Catalog>,
+    catalogs: Vec<CatalogSchema>,
 }
 
 impl SchemaStore {
@@ -18,18 +21,22 @@ impl SchemaStore {
         }
     }
 
-    pub async fn from_catalog_urls(catalog_urls: &[url::Url]) -> Self {
-        let mut store = Self::new();
-        for catalog_url in catalog_urls {
-            if let Ok(response) = store.http_client.get(catalog_url.as_str()).send().await {
-                if let Ok(catalog) = response.json::<Catalog>().await {
-                    store.catalogs.push(catalog);
+    pub async fn load_catalog(&mut self, catalog_url: &url::Url) {
+        if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
+            if let Ok(catalog) = response.json::<Catalog>().await {
+                for schema in catalog.schemas {
+                    if schema
+                        .file_match
+                        .iter()
+                        .any(|pattern| pattern.ends_with(".toml"))
+                    {
+                        self.catalogs.push(schema);
+                    }
                 }
-            } else {
-                tracing::warn!("Failed to fetch catalog: {}", catalog_url);
             }
+        } else {
+            tracing::warn!("failed to fetch catalog: {}", catalog_url);
         }
-        store
     }
 
     pub fn add_schema(&mut self, url: Url, schema: DocumentSchema) {

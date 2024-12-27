@@ -5,7 +5,7 @@ mod reference;
 mod schema_type;
 mod value;
 
-pub use catalog::Catalog;
+pub use catalog::{Catalog, CatalogSchema, DEFAULT_CATALOG_URL};
 pub use document_schema::DocumentSchema;
 pub use object_schema::ObjectSchema;
 pub use reference::Referable;
