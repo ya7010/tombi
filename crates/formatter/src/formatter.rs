@@ -26,7 +26,7 @@ impl<'a> Formatter<'a> {
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
-            options: options,
+            options,
             buf: String::new(),
         }
     }
@@ -61,7 +61,7 @@ impl<'a> Formatter<'a> {
 
     #[inline]
     pub(crate) fn options(&self) -> &crate::FormatOptions {
-        &self.options
+        self.options
     }
 
     #[inline]

@@ -71,7 +71,7 @@ macro_rules! test_serialize {
         fn $name() {
             use ast::AstNode;
             use document_tree::TryIntoDocumentTree;
-            use crate::IntoDocument;
+            use $crate::IntoDocument;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());

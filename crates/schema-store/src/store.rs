@@ -44,9 +44,6 @@ impl SchemaStore {
     }
 
     pub fn get_schema(&self, url: &Url) -> Option<DocumentSchema> {
-        match self.schemas.get(url) {
-            Some(schema) => Some(schema.clone()),
-            None => None,
-        }
+        self.schemas.get(url).map(|schema| schema.clone())
     }
 }

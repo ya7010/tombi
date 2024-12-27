@@ -4,7 +4,7 @@ use std::{borrow::Cow, fmt, marker::PhantomData, ops::Range};
 use crate::{
     cursor,
     green::{GreenNode, GreenNodeData},
-    red::{Preorder, RedPreorderWithTokens, RedElementChildren, RedNodeChildren},
+    red::{Preorder, RedElementChildren, RedNodeChildren, RedPreorderWithTokens},
     Direction, Language, NodeOrToken, SyntaxText, TokenAtOffset, WalkEvent,
 };
 

@@ -4,7 +4,7 @@ mod lexed;
 mod token;
 
 use cursor::Cursor;
-pub(self) use error::ErrorKind::*;
+use error::ErrorKind::*;
 pub use error::{Error, ErrorKind};
 pub use lexed::Lexed;
 use syntax::{SyntaxKind, T};
@@ -159,7 +159,7 @@ impl Cursor<'_> {
     }
 
     fn whitespace(&mut self) -> Result<Token, crate::Error> {
-        self.eat_while(|c| is_whitespace(c));
+        self.eat_while(is_whitespace);
         Ok(Token::new(SyntaxKind::WHITESPACE, self.pop_span_range()))
     }
 

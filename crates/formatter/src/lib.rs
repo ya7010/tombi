@@ -22,7 +22,7 @@ pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
 #[macro_export]
 macro_rules! test_format {
     (#[test] fn $name:ident($source:expr) -> Ok(source);) => {
-        crate::test_format!(#[test] fn $name($source) -> Ok($source););
+        $crate::test_format!(#[test] fn $name($source) -> Ok($source););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(source);) => {

@@ -21,7 +21,7 @@ impl crate::Table {
     /// [[foo.bar.baz]]  # <- This is also a subtable
     /// key = true
     /// ```
-    pub fn subtables<'a>(&'a self) -> impl Iterator<Item = TableOrArrayOfTable> + 'a {
+    pub fn subtables(&self) -> impl Iterator<Item = TableOrArrayOfTable> + '_ {
         support::node::next_siblings_nodes(self).take_while(|t: &TableOrArrayOfTable| {
             t.header()
                 .unwrap()
@@ -30,9 +30,7 @@ impl crate::Table {
         })
     }
 
-    pub fn array_of_tables_keys<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = AstChildren<crate::Key>> + 'a {
+    pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {
         support::node::prev_siblings_nodes(self)
             .map(|node: ArrayOfTables| node.header().unwrap().keys())
             .take_while(
@@ -47,6 +45,6 @@ impl crate::Table {
                     _ => false,
                 },
             )
-            .filter(|keys| self.header().unwrap().keys().starts_with(&keys))
+            .filter(|keys| self.header().unwrap().keys().starts_with(keys))
     }
 }

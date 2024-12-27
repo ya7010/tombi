@@ -52,7 +52,7 @@ impl TryFrom<ast::IntegerBin> for Integer {
         let token = node.token().unwrap();
         let range: text::Range = token.range();
 
-        match try_from_binary(&token.text()) {
+        match try_from_binary(token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Binary(node),
                 value,
@@ -69,7 +69,7 @@ impl TryFrom<ast::IntegerOct> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match try_from_octal(&token.text()) {
+        match try_from_octal(token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Octal(node),
                 value,
@@ -86,7 +86,7 @@ impl TryFrom<ast::IntegerDec> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match try_from_decimal(&token.text()) {
+        match try_from_decimal(token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Decimal(node),
                 value,
@@ -103,7 +103,7 @@ impl TryFrom<ast::IntegerHex> for Integer {
         let token = node.token().unwrap();
         let range = token.range();
 
-        match try_from_hexadecimal(&token.text()) {
+        match try_from_hexadecimal(token.text()) {
             Ok(value) => Ok(Self {
                 kind: IntegerKind::Hexadecimal(node),
                 value,

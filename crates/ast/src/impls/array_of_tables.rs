@@ -11,9 +11,7 @@ impl crate::ArrayOfTables {
         support::node::tailing_comment(self.syntax().children_with_tokens(), T!("]]"))
     }
 
-    pub fn array_of_tables_keys<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = AstChildren<crate::Key>> + 'a {
+    pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {
         support::node::prev_siblings_nodes(self)
             .map(|node: ArrayOfTables| node.header().unwrap().keys())
             .take_while(
@@ -28,6 +26,6 @@ impl crate::ArrayOfTables {
                     _ => false,
                 },
             )
-            .filter(|keys| self.header().unwrap().keys().starts_with(&keys))
+            .filter(|keys| self.header().unwrap().keys().starts_with(keys))
     }
 }

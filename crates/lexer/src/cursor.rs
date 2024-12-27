@@ -36,15 +36,14 @@ impl<'a> Cursor<'a> {
         // `.next()` optimizes better than `.nth(0)`
         self.chars
             .clone()
-            .skip(i.saturating_sub(1))
-            .next()
+            .nth(i.saturating_sub(1))
             .unwrap_or(EOF_CHAR)
     }
 
     pub fn peek_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
-        let mut iter = self.chars.clone();
+        let iter = self.chars.clone();
         let mut s = String::new();
-        while let Some(c) = iter.next() {
+        for c in iter {
             if predicate(c) {
                 s.push(c);
             } else {
@@ -84,10 +83,10 @@ impl<'a> Cursor<'a> {
     }
 
     pub fn peek_with_current_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
-        let mut iter = self.chars.clone();
+        let iter = self.chars.clone();
         let mut s = String::new();
         s.push(self.current_char);
-        while let Some(c) = iter.next() {
+        for c in iter {
             if predicate(c) {
                 s.push(c);
             } else {

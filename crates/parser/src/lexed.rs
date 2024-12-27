@@ -95,7 +95,7 @@ impl<'a> LexedStr<'a> {
                 if was_joint {
                     res.was_joint();
                 }
-                res.push(token.clone());
+                res.push(*token);
                 was_joint = true;
             }
         }

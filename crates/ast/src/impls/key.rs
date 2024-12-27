@@ -29,18 +29,15 @@ impl crate::Key {
 
 impl AstChildren<crate::Key> {
     pub fn starts_with(&self, other: &AstChildren<crate::Key>) -> bool {
-        self.clone()
-            .into_iter()
-            .zip(other.clone().into_iter())
-            .all(|(a, b)| {
-                match (
-                    a.try_to_raw_text(TomlVersion::latest()),
-                    b.try_to_raw_text(TomlVersion::latest()),
-                ) {
-                    (Ok(a), Ok(b)) => a == b,
-                    _ => false,
-                }
-            })
+        self.clone().zip(other.clone()).all(|(a, b)| {
+            match (
+                a.try_to_raw_text(TomlVersion::latest()),
+                b.try_to_raw_text(TomlVersion::latest()),
+            ) {
+                (Ok(a), Ok(b)) => a == b,
+                _ => false,
+            }
+        })
     }
 
     pub fn same_as(&self, other: &AstChildren<crate::Key>) -> bool {

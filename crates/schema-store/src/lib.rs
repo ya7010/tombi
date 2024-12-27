@@ -44,14 +44,10 @@ pub fn get_keys_value_info(
         }
     }
 
-    if let Some(value_type) = value_type {
-        Some(KeysValueInfo {
-            accessors: Accessors::new(accessors),
-            value_type,
-        })
-    } else {
-        None
-    }
+    value_type.map(|value_type| KeysValueInfo {
+        accessors: Accessors::new(accessors),
+        value_type,
+    })
 }
 
 fn get_item_table<'a>(

@@ -399,7 +399,7 @@ impl<'a> Iterator for Children<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for Children<'a> {
+impl DoubleEndedIterator for Children<'_> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.raw.next_back().map(GreenChild::as_ref)

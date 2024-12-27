@@ -40,17 +40,14 @@ impl Backend {
     }
 
     pub fn get_ast(&self, uri: &Url) -> Option<ast::Root> {
-        self.document_sources
-            .get(uri)
-            .map(|document_info| {
-                let p = parser::parse(&document_info.source, self.toml_version());
-                if !p.errors().is_empty() {
-                    return None;
-                }
+        self.document_sources.get(uri).and_then(|document_info| {
+            let p = parser::parse(&document_info.source, self.toml_version());
+            if !p.errors().is_empty() {
+                return None;
+            }
 
-                ast::Root::cast(p.into_syntax_node())
-            })
-            .flatten()
+            ast::Root::cast(p.into_syntax_node())
+        })
     }
 
     pub fn toml_version(&self) -> TomlVersion {

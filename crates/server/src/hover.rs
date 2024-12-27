@@ -24,7 +24,7 @@ impl std::fmt::Display for HoverContent {
         }
 
         if let Some(keys_value_info) = &self.keys_value_info {
-            writeln!(f, "Keys: `{}`\n", keys_value_info.accessors().to_string())?;
+            writeln!(f, "Keys: `{}`\n", keys_value_info.accessors())?;
             writeln!(f, "Value: `{:?}`\n", keys_value_info.value_type())?;
         }
 
@@ -45,16 +45,16 @@ impl std::fmt::Display for HoverContent {
     }
 }
 
-impl Into<tower_lsp::lsp_types::Hover> for HoverContent {
-    fn into(self) -> tower_lsp::lsp_types::Hover {
+impl From<HoverContent> for tower_lsp::lsp_types::Hover {
+    fn from(val: HoverContent) -> Self {
         tower_lsp::lsp_types::Hover {
             contents: tower_lsp::lsp_types::HoverContents::Markup(
                 tower_lsp::lsp_types::MarkupContent {
                     kind: tower_lsp::lsp_types::MarkupKind::Markdown,
-                    value: self.to_string(),
+                    value: val.to_string(),
                 },
             ),
-            range: self.range.map(Into::into),
+            range: val.range.map(Into::into),
         }
     }
 }

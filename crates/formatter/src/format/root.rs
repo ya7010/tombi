@@ -23,7 +23,7 @@ impl Format for ast::Root {
                     |(mut header, mut acc), item| match &item {
                         ast::RootItem::Table(table) => {
                             let header_keys = table.header().unwrap().keys();
-                            let key_value_size = table.key_values().into_iter().count();
+                            let key_value_size = table.key_values().count();
 
                             match header {
                                 Header::Root { key_value_size } => {
@@ -58,7 +58,7 @@ impl Format for ast::Root {
                         }
                         ast::RootItem::ArrayOfTables(array_of_tables) => {
                             let header_keys = array_of_tables.header().unwrap().keys();
-                            let key_value_size = array_of_tables.key_values().into_iter().count();
+                            let key_value_size = array_of_tables.key_values().count();
 
                             match header {
                                 Header::Root { key_value_size } => {

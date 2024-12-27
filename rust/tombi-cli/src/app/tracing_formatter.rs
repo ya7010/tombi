@@ -22,7 +22,7 @@ impl TombiFormatter {
             }
             .bold()
         } else {
-            return Style::new();
+            Style::new()
         }
     }
 
@@ -95,7 +95,7 @@ where
                 let link = if let Some(line) = metadata.line() {
                     format!("{}:{}", file, line)
                 } else {
-                    format!("{}", file)
+                    file.to_string()
                 };
 
                 writeln!(

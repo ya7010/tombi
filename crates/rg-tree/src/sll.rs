@@ -21,7 +21,7 @@ pub(crate) enum AddToSllResult<'a, E: Elem> {
     AlreadyInSll(*const E),
 }
 
-impl<'a, E: Elem> AddToSllResult<'a, E> {
+impl<E: Elem> AddToSllResult<'_, E> {
     pub(crate) fn add_to_sll(&self, elem_ptr: *const E) {
         unsafe {
             (*elem_ptr).prev().set(elem_ptr);

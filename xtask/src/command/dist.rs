@@ -82,7 +82,7 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
         ));
     }
 
-    sh.copy_file(&target.server_path, &bundle_path.join("tombi"))?;
+    sh.copy_file(&target.server_path, bundle_path.join("tombi"))?;
     if let Some(symbols_path) = &target.symbols_path {
         sh.copy_file(symbols_path, &bundle_path)?;
     }

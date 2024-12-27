@@ -547,8 +547,8 @@ fn insert_table(
     new_table_fn: impl Fn(&Table) -> Table,
     errors: &mut Vec<crate::Error>,
 ) {
-    let new_table = new_table_fn(&table);
-    match new_table_fn(&table).insert(key, Value::Table(std::mem::replace(table, new_table))) {
+    let new_table = new_table_fn(table);
+    match new_table_fn(table).insert(key, Value::Table(std::mem::replace(table, new_table))) {
         Ok(t) => *table = t,
         Err(errs) => errors.extend(errs),
     };
@@ -560,7 +560,7 @@ fn insert_array_of_tables(
     new_array_of_tables_fn: impl Fn(&Table) -> Array,
     errors: &mut Vec<crate::Error>,
 ) {
-    let mut array = new_array_of_tables_fn(&table);
+    let mut array = new_array_of_tables_fn(table);
     let new_table = table.new_parent_table();
     array.push(Value::Table(std::mem::replace(table, new_table)));
     match table.new_parent_table().insert(key, Value::Array(array)) {

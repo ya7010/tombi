@@ -82,7 +82,7 @@ impl serde::Serialize for String {
                 support::string::try_from_multi_line_literal_string(&self.value)
             }
         }
-        .map_err(|err| serde::ser::Error::custom(err))?
+        .map_err(serde::ser::Error::custom)?
         .serialize(serializer)
     }
 }

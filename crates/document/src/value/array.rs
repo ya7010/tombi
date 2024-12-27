@@ -59,9 +59,9 @@ impl Array {
     }
 }
 
-impl Into<Vec<Value>> for Array {
-    fn into(self) -> Vec<Value> {
-        self.values
+impl From<Array> for Vec<Value> {
+    fn from(val: Array) -> Self {
+        val.values
     }
 }
 

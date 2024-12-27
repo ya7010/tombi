@@ -26,7 +26,7 @@ pub async fn handle_formatting(
 
     match formatter::Formatter::new(
         backend.toml_version(),
-        &backend
+        backend
             .config
             .format
             .as_ref()

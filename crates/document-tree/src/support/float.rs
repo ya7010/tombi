@@ -12,7 +12,9 @@ pub fn try_from_float(value: &str) -> Result<f64, self::ParseError> {
     if value.chars().enumerate().any(|(i, c)| {
         if c == '_' {
             match (value.chars().nth(i - 1), value.chars().nth(i + 1)) {
-                (Some(digit1), Some(digit2)) => !digit1.is_digit(10) || !digit2.is_digit(10),
+                (Some(digit1), Some(digit2)) => {
+                    !digit1.is_ascii_digit() || !digit2.is_ascii_digit()
+                }
                 (None, _) | (_, None) => true,
             }
         } else {
