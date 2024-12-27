@@ -11,7 +11,6 @@ use tracing_formatter::TombiFormatter;
 use tracing_subscriber::prelude::*;
 
 #[derive(clap::Parser)]
-#[command()]
 #[command(
     name="tombi",
     about = app_about(),
