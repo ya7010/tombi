@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Tombi",
   "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.\n See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.",
   "type": "object",
@@ -8,7 +8,7 @@
       "title": "Formatter options.",
       "anyOf": [
         {
-          "$ref": "#/definitions/FormatOptions"
+          "$ref": "#/$defs/FormatOptions"
         },
         {
           "type": "null"
@@ -19,7 +19,7 @@
       "title": "TOML version.",
       "anyOf": [
         {
-          "$ref": "#/definitions/TomlVersion"
+          "$ref": "#/$defs/TomlVersion"
         },
         {
           "type": "null"
@@ -31,7 +31,7 @@
       "title": "Linter options.",
       "anyOf": [
         {
-          "$ref": "#/definitions/LintOptions"
+          "$ref": "#/$defs/LintOptions"
         },
         {
           "type": "null"
@@ -45,13 +45,13 @@
         "null"
       ],
       "items": {
-        "$ref": "#/definitions/SchemaOptions"
+        "$ref": "#/$defs/SchemaOptions"
       }
     }
   },
   "additionalProperties": false,
   "x-tombi-toml-version": "v1.1.0-preview",
-  "definitions": {
+  "$defs": {
     "TomlVersion": {
       "title": "TOML version.",
       "type": "string",
@@ -68,7 +68,7 @@
           "description": "Whether to use spaces or tabs for indentation.",
           "anyOf": [
             {
-              "$ref": "#/definitions/IdentStyle"
+              "$ref": "#/$defs/IdentStyle"
             },
             {
               "type": "null"
@@ -80,7 +80,7 @@
           "title": "The number of spaces per indentation level.",
           "anyOf": [
             {
-              "$ref": "#/definitions/IdentWidth"
+              "$ref": "#/$defs/IdentWidth"
             },
             {
               "type": "null"
@@ -93,7 +93,7 @@
           "description": "In TOML, the line ending must be either `LF` or `CRLF`.\n\n - `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos.\n - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
           "anyOf": [
             {
-              "$ref": "#/definitions/LineEnding"
+              "$ref": "#/$defs/LineEnding"
             },
             {
               "type": "null"
@@ -106,7 +106,7 @@
           "description": "In accordance with [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339), you can use `T` or space character between date and time.\n\n - `T`: Example: `2001-01-01T00:00:00`\n - `space`: Example: `2001-01-01 00:00:00`\n - `preserve`: Preserve the original delimiter.",
           "anyOf": [
             {
-              "$ref": "#/definitions/DateTimeDelimiter"
+              "$ref": "#/$defs/DateTimeDelimiter"
             },
             {
               "type": "null"
@@ -163,7 +163,7 @@
           "title": "Use schema catalog.",
           "anyOf": [
             {
-              "$ref": "#/definitions/UseSchemaCatalog"
+              "$ref": "#/$defs/UseSchemaCatalog"
             },
             {
               "type": "null"
@@ -184,7 +184,7 @@
           "title": "The TOML version that the schema is available.",
           "anyOf": [
             {
-              "$ref": "#/definitions/TomlVersion"
+              "$ref": "#/$defs/TomlVersion"
             },
             {
               "type": "null"

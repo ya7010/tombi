@@ -3,7 +3,7 @@ use schemars::{generate::SchemaSettings, SchemaGenerator};
 use crate::utils::project_root;
 
 pub fn run() -> Result<(), anyhow::Error> {
-    let settings = SchemaSettings::draft07();
+    let settings = SchemaSettings::draft2020_12();
     let generator = SchemaGenerator::new(settings);
     let schema = generator.into_root_schema_for::<config::Config>();
 
