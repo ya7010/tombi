@@ -186,7 +186,7 @@ fn parse_value_schema(object: serde_json::Value) -> Option<ObjectSchema> {
                     "enum" => {
                         if let serde_json::Value::Array(array) = value {
                             for value in array {
-                                value_schema.enum_values.push(value.into());
+                                value_schema.enumerated_values.push(value.into());
                             }
                         }
                     }

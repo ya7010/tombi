@@ -3,7 +3,9 @@ use dashmap::DashMap;
 use std::sync::{Arc, RwLock};
 use url::Url;
 
-use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
+use crate::{
+    json_schema::JsonCatalog, schema::CatalogSchema, Accessor, DocumentSchema, ObjectSchema,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
@@ -144,6 +146,20 @@ impl SchemaStore {
                         .map(|obj| obj.as_str().map(|title| title.to_string()))
                         .flatten(),
                     schema_url: Some(url.to_owned()),
+                    properties: schema
+                        .get("properties")
+                        .map(|obj| obj.as_object())
+                        .flatten()
+                        .map(|obj| {
+                            obj.iter()
+                                .filter_map(|(key, value)| {
+                                    value.as_object().map(|_| {
+                                        (Accessor::Key(key.clone()), ObjectSchema::default())
+                                    })
+                                })
+                                .collect()
+                        })
+                        .unwrap_or_default(),
                     ..Default::default()
                 };
 
