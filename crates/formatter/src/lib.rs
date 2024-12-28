@@ -37,7 +37,7 @@ macro_rules! test_format {
         #[test]
         fn $name() {
 
-            match $crate::Formatter::new($toml_version, &crate::FormatOptions::default()).format($source) {
+            match $crate::Formatter::new($toml_version, &$crate::FormatOptions::default()).format($source) {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }

@@ -112,7 +112,7 @@ macro_rules! test_parser {
         fn $name() {
             let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
 
-            assert_eq!(p.errors(), vec![$(crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*])
+            assert_eq!(p.errors(), vec![$($crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*])
         }
     };
 }
