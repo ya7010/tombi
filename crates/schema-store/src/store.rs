@@ -1,5 +1,6 @@
 use config::SchemaOptions;
 use dashmap::DashMap;
+use std::sync::{Arc, RwLock};
 use url::Url;
 
 use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
@@ -8,14 +9,15 @@ use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
 pub struct SchemaStore {
     http_client: reqwest::Client,
     schemas: DashMap<Url, Result<DocumentSchema, crate::Error>>,
-    catalogs: DashMap<Url, CatalogSchema>,
+    catalogs: Arc<RwLock<Vec<CatalogSchema>>>,
 }
 
 impl SchemaStore {
     pub fn new() -> Self {
         Self {
             http_client: reqwest::Client::new(),
-            ..Default::default()
+            schemas: DashMap::new(),
+            catalogs: Arc::new(RwLock::new(Vec::new())),
         }
     }
 
@@ -35,19 +37,20 @@ impl SchemaStore {
         let Some(config_dir) = config_path.parent() else {
             return;
         };
-        for schema in schemas {
-            let Ok(url) = Url::parse(&format!(
-                "file://{}",
-                config_dir.join(schema.path).to_string_lossy()
-            )) else {
-                continue;
-            };
-            self.catalogs.insert(
-                url,
-                CatalogSchema {
+
+        if let Ok(mut catalogs) = self.catalogs.write() {
+            for schema in schemas {
+                let Ok(url) = Url::parse(&format!(
+                    "file://{}",
+                    config_dir.join(schema.path).to_string_lossy()
+                )) else {
+                    continue;
+                };
+                catalogs.push(CatalogSchema {
+                    url,
                     include: schema.include.unwrap_or_default(),
-                },
-            );
+                });
+            }
         }
     }
 
@@ -56,18 +59,18 @@ impl SchemaStore {
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
             if let Ok(catalog) = response.json::<JsonCatalog>().await {
-                for schema in catalog.schemas {
-                    if schema
-                        .file_match
-                        .iter()
-                        .any(|pattern| pattern.ends_with(".toml"))
-                    {
-                        self.catalogs.insert(
-                            schema.url,
-                            CatalogSchema {
+                if let Ok(mut catalogs) = self.catalogs.write() {
+                    for schema in catalog.schemas {
+                        if schema
+                            .file_match
+                            .iter()
+                            .any(|pattern| pattern.ends_with(".toml"))
+                        {
+                            catalogs.push(CatalogSchema {
+                                url: schema.url,
                                 include: schema.file_match,
-                            },
-                        );
+                            });
+                        }
                     }
                 }
                 Ok(())
@@ -156,22 +159,30 @@ impl SchemaStore {
         &self,
         source_path: &std::path::Path,
     ) -> Option<DocumentSchema> {
-        for catalog in &self.catalogs {
-            let catalog_url = catalog.key();
-            if catalog.include.iter().any(|pat| {
-                let pattern = if !pat.contains("*") {
-                    format!("**/{}", pat)
-                } else {
-                    pat.to_string()
-                };
-                glob::Pattern::new(&pattern)
-                    .ok()
-                    .map(|glob_pat| glob_pat.matches_path(source_path))
-                    .unwrap_or(false)
-            }) {
-                if let Ok(schema) = self.get_schema_from_url(catalog_url).await {
-                    return Some(schema);
-                }
+        let matching_urls: Vec<_> = {
+            let catalogs = self.catalogs.read().ok()?;
+            catalogs
+                .iter()
+                .filter(|catalog| {
+                    catalog.include.iter().any(|pat| {
+                        let pattern = if !pat.contains("*") {
+                            format!("**/{}", pat)
+                        } else {
+                            pat.to_string()
+                        };
+                        glob::Pattern::new(&pattern)
+                            .ok()
+                            .map(|glob_pat| glob_pat.matches_path(source_path))
+                            .unwrap_or(false)
+                    })
+                })
+                .map(|catalog| catalog.url.clone())
+                .collect()
+        };
+
+        for url in matching_urls {
+            if let Ok(schema) = self.get_schema_from_url(&url).await {
+                return Some(schema);
             }
         }
         None
