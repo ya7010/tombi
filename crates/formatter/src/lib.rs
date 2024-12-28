@@ -26,7 +26,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(source);) => {
-        crate::test_format!(#[test] fn $name($source, $toml_version) -> Ok($source););
+        $crate::test_format!(#[test] fn $name($source, $toml_version) -> Ok($source););
     };
 
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {

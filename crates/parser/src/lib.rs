@@ -79,7 +79,7 @@ macro_rules! test_parser {
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(_)} => {
         #[test]
         fn $name() {
-            let p = crate::parse(textwrap::dedent($source).trim(), $toml_version);
+            let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
 
             assert_eq!(p.errors(), vec![])
         }

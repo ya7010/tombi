@@ -79,7 +79,7 @@ macro_rules! test_serialize {
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
             match root.try_into_document_tree($toml_version) {
                 Ok(document_tree) => {
-                    let document: crate::Document = document_tree.into_document($toml_version);
+                    let document: $crate::Document = document_tree.into_document($toml_version);
                     let serialized = serde_json::to_string(&document).unwrap();
                     pretty_assertions::assert_eq!(serialized, $json.to_string());
                 }
