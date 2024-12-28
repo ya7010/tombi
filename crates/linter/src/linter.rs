@@ -6,11 +6,13 @@ use config::TomlVersion;
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use document_tree::TryIntoDocumentTree;
+use url::Url;
 
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
-    #[allow(dead_code)]
+    source_path: Option<&'a std::path::Path>,
+    schema_url: Option<&'a Url>,
     schema_store: &'a schema_store::SchemaStore,
     diagnostics: Vec<crate::Diagnostic>,
 }
@@ -20,11 +22,15 @@ impl<'a> Linter<'a> {
     pub fn new(
         toml_version: TomlVersion,
         options: &'a crate::LintOptions,
+        source_path: Option<&'a std::path::Path>,
+        schema_url: Option<&'a Url>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Self {
         Self {
             toml_version,
             options: Cow::Borrowed(options),
+            source_path,
+            schema_url,
             schema_store,
             diagnostics: Vec::new(),
         }
@@ -45,13 +51,32 @@ impl<'a> Linter<'a> {
             };
 
             root.lint(&mut self);
-            errors.extend(self.into_diagnostics());
 
             if let Err(errs) = root.try_into_document_tree(toml_version) {
                 for err in errs {
                     err.set_diagnostic(&mut errors);
                 }
             }
+
+            let _schema = if let Some(schema_url) = self.schema_url {
+                if let Some(schema) = self.schema_store.get_schema_from_url(schema_url) {
+                    tracing::debug!("find schema from url: {}", schema_url);
+                    Some(schema.value().clone())
+                } else {
+                    None
+                }
+            } else if let Some(source_path) = self.source_path {
+                if let Some(schema) = self.schema_store.get_schema_from_source(source_path) {
+                    tracing::debug!("find schema from source: {}", source_path.display());
+                    Some(schema.value().clone())
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
+            errors.extend(self.into_diagnostics());
         }
 
         if errors.is_empty() {

@@ -35,6 +35,8 @@ impl SchemaStore {
                         self.catalogs.insert(schema.url.clone(), schema);
                     }
                 }
+            } else {
+                tracing::warn!("failed to parse catalog: {}", catalog_url);
             }
         } else {
             tracing::warn!("failed to fetch catalog: {}", catalog_url);
@@ -45,7 +47,8 @@ impl SchemaStore {
         self.schemas.insert(url, schema);
     }
 
-    pub fn get_schema_from_url(&self, url: &Url) -> Option<Ref<'_, Url, DocumentSchema>> {
+    pub fn get_schema_from_url<'a>(&'a self, url: &Url) -> Option<Ref<'a, Url, DocumentSchema>> {
+        tracing::debug!("get schema from url: {}", url);
         self.schemas.get(url)
     }
 
@@ -55,7 +58,12 @@ impl SchemaStore {
     ) -> Option<Ref<'_, Url, DocumentSchema>> {
         for catalog in &self.catalogs {
             if catalog.file_match.iter().any(|pat| {
-                glob::Pattern::new(pat)
+                let pattern = if !pat.contains("*") {
+                    format!("**/{}", pat)
+                } else {
+                    pat.to_string()
+                };
+                glob::Pattern::new(&pattern)
                     .ok()
                     .map(|glob_pat| glob_pat.matches_path(source_path))
                     .unwrap_or(false)

@@ -17,6 +17,8 @@ serde = { workspace = true }
 syntax = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros"] }

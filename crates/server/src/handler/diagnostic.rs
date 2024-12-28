@@ -21,6 +21,8 @@ pub async fn handle_diagnostic(
                 .lint
                 .as_ref()
                 .unwrap_or(&LintOptions::default()),
+            None,
+            None,
             &backend.schema_store,
         )
         .lint(&document.source)

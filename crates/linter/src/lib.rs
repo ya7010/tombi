@@ -17,6 +17,8 @@ pub async fn lint(source: &str) -> Result<(), Vec<Diagnostic>> {
     Linter::new(
         config.toml_version.unwrap_or_default(),
         &config.lint.unwrap_or_default(),
+        None,
+        None,
         &schema_store::SchemaStore::default(),
     )
     .lint(source)

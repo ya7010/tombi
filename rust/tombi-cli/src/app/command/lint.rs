@@ -171,7 +171,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).await.is_ok() {
-        match linter::Linter::new(toml_version, options, schema_store)
+        match linter::Linter::new(toml_version, options, source_path, None, schema_store)
             .lint(&source)
             .await
         {

@@ -8,9 +8,11 @@ pub struct Catalog {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CatalogSchema {
     pub name: String,
     pub description: String,
+    #[serde(default)]
     pub file_match: Vec<String>,
     pub url: Url,
 }
