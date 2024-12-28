@@ -22,7 +22,13 @@ pub struct Args {
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn run(args: Args) -> Result<(), crate::Error> {
-    let (success_num, error_num) = inner_run(args, Pretty);
+    let (success_num, error_num) = match inner_run(args, Pretty) {
+        Ok((success_num, error_num)) => (success_num, error_num),
+        Err(error) => {
+            tracing::error!("{}", error);
+            std::process::exit(1);
+        }
+    };
 
     match success_num {
         0 => eprintln!("No files linted"),
@@ -37,7 +43,7 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     Ok(())
 }
 
-fn inner_run<P>(args: Args, printer: P) -> (usize, usize)
+fn inner_run<P>(args: Args, printer: P) -> Result<(usize, usize), schema_store::Error>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -67,7 +73,7 @@ where
             .unwrap_or_else(|| options.use_schema_catalog.unwrap_or_default().value())
         {
             let catalog_url = schema_store::DEFAULT_CATALOG_URL.parse().unwrap();
-            schema_store.load_catalog(&catalog_url).await;
+            schema_store.load_catalog(&catalog_url).await?
         }
 
         let input = arg::FileInput::from(args.files.as_ref());
@@ -154,7 +160,7 @@ where
 
         assert_eq!(success_num + error_num, total_num);
 
-        (success_num, error_num)
+        Ok((success_num, error_num))
     })
 }
 

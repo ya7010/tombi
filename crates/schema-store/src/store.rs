@@ -51,7 +51,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn load_catalog(&self, catalog_url: &url::Url) {
+    pub async fn load_catalog(&self, catalog_url: &url::Url) -> Result<(), crate::Error> {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
@@ -70,11 +70,16 @@ impl SchemaStore {
                         );
                     }
                 }
+                Ok(())
             } else {
-                tracing::warn!("failed to parse catalog: {}", catalog_url);
+                Err(crate::Error::CatalogParseFailed {
+                    catalog_url: catalog_url.clone(),
+                })
             }
         } else {
-            tracing::warn!("failed to fetch catalog: {}", catalog_url);
+            Err(crate::Error::CatalogFetchFailed {
+                catalog_url: catalog_url.clone(),
+            })
         }
     }
 

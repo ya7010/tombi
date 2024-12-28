@@ -71,9 +71,13 @@ impl LanguageServer for Backend {
             .unwrap_or_default()
             .value()
         {
-            self.schema_store
+            if let Err(err) = self
+                .schema_store
                 .load_catalog(&DEFAULT_CATALOG_URL.parse().unwrap())
-                .await;
+                .await
+            {
+                tracing::warn!("{}", err)
+            }
         }
 
         handle_initialize(params).await
