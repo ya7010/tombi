@@ -1,6 +1,7 @@
 use document_tree::support;
 use toml_version::TomlVersion;
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
     BasicString,
