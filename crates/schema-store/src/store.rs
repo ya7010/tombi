@@ -1,5 +1,5 @@
 use config::SchemaOptions;
-use dashmap::{mapref::one::Ref, DashMap};
+use dashmap::DashMap;
 use url::Url;
 
 use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
@@ -7,7 +7,7 @@ use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    schemas: DashMap<Url, DocumentSchema>,
+    schemas: DashMap<Url, Result<DocumentSchema, ()>>,
     catalogs: DashMap<Url, CatalogSchema>,
 }
 
@@ -78,18 +78,25 @@ impl SchemaStore {
         }
     }
 
-    pub fn add_schema(&mut self, url: Url, schema: DocumentSchema) {
-        self.schemas.insert(url, schema);
+    pub fn get_schema_from_url<'a>(&'a self, url: &Url) -> Option<DocumentSchema> {
+        match self.schemas.get(url) {
+            Some(schema) => match schema.value() {
+                Ok(schema) => Some(schema.clone()),
+                Err(_) => None,
+            },
+            None => {
+                let document_schema = DocumentSchema {
+                    ..Default::default()
+                };
+                self.schemas
+                    .insert(url.to_owned(), Ok(document_schema.clone()));
+
+                Some(document_schema)
+            }
+        }
     }
 
-    pub fn get_schema_from_url<'a>(&'a self, url: &Url) -> Option<Ref<'a, Url, DocumentSchema>> {
-        self.schemas.get(url)
-    }
-
-    pub fn get_schema_from_source(
-        &self,
-        source_path: &std::path::Path,
-    ) -> Option<Ref<'_, Url, DocumentSchema>> {
+    pub fn get_schema_from_source(&self, source_path: &std::path::Path) -> Option<DocumentSchema> {
         for catalog in &self.catalogs {
             let catalog_url = catalog.key();
             if catalog.include.iter().any(|pat| {
