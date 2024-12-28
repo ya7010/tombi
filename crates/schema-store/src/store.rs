@@ -113,6 +113,7 @@ impl SchemaStore {
                                 .get("description")
                                 .map(|obj| obj.as_str().map(|title| title.to_string()))
                                 .flatten(),
+                            schema_url: Some(url.to_owned()),
                             ..Default::default()
                         }
                     }
