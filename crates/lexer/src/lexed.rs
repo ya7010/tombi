@@ -45,20 +45,13 @@ impl Lexed {
         let (idx, b_idx) = self.bit_index(n);
         self.joints[idx] & (1 << b_idx) != 0
     }
-
-    pub fn iter(&self) -> impl Iterator<Item = &Result<crate::Token, crate::Error>> {
-        self.token_results.iter()
-    }
-
-    pub fn into_iter(self) -> impl Iterator<Item = Result<crate::Token, crate::Error>> {
-        self.token_results.into_iter()
-    }
 }
 
-impl Iterator for Lexed {
+impl IntoIterator for Lexed {
     type Item = Result<crate::Token, crate::Error>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.token_results.pop()
+    fn into_iter(self) -> Self::IntoIter {
+        self.token_results.into_iter()
     }
 }
