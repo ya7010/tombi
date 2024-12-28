@@ -91,12 +91,12 @@ impl SchemaStore {
         url: &Url,
     ) -> Result<DocumentSchema, crate::Error> {
         match self.schemas.get(url) {
-            Some(schema) => match schema.value() {
-                Ok(schema) => Ok(schema.clone()),
+            Some(document_schema) => match document_schema.value() {
+                Ok(document_schema) => Ok(document_schema.clone()),
                 Err(err) => Err(err.clone()),
             },
             None => {
-                let data: serde_json::Value = match url.scheme() {
+                let schema: schemars::Schema = match url.scheme() {
                     "file" => {
                         let file = std::fs::File::open(url.path()).map_err(|_| {
                             crate::Error::SchemaFileReadFailed {
@@ -135,11 +135,11 @@ impl SchemaStore {
                 })?;
 
                 let document_schema = DocumentSchema {
-                    title: data
+                    title: schema
                         .get("title")
                         .map(|obj| obj.as_str().map(|title| title.to_string()))
                         .flatten(),
-                    description: data
+                    description: schema
                         .get("description")
                         .map(|obj| obj.as_str().map(|title| title.to_string()))
                         .flatten(),

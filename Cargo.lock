@@ -1855,6 +1855,7 @@ dependencies = [
  "indexmap",
  "pretty_assertions",
  "reqwest",
+ "schemars",
  "serde",
  "serde_json",
  "text",
