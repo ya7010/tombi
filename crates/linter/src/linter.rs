@@ -38,6 +38,26 @@ impl<'a> Linter<'a> {
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
         let toml_version = self.toml_version;
+        let _schema = if let Some(schema_url) = self.schema_url {
+            if let Ok(schema) = self.schema_store.get_schema_from_url(schema_url).await {
+                tracing::debug!("find schema from url: {}", schema_url);
+                tracing::debug!("{:?}", &schema);
+                Some(schema)
+            } else {
+                None
+            }
+        } else if let Some(source_path) = self.source_path {
+            if let Some(schema) = self.schema_store.get_schema_from_source(source_path).await {
+                tracing::debug!("find schema from source: {}", source_path.display());
+                tracing::debug!("{:?}", &schema);
+                Some(schema)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
         let p = parser::parse(source, toml_version);
         let mut errors = vec![];
 
@@ -57,26 +77,6 @@ impl<'a> Linter<'a> {
                     err.set_diagnostic(&mut errors);
                 }
             }
-
-            let _schema = if let Some(schema_url) = self.schema_url {
-                if let Ok(schema) = self.schema_store.get_schema_from_url(schema_url) {
-                    tracing::debug!("find schema from url: {}", schema_url);
-                    tracing::debug!("{:?}", &schema);
-                    Some(schema)
-                } else {
-                    None
-                }
-            } else if let Some(source_path) = self.source_path {
-                if let Some(schema) = self.schema_store.get_schema_from_source(source_path) {
-                    tracing::debug!("find schema from source: {}", source_path.display());
-                    tracing::debug!("{:?}", &schema);
-                    Some(schema)
-                } else {
-                    None
-                }
-            } else {
-                None
-            };
 
             errors.extend(self.into_diagnostics());
         }

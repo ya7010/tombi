@@ -83,14 +83,17 @@ impl SchemaStore {
         }
     }
 
-    pub fn get_schema_from_url<'a>(&'a self, url: &Url) -> Result<DocumentSchema, crate::Error> {
+    pub async fn get_schema_from_url<'a>(
+        &'a self,
+        url: &Url,
+    ) -> Result<DocumentSchema, crate::Error> {
         match self.schemas.get(url) {
             Some(schema) => match schema.value() {
                 Ok(schema) => Ok(schema.clone()),
                 Err(err) => Err(err.clone()),
             },
             None => {
-                let document_schema = match url.scheme() {
+                let data: serde_json::Value = match url.scheme() {
                     "file" => {
                         let file = std::fs::File::open(url.path()).map_err(|_| {
                             crate::Error::SchemaFileReadFailed {
@@ -98,30 +101,47 @@ impl SchemaStore {
                             }
                         })?;
 
-                        let data: serde_json::Value =
-                            serde_json::from_reader(file).map_err(|_| {
-                                crate::Error::SchemaFileParseFailed {
-                                    schema_path: url.path().to_string(),
-                                }
-                            })?;
-                        DocumentSchema {
-                            title: data
-                                .get("title")
-                                .map(|obj| obj.as_str().map(|title| title.to_string()))
-                                .flatten(),
-                            description: data
-                                .get("description")
-                                .map(|obj| obj.as_str().map(|title| title.to_string()))
-                                .flatten(),
-                            schema_url: Some(url.to_owned()),
-                            ..Default::default()
-                        }
+                        serde_json::from_reader(file)
+                    }
+                    "http" | "https" => {
+                        let response =
+                            self.http_client
+                                .get(url.as_str())
+                                .send()
+                                .await
+                                .map_err(|_| crate::Error::SchemaFetchFailed {
+                                    schema_url: url.to_string(),
+                                })?;
+
+                        let bytes = response.bytes().await.map_err(|_| {
+                            crate::Error::SchemaFetchFailed {
+                                schema_url: url.to_string(),
+                            }
+                        })?;
+
+                        serde_json::from_reader(std::io::Cursor::new(bytes))
                     }
                     _ => {
                         return Err(crate::Error::UnsupportedUrlSchema {
                             url_schema: url.scheme().to_string(),
                         })
                     }
+                }
+                .map_err(|_| crate::Error::SchemaFileParseFailed {
+                    schema_path: url.path().to_string(),
+                })?;
+
+                let document_schema = DocumentSchema {
+                    title: data
+                        .get("title")
+                        .map(|obj| obj.as_str().map(|title| title.to_string()))
+                        .flatten(),
+                    description: data
+                        .get("description")
+                        .map(|obj| obj.as_str().map(|title| title.to_string()))
+                        .flatten(),
+                    schema_url: Some(url.to_owned()),
+                    ..Default::default()
                 };
 
                 self.schemas
@@ -132,7 +152,10 @@ impl SchemaStore {
         }
     }
 
-    pub fn get_schema_from_source(&self, source_path: &std::path::Path) -> Option<DocumentSchema> {
+    pub async fn get_schema_from_source(
+        &self,
+        source_path: &std::path::Path,
+    ) -> Option<DocumentSchema> {
         for catalog in &self.catalogs {
             let catalog_url = catalog.key();
             if catalog.include.iter().any(|pat| {
@@ -146,7 +169,7 @@ impl SchemaStore {
                     .map(|glob_pat| glob_pat.matches_path(source_path))
                     .unwrap_or(false)
             }) {
-                if let Ok(schema) = self.get_schema_from_url(catalog_url) {
+                if let Ok(schema) = self.get_schema_from_url(catalog_url).await {
                     return Some(schema);
                 }
             }

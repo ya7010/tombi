@@ -11,9 +11,12 @@ pub enum Error {
     #[error("unsupported url schema: {url_schema}")]
     UnsupportedUrlSchema { url_schema: String },
 
-    #[error("failed to read schema \"{schema_path}\"")]
+    #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: String },
 
-    #[error("failed to parse schema \"{schema_path}\"")]
+    #[error("failed to parse schema: \"{schema_path}\"")]
     SchemaFileParseFailed { schema_path: String },
+
+    #[error("failed to fetch schema: {schema_url}")]
+    SchemaFetchFailed { schema_url: String },
 }
