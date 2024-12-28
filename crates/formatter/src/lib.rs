@@ -49,7 +49,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr) -> Err(_);) => {
-        crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Err(_););
+        $crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Err(_););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
