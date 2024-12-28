@@ -31,9 +31,19 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     };
 
     match success_num {
-        0 => eprintln!("No files linted"),
+        0 => {
+            if error_num == 0 {
+                eprintln!("No files linted")
+            }
+        }
         1 => eprintln!("1 file linted"),
         _ => eprintln!("{} files linted", success_num),
+    }
+
+    match error_num {
+        0 => {}
+        1 => eprintln!("1 file failed to be linted"),
+        _ => eprintln!("{error_num} files failed to be linted"),
     }
 
     if error_num > 0 {
