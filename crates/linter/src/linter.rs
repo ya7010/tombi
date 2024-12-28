@@ -59,8 +59,9 @@ impl<'a> Linter<'a> {
             }
 
             let _schema = if let Some(schema_url) = self.schema_url {
-                if let Some(schema) = self.schema_store.get_schema_from_url(schema_url) {
+                if let Ok(schema) = self.schema_store.get_schema_from_url(schema_url) {
                     tracing::debug!("find schema from url: {}", schema_url);
+                    tracing::debug!("{:?}", &schema);
                     Some(schema)
                 } else {
                     None
@@ -68,6 +69,7 @@ impl<'a> Linter<'a> {
             } else if let Some(source_path) = self.source_path {
                 if let Some(schema) = self.schema_store.get_schema_from_source(source_path) {
                     tracing::debug!("find schema from source: {}", source_path.display());
+                    tracing::debug!("{:?}", &schema);
                     Some(schema)
                 } else {
                     None

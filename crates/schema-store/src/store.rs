@@ -7,7 +7,7 @@ use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    schemas: DashMap<Url, Result<DocumentSchema, ()>>,
+    schemas: DashMap<Url, Result<DocumentSchema, crate::Error>>,
     catalogs: DashMap<Url, CatalogSchema>,
 }
 
@@ -83,20 +83,50 @@ impl SchemaStore {
         }
     }
 
-    pub fn get_schema_from_url<'a>(&'a self, url: &Url) -> Option<DocumentSchema> {
+    pub fn get_schema_from_url<'a>(&'a self, url: &Url) -> Result<DocumentSchema, crate::Error> {
         match self.schemas.get(url) {
             Some(schema) => match schema.value() {
-                Ok(schema) => Some(schema.clone()),
-                Err(_) => None,
+                Ok(schema) => Ok(schema.clone()),
+                Err(err) => Err(err.clone()),
             },
             None => {
-                let document_schema = DocumentSchema {
-                    ..Default::default()
+                let document_schema = match url.scheme() {
+                    "file" => {
+                        let file = std::fs::File::open(url.path()).map_err(|_| {
+                            crate::Error::SchemaFileReadFailed {
+                                schema_path: url.path().to_string(),
+                            }
+                        })?;
+
+                        let data: serde_json::Value =
+                            serde_json::from_reader(file).map_err(|_| {
+                                crate::Error::SchemaFileParseFailed {
+                                    schema_path: url.path().to_string(),
+                                }
+                            })?;
+                        DocumentSchema {
+                            title: data
+                                .get("title")
+                                .map(|obj| obj.as_str().map(|title| title.to_string()))
+                                .flatten(),
+                            description: data
+                                .get("description")
+                                .map(|obj| obj.as_str().map(|title| title.to_string()))
+                                .flatten(),
+                            ..Default::default()
+                        }
+                    }
+                    _ => {
+                        return Err(crate::Error::UnsupportedUrlSchema {
+                            url_schema: url.scheme().to_string(),
+                        })
+                    }
                 };
+
                 self.schemas
                     .insert(url.to_owned(), Ok(document_schema.clone()));
 
-                Some(document_schema)
+                Ok(document_schema)
             }
         }
     }
@@ -115,7 +145,7 @@ impl SchemaStore {
                     .map(|glob_pat| glob_pat.matches_path(source_path))
                     .unwrap_or(false)
             }) {
-                if let Some(schema) = self.get_schema_from_url(catalog_url) {
+                if let Ok(schema) = self.get_schema_from_url(catalog_url) {
                     return Some(schema);
                 }
             }
