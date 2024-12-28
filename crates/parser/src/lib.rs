@@ -95,7 +95,7 @@ macro_rules! test_parser {
             ),*$(,)*
         ]
     )} => {
-        crate::test_parser! {#[test] fn $name($source, Default::default()) -> Err([$(SyntaxError($error_kind, $line1:$column1..$line2:$column2)),*])}
+        $crate::test_parser! {#[test] fn $name($source, Default::default()) -> Err([$(SyntaxError($error_kind, $line1:$column1..$line2:$column2)),*])}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(

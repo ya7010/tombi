@@ -30,7 +30,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
-        crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Ok($expected););
+        $crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Ok($expected););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($expected:expr);) => {
