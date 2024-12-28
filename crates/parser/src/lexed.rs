@@ -22,7 +22,7 @@ impl<'a> LexedStr<'a> {
         let mut last_position = text::Position::default();
         let mut errors = Vec::new();
 
-        for result_token in lexer::lex(source).into_iter() {
+        for result_token in lexer::lex(source) {
             let token = match result_token {
                 Ok(token) => token,
                 Err(error) => {
