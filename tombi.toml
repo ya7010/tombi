@@ -13,4 +13,8 @@ use-schema-catalog = false
 
 [[schemas]]
 path = "tombi.schema.json"
-include = ["**/tombi.toml"]
+include = ["tombi.toml"]
+
+[[schemas]]
+path = "schemas/cargo.schema.json"
+include = ["Cargo.toml"]
