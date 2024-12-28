@@ -12,12 +12,12 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yassun7010/tombi.git"
+    "url": "git+https://github.com/tombi-toml/tombi.git"
   },
   "bugs": {
-    "url": "https://github.com/yassun7010/tombi/issues"
+    "url": "https://github.com/tombi-toml/tombi/issues"
   },
-  "homepage": "https://github.com/yassun7010/tombi#readme",
+  "homepage": "https://github.com/tombi-toml/tombi#readme",
   "devDependencies": {
     "@types/node": "^22.10.1",
     "typescript": "^5.7.2"

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Tombi",
-  "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.\n See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.",
+  "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.\n See the [GitHub repository](https://github.com/tombi-toml/tombi) for more information.",
   "type": "object",
   "properties": {
     "format": {
@@ -40,10 +40,7 @@
     },
     "schemas": {
       "title": "Schema options array.",
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "$ref": "#/$defs/SchemaOptions"
       }
@@ -55,10 +52,7 @@
     "TomlVersion": {
       "title": "TOML version.",
       "type": "string",
-      "enum": [
-        "v1.0.0",
-        "v1.1.0-preview"
-      ]
+      "enum": ["v1.0.0", "v1.1.0-preview"]
     },
     "FormatOptions": {
       "type": "object",
@@ -119,10 +113,7 @@
     },
     "IdentStyle": {
       "type": "string",
-      "enum": [
-        "space",
-        "tab"
-      ]
+      "enum": ["space", "tab"]
     },
     "IdentWidth": {
       "type": "integer",
@@ -131,10 +122,7 @@
     },
     "LineEnding": {
       "type": "string",
-      "enum": [
-        "lf",
-        "crlf"
-      ]
+      "enum": ["lf", "crlf"]
     },
     "DateTimeDelimiter": {
       "description": "DateTime delimiter",
@@ -198,10 +186,7 @@
         "include": {
           "title": "The file match pattern of the schema.",
           "description": "Supports glob pattern.",
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": ["array", "null"],
           "items": {
             "type": "string"
           },
@@ -209,9 +194,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [
-        "path"
-      ]
+      "required": ["path"]
     }
   }
 }

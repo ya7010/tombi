@@ -13,7 +13,7 @@ pub use types::*;
 /// # Tombi
 ///
 /// **Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.
-/// See the [GitHub repository](https://github.com/yassun7010/tombi) for more information.
+/// See the [GitHub repository](https://github.com/tombi-toml/tombi) for more information.
 #[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]

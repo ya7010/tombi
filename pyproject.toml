@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.urls]
-GitHub = "https://github.com/yassun7010/tombi"
+GitHub = "https://github.com/tombi-toml/tombi"
 
 [build-system]
 requires = ["maturin>=1.5,<2.0"]

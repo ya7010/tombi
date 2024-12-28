@@ -8,7 +8,7 @@
     "name": "yassun7010",
     "email": "yassun7010@outlook.com"
   },
-  "repository": "https://github.com/yassun7010/tombi",
+  "repository": "https://github.com/tombi-toml/tombi",
   "license": "MIT",
   "keywords": ["toml", "formatter", "linter"],
   "categories": ["Programming Languages", "Formatters", "Linters"],
