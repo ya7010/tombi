@@ -55,7 +55,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
         #[test]
         fn $name() {
-            match crate::Formatter::new($toml_version, &crate::FormatOptions::default()).format($source) {
+            match $crate::Formatter::new($toml_version, &crate::FormatOptions::default()).format($source) {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {
                     pretty_assertions::assert_ne!(errors, vec![]);

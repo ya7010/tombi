@@ -15,6 +15,7 @@ macro_rules! token_types {
             $(pub(crate) const $custom: SemanticTokenType = SemanticTokenType::new($string);)*
         }
 
+        #[allow(clippy::upper_case_acronyms)]
         pub enum TokenType {
             $($standard,)*
             $($custom),*
