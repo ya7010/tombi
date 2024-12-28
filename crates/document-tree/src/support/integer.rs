@@ -9,7 +9,7 @@ pub fn try_from_octal(value: &str) -> Result<i64, ParseIntError> {
 }
 
 pub fn try_from_decimal(value: &str) -> Result<i64, ParseIntError> {
-    i64::from_str_radix(&value.replace('_', ""), 10)
+    value.replace('_', "").parse::<i64>()
 }
 
 pub fn try_from_hexadecimal(value: &str) -> Result<i64, ParseIntError> {
