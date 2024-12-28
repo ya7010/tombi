@@ -7,16 +7,16 @@ use toml_version::TomlVersion;
 #[derive(Debug, Clone)]
 pub struct SchemaOptions {
     /// # The TOML version that the schema is available.
-    toml_version: Option<TomlVersion>,
+    pub toml_version: Option<TomlVersion>,
 
     /// # The schema path.
-    path: String,
+    pub path: String,
 
     /// # The file match pattern of the schema.
     ///
     /// Supports glob pattern.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
-    include: Option<Vec<String>>,
+    pub include: Option<Vec<String>>,
     // /// # The schema options for specific keys.
     // #[cfg_attr(feature = "jsonschema", schemars(default))]
     // subschemas: Option<Vec<SubSchemaOptions>>,

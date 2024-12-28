@@ -1,13 +1,9 @@
 mod catalog;
-mod document_schema;
-mod object_schema;
 mod reference;
 mod schema_type;
 mod value;
 
-pub use catalog::{Catalog, CatalogSchema, DEFAULT_CATALOG_URL};
-pub use document_schema::DocumentSchema;
-pub use object_schema::ObjectSchema;
+pub use catalog::{JsonCatalog, DEFAULT_CATALOG_URL};
 pub use reference::Referable;
 pub use schema_type::{SchemaComposition, SchemaType};
 pub use value::Value;

@@ -1,4 +1,7 @@
-use super::{schema_type::SchemaComposition, value::Value, Referable};
+use crate::{
+    json_schema::{Referable, SchemaComposition},
+    Value,
+};
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct ObjectSchema {

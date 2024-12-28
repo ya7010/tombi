@@ -6,6 +6,7 @@ mod types;
 pub use format::FormatOptions;
 pub use lint::LintOptions;
 pub use schema::SchemaOptions;
+use std::path::PathBuf;
 pub use toml_version::TomlVersion;
 pub use types::*;
 
@@ -52,7 +53,7 @@ struct Tool {
 
 /// Load the config from the current directory.
 #[cfg(feature = "serde")]
-pub fn load() -> Config {
+pub fn load_with_path() -> (Config, Option<PathBuf>) {
     const CONFIG_FILENAME: &str = "tombi.toml";
     const PYPROJECT_FILENAME: &str = "pyproject.toml";
 
@@ -70,7 +71,7 @@ pub fn load() -> Config {
                 tracing::error!("Failed to parse {:?}", &config_path);
                 std::process::exit(1);
             };
-            return config;
+            return (config, Some(config_path));
         }
 
         let pyproject_toml_path = current_dir.join(PYPROJECT_FILENAME);
@@ -90,7 +91,7 @@ pub fn load() -> Config {
                 std::process::exit(1);
             };
             if let Some(Tool { tombi: Some(tombi) }) = config.tool {
-                return tombi;
+                return (tombi, Some(pyproject_toml_path));
             } else {
                 tracing::debug!("No [tool.tombi] found in {:?}", &config_path);
                 continue;
@@ -105,5 +106,11 @@ pub fn load() -> Config {
     tracing::debug!("No config file found.");
     tracing::debug!("Using default config.");
 
-    Config::default()
+    (Config::default(), None)
+}
+
+#[cfg(feature = "serde")]
+pub fn load() -> Config {
+    let (config, _) = load_with_path();
+    config
 }

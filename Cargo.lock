@@ -1847,6 +1847,7 @@ version = "0.0.0"
 dependencies = [
  "ahash",
  "ast",
+ "config",
  "dashmap 6.1.0",
  "document",
  "document-tree",

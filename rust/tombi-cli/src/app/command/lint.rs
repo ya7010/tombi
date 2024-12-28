@@ -43,12 +43,15 @@ where
     crate::Error: Print<P>,
     P: Copy + Clone + Send + 'static,
 {
-    let config = config::load();
+    let (config, config_path) = config::load_with_path();
     let toml_version = args
         .toml_version
         .unwrap_or(config.toml_version.unwrap_or_default());
+
     let options = config.lint.unwrap_or_default();
     let schema_store = schema_store::SchemaStore::default();
+
+    schema_store.load_config_schema(config_path, config.schemas.unwrap_or_default());
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()

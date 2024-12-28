@@ -1,4 +1,6 @@
-use super::{ObjectSchema, Referable};
+use crate::schema::ObjectSchema;
+
+use super::Referable;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SchemaType {

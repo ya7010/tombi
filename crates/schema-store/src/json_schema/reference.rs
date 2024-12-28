@@ -1,6 +1,4 @@
-use crate::SchemaStore;
-
-use super::DocumentSchema;
+use crate::{schema::DocumentSchema, SchemaStore};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Referable<T> {
