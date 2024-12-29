@@ -64,7 +64,8 @@ where
         .toml_version
         .unwrap_or(config.toml_version.unwrap_or_default());
 
-    let options = config.lint.unwrap_or_default();
+    let lint_options = config.lint.unwrap_or_default();
+    let schema_options = config.schema.unwrap_or_default();
     let schema_store = schema_store::SchemaStore::default();
 
     schema_store.load_config_schema(config_path, config.schemas.unwrap_or_default());
@@ -78,10 +79,12 @@ where
     };
 
     runtime.block_on(async {
-        if args
-            .use_schema_catalog
-            .unwrap_or_else(|| options.use_schema_catalog.unwrap_or_default().value())
-        {
+        if args.use_schema_catalog.unwrap_or_else(|| {
+            schema_options
+                .use_schema_catalog
+                .unwrap_or_default()
+                .value()
+        }) {
             let catalog_url = schema_store::DEFAULT_CATALOG_URL.parse().unwrap();
             schema_store.load_catalog(&catalog_url).await?
         }
@@ -99,7 +102,7 @@ where
                     printer,
                     None,
                     toml_version,
-                    &options,
+                    &lint_options,
                     &schema_store,
                 )
                 .await
@@ -118,7 +121,7 @@ where
                             tracing::debug!("linting... {:?}", source_path);
                             match tokio::fs::File::open(&source_path).await {
                                 Ok(file) => {
-                                    let options = options.clone();
+                                    let options = lint_options.clone();
                                     let schema_store = schema_store.clone();
 
                                     tasks.spawn(async move {

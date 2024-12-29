@@ -1,4 +1,4 @@
-use config::SchemaOptions;
+use config::SchemaInfo;
 use dashmap::DashMap;
 use std::sync::{Arc, RwLock};
 use url::Url;
@@ -26,7 +26,7 @@ impl SchemaStore {
     pub fn load_config_schema(
         &self,
         config_path: Option<std::path::PathBuf>,
-        schemas: Vec<SchemaOptions>,
+        schemas: Vec<SchemaInfo>,
     ) {
         let config_path = match config_path {
             Some(config_path) => config_path,

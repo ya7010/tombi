@@ -5,6 +5,7 @@ mod types;
 
 pub use format::FormatOptions;
 pub use lint::LintOptions;
+pub use schema::SchemaInfo;
 pub use schema::SchemaOptions;
 use std::path::PathBuf;
 pub use toml_version::TomlVersion;
@@ -31,8 +32,11 @@ pub struct Config {
     /// # Linter options.
     pub lint: Option<LintOptions>,
 
-    /// # Schema options array.
-    pub schemas: Option<Vec<SchemaOptions>>,
+    /// # Linter options.
+    pub schema: Option<SchemaOptions>,
+
+    /// # Schema Catalog list.
+    pub schemas: Option<Vec<SchemaInfo>>,
 }
 
 #[doc(hidden)]

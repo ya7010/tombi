@@ -5,7 +5,10 @@ format:
   line-ending: lf
 
 lint:
+
+schema:
   use-schema-catalog: true
+  catalog-path: https://www.schemastore.org/api/json/catalog.json
 
 schemas:
   - path: "tombi.schema.json"

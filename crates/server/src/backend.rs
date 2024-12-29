@@ -65,7 +65,7 @@ impl LanguageServer for Backend {
     ) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
         if self
             .config
-            .lint
+            .schema
             .as_ref()
             .map(|options| options.use_schema_catalog.unwrap_or_default())
             .unwrap_or_default()

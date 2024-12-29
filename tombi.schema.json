@@ -38,11 +38,25 @@
         }
       ]
     },
+    "schema": {
+      "title": "Linter options.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SchemaOptions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "schemas": {
-      "title": "Schema options array.",
-      "type": ["array", "null"],
+      "title": "Schema Catalog list.",
+      "type": [
+        "array",
+        "null"
+      ],
       "items": {
-        "$ref": "#/$defs/SchemaOptions"
+        "$ref": "#/$defs/SchemaInfo"
       }
     }
   },
@@ -52,7 +66,10 @@
     "TomlVersion": {
       "title": "TOML version.",
       "type": "string",
-      "enum": ["v1.0.0", "v1.1.0-preview"]
+      "enum": [
+        "v1.0.0",
+        "v1.1.0-preview"
+      ]
     },
     "FormatOptions": {
       "type": "object",
@@ -113,7 +130,10 @@
     },
     "IdentStyle": {
       "type": "string",
-      "enum": ["space", "tab"]
+      "enum": [
+        "space",
+        "tab"
+      ]
     },
     "IdentWidth": {
       "type": "integer",
@@ -122,7 +142,10 @@
     },
     "LineEnding": {
       "type": "string",
-      "enum": ["lf", "crlf"]
+      "enum": [
+        "lf",
+        "crlf"
+      ]
     },
     "DateTimeDelimiter": {
       "description": "DateTime delimiter",
@@ -146,9 +169,13 @@
     },
     "LintOptions": {
       "type": "object",
+      "additionalProperties": false
+    },
+    "SchemaOptions": {
+      "type": "object",
       "properties": {
         "use-schema-catalog": {
-          "title": "Use schema catalog.",
+          "title": "Use Schema catalog.",
           "anyOf": [
             {
               "$ref": "#/$defs/UseSchemaCatalog"
@@ -158,6 +185,18 @@
             }
           ],
           "default": true
+        },
+        "catalog-path": {
+          "title": "the catalog path.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OneOrMany_for_SchemaCatalogPath"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "https://www.schemastore.org/api/json/catalog.json"
         }
       },
       "additionalProperties": false
@@ -165,7 +204,25 @@
     "UseSchemaCatalog": {
       "type": "boolean"
     },
-    "SchemaOptions": {
+    "OneOrMany_for_SchemaCatalogPath": {
+      "description": "Generic value that can be either one or many",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SchemaCatalogPath"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SchemaCatalogPath"
+          }
+        }
+      ]
+    },
+    "SchemaCatalogPath": {
+      "description": "Generic value that can be either single or multiple",
+      "type": "string"
+    },
+    "SchemaInfo": {
       "type": "object",
       "properties": {
         "toml-version": {
@@ -186,7 +243,10 @@
         "include": {
           "title": "The file match pattern of the schema.",
           "description": "Supports glob pattern.",
-          "type": ["array", "null"],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -194,7 +254,9 @@
         }
       },
       "additionalProperties": false,
-      "required": ["path"]
+      "required": [
+        "path"
+      ]
     }
   }
 }
