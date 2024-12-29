@@ -75,12 +75,17 @@ fn app_about() -> String {
 
 const fn app_styles() -> clap::builder::Styles {
     clap::builder::Styles::plain()
-        .usage(
+        .header(
             Style::new()
                 .bold()
                 .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
         )
-        .header(
+        .error(
+            Style::new()
+                .bold()
+                .fg_color(Some(Color::Ansi(AnsiColor::Red))),
+        )
+        .usage(
             Style::new()
                 .bold()
                 .fg_color(Some(Color::Ansi(AnsiColor::Blue))),
@@ -90,6 +95,7 @@ const fn app_styles() -> clap::builder::Styles {
                 .bold()
                 .fg_color(Some(Color::Ansi(AnsiColor::Cyan))),
         )
+        .placeholder(Style::new().fg_color(Some(Color::Ansi(AnsiColor::Cyan))))
         .valid(
             Style::new()
                 .bold()
@@ -100,10 +106,4 @@ const fn app_styles() -> clap::builder::Styles {
                 .bold()
                 .fg_color(Some(Color::Ansi(AnsiColor::Red))),
         )
-        .error(
-            Style::new()
-                .bold()
-                .fg_color(Some(Color::Ansi(AnsiColor::Red))),
-        )
-        .placeholder(Style::new().fg_color(Some(Color::Ansi(AnsiColor::Cyan))))
 }
