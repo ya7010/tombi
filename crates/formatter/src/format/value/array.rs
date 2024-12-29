@@ -20,7 +20,7 @@ pub(crate) fn exceeds_line_width(
     node: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<bool, std::fmt::Error> {
-    let mut length = f.current_indent_len();
+    let mut length = f.current_line_width();
     length += 2; // '[' and ']'
     length += f.defs().singleline_array_bracket_inner_space().len() * 2; // Space after '[' and before ']'
     let mut first = true;

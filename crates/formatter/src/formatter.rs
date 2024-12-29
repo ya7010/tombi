@@ -144,8 +144,8 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub(crate) fn current_indent_len(&self) -> usize {
-        self.options().ident(self.indent_depth).len()
+    pub(crate) fn current_line_width(&self) -> usize {
+        self.buf.split("\n").last().unwrap_or_default().len()
     }
 }
 
