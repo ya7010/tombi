@@ -9,6 +9,8 @@ toml-version = "v1.1.0-preview"
 line-ending = "lf"
 
 [lint]
+
+[schema]
 use-schema-catalog = false
 
 [[schemas]]

@@ -49,7 +49,6 @@ impl<'a> Linter<'a> {
         } else if let Some(source_path) = self.source_path {
             if let Some(schema) = self.schema_store.get_schema_from_source(source_path).await {
                 tracing::debug!("find schema from source: {}", source_path.display());
-                tracing::debug!("{:?}", &schema);
                 Some(schema)
             } else {
                 None
