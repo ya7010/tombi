@@ -71,10 +71,6 @@ impl<'a> LexedStr<'a> {
         self.tokens[i].kind()
     }
 
-    pub fn text(&self, i: usize) -> &str {
-        self.text_in(i..i + 1)
-    }
-
     pub fn text_in(&self, r: std::ops::Range<usize>) -> &str {
         assert!(r.start < r.end && r.end <= self.len());
         let lo = self.tokens[r.start].span().start().into();
