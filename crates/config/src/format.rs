@@ -1,4 +1,4 @@
-use crate::{DateTimeDelimiter, IdentStyle, IdentWidth, LineEnding};
+use crate::{DateTimeDelimiter, IdentStyle, IdentWidth, LineEnding, LineWidth};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -15,6 +15,12 @@ pub struct FormatOptions {
     /// # The number of spaces per indentation level.
     #[cfg_attr(feature = "jsonschema", schemars(default = "IdentWidth::default"))]
     pub indent_width: Option<IdentWidth>,
+
+    /// # The maximum line width.
+    ///
+    /// The formatter will try to keep lines within this width.
+    #[cfg_attr(feature = "jsonschema", schemars(default = "LineWidth::default"))]
+    pub line_width: Option<LineWidth>,
 
     /// # The type of line ending.
     ///
@@ -44,6 +50,7 @@ impl FormatOptions {
         Self {
             indent_style: None,
             indent_width: None,
+            line_width: None,
             line_ending: None,
             date_time_delimiter: None,
         }
@@ -56,6 +63,9 @@ impl FormatOptions {
         if let Some(date_time_delimiter) = other.date_time_delimiter {
             self.date_time_delimiter = Some(date_time_delimiter);
         }
+        if let Some(line_width) = other.line_width {
+            self.line_width = Some(line_width);
+        }
 
         self
     }
@@ -63,6 +73,11 @@ impl FormatOptions {
     #[inline]
     pub fn date_time_delimiter(&self) -> DateTimeDelimiter {
         self.date_time_delimiter.unwrap_or_default()
+    }
+
+    #[inline]
+    pub fn line_width(&self) -> LineWidth {
+        self.line_width.unwrap_or_default()
     }
 
     #[inline]

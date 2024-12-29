@@ -28,6 +28,25 @@ impl<'a> Formatter<'a> {
         }
     }
 
+    /// Format a node and return the result as a string
+    pub(crate) fn format_to_string<T: Format>(
+        &mut self,
+        node: &T,
+    ) -> Result<String, std::fmt::Error> {
+        let old_buf = std::mem::take(&mut self.buf);
+        let old_indent = self.indent_depth;
+        let old_skip = self.skip_indent;
+
+        node.fmt(self)?;
+        let result = std::mem::take(&mut self.buf);
+
+        self.buf = old_buf;
+        self.indent_depth = old_indent;
+        self.skip_indent = old_skip;
+
+        Ok(result)
+    }
+
     pub fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
         let toml_version = self.toml_version;
         match parser::parse(source, toml_version).try_cast::<ast::Root>() {
@@ -64,6 +83,11 @@ impl<'a> Formatter<'a> {
     #[inline]
     pub(crate) fn defs(&self) -> &crate::Definitions {
         &self.defs
+    }
+
+    #[inline]
+    pub(crate) fn line_width(&self) -> u8 {
+        self.options.line_width.unwrap_or_default().value()
     }
 
     #[inline]
@@ -117,6 +141,11 @@ impl<'a> Formatter<'a> {
     #[inline]
     pub(crate) fn skip_indent(&mut self) {
         self.skip_indent = true;
+    }
+
+    #[inline]
+    pub(crate) fn current_indent_len(&self) -> usize {
+        self.options().ident(self.indent_depth).len()
     }
 }
 

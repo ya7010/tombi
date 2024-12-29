@@ -8,12 +8,50 @@ use std::fmt::Write;
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.should_be_multiline(f.toml_version()) {
+        if self.should_be_multiline(f.toml_version()) || exceeds_line_width(self, f)? {
             format_multiline_array(self, f)
         } else {
             format_singleline_array(self, f)
         }
     }
+}
+
+pub(crate) fn exceeds_line_width(
+    node: &ast::Array,
+    f: &mut crate::Formatter,
+) -> Result<bool, std::fmt::Error> {
+    let mut length = f.current_indent_len();
+    length += 2; // '[' and ']'
+    length += f.defs().singleline_array_bracket_inner_space().len() * 2; // Space after '[' and before ']'
+    let mut first = true;
+
+    for value in node.values() {
+        // Check if nested value should be multiline
+        let should_be_multiline = match &value {
+            ast::Value::Array(array) => {
+                array.should_be_multiline(f.toml_version()) || exceeds_line_width(array, f)?
+            }
+            ast::Value::InlineTable(table) => {
+                table.should_be_multiline(f.toml_version())
+                    || crate::format::value::inline_table::exceeds_line_width(table, f)?
+            }
+            _ => false,
+        };
+
+        if should_be_multiline {
+            return Ok(true);
+        }
+
+        // Calculate total length
+        if !first {
+            length += 1; // ","
+            length += f.defs().singleline_array_space_after_comma().len();
+        }
+        length += f.format_to_string(&value)?.len();
+        first = false;
+    }
+
+    Ok(length > f.line_width() as usize)
 }
 
 fn format_multiline_array(
@@ -133,6 +171,7 @@ fn format_singleline_array(
 #[cfg(test)]
 mod tests {
     use crate::test_format;
+    use config::FormatOptions;
 
     use super::*;
 
@@ -373,5 +412,73 @@ mod tests {
 
         let ast = ast::Array::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.has_tailing_comma_after_last_value(), expected);
+    }
+
+    test_format! {
+        #[test]
+        fn array_exceeds_line_width(
+            r#"array = [1111111111, 2222222222, 3333333333]"#,
+            Default::default(),
+            FormatOptions {
+                line_width: Some(20.try_into().unwrap()),
+                ..Default::default()
+            }
+        ) -> Ok(
+            r#"
+            array = [
+              1111111111,
+              2222222222,
+              3333333333,
+            ]
+            "#
+        );
+    }
+
+    test_format! {
+        #[test]
+        fn array_with_nested_array_exceeds_line_width(
+            r#"array = [[1111111111, 2222222222], [3333333333, 4444444444]]"#,
+            Default::default(),
+            FormatOptions {
+                line_width: Some(30.try_into().unwrap()),
+                ..Default::default()
+            }
+        ) -> Ok(
+            r#"
+            array = [
+              [1111111111, 2222222222],
+              [3333333333, 4444444444],
+            ]
+            "#
+        );
+    }
+
+    test_format! {
+        #[test]
+        fn array_with_nested_inline_table_exceeds_line_width(
+            r#"array = [{ key1 = 1111111111, key2 = 2222222222 }, { key3 = [3333333333, 4444444444], key4 = [5555555555, 6666666666, 7777777777] }]"#,
+            Default::default(),
+            FormatOptions {
+                line_width: Some(30.try_into().unwrap()),
+                ..Default::default()
+            }
+        ) -> Ok(
+            r#"
+            array = [
+              {
+                key1 = 1111111111,
+                key2 = 2222222222,
+              },
+              {
+                key3 = [3333333333, 4444444444],
+                key4 = [
+                  5555555555,
+                  6666666666,
+                  7777777777,
+                ],
+              },
+            ]
+            "#
+        );
     }
 }

@@ -9,12 +9,51 @@ use std::fmt::Write;
 
 impl Format for ast::InlineTable {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.should_be_multiline(f.toml_version()) {
+        if self.should_be_multiline(f.toml_version()) || exceeds_line_width(self, f)? {
             format_multiline_inline_table(self, f)
         } else {
             format_singleline_inline_table(self, f)
         }
     }
+}
+
+pub(crate) fn exceeds_line_width(
+    node: &ast::InlineTable,
+    f: &mut crate::Formatter,
+) -> Result<bool, std::fmt::Error> {
+    let mut length = f.current_indent_len();
+    length += 2; // '{' and '}'
+    length += f.defs().singleline_inline_table_brace_inner_space().len() * 2;
+    let mut first = true;
+
+    for key_value in node.key_values() {
+        // Check if nested value should be multiline
+        if let Some(value) = key_value.value() {
+            let should_be_multiline = match value {
+                ast::Value::Array(array) => {
+                    array.should_be_multiline(f.toml_version())
+                        || crate::format::value::array::exceeds_line_width(&array, f)?
+                }
+                ast::Value::InlineTable(table) => {
+                    table.should_be_multiline(f.toml_version()) || exceeds_line_width(&table, f)?
+                }
+                _ => false,
+            };
+
+            if should_be_multiline {
+                return Ok(true);
+            }
+        }
+
+        if !first {
+            length += 1; // ","
+            length += f.defs().singleline_inline_table_space_after_comma().len();
+        }
+        length += f.format_to_string(&key_value)?.len();
+        first = false;
+    }
+
+    Ok(length > f.line_width() as usize)
 }
 
 fn format_multiline_inline_table(
@@ -138,6 +177,7 @@ fn format_singleline_inline_table(
 #[cfg(test)]
 mod tests {
     use crate::test_format;
+    use config::{FormatOptions, TomlVersion};
 
     test_format! {
         #[test]
@@ -153,5 +193,70 @@ mod tests {
     test_format! {
         #[test]
         fn inline_table_key_value3(r#"animal = { type.name = "pug" }"#) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn inline_table_exceeds_line_width(
+            r#"table = { key1 = 1111111111, key2 = 2222222222, key3 = 3333333333 }"#,
+            TomlVersion::default(),
+            FormatOptions {
+                line_width: Some(30.try_into().unwrap()),
+                ..Default::default()
+            }
+        ) -> Ok(
+            r#"
+            table = {
+              key1 = 1111111111,
+              key2 = 2222222222,
+              key3 = 3333333333,
+            }
+            "#
+        );
+    }
+
+    test_format! {
+        #[test]
+        fn inline_table_with_nested_array_exceeds_line_width(
+            r#"table = { key1 = [1111111111, 2222222222], key2 = [3333333333, 4444444444] }"#,
+            TomlVersion::default(),
+            FormatOptions {
+                line_width: Some(30.try_into().unwrap()),
+                ..Default::default()
+            }
+        ) -> Ok(
+            r#"
+            table = {
+              key1 = [1111111111, 2222222222],
+              key2 = [3333333333, 4444444444],
+            }
+            "#
+        );
+    }
+
+    test_format! {
+        #[test]
+        fn inline_table_with_nested_inline_table_exceeds_line_width(
+            r#"table = { t1 = { key1 = 1111111111, key2 = 2222222222 }, t2 = { key3 = 3333333333, key4 = 4444444444 } }"#,
+            TomlVersion::default(),
+
+            FormatOptions {
+                line_width: Some(30.try_into().unwrap()),
+                ..Default::default()
+            }
+        ) -> Ok(
+            r#"
+            table = {
+              t1 = {
+                key1 = 1111111111,
+                key2 = 2222222222,
+              },
+              t2 = {
+                key3 = 3333333333,
+                key4 = 4444444444,
+              },
+            }
+            "#
+        );
     }
 }

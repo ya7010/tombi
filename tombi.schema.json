@@ -99,6 +99,19 @@
           ],
           "default": 2
         },
+        "line-width": {
+          "title": "The maximum line width.",
+          "description": "The formatter will try to keep lines within this width.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LineWidth"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 80
+        },
         "line-ending": {
           "title": "The type of line ending.",
           "description": "In TOML, the line ending must be either `LF` or `CRLF`.\n\n - `lf`: Line Feed only (`\\n`), common on Linux and macOS as well as inside git repos.\n - `crlf`: Carriage Return Line Feed (`\\r\\n`), common on Windows.",
@@ -139,6 +152,11 @@
       "type": "integer",
       "format": "uint8",
       "minimum": 0
+    },
+    "LineWidth": {
+      "type": "integer",
+      "format": "uint8",
+      "minimum": 1
     },
     "LineEnding": {
       "type": "string",

@@ -29,15 +29,22 @@ macro_rules! test_format {
         $crate::test_format!(#[test] fn $name($source, $toml_version) -> Ok($source););
     };
 
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Ok(source);) => {
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $options) -> Ok($source););
+    };
+
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
         $crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Ok($expected););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($expected:expr);) => {
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatOptions::default()) -> Ok($expected););
+    };
+
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Ok($expected:expr);) => {
         #[test]
         fn $name() {
-
-            match $crate::Formatter::new($toml_version, &$crate::FormatOptions::default()).format($source) {
+            match $crate::Formatter::new($toml_version, &$options).format($source) {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }
@@ -53,9 +60,13 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatOptions::default()) -> Err(_););
+    };
+
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Err(_);) => {
         #[test]
         fn $name() {
-            match $crate::Formatter::new($toml_version, &$crate::FormatOptions::default()).format($source) {
+            match $crate::Formatter::new($toml_version, &$options).format($source) {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {
                     pretty_assertions::assert_ne!(errors, vec![]);
