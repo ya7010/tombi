@@ -221,7 +221,7 @@ mod tests {
             r#"table = { key1 = [1111111111, 2222222222], key2 = [3333333333, 4444444444] }"#,
             TomlVersion::default(),
             FormatOptions {
-                line_width: Some(30.try_into().unwrap()),
+                line_width: Some(35.try_into().unwrap()),
                 ..Default::default()
             }
         ) -> Ok(

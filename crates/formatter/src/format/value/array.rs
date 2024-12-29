@@ -459,7 +459,7 @@ mod tests {
             r#"array = [{ key1 = 1111111111, key2 = 2222222222 }, { key3 = [3333333333, 4444444444], key4 = [5555555555, 6666666666, 7777777777] }]"#,
             Default::default(),
             FormatOptions {
-                line_width: Some(30.try_into().unwrap()),
+                line_width: Some(35.try_into().unwrap()),
                 ..Default::default()
             }
         ) -> Ok(
