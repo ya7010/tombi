@@ -110,9 +110,7 @@ fn format_multiline_inline_table(
             }
         }
 
-        for comments in table.inner_end_dangling_comments() {
-            comments.fmt(f)?;
-        }
+        table.inner_end_dangling_comments().fmt(f)?;
     } else {
         table.inner_dangling_comments().fmt(f)?;
     }

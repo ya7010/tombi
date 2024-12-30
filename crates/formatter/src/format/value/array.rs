@@ -109,9 +109,7 @@ fn format_multiline_array(
             }
         }
 
-        for comments in array.inner_end_dangling_comments() {
-            comments.fmt(f)?;
-        }
+        array.inner_end_dangling_comments().fmt(f)?;
     } else {
         array.inner_dangling_comments().fmt(f)?;
     }

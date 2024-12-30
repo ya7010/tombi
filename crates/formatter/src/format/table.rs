@@ -32,9 +32,7 @@ impl Format for ast::Table {
                 key_value.fmt(f)?;
             }
 
-            for comments in self.end_dangling_comments() {
-                comments.fmt(f)?;
-            }
+            self.end_dangling_comments().fmt(f)?;
         }
 
         Ok(())
