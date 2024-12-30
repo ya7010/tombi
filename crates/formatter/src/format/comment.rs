@@ -36,9 +36,7 @@ impl Format for Vec<Vec<BeginDanglingComment>> {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for comments in self {
-            if comments.is_empty() {
-                return Ok(());
-            }
+            assert!(!comments.is_empty());
 
             for comment in comments {
                 comment.fmt(f)?;

@@ -93,19 +93,25 @@ fn group_comments<T, I: Iterator<Item = syntax::SyntaxElement>>(iter: I) -> Vec<
 where
     T: From<crate::Comment>,
 {
+    let mut is_new_group = true;
     iter.fold(Vec::new(), |mut acc, node_or_token| {
         match node_or_token {
             SyntaxElement::Token(token) => match token.kind() {
                 COMMENT => {
                     if let Some(last_group) = acc.last_mut() {
                         if let Some(comment) = crate::Comment::cast(token) {
-                            last_group.push(comment.into());
+                            if is_new_group {
+                                acc.push(vec![comment.into()]);
+                            } else {
+                                last_group.push(comment.into());
+                            }
                         }
                     } else {
                         if let Some(comment) = crate::Comment::cast(token) {
                             acc.push(vec![comment.into()]);
                         }
                     }
+                    is_new_group = false;
                 }
                 LINE_BREAK => {
                     if token
@@ -116,7 +122,7 @@ where
                             .last()
                             .map_or(false, |last_group| !last_group.is_empty())
                         {
-                            acc.push(Vec::new());
+                            is_new_group = true;
                         }
                     }
                 }
