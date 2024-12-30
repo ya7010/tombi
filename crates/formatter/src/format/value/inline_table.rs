@@ -1,4 +1,4 @@
-use crate::format::comment::{BeginDanglingComment, EndDanglingComment};
+use crate::format::comment::{BeginDanglingComment, DanglingComment, EndDanglingComment};
 use crate::{
     format::comment::{LeadingComment, TailingComment},
     Format,
@@ -69,58 +69,69 @@ fn format_multiline_inline_table(
 
     f.inc_indent();
 
-    for comments in table.inner_begin_dangling_comments() {
-        comments
-            .into_iter()
-            .map(BeginDanglingComment)
-            .collect_vec()
-            .fmt(f)?;
-    }
+    let key_values_with_comma = table.key_values_with_comma().collect_vec();
 
-    for (i, (key_value, comma)) in table.key_values_with_comma().enumerate() {
-        // value format
-        {
-            if i > 0 {
-                write!(f, "{}", f.line_ending())?;
-            }
-            key_value.fmt(f)?;
+    if !key_values_with_comma.is_empty() {
+        for comments in table.inner_begin_dangling_comments() {
+            comments
+                .into_iter()
+                .map(BeginDanglingComment)
+                .collect_vec()
+                .fmt(f)?;
         }
 
-        // comma format
-        {
-            let (comma_leading_comments, comma_tailing_comment) = match comma {
-                Some(comma) => (
-                    comma.leading_comments().collect_vec(),
-                    comma.tailing_comment(),
-                ),
-                None => (vec![], None),
-            };
-
-            if !comma_leading_comments.is_empty() {
-                write!(f, "{}", f.line_ending())?;
-                for comment in comma_leading_comments {
-                    LeadingComment(comment).fmt(f)?;
+        for (i, (key_value, comma)) in key_values_with_comma.into_iter().enumerate() {
+            // value format
+            {
+                if i > 0 {
+                    write!(f, "{}", f.line_ending())?;
                 }
-                f.write_indent()?;
-                write!(f, ",")?;
-            } else if key_value.tailing_comment().is_some() {
-                write!(f, "{}", f.line_ending())?;
-                f.write_indent()?;
-                write!(f, ",")?;
-            } else {
-                write!(f, ",")?;
+                key_value.fmt(f)?;
             }
 
-            if let Some(comment) = comma_tailing_comment {
-                TailingComment(comment).fmt(f)?;
+            // comma format
+            {
+                let (comma_leading_comments, comma_tailing_comment) = match comma {
+                    Some(comma) => (
+                        comma.leading_comments().collect_vec(),
+                        comma.tailing_comment(),
+                    ),
+                    None => (vec![], None),
+                };
+
+                if !comma_leading_comments.is_empty() {
+                    write!(f, "{}", f.line_ending())?;
+                    for comment in comma_leading_comments {
+                        LeadingComment(comment).fmt(f)?;
+                    }
+                    f.write_indent()?;
+                    write!(f, ",")?;
+                } else if key_value.tailing_comment().is_some() {
+                    write!(f, "{}", f.line_ending())?;
+                    f.write_indent()?;
+                    write!(f, ",")?;
+                } else {
+                    write!(f, ",")?;
+                }
+
+                if let Some(comment) = comma_tailing_comment {
+                    TailingComment(comment).fmt(f)?;
+                }
             }
         }
-    }
 
-    for comments in table.inner_end_dangling_comments() {
-        comments
+        for comments in table.inner_end_dangling_comments() {
+            comments
+                .into_iter()
+                .map(EndDanglingComment)
+                .collect_vec()
+                .fmt(f)?;
+        }
+    } else {
+        table
+            .inner_dangling_comments()
             .into_iter()
-            .map(EndDanglingComment)
+            .map(|comments| comments.into_iter().map(DanglingComment).collect_vec())
             .collect_vec()
             .fmt(f)?;
     }
@@ -201,6 +212,35 @@ mod tests {
 
     test_format! {
         #[test]
+        fn inline_table_inner_comment_only1(
+            r#"
+            inline_table = {
+              # comment
+            }"#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn inline_table_inner_comment_only2(
+            r#"
+            inline_table = {
+              # comment 1-1
+              # comment 1-2
+
+              # comment 2-1
+              # comment 2-2
+              # comment 2-3
+
+              # comment 3-1
+            }"#,
+            TomlVersion::V1_1_0_Preview
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
         fn inline_table_exceeds_line_width(
             r#"table = { key1 = 1111111111, key2 = 2222222222, key3 = 3333333333 }"#,
             TomlVersion::default(),
@@ -243,7 +283,6 @@ mod tests {
         fn inline_table_with_nested_inline_table_exceeds_line_width(
             r#"table = { t1 = { key1 = 1111111111, key2 = 2222222222 }, t2 = { key3 = 3333333333, key4 = 4444444444 } }"#,
             TomlVersion::default(),
-
             FormatOptions {
                 line_width: Some(30.try_into().unwrap()),
                 ..Default::default()

@@ -10,7 +10,7 @@ impl crate::Root {
         support::node::end_dangling_comments(self.syntax().children_with_tokens())
     }
 
-    pub fn dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+    pub fn dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
         support::node::dangling_comments(self.syntax().children_with_tokens())
     }
 }

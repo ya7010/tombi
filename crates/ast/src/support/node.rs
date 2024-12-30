@@ -59,11 +59,8 @@ pub fn tailing_comment<I: Iterator<Item = syntax::SyntaxElement>>(
 #[inline]
 pub fn dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
-) -> impl Iterator<Item = crate::Comment> {
-    iter.filter_map(|node_or_token| match node_or_token {
-        SyntaxElement::Token(token) => crate::Comment::cast(token),
-        SyntaxElement::Node(_) => None,
-    })
+) -> Vec<Vec<crate::Comment>> {
+    group_comments(iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK)))
 }
 
 #[inline]
@@ -120,6 +117,17 @@ fn group_comments<I: Iterator<Item = syntax::SyntaxElement>>(iter: I) -> Vec<Vec
         }
         acc
     })
+}
+
+pub fn has_only_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+    iter: I,
+    start: SyntaxKind,
+    end: SyntaxKind,
+) -> bool {
+    iter.skip_while(|node| node.kind() != start)
+        .skip(1)
+        .take_while(|node| node.kind() != end)
+        .all(|node| matches!(node.kind(), WHITESPACE | COMMENT | LINE_BREAK))
 }
 
 #[inline]

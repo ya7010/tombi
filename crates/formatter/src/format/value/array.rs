@@ -67,7 +67,9 @@ fn format_multiline_array(
 
     f.inc_indent();
 
-    if !array.values().collect_vec().is_empty() {
+    let values_with_comma = array.values_with_comma().collect_vec();
+
+    if !values_with_comma.is_empty() {
         for comments in array.inner_begin_dangling_comments() {
             comments
                 .into_iter()
@@ -76,7 +78,7 @@ fn format_multiline_array(
                 .fmt(f)?;
         }
 
-        for (i, (value, comma)) in array.values_with_comma().enumerate() {
+        for (i, (value, comma)) in values_with_comma.into_iter().enumerate() {
             // value format
             {
                 if i > 0 {
@@ -125,8 +127,9 @@ fn format_multiline_array(
         }
     } else {
         array
-            .dangling_comments()
-            .map(DanglingComment)
+            .inner_dangling_comments()
+            .into_iter()
+            .map(|comments| comments.into_iter().map(DanglingComment).collect_vec())
             .collect_vec()
             .fmt(f)?;
     }
@@ -386,7 +389,7 @@ mod tests {
 
     test_format! {
         #[test]
-        fn array_only_inner_comment(
+        fn array_only_inner_comment_only1(
             r#"
             array = [
               # comment
@@ -396,23 +399,19 @@ mod tests {
 
     test_format! {
         #[test]
-        fn array_only_inner_comment2(
+        fn array_only_inner_comment_only2(
             r#"
             array = [
-              #comment1
+              # comment 1-1
+              # comment 1-2
 
-              #comment2
+              # comment 2-1
+              # comment 2-2
+              # comment 2-3
 
-              #comment3
+              # comment 3-1
             ]"#
-        ) -> Ok(
-            r#"
-            array = [
-              # comment1
-              # comment2
-              # comment3
-            ]"#
-        );
+        ) -> Ok(source);
     }
 
     #[rstest]

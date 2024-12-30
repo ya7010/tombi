@@ -89,10 +89,23 @@ impl Format for Vec<DanglingComment> {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for (i, comment) in self.iter().enumerate() {
-            if i > 0 {
+            if i != 0 {
                 write!(f, "{}", f.line_ending())?;
             }
             comment.fmt(f)?;
+        }
+        Ok(())
+    }
+}
+
+impl Format for Vec<Vec<DanglingComment>> {
+    #[inline]
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        for (i, comments) in self.iter().enumerate() {
+            if i != 0 {
+                write!(f, "{}{}", f.line_ending(), f.line_ending())?;
+            }
+            comments.fmt(f)?;
         }
         Ok(())
     }

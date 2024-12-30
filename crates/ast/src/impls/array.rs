@@ -24,8 +24,14 @@ impl crate::Array {
     }
 
     #[inline]
-    pub fn dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
-        support::node::dangling_comments(self.syntax().children_with_tokens())
+    pub fn inner_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
+        support::node::dangling_comments(
+            self.syntax()
+                .children_with_tokens()
+                .skip_while(|node| node.kind() != T!('['))
+                .skip(1) // skip '{'
+                .take_while(|node| node.kind() != T!(']')),
+        )
     }
 
     #[inline]
@@ -42,6 +48,7 @@ impl crate::Array {
     pub fn should_be_multiline(&self, toml_version: TomlVersion) -> bool {
         self.has_tailing_comma_after_last_value()
             || self.has_multiline_values(toml_version)
+            // || self.has_only_comments()
             || self.has_inner_comments()
     }
 
@@ -73,6 +80,12 @@ impl crate::Array {
         })
     }
 
+    #[inline]
+    pub fn has_only_comments(&self) -> bool {
+        support::node::has_only_comments(self.syntax().children_with_tokens(), T!('['), T!(']'))
+    }
+
+    #[inline]
     pub fn has_inner_comments(&self) -> bool {
         support::node::has_inner_comments(self.syntax().children_with_tokens(), T!('['), T!(']'))
     }

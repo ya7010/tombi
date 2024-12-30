@@ -133,7 +133,8 @@ impl Format for ast::Root {
             }
         } else {
             self.dangling_comments()
-                .map(DanglingComment)
+                .into_iter()
+                .map(|comments| comments.into_iter().map(DanglingComment).collect_vec())
                 .collect_vec()
                 .fmt(f)?;
         }
@@ -257,6 +258,31 @@ mod test {
             [[foo]]
 
             [[foo]]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn only_dangling_comment1(
+            r#"
+            # root dangling comment
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn only_dangling_comment2(
+            r#"
+            # root dangling comment 1-1
+            # root dangling comment 1-2
+
+            # root dangling comment 2-1
+            # root dangling comment 2-1
+            # root dangling comment 2-3
+
+            # root dangling comment 3-1
             "#
         ) -> Ok(source);
     }
