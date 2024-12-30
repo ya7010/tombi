@@ -117,11 +117,13 @@ fn format_multiline_inline_table(
         }
     }
 
-    table
-        .inner_end_dangling_comments()
-        .map(EndDanglingComment)
-        .collect_vec()
-        .fmt(f)?;
+    for comments in table.inner_end_dangling_comments() {
+        comments
+            .into_iter()
+            .map(EndDanglingComment)
+            .collect_vec()
+            .fmt(f)?;
+    }
 
     f.dec_indent();
 

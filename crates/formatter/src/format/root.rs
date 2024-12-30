@@ -124,10 +124,13 @@ impl Format for ast::Root {
                     item.fmt(f)
                 })?;
 
-            self.end_dangling_comments()
-                .map(EndDanglingComment)
-                .collect_vec()
-                .fmt(f)?;
+            for comments in self.end_dangling_comments() {
+                comments
+                    .into_iter()
+                    .map(EndDanglingComment)
+                    .collect_vec()
+                    .fmt(f)?;
+            }
         } else {
             self.dangling_comments()
                 .map(DanglingComment)

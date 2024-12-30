@@ -21,8 +21,10 @@ impl AppendSemanticTokens for ast::Root {
             item.append_semantic_tokens(builder);
         }
 
-        for comment in self.end_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+        for comments in self.end_dangling_comments() {
+            for comment in comments {
+                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            }
         }
     }
 }
@@ -203,8 +205,10 @@ impl AppendSemanticTokens for ast::Array {
             }
         }
 
-        for comment in self.inner_end_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+        for comments in self.inner_end_dangling_comments() {
+            for comment in comments {
+                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            }
         }
     }
 }
@@ -230,8 +234,10 @@ impl AppendSemanticTokens for ast::InlineTable {
             }
         }
 
-        for comment in self.inner_end_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+        for comments in self.inner_end_dangling_comments() {
+            for comment in comments {
+                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            }
         }
     }
 }

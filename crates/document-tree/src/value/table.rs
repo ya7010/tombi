@@ -482,9 +482,11 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
 
         table.kind = TableKind::InlineTable;
 
-        for comment in self.inner_end_dangling_comments() {
-            if let Err(error) = try_new_comment(&comment) {
-                errors.push(error);
+        for comments in self.inner_end_dangling_comments() {
+            for comment in comments {
+                if let Err(error) = try_new_comment(&comment) {
+                    errors.push(error);
+                }
             }
         }
 

@@ -116,11 +116,13 @@ fn format_multiline_array(
             }
         }
 
-        array
-            .inner_end_dangling_comments()
-            .map(EndDanglingComment)
-            .collect_vec()
-            .fmt(f)?;
+        for comments in array.inner_end_dangling_comments() {
+            comments
+                .into_iter()
+                .map(EndDanglingComment)
+                .collect_vec()
+                .fmt(f)?;
+        }
     } else {
         array
             .dangling_comments()
@@ -303,8 +305,11 @@ mod tests {
             # array leading comment2
             array = [
 
-              # inner array begin dangling comment1
-              # inner array begin dangling comment2
+              # inner array begin dangling comment group 1-1
+              # inner array begin dangling comment group 1-2
+
+
+              # inner array begin dangling comment group 2-1
 
               # value1 leading comment1
               # value1 leading comment2
@@ -317,9 +322,10 @@ mod tests {
               # value3 leading comment1
               # value3 leading comment2
               3 # value3 trailing comment
-              # array end dangling comment1
+              # array end dangling comment group 1-1
+              # array end dangling comment group 1-2
 
-              # array end dangling comment2
+              # array end dangling comment group 2-1
 
             ] # array tailing comment
             "#
@@ -328,8 +334,10 @@ mod tests {
             # array leading comment1
             # array leading comment2
             array = [
-              # inner array begin dangling comment1
-              # inner array begin dangling comment2
+              # inner array begin dangling comment group 1-1
+              # inner array begin dangling comment group 1-2
+
+              # inner array begin dangling comment group 2-1
 
               # value1 leading comment1
               # value1 leading comment2
@@ -344,8 +352,10 @@ mod tests {
               3  # value3 trailing comment
               ,
 
-              # array end dangling comment1
-              # array end dangling comment2
+              # array end dangling comment group 1-1
+              # array end dangling comment group 1-2
+
+              # array end dangling comment group 2-1
             ]  # array tailing comment
             "#
         );
