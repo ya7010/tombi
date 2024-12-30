@@ -1,5 +1,6 @@
 use syntax::T;
 
+use crate::parse::{begin_dangling_comments, end_dangling_comments};
 use crate::ErrorKind::*;
 use crate::{
     parse::{
@@ -32,6 +33,8 @@ impl Parse for ast::Table {
             invalid_line(p, ExpectedLineBreak);
         }
 
+        begin_dangling_comments(p);
+
         loop {
             let n = peek_leading_comments(p);
 
@@ -45,6 +48,8 @@ impl Parse for ast::Table {
                 invalid_line(p, ExpectedLineBreak);
             }
         }
+
+        end_dangling_comments(p, false);
 
         m.complete(p, TABLE);
     }

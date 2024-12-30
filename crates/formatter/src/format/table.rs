@@ -1,5 +1,6 @@
-use super::comment::{LeadingComment, TailingComment};
+use super::comment::{BeginDanglingComment, EndDanglingComment, LeadingComment, TailingComment};
 use crate::Format;
+use itertools::Itertools;
 use std::fmt::Write;
 
 impl Format for ast::Table {
@@ -16,9 +17,32 @@ impl Format for ast::Table {
             TailingComment(comment).fmt(f)?;
         }
 
-        for key_value in self.key_values() {
+        let key_values = self.key_values().collect_vec();
+
+        if key_values.is_empty() {
+            return Ok(());
+        } else {
             write!(f, "{}", f.line_ending())?;
-            key_value.fmt(f)?;
+
+            for comments in self.begin_dangling_comments() {
+                comments
+                    .into_iter()
+                    .map(BeginDanglingComment)
+                    .collect_vec()
+                    .fmt(f)?;
+            }
+
+            for (i, key_value) in key_values.into_iter().enumerate() {
+                if i != 0 {
+                    write!(f, "{}", f.line_ending())?;
+                }
+                key_value.fmt(f)?;
+            }
+
+            self.end_dangling_comments()
+                .map(EndDanglingComment)
+                .collect_vec()
+                .fmt(f)?;
         }
 
         Ok(())
@@ -68,6 +92,36 @@ mod tests {
             # header leading comment1
             # header leading comment2
             [header]  # header tailing comment
+            # table begin dangling comment group 1-1
+            # table begin dangling comment group 1-2
+
+            # table begin dangling comment group 2-1
+            # table begin dangling comment group 2-2
+            # table begin dangling comment group 2-3
+
+            # table begin dangling comment group 3-1
+
+            # key value leading comment1
+            # key value leading comment2
+            key = "value"  # key tailing comment
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn table_begin_dangling_comment1(
+            r#"
+            [header]
+            # table begin dangling comment group 1-1
+            # table begin dangling comment group 1-2
+
+            # table begin dangling comment group 2-1
+            # table begin dangling comment group 2-2
+            # table begin dangling comment group 2-3
+
+            # table begin dangling comment group 3-1
+
             # key value leading comment1
             # key value leading comment2
             key = "value"  # key tailing comment

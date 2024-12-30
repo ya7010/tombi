@@ -1,12 +1,26 @@
 # root begin dangling comment1
 # root begin dangling comment2
 
-# table leading comment1
-# table leading comment2
+# table header leading comment1
+# table header leading comment2
 [aaaa]
-# table leading comment1
-# table leading comment2
-[aaaa.bbb]
+# table header tailing comment1
+# table header tailing comment1
+# table header leading comment1
+# table header leading comment2
+[aaaa.bbb]  # table header tailing comment
+# table begin dangling comment group 1-1
+# table begin dangling comment group 1-2
+
+# table begin dangling comment group 2-1
+# table begin dangling comment group 2-2
+# table begin dangling comment group 2-3
+
+# table begin dangling comment group 3-1
+
+# key value header comment1
+# key value header comment2
+# key value header comment3
 bool1 = true
 bool2 = false
 dec = 1  # dec tailing comment
