@@ -52,6 +52,11 @@ mod support {
                         if comment_count > 0 {
                             (0..=n).for_each(|_| p.bump_any());
                             while p.eat(LINE_BREAK) || p.eat(WHITESPACE) {}
+                            if p.at(COMMENT) {
+                                n = 0;
+                                comment_count = 0;
+                                continue;
+                            }
                             break;
                         }
                         n += 1;
