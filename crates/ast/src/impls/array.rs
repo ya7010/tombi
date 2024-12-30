@@ -10,7 +10,7 @@ impl crate::Array {
             self.syntax()
                 .children_with_tokens()
                 .skip_while(|node| node.kind() != T!('['))
-                .skip(1),
+                .skip(1), // skip '['
         )
     }
 
