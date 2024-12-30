@@ -70,13 +70,12 @@ fn format_multiline_array(
     let values_with_comma = array.values_with_comma().collect_vec();
 
     if !values_with_comma.is_empty() {
-        for comments in array.inner_begin_dangling_comments() {
-            comments
-                .into_iter()
-                .map(BeginDanglingComment)
-                .collect_vec()
-                .fmt(f)?;
-        }
+        array
+            .inner_begin_dangling_comments()
+            .into_iter()
+            .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
+            .collect_vec()
+            .fmt(f)?;
 
         for (i, (value, comma)) in values_with_comma.into_iter().enumerate() {
             // value format

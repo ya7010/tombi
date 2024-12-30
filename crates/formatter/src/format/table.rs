@@ -24,13 +24,11 @@ impl Format for ast::Table {
         } else {
             write!(f, "{}", f.line_ending())?;
 
-            for comments in self.begin_dangling_comments() {
-                comments
-                    .into_iter()
-                    .map(BeginDanglingComment)
-                    .collect_vec()
-                    .fmt(f)?;
-            }
+            self.begin_dangling_comments()
+                .into_iter()
+                .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
+                .collect_vec()
+                .fmt(f)?;
 
             for (i, key_value) in key_values.into_iter().enumerate() {
                 if i != 0 {

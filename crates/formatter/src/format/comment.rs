@@ -31,17 +31,21 @@ impl Format for BeginDanglingComment {
     }
 }
 
-impl Format for Vec<BeginDanglingComment> {
+impl Format for Vec<Vec<BeginDanglingComment>> {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        if self.is_empty() {
-            return Ok(());
+        for comments in self {
+            if comments.is_empty() {
+                continue;
+            }
+
+            for comment in comments {
+                comment.fmt(f)?;
+            }
+            write!(f, "{}", f.line_ending())?;
         }
 
-        for comment in self {
-            comment.fmt(f)?;
-        }
-        write!(f, "{}", f.line_ending())
+        Ok(())
     }
 }
 

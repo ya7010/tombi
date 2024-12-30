@@ -72,13 +72,12 @@ fn format_multiline_inline_table(
     let key_values_with_comma = table.key_values_with_comma().collect_vec();
 
     if !key_values_with_comma.is_empty() {
-        for comments in table.inner_begin_dangling_comments() {
-            comments
-                .into_iter()
-                .map(BeginDanglingComment)
-                .collect_vec()
-                .fmt(f)?;
-        }
+        table
+            .inner_begin_dangling_comments()
+            .into_iter()
+            .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
+            .collect_vec()
+            .fmt(f)?;
 
         for (i, (key_value, comma)) in key_values_with_comma.into_iter().enumerate() {
             // value format
