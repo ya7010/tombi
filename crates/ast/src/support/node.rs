@@ -112,7 +112,12 @@ where
                         .next_sibling_or_token()
                         .map_or(false, |next| next.kind() == LINE_BREAK)
                     {
-                        acc.push(Vec::new());
+                        if acc
+                            .last()
+                            .map_or(false, |last_group| !last_group.is_empty())
+                        {
+                            acc.push(Vec::new());
+                        }
                     }
                 }
                 WHITESPACE => {}

@@ -37,7 +37,7 @@ impl Format for Vec<Vec<BeginDanglingComment>> {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for comments in self {
             if comments.is_empty() {
-                continue;
+                return Ok(());
             }
 
             for comment in comments {
@@ -64,7 +64,7 @@ impl Format for Vec<Vec<EndDanglingComment>> {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for comments in self {
             if comments.is_empty() {
-                continue;
+                return Ok(());
             }
 
             write!(f, "{}", f.line_ending())?;
