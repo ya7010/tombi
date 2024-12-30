@@ -45,6 +45,9 @@ mod support {
                     comment_count += 1;
                 }
                 LINE_BREAK => {
+                    while p.nth_at(n + 1, WHITESPACE) {
+                        n += 1;
+                    }
                     if p.nth_at(n + 1, LINE_BREAK) {
                         if comment_count > 0 {
                             (0..=n).for_each(|_| p.bump_any());
