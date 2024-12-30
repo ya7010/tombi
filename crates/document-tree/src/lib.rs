@@ -47,7 +47,7 @@ impl TryIntoDocumentTree<Root> for ast::Root {
 
         for comments in self.begin_dangling_comments() {
             for comment in comments {
-                if let Err(error) = try_new_comment(&comment) {
+                if let Err(error) = try_new_comment(&comment.into()) {
                     errors.push(error);
                 }
             }
@@ -68,7 +68,7 @@ impl TryIntoDocumentTree<Root> for ast::Root {
 
         for comments in self.end_dangling_comments() {
             for comment in comments {
-                if let Err(error) = try_new_comment(&comment) {
+                if let Err(error) = try_new_comment(&comment.into()) {
                     errors.push(error);
                 }
             }

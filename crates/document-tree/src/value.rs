@@ -72,13 +72,13 @@ impl TryIntoDocumentTree<Value> for ast::Value {
     ) -> Result<Value, Vec<crate::Error>> {
         let mut errors = Vec::new();
         for comment in self.leading_comments() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }
 
         if let Some(comment) = self.tailing_comment() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }

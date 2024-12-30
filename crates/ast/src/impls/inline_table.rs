@@ -4,7 +4,7 @@ use syntax::{SyntaxKind::*, T};
 use toml_version::TomlVersion;
 
 impl crate::InlineTable {
-    pub fn inner_begin_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
+    pub fn inner_begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {
         support::node::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
@@ -13,7 +13,7 @@ impl crate::InlineTable {
         )
     }
 
-    pub fn inner_end_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
+    pub fn inner_end_dangling_comments(&self) -> Vec<Vec<crate::EndDanglingComment>> {
         support::node::end_dangling_comments(
             self.syntax()
                 .children_with_tokens()
@@ -22,7 +22,7 @@ impl crate::InlineTable {
     }
 
     #[inline]
-    pub fn inner_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
+    pub fn inner_dangling_comments(&self) -> Vec<Vec<crate::DanglingComment>> {
         support::node::dangling_comments(
             self.syntax()
                 .children_with_tokens()

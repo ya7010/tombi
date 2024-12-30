@@ -1,3 +1,7 @@
+use ast::{
+    BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
+};
+
 use super::Format;
 use std::fmt::Write;
 
@@ -19,14 +23,11 @@ impl Format for ast::Comment {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BeginDanglingComment(pub ast::Comment);
-
 impl Format for BeginDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.write_indent()?;
-        self.0.fmt(f)?;
+        self.as_ref().fmt(f)?;
         write!(f, "{}", f.line_ending())
     }
 }
@@ -49,15 +50,12 @@ impl Format for Vec<Vec<BeginDanglingComment>> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct EndDanglingComment(pub ast::Comment);
-
 impl Format for EndDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", f.line_ending())?;
         f.write_indent()?;
-        self.0.fmt(f)
+        self.as_ref().fmt(f)
     }
 }
 
@@ -77,9 +75,6 @@ impl Format for Vec<EndDanglingComment> {
         Ok(())
     }
 }
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DanglingComment(pub ast::Comment);
 
 impl Format for DanglingComment {
     #[inline]
@@ -108,26 +103,20 @@ impl Format for Vec<Vec<DanglingComment>> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct LeadingComment(pub ast::Comment);
-
 impl Format for LeadingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.write_indent()?;
-        self.0.fmt(f)?;
+        self.as_ref().fmt(f)?;
         write!(f, "{}", f.line_ending())
     }
 }
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TailingComment(pub ast::Comment);
 
 impl Format for TailingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", f.defs().tailing_comment_space())?;
-        self.0.fmt(f)
+        self.as_ref().fmt(f)
     }
 }
 

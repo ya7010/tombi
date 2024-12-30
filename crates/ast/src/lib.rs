@@ -12,12 +12,15 @@ pub trait AstNode
 where
     Self: Debug,
 {
-    fn leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
+    fn leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment> {
         support::node::leading_comments(self.syntax().children_with_tokens())
     }
 
-    fn tailing_comment(&self) -> Option<crate::Comment> {
-        self.syntax().last_token().and_then(crate::Comment::cast)
+    fn tailing_comment(&self) -> Option<crate::TailingComment> {
+        self.syntax()
+            .last_token()
+            .and_then(crate::Comment::cast)
+            .map(Into::into)
     }
 
     fn can_cast(kind: syntax::SyntaxKind) -> bool

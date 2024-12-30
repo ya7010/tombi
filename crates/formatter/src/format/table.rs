@@ -1,4 +1,3 @@
-use super::comment::{BeginDanglingComment, EndDanglingComment, LeadingComment, TailingComment};
 use crate::Format;
 use itertools::Itertools;
 use std::fmt::Write;
@@ -8,13 +7,13 @@ impl Format for ast::Table {
         let header = self.header().unwrap();
 
         for comment in self.header_leading_comments() {
-            LeadingComment(comment).fmt(f)?;
+            comment.fmt(f)?;
         }
 
         write!(f, "[{header}]")?;
 
         if let Some(comment) = self.header_tailing_comment() {
-            TailingComment(comment).fmt(f)?;
+            comment.fmt(f)?;
         }
 
         let key_values = self.key_values().collect_vec();
@@ -24,11 +23,7 @@ impl Format for ast::Table {
         } else {
             write!(f, "{}", f.line_ending())?;
 
-            self.begin_dangling_comments()
-                .into_iter()
-                .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
-                .collect_vec()
-                .fmt(f)?;
+            self.begin_dangling_comments().fmt(f)?;
 
             for (i, key_value) in key_values.into_iter().enumerate() {
                 if i != 0 {
@@ -38,11 +33,7 @@ impl Format for ast::Table {
             }
 
             for comments in self.end_dangling_comments() {
-                comments
-                    .into_iter()
-                    .map(EndDanglingComment)
-                    .collect_vec()
-                    .fmt(f)?;
+                comments.fmt(f)?;
             }
         }
 

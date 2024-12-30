@@ -1,9 +1,5 @@
+use crate::format::Format;
 use ast::AstNode;
-
-use crate::format::{
-    comment::{LeadingComment, TailingComment},
-    Format,
-};
 use std::fmt::Write;
 
 use super::LiteralNode;
@@ -13,7 +9,7 @@ macro_rules! impl_date_time_format {
         impl Format for $type {
             fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
                 for comment in self.leading_comments() {
-                    LeadingComment(comment).fmt(f)?;
+                    comment.fmt(f)?;
                 }
 
                 let token = self.token().unwrap();
@@ -26,7 +22,7 @@ macro_rules! impl_date_time_format {
                 write!(f, "{}", text)?;
 
                 if let Some(comment) = self.tailing_comment() {
-                    TailingComment(comment).fmt(f)?;
+                    comment.fmt(f)?;
                 }
 
                 Ok(())

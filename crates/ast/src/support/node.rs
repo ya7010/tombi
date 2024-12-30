@@ -25,10 +25,10 @@ pub fn token(parent: &syntax::SyntaxNode, kind: syntax::SyntaxKind) -> Option<sy
 #[inline]
 pub fn leading_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
-) -> impl Iterator<Item = crate::Comment> {
+) -> impl Iterator<Item = crate::LeadingComment> {
     iter.take_while(|node| matches!(node.kind(), COMMENT | LINE_BREAK | WHITESPACE))
         .filter_map(|node_or_token| match node_or_token {
-            SyntaxElement::Token(token) => crate::Comment::cast(token),
+            SyntaxElement::Token(token) => crate::Comment::cast(token).map(Into::into),
             SyntaxElement::Node(_) => None,
         })
 }
@@ -37,17 +37,19 @@ pub fn leading_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 pub fn tailing_comment<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
     end: syntax::SyntaxKind,
-) -> Option<crate::Comment> {
+) -> Option<crate::TailingComment> {
     let mut iter = iter
         .skip_while(|item| item.kind() != end && item.kind() != EOF)
         .skip(1);
 
     match iter.next()? {
-        SyntaxElement::Token(token) if token.kind() == COMMENT => crate::Comment::cast(token),
+        SyntaxElement::Token(token) if token.kind() == COMMENT => {
+            crate::Comment::cast(token).map(Into::into)
+        }
         SyntaxElement::Token(token) if token.kind() == WHITESPACE => {
             iter.next().and_then(|node_or_token| match node_or_token {
                 SyntaxElement::Token(token) if token.kind() == COMMENT => {
-                    crate::Comment::cast(token)
+                    crate::Comment::cast(token).map(Into::into)
                 }
                 _ => None,
             })
@@ -59,21 +61,21 @@ pub fn tailing_comment<I: Iterator<Item = syntax::SyntaxElement>>(
 #[inline]
 pub fn dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
-) -> Vec<Vec<crate::Comment>> {
+) -> Vec<Vec<crate::DanglingComment>> {
     group_comments(iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK)))
 }
 
 #[inline]
 pub fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
-) -> Vec<Vec<crate::Comment>> {
+) -> Vec<Vec<crate::BeginDanglingComment>> {
     group_comments(iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK)))
 }
 
 #[inline]
 pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
-) -> Vec<Vec<crate::Comment>> {
+) -> Vec<Vec<crate::EndDanglingComment>> {
     group_comments(
         iter.collect_vec()
             .into_iter()
@@ -87,18 +89,21 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 
 /// Group comments with empty line breaks.
 #[inline]
-fn group_comments<I: Iterator<Item = syntax::SyntaxElement>>(iter: I) -> Vec<Vec<crate::Comment>> {
+fn group_comments<T, I: Iterator<Item = syntax::SyntaxElement>>(iter: I) -> Vec<Vec<T>>
+where
+    T: From<crate::Comment>,
+{
     iter.fold(Vec::new(), |mut acc, node_or_token| {
         match node_or_token {
             SyntaxElement::Token(token) => match token.kind() {
                 COMMENT => {
                     if let Some(last_group) = acc.last_mut() {
                         if let Some(comment) = crate::Comment::cast(token) {
-                            last_group.push(comment);
+                            last_group.push(comment.into());
                         }
                     } else {
                         if let Some(comment) = crate::Comment::cast(token) {
-                            acc.push(vec![comment]);
+                            acc.push(vec![comment.into()]);
                         }
                     }
                 }

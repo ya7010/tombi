@@ -13,7 +13,7 @@ impl AppendSemanticTokens for ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comments in self.begin_dangling_comments() {
             for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
         }
 
@@ -23,7 +23,7 @@ impl AppendSemanticTokens for ast::Root {
 
         for comments in self.end_dangling_comments() {
             for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
         }
     }
@@ -42,7 +42,7 @@ impl AppendSemanticTokens for ast::RootItem {
 impl AppendSemanticTokens for ast::Table {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
         }
 
         if let Some(token) = self.bracket_start() {
@@ -60,7 +60,7 @@ impl AppendSemanticTokens for ast::Table {
         }
 
         if let Some(comment) = self.header_tailing_comment() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into())
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into())
         }
 
         for key_value in self.key_values() {
@@ -72,7 +72,7 @@ impl AppendSemanticTokens for ast::Table {
 impl AppendSemanticTokens for ast::ArrayOfTables {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
         }
 
         if let Some(token) = self.double_bracket_start() {
@@ -90,7 +90,7 @@ impl AppendSemanticTokens for ast::ArrayOfTables {
         }
 
         if let Some(comment) = self.header_tailing_comment() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into())
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into())
         }
 
         for key_value in self.key_values() {
@@ -102,7 +102,7 @@ impl AppendSemanticTokens for ast::ArrayOfTables {
 impl AppendSemanticTokens for ast::KeyValue {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
         }
 
         if let Some(key) = self.keys() {
@@ -132,7 +132,7 @@ impl AppendSemanticTokens for ast::Key {
 impl AppendSemanticTokens for ast::Value {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.leading_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
         }
 
         match self {
@@ -179,7 +179,7 @@ impl AppendSemanticTokens for ast::Value {
         }
 
         if let Some(comment) = self.tailing_comment() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into())
+            builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into())
         }
     }
 }
@@ -188,7 +188,7 @@ impl AppendSemanticTokens for ast::Array {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comments in self.inner_begin_dangling_comments() {
             for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
         }
 
@@ -196,18 +196,18 @@ impl AppendSemanticTokens for ast::Array {
             value.append_semantic_tokens(builder);
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {
-                    builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
                 }
 
                 if let Some(comment) = comma.tailing_comment() {
-                    builder.add_token(TokenType::COMMENT, comment.syntax().clone().into())
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into())
                 }
             }
         }
 
         for comments in self.inner_end_dangling_comments() {
             for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
         }
     }
@@ -217,7 +217,7 @@ impl AppendSemanticTokens for ast::InlineTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comments in self.inner_begin_dangling_comments() {
             for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
         }
 
@@ -225,18 +225,18 @@ impl AppendSemanticTokens for ast::InlineTable {
             key_value.append_semantic_tokens(builder);
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {
-                    builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
                 }
 
                 if let Some(comment) = comma.tailing_comment() {
-                    builder.add_token(TokenType::COMMENT, comment.syntax().clone().into())
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into())
                 }
             }
         }
 
         for comments in self.inner_end_dangling_comments() {
             for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
         }
     }

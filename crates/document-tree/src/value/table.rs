@@ -261,13 +261,13 @@ impl TryIntoDocumentTree<Table> for ast::Table {
         let mut errors = Vec::new();
 
         for comment in self.header_leading_comments() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }
 
         if let Some(comment) = self.header_tailing_comment() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }
@@ -325,13 +325,13 @@ impl TryIntoDocumentTree<Table> for ast::ArrayOfTables {
         let mut errors = Vec::new();
 
         for comment in self.header_leading_comments() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }
 
         if let Some(comment) = self.header_tailing_comment() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }
@@ -392,7 +392,7 @@ impl TryIntoDocumentTree<Table> for ast::KeyValue {
         let mut errors = Vec::new();
 
         for comment in self.leading_comments() {
-            if let Err(error) = try_new_comment(&comment) {
+            if let Err(error) = try_new_comment(comment.as_ref()) {
                 errors.push(error);
             }
         }
@@ -449,7 +449,7 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
 
         for comments in self.inner_begin_dangling_comments() {
             for comment in comments {
-                if let Err(error) = try_new_comment(&comment) {
+                if let Err(error) = try_new_comment(comment.as_ref()) {
                     errors.push(error);
                 }
             }
@@ -468,12 +468,12 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
             }
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {
-                    if let Err(error) = try_new_comment(&comment) {
+                    if let Err(error) = try_new_comment(comment.as_ref()) {
                         errors.push(error);
                     }
                 }
                 if let Some(comment) = comma.tailing_comment() {
-                    if let Err(error) = try_new_comment(&comment) {
+                    if let Err(error) = try_new_comment(comment.as_ref()) {
                         errors.push(error);
                     }
                 }
@@ -484,7 +484,7 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
 
         for comments in self.inner_end_dangling_comments() {
             for comment in comments {
-                if let Err(error) = try_new_comment(&comment) {
+                if let Err(error) = try_new_comment(comment.as_ref()) {
                     errors.push(error);
                 }
             }

@@ -1,7 +1,4 @@
-use super::{
-    comment::{BeginDanglingComment, DanglingComment, EndDanglingComment},
-    Format,
-};
+use super::Format;
 use itertools::Itertools;
 use std::fmt::Write;
 
@@ -11,11 +8,7 @@ impl Format for ast::Root {
 
         let items = self.items().collect_vec();
         if !items.is_empty() {
-            self.begin_dangling_comments()
-                .into_iter()
-                .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
-                .collect_vec()
-                .fmt(f)?;
+            self.begin_dangling_comments().fmt(f)?;
 
             items
                 .into_iter()
@@ -123,18 +116,10 @@ impl Format for ast::Root {
                 })?;
 
             for comments in self.end_dangling_comments() {
-                comments
-                    .into_iter()
-                    .map(EndDanglingComment)
-                    .collect_vec()
-                    .fmt(f)?;
+                comments.fmt(f)?;
             }
         } else {
-            self.dangling_comments()
-                .into_iter()
-                .map(|comments| comments.into_iter().map(DanglingComment).collect_vec())
-                .collect_vec()
-                .fmt(f)?;
+            self.dangling_comments().fmt(f)?;
         }
 
         Ok(())

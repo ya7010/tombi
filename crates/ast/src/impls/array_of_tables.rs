@@ -4,15 +4,15 @@ use syntax::T;
 use toml_version::TomlVersion;
 
 impl crate::ArrayOfTables {
-    pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::Comment> {
+    pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment> {
         support::node::leading_comments(self.syntax().children_with_tokens())
     }
 
-    pub fn header_tailing_comment(&self) -> Option<crate::Comment> {
+    pub fn header_tailing_comment(&self) -> Option<crate::TailingComment> {
         support::node::tailing_comment(self.syntax().children_with_tokens(), T!("]]"))
     }
 
-    pub fn begin_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
+    pub fn begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {
         support::node::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
@@ -21,7 +21,7 @@ impl crate::ArrayOfTables {
         )
     }
 
-    pub fn end_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
+    pub fn end_dangling_comments(&self) -> Vec<Vec<crate::EndDanglingComment>> {
         support::node::end_dangling_comments(self.syntax().children_with_tokens())
     }
 

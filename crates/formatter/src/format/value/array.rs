@@ -1,6 +1,3 @@
-use crate::format::comment::{
-    BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
-};
 use crate::Format;
 use ast::AstNode;
 use itertools::Itertools;
@@ -59,7 +56,7 @@ fn format_multiline_array(
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     for comment in array.leading_comments() {
-        LeadingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     f.write_indent()?;
@@ -70,12 +67,7 @@ fn format_multiline_array(
     let values_with_comma = array.values_with_comma().collect_vec();
 
     if !values_with_comma.is_empty() {
-        array
-            .inner_begin_dangling_comments()
-            .into_iter()
-            .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
-            .collect_vec()
-            .fmt(f)?;
+        array.inner_begin_dangling_comments().fmt(f)?;
 
         for (i, (value, comma)) in values_with_comma.into_iter().enumerate() {
             // value format
@@ -99,7 +91,7 @@ fn format_multiline_array(
                 if !comma_leading_comments.is_empty() {
                     write!(f, "{}", f.line_ending())?;
                     for comment in comma_leading_comments {
-                        LeadingComment(comment).fmt(f)?;
+                        comment.fmt(f)?;
                     }
                     f.write_indent()?;
                     write!(f, ",")?;
@@ -112,25 +104,16 @@ fn format_multiline_array(
                 }
 
                 if let Some(comment) = comma_tailing_comment {
-                    TailingComment(comment).fmt(f)?;
+                    comment.fmt(f)?;
                 }
             }
         }
 
         for comments in array.inner_end_dangling_comments() {
-            comments
-                .into_iter()
-                .map(EndDanglingComment)
-                .collect_vec()
-                .fmt(f)?;
+            comments.fmt(f)?;
         }
     } else {
-        array
-            .inner_dangling_comments()
-            .into_iter()
-            .map(|comments| comments.into_iter().map(DanglingComment).collect_vec())
-            .collect_vec()
-            .fmt(f)?;
+        array.inner_dangling_comments().fmt(f)?;
     }
 
     f.dec_indent();
@@ -140,7 +123,7 @@ fn format_multiline_array(
     write!(f, "]")?;
 
     if let Some(comment) = array.tailing_comment() {
-        TailingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     Ok(())
@@ -151,7 +134,7 @@ fn format_singleline_array(
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     for comment in array.leading_comments() {
-        LeadingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     f.write_indent()?;
@@ -168,7 +151,7 @@ fn format_singleline_array(
     write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())?;
 
     if let Some(comment) = array.tailing_comment() {
-        TailingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     Ok(())

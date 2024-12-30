@@ -6,7 +6,6 @@ mod inline_table;
 mod integer;
 mod string;
 
-use crate::format::comment::{LeadingComment, TailingComment};
 use crate::Format;
 use std::fmt::Write;
 use syntax::SyntaxToken;
@@ -44,14 +43,14 @@ where
 {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for comment in self.leading_comments() {
-            LeadingComment(comment).fmt(f)?;
+            comment.fmt(f)?;
         }
 
         f.write_indent()?;
         write!(f, "{}", self.token().unwrap())?;
 
         if let Some(comment) = self.tailing_comment() {
-            TailingComment(comment).fmt(f)?;
+            comment.fmt(f)?;
         }
 
         Ok(())

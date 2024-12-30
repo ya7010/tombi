@@ -1,8 +1,4 @@
-use crate::format::comment::{BeginDanglingComment, DanglingComment, EndDanglingComment};
-use crate::{
-    format::comment::{LeadingComment, TailingComment},
-    Format,
-};
+use crate::Format;
 use ast::AstNode;
 use itertools::Itertools;
 use std::fmt::Write;
@@ -61,7 +57,7 @@ fn format_multiline_inline_table(
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     for comment in table.leading_comments() {
-        LeadingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     f.write_indent()?;
@@ -72,12 +68,7 @@ fn format_multiline_inline_table(
     let key_values_with_comma = table.key_values_with_comma().collect_vec();
 
     if !key_values_with_comma.is_empty() {
-        table
-            .inner_begin_dangling_comments()
-            .into_iter()
-            .map(|comments| comments.into_iter().map(BeginDanglingComment).collect_vec())
-            .collect_vec()
-            .fmt(f)?;
+        table.inner_begin_dangling_comments().fmt(f)?;
 
         for (i, (key_value, comma)) in key_values_with_comma.into_iter().enumerate() {
             // value format
@@ -101,7 +92,7 @@ fn format_multiline_inline_table(
                 if !comma_leading_comments.is_empty() {
                     write!(f, "{}", f.line_ending())?;
                     for comment in comma_leading_comments {
-                        LeadingComment(comment).fmt(f)?;
+                        comment.fmt(f)?;
                     }
                     f.write_indent()?;
                     write!(f, ",")?;
@@ -114,25 +105,16 @@ fn format_multiline_inline_table(
                 }
 
                 if let Some(comment) = comma_tailing_comment {
-                    TailingComment(comment).fmt(f)?;
+                    comment.fmt(f)?;
                 }
             }
         }
 
         for comments in table.inner_end_dangling_comments() {
-            comments
-                .into_iter()
-                .map(EndDanglingComment)
-                .collect_vec()
-                .fmt(f)?;
+            comments.fmt(f)?;
         }
     } else {
-        table
-            .inner_dangling_comments()
-            .into_iter()
-            .map(|comments| comments.into_iter().map(DanglingComment).collect_vec())
-            .collect_vec()
-            .fmt(f)?;
+        table.inner_dangling_comments().fmt(f)?;
     }
 
     f.dec_indent();
@@ -142,7 +124,7 @@ fn format_multiline_inline_table(
     write!(f, "}}")?;
 
     if let Some(comment) = table.tailing_comment() {
-        TailingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     Ok(())
@@ -153,7 +135,7 @@ fn format_singleline_inline_table(
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     for comment in table.leading_comments() {
-        LeadingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     f.write_indent()?;
@@ -182,7 +164,7 @@ fn format_singleline_inline_table(
     )?;
 
     if let Some(comment) = table.tailing_comment() {
-        TailingComment(comment).fmt(f)?;
+        comment.fmt(f)?;
     }
 
     Ok(())

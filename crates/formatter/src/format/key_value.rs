@@ -3,12 +3,10 @@ use ast::AstNode;
 use crate::Format;
 use std::fmt::Write;
 
-use super::comment::LeadingComment;
-
 impl Format for ast::KeyValue {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for comment in self.leading_comments() {
-            LeadingComment(comment).fmt(f)?;
+            comment.fmt(f)?;
         }
 
         f.write_indent()?;
