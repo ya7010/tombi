@@ -32,8 +32,14 @@ infa = inf
 bs = "2"  # bs tailing comment
 ls = '3'  # ls tailing comment
 array1 = [
-  # array begin dangling comment1
-  # array begin dangling comment2
+  # array begin dangling comment 1-1
+  # array begin dangling comment 1-2
+
+  # array begin dangling comment 2-1
+  # array begin dangling comment 2-2
+  # array begin dangling comment 2-3
+
+  # array begin dangling comment 3-1
 
   # value1 leading comment1
   # value1 leading comment2
@@ -48,8 +54,14 @@ array1 = [
   # value2 leading comment3
   { key3 = 11, key4 = 2024-01-01T10:10:00 },  # value2 tailing comment
 
-  # array end dangling comment1
-  # array end dangling comment2
+  # array end dangling comment 1-1
+  # array end dangling comment 1-2
+
+  # array end dangling comment 2-1
+  # array end dangling comment 2-2
+  # array end dangling comment 2-3
+
+  # array end dangling comment 3-1
 ]  # array tailing comment
 array2 = [1, 2, 3]
 array3 = [
@@ -61,8 +73,14 @@ array4 = [[1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1]]
 array5 = [
   1,
   {
-    # inline begin dangling comment1
-    # inline begin dangling comment2
+    # inline begin dangling comment 1-1
+    # inline begin dangling comment 1-2
+
+    # inline begin dangling comment 2-1
+    # inline begin dangling comment 2-2
+    # inline begin dangling comment 2-3
+
+    # inline begin dangling comment 3-1
 
     # key1 leading comment1
     # key1 leading comment2
