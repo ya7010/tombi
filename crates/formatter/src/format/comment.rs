@@ -80,7 +80,7 @@ impl Format for DanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.write_indent()?;
-        self.0.fmt(f)
+        self.as_ref().fmt(f)
     }
 }
 
