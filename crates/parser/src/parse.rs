@@ -36,14 +36,14 @@ mod support {
     const TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
 
     pub fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
-        inner_dangling_comments(p, false);
+        impl_dangling_comments(p, false);
     }
 
     pub fn end_dangling_comments(p: &mut crate::parser::Parser<'_>, last_eat: bool) {
-        inner_dangling_comments(p, last_eat);
+        impl_dangling_comments(p, last_eat);
     }
 
-    fn inner_dangling_comments(p: &mut crate::parser::Parser<'_>, last_eat: bool) {
+    fn impl_dangling_comments(p: &mut crate::parser::Parser<'_>, last_eat: bool) {
         if last_eat {
             while p.eat_ts(DANGLING_COMMENTS_KINDS) {}
             return;
