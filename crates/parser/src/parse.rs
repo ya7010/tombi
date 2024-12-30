@@ -36,6 +36,19 @@ mod support {
     const TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
 
     pub fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
+        inner_dangling_comments(p, false);
+    }
+
+    pub fn end_dangling_comments(p: &mut crate::parser::Parser<'_>, last_eat: bool) {
+        inner_dangling_comments(p, last_eat);
+    }
+
+    fn inner_dangling_comments(p: &mut crate::parser::Parser<'_>, last_eat: bool) {
+        if last_eat {
+            while p.eat_ts(DANGLING_COMMENTS_KINDS) {}
+            return;
+        }
+
         let mut n = 0;
         let mut comment_count = 0;
         while p.nth_at_ts(n, DANGLING_COMMENTS_KINDS) {
@@ -67,10 +80,6 @@ mod support {
             }
             n += 1;
         }
-    }
-
-    pub fn end_dangling_comments(p: &mut crate::parser::Parser<'_>) {
-        while p.eat_ts(DANGLING_COMMENTS_KINDS) {}
     }
 
     pub fn peek_leading_comments(p: &mut crate::parser::Parser<'_>) -> usize {

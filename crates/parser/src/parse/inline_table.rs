@@ -51,7 +51,7 @@ impl Parse for ast::InlineTable {
             }
         }
 
-        end_dangling_comments(p);
+        end_dangling_comments(p, true);
 
         let end_range = p.current_range();
 

@@ -31,7 +31,7 @@ impl Parse for ast::Root {
             }
         }
 
-        end_dangling_comments(p);
+        end_dangling_comments(p, true);
 
         m.complete(p, ROOT);
     }

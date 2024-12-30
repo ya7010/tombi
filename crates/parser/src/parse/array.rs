@@ -39,7 +39,7 @@ impl Parse for ast::Array {
             }
         }
 
-        end_dangling_comments(p);
+        end_dangling_comments(p, true);
 
         if !p.eat(T![']']) {
             p.error(crate::Error::new(ExpectedBracketEnd, p.current_range()));
