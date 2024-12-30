@@ -23,6 +23,10 @@ pub use types::*;
 #[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-toml-version" = TomlVersion::V1_1_0_Preview)))]
 pub struct Config {
     /// # TOML version.
+    ///
+    /// The version specified here is interpreted preferentially,
+    /// but if the schema of the file to be inspected is of a lower version,
+    /// it will be interpreted in that version.
     #[cfg_attr(feature = "jsonschema", schemars(default = "TomlVersion::default"))]
     pub toml_version: Option<TomlVersion>,
 

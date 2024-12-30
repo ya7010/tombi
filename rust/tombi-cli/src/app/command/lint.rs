@@ -12,12 +12,16 @@ pub struct Args {
     files: Vec<String>,
 
     /// TOML version.
+    ///
+    /// The version specified here is interpreted preferentially,
+    /// but if the schema of the file to be inspected is of a lower version,
+    /// it will be interpreted in that version.
     #[arg(long, value_enum, default_value = None)]
     toml_version: Option<TomlVersion>,
 
-    /// Use schema catalog.
+    /// Enable or disable the schema catalog.
     #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
-    use_schema_catalog: Option<bool>,
+    schema_catalog_enabled: Option<bool>,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -79,9 +83,10 @@ where
     };
 
     runtime.block_on(async {
-        if args.use_schema_catalog.unwrap_or_else(|| {
+        if args.schema_catalog_enabled.unwrap_or_else(|| {
             schema_options
-                .use_schema_catalog
+                .catalog
+                .and_then(|catalog| catalog.enabled)
                 .unwrap_or_default()
                 .value()
         }) {

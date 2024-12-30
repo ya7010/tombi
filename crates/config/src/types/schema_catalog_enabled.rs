@@ -1,22 +1,22 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
-pub struct UseSchemaCatalog(pub bool);
+pub struct SchemaCatalogEnabled(pub bool);
 
-impl UseSchemaCatalog {
+impl SchemaCatalogEnabled {
     #[inline]
     pub fn value(&self) -> bool {
         self.0
     }
 }
 
-impl Default for UseSchemaCatalog {
+impl Default for SchemaCatalogEnabled {
     fn default() -> Self {
         Self(true)
     }
 }
 
-impl From<bool> for UseSchemaCatalog {
+impl From<bool> for SchemaCatalogEnabled {
     fn from(value: bool) -> Self {
         Self(value)
     }

@@ -11,7 +11,7 @@ line-ending = "lf"
 [lint]
 
 [schema]
-use-schema-catalog = false
+catalog.enabled = true
 
 [[schemas]]
 path = "tombi.schema.json"

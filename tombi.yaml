@@ -8,8 +8,9 @@ format:
 lint:
 
 schema:
-  use-schema-catalog: true
-  catalog-path: https://www.schemastore.org/api/json/catalog.json
+  catalog:
+    enabled: true
+    path: https://www.schemastore.org/api/json/catalog.json
 
 schemas:
   - path: "tombi.schema.json"

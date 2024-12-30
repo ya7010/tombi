@@ -17,6 +17,7 @@
     },
     "toml-version": {
       "title": "TOML version.",
+      "description": "The version specified here is interpreted preferentially,\n but if the schema of the file to be inspected is of a lower version,\n it will be interpreted in that version.",
       "anyOf": [
         {
           "$ref": "#/$defs/TomlVersion"
@@ -192,20 +193,36 @@
     "SchemaOptions": {
       "type": "object",
       "properties": {
-        "use-schema-catalog": {
-          "title": "Use Schema catalog.",
+        "catalog": {
+          "title": "Schema catalog options.",
           "anyOf": [
             {
-              "$ref": "#/$defs/UseSchemaCatalog"
+              "$ref": "#/$defs/SchemaCatalog"
             },
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SchemaCatalog": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "title": "Enable or disable the schema catalog.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SchemaCatalogEnabled"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "catalog-path": {
-          "title": "the catalog path.",
+        "path": {
+          "title": "The schema catalog path.",
           "anyOf": [
             {
               "$ref": "#/$defs/OneOrMany_for_SchemaCatalogPath"
@@ -219,7 +236,7 @@
       },
       "additionalProperties": false
     },
-    "UseSchemaCatalog": {
+    "SchemaCatalogEnabled": {
       "type": "boolean"
     },
     "OneOrMany_for_SchemaCatalogPath": {

@@ -1,6 +1,6 @@
 use toml_version::TomlVersion;
 
-use crate::{OneOrMany, SchemaCatalogPath, UseSchemaCatalog};
+use crate::{OneOrMany, SchemaCatalogEnabled, SchemaCatalogPath};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -8,28 +8,31 @@ use crate::{OneOrMany, SchemaCatalogPath, UseSchemaCatalog};
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone)]
 pub struct SchemaOptions {
-    /// # Use Schema catalog.
-    #[cfg_attr(
-        feature = "jsonschema",
-        schemars(default = "UseSchemaCatalog::default")
-    )]
-    pub use_schema_catalog: Option<UseSchemaCatalog>,
-
-    /// # the catalog path.
-    #[cfg_attr(
-        feature = "jsonschema",
-        schemars(default = "SchemaCatalogPath::default")
-    )]
-    pub catalog_path: Option<OneOrMany<SchemaCatalogPath>>,
+    /// # Schema catalog options.
+    pub catalog: Option<SchemaCatalog>,
 }
 
 impl SchemaOptions {
     pub const fn default() -> Self {
-        Self {
-            use_schema_catalog: None,
-            catalog_path: None,
-        }
+        Self { catalog: None }
     }
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone)]
+pub struct SchemaCatalog {
+    /// # Enable or disable the schema catalog.
+    pub enabled: Option<SchemaCatalogEnabled>,
+
+    /// # The schema catalog path.
+    #[cfg_attr(
+        feature = "jsonschema",
+        schemars(default = "SchemaCatalogPath::default")
+    )]
+    pub path: Option<OneOrMany<SchemaCatalogPath>>,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

@@ -67,7 +67,8 @@ impl LanguageServer for Backend {
             .config
             .schema
             .as_ref()
-            .map(|options| options.use_schema_catalog.unwrap_or_default())
+            .and_then(|options| options.catalog.as_ref())
+            .and_then(|catalog| catalog.enabled)
             .unwrap_or_default()
             .value()
         {
