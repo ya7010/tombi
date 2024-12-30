@@ -11,8 +11,10 @@ pub trait AppendSemanticTokens {
 
 impl AppendSemanticTokens for ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for comment in self.begin_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+        for comments in self.begin_dangling_comments() {
+            for comment in comments {
+                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            }
         }
 
         for item in self.items() {
@@ -182,8 +184,10 @@ impl AppendSemanticTokens for ast::Value {
 
 impl AppendSemanticTokens for ast::Array {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for comment in self.inner_begin_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+        for comments in self.inner_begin_dangling_comments() {
+            for comment in comments {
+                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            }
         }
 
         for (value, comma) in self.values_with_comma() {
@@ -207,8 +211,10 @@ impl AppendSemanticTokens for ast::Array {
 
 impl AppendSemanticTokens for ast::InlineTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for comment in self.inner_begin_dangling_comments() {
-            builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+        for comments in self.inner_begin_dangling_comments() {
+            for comment in comments {
+                builder.add_token(TokenType::COMMENT, comment.syntax().clone().into());
+            }
         }
 
         for (key_value, comma) in self.key_values_with_comma() {

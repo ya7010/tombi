@@ -2,7 +2,7 @@ use crate::support;
 use crate::AstNode;
 
 impl crate::Root {
-    pub fn begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+    pub fn begin_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
         support::node::begin_dangling_comments(self.syntax().children_with_tokens())
     }
 

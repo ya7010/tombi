@@ -68,11 +68,13 @@ fn format_multiline_array(
     f.inc_indent();
 
     if !array.values().collect_vec().is_empty() {
-        array
-            .inner_begin_dangling_comments()
-            .map(BeginDanglingComment)
-            .collect_vec()
-            .fmt(f)?;
+        for comments in array.inner_begin_dangling_comments() {
+            comments
+                .into_iter()
+                .map(BeginDanglingComment)
+                .collect_vec()
+                .fmt(f)?;
+        }
 
         for (i, (value, comma)) in array.values_with_comma().enumerate() {
             // value format

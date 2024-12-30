@@ -69,11 +69,13 @@ fn format_multiline_inline_table(
 
     f.inc_indent();
 
-    table
-        .inner_begin_dangling_comments()
-        .map(BeginDanglingComment)
-        .collect_vec()
-        .fmt(f)?;
+    for comments in table.inner_begin_dangling_comments() {
+        comments
+            .into_iter()
+            .map(BeginDanglingComment)
+            .collect_vec()
+            .fmt(f)?;
+    }
 
     for (i, (key_value, comma)) in table.key_values_with_comma().enumerate() {
         // value format

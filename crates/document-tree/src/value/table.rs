@@ -447,9 +447,11 @@ impl TryIntoDocumentTree<Table> for ast::InlineTable {
         let mut table = Table::new_inline_table(&self);
         let mut errors = Vec::new();
 
-        for comment in self.inner_begin_dangling_comments() {
-            if let Err(error) = try_new_comment(&comment) {
-                errors.push(error);
+        for comments in self.inner_begin_dangling_comments() {
+            for comment in comments {
+                if let Err(error) = try_new_comment(&comment) {
+                    errors.push(error);
+                }
             }
         }
 

@@ -69,11 +69,36 @@ pub fn dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 #[inline]
 pub fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
-) -> impl Iterator<Item = crate::Comment> {
+) -> Vec<Vec<crate::Comment>> {
     iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
-        .filter_map(|node_or_token| match node_or_token {
-            SyntaxElement::Token(token) => crate::Comment::cast(token),
-            SyntaxElement::Node(_) => None,
+        .fold(Vec::new(), |mut acc, node_or_token| {
+            match node_or_token {
+                SyntaxElement::Token(token) => match token.kind() {
+                    COMMENT => {
+                        if let Some(last_group) = acc.last_mut() {
+                            if let Some(comment) = crate::Comment::cast(token) {
+                                last_group.push(comment);
+                            }
+                        } else {
+                            if let Some(comment) = crate::Comment::cast(token) {
+                                acc.push(vec![comment]);
+                            }
+                        }
+                    }
+                    LINE_BREAK => {
+                        if token
+                            .next_sibling_or_token()
+                            .map_or(false, |next| next.kind() == LINE_BREAK)
+                        {
+                            acc.push(Vec::new());
+                        }
+                    }
+                    WHITESPACE => {}
+                    _ => unreachable!("unexpected token {:?}", token.kind()),
+                },
+                SyntaxElement::Node(_) => {}
+            }
+            acc
         })
 }
 

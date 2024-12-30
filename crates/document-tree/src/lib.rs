@@ -45,9 +45,11 @@ impl TryIntoDocumentTree<Root> for ast::Root {
         let mut root = Root(Table::new_root(&self));
         let mut errors = Vec::new();
 
-        for comment in self.begin_dangling_comments() {
-            if let Err(error) = try_new_comment(&comment) {
-                errors.push(error);
+        for comments in self.begin_dangling_comments() {
+            for comment in comments {
+                if let Err(error) = try_new_comment(&comment) {
+                    errors.push(error);
+                }
             }
         }
 

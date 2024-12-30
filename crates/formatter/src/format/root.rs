@@ -11,10 +11,13 @@ impl Format for ast::Root {
 
         let items = self.items().collect_vec();
         if !items.is_empty() {
-            self.begin_dangling_comments()
-                .map(BeginDanglingComment)
-                .collect_vec()
-                .fmt(f)?;
+            for comments in self.begin_dangling_comments() {
+                comments
+                    .into_iter()
+                    .map(BeginDanglingComment)
+                    .collect_vec()
+                    .fmt(f)?;
+            }
 
             items
                 .into_iter()

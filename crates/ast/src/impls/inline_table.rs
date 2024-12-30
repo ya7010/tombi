@@ -4,7 +4,7 @@ use syntax::{SyntaxKind::*, T};
 use toml_version::TomlVersion;
 
 impl crate::InlineTable {
-    pub fn inner_begin_dangling_comments(&self) -> impl Iterator<Item = crate::Comment> {
+    pub fn inner_begin_dangling_comments(&self) -> Vec<Vec<crate::Comment>> {
         support::node::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
