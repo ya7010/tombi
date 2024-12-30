@@ -17,7 +17,8 @@ impl crate::Table {
             self.syntax()
                 .children_with_tokens()
                 .skip_while(|node| !matches!(node.kind(), T!(']')))
-                .skip_while(|node| !matches!(node.kind(), LINE_BREAK)),
+                .skip_while(|node| !matches!(node.kind(), LINE_BREAK))
+                .take_while(|node| matches!(node.kind(), COMMENT | LINE_BREAK | WHITESPACE)),
         )
     }
 

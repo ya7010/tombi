@@ -60,12 +60,10 @@ impl Format for EndDanglingComment {
 impl Format for Vec<Vec<EndDanglingComment>> {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        for comments in self {
-            if comments.is_empty() {
-                return Ok(());
+        for (i, comments) in self.iter().enumerate() {
+            if i != 0 {
+                write!(f, "{}", f.line_ending())?;
             }
-
-            write!(f, "{}", f.line_ending())?;
 
             for comment in comments {
                 comment.fmt(f)?;

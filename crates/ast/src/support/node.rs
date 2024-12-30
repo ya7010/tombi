@@ -76,15 +76,30 @@ pub fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
 ) -> Vec<Vec<crate::EndDanglingComment>> {
-    group_comments(
-        iter.collect_vec()
-            .into_iter()
-            .rev()
-            .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
-            .collect_vec()
-            .into_iter()
-            .rev(),
-    )
+    let comment_iter = iter
+        .collect_vec()
+        .into_iter()
+        .rev()
+        .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
+        .collect_vec()
+        .into_iter()
+        .rev();
+
+    let comment_groups = group_comments(comment_iter.clone());
+    if comment_groups.is_empty()
+        || comment_iter
+            .skip(1) // skip LineBreak
+            .skip_while(|node| node.kind() == WHITESPACE)
+            .next()
+            .map_or(false, |node| node.kind() == COMMENT)
+    {
+        comment_groups
+    } else {
+        let mut result = Vec::with_capacity(comment_groups.len() + 1);
+        result.push(Vec::with_capacity(0));
+        result.extend(comment_groups);
+        result
+    }
 }
 
 /// Group comments with empty line breaks.
@@ -93,7 +108,7 @@ fn group_comments<T, I: Iterator<Item = syntax::SyntaxElement>>(iter: I) -> Vec<
 where
     T: From<crate::Comment>,
 {
-    let mut is_new_group = true;
+    let mut is_new_group = false;
     iter.fold(Vec::new(), |mut acc, node_or_token| {
         match node_or_token {
             SyntaxElement::Token(token) => match token.kind() {

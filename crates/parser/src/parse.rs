@@ -80,6 +80,14 @@ mod support {
             }
             n += 1;
         }
+
+        if p.nth_at(n + 1, EOF) {
+            for _ in 0..=n {
+                if !p.eat_ts(DANGLING_COMMENTS_KINDS) {
+                    break;
+                }
+            }
+        }
     }
 
     pub fn peek_leading_comments(p: &mut crate::parser::Parser<'_>) -> usize {

@@ -118,4 +118,47 @@ mod tests {
             "#
         ) -> Ok(source);
     }
+
+    test_format! {
+        #[test]
+        fn table_end_dangling_comment1(
+            r#"
+            [header]
+            key = "value"  # key tailing comment
+            # key value end dangling comment 1-1
+            # key value end dangling comment 1-2
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn table_end_dangling_comment2(
+            r#"
+            [header]
+            key = "value"  # key tailing comment
+            # key value end dangling comment 1-1
+            # key value end dangling comment 1-2
+
+            # key value end dangling comment 2-1
+            # key value end dangling comment 2-2
+            # key value end dangling comment 2-3
+
+            # key value end dangling comment 3-1
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn table_end_dangling_comment3(
+            r#"
+            [header]
+            key = "value"  # key tailing comment
+
+            # key value end dangling comment1
+            # key value end dangling comment2
+            "#
+        ) -> Ok(source);
+    }
 }

@@ -33,6 +33,7 @@ impl Parse for ast::ArrayOfTables {
         if !p.at_ts(TS_LINE_END) {
             invalid_line(p, ExpectedLineBreak);
         }
+        p.eat(LINE_BREAK);
 
         begin_dangling_comments(p);
 
