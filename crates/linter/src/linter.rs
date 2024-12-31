@@ -40,12 +40,12 @@ impl<'a> Linter<'a> {
             None => None,
         };
 
-        let toml_version = schema
+        self.toml_version = schema
             .map(|s| s.toml_version())
             .flatten()
             .unwrap_or(self.toml_version);
 
-        let p = parser::parse(source, toml_version);
+        let p = parser::parse(source, self.toml_version);
         let mut errors = vec![];
 
         for err in p.errors() {
@@ -59,7 +59,7 @@ impl<'a> Linter<'a> {
 
             root.lint(&mut self);
 
-            if let Err(errs) = root.try_into_document_tree(toml_version) {
+            if let Err(errs) = root.try_into_document_tree(self.toml_version) {
                 for err in errs {
                     err.set_diagnostic(&mut errors);
                 }

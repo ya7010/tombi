@@ -64,12 +64,12 @@ impl<'a> Formatter<'a> {
             None => None,
         };
 
-        let toml_version = schema
+        self.toml_version = schema
             .map(|s| s.toml_version())
             .flatten()
             .unwrap_or(self.toml_version);
 
-        match parser::parse(source, toml_version).try_cast::<ast::Root>() {
+        match parser::parse(source, self.toml_version).try_cast::<ast::Root>() {
             Ok(root) => {
                 tracing::trace!("TOML AST: {:#?}", root);
 
