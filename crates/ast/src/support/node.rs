@@ -85,7 +85,7 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         .into_iter()
         .rev();
 
-    // NOTE: If there is a whitespace comment at the beginning, it is treated as a group with an empty element.
+    // NOTE: If there is a whitespace comment at the beginning, it is treated as a empty comment group.
     //       This allows us to insert a line break at the beginning when formatting.
     let comment_groups = group_comments(comment_iter.clone());
     if comment_groups.is_empty()
@@ -95,8 +95,10 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
             .next()
             .map_or(false, |node| node.kind() == COMMENT)
     {
+        // No new line break at the beginning
         comment_groups
     } else {
+        // New line break at the beginning
         let mut result = Vec::with_capacity(comment_groups.len() + 1);
         result.push(Vec::with_capacity(0));
         result.extend(comment_groups);
