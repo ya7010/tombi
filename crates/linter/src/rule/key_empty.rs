@@ -28,7 +28,6 @@ mod tests {
             config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
-            None,
             &schema_store::SchemaStore::default(),
         )
         .lint("'' = 1")

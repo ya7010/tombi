@@ -10,6 +10,7 @@ ast = { workspace = true }
 config = { workspace = true }
 diagnostic = { workspace = true }
 document-tree = { workspace = true }
+itertools.workspace = true
 parser = { workspace = true }
 schema-store.workspace = true
 schemars = { workspace = true }

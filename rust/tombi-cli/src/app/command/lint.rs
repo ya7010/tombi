@@ -198,9 +198,14 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).await.is_ok() {
-        match linter::Linter::new(toml_version, lint_options, source_path, None, schema_store)
-            .lint(&source)
-            .await
+        match linter::Linter::new(
+            toml_version,
+            lint_options,
+            source_path.map(itertools::Either::Right),
+            schema_store,
+        )
+        .lint(&source)
+        .await
         {
             Ok(()) => {
                 return true;

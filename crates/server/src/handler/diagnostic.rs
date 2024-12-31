@@ -1,4 +1,5 @@
 use config::LintOptions;
+use itertools::Either;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
@@ -21,11 +22,7 @@ pub async fn handle_diagnostic(
                 .lint
                 .as_ref()
                 .unwrap_or(&LintOptions::default()),
-            match text_document.uri.scheme() {
-                "file" => Some(std::path::Path::new(text_document.uri.path())),
-                _ => None,
-            },
-            None,
+            Some(Either::Left(&text_document.uri)),
             &backend.schema_store,
         )
         .lint(&document.source)

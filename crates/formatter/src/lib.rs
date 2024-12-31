@@ -37,7 +37,6 @@ macro_rules! test_format {
                 $toml_version,
                 &$options,
                 None,
-                None,
                 &schema_store::SchemaStore::default()
             ).format($source).await {
                 Ok(formatted_text) => {
@@ -64,7 +63,6 @@ macro_rules! test_format {
             match $crate::Formatter::new(
                 $toml_version,
                 &$options,
-                None,
                 None,
                 &schema_store::SchemaStore::default()
             ).format($source).await {

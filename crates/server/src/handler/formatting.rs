@@ -1,5 +1,6 @@
 use config::FormatOptions;
 use dashmap::try_result::TryResult;
+use itertools::Either;
 use tower_lsp::lsp_types::{DocumentFormattingParams, TextEdit};
 
 use crate::backend::Backend;
@@ -31,11 +32,7 @@ pub async fn handle_formatting(
             .format
             .as_ref()
             .unwrap_or(&FormatOptions::default()),
-        match text_document.uri.scheme() {
-            "file" => Some(std::path::Path::new(text_document.uri.path())),
-            _ => None,
-        },
-        None,
+        Some(Either::Left(&text_document.uri)),
         &backend.schema_store,
     )
     .format(&document_info.source)

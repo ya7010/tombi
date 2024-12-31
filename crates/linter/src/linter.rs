@@ -6,13 +6,13 @@ use config::TomlVersion;
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use document_tree::TryIntoDocumentTree;
+use itertools::Either;
 use url::Url;
 
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
-    source_path: Option<&'a std::path::Path>,
-    schema_url: Option<&'a Url>,
+    schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
     schema_store: &'a schema_store::SchemaStore,
     diagnostics: Vec<crate::Diagnostic>,
 }
@@ -22,25 +22,23 @@ impl<'a> Linter<'a> {
     pub fn new(
         toml_version: TomlVersion,
         options: &'a crate::LintOptions,
-        source_path: Option<&'a std::path::Path>,
-        schema_url: Option<&'a Url>,
+        schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Self {
         Self {
             toml_version,
             options: Cow::Borrowed(options),
-            source_path,
-            schema_url,
+            schema_url_or_path,
             schema_store,
             diagnostics: Vec::new(),
         }
     }
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let schema = self
-            .schema_store
-            .get_schema(self.schema_url, self.source_path)
-            .await;
+        let schema = match self.schema_url_or_path {
+            Some(schema_url_or_path) => self.schema_store.get_schema(schema_url_or_path).await,
+            None => None,
+        };
 
         let toml_version = schema
             .map(|s| s.toml_version())

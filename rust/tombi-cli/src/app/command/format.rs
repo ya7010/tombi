@@ -216,8 +216,7 @@ where
         match formatter::Formatter::new(
             toml_version,
             format_options,
-            source_path,
-            None,
+            source_path.map(itertools::Either::Right),
             schema_store,
         )
         .format(&source)
