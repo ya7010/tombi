@@ -128,4 +128,10 @@ mod test {
         #[test]
         fn literal_string_key(r#"'key' = 'value'"#) -> Ok(json!({"key": "value"}))
     }
+
+    test_serialize! {
+        // FIXME: This should be a dotted key
+        #[test]
+        fn float_key(r#"3.14 = 'value'"#) -> Ok(json!({"3.14": "value"}))
+    }
 }
