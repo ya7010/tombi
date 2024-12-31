@@ -4,19 +4,8 @@ pub mod formatter;
 pub use config::FormatOptions;
 pub use formatter::Formatter;
 
-use diagnostic::Diagnostic;
 use format::Format;
 use formatter::definitions::Definitions;
-
-pub fn format(source: &str) -> Result<String, Vec<Diagnostic>> {
-    let config = config::load();
-
-    Formatter::new(
-        config.toml_version.unwrap_or_default(),
-        &config.format.unwrap_or_default(),
-    )
-    .format(source)
-}
 
 #[cfg(test)]
 #[macro_export]
@@ -42,9 +31,15 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Ok($expected:expr);) => {
-        #[test]
-        fn $name() {
-            match $crate::Formatter::new($toml_version, &$options).format($source) {
+        #[tokio::test]
+        async fn $name() {
+            match $crate::Formatter::new(
+                $toml_version,
+                &$options,
+                None,
+                None,
+                &schema_store::SchemaStore::default()
+            ).format($source).await {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }
@@ -64,9 +59,15 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Err(_);) => {
-        #[test]
-        fn $name() {
-            match $crate::Formatter::new($toml_version, &$options).format($source) {
+        #[tokio::test]
+        async fn $name() {
+            match $crate::Formatter::new(
+                $toml_version,
+                &$options,
+                None,
+                None,
+                &schema_store::SchemaStore::default()
+            ).format($source).await {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {
                     pretty_assertions::assert_ne!(errors, vec![]);
@@ -83,7 +84,8 @@ mod test {
     use super::*;
 
     test_format! {
-        #[test] fn test_key_values(r#"
+        #[test]
+        fn test_key_values(r#"
             array5 = [
               1,
               {
@@ -108,7 +110,8 @@ mod test {
     }
 
     test_format! {
-    #[test] fn test_sample_toml(
+    #[test]
+    fn test_sample_toml(
 r#"
 # begin dangling comment1
 # begin dangling comment2

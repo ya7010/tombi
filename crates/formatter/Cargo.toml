@@ -7,15 +7,18 @@ license = { workspace = true }
 
 [dependencies]
 ast = { workspace = true }
+config = { workspace = true }
+diagnostic = { workspace = true }
+itertools = { workspace = true }
 parser = { workspace = true }
+schema-store = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
 syntax = { workspace = true }
-tracing = { workspace = true }
 text = { workspace = true }
-diagnostic = { workspace = true }
-config = { workspace = true }
-itertools.workspace = true
+tokio = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
 
 [dev-dependencies]
 assert_matches = { workspace = true }

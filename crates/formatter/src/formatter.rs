@@ -5,6 +5,7 @@ use config::{DateTimeDelimiter, LineEnding, TomlVersion};
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use std::fmt::Write;
+use url::Url;
 
 pub struct Formatter<'a> {
     toml_version: TomlVersion,
@@ -12,18 +13,30 @@ pub struct Formatter<'a> {
     skip_indent: bool,
     defs: crate::Definitions,
     options: &'a crate::FormatOptions,
+    source_path: Option<&'a std::path::Path>,
+    schema_url: Option<&'a Url>,
+    schema_store: &'a schema_store::SchemaStore,
     buf: String,
 }
 
 impl<'a> Formatter<'a> {
     #[inline]
-    pub fn new(toml_version: TomlVersion, options: &'a crate::FormatOptions) -> Self {
+    pub fn new(
+        toml_version: TomlVersion,
+        options: &'a crate::FormatOptions,
+        source_path: Option<&'a std::path::Path>,
+        schema_url: Option<&'a Url>,
+        schema_store: &'a schema_store::SchemaStore,
+    ) -> Self {
         Self {
             toml_version,
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
             options,
+            source_path,
+            schema_url,
+            schema_store,
             buf: String::new(),
         }
     }
@@ -47,8 +60,17 @@ impl<'a> Formatter<'a> {
         Ok(result)
     }
 
-    pub fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let toml_version = self.toml_version;
+    pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
+        let schema = self
+            .schema_store
+            .get_schema(self.schema_url, self.source_path)
+            .await;
+
+        let toml_version = schema
+            .map(|s| s.toml_version())
+            .flatten()
+            .unwrap_or(self.toml_version);
+
         match parser::parse(source, toml_version).try_cast::<ast::Root>() {
             Ok(root) => {
                 tracing::trace!("TOML AST: {:#?}", root);

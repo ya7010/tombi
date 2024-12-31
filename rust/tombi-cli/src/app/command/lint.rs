@@ -187,7 +187,7 @@ async fn lint_file<R, P>(
     printer: P,
     source_path: Option<&std::path::Path>,
     toml_version: TomlVersion,
-    options: &LintOptions,
+    lint_options: &LintOptions,
     schema_store: &schema_store::SchemaStore,
 ) -> bool
 where
@@ -198,7 +198,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).await.is_ok() {
-        match linter::Linter::new(toml_version, options, source_path, None, schema_store)
+        match linter::Linter::new(toml_version, lint_options, source_path, None, schema_store)
             .lint(&source)
             .await
         {

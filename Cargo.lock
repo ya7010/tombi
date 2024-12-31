@@ -554,13 +554,16 @@ dependencies = [
  "parser",
  "pretty_assertions",
  "rstest",
+ "schema-store",
  "schemars",
  "serde",
  "syntax",
  "text",
  "textwrap",
+ "tokio",
  "tracing",
  "tracing-subscriber",
+ "url",
 ]
 
 [[package]]

@@ -15,6 +15,10 @@ pub struct Args {
     #[arg(long, value_enum, default_value = None)]
     toml_version: Option<TomlVersion>,
 
+    /// Enable or disable the schema catalog.
+    #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
+    schema_catalog_enabled: Option<bool>,
+
     /// Check only and don't overwrite files.
     #[arg(long, default_value_t = false)]
     check: bool,
@@ -22,7 +26,13 @@ pub struct Args {
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn run(args: Args) -> Result<(), crate::Error> {
-    let (success_num, not_needed_num, error_num) = inner_run(args, Pretty);
+    let (success_num, not_needed_num, error_num) = match inner_run(args, Pretty) {
+        Ok((success_num, not_needed_num, error_num)) => (success_num, not_needed_num, error_num),
+        Err(error) => {
+            tracing::error!("{}", error);
+            std::process::exit(1);
+        }
+    };
 
     match (success_num, not_needed_num) {
         (0, 0) => {
@@ -56,12 +66,23 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     Ok(())
 }
 
-fn inner_run<P>(args: Args, printer: P) -> (usize, usize, usize)
+fn inner_run<P>(args: Args, printer: P) -> Result<(usize, usize, usize), schema_store::Error>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
     P: Copy + Send + 'static,
 {
+    let (config, config_path) = config::load_with_path();
+    let toml_version = args
+        .toml_version
+        .unwrap_or(config.toml_version.unwrap_or_default());
+
+    let format_options = config.format.unwrap_or_default();
+    let schema_options = config.schema.unwrap_or_default();
+    let schema_store = schema_store::SchemaStore::default();
+
+    schema_store.load_config_schema(config_path, config.schemas.unwrap_or_default());
+
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -71,17 +92,22 @@ where
     };
 
     runtime.block_on(async {
+        if args.schema_catalog_enabled.unwrap_or_else(|| {
+            schema_options
+                .catalog
+                .and_then(|catalog| catalog.enabled)
+                .unwrap_or_default()
+                .value()
+        }) {
+            let catalog_url = schema_store::DEFAULT_CATALOG_URL.parse().unwrap();
+            schema_store.load_catalog(&catalog_url).await?
+        }
+
         let input = arg::FileInput::from(args.files.as_ref());
         let total_num = input.len();
         let mut success_num = 0;
         let mut not_needed_num = 0;
         let mut error_num = 0;
-
-        let config = config::load();
-        let toml_version = args
-            .toml_version
-            .unwrap_or(config.toml_version.unwrap_or_default());
-        let options = config.format.unwrap_or_default();
 
         match input {
             arg::FileInput::Stdin => {
@@ -92,7 +118,8 @@ where
                     None,
                     toml_version,
                     args.check,
-                    &options,
+                    &format_options,
+                    &schema_store,
                 )
                 .await
                 {
@@ -110,7 +137,9 @@ where
                             tracing::debug!("formatting... {:?}", &source_path);
                             match FormatFile::from_file(&source_path).await {
                                 Ok(file) => {
-                                    let options = options.clone();
+                                    let format_options = format_options.clone();
+                                    let schema_store = schema_store.clone();
+
                                     tasks.spawn(async move {
                                         format_file(
                                             file,
@@ -118,7 +147,8 @@ where
                                             Some(&source_path),
                                             toml_version,
                                             args.check,
-                                            &options,
+                                            &format_options,
+                                            &schema_store,
                                         )
                                         .await
                                     });
@@ -163,7 +193,7 @@ where
 
         assert_eq!(success_num + not_needed_num + error_num, total_num);
 
-        (success_num, not_needed_num, error_num)
+        Ok((success_num, not_needed_num, error_num))
     })
 }
 
@@ -173,7 +203,8 @@ async fn format_file<P>(
     source_path: Option<&std::path::Path>,
     toml_version: TomlVersion,
     check: bool,
-    options: &FormatOptions,
+    format_options: &FormatOptions,
+    schema_store: &schema_store::SchemaStore,
 ) -> Result<bool, ()>
 where
     Diagnostic: Print<P>,
@@ -182,7 +213,16 @@ where
 {
     let mut source = String::new();
     if file.read_to_string(&mut source).await.is_ok() {
-        match formatter::Formatter::new(toml_version, options).format(&source) {
+        match formatter::Formatter::new(
+            toml_version,
+            format_options,
+            source_path,
+            None,
+            schema_store,
+        )
+        .format(&source)
+        .await
+        {
             Ok(formatted) => {
                 if source != formatted {
                     if check {

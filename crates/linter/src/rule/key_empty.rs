@@ -24,7 +24,16 @@ mod tests {
 
     #[tokio::test]
     async fn test_key_empty() {
-        let err = crate::lint("'' = 1").await.unwrap_err();
+        let err = crate::Linter::new(
+            config::TomlVersion::default(),
+            &crate::LintOptions::default(),
+            None,
+            None,
+            &schema_store::SchemaStore::default(),
+        )
+        .lint("'' = 1")
+        .await
+        .unwrap_err();
         assert_eq!(
             err,
             vec![diagnostic::Diagnostic::new_warning(

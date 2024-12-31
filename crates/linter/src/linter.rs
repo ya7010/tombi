@@ -42,15 +42,10 @@ impl<'a> Linter<'a> {
             .get_schema(self.schema_url, self.source_path)
             .await;
 
-        let toml_version = match schema {
-            Some(schema) => schema
-                .toml_version
-                .inspect(|toml_version| {
-                    tracing::debug!("use schema TOML version: {toml_version}");
-                })
-                .unwrap_or(self.toml_version),
-            None => self.toml_version,
-        };
+        let toml_version = schema
+            .map(|s| s.toml_version())
+            .flatten()
+            .unwrap_or(self.toml_version);
 
         let p = parser::parse(source, toml_version);
         let mut errors = vec![];

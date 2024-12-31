@@ -31,8 +31,15 @@ pub async fn handle_formatting(
             .format
             .as_ref()
             .unwrap_or(&FormatOptions::default()),
+        match text_document.uri.scheme() {
+            "file" => Some(std::path::Path::new(text_document.uri.path())),
+            _ => None,
+        },
+        None,
+        &backend.schema_store,
     )
     .format(&document_info.source)
+    .await
     {
         Ok(new_text) => {
             if new_text != document_info.source {
