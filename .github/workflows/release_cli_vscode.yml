@@ -128,5 +128,5 @@ jobs:
         with:
           name: tombi-vscode-${{ env.TOMBI_VERSION }}-${{ matrix.target }}
           path: |
-            dist/tombi-cli-*
-            dist/tombi-vscode-*
+            dist/tombi-cli-${{ env.TOMBI_VERSION }}-*
+            dist/tombi-vscode-${{ env.TOMBI_VERSION }}-*
