@@ -96,9 +96,24 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
             .map_or(false, |node| node.kind() == COMMENT)
     {
         // No new line break at the beginning
+        //
+        // ```toml
+        // [foo]
+        // bar = 1
+        // # end dangling comment1
+        // # end dangling comment2
+        // ```
         comment_groups
     } else {
         // New line break at the beginning
+        //
+        // ```toml
+        // [foo]
+        // bar = 1
+        //
+        // # end dangling comment1
+        // # end dangling comment2
+        // ```
         let mut result = Vec::with_capacity(comment_groups.len() + 1);
         result.push(Vec::with_capacity(0));
         result.extend(comment_groups);
