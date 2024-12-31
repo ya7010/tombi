@@ -67,7 +67,9 @@ fn format_multiline_inline_table(
 
     let key_values_with_comma = table.key_values_with_comma().collect_vec();
 
-    if !key_values_with_comma.is_empty() {
+    if key_values_with_comma.is_empty() {
+        table.inner_dangling_comments().fmt(f)?;
+    } else {
         table.inner_begin_dangling_comments().fmt(f)?;
 
         for (i, (key_value, comma)) in key_values_with_comma.into_iter().enumerate() {
@@ -111,8 +113,6 @@ fn format_multiline_inline_table(
         }
 
         table.inner_end_dangling_comments().fmt(f)?;
-    } else {
-        table.inner_dangling_comments().fmt(f)?;
     }
 
     f.dec_indent();

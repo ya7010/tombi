@@ -66,7 +66,9 @@ fn format_multiline_array(
 
     let values_with_comma = array.values_with_comma().collect_vec();
 
-    if !values_with_comma.is_empty() {
+    if values_with_comma.is_empty() {
+        array.inner_dangling_comments().fmt(f)?;
+    } else {
         array.inner_begin_dangling_comments().fmt(f)?;
 
         for (i, (value, comma)) in values_with_comma.into_iter().enumerate() {
@@ -110,8 +112,6 @@ fn format_multiline_array(
         }
 
         array.inner_end_dangling_comments().fmt(f)?;
-    } else {
-        array.inner_dangling_comments().fmt(f)?;
     }
 
     f.dec_indent();
