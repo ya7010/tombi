@@ -1,4 +1,4 @@
-import { SUPPORT_LANGUAGES } from "@/extention";
+import { SUPPORT_TOML_LANGUAGES } from "@/extention";
 import * as vscode from "vscode";
 import type * as languageclient from "vscode-languageclient";
 
@@ -6,7 +6,7 @@ export function clientOptions(
   workspaceFolder?: vscode.WorkspaceFolder,
 ): languageclient.LanguageClientOptions {
   const options = {
-    documentSelector: SUPPORT_LANGUAGES.map((language) => ({
+    documentSelector: SUPPORT_TOML_LANGUAGES.map((language) => ({
       scheme: "file",
       language,
     })),

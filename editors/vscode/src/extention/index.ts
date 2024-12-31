@@ -11,14 +11,21 @@ export type { Settings };
 
 export const EXTENTION_ID = "tombi";
 export const EXTENTION_NAME = "Tombi";
-export const SUPPORT_LANGUAGES = ["toml", "cargoLock"];
+export const SUPPORT_TOML_LANGUAGES = ["toml", "cargoLock"];
 
 export class Extension {
+  private statusBarItem: vscode.StatusBarItem;
+
   constructor(
     private context: vscode.ExtensionContext,
     private client: node.LanguageClient,
     private server: Server,
   ) {
+    this.statusBarItem = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left,
+    );
+    this.context.subscriptions.push(this.statusBarItem);
+
     this.registerEvents();
     this.registerCommands();
   }
@@ -49,12 +56,16 @@ export class Extension {
       await extenstion.onDidOpenTextDocument(document);
     }
 
+    // Update status bar for initial state
+    extenstion.updateStatusBarItem();
+
     log.info("extension activated");
 
     return extenstion;
   }
 
   async deactivate(): Promise<void> {
+    this.statusBarItem.dispose();
     await this.client.stop();
     log.info("extension deactivated");
   }
@@ -68,12 +79,40 @@ export class Extension {
     );
   }
 
-  private registerEvents(): void {}
+  private registerEvents(): void {
+    this.context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor(() => {
+        this.updateStatusBarItem();
+      }),
+    );
+  }
+
+  private async updateStatusBarItem(): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (editor && SUPPORT_TOML_LANGUAGES.includes(editor.document.languageId)) {
+      try {
+        const version = await this.client.sendRequest(GetTomlVersionRequest, {
+          uri: editor.document.uri.toString(),
+        });
+        this.statusBarItem.text = `TOML: ${version}`;
+        this.statusBarItem.show();
+      } catch (error) {
+        const settings = vscode.workspace.getConfiguration(
+          EXTENTION_ID,
+        ) as Settings;
+        const version = settings.tomlVersion || "v1.0.0";
+        this.statusBarItem.text = `TOML: ${version}`;
+        this.statusBarItem.show();
+      }
+    } else {
+      this.statusBarItem.hide();
+    }
+  }
 
   private async onDidOpenTextDocument(
     document: vscode.TextDocument,
   ): Promise<void> {
-    if (SUPPORT_LANGUAGES.includes(document.languageId)) {
+    if (SUPPORT_TOML_LANGUAGES.includes(document.languageId)) {
       await this.client.sendNotification(
         node.DidOpenTextDocumentNotification.type,
         {
