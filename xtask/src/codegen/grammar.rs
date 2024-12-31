@@ -6,7 +6,7 @@ pub mod syntax_kind_src;
 
 use ast_src::{AstEnumSrc, AstNodeSrc, AstSrc, Cardinality, Field};
 use convert_case::{Case, Casing};
-use either::Either;
+use itertools::Either;
 use itertools::Itertools;
 use syntax_kind_src::TOKENS;
 use ungrammar::{Grammar, Rule};

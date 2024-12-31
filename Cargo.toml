@@ -23,7 +23,6 @@ dashmap = "6.1.0"
 diagnostic = { path = "crates/diagnostic" }
 document = { path = "crates/document" }
 document-tree = { path = "crates/document-tree" }
-either = "1.13.0"
 formatter = { path = "crates/formatter" }
 futures = "0.3.31"
 futures-util = "0.3.31"

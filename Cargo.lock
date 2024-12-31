@@ -2675,7 +2675,6 @@ dependencies = [
  "clap",
  "config",
  "convert_case",
- "either",
  "flate2",
  "itertools",
  "proc-macro2",
