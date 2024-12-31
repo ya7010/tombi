@@ -79,7 +79,13 @@ pub fn load_with_path() -> (Config, Option<PathBuf>) {
                 tracing::error!("Failed to parse {:?}", &config_path);
                 std::process::exit(1);
             };
-            return (config, Some(config_path));
+
+            let config_dirpath = match config_path.parent() {
+                Some(dir) => dir.to_owned(),
+                None => current_dir,
+            };
+
+            return (config, Some(config_dirpath));
         }
 
         let pyproject_toml_path = current_dir.join(PYPROJECT_FILENAME);

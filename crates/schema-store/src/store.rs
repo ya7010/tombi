@@ -26,32 +26,27 @@ impl SchemaStore {
 
     pub fn load_config_schema(
         &self,
-        config_path: Option<std::path::PathBuf>,
-        schemas: Vec<SchemaInfo>,
+        config_dirpath: Option<std::path::PathBuf>,
+        schemas: &[SchemaInfo],
     ) {
-        let config_path = match config_path {
-            Some(config_path) => config_path,
-            None => match std::env::current_dir() {
-                Ok(current_dir) => current_dir,
-                Err(_) => return,
-            },
+        let config_dirpath = match config_dirpath {
+            Some(path) => path,
+            None => std::env::current_dir().unwrap(),
         };
-
-        let Some(config_dir) = config_path.parent() else {
-            return;
-        };
-
         if let Ok(mut catalogs) = self.catalogs.write() {
-            for schema in schemas {
+            for schema in schemas.iter() {
                 let Ok(url) = Url::parse(&format!(
                     "file://{}",
-                    config_dir.join(schema.path).to_string_lossy()
+                    config_dirpath.join(&schema.path).to_string_lossy()
                 )) else {
                     continue;
                 };
                 catalogs.push(CatalogSchema {
                     url,
-                    include: schema.include.unwrap_or_default(),
+                    include: match schema.include.as_ref() {
+                        Some(include) => include.clone(),
+                        None => Vec::with_capacity(0),
+                    },
                 });
             }
         }
