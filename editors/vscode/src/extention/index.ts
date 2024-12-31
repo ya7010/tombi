@@ -7,6 +7,7 @@ import type { Settings } from "./settings";
 import * as command from "@/command";
 import { bootstrap } from "@/bootstrap";
 import { log } from "@/logging";
+import { getTomlVersion } from "@/lsp/client";
 export type { Settings };
 
 export const EXTENTION_ID = "tombi";
@@ -91,17 +92,22 @@ export class Extension {
     const editor = vscode.window.activeTextEditor;
     if (editor && SUPPORT_TOML_LANGUAGES.includes(editor.document.languageId)) {
       try {
-        const version = await this.client.sendRequest(GetTomlVersionRequest, {
+        const tomlVersion = await this.client.sendRequest(getTomlVersion, {
           uri: editor.document.uri.toString(),
         });
-        this.statusBarItem.text = `TOML: ${version}`;
+        this.statusBarItem.text = `TOML: ${tomlVersion}`;
+        this.statusBarItem.color = undefined;
+        this.statusBarItem.backgroundColor = undefined;
         this.statusBarItem.show();
       } catch (error) {
-        const settings = vscode.workspace.getConfiguration(
-          EXTENTION_ID,
-        ) as Settings;
-        const version = settings.tomlVersion || "v1.0.0";
-        this.statusBarItem.text = `TOML: ${version}`;
+        this.statusBarItem.text = "TOML: <unknown>";
+        this.statusBarItem.tooltip = `${error}`;
+        this.statusBarItem.color = new vscode.ThemeColor(
+          "statusBarItem.errorForeground",
+        );
+        this.statusBarItem.backgroundColor = new vscode.ThemeColor(
+          "statusBarItem.errorBackground",
+        );
         this.statusBarItem.show();
       }
     } else {

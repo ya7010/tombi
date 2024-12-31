@@ -5,7 +5,7 @@ use super::handler::{
 };
 use crate::{
     document::DocumentSource,
-    handler::{handle_folding_range, handle_initialized},
+    handler::{handle_folding_range, handle_get_toml_version, handle_initialized},
 };
 use ast::AstNode;
 use config::{Config, TomlVersion};
@@ -16,7 +16,7 @@ use tower_lsp::{
         DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
         DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
         HoverParams, InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
-        SemanticTokensResult, Url,
+        SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
 };
@@ -129,5 +129,14 @@ impl LanguageServer for Backend {
         params: DocumentDiagnosticParams,
     ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
         handle_diagnostic(self, params).await
+    }
+}
+
+impl Backend {
+    pub async fn get_toml_version(
+        &self,
+        params: TextDocumentIdentifier,
+    ) -> Result<String, tower_lsp::jsonrpc::Error> {
+        handle_get_toml_version(self, params).await
     }
 }

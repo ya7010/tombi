@@ -5,6 +5,7 @@ mod hover;
 mod semantic_tokens;
 mod toml;
 
+use backend::Backend;
 use config::TomlVersion;
 
 /// Run TOML Language Server
@@ -29,6 +30,7 @@ pub async fn serve(args: impl Into<Args>) {
     let (service, socket) = tower_lsp::LspService::build(|client| {
         crate::backend::Backend::new(client, args.toml_version)
     })
+    .custom_method("tombi/getTomlVersion", Backend::get_toml_version)
     .finish();
 
     tower_lsp::Server::new(stdin, stdout, socket)
