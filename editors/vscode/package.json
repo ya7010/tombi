@@ -88,13 +88,6 @@
             "type": "string",
             "minItems": 1
           }
-        },
-        "tombi.tomlVersion": {
-          "description": "Version of the TOML specification to use.",
-          "type": "string",
-          "scope": "resource",
-          "default": null,
-          "enum": ["v1.0.0", "v1.1.0-preview"]
         }
       }
     }

@@ -5,10 +5,7 @@ export function serverOptions(
   serverPath: string,
   settings: Settings,
 ): node.ServerOptions {
-  let serveArgs: string[] = settings.args ?? [];
-  if (settings.tomlVersion && serveArgs.indexOf("--toml-version") === -1) {
-    serveArgs = serveArgs.concat(["--toml-version", settings.tomlVersion]);
-  }
+  const serveArgs: string[] = settings.args ?? [];
 
   const run = {
     command: serverPath,
