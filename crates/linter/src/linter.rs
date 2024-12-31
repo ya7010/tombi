@@ -7,44 +7,51 @@ use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use document_tree::TryIntoDocumentTree;
 use itertools::Either;
+use schema_store::DocumentSchema;
 use url::Url;
 
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
-    schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
+    #[allow(dead_code)]
+    schema: Option<DocumentSchema>,
+    #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
     diagnostics: Vec<crate::Diagnostic>,
 }
 
 impl<'a> Linter<'a> {
     #[inline]
-    pub fn new(
+    pub async fn try_new(
         toml_version: TomlVersion,
         options: &'a crate::LintOptions,
         schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, schema_store::Error> {
+        let schema = match schema_url_or_path {
+            Some(schema_url_or_path) => {
+                Some(schema_store.try_get_schema(schema_url_or_path).await?)
+            }
+            None => None,
+        }
+        .flatten();
+
+        let toml_version = schema
+            .as_ref()
+            .map(|s| s.toml_version())
+            .flatten()
+            .unwrap_or(toml_version);
+
+        Ok(Self {
             toml_version,
             options: Cow::Borrowed(options),
-            schema_url_or_path,
+            schema,
             schema_store,
             diagnostics: Vec::new(),
-        }
+        })
     }
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let schema = match self.schema_url_or_path {
-            Some(schema_url_or_path) => self.schema_store.get_schema(schema_url_or_path).await,
-            None => None,
-        };
-
-        self.toml_version = schema
-            .map(|s| s.toml_version())
-            .flatten()
-            .unwrap_or(self.toml_version);
-
         let p = parser::parse(source, self.toml_version);
         let mut errors = vec![];
 

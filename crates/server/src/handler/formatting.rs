@@ -25,7 +25,7 @@ pub async fn handle_formatting(
         }
     };
 
-    match formatter::Formatter::new(
+    match formatter::Formatter::try_new(
         backend.toml_version(),
         backend
             .config
@@ -35,23 +35,27 @@ pub async fn handle_formatting(
         Some(Either::Left(&text_document.uri)),
         &backend.schema_store,
     )
-    .format(&document_info.source)
     .await
     {
-        Ok(new_text) => {
-            if new_text != document_info.source {
-                document_info.source = new_text.clone();
+        Ok(formatter) => match formatter.format(&document_info.source).await {
+            Ok(new_text) => {
+                if new_text != document_info.source {
+                    document_info.source = new_text.clone();
 
-                return Ok(Some(vec![TextEdit {
-                    range: text::Range::new(text::Position::MIN, text::Position::MAX).into(),
-                    new_text,
-                }]));
-            } else {
-                tracing::info!("no change");
+                    return Ok(Some(vec![TextEdit {
+                        range: text::Range::new(text::Position::MIN, text::Position::MAX).into(),
+                        new_text,
+                    }]));
+                } else {
+                    tracing::info!("no change");
+                }
             }
-        }
-        Err(_) => {
-            tracing::error!("failed to format");
+            Err(_) => {
+                tracing::error!("failed to format");
+            }
+        },
+        Err(err) => {
+            tracing::error!("failed to create formatter: {}", err);
         }
     }
 

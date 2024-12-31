@@ -33,12 +33,12 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Ok($expected:expr);) => {
         #[tokio::test]
         async fn $name() {
-            match $crate::Formatter::new(
+            match $crate::Formatter::try_new(
                 $toml_version,
                 &$options,
                 None,
                 &schema_store::SchemaStore::default()
-            ).format($source).await {
+            ).await.unwrap().format($source).await {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }
@@ -60,12 +60,12 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Err(_);) => {
         #[tokio::test]
         async fn $name() {
-            match $crate::Formatter::new(
+            match $crate::Formatter::try_new(
                 $toml_version,
                 &$options,
                 None,
                 &schema_store::SchemaStore::default()
-            ).format($source).await {
+            ).await.unwrap().format($source).await {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {
                     pretty_assertions::assert_ne!(errors, vec![]);

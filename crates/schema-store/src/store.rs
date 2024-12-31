@@ -41,6 +41,8 @@ impl SchemaStore {
                 )) else {
                     continue;
                 };
+                tracing::debug!("load config schema from: {}", url);
+
                 catalogs.push(CatalogSchema {
                     url,
                     include: match schema.include.as_ref() {
@@ -84,7 +86,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn get_schema_from_url<'a>(
+    pub async fn try_get_schema_from_url<'a>(
         &'a self,
         url: &Url,
     ) -> Result<DocumentSchema, crate::Error> {
@@ -175,57 +177,69 @@ impl SchemaStore {
         }
     }
 
-    pub async fn get_schema_from_source(
+    pub async fn try_get_schema_from_source(
         &self,
         source_path: &std::path::Path,
-    ) -> Option<DocumentSchema> {
-        let matching_urls: Vec<_> = {
-            let catalogs = self.catalogs.read().ok()?;
-            catalogs
-                .iter()
-                .filter(|catalog| {
-                    catalog.include.iter().any(|pat| {
-                        let pattern = if !pat.contains("*") {
-                            format!("**/{}", pat)
-                        } else {
-                            pat.to_string()
-                        };
-                        glob::Pattern::new(&pattern)
-                            .ok()
-                            .map(|glob_pat| glob_pat.matches_path(source_path))
-                            .unwrap_or(false)
+    ) -> Result<Option<DocumentSchema>, crate::Error> {
+        let matching_schema_urls: Vec<_> = {
+            match self.catalogs.read() {
+                Ok(catalogs) => catalogs
+                    .iter()
+                    .filter(|catalog| {
+                        catalog.include.iter().any(|pat| {
+                            let pattern = if !pat.contains("*") {
+                                format!("**/{}", pat)
+                            } else {
+                                pat.to_string()
+                            };
+                            glob::Pattern::new(&pattern)
+                                .ok()
+                                .map(|glob_pat| glob_pat.matches_path(source_path))
+                                .unwrap_or(false)
+                        })
                     })
-                })
-                .map(|catalog| catalog.url.clone())
-                .collect()
+                    .map(|catalog| catalog.url.clone())
+                    .collect(),
+                Err(_) => Vec::with_capacity(0),
+            }
         };
 
-        for url in matching_urls {
-            if let Ok(schema) = self.get_schema_from_url(&url).await {
-                return Some(schema);
+        for schema_url in matching_schema_urls {
+            if let Ok(schema) = self.try_get_schema_from_url(&schema_url).await {
+                return Ok(Some(schema));
             }
         }
-        None
+        Ok(None)
     }
 
-    pub async fn get_schema(
+    pub async fn try_get_schema(
         &self,
         url_or_path: Either<&Url, &std::path::Path>,
-    ) -> Option<DocumentSchema> {
+    ) -> Result<Option<DocumentSchema>, crate::Error> {
         match url_or_path {
-            Either::Left(schema_url) => {
-                self.get_schema_from_url(schema_url)
-                    .await
-                    .ok()
-                    .inspect(|_| {
-                        tracing::debug!("find schema from url: {}", schema_url);
-                    })
-            }
-            Either::Right(source_path) => {
-                self.get_schema_from_source(source_path).await.inspect(|_| {
-                    tracing::debug!("find schema from source: {}", source_path.display());
+            Either::Left(schema_url) => self
+                .try_get_schema_from_url(schema_url)
+                .await
+                .inspect(|_| {
+                    tracing::debug!("find schema from url: {}", schema_url);
                 })
-            }
+                .map(Some),
+            Either::Right(source_path) => self
+                .try_get_schema_from_source(source_path)
+                .await
+                .inspect(|_| {
+                    tracing::debug!("find schema from source: {}", source_path.display());
+                }),
+        }
+    }
+
+    pub fn catalog_urls(&self) -> Vec<Url> {
+        match self.catalogs.read() {
+            Ok(catalogs) => catalogs
+                .iter()
+                .map(|catalog| catalog.url.clone())
+                .collect::<Vec<_>>(),
+            Err(_) => Vec::with_capacity(0),
         }
     }
 }

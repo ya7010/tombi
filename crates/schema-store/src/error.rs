@@ -19,4 +19,7 @@ pub enum Error {
 
     #[error("failed to fetch schema: {schema_url}")]
     SchemaFetchFailed { schema_url: String },
+
+    #[error("failed to parse schema url from path: {path}")]
+    SchemaUrlParseFailed { path: std::path::PathBuf },
 }

@@ -15,39 +15,43 @@ pub async fn handle_diagnostic(
     tracing::info!("handle_diagnostic");
 
     let diagnostics = match backend.document_sources.get(&text_document.uri).as_deref() {
-        Some(document) => linter::Linter::new(
-            backend.toml_version(),
-            backend
-                .config
-                .lint
-                .as_ref()
-                .unwrap_or(&LintOptions::default()),
-            Some(Either::Left(&text_document.uri)),
-            &backend.schema_store,
-        )
-        .lint(&document.source)
-        .await
-        .map_or_else(
-            |diagnostics| {
-                diagnostics
-                    .into_iter()
-                    .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
-                        range: diagnostic.range().into(),
-                        severity: Some(match diagnostic.level() {
-                            diagnostic::Level::WARNING => {
-                                tower_lsp::lsp_types::DiagnosticSeverity::WARNING
-                            }
-                            diagnostic::Level::ERROR => {
-                                tower_lsp::lsp_types::DiagnosticSeverity::ERROR
-                            }
-                        }),
-                        message: diagnostic.message().to_string(),
-                        ..Default::default()
-                    })
-                    .collect()
-            },
-            |_| vec![],
-        ),
+        Some(document) => {
+            match linter::Linter::try_new(
+                backend.toml_version(),
+                backend
+                    .config
+                    .lint
+                    .as_ref()
+                    .unwrap_or(&LintOptions::default()),
+                Some(Either::Left(&text_document.uri)),
+                &backend.schema_store,
+            )
+            .await
+            {
+                Ok(linter) => linter.lint(&document.source).await.map_or_else(
+                    |diagnostics| {
+                        diagnostics
+                            .into_iter()
+                            .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
+                                range: diagnostic.range().into(),
+                                severity: Some(match diagnostic.level() {
+                                    diagnostic::Level::WARNING => {
+                                        tower_lsp::lsp_types::DiagnosticSeverity::WARNING
+                                    }
+                                    diagnostic::Level::ERROR => {
+                                        tower_lsp::lsp_types::DiagnosticSeverity::ERROR
+                                    }
+                                }),
+                                message: diagnostic.message().to_string(),
+                                ..Default::default()
+                            })
+                            .collect()
+                    },
+                    |_| vec![],
+                ),
+                Err(_) => return Err(tower_lsp::jsonrpc::Error::internal_error()),
+            }
+        }
         None => vec![],
     };
 

@@ -5,6 +5,7 @@ use config::{DateTimeDelimiter, LineEnding, TomlVersion};
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use itertools::Either;
+use schema_store::DocumentSchema;
 use std::fmt::Write;
 use url::Url;
 
@@ -14,29 +15,45 @@ pub struct Formatter<'a> {
     skip_indent: bool,
     defs: crate::Definitions,
     options: &'a crate::FormatOptions,
-    source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
+    #[allow(dead_code)]
+    schema: Option<DocumentSchema>,
+    #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
     buf: String,
 }
 
 impl<'a> Formatter<'a> {
     #[inline]
-    pub fn new(
+    pub async fn try_new(
         toml_version: TomlVersion,
         options: &'a crate::FormatOptions,
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, schema_store::Error> {
+        let schema = match source_url_or_path {
+            Some(source_url_or_path) => {
+                Some(schema_store.try_get_schema(source_url_or_path).await?)
+            }
+            None => None,
+        }
+        .flatten();
+
+        let toml_version = schema
+            .as_ref()
+            .map(|s| s.toml_version())
+            .flatten()
+            .unwrap_or(toml_version);
+
+        Ok(Self {
             toml_version,
             indent_depth: 0,
             skip_indent: false,
             defs: Default::default(),
             options,
-            source_url_or_path,
+            schema,
             schema_store,
             buf: String::new(),
-        }
+        })
     }
 
     /// Format a node and return the result as a string
@@ -59,16 +76,6 @@ impl<'a> Formatter<'a> {
     }
 
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let schema = match self.source_url_or_path {
-            Some(source_url_or_path) => self.schema_store.get_schema(source_url_or_path).await,
-            None => None,
-        };
-
-        self.toml_version = schema
-            .map(|s| s.toml_version())
-            .flatten()
-            .unwrap_or(self.toml_version);
-
         match parser::parse(source, self.toml_version).try_cast::<ast::Root>() {
             Ok(root) => {
                 tracing::trace!("TOML AST: {:#?}", root);

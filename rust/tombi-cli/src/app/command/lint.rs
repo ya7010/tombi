@@ -214,27 +214,31 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).await.is_ok() {
-        match linter::Linter::new(
+        match linter::Linter::try_new(
             toml_version,
             lint_options,
             source_path.map(itertools::Either::Right),
             schema_store,
         )
-        .lint(&source)
         .await
         {
-            Ok(()) => {
-                return true;
+            Ok(linter) => match linter.lint(&source).await {
+                Ok(()) => {
+                    return true;
+                }
+                Err(diagnostics) => if let Some(source_path) = source_path {
+                    diagnostics
+                        .into_iter()
+                        .map(|diagnostic| diagnostic.with_source_file(source_path))
+                        .collect()
+                } else {
+                    diagnostics
+                }
+                .print(printer),
+            },
+            Err(err) => {
+                tracing::error!("Failed to create linter: {:?}", err);
             }
-            Err(diagnostics) => if let Some(source_path) = source_path {
-                diagnostics
-                    .into_iter()
-                    .map(|diagnostic| diagnostic.with_source_file(source_path))
-                    .collect()
-            } else {
-                diagnostics
-            }
-            .print(printer),
         }
     }
     false
