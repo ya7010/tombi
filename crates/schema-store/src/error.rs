@@ -8,18 +8,15 @@ pub enum Error {
     #[error("failed to fetch catalog: {catalog_url}")]
     CatalogFetchFailed { catalog_url: Url },
 
-    #[error("unsupported url schema: {url_schema}")]
-    UnsupportedUrlSchema { url_schema: String },
+    #[error("unsupported url schema: {schema_url}")]
+    UnsupportedUrlSchema { schema_url: Url },
 
     #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: String },
 
-    #[error("failed to parse schema: \"{schema_path}\"")]
-    SchemaFileParseFailed { schema_path: String },
+    #[error("failed to parse schema: \"{schema_url}\"")]
+    SchemaFileParseFailed { schema_url: Url },
 
     #[error("failed to fetch schema: {schema_url}")]
     SchemaFetchFailed { schema_url: String },
-
-    #[error("failed to parse schema url from path: {path}")]
-    SchemaUrlParseFailed { path: std::path::PathBuf },
 }

@@ -124,12 +124,12 @@ impl SchemaStore {
                     }
                     _ => {
                         return Err(crate::Error::UnsupportedUrlSchema {
-                            url_schema: schema_url.scheme().to_string(),
+                            schema_url: schema_url.to_owned(),
                         })
                     }
                 }
                 .map_err(|_| crate::Error::SchemaFileParseFailed {
-                    schema_path: schema_url.path().to_string(),
+                    schema_url: schema_url.to_owned(),
                 })?;
 
                 let document_schema = DocumentSchema {
@@ -186,7 +186,7 @@ impl SchemaStore {
                 self.try_get_schema_from_path(source_path).await
             }
             _ => Err(crate::Error::UnsupportedUrlSchema {
-                url_schema: source_url.scheme().to_string(),
+                schema_url: source_url.to_owned(),
             }),
         }
     }
@@ -219,9 +219,7 @@ impl SchemaStore {
         };
 
         for schema_url in matching_schema_urls {
-            if let Ok(schema) = self.try_load_schema(&schema_url).await {
-                return Ok(Some(schema));
-            }
+            return Ok(Some(self.try_load_schema(&schema_url).await?));
         }
         Ok(None)
     }

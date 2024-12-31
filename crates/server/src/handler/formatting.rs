@@ -1,7 +1,9 @@
 use config::FormatOptions;
 use dashmap::try_result::TryResult;
 use itertools::Either;
-use tower_lsp::lsp_types::{DocumentFormattingParams, TextEdit};
+use tower_lsp::lsp_types::{
+    notification::ShowMessage, DocumentFormattingParams, MessageType, ShowMessageParams, TextEdit,
+};
 
 use crate::backend::Backend;
 
@@ -55,7 +57,15 @@ pub async fn handle_formatting(
             }
         },
         Err(err) => {
-            tracing::error!("failed to create formatter: {}", err);
+            tracing::error!("{err}");
+
+            backend
+                .client
+                .send_notification::<ShowMessage>(ShowMessageParams {
+                    typ: MessageType::ERROR,
+                    message: err.to_string(),
+                })
+                .await;
         }
     }
 

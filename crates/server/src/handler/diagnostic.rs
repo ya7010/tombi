@@ -1,8 +1,9 @@
 use config::LintOptions;
 use itertools::Either;
 use tower_lsp::lsp_types::{
-    DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
-    FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
+    notification::ShowMessage, DocumentDiagnosticParams, DocumentDiagnosticReport,
+    DocumentDiagnosticReportResult, FullDocumentDiagnosticReport, MessageType,
+    RelatedFullDocumentDiagnosticReport, ShowMessageParams,
 };
 
 use crate::backend::Backend;
@@ -50,11 +51,16 @@ pub async fn handle_diagnostic(
                     |_| vec![],
                 ),
                 Err(err) => {
-                    return Err(tower_lsp::jsonrpc::Error {
-                        code: tower_lsp::jsonrpc::ErrorCode::ServerError(0),
-                        message: std::borrow::Cow::Owned(err.to_string()),
-                        data: None,
-                    })
+                    tracing::error!("{err}");
+
+                    backend
+                        .client
+                        .send_notification::<ShowMessage>(ShowMessageParams {
+                            typ: MessageType::ERROR,
+                            message: err.to_string(),
+                        })
+                        .await;
+                    vec![]
                 }
             }
         }
