@@ -10,7 +10,7 @@ pub async fn handle_semantic_tokens_full(
     _backend: &Backend,
     SemanticTokensParams { text_document, .. }: SemanticTokensParams,
 ) -> Result<Option<SemanticTokensResult>, tower_lsp::jsonrpc::Error> {
-    tracing::info!("semantic_tokens_full");
+    tracing::info!("handle_semantic_tokens_full");
 
     let source = toml::try_load(&text_document.uri)?;
 
