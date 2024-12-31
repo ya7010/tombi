@@ -137,6 +137,14 @@ impl SchemaStore {
                 })?;
 
                 let document_schema = DocumentSchema {
+                    toml_version: schema
+                        .get("x-tombi-toml-version")
+                        .and_then(|obj| match obj {
+                            serde_json::Value::String(version) => {
+                                serde_json::from_str(&format!("\"{version}\"")).ok()
+                            }
+                            _ => None,
+                        }),
                     title: schema
                         .get("title")
                         .map(|obj| obj.as_str().map(|title| title.to_string()))

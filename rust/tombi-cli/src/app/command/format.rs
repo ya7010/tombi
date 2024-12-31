@@ -83,8 +83,6 @@ where
             .unwrap_or(config.toml_version.unwrap_or_default());
         let options = config.format.unwrap_or_default();
 
-        tracing::debug!("toml-version: {toml_version}");
-
         match input {
             arg::FileInput::Stdin => {
                 tracing::debug!("formatting... stdin input");

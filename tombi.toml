@@ -3,7 +3,7 @@
 # This file is for checking if the JsonSchema is correct.
 #
 
-toml-version = "v1.1.0-preview"
+toml-version = "v1.0.0"
 
 [format]
 line-ending = "lf"
@@ -20,3 +20,7 @@ include = ["tombi.toml"]
 [[schemas]]
 path = "schemas/cargo.schema.json"
 include = ["Cargo.toml"]
+
+[[schemas]]
+path = "schemas/sample.schema.json"
+include = ["sample.toml"]

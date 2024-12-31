@@ -37,8 +37,7 @@ impl<'a> Linter<'a> {
     }
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let toml_version = self.toml_version;
-        let _schema = if let Some(schema_url) = self.schema_url {
+        let schema = if let Some(schema_url) = self.schema_url {
             if let Ok(schema) = self.schema_store.get_schema_from_url(schema_url).await {
                 tracing::debug!("find schema from url: {}", schema_url);
                 tracing::debug!("{:?}", &schema);
@@ -55,6 +54,16 @@ impl<'a> Linter<'a> {
             }
         } else {
             None
+        };
+
+        let toml_version = match schema {
+            Some(schema) => schema
+                .toml_version
+                .inspect(|toml_version| {
+                    tracing::debug!("use schema TOML version: {toml_version}");
+                })
+                .unwrap_or(self.toml_version),
+            None => self.toml_version,
         };
 
         let p = parser::parse(source, toml_version);
