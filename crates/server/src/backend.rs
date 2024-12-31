@@ -3,17 +3,19 @@ use super::handler::{
     handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
     handle_semantic_tokens_full, handle_shutdown,
 };
-use crate::{document::DocumentSource, handler::handle_folding_range};
+use crate::{
+    document::DocumentSource,
+    handler::{handle_folding_range, handle_initialized},
+};
 use ast::AstNode;
 use config::{Config, TomlVersion};
 use dashmap::DashMap;
-use schema_store::DEFAULT_CATALOG_URL;
 use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
         DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
         DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
-        HoverParams, InitializeParams, InitializeResult, SemanticTokensParams,
+        HoverParams, InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
         SemanticTokensResult, Url,
     },
     LanguageServer,
@@ -63,25 +65,11 @@ impl LanguageServer for Backend {
         &self,
         params: InitializeParams,
     ) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
-        if self
-            .config
-            .schema
-            .as_ref()
-            .and_then(|options| options.catalog.as_ref())
-            .and_then(|catalog| catalog.enabled)
-            .unwrap_or_default()
-            .value()
-        {
-            if let Err(err) = self
-                .schema_store
-                .load_catalog(&DEFAULT_CATALOG_URL.parse().unwrap())
-                .await
-            {
-                tracing::warn!("{}", err)
-            }
-        }
-
         handle_initialize(params).await
+    }
+
+    async fn initialized(&self, params: InitializedParams) {
+        handle_initialized(&self, params).await
     }
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {

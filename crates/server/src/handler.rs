@@ -7,6 +7,7 @@ mod folding_range;
 mod formatting;
 mod hover;
 mod initialize;
+mod initialized;
 mod semantic_tokens_full;
 mod shutdown;
 
@@ -21,5 +22,6 @@ pub use folding_range::handle_folding_range;
 pub use formatting::handle_formatting;
 pub use hover::handle_hover;
 pub use initialize::handle_initialize;
+pub use initialized::handle_initialized;
 pub use semantic_tokens_full::handle_semantic_tokens_full;
 pub use shutdown::handle_shutdown;

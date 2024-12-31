@@ -22,17 +22,35 @@ impl SchemaOptions {
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct SchemaCatalog {
     /// # Enable or disable the schema catalog.
     pub enabled: Option<SchemaCatalogEnabled>,
 
-    /// # The schema catalog path.
+    /// # The schema catalog path or url.
     #[cfg_attr(
         feature = "jsonschema",
         schemars(default = "SchemaCatalogPath::default")
     )]
     pub path: Option<OneOrMany<SchemaCatalogPath>>,
+}
+
+impl SchemaCatalog {
+    pub fn paths(&self) -> Option<Vec<SchemaCatalogPath>> {
+        if self.enabled.unwrap_or_default().value() {
+            match &self.path {
+                Some(path) => Some(
+                    path.as_ref()
+                        .into_iter()
+                        .map(Clone::clone)
+                        .collect::<Vec<_>>(),
+                ),
+                None => Some(vec![SchemaCatalogPath::default()]),
+            }
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

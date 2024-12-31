@@ -57,7 +57,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn load_catalog(&self, catalog_url: &url::Url) -> Result<(), crate::Error> {
+    pub async fn load_catalog_from_url(&self, catalog_url: &url::Url) -> Result<(), crate::Error> {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {

@@ -19,3 +19,4 @@ serde = { workspace = true, optional = true }
 toml = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }
+url = { workspace = true }

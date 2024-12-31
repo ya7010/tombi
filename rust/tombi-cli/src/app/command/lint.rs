@@ -86,12 +86,22 @@ where
         if args.schema_catalog_enabled.unwrap_or_else(|| {
             schema_options
                 .catalog
+                .as_ref()
                 .and_then(|catalog| catalog.enabled)
                 .unwrap_or_default()
                 .value()
         }) {
-            let catalog_url = schema_store::DEFAULT_CATALOG_URL.parse().unwrap();
-            schema_store.load_catalog(&catalog_url).await?
+            for catalog_path in schema_options
+                .catalog
+                .unwrap_or_default()
+                .paths()
+                .unwrap_or_default()
+                .iter()
+            {
+                if let Ok(catalog_url) = TryInto::<url::Url>::try_into(catalog_path) {
+                    schema_store.load_catalog_from_url(&catalog_url).await?;
+                }
+            }
         }
 
         let input = arg::FileInput::from(args.files.as_ref());

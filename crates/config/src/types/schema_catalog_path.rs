@@ -24,3 +24,14 @@ impl Default for OneOrMany<SchemaCatalogPath> {
         Self::One(SchemaCatalogPath::default())
     }
 }
+
+impl TryInto<url::Url> for &SchemaCatalogPath {
+    type Error = url::ParseError;
+
+    fn try_into(self) -> Result<url::Url, Self::Error> {
+        match self.0.parse() {
+            Ok(url) => Ok(url),
+            Err(_) => format!("file://{}", self.0).parse(),
+        }
+    }
+}
