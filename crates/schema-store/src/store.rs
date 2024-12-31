@@ -211,4 +211,25 @@ impl SchemaStore {
         }
         None
     }
+
+    pub async fn get_schema(
+        &self,
+        schema_url: Option<&Url>,
+        source_path: Option<&std::path::Path>,
+    ) -> Option<DocumentSchema> {
+        if let Some(schema_url) = schema_url {
+            self.get_schema_from_url(schema_url)
+                .await
+                .ok()
+                .inspect(|_| {
+                    tracing::debug!("find schema from url: {}", schema_url);
+                })
+        } else if let Some(source_path) = source_path {
+            self.get_schema_from_source(source_path).await.inspect(|_| {
+                tracing::debug!("find schema from source: {}", source_path.display());
+            })
+        } else {
+            None
+        }
+    }
 }
