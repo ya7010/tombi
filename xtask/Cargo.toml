@@ -21,4 +21,7 @@ thiserror = { workspace = true }
 time = { version = "0.3.36", default-features = false }
 ungrammar = "1.16.1"
 xshell = "0.2.7"
-zip = { version = "2.2.1", default-features = false, features = ["deflate", "time"] }
+zip = { version = "2.2.1", default-features = false, features = [
+  "deflate",
+  "time",
+] }
