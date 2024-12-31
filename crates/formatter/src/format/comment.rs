@@ -23,6 +23,34 @@ impl Format for ast::Comment {
     }
 }
 
+impl Format for DanglingComment {
+    #[inline]
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        f.write_indent()?;
+        self.as_ref().fmt(f)
+    }
+}
+
+impl Format for Vec<Vec<DanglingComment>> {
+    #[inline]
+    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        for (i, comments) in self.iter().enumerate() {
+            assert!(!comments.is_empty());
+            if i != 0 {
+                write!(f, "{}{}", f.line_ending(), f.line_ending())?;
+            }
+
+            for (j, comment) in comments.iter().enumerate() {
+                if j != 0 {
+                    write!(f, "{}", f.line_ending())?;
+                }
+                comment.fmt(f)?;
+            }
+        }
+        Ok(())
+    }
+}
+
 impl Format for BeginDanglingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -66,33 +94,6 @@ impl Format for Vec<Vec<EndDanglingComment>> {
             }
 
             for comment in comments {
-                comment.fmt(f)?;
-            }
-        }
-        Ok(())
-    }
-}
-
-impl Format for DanglingComment {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        f.write_indent()?;
-        self.as_ref().fmt(f)
-    }
-}
-
-impl Format for Vec<Vec<DanglingComment>> {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        for (i, comments) in self.iter().enumerate() {
-            if i != 0 {
-                write!(f, "{}{}", f.line_ending(), f.line_ending())?;
-            }
-
-            for (j, comment) in comments.iter().enumerate() {
-                if j != 0 {
-                    write!(f, "{}", f.line_ending())?;
-                }
                 comment.fmt(f)?;
             }
         }

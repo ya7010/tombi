@@ -18,6 +18,7 @@ impl Format for ast::Root {
                         ast::RootItem::Table(table) => {
                             let header_keys = table.header().unwrap().keys();
                             let key_value_size = table.key_values().count();
+                            let has_dangling_comments = !table.dangling_comments().is_empty();
 
                             match header {
                                 Header::Root { key_value_size } => {
@@ -28,13 +29,16 @@ impl Format for ast::Root {
                                 Header::Table {
                                     header_keys: pre_header_keys,
                                     key_value_size,
+                                    has_dangling_comments,
                                 }
                                 | Header::ArrayOfTables {
                                     header_keys: pre_header_keys,
                                     key_value_size,
+                                    has_dangling_comments,
                                 } => {
                                     if key_value_size > 0
                                         || !header_keys.starts_with(&pre_header_keys)
+                                        || has_dangling_comments
                                     {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
@@ -46,6 +50,7 @@ impl Format for ast::Root {
                                 Header::Table {
                                     header_keys,
                                     key_value_size,
+                                    has_dangling_comments,
                                 },
                                 acc,
                             )
@@ -53,6 +58,8 @@ impl Format for ast::Root {
                         ast::RootItem::ArrayOfTables(array_of_tables) => {
                             let header_keys = array_of_tables.header().unwrap().keys();
                             let key_value_size = array_of_tables.key_values().count();
+                            let has_dangling_comments =
+                                !array_of_tables.dangling_comments().is_empty();
 
                             match header {
                                 Header::Root { key_value_size } => {
@@ -63,9 +70,11 @@ impl Format for ast::Root {
                                 Header::Table {
                                     header_keys: pre_header_keys,
                                     key_value_size,
+                                    has_dangling_comments,
                                 } => {
                                     if key_value_size > 0
                                         || !header_keys.starts_with(&pre_header_keys)
+                                        || has_dangling_comments
                                     {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
@@ -73,10 +82,12 @@ impl Format for ast::Root {
                                 Header::ArrayOfTables {
                                     header_keys: pre_header_keys,
                                     key_value_size,
+                                    has_dangling_comments,
                                 } => {
                                     if key_value_size > 0
                                         || !header_keys.starts_with(&pre_header_keys)
                                         || pre_header_keys.same_as(&header_keys)
+                                        || has_dangling_comments
                                     {
                                         acc.push(ItemOrNewLine::NewLine);
                                     }
@@ -88,6 +99,7 @@ impl Format for ast::Root {
                                 Header::ArrayOfTables {
                                     header_keys,
                                     key_value_size,
+                                    has_dangling_comments,
                                 },
                                 acc,
                             )
@@ -157,11 +169,13 @@ enum Header {
     Table {
         header_keys: ast::AstChildren<ast::Key>,
         key_value_size: usize,
+        has_dangling_comments: bool,
     },
 
     ArrayOfTables {
         header_keys: ast::AstChildren<ast::Key>,
         key_value_size: usize,
+        has_dangling_comments: bool,
     },
 }
 
@@ -213,9 +227,51 @@ mod test {
 
     test_format! {
         #[test]
+        fn empty_table_space_on_other_array_of_tables_with_comments(
+            r#"
+            [foo]  # header table comment
+            # table dangling comment 1-1
+            # table dangling comment 1-2
+
+            # table dangling comment 2-1
+            # table dangling comment 2-2
+            # table dangling comment 2-3
+
+            # table dangling comment 3-1
+
+            # table header leading comment1
+            # table header leading comment2
+            [[bar.baz]]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
         fn empty_array_of_tables_space_on_own_subtable(
             r#"
             [[foo]]
+            [foo.bar]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_array_of_tables_space_on_own_subtable_with_comments(
+            r#"
+            [[foo]]  # header tailing comment
+            # table dangling comment 1-1
+            # table dangling comment 1-2
+
+            # table dangling comment 2-1
+            # table dangling comment 2-2
+            # table dangling comment 2-3
+
+            # table dangling comment 3-1
+
+            # table header leading comment1
+            # table header leading comment2
             [foo.bar]
             "#
         ) -> Ok(source);
@@ -234,10 +290,50 @@ mod test {
 
     test_format! {
         #[test]
+        fn empty_array_of_tables_space_on_other_subtable_with_comments(
+            r#"
+            [[foo]]  # header tailing comment
+            # table dangling comment 1-1
+            # table dangling comment 1-2
+
+            # table dangling comment 2-1
+            # table dangling comment 2-2
+            # table dangling comment 2-3
+
+            # table dangling comment 3-1
+
+            [bar.baz]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
         fn empty_array_of_tables_space_on_same_array_of_tables(
             r#"
             [[foo]]
 
+            [[foo]]
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn empty_array_of_tables_space_on_same_array_of_tables_with_comment(
+            r#"
+            [[foo]]  # header tailing comment
+            # table dangling comment 1-1
+            # table dangling comment 1-2
+
+            # table dangling comment 2-1
+            # table dangling comment 2-2
+            # table dangling comment 2-3
+
+            # table dangling comment 3-1
+
+            # table header leading comment1
+            # table header leading comment2
             [[foo]]
             "#
         ) -> Ok(source);

@@ -19,6 +19,13 @@ impl Format for ast::ArrayOfTables {
         let key_values = self.key_values().collect_vec();
 
         if key_values.is_empty() {
+            let dangling_comments = self.dangling_comments();
+
+            if !dangling_comments.is_empty() {
+                write!(f, "{}", f.line_ending())?;
+                dangling_comments.fmt(f)?;
+            }
+
             return Ok(());
         } else {
             write!(f, "{}", f.line_ending())?;

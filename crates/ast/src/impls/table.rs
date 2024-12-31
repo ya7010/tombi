@@ -12,6 +12,16 @@ impl crate::Table {
         support::node::tailing_comment(self.syntax().children_with_tokens(), T!(']'))
     }
 
+    pub fn dangling_comments(&self) -> Vec<Vec<crate::DanglingComment>> {
+        support::node::dangling_comments(
+            self.syntax()
+                .children_with_tokens()
+                .skip_while(|node| !matches!(node.kind(), T!(']')))
+                .skip_while(|node| !matches!(node.kind(), LINE_BREAK))
+                .take_while(|node| matches!(node.kind(), COMMENT | LINE_BREAK | WHITESPACE)),
+        )
+    }
+
     pub fn begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {
         support::node::begin_dangling_comments(
             self.syntax()
