@@ -85,6 +85,8 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         .into_iter()
         .rev();
 
+    // NOTE: If there is a whitespace comment at the beginning, it is treated as a group with an empty element.
+    //       This allows us to insert a line break at the beginning when formatting.
     let comment_groups = group_comments(comment_iter.clone());
     if comment_groups.is_empty()
         || comment_iter
