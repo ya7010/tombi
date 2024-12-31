@@ -49,7 +49,13 @@ pub async fn handle_diagnostic(
                     },
                     |_| vec![],
                 ),
-                Err(_) => return Err(tower_lsp::jsonrpc::Error::internal_error()),
+                Err(err) => {
+                    return Err(tower_lsp::jsonrpc::Error {
+                        code: tower_lsp::jsonrpc::ErrorCode::ServerError(0),
+                        message: std::borrow::Cow::Owned(err.to_string()),
+                        data: None,
+                    })
+                }
             }
         }
         None => vec![],

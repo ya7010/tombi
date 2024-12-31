@@ -86,39 +86,37 @@ impl SchemaStore {
         }
     }
 
-    pub async fn try_get_schema_from_url<'a>(
-        &'a self,
-        url: &Url,
-    ) -> Result<DocumentSchema, crate::Error> {
-        match self.schemas.get(url) {
+    async fn try_load_schema(&self, schema_url: &Url) -> Result<DocumentSchema, crate::Error> {
+        tracing::debug!("try get schema from url: {}", schema_url);
+        match self.schemas.get(schema_url) {
             Some(document_schema) => match document_schema.value() {
                 Ok(document_schema) => Ok(document_schema.clone()),
                 Err(err) => Err(err.clone()),
             },
             None => {
-                let schema: schemars::Schema = match url.scheme() {
+                let schema: schemars::Schema = match schema_url.scheme() {
                     "file" => {
-                        let file = std::fs::File::open(url.path()).map_err(|_| {
+                        let file = std::fs::File::open(schema_url.path()).map_err(|_| {
                             crate::Error::SchemaFileReadFailed {
-                                schema_path: url.path().to_string(),
+                                schema_path: schema_url.path().to_string(),
                             }
                         })?;
 
                         serde_json::from_reader(file)
                     }
                     "http" | "https" => {
-                        let response =
-                            self.http_client
-                                .get(url.as_str())
-                                .send()
-                                .await
-                                .map_err(|_| crate::Error::SchemaFetchFailed {
-                                    schema_url: url.to_string(),
-                                })?;
+                        let response = self
+                            .http_client
+                            .get(schema_url.as_str())
+                            .send()
+                            .await
+                            .map_err(|_| crate::Error::SchemaFetchFailed {
+                                schema_url: schema_url.to_string(),
+                            })?;
 
                         let bytes = response.bytes().await.map_err(|_| {
                             crate::Error::SchemaFetchFailed {
-                                schema_url: url.to_string(),
+                                schema_url: schema_url.to_string(),
                             }
                         })?;
 
@@ -126,12 +124,12 @@ impl SchemaStore {
                     }
                     _ => {
                         return Err(crate::Error::UnsupportedUrlSchema {
-                            url_schema: url.scheme().to_string(),
+                            url_schema: schema_url.scheme().to_string(),
                         })
                     }
                 }
                 .map_err(|_| crate::Error::SchemaFileParseFailed {
-                    schema_path: url.path().to_string(),
+                    schema_path: schema_url.path().to_string(),
                 })?;
 
                 let document_schema = DocumentSchema {
@@ -151,7 +149,7 @@ impl SchemaStore {
                         .get("description")
                         .map(|obj| obj.as_str().map(|title| title.to_string()))
                         .flatten(),
-                    schema_url: Some(url.to_owned()),
+                    schema_url: Some(schema_url.to_owned()),
                     properties: schema
                         .get("properties")
                         .map(|obj| obj.as_object())
@@ -170,14 +168,30 @@ impl SchemaStore {
                 };
 
                 self.schemas
-                    .insert(url.to_owned(), Ok(document_schema.clone()));
+                    .insert(schema_url.to_owned(), Ok(document_schema.clone()));
 
                 Ok(document_schema)
             }
         }
     }
 
-    pub async fn try_get_schema_from_source(
+    pub async fn try_get_schema_from_url(
+        &self,
+        source_url: &url::Url,
+    ) -> Result<Option<DocumentSchema>, crate::Error> {
+        match source_url.scheme() {
+            "file" => {
+                let source_path = source_url.path();
+                let source_path = std::path::Path::new(source_path);
+                self.try_get_schema_from_path(source_path).await
+            }
+            _ => Err(crate::Error::UnsupportedUrlSchema {
+                url_schema: source_url.scheme().to_string(),
+            }),
+        }
+    }
+
+    pub async fn try_get_schema_from_path(
         &self,
         source_path: &std::path::Path,
     ) -> Result<Option<DocumentSchema>, crate::Error> {
@@ -205,7 +219,7 @@ impl SchemaStore {
         };
 
         for schema_url in matching_schema_urls {
-            if let Ok(schema) = self.try_get_schema_from_url(&schema_url).await {
+            if let Ok(schema) = self.try_load_schema(&schema_url).await {
                 return Ok(Some(schema));
             }
         }
@@ -214,22 +228,21 @@ impl SchemaStore {
 
     pub async fn try_get_schema(
         &self,
-        url_or_path: Either<&Url, &std::path::Path>,
+        source_url_or_path: Either<&Url, &std::path::Path>,
     ) -> Result<Option<DocumentSchema>, crate::Error> {
-        match url_or_path {
-            Either::Left(schema_url) => self
-                .try_get_schema_from_url(schema_url)
-                .await
-                .inspect(|_| {
-                    tracing::debug!("find schema from url: {}", schema_url);
+        match source_url_or_path {
+            Either::Left(source_url) => {
+                self.try_get_schema_from_url(source_url).await.inspect(|_| {
+                    tracing::debug!("find schema from url: {}", source_url);
                 })
-                .map(Some),
-            Either::Right(source_path) => self
-                .try_get_schema_from_source(source_path)
-                .await
-                .inspect(|_| {
-                    tracing::debug!("find schema from source: {}", source_path.display());
-                }),
+            }
+            Either::Right(source_path) => {
+                self.try_get_schema_from_path(source_path)
+                    .await
+                    .inspect(|_| {
+                        tracing::debug!("find schema from source: {}", source_path.display());
+                    })
+            }
         }
     }
 
