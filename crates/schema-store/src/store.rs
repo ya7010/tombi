@@ -1,4 +1,4 @@
-use config::SchemaInfo;
+use config::SchemaCatalogItem;
 use dashmap::DashMap;
 use itertools::Either;
 use std::sync::{Arc, RwLock};
@@ -27,7 +27,7 @@ impl SchemaStore {
     pub fn load_config_schema(
         &self,
         config_dirpath: Option<std::path::PathBuf>,
-        schemas: &[SchemaInfo],
+        schemas: &[SchemaCatalogItem],
     ) {
         let config_dirpath = match config_dirpath {
             Some(path) => path,

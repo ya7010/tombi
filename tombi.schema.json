@@ -40,7 +40,7 @@
       ]
     },
     "schema": {
-      "title": "Linter options.",
+      "title": "Schema options.",
       "anyOf": [
         {
           "$ref": "#/$defs/SchemaOptions"
@@ -51,13 +51,13 @@
       ]
     },
     "schemas": {
-      "title": "Schema Catalog list.",
+      "title": "Schema catalog items.",
       "type": [
         "array",
         "null"
       ],
       "items": {
-        "$ref": "#/$defs/SchemaInfo"
+        "$ref": "#/$defs/SchemaCatalogItem"
       }
     }
   },
@@ -222,7 +222,7 @@
           ]
         },
         "path": {
-          "title": "The schema catalog path.",
+          "title": "The schema catalog path or url.",
           "anyOf": [
             {
               "$ref": "#/$defs/OneOrMany_for_SchemaCatalogPath"
@@ -257,7 +257,7 @@
       "description": "Generic value that can be either single or multiple",
       "type": "string"
     },
-    "SchemaInfo": {
+    "SchemaCatalogItem": {
       "type": "object",
       "properties": {
         "toml-version": {

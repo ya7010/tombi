@@ -58,7 +58,7 @@ impl SchemaCatalog {
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone)]
-pub struct SchemaInfo {
+pub struct SchemaCatalogItem {
     /// # The TOML version that the schema is available.
     pub toml_version: Option<TomlVersion>,
 
