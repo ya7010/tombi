@@ -13,6 +13,9 @@ use std::path::PathBuf;
 pub use toml_version::TomlVersion;
 pub use types::*;
 
+const CONFIG_FILENAME: &str = "tombi.toml";
+const PYPROJECT_FILENAME: &str = "pyproject.toml";
+
 /// # Tombi
 ///
 /// **Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.
@@ -62,10 +65,12 @@ struct Tool {
 }
 
 #[cfg(feature = "serde")]
-impl TryFrom<&std::path::Path> for Config {
-    type Error = crate::Error;
+impl Config {
+    fn try_from_path<P: AsRef<std::path::Path>>(
+        config_path: P,
+    ) -> Result<Option<Self>, crate::Error> {
+        let config_path = config_path.as_ref();
 
-    fn try_from(config_path: &std::path::Path) -> Result<Self, Self::Error> {
         if !config_path.exists() {
             return Err(crate::Error::ConfigFileNotFound {
                 config_path: config_path.to_owned(),
@@ -78,25 +83,39 @@ impl TryFrom<&std::path::Path> for Config {
             });
         };
 
-        toml::from_str::<Config>(&config_str).map_err(|_| crate::Error::ConfigFileParseFailed {
-            config_path: config_path.to_owned(),
-        })
+        match config_path.file_name().and_then(|name| name.to_str()) {
+            Some(CONFIG_FILENAME) => toml::from_str::<Config>(&config_str)
+                .map_err(|_| crate::Error::ConfigFileParseFailed {
+                    config_path: config_path.to_owned(),
+                })
+                .map(Some),
+            Some(PYPROJECT_FILENAME) => {
+                let Ok(pyproject_toml) = toml::from_str::<PyProjectToml>(&config_str) else {
+                    return Err(crate::Error::ConfigFileParseFailed {
+                        config_path: config_path.to_owned(),
+                    });
+                };
+                if let Some(Tool { tombi: Some(tombi) }) = pyproject_toml.tool {
+                    Ok(Some(tombi))
+                } else {
+                    Ok(None)
+                }
+            }
+            _ => Err(crate::Error::ConfigFileUnsupported {
+                config_path: config_path.to_owned(),
+            }),
+        }
     }
-}
 
-#[cfg(feature = "serde")]
-impl TryFrom<url::Url> for Config {
-    type Error = crate::Error;
-
-    fn try_from(config_url: url::Url) -> Result<Self, Self::Error> {
+    pub fn try_from_url(config_url: url::Url) -> Result<Option<Self>, crate::Error> {
         match config_url.scheme() {
             "file" => {
                 let config_path = config_url
                     .to_file_path()
-                    .map_err(|_| crate::Error::UrlSchemaParseFailed { config_url })?;
-                Config::try_from(config_path.as_ref())
+                    .map_err(|_| crate::Error::ConfigUrlParseFailed { config_url })?;
+                Self::try_from_path(config_path)
             }
-            _ => Err(crate::Error::UrlSchemaUnsupported { config_url }),
+            _ => Err(crate::Error::ConfigUrlUnsupported { config_url }),
         }
     }
 }
@@ -104,16 +123,15 @@ impl TryFrom<url::Url> for Config {
 /// Load the config from the current directory.
 #[cfg(feature = "serde")]
 pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
-    const CONFIG_FILENAME: &str = "tombi.toml";
-    const PYPROJECT_FILENAME: &str = "pyproject.toml";
-
     let mut current_dir = std::env::current_dir().unwrap();
     loop {
         let config_path = current_dir.join(CONFIG_FILENAME);
         if config_path.exists() {
             tracing::debug!("\"{}\" found at {:?}", CONFIG_FILENAME, &config_path);
 
-            let config = Config::try_from(config_path.as_ref())?;
+            let Some(config) = Config::try_from_path(&config_path)? else {
+                unreachable!("tombi.toml must be Some(config)")
+            };
 
             let config_dirpath = match config_path.parent() {
                 Some(dir) => dir.to_owned(),
@@ -131,22 +149,11 @@ pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
                 pyproject_toml_path
             );
 
-            let Ok(pyproject_toml_str) = std::fs::read_to_string(&pyproject_toml_path) else {
-                return Err(crate::Error::ConfigFileReadFailed {
-                    config_path: pyproject_toml_path,
-                });
-            };
-            let Ok(config) = toml::from_str::<PyProjectToml>(&pyproject_toml_str) else {
-                return Err(crate::Error::ConfigFileParseFailed {
-                    config_path: pyproject_toml_path,
-                });
-            };
-            if let Some(Tool { tombi: Some(tombi) }) = config.tool {
-                return Ok((tombi, Some(pyproject_toml_path)));
-            } else {
+            let Some(config) = Config::try_from_path(&pyproject_toml_path)? else {
                 tracing::debug!("No [tool.tombi] found in {:?}", &config_path);
                 continue;
-            }
+            };
+            return Ok((config, Some(pyproject_toml_path)));
         }
 
         if !current_dir.pop() {

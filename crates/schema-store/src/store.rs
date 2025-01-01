@@ -87,12 +87,12 @@ impl SchemaStore {
                 }
                 Ok(())
             } else {
-                Err(crate::Error::CatalogParseFailed {
+                Err(crate::Error::CatalogUrlParseFailed {
                     catalog_url: catalog_url.clone(),
                 })
             }
         } else {
-            Err(crate::Error::CatalogFetchFailed {
+            Err(crate::Error::CatalogUrlFetchFailed {
                 catalog_url: catalog_url.clone(),
             })
         }
@@ -104,11 +104,14 @@ impl SchemaStore {
     ) -> Result<DocumentSchema, crate::Error> {
         let schema: schemars::Schema = match schema_url.scheme() {
             "file" => {
-                let file = std::fs::File::open(schema_url.path()).map_err(|_| {
-                    crate::Error::SchemaFileReadFailed {
-                        schema_path: schema_url.path().to_string(),
-                    }
-                })?;
+                let schema_path =
+                    schema_url
+                        .to_file_path()
+                        .map_err(|_| crate::Error::SchemaUrlParseFailed {
+                            schema_url: schema_url.to_owned(),
+                        })?;
+                let file = std::fs::File::open(&schema_path)
+                    .map_err(|_| crate::Error::SchemaFileReadFailed { schema_path })?;
 
                 serde_json::from_reader(file)
             }
@@ -119,7 +122,7 @@ impl SchemaStore {
                     .send()
                     .await
                     .map_err(|_| crate::Error::SchemaFetchFailed {
-                        schema_url: schema_url.to_string(),
+                        schema_url: schema_url.clone(),
                     })?;
 
                 let bytes =
@@ -127,13 +130,13 @@ impl SchemaStore {
                         .bytes()
                         .await
                         .map_err(|_| crate::Error::SchemaFetchFailed {
-                            schema_url: schema_url.to_string(),
+                            schema_url: schema_url.clone(),
                         })?;
 
                 serde_json::from_reader(std::io::Cursor::new(bytes))
             }
             _ => {
-                return Err(crate::Error::UrlSchemaUnsupported {
+                return Err(crate::Error::SchemaUrlUnsupported {
                     schema_url: schema_url.to_owned(),
                 })
             }
@@ -203,12 +206,16 @@ impl SchemaStore {
     ) -> Result<Option<DocumentSchema>, crate::Error> {
         match source_url.scheme() {
             "file" => {
-                let source_path = source_url.path();
-                let source_path = std::path::Path::new(source_path);
-                self.try_get_schema_from_path(source_path).await
+                let source_path =
+                    source_url
+                        .to_file_path()
+                        .map_err(|_| crate::Error::SourceUrlParseFailed {
+                            source_url: source_url.to_owned(),
+                        })?;
+                self.try_get_schema_from_path(&source_path).await
             }
-            _ => Err(crate::Error::UrlSchemaUnsupported {
-                schema_url: source_url.to_owned(),
+            _ => Err(crate::Error::SourceUrlUnsupported {
+                source_url: source_url.to_owned(),
             }),
         }
     }

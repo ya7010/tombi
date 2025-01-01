@@ -17,27 +17,32 @@ pub async fn handle_update_config(
     };
 
     for workspace_folder in workspace_folders {
-        let Ok(workspace_config_url) = workspace_folder.uri.join("tombi.toml") else {
-            continue;
-        };
-        if config_url == workspace_config_url {
-            match config::Config::try_from(config_url) {
-                Ok(config) => {
-                    backend
-                        .update_workspace_config(workspace_config_url, config)
-                        .await;
-                    return Ok(true);
-                }
-                Err(err) => {
-                    backend
-                        .client
-                        .send_notification::<ShowMessage>(ShowMessageParams {
-                            typ: MessageType::ERROR,
-                            message: err.to_string(),
-                        })
-                        .await;
+        for config_filename in ["tombi.toml"] {
+            let Ok(workspace_config_url) = workspace_folder.uri.join(config_filename) else {
+                continue;
+            };
+            if config_url == workspace_config_url {
+                match config::Config::try_from_url(workspace_config_url) {
+                    Ok(Some(config)) => {
+                        backend
+                            .update_workspace_config(config_url.clone(), config)
+                            .await;
+                        return Ok(true);
+                    }
+                    Ok(None) => {
+                        continue;
+                    }
+                    Err(err) => {
+                        backend
+                            .client
+                            .send_notification::<ShowMessage>(ShowMessageParams {
+                                typ: MessageType::ERROR,
+                                message: err.to_string(),
+                            })
+                            .await;
 
-                    return Ok(false);
+                        return Ok(false);
+                    }
                 }
             }
         }
