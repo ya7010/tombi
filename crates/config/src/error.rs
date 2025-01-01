@@ -8,6 +8,9 @@ pub enum Error {
     #[error("failed to parse config url: {config_url}")]
     UrlSchemaParseFailed { config_url: Url },
 
+    #[error("config file not found: {config_path:?}")]
+    ConfigFileNotFound { config_path: std::path::PathBuf },
+
     #[error("failed to read {config_path:?}")]
     ConfigFileReadFailed { config_path: std::path::PathBuf },
 

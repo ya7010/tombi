@@ -66,11 +66,18 @@ impl TryFrom<&std::path::Path> for Config {
     type Error = crate::Error;
 
     fn try_from(config_path: &std::path::Path) -> Result<Self, Self::Error> {
+        if !config_path.exists() {
+            return Err(crate::Error::ConfigFileNotFound {
+                config_path: config_path.to_owned(),
+            });
+        }
+
         let Ok(config_str) = std::fs::read_to_string(&config_path) else {
             return Err(crate::Error::ConfigFileReadFailed {
                 config_path: config_path.to_owned(),
             });
         };
+
         toml::from_str::<Config>(&config_str).map_err(|_| crate::Error::ConfigFileParseFailed {
             config_path: config_path.to_owned(),
         })
