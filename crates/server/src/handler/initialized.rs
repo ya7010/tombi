@@ -4,13 +4,16 @@ use crate::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: InitializedParams) {
-    backend.schema_store.load_config_schema(
-        None,
-        match &backend.config.read().await.schemas {
-            Some(schemas) => schemas,
-            None => &[],
-        },
-    );
+    backend
+        .schema_store
+        .load_config_schema(
+            None,
+            match &backend.config.read().await.schemas {
+                Some(schemas) => schemas,
+                None => &[],
+            },
+        )
+        .await;
 
     load_catalog(backend).await;
 }

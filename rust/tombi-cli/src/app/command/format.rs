@@ -81,14 +81,6 @@ where
     let schema_options = config.schema.unwrap_or_default();
     let schema_store = schema_store::SchemaStore::default();
 
-    schema_store.load_config_schema(
-        config_dirpath,
-        match &config.schemas {
-            Some(schemas) => schemas,
-            None => &[],
-        },
-    );
-
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -98,6 +90,16 @@ where
     };
 
     runtime.block_on(async {
+        schema_store
+            .load_config_schema(
+                config_dirpath,
+                match &config.schemas {
+                    Some(schemas) => schemas,
+                    None => &[],
+                },
+            )
+            .await;
+
         if args.schema_catalog_enabled.unwrap_or_else(|| {
             schema_options
                 .catalog

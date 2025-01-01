@@ -1,7 +1,8 @@
 use config::SchemaCatalogItem;
 use dashmap::DashMap;
 use itertools::Either;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use url::Url;
 
 use crate::{
@@ -24,7 +25,7 @@ impl SchemaStore {
         }
     }
 
-    pub fn load_config_schema(
+    pub async fn load_config_schema(
         &self,
         config_dirpath: Option<std::path::PathBuf>,
         schemas: &[SchemaCatalogItem],
@@ -33,24 +34,23 @@ impl SchemaStore {
             Some(path) => path,
             None => std::env::current_dir().unwrap(),
         };
-        if let Ok(mut catalogs) = self.catalogs.write() {
-            for schema in schemas.iter() {
-                let Ok(url) = Url::parse(&format!(
-                    "file://{}",
-                    config_dirpath.join(&schema.path).to_string_lossy()
-                )) else {
-                    continue;
-                };
-                tracing::debug!("load config schema from: {}", url);
+        let mut catalogs = self.catalogs.write().await;
+        for schema in schemas.iter() {
+            let Ok(url) = Url::parse(&format!(
+                "file://{}",
+                config_dirpath.join(&schema.path).to_string_lossy()
+            )) else {
+                continue;
+            };
+            tracing::debug!("load config schema from: {}", url);
 
-                catalogs.push(CatalogSchema {
-                    url,
-                    include: match schema.include.as_ref() {
-                        Some(include) => include.clone(),
-                        None => Vec::with_capacity(0),
-                    },
-                });
-            }
+            catalogs.push(CatalogSchema {
+                url,
+                include: match schema.include.as_ref() {
+                    Some(include) => include.clone(),
+                    None => Vec::with_capacity(0),
+                },
+            });
         }
     }
 
@@ -72,18 +72,17 @@ impl SchemaStore {
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
             if let Ok(catalog) = response.json::<JsonCatalog>().await {
-                if let Ok(mut catalogs) = self.catalogs.write() {
-                    for schema in catalog.schemas {
-                        if schema
-                            .file_match
-                            .iter()
-                            .any(|pattern| pattern.ends_with(".toml"))
-                        {
-                            catalogs.push(CatalogSchema {
-                                url: schema.url,
-                                include: schema.file_match,
-                            });
-                        }
+                let mut catalogs = self.catalogs.write().await;
+                for schema in catalog.schemas {
+                    if schema
+                        .file_match
+                        .iter()
+                        .any(|pattern| pattern.ends_with(".toml"))
+                    {
+                        catalogs.push(CatalogSchema {
+                            url: schema.url,
+                            include: schema.file_match,
+                        });
                     }
                 }
                 Ok(())
@@ -219,26 +218,25 @@ impl SchemaStore {
         source_path: &std::path::Path,
     ) -> Result<Option<DocumentSchema>, crate::Error> {
         let matching_schema_urls: Vec<_> = {
-            match self.catalogs.read() {
-                Ok(catalogs) => catalogs
-                    .iter()
-                    .filter(|catalog| {
-                        catalog.include.iter().any(|pat| {
-                            let pattern = if !pat.contains("*") {
-                                format!("**/{}", pat)
-                            } else {
-                                pat.to_string()
-                            };
-                            glob::Pattern::new(&pattern)
-                                .ok()
-                                .map(|glob_pat| glob_pat.matches_path(source_path))
-                                .unwrap_or(false)
-                        })
+            self.catalogs
+                .read()
+                .await
+                .iter()
+                .filter(|catalog| {
+                    catalog.include.iter().any(|pat| {
+                        let pattern = if !pat.contains("*") {
+                            format!("**/{}", pat)
+                        } else {
+                            pat.to_string()
+                        };
+                        glob::Pattern::new(&pattern)
+                            .ok()
+                            .map(|glob_pat| glob_pat.matches_path(source_path))
+                            .unwrap_or(false)
                     })
-                    .map(|catalog| catalog.url.clone())
-                    .collect(),
-                Err(_) => Vec::with_capacity(0),
-            }
+                })
+                .map(|catalog| catalog.url.clone())
+                .collect()
         };
 
         for schema_url in matching_schema_urls {
@@ -267,13 +265,12 @@ impl SchemaStore {
         }
     }
 
-    pub fn catalog_urls(&self) -> Vec<Url> {
-        match self.catalogs.read() {
-            Ok(catalogs) => catalogs
-                .iter()
-                .map(|catalog| catalog.url.clone())
-                .collect::<Vec<_>>(),
-            Err(_) => Vec::with_capacity(0),
-        }
+    pub async fn catalog_urls(&self) -> Vec<Url> {
+        self.catalogs
+            .read()
+            .await
+            .iter()
+            .map(|catalog| catalog.url.clone())
+            .collect::<Vec<_>>()
     }
 }
