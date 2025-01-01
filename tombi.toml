@@ -3,7 +3,7 @@
 # This file is for checking if the JsonSchema is correct.
 #
 
-toml-version = "v1.1.0-preview"
+toml-version = "v1.0.0"
 
 [format]
 line-width = 80
