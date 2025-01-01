@@ -20,8 +20,7 @@ pub async fn handle_diagnostic(
             match linter::Linter::try_new(
                 backend.toml_version().await,
                 backend
-                    .config
-                    .read()
+                    .config()
                     .await
                     .lint
                     .as_ref()

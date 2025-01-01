@@ -33,7 +33,7 @@ pub struct Backend {
     pub client: tower_lsp::Client,
     pub document_sources: DashMap<Url, DocumentSource>,
     toml_version: Option<TomlVersion>,
-    pub config: Arc<RwLock<Config>>,
+    config: Arc<RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
 
@@ -64,6 +64,14 @@ impl Backend {
             return ast::Root::cast(p.into_syntax_node());
         }
         None
+    }
+
+    pub async fn config(&self) -> Config {
+        self.config.read().await.clone()
+    }
+
+    pub async fn update_workspace_config(&self, _workspace_url: Url, config: Config) {
+        *self.config.write().await = config;
     }
 
     pub async fn toml_version(&self) -> TomlVersion {

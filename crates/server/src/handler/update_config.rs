@@ -23,11 +23,9 @@ pub async fn handle_update_config(
         if config_url == workspace_config_url {
             match config::Config::try_from(config_url) {
                 Ok(config) => {
-                    let mut cfg = backend.config.write().await;
-                    *cfg = config;
-
-                    tracing::debug!("config updated");
-
+                    backend
+                        .update_workspace_config(workspace_config_url, config)
+                        .await;
                     return Ok(true);
                 }
                 Err(err) => {

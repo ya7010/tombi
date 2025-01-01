@@ -33,8 +33,7 @@ pub async fn handle_formatting(
     match formatter::Formatter::try_new(
         toml_version,
         backend
-            .config
-            .read()
+            .config()
             .await
             .format
             .as_ref()

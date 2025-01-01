@@ -8,7 +8,7 @@ pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: Ini
         .schema_store
         .load_config_schema(
             None,
-            match &backend.config.read().await.schemas {
+            match &backend.config().await.schemas {
                 Some(schemas) => schemas,
                 None => &[],
             },
@@ -19,7 +19,7 @@ pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: Ini
 }
 
 async fn load_catalog(backend: &Backend) {
-    let config = backend.config.read().await;
+    let config = backend.config().await;
     let Some(catalog) = config
         .schema
         .as_ref()
