@@ -6,6 +6,7 @@
 toml-version = "v1.1.0-preview"
 
 [format]
+line-width = 80
 line-ending = "lf"
 
 [lint]
