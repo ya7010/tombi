@@ -11,6 +11,7 @@ mod initialize;
 mod initialized;
 mod semantic_tokens_full;
 mod shutdown;
+mod update_schema;
 
 mod did_save;
 pub use diagnostic::handle_diagnostic;
@@ -27,3 +28,4 @@ pub use initialize::handle_initialize;
 pub use initialized::handle_initialized;
 pub use semantic_tokens_full::handle_semantic_tokens_full;
 pub use shutdown::handle_shutdown;
+pub use update_schema::handle_update_schema;

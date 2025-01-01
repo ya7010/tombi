@@ -54,6 +54,16 @@ impl SchemaStore {
         }
     }
 
+    pub async fn update_schema(&self, schema_url: &Url) -> Result<(), crate::Error> {
+        if self.schemas.contains_key(schema_url) {
+            let document_schema = self.try_get_schema_from_schema_url(schema_url).await?;
+
+            self.schemas.insert(schema_url.clone(), Ok(document_schema));
+            tracing::debug!("update schema: {}", schema_url);
+        }
+        Ok(())
+    }
+
     pub async fn load_catalog_from_url(&self, catalog_url: &url::Url) -> Result<(), crate::Error> {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
@@ -86,86 +96,96 @@ impl SchemaStore {
         }
     }
 
+    async fn try_get_schema_from_schema_url(
+        &self,
+        schema_url: &Url,
+    ) -> Result<DocumentSchema, crate::Error> {
+        let schema: schemars::Schema = match schema_url.scheme() {
+            "file" => {
+                let file = std::fs::File::open(schema_url.path()).map_err(|_| {
+                    crate::Error::SchemaFileReadFailed {
+                        schema_path: schema_url.path().to_string(),
+                    }
+                })?;
+
+                serde_json::from_reader(file)
+            }
+            "http" | "https" => {
+                let response = self
+                    .http_client
+                    .get(schema_url.as_str())
+                    .send()
+                    .await
+                    .map_err(|_| crate::Error::SchemaFetchFailed {
+                        schema_url: schema_url.to_string(),
+                    })?;
+
+                let bytes =
+                    response
+                        .bytes()
+                        .await
+                        .map_err(|_| crate::Error::SchemaFetchFailed {
+                            schema_url: schema_url.to_string(),
+                        })?;
+
+                serde_json::from_reader(std::io::Cursor::new(bytes))
+            }
+            _ => {
+                return Err(crate::Error::UnsupportedUrlSchema {
+                    schema_url: schema_url.to_owned(),
+                })
+            }
+        }
+        .map_err(|_| crate::Error::SchemaFileParseFailed {
+            schema_url: schema_url.to_owned(),
+        })?;
+
+        let document_schema = DocumentSchema {
+            toml_version: schema
+                .get("x-tombi-toml-version")
+                .and_then(|obj| match obj {
+                    serde_json::Value::String(version) => {
+                        serde_json::from_str(&format!("\"{version}\"")).ok()
+                    }
+                    _ => None,
+                }),
+            title: schema
+                .get("title")
+                .map(|obj| obj.as_str().map(|title| title.to_string()))
+                .flatten(),
+            description: schema
+                .get("description")
+                .map(|obj| obj.as_str().map(|title| title.to_string()))
+                .flatten(),
+            schema_url: Some(schema_url.to_owned()),
+            properties: schema
+                .get("properties")
+                .map(|obj| obj.as_object())
+                .flatten()
+                .map(|obj| {
+                    obj.iter()
+                        .filter_map(|(key, value)| {
+                            value
+                                .as_object()
+                                .map(|_| (Accessor::Key(key.clone()), ObjectSchema::default()))
+                        })
+                        .collect()
+                })
+                .unwrap_or_default(),
+            ..Default::default()
+        };
+
+        Ok(document_schema)
+    }
+
     async fn try_load_schema(&self, schema_url: &Url) -> Result<DocumentSchema, crate::Error> {
-        tracing::debug!("try get schema from url: {}", schema_url);
         match self.schemas.get(schema_url) {
             Some(document_schema) => match document_schema.value() {
                 Ok(document_schema) => Ok(document_schema.clone()),
                 Err(err) => Err(err.clone()),
             },
             None => {
-                let schema: schemars::Schema = match schema_url.scheme() {
-                    "file" => {
-                        let file = std::fs::File::open(schema_url.path()).map_err(|_| {
-                            crate::Error::SchemaFileReadFailed {
-                                schema_path: schema_url.path().to_string(),
-                            }
-                        })?;
-
-                        serde_json::from_reader(file)
-                    }
-                    "http" | "https" => {
-                        let response = self
-                            .http_client
-                            .get(schema_url.as_str())
-                            .send()
-                            .await
-                            .map_err(|_| crate::Error::SchemaFetchFailed {
-                                schema_url: schema_url.to_string(),
-                            })?;
-
-                        let bytes = response.bytes().await.map_err(|_| {
-                            crate::Error::SchemaFetchFailed {
-                                schema_url: schema_url.to_string(),
-                            }
-                        })?;
-
-                        serde_json::from_reader(std::io::Cursor::new(bytes))
-                    }
-                    _ => {
-                        return Err(crate::Error::UnsupportedUrlSchema {
-                            schema_url: schema_url.to_owned(),
-                        })
-                    }
-                }
-                .map_err(|_| crate::Error::SchemaFileParseFailed {
-                    schema_url: schema_url.to_owned(),
-                })?;
-
-                let document_schema = DocumentSchema {
-                    toml_version: schema
-                        .get("x-tombi-toml-version")
-                        .and_then(|obj| match obj {
-                            serde_json::Value::String(version) => {
-                                serde_json::from_str(&format!("\"{version}\"")).ok()
-                            }
-                            _ => None,
-                        }),
-                    title: schema
-                        .get("title")
-                        .map(|obj| obj.as_str().map(|title| title.to_string()))
-                        .flatten(),
-                    description: schema
-                        .get("description")
-                        .map(|obj| obj.as_str().map(|title| title.to_string()))
-                        .flatten(),
-                    schema_url: Some(schema_url.to_owned()),
-                    properties: schema
-                        .get("properties")
-                        .map(|obj| obj.as_object())
-                        .flatten()
-                        .map(|obj| {
-                            obj.iter()
-                                .filter_map(|(key, value)| {
-                                    value.as_object().map(|_| {
-                                        (Accessor::Key(key.clone()), ObjectSchema::default())
-                                    })
-                                })
-                                .collect()
-                        })
-                        .unwrap_or_default(),
-                    ..Default::default()
-                };
+                let document_schema = self.try_get_schema_from_schema_url(schema_url).await?;
 
                 self.schemas
                     .insert(schema_url.to_owned(), Ok(document_schema.clone()));

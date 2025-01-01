@@ -31,6 +31,7 @@ pub async fn serve(args: impl Into<Args>) {
         crate::backend::Backend::new(client, args.toml_version)
     })
     .custom_method("tombi/getTomlVersion", Backend::get_toml_version)
+    .custom_method("tombi/updateSchema", Backend::update_schema)
     .finish();
 
     tower_lsp::Server::new(stdin, stdout, socket)

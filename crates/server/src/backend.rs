@@ -5,7 +5,9 @@ use super::handler::{
 };
 use crate::{
     document::DocumentSource,
-    handler::{handle_folding_range, handle_get_toml_version, handle_initialized},
+    handler::{
+        handle_folding_range, handle_get_toml_version, handle_initialized, handle_update_schema,
+    },
 };
 use ast::AstNode;
 use config::{Config, TomlVersion};
@@ -138,5 +140,12 @@ impl Backend {
         params: TextDocumentIdentifier,
     ) -> Result<String, tower_lsp::jsonrpc::Error> {
         handle_get_toml_version(self, params).await
+    }
+
+    pub async fn update_schema(
+        &self,
+        params: TextDocumentIdentifier,
+    ) -> Result<(), tower_lsp::jsonrpc::Error> {
+        handle_update_schema(self, params).await
     }
 }

@@ -7,12 +7,13 @@ import type { Settings } from "./settings";
 import * as command from "@/command";
 import { bootstrap } from "@/bootstrap";
 import { log } from "@/logging";
-import { getTomlVersion } from "@/lsp/client";
+import { getTomlVersion, updateSchema } from "@/lsp/client";
 export type { Settings };
 
 export const EXTENTION_ID = "tombi";
 export const EXTENTION_NAME = "Tombi";
 export const SUPPORT_TOML_LANGUAGES = ["toml", "cargoLock"];
+export const SUPPORT_JSON_LANGUAGES = ["json"];
 
 export class Extension {
   private statusBarItem: vscode.StatusBarItem;
@@ -85,6 +86,9 @@ export class Extension {
       vscode.window.onDidChangeActiveTextEditor(() => {
         this.updateStatusBarItem();
       }),
+      vscode.workspace.onDidSaveTextDocument((document) => {
+        this.onDidSaveTextDocument(document);
+      }),
     );
   }
 
@@ -118,6 +122,8 @@ export class Extension {
   private async onDidOpenTextDocument(
     document: vscode.TextDocument,
   ): Promise<void> {
+    log.info(`onDidOpenTextDocument: ${document.uri.toString()}`);
+
     if (SUPPORT_TOML_LANGUAGES.includes(document.languageId)) {
       await this.client.sendNotification(
         node.DidOpenTextDocumentNotification.type,
@@ -130,6 +136,18 @@ export class Extension {
           ),
         },
       );
+    }
+  }
+
+  private async onDidSaveTextDocument(
+    document: vscode.TextDocument,
+  ): Promise<void> {
+    log.info(`onDidSaveTextDocument: ${document.uri.toString()}`);
+
+    if (SUPPORT_JSON_LANGUAGES.includes(document.languageId)) {
+      await this.client.sendRequest(updateSchema, {
+        uri: document.uri.toString(),
+      });
     }
   }
 }
