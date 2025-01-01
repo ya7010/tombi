@@ -12,7 +12,7 @@ Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and language ser
 However, I rewrote a new Language Server for the following purposes.
 
 - Support for TOML v1.1.0
-- Formatter inspired by Python's [Black](https://github.com/psf/black) (Support for magic comma)
+- Formatter inspired by Python's [Black](https://github.com/psf/black) (Support for [magic trailing comma](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#the-magic-trailing-comma))
 
 ## Usage
 ### Formatting
