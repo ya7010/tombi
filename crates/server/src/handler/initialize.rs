@@ -4,6 +4,7 @@ use tower_lsp::lsp_types::{
     OneOf, PositionEncodingKind, SaveOptions, SemanticTokenModifier, SemanticTokensFullOptions,
     SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
     TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TextDocumentSyncSaveOptions,
 };
 
 use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
@@ -39,7 +40,7 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
             TextDocumentSyncOptions {
                 open_close: Some(true),
                 change: Some(TextDocumentSyncKind::FULL),
-                save: Some(SaveOptions::default().into()),
+                save: Some(TextDocumentSyncSaveOptions::Supported(true)),
                 ..Default::default()
             },
         )),
