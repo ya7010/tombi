@@ -8,8 +8,8 @@ use super::handler::{
 use crate::{
     document::DocumentSource,
     handler::{
-        handle_folding_range, handle_get_toml_version, handle_initialized, handle_update_config,
-        handle_update_schema,
+        handle_did_change_watched_files, handle_folding_range, handle_get_toml_version,
+        handle_initialized, handle_update_config, handle_update_schema,
     },
 };
 use ast::AstNode;
@@ -18,11 +18,11 @@ use dashmap::DashMap;
 use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
-        DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
-        DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
-        DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
-        HoverParams, InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
-        SemanticTokensResult, TextDocumentIdentifier, Url,
+        DidChangeConfigurationParams, DidChangeTextDocumentParams, DidChangeWatchedFilesParams,
+        DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
+        DocumentDiagnosticReportResult, DocumentSymbolParams, DocumentSymbolResponse, FoldingRange,
+        FoldingRangeParams, Hover, HoverParams, InitializeParams, InitializeResult,
+        InitializedParams, SemanticTokensParams, SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
 };
@@ -103,6 +103,10 @@ impl LanguageServer for Backend {
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
         handle_did_change(self, params).await
+    }
+
+    async fn did_change_watched_files(&self, params: DidChangeWatchedFilesParams) {
+        handle_did_change_watched_files(params).await
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {

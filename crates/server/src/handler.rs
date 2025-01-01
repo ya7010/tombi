@@ -1,6 +1,7 @@
 mod diagnostic;
 mod did_change;
 mod did_change_configuration;
+mod did_change_watched_files;
 mod did_open;
 mod did_save;
 mod document_symbol;
@@ -18,6 +19,7 @@ mod update_schema;
 pub use diagnostic::handle_diagnostic;
 pub use did_change::handle_did_change;
 pub use did_change_configuration::handle_did_change_configuration;
+pub use did_change_watched_files::handle_did_change_watched_files;
 pub use did_open::handle_did_open;
 pub use did_save::handle_did_save;
 pub use document_symbol::handle_document_symbol;
