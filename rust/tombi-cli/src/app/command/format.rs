@@ -11,10 +11,6 @@ pub struct Args {
     /// If the only argument is "-", the standard input will be used.
     files: Vec<String>,
 
-    /// TOML version.
-    #[arg(long, value_enum, default_value = None)]
-    toml_version: Option<TomlVersion>,
-
     /// Enable or disable the schema catalog.
     #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
     schema_catalog_enabled: Option<bool>,
@@ -73,10 +69,8 @@ where
     P: Copy + Send + 'static,
 {
     let (config, config_dirpath) = config::load_with_path()?;
-    let toml_version = args
-        .toml_version
-        .unwrap_or(config.toml_version.unwrap_or_default());
 
+    let toml_version = config.toml_version.unwrap_or_default();
     let format_options = config.format.unwrap_or_default();
     let schema_options = config.schema.unwrap_or_default();
     let schema_store = schema_store::SchemaStore::default();

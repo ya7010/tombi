@@ -32,17 +32,15 @@ pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
     pub document_sources: DashMap<Url, DocumentSource>,
-    toml_version: Option<TomlVersion>,
     config: Arc<RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
 
 impl Backend {
-    pub fn new(client: tower_lsp::Client, toml_version: Option<TomlVersion>) -> Self {
+    pub fn new(client: tower_lsp::Client) -> Self {
         Self {
             client,
             document_sources: Default::default(),
-            toml_version,
             config: Arc::new(RwLock::new(match config::load() {
                 Ok(config) => config,
                 Err(err) => {
@@ -75,8 +73,7 @@ impl Backend {
     }
 
     pub async fn toml_version(&self) -> TomlVersion {
-        self.toml_version
-            .unwrap_or(self.config.read().await.toml_version.unwrap_or_default())
+        self.config.read().await.toml_version.unwrap_or_default()
     }
 }
 
