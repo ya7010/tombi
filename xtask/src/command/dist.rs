@@ -75,6 +75,11 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
     sh.remove_path(&bundle_path)?;
     sh.create_dir(&bundle_path)?;
 
+    let readme_path = vscode_path.join("README.md");
+    let readme = sh.read_file(&readme_path)?;
+    let readme = readme.replace("tombi.svg", "tombi.jpg");
+    sh.write_file(&readme_path, &readme)?;
+
     if !target.server_path.exists() {
         return Err(anyhow::anyhow!(
             "CLI binary not found at {}. Please run `cargo build --package tombi-cli --release` first.",
