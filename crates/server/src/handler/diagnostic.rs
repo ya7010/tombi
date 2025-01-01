@@ -18,7 +18,7 @@ pub async fn handle_diagnostic(
     let diagnostics = match backend.document_sources.get(&text_document.uri).as_deref() {
         Some(document) => {
             match linter::Linter::try_new(
-                backend.toml_version().await,
+                backend.toml_version().await.unwrap_or_default(),
                 backend
                     .config()
                     .await

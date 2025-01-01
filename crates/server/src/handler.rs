@@ -25,7 +25,7 @@ pub use did_save::handle_did_save;
 pub use document_symbol::handle_document_symbol;
 pub use folding_range::handle_folding_range;
 pub use formatting::handle_formatting;
-pub use get_toml_version::handle_get_toml_version;
+pub use get_toml_version::{handle_get_toml_version, GetTomlVersionResponse};
 pub use hover::handle_hover;
 pub use initialize::handle_initialize;
 pub use initialized::handle_initialized;

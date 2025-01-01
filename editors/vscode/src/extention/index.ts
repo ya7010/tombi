@@ -96,12 +96,16 @@ export class Extension {
     const editor = vscode.window.activeTextEditor;
     if (editor && SUPPORT_TOML_LANGUAGES.includes(editor.document.languageId)) {
       try {
-        const tomlVersion = await this.client.sendRequest(getTomlVersion, {
-          uri: editor.document.uri.toString(),
-        });
-        this.statusBarItem.text = `TOML: ${tomlVersion}`;
+        const { tomlVersion, source } = await this.client.sendRequest(
+          getTomlVersion,
+          {
+            uri: editor.document.uri.toString(),
+          },
+        );
+        this.statusBarItem.text = `TOML: ${tomlVersion} (${source})`;
         this.statusBarItem.color = undefined;
         this.statusBarItem.backgroundColor = undefined;
+        this.statusBarItem.command = `${EXTENTION_ID}.showLanguageServerVersion`;
         this.statusBarItem.show();
       } catch (error) {
         this.statusBarItem.text = "TOML: <unknown>";

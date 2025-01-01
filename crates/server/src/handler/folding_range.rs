@@ -9,7 +9,7 @@ pub async fn handle_folding_range(
 ) -> Result<Option<Vec<FoldingRange>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_folding_range");
 
-    let toml_version = backend.toml_version().await;
+    let toml_version = backend.toml_version().await.unwrap_or_default();
 
     let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
         return Ok(None);

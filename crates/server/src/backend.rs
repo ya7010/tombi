@@ -9,7 +9,7 @@ use crate::{
     document::DocumentSource,
     handler::{
         handle_did_change_watched_files, handle_folding_range, handle_get_toml_version,
-        handle_initialized, handle_update_config, handle_update_schema,
+        handle_initialized, handle_update_config, handle_update_schema, GetTomlVersionResponse,
     },
 };
 use ast::AstNode;
@@ -72,8 +72,8 @@ impl Backend {
         *self.config.write().await = config;
     }
 
-    pub async fn toml_version(&self) -> TomlVersion {
-        self.config.read().await.toml_version.unwrap_or_default()
+    pub async fn toml_version(&self) -> Option<TomlVersion> {
+        self.config.read().await.toml_version
     }
 }
 
@@ -158,7 +158,7 @@ impl Backend {
     pub async fn get_toml_version(
         &self,
         params: TextDocumentIdentifier,
-    ) -> Result<String, tower_lsp::jsonrpc::Error> {
+    ) -> Result<GetTomlVersionResponse, tower_lsp::jsonrpc::Error> {
         handle_get_toml_version(self, params).await
     }
 

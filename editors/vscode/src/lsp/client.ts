@@ -6,7 +6,7 @@ import {
 export type GetTomlVersionParams = TextDocumentIdentifier;
 export const getTomlVersion = new RequestType<
   GetTomlVersionParams,
-  string,
+  { tomlVersion: string; source: string },
   void
 >("tombi/getTomlVersion");
 

@@ -28,7 +28,7 @@ pub async fn handle_formatting(
         }
     };
 
-    let toml_version = backend.toml_version().await;
+    let toml_version = backend.toml_version().await.unwrap_or_default();
 
     match formatter::Formatter::try_new(
         toml_version,
