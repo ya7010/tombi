@@ -35,7 +35,11 @@ The formatter/linter is almost complete, but support for JsonSchema is incomplet
 
 ## NOTE
 [TOML v1.1.0](https://github.com/toml-lang/toml/issues/928) has not been released.
+
 The formatter of Tombi will show its true power in `v1.1.0`, but be careful.
+
 Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/manifest.html), [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)) are `v1.0.0`.
+And the default TOML version of Tombi is also `v1.0.0`.
+
 Tombi will provide support for migrating from `v1.0.0` to `v1.1.0`,
 but it is not yet fully functional.
