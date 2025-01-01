@@ -7,7 +7,7 @@ import type { Settings } from "./settings";
 import * as command from "@/command";
 import { bootstrap } from "@/bootstrap";
 import { log } from "@/logging";
-import { getTomlVersion, updateSchema } from "@/lsp/client";
+import { getTomlVersion, updateConfig, updateSchema } from "@/lsp/client";
 export type { Settings };
 
 export const EXTENTION_ID = "tombi";
@@ -144,7 +144,11 @@ export class Extension {
   ): Promise<void> {
     log.info(`onDidSaveTextDocument: ${document.uri.toString()}`);
 
-    if (SUPPORT_JSON_LANGUAGES.includes(document.languageId)) {
+    if (document.uri.path.endsWith("tombi.toml")) {
+      await this.client.sendRequest(updateConfig, {
+        uri: document.uri.toString(),
+      });
+    } else if (SUPPORT_JSON_LANGUAGES.includes(document.languageId)) {
       await this.client.sendRequest(updateSchema, {
         uri: document.uri.toString(),
       });

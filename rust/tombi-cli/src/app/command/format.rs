@@ -66,13 +66,13 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     Ok(())
 }
 
-fn inner_run<P>(args: Args, printer: P) -> Result<(usize, usize, usize), schema_store::Error>
+fn inner_run<P>(args: Args, printer: P) -> Result<(usize, usize, usize), Box<dyn std::error::Error>>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
     P: Copy + Send + 'static,
 {
-    let (config, config_dirpath) = config::load_with_path();
+    let (config, config_dirpath) = config::load_with_path()?;
     let toml_version = args
         .toml_version
         .unwrap_or(config.toml_version.unwrap_or_default());

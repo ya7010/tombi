@@ -325,6 +325,7 @@ dependencies = [
  "clap",
  "schemars",
  "serde",
+ "thiserror",
  "toml",
  "toml-version",
  "tracing",

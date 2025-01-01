@@ -6,7 +6,8 @@ use super::handler::{
 use crate::{
     document::DocumentSource,
     handler::{
-        handle_folding_range, handle_get_toml_version, handle_initialized, handle_update_schema,
+        handle_folding_range, handle_get_toml_version, handle_initialized, handle_update_config,
+        handle_update_schema,
     },
 };
 use ast::AstNode;
@@ -39,7 +40,13 @@ impl Backend {
             client,
             document_sources: Default::default(),
             toml_version,
-            config: config::load(),
+            config: match config::load() {
+                Ok(config) => config,
+                Err(err) => {
+                    tracing::error!("{err}");
+                    Config::default()
+                }
+            },
             schema_store: schema_store::SchemaStore::new(),
         }
     }
@@ -147,5 +154,12 @@ impl Backend {
         params: TextDocumentIdentifier,
     ) -> Result<bool, tower_lsp::jsonrpc::Error> {
         handle_update_schema(self, params).await
+    }
+
+    pub async fn update_config(
+        &self,
+        params: TextDocumentIdentifier,
+    ) -> Result<bool, tower_lsp::jsonrpc::Error> {
+        handle_update_config(self, params).await
     }
 }

@@ -1,8 +1,10 @@
+mod error;
 pub mod format;
 mod lint;
 mod schema;
 mod types;
 
+pub use error::Error;
 pub use format::FormatOptions;
 pub use lint::LintOptions;
 pub use schema::SchemaCatalogItem;
@@ -59,9 +61,21 @@ struct Tool {
     tombi: Option<Config>,
 }
 
+#[cfg(feature = "serde")]
+pub fn from_path(config_path: &std::path::Path) -> Result<Config, crate::Error> {
+    let Ok(config_str) = std::fs::read_to_string(&config_path) else {
+        return Err(crate::Error::ReadFailed {
+            path: config_path.to_owned(),
+        });
+    };
+    toml::from_str::<Config>(&config_str).map_err(|_| crate::Error::ParseFailed {
+        path: config_path.to_owned(),
+    })
+}
+
 /// Load the config from the current directory.
 #[cfg(feature = "serde")]
-pub fn load_with_path() -> (Config, Option<PathBuf>) {
+pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
     const CONFIG_FILENAME: &str = "tombi.toml";
     const PYPROJECT_FILENAME: &str = "pyproject.toml";
 
@@ -72,12 +86,10 @@ pub fn load_with_path() -> (Config, Option<PathBuf>) {
             tracing::debug!("\"{}\" found at {:?}", CONFIG_FILENAME, &config_path);
 
             let Ok(config_str) = std::fs::read_to_string(&config_path) else {
-                tracing::error!("Failed to read {:?}", &config_path);
-                std::process::exit(1);
+                return Err(crate::Error::ReadFailed { path: config_path });
             };
             let Ok(config) = toml::from_str::<Config>(&config_str) else {
-                tracing::error!("Failed to parse {:?}", &config_path);
-                std::process::exit(1);
+                return Err(crate::Error::ParseFailed { path: config_path });
             };
 
             let config_dirpath = match config_path.parent() {
@@ -85,7 +97,7 @@ pub fn load_with_path() -> (Config, Option<PathBuf>) {
                 None => current_dir,
             };
 
-            return (config, Some(config_dirpath));
+            return Ok((config, Some(config_dirpath)));
         }
 
         let pyproject_toml_path = current_dir.join(PYPROJECT_FILENAME);
@@ -97,15 +109,17 @@ pub fn load_with_path() -> (Config, Option<PathBuf>) {
             );
 
             let Ok(pyproject_toml_str) = std::fs::read_to_string(&pyproject_toml_path) else {
-                tracing::error!("Failed to read {:?}", &pyproject_toml_path);
-                std::process::exit(1);
+                return Err(crate::Error::ReadFailed {
+                    path: pyproject_toml_path,
+                });
             };
             let Ok(config) = toml::from_str::<PyProjectToml>(&pyproject_toml_str) else {
-                tracing::error!("Failed to parse {:?}", &config_path);
-                std::process::exit(1);
+                return Err(crate::Error::ParseFailed {
+                    path: pyproject_toml_path,
+                });
             };
             if let Some(Tool { tombi: Some(tombi) }) = config.tool {
-                return (tombi, Some(pyproject_toml_path));
+                return Ok((tombi, Some(pyproject_toml_path)));
             } else {
                 tracing::debug!("No [tool.tombi] found in {:?}", &config_path);
                 continue;
@@ -117,14 +131,13 @@ pub fn load_with_path() -> (Config, Option<PathBuf>) {
         }
     }
 
-    tracing::debug!("No config file found.");
-    tracing::debug!("Using default config.");
+    tracing::debug!("config file not found, use default config");
 
-    (Config::default(), None)
+    Ok((Config::default(), None))
 }
 
 #[cfg(feature = "serde")]
-pub fn load() -> Config {
-    let (config, _) = load_with_path();
-    config
+pub fn load() -> Result<Config, crate::Error> {
+    let (config, _) = load_with_path()?;
+    Ok(config)
 }
