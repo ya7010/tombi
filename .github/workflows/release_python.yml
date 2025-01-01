@@ -211,6 +211,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [release-python]
     steps:
+      - uses: actions/checkout@v4
       - run: python python/set_version.py >> $GITHUB_ENV
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
