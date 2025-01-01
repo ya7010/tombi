@@ -15,6 +15,7 @@ pub use types::*;
 
 const CONFIG_FILENAME: &str = "tombi.toml";
 const PYPROJECT_FILENAME: &str = "pyproject.toml";
+pub const SUPPORTED_CONFIG_FILENAMES: [&str; 2] = [CONFIG_FILENAME, PYPROJECT_FILENAME];
 
 /// # Tombi
 ///

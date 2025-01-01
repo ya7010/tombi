@@ -1,3 +1,4 @@
+use config::SUPPORTED_CONFIG_FILENAMES;
 use tower_lsp::lsp_types::{
     notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier,
 };
@@ -17,7 +18,7 @@ pub async fn handle_update_config(
     };
 
     for workspace_folder in workspace_folders {
-        for config_filename in ["tombi.toml"] {
+        for config_filename in SUPPORTED_CONFIG_FILENAMES {
             let Ok(workspace_config_url) = workspace_folder.uri.join(config_filename) else {
                 continue;
             };
