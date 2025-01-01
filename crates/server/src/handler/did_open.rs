@@ -4,13 +4,16 @@ use crate::backend::Backend;
 use crate::document::DocumentSource;
 
 #[tracing::instrument(level = "debug", skip_all)]
-pub async fn handle_did_open(backend: &Backend, params: DidOpenTextDocumentParams) {
+pub async fn handle_did_open(
+    backend: &Backend,
+    DidOpenTextDocumentParams { text_document, .. }: DidOpenTextDocumentParams,
+) {
     tracing::info!("handle_did_open");
 
-    let uri = params.text_document.uri.clone();
-    let source = params.text_document.text;
-
-    backend
-        .document_sources
-        .insert(uri, DocumentSource::new(source));
+    let version = text_document.version;
+    let source = text_document.text;
+    backend.document_sources.insert(
+        text_document.uri.clone(),
+        DocumentSource::new(source, version),
+    );
 }

@@ -1,7 +1,7 @@
 use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, DiagnosticOptions, DiagnosticServerCapabilities,
     FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, PositionEncodingKind, SaveOptions, SemanticTokenModifier, SemanticTokensFullOptions,
+    OneOf, PositionEncodingKind, SemanticTokenModifier, SemanticTokensFullOptions,
     SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
     TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
     TextDocumentSyncSaveOptions,

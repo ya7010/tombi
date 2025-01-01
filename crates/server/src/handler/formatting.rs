@@ -2,7 +2,8 @@ use config::FormatOptions;
 use dashmap::try_result::TryResult;
 use itertools::Either;
 use tower_lsp::lsp_types::{
-    notification::ShowMessage, DocumentFormattingParams, MessageType, ShowMessageParams, TextEdit,
+    notification::{PublishDiagnostics, ShowMessage},
+    DocumentFormattingParams, MessageType, PublishDiagnosticsParams, ShowMessageParams, TextEdit,
 };
 
 use crate::backend::Backend;
@@ -49,11 +50,27 @@ pub async fn handle_formatting(
                         new_text,
                     }]));
                 } else {
-                    tracing::info!("no change");
+                    tracing::debug!("no change");
+                    backend
+                        .client
+                        .send_notification::<PublishDiagnostics>(PublishDiagnosticsParams {
+                            uri: text_document.uri,
+                            diagnostics: Vec::with_capacity(0),
+                            version: Some(document_info.version),
+                        })
+                        .await;
                 }
             }
-            Err(_) => {
+            Err(diagnostics) => {
                 tracing::error!("failed to format");
+                backend
+                    .client
+                    .send_notification::<PublishDiagnostics>(PublishDiagnosticsParams {
+                        uri: text_document.uri,
+                        diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                        version: Some(document_info.version),
+                    })
+                    .await;
             }
         },
         Err(err) => {
