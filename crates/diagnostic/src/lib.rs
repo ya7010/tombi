@@ -67,3 +67,17 @@ impl Diagnostic {
 pub trait SetDiagnostics {
     fn set_diagnostic(&self, diagnostics: &mut Vec<Diagnostic>);
 }
+
+impl From<Diagnostic> for tower_lsp::lsp_types::Diagnostic {
+    fn from(diagnostic: Diagnostic) -> Self {
+        tower_lsp::lsp_types::Diagnostic {
+            range: diagnostic.range().into(),
+            severity: Some(match diagnostic.level() {
+                level::Level::WARNING => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
+                level::Level::ERROR => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
+            }),
+            message: diagnostic.message().to_string(),
+            ..Default::default()
+        }
+    }
+}

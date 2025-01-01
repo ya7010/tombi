@@ -30,24 +30,7 @@ pub async fn handle_diagnostic(
             .await
             {
                 Ok(linter) => linter.lint(&document.source).await.map_or_else(
-                    |diagnostics| {
-                        diagnostics
-                            .into_iter()
-                            .map(|diagnostic| tower_lsp::lsp_types::Diagnostic {
-                                range: diagnostic.range().into(),
-                                severity: Some(match diagnostic.level() {
-                                    diagnostic::Level::WARNING => {
-                                        tower_lsp::lsp_types::DiagnosticSeverity::WARNING
-                                    }
-                                    diagnostic::Level::ERROR => {
-                                        tower_lsp::lsp_types::DiagnosticSeverity::ERROR
-                                    }
-                                }),
-                                message: diagnostic.message().to_string(),
-                                ..Default::default()
-                            })
-                            .collect()
-                    },
+                    |diagnostics| diagnostics.into_iter().map(Into::into).collect(),
                     |_| vec![],
                 ),
                 Err(err) => {

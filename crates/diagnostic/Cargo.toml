@@ -5,12 +5,17 @@ edition = { workspace = true }
 authors = { workspace = true }
 license = { workspace = true }
 
+[features]
+default = ["lsp"]
+lsp = ["tower-lsp"]
+
 [dependencies]
 nu-ansi-term = { workspace = true }
 serde = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+tower-lsp = { workspace = true, optional = true }
 
 [dev-dependencies]
 clap = { workspace = true }

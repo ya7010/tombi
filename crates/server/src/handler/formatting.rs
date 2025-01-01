@@ -12,7 +12,7 @@ pub async fn handle_formatting(
     backend: &Backend,
     DocumentFormattingParams { text_document, .. }: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
-    tracing::info!("handle_formatting: {}", text_document.uri);
+    tracing::info!("handle_formatting");
 
     let uri = &text_document.uri;
     let mut document_info = match backend.document_sources.try_get_mut(uri) {

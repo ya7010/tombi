@@ -433,6 +433,7 @@ dependencies = [
  "serde",
  "text",
  "thiserror",
+ "tower-lsp",
  "tracing",
  "tracing-subscriber",
 ]
