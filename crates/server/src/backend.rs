@@ -145,7 +145,7 @@ impl Backend {
     pub async fn update_schema(
         &self,
         params: TextDocumentIdentifier,
-    ) -> Result<(), tower_lsp::jsonrpc::Error> {
+    ) -> Result<bool, tower_lsp::jsonrpc::Error> {
         handle_update_schema(self, params).await
     }
 }

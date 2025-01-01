@@ -10,18 +10,21 @@ pub async fn handle_update_schema(
     TextDocumentIdentifier {
         uri: schema_url, ..
     }: TextDocumentIdentifier,
-) -> Result<(), tower_lsp::jsonrpc::Error> {
+) -> Result<bool, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_update_schema");
 
-    if let Err(err) = backend.schema_store.update_schema(&schema_url).await {
-        backend
-            .client
-            .send_notification::<ShowMessage>(ShowMessageParams {
-                typ: MessageType::ERROR,
-                message: err.to_string(),
-            })
-            .await;
-    }
+    match backend.schema_store.update_schema(&schema_url).await {
+        Ok(is_updated) => Ok(is_updated),
+        Err(err) => {
+            backend
+                .client
+                .send_notification::<ShowMessage>(ShowMessageParams {
+                    typ: MessageType::ERROR,
+                    message: err.to_string(),
+                })
+                .await;
 
-    Ok(())
+            Ok(false)
+        }
+    }
 }

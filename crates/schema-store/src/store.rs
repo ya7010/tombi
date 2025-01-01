@@ -54,14 +54,17 @@ impl SchemaStore {
         }
     }
 
-    pub async fn update_schema(&self, schema_url: &Url) -> Result<(), crate::Error> {
+    pub async fn update_schema(&self, schema_url: &Url) -> Result<bool, crate::Error> {
         if self.schemas.contains_key(schema_url) {
             let document_schema = self.try_get_schema_from_schema_url(schema_url).await?;
 
             self.schemas.insert(schema_url.clone(), Ok(document_schema));
             tracing::debug!("update schema: {}", schema_url);
+
+            Ok(true)
+        } else {
+            Ok(false)
         }
-        Ok(())
     }
 
     pub async fn load_catalog_from_url(&self, catalog_url: &url::Url) -> Result<(), crate::Error> {

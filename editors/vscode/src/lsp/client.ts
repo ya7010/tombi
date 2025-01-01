@@ -11,6 +11,6 @@ export const getTomlVersion = new RequestType<
 >("tombi/getTomlVersion");
 
 export type UpdateSchemaParams = TextDocumentIdentifier;
-export const updateSchema = new RequestType<UpdateSchemaParams, void, void>(
+export const updateSchema = new RequestType<UpdateSchemaParams, boolean, void>(
   "tombi/updateSchema",
 );
