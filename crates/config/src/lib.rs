@@ -30,9 +30,7 @@ pub const SUPPORTED_CONFIG_FILENAMES: [&str; 2] = [CONFIG_FILENAME, PYPROJECT_FI
 pub struct Config {
     /// # TOML version.
     ///
-    /// The version specified here is interpreted preferentially,
-    /// but if the schema of the file to be inspected is of a lower version,
-    /// it will be interpreted in that version.
+    /// Specifies the TOML version when the TOML version is not specified in the schema.
     #[cfg_attr(feature = "jsonschema", schemars(default = "TomlVersion::default"))]
     pub toml_version: Option<TomlVersion>,
 
