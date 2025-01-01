@@ -34,6 +34,7 @@ but you can control the behavior with a configuration file called
 The formatter/linter is almost complete, but support for JsonSchema is incomplete.
 
 ## NOTE
+### TOML v1.1.0
 [TOML v1.1.0](https://github.com/toml-lang/toml/issues/928) has not been released.
 
 The formatter of Tombi will show its true power in `v1.1.0`, but be careful.
@@ -42,3 +43,18 @@ Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/ma
 
 Tombi will provide support for migrating from `v1.0.0` to `v1.1.0`,
 but it is not yet fully functional.
+
+### toml-test
+[toml-test](https://github.com/toml-lang/toml-test) is almost supported. Once all tests pass, it will be included in CI for monitoring.
+
+### JSON Schema
+[TOML itself may add schema specifications](https://github.com/toml-lang/toml/issues/792),
+but like Taplo, Tombi is also trying to add validation functions to the linter that support [JSON Schema](https://json-schema.org/).
+
+Currently, we are considering adding special information called `x-tombi-*` to JSON Schema.
+
+- `x-tombi-toml-version`: Required to automatically determine which system supports `v1.1.0` (implemented)
+- `x-tombi-table-key-order-by`: For automatically sorting tables like `[dependencies]` (not implemented)
+
+We need to request additional modifications to the [JSON Schema Store](https://www.schemastore.org/json/),
+but Tombi has not yet gained market share, so it will be much later.
