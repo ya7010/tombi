@@ -134,7 +134,7 @@ impl SchemaStore {
                 serde_json::from_reader(std::io::Cursor::new(bytes))
             }
             _ => {
-                return Err(crate::Error::UnsupportedUrlSchema {
+                return Err(crate::Error::UrlSchemaUnsupported {
                     schema_url: schema_url.to_owned(),
                 })
             }
@@ -208,7 +208,7 @@ impl SchemaStore {
                 let source_path = std::path::Path::new(source_path);
                 self.try_get_schema_from_path(source_path).await
             }
-            _ => Err(crate::Error::UnsupportedUrlSchema {
+            _ => Err(crate::Error::UrlSchemaUnsupported {
                 schema_url: source_url.to_owned(),
             }),
         }

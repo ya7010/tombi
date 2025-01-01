@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::handler::{
     handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
     handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
@@ -13,6 +15,7 @@ use crate::{
 use ast::AstNode;
 use config::{Config, TomlVersion};
 use dashmap::DashMap;
+use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
         DidChangeConfigurationParams, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
@@ -30,7 +33,7 @@ pub struct Backend {
     pub client: tower_lsp::Client,
     pub document_sources: DashMap<Url, DocumentSource>,
     toml_version: Option<TomlVersion>,
-    pub config: Config,
+    pub config: Arc<RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
 
@@ -40,31 +43,32 @@ impl Backend {
             client,
             document_sources: Default::default(),
             toml_version,
-            config: match config::load() {
+            config: Arc::new(RwLock::new(match config::load() {
                 Ok(config) => config,
                 Err(err) => {
                     tracing::error!("{err}");
                     Config::default()
                 }
-            },
+            })),
             schema_store: schema_store::SchemaStore::new(),
         }
     }
 
-    pub fn get_ast(&self, uri: &Url) -> Option<ast::Root> {
-        self.document_sources.get(uri).and_then(|document_info| {
-            let p = parser::parse(&document_info.source, self.toml_version());
+    pub fn get_ast(&self, uri: &Url, toml_version: TomlVersion) -> Option<ast::Root> {
+        if let Some(document_info) = self.document_sources.get(uri) {
+            let p = parser::parse(&document_info.source, toml_version);
             if !p.errors().is_empty() {
                 return None;
             }
 
-            ast::Root::cast(p.into_syntax_node())
-        })
+            return ast::Root::cast(p.into_syntax_node());
+        }
+        None
     }
 
-    pub fn toml_version(&self) -> TomlVersion {
+    pub async fn toml_version(&self) -> TomlVersion {
         self.toml_version
-            .unwrap_or(self.config.toml_version.unwrap_or_default())
+            .unwrap_or(self.config.read().await.toml_version.unwrap_or_default())
     }
 }
 

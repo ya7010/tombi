@@ -1,4 +1,6 @@
-use tower_lsp::lsp_types::TextDocumentIdentifier;
+use tower_lsp::lsp_types::{
+    notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier,
+};
 
 use crate::backend::Backend;
 
@@ -19,7 +21,27 @@ pub async fn handle_update_config(
             continue;
         };
         if config_url == workspace_config_url {
-            return Ok(true);
+            match config::Config::try_from(config_url) {
+                Ok(config) => {
+                    let mut cfg = backend.config.write().await;
+                    *cfg = config;
+
+                    tracing::debug!("config updated");
+
+                    return Ok(true);
+                }
+                Err(err) => {
+                    backend
+                        .client
+                        .send_notification::<ShowMessage>(ShowMessageParams {
+                            typ: MessageType::ERROR,
+                            message: err.to_string(),
+                        })
+                        .await;
+
+                    return Ok(false);
+                }
+            }
         }
     }
 

@@ -10,12 +10,13 @@ pub async fn handle_document_symbol(
     DocumentSymbolParams { text_document, .. }: DocumentSymbolParams,
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_document_symbol");
+    let toml_version = backend.toml_version().await;
 
-    let Some(root) = backend.get_ast(&text_document.uri) else {
+    let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 
-    let Ok(root) = root.try_into_document_tree(backend.toml_version()) else {
+    let Ok(root) = root.try_into_document_tree(toml_version) else {
         return Ok(None);
     };
 

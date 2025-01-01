@@ -8,8 +8,11 @@ pub enum Error {
     #[error("failed to fetch catalog: {catalog_url}")]
     CatalogFetchFailed { catalog_url: Url },
 
-    #[error("unsupported url schema: {schema_url}")]
-    UnsupportedUrlSchema { schema_url: Url },
+    #[error("unsupported schema url: {schema_url}")]
+    UrlSchemaUnsupported { schema_url: Url },
+
+    #[error("failed to parse schema url: {schema_url}")]
+    UrlSchemaParseFailed { schema_url: Url },
 
     #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: String },

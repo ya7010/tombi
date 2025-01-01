@@ -6,7 +6,7 @@ use crate::backend::Backend;
 pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: InitializedParams) {
     backend.schema_store.load_config_schema(
         None,
-        match &backend.config.schemas {
+        match &backend.config.read().await.schemas {
             Some(schemas) => schemas,
             None => &[],
         },
@@ -16,8 +16,8 @@ pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: Ini
 }
 
 async fn load_catalog(backend: &Backend) {
-    let Some(catalog) = backend
-        .config
+    let config = backend.config.read().await;
+    let Some(catalog) = config
         .schema
         .as_ref()
         .and_then(|options| options.catalog.as_ref())

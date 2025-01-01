@@ -19,7 +19,7 @@ pub async fn handle_get_toml_version(
         .as_ref()
         .map(|s| s.toml_version())
         .flatten()
-        .unwrap_or(backend.toml_version());
+        .unwrap_or(backend.toml_version().await);
 
     Ok(toml_version.to_string())
 }

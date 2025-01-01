@@ -28,10 +28,14 @@ pub async fn handle_formatting(
         }
     };
 
+    let toml_version = backend.toml_version().await;
+
     match formatter::Formatter::try_new(
-        backend.toml_version(),
+        toml_version,
         backend
             .config
+            .read()
+            .await
             .format
             .as_ref()
             .unwrap_or(&FormatOptions::default()),

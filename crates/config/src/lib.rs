@@ -62,15 +62,36 @@ struct Tool {
 }
 
 #[cfg(feature = "serde")]
-pub fn from_path(config_path: &std::path::Path) -> Result<Config, crate::Error> {
-    let Ok(config_str) = std::fs::read_to_string(&config_path) else {
-        return Err(crate::Error::ReadFailed {
-            path: config_path.to_owned(),
-        });
-    };
-    toml::from_str::<Config>(&config_str).map_err(|_| crate::Error::ParseFailed {
-        path: config_path.to_owned(),
-    })
+impl TryFrom<&std::path::Path> for Config {
+    type Error = crate::Error;
+
+    fn try_from(config_path: &std::path::Path) -> Result<Self, Self::Error> {
+        let Ok(config_str) = std::fs::read_to_string(&config_path) else {
+            return Err(crate::Error::ConfigFileReadFailed {
+                config_path: config_path.to_owned(),
+            });
+        };
+        toml::from_str::<Config>(&config_str).map_err(|_| crate::Error::ConfigFileParseFailed {
+            config_path: config_path.to_owned(),
+        })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl TryFrom<url::Url> for Config {
+    type Error = crate::Error;
+
+    fn try_from(config_url: url::Url) -> Result<Self, Self::Error> {
+        match config_url.scheme() {
+            "file" => {
+                let config_path = config_url
+                    .to_file_path()
+                    .map_err(|_| crate::Error::UrlSchemaParseFailed { config_url })?;
+                Config::try_from(config_path.as_ref())
+            }
+            _ => Err(crate::Error::UrlSchemaUnsupported { config_url }),
+        }
+    }
 }
 
 /// Load the config from the current directory.
@@ -85,12 +106,7 @@ pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
         if config_path.exists() {
             tracing::debug!("\"{}\" found at {:?}", CONFIG_FILENAME, &config_path);
 
-            let Ok(config_str) = std::fs::read_to_string(&config_path) else {
-                return Err(crate::Error::ReadFailed { path: config_path });
-            };
-            let Ok(config) = toml::from_str::<Config>(&config_str) else {
-                return Err(crate::Error::ParseFailed { path: config_path });
-            };
+            let config = Config::try_from(config_path.as_ref())?;
 
             let config_dirpath = match config_path.parent() {
                 Some(dir) => dir.to_owned(),
@@ -109,13 +125,13 @@ pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
             );
 
             let Ok(pyproject_toml_str) = std::fs::read_to_string(&pyproject_toml_path) else {
-                return Err(crate::Error::ReadFailed {
-                    path: pyproject_toml_path,
+                return Err(crate::Error::ConfigFileReadFailed {
+                    config_path: pyproject_toml_path,
                 });
             };
             let Ok(config) = toml::from_str::<PyProjectToml>(&pyproject_toml_str) else {
-                return Err(crate::Error::ParseFailed {
-                    path: pyproject_toml_path,
+                return Err(crate::Error::ConfigFileParseFailed {
+                    config_path: pyproject_toml_path,
                 });
             };
             if let Some(Tool { tombi: Some(tombi) }) = config.tool {

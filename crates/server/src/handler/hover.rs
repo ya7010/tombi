@@ -21,7 +21,7 @@ pub async fn handle_hover(
 
     let source = toml::try_load(&text_document.uri)?;
     let position = position.into();
-    let toml_version = backend.toml_version();
+    let toml_version = backend.toml_version().await;
 
     let Some(root) = ast::Root::cast(parser::parse(&source, toml_version).into_syntax_node())
     else {
