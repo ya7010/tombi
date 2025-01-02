@@ -1,6 +1,6 @@
 use toml_version::TomlVersion;
 
-use crate::{OneOrMany, SchemaCatalogEnabled, SchemaCatalogPath};
+use crate::{Enabled, OneOrMany, SchemaCatalogPath};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -8,13 +8,37 @@ use crate::{OneOrMany, SchemaCatalogEnabled, SchemaCatalogPath};
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone)]
 pub struct SchemaOptions {
+    /// # Enable or disable the schema.
+    pub enabled: Option<Enabled>,
+
     /// # Schema catalog options.
     pub catalog: Option<SchemaCatalog>,
 }
 
 impl SchemaOptions {
     pub const fn default() -> Self {
-        Self { catalog: None }
+        Self {
+            enabled: None,
+            catalog: None,
+        }
+    }
+
+    pub fn catalog_paths(&self) -> Option<Vec<SchemaCatalogPath>> {
+        if self.enabled.unwrap_or_default().value() {
+            Some(
+                self.catalog
+                    .as_ref()
+                    .and_then(|catalog| {
+                        catalog
+                            .path
+                            .as_ref()
+                            .map(|path| path.as_ref().iter().cloned().collect())
+                    })
+                    .unwrap_or_else(|| vec![SchemaCatalogPath::default()]),
+            )
+        } else {
+            None
+        }
     }
 }
 
@@ -24,33 +48,15 @@ impl SchemaOptions {
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone)]
 pub struct SchemaCatalog {
-    /// # Enable or disable the schema catalog.
-    pub enabled: Option<SchemaCatalogEnabled>,
-
     /// # The schema catalog path or url.
+    ///
+    /// You can specify multiple catalogs by making it an array.
+    /// If you want to disable the default catalog, specify an empty array.
     #[cfg_attr(
         feature = "jsonschema",
         schemars(default = "SchemaCatalogPath::default")
     )]
     pub path: Option<OneOrMany<SchemaCatalogPath>>,
-}
-
-impl SchemaCatalog {
-    pub fn paths(&self) -> Option<Vec<SchemaCatalogPath>> {
-        if self.enabled.unwrap_or_default().value() {
-            match &self.path {
-                Some(path) => Some(
-                    path.as_ref()
-                        .into_iter()
-                        .map(Clone::clone)
-                        .collect::<Vec<_>>(),
-                ),
-                None => Some(vec![SchemaCatalogPath::default()]),
-            }
-        } else {
-            None
-        }
-    }
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

@@ -8,8 +8,8 @@ format:
 lint:
 
 schema:
+  enabled: true
   catalog:
-    enabled: true
     path: https://www.schemastore.org/api/json/catalog.json
 
 schemas:

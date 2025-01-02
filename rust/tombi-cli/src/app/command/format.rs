@@ -80,33 +80,21 @@ where
     };
 
     runtime.block_on(async {
-        schema_store
-            .load_config_schema(
-                config_dirpath,
-                match &config.schemas {
-                    Some(schemas) => schemas,
-                    None => &[],
-                },
-            )
-            .await;
+        if schema_options.enabled.unwrap_or_default().value() {
+            schema_store
+                .load_config_schema(
+                    config_dirpath,
+                    match &config.schemas {
+                        Some(schemas) => schemas,
+                        None => &[],
+                    },
+                )
+                .await;
 
-        if schema_options
-            .catalog
-            .as_ref()
-            .and_then(|catalog| catalog.enabled)
-            .unwrap_or_default()
-            .value()
-        {
-            for catalog_path in schema_options
-                .catalog
-                .unwrap_or_default()
-                .paths()
-                .unwrap_or_default()
-                .iter()
-            {
-                if let Ok(catalog_url) = TryInto::<url::Url>::try_into(catalog_path) {
-                    schema_store.load_catalog_from_url(&catalog_url).await?;
-                }
+            for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
+                schema_store
+                    .load_catalog_from_url(&catalog_path.try_into()?)
+                    .await?;
             }
         }
 

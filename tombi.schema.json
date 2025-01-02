@@ -17,7 +17,7 @@
     },
     "toml-version": {
       "title": "TOML version.",
-      "description": "The version specified here is interpreted preferentially,\n but if the schema of the file to be inspected is of a lower version,\n it will be interpreted in that version.",
+      "description": "Specifies the TOML version when the TOML version is not specified in the schema.",
       "anyOf": [
         {
           "$ref": "#/$defs/TomlVersion"
@@ -193,6 +193,17 @@
     "SchemaOptions": {
       "type": "object",
       "properties": {
+        "enabled": {
+          "title": "Enable or disable the schema.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SchemaEnabled"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "catalog": {
           "title": "Schema catalog options.",
           "anyOf": [
@@ -207,22 +218,15 @@
       },
       "additionalProperties": false
     },
+    "SchemaEnabled": {
+      "type": "boolean"
+    },
     "SchemaCatalog": {
       "type": "object",
       "properties": {
-        "enabled": {
-          "title": "Enable or disable the schema catalog.",
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SchemaCatalogEnabled"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "path": {
           "title": "The schema catalog path or url.",
+          "description": "You can specify multiple catalogs by making it an array.\n If you want to disable the default catalog, specify an empty array.",
           "anyOf": [
             {
               "$ref": "#/$defs/OneOrMany_for_SchemaCatalogPath"
@@ -236,11 +240,7 @@
       },
       "additionalProperties": false
     },
-    "SchemaCatalogEnabled": {
-      "type": "boolean"
-    },
     "OneOrMany_for_SchemaCatalogPath": {
-      "description": "Generic value that can be either one or many",
       "anyOf": [
         {
           "$ref": "#/$defs/SchemaCatalogPath"
