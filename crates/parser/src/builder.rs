@@ -150,6 +150,12 @@ pub fn intersperse_trivia(
         State::PendingEnter | State::Normal => unreachable!(),
     }
 
+    if let Some(eof) = builder.lexed.tokens.last() {
+        builder.tokens.push(eof.to_owned());
+    }
+
+    assert_eq!(builder.tokens, builder.lexed.tokens);
+
     // is_eof?
     assert_eq!(builder.token_index, builder.lexed.len());
 }
