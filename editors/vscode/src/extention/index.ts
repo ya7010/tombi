@@ -13,6 +13,7 @@ export type { Settings };
 export const EXTENTION_ID = "tombi";
 export const EXTENTION_NAME = "Tombi";
 export const SUPPORT_TOML_LANGUAGES = ["toml", "cargoLock"];
+export const SUPPORT_TOMBI_CONFIG_FILENAMES = ["tombi.toml", "pyproject.toml"];
 export const SUPPORT_JSON_LANGUAGES = ["json"];
 
 export class Extension {
@@ -148,7 +149,11 @@ export class Extension {
   ): Promise<void> {
     log.info(`onDidSaveTextDocument: ${document.uri.toString()}`);
 
-    if (document.uri.path.endsWith("tombi.toml")) {
+    if (
+      SUPPORT_TOMBI_CONFIG_FILENAMES.some((filename) =>
+        document.uri.path.endsWith(filename),
+      )
+    ) {
       await this.client.sendRequest(updateConfig, {
         uri: document.uri.toString(),
       });
