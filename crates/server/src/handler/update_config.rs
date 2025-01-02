@@ -1,6 +1,6 @@
 use config::SUPPORTED_CONFIG_FILENAMES;
 use tower_lsp::lsp_types::{
-    notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier,
+    notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier, Url,
 };
 
 use crate::backend::Backend;
@@ -18,10 +18,17 @@ pub async fn handle_update_config(
     };
 
     for workspace_folder in workspace_folders {
+        let workspace_folder_uri = if !workspace_folder.uri.as_str().ends_with('/') {
+            Url::parse(&format!("{}/", workspace_folder.uri.as_str())).unwrap()
+        } else {
+            workspace_folder.uri
+        };
+
         for config_filename in SUPPORTED_CONFIG_FILENAMES {
-            let Ok(workspace_config_url) = workspace_folder.uri.join(config_filename) else {
+            let Ok(workspace_config_url) = workspace_folder_uri.join(config_filename) else {
                 continue;
             };
+
             if config_url == workspace_config_url {
                 match config::Config::try_from_url(workspace_config_url) {
                     Ok(Some(config)) => {
@@ -48,6 +55,8 @@ pub async fn handle_update_config(
             }
         }
     }
+
+    tracing::info!("No workspace found for config file: {:?}", config_url);
 
     Ok(false)
 }
