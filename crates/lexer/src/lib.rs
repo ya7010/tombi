@@ -38,8 +38,11 @@ regex!(
 pub fn lex(source: &str) -> Lexed {
     let mut lexed = Lexed::default();
     let mut was_joint = false;
-    for res in tokenize(source) {
-        match res {
+    let mut last_offset = text::Offset::default();
+    let mut last_position = text::Position::default();
+
+    for result in tokenize(source) {
+        match result {
             Ok(token) if token.kind().is_trivia() => was_joint = false,
             _ => {
                 if was_joint {
@@ -48,8 +51,21 @@ pub fn lex(source: &str) -> Lexed {
                 was_joint = true;
             }
         }
-        lexed.push_token_result(res);
+        let (last_span, last_range) = lexed.push_result_token(result);
+        last_offset = last_span.end();
+        last_position = last_range.end();
     }
+
+    lexed.tokens.push(crate::Token::new(
+        SyntaxKind::EOF,
+        (
+            text::Span::new(last_offset, text::Offset::new(source.len() as u32)),
+            text::Range::new(
+                last_position,
+                last_position + text::RelativePosition::of(&source[last_offset.into()..]),
+            ),
+        ),
+    ));
 
     lexed
 }

@@ -2,7 +2,6 @@ mod builder;
 mod error;
 mod event;
 mod input;
-mod lexed;
 mod marker;
 mod output;
 mod parse;
@@ -13,8 +12,7 @@ mod token_set;
 use config::TomlVersion;
 pub use error::{Error, ErrorKind};
 pub use event::Event;
-use lexed::lex;
-pub use lexed::LexedStr;
+use input::Input;
 use output::Output;
 use parse::Parse;
 use parsed::Parsed;
@@ -26,8 +24,8 @@ pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
 
 #[allow(private_bounds)]
 pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
-    let lexed = lex(source);
-    let input = lexed.to_input();
+    let lexed = lexer::lex(source);
+    let input = Input::new(&lexed);
     let mut p = crate::parser::Parser::new(&input, toml_version);
 
     P::parse(&mut p);
@@ -38,7 +36,12 @@ pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<Syn
 
     let (green_tree, errs) = build_green_tree(source, &lexed.tokens, output);
 
-    let mut errors = lexed.errors;
+    let mut errors = lexed
+        .errors
+        .into_iter()
+        .map(crate::Error::from)
+        .collect::<Vec<_>>();
+
     errors.extend(errs);
 
     Parsed::new(green_tree, errors)

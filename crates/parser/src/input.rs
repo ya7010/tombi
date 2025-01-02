@@ -18,6 +18,28 @@ pub struct Input {
     joints: Vec<bits>,
 }
 
+impl Input {
+    pub fn new(lexed: &lexer::Lexed) -> Input {
+        let _p = tracing::info_span!("Lexer<'a, SyntaxKind>::to_input").entered();
+
+        let mut res = Input::default();
+        let mut was_joint = false;
+        for token in &lexed.tokens {
+            let kind = token.kind();
+            if kind.is_trivia() {
+                was_joint = false
+            } else {
+                if was_joint {
+                    res.was_joint();
+                }
+                res.push(*token);
+                was_joint = true;
+            }
+        }
+        res
+    }
+}
+
 /// `pub` impl used by callers to create `Tokens`.
 impl Input {
     #[inline]

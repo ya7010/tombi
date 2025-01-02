@@ -1,21 +1,44 @@
+use syntax::SyntaxKind::*;
+
 #[allow(non_camel_case_types)]
 type bits = u64;
 
 #[derive(Debug, Default)]
 pub struct Lexed {
-    pub token_results: Vec<Result<crate::Token, crate::Error>>,
+    pub tokens: Vec<crate::Token>,
     pub joints: Vec<bits>,
     pub errors: Vec<crate::Error>,
 }
 
 impl Lexed {
     #[inline]
-    pub fn push_token_result(&mut self, token_result: Result<crate::Token, crate::Error>) {
+    pub(crate) fn push_result_token(
+        &mut self,
+        result_token: Result<crate::Token, crate::Error>,
+    ) -> (text::Span, text::Range) {
         let idx = self.len();
         if idx % (bits::BITS as usize) == 0 {
             self.joints.push(0);
         }
-        self.token_results.push(token_result);
+        match result_token {
+            Ok(token) => {
+                let (span, range) = (token.span(), token.range());
+                self.tokens.push(token);
+
+                (span, range)
+            }
+            Err(error) => {
+                let (span, range) = (error.span(), error.range());
+
+                self.tokens.push(crate::Token::new(
+                    INVALID_TOKEN,
+                    (error.span(), error.range()),
+                ));
+                self.errors.push(error);
+
+                (span, range)
+            }
+        }
     }
 
     fn bit_index(&self, n: usize) -> (usize, usize) {
@@ -25,7 +48,7 @@ impl Lexed {
     }
 
     fn len(&self) -> usize {
-        self.token_results.len()
+        self.tokens.len()
     }
 
     /// Sets jointness for the last token we've pushed.
@@ -44,14 +67,5 @@ impl Lexed {
     pub fn is_joint(&self, n: usize) -> bool {
         let (idx, b_idx) = self.bit_index(n);
         self.joints[idx] & (1 << b_idx) != 0
-    }
-}
-
-impl IntoIterator for Lexed {
-    type Item = Result<crate::Token, crate::Error>;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.token_results.into_iter()
     }
 }
