@@ -54,6 +54,12 @@ impl<'a> LexedStr<'a> {
         }
     }
 
+    pub fn token(&self, i: usize) -> &lexer::Token {
+        assert!(i < self.len());
+
+        &self.tokens[i]
+    }
+
     pub fn as_str(&self) -> &str {
         self.source
     }

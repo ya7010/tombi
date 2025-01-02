@@ -1,3 +1,4 @@
+use lexer;
 use syntax::SyntaxKind;
 
 use crate::{output, LexedStr};
@@ -5,6 +6,7 @@ use crate::{output, LexedStr};
 pub struct Builder<'a, 'b> {
     pub(crate) lexed: &'a LexedStr<'a>,
     pub(crate) token_index: usize,
+    pub(crate) tokens: Vec<lexer::Token>,
     pub(crate) state: State,
     pub(crate) sink: &'b mut dyn FnMut(Step<'_>),
 }
@@ -31,6 +33,7 @@ impl<'a, 'b> Builder<'a, 'b> {
         Self {
             lexed,
             token_index: 0,
+            tokens: Vec::new(),
             state: State::PendingEnter,
             sink,
         }
@@ -98,6 +101,12 @@ impl<'a, 'b> Builder<'a, 'b> {
         let text = &self
             .lexed
             .text_in(self.token_index..self.token_index + n_tokens);
+
+        for i in 0..n_tokens {
+            self.tokens
+                .push(self.lexed.token(self.token_index + i).clone());
+        }
+
         self.token_index += n_tokens;
 
         (self.sink)(Step::AddToken { kind, text });
@@ -142,5 +151,6 @@ pub fn intersperse_trivia(
     }
 
     // is_eof?
-    builder.token_index == builder.lexed.len()
+    assert_eq!(builder.token_index, builder.lexed.len());
+    true
 }
