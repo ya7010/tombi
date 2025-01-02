@@ -86,7 +86,7 @@ impl Output {
         let e = ((kind as u16 as u32) << Self::KIND_SHIFT)
             | ((n_tokens as u32) << Self::N_INPUT_TOKEN_SHIFT)
             | Self::EVENT_MASK;
-        self.events.push(e)
+        self.events.push(e);
     }
 
     pub(crate) fn enter_node(&mut self, kind: SyntaxKind) {
