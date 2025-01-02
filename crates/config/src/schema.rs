@@ -9,6 +9,7 @@ use crate::{Enabled, OneOrMany, SchemaCatalogPath};
 #[derive(Debug, Default, Clone)]
 pub struct SchemaOptions {
     /// # Enable or disable the schema.
+    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
     pub enabled: Option<Enabled>,
 
     /// # Schema catalog options.

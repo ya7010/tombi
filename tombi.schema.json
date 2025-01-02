@@ -202,7 +202,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": true
         },
         "catalog": {
           "title": "Schema catalog options.",
