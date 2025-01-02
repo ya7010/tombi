@@ -77,13 +77,6 @@ impl<'a> LexedStr<'a> {
         self.tokens[i].kind()
     }
 
-    pub fn text_in(&self, r: std::ops::Range<usize>) -> &str {
-        assert!(r.start < r.end && r.end <= self.len());
-        let lo = self.tokens[r.start].span().start().into();
-        let hi = self.tokens[r.end].span().start().into();
-        &self.source[lo..hi]
-    }
-
     pub fn to_input(&self) -> Input {
         let _p = tracing::info_span!("Lexer<'a, SyntaxKind>::to_input").entered();
 

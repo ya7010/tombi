@@ -106,10 +106,6 @@ impl<'a, 'b, 'c> Builder<'a, 'b, 'c> {
             self.tokens[self.token_index + n_tokens].span().start(),
         );
         let text = &self.source[span];
-        // let text = &self.sour
-        //     .lexed
-        //     .text_in(self.token_index..self.token_index + n_tokens);
-
         self.token_index += n_tokens;
 
         (self.sink)(Step::AddToken { kind, text });
