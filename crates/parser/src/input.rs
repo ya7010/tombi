@@ -38,12 +38,18 @@ impl Input {
         }
         res
     }
+
+    fn bit_index(&self, n: usize) -> (usize, usize) {
+        let idx = n / (bits::BITS as usize);
+        let b_idx = n % (bits::BITS as usize);
+        (idx, b_idx)
+    }
 }
 
-/// `pub` impl used by callers to create `Tokens`.
+/// impl used by callers to create `Tokens`.
 impl Input {
     #[inline]
-    pub fn push(&mut self, token: lexer::Token) {
+    fn push(&mut self, token: lexer::Token) {
         let idx = self.len();
         if idx % (bits::BITS as usize) == 0 {
             self.joints.push(0);
@@ -58,7 +64,7 @@ impl Input {
     /// the *previous* token was joint, with mbe, you know whether the *current*
     /// one is joint. This API allows for styles of usage:
     #[inline]
-    pub fn was_joint(&mut self) {
+    fn was_joint(&mut self) {
         let n = self.len() - 1;
         let (idx, b_idx) = self.bit_index(n);
         self.joints[idx] |= 1 << b_idx;
@@ -86,13 +92,5 @@ impl Input {
 
     pub(crate) fn len(&self) -> usize {
         self.tokens.len()
-    }
-}
-
-impl Input {
-    fn bit_index(&self, n: usize) -> (usize, usize) {
-        let idx = n / (bits::BITS as usize);
-        let b_idx = n % (bits::BITS as usize);
-        (idx, b_idx)
     }
 }
