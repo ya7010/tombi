@@ -64,3 +64,7 @@ Currently, we are considering adding special information called `x-tombi-*` to J
 
 We need to request additional modifications to the [JSON Schema Store](https://www.schemastore.org/json/),
 but Tombi has not yet gained share, so it will be much later.
+
+### Comment
+Tombi is designed to automatically sort elements of `Table` / `Array Of Tables`(sort features not implemented yet).
+When the documentation site is published, a page will be created to explain the mechanism of comments treatment.
