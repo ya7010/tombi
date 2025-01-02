@@ -20,5 +20,5 @@ path = "schemas/cargo.schema.json"
 include = ["Cargo.toml"]
 
 [[schemas]]
-path = "schemas/sample.schema.json"
+path = "schemas/toml-v1.1.0-preview.schema.json"
 include = ["sample.toml"]
