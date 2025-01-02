@@ -36,7 +36,7 @@ pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<Syn
 
     let output = crate::event::process(events);
 
-    let (green_tree, errs) = build_green_tree(&lexed, output);
+    let (green_tree, errs) = build_green_tree(source, &lexed, output);
 
     let mut errors = lexed.errors;
     errors.extend(errs);
@@ -45,21 +45,27 @@ pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<Syn
 }
 
 pub fn build_green_tree(
+    source: &str,
     lexed: &LexedStr<'_>,
     parser_output: crate::Output,
 ) -> (rg_tree::GreenNode, Vec<crate::Error>) {
     let mut builder = syntax::SyntaxTreeBuilder::<crate::Error>::default();
 
-    builder::intersperse_trivia(lexed, &parser_output, &mut |step| match step {
-        builder::Step::AddToken { kind, text } => {
-            builder.token(kind, text);
-        }
-        builder::Step::StartNode { kind } => {
-            builder.start_node(kind);
-        }
-        builder::Step::FinishNode => builder.finish_node(),
-        builder::Step::Error { error } => builder.error(error),
-    });
+    builder::intersperse_trivia(
+        source,
+        &lexed.tokens,
+        &parser_output,
+        &mut |step| match step {
+            builder::Step::AddToken { kind, text } => {
+                builder.token(kind, text);
+            }
+            builder::Step::StartNode { kind } => {
+                builder.start_node(kind);
+            }
+            builder::Step::FinishNode => builder.finish_node(),
+            builder::Step::Error { error } => builder.error(error),
+        },
+    );
 
     builder.finish()
 }

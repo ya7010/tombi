@@ -1,20 +1,19 @@
 use lexer;
 use syntax::SyntaxKind;
 
-use crate::{output, LexedStr};
+use crate::output;
 
-pub struct Builder<'a, 'b> {
-    pub(crate) lexed: &'a LexedStr<'a>,
+pub struct Builder<'a, 'b, 'c> {
+    source: &'a str,
     pub(crate) token_index: usize,
-    pub(crate) tokens: Vec<lexer::Token>,
+    pub(crate) tokens: &'b [lexer::Token],
     pub(crate) state: State,
-    pub(crate) sink: &'b mut dyn FnMut(Step<'_>),
+    pub(crate) sink: &'c mut dyn FnMut(Step<'_>),
 }
 
-impl std::fmt::Debug for Builder<'_, '_> {
+impl std::fmt::Debug for Builder<'_, '_, '_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Builder")
-            .field("lexed", &self.lexed)
             .field("token_index", &self.token_index)
             .field("state", &self.state)
             .finish()
@@ -28,12 +27,16 @@ pub enum State {
     PendingExit,
 }
 
-impl<'a, 'b> Builder<'a, 'b> {
-    pub fn new(lexed: &'a LexedStr<'a>, sink: &'b mut dyn FnMut(Step<'_>)) -> Self {
+impl<'a, 'b, 'c> Builder<'a, 'b, 'c> {
+    pub fn new(
+        source: &'a str,
+        tokens: &'b [lexer::Token],
+        sink: &'c mut dyn FnMut(Step<'_>),
+    ) -> Self {
         Self {
-            lexed,
+            source,
             token_index: 0,
-            tokens: Vec::new(),
+            tokens,
             state: State::PendingEnter,
             sink,
         }
@@ -74,8 +77,8 @@ impl<'a, 'b> Builder<'a, 'b> {
     }
 
     pub fn eat_trivias(&mut self) {
-        while self.token_index < self.lexed.len() {
-            let kind = self.lexed.kind(self.token_index);
+        while self.token_index < self.tokens.len() {
+            let kind = self.tokens[self.token_index].kind();
             if !kind.is_trivia() {
                 break;
             }
@@ -84,28 +87,28 @@ impl<'a, 'b> Builder<'a, 'b> {
     }
 
     fn n_trivias(&self) -> usize {
-        (self.token_index..self.lexed.len())
-            .take_while(|&it| self.lexed.kind(it).is_trivia())
+        (self.token_index..self.tokens.len())
+            .take_while(|&it| self.tokens[it].kind().is_trivia())
             .count()
     }
 
     pub fn eat_n_trivias(&mut self) {
         for _ in 0..self.n_trivias() {
-            let kind = self.lexed.kind(self.token_index);
+            let kind = self.tokens[self.token_index].kind();
             assert!(kind.is_trivia());
             self.do_token(kind, 1);
         }
     }
 
     pub fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
-        let text = &self
-            .lexed
-            .text_in(self.token_index..self.token_index + n_tokens);
-
-        for i in 0..n_tokens {
-            self.tokens
-                .push(self.lexed.token(self.token_index + i).clone());
-        }
+        let span = text::Span::new(
+            self.tokens[self.token_index].span().start(),
+            self.tokens[self.token_index + n_tokens].span().start(),
+        );
+        let text = &self.source[span];
+        // let text = &self.sour
+        //     .lexed
+        //     .text_in(self.token_index..self.token_index + n_tokens);
 
         self.token_index += n_tokens;
 
@@ -122,11 +125,12 @@ pub enum Step<'a> {
 }
 
 pub fn intersperse_trivia(
-    lexed: &LexedStr,
+    source: &str,
+    tokens: &[lexer::Token],
     output: &crate::Output,
     sink: &mut dyn FnMut(Step<'_>),
 ) {
-    let mut builder = Builder::new(lexed, sink);
+    let mut builder = Builder::new(source, tokens, sink);
 
     for event in output.iter() {
         match event {
@@ -149,13 +153,4 @@ pub fn intersperse_trivia(
         }
         State::PendingEnter | State::Normal => unreachable!(),
     }
-
-    if let Some(eof) = builder.lexed.tokens.last() {
-        builder.tokens.push(eof.to_owned());
-    }
-
-    assert_eq!(builder.tokens, builder.lexed.tokens);
-
-    // is_eof?
-    assert_eq!(builder.token_index, builder.lexed.len());
 }
