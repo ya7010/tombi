@@ -11,10 +11,6 @@ pub struct Args {
     /// If the only argument is "-", the standard input will be used.
     files: Vec<String>,
 
-    /// Enable or disable the schema catalog.
-    #[arg(long, action = clap::ArgAction::Set, default_value = "true")]
-    schema_catalog_enabled: Option<bool>,
-
     /// Check only and don't overwrite files.
     #[arg(long, default_value_t = false)]
     check: bool,
@@ -94,14 +90,13 @@ where
             )
             .await;
 
-        if args.schema_catalog_enabled.unwrap_or_else(|| {
-            schema_options
-                .catalog
-                .as_ref()
-                .and_then(|catalog| catalog.enabled)
-                .unwrap_or_default()
-                .value()
-        }) {
+        if schema_options
+            .catalog
+            .as_ref()
+            .and_then(|catalog| catalog.enabled)
+            .unwrap_or_default()
+            .value()
+        {
             for catalog_path in schema_options
                 .catalog
                 .unwrap_or_default()
