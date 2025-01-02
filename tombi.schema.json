@@ -197,7 +197,7 @@
           "title": "Enable or disable the schema.",
           "anyOf": [
             {
-              "$ref": "#/$defs/SchemaEnabled"
+              "$ref": "#/$defs/Enabled"
             },
             {
               "type": "null"
@@ -218,7 +218,7 @@
       },
       "additionalProperties": false
     },
-    "SchemaEnabled": {
+    "Enabled": {
       "type": "boolean"
     },
     "SchemaCatalog": {
