@@ -125,7 +125,7 @@ pub fn intersperse_trivia(
     lexed: &LexedStr,
     output: &crate::Output,
     sink: &mut dyn FnMut(Step<'_>),
-) -> bool {
+) {
     let mut builder = Builder::new(lexed, sink);
 
     for event in output.iter() {
@@ -152,5 +152,4 @@ pub fn intersperse_trivia(
 
     // is_eof?
     assert_eq!(builder.token_index, builder.lexed.len());
-    true
 }

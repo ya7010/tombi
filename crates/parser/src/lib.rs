@@ -50,7 +50,7 @@ pub fn build_green_tree(
 ) -> (rg_tree::GreenNode, Vec<crate::Error>) {
     let mut builder = syntax::SyntaxTreeBuilder::<crate::Error>::default();
 
-    let _ = builder::intersperse_trivia(lexed, &parser_output, &mut |step| match step {
+    builder::intersperse_trivia(lexed, &parser_output, &mut |step| match step {
         builder::Step::AddToken { kind, text } => {
             builder.token(kind, text);
         }
