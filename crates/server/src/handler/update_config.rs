@@ -56,7 +56,7 @@ pub async fn handle_update_config(
         }
     }
 
-    tracing::info!("No workspace found for config file: {:?}", config_url);
+    tracing::info!("No workspace found for config settings: {}", config_url);
 
     Ok(false)
 }
