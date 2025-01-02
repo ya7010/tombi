@@ -9,7 +9,7 @@ type bits = u64;
 ///
 /// As of now, parser doesn't have access to the *text* of the tokens, and makes
 /// decisions based solely on their classification. Unlike `LexerToken`, the
-/// `Tokens` doesn't include whitespace and comments. Main input to the parser.
+/// `Tokens` doesn't include whitespace. Main input to the parser.
 ///
 /// Struct of arrays internally, but this shouldn't really matter.
 #[derive(Debug, Default)]
