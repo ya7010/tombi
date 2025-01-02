@@ -64,7 +64,7 @@ impl<'a, 'b, 'c> Builder<'a, 'b, 'c> {
             State::Normal => (),
         }
 
-        self.eat_n_trivias();
+        self.eat_trivias();
         (self.sink)(Step::StartNode { kind });
     }
 
@@ -86,21 +86,7 @@ impl<'a, 'b, 'c> Builder<'a, 'b, 'c> {
         }
     }
 
-    fn n_trivias(&self) -> usize {
-        (self.token_index..self.tokens.len())
-            .take_while(|&it| self.tokens[it].kind().is_trivia())
-            .count()
-    }
-
-    pub fn eat_n_trivias(&mut self) {
-        for _ in 0..self.n_trivias() {
-            let kind = self.tokens[self.token_index].kind();
-            assert!(kind.is_trivia());
-            self.do_token(kind, 1);
-        }
-    }
-
-    pub fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
+    fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
         let span = text::Span::new(
             self.tokens[self.token_index].span().start(),
             self.tokens[self.token_index + n_tokens].span().start(),
