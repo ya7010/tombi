@@ -78,6 +78,8 @@ impl<'a> Formatter<'a> {
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
         match parser::parse(source, self.toml_version).try_cast::<ast::Root>() {
             Ok(root) => {
+                let root = ast_editor::edit(root);
+
                 tracing::trace!("TOML AST: {:#?}", root);
 
                 let line_ending = {

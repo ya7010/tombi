@@ -7,6 +7,7 @@ license = { workspace = true }
 
 [dependencies]
 ast = { workspace = true }
+ast-editor = { workspace = true }
 config = { workspace = true }
 diagnostic = { workspace = true }
 itertools = { workspace = true }
