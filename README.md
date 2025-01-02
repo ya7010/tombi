@@ -47,7 +47,7 @@ Tombi will provide support for migrating from `v1.0.0` to `v1.1.0`,
 but it is not yet fully functional.
 
 > [!IMPORTANT]
-> Tombi currently provides `v1.1.0-preview`, but `v1.1.0` is not available yet.
+> Tombi currently provides `v1.0.0`(default) and `v1.1.0-preview`, but `v1.1.0` is not available yet.
 
 ### toml-test
 [toml-test](https://github.com/toml-lang/toml-test) is almost supported. Once all tests pass, it will be included in CI for monitoring.
