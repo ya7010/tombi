@@ -15,3 +15,15 @@ impl<T> OneOrMany<T> {
         }
     }
 }
+
+impl<T> From<T> for OneOrMany<T> {
+    fn from(value: T) -> Self {
+        OneOrMany::One(value)
+    }
+}
+
+impl<T> From<Vec<T>> for OneOrMany<T> {
+    fn from(values: Vec<T>) -> Self {
+        OneOrMany::Many(values)
+    }
+}

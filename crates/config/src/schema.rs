@@ -94,3 +94,33 @@ pub struct SchemaCatalogItem {
 //     /// The path of the key to apply the schema.
 //     keys: String,
 // }
+
+#[cfg(test)]
+mod tests {
+    use assert_matches::assert_matches;
+
+    use super::*;
+
+    #[test]
+    fn schema_catalog_paths_default() {
+        let schema = SchemaOptions::default();
+        let _expected = vec![SchemaCatalogPath::default()];
+
+        assert_matches!(schema.catalog_paths(), Some(_expected));
+    }
+
+    #[test]
+    fn schema_catalog_paths_empty() {
+        let schema = SchemaOptions {
+            catalog: Some(SchemaCatalog {
+                path: Some(vec![].into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        let _expected: Vec<SchemaCatalogPath> = vec![];
+
+        assert_matches!(schema.catalog_paths(), Some(_expected));
+    }
+}

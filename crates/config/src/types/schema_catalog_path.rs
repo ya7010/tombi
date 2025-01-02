@@ -1,7 +1,7 @@
 use super::OneOrMany;
 
 /// Generic value that can be either single or multiple
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 pub struct SchemaCatalogPath(String);
