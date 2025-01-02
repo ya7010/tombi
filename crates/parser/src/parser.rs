@@ -10,6 +10,7 @@ use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};
 pub(crate) struct Parser<'t> {
     input: &'t Input,
     pos: usize,
+    tokens: Vec<lexer::Token>,
     pub(crate) events: Vec<crate::Event>,
     toml_version: TomlVersion,
 }
@@ -19,6 +20,7 @@ impl<'t> Parser<'t> {
         Self {
             input,
             pos: 0,
+            tokens: Vec::new(),
             events: Vec::new(),
             toml_version,
         }
@@ -28,8 +30,11 @@ impl<'t> Parser<'t> {
         self.toml_version
     }
 
-    pub(crate) fn finish(self) -> Vec<crate::Event> {
-        self.events
+    pub(crate) fn finish(mut self) -> (Vec<lexer::Token>, Vec<crate::Event>) {
+        for i in self.pos..self.input.len() {
+            self.tokens.push(self.input.token(i));
+        }
+        (self.tokens, self.events)
     }
 
     #[inline]
@@ -147,8 +152,12 @@ impl<'t> Parser<'t> {
     }
 
     fn do_bump(&mut self, kind: SyntaxKind, n_raw_tokens: u8) {
-        self.pos += n_raw_tokens as usize;
         self.push_event(Event::Token { kind, n_raw_tokens });
+        for i in 0..n_raw_tokens {
+            self.tokens.push(self.input.token(self.pos + i as usize));
+        }
+
+        self.pos += n_raw_tokens as usize;
     }
 
     fn do_bump_kind(&mut self, kind: SyntaxKind) {

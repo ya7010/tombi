@@ -45,6 +45,10 @@ impl Input {
 
 /// pub(crate) impl used by the parser to consume `Tokens`.
 impl Input {
+    pub(crate) fn token(&self, idx: usize) -> lexer::Token {
+        self.tokens.get(idx).unwrap_or(&lexer::Token::eof()).clone()
+    }
+
     pub(crate) fn kind(&self, idx: usize) -> SyntaxKind {
         self.tokens.get(idx).map_or(EOF, |t| t.kind())
     }
@@ -57,6 +61,10 @@ impl Input {
         let (idx, b_idx) = self.bit_index(n);
         self.joints[idx] & 1 << b_idx != 0
     }
+
+    pub(crate) fn len(&self) -> usize {
+        self.tokens.len()
+    }
 }
 
 impl Input {
@@ -64,8 +72,5 @@ impl Input {
         let idx = n / (bits::BITS as usize);
         let b_idx = n % (bits::BITS as usize);
         (idx, b_idx)
-    }
-    fn len(&self) -> usize {
-        self.tokens.len()
     }
 }

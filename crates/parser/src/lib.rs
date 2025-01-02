@@ -32,7 +32,7 @@ pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<Syn
 
     P::parse(&mut p);
 
-    let events = p.finish();
+    let (_tokens, events) = p.finish();
 
     let output = crate::event::process(events);
 
