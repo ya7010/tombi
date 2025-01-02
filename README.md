@@ -39,12 +39,15 @@ The formatter/linter is almost complete, but support for JsonSchema is incomplet
 ### TOML v1.1.0
 [TOML v1.1.0](https://github.com/toml-lang/toml/issues/928) has not been released.
 
-The formatter of Tombi will show its true power in `v1.1.0`, but be careful.
+The formatter of Tombi will show its true power in `v1.1.0-preview`, but be careful.
 
 Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/manifest.html), [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)) are `v1.0.0`, and the default TOML version of Tombi is also `v1.0.0`.
 
 Tombi will provide support for migrating from `v1.0.0` to `v1.1.0`,
 but it is not yet fully functional.
+
+> [!IMPORTANT]
+> Tombi currently provides `v1.1.0-preview`, but `v1.1.0` is not available.
 
 ### toml-test
 [toml-test](https://github.com/toml-lang/toml-test) is almost supported. Once all tests pass, it will be included in CI for monitoring.
@@ -59,4 +62,4 @@ Currently, we are considering adding special information called `x-tombi-*` to J
 - `x-tombi-table-key-order-by`: For automatically sorting tables like `[dependencies]` (not implemented)
 
 We need to request additional modifications to the [JSON Schema Store](https://www.schemastore.org/json/),
-but Tombi has not yet gained market share, so it will be much later.
+but Tombi has not yet gained share, so it will be much later.
