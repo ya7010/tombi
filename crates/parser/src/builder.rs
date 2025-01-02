@@ -5,10 +5,10 @@ use crate::output;
 
 pub struct Builder<'a, 'b, 'c> {
     source: &'a str,
-    pub(crate) token_index: usize,
-    pub(crate) tokens: &'b [lexer::Token],
-    pub(crate) state: State,
-    pub(crate) sink: &'c mut dyn FnMut(Step<'_>),
+    token_index: usize,
+    tokens: &'b [lexer::Token],
+    state: State,
+    sink: &'c mut dyn FnMut(Step<'_>),
 }
 
 impl std::fmt::Debug for Builder<'_, '_, '_> {
