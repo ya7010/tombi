@@ -33,7 +33,8 @@ but you can control the behavior with a configuration file called
 [tombi.toml](https://github.com/tombi-toml/tombi/blob/main/tombi.toml).
 
 ## TODO
-The formatter/linter is almost complete, but support for JsonSchema is incomplete.
+1. The formatter/linter is almost complete, but support for JsonSchema is incomplete.
+2. The documentation site release.
 
 ## NOTE
 ### TOML v1.1.0
