@@ -27,11 +27,11 @@ pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<Syn
 
     P::parse(&mut p);
 
-    let (_tokens, events) = p.finish();
+    let (tokens, events) = p.finish();
 
     let output = crate::event::process(events);
 
-    let (green_tree, errs) = build_green_tree(source, &lexed.tokens, output);
+    let (green_tree, errs) = build_green_tree(source, &tokens, output);
 
     let mut errors = lexed
         .errors
