@@ -4,22 +4,28 @@ use syntax::{
     T,
 };
 
-use crate::{input::Input, marker::Marker, token_set::TokenSet, Event};
+use crate::{marker::Marker, token_set::TokenSet, Event};
 
 #[derive(Debug)]
 pub(crate) struct Parser<'t> {
-    input: &'t Input,
+    input_tokens: &'t [lexer::Token],
     pos: usize,
-    tokens: Vec<lexer::Token>,
+    pub tokens: Vec<lexer::Token>,
     pub(crate) events: Vec<crate::Event>,
     toml_version: TomlVersion,
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(input: &'t Input, toml_version: TomlVersion) -> Self {
+    pub(crate) fn new(input_tokens: &'t [lexer::Token], toml_version: TomlVersion) -> Self {
         Self {
-            input,
-            pos: 0,
+            input_tokens,
+            pos: input_tokens
+                .iter()
+                .enumerate()
+                .skip_while(|(_, token)| token.kind().is_trivia())
+                .next()
+                .map(|(i, _)| i)
+                .unwrap_or_default(),
             tokens: Vec::new(),
             events: Vec::new(),
             toml_version,
@@ -31,8 +37,8 @@ impl<'t> Parser<'t> {
     }
 
     pub(crate) fn finish(mut self) -> (Vec<lexer::Token>, Vec<crate::Event>) {
-        for i in self.pos..self.input.len() {
-            self.tokens.push(self.input.token(i));
+        for i in self.pos..self.input_tokens.len() {
+            self.tokens.push(self.input_tokens[i]);
         }
         (self.tokens, self.events)
     }
@@ -44,19 +50,47 @@ impl<'t> Parser<'t> {
 
     #[inline]
     pub(crate) fn current_range(&self) -> text::Range {
-        self.input.range(self.pos)
+        self.input_tokens[self.pos].range()
     }
 
     #[inline]
     pub(crate) fn previous_range(&self) -> text::Range {
-        match self.pos.checked_sub(1) {
-            Some(pos) => self.input.range(pos),
-            None => text::Range::default(),
+        if self.pos == 0 {
+            return text::Range::default();
         }
+        let mut pos = self.pos - 1;
+        while pos > 0 && self.input_tokens[pos].kind().is_trivia() {
+            pos -= 1;
+        }
+        self.input_tokens[pos].range()
     }
 
+    fn nth_index(&self, n: usize) -> usize {
+        let mut n = n + 1;
+        for pos in self.pos..self.input_tokens.len() {
+            let token = self.input_tokens[pos];
+            if !token.kind().is_trivia() {
+                n -= 1;
+                if n == 0 {
+                    return pos;
+                }
+            }
+        }
+        self.input_tokens.len()
+    }
+
+    fn nth_token(&self, n: usize) -> lexer::Token {
+        let pos = self.nth_index(n);
+        if pos == self.input_tokens.len() {
+            return lexer::Token::eof();
+        }
+
+        self.input_tokens[pos]
+    }
+
+    #[inline]
     pub(crate) fn nth(&self, n: usize) -> SyntaxKind {
-        self.input.kind(self.pos + n)
+        self.nth_token(n).kind()
     }
 
     /// Checks if the current token is `kind`.
@@ -68,18 +102,26 @@ impl<'t> Parser<'t> {
         match kind {
             T!["[["] => self.at_composite2(n, T!['['], T!['[']),
             T!["]]"] => self.at_composite2(n, T![']'], T![']']),
-            _ => self.input.kind(self.pos + n) == kind,
+            _ => self.nth(n) == kind,
         }
     }
 
+    #[inline]
     pub(crate) fn nth_range(&self, n: usize) -> text::Range {
-        self.input.range(self.pos + n)
+        self.nth_token(n).range()
+    }
+
+    fn is_joint(&self, n: usize) -> bool {
+        let index = self.nth_index(n);
+        if index + 1 >= self.input_tokens.len() {
+            return false;
+        }
+
+        !self.input_tokens[index + 1].kind().is_trivia()
     }
 
     fn at_composite2(&self, n: usize, k1: SyntaxKind, k2: SyntaxKind) -> bool {
-        self.input.kind(self.pos + n) == k1
-            && self.input.kind(self.pos + n + 1) == k2
-            && self.input.is_joint(self.pos + n)
+        self.nth(n) == k1 && self.nth(n + 1) == k2 && self.is_joint(n)
     }
 
     /// Consume the next token if `kind` matches.
@@ -153,11 +195,10 @@ impl<'t> Parser<'t> {
 
     fn do_bump(&mut self, kind: SyntaxKind, n_raw_tokens: u8) {
         self.push_event(Event::Token { kind, n_raw_tokens });
-        for i in 0..n_raw_tokens {
-            self.tokens.push(self.input.token(self.pos + i as usize));
-        }
+        let nth_index = self.nth_index((n_raw_tokens) as usize);
+        self.tokens.extend(&self.input_tokens[self.pos..nth_index]);
 
-        self.pos += n_raw_tokens as usize;
+        self.pos = nth_index as usize;
     }
 
     fn do_bump_kind(&mut self, kind: SyntaxKind) {

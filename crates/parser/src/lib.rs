@@ -1,7 +1,6 @@
 mod builder;
 mod error;
 mod event;
-mod input;
 mod marker;
 mod output;
 mod parse;
@@ -12,7 +11,6 @@ mod token_set;
 use config::TomlVersion;
 pub use error::{Error, ErrorKind};
 pub use event::Event;
-use input::Input;
 use output::Output;
 use parse::Parse;
 use parsed::Parsed;
@@ -25,8 +23,7 @@ pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
 #[allow(private_bounds)]
 pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
     let lexed = lexer::lex(source);
-    let input = Input::new(&lexed);
-    let mut p = crate::parser::Parser::new(&input, toml_version);
+    let mut p = crate::parser::Parser::new(&lexed.tokens, toml_version);
 
     P::parse(&mut p);
 
