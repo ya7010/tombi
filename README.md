@@ -33,10 +33,6 @@ The documentation site has not been built yet,
 but you can control the behavior with a configuration file called
 [tombi.toml](https://github.com/tombi-toml/tombi/blob/main/tombi.toml).
 
-## TODO
-1. The formatter/linter is almost complete, but support for JsonSchema is incomplete.
-2. The documentation site release.
-
 ## NOTE
 ### TOML v1.1.0
 [TOML v1.1.0](https://github.com/toml-lang/toml/issues/928) has not been released.
