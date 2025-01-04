@@ -19,6 +19,7 @@ syntax = { workspace = true }
 text = { workspace = true }
 tokio.workspace = true
 tracing = { workspace = true }
+unicode-segmentation = { workspace = true }
 url = { workspace = true }
 
 [dev-dependencies]

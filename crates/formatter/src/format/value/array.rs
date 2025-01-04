@@ -2,6 +2,7 @@ use crate::Format;
 use ast::AstNode;
 use itertools::Itertools;
 use std::fmt::Write;
+use unicode_segmentation::UnicodeSegmentation;
 
 impl Format for ast::Array {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -44,8 +45,16 @@ pub(crate) fn exceeds_line_width(
             length += 1; // ","
             length += f.defs().singleline_array_space_after_comma().len();
         }
-        length += f.format_to_string(&value)?.len();
+        length += f.format_to_string(&value)?.graphemes(true).count();
         first = false;
+    }
+
+    if let Some(tailing_comment) = node.tailing_comment() {
+        length += f.defs().tailing_comment_space().len();
+        length += f
+            .format_to_string(tailing_comment.as_ref())?
+            .graphemes(true)
+            .count();
     }
 
     Ok(length > f.line_width() as usize)

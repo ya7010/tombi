@@ -7,6 +7,7 @@ use diagnostic::SetDiagnostics;
 use itertools::Either;
 use schema_store::DocumentSchema;
 use std::fmt::Write;
+use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
 
 pub struct Formatter<'a> {
@@ -174,7 +175,12 @@ impl<'a> Formatter<'a> {
 
     #[inline]
     pub(crate) fn current_line_width(&self) -> usize {
-        self.buf.split("\n").last().unwrap_or_default().len()
+        self.buf
+            .split("\n")
+            .last()
+            .unwrap_or_default()
+            .graphemes(true)
+            .count()
     }
 }
 

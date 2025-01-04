@@ -61,4 +61,5 @@ toml-version = { path = "crates/toml-version" }
 tower-lsp = { version = "0.20.0" }
 tracing = { version = "0.1.41" }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+unicode-segmentation = "1.12.0"
 url = { version = "2.5.4", features = ["serde"] }
