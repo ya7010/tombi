@@ -44,11 +44,12 @@ The formatter of Tombi will show its true power in `v1.1.0-preview`, but be care
 
 Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/manifest.html), [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)) are `v1.0.0`, and the default TOML version of Tombi is also `v1.0.0`.
 
-Tombi will provide support for migrating from `v1.0.0` to `v1.1.0`,
-but it is not yet fully functional.
-
 > [!IMPORTANT]
 > Tombi currently provides `v1.0.0`(default) and `v1.1.0-preview`, but `v1.1.0` is not available yet.
+> If you want to use `v1.1.0-preview`, write as follows in `tombi.toml`.
+> ```toml
+> toml-version = "1.1.0-preview"
+> ```
 
 ### toml-test
 [toml-test](https://github.com/toml-lang/toml-test) is almost supported. Once all tests pass, it will be included in CI for monitoring.
