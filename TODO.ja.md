@@ -15,6 +15,7 @@
 - [ ] ast-editor の実装
     - [ ] 末尾カンマとコメントの関係の差し替え
     - [ ] テーブルのキーの並び替えに対応
+- [ ] document site の立ち上げ
 
 ### Bugs
 - [x] Local Date 型が誤って IntegerDec としてパースされる
