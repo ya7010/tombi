@@ -4,6 +4,7 @@
 
 [![Marketplace Version](https://vsmarketplacebadges.dev/version/yassun7010.tombi.png?label=VS%20Code%20Marketplace&logo=visual-studio-code "Current Release")](https://marketplace.visualstudio.com/items?itemName=yassun7010.tombi)
 [![CI VSCode Extensions](https://github.com/tombi-toml/tombi/actions/workflows/ci_vscode.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions/workflows/ci_vscode.yml)
+[![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 [![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js?style=flat-square)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 
 Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and language server.
@@ -52,7 +53,8 @@ Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/ma
 > ```
 
 ### toml-test
-[toml-test](https://github.com/toml-lang/toml-test) is almost supported. Once all tests pass, it will be included in CI for monitoring.
+We are monitoring the passing of all test cases of [toml-test](https://github.com/toml-lang/toml-test) with CI.
+[![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 
 ### JSON Schema
 [TOML itself may add schema specifications](https://github.com/toml-lang/toml/issues/792),
