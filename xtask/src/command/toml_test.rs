@@ -6,32 +6,25 @@ use crate::utils::project_root;
 
 use config::TomlVersion;
 
-pub fn run(sh: &Shell) -> anyhow::Result<()> {
+#[derive(clap::Args, Debug)]
+pub struct Args {
+    #[arg(long, default_value_t= TomlVersion::default())]
+    toml_version: TomlVersion,
+}
+
+pub fn run(sh: &Shell, args: Args) -> anyhow::Result<()> {
     let project_root = project_root();
 
     sh.change_dir(&project_root);
 
     xshell::cmd!(sh, "cargo build --bin decode").run()?;
 
-    let mut has_failed = false;
-    for &toml_version in &[TomlVersion::V1_0_0, TomlVersion::V1_1_0_Preview] {
-        if let Ok(false) = decode_test(sh, &project_root, toml_version) {
-            has_failed = true;
-        }
-    }
-
-    if has_failed {
-        std::process::exit(1);
-    }
+    decode_test(sh, &project_root, args.toml_version);
 
     Ok(())
 }
 
-fn decode_test(
-    sh: &Shell,
-    project_root: &std::path::Path,
-    toml_version: TomlVersion,
-) -> anyhow::Result<bool> {
+fn decode_test(sh: &Shell, project_root: &std::path::Path, toml_version: TomlVersion) {
     let toml_test_version = toml_test_version(toml_version);
     let toml_version_str = serde_json::to_string(&toml_version).unwrap_or_default();
     let toml_version_str = toml_version_str.trim_matches('"');
@@ -39,18 +32,17 @@ fn decode_test(
     match xshell::cmd!(
         sh,
         "toml-test -color=never -toml={toml_test_version} -- {project_root}/target/debug/decode --toml-version {toml_version_str}"
-    )
-    .ignore_status()
-    .output()
-    {
+    ).output() {
         Ok(output) => {
-            let output_path =
-                project_root.join(format!("toml-test/result/decode-{toml_version_str}.txt"));
-            let mut file = std::fs::File::create(output_path)?;
-            file.write_all(&output.stdout)?;
-            Ok(output.status.success())
+            std::io::stdout().write_all(&output.stdout).unwrap();
+            std::io::stderr().write_all(&output.stderr).unwrap();
+            if !output.status.success() {
+                std::process::exit(output.status.code().unwrap_or(1));
+            }
         }
-        Err(_) => unreachable!("ignore_status() should prevent this"),
+        Err(err) => {
+            eprintln!("{}", err.to_string());
+        }
     }
 }
 

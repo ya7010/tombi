@@ -17,7 +17,7 @@ pub enum XTaskCommand {
     SetVersion,
 
     /// Run toml-test.
-    TomlTest,
+    TomlTest(toml_test::Args),
 
     /// Prepare the distribution.
     Dist,

@@ -1,3 +1,0 @@
-toml-test v0001-01-01 [/Users/s23467/develop/tombi/target/debug/decode --toml-version v1.0.0]: using embedded tests
-  valid tests: 182 passed,  0 failed
-invalid tests: 371 passed,  0 failed
