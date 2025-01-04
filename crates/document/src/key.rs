@@ -141,7 +141,12 @@ mod test {
 
     test_serialize! {
         #[test]
-        fn float_key(r#"3.14 = 'value'"#) -> Ok(json!({"3": {"14": "value"}}))
+        fn float_key1(r#"3.14 = 'value'"#) -> Ok(json!({"3": {"14": "value"}}))
+    }
+
+    test_serialize! {
+        #[test]
+        fn float_key2(r#"nan = 'value'"#) -> Ok(json!({"nan": "value"}))
     }
 
     test_serialize! {
