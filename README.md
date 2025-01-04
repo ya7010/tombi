@@ -58,7 +58,7 @@ We are monitoring the passing of all test cases of [toml-test](https://github.co
 [![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 
 ### JSON Schema
-[TOML itself may add schema specifications](https://github.com/toml-lang/toml/issues/792),
+TOML itself may add [schema specifications](https://github.com/toml-lang/toml/issues/792),
 but like Taplo, Tombi is also trying to add validation functions to the linter that support [JSON Schema](https://json-schema.org/).
 
 Currently, we are considering adding special information called `x-tombi-*` to JSON Schema.
