@@ -114,6 +114,7 @@ lt1 = 07:32:00  # lt1 tailing comment
 # lt2 leading tailing comment
 lt2 = 00:32:00.999999  # lt2 tailing comment
 inline_table = { aaa = 1 }
+3.14.5.ab = true
 
 [aaaa.ccc]
 key1 = 11
