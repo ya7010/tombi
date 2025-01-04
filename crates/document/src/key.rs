@@ -135,14 +135,17 @@ mod test {
     }
 
     test_serialize! {
-        // FIXME: This should be a dotted key
         #[test]
         fn integer_key(r#"123 = 'value'"#) -> Ok(json!({"123":  "value"}))
     }
 
     test_serialize! {
-        // FIXME: This should be a dotted key
         #[test]
         fn float_key(r#"3.14 = 'value'"#) -> Ok(json!({"3": {"14": "value"}}))
+    }
+
+    test_serialize! {
+        #[test]
+        fn float_and_bare_key(r#"3.14.abc = 'value'"#) -> Ok(json!({"3": {"14": {"abc": "value"}}}))
     }
 }
