@@ -1,4 +1,4 @@
-name: TOML Test
+name: toml-test
 
 on:
   push:
