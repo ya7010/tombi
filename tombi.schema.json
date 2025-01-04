@@ -138,6 +138,17 @@
             }
           ],
           "default": "T"
+        },
+        "quote-style": {
+          "title": "The preferred quote character for strings.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QuoteStyle"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -181,6 +192,26 @@
         },
         {
           "description": "Preserve the source delimiter",
+          "type": "string",
+          "const": "preserve"
+        }
+      ]
+    },
+    "QuoteStyle": {
+      "description": "The preferred quote character for strings.",
+      "oneOf": [
+        {
+          "description": "Prefer the double quote",
+          "type": "string",
+          "const": "double"
+        },
+        {
+          "description": "Prefer the single quote",
+          "type": "string",
+          "const": "single"
+        },
+        {
+          "description": "Preserve the source quote",
           "type": "string",
           "const": "preserve"
         }

@@ -158,7 +158,7 @@ fn format_singleline_array(
 #[cfg(test)]
 mod tests {
     use crate::test_format;
-    use config::{FormatOptions, TomlVersion};
+    use config::{FormatOptions, QuoteStyle, TomlVersion};
 
     use super::*;
 
@@ -209,7 +209,12 @@ mod tests {
     test_format! {
         #[test]
         fn singleline_array7(
-            r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#
+            r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#,
+            TomlVersion::default(),
+            FormatOptions {
+                quote_style: Some(QuoteStyle::Preserve),
+                ..Default::default()
+            }
         ) -> Ok(r#"string_array = ["all", 'strings', """are the same""", '''type''']"#);
     }
 

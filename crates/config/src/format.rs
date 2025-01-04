@@ -1,4 +1,4 @@
-use crate::{DateTimeDelimiter, IdentStyle, IdentWidth, LineEnding, LineWidth};
+use crate::{DateTimeDelimiter, IdentStyle, IdentWidth, LineEnding, LineWidth, QuoteStyle};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -43,6 +43,9 @@ pub struct FormatOptions {
         schemars(default = "DateTimeDelimiter::default")
     )]
     pub date_time_delimiter: Option<DateTimeDelimiter>,
+
+    /// # The preferred quote character for strings.
+    pub quote_style: Option<QuoteStyle>,
 }
 
 impl FormatOptions {
@@ -53,6 +56,7 @@ impl FormatOptions {
             line_width: None,
             line_ending: None,
             date_time_delimiter: None,
+            quote_style: None,
         }
     }
 
@@ -71,13 +75,18 @@ impl FormatOptions {
     }
 
     #[inline]
+    pub fn line_width(&self) -> LineWidth {
+        self.line_width.unwrap_or_default()
+    }
+
+    #[inline]
     pub fn date_time_delimiter(&self) -> DateTimeDelimiter {
         self.date_time_delimiter.unwrap_or_default()
     }
 
     #[inline]
-    pub fn line_width(&self) -> LineWidth {
-        self.line_width.unwrap_or_default()
+    pub fn quote_style(&self) -> QuoteStyle {
+        self.quote_style.unwrap_or_default()
     }
 
     #[inline]

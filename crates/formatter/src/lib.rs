@@ -77,7 +77,7 @@ macro_rules! test_format {
 
 #[cfg(test)]
 mod test {
-    use config::TomlVersion;
+    use config::{FormatOptions, QuoteStyle, TomlVersion};
 
     use super::*;
 
@@ -216,7 +216,10 @@ key6 = 3  # key value tailing comment
 # end dangling comment1
 # end dangling comment2
 "#,
-    TomlVersion::V1_1_0_Preview)
-        -> Ok(source);
+    TomlVersion::V1_1_0_Preview,
+    FormatOptions{
+        quote_style: Some(QuoteStyle::Preserve),
+        ..Default::default()
+    }) -> Ok(source);
     }
 }
