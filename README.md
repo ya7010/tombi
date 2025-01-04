@@ -54,6 +54,7 @@ Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/ma
 
 ### toml-test
 We are monitoring the passing of all test cases of [toml-test](https://github.com/toml-lang/toml-test) with CI.
+
 [![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 
 ### JSON Schema
