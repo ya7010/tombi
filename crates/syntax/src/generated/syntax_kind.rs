@@ -38,7 +38,6 @@ pub enum SyntaxKind {
     COMMENT,
     ERROR,
     ROOT,
-    DOTTED_KEYS,
     KEYS,
     KEY,
     VALUE,

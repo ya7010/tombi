@@ -26,21 +26,21 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
                     quote! {
                         #[inline]
                         pub fn #method_name(&self) -> AstChildren<#ty> {
-                            support::children(&self.syntax)
+                            support::node::children(&self.syntax)
                         }
                     }
                 } else if let Some(token_kind) = field.token_kind() {
                     quote! {
                         #[inline]
                         pub fn #method_name(&self) -> Option<#ty> {
-                            support::token(&self.syntax, #token_kind)
+                            support::node::token(&self.syntax, #token_kind)
                         }
                     }
                 } else {
                     quote! {
                         #[inline]
                         pub fn #method_name(&self) -> Option<#ty> {
-                            support::child(&self.syntax)
+                            support::node::child(&self.syntax)
                         }
                     }
                 }

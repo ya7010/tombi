@@ -32,7 +32,6 @@ pub const TOKENS: &[&str] = &["WHITESPACE", "LINE_BREAK", "BARE_KEY", "COMMENT",
 
 pub const NODES: &[&str] = &[
     "ROOT",
-    "DOTTED_KEYS",
     "KEYS",
     "KEY",
     "VALUE",
