@@ -1,3 +1,4 @@
+mod completion;
 mod diagnostic;
 mod did_change;
 mod did_change_configuration;
@@ -16,6 +17,7 @@ mod shutdown;
 mod update_config;
 mod update_schema;
 
+pub use completion::handle_completion;
 pub use diagnostic::handle_diagnostic;
 pub use did_change::handle_did_change;
 pub use did_change_configuration::handle_did_change_configuration;

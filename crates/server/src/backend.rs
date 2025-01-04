@@ -8,8 +8,9 @@ use super::handler::{
 use crate::{
     document::DocumentSource,
     handler::{
-        handle_did_change_watched_files, handle_folding_range, handle_get_toml_version,
-        handle_initialized, handle_update_config, handle_update_schema, GetTomlVersionResponse,
+        handle_completion, handle_did_change_watched_files, handle_folding_range,
+        handle_get_toml_version, handle_initialized, handle_update_config, handle_update_schema,
+        GetTomlVersionResponse,
     },
 };
 use ast::AstNode;
@@ -18,11 +19,12 @@ use dashmap::DashMap;
 use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
-        DidChangeConfigurationParams, DidChangeTextDocumentParams, DidChangeWatchedFilesParams,
-        DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
-        DocumentDiagnosticReportResult, DocumentSymbolParams, DocumentSymbolResponse, FoldingRange,
-        FoldingRangeParams, Hover, HoverParams, InitializeParams, InitializeResult,
-        InitializedParams, SemanticTokensParams, SemanticTokensResult, TextDocumentIdentifier, Url,
+        CompletionParams, CompletionResponse, DidChangeConfigurationParams,
+        DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidOpenTextDocumentParams,
+        DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
+        DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
+        HoverParams, InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
+        SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
 };
@@ -114,6 +116,13 @@ impl LanguageServer for Backend {
 
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         handle_did_change_configuration(params).await
+    }
+
+    async fn completion(
+        &self,
+        params: CompletionParams,
+    ) -> Result<Option<CompletionResponse>, tower_lsp::jsonrpc::Error> {
+        handle_completion(self, params).await
     }
 
     async fn semantic_tokens_full(

@@ -1,10 +1,10 @@
 use tower_lsp::lsp_types::{
-    ClientCapabilities, ClientInfo, DiagnosticOptions, DiagnosticServerCapabilities,
-    FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, PositionEncodingKind, SemanticTokenModifier, SemanticTokensFullOptions,
-    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TextDocumentSyncSaveOptions,
+    ClientCapabilities, ClientInfo, CompletionOptions, CompletionOptionsCompletionItem,
+    DiagnosticOptions, DiagnosticServerCapabilities, FoldingRangeProviderCapability,
+    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, PositionEncodingKind,
+    SemanticTokenModifier, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
+    ServerCapabilities, ServerInfo, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
 };
 
 use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
@@ -33,7 +33,7 @@ pub async fn handle_initialize(
     })
 }
 
-pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerCapabilities {
+pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCapabilities {
     ServerCapabilities {
         position_encoding: Some(PositionEncodingKind::UTF16),
         text_document_sync: Some(TextDocumentSyncCapability::Options(
@@ -45,30 +45,30 @@ pub fn server_capabilities(_client_capabilities: &ClientCapabilities) -> ServerC
             },
         )),
         hover_provider: Some(HoverProviderCapability::Simple(true)),
-        // completion_provider: Some(CompletionOptions {
-        //     trigger_characters: Some(vec![
-        //         ".".into(),
-        //         "=".into(),
-        //         "[".into(),
-        //         "{".into(),
-        //         ",".into(),
-        //         "'".into(),
-        //         "\"".into(),
-        //     ]),
-        //     completion_item: Some(CompletionOptionsCompletionItem {
-        //         label_details_support: (|| -> _ {
-        //             client_capabilities
-        //                 .text_document
-        //                 .as_ref()?
-        //                 .completion
-        //                 .as_ref()?
-        //                 .completion_item
-        //                 .as_ref()?
-        //                 .label_details_support
-        //         })(),
-        //     }),
-        //     ..Default::default()
-        // }),
+        completion_provider: Some(CompletionOptions {
+            trigger_characters: Some(vec![
+                ".".into(),
+                "=".into(),
+                "[".into(),
+                "{".into(),
+                ",".into(),
+                "'".into(),
+                "\"".into(),
+            ]),
+            completion_item: Some(CompletionOptionsCompletionItem {
+                label_details_support: (|| -> _ {
+                    client_capabilities
+                        .text_document
+                        .as_ref()?
+                        .completion
+                        .as_ref()?
+                        .completion_item
+                        .as_ref()?
+                        .label_details_support
+                })(),
+            }),
+            ..Default::default()
+        }),
         // declaration_provider: Some(DeclarationCapability::Simple(true)),
         // definition_provider: Some(OneOf::Left(true)),
         // type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
