@@ -15,7 +15,7 @@ Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and language ser
 [Taplo](https://github.com/tamasfe/taplo) is already famous as a TOML Language Server.
 However, I rewrote a new Language Server for the following purposes.
 
-- Support for TOML v1.1.0
+- Support for TOML v1.1.0 (preview)
 - Formatter inspired by Python's [Black](https://github.com/psf/black) (Support for [magic trailing comma](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#the-magic-trailing-comma))
 - A formatter with stable behavior
 
