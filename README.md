@@ -57,7 +57,7 @@ We are monitoring the passing of all test cases of [toml-test](https://github.co
 
 [![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 
-### JSON Schema
+### 🚧 JSON Schema 🚧
 TOML itself may add [schema specifications](https://github.com/toml-lang/toml/issues/792),
 but like Taplo, Tombi is also trying to add validation functions to the linter that support [JSON Schema](https://json-schema.org/).
 
@@ -69,6 +69,6 @@ Currently, we are considering adding special information called `x-tombi-*` to J
 We need to request additional modifications to the [JSON Schema Store](https://www.schemastore.org/json/),
 but Tombi has not yet gained share, so it will be much later.
 
-### Comment
+### Comment Formatting
 Tombi is designed to automatically sort elements of `Table` / `Array Of Tables`(sort features not implemented yet).
 When the documentation site is published, a page will be created to explain the mechanism of comments treatment.
