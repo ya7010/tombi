@@ -23,6 +23,9 @@ pub enum ParseError {
     #[error("invalid control character in input")]
     InvalidControlCharacter,
 
+    #[error("bare key contains '+' character")]
+    PlusCharacter,
+
     #[error("trailing backslash in input")]
     TrailingBackslash,
 
@@ -37,6 +40,10 @@ pub enum ParseError {
 }
 
 pub fn try_from_bare_key(value: &str, toml_version: TomlVersion) -> Result<String, ParseError> {
+    if value.chars().any(|c| matches!(c, '+')) {
+        return Err(ParseError::PlusCharacter);
+    }
+
     if toml_version >= TomlVersion::V1_1_0_Preview
         || value.chars().all(|c| {
             matches!(

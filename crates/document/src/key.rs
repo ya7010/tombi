@@ -146,7 +146,19 @@ mod test {
 
     test_serialize! {
         #[test]
-        fn float_key2(r#"nan = 'value'"#) -> Ok(json!({"nan": "value"}))
+        fn nan_float_key(r#"nan = 'value'"#) -> Ok(json!({"nan": "value"}))
+    }
+
+    test_serialize! {
+        #[test]
+        fn p_nan_float_key(r#"+nan = 'value'"#) -> Err([
+            ("invalid string: bare key contains '+' character", ((0, 0), (0, 4)))
+        ])
+    }
+
+    test_serialize! {
+        #[test]
+        fn m_nan_float_key(r#"-nan = 'value'"#) -> Ok(json!({"-nan": "value"}))
     }
 
     test_serialize! {

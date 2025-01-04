@@ -30,7 +30,7 @@ hex = 0x01  # hex tailing comment
 float1 = 0.1234  # float tailing comment
 infa = inf
 bs = "2"  # bs tailing comment
-ls = '3'  # ls tailing comment
+ls = "3"  # ls tailing comment
 array1 = [
   # array begin dangling comment 1-1
   # array begin dangling comment 1-2
@@ -115,6 +115,7 @@ lt1 = 07:32:00  # lt1 tailing comment
 lt2 = 00:32:00.999999  # lt2 tailing comment
 inline_table = { aaa = 1 }
 3.14.5.ab = true
+nan = true
 
 [aaaa.ccc]
 key1 = 11
