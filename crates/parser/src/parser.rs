@@ -8,6 +8,7 @@ use crate::{marker::Marker, token_set::TokenSet, Event};
 
 #[derive(Debug)]
 pub(crate) struct Parser<'t> {
+    source: &'t str,
     input_tokens: &'t [lexer::Token],
     pos: usize,
     pub tokens: Vec<lexer::Token>,
@@ -16,8 +17,13 @@ pub(crate) struct Parser<'t> {
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(input_tokens: &'t [lexer::Token], toml_version: TomlVersion) -> Self {
+    pub(crate) fn new(
+        source: &'t str,
+        input_tokens: &'t [lexer::Token],
+        toml_version: TomlVersion,
+    ) -> Self {
         Self {
+            source,
             input_tokens,
             pos: input_tokens
                 .iter()
@@ -191,6 +197,101 @@ impl<'t> Parser<'t> {
             return;
         }
         self.do_bump(kind, 1);
+    }
+
+    pub(crate) fn bump_float_key(&mut self) {
+        assert!(self.nth(0) == FLOAT);
+        let token = self.nth_token(0);
+        let text = &self.source[token.span()];
+
+        if !text.contains('.') {
+            let m = self.start();
+            self.bump_remap(BARE_KEY);
+            m.complete(self, BARE_KEY);
+            return;
+        }
+
+        let parts: Vec<&str> = text.split('.').collect();
+        assert!(parts.len() == 2);
+
+        let key1 = {
+            let m = self.start();
+
+            let token = lexer::Token::new(
+                BARE_KEY,
+                (
+                    text::Span::new(
+                        token.span().start(),
+                        token.span().start() + text::Offset::of(parts[0]),
+                    ),
+                    text::Range::new(
+                        token.range().start(),
+                        token.range().start() + text::RelativePosition::of(parts[0]),
+                    ),
+                ),
+            );
+            self.tokens.push(token);
+            self.push_event(Event::Token {
+                kind: token.kind(),
+                n_raw_tokens: 1,
+            });
+
+            m.complete(self, token.kind());
+
+            token
+        };
+        let dot = {
+            let m = self.start();
+
+            let token = lexer::Token::new(
+                T![.],
+                (
+                    text::Span::new(key1.span().end(), key1.span().end() + text::Offset::of(".")),
+                    text::Range::new(
+                        key1.range().end(),
+                        key1.range().end() + text::RelativePosition::of("."),
+                    ),
+                ),
+            );
+
+            self.tokens.push(token);
+
+            self.push_event(Event::Token {
+                kind: token.kind(),
+                n_raw_tokens: 1,
+            });
+
+            m.complete(self, token.kind());
+
+            token
+        };
+        {
+            let m = self.start();
+
+            let token = lexer::Token::new(
+                BARE_KEY,
+                (
+                    text::Span::new(
+                        dot.span().end(),
+                        dot.span().end() + text::Offset::of(parts[1]),
+                    ),
+                    text::Range::new(
+                        dot.range().end(),
+                        dot.range().end() + text::RelativePosition::of(parts[1]),
+                    ),
+                ),
+            );
+
+            self.tokens.push(token);
+
+            self.push_event(Event::Token {
+                kind: token.kind(),
+                n_raw_tokens: 1,
+            });
+
+            m.complete(self, token.kind())
+        }
+        self.pos += 1;
     }
 
     fn do_bump(&mut self, kind: SyntaxKind, n_raw_tokens: u8) {

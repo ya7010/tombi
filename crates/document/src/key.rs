@@ -130,8 +130,19 @@ mod test {
     }
 
     test_serialize! {
+        #[test]
+        fn boolean_key(r#"true = 'value'"#) -> Ok(json!({"true": "value"}))
+    }
+
+    test_serialize! {
         // FIXME: This should be a dotted key
         #[test]
-        fn float_key(r#"3.14 = 'value'"#) -> Ok(json!({"3.14": "value"}))
+        fn integer_key(r#"123 = 'value'"#) -> Ok(json!({"123":  "value"}))
+    }
+
+    test_serialize! {
+        // FIXME: This should be a dotted key
+        #[test]
+        fn float_key(r#"3.14 = 'value'"#) -> Ok(json!({"3": {"14": "value"}}))
     }
 }

@@ -26,7 +26,7 @@ pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
 impl Parse for ast::Keys {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
-        if eat_keys(p).is_some() {
+        if eat_keys(p) {
             m.complete(p, KEYS);
         } else {
             m.complete(p, INVALID_TOKEN);
@@ -34,55 +34,47 @@ impl Parse for ast::Keys {
     }
 }
 
-fn eat_keys(p: &mut Parser<'_>) -> Option<SyntaxKind> {
+fn eat_keys(p: &mut Parser<'_>) -> bool {
     if p.nth_at(1, T![.]) {
+        let mut is_error = false;
         // Dotted keys Mode
         loop {
-            let m = p.start();
-            if let Some(kind) = eat_key(p) {
-                m.complete(p, kind);
-            } else {
-                p.error(crate::Error::new(ExpectedKey, p.current_range()));
-                m.complete(p, INVALID_TOKEN);
-                return None;
-            }
+            is_error |= !eat_key(p);
             if !p.eat(T![.]) {
                 break;
             }
         }
-        Some(DOTTED_KEYS)
+        !is_error
     } else {
-        let m = p.start();
-        if let Some(kind) = eat_key(p) {
-            m.complete(p, kind);
-            Some(kind)
-        } else {
-            p.error(crate::Error::new(ExpectedKey, p.current_range()));
-            m.complete(p, INVALID_TOKEN);
-            None
-        }
+        eat_key(p)
     }
 }
 
-pub fn eat_key(p: &mut Parser<'_>) -> Option<SyntaxKind> {
+pub fn eat_key(p: &mut Parser<'_>) -> bool {
     let kind = p.current();
     match kind {
         BARE_KEY | BASIC_STRING | LITERAL_STRING => {
-            p.bump_any();
-            Some(kind)
+            let m = p.start();
+            p.bump(kind);
+            m.complete(p, kind);
+            true
         }
-        INTEGER_DEC => {
+        INTEGER_DEC | BOOLEAN => {
+            let m = p.start();
             p.bump_remap(BARE_KEY);
-            Some(BARE_KEY)
+            m.complete(p, BARE_KEY);
+            true
         }
         FLOAT => {
-            p.bump_remap(BARE_KEY);
-            Some(BARE_KEY)
+            p.bump_float_key();
+            true
         }
-        BOOLEAN => {
-            p.bump_remap(BARE_KEY);
-            Some(BARE_KEY)
+        _ => {
+            let m = p.start();
+            p.error(crate::Error::new(ExpectedKey, p.current_range()));
+            // p.bump_remap(INVALID_TOKEN);
+            m.complete(p, INVALID_TOKEN);
+            return false;
         }
-        _ => None,
     }
 }

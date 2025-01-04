@@ -23,7 +23,7 @@ pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
 #[allow(private_bounds)]
 pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
     let lexed = lexer::lex(source);
-    let mut p = crate::parser::Parser::new(&lexed.tokens, toml_version);
+    let mut p = crate::parser::Parser::new(source, &lexed.tokens, toml_version);
 
     P::parse(&mut p);
 
