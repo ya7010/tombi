@@ -24,7 +24,6 @@ pub(crate) const TS_KEY_FIRST: TokenSet = TokenSet::new(&[
     // true = "value"
     BOOLEAN,
 ]);
-pub(crate) const TS_KEYS_END: TokenSet = TokenSet::new(&[T![']'], T![=]]);
 
 /// A bit-set of `SyntaxKind`s
 #[derive(Clone, Copy)]

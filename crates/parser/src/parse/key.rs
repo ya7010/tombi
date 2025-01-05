@@ -1,6 +1,6 @@
 use syntax::{SyntaxKind::*, T};
 
-use crate::{parser::Parser, token_set::TS_KEYS_END};
+use crate::{parser::Parser, token_set::TS_KEY_FIRST};
 
 use super::Parse;
 use crate::ErrorKind::*;
@@ -26,7 +26,7 @@ fn eat_keys(p: &mut Parser<'_>) -> bool {
                 break;
             }
 
-            if p.at_ts(TS_KEYS_END) {
+            if !p.at_ts(TS_KEY_FIRST) {
                 p.error(crate::Error::new(
                     ForbiddenKeysLastPeriod,
                     p.current_range(),
