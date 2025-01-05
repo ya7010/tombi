@@ -6,7 +6,7 @@ use tokio::sync::RwLock;
 use url::Url;
 
 use crate::{
-    json_schema::JsonCatalog, schema::CatalogSchema, Accessor, DocumentSchema, ObjectSchema,
+    json_schema::JsonCatalog, schema::CatalogSchema, Accessor, DocumentSchema, TableSchema,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -169,7 +169,7 @@ impl SchemaStore {
                         .filter_map(|(key, value)| {
                             value
                                 .as_object()
-                                .map(|_| (Accessor::Key(key.to_string()), ObjectSchema::default()))
+                                .map(|_| (Accessor::Key(key.to_string()), TableSchema::default()))
                         })
                         .collect()
                 })

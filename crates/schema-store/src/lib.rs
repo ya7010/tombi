@@ -9,7 +9,7 @@ pub use accessor::{Accessor, Accessors};
 pub use error::Error;
 use json_schema::SchemaComposition;
 pub use json_schema::{SchemaType, Value, DEFAULT_CATALOG_URL};
-pub use schema::{DocumentSchema, ObjectSchema};
+pub use schema::{DocumentSchema, TableSchema};
 pub use store::SchemaStore;
 pub use value_type::ValueType;
 
@@ -147,10 +147,10 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     schema
 }
 
-fn parse_value_schema(object: serde_json::Value) -> Option<ObjectSchema> {
+fn parse_value_schema(object: serde_json::Value) -> Option<TableSchema> {
     match object {
         serde_json::Value::Object(object) => {
-            let mut value_schema = ObjectSchema::default();
+            let mut value_schema = TableSchema::default();
 
             for (key, value) in object {
                 match key.as_str() {

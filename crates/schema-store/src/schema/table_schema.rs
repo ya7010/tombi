@@ -4,7 +4,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct ObjectSchema {
+pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub schema: Option<Referable<SchemaComposition>>,

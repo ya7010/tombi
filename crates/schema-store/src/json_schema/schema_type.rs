@@ -1,4 +1,4 @@
-use crate::schema::ObjectSchema;
+use crate::schema::TableSchema;
 
 use super::Referable;
 
@@ -15,7 +15,7 @@ pub enum SchemaType {
 #[derive(Debug, Clone, PartialEq)]
 pub enum SchemaComposition {
     Type(SchemaType),
-    OneOf(Vec<Referable<ObjectSchema>>),
-    AnyOf(Vec<Referable<ObjectSchema>>),
-    AllOf(Vec<Referable<ObjectSchema>>),
+    OneOf(Vec<Referable<TableSchema>>),
+    AnyOf(Vec<Referable<TableSchema>>),
+    AllOf(Vec<Referable<TableSchema>>),
 }
