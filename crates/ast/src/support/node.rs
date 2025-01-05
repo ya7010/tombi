@@ -91,8 +91,7 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     if comment_groups.is_empty()
         || comment_iter
             .skip(1) // skip LineBreak
-            .skip_while(|node| node.kind() == WHITESPACE)
-            .next()
+            .find(|node| node.kind() != WHITESPACE)
             .map_or(false, |node| node.kind() == COMMENT)
     {
         // No new line break at the beginning
@@ -148,9 +147,11 @@ where
                 LINE_BREAK => {
                     if token
                         .next_sibling_or_token()
-                        .map_or(false, |next| next.kind() == LINE_BREAK) && acc
+                        .map_or(false, |next| next.kind() == LINE_BREAK)
+                        && acc
                             .last()
-                            .map_or(false, |last_group| !last_group.is_empty()) {
+                            .map_or(false, |last_group| !last_group.is_empty())
+                    {
                         is_new_group = true;
                     }
                 }

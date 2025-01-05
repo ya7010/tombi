@@ -7,8 +7,8 @@ pub enum OneOrMany<T> {
     Many(Vec<T>),
 }
 
-impl<T> OneOrMany<T> {
-    pub fn as_ref(&self) -> &[T] {
+impl<T> std::convert::AsRef<[T]> for OneOrMany<T> {
+    fn as_ref(&self) -> &[T] {
         match self {
             OneOrMany::One(value) => std::slice::from_ref(value),
             OneOrMany::Many(values) => values,
