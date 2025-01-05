@@ -131,8 +131,11 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     if content.get("properties").is_some() {
         if let serde_json::Value::Object(object) = content["properties"].take() {
             for (key, value) in object.into_iter() {
-                if let Some(value_schema) = parse_value_schema(&value) {
-                    schema.properties.insert(Accessor::Key(key), value_schema);
+                let Some(object) = value.as_object() else {
+                    continue;
+                };
+                if let Some(value_schema) = ValueSchema::new(&object) {
+                    schema.definitions.insert(key, value_schema);
                 }
             }
         }
@@ -140,34 +143,14 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     if content.get("definitions").is_some() {
         if let serde_json::Value::Object(object) = content["definitions"].take() {
             for (key, value) in object.into_iter() {
-                if let Some(value_schema) = parse_value_schema(&value) {
+                let Some(object) = value.as_object() else {
+                    continue;
+                };
+                if let Some(value_schema) = ValueSchema::new(&object) {
                     schema.definitions.insert(key, value_schema);
                 }
             }
         }
     }
     schema
-}
-
-fn parse_value_schema(object: &serde_json::Value) -> Option<ValueSchema> {
-    match object {
-        serde_json::Value::Object(object) => {
-            if let Some(_type) = object.get("type") {
-                if let serde_json::Value::String(type_str) = _type {
-                    return match type_str.as_str() {
-                        "null" => Some(ValueSchema::Null),
-                        "boolean" => Some(ValueSchema::Boolean(BooleanSchema::new(object))),
-                        "integer" => Some(ValueSchema::Integer(IntegerSchema::new(object))),
-                        "number" => Some(ValueSchema::Float(FloatSchema::new(object))),
-                        "string" => Some(ValueSchema::String(StringSchema::new(object))),
-                        "array" => Some(ValueSchema::Array(ArraySchema::new(object))),
-                        "object" => Some(ValueSchema::Table(TableSchema::new(object))),
-                        _ => None,
-                    };
-                }
-            }
-            None
-        }
-        _ => None,
-    }
 }
