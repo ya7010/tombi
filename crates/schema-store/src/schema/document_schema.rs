@@ -2,7 +2,7 @@ use crate::Accessor;
 use config::TomlVersion;
 use indexmap::IndexMap;
 
-use super::ValueSchema;
+use super::{referable::Referable, ValueSchema};
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DocumentSchema {
@@ -10,8 +10,8 @@ pub struct DocumentSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub schema_url: Option<url::Url>,
-    pub properties: IndexMap<Accessor, ValueSchema>,
-    pub definitions: ahash::HashMap<String, ValueSchema>,
+    pub properties: IndexMap<Accessor, Referable<ValueSchema>>,
+    pub definitions: ahash::HashMap<String, Referable<ValueSchema>>,
 }
 
 impl DocumentSchema {
@@ -21,35 +21,29 @@ impl DocumentSchema {
         })
     }
 
-    pub fn resolve_ref(&self, value_schema: &ValueSchema) -> ValueSchema {
+    pub fn resolve_ref(&self, value_schema: &Referable<ValueSchema>) -> Option<ValueSchema> {
         match value_schema {
-            ValueSchema::Ref(ref_str) => {
+            Referable::Ref(ref_str) => {
                 if let Some(schema) = self.definitions.get(ref_str) {
                     self.resolve_ref(schema)
                 } else {
                     tracing::warn!("schema not found: {ref_str}");
-                    ValueSchema::Null
+                    None
                 }
             }
-            ValueSchema::OneOf(schemas) => ValueSchema::OneOf(
+            Referable::Resolved(ValueSchema::OneOf(schemas)) => Some(ValueSchema::OneOf(
                 schemas
                     .iter()
-                    .map(|schema| self.resolve_ref(schema))
+                    .filter_map(|schema| self.resolve_ref(schema).map(Referable::Resolved))
                     .collect(),
-            ),
-            ValueSchema::AnyOf(schemas) => ValueSchema::AnyOf(
+            )),
+            Referable::Resolved(ValueSchema::AnyOf(schemas)) => Some(ValueSchema::AnyOf(
                 schemas
                     .iter()
-                    .map(|schema| self.resolve_ref(schema))
+                    .filter_map(|schema| self.resolve_ref(schema).map(Referable::Resolved))
                     .collect(),
-            ),
-            ValueSchema::AllOf(schemas) => ValueSchema::AllOf(
-                schemas
-                    .iter()
-                    .map(|schema| self.resolve_ref(schema))
-                    .collect(),
-            ),
-            schema => schema.clone(),
+            )),
+            Referable::Resolved(schema) => Some(schema.clone()),
         }
     }
 }

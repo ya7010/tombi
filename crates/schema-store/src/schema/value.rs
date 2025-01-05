@@ -20,6 +20,8 @@ pub use offset_date_time::OffsetDateTimeSchema;
 pub use string::StringSchema;
 pub use table::TableSchema;
 
+use super::referable::Referable;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum ValueSchema {
     Null,
@@ -33,20 +35,13 @@ pub enum ValueSchema {
     OffsetDateTime(OffsetDateTimeSchema),
     Array(ArraySchema),
     Table(TableSchema),
-    OneOf(Vec<ValueSchema>),
-    AnyOf(Vec<ValueSchema>),
-    AllOf(Vec<ValueSchema>),
-    Ref(String),
+    OneOf(Vec<Referable<ValueSchema>>),
+    AnyOf(Vec<Referable<ValueSchema>>),
+    AllOf(Vec<Referable<ValueSchema>>),
 }
 
 impl ValueSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
-        if let Some(ref_value) = object.get("$ref") {
-            if let serde_json::Value::String(ref_str) = ref_value {
-                return Some(ValueSchema::Ref(ref_str.clone()));
-            }
-        }
-
         if let Some(_type) = object.get("type") {
             if let serde_json::Value::String(type_str) = _type {
                 return match type_str.as_str() {
@@ -88,7 +83,6 @@ impl ValueSchema {
             ValueSchema::OneOf(_) => None,
             ValueSchema::AnyOf(_) => None,
             ValueSchema::AllOf(_) => None,
-            ValueSchema::Ref(_) => unreachable!("Ref schema should be resolved"),
         }
     }
 
@@ -108,7 +102,18 @@ impl ValueSchema {
             ValueSchema::OneOf(_) => None,
             ValueSchema::AnyOf(_) => None,
             ValueSchema::AllOf(_) => None,
-            ValueSchema::Ref(_) => unreachable!("Ref schema should be resolved"),
         }
+    }
+}
+
+impl Referable<ValueSchema> {
+    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
+        if let Some(ref_value) = object.get("$ref") {
+            if let serde_json::Value::String(ref_str) = ref_value {
+                return Some(Referable::Ref(ref_str.clone()));
+            }
+        }
+
+        ValueSchema::new(object).map(Referable::Resolved)
     }
 }

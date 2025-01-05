@@ -8,7 +8,7 @@ use url::Url;
 
 use crate::{
     json_schema::JsonCatalog,
-    schema::{CatalogSchema, ValueSchema},
+    schema::{CatalogSchema, Referable, ValueSchema},
     Accessor, DocumentSchema,
 };
 
@@ -172,7 +172,7 @@ impl SchemaStore {
                         .filter_map(|(key, value)| {
                             value
                                 .as_object()
-                                .and_then(|object| ValueSchema::new(&object))
+                                .and_then(|object| Referable::<ValueSchema>::new(&object))
                                 .map(|object| (Accessor::Key(key.to_string()), object))
                         })
                         .collect::<IndexMap<_, _>>()

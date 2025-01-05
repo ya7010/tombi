@@ -9,7 +9,7 @@ pub use accessor::{Accessor, Accessors};
 pub use error::Error;
 pub use json_schema::{SchemaType, Value, DEFAULT_CATALOG_URL};
 pub use schema::DocumentSchema;
-use schema::ValueSchema;
+use schema::{Referable, ValueSchema};
 pub use store::SchemaStore;
 pub use value_type::ValueType;
 
@@ -132,7 +132,7 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = ValueSchema::new(&object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
                     schema.properties.insert(Accessor::Key(key), value_schema);
                 }
             }
@@ -144,7 +144,7 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = ValueSchema::new(&object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
                     schema.definitions.insert(key, value_schema);
                 }
             }
