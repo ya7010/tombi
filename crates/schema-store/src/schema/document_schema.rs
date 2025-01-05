@@ -43,6 +43,12 @@ impl DocumentSchema {
                     .filter_map(|schema| self.resolve_ref(schema).map(Referable::Resolved))
                     .collect(),
             )),
+            Referable::Resolved(ValueSchema::AllOf(schemas)) => Some(ValueSchema::AllOf(
+                schemas
+                    .iter()
+                    .filter_map(|schema| self.resolve_ref(schema).map(Referable::Resolved))
+                    .collect(),
+            )),
             Referable::Resolved(schema) => Some(schema.clone()),
         }
     }
