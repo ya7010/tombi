@@ -2,6 +2,7 @@ mod error;
 pub mod format;
 mod lint;
 mod schema;
+mod server;
 mod types;
 
 pub use error::Error;
@@ -39,6 +40,10 @@ pub struct Config {
 
     /// # Linter options.
     pub lint: Option<LintOptions>,
+
+    /// # Language server options.
+    #[cfg_attr(feature = "jsonschema", schemars(skip))]
+    pub server: Option<server::ServerOptions>,
 
     /// # Schema options.
     pub schema: Option<SchemaOptions>,

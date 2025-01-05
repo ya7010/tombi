@@ -21,9 +21,14 @@ pub async fn handle_completion(
 ) -> Result<Option<CompletionResponse>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_completion");
 
-    if !backend
-        .config()
-        .await
+    let config = backend.config().await;
+
+    if !config.server.and_then(|s| s.completion).unwrap_or_default() {
+        tracing::debug!("`server.completion` is false");
+        return Ok(None);
+    }
+
+    if !config
         .schema
         .and_then(|s| s.enabled)
         .unwrap_or_default()
