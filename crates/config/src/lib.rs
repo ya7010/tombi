@@ -76,7 +76,7 @@ impl Config {
             });
         }
 
-        let Ok(config_str) = std::fs::read_to_string(&config_path) else {
+        let Ok(config_str) = std::fs::read_to_string(config_path) else {
             return Err(crate::Error::ConfigFileReadFailed {
                 config_path: config_path.to_owned(),
             });

@@ -299,7 +299,7 @@ impl<'t> Parser<'t> {
         let nth_index = self.nth_index((n_raw_tokens) as usize);
         self.tokens.extend(&self.input_tokens[self.pos..nth_index]);
 
-        self.pos = nth_index as usize;
+        self.pos = nth_index;
     }
 
     fn do_bump_kind(&mut self, kind: SyntaxKind) {

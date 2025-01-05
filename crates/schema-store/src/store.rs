@@ -156,17 +156,14 @@ impl SchemaStore {
                 }),
             title: schema
                 .get("title")
-                .map(|obj| obj.as_str().map(|title| title.to_string()))
-                .flatten(),
+                .and_then(|obj| obj.as_str().map(|title| title.to_string())),
             description: schema
                 .get("description")
-                .map(|obj| obj.as_str().map(|title| title.to_string()))
-                .flatten(),
+                .and_then(|obj| obj.as_str().map(|title| title.to_string())),
             schema_url: Some(schema_url.to_owned()),
             properties: schema
                 .get("properties")
-                .map(|obj| obj.as_object())
-                .flatten()
+                .and_then(|obj| obj.as_object())
                 .map(|obj| {
                     obj.iter()
                         .filter_map(|(key, value)| {

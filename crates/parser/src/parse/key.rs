@@ -74,7 +74,7 @@ pub fn eat_key(p: &mut Parser<'_>) -> bool {
             p.error(crate::Error::new(ExpectedKey, p.current_range()));
             // p.bump_remap(INVALID_TOKEN);
             m.complete(p, INVALID_TOKEN);
-            return false;
+            false
         }
     }
 }

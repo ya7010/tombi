@@ -29,12 +29,7 @@ impl SchemaOptions {
             Some(
                 self.catalog
                     .as_ref()
-                    .and_then(|catalog| {
-                        catalog
-                            .path
-                            .as_ref()
-                            .map(|path| path.as_ref().iter().cloned().collect())
-                    })
+                    .and_then(|catalog| catalog.path.as_ref().map(|path| path.as_ref().to_vec()))
                     .unwrap_or_else(|| vec![SchemaCatalogPath::default()]),
             )
         } else {
@@ -104,7 +99,7 @@ mod tests {
     #[test]
     fn schema_catalog_paths_default() {
         let schema = SchemaOptions::default();
-        let _expected = vec![SchemaCatalogPath::default()];
+        let _expected = [SchemaCatalogPath::default()];
 
         assert_matches!(schema.catalog_paths(), Some(_expected));
     }

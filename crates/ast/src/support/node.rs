@@ -140,24 +140,18 @@ where
                                 last_group.push(comment.into());
                             }
                         }
-                    } else {
-                        if let Some(comment) = crate::Comment::cast(token) {
-                            acc.push(vec![comment.into()]);
-                        }
+                    } else if let Some(comment) = crate::Comment::cast(token) {
+                        acc.push(vec![comment.into()]);
                     }
                     is_new_group = false;
                 }
                 LINE_BREAK => {
                     if token
                         .next_sibling_or_token()
-                        .map_or(false, |next| next.kind() == LINE_BREAK)
-                    {
-                        if acc
+                        .map_or(false, |next| next.kind() == LINE_BREAK) && acc
                             .last()
-                            .map_or(false, |last_group| !last_group.is_empty())
-                        {
-                            is_new_group = true;
-                        }
+                            .map_or(false, |last_group| !last_group.is_empty()) {
+                        is_new_group = true;
                     }
                 }
                 WHITESPACE => {}

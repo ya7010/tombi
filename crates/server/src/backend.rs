@@ -91,7 +91,7 @@ impl LanguageServer for Backend {
     }
 
     async fn initialized(&self, params: InitializedParams) {
-        handle_initialized(&self, params).await
+        handle_initialized(self, params).await
     }
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {

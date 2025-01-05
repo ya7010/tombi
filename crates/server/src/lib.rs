@@ -22,7 +22,7 @@ pub async fn serve(_args: impl Into<Args>) {
     let stdout = tokio::io::stdout();
 
     let (service, socket) =
-        tower_lsp::LspService::build(|client| crate::backend::Backend::new(client))
+        tower_lsp::LspService::build(crate::backend::Backend::new)
             .custom_method("tombi/getTomlVersion", Backend::get_toml_version)
             .custom_method("tombi/updateSchema", Backend::update_schema)
             .custom_method("tombi/updateConfig", Backend::update_config)

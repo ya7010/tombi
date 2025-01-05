@@ -114,7 +114,7 @@ fn get_completion_items(
         }
     }
 
-    if accessors.len() == 0 {
+    if accessors.is_empty() {
         for (key, object_schema) in &document_schema.properties {
             items.push(CompletionItem {
                 label: key.to_string(),

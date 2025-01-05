@@ -18,12 +18,11 @@ pub async fn handle_get_toml_version(
 
     let (toml_version, source) = schema
         .as_ref()
-        .map(|document_schema| {
+        .and_then(|document_schema| {
             document_schema
                 .toml_version()
                 .map(|toml_version| (toml_version, "schema"))
         })
-        .flatten()
         .unwrap_or(match backend.toml_version().await {
             Some(toml_version) => (toml_version, "config"),
             None => (TomlVersion::default(), "default"),

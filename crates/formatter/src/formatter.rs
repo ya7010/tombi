@@ -41,8 +41,7 @@ impl<'a> Formatter<'a> {
 
         let toml_version = schema
             .as_ref()
-            .map(|s| s.toml_version())
-            .flatten()
+            .and_then(|s| s.toml_version())
             .unwrap_or(toml_version);
 
         Ok(Self {

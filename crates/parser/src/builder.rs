@@ -1,4 +1,3 @@
-use lexer;
 use syntax::SyntaxKind;
 
 use crate::output;
