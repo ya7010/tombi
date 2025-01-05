@@ -18,8 +18,11 @@ impl TableSchema {
         let mut properties = HashMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
-                if let Some(schema) = crate::parse_value_schema(value) {
-                    properties.insert(Accessor::Key(key.clone()), schema);
+                let Some(object) = value.as_object() else {
+                    continue;
+                };
+                if let Some(value_schema) = ValueSchema::new(&object) {
+                    properties.insert(Accessor::Key(key.clone()), value_schema);
                 }
             }
         }

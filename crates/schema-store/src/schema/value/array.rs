@@ -23,7 +23,7 @@ impl ArraySchema {
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             items: object
                 .get("items")
-                .and_then(|value| crate::parse_value_schema(value).map(Box::new)),
+                .and_then(|value| value.as_object().and_then(ValueSchema::new).map(Box::new)),
             min_items: object
                 .get("minItems")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),
