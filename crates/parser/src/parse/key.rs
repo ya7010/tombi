@@ -36,15 +36,15 @@ impl Parse for ast::Keys {
 
 fn eat_keys(p: &mut Parser<'_>) -> bool {
     if p.nth_at(1, T![.]) {
-        let mut is_error = false;
+        let mut has_error = false;
         // Dotted keys Mode
         loop {
-            is_error |= !eat_key(p);
+            has_error |= !eat_key(p);
             if !p.eat(T![.]) {
                 break;
             }
         }
-        !is_error
+        !has_error
     } else {
         eat_key(p)
     }
