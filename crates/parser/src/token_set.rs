@@ -12,18 +12,19 @@ pub(crate) const TS_LEADING_COMMENTS_KINDS: TokenSet =
 pub(crate) const TS_TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
 pub(crate) const TS_KEY_FIRST: TokenSet = TokenSet::new(&[
     // name = "Tom"
-    SyntaxKind::BARE_KEY,
+    BARE_KEY,
     // "127.0.0.1" = "value"
-    SyntaxKind::BASIC_STRING,
+    BASIC_STRING,
     // 'key2' = "value"
-    SyntaxKind::LITERAL_STRING,
+    LITERAL_STRING,
     // 1234 = "value"
-    SyntaxKind::INTEGER_DEC,
+    INTEGER_DEC,
     // 3.14159 = "pi"
-    SyntaxKind::FLOAT,
+    FLOAT,
     // true = "value"
-    SyntaxKind::BOOLEAN,
+    BOOLEAN,
 ]);
+pub(crate) const TS_KEYS_END: TokenSet = TokenSet::new(&[T![']'], T![=]]);
 
 /// A bit-set of `SyntaxKind`s
 #[derive(Clone, Copy)]

@@ -66,6 +66,9 @@ pub enum ErrorKind {
     #[error("expected line break")]
     ExpectedLineBreak,
 
+    #[error("forbidden last period in keys")]
+    ForbiddenKeysLastPeriod,
+
     #[error("inline table must be single line")]
     InlineTableMustSingleLine,
 

@@ -78,7 +78,7 @@ mod test {
             key1 = 1
             key2 = 2
             "#
-        ) -> Err([SyntaxError(ExpectedKey, 0:6..0:7)])
+        ) -> Err([SyntaxError(ForbiddenKeysLastPeriod, 0:6..0:7)])
     }
 
     test_parser! {

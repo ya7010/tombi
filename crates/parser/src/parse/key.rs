@@ -1,6 +1,6 @@
 use syntax::{SyntaxKind::*, T};
 
-use crate::parser::Parser;
+use crate::{parser::Parser, token_set::TS_KEYS_END};
 
 use super::Parse;
 use crate::ErrorKind::*;
@@ -23,6 +23,14 @@ fn eat_keys(p: &mut Parser<'_>) -> bool {
         loop {
             has_error |= !eat_key(p);
             if !p.eat(T![.]) {
+                break;
+            }
+
+            if p.at_ts(TS_KEYS_END) {
+                p.error(crate::Error::new(
+                    ForbiddenKeysLastPeriod,
+                    p.current_range(),
+                ));
                 break;
             }
         }
