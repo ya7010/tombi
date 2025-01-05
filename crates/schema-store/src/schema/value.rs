@@ -36,10 +36,17 @@ pub enum ValueSchema {
     OneOf(Vec<ValueSchema>),
     AnyOf(Vec<ValueSchema>),
     AllOf(Vec<ValueSchema>),
+    Ref(String),
 }
 
 impl ValueSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
+        if let Some(ref_value) = object.get("$ref") {
+            if let serde_json::Value::String(ref_str) = ref_value {
+                return Some(ValueSchema::Ref(ref_str.clone()));
+            }
+        }
+
         if let Some(_type) = object.get("type") {
             if let serde_json::Value::String(type_str) = _type {
                 return match type_str.as_str() {
@@ -81,6 +88,7 @@ impl ValueSchema {
             ValueSchema::OneOf(_) => None,
             ValueSchema::AnyOf(_) => None,
             ValueSchema::AllOf(_) => None,
+            ValueSchema::Ref(_) => None,
         }
     }
 
@@ -100,6 +108,7 @@ impl ValueSchema {
             ValueSchema::OneOf(_) => None,
             ValueSchema::AnyOf(_) => None,
             ValueSchema::AllOf(_) => None,
+            ValueSchema::Ref(_) => None,
         }
     }
 }
