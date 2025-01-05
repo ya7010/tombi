@@ -169,14 +169,17 @@ impl SchemaStore {
                 .and_then(|obj| obj.as_object())
                 .map(|obj| {
                     obj.iter()
-                        .filter_map(|(key, value)| {
-                            value.as_object().map(|object| {
+                        .filter_map(|(key, value)| 
+                            value
+                            .as_object()
+                            .and_then(|object| ValueSchema::new(&object))
+                            .map(|object| {
                                 (
                                     Accessor::Key(key.to_string()),
-                                    ValueSchema::new(&object).unwrap(),
+                                    object,
                                 )
                             })
-                        })
+                        )
                         .collect::<IndexMap<_, _>>()
                 })
                 .unwrap_or_default(),
