@@ -8,13 +8,8 @@ mod root;
 mod table;
 mod value;
 
-use crate::{parser::Parser, token_set::TokenSet};
+use crate::{parser::Parser, token_set::TS_LINE_END};
 use support::*;
-use syntax::{SyntaxKind::*, T};
-
-const TS_LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
-const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EOF]);
-const TS_NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
 
 pub(crate) trait Parse {
     fn parse(p: &mut Parser<'_>);
@@ -29,11 +24,12 @@ pub fn invalid_line(p: &mut Parser<'_>, kind: crate::ErrorKind) {
 }
 
 mod support {
-    use crate::{token_set::TokenSet, SyntaxKind::*};
-
-    const DANGLING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, WHITESPACE]);
-    const LEADING_COMMENTS_KINDS: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, WHITESPACE]);
-    const TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
+    use crate::{
+        token_set::{
+            TS_DANGLING_COMMENTS_KINDS, TS_LEADING_COMMENTS_KINDS, TS_TAILING_COMMENT_KINDS,
+        },
+        SyntaxKind::*,
+    };
 
     pub fn begin_dangling_comments(p: &mut crate::parser::Parser<'_>) {
         impl_dangling_comments(p, false);
@@ -45,13 +41,13 @@ mod support {
 
     fn impl_dangling_comments(p: &mut crate::parser::Parser<'_>, last_eat: bool) {
         if last_eat {
-            while p.eat_ts(DANGLING_COMMENTS_KINDS) {}
+            while p.eat_ts(TS_DANGLING_COMMENTS_KINDS) {}
             return;
         }
 
         let mut n = 0;
         let mut comment_count = 0;
-        while p.nth_at_ts(n, DANGLING_COMMENTS_KINDS) {
+        while p.nth_at_ts(n, TS_DANGLING_COMMENTS_KINDS) {
             let kind = p.nth(n);
             match kind {
                 COMMENT => {
@@ -83,7 +79,7 @@ mod support {
 
         if p.nth_at(n + 1, EOF) {
             for _ in 0..=n {
-                if !p.eat_ts(DANGLING_COMMENTS_KINDS) {
+                if !p.eat_ts(TS_DANGLING_COMMENTS_KINDS) {
                     break;
                 }
             }
@@ -92,7 +88,7 @@ mod support {
 
     pub fn peek_leading_comments(p: &mut crate::parser::Parser<'_>) -> usize {
         let mut n = 0;
-        while p.nth_at_ts(n, LEADING_COMMENTS_KINDS) {
+        while p.nth_at_ts(n, TS_LEADING_COMMENTS_KINDS) {
             n += 1;
         }
 
@@ -101,11 +97,11 @@ mod support {
 
     #[inline]
     pub fn leading_comments(p: &mut crate::parser::Parser<'_>) {
-        while p.eat_ts(LEADING_COMMENTS_KINDS) {}
+        while p.eat_ts(TS_LEADING_COMMENTS_KINDS) {}
     }
 
     #[inline]
     pub fn tailing_comment(p: &mut crate::parser::Parser<'_>) {
-        while p.eat_ts(TAILING_COMMENT_KINDS) {}
+        while p.eat_ts(TS_TAILING_COMMENT_KINDS) {}
     }
 }

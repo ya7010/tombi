@@ -1,8 +1,6 @@
-use super::{
-    leading_comments, peek_leading_comments, tailing_comment, Parse, TS_COMMEMT_OR_LINE_END,
-};
-use crate::parser::Parser;
+use super::{leading_comments, peek_leading_comments, tailing_comment, Parse};
 use crate::ErrorKind::*;
+use crate::{parser::Parser, token_set::TS_COMMEMT_OR_LINE_END};
 use syntax::{SyntaxKind::*, T};
 
 impl Parse for ast::Value {

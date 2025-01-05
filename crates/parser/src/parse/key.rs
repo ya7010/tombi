@@ -1,27 +1,9 @@
-use syntax::{
-    SyntaxKind::{self, *},
-    T,
-};
+use syntax::{SyntaxKind::*, T};
 
-use crate::{parser::Parser, token_set::TokenSet};
+use crate::parser::Parser;
 
 use super::Parse;
 use crate::ErrorKind::*;
-
-pub(crate) const KEY_FIRST: TokenSet = TokenSet::new(&[
-    // name = "Tom"
-    SyntaxKind::BARE_KEY,
-    // "127.0.0.1" = "value"
-    SyntaxKind::BASIC_STRING,
-    // 'key2' = "value"
-    SyntaxKind::LITERAL_STRING,
-    // 1234 = "value"
-    SyntaxKind::INTEGER_DEC,
-    // 3.14159 = "pi"
-    SyntaxKind::FLOAT,
-    // true = "value"
-    SyntaxKind::BOOLEAN,
-]);
 
 impl Parse for ast::Keys {
     fn parse(p: &mut Parser<'_>) {

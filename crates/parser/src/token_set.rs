@@ -1,5 +1,30 @@
 use syntax::SyntaxKind;
 
+use syntax::{SyntaxKind::*, T};
+
+pub(crate) const TS_LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
+pub(crate) const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EOF]);
+pub(crate) const TS_NEXT_SECTION: TokenSet = TokenSet::new(&[T!['['], T!("[["), EOF]);
+pub(crate) const TS_DANGLING_COMMENTS_KINDS: TokenSet =
+    TokenSet::new(&[COMMENT, LINE_BREAK, WHITESPACE]);
+pub(crate) const TS_LEADING_COMMENTS_KINDS: TokenSet =
+    TokenSet::new(&[COMMENT, LINE_BREAK, WHITESPACE]);
+pub(crate) const TS_TAILING_COMMENT_KINDS: TokenSet = TokenSet::new(&[COMMENT, WHITESPACE]);
+pub(crate) const TS_KEY_FIRST: TokenSet = TokenSet::new(&[
+    // name = "Tom"
+    SyntaxKind::BARE_KEY,
+    // "127.0.0.1" = "value"
+    SyntaxKind::BASIC_STRING,
+    // 'key2' = "value"
+    SyntaxKind::LITERAL_STRING,
+    // 1234 = "value"
+    SyntaxKind::INTEGER_DEC,
+    // 3.14159 = "pi"
+    SyntaxKind::FLOAT,
+    // true = "value"
+    SyntaxKind::BOOLEAN,
+]);
+
 /// A bit-set of `SyntaxKind`s
 #[derive(Clone, Copy)]
 pub(crate) struct TokenSet([u64; 3]);

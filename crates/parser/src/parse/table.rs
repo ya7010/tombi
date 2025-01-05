@@ -1,11 +1,11 @@
 use syntax::T;
 
 use crate::parse::{begin_dangling_comments, end_dangling_comments};
+use crate::token_set::TS_NEXT_SECTION;
 use crate::ErrorKind::*;
 use crate::{
     parse::{
         invalid_line, leading_comments, peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
-        TS_NEXT_SECTION,
     },
     parser::Parser,
 };
