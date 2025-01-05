@@ -109,7 +109,6 @@ mod tests {
         let schema = SchemaOptions {
             catalog: Some(SchemaCatalog {
                 path: Some(vec![].into()),
-                ..Default::default()
             }),
             ..Default::default()
         };

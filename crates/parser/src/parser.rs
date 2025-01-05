@@ -28,8 +28,7 @@ impl<'t> Parser<'t> {
             pos: input_tokens
                 .iter()
                 .enumerate()
-                .skip_while(|(_, token)| token.kind().is_trivia())
-                .next()
+                .find(|(_, token)| !token.kind().is_trivia())
                 .map(|(i, _)| i)
                 .unwrap_or_default(),
             tokens: Vec::new(),

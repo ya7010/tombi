@@ -244,7 +244,9 @@ impl SchemaStore {
         };
 
         for schema_url in matching_schema_urls {
-            return Ok(Some(self.try_load_schema(&schema_url).await?));
+            if let Ok(schema) = self.try_load_schema(&schema_url).await {
+                return Ok(Some(schema));
+            }
         }
         Ok(None)
     }
