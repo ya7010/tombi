@@ -1,8 +1,5 @@
+use crate::{Accessor, ObjectSchema};
 use config::TomlVersion;
-
-use crate::Accessor;
-
-use super::object_schema::ObjectSchema;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DocumentSchema {

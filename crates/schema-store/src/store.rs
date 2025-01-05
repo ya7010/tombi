@@ -172,7 +172,7 @@ impl SchemaStore {
                         .filter_map(|(key, value)| {
                             value
                                 .as_object()
-                                .map(|_| (Accessor::Key(key.clone()), ObjectSchema::default()))
+                                .map(|_| (Accessor::Key(key.to_string()), ObjectSchema::default()))
                         })
                         .collect()
                 })

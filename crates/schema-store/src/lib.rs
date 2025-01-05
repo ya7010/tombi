@@ -130,9 +130,7 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
         if let serde_json::Value::Object(object) = content["properties"].take() {
             for (key, value) in object.into_iter() {
                 if let Some(value_schema) = parse_value_schema(value) {
-                    schema
-                        .properties
-                        .insert(Accessor::Key(key.to_string()), value_schema);
+                    schema.properties.insert(Accessor::Key(key), value_schema);
                 }
             }
         }
