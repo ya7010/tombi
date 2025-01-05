@@ -1,5 +1,8 @@
-use crate::{Accessor, TableSchema};
+use crate::Accessor;
 use config::TomlVersion;
+use indexmap::IndexMap;
+
+use super::ValueSchema;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct DocumentSchema {
@@ -7,8 +10,8 @@ pub struct DocumentSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub schema_url: Option<url::Url>,
-    pub properties: ahash::HashMap<Accessor, TableSchema>,
-    pub definitions: ahash::HashMap<String, TableSchema>,
+    pub properties: IndexMap<Accessor, ValueSchema>,
+    pub definitions: ahash::HashMap<String, ValueSchema>,
 }
 
 impl DocumentSchema {

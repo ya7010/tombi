@@ -1,12 +1,15 @@
 use config::SchemaCatalogItem;
 use dashmap::DashMap;
+use indexmap::IndexMap;
 use itertools::Either;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use url::Url;
 
 use crate::{
-    json_schema::JsonCatalog, schema::CatalogSchema, Accessor, DocumentSchema, TableSchema,
+    json_schema::JsonCatalog,
+    schema::{CatalogSchema, ValueSchema},
+    Accessor, DocumentSchema,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -167,11 +170,14 @@ impl SchemaStore {
                 .map(|obj| {
                     obj.iter()
                         .filter_map(|(key, value)| {
-                            value
-                                .as_object()
-                                .map(|_| (Accessor::Key(key.to_string()), TableSchema::default()))
+                            value.as_object().map(|object| {
+                                (
+                                    Accessor::Key(key.to_string()),
+                                    ValueSchema::new(&object).unwrap(),
+                                )
+                            })
                         })
-                        .collect()
+                        .collect::<IndexMap<_, _>>()
                 })
                 .unwrap_or_default(),
             ..Default::default()

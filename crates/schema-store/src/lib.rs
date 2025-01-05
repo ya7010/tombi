@@ -7,9 +7,11 @@ mod value_type;
 
 pub use accessor::{Accessor, Accessors};
 pub use error::Error;
-use json_schema::SchemaComposition;
 pub use json_schema::{SchemaType, Value, DEFAULT_CATALOG_URL};
-pub use schema::{DocumentSchema, TableSchema};
+pub use schema::DocumentSchema;
+use schema::{
+    ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, StringSchema, TableSchema, ValueSchema,
+};
 pub use store::SchemaStore;
 pub use value_type::ValueType;
 
@@ -129,7 +131,7 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     if content.get("properties").is_some() {
         if let serde_json::Value::Object(object) = content["properties"].take() {
             for (key, value) in object.into_iter() {
-                if let Some(value_schema) = parse_value_schema(value) {
+                if let Some(value_schema) = parse_value_schema(&value) {
                     schema.properties.insert(Accessor::Key(key), value_schema);
                 }
             }
@@ -138,7 +140,7 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     if content.get("definitions").is_some() {
         if let serde_json::Value::Object(object) = content["definitions"].take() {
             for (key, value) in object.into_iter() {
-                if let Some(value_schema) = parse_value_schema(value) {
+                if let Some(value_schema) = parse_value_schema(&value) {
                     schema.definitions.insert(key, value_schema);
                 }
             }
@@ -147,52 +149,24 @@ pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
     schema
 }
 
-fn parse_value_schema(object: serde_json::Value) -> Option<TableSchema> {
+fn parse_value_schema(object: &serde_json::Value) -> Option<ValueSchema> {
     match object {
         serde_json::Value::Object(object) => {
-            let mut value_schema = TableSchema::default();
-
-            for (key, value) in object {
-                match key.as_str() {
-                    "title" => {
-                        if let serde_json::Value::String(title) = value {
-                            value_schema.title = Some(title);
-                        }
-                    }
-                    "description" => {
-                        if let serde_json::Value::String(description) = value {
-                            value_schema.description = Some(description);
-                        }
-                    }
-                    "type" => {
-                        if let serde_json::Value::String(type_str) = value {
-                            let schema_type = match type_str.as_str() {
-                                "null" => SchemaType::Null,
-                                "boolean" => SchemaType::Boolean,
-                                "number" => SchemaType::Numeric,
-                                "string" => SchemaType::String,
-                                "array" => SchemaType::Array,
-                                "object" => SchemaType::Object,
-                                _ => continue,
-                            };
-                            value_schema.schema = Some(SchemaComposition::Type(schema_type).into());
-                        }
-                    }
-                    "default" => {
-                        value_schema.default = Some(value.into());
-                    }
-                    "enum" => {
-                        if let serde_json::Value::Array(array) = value {
-                            for value in array {
-                                value_schema.enumerated_values.push(value.into());
-                            }
-                        }
-                    }
-                    _ => {}
+            if let Some(_type) = object.get("type") {
+                if let serde_json::Value::String(type_str) = _type {
+                    return match type_str.as_str() {
+                        "null" => Some(ValueSchema::Null),
+                        "boolean" => Some(ValueSchema::Boolean(BooleanSchema::new(object))),
+                        "integer" => Some(ValueSchema::Integer(IntegerSchema::new(object))),
+                        "number" => Some(ValueSchema::Float(FloatSchema::new(object))),
+                        "string" => Some(ValueSchema::String(StringSchema::new(object))),
+                        "array" => Some(ValueSchema::Array(ArraySchema::new(object))),
+                        "object" => Some(ValueSchema::Table(TableSchema::new(object))),
+                        _ => None,
+                    };
                 }
             }
-
-            Some(value_schema)
+            None
         }
         _ => None,
     }

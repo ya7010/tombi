@@ -124,7 +124,7 @@ fn get_completion_items(
             items.push(CompletionItem {
                 label: key.to_string(),
                 kind: Some(CompletionItemKind::PROPERTY),
-                detail: match (&object_schema.title, &object_schema.description) {
+                detail: match (object_schema.title(), object_schema.description()) {
                     (Some(title), Some(description)) => {
                         Some(format!("{}\n\n{}", title, description))
                     }
