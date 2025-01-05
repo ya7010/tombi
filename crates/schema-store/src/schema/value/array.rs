@@ -1,5 +1,4 @@
 use super::ValueSchema;
-use crate::{value_type::HasValueType, ValueType};
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct ArraySchema {
@@ -35,11 +34,5 @@ impl ArraySchema {
                 .get("default")
                 .and_then(|v| v.as_array().map(|arr| arr.clone())),
         }
-    }
-}
-
-impl HasValueType for ArraySchema {
-    fn value_type(&self) -> ValueType {
-        ValueType::Array
     }
 }

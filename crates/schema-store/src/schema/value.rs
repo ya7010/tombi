@@ -88,7 +88,7 @@ impl ValueSchema {
             ValueSchema::OneOf(_) => None,
             ValueSchema::AnyOf(_) => None,
             ValueSchema::AllOf(_) => None,
-            ValueSchema::Ref(_) => None,
+            ValueSchema::Ref(_) => unreachable!("Ref schema should be resolved"),
         }
     }
 
@@ -108,7 +108,7 @@ impl ValueSchema {
             ValueSchema::OneOf(_) => None,
             ValueSchema::AnyOf(_) => None,
             ValueSchema::AllOf(_) => None,
-            ValueSchema::Ref(_) => None,
+            ValueSchema::Ref(_) => unreachable!("Ref schema should be resolved"),
         }
     }
 }

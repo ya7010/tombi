@@ -1,5 +1,3 @@
-use crate::{value_type::HasValueType, ValueType};
-
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct FloatSchema {
     pub title: Option<String>,
@@ -28,11 +26,5 @@ impl FloatSchema {
             multiple_of: object.get("multipleOf").and_then(|v| v.as_f64()),
             default: object.get("default").and_then(|v| v.as_f64()),
         }
-    }
-}
-
-impl HasValueType for FloatSchema {
-    fn value_type(&self) -> ValueType {
-        ValueType::Float
     }
 }

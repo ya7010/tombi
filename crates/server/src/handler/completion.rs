@@ -121,6 +121,7 @@ fn get_completion_items(
 
     if accessors.is_empty() {
         for (key, object_schema) in &document_schema.properties {
+            let object_schema = document_schema.resolve_ref(object_schema);
             items.push(CompletionItem {
                 label: key.to_string(),
                 kind: Some(CompletionItemKind::PROPERTY),

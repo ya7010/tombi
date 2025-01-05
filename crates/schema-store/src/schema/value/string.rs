@@ -1,5 +1,3 @@
-use crate::{value_type::HasValueType, ValueType};
-
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct StringSchema {
     pub title: Option<String>,
@@ -32,11 +30,5 @@ impl StringSchema {
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
         }
-    }
-}
-
-impl HasValueType for StringSchema {
-    fn value_type(&self) -> ValueType {
-        ValueType::String
     }
 }

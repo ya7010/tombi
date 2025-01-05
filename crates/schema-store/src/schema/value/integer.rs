@@ -1,5 +1,3 @@
-use crate::{value_type::HasValueType, ValueType};
-
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct IntegerSchema {
     pub title: Option<String>,
@@ -28,11 +26,5 @@ impl IntegerSchema {
             multiple_of: object.get("multipleOf").and_then(|v| v.as_i64()),
             default: object.get("default").and_then(|v| v.as_i64()),
         }
-    }
-}
-
-impl HasValueType for IntegerSchema {
-    fn value_type(&self) -> ValueType {
-        ValueType::Integer
     }
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{value_type::HasValueType, Accessor, ValueType};
+use crate::Accessor;
 
 use super::ValueSchema;
 
@@ -44,11 +44,5 @@ impl TableSchema {
             }),
             default: object.get("default").cloned(),
         }
-    }
-}
-
-impl HasValueType for TableSchema {
-    fn value_type(&self) -> ValueType {
-        ValueType::Table
     }
 }

@@ -11,7 +11,3 @@ pub enum ValueType {
     Array,
     Table,
 }
-
-pub trait HasValueType {
-    fn value_type(&self) -> ValueType;
-}

@@ -1,5 +1,3 @@
-use crate::{value_type::HasValueType, ValueType};
-
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct OffsetDateTimeSchema {
     pub title: Option<String>,
@@ -20,11 +18,5 @@ impl OffsetDateTimeSchema {
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
         }
-    }
-}
-
-impl HasValueType for OffsetDateTimeSchema {
-    fn value_type(&self) -> ValueType {
-        ValueType::OffsetDateTime
     }
 }
