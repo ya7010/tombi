@@ -15,6 +15,7 @@ impl Format for ast::BasicString {
         let text = match f.options().quote_style() {
             QuoteStyle::Double | QuoteStyle::Preserve => text,
             QuoteStyle::Single => {
+                // TODO: Only supports simple conditions, so it needs to be changed to behavior closer to black
                 if text.contains("\\") || text.contains("'") {
                     text
                 } else {
@@ -43,6 +44,7 @@ impl Format for ast::LiteralString {
         let text = match f.options().quote_style() {
             QuoteStyle::Single | QuoteStyle::Preserve => text,
             QuoteStyle::Double => {
+                // TODO: Only supports simple conditions, so it needs to be changed to behavior closer to black
                 if text.contains("\\") || text.contains("\"") {
                     text
                 } else {
