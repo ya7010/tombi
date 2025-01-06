@@ -1,20 +1,60 @@
 use crate::Accessor;
 use config::TomlVersion;
 use indexmap::IndexMap;
+use std::sync::{Arc, RwLock};
 
 use super::{referable::Referable, ValueSchema};
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct DocumentSchema {
     pub(crate) toml_version: Option<TomlVersion>,
     pub title: Option<String>,
     pub description: Option<String>,
     pub schema_url: Option<url::Url>,
-    pub properties: IndexMap<Accessor, Referable<ValueSchema>>,
-    pub definitions: ahash::HashMap<String, Referable<ValueSchema>>,
+    pub properties: Arc<RwLock<IndexMap<Accessor, Referable<ValueSchema>>>>,
+    pub definitions: Arc<RwLock<ahash::HashMap<String, Referable<ValueSchema>>>>,
 }
 
 impl DocumentSchema {
+    pub fn new(content: serde_json::Value) -> Self {
+        let mut properties = IndexMap::default();
+        if content.get("properties").is_some() {
+            if let Some(serde_json::Value::Object(object)) = content.get("properties") {
+                for (key, value) in object.into_iter() {
+                    let Some(object) = value.as_object() else {
+                        continue;
+                    };
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                        properties.insert(Accessor::Key(key.clone()), value_schema);
+                    }
+                }
+            }
+        }
+
+        Self {
+            toml_version: content
+                .get("x-tombi-toml-version")
+                .and_then(|obj| match obj {
+                    serde_json::Value::String(version) => {
+                        serde_json::from_str(&format!("\"{version}\"")).ok()
+                    }
+                    _ => None,
+                }),
+            title: content
+                .get("title")
+                .and_then(|v| v.as_str().map(|s| s.to_string())),
+            description: content
+                .get("description")
+                .and_then(|v| v.as_str().map(|s| s.to_string())),
+            schema_url: content
+                .get("$id")
+                .and_then(|v| v.as_str())
+                .and_then(|s| url::Url::parse(s).ok()),
+            properties: Arc::new(RwLock::new(properties)),
+            definitions: Arc::new(RwLock::new(ahash::HashMap::default())),
+        }
+    }
+
     pub fn toml_version(&self) -> Option<TomlVersion> {
         self.toml_version.inspect(|version| {
             tracing::debug!("use schema TOML version: {version}");
@@ -24,7 +64,15 @@ impl DocumentSchema {
     pub fn resolve_ref(&self, value_schema: &mut Referable<ValueSchema>) {
         match value_schema {
             Referable::Ref(ref_str) => {
-                if let Some(schema) = self.definitions.get(ref_str) {
+                let definitions = match self.definitions.read() {
+                    Ok(guard) => guard,
+                    Err(err) => {
+                        tracing::error!("failed to read definitions: {}", err);
+                        return;
+                    }
+                };
+
+                if let Some(schema) = definitions.get(ref_str) {
                     let ref_str = ref_str.clone();
                     let resolved = self.resolve_ref_inner(schema);
                     if let Some(resolved) = resolved {
@@ -58,7 +106,15 @@ impl DocumentSchema {
     fn resolve_ref_inner(&self, value_schema: &Referable<ValueSchema>) -> Option<ValueSchema> {
         match value_schema {
             Referable::Ref(ref_str) => {
-                if let Some(schema) = self.definitions.get(ref_str) {
+                let definitions = match self.definitions.read() {
+                    Ok(guard) => guard,
+                    Err(err) => {
+                        tracing::error!("failed to read definitions: {}", err);
+                        return None;
+                    }
+                };
+
+                if let Some(schema) = definitions.get(ref_str) {
                     self.resolve_ref_inner(schema)
                 } else {
                     tracing::warn!("schema not found: {ref_str}");
@@ -85,5 +141,32 @@ impl DocumentSchema {
             )),
             Referable::Resolved(schema) => Some(schema.clone()),
         }
+    }
+}
+
+impl PartialEq for DocumentSchema {
+    fn eq(&self, other: &Self) -> bool {
+        let props_eq = if let (Ok(self_props), Ok(other_props)) =
+            (self.properties.read(), other.properties.read())
+        {
+            *self_props == *other_props
+        } else {
+            false
+        };
+
+        let defs_eq = if let (Ok(self_defs), Ok(other_defs)) =
+            (self.definitions.read(), other.definitions.read())
+        {
+            *self_defs == *other_defs
+        } else {
+            false
+        };
+
+        self.toml_version == other.toml_version
+            && self.title == other.title
+            && self.description == other.description
+            && self.schema_url == other.schema_url
+            && props_eq
+            && defs_eq
     }
 }

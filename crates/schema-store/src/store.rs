@@ -1,16 +1,11 @@
 use config::SchemaCatalogItem;
 use dashmap::DashMap;
-use indexmap::IndexMap;
 use itertools::Either;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use url::Url;
 
-use crate::{
-    json_schema::JsonCatalog,
-    schema::{CatalogSchema, Referable, ValueSchema},
-    Accessor, DocumentSchema,
-};
+use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
@@ -105,7 +100,7 @@ impl SchemaStore {
         &self,
         schema_url: &Url,
     ) -> Result<DocumentSchema, crate::Error> {
-        let schema: schemars::Schema = match schema_url.scheme() {
+        let schema: serde_json::Value = match schema_url.scheme() {
             "file" => {
                 let schema_path =
                     schema_url
@@ -148,40 +143,7 @@ impl SchemaStore {
             schema_url: schema_url.to_owned(),
         })?;
 
-        let document_schema = DocumentSchema {
-            toml_version: schema
-                .get("x-tombi-toml-version")
-                .and_then(|obj| match obj {
-                    serde_json::Value::String(version) => {
-                        serde_json::from_str(&format!("\"{version}\"")).ok()
-                    }
-                    _ => None,
-                }),
-            title: schema
-                .get("title")
-                .and_then(|obj| obj.as_str().map(|title| title.to_string())),
-            description: schema
-                .get("description")
-                .and_then(|obj| obj.as_str().map(|title| title.to_string())),
-            schema_url: Some(schema_url.to_owned()),
-            properties: schema
-                .get("properties")
-                .and_then(|obj| obj.as_object())
-                .map(|obj| {
-                    obj.iter()
-                        .filter_map(|(key, value)| {
-                            value
-                                .as_object()
-                                .and_then(|object| Referable::<ValueSchema>::new(&object))
-                                .map(|object| (Accessor::Key(key.to_string()), object))
-                        })
-                        .collect::<IndexMap<_, _>>()
-                })
-                .unwrap_or_default(),
-            ..Default::default()
-        };
-
-        Ok(document_schema)
+        Ok(DocumentSchema::new(schema))
     }
 
     async fn try_load_schema(&self, schema_url: &Url) -> Result<DocumentSchema, crate::Error> {

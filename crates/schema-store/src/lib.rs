@@ -122,33 +122,3 @@ fn get_item_table<'a>(
         }
     }
 }
-
-pub fn parse_document_schema(mut content: serde_json::Value) -> DocumentSchema {
-    let mut schema = DocumentSchema::default();
-
-    if content.get("properties").is_some() {
-        if let serde_json::Value::Object(object) = content["properties"].take() {
-            for (key, value) in object.into_iter() {
-                let Some(object) = value.as_object() else {
-                    continue;
-                };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
-                    schema.properties.insert(Accessor::Key(key), value_schema);
-                }
-            }
-        }
-    }
-    if content.get("definitions").is_some() {
-        if let serde_json::Value::Object(object) = content["definitions"].take() {
-            for (key, value) in object.into_iter() {
-                let Some(object) = value.as_object() else {
-                    continue;
-                };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
-                    schema.definitions.insert(key, value_schema);
-                }
-            }
-        }
-    }
-    schema
-}
