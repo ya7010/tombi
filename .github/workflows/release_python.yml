@@ -17,6 +17,9 @@ on:
 permissions:
   contents: read
 
+env:
+  TOMBI_VERSION: null
+
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}

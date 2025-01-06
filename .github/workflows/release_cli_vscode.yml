@@ -14,6 +14,9 @@ on:
 permissions:
   contents: read
 
+env:
+  TOMBI_VERSION: null
+
 jobs:
   delete-old-dev-artifacts:
     runs-on: ubuntu-latest
