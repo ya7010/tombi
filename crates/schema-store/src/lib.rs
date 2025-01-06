@@ -9,7 +9,7 @@ pub use accessor::{Accessor, Accessors};
 pub use error::Error;
 pub use json_schema::{SchemaType, Value, DEFAULT_CATALOG_URL};
 pub use schema::DocumentSchema;
-use schema::{Referable, ValueSchema};
+pub use schema::{Referable, ValueSchema};
 pub use store::SchemaStore;
 pub use value_type::ValueType;
 

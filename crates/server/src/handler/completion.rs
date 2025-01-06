@@ -1,5 +1,6 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use dashmap::try_result::TryResult;
+use schema_store::Referable;
 use tower_lsp::lsp_types::{
     CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse,
     TextDocumentPositionParams,
@@ -120,23 +121,27 @@ fn get_completion_items(
     }
 
     if accessors.is_empty() {
-        for (key, object_schema) in &document_schema.properties {
-            let Some(object_schema) = document_schema.resolve_ref(object_schema) else {
-                continue;
-            };
-            items.push(CompletionItem {
-                label: key.to_string(),
-                kind: Some(CompletionItemKind::PROPERTY),
-                detail: match (object_schema.title(), object_schema.description()) {
-                    (Some(title), Some(description)) => {
-                        Some(format!("{}\n\n{}", title, description))
-                    }
-                    (Some(title), None) => Some(title.to_owned()),
-                    (None, Some(description)) => Some(description.to_owned()),
-                    (None, None) => None,
-                },
-                ..Default::default()
-            });
+        for (key, object_schema) in document_schema.properties.iter() {
+            let mut schema = object_schema.clone();
+            document_schema.resolve_ref(&mut schema);
+            match schema {
+                Referable::Resolved(value_schema) => {
+                    items.push(CompletionItem {
+                        label: key.to_string(),
+                        kind: Some(CompletionItemKind::PROPERTY),
+                        detail: match (value_schema.title(), value_schema.description()) {
+                            (Some(title), Some(description)) => {
+                                Some(format!("{}\n\n{}", title, description))
+                            }
+                            (Some(title), None) => Some(title.to_owned()),
+                            (None, Some(description)) => Some(description.to_owned()),
+                            (None, None) => None,
+                        },
+                        ..Default::default()
+                    });
+                }
+                _ => {}
+            }
         }
     }
 
