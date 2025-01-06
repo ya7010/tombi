@@ -20,7 +20,7 @@ pub use offset_date_time::OffsetDateTimeSchema;
 pub use string::StringSchema;
 pub use table::TableSchema;
 
-use super::referable::Referable;
+use super::{referable::Referable, DocumentSchema};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ValueSchema {
@@ -115,5 +115,45 @@ impl Referable<ValueSchema> {
         }
 
         ValueSchema::new(object).map(Referable::Resolved)
+    }
+
+    pub fn resolve<'a>(
+        &'a mut self,
+        document_schema: &'a DocumentSchema,
+    ) -> Result<&'a ValueSchema, crate::Error> {
+        match self {
+            Referable::Ref(ref_str) => {
+                let definitions = match document_schema.definitions.read() {
+                    Ok(guard) => guard,
+                    Err(_) => {
+                        return Err(crate::Error::LockError {
+                            ref_string: ref_str.clone(),
+                        });
+                    }
+                };
+
+                if let Some(definition_schema) = definitions.get(ref_str) {
+                    *self = definition_schema.clone();
+                    self.resolve(document_schema)
+                } else {
+                    Err(crate::Error::DefinitionNotFound {
+                        definition_ref: ref_str.clone(),
+                    })
+                }
+            }
+            Referable::Resolved(resolved) => {
+                match resolved {
+                    ValueSchema::OneOf(schemas)
+                    | ValueSchema::AnyOf(schemas)
+                    | ValueSchema::AllOf(schemas) => {
+                        for schema in schemas {
+                            schema.resolve(document_schema)?;
+                        }
+                    }
+                    _ => {}
+                }
+                Ok(resolved)
+            }
+        }
     }
 }
