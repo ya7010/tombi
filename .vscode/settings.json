@@ -11,6 +11,9 @@
   "editor.comments.insertSpace": true,
   // NOTE: It's too slow!!
   // "rust-analyzer.check.command": "clippy",
+  "yaml.schemas": {
+    "./tombi.schema.json": ["tombi.yaml"]
+  },
   "[typescript]": {
     "editor.tabSize": 2,
     "editor.defaultFormatter": "biomejs.biome"
@@ -29,8 +32,5 @@
   "[toml]": {
     "editor.tabSize": 2,
     "editor.defaultFormatter": "yassun7010.tombi"
-  },
-  "yaml.schemas": {
-    "./tombi.schema.json": ["tombi.yaml"]
   }
 }
