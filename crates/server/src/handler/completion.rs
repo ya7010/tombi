@@ -1,5 +1,6 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use dashmap::try_result::TryResult;
+use itertools::Itertools;
 use tower_lsp::lsp_types::{
     CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse,
     TextDocumentPositionParams,
@@ -122,9 +123,12 @@ fn get_completion_items(
     if accessors.is_empty() {
         if let Ok(mut properties) = document_schema.properties.write() {
             for (key, value_schema) in properties.iter_mut() {
-                let Ok(value_schema) = value_schema.resolve(document_schema) else {
-                    tracing::warn!("failed to resolve schema: {}", key);
-                    continue;
+                let value_schema = match value_schema.resolve(document_schema) {
+                    Ok(value_schema) => value_schema,
+                    Err(err) => {
+                        tracing::warn!("failed to resolve {key} schema. {err}");
+                        continue;
+                    }
                 };
 
                 items.push(CompletionItem {

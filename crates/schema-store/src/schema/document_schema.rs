@@ -31,6 +31,32 @@ impl DocumentSchema {
             }
         }
 
+        let mut definitions = ahash::HashMap::default();
+        if content.get("definitions").is_some() {
+            if let Some(serde_json::Value::Object(object)) = content.get("definitions") {
+                for (key, value) in object.into_iter() {
+                    let Some(object) = value.as_object() else {
+                        continue;
+                    };
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                        definitions.insert(format!("#/definitions/{key}"), value_schema);
+                    }
+                }
+            }
+        }
+        if content.get("$defs").is_some() {
+            if let Some(serde_json::Value::Object(object)) = content.get("$defs") {
+                for (key, value) in object.into_iter() {
+                    let Some(object) = value.as_object() else {
+                        continue;
+                    };
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                        definitions.insert(format!("#/$defs/{key}"), value_schema);
+                    }
+                }
+            }
+        }
+
         Self {
             toml_version: content
                 .get("x-tombi-toml-version")
@@ -51,7 +77,7 @@ impl DocumentSchema {
                 .and_then(|v| v.as_str())
                 .and_then(|s| url::Url::parse(s).ok()),
             properties: Arc::new(RwLock::new(properties)),
-            definitions: Arc::new(RwLock::new(ahash::HashMap::default())),
+            definitions: Arc::new(RwLock::new(definitions)),
         }
     }
 
