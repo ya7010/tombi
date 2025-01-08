@@ -141,6 +141,8 @@ fn get_completion_items(
                     ..Default::default()
                 });
             }
+        } else {
+            tracing::warn!("failed to acquire the DocumentSchema write lock");
         }
     }
 
