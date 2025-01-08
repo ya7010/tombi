@@ -5,7 +5,7 @@ use url::Url;
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum Error {
     #[error("failed to lock schema: {ref_string}")]
-    LockError { ref_string: String },
+    SchemaLockError { ref_string: String },
 
     #[error("definition ref not found: {definition_ref}")]
     DefinitionNotFound { definition_ref: String },

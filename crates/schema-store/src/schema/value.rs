@@ -170,7 +170,7 @@ impl Referable<ValueSchema> {
                 let definitions = match document_schema.definitions.read() {
                     Ok(guard) => guard,
                     Err(_) => {
-                        return Err(crate::Error::LockError {
+                        return Err(crate::Error::SchemaLockError {
                             ref_string: ref_str.clone(),
                         });
                     }
