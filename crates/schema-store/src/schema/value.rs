@@ -1,3 +1,5 @@
+mod all_of;
+mod any_of;
 mod array;
 mod boolean;
 mod float;
@@ -6,9 +8,12 @@ mod local_date;
 mod local_date_time;
 mod local_time;
 mod offset_date_time;
+mod one_of;
 mod string;
 mod table;
 
+use all_of::AllOfSchema;
+use any_of::AnyOfSchema;
 pub use array::ArraySchema;
 pub use boolean::BooleanSchema;
 pub use float::FloatSchema;
@@ -17,6 +22,7 @@ pub use local_date::LocalDateSchema;
 pub use local_date_time::LocalDateTimeSchema;
 pub use local_time::LocalTimeSchema;
 pub use offset_date_time::OffsetDateTimeSchema;
+use one_of::OneOfSchema;
 pub use string::StringSchema;
 pub use table::TableSchema;
 
@@ -35,9 +41,9 @@ pub enum ValueSchema {
     OffsetDateTime(OffsetDateTimeSchema),
     Array(ArraySchema),
     Table(TableSchema),
-    OneOf(Vec<Referable<ValueSchema>>),
-    AnyOf(Vec<Referable<ValueSchema>>),
-    AllOf(Vec<Referable<ValueSchema>>),
+    OneOf(OneOfSchema),
+    AnyOf(AnyOfSchema),
+    AllOf(AllOfSchema),
 }
 
 impl ValueSchema {
@@ -55,8 +61,8 @@ impl ValueSchema {
                                 return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
                             }
                             "date-time" => {
-                                return Some(ValueSchema::OneOf(
-                                    [
+                                return Some(ValueSchema::OneOf(OneOfSchema {
+                                    schemas: [
                                         ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
                                             object,
                                         )),
@@ -66,7 +72,8 @@ impl ValueSchema {
                                     ]
                                     .map(Referable::Resolved)
                                     .to_vec(),
-                                ));
+                                    ..Default::default()
+                                }));
                             }
                             "time" => {
                                 return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)));
@@ -82,30 +89,14 @@ impl ValueSchema {
             };
         }
 
-        if let Some(serde_json::Value::Array(one_of)) = object.get("oneOf") {
-            return Some(ValueSchema::OneOf(
-                one_of
-                    .iter()
-                    .filter_map(|value| value.as_object().and_then(Referable::<ValueSchema>::new))
-                    .collect(),
-            ));
+        if object.get("oneOf").is_some() {
+            return Some(ValueSchema::OneOf(OneOfSchema::new(object)));
         }
-        if let Some(serde_json::Value::Array(any_of)) = object.get("anyOf") {
-            return Some(ValueSchema::AnyOf(
-                any_of
-                    .iter()
-                    .filter_map(|value| value.as_object().and_then(Referable::<ValueSchema>::new))
-                    .collect(),
-            ));
+        if object.get("anyOf").is_some() {
+            return Some(ValueSchema::AnyOf(AnyOfSchema::new(object)));
         }
-
-        if let Some(serde_json::Value::Array(all_of)) = object.get("allOf") {
-            return Some(ValueSchema::AllOf(
-                all_of
-                    .iter()
-                    .filter_map(|value| value.as_object().and_then(Referable::<ValueSchema>::new))
-                    .collect(),
-            ));
+        if object.get("allOf").is_some() {
+            return Some(ValueSchema::AllOf(AllOfSchema::new(object)));
         }
 
         None
@@ -124,9 +115,9 @@ impl ValueSchema {
             ValueSchema::OffsetDateTime(schema) => schema.title.as_deref(),
             ValueSchema::Array(schema) => schema.title.as_deref(),
             ValueSchema::Table(schema) => schema.title.as_deref(),
-            ValueSchema::OneOf(_) => None,
-            ValueSchema::AnyOf(_) => None,
-            ValueSchema::AllOf(_) => None,
+            ValueSchema::OneOf(schema) => schema.title.as_deref(),
+            ValueSchema::AnyOf(schema) => schema.title.as_deref(),
+            ValueSchema::AllOf(schema) => schema.title.as_deref(),
         }
     }
 
@@ -143,9 +134,9 @@ impl ValueSchema {
             ValueSchema::OffsetDateTime(schema) => schema.description.as_deref(),
             ValueSchema::Array(schema) => schema.description.as_deref(),
             ValueSchema::Table(schema) => schema.description.as_deref(),
-            ValueSchema::OneOf(_) => None,
-            ValueSchema::AnyOf(_) => None,
-            ValueSchema::AllOf(_) => None,
+            ValueSchema::OneOf(schema) => schema.description.as_deref(),
+            ValueSchema::AnyOf(schema) => schema.description.as_deref(),
+            ValueSchema::AllOf(schema) => schema.description.as_deref(),
         }
     }
 }
@@ -187,9 +178,9 @@ impl Referable<ValueSchema> {
             }
             Referable::Resolved(resolved) => {
                 match resolved {
-                    ValueSchema::OneOf(schemas)
-                    | ValueSchema::AnyOf(schemas)
-                    | ValueSchema::AllOf(schemas) => {
+                    ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                    | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+                    | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                         for schema in schemas {
                             schema.resolve(document_schema)?;
                         }

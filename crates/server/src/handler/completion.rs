@@ -1,8 +1,7 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use dashmap::try_result::TryResult;
-use itertools::Itertools;
 use tower_lsp::lsp_types::{
-    CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse,
+    self, CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse,
     TextDocumentPositionParams,
 };
 
@@ -130,20 +129,20 @@ fn get_completion_items(
                         continue;
                     }
                 };
-
-                items.push(CompletionItem {
+                let completion_item = CompletionItem {
                     label: key.to_string(),
                     kind: Some(CompletionItemKind::PROPERTY),
-                    detail: match (value_schema.title(), value_schema.description()) {
-                        (Some(title), Some(description)) => {
-                            Some(format!("{}\n\n{}", title, description))
-                        }
-                        (Some(title), None) => Some(title.to_owned()),
-                        (None, Some(description)) => Some(description.to_owned()),
-                        (None, None) => None,
-                    },
+                    detail: value_schema.title().map(ToString::to_string),
+                    documentation: value_schema.description().map(|description| {
+                        lsp_types::Documentation::MarkupContent(lsp_types::MarkupContent {
+                            kind: lsp_types::MarkupKind::Markdown,
+                            value: description.to_string(),
+                        })
+                    }),
                     ..Default::default()
-                });
+                };
+
+                items.push(completion_item);
             }
         } else {
             tracing::warn!("failed to acquire the DocumentSchema write lock");
