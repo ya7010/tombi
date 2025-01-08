@@ -42,27 +42,44 @@ pub enum ValueSchema {
 
 impl ValueSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
-        if let Some(_type) = object.get("type") {
-            if let serde_json::Value::String(type_str) = _type {
-                return match type_str.as_str() {
-                    "null" => Some(ValueSchema::Null),
-                    "boolean" => Some(ValueSchema::Boolean(BooleanSchema::new(object))),
-                    "integer" => Some(ValueSchema::Integer(IntegerSchema::new(object))),
-                    "number" => Some(ValueSchema::Float(FloatSchema::new(object))),
-                    "string" => Some(ValueSchema::String(StringSchema::new(object))),
-                    "array" => Some(ValueSchema::Array(ArraySchema::new(object))),
-                    "object" => Some(ValueSchema::Table(TableSchema::new(object))),
-                    "local_date" => Some(ValueSchema::LocalDate(LocalDateSchema::new(object))),
-                    "local_date_time" => {
-                        Some(ValueSchema::LocalDateTime(LocalDateTimeSchema::new(object)))
+        if let Some(serde_json::Value::String(type_str)) = object.get("type") {
+            match type_str.as_str() {
+                "null" => return Some(ValueSchema::Null),
+                "boolean" => return Some(ValueSchema::Boolean(BooleanSchema::new(object))),
+                "integer" => return Some(ValueSchema::Integer(IntegerSchema::new(object))),
+                "number" => return Some(ValueSchema::Float(FloatSchema::new(object))),
+                "string" => {
+                    if let Some(serde_json::Value::String(format_str)) = object.get("format") {
+                        match format_str.as_str() {
+                            "date" => {
+                                return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
+                            }
+                            "date-time" => {
+                                return Some(ValueSchema::OneOf(
+                                    [
+                                        ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
+                                            object,
+                                        )),
+                                        ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
+                                            object,
+                                        )),
+                                    ]
+                                    .map(Referable::Resolved)
+                                    .to_vec(),
+                                ));
+                            }
+                            "time" => {
+                                return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)));
+                            }
+                            _ => {}
+                        }
                     }
-                    "local_time" => Some(ValueSchema::LocalTime(LocalTimeSchema::new(object))),
-                    "offset_date_time" => Some(ValueSchema::OffsetDateTime(
-                        OffsetDateTimeSchema::new(object),
-                    )),
-                    _ => None,
-                };
-            }
+                    return Some(ValueSchema::String(StringSchema::new(object)));
+                }
+                "array" => return Some(ValueSchema::Array(ArraySchema::new(object))),
+                "object" => return Some(ValueSchema::Table(TableSchema::new(object))),
+                _ => {}
+            };
         }
         None
     }
