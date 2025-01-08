@@ -56,7 +56,7 @@ pub async fn handle_completion(
         .try_get_schema_from_url(&text_document.uri)
         .await
     else {
-        tracing::debug!("schema not found: {}", uri);
+        tracing::debug!("schema not found: {}", text_document.uri);
         return Ok(None);
     };
 
