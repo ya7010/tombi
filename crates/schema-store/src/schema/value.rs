@@ -81,6 +81,33 @@ impl ValueSchema {
                 _ => {}
             };
         }
+
+        if let Some(serde_json::Value::Array(one_of)) = object.get("oneOf") {
+            return Some(ValueSchema::OneOf(
+                one_of
+                    .iter()
+                    .filter_map(|value| value.as_object().and_then(Referable::<ValueSchema>::new))
+                    .collect(),
+            ));
+        }
+        if let Some(serde_json::Value::Array(any_of)) = object.get("anyOf") {
+            return Some(ValueSchema::AnyOf(
+                any_of
+                    .iter()
+                    .filter_map(|value| value.as_object().and_then(Referable::<ValueSchema>::new))
+                    .collect(),
+            ));
+        }
+
+        if let Some(serde_json::Value::Array(all_of)) = object.get("allOf") {
+            return Some(ValueSchema::AllOf(
+                all_of
+                    .iter()
+                    .filter_map(|value| value.as_object().and_then(Referable::<ValueSchema>::new))
+                    .collect(),
+            ));
+        }
+
         None
     }
 
