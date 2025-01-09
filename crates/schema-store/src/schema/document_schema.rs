@@ -17,6 +17,27 @@ pub struct DocumentSchema {
 
 impl DocumentSchema {
     pub fn new(content: serde_json::Value) -> Self {
+        let toml_version = content
+            .get("x-tombi-toml-version")
+            .and_then(|obj| match obj {
+                serde_json::Value::String(version) => {
+                    serde_json::from_str(&format!("\"{version}\"")).ok()
+                }
+                _ => None,
+            });
+        let title = content
+            .get("title")
+            .and_then(|v| v.as_str().map(|s| s.to_string()));
+
+        let description = content
+            .get("description")
+            .and_then(|v| v.as_str().map(|s| s.to_string()));
+
+        let schema_url = content
+            .get("$id")
+            .and_then(|v| v.as_str())
+            .and_then(|s| url::Url::parse(s).ok());
+
         let mut properties = IndexMap::default();
         if content.get("properties").is_some() {
             if let Some(serde_json::Value::Object(object)) = content.get("properties") {
@@ -58,24 +79,10 @@ impl DocumentSchema {
         }
 
         Self {
-            toml_version: content
-                .get("x-tombi-toml-version")
-                .and_then(|obj| match obj {
-                    serde_json::Value::String(version) => {
-                        serde_json::from_str(&format!("\"{version}\"")).ok()
-                    }
-                    _ => None,
-                }),
-            title: content
-                .get("title")
-                .and_then(|v| v.as_str().map(|s| s.to_string())),
-            description: content
-                .get("description")
-                .and_then(|v| v.as_str().map(|s| s.to_string())),
-            schema_url: content
-                .get("$id")
-                .and_then(|v| v.as_str())
-                .and_then(|s| url::Url::parse(s).ok()),
+            toml_version,
+            title,
+            description,
+            schema_url,
             properties: Arc::new(RwLock::new(properties)),
             definitions: Arc::new(RwLock::new(definitions)),
         }
