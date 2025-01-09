@@ -50,6 +50,11 @@ impl Parse for ast::ArrayOfTables {
 
         end_dangling_comments(p, false);
 
+        // NOTE: For easier calculation of the separation between tables
+        //       from the cursor position in the editor,
+        //       consume whitespace until the next section.
+        while p.eat(LINE_BREAK) {}
+
         m.complete(p, ARRAY_OF_TABLES);
     }
 }
