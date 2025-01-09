@@ -1,3 +1,5 @@
+use crate::AstToken;
+
 macro_rules! impl_comment {
     (
         #[derive(Debug, Clone, PartialEq, Eq, AsRef, From, Into)]
@@ -5,6 +7,12 @@ macro_rules! impl_comment {
     ) => {
         #[derive(Debug, Clone, PartialEq, Eq)]
         pub struct $name(crate::Comment);
+
+        impl $name {
+            pub fn syntax(&self) -> &syntax::SyntaxToken {
+                self.0.syntax()
+            }
+        }
 
         impl AsRef<crate::Comment> for $name {
             fn as_ref(&self) -> &crate::Comment {

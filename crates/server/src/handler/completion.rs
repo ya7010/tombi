@@ -119,8 +119,8 @@ fn get_completion_items(
         }
     }
 
-    if accessors.is_empty() {
-        if let Ok(mut properties) = document_schema.properties.write() {
+    if let Ok(mut properties) = document_schema.properties.write() {
+        if accessors.is_empty() {
             for (key, value_schema) in properties.iter_mut() {
                 let value_schema = match value_schema.resolve(document_schema) {
                     Ok(value_schema) => value_schema,
