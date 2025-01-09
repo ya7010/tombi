@@ -46,7 +46,7 @@ impl DocumentSchema {
                         continue;
                     };
                     if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
-                        properties.insert(Accessor::Key(key.clone()), value_schema);
+                        properties.insert(Accessor::Key(key.into()), value_schema);
                     }
                 }
             }
@@ -92,6 +92,17 @@ impl DocumentSchema {
         self.toml_version.inspect(|version| {
             tracing::debug!("use schema TOML version: {version}");
         })
+    }
+
+    pub fn find_schema_candidates(&self, accessors: &[Accessor]) -> Vec<ValueSchema> {
+        let candidates = Vec::new();
+        let mut _properties = self.properties.write().unwrap();
+
+        if accessors.is_empty() {
+            return candidates;
+        }
+
+        candidates
     }
 }
 

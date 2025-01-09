@@ -40,7 +40,7 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let Some(keys_value_info) = get_keys_value_info(root, &keys, position) else {
+    let Some(keys_value_info) = get_keys_value_info(root, &keys, position, toml_version) else {
         return Ok(None);
     };
 

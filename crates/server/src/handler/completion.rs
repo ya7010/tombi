@@ -78,7 +78,7 @@ fn get_completion_items(
     root: &ast::Root,
     position: text::Position,
     document_schema: &schema_store::DocumentSchema,
-    _toml_version: config::TomlVersion,
+    toml_version: config::TomlVersion,
 ) -> Vec<CompletionItem> {
     let mut items = vec![];
 
@@ -88,7 +88,11 @@ fn get_completion_items(
             if let Some(keys) = kv.keys() {
                 for key in keys.keys() {
                     if key.syntax().range().end() < position {
-                        accessors.push(schema_store::Accessor::Key(key.to_string()));
+                        accessors.push(schema_store::Accessor::Key(
+                            key.try_to_raw_text(toml_version)
+                                .unwrap_or(key.to_string())
+                                .into(),
+                        ));
                     }
                 }
             }
@@ -97,7 +101,7 @@ fn get_completion_items(
                 let mut header_keys = vec![];
                 for key in header.keys() {
                     if key.syntax().range().end() < position {
-                        header_keys.push(schema_store::Accessor::Key(key.to_string()));
+                        header_keys.push(schema_store::Accessor::Key(key.to_string().into()));
                     }
                 }
 
@@ -109,7 +113,11 @@ fn get_completion_items(
                 let mut header_keys = vec![];
                 for key in header.keys() {
                     if key.syntax().range().end() < position {
-                        header_keys.push(schema_store::Accessor::Key(key.to_string()));
+                        header_keys.push(schema_store::Accessor::Key(
+                            key.try_to_raw_text(toml_version)
+                                .unwrap_or(key.to_string())
+                                .into(),
+                        ));
                     }
                 }
 

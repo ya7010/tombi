@@ -1,8 +1,32 @@
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Key(String);
+
+impl Key {
+    pub fn new(key: String) -> Self {
+        Self(key)
+    }
+}
+
+impl std::fmt::Display for Key {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl<T> From<T> for Key
+where
+    T: Into<String>,
+{
+    fn from(value: T) -> Self {
+        Self(value.into())
+    }
+}
+
 /// Represents an accessor to a value in a TOML-like structure.
 /// It can either be a key (for objects) or an index (for arrays).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Accessor {
-    Key(String),
+    Key(Key),
     Index(usize),
 }
 

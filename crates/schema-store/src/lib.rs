@@ -5,7 +5,7 @@ mod schema;
 mod store;
 mod value_type;
 
-pub use accessor::{Accessor, Accessors};
+pub use accessor::{Accessor, Accessors, Key};
 pub use error::Error;
 pub use json_schema::{SchemaType, Value, DEFAULT_CATALOG_URL};
 pub use schema::DocumentSchema;
@@ -33,6 +33,7 @@ pub fn get_keys_value_info(
     root: document_tree::Root,
     keys: &[document_tree::Key],
     position: text::Position,
+    toml_version: config::TomlVersion,
 ) -> Option<KeysValueInfo> {
     let mut accessors = Vec::new();
     let mut value_type = None;
@@ -40,7 +41,8 @@ pub fn get_keys_value_info(
     let mut table_ref = &table;
 
     for key in keys {
-        accessors.push(Accessor::Key(key.to_string()));
+        accessors.push(Accessor::Key(key.to_raw_text(toml_version).into()));
+
         if let Some(value) = table_ref.get(key) {
             if let Some(table) = get_item_table(value, &mut accessors, &mut value_type, position) {
                 table_ref = table;

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 use crate::Accessor;
 
@@ -8,21 +8,21 @@ use super::ValueSchema;
 pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub properties: HashMap<Accessor, ValueSchema>,
+    pub properties: IndexMap<Accessor, ValueSchema>,
     pub required: Option<Vec<String>>,
     pub default: Option<serde_json::Value>,
 }
 
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
-        let mut properties = HashMap::new();
+        let mut properties = IndexMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
                 if let Some(value_schema) = ValueSchema::new(&object) {
-                    properties.insert(Accessor::Key(key.clone()), value_schema);
+                    properties.insert(Accessor::Key(key.into()), value_schema);
                 }
             }
         }
