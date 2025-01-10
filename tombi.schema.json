@@ -73,6 +73,7 @@
       ]
     },
     "FormatOptions": {
+      "description": "! Formatting options\n!\n! Options for adjusting the formatting of TOML files.\n! Initially, this structure contained settings related to `line-width`, etc.,\n! but to avoid unnecessary discussions about the format, all settings have been moved to [formatter::FormatDefinition].\n! In the future, there is a possibility that options will be added to this structure,\n! but considering the recent trend of formatters to avoid such discussions by restricting the settings and its results,\n! this structure is currently empty.\n # Formatter options.\n\n To avoid needless discussion of formatting rules,\n we do not currently have a configuration item for formatting.",
       "type": "object",
       "additionalProperties": false
     },

@@ -7,6 +7,10 @@
 ///! but considering the recent trend of formatters to avoid such discussions by restricting the settings and its results,
 ///! this structure is currently empty.
 
+/// # Formatter options.
+///
+/// To avoid needless discussion of formatting rules,
+/// we do not currently have a configuration item for formatting.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
