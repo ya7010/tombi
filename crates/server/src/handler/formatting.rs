@@ -38,6 +38,7 @@ pub async fn handle_formatting(
             .format
             .as_ref()
             .unwrap_or(&FormatOptions::default()),
+        Default::default(),
         Some(Either::Left(&text_document.uri)),
         &backend.schema_store,
     )

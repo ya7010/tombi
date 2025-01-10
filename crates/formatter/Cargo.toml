@@ -5,6 +5,10 @@ edition = { workspace = true }
 authors = { workspace = true }
 license = { workspace = true }
 
+[features]
+serde = ["dep:serde"]
+jsonschema = ["serde", "dep:schemars"]
+
 [dependencies]
 ast = { workspace = true }
 ast-editor = { workspace = true }
@@ -13,8 +17,8 @@ diagnostic = { workspace = true }
 itertools = { workspace = true }
 parser = { workspace = true }
 schema-store = { workspace = true }
-schemars = { workspace = true }
-serde = { workspace = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
 syntax = { workspace = true }
 text = { workspace = true }
 tokio.workspace = true

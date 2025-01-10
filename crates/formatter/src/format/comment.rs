@@ -113,7 +113,7 @@ impl Format for LeadingComment {
 impl Format for TailingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", f.defs().tailing_comment_space())?;
+        write!(f, "{}", f.tailing_comment_space())?;
         self.as_ref().fmt(f)
     }
 }
