@@ -20,7 +20,7 @@ pub(crate) fn exceeds_line_width(
 ) -> Result<bool, std::fmt::Error> {
     let mut length = f.current_line_width();
     length += 2; // '[' and ']'
-    length += f.defs().singleline_array_bracket_inner_space().len() * 2; // Space after '[' and before ']'
+    length += f.singleline_array_bracket_inner_space().len() * 2; // Space after '[' and before ']'
     let mut first = true;
 
     for value in node.values() {
@@ -43,14 +43,14 @@ pub(crate) fn exceeds_line_width(
         // Calculate total length
         if !first {
             length += 1; // ","
-            length += f.defs().singleline_array_space_after_comma().len();
+            length += f.singleline_array_space_after_comma().len();
         }
         length += f.format_to_string(&value)?.graphemes(true).count();
         first = false;
     }
 
     if let Some(tailing_comment) = node.tailing_comment() {
-        length += f.defs().tailing_comment_space().len();
+        length += f.tailing_comment_space().len();
         length += f
             .format_to_string(tailing_comment.as_ref())?
             .graphemes(true)
@@ -145,17 +145,17 @@ fn format_singleline_array(
     }
 
     f.write_indent()?;
-    write!(f, "[{}", f.defs().singleline_array_bracket_inner_space())?;
+    write!(f, "[{}", f.singleline_array_bracket_inner_space())?;
 
     for (i, value) in array.values().enumerate() {
         if i > 0 {
-            write!(f, ",{}", f.defs().singleline_array_space_after_comma())?;
+            write!(f, ",{}", f.singleline_array_space_after_comma())?;
         }
         f.skip_indent();
         value.fmt(f)?;
     }
 
-    write!(f, "{}]", f.defs().singleline_array_bracket_inner_space())?;
+    write!(f, "{}]", f.singleline_array_bracket_inner_space())?;
 
     if let Some(comment) = array.tailing_comment() {
         comment.fmt(f)?;
@@ -166,8 +166,8 @@ fn format_singleline_array(
 
 #[cfg(test)]
 mod tests {
-    use crate::test_format;
-    use config::{FormatOptions, QuoteStyle, TomlVersion};
+    use crate::{formatter::definitions::FormatDefinitions, test_format};
+    use config::{QuoteStyle, TomlVersion};
 
     use super::*;
 
@@ -220,7 +220,7 @@ mod tests {
         fn singleline_array7(
             r#"string_array = [ "all", 'strings', """are the same""", '''type''' ]"#,
             TomlVersion::default(),
-            FormatOptions {
+            FormatDefinitions {
                 quote_style: Some(QuoteStyle::Preserve),
                 ..Default::default()
             }
@@ -423,7 +423,7 @@ mod tests {
         fn array_exceeds_line_width(
             r#"array = [1111111111, 2222222222, 3333333333]"#,
             Default::default(),
-            FormatOptions {
+            FormatDefinitions {
                 line_width: Some(20.try_into().unwrap()),
                 ..Default::default()
             }
@@ -443,7 +443,7 @@ mod tests {
         fn array_with_nested_array_exceeds_line_width(
             r#"array = [[1111111111, 2222222222], [3333333333, 4444444444]]"#,
             Default::default(),
-            FormatOptions {
+            FormatDefinitions {
                 line_width: Some(30.try_into().unwrap()),
                 ..Default::default()
             }
@@ -462,7 +462,7 @@ mod tests {
         fn array_with_nested_inline_table_exceeds_line_width(
             r#"array = [{ key1 = 1111111111, key2 = 2222222222 }, { key3 = [3333333333, 4444444444], key4 = [5555555555, 6666666666, 7777777777] }]"#,
             TomlVersion::V1_1_0_Preview,
-            FormatOptions {
+            FormatDefinitions {
                 line_width: Some(35.try_into().unwrap()),
                 ..Default::default()
             }

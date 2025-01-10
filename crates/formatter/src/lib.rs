@@ -5,7 +5,7 @@ pub use config::FormatOptions;
 pub use formatter::Formatter;
 
 use format::Format;
-use formatter::definitions::Definitions;
+use formatter::definitions::FormatDefinitions;
 
 #[cfg(test)]
 #[macro_export]
@@ -18,8 +18,8 @@ macro_rules! test_format {
         $crate::test_format!(#[test] fn $name($source, $toml_version) -> Ok($source););
     };
 
-    (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Ok(source);) => {
-        $crate::test_format!(#[test] fn $name($source, $toml_version, $options) -> Ok($source););
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definition:expr) -> Ok(source);) => {
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $definition) -> Ok($source););
     };
 
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
@@ -27,15 +27,16 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($expected:expr);) => {
-        $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatOptions::default()) -> Ok($expected););
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatDefinitions::default()) -> Ok($expected););
     };
 
-    (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Ok($expected:expr);) => {
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definition:expr) -> Ok($expected:expr);) => {
         #[tokio::test]
         async fn $name() {
             match $crate::Formatter::try_new(
                 $toml_version,
-                &$options,
+                &crate::FormatOptions::default(),
+                $definition,
                 None,
                 &schema_store::SchemaStore::default()
             ).await.unwrap().format($source).await {
@@ -54,15 +55,16 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
-        $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatOptions::default()) -> Err(_););
+        $crate::test_format!(#[test] fn $name($source, $toml_version, crate::FormatDefinitions::default()) -> Err(_););
     };
 
-    (#[test] fn $name:ident($source:expr, $toml_version:expr, $options:expr) -> Err(_);) => {
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr) -> Err(_);) => {
         #[tokio::test]
         async fn $name() {
             match $crate::Formatter::try_new(
                 $toml_version,
-                &$options,
+                &crate::FormatOptions::default(),
+                $definitions,
                 None,
                 &schema_store::SchemaStore::default()
             ).await.unwrap().format($source).await {
@@ -77,9 +79,9 @@ macro_rules! test_format {
 
 #[cfg(test)]
 mod test {
-    use config::{FormatOptions, QuoteStyle, TomlVersion};
-
     use super::*;
+    use crate::FormatDefinitions;
+    use config::{QuoteStyle, TomlVersion};
 
     test_format! {
         #[test]
@@ -217,7 +219,7 @@ key6 = 3  # key value tailing comment
 # end dangling comment2
 "#,
     TomlVersion::V1_1_0_Preview,
-    FormatOptions{
+    FormatDefinitions{
         quote_style: Some(QuoteStyle::Preserve),
         ..Default::default()
     }) -> Ok(source);

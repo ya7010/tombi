@@ -1,7 +1,7 @@
 pub mod definitions;
 
 use crate::Format;
-use config::{DateTimeDelimiter, LineEnding, TomlVersion};
+use config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use itertools::Either;
@@ -14,7 +14,8 @@ pub struct Formatter<'a> {
     toml_version: TomlVersion,
     indent_depth: u8,
     skip_indent: bool,
-    defs: crate::Definitions,
+    definitions: crate::FormatDefinitions,
+    #[allow(dead_code)]
     options: &'a crate::FormatOptions,
     #[allow(dead_code)]
     schema: Option<DocumentSchema>,
@@ -28,6 +29,7 @@ impl<'a> Formatter<'a> {
     pub async fn try_new(
         toml_version: TomlVersion,
         options: &'a crate::FormatOptions,
+        definitions: crate::FormatDefinitions,
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
@@ -48,31 +50,12 @@ impl<'a> Formatter<'a> {
             toml_version,
             indent_depth: 0,
             skip_indent: false,
-            defs: Default::default(),
+            definitions,
             options,
             schema,
             schema_store,
             buf: String::new(),
         })
-    }
-
-    /// Format a node and return the result as a string
-    pub(crate) fn format_to_string<T: Format>(
-        &mut self,
-        node: &T,
-    ) -> Result<String, std::fmt::Error> {
-        let old_buf = std::mem::take(&mut self.buf);
-        let old_indent = self.indent_depth;
-        let old_skip = self.skip_indent;
-
-        node.fmt(self)?;
-        let result = std::mem::take(&mut self.buf);
-
-        self.buf = old_buf;
-        self.indent_depth = old_indent;
-        self.skip_indent = old_skip;
-
-        Ok(result)
     }
 
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
@@ -99,29 +82,38 @@ impl<'a> Formatter<'a> {
         }
     }
 
+    /// Format a node and return the result as a string
+    pub(crate) fn format_to_string<T: Format>(
+        &mut self,
+        node: &T,
+    ) -> Result<String, std::fmt::Error> {
+        let old_buf = std::mem::take(&mut self.buf);
+        let old_indent = self.indent_depth;
+        let old_skip = self.skip_indent;
+
+        node.fmt(self)?;
+        let result = std::mem::take(&mut self.buf);
+
+        self.buf = old_buf;
+        self.indent_depth = old_indent;
+        self.skip_indent = old_skip;
+
+        Ok(result)
+    }
+
     #[inline]
     pub(crate) fn toml_version(&self) -> TomlVersion {
         self.toml_version
     }
 
     #[inline]
-    pub(crate) fn options(&self) -> &crate::FormatOptions {
-        self.options
-    }
-
-    #[inline]
-    pub(crate) fn defs(&self) -> &crate::Definitions {
-        &self.defs
-    }
-
-    #[inline]
     pub(crate) fn line_width(&self) -> u8 {
-        self.options.line_width.unwrap_or_default().value()
+        self.definitions.line_width.unwrap_or_default().value()
     }
 
     #[inline]
     pub(crate) fn line_ending(&self) -> &'static str {
-        match self.options.line_ending.unwrap_or_default() {
+        match self.definitions.line_ending.unwrap_or_default() {
             LineEnding::Lf => "\n",
             LineEnding::Crlf => "\r\n",
         }
@@ -129,10 +121,50 @@ impl<'a> Formatter<'a> {
 
     #[inline]
     pub(crate) fn date_time_delimiter(&self) -> Option<&'static str> {
-        match self.options.date_time_delimiter() {
+        match self.definitions.date_time_delimiter.unwrap_or_default() {
             DateTimeDelimiter::T => Some("T"),
             DateTimeDelimiter::Space => Some(" "),
             DateTimeDelimiter::Preserve => None,
+        }
+    }
+
+    #[inline]
+    pub(crate) fn quote_style(&self) -> config::QuoteStyle {
+        self.definitions.quote_style.unwrap_or_default()
+    }
+
+    #[inline]
+    pub(crate) const fn tailing_comment_space(&self) -> &'static str {
+        self.definitions.tailing_comment_space()
+    }
+
+    #[inline]
+    pub(crate) const fn singleline_array_bracket_inner_space(&self) -> &'static str {
+        self.definitions.singleline_array_bracket_inner_space()
+    }
+
+    #[inline]
+    pub(crate) const fn singleline_array_space_after_comma(&self) -> &'static str {
+        self.definitions.singleline_array_space_after_comma()
+    }
+
+    #[inline]
+    pub(crate) const fn singleline_inline_table_brace_inner_space(&self) -> &'static str {
+        self.definitions.singleline_inline_table_brace_inner_space()
+    }
+
+    #[inline]
+    pub(crate) const fn singleline_inline_table_space_after_comma(&self) -> &'static str {
+        self.definitions.singleline_inline_table_space_after_comma()
+    }
+
+    #[inline]
+    pub(crate) fn ident(&self, depth: u8) -> String {
+        match self.definitions.indent_style.unwrap_or_default() {
+            IndentStyle::Space => " ".repeat(
+                (self.definitions.indent_width.unwrap_or_default().value() * depth) as usize,
+            ),
+            IndentStyle::Tab => "\t".repeat(depth as usize),
         }
     }
 
@@ -148,7 +180,7 @@ impl<'a> Formatter<'a> {
 
             Ok(())
         } else {
-            write!(self, "{}", self.options().ident(self.indent_depth))
+            write!(self, "{}", self.ident(self.indent_depth))
         }
     }
 
@@ -163,13 +195,13 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    fn reset_indent(&mut self) {
-        self.indent_depth = 0;
+    pub(crate) fn skip_indent(&mut self) {
+        self.skip_indent = true;
     }
 
     #[inline]
-    pub(crate) fn skip_indent(&mut self) {
-        self.skip_indent = true;
+    pub(crate) fn reset_indent(&mut self) {
+        self.indent_depth = 0;
     }
 
     #[inline]

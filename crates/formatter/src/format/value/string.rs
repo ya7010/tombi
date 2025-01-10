@@ -12,7 +12,7 @@ impl Format for ast::BasicString {
 
         f.write_indent()?;
         let text = self.token().unwrap().text().to_owned();
-        let text = match f.options().quote_style() {
+        let text = match f.quote_style() {
             QuoteStyle::Double | QuoteStyle::Preserve => text,
             QuoteStyle::Single => {
                 // TODO: Only supports simple conditions, so it needs to be changed to behavior closer to black
@@ -41,7 +41,7 @@ impl Format for ast::LiteralString {
 
         f.write_indent()?;
         let text = self.token().unwrap().text().to_owned();
-        let text = match f.options().quote_style() {
+        let text = match f.quote_style() {
             QuoteStyle::Single | QuoteStyle::Preserve => text,
             QuoteStyle::Double => {
                 // TODO: Only supports simple conditions, so it needs to be changed to behavior closer to black
@@ -75,8 +75,8 @@ impl LiteralNode for ast::MultiLineLiteralString {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_format;
-    use config::{FormatOptions, QuoteStyle, TomlVersion};
+    use crate::{test_format, FormatDefinitions};
+    use config::{QuoteStyle, TomlVersion};
 
     test_format! {
         #[test]
@@ -93,7 +93,7 @@ mod tests {
         fn basic_string_value_quote_style_single1(
             r#"key = "value""#,
             TomlVersion::default(),
-            FormatOptions {
+            FormatDefinitions {
                 quote_style: Some(QuoteStyle::Single),
                 ..Default::default()
             }
@@ -105,7 +105,7 @@ mod tests {
         fn basic_string_value_quote_style_single2(
             r#"key = "'value'""#,
             TomlVersion::default(),
-            FormatOptions {
+            FormatDefinitions {
                 quote_style: Some(QuoteStyle::Single),
                 ..Default::default()
             }

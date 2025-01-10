@@ -1,6 +1,7 @@
 use crate::app::arg;
 use config::{FormatOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
+use formatter::formatter::definitions::FormatDefinitions;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 /// Format TOML files.
@@ -211,6 +212,7 @@ where
         match formatter::Formatter::try_new(
             toml_version,
             format_options,
+            FormatDefinitions::default(),
             source_path.map(itertools::Either::Right),
             schema_store,
         )
