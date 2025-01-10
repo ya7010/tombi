@@ -17,7 +17,7 @@
     },
     "toml-version": {
       "title": "TOML version.",
-      "description": "Specifies the TOML version when the TOML version is not specified in the schema.",
+      "description": "TOML version to use if not specified in the schema.",
       "anyOf": [
         {
           "$ref": "#/$defs/TomlVersion"
