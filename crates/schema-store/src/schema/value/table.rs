@@ -1,14 +1,16 @@
+use std::sync::{Arc, RwLock};
+
 use indexmap::IndexMap;
 
-use crate::Accessor;
+use crate::{schema::document::SchemaProperties, Accessor, Referable};
 
 use super::ValueSchema;
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone)]
 pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub properties: IndexMap<Accessor, ValueSchema>,
+    pub properties: SchemaProperties,
     pub required: Option<Vec<String>>,
     pub default: Option<serde_json::Value>,
 }
@@ -21,7 +23,7 @@ impl TableSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = ValueSchema::new(&object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
                     properties.insert(Accessor::Key(key.into()), value_schema);
                 }
             }
@@ -34,7 +36,7 @@ impl TableSchema {
             description: object
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
-            properties,
+            properties: Arc::new(RwLock::new(properties)),
             required: object.get("required").and_then(|v| {
                 v.as_array().map(|arr| {
                     arr.iter()

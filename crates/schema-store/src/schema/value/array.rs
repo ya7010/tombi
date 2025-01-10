@@ -1,6 +1,6 @@
 use super::ValueSchema;
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
     pub title: Option<String>,
     pub description: Option<String>,

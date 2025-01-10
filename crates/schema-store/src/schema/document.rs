@@ -1,22 +1,25 @@
+use super::{referable::Referable, ValueSchema};
 use crate::Accessor;
 use config::TomlVersion;
 use indexmap::IndexMap;
 use std::sync::{Arc, RwLock};
 
-use super::{referable::Referable, ValueSchema};
+pub type SchemaProperties = Arc<RwLock<IndexMap<Accessor, Referable<ValueSchema>>>>;
+pub type SchemaDefinitions = Arc<RwLock<ahash::HashMap<String, Referable<ValueSchema>>>>;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {
+    pub document_url: url::Url,
+    pub schema_id: Option<url::Url>,
     pub(crate) toml_version: Option<TomlVersion>,
     pub title: Option<String>,
     pub description: Option<String>,
-    pub schema_url: Option<url::Url>,
-    pub properties: Arc<RwLock<IndexMap<Accessor, Referable<ValueSchema>>>>,
-    pub definitions: Arc<RwLock<ahash::HashMap<String, Referable<ValueSchema>>>>,
+    pub properties: SchemaProperties,
+    pub definitions: SchemaDefinitions,
 }
 
 impl DocumentSchema {
-    pub fn new(content: serde_json::Value) -> Self {
+    pub fn new(content: serde_json::Value, document_url: url::Url) -> Self {
         let toml_version = content
             .get("x-tombi-toml-version")
             .and_then(|obj| match obj {
@@ -79,10 +82,11 @@ impl DocumentSchema {
         }
 
         Self {
+            document_url,
+            schema_id: schema_url,
             toml_version,
             title,
             description,
-            schema_url,
             properties: Arc::new(RwLock::new(properties)),
             definitions: Arc::new(RwLock::new(definitions)),
         }
@@ -92,43 +96,5 @@ impl DocumentSchema {
         self.toml_version.inspect(|version| {
             tracing::debug!("use schema TOML version: {version}");
         })
-    }
-
-    pub fn find_schema_candidates(&self, accessors: &[Accessor]) -> Vec<ValueSchema> {
-        let candidates = Vec::new();
-        let mut _properties = self.properties.write().unwrap();
-
-        if accessors.is_empty() {
-            return candidates;
-        }
-
-        candidates
-    }
-}
-
-impl PartialEq for DocumentSchema {
-    fn eq(&self, other: &Self) -> bool {
-        let props_eq = if let (Ok(self_props), Ok(other_props)) =
-            (self.properties.read(), other.properties.read())
-        {
-            *self_props == *other_props
-        } else {
-            false
-        };
-
-        let defs_eq = if let (Ok(self_defs), Ok(other_defs)) =
-            (self.definitions.read(), other.definitions.read())
-        {
-            *self_defs == *other_defs
-        } else {
-            false
-        };
-
-        self.toml_version == other.toml_version
-            && self.title == other.title
-            && self.description == other.description
-            && self.schema_url == other.schema_url
-            && props_eq
-            && defs_eq
     }
 }

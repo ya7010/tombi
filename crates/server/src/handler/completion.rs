@@ -1,11 +1,10 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use dashmap::try_result::TryResult;
 use tower_lsp::lsp_types::{
-    self, CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse,
-    TextDocumentPositionParams,
+    CompletionItem, CompletionParams, CompletionResponse, TextDocumentPositionParams,
 };
 
-use crate::backend;
+use crate::{backend, completion::FindCompletionItems};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_completion(
@@ -80,8 +79,6 @@ fn get_completion_items(
     document_schema: &schema_store::DocumentSchema,
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionItem> {
-    let mut items = vec![];
-
     let mut accessors: Vec<schema_store::Accessor> = vec![];
     for node in ancestors_at_position(root.syntax(), position) {
         if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
@@ -127,35 +124,12 @@ fn get_completion_items(
         }
     }
 
-    if let Ok(mut properties) = document_schema.properties.write() {
-        if accessors.is_empty() {
-            for (key, value_schema) in properties.iter_mut() {
-                let value_schema = match value_schema.resolve(document_schema) {
-                    Ok(value_schema) => value_schema,
-                    Err(err) => {
-                        tracing::warn!("failed to resolve {key} schema. {err}");
-                        continue;
-                    }
-                };
-                let completion_item = CompletionItem {
-                    label: key.to_string(),
-                    kind: Some(CompletionItemKind::PROPERTY),
-                    detail: value_schema.title().map(ToString::to_string),
-                    documentation: value_schema.description().map(|description| {
-                        lsp_types::Documentation::MarkupContent(lsp_types::MarkupContent {
-                            kind: lsp_types::MarkupKind::Markdown,
-                            value: description.to_string(),
-                        })
-                    }),
-                    ..Default::default()
-                };
+    let (completion_items, errors) =
+        document_schema.find_completion_items(&accessors, &document_schema.definitions);
 
-                items.push(completion_item);
-            }
-        } else {
-            tracing::warn!("failed to acquire the DocumentSchema write lock");
-        }
+    for error in errors {
+        tracing::error!("error: {:?}", error);
     }
 
-    items
+    completion_items
 }

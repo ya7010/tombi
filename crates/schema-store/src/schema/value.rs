@@ -12,8 +12,9 @@ mod one_of;
 mod string;
 mod table;
 
-use all_of::AllOfSchema;
-use any_of::AnyOfSchema;
+use crate::{Referable, SchemaDefinitions};
+pub use all_of::AllOfSchema;
+pub use any_of::AnyOfSchema;
 pub use array::ArraySchema;
 pub use boolean::BooleanSchema;
 pub use float::FloatSchema;
@@ -22,13 +23,11 @@ pub use local_date::LocalDateSchema;
 pub use local_date_time::LocalDateTimeSchema;
 pub use local_time::LocalTimeSchema;
 pub use offset_date_time::OffsetDateTimeSchema;
-use one_of::OneOfSchema;
+pub use one_of::OneOfSchema;
 pub use string::StringSchema;
 pub use table::TableSchema;
 
-use super::{referable::Referable, DocumentSchema};
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub enum ValueSchema {
     Null,
     Boolean(BooleanSchema),
@@ -154,27 +153,29 @@ impl Referable<ValueSchema> {
 
     pub fn resolve<'a>(
         &'a mut self,
-        document_schema: &'a DocumentSchema,
+        definitions: &SchemaDefinitions,
     ) -> Result<&'a ValueSchema, crate::Error> {
         match self {
             Referable::Ref(ref_str) => {
-                let definitions = match document_schema.definitions.read() {
-                    Ok(guard) => guard,
-                    Err(_) => {
-                        return Err(crate::Error::SchemaLockError {
-                            ref_string: ref_str.clone(),
-                        });
-                    }
-                };
+                {
+                    let defs = match definitions.read() {
+                        Ok(guard) => guard,
+                        Err(_) => {
+                            return Err(crate::Error::ReferenceLockError {
+                                ref_string: ref_str.clone(),
+                            });
+                        }
+                    };
 
-                if let Some(definition_schema) = definitions.get(ref_str) {
-                    *self = definition_schema.clone();
-                    self.resolve(document_schema)
-                } else {
-                    Err(crate::Error::DefinitionNotFound {
-                        definition_ref: ref_str.clone(),
-                    })
+                    if let Some(definition_schema) = defs.get(ref_str) {
+                        *self = definition_schema.clone();
+                    } else {
+                        Err(crate::Error::DefinitionNotFound {
+                            definition_ref: ref_str.clone(),
+                        })?;
+                    }
                 }
+                self.resolve(definitions)
             }
             Referable::Resolved(resolved) => {
                 match resolved {
@@ -182,7 +183,7 @@ impl Referable<ValueSchema> {
                     | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                     | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                         for schema in schemas {
-                            schema.resolve(document_schema)?;
+                            schema.resolve(definitions)?;
                         }
                     }
                     _ => {}

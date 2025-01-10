@@ -143,7 +143,7 @@ impl SchemaStore {
             schema_url: schema_url.to_owned(),
         })?;
 
-        Ok(DocumentSchema::new(schema))
+        Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
     async fn try_load_schema(&self, schema_url: &Url) -> Result<DocumentSchema, crate::Error> {

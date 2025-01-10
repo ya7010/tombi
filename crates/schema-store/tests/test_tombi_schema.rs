@@ -24,13 +24,17 @@ fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
     use std::io::Read;
 
     let path = project_root()?;
-    let file = File::open(path.join("tombi.schema.json"))?;
+    let document_path = path.join("tombi.schema.json");
+    let file = File::open(&document_path)?;
     let mut reader = BufReader::new(file);
 
     let mut contents = String::new();
     reader.read_to_string(&mut contents)?;
 
-    let document_schema = DocumentSchema::new(serde_json::from_str(&contents)?);
+    let document_schema = DocumentSchema::new(
+        serde_json::from_str(&contents)?,
+        url::Url::from_file_path(&document_path).unwrap(),
+    );
 
     dbg!(document_schema);
     Ok(())

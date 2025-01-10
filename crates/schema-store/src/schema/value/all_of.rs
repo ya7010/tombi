@@ -2,7 +2,7 @@ use crate::Referable;
 
 use super::ValueSchema;
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone)]
 pub struct AllOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
