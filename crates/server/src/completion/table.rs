@@ -1,6 +1,6 @@
 use super::{CompletionHint, FindCompletionItems};
 use indexmap::map::MutableKeys;
-use schema_store::{FindCandidates, TableSchema};
+use schema_store::{FindCandidates, TableSchema, ValueSchema};
 use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind, MarkupContent, MarkupKind};
 
 impl FindCompletionItems for TableSchema {
@@ -22,17 +22,28 @@ impl FindCompletionItems for TableSchema {
         };
 
         if accessors.is_empty() {
-            for (key, value_schema) in properties.iter_mut2() {
-                if let Ok(schema) = value_schema.resolve(definitions) {
+            for (key, value) in properties.iter_mut2() {
+                if let Ok(value_schema) = value.resolve(definitions) {
                     let (schema_candidates, schema_errors) =
-                        schema.find_candidates(accessors, definitions);
+                        value_schema.find_candidates(accessors, definitions);
 
-                    for candidate in schema_candidates {
+                    for schema_candidate in schema_candidates {
+                        match completion_hint {
+                            Some(CompletionHint::InTableHeader) => {
+                                if !value_schema.is_match(&|s| {
+                                    matches!(s, ValueSchema::Table(_) | ValueSchema::Array(_))
+                                }) {
+                                    continue;
+                                }
+                            }
+                            _ => {}
+                        }
+
                         let completion_item = CompletionItem {
                             label: key.to_string(),
                             kind: Some(CompletionItemKind::PROPERTY),
-                            detail: candidate.title().map(ToString::to_string),
-                            documentation: candidate.description().map(|description| {
+                            detail: schema_candidate.title().map(ToString::to_string),
+                            documentation: schema_candidate.description().map(|description| {
                                 tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
                                     kind: MarkupKind::Markdown,
                                     value: description.to_string(),
