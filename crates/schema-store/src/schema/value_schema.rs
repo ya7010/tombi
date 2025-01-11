@@ -1,11 +1,12 @@
-use crate::{Referable, SchemaDefinitions};
-use std::sync::{Arc, RwLock};
-
+use super::FindCandidates;
 use super::{
     AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema,
     LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema,
     StringSchema, TableSchema,
 };
+use crate::Referable;
+use crate::{Accessor, SchemaDefinitions};
+use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Clone)]
 pub enum ValueSchema {
@@ -215,6 +216,23 @@ impl Referable<ValueSchema> {
                     _ => {}
                 }
                 Ok(resolved)
+            }
+        }
+    }
+}
+
+impl FindCandidates for ValueSchema {
+    fn find_candidates(
+        &self,
+        accessors: &[Accessor],
+        definitions: &SchemaDefinitions,
+    ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
+        if accessors.is_empty() {
+            (vec![self.clone()], Vec::new())
+        } else {
+            match self {
+                Self::Table(table) => table.find_candidates(accessors, definitions),
+                _ => (Vec::new(), Vec::new()),
             }
         }
     }

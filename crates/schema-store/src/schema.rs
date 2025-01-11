@@ -2,7 +2,6 @@ mod all_of_schema;
 mod any_of_schema;
 mod array_schema;
 mod boolean_schema;
-mod candidate_schema;
 mod catalog_schema;
 mod document_schema;
 mod float_schema;
@@ -33,7 +32,6 @@ pub use table_schema::TableSchema;
 
 use std::sync::{Arc, RwLock};
 
-pub use candidate_schema::FindCandidates;
 pub use catalog_schema::CatalogSchema;
 pub use document_schema::DocumentSchema;
 use indexmap::IndexMap;
@@ -45,3 +43,11 @@ use crate::Accessor;
 pub type SchemaProperties = Arc<RwLock<IndexMap<Accessor, Referable<ValueSchema>>>>;
 pub type SchemaDefinitions = Arc<RwLock<ahash::HashMap<String, Referable<ValueSchema>>>>;
 pub type Schemas = Arc<RwLock<Vec<Referable<ValueSchema>>>>;
+
+pub trait FindCandidates {
+    fn find_candidates(
+        &self,
+        accessors: &[Accessor],
+        definitions: &SchemaDefinitions,
+    ) -> (Vec<ValueSchema>, Vec<crate::Error>);
+}

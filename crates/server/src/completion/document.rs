@@ -27,6 +27,8 @@ impl FindCompletionItems for DocumentSchema {
                         value_schema.find_candidates(accessors, definitions);
 
                     for schema_candidate in schema_candidates {
+                        tracing::debug!("key: {}", key);
+                        tracing::debug!("schema_candidate: {:?}", schema_candidate);
                         match completion_hint {
                             Some(CompletionHint::InTableHeader) => {
                                 if !value_schema.is_match(&|s| {
