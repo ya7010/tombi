@@ -1,12 +1,13 @@
 use schema_store::AnyOfSchema;
 
-use crate::completion::{Completion, FindCompletionItems};
+use crate::completion::{Completion, CompletionHint, FindCompletionItems};
 
 impl FindCompletionItems for AnyOfSchema {
     fn find_completion_items(
         &self,
         accessors: &[schema_store::Accessor],
         definitions: &schema_store::SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
     ) -> (
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,
@@ -18,7 +19,7 @@ impl FindCompletionItems for AnyOfSchema {
             for value_schema in schemas.iter_mut() {
                 if let Ok(schema) = value_schema.resolve(definitions) {
                     let (mut inner_completion_items, schema_errors) =
-                        schema.find_completion_items(accessors, definitions);
+                        schema.find_completion_items(accessors, definitions, completion_hint);
 
                     for completion_item in &mut inner_completion_items {
                         if completion_item.detail.is_none() {

@@ -1,4 +1,4 @@
-use super::FindCompletionItems;
+use super::{CompletionHint, FindCompletionItems};
 use indexmap::map::MutableKeys;
 use schema_store::{FindCandidates, TableSchema};
 use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind, MarkupContent, MarkupKind};
@@ -8,6 +8,7 @@ impl FindCompletionItems for TableSchema {
         &self,
         accessors: &[schema_store::Accessor],
         definitions: &schema_store::SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
     ) -> (
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,
@@ -50,7 +51,11 @@ impl FindCompletionItems for TableSchema {
 
         if let Some(value) = properties.get_mut(&accessors[0]) {
             if let Ok(schema) = value.resolve(&definitions) {
-                return schema.find_completion_items(&accessors[1..], &definitions);
+                return schema.find_completion_items(
+                    &accessors[1..],
+                    &definitions,
+                    completion_hint,
+                );
             }
         }
 

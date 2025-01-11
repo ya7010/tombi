@@ -4,7 +4,10 @@ use tower_lsp::lsp_types::{
     CompletionItem, CompletionParams, CompletionResponse, TextDocumentPositionParams,
 };
 
-use crate::{backend, completion::FindCompletionItems};
+use crate::{
+    backend,
+    completion::{CompletionHint, FindCompletionItems},
+};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_completion(
@@ -80,6 +83,8 @@ fn get_completion_items(
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionItem> {
     let mut accessors: Vec<schema_store::Accessor> = vec![];
+    let mut completion_hint = None;
+
     for node in ancestors_at_position(root.syntax(), position) {
         if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
             if let Some(keys) = kv.keys() {
@@ -93,20 +98,12 @@ fn get_completion_items(
                     }
                 }
             }
-        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            if let Some(header) = array_of_tables.header() {
-                let mut header_keys = vec![];
-                for key in header.keys() {
-                    if key.syntax().range().end() < position {
-                        header_keys.push(schema_store::Accessor::Key(key.to_string().into()));
-                    }
-                }
-
-                header_keys.extend(accessors);
-                accessors = header_keys;
-            }
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
             if let Some(header) = table.header() {
+                if header.syntax().range().contains(position) {
+                    completion_hint = Some(CompletionHint::InTableHeader);
+                }
+
                 let mut header_keys = vec![];
                 for key in header.keys() {
                     if key.syntax().range().end() < position {
@@ -121,11 +118,30 @@ fn get_completion_items(
                 header_keys.extend(accessors);
                 accessors = header_keys;
             }
+        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
+            if let Some(header) = array_of_tables.header() {
+                if header.syntax().range().contains(position) {
+                    completion_hint = Some(CompletionHint::InTableHeader);
+                }
+
+                let mut header_keys = vec![];
+                for key in header.keys() {
+                    if key.syntax().range().end() < position {
+                        header_keys.push(schema_store::Accessor::Key(key.to_string().into()));
+                    }
+                }
+
+                header_keys.extend(accessors);
+                accessors = header_keys;
+            }
         }
     }
 
-    let (completion_items, errors) =
-        document_schema.find_completion_items(&accessors, &document_schema.definitions);
+    let (completion_items, errors) = document_schema.find_completion_items(
+        &accessors,
+        &document_schema.definitions,
+        completion_hint,
+    );
 
     for error in errors {
         tracing::error!("error: {:?}", error);

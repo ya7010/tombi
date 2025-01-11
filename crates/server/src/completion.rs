@@ -1,7 +1,9 @@
 mod document;
+mod hint;
 mod table;
 mod value;
 
+pub use hint::CompletionHint;
 use schema_store::{Accessor, SchemaDefinitions};
 use tower_lsp::lsp_types::{CompletionItem, MarkupContent, MarkupKind};
 
@@ -10,6 +12,7 @@ pub trait FindCompletionItems {
         &self,
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
     ) -> (Vec<CompletionItem>, Vec<schema_store::Error>);
 }
 
