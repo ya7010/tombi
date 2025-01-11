@@ -1,4 +1,4 @@
-use super::{referable::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
+use super::{referable_schema::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
 use crate::Accessor;
 use config::TomlVersion;
 use indexmap::IndexMap;
