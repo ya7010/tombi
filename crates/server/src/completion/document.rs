@@ -28,10 +28,13 @@ impl FindCompletionItems for DocumentSchema {
 
                     for schema_candidate in schema_candidates {
                         match completion_hint {
-                            Some(CompletionHint::InTableHeader) => match value_schema {
-                                ValueSchema::Table(_) | ValueSchema::Array(_) => {}
-                                _ => continue,
-                            },
+                            Some(CompletionHint::InTableHeader) => {
+                                if !value_schema.is_match(&|s| {
+                                    matches!(s, ValueSchema::Table(_) | ValueSchema::Array(_))
+                                }) {
+                                    continue;
+                                }
+                            }
                             _ => {}
                         }
 

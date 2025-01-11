@@ -99,11 +99,11 @@ fn get_completion_items(
                 }
             }
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            if let Some(header) = table.header() {
-                if header.syntax().range().contains(position) {
-                    completion_hint = Some(CompletionHint::InTableHeader);
-                }
+            if table.contains_header(position) {
+                completion_hint = Some(CompletionHint::InTableHeader);
+            }
 
+            if let Some(header) = table.header() {
                 let mut header_keys = vec![];
                 for key in header.keys() {
                     if key.syntax().range().end() < position {
@@ -119,11 +119,11 @@ fn get_completion_items(
                 accessors = header_keys;
             }
         } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            if let Some(header) = array_of_tables.header() {
-                if header.syntax().range().contains(position) {
-                    completion_hint = Some(CompletionHint::InTableHeader);
-                }
+            if array_of_tables.contains_header(position) {
+                completion_hint = Some(CompletionHint::InTableHeader);
+            }
 
+            if let Some(header) = array_of_tables.header() {
                 let mut header_keys = vec![];
                 for key in header.keys() {
                     if key.syntax().range().end() < position {

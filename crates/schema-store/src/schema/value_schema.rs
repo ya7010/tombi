@@ -120,6 +120,48 @@ impl ValueSchema {
             ValueSchema::AllOf(schema) => schema.description.as_deref(),
         }
     }
+
+    pub fn is_match<T: Fn(&ValueSchema) -> bool>(&self, condition: &T) -> bool {
+        match self {
+            ValueSchema::OneOf(one_of) => {
+                let Ok(mut schemas) = one_of.schemas.write() else {
+                    return false;
+                };
+                schemas.iter_mut().any(|schema| {
+                    if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
+                        schema.is_match(condition)
+                    } else {
+                        false
+                    }
+                })
+            }
+            ValueSchema::AnyOf(any_of) => {
+                let Ok(mut schemas) = any_of.schemas.write() else {
+                    return false;
+                };
+                schemas.iter_mut().any(|schema| {
+                    if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
+                        schema.is_match(condition)
+                    } else {
+                        false
+                    }
+                })
+            }
+            ValueSchema::AllOf(all_of) => {
+                let Ok(mut schemas) = all_of.schemas.write() else {
+                    return false;
+                };
+                schemas.iter_mut().all(|schema| {
+                    if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
+                        schema.is_match(condition)
+                    } else {
+                        false
+                    }
+                })
+            }
+            _ => condition(self),
+        }
+    }
 }
 
 impl Referable<ValueSchema> {
