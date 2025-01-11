@@ -47,9 +47,9 @@ impl FindCompletionItems for DocumentSchema {
             return (completion_items, errors);
         }
 
-        if let Some(value) = properties.get_mut(&accessors[0]) {
-            if let Ok(schema) = value.resolve(&definitions) {
-                return schema.find_completion_items(&accessors[1..], &definitions);
+        if let Some(referable_value_schema) = properties.get_mut(&accessors[0]) {
+            if let Ok(value_schema) = referable_value_schema.resolve(&definitions) {
+                return value_schema.find_completion_items(&accessors[1..], &definitions);
             }
         }
 

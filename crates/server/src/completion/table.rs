@@ -21,8 +21,8 @@ impl FindCompletionItems for TableSchema {
         };
 
         if accessors.is_empty() {
-            for (key, value) in properties.iter_mut2() {
-                if let Ok(schema) = value.resolve(definitions) {
+            for (key, value_schema) in properties.iter_mut2() {
+                if let Ok(schema) = value_schema.resolve(definitions) {
                     let (schema_candidates, schema_errors) =
                         schema.find_candidates(accessors, definitions);
 

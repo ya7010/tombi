@@ -1,11 +1,8 @@
-use super::{referable::Referable, ValueSchema};
+use super::{referable::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
 use crate::Accessor;
 use config::TomlVersion;
 use indexmap::IndexMap;
 use std::sync::{Arc, RwLock};
-
-pub type SchemaProperties = Arc<RwLock<IndexMap<Accessor, Referable<ValueSchema>>>>;
-pub type SchemaDefinitions = Arc<RwLock<ahash::HashMap<String, Referable<ValueSchema>>>>;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {

@@ -24,6 +24,7 @@ pub use local_date_time::LocalDateTimeSchema;
 pub use local_time::LocalTimeSchema;
 pub use offset_date_time::OffsetDateTimeSchema;
 pub use one_of::OneOfSchema;
+use std::sync::{Arc, RwLock};
 pub use string::StringSchema;
 pub use table::TableSchema;
 
@@ -61,16 +62,18 @@ impl ValueSchema {
                             }
                             "date-time" => {
                                 return Some(ValueSchema::OneOf(OneOfSchema {
-                                    schemas: [
-                                        ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
-                                            object,
-                                        )),
-                                        ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
-                                            object,
-                                        )),
-                                    ]
-                                    .map(Referable::Resolved)
-                                    .to_vec(),
+                                    schemas: Arc::new(RwLock::new(
+                                        [
+                                            ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
+                                                object,
+                                            )),
+                                            ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
+                                                object,
+                                            )),
+                                        ]
+                                        .map(Referable::Resolved)
+                                        .to_vec(),
+                                    )),
                                     ..Default::default()
                                 }));
                             }
@@ -182,8 +185,10 @@ impl Referable<ValueSchema> {
                     ValueSchema::OneOf(OneOfSchema { schemas, .. })
                     | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                     | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                        for schema in schemas {
-                            schema.resolve(definitions)?;
+                        if let Ok(mut schemas) = schemas.write() {
+                            for schema in schemas.iter_mut() {
+                                schema.resolve(definitions)?;
+                            }
                         }
                     }
                     _ => {}

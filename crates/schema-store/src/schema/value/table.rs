@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
-use crate::{schema::document::SchemaProperties, Accessor, Referable};
+use crate::{Accessor, Referable, SchemaProperties};
 
 use super::ValueSchema;
 

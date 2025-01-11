@@ -46,15 +46,15 @@ impl std::fmt::Display for HoverContent {
 }
 
 impl From<HoverContent> for tower_lsp::lsp_types::Hover {
-    fn from(val: HoverContent) -> Self {
+    fn from(value: HoverContent) -> Self {
         tower_lsp::lsp_types::Hover {
             contents: tower_lsp::lsp_types::HoverContents::Markup(
                 tower_lsp::lsp_types::MarkupContent {
                     kind: tower_lsp::lsp_types::MarkupKind::Markdown,
-                    value: val.to_string(),
+                    value: value.to_string(),
                 },
             ),
-            range: val.range.map(Into::into),
+            range: value.range.map(Into::into),
         }
     }
 }

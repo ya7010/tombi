@@ -1,4 +1,6 @@
-use crate::Referable;
+use std::sync::{Arc, RwLock};
+
+use crate::{Referable, Schemas};
 
 use super::ValueSchema;
 
@@ -6,7 +8,7 @@ use super::ValueSchema;
 pub struct AnyOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub schemas: Vec<Referable<ValueSchema>>,
+    pub schemas: Schemas,
     pub default: Option<serde_json::Value>,
 }
 
@@ -35,7 +37,7 @@ impl AnyOfSchema {
         Self {
             title,
             description,
-            schemas,
+            schemas: Arc::new(RwLock::new(schemas)),
             default,
         }
     }
