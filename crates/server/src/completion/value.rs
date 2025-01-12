@@ -3,6 +3,10 @@ mod any_of;
 mod boolean;
 mod float;
 mod integer;
+mod local_date;
+mod local_date_time;
+mod local_time;
+mod offset_date_time;
 mod one_of;
 mod string;
 
@@ -45,6 +49,18 @@ impl FindCompletionItems for ValueSchema {
             }
             Self::String(string) => {
                 string.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::OffsetDateTime(offset_date_time) => {
+                offset_date_time.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::LocalDateTime(local_date_time) => {
+                local_date_time.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::LocalDate(local_date) => {
+                local_date.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::LocalTime(local_time) => {
+                local_time.find_completion_items(accessors, definitions, completion_hint)
             }
             _ => (Vec::new(), Vec::new()),
         }

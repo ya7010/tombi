@@ -18,7 +18,6 @@ impl FindCompletionItems for FloatSchema {
                 .map(|value| tower_lsp::lsp_types::CompletionItem {
                     label: value.to_string(),
                     kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                    detail: Some("Integer".to_string()),
                     ..Default::default()
                 })
                 .collect();

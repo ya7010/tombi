@@ -1,8 +1,9 @@
-use schema_store::BooleanSchema;
+use chrono;
+use schema_store::LocalTimeSchema;
 
 use crate::completion::FindCompletionItems;
 
-impl FindCompletionItems for BooleanSchema {
+impl FindCompletionItems for LocalTimeSchema {
     fn find_completion_items(
         &self,
         _accessors: &[schema_store::Accessor],
@@ -24,14 +25,11 @@ impl FindCompletionItems for BooleanSchema {
             return (items, Vec::with_capacity(0));
         } else {
             (
-                ["true", "false"]
-                    .into_iter()
-                    .map(|label| tower_lsp::lsp_types::CompletionItem {
-                        label: label.to_string(),
-                        kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                        ..Default::default()
-                    })
-                    .collect(),
+                vec![tower_lsp::lsp_types::CompletionItem {
+                    label: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                    ..Default::default()
+                }],
                 Vec::with_capacity(0),
             )
         }

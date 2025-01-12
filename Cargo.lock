@@ -1811,6 +1811,7 @@ dependencies = [
  "ahash",
  "ast",
  "camino",
+ "chrono",
  "clap",
  "config",
  "crossbeam-channel",

@@ -39,6 +39,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 syntax.workspace = true
 ahash.workspace = true
+chrono.workspace = true
 
 [dev-dependencies]
 rstest = { workspace = true }
