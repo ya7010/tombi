@@ -34,14 +34,13 @@ use std::sync::{Arc, RwLock};
 
 pub use catalog_schema::CatalogSchema;
 pub use document_schema::DocumentSchema;
-use indexmap::IndexMap;
 pub use referable_schema::Referable;
 pub use value_schema::*;
 
 use crate::Accessor;
 
-pub type SchemaProperties = Arc<RwLock<IndexMap<Accessor, Referable<ValueSchema>>>>;
-pub type SchemaDefinitions = Arc<RwLock<ahash::HashMap<String, Referable<ValueSchema>>>>;
+pub type SchemaProperties = dashmap::DashMap<Accessor, Referable<ValueSchema>>;
+pub type SchemaDefinitions = dashmap::DashMap<String, Referable<ValueSchema>>;
 pub type Schemas = Arc<RwLock<Vec<Referable<ValueSchema>>>>;
 
 pub trait FindCandidates {

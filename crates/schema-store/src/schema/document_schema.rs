@@ -2,8 +2,7 @@ use super::FindCandidates;
 use super::{referable_schema::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
 use crate::Accessor;
 use config::TomlVersion;
-use indexmap::IndexMap;
-use std::sync::{Arc, RwLock};
+use dashmap::DashMap;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {
@@ -39,7 +38,7 @@ impl DocumentSchema {
             .and_then(|v| v.as_str())
             .and_then(|s| url::Url::parse(s).ok());
 
-        let mut properties = IndexMap::default();
+        let properties = DashMap::default();
         if content.get("properties").is_some() {
             if let Some(serde_json::Value::Object(object)) = content.get("properties") {
                 for (key, value) in object.into_iter() {
@@ -53,7 +52,7 @@ impl DocumentSchema {
             }
         }
 
-        let mut definitions = ahash::HashMap::default();
+        let definitions = DashMap::default();
         if content.get("definitions").is_some() {
             if let Some(serde_json::Value::Object(object)) = content.get("definitions") {
                 for (key, value) in object.into_iter() {
@@ -85,8 +84,8 @@ impl DocumentSchema {
             toml_version,
             title,
             description,
-            properties: Arc::new(RwLock::new(properties)),
-            definitions: Arc::new(RwLock::new(definitions)),
+            properties,
+            definitions,
         }
     }
 
@@ -106,15 +105,8 @@ impl FindCandidates for DocumentSchema {
         let mut candidates = Vec::new();
         let mut errors = Vec::new();
 
-        let Ok(mut properties) = self.properties.write() else {
-            errors.push(crate::Error::DocumentLockError {
-                schema_url: self.document_url.clone(),
-            });
-            return (candidates, errors);
-        };
-
         if accessors.is_empty() {
-            for value in properties.values_mut() {
+            for mut value in self.properties.iter_mut() {
                 if let Ok(schema) = value.resolve(definitions) {
                     let (schema_candidates, schema_errors) =
                         schema.find_candidates(accessors, definitions);
@@ -126,7 +118,7 @@ impl FindCandidates for DocumentSchema {
             return (candidates, errors);
         }
 
-        if let Some(value) = properties.get_mut(&accessors[0]) {
+        if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
             if let Ok(schema) = value.resolve(&definitions) {
                 return schema.find_candidates(&accessors[1..], &definitions);
             }

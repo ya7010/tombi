@@ -1,7 +1,6 @@
 use crate::completion::CompletionCandidate;
 
 use super::{CompletionHint, FindCompletionItems};
-use indexmap::map::MutableKeys;
 use schema_store::{Accessor, DocumentSchema, FindCandidates, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind};
 
@@ -15,23 +14,14 @@ impl FindCompletionItems for DocumentSchema {
         let mut completion_items = Vec::new();
         let mut errors = Vec::new();
 
-        let Ok(mut properties) = self.properties.write() else {
-            errors.push(schema_store::Error::DocumentLockError {
-                schema_url: self.document_url.clone(),
-            });
-            return (completion_items, errors);
-        };
-
         if accessors.is_empty() {
-            for (key, value) in properties.iter_mut2() {
-                if let Ok(value_schema) = value.resolve(definitions) {
+            for mut property in self.properties.iter_mut() {
+                let key = property.key().to_string();
+                if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                     let (schema_candidates, schema_errors) =
                         value_schema.find_candidates(accessors, definitions);
 
                     for schema_candidate in schema_candidates {
-                        tracing::debug!("key: {}", key);
-                        tracing::debug!("schema_candidate: {:?}", schema_candidate);
-
                         match completion_hint {
                             Some(CompletionHint::InTableHeader) => {
                                 if !value_schema.is_match(&|s| {
@@ -60,7 +50,7 @@ impl FindCompletionItems for DocumentSchema {
             return (completion_items, errors);
         }
 
-        if let Some(referable_value_schema) = properties.get_mut(&accessors[0]) {
+        if let Some(mut referable_value_schema) = self.properties.get_mut(&accessors[0]) {
             if let Ok(value_schema) = referable_value_schema.resolve(&definitions) {
                 return value_schema.find_completion_items(
                     &accessors[1..],

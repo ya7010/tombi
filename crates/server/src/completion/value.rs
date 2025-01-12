@@ -1,5 +1,6 @@
 mod all_of;
 mod any_of;
+mod boolean;
 mod one_of;
 
 use super::{CompletionCandidate, CompletionHint, FindCompletionItems};
@@ -29,6 +30,9 @@ impl FindCompletionItems for ValueSchema {
             }
             Self::OneOf(one_of) => {
                 one_of.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::Boolean(boolean) => {
+                boolean.find_completion_items(accessors, definitions, completion_hint)
             }
             _ => (Vec::new(), Vec::new()),
         }

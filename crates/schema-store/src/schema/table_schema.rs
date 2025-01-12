@@ -1,8 +1,7 @@
 use super::FindCandidates;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
-use indexmap::IndexMap;
-use std::sync::{Arc, RwLock};
+use dashmap::DashMap;
 
 #[derive(Debug, Default, Clone)]
 pub struct TableSchema {
@@ -15,7 +14,7 @@ pub struct TableSchema {
 
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
-        let mut properties = IndexMap::new();
+        let properties = DashMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
                 let Some(object) = value.as_object() else {
@@ -34,7 +33,7 @@ impl TableSchema {
             description: object
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
-            properties: Arc::new(RwLock::new(properties)),
+            properties,
             required: object.get("required").and_then(|v| {
                 v.as_array().map(|arr| {
                     arr.iter()
@@ -56,16 +55,11 @@ impl FindCandidates for TableSchema {
         let mut candidates = Vec::new();
         let mut errors = Vec::new();
 
-        let Ok(mut properties) = self.properties.write() else {
-            errors.push(crate::Error::SchemaLockError);
-            return (candidates, errors);
-        };
-
         if accessors.is_empty() {
-            for value in properties.values_mut() {
-                if let Ok(schema) = value.resolve(definitions) {
+            for mut property in self.properties.iter_mut() {
+                if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                     let (schema_candidates, schema_errors) =
-                        schema.find_candidates(accessors, definitions);
+                        value_schema.find_candidates(accessors, definitions);
                     candidates.extend(schema_candidates);
                     errors.extend(schema_errors);
                 }
@@ -74,7 +68,7 @@ impl FindCandidates for TableSchema {
             return (candidates, errors);
         }
 
-        if let Some(value) = properties.get_mut(&accessors[0]) {
+        if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
             if let Ok(schema) = value.resolve(&definitions) {
                 return schema.find_candidates(&accessors[1..], &definitions);
             }

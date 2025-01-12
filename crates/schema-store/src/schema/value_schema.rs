@@ -209,16 +209,7 @@ impl Referable<ValueSchema> {
         match self {
             Referable::Ref(ref_str) => {
                 {
-                    let defs = match definitions.read() {
-                        Ok(guard) => guard,
-                        Err(_) => {
-                            return Err(crate::Error::ReferenceLockError {
-                                ref_string: ref_str.clone(),
-                            });
-                        }
-                    };
-
-                    if let Some(definition_schema) = defs.get(ref_str) {
+                    if let Some(definition_schema) = definitions.get(ref_str) {
                         *self = definition_schema.clone();
                     } else {
                         Err(crate::Error::DefinitionNotFound {
