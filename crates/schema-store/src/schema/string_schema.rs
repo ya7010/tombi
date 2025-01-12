@@ -5,6 +5,7 @@ pub struct StringSchema {
     pub min_length: Option<usize>,
     pub max_length: Option<usize>,
     pub pattern: Option<String>,
+    pub enumerate: Option<Vec<String>>,
     pub default: Option<String>,
 }
 
@@ -26,6 +27,11 @@ impl StringSchema {
             pattern: object
                 .get("pattern")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
+            enumerate: object.get("enum").and_then(|v| v.as_array()).map(|a| {
+                a.iter()
+                    .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                    .collect()
+            }),
             default: object
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),

@@ -7,6 +7,7 @@ pub struct FloatSchema {
     pub exclusive_minimum: Option<f64>,
     pub exclusive_maximum: Option<f64>,
     pub multiple_of: Option<f64>,
+    pub enumerate: Option<Vec<f64>>,
     pub default: Option<f64>,
 }
 
@@ -24,6 +25,10 @@ impl FloatSchema {
             exclusive_minimum: object.get("exclusiveMinimum").and_then(|v| v.as_f64()),
             exclusive_maximum: object.get("exclusiveMaximum").and_then(|v| v.as_f64()),
             multiple_of: object.get("multipleOf").and_then(|v| v.as_f64()),
+            enumerate: object
+                .get("enum")
+                .and_then(|v| v.as_array())
+                .map(|v| v.iter().filter_map(|v| v.as_f64()).collect()),
             default: object.get("default").and_then(|v| v.as_f64()),
         }
     }

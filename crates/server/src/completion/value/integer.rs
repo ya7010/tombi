@@ -1,8 +1,8 @@
-use schema_store::StringSchema;
+use schema_store::IntegerSchema;
 
 use crate::completion::FindCompletionItems;
 
-impl FindCompletionItems for StringSchema {
+impl FindCompletionItems for IntegerSchema {
     fn find_completion_items(
         &self,
         _accessors: &[schema_store::Accessor],

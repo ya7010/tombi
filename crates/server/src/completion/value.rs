@@ -1,6 +1,8 @@
 mod all_of;
 mod any_of;
 mod boolean;
+mod float;
+mod integer;
 mod one_of;
 mod string;
 
@@ -37,6 +39,12 @@ impl FindCompletionItems for ValueSchema {
             }
             Self::Integer(integer) => {
                 integer.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::Float(float) => {
+                float.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::String(string) => {
+                string.find_completion_items(accessors, definitions, completion_hint)
             }
             _ => (Vec::new(), Vec::new()),
         }
