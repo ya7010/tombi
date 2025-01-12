@@ -1,7 +1,9 @@
 use crate::completion::CompletionCandidate;
 
 use super::{CompletionHint, FindCompletionItems};
-use schema_store::{Accessor, DocumentSchema, FindCandidates, SchemaDefinitions, ValueSchema};
+use schema_store::{
+    Accessor, DocumentSchema, FindSchemaCandidates, SchemaDefinitions, ValueSchema,
+};
 use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind};
 
 impl FindCompletionItems for DocumentSchema {
@@ -19,7 +21,7 @@ impl FindCompletionItems for DocumentSchema {
                 let key = property.key().to_string();
                 if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                     let (schema_candidates, schema_errors) =
-                        value_schema.find_candidates(accessors, definitions);
+                        value_schema.find_schema_candidates(accessors, definitions);
 
                     for schema_candidate in schema_candidates {
                         match completion_hint {

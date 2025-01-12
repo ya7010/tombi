@@ -1,4 +1,4 @@
-use super::FindCandidates;
+use super::FindSchemaCandidates;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
 use dashmap::DashMap;
@@ -46,8 +46,8 @@ impl TableSchema {
     }
 }
 
-impl FindCandidates for TableSchema {
-    fn find_candidates(
+impl FindSchemaCandidates for TableSchema {
+    fn find_schema_candidates(
         &self,
         accessors: &[crate::Accessor],
         definitions: &crate::SchemaDefinitions,
@@ -59,7 +59,7 @@ impl FindCandidates for TableSchema {
             for mut property in self.properties.iter_mut() {
                 if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                     let (schema_candidates, schema_errors) =
-                        value_schema.find_candidates(accessors, definitions);
+                        value_schema.find_schema_candidates(accessors, definitions);
                     candidates.extend(schema_candidates);
                     errors.extend(schema_errors);
                 }
@@ -70,7 +70,7 @@ impl FindCandidates for TableSchema {
 
         if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
             if let Ok(schema) = value.resolve(&definitions) {
-                return schema.find_candidates(&accessors[1..], &definitions);
+                return schema.find_schema_candidates(&accessors[1..], &definitions);
             }
         }
 

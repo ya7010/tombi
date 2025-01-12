@@ -1,4 +1,4 @@
-use super::FindCandidates;
+use super::FindSchemaCandidates;
 use super::{referable_schema::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
 use crate::Accessor;
 use config::TomlVersion;
@@ -96,8 +96,8 @@ impl DocumentSchema {
     }
 }
 
-impl FindCandidates for DocumentSchema {
-    fn find_candidates(
+impl FindSchemaCandidates for DocumentSchema {
+    fn find_schema_candidates(
         &self,
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
@@ -109,7 +109,7 @@ impl FindCandidates for DocumentSchema {
             for mut value in self.properties.iter_mut() {
                 if let Ok(schema) = value.resolve(definitions) {
                     let (schema_candidates, schema_errors) =
-                        schema.find_candidates(accessors, definitions);
+                        schema.find_schema_candidates(accessors, definitions);
                     candidates.extend(schema_candidates);
                     errors.extend(schema_errors);
                 }
@@ -120,7 +120,7 @@ impl FindCandidates for DocumentSchema {
 
         if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
             if let Ok(schema) = value.resolve(&definitions) {
-                return schema.find_candidates(&accessors[1..], &definitions);
+                return schema.find_schema_candidates(&accessors[1..], &definitions);
             }
         }
 

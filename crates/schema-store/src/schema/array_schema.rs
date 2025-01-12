@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::Accessor;
 
-use super::{FindCandidates, Referable, SchemaDefinitions, ValueSchema};
+use super::{FindSchemaCandidates, Referable, SchemaDefinitions, ValueSchema};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
@@ -44,8 +44,8 @@ impl ArraySchema {
     }
 }
 
-impl FindCandidates for ArraySchema {
-    fn find_candidates(
+impl FindSchemaCandidates for ArraySchema {
+    fn find_schema_candidates(
         &self,
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
@@ -59,14 +59,14 @@ impl FindCandidates for ArraySchema {
         if let Ok(referable_schema) = items.read() {
             if let Some(value_schema) = referable_schema.resolved() {
                 let (mut item_candidates, mut item_errors) =
-                    value_schema.find_candidates(accessors, definitions);
+                    value_schema.find_schema_candidates(accessors, definitions);
                 candidates.append(&mut item_candidates);
                 errors.append(&mut item_errors);
             } else {
                 if let Ok(mut referable_schema) = items.write() {
                     if let Ok(value_schema) = referable_schema.resolve(definitions) {
                         let (mut item_candidates, mut item_errors) =
-                            value_schema.find_candidates(&accessors[1..], definitions);
+                            value_schema.find_schema_candidates(&accessors[1..], definitions);
                         candidates.append(&mut item_candidates);
                         errors.append(&mut item_errors);
                     };

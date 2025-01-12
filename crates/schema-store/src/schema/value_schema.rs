@@ -1,4 +1,4 @@
-use super::FindCandidates;
+use super::FindSchemaCandidates;
 use super::{
     AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema,
     LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema,
@@ -238,8 +238,8 @@ impl Referable<ValueSchema> {
     }
 }
 
-impl FindCandidates for ValueSchema {
-    fn find_candidates(
+impl FindSchemaCandidates for ValueSchema {
+    fn find_schema_candidates(
         &self,
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
@@ -248,8 +248,8 @@ impl FindCandidates for ValueSchema {
             (vec![self.clone()], Vec::new())
         } else {
             match self {
-                Self::Table(table) => table.find_candidates(accessors, definitions),
-                Self::Array(array) => array.find_candidates(accessors, definitions),
+                Self::Table(table) => table.find_schema_candidates(accessors, definitions),
+                Self::Array(array) => array.find_schema_candidates(accessors, definitions),
                 _ => (vec![self.clone()], Vec::new()),
             }
         }
