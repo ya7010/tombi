@@ -28,47 +28,27 @@ pub enum ValueSchema {
 
 impl ValueSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
-        if let Some(serde_json::Value::String(type_str)) = object.get("type") {
-            match type_str.as_str() {
-                "null" => return Some(ValueSchema::Null),
-                "boolean" => return Some(ValueSchema::Boolean(BooleanSchema::new(object))),
-                "integer" => return Some(ValueSchema::Integer(IntegerSchema::new(object))),
-                "number" => return Some(ValueSchema::Float(FloatSchema::new(object))),
-                "string" => {
-                    if let Some(serde_json::Value::String(format_str)) = object.get("format") {
-                        match format_str.as_str() {
-                            "date" => {
-                                return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
-                            }
-                            "date-time" => {
-                                return Some(ValueSchema::OneOf(OneOfSchema {
-                                    schemas: Arc::new(RwLock::new(
-                                        [
-                                            ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
-                                                object,
-                                            )),
-                                            ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
-                                                object,
-                                            )),
-                                        ]
-                                        .map(Referable::Resolved)
-                                        .to_vec(),
-                                    )),
-                                    ..Default::default()
-                                }));
-                            }
-                            "time" => {
-                                return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)));
-                            }
-                            _ => {}
-                        }
-                    }
-                    return Some(ValueSchema::String(StringSchema::new(object)));
-                }
-                "array" => return Some(ValueSchema::Array(ArraySchema::new(object))),
-                "object" => return Some(ValueSchema::Table(TableSchema::new(object))),
-                _ => {}
-            };
+        match object.get("type") {
+            Some(serde_json::Value::String(type_str)) => return Self::new_single(type_str, object),
+            Some(serde_json::Value::Array(types)) => {
+                return Some(Self::OneOf(OneOfSchema {
+                    schemas: Arc::new(RwLock::new(
+                        types
+                            .iter()
+                            .filter_map(|type_value| {
+                                if let serde_json::Value::String(type_str) = type_value {
+                                    Self::new_single(type_str, object)
+                                } else {
+                                    None
+                                }
+                            })
+                            .map(Referable::Resolved)
+                            .collect(),
+                    )),
+                    ..Default::default()
+                }));
+            }
+            _ => {}
         }
 
         if object.get("oneOf").is_some() {
@@ -82,6 +62,52 @@ impl ValueSchema {
         }
 
         None
+    }
+
+    fn new_single(
+        type_str: &str,
+        object: &serde_json::Map<String, serde_json::Value>,
+    ) -> Option<Self> {
+        match type_str {
+            "null" => Some(ValueSchema::Null),
+            "boolean" => Some(ValueSchema::Boolean(BooleanSchema::new(object))),
+            "integer" => Some(ValueSchema::Integer(IntegerSchema::new(object))),
+            "number" => Some(ValueSchema::Float(FloatSchema::new(object))),
+            "string" => {
+                if let Some(serde_json::Value::String(format_str)) = object.get("format") {
+                    match format_str.as_str() {
+                        "date" => {
+                            Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
+                        }
+                        "date-time" => {
+                            Some(ValueSchema::OneOf(OneOfSchema {
+                                schemas: Arc::new(RwLock::new(
+                                    [
+                                        ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
+                                            object,
+                                        )),
+                                        ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
+                                            object,
+                                        )),
+                                    ]
+                                    .map(Referable::Resolved)
+                                    .to_vec(),
+                                )),
+                                ..Default::default()
+                            }));
+                        }
+                        "time" => {
+                            Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)));
+                        }
+                        _ => {}
+                    }
+                }
+                Some(ValueSchema::String(StringSchema::new(object)))
+            }
+            "array" => Some(ValueSchema::Array(ArraySchema::new(object))),
+            "object" => Some(ValueSchema::Table(TableSchema::new(object))),
+            _ => None,
+        }
     }
 
     pub fn title(&self) -> Option<&str> {
@@ -232,6 +258,7 @@ impl FindCandidates for ValueSchema {
         } else {
             match self {
                 Self::Table(table) => table.find_candidates(accessors, definitions),
+                Self::Array(array) => array.find_candidates(accessors, definitions),
                 _ => (Vec::new(), Vec::new()),
             }
         }
