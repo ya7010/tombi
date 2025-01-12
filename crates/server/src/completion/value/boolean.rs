@@ -12,22 +12,35 @@ impl FindCompletionItems for BooleanSchema {
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,
     ) {
-        (
-            vec![
-                tower_lsp::lsp_types::CompletionItem {
-                    label: "true".to_string(),
+        if let Some(enumerate) = &self.enumurate {
+            let items = enumerate
+                .iter()
+                .map(|value| tower_lsp::lsp_types::CompletionItem {
+                    label: value.to_string(),
                     kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     detail: Some("Boolean".to_string()),
                     ..Default::default()
-                },
-                tower_lsp::lsp_types::CompletionItem {
-                    label: "false".to_string(),
-                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                    detail: Some("Boolean".to_string()),
-                    ..Default::default()
-                },
-            ],
-            Vec::with_capacity(0),
-        )
+                })
+                .collect();
+            return (items, Vec::with_capacity(0));
+        } else {
+            (
+                vec![
+                    tower_lsp::lsp_types::CompletionItem {
+                        label: "true".to_string(),
+                        kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                        detail: Some("Boolean".to_string()),
+                        ..Default::default()
+                    },
+                    tower_lsp::lsp_types::CompletionItem {
+                        label: "false".to_string(),
+                        kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                        detail: Some("Boolean".to_string()),
+                        ..Default::default()
+                    },
+                ],
+                Vec::with_capacity(0),
+            )
+        }
     }
 }

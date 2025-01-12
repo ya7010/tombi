@@ -3,6 +3,7 @@ pub struct BooleanSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub default: Option<bool>,
+    pub enumurate: Option<Vec<bool>>,
 }
 
 impl BooleanSchema {
@@ -15,6 +16,10 @@ impl BooleanSchema {
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             default: object.get("default").and_then(|v| v.as_bool()),
+            enumurate: object
+                .get("enum")
+                .and_then(|v| v.as_array())
+                .map(|a| a.iter().filter_map(|v| v.as_bool()).collect()),
         }
     }
 }
