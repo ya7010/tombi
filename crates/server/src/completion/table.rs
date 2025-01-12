@@ -48,17 +48,15 @@ impl FindCompletionItems for TableSchema {
                     errors.extend(schema_errors);
                 }
             }
-
-            return (completions, errors);
-        }
-
-        if let Some(mut property) = self.properties.get_mut(&accessors[0]) {
-            if let Ok(schema) = property.value_mut().resolve(&definitions) {
-                return schema.find_completion_items(
-                    &accessors[1..],
-                    &definitions,
-                    completion_hint,
-                );
+        } else {
+            if let Some(mut property) = self.properties.get_mut(&accessors[0]) {
+                if let Ok(schema) = property.value_mut().resolve(&definitions) {
+                    return schema.find_completion_items(
+                        &accessors[1..],
+                        &definitions,
+                        completion_hint,
+                    );
+                }
             }
         }
 
