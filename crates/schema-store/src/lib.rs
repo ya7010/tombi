@@ -5,7 +5,7 @@ mod schema;
 mod store;
 mod value_type;
 
-pub use accessor::{Accessor, Accessors, Key};
+pub use accessor::{Accessor, Accessors};
 pub use error::Error;
 pub use json_schema::{SchemaType, Value, DEFAULT_CATALOG_URL};
 pub use schema::*;
