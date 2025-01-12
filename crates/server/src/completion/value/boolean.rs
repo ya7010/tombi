@@ -12,7 +12,7 @@ impl FindCompletionItems for BooleanSchema {
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,
     ) {
-        if let Some(enumerate) = &self.enumurate {
+        if let Some(enumerate) = &self.enumerate {
             let items = enumerate
                 .iter()
                 .map(|value| tower_lsp::lsp_types::CompletionItem {

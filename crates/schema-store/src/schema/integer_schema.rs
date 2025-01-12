@@ -7,6 +7,7 @@ pub struct IntegerSchema {
     pub exclusive_minimum: Option<i64>,
     pub exclusive_maximum: Option<i64>,
     pub multiple_of: Option<i64>,
+    pub enumerate: Option<Vec<i64>>,
     pub default: Option<i64>,
 }
 
@@ -24,6 +25,10 @@ impl IntegerSchema {
             exclusive_minimum: object.get("exclusiveMinimum").and_then(|v| v.as_i64()),
             exclusive_maximum: object.get("exclusiveMaximum").and_then(|v| v.as_i64()),
             multiple_of: object.get("multipleOf").and_then(|v| v.as_i64()),
+            enumerate: object
+                .get("enumerate")
+                .and_then(|v| v.as_array())
+                .map(|v| v.iter().filter_map(|v| v.as_i64()).collect()),
             default: object.get("default").and_then(|v| v.as_i64()),
         }
     }

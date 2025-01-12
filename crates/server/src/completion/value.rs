@@ -2,6 +2,7 @@ mod all_of;
 mod any_of;
 mod boolean;
 mod one_of;
+mod string;
 
 use super::{CompletionCandidate, CompletionHint, FindCompletionItems};
 use schema_store::{
@@ -33,6 +34,9 @@ impl FindCompletionItems for ValueSchema {
             }
             Self::Boolean(boolean) => {
                 boolean.find_completion_items(accessors, definitions, completion_hint)
+            }
+            Self::Integer(integer) => {
+                integer.find_completion_items(accessors, definitions, completion_hint)
             }
             _ => (Vec::new(), Vec::new()),
         }
