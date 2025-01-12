@@ -1,6 +1,6 @@
-use schema_store::AllOfSchema;
+use schema_store::{AllOfSchema, Schemas};
 
-use crate::completion::{Completion, CompletionHint, FindCompletionItems};
+use crate::completion::{CompletionCandidate, CompletionHint, CompositeSchema, FindCompletionItems};
 
 impl FindCompletionItems for AllOfSchema {
     fn find_completion_items(
@@ -23,10 +23,11 @@ impl FindCompletionItems for AllOfSchema {
 
                     for completion_item in &mut inner_completion_items {
                         if completion_item.detail.is_none() {
-                            completion_item.detail = self.detail();
+                            completion_item.detail = self.detail(definitions, completion_hint);
                         }
                         if completion_item.documentation.is_none() {
-                            completion_item.documentation = self.documentation();
+                            completion_item.documentation =
+                                self.documentation(definitions, completion_hint);
                         }
                     }
 
@@ -42,12 +43,16 @@ impl FindCompletionItems for AllOfSchema {
     }
 }
 
-impl Completion for AllOfSchema {
-    fn title(&self) -> Option<&str> {
-        self.title.as_deref()
+impl CompositeSchema for AllOfSchema {
+    fn title(&self) -> Option<String> {
+        self.title.clone()
     }
 
-    fn description(&self) -> Option<&str> {
-        self.description.as_deref()
+    fn description(&self) -> Option<String> {
+        self.description.clone()
+    }
+
+    fn schemas(&self) -> &Schemas {
+        &self.schemas
     }
 }

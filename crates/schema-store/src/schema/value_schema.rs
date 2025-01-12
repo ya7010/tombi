@@ -259,7 +259,7 @@ impl FindCandidates for ValueSchema {
             match self {
                 Self::Table(table) => table.find_candidates(accessors, definitions),
                 Self::Array(array) => array.find_candidates(accessors, definitions),
-                _ => (Vec::new(), Vec::new()),
+                _ => (vec![self.clone()], Vec::new()),
             }
         }
     }

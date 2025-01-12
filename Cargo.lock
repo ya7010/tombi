@@ -1808,6 +1808,7 @@ dependencies = [
 name = "server"
 version = "0.0.0"
 dependencies = [
+ "ahash",
  "ast",
  "camino",
  "clap",

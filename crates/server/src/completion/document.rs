@@ -1,3 +1,5 @@
+use crate::completion::CompletionCandidate;
+
 use super::{CompletionHint, FindCompletionItems};
 use indexmap::map::MutableKeys;
 use schema_store::{Accessor, DocumentSchema, FindCandidates, SchemaDefinitions, ValueSchema};
@@ -27,8 +29,9 @@ impl FindCompletionItems for DocumentSchema {
                         value_schema.find_candidates(accessors, definitions);
 
                     for schema_candidate in schema_candidates {
-                        // tracing::debug!("key: {}", key);
-                        // tracing::debug!("schema_candidate: {:?}", schema_candidate);
+                        tracing::debug!("key: {}", key);
+                        tracing::debug!("schema_candidate: {:?}", schema_candidate);
+
                         match completion_hint {
                             Some(CompletionHint::InTableHeader) => {
                                 if !value_schema.is_match(&|s| {
@@ -43,13 +46,9 @@ impl FindCompletionItems for DocumentSchema {
                         let completion_item = CompletionItem {
                             label: key.to_string(),
                             kind: Some(CompletionItemKind::PROPERTY),
-                            detail: schema_candidate.title().map(ToString::to_string),
-                            documentation: schema_candidate.description().map(|description| {
-                                tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
-                                    kind: MarkupKind::Markdown,
-                                    value: description.to_string(),
-                                })
-                            }),
+                            detail: schema_candidate.detail(definitions, completion_hint),
+                            documentation: schema_candidate
+                                .documentation(definitions, completion_hint),
                             ..Default::default()
                         };
                         completion_items.push(completion_item);
