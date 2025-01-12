@@ -3,7 +3,7 @@ use crate::completion::CompletionCandidate;
 use super::{CompletionHint, FindCompletionItems};
 use indexmap::map::MutableKeys;
 use schema_store::{FindCandidates, TableSchema, ValueSchema};
-use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind, MarkupContent, MarkupKind};
+use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind};
 
 impl FindCompletionItems for TableSchema {
     fn find_completion_items(

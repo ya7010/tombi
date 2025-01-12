@@ -127,10 +127,3 @@ pub trait CompositeSchema {
     fn description(&self) -> Option<String>;
     fn schemas(&self) -> &Schemas;
 }
-
-#[cfg(test)]
-mod test {
-    use serde_json::json;
-
-    fn array_schema() {}
-}
