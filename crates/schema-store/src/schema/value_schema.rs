@@ -110,6 +110,25 @@ impl ValueSchema {
         }
     }
 
+    fn value_type(&self) -> crate::ValueType {
+        match self {
+            Self::Null => crate::ValueType::Null,
+            Self::Boolean(boolean) => boolean.value_type(),
+            Self::Integer(integer) => integer.value_type(),
+            Self::Float(float) => float.value_type(),
+            Self::String(string) => string.value_type(),
+            Self::LocalDate(local_date) => local_date.value_type(),
+            Self::LocalDateTime(local_date_time) => local_date_time.value_type(),
+            Self::LocalTime(local_time) => local_time.value_type(),
+            Self::OffsetDateTime(offset_date_time) => offset_date_time.value_type(),
+            Self::Array(array) => array.value_type(),
+            Self::Table(table) => table.value_type(),
+            Self::OneOf(one_of) => one_of.value_type(),
+            Self::AnyOf(any_of) => any_of.value_type(),
+            Self::AllOf(all_of) => all_of.value_type(),
+        }
+    }
+
     pub fn title(&self) -> Option<&str> {
         match self {
             ValueSchema::Null => None,
@@ -200,6 +219,13 @@ impl Referable<ValueSchema> {
         }
 
         ValueSchema::new(object).map(Referable::Resolved)
+    }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        match self {
+            Referable::Ref(_) => crate::ValueType::Any,
+            Referable::Resolved(schema) => schema.value_type(),
+        }
     }
 
     pub fn resolve<'a>(

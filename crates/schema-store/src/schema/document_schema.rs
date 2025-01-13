@@ -100,6 +100,10 @@ impl DocumentSchema {
             tracing::debug!("use schema TOML version: {version}");
         })
     }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::Table
+    }
 }
 
 impl Schema for DocumentSchema {

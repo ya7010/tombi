@@ -32,4 +32,8 @@ impl IntegerSchema {
             default: object.get("default").and_then(|v| v.as_i64()),
         }
     }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::Integer
+    }
 }

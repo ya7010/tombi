@@ -22,4 +22,8 @@ impl BooleanSchema {
                 .map(|a| a.iter().filter_map(|v| v.as_bool()).collect()),
         }
     }
+
+    pub const fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::Boolean
+    }
 }

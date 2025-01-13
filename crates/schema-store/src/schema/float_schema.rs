@@ -32,4 +32,8 @@ impl FloatSchema {
             default: object.get("default").and_then(|v| v.as_f64()),
         }
     }
+
+    pub const fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::Float
+    }
 }

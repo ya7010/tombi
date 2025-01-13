@@ -44,6 +44,10 @@ impl TableSchema {
             default: object.get("default").cloned(),
         }
     }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::Table
+    }
 }
 
 impl Schema for TableSchema {

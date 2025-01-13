@@ -24,4 +24,8 @@ impl LocalDateSchema {
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
         }
     }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::LocalDate
+    }
 }

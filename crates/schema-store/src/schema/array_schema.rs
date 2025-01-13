@@ -42,6 +42,10 @@ impl ArraySchema {
                 .and_then(|v| v.as_array().map(|arr| arr.clone())),
         }
     }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::Array
+    }
 }
 
 impl Schema for ArraySchema {

@@ -41,4 +41,15 @@ impl AllOfSchema {
             default,
         }
     }
+
+    pub fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::AllOf(
+            self.schemas
+                .read()
+                .unwrap()
+                .iter()
+                .map(|schema| schema.value_type())
+                .collect(),
+        )
+    }
 }

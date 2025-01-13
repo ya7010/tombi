@@ -37,4 +37,8 @@ impl StringSchema {
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
         }
     }
+
+    pub const fn value_type(&self) -> crate::ValueType {
+        crate::ValueType::String
+    }
 }
