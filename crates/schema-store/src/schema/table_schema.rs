@@ -1,4 +1,4 @@
-use super::FindSchemaCandidates;
+use super::Schema;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
 use dashmap::DashMap;
@@ -46,7 +46,7 @@ impl TableSchema {
     }
 }
 
-impl FindSchemaCandidates for TableSchema {
+impl Schema for TableSchema {
     fn find_schema_candidates(
         &self,
         accessors: &[crate::Accessor],

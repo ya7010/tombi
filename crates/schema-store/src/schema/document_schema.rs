@@ -1,4 +1,4 @@
-use super::FindSchemaCandidates;
+use super::Schema;
 use super::{referable_schema::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
 use crate::Accessor;
 use config::TomlVersion;
@@ -102,7 +102,7 @@ impl DocumentSchema {
     }
 }
 
-impl FindSchemaCandidates for DocumentSchema {
+impl Schema for DocumentSchema {
     fn find_schema_candidates(
         &self,
         accessors: &[Accessor],

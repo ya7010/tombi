@@ -2,7 +2,7 @@ use crate::completion::CompletionCandidate;
 
 use super::{CompletionHint, FindCompletionItems};
 use schema_store::{
-    Accessor, DocumentSchema, FindSchemaCandidates, SchemaDefinitions, ValueSchema,
+    Accessor, DocumentSchema, Schema, SchemaDefinitions, ValueSchema,
 };
 use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind};
 

@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::Accessor;
 
-use super::{FindSchemaCandidates, Referable, SchemaDefinitions, ValueSchema};
+use super::{Referable, Schema, SchemaDefinitions, ValueSchema};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
@@ -44,7 +44,7 @@ impl ArraySchema {
     }
 }
 
-impl FindSchemaCandidates for ArraySchema {
+impl Schema for ArraySchema {
     fn find_schema_candidates(
         &self,
         accessors: &[Accessor],

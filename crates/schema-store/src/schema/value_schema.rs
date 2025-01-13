@@ -1,4 +1,4 @@
-use super::FindSchemaCandidates;
+use super::Schema;
 use super::{
     AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema,
     LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema,
@@ -238,7 +238,7 @@ impl Referable<ValueSchema> {
     }
 }
 
-impl FindSchemaCandidates for ValueSchema {
+impl Schema for ValueSchema {
     fn find_schema_candidates(
         &self,
         accessors: &[Accessor],
