@@ -8,7 +8,7 @@ impl GetHoverContent for document_tree::Value {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        definitions: Option<&schema_store::SchemaDefinitions>,
+        definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         match self {
             Self::Boolean(boolean) => boolean.get_hover_content(

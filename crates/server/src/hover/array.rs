@@ -8,7 +8,7 @@ impl GetHoverContent for document_tree::Array {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        definitions: Option<&schema_store::SchemaDefinitions>,
+        definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         for (index, value) in self.values().iter().enumerate() {
             if value.range().contains(position) {

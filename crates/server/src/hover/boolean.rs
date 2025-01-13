@@ -8,7 +8,7 @@ impl GetHoverContent for document_tree::Boolean {
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        _definitions: Option<&schema_store::SchemaDefinitions>,
+        _definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         let keys = schema_store::Accessors::new(accessors.clone());
         let value_type = schema_store::ValueType::Boolean;

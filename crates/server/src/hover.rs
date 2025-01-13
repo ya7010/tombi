@@ -11,6 +11,7 @@ mod table;
 mod value;
 
 use config::TomlVersion;
+use dashmap::DashMap;
 use itertools::Itertools;
 use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
@@ -23,7 +24,7 @@ trait GetHoverContent {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        definitions: Option<&schema_store::SchemaDefinitions>,
+        definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent>;
 }
 
@@ -96,7 +97,9 @@ pub fn get_hover_content(
         toml_version,
         position,
         keys,
-        document_schema.map(|schema| &schema.definitions),
+        document_schema
+            .map(|schema| &schema.definitions)
+            .unwrap_or(&DashMap::new()),
     )
 }
 
