@@ -12,6 +12,7 @@ pub struct DocumentSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub properties: SchemaProperties,
+    pub additional_properties: Option<bool>,
     pub definitions: SchemaDefinitions,
 }
 
@@ -52,6 +53,10 @@ impl DocumentSchema {
             }
         }
 
+        let additional_properties = content
+            .get("additionalProperties")
+            .and_then(|v| v.as_bool());
+
         let definitions = DashMap::default();
         if content.get("definitions").is_some() {
             if let Some(serde_json::Value::Object(object)) = content.get("definitions") {
@@ -85,6 +90,7 @@ impl DocumentSchema {
             title,
             description,
             properties,
+            additional_properties,
             definitions,
         }
     }

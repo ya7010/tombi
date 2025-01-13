@@ -14,7 +14,7 @@ pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
     #[allow(dead_code)]
-    schema: Option<DocumentSchema>,
+    document_schema: Option<DocumentSchema>,
     #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
     diagnostics: Vec<crate::Diagnostic>,
@@ -28,7 +28,7 @@ impl<'a> Linter<'a> {
         schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
-        let schema = match schema_url_or_path {
+        let document_schema = match schema_url_or_path {
             Some(schema_url_or_path) => {
                 Some(schema_store.try_get_schema(schema_url_or_path).await?)
             }
@@ -36,7 +36,7 @@ impl<'a> Linter<'a> {
         }
         .flatten();
 
-        let toml_version = schema
+        let toml_version = document_schema
             .as_ref()
             .and_then(|s| s.toml_version())
             .unwrap_or(toml_version);
@@ -44,7 +44,7 @@ impl<'a> Linter<'a> {
         Ok(Self {
             toml_version,
             options: Cow::Borrowed(options),
-            schema,
+            document_schema,
             schema_store,
             diagnostics: Vec::new(),
         })
@@ -65,9 +65,22 @@ impl<'a> Linter<'a> {
 
             root.lint(&mut self);
 
-            if let Err(errs) = root.try_into_document_tree(self.toml_version) {
-                for err in errs {
-                    err.set_diagnostic(&mut errors);
+            match root.try_into_document_tree(self.toml_version) {
+                Ok(document_tree) => {
+                    if let Some(document_schema) = &self.document_schema {
+                        if let Err(errs) =
+                            crate::validation::root::validate(document_tree, document_schema)
+                        {
+                            for err in errs {
+                                err.set_diagnostic(&mut errors);
+                            }
+                        }
+                    }
+                }
+                Err(errs) => {
+                    for err in errs {
+                        err.set_diagnostic(&mut errors);
+                    }
                 }
             }
 
