@@ -44,13 +44,9 @@ pub fn get_keys_value_info(
         accessors.push(Accessor::Key(key.to_raw_text(toml_version).into()));
 
         if let Some(value) = table_ref.get(key) {
-            if let Some(table) = get_item_table(
-                value,
-                &mut accessors,
-                &mut value_type,
-                position,
-                document_schema,
-            ) {
+            if let Some(table) =
+                get_item_table(value, &mut accessors, &mut value_type, position, None)
+            {
                 table_ref = table;
             }
         }
@@ -67,7 +63,7 @@ fn get_item_table<'a>(
     accessors: &mut Vec<Accessor>,
     value_type: &mut Option<ValueType>,
     position: text::Position,
-    document_schema: Option<&DocumentSchema>,
+    value_schema: Option<&ValueSchema>,
 ) -> Option<&'a document_tree::Table> {
     use document_tree::ArrayKind::*;
     use document_tree::Value;
@@ -112,7 +108,7 @@ fn get_item_table<'a>(
                 if value.range().contains(position) {
                     accessors.push(Accessor::Index(index));
                     let table_ref =
-                        get_item_table(value, accessors, value_type, position, document_schema);
+                        get_item_table(value, accessors, value_type, position, value_schema);
 
                     match array.kind() {
                         ArrayOfTables | ParentArrayOfTables => {
