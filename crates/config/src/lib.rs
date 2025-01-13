@@ -42,7 +42,6 @@ pub struct Config {
     pub lint: Option<LintOptions>,
 
     /// # Language server options.
-    #[cfg_attr(feature = "jsonschema", schemars(skip))]
     pub server: Option<server::ServerOptions>,
 
     /// # Schema options.

@@ -39,6 +39,17 @@
         }
       ]
     },
+    "server": {
+      "title": "Language server options.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ServerOptions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "schema": {
       "title": "Schema options.",
       "anyOf": [
@@ -80,6 +91,20 @@
     },
     "LintOptions": {
       "type": "object",
+      "additionalProperties": false
+    },
+    "ServerOptions": {
+      "type": "object",
+      "properties": {
+        "completion": {
+          "title": "Enable completion.",
+          "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SchemaOptions": {
