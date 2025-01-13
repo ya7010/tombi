@@ -1,12 +1,38 @@
+mod array;
+mod boolean;
+mod float;
+mod integer;
+mod local_date;
+mod local_date_time;
+mod local_time;
+mod offset_date_time;
+mod string;
+mod table;
+mod value;
+
+use config::TomlVersion;
 use itertools::Itertools;
-use schema_store::KeysValueInfo;
-use std::fmt::Debug;
+use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
+use std::{fmt::Debug, ops::Deref};
+
+trait GetHoverContent {
+    fn get_hover_content(
+        &self,
+        accessors: &mut Vec<Accessor>,
+        value_schema: Option<&ValueSchema>,
+        toml_version: TomlVersion,
+        position: text::Position,
+        keys: &[document_tree::Key],
+        definitions: Option<&schema_store::SchemaDefinitions>,
+    ) -> Option<HoverContent>;
+}
 
 #[derive(Debug, Default)]
 pub struct HoverContent {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub keys_value_info: Option<KeysValueInfo>,
+    pub keys: Accessors,
+    pub value_type: ValueType,
     pub enumerated_values: Vec<String>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
     pub range: Option<text::Range>,
@@ -22,10 +48,8 @@ impl std::fmt::Display for HoverContent {
             writeln!(f, "{}\n", description.split("\n").join("\n\n"))?;
         }
 
-        if let Some(keys_value_info) = &self.keys_value_info {
-            writeln!(f, "Keys: `{}`\n", keys_value_info.accessors())?;
-            writeln!(f, "Value: `{:?}`\n", keys_value_info.value_type())?;
-        }
+        writeln!(f, "Keys: `{}`\n", self.keys)?;
+        writeln!(f, "Value: `{:?}`\n", self.value_type)?;
 
         if !self.enumerated_values.is_empty() {
             writeln!(f, "Allowed Values:\n")?;
@@ -56,6 +80,24 @@ impl From<HoverContent> for tower_lsp::lsp_types::Hover {
             range: value.range.map(Into::into),
         }
     }
+}
+
+pub fn get_hover_content(
+    root: &document_tree::Root,
+    toml_version: TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    document_schema: Option<&DocumentSchema>,
+) -> Option<HoverContent> {
+    let table = root.deref();
+    table.get_hover_content(
+        &mut vec![],
+        None,
+        toml_version,
+        position,
+        keys,
+        document_schema.map(|schema| &schema.definitions),
+    )
 }
 
 fn get_schema_name(schema_url: &tower_lsp::lsp_types::Url) -> Option<&str> {

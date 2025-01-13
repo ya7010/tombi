@@ -1,8 +1,7 @@
-use crate::{backend, hover::HoverContent, toml};
+use crate::{backend, hover::get_hover_content, toml};
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use schema_store::get_keys_value_info;
 use tower_lsp::lsp_types::{Hover, HoverParams, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -47,24 +46,17 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let Some(keys_value_info) = get_keys_value_info(
-        root,
-        &keys,
-        position,
+    return Ok(get_hover_content(
+        &root,
         toml_version,
-        (&document_schema).as_ref(),
-    ) else {
-        return Ok(None);
-    };
-
-    return Ok(Some(
-        HoverContent {
-            keys_value_info: Some(keys_value_info),
-            range,
-            ..Default::default()
-        }
-        .into(),
-    ));
+        position,
+        &keys,
+        document_schema.as_ref(),
+    )
+    .map(|mut content| {
+        content.range = range;
+        content.into()
+    }));
 }
 
 fn get_hover_range(

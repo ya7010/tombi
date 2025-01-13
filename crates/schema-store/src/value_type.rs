@@ -1,5 +1,7 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum ValueType {
+    #[default]
+    Any,
     Null,
     Boolean,
     Integer,
@@ -11,7 +13,6 @@ pub enum ValueType {
     LocalTime,
     Array,
     Table,
-    Any,
     OneOf(Vec<ValueType>),
     AnyOf(Vec<ValueType>),
     AllOf(Vec<ValueType>),
