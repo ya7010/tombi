@@ -33,6 +33,7 @@ pub fn get_keys_value_info(
     keys: &[document_tree::Key],
     position: text::Position,
     toml_version: config::TomlVersion,
+    document_schema: Option<&DocumentSchema>,
 ) -> Option<KeysValueInfo> {
     let mut accessors = Vec::new();
     let mut value_type = None;
@@ -43,7 +44,13 @@ pub fn get_keys_value_info(
         accessors.push(Accessor::Key(key.to_raw_text(toml_version).into()));
 
         if let Some(value) = table_ref.get(key) {
-            if let Some(table) = get_item_table(value, &mut accessors, &mut value_type, position) {
+            if let Some(table) = get_item_table(
+                value,
+                &mut accessors,
+                &mut value_type,
+                position,
+                document_schema,
+            ) {
                 table_ref = table;
             }
         }
@@ -60,6 +67,7 @@ fn get_item_table<'a>(
     accessors: &mut Vec<Accessor>,
     value_type: &mut Option<ValueType>,
     position: text::Position,
+    document_schema: Option<&DocumentSchema>,
 ) -> Option<&'a document_tree::Table> {
     use document_tree::ArrayKind::*;
     use document_tree::Value;
@@ -103,7 +111,8 @@ fn get_item_table<'a>(
             for (index, value) in array.values().iter().enumerate() {
                 if value.range().contains(position) {
                     accessors.push(Accessor::Index(index));
-                    let table_ref = get_item_table(value, accessors, value_type, position);
+                    let table_ref =
+                        get_item_table(value, accessors, value_type, position, document_schema);
 
                     match array.kind() {
                         ArrayOfTables | ParentArrayOfTables => {

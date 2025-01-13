@@ -23,6 +23,13 @@ pub async fn handle_hover(
     let position = position.into();
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
+    let document_schema = backend
+        .schema_store
+        .try_get_schema_from_url(&text_document.uri)
+        .await
+        .ok()
+        .flatten();
+
     let Some(root) = ast::Root::cast(parser::parse(&source, toml_version).into_syntax_node())
     else {
         return Ok(None);
@@ -40,7 +47,13 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let Some(keys_value_info) = get_keys_value_info(root, &keys, position, toml_version) else {
+    let Some(keys_value_info) = get_keys_value_info(
+        root,
+        &keys,
+        position,
+        toml_version,
+        (&document_schema).as_ref(),
+    ) else {
         return Ok(None);
     };
 
