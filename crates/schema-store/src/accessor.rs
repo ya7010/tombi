@@ -25,6 +25,12 @@ impl Accessors {
     }
 }
 
+impl AsRef<[Accessor]> for Accessors {
+    fn as_ref(&self) -> &[Accessor] {
+        &self.0
+    }
+}
+
 impl std::fmt::Display for Accessors {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut iter = self.0.iter();

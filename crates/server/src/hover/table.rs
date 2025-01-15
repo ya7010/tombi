@@ -51,20 +51,10 @@ impl GetHoverContent for document_tree::Table {
         let keys = schema_store::Accessors::new(accessors.clone());
         let value_type = schema_store::ValueType::Table;
 
-        if let Some(schema_store::ValueSchema::Table(schema)) = value_schema {
-            Some(super::HoverContent {
-                title: schema.title.clone(),
-                description: schema.description.clone(),
-                keys,
-                value_type,
-                ..Default::default()
-            })
-        } else {
-            Some(super::HoverContent {
-                keys,
-                value_type,
-                ..Default::default()
-            })
-        }
+        Some(HoverContent {
+            keys,
+            value_type,
+            ..Default::default()
+        })
     }
 }
