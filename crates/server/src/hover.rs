@@ -19,7 +19,7 @@ use std::{fmt::Debug, ops::Deref};
 trait GetHoverContent {
     fn get_hover_content(
         &self,
-        accessors: &mut Vec<Accessor>,
+        accessors: &Vec<Accessor>,
         value_schema: Option<&ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,

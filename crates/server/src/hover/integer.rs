@@ -3,7 +3,7 @@ use super::GetHoverContent;
 impl GetHoverContent for document_tree::Integer {
     fn get_hover_content(
         &self,
-        accessors: &mut Vec<schema_store::Accessor>,
+        accessors: &Vec<schema_store::Accessor>,
         value_schema: Option<&schema_store::ValueSchema>,
         _toml_version: config::TomlVersion,
         _position: text::Position,

@@ -3,7 +3,7 @@ use super::GetHoverContent;
 impl GetHoverContent for document_tree::Array {
     fn get_hover_content(
         &self,
-        accessors: &mut Vec<schema_store::Accessor>,
+        accessors: &Vec<schema_store::Accessor>,
         value_schema: Option<&schema_store::ValueSchema>,
         toml_version: config::TomlVersion,
         position: text::Position,
@@ -12,9 +12,14 @@ impl GetHoverContent for document_tree::Array {
     ) -> Option<super::HoverContent> {
         for (index, value) in self.values().iter().enumerate() {
             if value.range().contains(position) {
-                accessors.push(schema_store::Accessor::Index(index));
+                let accessor = schema_store::Accessor::Index(index);
+
                 return value.get_hover_content(
-                    accessors,
+                    &accessors
+                        .clone()
+                        .into_iter()
+                        .chain(std::iter::once(accessor))
+                        .collect(),
                     value_schema,
                     toml_version,
                     position,
