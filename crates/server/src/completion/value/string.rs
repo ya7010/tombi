@@ -16,7 +16,7 @@ impl FindCompletionItems for StringSchema {
             let items = enumerate
                 .iter()
                 .map(|value| tower_lsp::lsp_types::CompletionItem {
-                    label: value.to_string(),
+                    label: format!("\"{value}\""),
                     kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     ..Default::default()
                 })
