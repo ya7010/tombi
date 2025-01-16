@@ -1,4 +1,4 @@
-use super::GetHoverContent;
+use super::{GetHoverContent, HoverContent};
 
 impl GetHoverContent for document_tree::Value {
     fn get_hover_content(
@@ -93,4 +93,36 @@ impl GetHoverContent for document_tree::Value {
             ),
         }
     }
+}
+
+pub fn get_any_of_hover_content<T>(
+    value: &T,
+    accessors: &Vec<schema_store::Accessor>,
+    any_of_schema: &schema_store::AnyOfSchema,
+    toml_version: config::TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    definitions: &schema_store::SchemaDefinitions,
+) -> Option<HoverContent>
+where
+    T: GetHoverContent,
+{
+    if let Ok(mut schemas) = any_of_schema.schemas.write() {
+        for referable_schema in schemas.iter_mut() {
+            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+                continue;
+            };
+            if let Some(hover_content) = value.get_hover_content(
+                accessors,
+                Some(&value_schema),
+                toml_version,
+                position,
+                keys,
+                definitions,
+            ) {
+                return Some(hover_content);
+            }
+        }
+    }
+    None
 }

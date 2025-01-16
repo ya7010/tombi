@@ -1,4 +1,4 @@
-use schema_store::{Accessors, ValueSchema};
+use crate::hover::value::get_any_of_hover_content;
 
 use super::GetHoverContent;
 
@@ -19,39 +19,33 @@ impl GetHoverContent for document_tree::String {
             value_schema
         );
         match value_schema {
-            Some(ValueSchema::String(schema)) => {
+            Some(schema_store::ValueSchema::String(schema)) => {
                 return Some(super::HoverContent {
                     title: schema.title.clone(),
                     description: schema.description.clone(),
-                    keys: Accessors::new(accessors.clone()),
+                    keys: schema_store::Accessors::new(accessors.clone()),
                     value_type,
                     ..Default::default()
                 })
             }
-            Some(ValueSchema::AnyOf(any_of)) => {
-                if let Ok(mut schemas) = any_of.schemas.write() {
-                    for referable_schema in schemas.iter_mut() {
-                        let Ok(value_schema) = referable_schema.resolve(definitions) else {
-                            continue;
-                        };
-                        if let Some(hover_content) = self.get_hover_content(
-                            accessors,
-                            Some(&value_schema),
-                            toml_version,
-                            position,
-                            keys,
-                            definitions,
-                        ) {
-                            return Some(hover_content);
-                        }
-                    }
+            Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
+                if let Some(hover_content) = get_any_of_hover_content(
+                    self,
+                    accessors,
+                    any_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    definitions,
+                ) {
+                    return Some(hover_content);
                 }
             }
             _ => {}
         };
 
         Some(super::HoverContent {
-            keys: Accessors::new(accessors.clone()),
+            keys: schema_store::Accessors::new(accessors.clone()),
             value_type,
             ..Default::default()
         })
