@@ -12,7 +12,6 @@ mod value;
 
 use config::TomlVersion;
 use dashmap::DashMap;
-use itertools::Itertools;
 use schema_store::{Accessor, Accessors, DocumentSchema, TableSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 
