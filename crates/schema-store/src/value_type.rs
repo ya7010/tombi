@@ -1,4 +1,4 @@
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub enum ValueType {
     #[default]
     Any,

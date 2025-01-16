@@ -1,4 +1,7 @@
-use super::{value::get_any_of_hover_content, GetHoverContent};
+use super::{
+    value::{get_any_of_hover_content, get_one_of_hover_content},
+    GetHoverContent,
+};
 
 impl GetHoverContent for document_tree::Float {
     fn get_hover_content(
@@ -22,6 +25,19 @@ impl GetHoverContent for document_tree::Float {
                     ..Default::default()
                 })
             }
+            Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+                if let Some(hover_content) = get_one_of_hover_content(
+                    self,
+                    accessors,
+                    one_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    definitions,
+                ) {
+                    return Some(hover_content);
+                }
+            }
             Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
                 if let Some(hover_content) = get_any_of_hover_content(
                     self,
@@ -35,7 +51,8 @@ impl GetHoverContent for document_tree::Float {
                     return Some(hover_content);
                 }
             }
-            _ => {}
+            Some(_) => return None,
+            None => {}
         }
 
         Some(super::HoverContent {

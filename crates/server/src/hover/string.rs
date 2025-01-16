@@ -14,10 +14,6 @@ impl GetHoverContent for document_tree::String {
     ) -> Option<super::HoverContent> {
         let value_type = schema_store::ValueType::String;
 
-        tracing::debug!(
-            "String::get_hover_content: value_schema: {:?}",
-            value_schema
-        );
         match value_schema {
             Some(schema_store::ValueSchema::String(schema)) => {
                 return Some(super::HoverContent {
@@ -41,7 +37,8 @@ impl GetHoverContent for document_tree::String {
                     return Some(hover_content);
                 }
             }
-            _ => {}
+            Some(_) => return None,
+            None => {}
         };
 
         Some(super::HoverContent {
