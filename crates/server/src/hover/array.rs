@@ -21,7 +21,7 @@ impl GetHoverContent for document_tree::Array {
                     Some(schema_store::ValueSchema::Array(array)) => {
                         if let Some(items) = &array.items {
                             if let Ok(mut item) = items.write() {
-                                return value.get_hover_content(
+                                let Some(mut hover_content) = value.get_hover_content(
                                     &accessors
                                         .clone()
                                         .into_iter()
@@ -32,7 +32,21 @@ impl GetHoverContent for document_tree::Array {
                                     position,
                                     keys,
                                     definitions,
-                                );
+                                ) else {
+                                    return None;
+                                };
+
+                                if hover_content.title.is_none() {
+                                    if let Some(title) = &array.title {
+                                        hover_content.title = Some(title.clone());
+                                    }
+                                }
+                                if hover_content.description.is_none() {
+                                    if let Some(description) = &array.description {
+                                        hover_content.description = Some(description.clone());
+                                    }
+                                }
+                                return Some(hover_content);
                             }
                         }
                     }
