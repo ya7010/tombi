@@ -1,3 +1,5 @@
+use crate::Enabled;
+
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
@@ -9,7 +11,8 @@ pub struct ServerOptions {
     /// Whether to enable completion.
     ///
     /// **WARNING**: 🚧 This feature is experimental 🚧
-    pub completion: Option<bool>,
+    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
+    pub completion: Option<Enabled>,
 }
 
 impl ServerOptions {

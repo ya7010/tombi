@@ -99,13 +99,21 @@
         "completion": {
           "title": "Enable completion.",
           "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Enabled"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": true
         }
       },
       "additionalProperties": false
+    },
+    "Enabled": {
+      "type": "boolean"
     },
     "SchemaOptions": {
       "type": "object",
@@ -135,9 +143,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "Enabled": {
-      "type": "boolean"
     },
     "SchemaCatalog": {
       "type": "object",
