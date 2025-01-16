@@ -25,7 +25,12 @@ pub async fn handle_completion(
 
     let config = backend.config().await;
 
-    if !config.server.and_then(|s| s.completion).unwrap_or_default() {
+    if !config
+        .server
+        .and_then(|s| s.completion)
+        .unwrap_or_default()
+        .value()
+    {
         tracing::debug!("`server.completion` is false");
         return Ok(None);
     }
