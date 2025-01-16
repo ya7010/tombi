@@ -117,8 +117,6 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            tracing::debug!("OneOf value: {:?}", value);
-            tracing::debug!("OneOf schema: {:?}", value_schema);
             if let Some(hover_content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
