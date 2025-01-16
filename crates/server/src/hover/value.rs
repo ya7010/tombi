@@ -132,7 +132,19 @@ where
         }
     }
     if hover_contents.len() == 1 {
-        hover_contents.into_iter().next()
+        hover_contents.into_iter().next().map(|mut hover_content| {
+            if hover_content.title.is_none() {
+                if let Some(title) = &one_of_schema.title {
+                    hover_content.title = Some(title.clone());
+                }
+            }
+            if hover_content.description.is_none() {
+                if let Some(description) = &one_of_schema.description {
+                    hover_content.description = Some(description.clone());
+                }
+            }
+            hover_content
+        })
     } else {
         None
     }
@@ -155,7 +167,7 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            if let Some(hover_content) = value.get_hover_content(
+            if let Some(mut hover_content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
                 toml_version,
@@ -163,6 +175,16 @@ where
                 keys,
                 definitions,
             ) {
+                if hover_content.title.is_none() {
+                    if let Some(title) = &any_of_schema.title {
+                        hover_content.title = Some(title.clone());
+                    }
+                }
+                if hover_content.description.is_none() {
+                    if let Some(description) = &any_of_schema.description {
+                        hover_content.description = Some(description.clone());
+                    }
+                }
                 return Some(hover_content);
             }
         }
