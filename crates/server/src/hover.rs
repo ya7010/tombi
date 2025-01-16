@@ -55,7 +55,7 @@ impl std::fmt::Display for HoverContent {
         }
 
         writeln!(f, "Keys: `{}`\n", self.keys)?;
-        writeln!(f, "Value: `{:?}`\n", self.value_type)?;
+        writeln!(f, "Value: `{}`\n", self.value_type)?;
 
         if !self.enumerated_values.is_empty() {
             writeln!(f, "Allowed Values:\n")?;

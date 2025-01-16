@@ -110,7 +110,7 @@ impl ValueSchema {
         }
     }
 
-    fn value_type(&self) -> crate::ValueType {
+    pub fn value_type(&self) -> crate::ValueType {
         match self {
             Self::Null => crate::ValueType::Null,
             Self::Boolean(boolean) => boolean.value_type(),
