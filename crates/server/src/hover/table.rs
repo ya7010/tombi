@@ -79,6 +79,7 @@ impl GetHoverContent for document_tree::Table {
                         value_type: schema_store::ValueType::Table,
                         ..Default::default()
                     };
+
                     if let Some(title) = &table.title {
                         hover_content.title = Some(title.clone());
                     }
@@ -93,7 +94,7 @@ impl GetHoverContent for document_tree::Table {
                             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                                 continue;
                             };
-                            if let Some(hover_content) = self.get_hover_content(
+                            if let Some(mut hover_content) = self.get_hover_content(
                                 accessors,
                                 Some(&value_schema),
                                 toml_version,
@@ -101,6 +102,16 @@ impl GetHoverContent for document_tree::Table {
                                 keys,
                                 definitions,
                             ) {
+                                if hover_content.title.is_none() {
+                                    if let Some(title) = &any_of.title {
+                                        hover_content.title = Some(title.clone());
+                                    }
+                                }
+                                if hover_content.description.is_none() {
+                                    if let Some(description) = &any_of.description {
+                                        hover_content.description = Some(description.clone());
+                                    }
+                                }
                                 return Some(hover_content);
                             }
                         }
