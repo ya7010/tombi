@@ -1,7 +1,7 @@
 use config::TomlVersion;
 use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
 
-use super::{GetHoverContent, HoverContent};
+use super::{value::get_any_of_hover_content, GetHoverContent, HoverContent};
 
 impl GetHoverContent for document_tree::Table {
     fn get_hover_content(
@@ -34,23 +34,17 @@ impl GetHoverContent for document_tree::Table {
                             );
                         }
                     }
-                    Some(ValueSchema::AnyOf(any_of)) => {
-                        if let Ok(mut schemas) = any_of.schemas.write() {
-                            for referable_schema in schemas.iter_mut() {
-                                let Ok(value_schema) = referable_schema.resolve(definitions) else {
-                                    continue;
-                                };
-                                if let Some(hover_content) = self.get_hover_content(
-                                    accessors,
-                                    Some(&value_schema),
-                                    toml_version,
-                                    position,
-                                    keys,
-                                    definitions,
-                                ) {
-                                    return Some(hover_content);
-                                }
-                            }
+                    Some(ValueSchema::AnyOf(any_of_schema)) => {
+                        if let Some(hover_content) = get_any_of_hover_content(
+                            self,
+                            accessors,
+                            any_of_schema,
+                            toml_version,
+                            position,
+                            keys,
+                            definitions,
+                        ) {
+                            return Some(hover_content);
                         }
                     }
                     _ => {}
