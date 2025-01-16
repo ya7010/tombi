@@ -41,12 +41,18 @@ pub struct HoverContent {
 
 impl std::fmt::Display for HoverContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        const SECTION_SEPARATOR: &str = "-----";
+
         if let Some(title) = &self.title {
-            writeln!(f, "## {}\n", title)?;
+            writeln!(f, "#### {}\n", title)?;
         }
 
         if let Some(description) = &self.description {
-            writeln!(f, "{}\n", description.split("\n").join("\n\n"))?;
+            writeln!(f, "{}\n", description)?;
+        }
+
+        if self.title.is_some() || self.description.is_some() {
+            writeln!(f, "{}\n", SECTION_SEPARATOR)?;
         }
 
         writeln!(f, "Keys: `{}`\n", self.keys)?;
@@ -65,6 +71,7 @@ impl std::fmt::Display for HoverContent {
                 writeln!(f, "Source: [{schema_filename}]({schema_url})\n",)?;
             }
         }
+
         Ok(())
     }
 }
