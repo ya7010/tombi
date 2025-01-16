@@ -1,6 +1,6 @@
 use crate::hover::value::get_any_of_hover_content;
 
-use super::GetHoverContent;
+use super::{value::get_all_of_hover_content, GetHoverContent};
 
 impl GetHoverContent for document_tree::String {
     fn get_hover_content(
@@ -29,6 +29,19 @@ impl GetHoverContent for document_tree::String {
                     self,
                     accessors,
                     any_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    definitions,
+                ) {
+                    return Some(hover_content);
+                }
+            }
+            Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+                if let Some(hover_content) = get_all_of_hover_content(
+                    self,
+                    accessors,
+                    all_of_schema,
                     toml_version,
                     position,
                     keys,

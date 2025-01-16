@@ -1,5 +1,5 @@
 use super::{
-    value::{get_any_of_hover_content, get_one_of_hover_content},
+    value::{get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content},
     GetHoverContent,
 };
 
@@ -43,6 +43,19 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                     self,
                     accessors,
                     any_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    definitions,
+                ) {
+                    return Some(hover_content);
+                }
+            }
+            Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+                if let Some(hover_content) = get_all_of_hover_content(
+                    self,
+                    accessors,
+                    all_of_schema,
                     toml_version,
                     position,
                     keys,
