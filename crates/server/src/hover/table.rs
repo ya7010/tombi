@@ -86,7 +86,7 @@ impl GetHoverContent for document_tree::Table {
                         .into_iter()
                         .chain(std::iter::once(accessor))
                         .collect(),
-                    value_schema,
+                    None,
                     toml_version,
                     position,
                     &keys[1..],
