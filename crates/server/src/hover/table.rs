@@ -34,6 +34,25 @@ impl GetHoverContent for document_tree::Table {
                             );
                         }
                     }
+                    Some(ValueSchema::AnyOf(any_of)) => {
+                        if let Ok(mut schemas) = any_of.schemas.write() {
+                            for referable_schema in schemas.iter_mut() {
+                                let Ok(value_schema) = referable_schema.resolve(definitions) else {
+                                    continue;
+                                };
+                                if let Some(hover_content) = self.get_hover_content(
+                                    accessors,
+                                    Some(&value_schema),
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    definitions,
+                                ) {
+                                    return Some(hover_content);
+                                }
+                            }
+                        }
+                    }
                     _ => {}
                 }
 
