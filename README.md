@@ -15,7 +15,7 @@ Tombi aims to make more services and tools use TOML.
 
 JSON is excellent as a data description language, but it does not support comments and lacks convenience.
 
-YAML has a [Great VSCode extension by RedHat](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml),
+YAML has a [Great VSCode Extension by RedHat](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml),
 but the language specification is complex and may exhibit unexpected behavior.
 
 Tombi aims to provide TOML with features like RedHat's YAML extension to improve developers' experience.
