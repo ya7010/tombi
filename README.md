@@ -12,7 +12,9 @@ Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and language ser
 
 ## Purpose of Tombi
 Tombi aims to make more services and tools use TOML.
+
 JSON is excellent as a data description language, but it does not support comments and lacks convenience.
+
 YAML has a [great VSCode extension from RedHat](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml),
 but the language specification is complex and may exhibit unexpected behavior.
 
