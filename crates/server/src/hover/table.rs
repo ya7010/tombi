@@ -6,7 +6,7 @@ use super::{GetHoverContent, HoverContent};
 impl GetHoverContent for document_tree::Table {
     fn get_hover_content(
         &self,
-        accessors: &mut Vec<Accessor>,
+        accessors: &Vec<Accessor>,
         value_schema: Option<&ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -17,26 +17,84 @@ impl GetHoverContent for document_tree::Table {
             if let Some(value) = self.get(key) {
                 let accessor = Accessor::Key(key.to_raw_text(toml_version));
 
-                accessors.push(accessor);
+                match value_schema {
+                    Some(ValueSchema::Table(table)) => {
+                        if let Some(mut property) = table.properties.get_mut(&accessor) {
+                            return value.get_hover_content(
+                                &accessors
+                                    .clone()
+                                    .into_iter()
+                                    .chain(std::iter::once(accessor))
+                                    .collect(),
+                                property.resolve(definitions).ok(),
+                                toml_version,
+                                position,
+                                &keys[1..],
+                                definitions,
+                            );
+                        }
+                    }
+                    _ => {}
+                }
 
                 return value.get_hover_content(
-                    accessors,
+                    &accessors
+                        .clone()
+                        .into_iter()
+                        .chain(std::iter::once(accessor))
+                        .collect(),
                     value_schema,
                     toml_version,
                     position,
                     &keys[1..],
                     definitions,
                 );
+            } else {
+                return None;
+            }
+        } else {
+            match value_schema {
+                Some(ValueSchema::Table(table)) => {
+                    let mut hover_content = HoverContent {
+                        keys: schema_store::Accessors::new(accessors.clone()),
+                        value_type: schema_store::ValueType::Table,
+                        ..Default::default()
+                    };
+                    if let Some(title) = &table.title {
+                        hover_content.title = Some(title.clone());
+                    }
+                    if let Some(description) = &table.description {
+                        hover_content.description = Some(description.clone());
+                    }
+                    return Some(hover_content);
+                }
+                Some(ValueSchema::AnyOf(any_of)) => {
+                    if let Ok(mut schemas) = any_of.schemas.write() {
+                        for referable_schema in schemas.iter_mut() {
+                            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+                                continue;
+                            };
+                            if let Some(hover_content) = self.get_hover_content(
+                                accessors,
+                                Some(&value_schema),
+                                toml_version,
+                                position,
+                                keys,
+                                definitions,
+                            ) {
+                                return Some(hover_content);
+                            }
+                        }
+                    }
+                    None
+                }
+                Some(_) => return None,
+                None => Some(HoverContent {
+                    keys: schema_store::Accessors::new(accessors.clone()),
+                    value_type: schema_store::ValueType::Table,
+                    ..Default::default()
+                }),
             }
         }
-
-        let keys = schema_store::Accessors::new(accessors.clone());
-        let value_type = schema_store::ValueType::Table;
-
-        Some(HoverContent {
-            keys,
-            value_type,
-            ..Default::default()
-        })
     }
 }
