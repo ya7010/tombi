@@ -10,7 +10,6 @@ toml-version = "v1.0.0"
 [lint]
 
 [server]
-completion = true
 
 [[schemas]]
 path = "tombi.schema.json"
