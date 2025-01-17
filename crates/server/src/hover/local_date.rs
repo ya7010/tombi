@@ -22,6 +22,11 @@ impl GetHoverContent for document_tree::LocalDate {
                     description: schema.description.clone(),
                     keys: schema_store::Accessors::new(accessors.clone()),
                     value_type,
+                    enumerated_values: schema
+                        .enumerate
+                        .as_ref()
+                        .map(|v| v.iter().map(ToString::to_string).collect())
+                        .unwrap_or_default(),
                     ..Default::default()
                 })
             }

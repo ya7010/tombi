@@ -21,6 +21,11 @@ impl GetHoverContent for document_tree::String {
                     description: schema.description.clone(),
                     keys: schema_store::Accessors::new(accessors.clone()),
                     value_type,
+                    enumerated_values: schema
+                        .enumerate
+                        .as_ref()
+                        .map(|v| v.iter().map(|s| format!("\"{s}\"")).collect())
+                        .unwrap_or_default(),
                     ..Default::default()
                 })
             }
