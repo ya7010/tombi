@@ -69,6 +69,7 @@ pub struct SchemaCatalogItem {
 
     /// # The file match pattern of the schema.
     ///
+    /// The file match pattern to include the target to apply the schema.
     /// Supports glob pattern.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     pub include: Option<Vec<String>>,
