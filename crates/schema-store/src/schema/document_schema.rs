@@ -14,7 +14,7 @@ pub struct DocumentSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub properties: SchemaProperties,
-    pub additional_property_allowed: bool,
+    pub additional_properties: bool,
     pub additional_property_schema: Option<SchemaItem>,
     pub definitions: SchemaDefinitions,
 }
@@ -54,7 +54,7 @@ impl DocumentSchema {
             }
         }
 
-        let (additional_property_allowed, additional_property_schema) =
+        let (additional_properties, additional_property_schema) =
             match value.get("additionalProperties") {
                 Some(serde_json::Value::Bool(allow)) => (*allow, None),
                 Some(serde_json::Value::Object(object)) => {
@@ -100,7 +100,7 @@ impl DocumentSchema {
             title,
             description,
             properties,
-            additional_property_allowed,
+            additional_properties,
             additional_property_schema,
             definitions,
         }

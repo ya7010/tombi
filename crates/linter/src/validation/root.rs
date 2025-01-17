@@ -7,15 +7,15 @@ pub fn validate(
     document_schema: &schema_store::DocumentSchema,
 ) -> Result<(), Vec<crate::Error>> {
     let mut errors = Vec::new();
-    let additional_property_allowed = document_schema.additional_property_allowed;
+    let additional_properties = document_schema.additional_properties;
     for (key, value) in root.deref().key_values() {
-        if additional_property_allowed == false
+        if additional_properties == false
             && document_schema
                 .properties
                 .get(&Accessor::Key(key.to_string()))
                 .is_none()
         {
-            if !additional_property_allowed {
+            if !additional_properties {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::KeyNotAllowed {
                         key: key.to_string(),

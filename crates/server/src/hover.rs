@@ -103,7 +103,7 @@ pub fn get_hover_content(
                 title: schema.title,
                 description: schema.description,
                 properties: schema.properties,
-                additional_property_allowed: schema.additional_property_allowed,
+                additional_properties: schema.additional_properties,
                 additional_property_schema: schema.additional_property_schema,
                 required: None,
                 default: None,
