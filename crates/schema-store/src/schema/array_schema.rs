@@ -2,13 +2,13 @@ use std::sync::{Arc, RwLock};
 
 use crate::Accessor;
 
-use super::{Referable, Schema, SchemaDefinitions, ValueSchema};
+use super::{Referable, Schema, SchemaDefinitions, SchemaItem, ValueSchema};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub items: Option<Arc<RwLock<Referable<ValueSchema>>>>,
+    pub items: Option<SchemaItem>,
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,

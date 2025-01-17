@@ -1,5 +1,7 @@
-use super::Schema;
+use std::sync::{Arc, RwLock};
+
 use super::{referable_schema::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
+use super::{Schema, SchemaItem};
 use crate::Accessor;
 use config::TomlVersion;
 use dashmap::DashMap;
@@ -12,36 +14,35 @@ pub struct DocumentSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub properties: SchemaProperties,
-    pub additional_properties: Option<bool>,
+    pub additional_property_allowed: bool,
+    pub additional_property_schema: Option<SchemaItem>,
     pub definitions: SchemaDefinitions,
 }
 
 impl DocumentSchema {
-    pub fn new(content: serde_json::Value, document_url: url::Url) -> Self {
-        let toml_version = content
-            .get("x-tombi-toml-version")
-            .and_then(|obj| match obj {
-                serde_json::Value::String(version) => {
-                    serde_json::from_str(&format!("\"{version}\"")).ok()
-                }
-                _ => None,
-            });
-        let title = content
+    pub fn new(value: serde_json::Value, document_url: url::Url) -> Self {
+        let toml_version = value.get("x-tombi-toml-version").and_then(|obj| match obj {
+            serde_json::Value::String(version) => {
+                serde_json::from_str(&format!("\"{version}\"")).ok()
+            }
+            _ => None,
+        });
+        let title = value
             .get("title")
             .and_then(|v| v.as_str().map(|s| s.to_string()));
 
-        let description = content
+        let description = value
             .get("description")
             .and_then(|v| v.as_str().map(|s| s.to_string()));
 
-        let schema_url = content
+        let schema_url = value
             .get("$id")
             .and_then(|v| v.as_str())
             .and_then(|s| url::Url::parse(s).ok());
 
         let properties = DashMap::default();
-        if content.get("properties").is_some() {
-            if let Some(serde_json::Value::Object(object)) = content.get("properties") {
+        if value.get("properties").is_some() {
+            if let Some(serde_json::Value::Object(object)) = value.get("properties") {
                 for (key, value) in object.into_iter() {
                     let Some(object) = value.as_object() else {
                         continue;
@@ -53,13 +54,22 @@ impl DocumentSchema {
             }
         }
 
-        let additional_properties = content
-            .get("additionalProperties")
-            .and_then(|v| v.as_bool());
+        let (additional_property_allowed, additional_property_schema) =
+            match value.get("additionalProperties") {
+                Some(serde_json::Value::Bool(allow)) => (*allow, None),
+                Some(serde_json::Value::Object(object)) => {
+                    let value_schema = Referable::<ValueSchema>::new(object);
+                    (
+                        true,
+                        value_schema.map(|schema| Arc::new(RwLock::new(schema))),
+                    )
+                }
+                _ => (true, None),
+            };
 
         let definitions = DashMap::default();
-        if content.get("definitions").is_some() {
-            if let Some(serde_json::Value::Object(object)) = content.get("definitions") {
+        if value.get("definitions").is_some() {
+            if let Some(serde_json::Value::Object(object)) = value.get("definitions") {
                 for (key, value) in object.into_iter() {
                     let Some(object) = value.as_object() else {
                         continue;
@@ -70,8 +80,8 @@ impl DocumentSchema {
                 }
             }
         }
-        if content.get("$defs").is_some() {
-            if let Some(serde_json::Value::Object(object)) = content.get("$defs") {
+        if value.get("$defs").is_some() {
+            if let Some(serde_json::Value::Object(object)) = value.get("$defs") {
                 for (key, value) in object.into_iter() {
                     let Some(object) = value.as_object() else {
                         continue;
@@ -90,7 +100,8 @@ impl DocumentSchema {
             title,
             description,
             properties,
-            additional_properties,
+            additional_property_allowed,
+            additional_property_schema,
             definitions,
         }
     }

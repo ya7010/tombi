@@ -1,4 +1,8 @@
+use std::sync::Arc;
+use std::sync::RwLock;
+
 use super::Schema;
+use super::SchemaItem;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
 use dashmap::DashMap;
@@ -8,6 +12,8 @@ pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub properties: SchemaProperties,
+    pub additional_property_allowed: bool,
+    pub additional_property_schema: Option<SchemaItem>,
     pub required: Option<Vec<String>>,
     pub default: Option<serde_json::Value>,
 }
@@ -25,6 +31,18 @@ impl TableSchema {
                 }
             }
         }
+        let (additional_property_allowed, additional_property_schema) =
+            match object.get("additionalProperties") {
+                Some(serde_json::Value::Bool(allow)) => (*allow, None),
+                Some(serde_json::Value::Object(object)) => {
+                    let value_schema = Referable::<ValueSchema>::new(object);
+                    (
+                        true,
+                        value_schema.map(|schema| Arc::new(RwLock::new(schema))),
+                    )
+                }
+                _ => (true, None),
+            };
 
         Self {
             title: object
@@ -34,6 +52,8 @@ impl TableSchema {
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             properties,
+            additional_property_allowed,
+            additional_property_schema,
             required: object.get("required").and_then(|v| {
                 v.as_array().map(|arr| {
                     arr.iter()
