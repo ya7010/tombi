@@ -42,13 +42,13 @@ impl Validate for document_tree::String {
             _ => unreachable!("Expected a String schema"),
         };
 
-        let value = self.value();
+        let value = self.to_raw_string(toml_version);
         if let Some(enumerate) = &string_schema.enumerate {
-            if !enumerate.contains(&value.to_string()) {
+            if !enumerate.contains(&value) {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::InvalidValue {
                         expected: enumerate.into_iter().map(ToString::to_string).join(", "),
-                        actual: value.to_string(),
+                        actual: value.clone(),
                     },
                     range: self.range(),
                 });
@@ -89,11 +89,11 @@ impl Validate for document_tree::String {
                     range: self.range(),
                 }]
             })?;
-            if !regex.is_match(value) {
+            if !regex.is_match(&value) {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::PatternMismatch {
                         pattern: pattern.clone(),
-                        actual: value.to_string(),
+                        actual: value,
                     },
                     range: self.range(),
                 });
