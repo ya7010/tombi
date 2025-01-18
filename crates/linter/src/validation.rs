@@ -1,3 +1,4 @@
+mod array;
 mod boolean;
 mod float;
 mod integer;
