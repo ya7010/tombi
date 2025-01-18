@@ -117,19 +117,13 @@ impl GetHoverContent for document_tree::Table {
         } else {
             match value_schema {
                 Some(ValueSchema::Table(table)) => {
-                    let mut hover_content = HoverContent {
+                    return Some(HoverContent {
+                        title: table.title.clone(),
+                        description: table.description.clone(),
                         keys: schema_store::Accessors::new(accessors.clone()),
                         value_type: schema_store::ValueType::Table,
                         ..Default::default()
-                    };
-
-                    if let Some(title) = &table.title {
-                        hover_content.title = Some(title.clone());
-                    }
-                    if let Some(description) = &table.description {
-                        hover_content.description = Some(description.clone());
-                    }
-                    return Some(hover_content);
+                    });
                 }
                 Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
                     if let Some(hover_content) = get_one_of_hover_content(

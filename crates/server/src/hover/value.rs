@@ -136,12 +136,10 @@ where
     }
     if hover_contents.len() == 1 {
         hover_contents.into_iter().next().map(|mut hover_content| {
-            if hover_content.title.is_none() {
+            if hover_content.title.is_none() && hover_content.description.is_none() {
                 if let Some(title) = &one_of_schema.title {
                     hover_content.title = Some(title.clone());
                 }
-            }
-            if hover_content.description.is_none() {
                 if let Some(description) = &one_of_schema.description {
                     hover_content.description = Some(description.clone());
                 }
@@ -188,12 +186,10 @@ where
                 keys,
                 definitions,
             ) {
-                if content.title.is_none() {
+                if content.title.is_none() && content.description.is_none() {
                     if let Some(title) = &any_of_schema.title {
                         content.title = Some(title.clone());
                     }
-                }
-                if content.description.is_none() {
                     if let Some(description) = &any_of_schema.description {
                         content.description = Some(description.clone());
                     }
@@ -255,13 +251,10 @@ where
         (None, None)
     };
 
-    if title.is_none() {
+    if title.is_none() && description.is_none() {
         if let Some(t) = &all_of_schema.title {
             title = Some(t.clone());
         }
-    }
-
-    if description.is_none() {
         if let Some(d) = &all_of_schema.description {
             description = Some(d.clone());
         }

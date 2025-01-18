@@ -36,12 +36,12 @@ impl GetHoverContent for document_tree::Array {
                                     return None;
                                 };
 
-                                if hover_content.title.is_none() {
+                                if hover_content.title.is_none()
+                                    && hover_content.description.is_none()
+                                {
                                     if let Some(title) = &array.title {
                                         hover_content.title = Some(title.clone());
                                     }
-                                }
-                                if hover_content.description.is_none() {
                                     if let Some(description) = &array.description {
                                         hover_content.description = Some(description.clone());
                                     }
@@ -109,19 +109,13 @@ impl GetHoverContent for document_tree::Array {
 
         match value_schema {
             Some(schema_store::ValueSchema::Array(array)) => {
-                let mut hover_content = HoverContent {
+                return Some(HoverContent {
+                    title: array.title.clone(),
+                    description: array.description.clone(),
                     keys: schema_store::Accessors::new(accessors.clone()),
                     value_type: schema_store::ValueType::Array,
                     ..Default::default()
-                };
-
-                if let Some(title) = &array.title {
-                    hover_content.title = Some(title.clone());
-                }
-                if let Some(description) = &array.description {
-                    hover_content.description = Some(description.clone());
-                }
-                return Some(hover_content);
+                });
             }
             Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
                 if let Some(hover_content) = get_one_of_hover_content(
