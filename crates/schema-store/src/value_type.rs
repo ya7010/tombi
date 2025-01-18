@@ -32,19 +32,24 @@ impl ValueType {
             | ValueType::LocalTime
             | ValueType::Array
             | ValueType::Table => ValueType::AnyOf(vec![self, ValueType::Null]),
-            ValueType::OneOf(types) | ValueType::AnyOf(types) | ValueType::AllOf(types) => {
-                ValueType::AllOf(
-                    types
-                        .into_iter()
-                        .map(|t| {
-                            if t.is_nullable() {
-                                t
-                            } else {
-                                t.into_nullable()
-                            }
-                        })
-                        .collect::<Vec<_>>(),
-                )
+            ValueType::OneOf(mut types) => {
+                if !types.iter().any(|t| t.is_nullable()) {
+                    types.push(ValueType::Null);
+                }
+                ValueType::OneOf(types)
+            }
+            ValueType::AnyOf(mut types) => {
+                if !types.iter().all(|t| t.is_nullable()) {
+                    types.push(ValueType::Null);
+                }
+                ValueType::AnyOf(types)
+            }
+            ValueType::AllOf(types) => {
+                if types.iter().all(|t| !t.is_nullable()) {
+                    ValueType::AnyOf(vec![ValueType::AllOf(types), ValueType::Null])
+                } else {
+                    ValueType::AllOf(types)
+                }
             }
         }
     }
@@ -62,9 +67,10 @@ impl ValueType {
             | ValueType::LocalTime
             | ValueType::Array
             | ValueType::Table => false,
-            ValueType::OneOf(types) | ValueType::AnyOf(types) | ValueType::AllOf(types) => {
+            ValueType::OneOf(types) | ValueType::AnyOf(types) => {
                 types.iter().any(|t| t.is_nullable())
             }
+            ValueType::AllOf(types) => types.iter().all(|t| t.is_nullable()),
         }
     }
 }
