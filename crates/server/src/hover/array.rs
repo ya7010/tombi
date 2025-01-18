@@ -1,4 +1,4 @@
-use schema_store::{Accessors, ValueSchema, ValueType};
+use schema_store::{Accessor, Accessors, ValueSchema, ValueType};
 
 use super::{
     value::{get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content},
