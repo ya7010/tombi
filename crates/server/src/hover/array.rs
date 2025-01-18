@@ -1,3 +1,5 @@
+use schema_store::{Accessors, ValueSchema, ValueType};
+
 use super::{
     value::{get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content},
     GetHoverContent, HoverContent,
@@ -6,8 +8,8 @@ use super::{
 impl GetHoverContent for document_tree::Array {
     fn get_hover_content(
         &self,
-        accessors: &Vec<schema_store::Accessor>,
-        value_schema: Option<&schema_store::ValueSchema>,
+        accessors: &Vec<Accessor>,
+        value_schema: Option<&ValueSchema>,
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -15,10 +17,10 @@ impl GetHoverContent for document_tree::Array {
     ) -> Option<super::HoverContent> {
         for (index, value) in self.values().iter().enumerate() {
             if value.range().contains(position) {
-                let accessor = schema_store::Accessor::Index(index);
+                let accessor = Accessor::Index(index);
 
                 match value_schema {
-                    Some(schema_store::ValueSchema::Array(array)) => {
+                    Some(ValueSchema::Array(array)) => {
                         if let Some(items) = &array.items {
                             if let Ok(mut item) = items.write() {
                                 let Some(mut hover_content) = value.get_hover_content(
@@ -50,7 +52,7 @@ impl GetHoverContent for document_tree::Array {
                             }
                         }
                     }
-                    Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+                    Some(ValueSchema::OneOf(one_of_schema)) => {
                         if let Some(hover_content) = get_one_of_hover_content(
                             self,
                             accessors,
@@ -63,7 +65,7 @@ impl GetHoverContent for document_tree::Array {
                             return Some(hover_content);
                         }
                     }
-                    Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
+                    Some(ValueSchema::AnyOf(any_of_schema)) => {
                         if let Some(hover_content) = get_any_of_hover_content(
                             self,
                             accessors,
@@ -76,7 +78,7 @@ impl GetHoverContent for document_tree::Array {
                             return Some(hover_content);
                         }
                     }
-                    Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+                    Some(ValueSchema::AllOf(all_of_schema)) => {
                         if let Some(hover_content) = get_all_of_hover_content(
                             self,
                             accessors,
@@ -108,18 +110,18 @@ impl GetHoverContent for document_tree::Array {
         }
 
         match value_schema {
-            Some(schema_store::ValueSchema::Array(array)) => {
+            Some(ValueSchema::Array(array)) => {
                 return Some(HoverContent {
                     title: array.title.clone(),
                     description: array.description.clone(),
-                    keys: schema_store::Accessors::new(accessors.clone()),
-                    value_type: schema_store::ValueType::Array,
+                    keys: Accessors::new(accessors.clone()),
+                    value_type: ValueType::Array,
                     enumerated_values: vec![],
                     schema_url: None,
                     range: Some(self.range()),
                 });
             }
-            Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+            Some(ValueSchema::OneOf(one_of_schema)) => {
                 if let Some(hover_content) = get_one_of_hover_content(
                     self,
                     accessors,
@@ -132,7 +134,7 @@ impl GetHoverContent for document_tree::Array {
                     return Some(hover_content);
                 }
             }
-            Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
+            Some(ValueSchema::AnyOf(any_of_schema)) => {
                 if let Some(hover_content) = get_any_of_hover_content(
                     self,
                     accessors,
@@ -145,7 +147,7 @@ impl GetHoverContent for document_tree::Array {
                     return Some(hover_content);
                 }
             }
-            Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+            Some(ValueSchema::AllOf(all_of_schema)) => {
                 if let Some(hover_content) = get_all_of_hover_content(
                     self,
                     accessors,
@@ -164,8 +166,8 @@ impl GetHoverContent for document_tree::Array {
         Some(super::HoverContent {
             title: None,
             description: None,
-            keys: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::Array,
+            keys: Accessors::new(accessors.clone()),
+            value_type: ValueType::Array,
             enumerated_values: vec![],
             schema_url: None,
             range: Some(self.range()),
