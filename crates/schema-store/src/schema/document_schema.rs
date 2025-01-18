@@ -1,7 +1,7 @@
 use std::sync::{Arc, RwLock};
 
 use super::{referable_schema::Referable, SchemaDefinitions, SchemaProperties, ValueSchema};
-use super::{Schema, SchemaItem};
+use super::{Schema, SchemaItem, TableSchema};
 use crate::Accessor;
 use config::TomlVersion;
 use dashmap::DashMap;
@@ -122,6 +122,23 @@ impl DocumentSchema {
 
     pub fn value_type(&self) -> crate::ValueType {
         crate::ValueType::Table
+    }
+}
+
+impl From<DocumentSchema> for (ValueSchema, SchemaDefinitions) {
+    fn from(document_schema: DocumentSchema) -> Self {
+        (
+            ValueSchema::Table(TableSchema {
+                title: document_schema.title,
+                description: document_schema.description,
+                properties: document_schema.properties,
+                additional_properties: document_schema.additional_properties,
+                additional_property_schema: document_schema.additional_property_schema,
+                required: document_schema.required,
+                default: None,
+            }),
+            document_schema.definitions,
+        )
     }
 }
 

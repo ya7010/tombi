@@ -17,7 +17,7 @@ pub struct Linter<'a> {
     document_schema: Option<DocumentSchema>,
     #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
-    diagnostics: Vec<crate::Diagnostic>,
+    pub(crate) diagnostics: Vec<crate::Diagnostic>,
 }
 
 impl<'a> Linter<'a> {
@@ -67,9 +67,9 @@ impl<'a> Linter<'a> {
 
             match root.try_into_document_tree(self.toml_version) {
                 Ok(document_tree) => {
-                    if let Some(document_schema) = &self.document_schema {
+                    if let Some(document_schema) = self.document_schema {
                         if let Err(errs) =
-                            crate::validation::root::validate(document_tree, document_schema)
+                            crate::validation::validate(document_tree, document_schema)
                         {
                             for err in errs {
                                 err.set_diagnostic(&mut errors);
@@ -84,7 +84,7 @@ impl<'a> Linter<'a> {
                 }
             }
 
-            errors.extend(self.into_diagnostics());
+            errors.extend(self.diagnostics);
         }
 
         if errors.is_empty() {
@@ -104,11 +104,6 @@ impl<'a> Linter<'a> {
     #[allow(dead_code)]
     pub(crate) fn options(&self) -> &crate::LintOptions {
         &self.options
-    }
-
-    #[inline]
-    pub(crate) fn into_diagnostics(self) -> Vec<crate::Diagnostic> {
-        self.diagnostics
     }
 
     #[inline]

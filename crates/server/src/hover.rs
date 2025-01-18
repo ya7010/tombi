@@ -12,7 +12,7 @@ mod value;
 
 use config::TomlVersion;
 use dashmap::DashMap;
-use schema_store::{Accessor, Accessors, DocumentSchema, TableSchema, ValueSchema, ValueType};
+use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 
 trait GetHoverContent {
@@ -98,20 +98,13 @@ pub fn get_hover_content(
 ) -> Option<HoverContent> {
     let table = root.deref();
     let (value_schema, definitions) = match document_schema {
-        Some(document_schema) => (
-            Some(ValueSchema::Table(TableSchema {
-                title: document_schema.title,
-                description: document_schema.description,
-                properties: document_schema.properties,
-                additional_properties: document_schema.additional_properties,
-                additional_property_schema: document_schema.additional_property_schema,
-                required: document_schema.required,
-                default: None,
-            })),
-            document_schema.definitions,
-        ),
+        Some(document_schema) => {
+            let (value_schema, definitions) = document_schema.into();
+            (Some(value_schema), definitions)
+        }
         None => (None, DashMap::new()),
     };
+
     table.get_hover_content(
         &mut vec![],
         value_schema.as_ref(),

@@ -1060,6 +1060,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "config",
+ "dashmap 6.1.0",
  "diagnostic",
  "document-tree",
  "itertools",
