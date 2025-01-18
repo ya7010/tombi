@@ -11,6 +11,8 @@ toml-version = "v1.0.0"
 
 [server]
 
+[schema.catalog]
+
 [[schemas]]
 path = "tombi.schema.json"
 include = ["tombi.toml"]
