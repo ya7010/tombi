@@ -47,7 +47,8 @@ where
     T: Validate + ValueImpl,
 {
     let mut errors = vec![];
-
+    let mut is_type_match = false;
+    let mut type_mismatch_errors = vec![];
     let mut valid_count = 0;
 
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
@@ -67,6 +68,7 @@ where
                 | (document_tree::ValueType::LocalTime, ValueSchema::LocalTime(_))
                 | (document_tree::ValueType::Table, ValueSchema::Table(_))
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
+                    is_type_match = true;
                     match value.validate(toml_version, value_schema, definitions) {
                         Ok(()) => {
                             valid_count += 1;
@@ -86,7 +88,13 @@ where
                 | (_, ValueSchema::Table(_))
                 | (_, ValueSchema::Array(_))
                 | (_, ValueSchema::Null) => {
-                    continue;
+                    type_mismatch_errors.push(crate::Error {
+                        kind: crate::ErrorKind::TypeMismatch {
+                            expected: value_schema.value_type(),
+                            actual: value.value_type(),
+                        },
+                        range: value.range(),
+                    });
                 }
                 (_, ValueSchema::OneOf(one_of_schema)) => {
                     match validate_one_of(value, toml_version, one_of_schema, definitions) {
@@ -123,6 +131,10 @@ where
         return Ok(());
     }
 
+    if !is_type_match {
+        errors.append(&mut type_mismatch_errors);
+    }
+
     Err(errors)
 }
 
@@ -136,6 +148,8 @@ where
     T: Validate + ValueImpl,
 {
     let mut errors = vec![];
+    let mut is_type_match = false;
+    let mut type_mismatch_errors = vec![];
 
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         for referable_schema in schemas.iter_mut() {
@@ -153,6 +167,7 @@ where
                 | (document_tree::ValueType::LocalTime, ValueSchema::LocalTime(_))
                 | (document_tree::ValueType::Table, ValueSchema::Table(_))
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
+                    is_type_match = true;
                     match value.validate(toml_version, value_schema, definitions) {
                         Ok(()) => {
                             return Ok(());
@@ -171,7 +186,7 @@ where
                 | (_, ValueSchema::Table(_))
                 | (_, ValueSchema::Array(_))
                 | (_, ValueSchema::Null) => {
-                    errors.push(crate::Error {
+                    type_mismatch_errors.push(crate::Error {
                         kind: crate::ErrorKind::TypeMismatch {
                             expected: value_schema.value_type(),
                             actual: value.value_type(),
@@ -205,6 +220,10 @@ where
                 }
             }
         }
+    }
+
+    if !is_type_match {
+        errors.append(&mut type_mismatch_errors);
     }
 
     Err(errors)

@@ -19,10 +19,10 @@ impl Validate for document_tree::Boolean {
             | ValueType::AnyOf(_)
             | ValueType::AllOf(_) => {}
             ValueType::Null => return Ok(()),
-            _ => {
+            value_schema => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
-                        expected: ValueType::Boolean,
+                        expected: value_schema,
                         actual: self.value_type(),
                     },
                     range: self.range(),

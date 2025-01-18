@@ -15,10 +15,10 @@ impl Validate for document_tree::Table {
         match value_schema.value_type() {
             ValueType::Table | ValueType::OneOf(_) | ValueType::AnyOf(_) | ValueType::AllOf(_) => {}
             ValueType::Null => return Ok(()),
-            _ => {
+            value_schema => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
-                        expected: schema_store::ValueType::Table,
+                        expected: value_schema,
                         actual: self.value_type(),
                     },
                     range: self.range(),
