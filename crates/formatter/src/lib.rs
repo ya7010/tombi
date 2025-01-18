@@ -30,13 +30,17 @@ macro_rules! test_format {
         $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatDefinitions::default()) -> Ok($expected););
     };
 
-    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definition:expr) -> Ok($expected:expr);) => {
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr) -> Ok($expected:expr);) => {
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $definitions, &crate::FormatOptions::default()) -> Ok($expected););
+    };
+
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Ok($expected:expr);) => {
         #[tokio::test]
         async fn $name() {
             match $crate::Formatter::try_new(
                 $toml_version,
-                $definition,
-                &crate::FormatOptions::default(),
+                $definitions,
+                $options,
                 None,
                 &schema_store::SchemaStore::default()
             ).await.unwrap().format($source).await {
@@ -59,12 +63,16 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr) -> Err(_);) => {
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $definitions, &crate::FormatOptions::default()) -> Err(_););
+    };
+
+    (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Err(_);) => {
         #[tokio::test]
         async fn $name() {
             match $crate::Formatter::try_new(
                 $toml_version,
                 $definitions,
-                &crate::FormatOptions::default(),
+                $options,
                 None,
                 &schema_store::SchemaStore::default()
             ).await.unwrap().format($source).await {
