@@ -17,6 +17,8 @@ pub struct DocumentSchema {
     pub additional_properties: bool,
     pub additional_property_schema: Option<SchemaItem>,
     pub required: Option<Vec<String>>,
+    pub min_properties: Option<usize>,
+    pub max_properties: Option<usize>,
     pub definitions: SchemaDefinitions,
 }
 
@@ -110,6 +112,12 @@ impl DocumentSchema {
                         .collect()
                 })
             }),
+            min_properties: value
+                .get("minProperties")
+                .and_then(|v| v.as_u64().map(|u| u as usize)),
+            max_properties: value
+                .get("maxProperties")
+                .and_then(|v| v.as_u64().map(|u| u as usize)),
             definitions,
         }
     }
@@ -135,6 +143,8 @@ impl From<DocumentSchema> for (ValueSchema, SchemaDefinitions) {
                 additional_properties: document_schema.additional_properties,
                 additional_property_schema: document_schema.additional_property_schema,
                 required: document_schema.required,
+                min_properties: document_schema.min_properties,
+                max_properties: document_schema.max_properties,
                 default: None,
             }),
             document_schema.definitions,

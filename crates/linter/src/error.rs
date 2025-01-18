@@ -63,11 +63,23 @@ pub enum ErrorKind {
     #[error("The value \"{actual}\" does not match the pattern \"{pattern}\"")]
     PatternMismatch { pattern: String, actual: String },
 
+    #[error("The array must contain at most {max_items} items, but found {actual}")]
+    MaxItems { max_items: usize, actual: usize },
+
     #[error("The array must contain at least {min_items} items, but found {actual}")]
     MinItems { min_items: usize, actual: usize },
 
-    #[error("The array must contain at most {max_items} items, but found {actual}")]
-    MaxItems { max_items: usize, actual: usize },
+    #[error("The object must contain at most {max_properties} properties, but found {actual}")]
+    MaxProperties {
+        max_properties: usize,
+        actual: usize,
+    },
+
+    #[error("The object must contain at least {min_properties} properties, but found {actual}")]
+    MinProperties {
+        min_properties: usize,
+        actual: usize,
+    },
 }
 
 #[derive(Debug)]

@@ -92,6 +92,30 @@ impl Validate for document_tree::Table {
             }
         }
 
+        if let Some(max_properties) = table_schema.max_properties {
+            if self.keys().count() > max_properties {
+                errors.push(crate::Error {
+                    kind: crate::ErrorKind::MaxProperties {
+                        max_properties,
+                        actual: self.keys().count(),
+                    },
+                    range: self.range(),
+                });
+            }
+        }
+
+        if let Some(min_properties) = table_schema.min_properties {
+            if self.keys().count() < min_properties {
+                errors.push(crate::Error {
+                    kind: crate::ErrorKind::MinProperties {
+                        min_properties,
+                        actual: self.keys().count(),
+                    },
+                    range: self.range(),
+                });
+            }
+        }
+
         if errors.is_empty() {
             Ok(())
         } else {

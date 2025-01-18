@@ -52,22 +52,23 @@ impl Validate for document_tree::Array {
             }
         }
 
-        if let Some(min_items) = array_schema.min_items {
-            if self.values().len() < min_items {
+        if let Some(max_items) = array_schema.max_items {
+            if self.values().len() > max_items {
                 errors.push(crate::Error {
-                    kind: crate::ErrorKind::MinItems {
-                        min_items,
+                    kind: crate::ErrorKind::MaxItems {
+                        max_items,
                         actual: self.values().len(),
                     },
                     range: self.range(),
                 });
             }
         }
-        if let Some(max_items) = array_schema.max_items {
-            if self.values().len() > max_items {
+
+        if let Some(min_items) = array_schema.min_items {
+            if self.values().len() < min_items {
                 errors.push(crate::Error {
-                    kind: crate::ErrorKind::MaxItems {
-                        max_items,
+                    kind: crate::ErrorKind::MinItems {
+                        min_items,
                         actual: self.values().len(),
                     },
                     range: self.range(),
