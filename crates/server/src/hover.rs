@@ -15,6 +15,32 @@ use dashmap::DashMap;
 use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 
+pub fn get_hover_content(
+    root: &document_tree::Root,
+    toml_version: TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    document_schema: Option<DocumentSchema>,
+) -> Option<HoverContent> {
+    let table = root.deref();
+    let (value_schema, definitions) = match document_schema {
+        Some(document_schema) => {
+            let (value_schema, definitions) = document_schema.into();
+            (Some(value_schema), definitions)
+        }
+        None => (None, DashMap::new()),
+    };
+
+    table.get_hover_content(
+        &mut vec![],
+        value_schema.as_ref(),
+        toml_version,
+        position,
+        keys,
+        &definitions,
+    )
+}
+
 trait GetHoverContent {
     fn get_hover_content(
         &self,
@@ -94,32 +120,6 @@ impl From<HoverContent> for tower_lsp::lsp_types::Hover {
             range: value.range.map(Into::into),
         }
     }
-}
-
-pub fn get_hover_content(
-    root: &document_tree::Root,
-    toml_version: TomlVersion,
-    position: text::Position,
-    keys: &[document_tree::Key],
-    document_schema: Option<DocumentSchema>,
-) -> Option<HoverContent> {
-    let table = root.deref();
-    let (value_schema, definitions) = match document_schema {
-        Some(document_schema) => {
-            let (value_schema, definitions) = document_schema.into();
-            (Some(value_schema), definitions)
-        }
-        None => (None, DashMap::new()),
-    };
-
-    table.get_hover_content(
-        &mut vec![],
-        value_schema.as_ref(),
-        toml_version,
-        position,
-        keys,
-        &definitions,
-    )
 }
 
 fn get_schema_name(schema_url: &tower_lsp::lsp_types::Url) -> Option<&str> {
