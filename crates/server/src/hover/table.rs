@@ -1,5 +1,5 @@
 use config::TomlVersion;
-use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
+use schema_store::{Accessor, Accessors, SchemaDefinitions, ValueSchema, ValueType};
 
 use super::{
     value::{get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content},
@@ -116,12 +116,12 @@ impl GetHoverContent for document_tree::Table {
             }
         } else {
             match value_schema {
-                Some(ValueSchema::Table(table)) => {
+                Some(ValueSchema::Table(table_schema)) => {
                     return Some(HoverContent {
-                        title: table.title.clone(),
-                        description: table.description.clone(),
-                        keys: schema_store::Accessors::new(accessors.clone()),
-                        value_type: schema_store::ValueType::Table,
+                        title: table_schema.title.clone(),
+                        description: table_schema.description.clone(),
+                        keys: Accessors::new(accessors.clone()),
+                        value_type: ValueType::Table,
                         enumerated_values: vec![],
                         schema_url: None,
                         range: Some(self.range()),
@@ -174,8 +174,8 @@ impl GetHoverContent for document_tree::Table {
         Some(HoverContent {
             title: None,
             description: None,
-            keys: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::Table,
+            keys: Accessors::new(accessors.clone()),
+            value_type: ValueType::Table,
             enumerated_values: vec![],
             schema_url: None,
             range: Some(self.range()),
