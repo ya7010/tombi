@@ -5,6 +5,9 @@ pub enum ErrorKind {
     #[error("An empty quoted key is allowed, but it is not recommended")]
     KeyEmpty,
 
+    #[error("The key \"{key}\" is required")]
+    KeyRequired { key: String },
+
     #[error("\"{key}\" is not allowed")]
     KeyNotAllowed { key: String },
 

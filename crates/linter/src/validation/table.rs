@@ -73,6 +73,24 @@ impl Validate for document_tree::Table {
             };
         }
 
+        if let Some(required) = &table_schema.required {
+            let keys = self
+                .keys()
+                .map(|key| key.to_raw_text(toml_version))
+                .collect::<Vec<_>>();
+
+            for required_key in required {
+                if !keys.contains(required_key) {
+                    errors.push(crate::Error {
+                        kind: crate::ErrorKind::KeyRequired {
+                            key: required_key.to_string(),
+                        },
+                        range: self.range(),
+                    });
+                }
+            }
+        }
+
         if errors.is_empty() {
             Ok(())
         } else {

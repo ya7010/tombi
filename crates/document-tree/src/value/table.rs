@@ -100,6 +100,17 @@ impl Table {
         }
     }
 
+    #[inline]
+    pub fn keys(&self) -> impl Iterator<Item = &Key> {
+        self.key_values.keys()
+    }
+
+    #[inline]
+    pub fn values(&self) -> impl Iterator<Item = &Value> {
+        self.key_values.values()
+    }
+
+    #[inline]
     pub fn key_values(&self) -> &IndexMap<Key, Value> {
         &self.key_values
     }
