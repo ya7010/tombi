@@ -17,31 +17,31 @@ pub enum ErrorKind {
     #[error("Expected one of {expected}, but found {actual}")]
     InvalidValue { expected: String, actual: String },
 
-    #[error("The value {actual} exceeds the maximum value of {maximum}")]
+    #[error("The value must be > {maximum}, but found {actual}")]
     MaximumInteger { maximum: i64, actual: i64 },
 
-    #[error("The value {actual} is less than the minimum value of {minimum}")]
+    #[error("The value must be < {minimum}, but found {actual}")]
     MinimumInteger { minimum: i64, actual: i64 },
 
-    #[error("The value {actual} exceeds the exclusive maximum value of {maximum}")]
+    #[error("The value must be ≥ {maximum}, but found {actual}")]
     ExclusiveMaximumInteger { maximum: i64, actual: i64 },
 
-    #[error("The value {actual} is less than the exclusive minimum value of {minimum}")]
+    #[error("The value must be ≤ {minimum}, but found {actual}")]
     ExclusiveMinimumInteger { minimum: i64, actual: i64 },
 
     #[error("The value {actual} is not a multiple of {multiple_of}")]
     MultipleOfInteger { multiple_of: i64, actual: i64 },
 
-    #[error("The value {actual} exceeds the maximum value of {maximum}")]
+    #[error("The value must be > {maximum}, but found {actual}")]
     MaximumFloat { maximum: f64, actual: f64 },
 
-    #[error("The value {actual} is less than the minimum value of {minimum}")]
+    #[error("The value must be < {minimum}, but found {actual}")]
     MinimumFloat { minimum: f64, actual: f64 },
 
-    #[error("The value {actual} exceeds the exclusive maximum value of {maximum}")]
+    #[error("The value must be ≥ {maximum}, but found {actual}")]
     ExclusiveMaximumFloat { maximum: f64, actual: f64 },
 
-    #[error("The value {actual} is less than the exclusive minimum value of {minimum}")]
+    #[error("The value must be ≤ {minimum}, but found {actual}")]
     ExclusiveMinimumFloat { minimum: f64, actual: f64 },
 
     #[error("The value {actual} is not a multiple of {multiple_of}")]
