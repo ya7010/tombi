@@ -15,7 +15,7 @@ pub enum ErrorKind {
         actual: ValueType,
     },
 
-    #[error("The value must be one of [{}], but found {actual}", .expected.iter().map(quoted).join(", "))]
+    #[error("The value must be one of [{}], but found {actual}", .expected.join(", "))]
     Eunmerate {
         expected: Vec<String>,
         actual: String,
@@ -77,8 +77,4 @@ impl diagnostic::SetDiagnostics for Error {
             self.range,
         ))
     }
-}
-
-fn quoted(key: &String) -> String {
-    format!("\"{}\"", key)
 }

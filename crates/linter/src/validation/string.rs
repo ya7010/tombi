@@ -47,7 +47,7 @@ impl Validate for document_tree::String {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::Eunmerate {
                         expected: enumerate.iter().map(|s| format!("\"{s}\"")).collect(),
-                        actual: value.clone(),
+                        actual: self.value().to_string(),
                     },
                     range: self.range(),
                 });
