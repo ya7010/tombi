@@ -1,3 +1,5 @@
+use schema_store::ValueType;
+
 #[derive(thiserror::Error, Debug)]
 pub enum ErrorKind {
     #[error("An empty quoted key is allowed, but it is not recommended")]
@@ -5,6 +7,12 @@ pub enum ErrorKind {
 
     #[error("\"{key}\" is not allowed")]
     KeyNotAllowed { key: String },
+
+    #[error("Expected a value of type {expected}, but found {actual}")]
+    TypeMismatch {
+        expected: ValueType,
+        actual: ValueType,
+    },
 }
 
 #[derive(Debug)]

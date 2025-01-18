@@ -1,5 +1,6 @@
-pub mod table;
-pub mod value;
+mod boolean;
+mod table;
+mod value;
 
 use config::TomlVersion;
 use schema_store::SchemaDefinitions;

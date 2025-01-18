@@ -12,9 +12,10 @@ impl Validate for document_tree::Value {
         definitions: &SchemaDefinitions,
     ) {
         match self {
-            document_tree::Value::Table(table) => {
-                table.validate(errors, toml_version, value_schema, definitions)
+            Self::Boolean(boolean) => {
+                boolean.validate(errors, toml_version, value_schema, definitions)
             }
+            Self::Table(table) => table.validate(errors, toml_version, value_schema, definitions),
             _ => {}
         }
     }
