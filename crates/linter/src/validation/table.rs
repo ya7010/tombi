@@ -13,6 +13,7 @@ impl Validate for document_tree::Table {
         let mut errors = vec![];
         match value_schema.value_type() {
             ValueType::Table | ValueType::OneOf(_) | ValueType::AnyOf(_) | ValueType::AllOf(_) => {}
+            ValueType::Null => return Ok(()),
             value_type => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
