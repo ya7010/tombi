@@ -1,6 +1,5 @@
 use super::{
-    value::{get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content},
-    GetHoverContent,
+    get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content, GetHoverContent,
 };
 
 impl GetHoverContent for document_tree::LocalDateTime {

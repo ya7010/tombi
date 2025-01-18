@@ -2,8 +2,8 @@ use config::TomlVersion;
 use schema_store::{Accessor, Accessors, SchemaDefinitions, ValueSchema, ValueType};
 
 use super::{
-    value::{get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content},
-    GetHoverContent, HoverContent,
+    get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content, GetHoverContent,
+    HoverContent,
 };
 
 impl GetHoverContent for document_tree::Table {

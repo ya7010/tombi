@@ -1,6 +1,4 @@
-use crate::hover::value::get_any_of_hover_content;
-
-use super::{value::get_all_of_hover_content, GetHoverContent};
+use super::{get_all_of_hover_content, get_any_of_hover_content, GetHoverContent};
 
 impl GetHoverContent for document_tree::String {
     fn get_hover_content(
