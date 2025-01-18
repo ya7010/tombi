@@ -1,7 +1,7 @@
 use config::TomlVersion;
-use schema_store::{Accessor, ValueSchema};
+use schema_store::{Accessor, ValueSchema, ValueType};
 
-use super::Validate;
+use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for document_tree::Table {
     fn validate(
@@ -10,12 +10,33 @@ impl Validate for document_tree::Table {
         value_schema: &ValueSchema,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Result<(), Vec<crate::Error>> {
+        let mut errors = vec![];
+        match value_schema.value_type() {
+            ValueType::Table | ValueType::OneOf(_) | ValueType::AnyOf(_) | ValueType::AllOf(_) => {}
+            value_type => {
+                return Err(vec![crate::Error {
+                    kind: crate::ErrorKind::TypeMismatch {
+                        expected: schema_store::ValueType::Table,
+                        actual: value_type,
+                    },
+                    range: self.range(),
+                }])
+            }
+        }
+
         let table_schema = match value_schema {
             ValueSchema::Table(table_schema) => table_schema,
-            _ => return Ok(()),
+            ValueSchema::OneOf(one_of_schema) => {
+                return validate_one_of(self, toml_version, one_of_schema, definitions)
+            }
+            ValueSchema::AnyOf(any_of_schema) => {
+                return validate_any_of(self, toml_version, any_of_schema, definitions)
+            }
+            ValueSchema::AllOf(all_of_schema) => {
+                return validate_all_of(self, toml_version, all_of_schema, definitions)
+            }
+            _ => unreachable!("Expected a table schema"),
         };
-
-        let mut errors = vec![];
 
         for (key, value) in self.key_values() {
             if table_schema.additional_properties == false

@@ -2,31 +2,43 @@ use config::TomlVersion;
 use itertools::Itertools;
 use schema_store::{SchemaDefinitions, ValueSchema, ValueType};
 
-use super::Validate;
+use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for document_tree::Boolean {
     fn validate(
         &self,
-        _toml_version: TomlVersion,
+        toml_version: TomlVersion,
         value_schema: &ValueSchema,
-        _definitions: &SchemaDefinitions,
+        definitions: &SchemaDefinitions,
     ) -> Result<(), Vec<crate::Error>> {
         let mut errors = vec![];
 
         match value_schema.value_type() {
-            ValueType::Boolean => {}
+            ValueType::Boolean
+            | ValueType::OneOf(_)
+            | ValueType::AnyOf(_)
+            | ValueType::AllOf(_) => {}
             value_type => {
-                errors.push(crate::Error {
+                return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
                         expected: ValueType::Boolean,
                         actual: value_type,
                     },
                     range: self.range(),
-                });
+                }]);
             }
         }
         let boolean_schema = match value_schema {
             ValueSchema::Boolean(boolean_schema) => boolean_schema,
+            ValueSchema::OneOf(one_of_schema) => {
+                return validate_one_of(self, toml_version, one_of_schema, definitions)
+            }
+            ValueSchema::AnyOf(any_of_schema) => {
+                return validate_any_of(self, toml_version, any_of_schema, definitions)
+            }
+            ValueSchema::AllOf(all_of_schema) => {
+                return validate_all_of(self, toml_version, all_of_schema, definitions)
+            }
             _ => unreachable!("Expected a boolean schema"),
         };
 
