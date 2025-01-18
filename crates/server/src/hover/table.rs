@@ -35,6 +35,25 @@ impl GetHoverContent for document_tree::Table {
                                 &keys[1..],
                                 definitions,
                             );
+                        } else if let Some(additiona_property_schema) =
+                            &table.additional_property_schema
+                        {
+                            if let Ok(mut additiona_property_schema) =
+                                additiona_property_schema.write()
+                            {
+                                return value.get_hover_content(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    additiona_property_schema.resolve(definitions).ok(),
+                                    toml_version,
+                                    position,
+                                    &keys[1..],
+                                    definitions,
+                                );
+                            }
                         }
                     }
                     Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
