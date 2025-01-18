@@ -176,7 +176,12 @@ where
                     hover_content.description = Some(description.clone());
                 }
             }
-            hover_content.value_type = ValueType::OneOf(value_types.into_iter().collect());
+
+            if value_types.len() == 1 {
+                hover_content.value_type = value_types.into_iter().next().unwrap();
+            } else {
+                hover_content.value_type = ValueType::OneOf(value_types.into_iter().collect());
+            }
 
             hover_content
         })
@@ -228,7 +233,11 @@ where
             }
         }
         if let Some(mut hover_content) = hover_content {
-            hover_content.value_type = ValueType::AnyOf(value_types.into_iter().collect());
+            if value_types.len() == 1 {
+                hover_content.value_type = value_types.into_iter().next().unwrap();
+            } else {
+                hover_content.value_type = ValueType::AnyOf(value_types.into_iter().collect());
+            }
             return Some(hover_content);
         }
     }
@@ -290,11 +299,17 @@ where
         }
     }
 
+    let value_type = if value_types.len() == 1 {
+        value_types.into_iter().next().unwrap()
+    } else {
+        ValueType::AllOf(value_types.into_iter().collect())
+    };
+
     Some(HoverContent {
         title,
         description,
         keys: schema_store::Accessors::new(accessors.clone()),
-        value_type: schema_store::ValueType::AllOf(value_types.into_iter().collect()),
+        value_type,
         enumerated_values: Vec::new(),
         schema_url: None,
         range: None,
