@@ -45,8 +45,11 @@ impl Validate for LocalTime {
         if let Some(enumerate) = &local_time_schema.enumerate {
             if !enumerate.contains(&value_string) {
                 errors.push(crate::Error {
-                    kind: crate::ErrorKind::InvalidValue {
-                        expected: enumerate.into_iter().map(ToString::to_string).join(", "),
+                    kind: crate::ErrorKind::Eunmerate {
+                        expected: format!(
+                            "[{}]",
+                            enumerate.into_iter().map(ToString::to_string).join(", ")
+                        ),
                         actual: value_string,
                     },
                     range: self.range(),

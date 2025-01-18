@@ -14,8 +14,8 @@ pub enum ErrorKind {
         actual: ValueType,
     },
 
-    #[error("Expected one of {expected}, but found {actual}")]
-    InvalidValue { expected: String, actual: String },
+    #[error("The value must be one of {expected}, but found {actual}")]
+    Eunmerate { expected: String, actual: String },
 
     #[error("The value must be > {maximum}, but found {actual}")]
     MaximumInteger { maximum: i64, actual: i64 },

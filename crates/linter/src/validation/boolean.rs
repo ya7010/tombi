@@ -46,7 +46,7 @@ impl Validate for document_tree::Boolean {
         if let Some(enumerate) = &boolean_schema.enumerate {
             if !enumerate.contains(&value) {
                 errors.push(crate::Error {
-                    kind: crate::ErrorKind::InvalidValue {
+                    kind: crate::ErrorKind::Eunmerate {
                         expected: format!(
                             "[{}]",
                             enumerate.into_iter().map(ToString::to_string).join(", ")

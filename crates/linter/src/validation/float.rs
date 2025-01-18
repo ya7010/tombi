@@ -45,8 +45,11 @@ impl Validate for document_tree::Float {
         if let Some(enumerate) = &float_schema.enumerate {
             if !enumerate.contains(&value) {
                 errors.push(crate::Error {
-                    kind: crate::ErrorKind::InvalidValue {
-                        expected: enumerate.into_iter().map(ToString::to_string).join(", "),
+                    kind: crate::ErrorKind::Eunmerate {
+                        expected: format!(
+                            "[{}]",
+                            enumerate.into_iter().map(ToString::to_string).join(", ")
+                        ),
                         actual: value.to_string(),
                     },
                     range: self.range(),
