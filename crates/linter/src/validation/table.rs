@@ -6,15 +6,16 @@ use super::Validate;
 impl Validate for document_tree::Table {
     fn validate(
         &self,
-        errors: &mut Vec<crate::Error>,
         toml_version: TomlVersion,
         value_schema: &ValueSchema,
         definitions: &schema_store::SchemaDefinitions,
-    ) {
+    ) -> Result<(), Vec<crate::Error>> {
         let table_schema = match value_schema {
             ValueSchema::Table(table_schema) => table_schema,
-            _ => return,
+            _ => return Ok(()),
         };
+
+        let mut errors = vec![];
 
         for (key, value) in self.key_values() {
             if table_schema.additional_properties == false
@@ -35,18 +36,31 @@ impl Validate for document_tree::Table {
                 }
                 if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                     if let Ok(value_schema) = property.resolve(definitions) {
-                        value.validate(errors, toml_version, value_schema, &definitions)
+                        if let Err(errs) = value.validate(toml_version, value_schema, &definitions)
+                        {
+                            errors.extend(errs);
+                        }
                     }
                 } else if let Some(additional_property_schema) =
                     &table_schema.additional_property_schema
                 {
                     if let Ok(mut additional_property_schema) = additional_property_schema.write() {
                         if let Ok(value_schema) = additional_property_schema.resolve(definitions) {
-                            value.validate(errors, toml_version, value_schema, &definitions)
+                            if let Err(errs) =
+                                value.validate(toml_version, value_schema, &definitions)
+                            {
+                                errors.extend(errs);
+                            }
                         }
                     }
                 };
             }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
         }
     }
 }
