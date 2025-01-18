@@ -78,7 +78,10 @@ impl ValueType {
 impl std::fmt::Display for ValueType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ValueType::Null => write!(f, "Null"),
+            ValueType::Null => {
+                // NOTE: If this representation appears in the Hover of the Language Server, it is a bug.
+                write!(f, "Null")
+            }
             ValueType::Boolean => write!(f, "Boolean"),
             ValueType::Integer => write!(f, "Integer"),
             ValueType::Float => write!(f, "Float"),
