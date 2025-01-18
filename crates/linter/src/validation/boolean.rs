@@ -1,4 +1,5 @@
 use config::TomlVersion;
+use itertools::Itertools;
 use schema_store::{SchemaDefinitions, ValueSchema, ValueType};
 
 use super::Validate;
@@ -24,10 +25,26 @@ impl Validate for document_tree::Boolean {
                 });
             }
         }
-        let _boolean_schema = match value_schema {
+        let boolean_schema = match value_schema {
             ValueSchema::Boolean(boolean_schema) => boolean_schema,
             _ => unreachable!("Expected a boolean schema"),
         };
+
+        if let Some(enumerate) = &boolean_schema.enumerate {
+            let value = self.value();
+            if !enumerate.contains(&value) {
+                errors.push(crate::Error {
+                    kind: crate::ErrorKind::InvalidValue {
+                        expected: format!(
+                            "[{}]",
+                            enumerate.into_iter().map(ToString::to_string).join(", ")
+                        ),
+                        actual: value.to_string(),
+                    },
+                    range: self.range(),
+                });
+            }
+        }
 
         if errors.is_empty() {
             Ok(())

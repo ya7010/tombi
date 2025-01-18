@@ -13,6 +13,9 @@ pub enum ErrorKind {
         expected: ValueType,
         actual: ValueType,
     },
+
+    #[error("Expected one of {expected}, but found {actual}")]
+    InvalidValue { expected: String, actual: String },
 }
 
 #[derive(Debug)]
