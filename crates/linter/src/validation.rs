@@ -1,4 +1,5 @@
 mod boolean;
+mod integer;
 mod table;
 mod value;
 

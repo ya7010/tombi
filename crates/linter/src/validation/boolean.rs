@@ -42,8 +42,8 @@ impl Validate for document_tree::Boolean {
             _ => unreachable!("Expected a boolean schema"),
         };
 
+        let value = self.value();
         if let Some(enumerate) = &boolean_schema.enumerate {
-            let value = self.value();
             if !enumerate.contains(&value) {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::InvalidValue {
