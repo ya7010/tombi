@@ -21,8 +21,8 @@ impl GetHoverContent for document_tree::Table {
                 let accessor = Accessor::Key(key.to_raw_text(toml_version));
 
                 match value_schema {
-                    Some(ValueSchema::Table(table)) => {
-                        if let Some(mut property) = table.properties.get_mut(&accessor) {
+                    Some(ValueSchema::Table(table_schema)) => {
+                        if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                             return value.get_hover_content(
                                 &accessors
                                     .clone()
@@ -36,7 +36,7 @@ impl GetHoverContent for document_tree::Table {
                                 definitions,
                             );
                         } else if let Some(additiona_property_schema) =
-                            &table.additional_property_schema
+                            &table_schema.additional_property_schema
                         {
                             if let Ok(mut additiona_property_schema) =
                                 additiona_property_schema.write()

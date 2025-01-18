@@ -68,9 +68,11 @@ impl<'a> Linter<'a> {
             match root.try_into_document_tree(self.toml_version) {
                 Ok(document_tree) => {
                     if let Some(document_schema) = self.document_schema {
-                        if let Err(errs) =
-                            crate::validation::validate(document_tree, document_schema)
-                        {
+                        if let Err(errs) = crate::validation::validate(
+                            document_tree,
+                            self.toml_version,
+                            document_schema,
+                        ) {
                             for err in errs {
                                 err.set_diagnostic(&mut errors);
                             }

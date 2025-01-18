@@ -1,3 +1,4 @@
+use config::TomlVersion;
 use schema_store::{Accessor, ValueSchema};
 
 use super::Validate;
@@ -6,6 +7,7 @@ impl Validate for document_tree::Table {
     fn validate(
         &self,
         errors: &mut Vec<crate::Error>,
+        toml_version: TomlVersion,
         value_schema: &ValueSchema,
         definitions: &schema_store::SchemaDefinitions,
     ) {
@@ -21,6 +23,8 @@ impl Validate for document_tree::Table {
                     .get(&Accessor::Key(key.to_string()))
                     .is_none()
             {
+                let accessor = Accessor::Key(key.to_raw_text(toml_version));
+
                 if !table_schema.additional_properties {
                     errors.push(crate::Error {
                         kind: crate::ErrorKind::KeyNotAllowed {
@@ -29,8 +33,19 @@ impl Validate for document_tree::Table {
                         range: key.range() + value.range(),
                     });
                 }
-
-                value.validate(errors, &value_schema, &definitions);
+                if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                    if let Ok(value_schema) = property.resolve(definitions) {
+                        value.validate(errors, toml_version, value_schema, &definitions)
+                    }
+                } else if let Some(additional_property_schema) =
+                    &table_schema.additional_property_schema
+                {
+                    if let Ok(mut additional_property_schema) = additional_property_schema.write() {
+                        if let Ok(value_schema) = additional_property_schema.resolve(definitions) {
+                            value.validate(errors, toml_version, value_schema, &definitions)
+                        }
+                    }
+                };
             }
         }
     }
