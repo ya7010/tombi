@@ -158,14 +158,18 @@ where
                 keys,
                 definitions,
             ) {
-                value_types.insert(hover_content.value_type.clone());
-
-                if hover_content.value_type != ValueType::Null {
-                    hover_contents.insert(hover_content);
+                if keys.is_empty() {
+                    value_types.insert(value_schema.value_type());
+                    if hover_content.value_type != ValueType::Null {
+                        hover_contents.insert(hover_content);
+                    }
+                } else {
+                    return Some(hover_content);
                 }
             }
         }
     }
+
     if hover_contents.len() == 1 {
         hover_contents.into_iter().next().map(|mut hover_content| {
             if hover_content.title.is_none() && hover_content.description.is_none() {
@@ -209,6 +213,15 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
+
+            if keys.is_empty() {
+                value_types.insert(value_schema.value_type());
+            }
+
+            if hover_content.is_some() {
+                continue;
+            }
+
             if let Some(mut content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
@@ -217,8 +230,6 @@ where
                 keys,
                 definitions,
             ) {
-                value_types.insert(content.value_type.clone());
-
                 if content.title.is_none() && content.description.is_none() {
                     if let Some(title) = &any_of_schema.title {
                         content.title = Some(title.clone());
@@ -227,9 +238,8 @@ where
                         content.description = Some(description.clone());
                     }
                 }
-                if hover_content.is_none() {
-                    hover_content = Some(content);
-                }
+
+                hover_content = Some(content);
             }
         }
         if let Some(mut hover_content) = hover_content {
@@ -330,5 +340,65 @@ mod test {
     fn url_content(#[case] url: &str) {
         let url = Url::parse(url).unwrap();
         assert_eq!(get_schema_name(&url).unwrap(), "tombi.schema.json");
+    }
+
+    #[test]
+    fn any_of_array_null() {
+        let value_type = ValueType::AnyOf(
+            vec![ValueType::Array, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Array?");
+    }
+
+    #[test]
+    fn one_of_array_null() {
+        let value_type = ValueType::OneOf(
+            vec![ValueType::Array, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Array?");
+    }
+
+    #[test]
+    fn all_of_array_null() {
+        let value_type = ValueType::AllOf(
+            vec![ValueType::Array, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Array?");
+    }
+
+    #[test]
+    fn nullable_one_of() {
+        let value_type = ValueType::OneOf(
+            vec![ValueType::Array, ValueType::Table, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "(Array ^ Table)?");
+    }
+
+    #[test]
+    fn nullable_any_of() {
+        let value_type = ValueType::AnyOf(
+            vec![ValueType::Array, ValueType::Table, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "(Array | Table)?");
+    }
+
+    #[test]
+    fn nullable_all_of() {
+        let value_type = ValueType::AllOf(
+            vec![ValueType::Array, ValueType::Table, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "(Array & Table)?");
     }
 }

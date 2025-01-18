@@ -1828,6 +1828,7 @@ dependencies = [
  "itertools",
  "linter",
  "parser",
+ "pretty_assertions",
  "rstest",
  "rustc-hash",
  "schema-store",
