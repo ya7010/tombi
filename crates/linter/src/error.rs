@@ -46,6 +46,18 @@ pub enum ErrorKind {
 
     #[error("The value {actual} is not a multiple of {multiple_of}")]
     MultipleOfFloat { multiple_of: f64, actual: f64 },
+
+    #[error("The length must be ≤ {maximum}, but found {actual}")]
+    MaximumLength { maximum: usize, actual: usize },
+
+    #[error("The length must be ≥ {minimum}, but found {actual}")]
+    MinimumLength { minimum: usize, actual: usize },
+
+    #[error("The pattern \"{pattern}\" is invalid: {error}")]
+    InvalidPattern { pattern: String, error: String },
+
+    #[error("The value \"{actual}\" does not match the pattern \"{pattern}\"")]
+    PatternMismatch { pattern: String, actual: String },
 }
 
 #[derive(Debug)]

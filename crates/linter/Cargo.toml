@@ -13,6 +13,7 @@ diagnostic = { workspace = true }
 document-tree = { workspace = true }
 itertools.workspace = true
 parser = { workspace = true }
+regex.workspace = true
 schema-store.workspace = true
 schemars = { workspace = true }
 serde = { workspace = true }

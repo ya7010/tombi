@@ -1065,6 +1065,7 @@ dependencies = [
  "document-tree",
  "itertools",
  "parser",
+ "regex",
  "schema-store",
  "schemars",
  "serde",
