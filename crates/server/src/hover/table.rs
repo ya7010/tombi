@@ -122,7 +122,9 @@ impl GetHoverContent for document_tree::Table {
                         description: table.description.clone(),
                         keys: schema_store::Accessors::new(accessors.clone()),
                         value_type: schema_store::ValueType::Table,
-                        ..Default::default()
+                        enumerated_values: vec![],
+                        schema_url: None,
+                        range: Some(self.range()),
                     });
                 }
                 Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
@@ -170,9 +172,13 @@ impl GetHoverContent for document_tree::Table {
         }
 
         Some(HoverContent {
+            title: None,
+            description: None,
             keys: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Table,
-            ..Default::default()
+            enumerated_values: vec![],
+            schema_url: None,
+            range: Some(self.range()),
         })
     }
 }

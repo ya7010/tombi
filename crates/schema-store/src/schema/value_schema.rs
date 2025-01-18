@@ -223,7 +223,7 @@ impl Referable<ValueSchema> {
 
     pub fn value_type(&self) -> crate::ValueType {
         match self {
-            Referable::Ref(_) => crate::ValueType::Any,
+            Referable::Ref(_) => unreachable!("unreachable ref value_tyle."),
             Referable::Resolved(schema) => schema.value_type(),
         }
     }

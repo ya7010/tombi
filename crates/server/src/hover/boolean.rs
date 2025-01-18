@@ -27,7 +27,8 @@ impl GetHoverContent for document_tree::Boolean {
                         .as_ref()
                         .map(|v| v.iter().map(ToString::to_string).collect())
                         .unwrap_or_default(),
-                    ..Default::default()
+                    schema_url: None,
+                    range: Some(self.range()),
                 })
             }
             Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
@@ -74,9 +75,13 @@ impl GetHoverContent for document_tree::Boolean {
         }
 
         Some(super::HoverContent {
+            title: None,
+            description: None,
             keys: schema_store::Accessors::new(accessors.clone()),
             value_type,
-            ..Default::default()
+            enumerated_values: vec![],
+            schema_url: None,
+            range: Some(self.range()),
         })
     }
 }

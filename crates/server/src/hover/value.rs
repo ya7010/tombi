@@ -265,6 +265,8 @@ where
         description,
         keys: schema_store::Accessors::new(accessors.clone()),
         value_type: schema_store::ValueType::AllOf(value_types.into_iter().collect()),
-        ..Default::default()
+        enumerated_values: Vec::new(),
+        schema_url: None,
+        range: None,
     })
 }

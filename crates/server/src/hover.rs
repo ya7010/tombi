@@ -27,7 +27,7 @@ trait GetHoverContent {
     ) -> Option<HoverContent>;
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct HoverContent {
     pub title: Option<String>,
     pub description: Option<String>,

@@ -1,9 +1,7 @@
 use itertools::Itertools;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ValueType {
-    #[default]
-    Any,
     Null,
     Boolean,
     Integer,
@@ -23,7 +21,6 @@ pub enum ValueType {
 impl std::fmt::Display for ValueType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ValueType::Any => write!(f, "Any"),
             ValueType::Null => write!(f, "Null"),
             ValueType::Boolean => write!(f, "Boolean"),
             ValueType::Integer => write!(f, "Integer"),

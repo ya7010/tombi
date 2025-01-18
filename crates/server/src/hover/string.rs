@@ -26,7 +26,8 @@ impl GetHoverContent for document_tree::String {
                         .as_ref()
                         .map(|v| v.iter().map(|s| format!("\"{s}\"")).collect())
                         .unwrap_or_default(),
-                    ..Default::default()
+                    schema_url: None,
+                    range: Some(self.range()),
                 })
             }
             Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
@@ -60,9 +61,13 @@ impl GetHoverContent for document_tree::String {
         };
 
         Some(super::HoverContent {
+            title: None,
+            description: None,
             keys: schema_store::Accessors::new(accessors.clone()),
             value_type,
-            ..Default::default()
+            enumerated_values: vec![],
+            schema_url: None,
+            range: Some(self.range()),
         })
     }
 }
