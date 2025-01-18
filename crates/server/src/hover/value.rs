@@ -118,8 +118,6 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            value_types.insert(value_schema.value_type());
-
             if let Some(hover_content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
@@ -128,6 +126,8 @@ where
                 keys,
                 definitions,
             ) {
+                value_types.insert(hover_content.value_type.clone());
+
                 if hover_content.value_type != ValueType::Null {
                     hover_contents.insert(hover_content);
                 }
@@ -172,12 +172,6 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            value_types.insert(value_schema.value_type());
-
-            if hover_content.is_some() {
-                continue;
-            }
-
             if let Some(mut content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
@@ -186,6 +180,8 @@ where
                 keys,
                 definitions,
             ) {
+                value_types.insert(content.value_type.clone());
+
                 if content.title.is_none() && content.description.is_none() {
                     if let Some(title) = &any_of_schema.title {
                         content.title = Some(title.clone());
@@ -194,7 +190,9 @@ where
                         content.description = Some(description.clone());
                     }
                 }
-                hover_content = Some(content);
+                if hover_content.is_none() {
+                    hover_content = Some(content);
+                }
             }
         }
         if let Some(mut hover_content) = hover_content {
