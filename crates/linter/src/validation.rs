@@ -1,6 +1,9 @@
 mod boolean;
 mod float;
 mod integer;
+mod local_date;
+mod local_date_time;
+mod local_time;
 mod offset_date_time;
 mod string;
 mod table;
