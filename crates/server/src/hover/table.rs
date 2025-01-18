@@ -44,7 +44,13 @@ impl GetHoverContent for document_tree::Table {
                                     definitions,
                                 )
                                 .map(|hover_content| {
-                                    if keys.len() == 1 && !required {
+                                    if keys.len() == 1
+                                        && !required
+                                        && matches!(
+                                            hover_content.keys.last(),
+                                            Some(Accessor::Key(_))
+                                        )
+                                    {
                                         hover_content.into_nullable()
                                     } else {
                                         hover_content
@@ -70,7 +76,12 @@ impl GetHoverContent for document_tree::Table {
                                         definitions,
                                     )
                                     .map(|hover_content| {
-                                        if keys.len() == 1 {
+                                        if keys.len() == 1
+                                            && matches!(
+                                                hover_content.keys.last(),
+                                                Some(Accessor::Key(_))
+                                            )
+                                        {
                                             hover_content.into_nullable()
                                         } else {
                                             hover_content

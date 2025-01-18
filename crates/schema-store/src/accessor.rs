@@ -20,8 +20,19 @@ impl std::fmt::Display for Accessor {
 pub struct Accessors(Vec<Accessor>);
 
 impl Accessors {
+    #[inline]
     pub fn new(accessors: Vec<Accessor>) -> Self {
         Self(accessors)
+    }
+
+    #[inline]
+    pub fn first(&self) -> Option<&Accessor> {
+        self.0.first()
+    }
+
+    #[inline]
+    pub fn last(&self) -> Option<&Accessor> {
+        self.0.last()
     }
 }
 
