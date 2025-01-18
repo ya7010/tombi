@@ -32,7 +32,7 @@ pub fn get_hover_content(
     };
 
     table.get_hover_content(
-        &mut vec![],
+        &Vec::with_capacity(0),
         value_schema.as_ref(),
         toml_version,
         position,
