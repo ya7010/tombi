@@ -56,7 +56,7 @@ impl GetHoverContent for document_tree::Table {
                             }
                         }
                     }
-                    Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+                    Some(ValueSchema::OneOf(one_of_schema)) => {
                         if let Some(hover_content) = get_one_of_hover_content(
                             self,
                             accessors,
@@ -82,7 +82,7 @@ impl GetHoverContent for document_tree::Table {
                             return Some(hover_content);
                         }
                     }
-                    Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+                    Some(ValueSchema::AllOf(all_of_schema)) => {
                         if let Some(hover_content) = get_all_of_hover_content(
                             self,
                             accessors,
@@ -127,7 +127,7 @@ impl GetHoverContent for document_tree::Table {
                         range: Some(self.range()),
                     });
                 }
-                Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+                Some(ValueSchema::OneOf(one_of_schema)) => {
                     if let Some(hover_content) = get_one_of_hover_content(
                         self,
                         accessors,
@@ -140,7 +140,7 @@ impl GetHoverContent for document_tree::Table {
                         return Some(hover_content);
                     }
                 }
-                Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
+                Some(ValueSchema::AnyOf(any_of_schema)) => {
                     if let Some(hover_content) = get_any_of_hover_content(
                         self,
                         accessors,
@@ -153,7 +153,7 @@ impl GetHoverContent for document_tree::Table {
                         return Some(hover_content);
                     }
                 }
-                Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+                Some(ValueSchema::AllOf(all_of_schema)) => {
                     if let Some(hover_content) = get_all_of_hover_content(
                         self,
                         accessors,
