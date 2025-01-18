@@ -1,6 +1,7 @@
-use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
-use document_tree::LocalTime;
+use document_tree::{LocalTime, ValueImpl};
 use schema_store::ValueType;
+
+use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for LocalTime {
     fn validate(
@@ -17,11 +18,11 @@ impl Validate for LocalTime {
             | ValueType::AnyOf(_)
             | ValueType::AllOf(_) => {}
             ValueType::Null => return Ok(()),
-            value_type => {
+            _ => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
                         expected: ValueType::LocalTime,
-                        actual: value_type,
+                        actual: self.value_type(),
                     },
                     range: self.range(),
                 }]);

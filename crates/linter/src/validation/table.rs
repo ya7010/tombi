@@ -1,4 +1,5 @@
 use config::TomlVersion;
+use document_tree::ValueImpl;
 use schema_store::{Accessor, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
@@ -14,11 +15,11 @@ impl Validate for document_tree::Table {
         match value_schema.value_type() {
             ValueType::Table | ValueType::OneOf(_) | ValueType::AnyOf(_) | ValueType::AllOf(_) => {}
             ValueType::Null => return Ok(()),
-            value_type => {
+            _ => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
                         expected: schema_store::ValueType::Table,
-                        actual: value_type,
+                        actual: self.value_type(),
                     },
                     range: self.range(),
                 }])

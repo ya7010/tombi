@@ -1,4 +1,5 @@
 use config::TomlVersion;
+use document_tree::ValueImpl;
 use schema_store::{SchemaDefinitions, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
@@ -18,11 +19,11 @@ impl Validate for document_tree::Boolean {
             | ValueType::AnyOf(_)
             | ValueType::AllOf(_) => {}
             ValueType::Null => return Ok(()),
-            value_type => {
+            _ => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
                         expected: ValueType::Boolean,
-                        actual: value_type,
+                        actual: self.value_type(),
                     },
                     range: self.range(),
                 }]);

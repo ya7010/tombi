@@ -1,6 +1,6 @@
 use ast::AstNode;
 
-use crate::{support::comment::try_new_comment, TryIntoDocumentTree, Value};
+use crate::{support::comment::try_new_comment, TryIntoDocumentTree, Value, ValueImpl, ValueType};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -150,6 +150,16 @@ impl Array {
 
     pub fn symbol_range(&self) -> text::Range {
         self.symbol_range
+    }
+}
+
+impl ValueImpl for Array {
+    fn value_type(&self) -> ValueType {
+        ValueType::Array
+    }
+
+    fn range(&self) -> text::Range {
+        self.range()
     }
 }
 

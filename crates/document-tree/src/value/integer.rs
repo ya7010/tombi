@@ -1,5 +1,6 @@
-use crate::support::integer::{
-    try_from_binary, try_from_decimal, try_from_hexadecimal, try_from_octal,
+use crate::{
+    support::integer::{try_from_binary, try_from_decimal, try_from_hexadecimal, try_from_octal},
+    ValueImpl, ValueType,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,6 +42,16 @@ impl Integer {
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for Integer {
+    fn value_type(&self) -> ValueType {
+        ValueType::Integer
+    }
+
+    fn range(&self) -> text::Range {
         self.range()
     }
 }

@@ -4,7 +4,9 @@ use indexmap::IndexMap;
 use itertools::Itertools;
 use toml_version::TomlVersion;
 
-use crate::{support::comment::try_new_comment, Array, Key, TryIntoDocumentTree, Value};
+use crate::{
+    support::comment::try_new_comment, Array, Key, TryIntoDocumentTree, Value, ValueImpl, ValueType,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
@@ -263,6 +265,16 @@ impl Table {
 impl From<Table> for IndexMap<Key, Value> {
     fn from(table: Table) -> IndexMap<Key, Value> {
         table.key_values
+    }
+}
+
+impl ValueImpl for Table {
+    fn value_type(&self) -> ValueType {
+        ValueType::Table
+    }
+
+    fn range(&self) -> text::Range {
+        self.range()
     }
 }
 

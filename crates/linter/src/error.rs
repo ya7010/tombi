@@ -1,5 +1,3 @@
-use schema_store::ValueType;
-
 #[derive(thiserror::Error, Debug)]
 pub enum ErrorKind {
     #[error("An empty quoted key is allowed, but it is not recommended")]
@@ -13,8 +11,8 @@ pub enum ErrorKind {
 
     #[error("Expected a value of type {expected}, but found {actual}")]
     TypeMismatch {
-        expected: ValueType,
-        actual: ValueType,
+        expected: schema_store::ValueType,
+        actual: document_tree::ValueType,
     },
 
     #[error("The value must be one of [{}], but found {actual}", .expected.join(", "))]

@@ -1,4 +1,4 @@
-use crate::support::float::try_from_float;
+use crate::{support::float::try_from_float, ValueImpl, ValueType};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Float {
@@ -24,6 +24,16 @@ impl Float {
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for Float {
+    fn value_type(&self) -> ValueType {
+        ValueType::Float
+    }
+
+    fn range(&self) -> text::Range {
         self.range()
     }
 }

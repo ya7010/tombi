@@ -65,6 +65,27 @@ impl Value {
     }
 }
 
+impl crate::ValueImpl for Value {
+    fn value_type(&self) -> crate::ValueType {
+        match self {
+            Value::Boolean(boolean) => boolean.value_type(),
+            Value::Integer(integer) => integer.value_type(),
+            Value::Float(float) => float.value_type(),
+            Value::String(string) => string.value_type(),
+            Value::OffsetDateTime(offset_date_time) => offset_date_time.value_type(),
+            Value::LocalDateTime(local_date_time) => local_date_time.value_type(),
+            Value::LocalDate(local_date) => local_date.value_type(),
+            Value::LocalTime(local_time) => local_time.value_type(),
+            Value::Array(array) => array.value_type(),
+            Value::Table(table) => table.value_type(),
+        }
+    }
+
+    fn range(&self) -> text::Range {
+        self.range()
+    }
+}
+
 impl TryIntoDocumentTree<Value> for ast::Value {
     fn try_into_document_tree(
         self,

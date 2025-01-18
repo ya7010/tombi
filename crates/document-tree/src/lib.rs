@@ -2,6 +2,7 @@ mod error;
 mod key;
 pub mod support;
 mod value;
+mod value_type;
 
 pub use error::Error;
 pub use key::{Key, KeyKind};
@@ -12,6 +13,7 @@ pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
+pub use value_type::ValueType;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Root(Table);
@@ -34,6 +36,12 @@ enum RootItem {
     Table(Table),
     ArrayOfTables(Table),
     KeyValue(Table),
+}
+
+pub trait ValueImpl {
+    fn value_type(&self) -> ValueType;
+
+    fn range(&self) -> text::Range;
 }
 
 pub trait TryIntoDocumentTree<T> {

@@ -1,3 +1,4 @@
+use document_tree::ValueImpl;
 use regex::Regex;
 use schema_store::ValueType;
 
@@ -16,11 +17,11 @@ impl Validate for document_tree::String {
             ValueType::String | ValueType::OneOf(_) | ValueType::AnyOf(_) | ValueType::AllOf(_) => {
             }
             ValueType::Null => return Ok(()),
-            value_type => {
+            _ => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
                         expected: ValueType::String,
-                        actual: value_type,
+                        actual: self.value_type(),
                     },
                     range: self.range(),
                 }]);

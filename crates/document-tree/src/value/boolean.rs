@@ -1,3 +1,5 @@
+use crate::{ValueImpl, ValueType};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
     value: bool,
@@ -22,6 +24,16 @@ impl Boolean {
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for Boolean {
+    fn value_type(&self) -> ValueType {
+        ValueType::Boolean
+    }
+
+    fn range(&self) -> text::Range {
         self.range()
     }
 }

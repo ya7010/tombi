@@ -2,7 +2,7 @@ use crate::{
     support::chrono::{
         try_new_local_date, try_new_local_date_time, try_new_local_time, try_new_offset_date_time,
     },
-    TryIntoDocumentTree,
+    TryIntoDocumentTree, ValueImpl, ValueType,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -115,6 +115,46 @@ impl LocalTime {
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for OffsetDateTime {
+    fn value_type(&self) -> ValueType {
+        ValueType::OffsetDateTime
+    }
+
+    fn range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for LocalDateTime {
+    fn value_type(&self) -> ValueType {
+        ValueType::LocalDateTime
+    }
+
+    fn range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for LocalDate {
+    fn value_type(&self) -> ValueType {
+        ValueType::LocalDate
+    }
+
+    fn range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for LocalTime {
+    fn value_type(&self) -> ValueType {
+        ValueType::LocalTime
+    }
+
+    fn range(&self) -> text::Range {
         self.range()
     }
 }

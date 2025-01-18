@@ -1,6 +1,6 @@
 use toml_version::TomlVersion;
 
-use crate::TryIntoDocumentTree;
+use crate::{TryIntoDocumentTree, ValueImpl, ValueType};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StringKind {
@@ -80,6 +80,16 @@ impl String {
 
     #[inline]
     pub fn symbol_range(&self) -> text::Range {
+        self.range()
+    }
+}
+
+impl ValueImpl for String {
+    fn value_type(&self) -> ValueType {
+        ValueType::String
+    }
+
+    fn range(&self) -> text::Range {
         self.range()
     }
 }

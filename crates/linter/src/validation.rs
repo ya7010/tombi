@@ -11,6 +11,7 @@ mod table;
 mod value;
 
 use config::TomlVersion;
+use document_tree::ValueImpl;
 use schema_store::OneOfSchema;
 use schema_store::SchemaDefinitions;
 use schema_store::ValueSchema;
@@ -43,7 +44,7 @@ fn validate_one_of<T>(
     definitions: &SchemaDefinitions,
 ) -> Result<(), Vec<crate::Error>>
 where
-    T: Validate,
+    T: Validate + ValueImpl,
 {
     let mut errors = vec![];
 
@@ -54,12 +55,66 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            match value.validate(toml_version, value_schema, definitions) {
-                Ok(()) => {
-                    valid_count += 1;
-                    break;
+
+            match (value.value_type(), value_schema) {
+                (document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
+                | (document_tree::ValueType::Integer, ValueSchema::Integer(_))
+                | (document_tree::ValueType::Float, ValueSchema::Float(_))
+                | (document_tree::ValueType::String, ValueSchema::String(_))
+                | (document_tree::ValueType::OffsetDateTime, ValueSchema::OffsetDateTime(_))
+                | (document_tree::ValueType::LocalDateTime, ValueSchema::LocalDateTime(_))
+                | (document_tree::ValueType::LocalDate, ValueSchema::LocalDate(_))
+                | (document_tree::ValueType::LocalTime, ValueSchema::LocalTime(_))
+                | (document_tree::ValueType::Table, ValueSchema::Table(_))
+                | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
+                    match value.validate(toml_version, value_schema, definitions) {
+                        Ok(()) => {
+                            valid_count += 1;
+                            break;
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
                 }
-                Err(mut schema_errors) => errors.append(&mut schema_errors),
+                (_, ValueSchema::Boolean(_))
+                | (_, ValueSchema::Integer(_))
+                | (_, ValueSchema::Float(_))
+                | (_, ValueSchema::String(_))
+                | (_, ValueSchema::OffsetDateTime(_))
+                | (_, ValueSchema::LocalDateTime(_))
+                | (_, ValueSchema::LocalDate(_))
+                | (_, ValueSchema::LocalTime(_))
+                | (_, ValueSchema::Table(_))
+                | (_, ValueSchema::Array(_))
+                | (_, ValueSchema::Null) => {
+                    continue;
+                }
+                (_, ValueSchema::OneOf(one_of_schema)) => {
+                    match validate_one_of(value, toml_version, one_of_schema, definitions) {
+                        Ok(()) => {
+                            valid_count += 1;
+                            break;
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
+                }
+                (_, ValueSchema::AnyOf(any_of_schema)) => {
+                    match validate_any_of(value, toml_version, &any_of_schema, definitions) {
+                        Ok(()) => {
+                            valid_count += 1;
+                            break;
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
+                }
+                (_, ValueSchema::AllOf(all_of_schema)) => {
+                    match validate_all_of(value, toml_version, &all_of_schema, definitions) {
+                        Ok(()) => {
+                            valid_count += 1;
+                            break;
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
+                }
             }
         }
     }
@@ -78,7 +133,7 @@ fn validate_any_of<T>(
     definitions: &schema_store::SchemaDefinitions,
 ) -> Result<(), Vec<crate::Error>>
 where
-    T: Validate,
+    T: Validate + ValueImpl,
 {
     let mut errors = vec![];
 
@@ -87,11 +142,67 @@ where
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            match value.validate(toml_version, value_schema, definitions) {
-                Ok(()) => {
-                    return Ok(());
+            match (value.value_type(), value_schema) {
+                (document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
+                | (document_tree::ValueType::Integer, ValueSchema::Integer(_))
+                | (document_tree::ValueType::Float, ValueSchema::Float(_))
+                | (document_tree::ValueType::String, ValueSchema::String(_))
+                | (document_tree::ValueType::OffsetDateTime, ValueSchema::OffsetDateTime(_))
+                | (document_tree::ValueType::LocalDateTime, ValueSchema::LocalDateTime(_))
+                | (document_tree::ValueType::LocalDate, ValueSchema::LocalDate(_))
+                | (document_tree::ValueType::LocalTime, ValueSchema::LocalTime(_))
+                | (document_tree::ValueType::Table, ValueSchema::Table(_))
+                | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
+                    match value.validate(toml_version, value_schema, definitions) {
+                        Ok(()) => {
+                            return Ok(());
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
                 }
-                Err(mut schema_errors) => errors.append(&mut schema_errors),
+                (_, ValueSchema::Boolean(_))
+                | (_, ValueSchema::Integer(_))
+                | (_, ValueSchema::Float(_))
+                | (_, ValueSchema::String(_))
+                | (_, ValueSchema::OffsetDateTime(_))
+                | (_, ValueSchema::LocalDateTime(_))
+                | (_, ValueSchema::LocalDate(_))
+                | (_, ValueSchema::LocalTime(_))
+                | (_, ValueSchema::Table(_))
+                | (_, ValueSchema::Array(_))
+                | (_, ValueSchema::Null) => {
+                    errors.push(crate::Error {
+                        kind: crate::ErrorKind::TypeMismatch {
+                            expected: value_schema.value_type(),
+                            actual: value.value_type(),
+                        },
+                        range: value.range(),
+                    });
+                }
+                (_, ValueSchema::OneOf(one_of_schema)) => {
+                    match validate_one_of(value, toml_version, &one_of_schema, definitions) {
+                        Ok(()) => {
+                            return Ok(());
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
+                }
+                (_, ValueSchema::AnyOf(any_of_schema)) => {
+                    match validate_any_of(value, toml_version, &any_of_schema, definitions) {
+                        Ok(()) => {
+                            return Ok(());
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
+                }
+                (_, ValueSchema::AllOf(all_of_schema)) => {
+                    match validate_all_of(value, toml_version, &all_of_schema, definitions) {
+                        Ok(()) => {
+                            return Ok(());
+                        }
+                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                    }
+                }
             }
         }
     }
