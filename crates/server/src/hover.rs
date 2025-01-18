@@ -38,6 +38,13 @@ pub struct HoverContent {
     pub range: Option<text::Range>,
 }
 
+impl HoverContent {
+    pub fn into_nullable(mut self) -> HoverContent {
+        self.value_type = self.value_type.into_nullable();
+        self
+    }
+}
+
 impl std::fmt::Display for HoverContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         const SECTION_SEPARATOR: &str = "-----";

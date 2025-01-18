@@ -18,6 +18,57 @@ pub enum ValueType {
     AllOf(Vec<ValueType>),
 }
 
+impl ValueType {
+    pub fn into_nullable(self) -> Self {
+        match self {
+            ValueType::Null => ValueType::Null,
+            ValueType::Boolean
+            | ValueType::Integer
+            | ValueType::Float
+            | ValueType::String
+            | ValueType::OffsetDateTime
+            | ValueType::LocalDateTime
+            | ValueType::LocalDate
+            | ValueType::LocalTime
+            | ValueType::Array
+            | ValueType::Table => ValueType::AnyOf(vec![self, ValueType::Null]),
+            ValueType::OneOf(types) | ValueType::AnyOf(types) | ValueType::AllOf(types) => {
+                ValueType::AllOf(
+                    types
+                        .into_iter()
+                        .map(|t| {
+                            if t.is_nullable() {
+                                t
+                            } else {
+                                t.into_nullable()
+                            }
+                        })
+                        .collect::<Vec<_>>(),
+                )
+            }
+        }
+    }
+
+    pub fn is_nullable(&self) -> bool {
+        match self {
+            ValueType::Null => true,
+            ValueType::Boolean
+            | ValueType::Integer
+            | ValueType::Float
+            | ValueType::String
+            | ValueType::OffsetDateTime
+            | ValueType::LocalDateTime
+            | ValueType::LocalDate
+            | ValueType::LocalTime
+            | ValueType::Array
+            | ValueType::Table => false,
+            ValueType::OneOf(types) | ValueType::AnyOf(types) | ValueType::AllOf(types) => {
+                types.iter().any(|t| t.is_nullable())
+            }
+        }
+    }
+}
+
 impl std::fmt::Display for ValueType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

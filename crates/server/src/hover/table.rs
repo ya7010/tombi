@@ -18,41 +18,64 @@ impl GetHoverContent for document_tree::Table {
     ) -> Option<HoverContent> {
         if let Some(key) = keys.first() {
             if let Some(value) = self.get(key) {
-                let accessor = Accessor::Key(key.to_raw_text(toml_version));
+                let key_str = key.to_raw_text(toml_version);
+                let accessor = Accessor::Key(key_str.clone());
 
                 match value_schema {
                     Some(ValueSchema::Table(table_schema)) => {
                         if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
-                            return value.get_hover_content(
-                                &accessors
-                                    .clone()
-                                    .into_iter()
-                                    .chain(std::iter::once(accessor))
-                                    .collect(),
-                                property.resolve(definitions).ok(),
-                                toml_version,
-                                position,
-                                &keys[1..],
-                                definitions,
-                            );
+                            let required = table_schema
+                                .required
+                                .as_ref()
+                                .map(|r| r.contains(&key_str))
+                                .unwrap_or(false);
+
+                            return value
+                                .get_hover_content(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    property.resolve(definitions).ok(),
+                                    toml_version,
+                                    position,
+                                    &keys[1..],
+                                    definitions,
+                                )
+                                .map(|hover_content| {
+                                    if keys.len() == 1 && !required {
+                                        hover_content.into_nullable()
+                                    } else {
+                                        hover_content
+                                    }
+                                });
                         } else if let Some(additiona_property_schema) =
                             &table_schema.additional_property_schema
                         {
                             if let Ok(mut additiona_property_schema) =
                                 additiona_property_schema.write()
                             {
-                                return value.get_hover_content(
-                                    &accessors
-                                        .clone()
-                                        .into_iter()
-                                        .chain(std::iter::once(accessor))
-                                        .collect(),
-                                    additiona_property_schema.resolve(definitions).ok(),
-                                    toml_version,
-                                    position,
-                                    &keys[1..],
-                                    definitions,
-                                );
+                                return value
+                                    .get_hover_content(
+                                        &accessors
+                                            .clone()
+                                            .into_iter()
+                                            .chain(std::iter::once(accessor))
+                                            .collect(),
+                                        additiona_property_schema.resolve(definitions).ok(),
+                                        toml_version,
+                                        position,
+                                        &keys[1..],
+                                        definitions,
+                                    )
+                                    .map(|hover_content| {
+                                        if keys.len() == 1 {
+                                            hover_content.into_nullable()
+                                        } else {
+                                            hover_content
+                                        }
+                                    });
                             }
                         }
                     }
