@@ -31,6 +31,21 @@ pub enum ErrorKind {
 
     #[error("The value {actual} is not a multiple of {multiple_of}")]
     MultipleOfInteger { multiple_of: i64, actual: i64 },
+
+    #[error("The value {actual} exceeds the maximum value of {maximum}")]
+    MaximumFloat { maximum: f64, actual: f64 },
+
+    #[error("The value {actual} is less than the minimum value of {minimum}")]
+    MinimumFloat { minimum: f64, actual: f64 },
+
+    #[error("The value {actual} exceeds the exclusive maximum value of {maximum}")]
+    ExclusiveMaximumFloat { maximum: f64, actual: f64 },
+
+    #[error("The value {actual} is less than the exclusive minimum value of {minimum}")]
+    ExclusiveMinimumFloat { minimum: f64, actual: f64 },
+
+    #[error("The value {actual} is not a multiple of {multiple_of}")]
+    MultipleOfFloat { multiple_of: f64, actual: f64 },
 }
 
 #[derive(Debug)]
