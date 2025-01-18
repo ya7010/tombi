@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use schema_store::ValueType;
 
 #[derive(thiserror::Error, Debug)]
