@@ -35,7 +35,7 @@ impl Validate for document_tree::Table {
             ValueSchema::AllOf(all_of_schema) => {
                 return validate_all_of(self, toml_version, all_of_schema, definitions)
             }
-            _ => unreachable!("Expected a table schema"),
+            _ => unreachable!("Expected a Table schema"),
         };
 
         for (key, value) in self.key_values() {

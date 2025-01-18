@@ -38,7 +38,7 @@ impl Validate for document_tree::Integer {
             schema_store::ValueSchema::AllOf(all_of_schema) => {
                 return validate_all_of(self, toml_version, all_of_schema, definitions)
             }
-            _ => unreachable!("Expected an integer schema"),
+            _ => unreachable!("Expected an Integer schema"),
         };
 
         let value = self.value();

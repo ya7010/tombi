@@ -38,7 +38,7 @@ impl Validate for document_tree::Float {
             schema_store::ValueSchema::AllOf(all_of_schema) => {
                 return validate_all_of(self, toml_version, all_of_schema, definitions)
             }
-            _ => unreachable!("Expected a float schema"),
+            _ => unreachable!("Expected a Float schema"),
         };
 
         let value = self.value();
