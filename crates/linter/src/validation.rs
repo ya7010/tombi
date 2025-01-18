@@ -68,10 +68,7 @@ where
         return Ok(());
     }
 
-    Err(errors
-        .into_iter()
-        .filter(|error| !matches!(error.kind, crate::ErrorKind::TypeMismatch { .. }))
-        .collect())
+    Err(errors)
 }
 
 fn validate_any_of<T>(
@@ -99,10 +96,7 @@ where
         }
     }
 
-    Err(errors
-        .into_iter()
-        .filter(|error| !matches!(error.kind, crate::ErrorKind::TypeMismatch { .. }))
-        .collect())
+    Err(errors)
 }
 
 fn validate_all_of<T>(
