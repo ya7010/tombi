@@ -32,13 +32,13 @@ pub async fn handle_formatting(
 
     match formatter::Formatter::try_new(
         toml_version,
+        Default::default(),
         backend
             .config()
             .await
             .format
             .as_ref()
             .unwrap_or(&FormatOptions::default()),
-        Default::default(),
         Some(Either::Left(&text_document.uri)),
         &backend.schema_store,
     )

@@ -28,8 +28,8 @@ impl<'a> Formatter<'a> {
     #[inline]
     pub async fn try_new(
         toml_version: TomlVersion,
-        options: &'a crate::FormatOptions,
         definitions: crate::FormatDefinitions,
+        options: &'a crate::FormatOptions,
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {

@@ -35,8 +35,8 @@ macro_rules! test_format {
         async fn $name() {
             match $crate::Formatter::try_new(
                 $toml_version,
-                &crate::FormatOptions::default(),
                 $definition,
+                &crate::FormatOptions::default(),
                 None,
                 &schema_store::SchemaStore::default()
             ).await.unwrap().format($source).await {
@@ -63,8 +63,8 @@ macro_rules! test_format {
         async fn $name() {
             match $crate::Formatter::try_new(
                 $toml_version,
-                &crate::FormatOptions::default(),
                 $definitions,
+                &crate::FormatOptions::default(),
                 None,
                 &schema_store::SchemaStore::default()
             ).await.unwrap().format($source).await {

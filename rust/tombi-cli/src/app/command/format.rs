@@ -211,8 +211,8 @@ where
     if file.read_to_string(&mut source).await.is_ok() {
         match formatter::Formatter::try_new(
             toml_version,
-            format_options,
             FormatDefinitions::default(),
+            format_options,
             source_path.map(itertools::Either::Right),
             schema_store,
         )
