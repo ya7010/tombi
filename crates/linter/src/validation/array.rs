@@ -16,7 +16,7 @@ impl Validate for document_tree::Array {
             value_type => {
                 return Err(vec![crate::Error {
                     kind: crate::ErrorKind::TypeMismatch {
-                        expected: schema_store::ValueType::Array,
+                        expected: ValueType::Array,
                         actual: value_type,
                     },
                     range: self.range(),
