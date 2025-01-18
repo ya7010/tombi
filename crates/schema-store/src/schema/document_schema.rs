@@ -16,6 +16,7 @@ pub struct DocumentSchema {
     pub properties: SchemaProperties,
     pub additional_properties: bool,
     pub additional_property_schema: Option<SchemaItem>,
+    pub required: Option<Vec<String>>,
     pub definitions: SchemaDefinitions,
 }
 
@@ -102,6 +103,13 @@ impl DocumentSchema {
             properties,
             additional_properties,
             additional_property_schema,
+            required: value.get("required").and_then(|v| {
+                v.as_array().map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                        .collect()
+                })
+            }),
             definitions,
         }
     }

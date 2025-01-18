@@ -98,17 +98,17 @@ pub fn get_hover_content(
 ) -> Option<HoverContent> {
     let table = root.deref();
     let (value_schema, definitions) = match document_schema {
-        Some(schema) => (
+        Some(document_schema) => (
             Some(ValueSchema::Table(TableSchema {
-                title: schema.title,
-                description: schema.description,
-                properties: schema.properties,
-                additional_properties: schema.additional_properties,
-                additional_property_schema: schema.additional_property_schema,
-                required: None,
+                title: document_schema.title,
+                description: document_schema.description,
+                properties: document_schema.properties,
+                additional_properties: document_schema.additional_properties,
+                additional_property_schema: document_schema.additional_property_schema,
+                required: document_schema.required,
                 default: None,
             })),
-            schema.definitions,
+            document_schema.definitions,
         ),
         None => (None, DashMap::new()),
     };
