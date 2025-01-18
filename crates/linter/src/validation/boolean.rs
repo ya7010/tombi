@@ -1,5 +1,4 @@
 use config::TomlVersion;
-use itertools::Itertools;
 use schema_store::{SchemaDefinitions, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
@@ -47,10 +46,7 @@ impl Validate for document_tree::Boolean {
             if !enumerate.contains(&value) {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::Eunmerate {
-                        expected: format!(
-                            "[{}]",
-                            enumerate.into_iter().map(ToString::to_string).join(", ")
-                        ),
+                        expected: enumerate.iter().map(ToString::to_string).collect(),
                         actual: value.to_string(),
                     },
                     range: self.range(),

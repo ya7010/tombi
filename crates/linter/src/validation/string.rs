@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use regex::Regex;
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
@@ -47,10 +46,7 @@ impl Validate for document_tree::String {
             if !enumerate.contains(&value) {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::Eunmerate {
-                        expected: format!(
-                            "[{}]",
-                            enumerate.into_iter().map(ToString::to_string).join(", ")
-                        ),
+                        expected: enumerate.iter().map(|s| format!("\"{s}\"")).collect(),
                         actual: value.clone(),
                     },
                     range: self.range(),

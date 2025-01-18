@@ -1,6 +1,5 @@
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 use document_tree::LocalDate;
-use itertools::Itertools;
 
 impl Validate for LocalDate {
     fn validate(
@@ -46,10 +45,7 @@ impl Validate for LocalDate {
             if !enumerate.contains(&value_string) {
                 errors.push(crate::Error {
                     kind: crate::ErrorKind::Eunmerate {
-                        expected: format!(
-                            "[{}]",
-                            enumerate.into_iter().map(ToString::to_string).join(", ")
-                        ),
+                        expected: enumerate.iter().map(ToString::to_string).collect(),
                         actual: value_string,
                     },
                     range: self.range(),

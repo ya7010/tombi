@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use schema_store::ValueType;
 
 #[derive(thiserror::Error, Debug)]
@@ -14,8 +15,11 @@ pub enum ErrorKind {
         actual: ValueType,
     },
 
-    #[error("The value must be one of {expected}, but found {actual}")]
-    Eunmerate { expected: String, actual: String },
+    #[error("The value must be one of [{}], but found {actual}", .expected.iter().map(quoted).join(", "))]
+    Eunmerate {
+        expected: Vec<String>,
+        actual: String,
+    },
 
     #[error("The value must be > {maximum}, but found {actual}")]
     MaximumInteger { maximum: i64, actual: i64 },
@@ -73,4 +77,8 @@ impl diagnostic::SetDiagnostics for Error {
             self.range,
         ))
     }
+}
+
+fn quoted(key: &String) -> String {
+    format!("\"{}\"", key)
 }
