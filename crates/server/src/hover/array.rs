@@ -22,14 +22,14 @@ impl GetHoverContent for document_tree::Array {
                 match value_schema {
                     Some(ValueSchema::Array(array)) => {
                         if let Some(items) = &array.items {
-                            if let Ok(mut item) = items.write() {
+                            if let Ok(mut item_schema) = items.write() {
                                 let Some(mut hover_content) = value.get_hover_content(
                                     &accessors
                                         .clone()
                                         .into_iter()
                                         .chain(std::iter::once(accessor))
                                         .collect(),
-                                    item.resolve(definitions).ok(),
+                                    item_schema.resolve(definitions).ok(),
                                     toml_version,
                                     position,
                                     keys,
