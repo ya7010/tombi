@@ -46,10 +46,11 @@ impl GetHoverContent for document_tree::Table {
                                 .map(|hover_content| {
                                     if keys.len() == 1
                                         && !required
-                                        && matches!(
-                                            hover_content.keys.last(),
-                                            Some(Accessor::Key(_))
-                                        )
+                                        && hover_content
+                                            .accessors
+                                            .last()
+                                            .map(|accessor| accessor.is_key())
+                                            .unwrap_or_default()
                                     {
                                         hover_content.into_nullable()
                                     } else {
@@ -77,10 +78,11 @@ impl GetHoverContent for document_tree::Table {
                                     )
                                     .map(|hover_content| {
                                         if keys.len() == 1
-                                            && matches!(
-                                                hover_content.keys.last(),
-                                                Some(Accessor::Key(_))
-                                            )
+                                            && hover_content
+                                                .accessors
+                                                .last()
+                                                .map(|accessor| accessor.is_key())
+                                                .unwrap_or_default()
                                         {
                                             hover_content.into_nullable()
                                         } else {
@@ -154,7 +156,7 @@ impl GetHoverContent for document_tree::Table {
                     return Some(HoverContent {
                         title: table_schema.title.clone(),
                         description: table_schema.description.clone(),
-                        keys: Accessors::new(accessors.clone()),
+                        accessors: Accessors::new(accessors.clone()),
                         value_type: ValueType::Table,
                         enumerated_values: vec![],
                         schema_url: None,
@@ -208,7 +210,7 @@ impl GetHoverContent for document_tree::Table {
         Some(HoverContent {
             title: None,
             description: None,
-            keys: Accessors::new(accessors.clone()),
+            accessors: Accessors::new(accessors.clone()),
             value_type: ValueType::Table,
             enumerated_values: vec![],
             schema_url: None,

@@ -57,7 +57,7 @@ trait GetHoverContent {
 pub struct HoverContent {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub keys: Accessors,
+    pub accessors: Accessors,
     pub value_type: ValueType,
     pub enumerated_values: Vec<String>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
@@ -87,7 +87,7 @@ impl std::fmt::Display for HoverContent {
             writeln!(f, "{}\n", SECTION_SEPARATOR)?;
         }
 
-        writeln!(f, "Keys: `{}`\n", self.keys)?;
+        writeln!(f, "Keys: `{}`\n", self.accessors)?;
         writeln!(f, "Value: `{}`\n", self.value_type)?;
 
         if !self.enumerated_values.is_empty() {
@@ -325,7 +325,7 @@ where
     Some(HoverContent {
         title,
         description,
-        keys: schema_store::Accessors::new(accessors.clone()),
+        accessors: schema_store::Accessors::new(accessors.clone()),
         value_type,
         enumerated_values: Vec::new(),
         schema_url: None,

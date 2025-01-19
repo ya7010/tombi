@@ -6,6 +6,18 @@ pub enum Accessor {
     Index(usize),
 }
 
+impl Accessor {
+    #[inline]
+    pub fn is_key(&self) -> bool {
+        matches!(self, Accessor::Key(_))
+    }
+
+    #[inline]
+    pub fn is_index(&self) -> bool {
+        matches!(self, Accessor::Index(_))
+    }
+}
+
 impl std::fmt::Display for Accessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

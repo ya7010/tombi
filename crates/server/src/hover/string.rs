@@ -17,7 +17,7 @@ impl GetHoverContent for document_tree::String {
                 return Some(super::HoverContent {
                     title: schema.title.clone(),
                     description: schema.description.clone(),
-                    keys: schema_store::Accessors::new(accessors.clone()),
+                    accessors: schema_store::Accessors::new(accessors.clone()),
                     value_type,
                     enumerated_values: schema
                         .enumerate
@@ -61,7 +61,7 @@ impl GetHoverContent for document_tree::String {
         Some(super::HoverContent {
             title: None,
             description: None,
-            keys: schema_store::Accessors::new(accessors.clone()),
+            accessors: schema_store::Accessors::new(accessors.clone()),
             value_type,
             enumerated_values: vec![],
             schema_url: None,

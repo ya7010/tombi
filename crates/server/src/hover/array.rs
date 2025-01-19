@@ -114,7 +114,7 @@ impl GetHoverContent for document_tree::Array {
                 return Some(HoverContent {
                     title: array.title.clone(),
                     description: array.description.clone(),
-                    keys: Accessors::new(accessors.clone()),
+                    accessors: Accessors::new(accessors.clone()),
                     value_type: ValueType::Array,
                     enumerated_values: vec![],
                     schema_url: None,
@@ -166,7 +166,7 @@ impl GetHoverContent for document_tree::Array {
         Some(super::HoverContent {
             title: None,
             description: None,
-            keys: Accessors::new(accessors.clone()),
+            accessors: Accessors::new(accessors.clone()),
             value_type: ValueType::Array,
             enumerated_values: vec![],
             schema_url: None,
