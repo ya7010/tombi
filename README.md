@@ -80,3 +80,27 @@ but Tombi has not yet gained share, so it will be much later.
 ### Comment Formatting
 Tombi is designed to automatically sort elements of `Table` / `Array Of Tables`(sort features not implemented yet).
 When the documentation site is published, a page will be created to explain the mechanism of comments treatment.
+
+### Hover Type
+If there is JSON Schema information, Tombi will display executable types as hover information as shown in the following table.
+
+| JSON Schema | Hover Type |
+| --- | --- |
+| `type: boolean` | `Boolean` |
+| `type: integer` | `Integer` |
+| `type: number, ` | `Float` |
+| `type: string` | `String` |
+| `type: string, format: date-time` | `OffsetDateTime ^ LocalDateTime` |
+| `type: string, format: date` | `LocalDate` |
+| `type: string, format: time` | `LocalTime` |
+| `type: array` | `Array` |
+| `type: object` | `Table` |
+
+Also, the following abbreviations are used for Composition Type and Null described in JSON Schema.
+
+| JSON Schema | Hover Type |
+| --- | --- |
+| `oneOf` | `String ^ Boolean` |
+| `anyOf` | `String \| Boolean` |
+| `allOf` | `String & Boolean` |
+| `null` | `String?` |
