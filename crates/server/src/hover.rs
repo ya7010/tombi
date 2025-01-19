@@ -148,14 +148,27 @@ fn get_one_of_hover_content<T>(
 where
     T: GetHoverContent + document_tree::ValueImpl,
 {
-    let mut value_types = indexmap::IndexSet::new();
     let mut one_hover_contents = ahash::AHashSet::new();
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
+        let mut value_type_set = indexmap::IndexSet::new();
         for referable_schema in schemas.iter_mut() {
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
-            if let Some(hover_content) = value.get_hover_content(
+            value_type_set.insert(value_schema.value_type());
+        }
+
+        let value_type = if value_type_set.len() == 1 {
+            value_type_set.into_iter().next().unwrap()
+        } else {
+            ValueType::OneOf(value_type_set.into_iter().collect())
+        };
+
+        for referable_schema in schemas.iter_mut() {
+            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+                continue;
+            };
+            if let Some(mut hover_content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
                 toml_version,
@@ -164,14 +177,26 @@ where
                 schema_url,
                 definitions,
             ) {
-                if keys.is_empty() {
-                    value_types.insert(value_schema.value_type());
-                    if hover_content.value_type != ValueType::Null {
-                        one_hover_contents.insert(hover_content);
+                if hover_content.title.is_none() && hover_content.description.is_none() {
+                    if let Some(title) = &one_of_schema.title {
+                        hover_content.title = Some(title.clone());
                     }
-                } else {
+                    if let Some(description) = &one_of_schema.description {
+                        hover_content.description = Some(description.clone());
+                    }
+                }
+
+                if keys.is_empty() {
+                    hover_content.value_type = value_type.clone();
+                }
+
+                if value_schema.value_type() == schema_store::ValueType::Array
+                    && hover_content.value_type != schema_store::ValueType::Array
+                {
                     return Some(hover_content);
                 }
+
+                one_hover_contents.insert(hover_content);
             }
         }
     }
@@ -188,12 +213,6 @@ where
                     if let Some(description) = &one_of_schema.description {
                         hover_content.description = Some(description.clone());
                     }
-                }
-
-                if value_types.len() == 1 {
-                    hover_content.value_type = value_types.into_iter().next().unwrap();
-                } else {
-                    hover_content.value_type = ValueType::OneOf(value_types.into_iter().collect());
                 }
 
                 hover_content
@@ -225,14 +244,14 @@ where
     T: GetHoverContent + document_tree::ValueImpl,
 {
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
-        let mut value_types = indexmap::IndexSet::new();
+        let mut value_type_set = indexmap::IndexSet::new();
         let mut any_hover_content = None;
         for referable_schema in schemas.iter_mut() {
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
             };
 
-            if let Some(mut content) = value.get_hover_content(
+            if let Some(mut hover_content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
                 toml_version,
@@ -241,40 +260,40 @@ where
                 schema_url,
                 definitions,
             ) {
-                if content.title.is_none() && content.description.is_none() {
+                if hover_content.title.is_none() && hover_content.description.is_none() {
                     if let Some(title) = &any_of_schema.title {
-                        content.title = Some(title.clone());
+                        hover_content.title = Some(title.clone());
                     }
                     if let Some(description) = &any_of_schema.description {
-                        content.description = Some(description.clone());
+                        hover_content.description = Some(description.clone());
                     }
                 }
 
                 if keys.is_empty() {
-                    value_types.insert(value_schema.value_type());
+                    value_type_set.insert(value_schema.value_type());
                 } else {
-                    value_types.insert(content.value_type.clone());
+                    value_type_set.insert(hover_content.value_type.clone());
                 }
 
                 if any_hover_content.is_none() {
                     if value_schema.value_type() == schema_store::ValueType::Array
-                        && content.value_type != schema_store::ValueType::Array
+                        && hover_content.value_type != schema_store::ValueType::Array
                     {
-                        return Some(content);
+                        return Some(hover_content);
                     }
-                    any_hover_content = Some(content);
+                    any_hover_content = Some(hover_content);
                 }
             } else {
                 if keys.is_empty() {
-                    value_types.insert(value_schema.value_type());
+                    value_type_set.insert(value_schema.value_type());
                 }
             }
         }
         if let Some(mut hover_content) = any_hover_content {
-            if value_types.len() == 1 {
-                hover_content.value_type = value_types.into_iter().next().unwrap();
+            if value_type_set.len() == 1 {
+                hover_content.value_type = value_type_set.into_iter().next().unwrap();
             } else {
-                hover_content.value_type = ValueType::AnyOf(value_types.into_iter().collect());
+                hover_content.value_type = ValueType::AnyOf(value_type_set.into_iter().collect());
             }
             return Some(hover_content);
         }
@@ -305,7 +324,7 @@ where
     T: GetHoverContent,
 {
     let mut title_description_set = ahash::AHashSet::new();
-    let mut value_types = indexmap::IndexSet::new();
+    let mut value_type_set = indexmap::IndexSet::new();
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
         for referable_schema in schemas.iter_mut() {
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
@@ -325,9 +344,7 @@ where
                         hover_content.title.clone(),
                         hover_content.description.clone(),
                     ));
-                    value_types.insert(hover_content.value_type);
-                } else {
-                    return None;
+                    value_type_set.insert(hover_content.value_type);
                 }
             }
         }
@@ -348,10 +365,10 @@ where
         }
     }
 
-    let value_type = if value_types.len() == 1 {
-        value_types.into_iter().next().unwrap()
+    let value_type = if value_type_set.len() == 1 {
+        value_type_set.into_iter().next().unwrap()
     } else {
-        ValueType::AllOf(value_types.into_iter().collect())
+        ValueType::AllOf(value_type_set.into_iter().collect())
     };
 
     Some(HoverContent {
