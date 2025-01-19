@@ -149,7 +149,7 @@ fn get_hover_range(
 
 #[cfg(test)]
 mod test {
-    use crate::test::{cargo_schema_path, tombi_schema_path};
+    use crate::test::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
 
     use super::*;
 
@@ -230,7 +230,7 @@ mod test {
                 .expect("failed to handle hover")
                 .expect("failed to get hover content");
 
-                assert!(hover_content.schema_url.is_some());
+                assert!(hover_content.schema_url.is_some(), "The hover target is not defined in the schema.");
                 pretty_assertions::assert_eq!(hover_content.accessors.to_string(), $keys);
                 pretty_assertions::assert_eq!(hover_content.value_type.to_string(), $value_type);
             }
@@ -259,7 +259,7 @@ mod test {
             "#
         ) -> Ok({
             "Keys": "schemas[0]",
-            "Value": "Array?"
+            "Value": "Array?" // FIXME: Should be "Table".
         });
     );
 
@@ -358,6 +358,36 @@ mod test {
         ) -> Ok({
             "Keys": "dependencies.serde.features[0]",
             "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn pyprpoject_project_readme(
+            pyproject_schema_path(),
+            r#"
+            [project]
+            readme = "█1.0.0" }
+            "#
+        ) -> Ok({
+            "Keys": "project.readme",
+            "Value": "(String ^ Table)?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn pyprpoject_dependency_groups(
+            pyproject_schema_path(),
+            r#"
+            [dependency-groups]
+            dev = [
+                "█pytest>=8.3.3",
+            ]
+            "#
+        ) -> Ok({
+            "Keys": "dependency-groups.dev[0]",
+            "Value": "String ^ Table"
         });
     );
 }

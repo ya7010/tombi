@@ -57,4 +57,8 @@ mod test {
     pub fn cargo_schema_path() -> PathBuf {
         project_root().join("schemas").join("Cargo.schema.json")
     }
+
+    pub fn pyproject_schema_path() -> PathBuf {
+        project_root().join("schemas").join("pyproject.schema.json")
+    }
 }
