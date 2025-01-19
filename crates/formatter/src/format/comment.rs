@@ -141,4 +141,14 @@ mod tests {
         #[test]
         fn only_space_comment2(r"#      ") -> Ok(r"#");
     }
+
+    test_format! {
+        #[test]
+        fn multiline_comment_with_ident(
+            r#"
+            # NOTE: Tombi preserves spaces at the beginning of a comment line.
+            #       This allows for multi-line indentation to be preserved.
+            "#
+        ) -> Ok(source);
+    }
 }
