@@ -14,7 +14,6 @@ use config::TomlVersion;
 use dashmap::DashMap;
 use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
-use tower_lsp::lsp_types::Hover;
 
 pub fn get_hover_content(
     root: &document_tree::Root,
@@ -347,8 +346,8 @@ where
     };
 
     Some(HoverContent {
-        title: None,
-        description: None,
+        title,
+        description,
         accessors: schema_store::Accessors::new(accessors.clone()),
         value_type,
         enumerated_values: Vec::new(),
