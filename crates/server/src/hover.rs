@@ -245,7 +245,19 @@ where
 {
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         let mut value_type_set = indexmap::IndexSet::new();
-        let mut any_hover_content = None;
+        for referable_schema in schemas.iter_mut() {
+            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+                continue;
+            };
+            value_type_set.insert(value_schema.value_type());
+        }
+
+        let value_type = if value_type_set.len() == 1 {
+            value_type_set.into_iter().next().unwrap()
+        } else {
+            ValueType::AnyOf(value_type_set.into_iter().collect())
+        };
+
         for referable_schema in schemas.iter_mut() {
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
                 continue;
@@ -270,32 +282,11 @@ where
                 }
 
                 if keys.is_empty() {
-                    value_type_set.insert(value_schema.value_type());
-                } else {
-                    value_type_set.insert(hover_content.value_type.clone());
+                    hover_content.value_type = value_type;
                 }
 
-                if any_hover_content.is_none() {
-                    if value_schema.value_type() == schema_store::ValueType::Array
-                        && hover_content.value_type != schema_store::ValueType::Array
-                    {
-                        return Some(hover_content);
-                    }
-                    any_hover_content = Some(hover_content);
-                }
-            } else {
-                if keys.is_empty() {
-                    value_type_set.insert(value_schema.value_type());
-                }
+                return Some(hover_content);
             }
-        }
-        if let Some(mut hover_content) = any_hover_content {
-            if value_type_set.len() == 1 {
-                hover_content.value_type = value_type_set.into_iter().next().unwrap();
-            } else {
-                hover_content.value_type = ValueType::AnyOf(value_type_set.into_iter().collect());
-            }
-            return Some(hover_content);
         }
     };
 
