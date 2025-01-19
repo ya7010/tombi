@@ -48,12 +48,10 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
         completion_provider: Some(CompletionOptions {
             trigger_characters: Some(vec![
                 ".".into(),
+                ",".into(),
                 "=".into(),
                 "[".into(),
                 "{".into(),
-                ",".into(),
-                "'".into(),
-                "\"".into(),
             ]),
             completion_item: Some(CompletionOptionsCompletionItem {
                 label_details_support: (|| -> _ {
