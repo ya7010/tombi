@@ -206,7 +206,7 @@ impl GetHoverContent for document_tree::Table {
                         accessors: Accessors::new(accessors.clone()),
                         value_type: ValueType::Table,
                         enumerated_values: vec![],
-                        schema_url: None,
+                        schema_url: schema_url.cloned(),
                         range: Some(self.range()),
                     });
                 }
