@@ -252,6 +252,20 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn tombi_schema_catalog_path(
+            tombi_schema_path(),
+            r#"
+            [schema.catalog]
+            path = "█https://www.schemastore.org/api/json/catalog.json"
+            "#
+        ) -> Ok({
+            "Keys": "schema.catalog.path",
+            "Value": "String | Array?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         async fn tombi_schemas(
             tombi_schema_path(),
             r#"
