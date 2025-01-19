@@ -34,3 +34,23 @@ pub async fn serve(_args: impl Into<Args>) {
 
     tracing::info!("Tombi LSP Server did shut down.");
 }
+
+#[cfg(test)]
+mod test {
+    use std::path::PathBuf;
+
+    fn project_root() -> PathBuf {
+        let dir = std::env::var("CARGO_MANIFEST_DIR")
+            .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_owned());
+        PathBuf::from(dir)
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .to_owned()
+    }
+
+    pub fn tombi_schema_path() -> PathBuf {
+        project_root().join("tombi.schema.json")
+    }
+}

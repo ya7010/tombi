@@ -5,7 +5,11 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use url::Url;
 
-use crate::{json_schema::JsonCatalog, schema::CatalogSchema, DocumentSchema};
+use crate::{
+    json_schema::{JsonCatalog, JsonCatalogSchema},
+    schema::CatalogSchema,
+    DocumentSchema,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
@@ -34,10 +38,7 @@ impl SchemaStore {
         };
         let mut catalogs = self.catalogs.write().await;
         for schema in schemas.iter() {
-            let Ok(url) = Url::parse(&format!(
-                "file://{}",
-                config_dirpath.join(&schema.path).to_string_lossy()
-            )) else {
+            let Ok(url) = Url::from_file_path(config_dirpath.join(&schema.path)) else {
                 continue;
             };
             tracing::debug!("load config schema from: {}", url);
@@ -71,15 +72,15 @@ impl SchemaStore {
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
             if let Ok(catalog) = response.json::<JsonCatalog>().await {
                 let mut catalogs = self.catalogs.write().await;
-                for schema in catalog.schemas {
-                    if schema
+                for catalog_schema in catalog.schemas {
+                    if catalog_schema
                         .file_match
                         .iter()
                         .any(|pattern| pattern.ends_with(".toml"))
                     {
                         catalogs.push(CatalogSchema {
-                            url: schema.url,
-                            include: schema.file_match,
+                            url: catalog_schema.url,
+                            include: catalog_schema.file_match,
                         });
                     }
                 }
@@ -93,6 +94,20 @@ impl SchemaStore {
             Err(crate::Error::CatalogUrlFetchFailed {
                 catalog_url: catalog_url.clone(),
             })
+        }
+    }
+
+    pub async fn add_catalog(&self, catalog_schema: JsonCatalogSchema) {
+        let mut catalogs = self.catalogs.write().await;
+        if catalog_schema
+            .file_match
+            .iter()
+            .any(|pattern| pattern.ends_with(".toml"))
+        {
+            catalogs.push(CatalogSchema {
+                url: catalog_schema.url,
+                include: catalog_schema.file_match,
+            });
         }
     }
 

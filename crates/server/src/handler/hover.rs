@@ -1,8 +1,12 @@
-use crate::{backend, hover::get_hover_content, toml};
+use crate::{
+    backend,
+    hover::{get_hover_content, HoverContent},
+    toml,
+};
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use tower_lsp::lsp_types::{Hover, HoverParams, TextDocumentPositionParams};
+use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_hover(
@@ -15,7 +19,7 @@ pub async fn handle_hover(
             },
         ..
     }: HoverParams,
-) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<HoverContent>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_hover");
 
     let source = toml::try_load(&text_document.uri)?;
@@ -50,7 +54,7 @@ pub async fn handle_hover(
         get_hover_content(&root, toml_version, position, &keys, document_schema).map(
             |mut content| {
                 content.range = range;
-                content.into()
+                content
             },
         ),
     );
@@ -141,4 +145,135 @@ fn get_hover_range(
         keys_vec.into_iter().rev().flatten().collect_vec(),
         hover_range,
     ))
+}
+
+#[cfg(test)]
+mod test {
+    use crate::test::tombi_schema_path;
+
+    use super::*;
+
+    #[macro_export]
+    macro_rules! test_hover_keys_value {
+        (#[tokio::test] async fn $name:ident($schema_file_path:expr, $source:expr) -> Ok({
+            "Keys": $keys:expr,
+            "Value": $value_type:expr
+        });) => {
+            #[tokio::test]
+            async fn $name() {
+                use backend::Backend;
+                use std::io::Write;
+                use tower_lsp::{
+                    lsp_types::{TextDocumentIdentifier, Url, WorkDoneProgressParams},
+                    LspService,
+                };
+                use schema_store::JsonCatalogSchema;
+
+                let (service, _) = LspService::new(|client| Backend::new(client));
+
+                let backend = service.inner();
+
+                let schema_url = Url::from_file_path($schema_file_path).expect(
+                    format!(
+                        "failed to convert schema path to URL: {}",
+                        tombi_schema_path().display()
+                    )
+                    .as_str(),
+                );
+                backend
+                    .schema_store
+                    .add_catalog(
+                        JsonCatalogSchema{
+                            name: "test_schema".to_string(),
+                            description: "schema for testing".to_string(),
+                            file_match: vec!["*.toml".to_string()],
+                            url: schema_url.clone(),
+                        }
+                    )
+                    .await;
+
+                let temp_file = tempfile::NamedTempFile::with_suffix_in(
+                        ".toml",
+                        std::env::current_dir().expect("failed to get current directory"),
+                    )
+                    .expect("failed to create temporary file");
+
+                let mut toml_data = textwrap::dedent($source).trim().to_string();
+
+                let pos = toml_data
+                    .as_str()
+                    .find("█")
+                    .expect("failed to find hover position marker (█) in the test data");
+
+                toml_data.remove(pos);
+                temp_file.as_file().write_all(toml_data.as_bytes()).expect(
+                    "failed to write test data to the temporary file, which is used as a text document",
+                );
+
+                let hover_content = handle_hover(
+                    &backend,
+                    HoverParams {
+                        text_document_position_params: TextDocumentPositionParams {
+                            text_document: TextDocumentIdentifier {
+                                uri: Url::from_file_path(temp_file.path()).expect(
+                                    "failed to convert temporary file path to URL for the text document",
+                                ),
+                            },
+                            position: (text::Position::default()
+                                + text::RelativePosition::of(&toml_data[..pos]))
+                            .into(),
+                        },
+                        work_done_progress_params: WorkDoneProgressParams::default(),
+                    },
+                )
+                .await
+                .expect("failed to handle hover")
+                .expect("failed to get hover content");
+
+                assert!(hover_content.schema_url.is_some());
+                pretty_assertions::assert_eq!(hover_content.accessors.to_string(), $keys);
+                pretty_assertions::assert_eq!(hover_content.value_type.to_string(), $value_type);
+            }
+        }
+    }
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn tombi_toml_version(
+            tombi_schema_path(),
+            r#"
+            toml-version = "█v1.0.0"
+            "#
+        ) -> Ok({
+            "Keys": "toml-version",
+            "Value": "String?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn tombi_schemas(
+            tombi_schema_path(),
+            r#"
+            [[schemas█]]
+            "#
+        ) -> Ok({
+            "Keys": "schemas[0]",
+            "Value": "Array?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn tombi_schemas_path(
+            tombi_schema_path(),
+            r#"
+            [[schemas]]
+            path = "█tombi.schema.json"
+            "#
+        ) -> Ok({
+            "Keys": "schemas[0].path",
+            "Value": "String"
+        });
+    );
 }
