@@ -31,7 +31,7 @@ impl ValueSchema {
         match object.get("type") {
             Some(serde_json::Value::String(type_str)) => return Self::new_single(type_str, object),
             Some(serde_json::Value::Array(types)) => {
-                return Some(Self::AnyOf(AnyOfSchema {
+                return Some(Self::OneOf(OneOfSchema {
                     schemas: Arc::new(RwLock::new(
                         types
                             .iter()
@@ -80,7 +80,7 @@ impl ValueSchema {
                             Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
                         }
                         "date-time" => {
-                            Some(ValueSchema::AnyOf(AnyOfSchema {
+                            Some(ValueSchema::OneOf(OneOfSchema {
                                 schemas: Arc::new(RwLock::new(
                                     [
                                         ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
