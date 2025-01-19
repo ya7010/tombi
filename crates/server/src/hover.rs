@@ -141,7 +141,7 @@ fn get_one_of_hover_content<T>(
     definitions: &schema_store::SchemaDefinitions,
 ) -> Option<HoverContent>
 where
-    T: GetHoverContent + Debug,
+    T: GetHoverContent + document_tree::ValueImpl,
 {
     let mut value_types = indexmap::IndexSet::new();
     let mut one_hover_contents = ahash::AHashSet::new();
@@ -197,7 +197,7 @@ where
             title: None,
             description: None,
             accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: ValueType::OneOf(value_types.into_iter().collect()),
+            value_type: value.value_type().into(),
             enumerated_values: Vec::new(),
             schema_url: None,
             range: None,
@@ -215,7 +215,7 @@ fn get_any_of_hover_content<T>(
     definitions: &schema_store::SchemaDefinitions,
 ) -> Option<HoverContent>
 where
-    T: GetHoverContent,
+    T: GetHoverContent + document_tree::ValueImpl,
 {
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         let mut value_types = indexmap::IndexSet::new();
@@ -270,18 +270,17 @@ where
             }
             return Some(hover_content);
         }
-        Some(HoverContent {
-            title: None,
-            description: None,
-            accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: ValueType::AnyOf(value_types.into_iter().collect()),
-            enumerated_values: Vec::new(),
-            schema_url: None,
-            range: None,
-        })
-    } else {
-        None
-    }
+    };
+
+    Some(HoverContent {
+        title: None,
+        description: None,
+        accessors: schema_store::Accessors::new(accessors.clone()),
+        value_type: value.value_type().into(),
+        enumerated_values: Vec::new(),
+        schema_url: None,
+        range: None,
+    })
 }
 
 fn get_all_of_hover_content<T>(
