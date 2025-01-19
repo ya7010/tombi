@@ -3,6 +3,7 @@ use std::sync::RwLock;
 
 use super::Schema;
 use super::SchemaItem;
+use super::SchemaPatternProperties;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
 use dashmap::DashMap;
@@ -12,6 +13,7 @@ pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub properties: SchemaProperties,
+    pub pattern_properties: Option<SchemaPatternProperties>,
     pub additional_properties: bool,
     pub additional_property_schema: Option<SchemaItem>,
     pub required: Option<Vec<String>>,
@@ -33,6 +35,21 @@ impl TableSchema {
                 }
             }
         }
+        let pattern_properties = match object.get("patternProperties") {
+            Some(serde_json::Value::Object(props)) => {
+                let pattern_properties = DashMap::new();
+                for (pattern, value) in props {
+                    let Some(object) = value.as_object() else {
+                        continue;
+                    };
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                        pattern_properties.insert(pattern.clone(), value_schema);
+                    }
+                }
+                Some(pattern_properties)
+            }
+            _ => None,
+        };
         let (additional_properties, additional_property_schema) =
             match object.get("additionalProperties") {
                 Some(serde_json::Value::Bool(allow)) => (*allow, None),
@@ -54,6 +71,7 @@ impl TableSchema {
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             properties,
+            pattern_properties,
             additional_properties,
             additional_property_schema,
             required: object.get("required").and_then(|v| {

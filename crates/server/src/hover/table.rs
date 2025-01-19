@@ -57,7 +57,45 @@ impl GetHoverContent for document_tree::Table {
                                         hover_content
                                     }
                                 });
-                        } else if let Some(additiona_property_schema) =
+                        }
+                        if let Some(pattern_properties) = &table_schema.pattern_properties {
+                            for mut pattern_property in pattern_properties.iter_mut() {
+                                let property_key = pattern_property.key();
+                                if let Ok(pattern) = regex::Regex::new(property_key) {
+                                    if pattern.is_match(&key_str) {
+                                        let property_schema = pattern_property.value_mut();
+
+                                        return value
+                                            .get_hover_content(
+                                                &accessors
+                                                    .clone()
+                                                    .into_iter()
+                                                    .chain(std::iter::once(accessor))
+                                                    .collect(),
+                                                property_schema.resolve(definitions).ok(),
+                                                toml_version,
+                                                position,
+                                                &keys[1..],
+                                                definitions,
+                                            )
+                                            .map(|hover_content| {
+                                                if keys.len() == 1
+                                                    && hover_content
+                                                        .accessors
+                                                        .last()
+                                                        .map(|accessor| accessor.is_key())
+                                                        .unwrap_or_default()
+                                                {
+                                                    hover_content.into_nullable()
+                                                } else {
+                                                    hover_content
+                                                }
+                                            });
+                                    }
+                                };
+                            }
+                        }
+                        if let Some(additiona_property_schema) =
                             &table_schema.additional_property_schema
                         {
                             if let Ok(mut additiona_property_schema) =

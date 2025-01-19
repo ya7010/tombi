@@ -41,37 +41,64 @@ impl Validate for document_tree::Table {
         };
 
         for (key, value) in self.key_values() {
-            let accessor = Accessor::Key(key.to_raw_text(toml_version));
-            if table_schema.additional_properties == false
-                && table_schema.properties.get(&accessor).is_none()
-            {
-                errors.push(crate::Error {
-                    kind: crate::ErrorKind::KeyNotAllowed {
-                        key: key.to_string(),
-                    },
-                    range: key.range() + value.range(),
-                });
-                continue;
-            }
+            let accessor_raw_text = key.to_raw_text(toml_version);
+            let accessor = Accessor::Key(accessor_raw_text.clone());
 
+            let mut matche_key = false;
             if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                matche_key = true;
                 if let Ok(value_schema) = property.resolve(definitions) {
                     if let Err(errs) = value.validate(toml_version, value_schema, &definitions) {
                         errors.extend(errs);
                     }
                 }
-            } else if let Some(additional_property_schema) =
-                &table_schema.additional_property_schema
-            {
-                if let Ok(mut additional_property_schema) = additional_property_schema.write() {
-                    if let Ok(value_schema) = additional_property_schema.resolve(definitions) {
-                        if let Err(errs) = value.validate(toml_version, value_schema, &definitions)
-                        {
-                            errors.extend(errs);
+            }
+
+            if let Some(pattern_properties) = &table_schema.pattern_properties {
+                for mut pattern_property in pattern_properties.iter_mut() {
+                    let property_key = pattern_property.key();
+                    let Ok(pattern) = regex::Regex::new(property_key) else {
+                        errors.push(crate::Error {
+                            kind: crate::ErrorKind::InvalidPropertyKeyPattern {
+                                pattern: property_key.to_string(),
+                            },
+                            range: key.range(),
+                        });
+                        continue;
+                    };
+                    if pattern.is_match(&accessor_raw_text) {
+                        matche_key = true;
+                        let property_schema = pattern_property.value_mut();
+                        if let Ok(value_schema) = property_schema.resolve(definitions) {
+                            if let Err(errs) =
+                                value.validate(toml_version, value_schema, &definitions)
+                            {
+                                errors.extend(errs);
+                            }
                         }
                     }
                 }
-            };
+            }
+            if !matche_key {
+                if let Some(additional_property_schema) = &table_schema.additional_property_schema {
+                    if let Ok(mut additional_property_schema) = additional_property_schema.write() {
+                        if let Ok(value_schema) = additional_property_schema.resolve(definitions) {
+                            if let Err(errs) =
+                                value.validate(toml_version, value_schema, &definitions)
+                            {
+                                errors.extend(errs);
+                            }
+                        }
+                    }
+                } else if !table_schema.additional_properties {
+                    errors.push(crate::Error {
+                        kind: crate::ErrorKind::KeyNotAllowed {
+                            key: key.to_string(),
+                        },
+                        range: key.range() + value.range(),
+                    });
+                }
+            }
         }
 
         if let Some(required) = &table_schema.required {

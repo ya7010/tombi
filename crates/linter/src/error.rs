@@ -80,6 +80,9 @@ pub enum ErrorKind {
         min_properties: usize,
         actual: usize,
     },
+
+    #[error("The property key must match the pattern \"{pattern}\"")]
+    InvalidPropertyKeyPattern { pattern: String },
 }
 
 #[derive(Debug)]
