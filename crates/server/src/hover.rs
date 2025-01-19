@@ -217,14 +217,6 @@ where
                 continue;
             };
 
-            if keys.is_empty() {
-                value_types.insert(value_schema.value_type());
-            }
-
-            if any_hover_content.is_some() {
-                continue;
-            }
-
             if let Some(mut content) = value.get_hover_content(
                 accessors,
                 Some(&value_schema),
@@ -242,11 +234,24 @@ where
                     }
                 }
 
-                if !keys.is_empty() {
+                if keys.is_empty() {
+                    value_types.insert(value_schema.value_type());
+                } else {
                     value_types.insert(content.value_type.clone());
                 }
 
-                any_hover_content = Some(content);
+                if any_hover_content.is_none() {
+                    if value_schema.value_type() == schema_store::ValueType::Array
+                        && content.value_type != schema_store::ValueType::Array
+                    {
+                        return Some(content);
+                    }
+                    any_hover_content = Some(content);
+                }
+            } else {
+                if keys.is_empty() {
+                    value_types.insert(value_schema.value_type());
+                }
             }
         }
         if let Some(mut hover_content) = any_hover_content {
