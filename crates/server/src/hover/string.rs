@@ -1,4 +1,6 @@
-use super::{get_all_of_hover_content, get_any_of_hover_content, GetHoverContent};
+use super::{
+    get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content, GetHoverContent,
+};
 
 impl GetHoverContent for document_tree::String {
     fn get_hover_content(
@@ -27,6 +29,19 @@ impl GetHoverContent for document_tree::String {
                     schema_url: None,
                     range: Some(self.range()),
                 })
+            }
+            Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+                if let Some(hover_content) = get_one_of_hover_content(
+                    self,
+                    accessors,
+                    one_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    definitions,
+                ) {
+                    return Some(hover_content);
+                }
             }
             Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
                 if let Some(hover_content) = get_any_of_hover_content(
