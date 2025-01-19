@@ -14,6 +14,7 @@ use config::TomlVersion;
 use dashmap::DashMap;
 use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
+use tower_lsp::lsp_types::Hover;
 
 pub fn get_hover_content(
     root: &document_tree::Root,
@@ -193,7 +194,15 @@ where
                 hover_content
             })
     } else {
-        None
+        Some(HoverContent {
+            title: None,
+            description: None,
+            accessors: schema_store::Accessors::new(accessors.clone()),
+            value_type: ValueType::OneOf(value_types.into_iter().collect()),
+            enumerated_values: Vec::new(),
+            schema_url: None,
+            range: None,
+        })
     }
 }
 
@@ -262,8 +271,18 @@ where
             }
             return Some(hover_content);
         }
+        Some(HoverContent {
+            title: None,
+            description: None,
+            accessors: schema_store::Accessors::new(accessors.clone()),
+            value_type: ValueType::AnyOf(value_types.into_iter().collect()),
+            enumerated_values: Vec::new(),
+            schema_url: None,
+            range: None,
+        })
+    } else {
+        None
     }
-    None
 }
 
 fn get_all_of_hover_content<T>(
@@ -328,8 +347,8 @@ where
     };
 
     Some(HoverContent {
-        title,
-        description,
+        title: None,
+        description: None,
         accessors: schema_store::Accessors::new(accessors.clone()),
         value_type,
         enumerated_values: Vec::new(),
