@@ -6,7 +6,7 @@ use dashmap::DashMap;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {
-    pub document_url: url::Url,
+    pub schema_url: url::Url,
     pub schema_id: Option<url::Url>,
     pub(crate) toml_version: Option<TomlVersion>,
     pub table_schema: TableSchema,
@@ -14,14 +14,14 @@ pub struct DocumentSchema {
 }
 
 impl DocumentSchema {
-    pub fn new(value: serde_json::Map<String, serde_json::Value>, document_url: url::Url) -> Self {
+    pub fn new(value: serde_json::Map<String, serde_json::Value>, schema_url: url::Url) -> Self {
         let toml_version = value.get("x-tombi-toml-version").and_then(|obj| match obj {
             serde_json::Value::String(version) => {
                 serde_json::from_str(&format!("\"{version}\"")).ok()
             }
             _ => None,
         });
-        let schema_url = value
+        let schema_id = value
             .get("$id")
             .and_then(|v| v.as_str())
             .and_then(|s| url::Url::parse(s).ok());
@@ -51,8 +51,8 @@ impl DocumentSchema {
         }
 
         Self {
-            document_url,
-            schema_id: schema_url,
+            schema_url,
+            schema_id,
             toml_version,
             table_schema,
             definitions,
