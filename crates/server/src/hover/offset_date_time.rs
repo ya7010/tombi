@@ -1,3 +1,5 @@
+use tower_lsp::lsp_types::Url;
+
 use super::{
     get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content, GetHoverContent,
 };
@@ -10,6 +12,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         let value_type = schema_store::ValueType::OffsetDateTime;
@@ -26,7 +29,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                         .as_ref()
                         .map(|v| v.iter().map(ToString::to_string).collect())
                         .unwrap_or_default(),
-                    schema_url: None,
+                    schema_url: schema_url.cloned(),
                     range: Some(self.range()),
                 })
             }
@@ -38,6 +41,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 ) {
                     return Some(hover_content);
@@ -51,6 +55,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 ) {
                     return Some(hover_content);
@@ -64,6 +69,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 ) {
                     return Some(hover_content);

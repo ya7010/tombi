@@ -1,4 +1,5 @@
 use schema_store::{Accessor, Accessors, ValueSchema, ValueType};
+use tower_lsp::lsp_types::Url;
 
 use super::{
     get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content, GetHoverContent,
@@ -13,6 +14,7 @@ impl GetHoverContent for document_tree::Array {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         for (index, value) in self.values().iter().enumerate() {
@@ -33,6 +35,7 @@ impl GetHoverContent for document_tree::Array {
                                     toml_version,
                                     position,
                                     keys,
+                                    schema_url,
                                     definitions,
                                 ) else {
                                     return None;
@@ -60,6 +63,7 @@ impl GetHoverContent for document_tree::Array {
                             toml_version,
                             position,
                             keys,
+                            schema_url,
                             definitions,
                         ) {
                             return Some(hover_content);
@@ -73,6 +77,7 @@ impl GetHoverContent for document_tree::Array {
                             toml_version,
                             position,
                             keys,
+                            schema_url,
                             definitions,
                         ) {
                             return Some(hover_content);
@@ -86,6 +91,7 @@ impl GetHoverContent for document_tree::Array {
                             toml_version,
                             position,
                             keys,
+                            schema_url,
                             definitions,
                         ) {
                             return Some(hover_content);
@@ -104,6 +110,7 @@ impl GetHoverContent for document_tree::Array {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 );
             }
@@ -117,7 +124,7 @@ impl GetHoverContent for document_tree::Array {
                     accessors: Accessors::new(accessors.clone()),
                     value_type: ValueType::Array,
                     enumerated_values: vec![],
-                    schema_url: None,
+                    schema_url: schema_url.cloned(),
                     range: Some(self.range()),
                 });
             }
@@ -129,6 +136,7 @@ impl GetHoverContent for document_tree::Array {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 ) {
                     return Some(hover_content);
@@ -142,6 +150,7 @@ impl GetHoverContent for document_tree::Array {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 ) {
                     return Some(hover_content);
@@ -155,6 +164,7 @@ impl GetHoverContent for document_tree::Array {
                     toml_version,
                     position,
                     keys,
+                    schema_url,
                     definitions,
                 ) {
                     return Some(hover_content);

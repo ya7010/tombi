@@ -14,6 +14,7 @@ use config::TomlVersion;
 use dashmap::DashMap;
 use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
+use tower_lsp::lsp_types::Url;
 
 pub fn get_hover_content(
     root: &document_tree::Root,
@@ -23,12 +24,13 @@ pub fn get_hover_content(
     document_schema: Option<DocumentSchema>,
 ) -> Option<HoverContent> {
     let table = root.deref();
-    let (value_schema, definitions) = match document_schema {
+    let (value_schema, schema_url, definitions) = match document_schema {
         Some(document_schema) => (
             Some(ValueSchema::Table(document_schema.table_schema)),
+            Some(document_schema.schema_url),
             document_schema.definitions,
         ),
-        None => (None, DashMap::new()),
+        None => (None, None, DashMap::new()),
     };
 
     table.get_hover_content(
@@ -37,6 +39,7 @@ pub fn get_hover_content(
         toml_version,
         position,
         keys,
+        schema_url.as_ref(),
         &definitions,
     )
 }
@@ -49,6 +52,7 @@ trait GetHoverContent {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent>;
 }
@@ -100,7 +104,7 @@ impl std::fmt::Display for HoverContent {
 
         if let Some(schema_url) = &self.schema_url {
             if let Some(schema_filename) = get_schema_name(schema_url) {
-                writeln!(f, "Source: [{schema_filename}]({schema_url})\n",)?;
+                writeln!(f, "Schema: [{schema_filename}]({schema_url})\n",)?;
             }
         }
 
@@ -138,6 +142,7 @@ fn get_one_of_hover_content<T>(
     toml_version: config::TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
     definitions: &schema_store::SchemaDefinitions,
 ) -> Option<HoverContent>
 where
@@ -156,6 +161,7 @@ where
                 toml_version,
                 position,
                 keys,
+                schema_url,
                 definitions,
             ) {
                 if keys.is_empty() {
@@ -212,6 +218,7 @@ fn get_any_of_hover_content<T>(
     toml_version: config::TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
     definitions: &schema_store::SchemaDefinitions,
 ) -> Option<HoverContent>
 where
@@ -231,6 +238,7 @@ where
                 toml_version,
                 position,
                 keys,
+                schema_url,
                 definitions,
             ) {
                 if content.title.is_none() && content.description.is_none() {
@@ -290,6 +298,7 @@ fn get_all_of_hover_content<T>(
     toml_version: config::TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
     definitions: &schema_store::SchemaDefinitions,
 ) -> Option<HoverContent>
 where
@@ -308,6 +317,7 @@ where
                 toml_version,
                 position,
                 keys,
+                schema_url,
                 definitions,
             ) {
                 if hover_content.title.is_some() || hover_content.description.is_some() {

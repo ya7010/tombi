@@ -1,5 +1,6 @@
 use config::TomlVersion;
 use schema_store::{Accessor, Accessors, SchemaDefinitions, ValueSchema, ValueType};
+use tower_lsp::lsp_types::Url;
 
 use super::{
     get_all_of_hover_content, get_any_of_hover_content, get_one_of_hover_content, GetHoverContent,
@@ -14,6 +15,7 @@ impl GetHoverContent for document_tree::Table {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
     ) -> Option<HoverContent> {
         if let Some(key) = keys.first() {
@@ -41,6 +43,7 @@ impl GetHoverContent for document_tree::Table {
                                     toml_version,
                                     position,
                                     &keys[1..],
+                                    schema_url,
                                     definitions,
                                 )
                                 .map(|hover_content| {
@@ -76,6 +79,7 @@ impl GetHoverContent for document_tree::Table {
                                                 toml_version,
                                                 position,
                                                 &keys[1..],
+                                                schema_url,
                                                 definitions,
                                             )
                                             .map(|hover_content| {
@@ -112,6 +116,7 @@ impl GetHoverContent for document_tree::Table {
                                         toml_version,
                                         position,
                                         &keys[1..],
+                                        schema_url,
                                         definitions,
                                     )
                                     .map(|hover_content| {
@@ -138,6 +143,7 @@ impl GetHoverContent for document_tree::Table {
                             toml_version,
                             position,
                             keys,
+                            schema_url,
                             definitions,
                         ) {
                             return Some(hover_content);
@@ -151,6 +157,7 @@ impl GetHoverContent for document_tree::Table {
                             toml_version,
                             position,
                             keys,
+                            schema_url,
                             definitions,
                         ) {
                             return Some(hover_content);
@@ -164,6 +171,7 @@ impl GetHoverContent for document_tree::Table {
                             toml_version,
                             position,
                             keys,
+                            schema_url,
                             definitions,
                         ) {
                             return Some(hover_content);
@@ -183,6 +191,7 @@ impl GetHoverContent for document_tree::Table {
                     toml_version,
                     position,
                     &keys[1..],
+                    schema_url,
                     definitions,
                 );
             } else {
@@ -209,6 +218,7 @@ impl GetHoverContent for document_tree::Table {
                         toml_version,
                         position,
                         keys,
+                        schema_url,
                         definitions,
                     ) {
                         return Some(hover_content);
@@ -222,6 +232,7 @@ impl GetHoverContent for document_tree::Table {
                         toml_version,
                         position,
                         keys,
+                        schema_url,
                         definitions,
                     ) {
                         return Some(hover_content);
@@ -235,6 +246,7 @@ impl GetHoverContent for document_tree::Table {
                         toml_version,
                         position,
                         keys,
+                        schema_url,
                         definitions,
                     ) {
                         return Some(hover_content);
