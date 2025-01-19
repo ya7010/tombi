@@ -100,7 +100,7 @@ impl SchemaStore {
         &self,
         schema_url: &Url,
     ) -> Result<DocumentSchema, crate::Error> {
-        let schema: serde_json::Value = match schema_url.scheme() {
+        let schema: serde_json::Map<String, serde_json::Value> = match schema_url.scheme() {
             "file" => {
                 let schema_path =
                     schema_url

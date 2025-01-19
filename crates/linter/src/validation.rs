@@ -32,9 +32,12 @@ pub fn validate(
     document_schema: schema_store::DocumentSchema,
 ) -> Result<(), Vec<crate::Error>> {
     let table = root.deref();
-    let (value_schema, definitions) = document_schema.into();
 
-    table.validate(toml_version, &value_schema, &definitions)
+    table.validate(
+        toml_version,
+        &ValueSchema::Table(document_schema.table_schema),
+        &document_schema.definitions,
+    )
 }
 
 fn validate_one_of<T>(

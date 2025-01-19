@@ -24,10 +24,10 @@ pub fn get_hover_content(
 ) -> Option<HoverContent> {
     let table = root.deref();
     let (value_schema, definitions) = match document_schema {
-        Some(document_schema) => {
-            let (value_schema, definitions) = document_schema.into();
-            (Some(value_schema), definitions)
-        }
+        Some(document_schema) => (
+            Some(ValueSchema::Table(document_schema.table_schema)),
+            document_schema.definitions,
+        ),
         None => (None, DashMap::new()),
     };
 
