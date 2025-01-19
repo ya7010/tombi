@@ -105,8 +105,8 @@ Also, the following abbreviations are used for Composition Type and Null describ
 | `allOf` | `String & Boolean` |
 | `null` | `String?` |
 
-To shorten the display character count of the type, the name of the definitions in the schema
-is not used, and the basic type of TOML is displayed.
+To shorten the display character on the hover, the name of the definitions in the schema
+is not used, and the type is displayed as the TOML basic type.
 
 Therefore, the `&` that indicates the relationship of `allOf` does not appear on hover
 if you are using the correct JSON Schema.
