@@ -149,7 +149,7 @@ fn get_hover_range(
 
 #[cfg(test)]
 mod test {
-    use crate::test::tombi_schema_path;
+    use crate::test::{cargo_schema_path, tombi_schema_path};
 
     use super::*;
 
@@ -273,6 +273,90 @@ mod test {
             "#
         ) -> Ok({
             "Keys": "schemas[0].path",
+            "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_package_name(
+            cargo_schema_path(),
+            r#"
+            [package]
+            name█ = "tombi"
+            "#
+        ) -> Ok({
+            "Keys": "package.name",
+            "Value": "String" // Yes; the value is required.
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_dependencies_key(
+            cargo_schema_path(),
+            r#"
+            [dependencies]
+            serde█ = { workspace = true }
+            "#
+        ) -> Ok({
+            "Keys": "dependencies.serde",
+            "Value": "(String | Table)?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_dependencies_version(
+            cargo_schema_path(),
+            r#"
+            [dependencies]
+            serde = "█1.0"
+            "#
+        ) -> Ok({
+            "Keys": "dependencies.serde",
+            "Value": "(String | Table)?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_dependencies_workspace(
+            cargo_schema_path(),
+            r#"
+            [dependencies]
+            serde = { workspace█ = true }
+            "#
+        ) -> Ok({
+            "Keys": "dependencies.serde.workspace",
+            "Value": "Boolean?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_dependencies_features(
+            cargo_schema_path(),
+            r#"
+            [dependencies]
+            serde = { version = "^1.0.0", features█ = ["derive"] }
+            "#
+        ) -> Ok({
+            "Keys": "dependencies.serde.features",
+            "Value": "Array?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_dependencies_features_item(
+            cargo_schema_path(),
+            r#"
+            [dependencies]
+            serde = { version = "^1.0.0", features = ["derive█"] }
+            "#
+        ) -> Ok({
+            "Keys": "dependencies.serde.features[0]",
             "Value": "String"
         });
     );

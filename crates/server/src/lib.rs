@@ -53,4 +53,8 @@ mod test {
     pub fn tombi_schema_path() -> PathBuf {
         project_root().join("tombi.schema.json")
     }
+
+    pub fn cargo_schema_path() -> PathBuf {
+        project_root().join("schemas").join("Cargo.schema.json")
+    }
 }
