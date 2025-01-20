@@ -90,6 +90,8 @@ impl Validate for document_tree::String {
                         range: self.range(),
                     });
                 }
+            } else {
+                tracing::error!("Invalid regex pattern: {:?}", pattern);
             }
         }
 

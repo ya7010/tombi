@@ -60,6 +60,7 @@ impl Validate for document_tree::Table {
                 for mut pattern_property in pattern_properties.iter_mut() {
                     let property_key = pattern_property.key();
                     let Ok(pattern) = regex::Regex::new(property_key) else {
+                        tracing::error!("Invalid regex pattern property: {}", property_key);
                         continue;
                     };
                     if pattern.is_match(&accessor_raw_text) {
