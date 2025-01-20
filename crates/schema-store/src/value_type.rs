@@ -99,6 +99,7 @@ impl ValueType {
     /// Simplify the type by removing unnecessary nesting.
     ///
     /// For example, `OneOf([OneOf([A, B]), C])` will be simplified to `OneOf([A, B, C])`.
+    /// Also, if `Null` is included, it is taken out at the end of the outermost. This always displays `? at the end of type display.
     pub fn simplify(&self) -> Self {
         match self {
             ValueType::OneOf(types) => {
