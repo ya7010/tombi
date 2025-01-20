@@ -95,11 +95,95 @@ impl ValueType {
             ValueType::AllOf(types) => fmt_composit_types(types, '&', is_root),
         }
     }
+
+    /// Simplify the type by removing unnecessary nesting.
+    ///
+    /// For example, `OneOf([OneOf([A, B]), C])` will be simplified to `OneOf([A, B, C])`.
+    pub fn simplify(&self) -> Self {
+        match self {
+            ValueType::OneOf(types) => {
+                let mut simplified_types = Vec::new();
+                for t in types {
+                    match t.simplify() {
+                        ValueType::OneOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.extend(nested_types.into_iter().filter_map(|t| {
+                                if let ValueType::Null = t {
+                                    has_nullable = true;
+                                    None
+                                } else {
+                                    Some(t)
+                                }
+                            }));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
+                        other => {
+                            simplified_types.push(other);
+                        }
+                    }
+                }
+                ValueType::OneOf(simplified_types)
+            }
+            ValueType::AnyOf(types) => {
+                let mut simplified_types = Vec::new();
+                for t in types {
+                    match t.simplify() {
+                        ValueType::AnyOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.extend(nested_types.into_iter().filter_map(|t| {
+                                if let ValueType::Null = t {
+                                    has_nullable = true;
+                                    None
+                                } else {
+                                    Some(t)
+                                }
+                            }));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
+                        other => {
+                            simplified_types.push(other);
+                        }
+                    }
+                }
+                ValueType::AnyOf(simplified_types)
+            }
+            ValueType::AllOf(types) => {
+                let mut simplified_types = Vec::new();
+                for t in types {
+                    match t.simplify() {
+                        ValueType::AllOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.extend(nested_types.into_iter().filter_map(|t| {
+                                if let ValueType::Null = t {
+                                    has_nullable = true;
+                                    None
+                                } else {
+                                    Some(t)
+                                }
+                            }));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
+                        other => {
+                            simplified_types.push(other);
+                        }
+                    }
+                }
+                ValueType::AllOf(simplified_types)
+            }
+            other => other.to_owned(),
+        }
+    }
 }
 
 impl std::fmt::Display for ValueType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_display(true))
+        write!(f, "{}", self.simplify().to_display(true))
     }
 }
 
@@ -168,5 +252,243 @@ fn fmt_composit_types(types: &[ValueType], separator: char, is_root: bool) -> St
                 )
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn any_of_array_null() {
+        let value_type = ValueType::AnyOf(
+            vec![ValueType::Array, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Array?");
+    }
+
+    #[test]
+    fn one_of_array_null() {
+        let value_type = ValueType::OneOf(
+            vec![ValueType::Array, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Array?");
+    }
+
+    #[test]
+    fn all_of_array_null() {
+        let value_type = ValueType::AllOf(
+            vec![ValueType::Array, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Array?");
+    }
+
+    #[test]
+    fn nullable_one_of() {
+        let value_type = ValueType::OneOf(
+            vec![ValueType::Array, ValueType::Table, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "(Array ^ Table)?");
+    }
+
+    #[test]
+    fn nullable_any_of() {
+        let value_type = ValueType::AnyOf(
+            vec![ValueType::Array, ValueType::Table, ValueType::Null]
+                .into_iter()
+                .collect(),
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "(Array | Table)?");
+    }
+
+    #[test]
+    fn nullable_all_of() {
+        let value_type =
+            ValueType::AllOf(vec![ValueType::Array, ValueType::Table, ValueType::Null]);
+        pretty_assertions::assert_eq!(value_type.to_string(), "(Array & Table)?");
+    }
+
+    #[test]
+    fn nested_one_of() {
+        let value_type = ValueType::OneOf(
+            vec![
+                ValueType::OneOf(vec![ValueType::Boolean, ValueType::String]),
+                ValueType::Array,
+                ValueType::Table,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean ^ String) ^ Array ^ Table"
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Boolean ^ String ^ Array ^ Table");
+    }
+
+    #[test]
+    fn nested_any_of() {
+        let value_type = ValueType::AnyOf(
+            vec![
+                ValueType::AnyOf(vec![ValueType::Boolean, ValueType::String]),
+                ValueType::Array,
+                ValueType::Table,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean | String) | Array | Table"
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Boolean | String | Array | Table");
+    }
+
+    #[test]
+    fn nested_all_of() {
+        let value_type = ValueType::AllOf(
+            vec![
+                ValueType::AllOf(vec![ValueType::Boolean, ValueType::String]),
+                ValueType::Array,
+                ValueType::Table,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean & String) & Array & Table"
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Boolean & String & Array & Table");
+    }
+
+    #[test]
+    fn nested_one_of_withnullable() {
+        let value_type = ValueType::OneOf(
+            vec![
+                ValueType::OneOf(vec![ValueType::Boolean, ValueType::String]),
+                ValueType::Array,
+                ValueType::Table,
+                ValueType::Null,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "((Boolean ^ String) ^ Array ^ Table)?"
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_string(),
+            "(Boolean ^ String ^ Array ^ Table)?"
+        );
+    }
+
+    #[test]
+    fn nested_one_of_with_nested_nullable() {
+        let value_type = ValueType::OneOf(
+            vec![
+                ValueType::OneOf(vec![ValueType::Boolean, ValueType::String, ValueType::Null]),
+                ValueType::Array,
+                ValueType::Table,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean ^ String)? ^ Array ^ Table"
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_string(),
+            "(Boolean ^ String ^ Array ^ Table)?"
+        );
+    }
+
+    #[test]
+    fn nested_any_of_with_nested_nullable() {
+        let value_type = ValueType::AnyOf(
+            vec![
+                ValueType::AnyOf(vec![ValueType::Boolean, ValueType::String, ValueType::Null]),
+                ValueType::Array,
+                ValueType::Table,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean | String)? | Array | Table"
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_string(),
+            "(Boolean | String | Array | Table)?"
+        );
+    }
+
+    #[test]
+    fn nested_all_of_with_nested_nullable() {
+        let value_type = ValueType::AllOf(
+            vec![
+                ValueType::AllOf(vec![ValueType::Boolean, ValueType::String, ValueType::Null]),
+                ValueType::Array,
+                ValueType::Table,
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean & String)? & Array & Table"
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_string(),
+            "(Boolean & String & Array & Table)?"
+        );
+    }
+
+    #[test]
+    fn nested_one_of_any_of() {
+        let value_type = ValueType::OneOf(
+            vec![
+                ValueType::OneOf(vec![ValueType::Boolean, ValueType::String]),
+                ValueType::AnyOf(vec![ValueType::Array, ValueType::Table]),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean ^ String) ^ (Array | Table)"
+        );
+        pretty_assertions::assert_eq!(value_type.to_string(), "Boolean ^ String ^ (Array | Table)");
+    }
+
+    #[test]
+    fn nested_one_of_any_of_with_nullable() {
+        let value_type = ValueType::OneOf(
+            vec![
+                ValueType::OneOf(vec![ValueType::Boolean, ValueType::String]),
+                ValueType::AnyOf(vec![ValueType::Array, ValueType::Table, ValueType::Null]),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_display(true),
+            "(Boolean ^ String) ^ (Array | Table)?"
+        );
+        pretty_assertions::assert_eq!(
+            value_type.to_string(),
+            "Boolean ^ String ^ (Array | Table)?"
+        );
     }
 }
