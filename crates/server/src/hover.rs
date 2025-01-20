@@ -186,7 +186,7 @@ where
                     }
                 }
 
-                if keys.is_empty() {
+                if keys.is_empty() && accessors == hover_content.accessors.as_ref() {
                     hover_content.value_type = value_type.clone();
                 }
 
@@ -281,7 +281,7 @@ where
                     }
                 }
 
-                if keys.is_empty() {
+                if keys.is_empty() && accessors == hover_content.accessors.as_ref() {
                     hover_content.value_type = value_type;
                 }
 

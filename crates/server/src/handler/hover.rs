@@ -266,6 +266,9 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        // NOTE: This test is correct. When you hover over the last key of the header of ArrayOfTables,
+        //       the Keys in the hover content is `schema[$index]`, not `schemas`.
+        //       Therefore, the Value is `Table`.
         async fn tombi_schemas(
             tombi_schema_path(),
             r#"
@@ -273,7 +276,7 @@ mod test {
             "#
         ) -> Ok({
             "Keys": "schemas[0]",
-            "Value": "Array?" // FIXME: Should be "Table".
+            "Value": "Table"
         });
     );
 
