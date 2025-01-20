@@ -73,29 +73,33 @@ impl ValueType {
             ValueType::AllOf(types) => types.iter().all(|t| t.is_nullable()),
         }
     }
+
+    fn to_display(&self, is_root: bool) -> String {
+        match self {
+            ValueType::Null => {
+                // NOTE: If this representation appears in the Hover of the Language Server, it is a bug.
+                "Null".to_string()
+            }
+            ValueType::Boolean => "Boolean".to_string(),
+            ValueType::Integer => "Integer".to_string(),
+            ValueType::Float => "Float".to_string(),
+            ValueType::String => "String".to_string(),
+            ValueType::OffsetDateTime => "OffsetDateTime".to_string(),
+            ValueType::LocalDateTime => "LocalDateTime".to_string(),
+            ValueType::LocalDate => "LocalDate".to_string(),
+            ValueType::LocalTime => "LocalTime".to_string(),
+            ValueType::Array => "Array".to_string(),
+            ValueType::Table => "Table".to_string(),
+            ValueType::OneOf(types) => fmt_composit_types(types, '^', is_root),
+            ValueType::AnyOf(types) => fmt_composit_types(types, '|', is_root),
+            ValueType::AllOf(types) => fmt_composit_types(types, '&', is_root),
+        }
+    }
 }
 
 impl std::fmt::Display for ValueType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ValueType::Null => {
-                // NOTE: If this representation appears in the Hover of the Language Server, it is a bug.
-                write!(f, "Null")
-            }
-            ValueType::Boolean => write!(f, "Boolean"),
-            ValueType::Integer => write!(f, "Integer"),
-            ValueType::Float => write!(f, "Float"),
-            ValueType::String => write!(f, "String"),
-            ValueType::OffsetDateTime => write!(f, "OffsetDateTime"),
-            ValueType::LocalDateTime => write!(f, "LocalDateTime"),
-            ValueType::LocalDate => write!(f, "LocalDate"),
-            ValueType::LocalTime => write!(f, "LocalTime"),
-            ValueType::Array => write!(f, "Array"),
-            ValueType::Table => write!(f, "Table"),
-            ValueType::OneOf(ref types) => fmt_composit_types(f, types, '^'),
-            ValueType::AnyOf(types) => fmt_composit_types(f, types, '|'),
-            ValueType::AllOf(types) => fmt_composit_types(f, types, '&'),
-        }
+        write!(f, "{}", self.to_display(true))
     }
 }
 
@@ -116,11 +120,7 @@ impl From<document_tree::ValueType> for ValueType {
     }
 }
 
-fn fmt_composit_types(
-    f: &mut std::fmt::Formatter<'_>,
-    types: &[ValueType],
-    separator: char,
-) -> std::fmt::Result {
+fn fmt_composit_types(types: &[ValueType], separator: char, is_root: bool) -> String {
     let mut nullable = false;
     let non_null_types = types
         .into_iter()
@@ -136,25 +136,37 @@ fn fmt_composit_types(
 
     if nullable {
         if non_null_types.len() == 1 {
-            write!(f, "{}?", non_null_types[0])
+            format!("{}?", non_null_types[0].to_display(false))
         } else {
-            write!(
-                f,
+            format!(
                 "({})?",
                 non_null_types
                     .iter()
-                    .map(ToString::to_string)
+                    .map(|t| t.to_display(false))
                     .join(&format!(" {} ", separator)),
             )
         }
     } else {
-        write!(
-            f,
-            "{}",
-            types
-                .iter()
-                .map(ToString::to_string)
-                .join(&format!(" {} ", separator))
-        )
+        if is_root {
+            format!(
+                "{}",
+                non_null_types
+                    .iter()
+                    .map(|t| t.to_display(false))
+                    .join(&format!(" {} ", separator))
+            )
+        } else {
+            if non_null_types.len() == 1 {
+                format!("{}", non_null_types[0].to_display(false))
+            } else {
+                format!(
+                    "({})",
+                    non_null_types
+                        .iter()
+                        .map(|t| t.to_display(false))
+                        .join(&format!(" {} ", separator)),
+                )
+            }
+        }
     }
 }

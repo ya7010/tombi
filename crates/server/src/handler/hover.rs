@@ -260,7 +260,7 @@ mod test {
             "#
         ) -> Ok({
             "Keys": "schema.catalog.path",
-            "Value": "String | Array?"
+            "Value": "(String | Array)?"
         });
     );
 
