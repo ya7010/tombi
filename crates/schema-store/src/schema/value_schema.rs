@@ -75,6 +75,7 @@ impl ValueSchema {
             "number" => Some(ValueSchema::Float(FloatSchema::new(object))),
             "string" => {
                 if let Some(serde_json::Value::String(format_str)) = object.get("format") {
+                    // See: https://json-schema.org/understanding-json-schema/reference/type#built-in-formats
                     match format_str.as_str() {
                         "date" => {
                             Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
