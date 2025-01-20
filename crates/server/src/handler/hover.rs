@@ -307,6 +307,20 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn cargo_package_readme(
+            cargo_schema_path(),
+            r#"
+            [package]
+            readme = "█README.md"
+            "#
+        ) -> Ok({
+            "Keys": "package.readme",
+            "Value": "(String | Boolean | Table)?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         async fn cargo_dependencies_key(
             cargo_schema_path(),
             r#"
