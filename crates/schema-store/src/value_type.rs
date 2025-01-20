@@ -119,6 +119,44 @@ impl ValueType {
                                 simplified_types.push(ValueType::Null);
                             }
                         }
+                        ValueType::AnyOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.push(ValueType::AnyOf(
+                                nested_types
+                                    .into_iter()
+                                    .filter_map(|t| {
+                                        if let ValueType::Null = t {
+                                            has_nullable = true;
+                                            None
+                                        } else {
+                                            Some(t)
+                                        }
+                                    })
+                                    .collect(),
+                            ));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
+                        ValueType::AllOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.push(ValueType::AllOf(
+                                nested_types
+                                    .into_iter()
+                                    .filter_map(|t| {
+                                        if let ValueType::Null = t {
+                                            has_nullable = true;
+                                            None
+                                        } else {
+                                            Some(t)
+                                        }
+                                    })
+                                    .collect(),
+                            ));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
                         other => {
                             simplified_types.push(other);
                         }
@@ -130,6 +168,25 @@ impl ValueType {
                 let mut simplified_types = Vec::new();
                 for t in types {
                     match t.simplify() {
+                        ValueType::OneOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.push(ValueType::OneOf(
+                                nested_types
+                                    .into_iter()
+                                    .filter_map(|t| {
+                                        if let ValueType::Null = t {
+                                            has_nullable = true;
+                                            None
+                                        } else {
+                                            Some(t)
+                                        }
+                                    })
+                                    .collect(),
+                            ));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
                         ValueType::AnyOf(nested_types) => {
                             let mut has_nullable = false;
                             simplified_types.extend(nested_types.into_iter().filter_map(|t| {
@@ -140,6 +197,25 @@ impl ValueType {
                                     Some(t)
                                 }
                             }));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
+                        ValueType::AllOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.push(ValueType::AllOf(
+                                nested_types
+                                    .into_iter()
+                                    .filter_map(|t| {
+                                        if let ValueType::Null = t {
+                                            has_nullable = true;
+                                            None
+                                        } else {
+                                            Some(t)
+                                        }
+                                    })
+                                    .collect(),
+                            ));
                             if has_nullable {
                                 simplified_types.push(ValueType::Null);
                             }
@@ -155,6 +231,44 @@ impl ValueType {
                 let mut simplified_types = Vec::new();
                 for t in types {
                     match t.simplify() {
+                        ValueType::OneOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.push(ValueType::OneOf(
+                                nested_types
+                                    .into_iter()
+                                    .filter_map(|t| {
+                                        if let ValueType::Null = t {
+                                            has_nullable = true;
+                                            None
+                                        } else {
+                                            Some(t)
+                                        }
+                                    })
+                                    .collect(),
+                            ));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
+                        ValueType::AnyOf(nested_types) => {
+                            let mut has_nullable = false;
+                            simplified_types.push(ValueType::AnyOf(
+                                nested_types
+                                    .into_iter()
+                                    .filter_map(|t| {
+                                        if let ValueType::Null = t {
+                                            has_nullable = true;
+                                            None
+                                        } else {
+                                            Some(t)
+                                        }
+                                    })
+                                    .collect(),
+                            ));
+                            if has_nullable {
+                                simplified_types.push(ValueType::Null);
+                            }
+                        }
                         ValueType::AllOf(nested_types) => {
                             let mut has_nullable = false;
                             simplified_types.extend(nested_types.into_iter().filter_map(|t| {
@@ -488,7 +602,7 @@ mod test {
         );
         pretty_assertions::assert_eq!(
             value_type.to_string(),
-            "Boolean ^ String ^ (Array | Table)?"
+            "(Boolean ^ String ^ (Array | Table))?"
         );
     }
 }
