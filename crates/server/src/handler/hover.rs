@@ -395,7 +395,7 @@ mod test {
             pyproject_schema_path(),
             r#"
             [project]
-            readme = "█1.0.0" }
+            readme = "█1.0.0"
             "#
         ) -> Ok({
             "Keys": "project.readme",
