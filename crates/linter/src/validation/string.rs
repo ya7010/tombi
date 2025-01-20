@@ -80,23 +80,16 @@ impl Validate for document_tree::String {
         }
 
         if let Some(pattern) = &string_schema.pattern {
-            let regex = Regex::new(pattern).map_err(|e| {
-                vec![crate::Error {
-                    kind: crate::ErrorKind::InvalidPattern {
-                        pattern: pattern.clone(),
-                        error: e.to_string(),
-                    },
-                    range: self.range(),
-                }]
-            })?;
-            if !regex.is_match(&value) {
-                errors.push(crate::Error {
-                    kind: crate::ErrorKind::PatternMismatch {
-                        pattern: pattern.clone(),
-                        actual: value,
-                    },
-                    range: self.range(),
-                });
+            if let Ok(regex) = Regex::new(pattern) {
+                if !regex.is_match(&value) {
+                    errors.push(crate::Error {
+                        kind: crate::ErrorKind::Pattern {
+                            pattern: pattern.clone(),
+                            actual: value,
+                        },
+                        range: self.range(),
+                    });
+                }
             }
         }
 

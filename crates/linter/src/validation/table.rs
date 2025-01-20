@@ -2,6 +2,8 @@ use config::TomlVersion;
 use document_tree::ValueImpl;
 use schema_store::{Accessor, ValueSchema, ValueType};
 
+use crate::error::Patterns;
+
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for document_tree::Table {
@@ -58,12 +60,6 @@ impl Validate for document_tree::Table {
                 for mut pattern_property in pattern_properties.iter_mut() {
                     let property_key = pattern_property.key();
                     let Ok(pattern) = regex::Regex::new(property_key) else {
-                        errors.push(crate::Error {
-                            kind: crate::ErrorKind::InvalidPropertyKeyPattern {
-                                pattern: property_key.to_string(),
-                            },
-                            range: key.range(),
-                        });
                         continue;
                     };
                     if pattern.is_match(&accessor_raw_text) {
@@ -90,13 +86,30 @@ impl Validate for document_tree::Table {
                             }
                         }
                     }
-                } else if !table_schema.additional_properties {
+                    continue;
+                }
+                if let Some(pattern_properties) = &table_schema.pattern_properties {
+                    errors.push(crate::Error {
+                        kind: crate::ErrorKind::PatternProperty {
+                            patterns: Patterns(
+                                pattern_properties
+                                    .iter()
+                                    .map(|p| p.key().to_string())
+                                    .collect(),
+                            ),
+                        },
+                        range: key.range(),
+                    });
+                    continue;
+                }
+                if !table_schema.additional_properties {
                     errors.push(crate::Error {
                         kind: crate::ErrorKind::KeyNotAllowed {
                             key: key.to_string(),
                         },
                         range: key.range() + value.range(),
                     });
+                    continue;
                 }
             }
         }

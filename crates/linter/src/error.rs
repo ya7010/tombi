@@ -1,9 +1,11 @@
+use itertools::Itertools;
+
 #[derive(thiserror::Error, Debug)]
 pub enum ErrorKind {
     #[error("An empty quoted key is allowed, but it is not recommended")]
     KeyEmpty,
 
-    #[error("The key \"{key}\" is required")]
+    #[error("\"{key}\" is required")]
     KeyRequired { key: String },
 
     #[error("\"{key}\" is not allowed")]
@@ -57,32 +59,29 @@ pub enum ErrorKind {
     #[error("The length must be ≥ {minimum}, but found {actual}")]
     MinimumLength { minimum: usize, actual: usize },
 
-    #[error("The pattern \"{pattern}\" is invalid: {error}")]
-    InvalidPattern { pattern: String, error: String },
+    #[error("\"{actual}\" does not match the pattern \"{pattern}\"")]
+    Pattern { pattern: String, actual: String },
 
-    #[error("The value \"{actual}\" does not match the pattern \"{pattern}\"")]
-    PatternMismatch { pattern: String, actual: String },
-
-    #[error("The array must contain at most {max_items} items, but found {actual}")]
+    #[error("Array must contain at most {max_items} items, but found {actual}")]
     MaxItems { max_items: usize, actual: usize },
 
-    #[error("The array must contain at least {min_items} items, but found {actual}")]
+    #[error("Array must contain at least {min_items} items, but found {actual}")]
     MinItems { min_items: usize, actual: usize },
 
-    #[error("The object must contain at most {max_properties} properties, but found {actual}")]
+    #[error("Table must contain at most {max_properties} properties, but found {actual}")]
     MaxProperties {
         max_properties: usize,
         actual: usize,
     },
 
-    #[error("The object must contain at least {min_properties} properties, but found {actual}")]
+    #[error("Table must contain at least {min_properties} properties, but found {actual}")]
     MinProperties {
         min_properties: usize,
         actual: usize,
     },
 
-    #[error("The property key must match the pattern \"{pattern}\"")]
-    InvalidPropertyKeyPattern { pattern: String },
+    #[error("Key must match the pattern \"{patterns}\"")]
+    PatternProperty { patterns: Patterns },
 }
 
 #[derive(Debug)]
@@ -97,5 +96,18 @@ impl diagnostic::SetDiagnostics for Error {
             self.kind.to_string(),
             self.range,
         ))
+    }
+}
+
+#[derive(Debug)]
+pub struct Patterns(pub Vec<String>);
+
+impl std::fmt::Display for Patterns {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.0.len() == 1 {
+            return write!(f, "{}", self.0[0]);
+        } else {
+            write!(f, "{}", self.0.iter().map(|p| format!("({})", p)).join("|"))
+        }
     }
 }
