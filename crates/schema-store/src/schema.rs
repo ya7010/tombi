@@ -45,7 +45,7 @@ pub type SchemaItem = Arc<RwLock<Referable<ValueSchema>>>;
 pub type SchemaDefinitions = dashmap::DashMap<String, Referable<ValueSchema>>;
 pub type Schemas = Arc<RwLock<Vec<Referable<ValueSchema>>>>;
 
-pub trait Schema {
+pub trait FindSchemaCandidates {
     fn find_schema_candidates(
         &self,
         accessors: &[Accessor],

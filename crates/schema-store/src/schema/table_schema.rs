@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::sync::RwLock;
 
-use super::Schema;
+use super::FindSchemaCandidates;
 use super::SchemaItem;
 use super::SchemaPatternProperties;
 use super::ValueSchema;
@@ -96,7 +96,7 @@ impl TableSchema {
     }
 }
 
-impl Schema for TableSchema {
+impl FindSchemaCandidates for TableSchema {
     fn find_schema_candidates(
         &self,
         accessors: &[crate::Accessor],
