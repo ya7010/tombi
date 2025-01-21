@@ -105,7 +105,7 @@ Also, the following abbreviations are used for Composition Type and Null describ
 | `allOf` | `String & Boolean` |
 | `null` | `String?` |
 
-> [!IMPORTANT]
+> [!TIP]
 > To shorten the display character on the hover, the name of the definitions in the schema
 > is not used, and the type is displayed as the TOML basic type.
 >
