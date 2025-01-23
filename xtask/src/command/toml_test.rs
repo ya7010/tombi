@@ -32,7 +32,7 @@ fn decode_test(sh: &Shell, project_root: &std::path::Path, toml_version: TomlVer
     match xshell::cmd!(
         sh,
         "toml-test -color=never -toml={toml_test_version} -- {project_root}/target/debug/decode --toml-version {toml_version_str}"
-    ).output() {
+    ).ignore_status().output() {
         Ok(output) => {
             std::io::stdout().write_all(&output.stdout).unwrap();
             std::io::stderr().write_all(&output.stderr).unwrap();
