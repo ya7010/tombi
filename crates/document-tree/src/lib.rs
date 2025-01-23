@@ -66,6 +66,7 @@ impl<T, U> TryIntoDocumentTree<T> for U
 where
     U: IntoDocumentTreeResult<T>,
 {
+    #[inline]
     fn try_into_document_tree(self, toml_version: TomlVersion) -> Result<T, Vec<crate::Error>> {
         self.into_document_tree_result(toml_version).ok()
     }
