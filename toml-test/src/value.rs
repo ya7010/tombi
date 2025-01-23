@@ -90,6 +90,9 @@ impl IntoValue for document_tree::Value {
                     .map(|(k, v)| (k.to_raw_text(toml_version), v.into_value(toml_version)))
                     .collect(),
             ),
+            document_tree::Value::Incomplete { .. } => {
+                unreachable!("Incomplete value should not be converted to Value.")
+            }
         }
     }
 }

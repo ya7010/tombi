@@ -70,23 +70,18 @@ macro_rules! test_serialize {
         #[test]
         fn $name() {
             use ast::AstNode;
-            use document_tree::TryIntoDocumentTree;
+            use document_tree::IntoDocumentTreeResult;
             use $crate::IntoDocument;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
             pretty_assertions::assert_eq!(p.errors(), &[]);
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
-            match root.try_into_document_tree($toml_version) {
-                Ok(document_tree) => {
-                    let document: $crate::Document = document_tree.into_document($toml_version);
-                    let serialized = serde_json::to_string(&document).unwrap();
-                    pretty_assertions::assert_eq!(serialized, $json.to_string());
-                }
-                Err(errors) => {
-                    pretty_assertions::assert_eq!(errors, vec![]);
-                }
-            }
+            let (document_tree, errors) = root.into_document_tree_result($toml_version).into();
+            pretty_assertions::assert_eq!(errors, vec![]);
+            let document: $crate::Document = document_tree.into_document($toml_version);
+            let serialized = serde_json::to_string(&document).unwrap();
+            pretty_assertions::assert_eq!(serialized, $json.to_string());
         }
     };
 
@@ -100,7 +95,7 @@ macro_rules! test_serialize {
         fn $name() {
             use ast::AstNode;
             use itertools::Itertools;
-            use document_tree::TryIntoDocumentTree;
+            use document_tree::IntoDocumentTreeResult;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
@@ -119,20 +114,14 @@ macro_rules! test_serialize {
                 );
             }
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
-            match root.try_into_document_tree($toml_version) {
-                Ok(_) => {
-                    pretty_assertions::assert_eq!("expected error", "but got success");
-                }
-                Err(errs) => {
-                    pretty_assertions::assert_eq!(
+            let (_, errs) = root.into_document_tree_result($toml_version).into();
+            pretty_assertions::assert_eq!(
                         errs
                             .iter()
                             .map(|e| (e.to_message(), e.range()))
                             .collect_vec(),
                         errors
                     );
-                }
-            }
         }
     };
 }

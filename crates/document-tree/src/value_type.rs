@@ -10,6 +10,7 @@ pub enum ValueType {
     LocalTime,
     Array,
     Table,
+    Incomplete,
 }
 
 impl std::fmt::Display for ValueType {

@@ -29,6 +29,7 @@ impl Validate for document_tree::Value {
             }
             Self::Array(array) => array.validate(toml_version, value_schema, definitions),
             Self::Table(table) => table.validate(toml_version, value_schema, definitions),
+            Self::Incomplete { .. } => Ok(()),
         }
     }
 }

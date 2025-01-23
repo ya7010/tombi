@@ -316,6 +316,7 @@ impl From<document_tree::ValueType> for ValueType {
             document_tree::ValueType::LocalTime => ValueType::LocalTime,
             document_tree::ValueType::Array => ValueType::Array,
             document_tree::ValueType::Table => ValueType::Table,
+            document_tree::ValueType::Incomplete => unreachable!("incomplete value"),
         }
     }
 }

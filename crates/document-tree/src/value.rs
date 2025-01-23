@@ -15,7 +15,7 @@ pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
-use crate::{support::comment::try_new_comment, TryIntoDocumentTree};
+use crate::{support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -29,6 +29,7 @@ pub enum Value {
     LocalTime(LocalTime),
     Array(Array),
     Table(Table),
+    Incomplete { range: text::Range },
 }
 
 impl Value {
@@ -45,6 +46,7 @@ impl Value {
             Value::LocalTime(value) => value.range(),
             Value::Array(value) => value.range(),
             Value::Table(value) => value.range(),
+            Value::Incomplete { range } => *range,
         }
     }
 
@@ -61,6 +63,7 @@ impl Value {
             Value::LocalTime(value) => value.symbol_range(),
             Value::Array(value) => value.symbol_range(),
             Value::Table(value) => value.symbol_range(),
+            Value::Incomplete { range } => *range,
         }
     }
 }
@@ -78,6 +81,7 @@ impl crate::ValueImpl for Value {
             Value::LocalTime(local_time) => local_time.value_type(),
             Value::Array(array) => array.value_type(),
             Value::Table(table) => table.value_type(),
+            Value::Incomplete { .. } => crate::ValueType::Incomplete,
         }
     }
 
@@ -86,11 +90,11 @@ impl crate::ValueImpl for Value {
     }
 }
 
-impl TryIntoDocumentTree<Value> for ast::Value {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::Value {
+    fn into_document_tree_result(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> Result<Value, Vec<crate::Error>> {
+    ) -> DocumentTreeResult<crate::Value> {
         let mut errors = Vec::new();
         for comment in self.leading_comments() {
             if let Err(error) = try_new_comment(comment.as_ref()) {
@@ -104,57 +108,34 @@ impl TryIntoDocumentTree<Value> for ast::Value {
             }
         }
 
-        let result = match self {
-            ast::Value::BasicString(string) => string
-                .try_into_document_tree(toml_version)
-                .map(Value::String),
-            ast::Value::LiteralString(string) => string
-                .try_into_document_tree(toml_version)
-                .map(Value::String),
-            ast::Value::MultiLineBasicString(string) => string
-                .try_into_document_tree(toml_version)
-                .map(Value::String),
-            ast::Value::MultiLineLiteralString(string) => string
-                .try_into_document_tree(toml_version)
-                .map(Value::String),
-            ast::Value::IntegerBin(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::IntegerOct(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::IntegerDec(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::IntegerHex(integer) => integer.try_into().map(Value::Integer),
-            ast::Value::Float(float) => float.try_into().map(Value::Float),
-            ast::Value::Boolean(boolean) => boolean.try_into().map(Value::Boolean),
-            ast::Value::OffsetDateTime(dt) => dt
-                .try_into_document_tree(toml_version)
-                .map(Value::OffsetDateTime),
-            ast::Value::LocalDateTime(dt) => dt
-                .try_into_document_tree(toml_version)
-                .map(Value::LocalDateTime),
-            ast::Value::LocalDate(date) => date
-                .try_into_document_tree(toml_version)
-                .map(Value::LocalDate),
-            ast::Value::LocalTime(time) => time
-                .try_into_document_tree(toml_version)
-                .map(Value::LocalTime),
-            ast::Value::Array(array) => {
-                array.try_into_document_tree(toml_version).map(Value::Array)
+        let mut document_tree_result = match self {
+            ast::Value::BasicString(string) => string.into_document_tree_result(toml_version),
+            ast::Value::LiteralString(string) => string.into_document_tree_result(toml_version),
+            ast::Value::MultiLineBasicString(string) => {
+                string.into_document_tree_result(toml_version)
             }
-            ast::Value::InlineTable(inline_table) => inline_table
-                .try_into_document_tree(toml_version)
-                .map(Value::Table),
+            ast::Value::MultiLineLiteralString(string) => {
+                string.into_document_tree_result(toml_version)
+            }
+            ast::Value::IntegerBin(integer) => integer.into_document_tree_result(toml_version),
+            ast::Value::IntegerOct(integer) => integer.into_document_tree_result(toml_version),
+            ast::Value::IntegerDec(integer) => integer.into_document_tree_result(toml_version),
+            ast::Value::IntegerHex(integer) => integer.into_document_tree_result(toml_version),
+            ast::Value::Float(float) => float.into_document_tree_result(toml_version),
+            ast::Value::Boolean(boolean) => boolean.into_document_tree_result(toml_version),
+            ast::Value::OffsetDateTime(dt) => dt.into_document_tree_result(toml_version),
+            ast::Value::LocalDateTime(dt) => dt.into_document_tree_result(toml_version),
+            ast::Value::LocalDate(date) => date.into_document_tree_result(toml_version),
+            ast::Value::LocalTime(time) => time.into_document_tree_result(toml_version),
+            ast::Value::Array(array) => array.into_document_tree_result(toml_version),
+            ast::Value::InlineTable(inline_table) => {
+                inline_table.into_document_tree_result(toml_version)
+            }
         };
 
-        match result {
-            Ok(value) => {
-                if errors.is_empty() {
-                    Ok(value)
-                } else {
-                    Err(errors)
-                }
-            }
-            Err(errs) => {
-                errors.extend(errs);
-                Err(errors)
-            }
-        }
+        errors.extend(document_tree_result.errors);
+        document_tree_result.errors = errors;
+
+        document_tree_result
     }
 }

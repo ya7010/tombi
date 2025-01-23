@@ -104,6 +104,7 @@ impl GetHoverContent for document_tree::Value {
                 schema_url,
                 definitions,
             ),
+            Self::Incomplete { .. } => None,
         }
     }
 }

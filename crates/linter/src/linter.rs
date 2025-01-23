@@ -5,7 +5,7 @@ use ast::AstNode;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
-use document_tree::TryIntoDocumentTree;
+use document_tree::IntoDocumentTreeResult;
 use itertools::Either;
 use schema_store::DocumentSchema;
 use url::Url;
@@ -65,21 +65,17 @@ impl<'a> Linter<'a> {
 
             root.lint(&mut self);
 
-            match root.try_into_document_tree(self.toml_version) {
-                Ok(document_tree) => {
-                    if let Some(document_schema) = self.document_schema {
-                        if let Err(errs) = crate::validation::validate(
-                            document_tree,
-                            self.toml_version,
-                            document_schema,
-                        ) {
-                            for err in errs {
-                                err.set_diagnostic(&mut errors);
-                            }
-                        }
-                    }
-                }
-                Err(errs) => {
+            let (document_tree, errs) =
+                root.into_document_tree_result(self.toml_version).into();
+
+            for err in errs {
+                err.set_diagnostic(&mut errors);
+            }
+
+            if let Some(document_schema) = self.document_schema {
+                if let Err(errs) =
+                    crate::validation::validate(document_tree, self.toml_version, document_schema)
+                {
                     for err in errs {
                         err.set_diagnostic(&mut errors);
                     }

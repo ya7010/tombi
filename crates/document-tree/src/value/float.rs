@@ -1,4 +1,9 @@
-use crate::{support::float::try_from_float, ValueImpl, ValueType};
+use toml_version::TomlVersion;
+
+use crate::{
+    support::float::try_from_float, DocumentTreeResult, IntoDocumentTreeResult, ValueImpl,
+    ValueType,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Float {
@@ -38,15 +43,28 @@ impl ValueImpl for Float {
     }
 }
 
-impl TryFrom<ast::Float> for Float {
-    type Error = Vec<crate::Error>;
+impl IntoDocumentTreeResult<crate::Value> for ast::Float {
+    fn into_document_tree_result(
+        self,
+        _toml_version: TomlVersion,
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-    fn try_from(node: ast::Float) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        let range = token.range();
         match try_from_float(token.text()) {
-            Ok(value) => Ok(Self { value, node }),
-            Err(error) => Err(vec![crate::Error::ParseFloatError { error, range }]),
+            Ok(value) => DocumentTreeResult {
+                tree: crate::Value::Float(crate::Float { value, node: self }),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::ParseFloatError { error, range }],
+            },
         }
     }
 }

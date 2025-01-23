@@ -2,10 +2,10 @@ use std::ops::Deref;
 
 use toml_version::TomlVersion;
 
-use crate::{support::comment::try_new_comment, Table, TryIntoDocumentTree};
+use crate::{support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult, Table};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Root(Table);
+pub struct Root(pub(crate) Table);
 
 impl From<Root> for Table {
     fn from(root: Root) -> Self {
@@ -21,15 +21,18 @@ impl Deref for Root {
     }
 }
 
-enum RootItem {
+pub(crate) enum RootItem {
     Table(Table),
     ArrayOfTables(Table),
     KeyValue(Table),
 }
 
-impl TryIntoDocumentTree<Root> for ast::Root {
-    fn try_into_document_tree(self, toml_version: TomlVersion) -> Result<Root, Vec<crate::Error>> {
-        let mut root = Root(Table::new_root(&self));
+impl IntoDocumentTreeResult<crate::Root> for ast::Root {
+    fn into_document_tree_result(
+        self,
+        toml_version: TomlVersion,
+    ) -> crate::DocumentTreeResult<crate::Root> {
+        let mut root = crate::Root(crate::Table::new_root(&self));
         let mut errors = Vec::new();
 
         for comments in self.begin_dangling_comments() {
@@ -41,15 +44,20 @@ impl TryIntoDocumentTree<Root> for ast::Root {
         }
 
         for item in self.items() {
-            if let Err(errs) = match item.try_into_document_tree(toml_version) {
-                Ok(
-                    RootItem::Table(table)
-                    | RootItem::ArrayOfTables(table)
-                    | RootItem::KeyValue(table),
-                ) => root.0.merge(table),
-                Err(errs) => Err(errs),
-            } {
+            let (item, errs) = item.into_document_tree_result(toml_version).into();
+
+            if !errs.is_empty() {
                 errors.extend(errs);
+            }
+
+            match item {
+                RootItem::Table(table)
+                | RootItem::ArrayOfTables(table)
+                | RootItem::KeyValue(table) => {
+                    if let Err(errs) = root.0.merge(table) {
+                        errors.extend(errs);
+                    }
+                }
             }
         }
 
@@ -61,29 +69,25 @@ impl TryIntoDocumentTree<Root> for ast::Root {
             }
         }
 
-        if errors.is_empty() {
-            Ok(root)
-        } else {
-            Err(errors)
-        }
+        DocumentTreeResult { tree: root, errors }
     }
 }
 
-impl TryIntoDocumentTree<RootItem> for ast::RootItem {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::RootItem> for ast::RootItem {
+    fn into_document_tree_result(
         self,
         toml_version: TomlVersion,
-    ) -> Result<RootItem, Vec<crate::Error>> {
+    ) -> crate::DocumentTreeResult<crate::RootItem> {
         match self {
             ast::RootItem::Table(table) => table
-                .try_into_document_tree(toml_version)
-                .map(RootItem::Table),
+                .into_document_tree_result(toml_version)
+                .map(crate::RootItem::Table),
             ast::RootItem::ArrayOfTables(array) => array
-                .try_into_document_tree(toml_version)
-                .map(RootItem::ArrayOfTables),
+                .into_document_tree_result(toml_version)
+                .map(crate::RootItem::ArrayOfTables),
             ast::RootItem::KeyValue(key_value) => key_value
-                .try_into_document_tree(toml_version)
-                .map(RootItem::KeyValue),
+                .into_document_tree_result(toml_version)
+                .map(crate::RootItem::KeyValue),
         }
     }
 }

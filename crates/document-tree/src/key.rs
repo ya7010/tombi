@@ -1,6 +1,7 @@
+use ast::AstNode;
 use toml_version::TomlVersion;
 
-use crate::TryIntoDocumentTree;
+use crate::{DocumentTreeResult, IntoDocumentTreeResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
@@ -89,14 +90,20 @@ impl std::fmt::Display for Key {
     }
 }
 
-impl TryIntoDocumentTree<Key> for ast::Key {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<Option<Key>> for ast::Key {
+    fn into_document_tree_result(
         self,
-        toml_version: toml_version::TomlVersion,
-    ) -> Result<Key, Vec<crate::Error>> {
-        let token = self.token().unwrap();
+        toml_version: TomlVersion,
+    ) -> crate::DocumentTreeResult<Option<Key>> {
+        let range = self.syntax().range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: None,
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-        Key::try_new(
+        match Key::try_new(
             match self {
                 ast::Key::BareKey(_) => KeyKind::BareKey,
                 ast::Key::BasicString(_) => KeyKind::BasicString,
@@ -105,17 +112,39 @@ impl TryIntoDocumentTree<Key> for ast::Key {
             token.text().to_string(),
             token.range(),
             toml_version,
-        )
-        .map_err(|error| vec![error])
+        ) {
+            Ok(key) => DocumentTreeResult {
+                tree: Some(key),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: None,
+                errors: vec![error],
+            },
+        }
     }
 }
 
-impl TryIntoDocumentTree<String> for Key {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<Vec<crate::Key>> for ast::Keys {
+    fn into_document_tree_result(
         self,
-        toml_version: TomlVersion,
-    ) -> Result<String, Vec<crate::Error>> {
-        self.try_to_raw_string(toml_version)
-            .map_err(|error| vec![error])
+        toml_version: toml_version::TomlVersion,
+    ) -> DocumentTreeResult<Vec<crate::Key>> {
+        let mut keys = Vec::new();
+        let mut errors = Vec::new();
+
+        for key in self.keys() {
+            let result = key.into_document_tree_result(toml_version);
+            if !result.errors.is_empty() {
+                errors.extend(result.errors);
+
+                return DocumentTreeResult { tree: keys, errors };
+            }
+            if let Some(key) = result.tree {
+                keys.push(key);
+            }
+        }
+
+        DocumentTreeResult { tree: keys, errors }
     }
 }

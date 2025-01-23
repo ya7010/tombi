@@ -2,7 +2,7 @@ use crate::{
     support::chrono::{
         try_new_local_date, try_new_local_date_time, try_new_local_time, try_new_offset_date_time,
     },
-    TryIntoDocumentTree, ValueImpl, ValueType,
+    DocumentTreeResult, IntoDocumentTreeResult, ValueImpl, ValueType,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -159,50 +159,106 @@ impl ValueImpl for LocalTime {
     }
 }
 
-impl TryIntoDocumentTree<OffsetDateTime> for ast::OffsetDateTime {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::OffsetDateTime {
+    fn into_document_tree_result(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> Result<OffsetDateTime, Vec<crate::Error>> {
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(_) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
+
         match try_new_offset_date_time(&self, toml_version) {
-            Ok(value) => Ok(OffsetDateTime { value, node: self }),
-            Err(error) => Err(vec![error]),
+            Ok(value) => DocumentTreeResult {
+                tree: crate::Value::OffsetDateTime(crate::OffsetDateTime { value, node: self }),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![error],
+            },
         }
     }
 }
 
-impl TryIntoDocumentTree<LocalDateTime> for ast::LocalDateTime {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::LocalDateTime {
+    fn into_document_tree_result(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> Result<LocalDateTime, Vec<crate::Error>> {
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(_) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
+
         match try_new_local_date_time(&self, toml_version) {
-            Ok(value) => Ok(LocalDateTime { value, node: self }),
-            Err(error) => Err(vec![error]),
+            Ok(value) => DocumentTreeResult {
+                tree: crate::Value::LocalDateTime(crate::LocalDateTime { value, node: self }),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![error],
+            },
         }
     }
 }
 
-impl TryIntoDocumentTree<LocalDate> for ast::LocalDate {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::LocalDate {
+    fn into_document_tree_result(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> Result<LocalDate, Vec<crate::Error>> {
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(_) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
+
         match try_new_local_date(&self, toml_version) {
-            Ok(value) => Ok(LocalDate { value, node: self }),
-            Err(error) => Err(vec![error]),
+            Ok(value) => DocumentTreeResult {
+                tree: crate::Value::LocalDate(crate::LocalDate { value, node: self }),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![error],
+            },
         }
     }
 }
 
-impl TryIntoDocumentTree<LocalTime> for ast::LocalTime {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::LocalTime {
+    fn into_document_tree_result(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> Result<LocalTime, Vec<crate::Error>> {
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(_) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
+
         match try_new_local_time(&self, toml_version) {
-            Ok(value) => Ok(LocalTime { value, node: self }),
-            Err(error) => Err(vec![error]),
+            Ok(value) => DocumentTreeResult {
+                tree: crate::Value::LocalTime(crate::LocalTime { value, node: self }),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![error],
+            },
         }
     }
 }

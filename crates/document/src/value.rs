@@ -44,6 +44,9 @@ impl IntoDocument<Value> for document_tree::Value {
             document_tree::Value::LocalTime(value) => Value::LocalTime(value.into()),
             document_tree::Value::Array(value) => Value::Array(value.into_document(toml_version)),
             document_tree::Value::Table(value) => Value::Table(value.into_document(toml_version)),
+            document_tree::Value::Incomplete { .. } => {
+                unreachable!("Incomplete value should not be converted to document")
+            }
         }
     }
 }

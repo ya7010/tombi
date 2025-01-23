@@ -1,6 +1,9 @@
 use ast::AstNode;
 
-use crate::{support::comment::try_new_comment, TryIntoDocumentTree, Value, ValueImpl, ValueType};
+use crate::{
+    support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult, Value,
+    ValueImpl, ValueType,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -163,11 +166,11 @@ impl ValueImpl for Array {
     }
 }
 
-impl TryIntoDocumentTree<Array> for ast::Array {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::Array {
+    fn into_document_tree_result(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> Result<Array, Vec<crate::Error>> {
+    ) -> crate::DocumentTreeResult<crate::Value> {
         let mut array = Array::new_array(&self);
 
         let mut errors = Vec::new();
@@ -181,10 +184,12 @@ impl TryIntoDocumentTree<Array> for ast::Array {
         }
 
         for (value, comma) in self.values_with_comma() {
-            match value.try_into_document_tree(toml_version) {
-                Ok(value) => array.push(value),
-                Err(errs) => errors.extend(errs),
+            let (value, errs) = value.into_document_tree_result(toml_version).into();
+            if !errs.is_empty() {
+                errors.extend(errs);
             }
+            array.push(value);
+
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {
                     if let Err(error) = try_new_comment(comment.as_ref()) {
@@ -207,10 +212,9 @@ impl TryIntoDocumentTree<Array> for ast::Array {
             }
         }
 
-        if errors.is_empty() {
-            Ok(array)
-        } else {
-            Err(errors)
+        DocumentTreeResult {
+            tree: crate::Value::Array(array),
+            errors,
         }
     }
 }

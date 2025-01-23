@@ -62,6 +62,10 @@ pub enum Error {
         error: crate::support::comment::ParseError,
         range: text::Range,
     },
+
+    /// Error when `ast::Node` is None
+    #[error("incomplete node")]
+    IncompleteNode { range: text::Range },
 }
 
 impl Error {
@@ -82,6 +86,7 @@ impl Error {
             Self::ParseLocalDateError { range, .. } => *range,
             Self::ParseLocalTimeError { range, .. } => *range,
             Self::ParseCommentError { range, .. } => *range,
+            Self::IncompleteNode { range } => *range,
         }
     }
 }

@@ -1,4 +1,6 @@
-use crate::{ValueImpl, ValueType};
+use toml_version::TomlVersion;
+
+use crate::{DocumentTreeResult, IntoDocumentTreeResult, ValueImpl, ValueType};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
@@ -38,18 +40,28 @@ impl ValueImpl for Boolean {
     }
 }
 
-impl TryFrom<ast::Boolean> for Boolean {
-    type Error = Vec<crate::Error>;
+impl IntoDocumentTreeResult<crate::Value> for ast::Boolean {
+    fn into_document_tree_result(
+        self,
+        _toml_version: TomlVersion,
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-    fn try_from(node: ast::Boolean) -> Result<Self, Self::Error> {
-        let token = node.token().unwrap();
-        Ok(Self {
-            value: match token.text() {
-                "true" => true,
-                "false" => false,
-                _ => unreachable!(),
-            },
-            node,
-        })
+        let value = match token.text() {
+            "true" => true,
+            "false" => false,
+            _ => unreachable!(),
+        };
+
+        DocumentTreeResult {
+            tree: crate::Value::Boolean(crate::Boolean { value, node: self }),
+            errors: Vec::with_capacity(0),
+        }
     }
 }

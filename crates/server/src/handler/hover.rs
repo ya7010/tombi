@@ -118,8 +118,8 @@ fn get_hover_range(
                 .take_while(|key| key.token().unwrap().range().start() <= position)
             {
                 match key.try_into_document_tree(toml_version) {
-                    Ok(key) => new_keys.push(key),
-                    Err(_) => return None,
+                    Ok(Some(key)) => new_keys.push(key),
+                    _ => return None,
                 }
             }
             new_keys
@@ -127,8 +127,8 @@ fn get_hover_range(
             let mut new_keys = Vec::with_capacity(keys.keys().count());
             for key in keys.keys() {
                 match key.try_into_document_tree(toml_version) {
-                    Ok(key) => new_keys.push(key),
-                    Err(_) => return None,
+                    Ok(Some(key)) => new_keys.push(key),
+                    _ => return None,
                 }
             }
             new_keys

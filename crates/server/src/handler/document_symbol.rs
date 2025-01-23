@@ -1,5 +1,5 @@
 use crate::backend::Backend;
-use document_tree::TryIntoDocumentTree;
+use document_tree::IntoDocumentTreeResult;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -16,7 +16,7 @@ pub async fn handle_document_symbol(
         return Ok(None);
     };
 
-    let Ok(root) = root.try_into_document_tree(toml_version) else {
+    let Ok(root) = root.into_document_tree_result(toml_version).ok() else {
         return Ok(None);
     };
 
@@ -143,5 +143,6 @@ fn symbols_for_value(
                 tags: None,
             });
         }
+        Incomplete { .. } => {}
     }
 }

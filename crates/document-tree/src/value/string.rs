@@ -1,6 +1,6 @@
 use toml_version::TomlVersion;
 
-use crate::{TryIntoDocumentTree, ValueImpl, ValueType};
+use crate::{DocumentTreeResult, IntoDocumentTreeResult, ValueImpl, ValueType};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StringKind {
@@ -16,7 +16,7 @@ pub struct String {
     value: std::string::String,
 }
 
-impl String {
+impl crate::String {
     pub fn try_new(
         kind: StringKind,
         value: std::string::String,
@@ -84,7 +84,7 @@ impl String {
     }
 }
 
-impl ValueImpl for String {
+impl ValueImpl for crate::String {
     fn value_type(&self) -> ValueType {
         ValueType::String
     }
@@ -94,86 +94,122 @@ impl ValueImpl for String {
     }
 }
 
-impl TryIntoDocumentTree<String> for ast::BasicString {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::BasicString {
+    fn into_document_tree_result(
         self,
         toml_version: TomlVersion,
-    ) -> Result<String, Vec<crate::Error>> {
-        let token = self.token().unwrap();
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-        String::try_new(
+        match crate::String::try_new(
             StringKind::BasicString(self),
             token.text().to_string(),
             toml_version,
-        )
-        .map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
+        ) {
+            Ok(string) => DocumentTreeResult {
+                tree: crate::Value::String(string),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::ParseStringError { error, range }],
+            },
+        }
     }
 }
 
-impl TryIntoDocumentTree<String> for ast::LiteralString {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::LiteralString {
+    fn into_document_tree_result(
         self,
         toml_version: TomlVersion,
-    ) -> Result<String, Vec<crate::Error>> {
-        let token = self.token().unwrap();
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-        String::try_new(
+        match crate::String::try_new(
             StringKind::LiteralString(self),
             token.text().to_string(),
             toml_version,
-        )
-        .map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
+        ) {
+            Ok(string) => DocumentTreeResult {
+                tree: crate::Value::String(string),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::ParseStringError { error, range }],
+            },
+        }
     }
 }
 
-impl TryIntoDocumentTree<String> for ast::MultiLineBasicString {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::MultiLineBasicString {
+    fn into_document_tree_result(
         self,
         toml_version: TomlVersion,
-    ) -> Result<String, Vec<crate::Error>> {
-        let token = self.token().unwrap();
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-        String::try_new(
+        match crate::String::try_new(
             StringKind::MultiLineBasicString(self),
             token.text().to_string(),
             toml_version,
-        )
-        .map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
+        ) {
+            Ok(string) => DocumentTreeResult {
+                tree: crate::Value::String(string),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::ParseStringError { error, range }],
+            },
+        }
     }
 }
 
-impl TryIntoDocumentTree<String> for ast::MultiLineLiteralString {
-    fn try_into_document_tree(
+impl IntoDocumentTreeResult<crate::Value> for ast::MultiLineLiteralString {
+    fn into_document_tree_result(
         self,
         toml_version: TomlVersion,
-    ) -> Result<String, Vec<crate::Error>> {
-        let token = self.token().unwrap();
+    ) -> DocumentTreeResult<crate::Value> {
+        let range = self.range();
+        let Some(token) = self.token() else {
+            return DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::IncompleteNode { range }],
+            };
+        };
 
-        String::try_new(
+        match crate::String::try_new(
             StringKind::MultiLineLiteralString(self),
             token.text().to_string(),
             toml_version,
-        )
-        .map_err(|error| {
-            vec![crate::Error::ParseStringError {
-                error,
-                range: token.range(),
-            }]
-        })
+        ) {
+            Ok(string) => DocumentTreeResult {
+                tree: crate::Value::String(string),
+                errors: Vec::with_capacity(0),
+            },
+            Err(error) => DocumentTreeResult {
+                tree: crate::Value::Incomplete { range },
+                errors: vec![crate::Error::ParseStringError { error, range }],
+            },
+        }
     }
 }
