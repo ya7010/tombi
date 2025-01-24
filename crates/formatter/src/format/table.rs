@@ -6,9 +6,7 @@ impl Format for ast::Table {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 
-        for comment in self.header_leading_comments() {
-            comment.fmt(f)?;
-        }
+        self.header_leading_comments().collect::<Vec<_>>().fmt(f)?;
 
         write!(f, "[{header}]")?;
 

@@ -52,7 +52,7 @@ pub(crate) fn exceeds_line_width(
     if let Some(tailing_comment) = node.tailing_comment() {
         length += f.tailing_comment_space().len();
         length += f
-            .format_to_string(tailing_comment.as_ref())?
+            .format_to_string(&tailing_comment)?
             .graphemes(true)
             .count();
     }
@@ -64,9 +64,7 @@ fn format_multiline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    for comment in array.leading_comments() {
-        comment.fmt(f)?;
-    }
+    array.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
     f.write_indent()?;
     write!(f, "[{}", f.line_ending())?;
@@ -101,9 +99,7 @@ fn format_multiline_array(
 
                 if !comma_leading_comments.is_empty() {
                     write!(f, "{}", f.line_ending())?;
-                    for comment in comma_leading_comments {
-                        comment.fmt(f)?;
-                    }
+                    comma_leading_comments.fmt(f)?;
                     f.write_indent()?;
                     write!(f, ",")?;
                 } else if value.tailing_comment().is_some() {
@@ -140,9 +136,7 @@ fn format_singleline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    for comment in array.leading_comments() {
-        comment.fmt(f)?;
-    }
+    array.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
     f.write_indent()?;
     write!(f, "[{}", f.singleline_array_bracket_inner_space())?;

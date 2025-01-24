@@ -58,7 +58,7 @@ pub(crate) fn exceeds_line_width(
     if let Some(tailing_comment) = node.tailing_comment() {
         length += f.tailing_comment_space().len();
         length += f
-            .format_to_string(tailing_comment.as_ref())?
+            .format_to_string(&tailing_comment)?
             .graphemes(true)
             .count();
     }
@@ -70,9 +70,7 @@ fn format_multiline_inline_table(
     table: &ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    for comment in table.leading_comments() {
-        comment.fmt(f)?;
-    }
+    table.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
     f.write_indent()?;
     write!(f, "{{{}", f.line_ending())?;
@@ -107,9 +105,7 @@ fn format_multiline_inline_table(
 
                 if !comma_leading_comments.is_empty() {
                     write!(f, "{}", f.line_ending())?;
-                    for comment in comma_leading_comments {
-                        comment.fmt(f)?;
-                    }
+                    comma_leading_comments.fmt(f)?;
                     f.write_indent()?;
                     write!(f, ",")?;
                 } else if key_value.tailing_comment().is_some() {
@@ -146,9 +142,7 @@ fn format_singleline_inline_table(
     table: &ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    for comment in table.leading_comments() {
-        comment.fmt(f)?;
-    }
+    table.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
     f.write_indent()?;
     write!(f, "{{{}", f.singleline_inline_table_brace_inner_space())?;

@@ -8,9 +8,7 @@ macro_rules! impl_date_time_format {
     (impl Format for $type:ty;) => {
         impl Format for $type {
             fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-                for comment in self.leading_comments() {
-                    comment.fmt(f)?;
-                }
+                self.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
                 let token = self.token().unwrap();
                 let mut text = token.text().to_string();

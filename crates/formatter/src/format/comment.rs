@@ -5,32 +5,6 @@ use ast::{
 use super::Format;
 use std::fmt::Write;
 
-impl Format for ast::Comment {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        let comment = self.to_string();
-        let mut iter = comment.trim_ascii_end().chars();
-        write!(f, "{}", iter.next().unwrap())?;
-
-        if let Some(c) = iter.next() {
-            if c != ' ' && c != '\t' {
-                write!(f, " ")?;
-            }
-            write!(f, "{}", c)?;
-        }
-
-        write!(f, "{}", iter.as_str())
-    }
-}
-
-impl Format for DanglingComment {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        f.write_indent()?;
-        self.as_ref().fmt(f)
-    }
-}
-
 impl Format for Vec<Vec<DanglingComment>> {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -41,22 +15,17 @@ impl Format for Vec<Vec<DanglingComment>> {
             }
 
             for (j, comment) in comments.iter().enumerate() {
-                if j != 0 {
+                if j == 0 {
+                    f.write_indent()?;
+                    format_comment(f, comment.as_ref(), true)?;
+                } else {
                     write!(f, "{}", f.line_ending())?;
+                    f.write_indent()?;
+                    format_comment(f, comment.as_ref(), false)?;
                 }
-                comment.fmt(f)?;
             }
         }
         Ok(())
-    }
-}
-
-impl Format for BeginDanglingComment {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        f.write_indent()?;
-        self.as_ref().fmt(f)?;
-        write!(f, "{}", f.line_ending())
     }
 }
 
@@ -66,22 +35,19 @@ impl Format for Vec<Vec<BeginDanglingComment>> {
         for comments in self {
             assert!(!comments.is_empty());
 
-            for comment in comments {
-                comment.fmt(f)?;
+            for (i, comment) in comments.iter().enumerate() {
+                f.write_indent()?;
+                if i == 0 {
+                    format_comment(f, comment.as_ref(), true)?;
+                } else {
+                    format_comment(f, comment.as_ref(), false)?;
+                }
+                write!(f, "{}", f.line_ending())?;
             }
             write!(f, "{}", f.line_ending())?;
         }
 
         Ok(())
-    }
-}
-
-impl Format for EndDanglingComment {
-    #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", f.line_ending())?;
-        f.write_indent()?;
-        self.as_ref().fmt(f)
     }
 }
 
@@ -93,20 +59,32 @@ impl Format for Vec<Vec<EndDanglingComment>> {
                 write!(f, "{}", f.line_ending())?;
             }
 
-            for comment in comments {
-                comment.fmt(f)?;
+            for (j, comment) in comments.iter().enumerate() {
+                write!(f, "{}", f.line_ending())?;
+                f.write_indent()?;
+                if j == 0 {
+                    format_comment(f, comment.as_ref(), true)?;
+                } else {
+                    format_comment(f, comment.as_ref(), false)?;
+                }
             }
         }
         Ok(())
     }
 }
 
-impl Format for LeadingComment {
-    #[inline]
+impl Format for Vec<LeadingComment> {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        f.write_indent()?;
-        self.as_ref().fmt(f)?;
-        write!(f, "{}", f.line_ending())
+        for (i, comment) in self.iter().enumerate() {
+            f.write_indent()?;
+            if i == 0 {
+                format_comment(f, comment.as_ref(), true)?;
+            } else {
+                format_comment(f, comment.as_ref(), false)?;
+            }
+            write!(f, "{}", f.line_ending())?;
+        }
+        Ok(())
     }
 }
 
@@ -114,8 +92,37 @@ impl Format for TailingComment {
     #[inline]
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", f.tailing_comment_space())?;
-        self.as_ref().fmt(f)
+        format_comment(f, self.as_ref(), true)
     }
+}
+
+fn format_comment(
+    f: &mut crate::Formatter,
+    comment: &ast::Comment,
+    strip_leading_spaces: bool,
+) -> Result<(), std::fmt::Error> {
+    let comment = comment.to_string();
+    let mut iter = comment.trim_ascii_end().chars();
+
+    // skip the first '#' character
+    write!(f, "{}", iter.next().unwrap())?;
+
+    if let Some(c) = iter.next() {
+        if c != ' ' && c != '\t' {
+            write!(f, " ")?;
+        }
+        write!(f, "{}", c)?;
+    }
+    if strip_leading_spaces {
+        while let Some(c) = iter.next() {
+            if c != ' ' && c != '\t' {
+                write!(f, "{}", c)?;
+                break;
+            }
+        }
+    }
+
+    write!(f, "{}", iter.as_str())
 }
 
 #[cfg(test)]

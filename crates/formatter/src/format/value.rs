@@ -42,9 +42,7 @@ where
     T: LiteralNode + ast::AstNode,
 {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        for comment in self.leading_comments() {
-            comment.fmt(f)?;
-        }
+        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
         f.write_indent()?;
         write!(f, "{}", self.token().unwrap())?;

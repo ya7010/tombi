@@ -6,9 +6,7 @@ use std::fmt::Write;
 
 impl Format for ast::BasicString {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        for comment in self.leading_comments() {
-            comment.fmt(f)?;
-        }
+        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
         f.write_indent()?;
         let text = self.token().unwrap().text().to_owned();
@@ -35,9 +33,7 @@ impl Format for ast::BasicString {
 
 impl Format for ast::LiteralString {
     fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        for comment in self.leading_comments() {
-            comment.fmt(f)?;
-        }
+        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
 
         f.write_indent()?;
         let text = self.token().unwrap().text().to_owned();
