@@ -104,7 +104,7 @@ fn format_comment(
     let comment = comment.to_string();
     let mut iter = comment.trim_ascii_end().chars();
 
-    // skip the first '#' character
+    // write '#' character
     write!(f, "{}", iter.next().unwrap())?;
 
     if let Some(c) = iter.next() {
