@@ -7,7 +7,7 @@ mod value_type;
 
 pub use error::Error;
 pub use key::{Key, KeyKind};
-pub use root::Root;
+pub use root::DocumentTree;
 use root::RootItem;
 use toml_version::TomlVersion;
 pub use value::{

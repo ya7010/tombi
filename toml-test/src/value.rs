@@ -97,7 +97,7 @@ impl IntoValue for document_tree::Value {
     }
 }
 
-impl IntoValue for document_tree::Root {
+impl IntoValue for document_tree::DocumentTree {
     fn into_value(self, toml_version: TomlVersion) -> Value {
         Value::Table(
             document_tree::Table::from(self)

@@ -27,10 +27,10 @@ pub async fn handle_document_symbol(
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-fn create_symbols(root: &document_tree::Root) -> Vec<DocumentSymbol> {
+fn create_symbols(tree: &document_tree::DocumentTree) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
-    for (key, value) in root.key_values() {
+    for (key, value) in tree.key_values() {
         symbols_for_value(key.to_string(), value, None, &mut symbols);
     }
 

@@ -27,11 +27,11 @@ trait Validate {
 }
 
 pub fn validate(
-    root: document_tree::Root,
+    tree: document_tree::DocumentTree,
     toml_version: TomlVersion,
     document_schema: schema_store::DocumentSchema,
 ) -> Result<(), Vec<crate::Error>> {
-    let table = root.deref();
+    let table = tree.deref();
 
     table.validate(
         toml_version,

@@ -5,15 +5,15 @@ use toml_version::TomlVersion;
 use crate::{support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult, Table};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Root(pub(crate) Table);
+pub struct DocumentTree(pub(crate) Table);
 
-impl From<Root> for Table {
-    fn from(root: Root) -> Self {
-        root.0
+impl From<DocumentTree> for Table {
+    fn from(tree: DocumentTree) -> Self {
+        tree.0
     }
 }
 
-impl Deref for Root {
+impl Deref for DocumentTree {
     type Target = Table;
 
     fn deref(&self) -> &Self::Target {
@@ -27,12 +27,12 @@ pub(crate) enum RootItem {
     KeyValue(Table),
 }
 
-impl IntoDocumentTreeResult<crate::Root> for ast::Root {
+impl IntoDocumentTreeResult<crate::DocumentTree> for ast::Root {
     fn into_document_tree_result(
         self,
         toml_version: TomlVersion,
-    ) -> crate::DocumentTreeResult<crate::Root> {
-        let mut root = crate::Root(crate::Table::new_root(&self));
+    ) -> crate::DocumentTreeResult<crate::DocumentTree> {
+        let mut tree = crate::DocumentTree(crate::Table::new_root(&self));
         let mut errors = Vec::new();
 
         for comments in self.begin_dangling_comments() {
@@ -54,7 +54,7 @@ impl IntoDocumentTreeResult<crate::Root> for ast::Root {
                 RootItem::Table(table)
                 | RootItem::ArrayOfTables(table)
                 | RootItem::KeyValue(table) => {
-                    if let Err(errs) = root.0.merge(table) {
+                    if let Err(errs) = tree.0.merge(table) {
                         errors.extend(errs);
                     }
                 }
@@ -69,7 +69,7 @@ impl IntoDocumentTreeResult<crate::Root> for ast::Root {
             }
         }
 
-        DocumentTreeResult { tree: root, errors }
+        DocumentTreeResult { tree, errors }
     }
 }
 

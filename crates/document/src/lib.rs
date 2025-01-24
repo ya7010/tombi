@@ -23,7 +23,7 @@ pub trait IntoDocument<T> {
     fn into_document(self, toml_version: TomlVersion) -> T;
 }
 
-impl IntoDocument<Document> for document_tree::Root {
+impl IntoDocument<Document> for document_tree::DocumentTree {
     fn into_document(self, toml_version: TomlVersion) -> Document {
         Document(document_tree::Table::from(self).into_document(toml_version))
     }

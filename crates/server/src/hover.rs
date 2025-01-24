@@ -17,13 +17,13 @@ use std::{fmt::Debug, ops::Deref};
 use tower_lsp::lsp_types::Url;
 
 pub fn get_hover_content(
-    root: &document_tree::Root,
+    tree: &document_tree::DocumentTree,
     toml_version: TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
     document_schema: Option<DocumentSchema>,
 ) -> Option<HoverContent> {
-    let table = root.deref();
+    let table = tree.deref();
     let (value_schema, schema_url, definitions) = match document_schema {
         Some(document_schema) => (
             Some(ValueSchema::Table(document_schema.table_schema)),
