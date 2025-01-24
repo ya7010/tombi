@@ -1,7 +1,23 @@
 use chrono;
 use schema_store::OffsetDateTimeSchema;
 
-use crate::completion::FindCompletionItems;
+use crate::completion::{FindCompletionItems, FindCompletionItems2};
+
+impl FindCompletionItems2 for document_tree::OffsetDateTime {
+    fn find_completion_items2(
+        &self,
+        _accessors: &[schema_store::Accessor],
+        _value_schema: &schema_store::ValueSchema,
+        _toml_version: config::TomlVersion,
+        _definitions: &schema_store::SchemaDefinitions,
+        _completion_hint: Option<crate::completion::CompletionHint>,
+    ) -> (
+        Vec<tower_lsp::lsp_types::CompletionItem>,
+        Vec<schema_store::Error>,
+    ) {
+        (Vec::with_capacity(0), Vec::with_capacity(0))
+    }
+}
 
 impl FindCompletionItems for OffsetDateTimeSchema {
     fn find_completion_items(

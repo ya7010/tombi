@@ -29,13 +29,13 @@ trait Validate {
 pub fn validate(
     tree: document_tree::DocumentTree,
     toml_version: TomlVersion,
-    document_schema: schema_store::DocumentSchema,
+    document_schema: &schema_store::DocumentSchema,
 ) -> Result<(), Vec<crate::Error>> {
     let table = tree.deref();
 
     table.validate(
         toml_version,
-        &ValueSchema::Table(document_schema.table_schema),
+        document_schema.value_schema(),
         &document_schema.definitions,
     )
 }

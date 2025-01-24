@@ -9,7 +9,7 @@ pub struct DocumentSchema {
     pub schema_url: url::Url,
     pub schema_id: Option<url::Url>,
     pub(crate) toml_version: Option<TomlVersion>,
-    pub table_schema: TableSchema,
+    table_schema: ValueSchema,
     pub definitions: SchemaDefinitions,
 }
 
@@ -54,7 +54,7 @@ impl DocumentSchema {
             schema_url,
             schema_id,
             toml_version,
-            table_schema,
+            table_schema: ValueSchema::Table(table_schema),
             definitions,
         }
     }
@@ -67,6 +67,17 @@ impl DocumentSchema {
 
     pub fn value_type(&self) -> crate::ValueType {
         crate::ValueType::Table
+    }
+
+    pub fn table_schema(&self) -> &TableSchema {
+        match &self.table_schema {
+            ValueSchema::Table(table_schema) => table_schema,
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn value_schema(&self) -> &ValueSchema {
+        &self.table_schema
     }
 }
 

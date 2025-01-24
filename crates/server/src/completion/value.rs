@@ -1,5 +1,6 @@
 mod all_of;
 mod any_of;
+mod array;
 mod boolean;
 mod float;
 mod integer;
@@ -10,13 +11,98 @@ mod offset_date_time;
 mod one_of;
 mod string;
 
-use super::{CompletionCandidate, CompletionHint, FindCompletionItems};
+use super::{CompletionCandidate, CompletionHint, FindCompletionItems, FindCompletionItems2};
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
     LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
     TableSchema, ValueSchema,
 };
 use tower_lsp::lsp_types::CompletionItem;
+
+impl FindCompletionItems2 for document_tree::Value {
+    fn find_completion_items2(
+        &self,
+        accessors: &[Accessor],
+        value_schema: &ValueSchema,
+        toml_version: config::TomlVersion,
+        definitions: &SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
+    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
+        match self {
+            Self::Boolean(boolean) => boolean.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::Integer(integer) => integer.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::Float(float) => float.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::String(string) => string.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::OffsetDateTime(offset_date_time) => offset_date_time.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::LocalDateTime(local_date_time) => local_date_time.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::LocalDate(local_date) => local_date.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::LocalTime(local_time) => local_time.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::Array(array) => array.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::Table(table) => table.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                definitions,
+                completion_hint,
+            ),
+            Self::Incomplete { .. } => (Vec::new(), Vec::new()),
+        }
+    }
+}
 
 impl FindCompletionItems for ValueSchema {
     fn find_completion_items(

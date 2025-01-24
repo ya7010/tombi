@@ -50,14 +50,17 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    return Ok(
-        get_hover_content(&root, toml_version, position, &keys, document_schema).map(
-            |mut content| {
-                content.range = range;
-                content
-            },
-        ),
-    );
+    return Ok(get_hover_content(
+        &root,
+        toml_version,
+        position,
+        &keys,
+        document_schema.as_ref(),
+    )
+    .map(|mut content| {
+        content.range = range;
+        content
+    }));
 }
 
 fn get_hover_range(

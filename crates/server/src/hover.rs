@@ -21,27 +21,29 @@ pub fn get_hover_content(
     toml_version: TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
-    document_schema: Option<DocumentSchema>,
+    document_schema: Option<&DocumentSchema>,
 ) -> Option<HoverContent> {
     let table = tree.deref();
-    let (value_schema, schema_url, definitions) = match document_schema {
-        Some(document_schema) => (
-            Some(ValueSchema::Table(document_schema.table_schema)),
-            Some(document_schema.schema_url),
-            document_schema.definitions,
+    match document_schema {
+        Some(document_schema) => table.get_hover_content(
+            &Vec::with_capacity(0),
+            Some(document_schema.value_schema()),
+            toml_version,
+            position,
+            keys,
+            Some(document_schema.schema_url.clone()).as_ref(),
+            &document_schema.definitions,
         ),
-        None => (None, None, DashMap::new()),
-    };
-
-    table.get_hover_content(
-        &Vec::with_capacity(0),
-        value_schema.as_ref(),
-        toml_version,
-        position,
-        keys,
-        schema_url.as_ref(),
-        &definitions,
-    )
+        None => table.get_hover_content(
+            &Vec::with_capacity(0),
+            None,
+            toml_version,
+            position,
+            keys,
+            None,
+            &DashMap::new(),
+        ),
+    }
 }
 
 trait GetHoverContent {

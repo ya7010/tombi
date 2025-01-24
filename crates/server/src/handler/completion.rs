@@ -1,12 +1,13 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use dashmap::try_result::TryResult;
+use document_tree::IntoDocumentTreeResult;
 use tower_lsp::lsp_types::{
     CompletionItem, CompletionParams, CompletionResponse, TextDocumentPositionParams,
 };
 
 use crate::{
     backend,
-    completion::{CompletionHint, FindCompletionItems},
+    completion::{CompletionHint, FindCompletionItems2},
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -76,13 +77,13 @@ pub async fn handle_completion(
         return Ok(None);
     };
 
-    let items = get_completion_items(&root, position.into(), document_schema, toml_version);
+    let items = get_completion_items(root, position.into(), document_schema, toml_version);
 
     Ok(Some(CompletionResponse::Array(items)))
 }
 
 fn get_completion_items(
-    root: &ast::Root,
+    root: ast::Root,
     position: text::Position,
     document_schema: &schema_store::DocumentSchema,
     toml_version: config::TomlVersion,
@@ -142,9 +143,15 @@ fn get_completion_items(
         }
     }
 
-    let (completion_items, errors) = document_schema.find_completion_items(
+    let document_tree = root.into_document_tree_result(toml_version).tree;
+
+    let definitions = &document_schema.definitions;
+
+    let (completion_items, errors) = document_tree.find_completion_items2(
         &accessors,
-        &document_schema.definitions,
+        document_schema.value_schema(),
+        toml_version,
+        &definitions,
         completion_hint,
     );
 
