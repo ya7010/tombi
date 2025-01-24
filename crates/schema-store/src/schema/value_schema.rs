@@ -149,6 +149,25 @@ impl ValueSchema {
         }
     }
 
+    pub fn title_mut(&mut self) -> Option<&mut String> {
+        match self {
+            ValueSchema::Null => None,
+            ValueSchema::Boolean(schema) => schema.title.as_mut(),
+            ValueSchema::Integer(schema) => schema.title.as_mut(),
+            ValueSchema::Float(schema) => schema.title.as_mut(),
+            ValueSchema::String(schema) => schema.title.as_mut(),
+            ValueSchema::LocalDate(schema) => schema.title.as_mut(),
+            ValueSchema::LocalDateTime(schema) => schema.title.as_mut(),
+            ValueSchema::LocalTime(schema) => schema.title.as_mut(),
+            ValueSchema::OffsetDateTime(schema) => schema.title.as_mut(),
+            ValueSchema::Array(schema) => schema.title.as_mut(),
+            ValueSchema::Table(schema) => schema.title.as_mut(),
+            ValueSchema::OneOf(schema) => schema.title.as_mut(),
+            ValueSchema::AnyOf(schema) => schema.title.as_mut(),
+            ValueSchema::AllOf(schema) => schema.title.as_mut(),
+        }
+    }
+
     pub fn description(&self) -> Option<&str> {
         match self {
             ValueSchema::Null => None,
@@ -165,6 +184,25 @@ impl ValueSchema {
             ValueSchema::OneOf(schema) => schema.description.as_deref(),
             ValueSchema::AnyOf(schema) => schema.description.as_deref(),
             ValueSchema::AllOf(schema) => schema.description.as_deref(),
+        }
+    }
+
+    pub fn description_mut(&mut self) -> Option<&mut String> {
+        match self {
+            ValueSchema::Null => None,
+            ValueSchema::Boolean(schema) => schema.description.as_mut(),
+            ValueSchema::Integer(schema) => schema.description.as_mut(),
+            ValueSchema::Float(schema) => schema.description.as_mut(),
+            ValueSchema::String(schema) => schema.description.as_mut(),
+            ValueSchema::LocalDate(schema) => schema.description.as_mut(),
+            ValueSchema::LocalDateTime(schema) => schema.description.as_mut(),
+            ValueSchema::LocalTime(schema) => schema.description.as_mut(),
+            ValueSchema::OffsetDateTime(schema) => schema.description.as_mut(),
+            ValueSchema::Array(schema) => schema.description.as_mut(),
+            ValueSchema::Table(schema) => schema.description.as_mut(),
+            ValueSchema::OneOf(schema) => schema.description.as_mut(),
+            ValueSchema::AnyOf(schema) => schema.description.as_mut(),
+            ValueSchema::AllOf(schema) => schema.description.as_mut(),
         }
     }
 
@@ -214,8 +252,16 @@ impl ValueSchema {
 impl Referable<ValueSchema> {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
         if let Some(ref_value) = object.get("$ref") {
-            if let serde_json::Value::String(ref_str) = ref_value {
-                return Some(Referable::Ref(ref_str.clone()));
+            if let serde_json::Value::String(ref_string) = ref_value {
+                return Some(Referable::Ref {
+                    reference: ref_string.clone(),
+                    title: object
+                        .get("title")
+                        .and_then(|title| title.as_str().map(|s| s.to_string())),
+                    description: object
+                        .get("description")
+                        .and_then(|description| description.as_str().map(|s| s.to_string())),
+                });
             }
         }
 
@@ -224,8 +270,8 @@ impl Referable<ValueSchema> {
 
     pub fn value_type(&self) -> crate::ValueType {
         match self {
-            Referable::Ref(_) => unreachable!("unreachable ref value_tyle."),
             Referable::Resolved(schema) => schema.value_type(),
+            Referable::Ref { .. } => unreachable!("unreachable ref value_tyle."),
         }
     }
 
@@ -234,13 +280,31 @@ impl Referable<ValueSchema> {
         definitions: &SchemaDefinitions,
     ) -> Result<&'a ValueSchema, crate::Error> {
         match self {
-            Referable::Ref(ref_str) => {
+            Referable::Ref {
+                reference,
+                title,
+                description,
+            } => {
                 {
-                    if let Some(definition_schema) = definitions.get(ref_str) {
-                        *self = definition_schema.clone();
+                    if let Some(definition_schema) = definitions.get(reference) {
+                        let mut referable_schema = definition_schema.to_owned();
+                        if let Referable::Resolved(ref mut schema) = &mut referable_schema {
+                            if let Some(schema_title) = schema.title_mut() {
+                                if let Some(title) = title {
+                                    *schema_title = title.clone();
+                                }
+                            }
+                            if let Some(schema_description) = schema.description_mut() {
+                                if let Some(description) = description {
+                                    *schema_description = description.clone();
+                                }
+                            }
+                        }
+
+                        *self = referable_schema;
                     } else {
                         Err(crate::Error::DefinitionNotFound {
-                            definition_ref: ref_str.clone(),
+                            definition_ref: reference.clone(),
                         })?;
                     }
                 }
