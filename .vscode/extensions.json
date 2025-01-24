@@ -2,7 +2,9 @@
   "recommendations": [
     "biomejs.biome",
     "rust-lang.rust-analyzer",
-    "yassun7010.tombi"
+    "yassun7010.tombi",
+    "ms-python.python",
+    "charliermarsh.ruff"
   ],
   "unwantedRecommendations": ["tamasfe.even-better-toml"]
 }
