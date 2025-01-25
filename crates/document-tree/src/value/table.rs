@@ -471,17 +471,23 @@ impl IntoDocumentTreeResult<Table> for ast::KeyValue {
             return make_keys_table(keys, table, errors);
         }
 
-        let Some(value) = self.value() else {
-            errors.push(crate::Error::IncompleteNode {
-                range: table.range(),
-            });
-            return make_keys_table(keys, table, errors);
+        let value = match self.value() {
+            Some(value) => {
+                let (value, errs) = value.into_document_tree_result(toml_version).into();
+                if !errs.is_empty() {
+                    errors.extend(errs);
+                }
+                value
+            }
+            None => {
+                errors.push(crate::Error::IncompleteNode {
+                    range: table.range(),
+                });
+                Value::Incomplete {
+                    range: self.range(),
+                }
+            }
         };
-
-        let (value, errs) = value.into_document_tree_result(toml_version).into();
-        if !errs.is_empty() {
-            errors.extend(errs);
-        }
 
         let table = if let Some(key) = keys.pop() {
             match Table::new_key_value(&self).insert(key, value) {
