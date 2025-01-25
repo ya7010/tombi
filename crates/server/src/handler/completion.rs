@@ -95,15 +95,29 @@ fn get_completion_items(
         let ast_keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
             kv.keys()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            if table.contains_header(position) {
-                completion_hint = Some(CompletionHint::InTableHeader);
+            if position < table.bracket_start().unwrap().range().start() {
+                None
+            } else {
+                if table.contains_header(position) {
+                    completion_hint = Some(CompletionHint::InTableHeader);
+                }
+                table.header()
             }
-            table.header()
         } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            if array_of_tables.contains_header(position) {
-                completion_hint = Some(CompletionHint::InTableHeader);
+            if position
+                < array_of_tables
+                    .double_bracket_start()
+                    .unwrap()
+                    .range()
+                    .start()
+            {
+                None
+            } else {
+                if array_of_tables.contains_header(position) {
+                    completion_hint = Some(CompletionHint::InTableHeader);
+                }
+                array_of_tables.header()
             }
-            array_of_tables.header()
         } else {
             continue;
         };

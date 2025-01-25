@@ -71,9 +71,9 @@ impl FindCompletionItems2 for document_tree::Table {
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
         toml_version: TomlVersion,
-        _position: text::Position,
-        _keys: &[document_tree::Key],
-        _schema_url: Option<&Url>,
+        position: text::Position,
+        keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> (
@@ -83,7 +83,36 @@ impl FindCompletionItems2 for document_tree::Table {
         let mut completions = Vec::new();
         let mut errors = Vec::new();
 
-        if accessors.is_empty() {
+        if let Some(key) = keys.first() {
+            let key_str = key.to_raw_text(toml_version);
+            let accessor = Accessor::Key(key_str.clone());
+            if let Some(value) = self.get(key) {
+                match value_schema {
+                    ValueSchema::Table(table_schema) => {
+                        if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                            if let Ok(property_schema) = property.value_mut().resolve(&definitions)
+                            {
+                                return value.find_completion_items2(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    property_schema,
+                                    toml_version,
+                                    position,
+                                    &keys[1..],
+                                    schema_url,
+                                    definitions,
+                                    completion_hint,
+                                );
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        } else {
             match value_schema {
                 ValueSchema::Table(table_schema) => {
                     for mut property in table_schema.properties.iter_mut() {
@@ -135,21 +164,6 @@ impl FindCompletionItems2 for document_tree::Table {
                                 completions.push(completion_item);
                             }
                             errors.extend(schema_errors);
-                        }
-                    }
-                }
-                _ => {}
-            }
-        } else {
-            match value_schema {
-                ValueSchema::Table(table_schema) => {
-                    if let Some(mut property) = table_schema.properties.get_mut(&accessors[0]) {
-                        if let Ok(schema) = property.value_mut().resolve(&definitions) {
-                            return schema.find_completion_items(
-                                &accessors[1..],
-                                &definitions,
-                                completion_hint,
-                            );
                         }
                     }
                 }
