@@ -32,7 +32,7 @@ pub enum ParseError {
     #[error("\\e is allowed in TOML v1.1.0 or later")]
     EscapeCharacter,
 
-    #[error("\\xXX is allowed in TOML v1.0.0 or earlier")]
+    #[error("\\xXX is allowed in TOML v1.1.0 or later")]
     HexEscapeSequence,
 
     #[error("unicode key is allowed in TOML v1.1.0 or later")]
