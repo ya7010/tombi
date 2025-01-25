@@ -211,7 +211,7 @@ impl GetHoverContent for document_tree::Table {
                     });
                 }
                 Some(ValueSchema::OneOf(one_of_schema)) => {
-                    if let Some(hover_content) = get_one_of_hover_content(
+                    return get_one_of_hover_content(
                         self,
                         accessors,
                         one_of_schema,
@@ -220,12 +220,10 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                    ) {
-                        return Some(hover_content);
-                    }
+                    )
                 }
                 Some(ValueSchema::AnyOf(any_of_schema)) => {
-                    if let Some(hover_content) = get_any_of_hover_content(
+                    return get_any_of_hover_content(
                         self,
                         accessors,
                         any_of_schema,
@@ -234,12 +232,10 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                    ) {
-                        return Some(hover_content);
-                    }
+                    )
                 }
                 Some(ValueSchema::AllOf(all_of_schema)) => {
-                    if let Some(hover_content) = get_all_of_hover_content(
+                    return get_all_of_hover_content(
                         self,
                         accessors,
                         all_of_schema,
@@ -248,9 +244,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                    ) {
-                        return Some(hover_content);
-                    }
+                    )
                 }
                 Some(_) => return None,
                 None => {}

@@ -188,3 +188,168 @@ pub trait CompositeSchema {
     fn description(&self) -> Option<String>;
     fn schemas(&self) -> &Schemas;
 }
+
+fn find_one_of_completion_items<T>(
+    value: &T,
+    accessors: &Vec<Accessor>,
+    one_of_schema: &schema_store::OneOfSchema,
+    toml_version: TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
+    definitions: &SchemaDefinitions,
+    completion_hint: Option<CompletionHint>,
+) -> (
+    Vec<tower_lsp::lsp_types::CompletionItem>,
+    Vec<schema_store::Error>,
+)
+where
+    T: FindCompletionItems2,
+{
+    let mut completion_items = Vec::new();
+    let mut errors = Vec::new();
+
+    if let Ok(mut schemas) = one_of_schema.schemas.write() {
+        for schema in schemas.iter_mut() {
+            if let Ok(schema) = schema.resolve(definitions) {
+                let (schema_completions, schema_errors) = value.find_completion_items2(
+                    accessors,
+                    schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                );
+
+                completion_items.extend(schema_completions);
+                errors.extend(schema_errors);
+            } else {
+                errors.push(schema_store::Error::SchemaLockError);
+            }
+        }
+    }
+
+    for completion_item in completion_items.iter_mut() {
+        if completion_item.detail.is_none() {
+            completion_item.detail = one_of_schema.detail(definitions, completion_hint);
+        }
+        if completion_item.documentation.is_none() {
+            completion_item.documentation =
+                one_of_schema.documentation(definitions, completion_hint);
+        }
+    }
+
+    (completion_items, errors)
+}
+
+fn find_any_of_completion_items<T>(
+    value: &T,
+    accessors: &Vec<Accessor>,
+    any_of_schema: &schema_store::AnyOfSchema,
+    toml_version: TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
+    definitions: &SchemaDefinitions,
+    completion_hint: Option<CompletionHint>,
+) -> (
+    Vec<tower_lsp::lsp_types::CompletionItem>,
+    Vec<schema_store::Error>,
+)
+where
+    T: FindCompletionItems2,
+{
+    let mut completion_items = Vec::new();
+    let mut errors = Vec::new();
+
+    if let Ok(mut schemas) = any_of_schema.schemas.write() {
+        for schema in schemas.iter_mut() {
+            if let Ok(schema) = schema.resolve(definitions) {
+                let (schema_completions, schema_errors) = value.find_completion_items2(
+                    accessors,
+                    schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                );
+
+                completion_items.extend(schema_completions);
+                errors.extend(schema_errors);
+            } else {
+                errors.push(schema_store::Error::SchemaLockError);
+            }
+        }
+    }
+
+    for completion_item in completion_items.iter_mut() {
+        if completion_item.detail.is_none() {
+            completion_item.detail = any_of_schema.detail(definitions, completion_hint);
+        }
+        if completion_item.documentation.is_none() {
+            completion_item.documentation =
+                any_of_schema.documentation(definitions, completion_hint);
+        }
+    }
+
+    (completion_items, errors)
+}
+
+fn find_all_if_completion_items<T>(
+    value: &T,
+    accessors: &Vec<Accessor>,
+    all_of_schema: &schema_store::AllOfSchema,
+    toml_version: TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
+    definitions: &SchemaDefinitions,
+    completion_hint: Option<CompletionHint>,
+) -> (
+    Vec<tower_lsp::lsp_types::CompletionItem>,
+    Vec<schema_store::Error>,
+)
+where
+    T: FindCompletionItems2,
+{
+    let mut completion_items = Vec::new();
+    let mut errors = Vec::new();
+
+    if let Ok(mut schemas) = all_of_schema.schemas.write() {
+        for schema in schemas.iter_mut() {
+            if let Ok(schema) = schema.resolve(definitions) {
+                let (schema_completions, schema_errors) = value.find_completion_items2(
+                    accessors,
+                    schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                );
+
+                completion_items.extend(schema_completions);
+                errors.extend(schema_errors);
+            } else {
+                errors.push(schema_store::Error::SchemaLockError);
+            }
+        }
+    }
+
+    for completion_item in completion_items.iter_mut() {
+        if completion_item.detail.is_none() {
+            completion_item.detail = all_of_schema.detail(definitions, completion_hint);
+        }
+        if completion_item.documentation.is_none() {
+            completion_item.documentation =
+                all_of_schema.documentation(definitions, completion_hint);
+        }
+    }
+
+    (completion_items, errors)
+}
