@@ -6,7 +6,7 @@ mod value;
 use config::TomlVersion;
 pub use hint::CompletionHint;
 use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
-use tower_lsp::lsp_types::{CompletionItem, MarkupContent, MarkupKind, Url};
+use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
 pub trait FindCompletionItems {
     fn find_completion_items(
@@ -14,13 +14,16 @@ pub trait FindCompletionItems {
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>);
+    ) -> (
+        Vec<tower_lsp::lsp_types::CompletionItem>,
+        Vec<schema_store::Error>,
+    );
 }
 
 pub trait FindCompletionItems2 {
     fn find_completion_items2(
         &self,
-        accessors: &[Accessor],
+        accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
         toml_version: TomlVersion,
         position: text::Position,
@@ -28,7 +31,10 @@ pub trait FindCompletionItems2 {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>);
+    ) -> (
+        Vec<tower_lsp::lsp_types::CompletionItem>,
+        Vec<schema_store::Error>,
+    );
 }
 
 pub trait CompletionCandidate {

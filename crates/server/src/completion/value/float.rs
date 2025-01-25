@@ -7,7 +7,7 @@ use crate::completion::{CompletionHint, FindCompletionItems, FindCompletionItems
 impl FindCompletionItems2 for document_tree::Float {
     fn find_completion_items2(
         &self,
-        _accessors: &[Accessor],
+        _accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
         _toml_version: TomlVersion,
         _position: text::Position,

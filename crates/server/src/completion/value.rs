@@ -18,12 +18,12 @@ use schema_store::{
     LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
     TableSchema, ValueSchema,
 };
-use tower_lsp::lsp_types::{CompletionItem, Url};
+use tower_lsp::lsp_types::Url;
 
 impl FindCompletionItems2 for document_tree::Value {
     fn find_completion_items2(
         &self,
-        accessors: &[Accessor],
+        accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
         toml_version: TomlVersion,
         position: text::Position,
@@ -31,7 +31,10 @@ impl FindCompletionItems2 for document_tree::Value {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
+    ) -> (
+        Vec<tower_lsp::lsp_types::CompletionItem>,
+        Vec<schema_store::Error>,
+    ) {
         match self {
             Self::Boolean(boolean) => boolean.find_completion_items2(
                 accessors,
@@ -144,7 +147,10 @@ impl FindCompletionItems for ValueSchema {
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
+    ) -> (
+        Vec<tower_lsp::lsp_types::CompletionItem>,
+        Vec<schema_store::Error>,
+    ) {
         match self {
             Self::Table(table) => {
                 table.find_completion_items(accessors, definitions, completion_hint)
