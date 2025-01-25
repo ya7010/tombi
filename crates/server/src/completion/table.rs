@@ -84,79 +84,82 @@ impl FindCompletionItems2 for document_tree::Table {
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,
     ) {
-        let mut completions = Vec::new();
-        let mut errors = Vec::new();
+        match value_schema {
+            ValueSchema::Table(table_schema) => {
+                let mut completions = Vec::new();
+                let mut errors = Vec::new();
 
-        if let Some(key) = keys.first() {
-            let accessor = Accessor::Key(key.to_raw_text(toml_version));
-            if let Some(value) = self.get(key) {
-                match value_schema {
-                    ValueSchema::Table(table_schema) => {
-                        if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
-                            if let Ok(property_schema) = property.value_mut().resolve(&definitions)
-                            {
-                                return value.find_completion_items2(
-                                    &accessors
-                                        .clone()
-                                        .into_iter()
-                                        .chain(std::iter::once(accessor))
-                                        .collect(),
-                                    property_schema,
+                if let Some(key) = keys.first() {
+                    let accessor = Accessor::Key(key.to_raw_text(toml_version));
+                    if let Some(value) = self.get(key) {
+                        match value_schema {
+                            ValueSchema::Table(table_schema) => {
+                                if let Some(mut property) =
+                                    table_schema.properties.get_mut(&accessor)
+                                {
+                                    if let Ok(property_schema) =
+                                        property.value_mut().resolve(&definitions)
+                                    {
+                                        return value.find_completion_items2(
+                                            &accessors
+                                                .clone()
+                                                .into_iter()
+                                                .chain(std::iter::once(accessor))
+                                                .collect(),
+                                            property_schema,
+                                            toml_version,
+                                            position,
+                                            &keys[1..],
+                                            schema_url,
+                                            definitions,
+                                            completion_hint,
+                                        );
+                                    }
+                                }
+                            }
+                            ValueSchema::OneOf(one_of_schema) => {
+                                return find_one_of_completion_items(
+                                    self,
+                                    accessors,
+                                    one_of_schema,
                                     toml_version,
                                     position,
-                                    &keys[1..],
+                                    keys,
                                     schema_url,
                                     definitions,
                                     completion_hint,
                                 );
                             }
+                            ValueSchema::AnyOf(any_of_schema) => {
+                                return find_any_of_completion_items(
+                                    self,
+                                    accessors,
+                                    any_of_schema,
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    schema_url,
+                                    definitions,
+                                    completion_hint,
+                                );
+                            }
+                            ValueSchema::AllOf(all_of_schema) => {
+                                return find_all_if_completion_items(
+                                    self,
+                                    accessors,
+                                    all_of_schema,
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    schema_url,
+                                    definitions,
+                                    completion_hint,
+                                );
+                            }
+                            _ => {}
                         }
                     }
-                    ValueSchema::OneOf(one_of_schema) => {
-                        return find_one_of_completion_items(
-                            self,
-                            accessors,
-                            one_of_schema,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                            completion_hint,
-                        );
-                    }
-                    ValueSchema::AnyOf(any_of_schema) => {
-                        return find_any_of_completion_items(
-                            self,
-                            accessors,
-                            any_of_schema,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                            completion_hint,
-                        );
-                    }
-                    ValueSchema::AllOf(all_of_schema) => {
-                        return find_all_if_completion_items(
-                            self,
-                            accessors,
-                            all_of_schema,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                            completion_hint,
-                        );
-                    }
-                    _ => {}
-                }
-            }
-        } else {
-            match value_schema {
-                ValueSchema::Table(table_schema) => {
+                } else {
                     for mut property in table_schema.properties.iter_mut() {
                         let label = property.key().to_string();
                         let key = self.keys().find(|k| k.to_raw_text(toml_version) == label);
@@ -209,49 +212,42 @@ impl FindCompletionItems2 for document_tree::Table {
                         }
                     }
                 }
-                ValueSchema::OneOf(one_of_schema) => {
-                    return find_one_of_completion_items(
-                        self,
-                        accessors,
-                        one_of_schema,
-                        toml_version,
-                        position,
-                        keys,
-                        schema_url,
-                        definitions,
-                        completion_hint,
-                    );
-                }
-                ValueSchema::AnyOf(any_of_schema) => {
-                    return find_any_of_completion_items(
-                        self,
-                        accessors,
-                        any_of_schema,
-                        toml_version,
-                        position,
-                        keys,
-                        schema_url,
-                        definitions,
-                        completion_hint,
-                    );
-                }
-                ValueSchema::AllOf(all_of_schema) => {
-                    return find_all_if_completion_items(
-                        self,
-                        accessors,
-                        all_of_schema,
-                        toml_version,
-                        position,
-                        keys,
-                        schema_url,
-                        definitions,
-                        completion_hint,
-                    );
-                }
-                _ => {}
+                (completions, errors)
             }
+            ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
+                self,
+                accessors,
+                one_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            ValueSchema::AnyOf(any_of_schema) => find_any_of_completion_items(
+                self,
+                accessors,
+                any_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+                self,
+                accessors,
+                all_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
         }
-
-        (completions, errors)
     }
 }
