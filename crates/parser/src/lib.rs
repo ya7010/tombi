@@ -73,7 +73,7 @@ macro_rules! test_parser {
         fn $name() {
             let p = $crate::parse(textwrap::dedent($source).trim(), Default::default());
 
-            assert_eq!(p.errors(), vec![])
+            pretty_assertions::assert_eq!(p.errors(), vec![])
         }
     };
 
@@ -82,7 +82,7 @@ macro_rules! test_parser {
         fn $name() {
             let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
 
-            assert_eq!(p.errors(), vec![])
+            pretty_assertions::assert_eq!(p.errors(), vec![])
         }
     };
 
@@ -113,7 +113,7 @@ macro_rules! test_parser {
         fn $name() {
             let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
 
-            assert_eq!(p.errors(), vec![$($crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*])
+            pretty_assertions::assert_eq!(p.errors(), vec![$($crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*])
         }
     };
 }
