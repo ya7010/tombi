@@ -1,3 +1,4 @@
+use schema_store::ValueSchema;
 use tower_lsp::lsp_types::Url;
 
 use super::{
@@ -8,7 +9,7 @@ impl GetHoverContent for document_tree::String {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        value_schema: Option<&schema_store::ValueSchema>,
+        value_schema: Option<&ValueSchema>,
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -18,7 +19,7 @@ impl GetHoverContent for document_tree::String {
         let value_type = schema_store::ValueType::String;
 
         match value_schema {
-            Some(schema_store::ValueSchema::String(schema)) => {
+            Some(ValueSchema::String(schema)) => {
                 return Some(super::HoverContent {
                     title: schema.title.clone(),
                     description: schema.description.clone(),
@@ -33,7 +34,7 @@ impl GetHoverContent for document_tree::String {
                     range: Some(self.range()),
                 })
             }
-            Some(schema_store::ValueSchema::OneOf(one_of_schema)) => {
+            Some(ValueSchema::OneOf(one_of_schema)) => {
                 if let Some(hover_content) = get_one_of_hover_content(
                     self,
                     accessors,
@@ -47,7 +48,7 @@ impl GetHoverContent for document_tree::String {
                     return Some(hover_content);
                 }
             }
-            Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => {
+            Some(ValueSchema::AnyOf(any_of_schema)) => {
                 if let Some(hover_content) = get_any_of_hover_content(
                     self,
                     accessors,
@@ -61,7 +62,7 @@ impl GetHoverContent for document_tree::String {
                     return Some(hover_content);
                 }
             }
-            Some(schema_store::ValueSchema::AllOf(all_of_schema)) => {
+            Some(ValueSchema::AllOf(all_of_schema)) => {
                 if let Some(hover_content) = get_all_of_hover_content(
                     self,
                     accessors,
