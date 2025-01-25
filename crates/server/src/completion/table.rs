@@ -70,7 +70,7 @@ impl FindCompletionItems2 for document_tree::Table {
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
-        _toml_version: TomlVersion,
+        toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
         _schema_url: Option<&Url>,
@@ -87,7 +87,8 @@ impl FindCompletionItems2 for document_tree::Table {
             match value_schema {
                 ValueSchema::Table(table_schema) => {
                     for mut property in table_schema.properties.iter_mut() {
-                        let key = property.key().to_string();
+                        let label = property.key().to_string();
+                        let key = self.keys().find(|k| k.to_raw_text(toml_version) == label);
                         if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                             let (schema_candidates, schema_errors) =
                                 value_schema.find_schema_candidates(accessors, definitions);
@@ -105,9 +106,26 @@ impl FindCompletionItems2 for document_tree::Table {
                                     }
                                     _ => {}
                                 }
+                                if let Some(key) = key {
+                                    if let Some(value) = self.get(key) {
+                                        match value {
+                                            document_tree::Value::Boolean(_)
+                                            | document_tree::Value::Integer(_)
+                                            | document_tree::Value::Float(_)
+                                            | document_tree::Value::String(_)
+                                            | document_tree::Value::OffsetDateTime(_)
+                                            | document_tree::Value::LocalDateTime(_)
+                                            | document_tree::Value::LocalDate(_)
+                                            | document_tree::Value::LocalTime(_)
+                                            | document_tree::Value::Array(_) => continue,
+                                            document_tree::Value::Table(_)
+                                            | document_tree::Value::Incomplete { .. } => {}
+                                        }
+                                    }
+                                }
 
                                 let completion_item = tower_lsp::lsp_types::CompletionItem {
-                                    label: key.to_string(),
+                                    label: label.clone(),
                                     kind: Some(CompletionItemKind::PROPERTY),
                                     detail: schema_candidate.detail(definitions, completion_hint),
                                     documentation: schema_candidate
