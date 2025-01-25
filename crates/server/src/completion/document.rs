@@ -3,7 +3,7 @@ use std::ops::Deref;
 use super::{CompletionHint, FindCompletionItems, FindCompletionItems2};
 use config::TomlVersion;
 use schema_store::{Accessor, DocumentSchema, SchemaDefinitions, ValueSchema};
-use tower_lsp::lsp_types::CompletionItem;
+use tower_lsp::lsp_types::{CompletionItem, Url};
 
 impl FindCompletionItems for DocumentSchema {
     fn find_completion_items(
@@ -23,6 +23,9 @@ impl FindCompletionItems2 for document_tree::DocumentTree {
         accessors: &[Accessor],
         value_schema: &ValueSchema,
         toml_version: TomlVersion,
+        position: text::Position,
+        keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
@@ -30,6 +33,9 @@ impl FindCompletionItems2 for document_tree::DocumentTree {
             accessors,
             value_schema,
             toml_version,
+            position,
+            keys,
+            schema_url,
             definitions,
             completion_hint,
         )

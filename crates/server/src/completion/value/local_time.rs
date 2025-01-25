@@ -1,16 +1,21 @@
 use chrono;
-use schema_store::LocalTimeSchema;
+use config::TomlVersion;
+use schema_store::{Accessor, LocalTimeSchema, SchemaDefinitions, ValueSchema};
+use tower_lsp::lsp_types::Url;
 
-use crate::completion::{FindCompletionItems, FindCompletionItems2};
+use crate::completion::{CompletionHint, FindCompletionItems, FindCompletionItems2};
 
 impl FindCompletionItems2 for document_tree::LocalTime {
     fn find_completion_items2(
         &self,
-        _accessors: &[schema_store::Accessor],
-        _value_schema: &schema_store::ValueSchema,
-        _toml_version: config::TomlVersion,
-        _definitions: &schema_store::SchemaDefinitions,
-        _completion_hint: Option<crate::completion::CompletionHint>,
+        _accessors: &[Accessor],
+        _value_schema: &ValueSchema,
+        _toml_version: TomlVersion,
+        _position: text::Position,
+        _keys: &[document_tree::Key],
+        _schema_url: Option<&Url>,
+        _definitions: &SchemaDefinitions,
+        _completion_hint: Option<CompletionHint>,
     ) -> (
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,

@@ -31,7 +31,7 @@ pub fn get_hover_content(
             toml_version,
             position,
             keys,
-            Some(document_schema.schema_url.clone()).as_ref(),
+            Some(&document_schema.schema_url),
             &document_schema.definitions,
         ),
         None => table.get_hover_content(

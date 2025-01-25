@@ -1,8 +1,9 @@
 use crate::completion::CompletionCandidate;
 
 use super::{CompletionHint, FindCompletionItems, FindCompletionItems2};
-use schema_store::{FindSchemaCandidates, TableSchema, ValueSchema};
-use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind};
+use config::TomlVersion;
+use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
+use tower_lsp::lsp_types::{CompletionItem, CompletionItemKind, Url};
 
 impl FindCompletionItems for TableSchema {
     fn find_completion_items(
@@ -67,12 +68,18 @@ impl FindCompletionItems for TableSchema {
 impl FindCompletionItems2 for document_tree::Table {
     fn find_completion_items2(
         &self,
-        _accessors: &[schema_store::Accessor],
+        _accessors: &[Accessor],
         _value_schema: &ValueSchema,
-        _toml_version: config::TomlVersion,
-        _definitions: &schema_store::SchemaDefinitions,
+        _toml_version: TomlVersion,
+        _position: text::Position,
+        _keys: &[document_tree::Key],
+        _schema_url: Option<&Url>,
+        _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
     ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
-        (Vec::new(), Vec::new())
+        let completions = Vec::new();
+        let errors = Vec::new();
+
+        (completions, errors)
     }
 }
