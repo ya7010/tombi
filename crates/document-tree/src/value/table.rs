@@ -42,12 +42,12 @@ impl Table {
             kind: TableKind::Table,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: match (node.bracket_start(), node.bracket_end()) {
-                (Some(start), Some(end)) => {
-                    text::Range::new(start.range().start(), end.range().end())
-                }
-                _ => node.range(),
-            },
+            symbol_range: text::Range::new(
+                node.bracket_start()
+                    .map(|bracket| bracket.range().start())
+                    .unwrap_or_else(|| node.range().start()),
+                node.range().end(),
+            ),
         }
     }
 
@@ -56,12 +56,12 @@ impl Table {
             kind: TableKind::Table,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: match (node.double_bracket_start(), node.double_bracket_end()) {
-                (Some(start), Some(end)) => {
-                    text::Range::new(start.range().start(), end.range().end())
-                }
-                _ => node.range(),
-            },
+            symbol_range: text::Range::new(
+                node.double_bracket_start()
+                    .map(|bracket| bracket.range().start())
+                    .unwrap_or_else(|| node.range().start()),
+                node.range().end(),
+            ),
         }
     }
 
@@ -70,12 +70,12 @@ impl Table {
             kind: TableKind::InlineTable,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: match (node.brace_start(), node.brace_end()) {
-                (Some(start), Some(end)) => {
-                    text::Range::new(start.range().start(), end.range().end())
-                }
-                _ => node.range(),
-            },
+            symbol_range: text::Range::new(
+                node.brace_start()
+                    .map(|brace| brace.range().start())
+                    .unwrap_or_else(|| node.range().start()),
+                node.range().end(),
+            ),
         }
     }
 
