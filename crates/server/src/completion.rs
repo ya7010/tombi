@@ -8,18 +8,6 @@ pub use hint::CompletionHint;
 use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
-pub trait FindCompletionItems {
-    fn find_completion_items(
-        &self,
-        accessors: &[Accessor],
-        definitions: &SchemaDefinitions,
-        completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    );
-}
-
 pub trait FindCompletionItems2 {
     fn find_completion_items2(
         &self,
@@ -70,46 +58,6 @@ pub trait CompletionCandidate {
                     value: description,
                 })
             })
-    }
-}
-
-impl<T: CompositeSchema> FindCompletionItems for T {
-    fn find_completion_items(
-        &self,
-        accessors: &[schema_store::Accessor],
-        definitions: &schema_store::SchemaDefinitions,
-        completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
-        let mut completion_items = Vec::new();
-        let mut errors = Vec::new();
-
-        if let Ok(mut schemas) = self.schemas().write() {
-            for value_schema in schemas.iter_mut() {
-                if let Ok(schema) = value_schema.resolve(definitions) {
-                    let (schema_completion_items, schema_errors) =
-                        schema.find_completion_items(accessors, definitions, completion_hint);
-
-                    completion_items.extend(schema_completion_items);
-                    errors.extend(schema_errors);
-                } else {
-                    errors.push(schema_store::Error::SchemaLockError);
-                }
-            }
-        }
-
-        for completion_item in completion_items.iter_mut() {
-            if completion_item.detail.is_none() {
-                completion_item.detail = self.detail(definitions, completion_hint);
-            }
-            if completion_item.documentation.is_none() {
-                completion_item.documentation = self.documentation(definitions, completion_hint);
-            }
-        }
-
-        (completion_items, errors)
     }
 }
 
