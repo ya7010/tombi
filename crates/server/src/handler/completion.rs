@@ -7,7 +7,7 @@ use tower_lsp::lsp_types::{
 
 use crate::{
     backend,
-    completion::{CompletionHint, FindCompletionItems2},
+    completion::{CompletionHint, FindCompletionItems},
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -152,7 +152,7 @@ fn get_completion_items(
 
     let document_tree = root.into_document_tree_result(toml_version).tree;
 
-    let (completion_items, errors) = document_tree.find_completion_items2(
+    let (completion_items, errors) = document_tree.find_completion_items(
         &Vec::with_capacity(0),
         document_schema.value_schema(),
         toml_version,

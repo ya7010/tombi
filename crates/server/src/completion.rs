@@ -8,8 +8,8 @@ pub use hint::CompletionHint;
 use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
-pub trait FindCompletionItems2 {
-    fn find_completion_items2(
+pub trait FindCompletionItems {
+    fn find_completion_items(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
@@ -152,7 +152,7 @@ fn find_one_of_completion_items<T>(
     Vec<schema_store::Error>,
 )
 where
-    T: FindCompletionItems2,
+    T: FindCompletionItems,
 {
     let mut completion_items = Vec::new();
     let mut errors = Vec::new();
@@ -160,7 +160,7 @@ where
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let (schema_completions, schema_errors) = value.find_completion_items2(
+                let (schema_completions, schema_errors) = value.find_completion_items(
                     accessors,
                     schema,
                     toml_version,
@@ -207,7 +207,7 @@ fn find_any_of_completion_items<T>(
     Vec<schema_store::Error>,
 )
 where
-    T: FindCompletionItems2,
+    T: FindCompletionItems,
 {
     let mut completion_items = Vec::new();
     let mut errors = Vec::new();
@@ -215,7 +215,7 @@ where
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let (schema_completions, schema_errors) = value.find_completion_items2(
+                let (schema_completions, schema_errors) = value.find_completion_items(
                     accessors,
                     schema,
                     toml_version,
@@ -262,7 +262,7 @@ fn find_all_if_completion_items<T>(
     Vec<schema_store::Error>,
 )
 where
-    T: FindCompletionItems2,
+    T: FindCompletionItems,
 {
     let mut completion_items = Vec::new();
     let mut errors = Vec::new();
@@ -270,7 +270,7 @@ where
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let (schema_completions, schema_errors) = value.find_completion_items2(
+                let (schema_completions, schema_errors) = value.find_completion_items(
                     accessors,
                     schema,
                     toml_version,

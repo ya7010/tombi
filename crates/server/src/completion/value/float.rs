@@ -4,11 +4,11 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionHint, FindCompletionItems2,
+    CompletionHint, FindCompletionItems,
 };
 
-impl FindCompletionItems2 for document_tree::Float {
-    fn find_completion_items2(
+impl FindCompletionItems for document_tree::Float {
+    fn find_completion_items(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
@@ -23,7 +23,7 @@ impl FindCompletionItems2 for document_tree::Float {
         Vec<schema_store::Error>,
     ) {
         match value_schema {
-            ValueSchema::Float(float_schema) => float_schema.find_completion_items2(
+            ValueSchema::Float(float_schema) => float_schema.find_completion_items(
                 accessors,
                 value_schema,
                 toml_version,
@@ -71,8 +71,8 @@ impl FindCompletionItems2 for document_tree::Float {
     }
 }
 
-impl FindCompletionItems2 for FloatSchema {
-    fn find_completion_items2(
+impl FindCompletionItems for FloatSchema {
+    fn find_completion_items(
         &self,
         _accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
