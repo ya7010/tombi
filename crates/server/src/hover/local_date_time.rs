@@ -1,3 +1,4 @@
+use schema_store::ValueSchema;
 use tower_lsp::lsp_types::Url;
 
 use super::{
@@ -8,7 +9,7 @@ impl GetHoverContent for document_tree::LocalDateTime {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        value_schema: Option<&schema_store::ValueSchema>,
+        value_schema: Option<&ValueSchema>,
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -16,7 +17,7 @@ impl GetHoverContent for document_tree::LocalDateTime {
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         match value_schema {
-            Some(schema_store::ValueSchema::LocalDateTime(schema)) => Some(super::HoverContent {
+            Some(ValueSchema::LocalDateTime(schema)) => Some(super::HoverContent {
                 title: schema.title.clone(),
                 description: schema.description.clone(),
                 accessors: schema_store::Accessors::new(accessors.clone()),
@@ -29,7 +30,7 @@ impl GetHoverContent for document_tree::LocalDateTime {
                 schema_url: schema_url.cloned(),
                 range: Some(self.range()),
             }),
-            Some(schema_store::ValueSchema::OneOf(one_of_schema)) => get_one_of_hover_content(
+            Some(ValueSchema::OneOf(one_of_schema)) => get_one_of_hover_content(
                 self,
                 accessors,
                 one_of_schema,
@@ -39,7 +40,7 @@ impl GetHoverContent for document_tree::LocalDateTime {
                 schema_url,
                 definitions,
             ),
-            Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => get_any_of_hover_content(
+            Some(ValueSchema::AnyOf(any_of_schema)) => get_any_of_hover_content(
                 self,
                 accessors,
                 any_of_schema,
@@ -49,7 +50,7 @@ impl GetHoverContent for document_tree::LocalDateTime {
                 schema_url,
                 definitions,
             ),
-            Some(schema_store::ValueSchema::AllOf(all_of_schema)) => get_all_of_hover_content(
+            Some(ValueSchema::AllOf(all_of_schema)) => get_all_of_hover_content(
                 self,
                 accessors,
                 all_of_schema,
