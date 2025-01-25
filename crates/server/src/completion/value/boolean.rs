@@ -18,10 +18,7 @@ impl FindCompletionItems for document_tree::Boolean {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         match value_schema {
             ValueSchema::Boolean(boolean_schema) => boolean_schema.find_completion_items(
                 accessors,
@@ -66,7 +63,7 @@ impl FindCompletionItems for document_tree::Boolean {
                 definitions,
                 completion_hint,
             ),
-            _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            _ => Vec::with_capacity(0),
         }
     }
 }
@@ -82,32 +79,25 @@ impl FindCompletionItems for BooleanSchema {
         _schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         if let Some(enumerate) = &self.enumerate {
-            let items = enumerate
+            enumerate
                 .iter()
                 .map(|value| tower_lsp::lsp_types::CompletionItem {
                     label: value.to_string(),
                     kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     ..Default::default()
                 })
-                .collect();
-            return (items, Vec::with_capacity(0));
+                .collect()
         } else {
-            (
-                ["true", "false"]
-                    .into_iter()
-                    .map(|label| tower_lsp::lsp_types::CompletionItem {
-                        label: label.to_string(),
-                        kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                        ..Default::default()
-                    })
-                    .collect(),
-                Vec::with_capacity(0),
-            )
+            ["true", "false"]
+                .into_iter()
+                .map(|label| tower_lsp::lsp_types::CompletionItem {
+                    label: label.to_string(),
+                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                    ..Default::default()
+                })
+                .collect()
         }
     }
 }

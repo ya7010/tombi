@@ -19,10 +19,7 @@ pub trait FindCompletionItems {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    );
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem>;
 }
 
 pub trait CompletionCandidate {
@@ -147,20 +144,16 @@ fn find_one_of_completion_items<T>(
     schema_url: Option<&Url>,
     definitions: &SchemaDefinitions,
     completion_hint: Option<CompletionHint>,
-) -> (
-    Vec<tower_lsp::lsp_types::CompletionItem>,
-    Vec<schema_store::Error>,
-)
+) -> Vec<tower_lsp::lsp_types::CompletionItem>
 where
     T: FindCompletionItems,
 {
     let mut completion_items = Vec::new();
-    let mut errors = Vec::new();
 
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let (schema_completions, schema_errors) = value.find_completion_items(
+                let schema_completions = value.find_completion_items(
                     accessors,
                     schema,
                     toml_version,
@@ -172,9 +165,6 @@ where
                 );
 
                 completion_items.extend(schema_completions);
-                errors.extend(schema_errors);
-            } else {
-                errors.push(schema_store::Error::SchemaLockError);
             }
         }
     }
@@ -189,7 +179,7 @@ where
         }
     }
 
-    (completion_items, errors)
+    completion_items
 }
 
 fn find_any_of_completion_items<T>(
@@ -202,20 +192,16 @@ fn find_any_of_completion_items<T>(
     schema_url: Option<&Url>,
     definitions: &SchemaDefinitions,
     completion_hint: Option<CompletionHint>,
-) -> (
-    Vec<tower_lsp::lsp_types::CompletionItem>,
-    Vec<schema_store::Error>,
-)
+) -> Vec<tower_lsp::lsp_types::CompletionItem>
 where
     T: FindCompletionItems,
 {
     let mut completion_items = Vec::new();
-    let mut errors = Vec::new();
 
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let (schema_completions, schema_errors) = value.find_completion_items(
+                let schema_completions = value.find_completion_items(
                     accessors,
                     schema,
                     toml_version,
@@ -227,9 +213,6 @@ where
                 );
 
                 completion_items.extend(schema_completions);
-                errors.extend(schema_errors);
-            } else {
-                errors.push(schema_store::Error::SchemaLockError);
             }
         }
     }
@@ -244,7 +227,7 @@ where
         }
     }
 
-    (completion_items, errors)
+    completion_items
 }
 
 fn find_all_if_completion_items<T>(
@@ -257,20 +240,16 @@ fn find_all_if_completion_items<T>(
     schema_url: Option<&Url>,
     definitions: &SchemaDefinitions,
     completion_hint: Option<CompletionHint>,
-) -> (
-    Vec<tower_lsp::lsp_types::CompletionItem>,
-    Vec<schema_store::Error>,
-)
+) -> Vec<tower_lsp::lsp_types::CompletionItem>
 where
     T: FindCompletionItems,
 {
     let mut completion_items = Vec::new();
-    let mut errors = Vec::new();
 
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let (schema_completions, schema_errors) = value.find_completion_items(
+                let schema_completions = value.find_completion_items(
                     accessors,
                     schema,
                     toml_version,
@@ -282,9 +261,6 @@ where
                 );
 
                 completion_items.extend(schema_completions);
-                errors.extend(schema_errors);
-            } else {
-                errors.push(schema_store::Error::SchemaLockError);
             }
         }
     }
@@ -299,5 +275,5 @@ where
         }
     }
 
-    (completion_items, errors)
+    completion_items
 }

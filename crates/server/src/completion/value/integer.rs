@@ -18,10 +18,7 @@ impl FindCompletionItems for document_tree::Integer {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         match value_schema {
             ValueSchema::Integer(integer_schema) => integer_schema.find_completion_items(
                 accessors,
@@ -66,7 +63,7 @@ impl FindCompletionItems for document_tree::Integer {
                 definitions,
                 completion_hint,
             ),
-            _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            _ => Vec::with_capacity(0),
         }
     }
 }
@@ -82,22 +79,18 @@ impl FindCompletionItems for IntegerSchema {
         _schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         if let Some(enumerate) = &self.enumerate {
-            let items = enumerate
+            enumerate
                 .iter()
                 .map(|value| tower_lsp::lsp_types::CompletionItem {
                     label: value.to_string(),
                     kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     ..Default::default()
                 })
-                .collect();
-            (items, Vec::with_capacity(0))
+                .collect()
         } else {
-            (Vec::with_capacity(0), Vec::with_capacity(0))
+            Vec::with_capacity(0)
         }
     }
 }

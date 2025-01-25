@@ -34,10 +34,7 @@ impl FindCompletionItems for document_tree::Value {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         match self {
             Self::Boolean(boolean) => boolean.find_completion_items(
                 accessors,
@@ -233,8 +230,7 @@ impl FindCompletionItems for document_tree::Value {
                             ..Default::default()
                         }],
                     };
-
-                    (completion_items, Vec::with_capacity(0))
+                    completion_items
                 }
                 ValueSchema::Table(_) => {
                     let completion_items = match completion_hint {
@@ -245,8 +241,7 @@ impl FindCompletionItems for document_tree::Value {
                             ..Default::default()
                         }],
                     };
-
-                    (completion_items, Vec::with_capacity(0))
+                    completion_items
                 }
                 ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
                     self,
@@ -281,7 +276,7 @@ impl FindCompletionItems for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
-                ValueSchema::Null => (Vec::with_capacity(0), Vec::with_capacity(0)),
+                ValueSchema::Null => Vec::with_capacity(0),
             },
         }
     }

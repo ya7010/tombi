@@ -16,10 +16,7 @@ impl FindCompletionItems for document_tree::DocumentTree {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         self.deref().find_completion_items(
             accessors,
             value_schema,

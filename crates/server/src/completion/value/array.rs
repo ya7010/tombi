@@ -18,12 +18,9 @@ impl FindCompletionItems for document_tree::Array {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         match value_schema {
-            ValueSchema::Array(_) => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            ValueSchema::Array(_) => Vec::with_capacity(0),
             ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
                 self,
                 accessors,
@@ -57,7 +54,7 @@ impl FindCompletionItems for document_tree::Array {
                 definitions,
                 completion_hint,
             ),
-            _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            _ => Vec::with_capacity(0),
         }
     }
 }

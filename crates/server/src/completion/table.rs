@@ -18,14 +18,10 @@ impl FindCompletionItems for document_tree::Table {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (
-        Vec<tower_lsp::lsp_types::CompletionItem>,
-        Vec<schema_store::Error>,
-    ) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         match value_schema {
             ValueSchema::Table(table_schema) => {
                 let mut completions = Vec::new();
-                let mut errors = Vec::new();
 
                 if let Some(key) = keys.first() {
                     let accessor = Accessor::Key(key.to_raw_text(toml_version));
@@ -102,8 +98,13 @@ impl FindCompletionItems for document_tree::Table {
                         let label = property.key().to_string();
                         let key = self.keys().find(|k| k.to_raw_text(toml_version) == label);
                         if let Ok(value_schema) = property.value_mut().resolve(definitions) {
-                            let (schema_candidates, schema_errors) =
+                            let (schema_candidates, errors) =
                                 value_schema.find_schema_candidates(accessors, definitions);
+
+                            for error in errors {
+                                tracing::error!("{}", error);
+                            }
+
                             for schema_candidate in schema_candidates {
                                 match completion_hint {
                                     Some(CompletionHint::InTableHeader) => {
@@ -146,11 +147,10 @@ impl FindCompletionItems for document_tree::Table {
                                 };
                                 completions.push(completion_item);
                             }
-                            errors.extend(schema_errors);
                         }
                     }
                 }
-                (completions, errors)
+                completions
             }
             ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
                 self,
@@ -185,7 +185,7 @@ impl FindCompletionItems for document_tree::Table {
                 definitions,
                 completion_hint,
             ),
-            _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            _ => Vec::with_capacity(0),
         }
     }
 }
