@@ -3,9 +3,76 @@ use config::TomlVersion;
 use schema_store::{Accessor, LocalTimeSchema, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use crate::completion::{CompletionHint, FindCompletionItems, FindCompletionItems2};
+use crate::completion::{
+    find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
+    CompletionHint, FindCompletionItems, FindCompletionItems2,
+};
 
 impl FindCompletionItems2 for document_tree::LocalTime {
+    fn find_completion_items2(
+        &self,
+        accessors: &Vec<Accessor>,
+        value_schema: &ValueSchema,
+        toml_version: TomlVersion,
+        position: text::Position,
+        keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
+        definitions: &SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
+    ) -> (
+        Vec<tower_lsp::lsp_types::CompletionItem>,
+        Vec<schema_store::Error>,
+    ) {
+        match value_schema {
+            ValueSchema::LocalTime(local_time_schema) => local_time_schema.find_completion_items2(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
+                self,
+                accessors,
+                one_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            ValueSchema::AnyOf(any_of_schema) => find_any_of_completion_items(
+                self,
+                accessors,
+                any_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+                self,
+                accessors,
+                all_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+        }
+    }
+}
+
+impl FindCompletionItems2 for LocalTimeSchema {
     fn find_completion_items2(
         &self,
         _accessors: &Vec<Accessor>,
@@ -20,7 +87,26 @@ impl FindCompletionItems2 for document_tree::LocalTime {
         Vec<tower_lsp::lsp_types::CompletionItem>,
         Vec<schema_store::Error>,
     ) {
-        (Vec::with_capacity(0), Vec::with_capacity(0))
+        if let Some(enumerate) = &self.enumerate {
+            let items = enumerate
+                .iter()
+                .map(|value| tower_lsp::lsp_types::CompletionItem {
+                    label: value.to_string(),
+                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                    ..Default::default()
+                })
+                .collect();
+            (items, Vec::with_capacity(0))
+        } else {
+            (
+                vec![tower_lsp::lsp_types::CompletionItem {
+                    label: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                    ..Default::default()
+                }],
+                Vec::with_capacity(0),
+            )
+        }
     }
 }
 

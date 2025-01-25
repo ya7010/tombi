@@ -140,6 +140,36 @@ impl FindCompletionItems2 for document_tree::Value {
                 completion_hint,
             ),
             Self::Incomplete { .. } => match value_schema {
+                ValueSchema::Boolean(boolean_schema) => boolean_schema.find_completion_items2(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::Integer(integer_schema) => integer_schema.find_completion_items2(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::Float(float_schema) => float_schema.find_completion_items2(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
                 ValueSchema::String(string_schema) => string_schema.find_completion_items2(
                     accessors,
                     value_schema,
@@ -150,6 +180,74 @@ impl FindCompletionItems2 for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
+                ValueSchema::OffsetDateTime(offset_date_time_schema) => offset_date_time_schema
+                    .find_completion_items2(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::LocalDateTime(local_date_time_schema) => local_date_time_schema
+                    .find_completion_items2(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::LocalDate(local_date_schema) => local_date_schema
+                    .find_completion_items2(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::LocalTime(local_time_schema) => local_time_schema
+                    .find_completion_items2(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::Array(_) => {
+                    let completion_items = match completion_hint {
+                        Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+                        _ => vec![tower_lsp::lsp_types::CompletionItem {
+                            label: format!("[]"),
+                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                            ..Default::default()
+                        }],
+                    };
+
+                    (completion_items, Vec::with_capacity(0))
+                }
+                ValueSchema::Table(_) => {
+                    let completion_items = match completion_hint {
+                        Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+                        _ => vec![tower_lsp::lsp_types::CompletionItem {
+                            label: format!("{{}}"),
+                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                            ..Default::default()
+                        }],
+                    };
+
+                    (completion_items, Vec::with_capacity(0))
+                }
                 ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
                     self,
                     accessors,
@@ -183,7 +281,7 @@ impl FindCompletionItems2 for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
-                _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+                ValueSchema::Null => (Vec::with_capacity(0), Vec::with_capacity(0)),
             },
         }
     }
