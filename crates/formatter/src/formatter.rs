@@ -59,26 +59,36 @@ impl<'a> Formatter<'a> {
     }
 
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        match parser::parse(source, self.toml_version).try_cast::<ast::Root>() {
-            Ok(root) => {
-                let root = ast_editor::edit(root);
+        let parsed = parser::parse(source, self.toml_version);
 
-                tracing::trace!("TOML AST: {:#?}", root);
-
-                let line_ending = {
-                    root.fmt(&mut self).unwrap();
-                    self.line_ending()
-                };
-
-                Ok(self.buf + line_ending)
+        let diagnostics = if !parsed.errors().is_empty() {
+            let mut diagnostics = Vec::new();
+            for error in parsed.errors() {
+                error.set_diagnostic(&mut diagnostics);
             }
-            Err(errors) => {
-                let mut diagnostics = Vec::new();
-                for error in errors {
-                    error.set_diagnostic(&mut diagnostics);
-                }
-                Err(diagnostics)
-            }
+            diagnostics
+        } else {
+            Vec::with_capacity(0)
+        };
+
+        let Some(parsed) = parsed.cast::<ast::Root>() else {
+            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
+        };
+
+        let root = parsed.tree();
+        tracing::trace!("TOML AST: {:#?}", root);
+
+        if diagnostics.is_empty() {
+            let root = ast_editor::edit(root);
+
+            let line_ending = {
+                root.fmt(&mut self).unwrap();
+                self.line_ending()
+            };
+
+            Ok(self.buf + line_ending)
+        } else {
+            Err(diagnostics)
         }
     }
 

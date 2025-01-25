@@ -61,15 +61,6 @@ impl<T: AstNode> Parsed<T> {
     pub fn tree(&self) -> T {
         T::cast(self.syntax_node()).unwrap()
     }
-
-    /// Converts from `Parse<T>` to [`Result<T, Vec<SyntaxError>>`].
-    pub fn ok(self) -> Result<T, Vec<crate::Error>> {
-        if self.errors.is_empty() {
-            Ok(self.tree())
-        } else {
-            Err(self.errors)
-        }
-    }
 }
 
 impl Parsed<SyntaxNode> {
@@ -82,18 +73,6 @@ impl Parsed<SyntaxNode> {
             })
         } else {
             None
-        }
-    }
-
-    pub fn try_cast<N: AstNode>(self) -> Result<N, Vec<crate::Error>> {
-        if !self.errors.is_empty() {
-            return Err(self.errors);
-        }
-        match self.cast::<N>() {
-            Some(parsed) => parsed.ok(),
-            None => {
-                unreachable!("TOML Root node is always a valid AST node even if source is empty.")
-            }
         }
     }
 }
