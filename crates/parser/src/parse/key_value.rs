@@ -1,4 +1,4 @@
-use super::{leading_comments, tailing_comment, Parse};
+use super::{leading_comments, tailing_comment, Parse, TS_LINE_END};
 use crate::parser::Parser;
 use crate::ErrorKind::*;
 use syntax::{SyntaxKind::*, T};
@@ -15,7 +15,9 @@ impl Parse for ast::KeyValue {
             p.error(crate::Error::new(ExpectedEqual, p.current_range()));
         }
 
-        if p.at(COMMENT) {
+        if p.at_ts(TS_LINE_END) {
+            p.error(crate::Error::new(ExpectedValue, p.current_range()));
+        } else if p.at(COMMENT) {
             p.error(crate::Error::new(ExpectedValue, p.previous_range()));
         } else {
             ast::Value::parse(p);

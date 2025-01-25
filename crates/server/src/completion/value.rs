@@ -1,5 +1,6 @@
 mod all_of;
 mod any_of;
+mod array;
 mod boolean;
 mod float;
 mod integer;
@@ -10,59 +11,273 @@ mod offset_date_time;
 mod one_of;
 mod string;
 
-use super::{CompletionCandidate, CompletionHint, FindCompletionItems};
+use super::{
+    find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
+    CompletionCandidate, CompletionHint, FindCompletionItems,
+};
+use config::TomlVersion;
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
     LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
     TableSchema, ValueSchema,
 };
-use tower_lsp::lsp_types::CompletionItem;
+use tower_lsp::lsp_types::Url;
 
-impl FindCompletionItems for ValueSchema {
+impl FindCompletionItems for document_tree::Value {
     fn find_completion_items(
         &self,
-        accessors: &[Accessor],
+        accessors: &Vec<Accessor>,
+        value_schema: &ValueSchema,
+        toml_version: TomlVersion,
+        position: text::Position,
+        keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
         match self {
-            Self::Table(table) => {
-                table.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::AllOf(all_of) => {
-                all_of.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::AnyOf(any_of) => {
-                any_of.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::OneOf(one_of) => {
-                one_of.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::Boolean(boolean) => {
-                boolean.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::Integer(integer) => {
-                integer.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::Float(float) => {
-                float.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::String(string) => {
-                string.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::OffsetDateTime(offset_date_time) => {
-                offset_date_time.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::LocalDateTime(local_date_time) => {
-                local_date_time.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::LocalDate(local_date) => {
-                local_date.find_completion_items(accessors, definitions, completion_hint)
-            }
-            Self::LocalTime(local_time) => {
-                local_time.find_completion_items(accessors, definitions, completion_hint)
-            }
-            _ => (Vec::new(), Vec::new()),
+            Self::Boolean(boolean) => boolean.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::Integer(integer) => integer.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::Float(float) => float.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::String(string) => string.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::OffsetDateTime(offset_date_time) => offset_date_time.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::LocalDateTime(local_date_time) => local_date_time.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::LocalDate(local_date) => local_date.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::LocalTime(local_time) => local_time.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::Array(array) => array.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::Table(table) => table.find_completion_items(
+                accessors,
+                value_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+                completion_hint,
+            ),
+            Self::Incomplete { .. } => match value_schema {
+                ValueSchema::Boolean(boolean_schema) => boolean_schema.find_completion_items(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::Integer(integer_schema) => integer_schema.find_completion_items(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::Float(float_schema) => float_schema.find_completion_items(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::String(string_schema) => string_schema.find_completion_items(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::OffsetDateTime(offset_date_time_schema) => offset_date_time_schema
+                    .find_completion_items(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::LocalDateTime(local_date_time_schema) => local_date_time_schema
+                    .find_completion_items(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::LocalDate(local_date_schema) => local_date_schema
+                    .find_completion_items(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::LocalTime(local_time_schema) => local_time_schema
+                    .find_completion_items(
+                        accessors,
+                        value_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    ),
+                ValueSchema::Array(_) => {
+                    let completion_items = match completion_hint {
+                        Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+                        _ => vec![tower_lsp::lsp_types::CompletionItem {
+                            label: format!("[]"),
+                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                            ..Default::default()
+                        }],
+                    };
+                    completion_items
+                }
+                ValueSchema::Table(_) => {
+                    let completion_items = match completion_hint {
+                        Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+                        _ => vec![tower_lsp::lsp_types::CompletionItem {
+                            label: format!("{{}}"),
+                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                            ..Default::default()
+                        }],
+                    };
+                    completion_items
+                }
+                ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
+                    self,
+                    accessors,
+                    one_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::AnyOf(any_of_schema) => find_any_of_completion_items(
+                    self,
+                    accessors,
+                    any_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+                    self,
+                    accessors,
+                    all_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::Null => Vec::with_capacity(0),
+            },
         }
     }
 }

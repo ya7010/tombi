@@ -1260,6 +1260,7 @@ dependencies = [
  "drop_bomb",
  "itertools",
  "lexer",
+ "pretty_assertions",
  "rg-tree",
  "rstest",
  "syntax",

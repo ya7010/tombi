@@ -1,5 +1,6 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use dashmap::try_result::TryResult;
+use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 use tower_lsp::lsp_types::{
     CompletionItem, CompletionParams, CompletionResponse, TextDocumentPositionParams,
 };
@@ -76,81 +77,91 @@ pub async fn handle_completion(
         return Ok(None);
     };
 
-    let items = get_completion_items(&root, position.into(), document_schema, toml_version);
+    let items = get_completion_items(root, position.into(), document_schema, toml_version);
 
     Ok(Some(CompletionResponse::Array(items)))
 }
 
 fn get_completion_items(
-    root: &ast::Root,
+    root: ast::Root,
     position: text::Position,
     document_schema: &schema_store::DocumentSchema,
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionItem> {
-    let mut accessors: Vec<schema_store::Accessor> = vec![];
+    let mut keys: Vec<document_tree::Key> = vec![];
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
-            if let Some(keys) = kv.keys() {
-                for key in keys.keys() {
-                    if key.syntax().range().end() < position {
-                        accessors.push(schema_store::Accessor::Key(
-                            key.try_to_raw_text(toml_version)
-                                .unwrap_or(key.to_string())
-                                .into(),
-                        ));
-                    }
-                }
-            }
+        let ast_keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+            kv.keys()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            if table.contains_header(position) {
-                completion_hint = Some(CompletionHint::InTableHeader);
-            }
-
-            if let Some(header) = table.header() {
-                let mut header_keys = vec![];
-                for key in header.keys() {
-                    if key.syntax().range().end() < position {
-                        header_keys.push(schema_store::Accessor::Key(
-                            key.try_to_raw_text(toml_version)
-                                .unwrap_or(key.to_string())
-                                .into(),
-                        ));
-                    }
+            if position < table.bracket_start().unwrap().range().start() {
+                None
+            } else {
+                if table.contains_header(position) {
+                    completion_hint = Some(CompletionHint::InTableHeader);
                 }
-
-                header_keys.extend(accessors);
-                accessors = header_keys;
+                table.header()
             }
         } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            if array_of_tables.contains_header(position) {
-                completion_hint = Some(CompletionHint::InTableHeader);
-            }
-
-            if let Some(header) = array_of_tables.header() {
-                let mut header_keys = vec![];
-                for key in header.keys() {
-                    if key.syntax().range().end() < position {
-                        header_keys.push(schema_store::Accessor::Key(key.to_string().into()));
-                    }
+            if position
+                < array_of_tables
+                    .double_bracket_start()
+                    .unwrap()
+                    .range()
+                    .start()
+            {
+                None
+            } else {
+                if array_of_tables.contains_header(position) {
+                    completion_hint = Some(CompletionHint::InTableHeader);
                 }
-
-                header_keys.extend(accessors);
-                accessors = header_keys;
+                array_of_tables.header()
             }
-        }
+        } else {
+            continue;
+        };
+
+        let Some(ast_keys) = ast_keys else { continue };
+        let mut new_keys = if ast_keys.range().contains(position) {
+            let mut new_keys = Vec::with_capacity(ast_keys.keys().count());
+            for key in ast_keys
+                .keys()
+                .take_while(|key| key.token().unwrap().range().start() <= position)
+            {
+                match key.try_into_document_tree(toml_version) {
+                    Ok(Some(key)) => new_keys.push(key),
+                    _ => return vec![],
+                }
+            }
+            new_keys
+        } else {
+            let mut new_keys = Vec::with_capacity(ast_keys.keys().count());
+            for key in ast_keys.keys() {
+                match key.try_into_document_tree(toml_version) {
+                    Ok(Some(key)) => new_keys.push(key),
+                    _ => return vec![],
+                }
+            }
+            new_keys
+        };
+
+        new_keys.extend(keys);
+        keys = new_keys;
     }
 
-    let (completion_items, errors) = document_schema.find_completion_items(
-        &accessors,
+    let document_tree = root.into_document_tree_result(toml_version).tree;
+
+    let completion_items = document_tree.find_completion_items(
+        &Vec::with_capacity(0),
+        document_schema.value_schema(),
+        toml_version,
+        position,
+        &keys,
+        Some(&document_schema.schema_url),
         &document_schema.definitions,
         completion_hint,
     );
-
-    for error in errors {
-        tracing::error!("error: {:?}", error);
-    }
 
     completion_items
 }

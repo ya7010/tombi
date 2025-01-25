@@ -1,15 +1,31 @@
-use super::{CompletionHint, FindCompletionItems};
-use schema_store::{Accessor, DocumentSchema, SchemaDefinitions};
-use tower_lsp::lsp_types::CompletionItem;
+use std::ops::Deref;
 
-impl FindCompletionItems for DocumentSchema {
+use super::{CompletionHint, FindCompletionItems};
+use config::TomlVersion;
+use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
+use tower_lsp::lsp_types::Url;
+
+impl FindCompletionItems for document_tree::DocumentTree {
     fn find_completion_items(
         &self,
-        accessors: &[Accessor],
+        accessors: &Vec<Accessor>,
+        value_schema: &ValueSchema,
+        toml_version: TomlVersion,
+        position: text::Position,
+        keys: &[document_tree::Key],
+        schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> (Vec<CompletionItem>, Vec<schema_store::Error>) {
-        self.table_schema
-            .find_completion_items(accessors, definitions, completion_hint)
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+        self.deref().find_completion_items(
+            accessors,
+            value_schema,
+            toml_version,
+            position,
+            keys,
+            schema_url,
+            definitions,
+            completion_hint,
+        )
     }
 }

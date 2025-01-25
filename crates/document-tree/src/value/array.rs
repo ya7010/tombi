@@ -53,10 +53,12 @@ impl Array {
             kind: ArrayKind::Array,
             values: vec![],
             range: node.range(),
-            symbol_range: text::Range::new(
-                node.bracket_start().unwrap().range().start(),
-                node.bracket_end().unwrap().range().end(),
-            ),
+            symbol_range: match (node.bracket_start(), node.bracket_end()) {
+                (Some(start), Some(end)) => {
+                    text::Range::new(start.range().start(), end.range().end())
+                }
+                _ => node.range(),
+            },
         }
     }
 

@@ -17,12 +17,12 @@ impl GetHoverContent for document_tree::Array {
         schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
-        for (index, value) in self.values().iter().enumerate() {
-            if value.range().contains(position) {
-                let accessor = Accessor::Index(index);
+        match value_schema {
+            Some(ValueSchema::Array(array)) => {
+                for (index, value) in self.values().iter().enumerate() {
+                    if value.range().contains(position) {
+                        let accessor = Accessor::Index(index);
 
-                match value_schema {
-                    Some(ValueSchema::Array(array)) => {
                         if let Some(items) = &array.items {
                             if let Ok(mut item_schema) = items.write() {
                                 let Some(mut hover_content) = value.get_hover_content(
@@ -54,71 +54,23 @@ impl GetHoverContent for document_tree::Array {
                                 return Some(hover_content);
                             }
                         }
-                    }
-                    Some(ValueSchema::OneOf(one_of_schema)) => {
-                        if let Some(hover_content) = get_one_of_hover_content(
-                            self,
-                            accessors,
-                            one_of_schema,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                        ) {
-                            return Some(hover_content);
-                        }
-                    }
-                    Some(ValueSchema::AnyOf(any_of_schema)) => {
-                        if let Some(hover_content) = get_any_of_hover_content(
-                            self,
-                            accessors,
-                            any_of_schema,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                        ) {
-                            return Some(hover_content);
-                        }
-                    }
-                    Some(ValueSchema::AllOf(all_of_schema)) => {
-                        if let Some(hover_content) = get_all_of_hover_content(
-                            self,
-                            accessors,
-                            all_of_schema,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                        ) {
-                            return Some(hover_content);
-                        }
-                    }
-                    Some(_) => return None,
-                    None => {}
-                }
-                return value.get_hover_content(
-                    &accessors
-                        .clone()
-                        .into_iter()
-                        .chain(std::iter::once(accessor))
-                        .collect(),
-                    None,
-                    toml_version,
-                    position,
-                    keys,
-                    schema_url,
-                    definitions,
-                );
-            }
-        }
 
-        match value_schema {
-            Some(ValueSchema::Array(array)) => {
-                return Some(HoverContent {
+                        return value.get_hover_content(
+                            &accessors
+                                .clone()
+                                .into_iter()
+                                .chain(std::iter::once(accessor))
+                                .collect(),
+                            None,
+                            toml_version,
+                            position,
+                            keys,
+                            schema_url,
+                            definitions,
+                        );
+                    }
+                }
+                Some(HoverContent {
                     title: array.title.clone(),
                     description: array.description.clone(),
                     accessors: Accessors::new(accessors.clone()),
@@ -126,61 +78,48 @@ impl GetHoverContent for document_tree::Array {
                     enumerated_values: vec![],
                     schema_url: schema_url.cloned(),
                     range: Some(self.range()),
-                });
+                })
             }
-            Some(ValueSchema::OneOf(one_of_schema)) => {
-                if let Some(hover_content) = get_one_of_hover_content(
-                    self,
-                    accessors,
-                    one_of_schema,
-                    toml_version,
-                    position,
-                    keys,
-                    schema_url,
-                    definitions,
-                ) {
-                    return Some(hover_content);
-                }
-            }
-            Some(ValueSchema::AnyOf(any_of_schema)) => {
-                if let Some(hover_content) = get_any_of_hover_content(
-                    self,
-                    accessors,
-                    any_of_schema,
-                    toml_version,
-                    position,
-                    keys,
-                    schema_url,
-                    definitions,
-                ) {
-                    return Some(hover_content);
-                }
-            }
-            Some(ValueSchema::AllOf(all_of_schema)) => {
-                if let Some(hover_content) = get_all_of_hover_content(
-                    self,
-                    accessors,
-                    all_of_schema,
-                    toml_version,
-                    position,
-                    keys,
-                    schema_url,
-                    definitions,
-                ) {
-                    return Some(hover_content);
-                }
-            }
-            Some(_) => return None,
-            None => {}
+            Some(ValueSchema::OneOf(one_of_schema)) => get_one_of_hover_content(
+                self,
+                accessors,
+                one_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+            ),
+            Some(ValueSchema::AnyOf(any_of_schema)) => get_any_of_hover_content(
+                self,
+                accessors,
+                any_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+            ),
+            Some(ValueSchema::AllOf(all_of_schema)) => get_all_of_hover_content(
+                self,
+                accessors,
+                all_of_schema,
+                toml_version,
+                position,
+                keys,
+                schema_url,
+                definitions,
+            ),
+            Some(_) => None,
+            None => Some(super::HoverContent {
+                title: None,
+                description: None,
+                accessors: Accessors::new(accessors.clone()),
+                value_type: ValueType::Array,
+                enumerated_values: vec![],
+                schema_url: None,
+                range: Some(self.range()),
+            }),
         }
-        Some(super::HoverContent {
-            title: None,
-            description: None,
-            accessors: Accessors::new(accessors.clone()),
-            value_type: ValueType::Array,
-            enumerated_values: vec![],
-            schema_url: None,
-            range: Some(self.range()),
-        })
     }
 }

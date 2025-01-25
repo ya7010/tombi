@@ -43,7 +43,9 @@ impl Table {
             key_values: Default::default(),
             range: node.syntax().range(),
             symbol_range: text::Range::new(
-                node.bracket_start().unwrap().range().start(),
+                node.bracket_start()
+                    .map(|bracket| bracket.range().start())
+                    .unwrap_or_else(|| node.range().start()),
                 node.range().end(),
             ),
         }
@@ -55,7 +57,9 @@ impl Table {
             key_values: Default::default(),
             range: node.syntax().range(),
             symbol_range: text::Range::new(
-                node.double_bracket_start().unwrap().range().start(),
+                node.double_bracket_start()
+                    .map(|bracket| bracket.range().start())
+                    .unwrap_or_else(|| node.range().start()),
                 node.range().end(),
             ),
         }
@@ -67,8 +71,10 @@ impl Table {
             key_values: Default::default(),
             range: node.syntax().range(),
             symbol_range: text::Range::new(
-                node.brace_start().unwrap().range().start(),
-                node.brace_end().unwrap().range().end(),
+                node.brace_start()
+                    .map(|brace| brace.range().start())
+                    .unwrap_or_else(|| node.range().start()),
+                node.range().end(),
             ),
         }
     }
@@ -79,7 +85,9 @@ impl Table {
             key_values: Default::default(),
             range: node.syntax().range(),
             symbol_range: text::Range::new(
-                node.keys().unwrap().range().start(),
+                node.keys()
+                    .map(|key| key.range().start())
+                    .unwrap_or_else(|| node.syntax().range().start()),
                 node.syntax().range().end(),
             ),
         }
@@ -463,17 +471,23 @@ impl IntoDocumentTreeResult<Table> for ast::KeyValue {
             return make_keys_table(keys, table, errors);
         }
 
-        let Some(value) = self.value() else {
-            errors.push(crate::Error::IncompleteNode {
-                range: table.range(),
-            });
-            return make_keys_table(keys, table, errors);
+        let value = match self.value() {
+            Some(value) => {
+                let (value, errs) = value.into_document_tree_result(toml_version).into();
+                if !errs.is_empty() {
+                    errors.extend(errs);
+                }
+                value
+            }
+            None => {
+                errors.push(crate::Error::IncompleteNode {
+                    range: table.range(),
+                });
+                Value::Incomplete {
+                    range: self.range(),
+                }
+            }
         };
-
-        let (value, errs) = value.into_document_tree_result(toml_version).into();
-        if !errs.is_empty() {
-            errors.extend(errs);
-        }
 
         let table = if let Some(key) = keys.pop() {
             match Table::new_key_value(&self).insert(key, value) {
