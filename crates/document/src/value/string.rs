@@ -224,12 +224,12 @@ mod test {
             "#,
             TomlVersion::V1_0_0
         ) -> Err([
-            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((2, 18), (2, 43))),
-            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((3, 18), (3, 24))),
-            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((4, 18), (4, 24))),
-            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((5, 18), (5, 44))),
-            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((6, 18), (6, 37))),
-            ("invalid string: \\xXX is allowed in TOML v1.0.0 or earlier", ((8, 12), (14, 3))),
+            ("invalid string: \\xXX is allowed in TOML v1.1.0 or later", ((2, 18), (2, 43))),
+            ("invalid string: \\xXX is allowed in TOML v1.1.0 or later", ((3, 18), (3, 24))),
+            ("invalid string: \\xXX is allowed in TOML v1.1.0 or later", ((4, 18), (4, 24))),
+            ("invalid string: \\xXX is allowed in TOML v1.1.0 or later", ((5, 18), (5, 44))),
+            ("invalid string: \\xXX is allowed in TOML v1.1.0 or later", ((6, 18), (6, 37))),
+            ("invalid string: \\xXX is allowed in TOML v1.1.0 or later", ((8, 12), (14, 3))),
         ])
     }
 
