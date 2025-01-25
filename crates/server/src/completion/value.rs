@@ -11,7 +11,10 @@ mod offset_date_time;
 mod one_of;
 mod string;
 
-use super::{CompletionCandidate, CompletionHint, FindCompletionItems, FindCompletionItems2};
+use super::{
+    find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
+    CompletionCandidate, CompletionHint, FindCompletionItems, FindCompletionItems2,
+};
 use config::TomlVersion;
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
@@ -136,7 +139,52 @@ impl FindCompletionItems2 for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::Incomplete { .. } => (Vec::new(), Vec::new()),
+            Self::Incomplete { .. } => match value_schema {
+                ValueSchema::String(string_schema) => string_schema.find_completion_items2(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
+                    self,
+                    accessors,
+                    one_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::AnyOf(any_of_schema) => find_any_of_completion_items(
+                    self,
+                    accessors,
+                    any_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+                    self,
+                    accessors,
+                    all_of_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
+                _ => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            },
         }
     }
 }
