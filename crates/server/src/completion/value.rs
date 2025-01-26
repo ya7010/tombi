@@ -14,7 +14,7 @@ mod table;
 
 use super::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionCandidate, CompletionHint, FindCompletionItems,
+    CompletionCandidate, CompletionContent, CompletionHint, FindCompletionItems,
 };
 use config::TomlVersion;
 use schema_store::{
@@ -35,7 +35,7 @@ impl FindCompletionItems for document_tree::Value {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         match self {
             Self::Boolean(boolean) => boolean.find_completion_items(
                 accessors,
@@ -225,7 +225,7 @@ impl FindCompletionItems for document_tree::Value {
                 ValueSchema::Array(_) => {
                     let completion_items = match completion_hint {
                         Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-                        _ => vec![tower_lsp::lsp_types::CompletionItem {
+                        _ => vec![CompletionContent {
                             label: format!("[]"),
                             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                             ..Default::default()

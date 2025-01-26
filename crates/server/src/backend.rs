@@ -218,7 +218,11 @@ impl LanguageServer for Backend {
         &self,
         params: CompletionParams,
     ) -> Result<Option<CompletionResponse>, tower_lsp::jsonrpc::Error> {
-        handle_completion(self, params).await
+        handle_completion(self, params).await.map(|response| {
+            response.map(|completion_content| {
+                CompletionResponse::Array(completion_content.into_iter().map(Into::into).collect())
+            })
+        })
     }
 
     async fn semantic_tokens_full(
@@ -238,7 +242,7 @@ impl LanguageServer for Backend {
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {
         handle_hover(self, params)
             .await
-            .map(|content| content.map(|c| c.into()))
+            .map(|response| response.map(|hover_content| hover_content.into()))
     }
 
     async fn folding_range(

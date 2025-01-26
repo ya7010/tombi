@@ -7,6 +7,51 @@ pub use hint::CompletionHint;
 use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum CompletionPriority {
+    DefaultValue = 0,
+    #[default]
+    Normal = 1,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct CompletionContent {
+    pub label: String,
+    pub kind: Option<tower_lsp::lsp_types::CompletionItemKind>,
+    pub priority: CompletionPriority,
+    pub detail: Option<String>,
+    pub documentation: Option<tower_lsp::lsp_types::Documentation>,
+}
+
+impl CompletionContent {
+    pub fn new_default_value(label: String) -> Self {
+        Self {
+            label,
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            priority: CompletionPriority::DefaultValue,
+            detail: Some("default".to_string()),
+            documentation: None,
+        }
+    }
+}
+
+impl Into<tower_lsp::lsp_types::CompletionItem> for CompletionContent {
+    fn into(self) -> tower_lsp::lsp_types::CompletionItem {
+        let sorted_text = format!("{}_{}", (self.priority as usize), &self.label);
+        tower_lsp::lsp_types::CompletionItem {
+            label: self.label,
+            kind: Some(
+                self.kind
+                    .unwrap_or(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            ),
+            detail: self.detail,
+            documentation: self.documentation,
+            sort_text: Some(sorted_text),
+            ..Default::default()
+        }
+    }
+}
+
 pub trait FindCompletionItems {
     fn find_completion_items(
         &self,
@@ -18,7 +63,7 @@ pub trait FindCompletionItems {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem>;
+    ) -> Vec<CompletionContent>;
 }
 
 pub trait CompletionCandidate {
@@ -143,7 +188,7 @@ fn find_one_of_completion_items<T>(
     schema_url: Option<&Url>,
     definitions: &SchemaDefinitions,
     completion_hint: Option<CompletionHint>,
-) -> Vec<tower_lsp::lsp_types::CompletionItem>
+) -> Vec<CompletionContent>
 where
     T: FindCompletionItems,
 {
@@ -179,12 +224,7 @@ where
     }
 
     if let Some(default) = &one_of_schema.default {
-        completion_items.push(tower_lsp::lsp_types::CompletionItem {
-            label: default.to_string(),
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            detail: Some("default".to_string()),
-            ..Default::default()
-        });
+        completion_items.push(CompletionContent::new_default_value(default.to_string()));
     }
 
     completion_items
@@ -200,7 +240,7 @@ fn find_any_of_completion_items<T>(
     schema_url: Option<&Url>,
     definitions: &SchemaDefinitions,
     completion_hint: Option<CompletionHint>,
-) -> Vec<tower_lsp::lsp_types::CompletionItem>
+) -> Vec<CompletionContent>
 where
     T: FindCompletionItems,
 {
@@ -236,12 +276,7 @@ where
     }
 
     if let Some(default) = &any_of_schema.default {
-        completion_items.push(tower_lsp::lsp_types::CompletionItem {
-            label: default.to_string(),
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            detail: Some("default".to_string()),
-            ..Default::default()
-        });
+        completion_items.push(CompletionContent::new_default_value(default.to_string()));
     }
 
     completion_items
@@ -257,7 +292,7 @@ fn find_all_if_completion_items<T>(
     schema_url: Option<&Url>,
     definitions: &SchemaDefinitions,
     completion_hint: Option<CompletionHint>,
-) -> Vec<tower_lsp::lsp_types::CompletionItem>
+) -> Vec<CompletionContent>
 where
     T: FindCompletionItems,
 {
@@ -293,12 +328,7 @@ where
     }
 
     if let Some(default) = &all_of_schema.default {
-        completion_items.push(tower_lsp::lsp_types::CompletionItem {
-            label: default.to_string(),
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            detail: Some("default".to_string()),
-            ..Default::default()
-        });
+        completion_items.push(CompletionContent::new_default_value(default.to_string()));
     }
 
     completion_items

@@ -1,5 +1,6 @@
 use crate::completion::{
     find_any_of_completion_items, find_one_of_completion_items, CompletionCandidate,
+    CompletionContent,
 };
 
 use super::{find_all_if_completion_items, CompletionHint, FindCompletionItems};
@@ -18,7 +19,7 @@ impl FindCompletionItems for document_tree::Table {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         match value_schema {
             ValueSchema::Table(table_schema) => {
                 let mut completions = Vec::new();
@@ -137,7 +138,7 @@ impl FindCompletionItems for document_tree::Table {
                                     }
                                 }
 
-                                let completion_item = tower_lsp::lsp_types::CompletionItem {
+                                let completion_content = CompletionContent {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::PROPERTY),
                                     detail: schema_candidate.detail(definitions, completion_hint),
@@ -145,7 +146,7 @@ impl FindCompletionItems for document_tree::Table {
                                         .documentation(definitions, completion_hint),
                                     ..Default::default()
                                 };
-                                completions.push(completion_item);
+                                completions.push(completion_content);
                             }
                         }
                     }
@@ -201,7 +202,7 @@ impl FindCompletionItems for TableSchema {
         _schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         let mut completions = Vec::new();
 
         for mut property in self.properties.iter_mut() {
@@ -226,14 +227,14 @@ impl FindCompletionItems for TableSchema {
                         }
                         _ => {}
                     }
-                    let completion_item = tower_lsp::lsp_types::CompletionItem {
+                    let completion_content = CompletionContent {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::PROPERTY),
                         detail: schema_candidate.detail(definitions, completion_hint),
                         documentation: schema_candidate.documentation(definitions, completion_hint),
                         ..Default::default()
                     };
-                    completions.push(completion_item);
+                    completions.push(completion_content);
                 }
             }
         }

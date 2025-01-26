@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionHint, FindCompletionItems,
+    CompletionContent, CompletionHint, FindCompletionItems,
 };
 
 impl FindCompletionItems for document_tree::Boolean {
@@ -18,7 +18,7 @@ impl FindCompletionItems for document_tree::Boolean {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         match value_schema {
             ValueSchema::Boolean(boolean_schema) => boolean_schema.find_completion_items(
                 accessors,
@@ -79,22 +79,20 @@ impl FindCompletionItems for BooleanSchema {
         _schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         if let Some(enumerate) = &self.enumerate {
             enumerate
                 .iter()
-                .map(|value| tower_lsp::lsp_types::CompletionItem {
+                .map(|value| CompletionContent {
                     label: value.to_string(),
-                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     ..Default::default()
                 })
                 .collect()
         } else {
             ["true", "false"]
                 .into_iter()
-                .map(|label| tower_lsp::lsp_types::CompletionItem {
-                    label: label.to_string(),
-                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                .map(|value| CompletionContent {
+                    label: value.to_string(),
                     ..Default::default()
                 })
                 .collect()

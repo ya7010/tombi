@@ -1,12 +1,10 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
-use tower_lsp::lsp_types::{
-    CompletionItem, CompletionParams, CompletionResponse, TextDocumentPositionParams,
-};
+use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
 use crate::{
     backend,
-    completion::{CompletionHint, FindCompletionItems},
+    completion::{CompletionContent, CompletionHint, FindCompletionItems},
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -20,7 +18,7 @@ pub async fn handle_completion(
             },
         ..
     }: CompletionParams,
-) -> Result<Option<CompletionResponse>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_completion");
 
     let config = backend.config().await;
@@ -59,9 +57,10 @@ pub async fn handle_completion(
         return Ok(None);
     };
 
-    let items = get_completion_items(root, position.into(), document_schema, toml_version);
+    let completion_contents =
+        get_completion_items(root, position.into(), document_schema, toml_version);
 
-    Ok(Some(CompletionResponse::Array(items)))
+    Ok(Some(completion_contents))
 }
 
 fn get_completion_items(
@@ -69,7 +68,7 @@ fn get_completion_items(
     position: text::Position,
     document_schema: &schema_store::DocumentSchema,
     toml_version: config::TomlVersion,
-) -> Vec<CompletionItem> {
+) -> Vec<CompletionContent> {
     let mut keys: Vec<document_tree::Key> = vec![];
     let mut completion_hint = None;
 
@@ -134,7 +133,7 @@ fn get_completion_items(
 
     let document_tree = root.into_document_tree_result(toml_version).tree;
 
-    let completion_items = document_tree.find_completion_items(
+    let completion_contents = document_tree.find_completion_items(
         &Vec::with_capacity(0),
         document_schema.value_schema(),
         toml_version,
@@ -145,7 +144,7 @@ fn get_completion_items(
         completion_hint,
     );
 
-    completion_items
+    completion_contents
 }
 
 #[cfg(test)]
@@ -173,7 +172,7 @@ mod test {
                 use tower_lsp::{
                     lsp_types::{
                         DidOpenTextDocumentParams, PartialResultParams, TextDocumentIdentifier,
-                        TextDocumentItem, Url, WorkDoneProgressParams,
+                        TextDocumentItem, Url, WorkDoneProgressParams, CompletionItem,
                     },
                     LspService,
                 };
@@ -254,23 +253,19 @@ mod test {
                 .expect("failed to handle completion")
                 .expect("failed to get completion items");
 
-                match completions {
-                    CompletionResponse::Array(items) => {
-                        let labels = items
-                            .into_iter()
-                            .sorted_by(|a, b|
-                                a.sort_text.as_ref().unwrap_or(&a.label).cmp(&b.sort_text.as_ref().unwrap_or(&b.label))
-                            )
-                            .map(|item| item.label)
-                            .collect::<Vec<_>>();
+                let labels = completions
+                    .into_iter()
+                    .map(|content| Into::<CompletionItem>::into(content))
+                    .sorted_by(|a, b|
+                        a.sort_text.as_ref().unwrap_or(&a.label).cmp(&b.sort_text.as_ref().unwrap_or(&b.label))
+                    )
+                    .map(|item| item.label)
+                    .collect::<Vec<_>>();
 
-                        pretty_assertions::assert_eq!(
-                            labels,
-                            vec![$($label.to_string()),*]
-                        );
-                    }
-                    _ => panic!("expected completion items"),
-                }
+                pretty_assertions::assert_eq!(
+                    labels,
+                    vec![$($label.to_string()),*]
+                );
             }
         };
     }

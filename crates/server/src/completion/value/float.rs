@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionHint, FindCompletionItems,
+    CompletionContent, CompletionHint, FindCompletionItems,
 };
 
 impl FindCompletionItems for document_tree::Float {
@@ -18,7 +18,7 @@ impl FindCompletionItems for document_tree::Float {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         match value_schema {
             ValueSchema::Float(float_schema) => float_schema.find_completion_items(
                 accessors,
@@ -79,27 +79,20 @@ impl FindCompletionItems for FloatSchema {
         _schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         let mut completion_items = vec![];
 
         if let Some(enumerate) = &self.enumerate {
             for item in enumerate {
-                completion_items.push(tower_lsp::lsp_types::CompletionItem {
+                completion_items.push(CompletionContent {
                     label: item.to_string(),
-                    kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     ..Default::default()
                 });
             }
         }
 
         if let Some(default) = &self.default {
-            completion_items.push(tower_lsp::lsp_types::CompletionItem {
-                label: default.to_string(),
-                kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                detail: Some("default".to_string()),
-                preselect: Some(true),
-                ..Default::default()
-            });
+            completion_items.push(CompletionContent::new_default_value(default.to_string()));
         }
 
         completion_items

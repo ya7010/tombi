@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use super::{CompletionHint, FindCompletionItems};
+use super::{CompletionContent, CompletionHint, FindCompletionItems};
 use config::TomlVersion;
 use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
@@ -16,7 +16,7 @@ impl FindCompletionItems for document_tree::DocumentTree {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         self.deref().find_completion_items(
             accessors,
             value_schema,

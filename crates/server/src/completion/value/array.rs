@@ -1,5 +1,6 @@
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
+    CompletionContent,
 };
 
 use super::{CompletionHint, FindCompletionItems};
@@ -18,7 +19,7 @@ impl FindCompletionItems for document_tree::Array {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+    ) -> Vec<CompletionContent> {
         match value_schema {
             ValueSchema::Array(_) => Vec::with_capacity(0),
             ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
