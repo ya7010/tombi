@@ -52,6 +52,9 @@ pub async fn handle_completion(
     let Some(document_source) = backend.get_document_source(&text_document.uri) else {
         return Ok(None);
     };
+
+    // FIXME: Remove whitespaces, because the AST assigns the whitespace to the next section.
+    //        In the future, it would be better to move the whitespace in ast_editor.
     let mut position: text::Position = position.into();
     while position.column() != 0 && position.char_at_left(&document_source.source) == Some(' ') {
         position = text::Position::new(position.line(), position.column() - 1);
