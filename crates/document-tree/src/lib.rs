@@ -54,10 +54,12 @@ pub trait ValueImpl {
     fn range(&self) -> text::Range;
 }
 
+/// A structure that holds an incomplete tree and errors that are the reason for the incompleteness.
 pub trait IntoDocumentTreeResult<T> {
     fn into_document_tree_result(self, toml_version: TomlVersion) -> DocumentTreeResult<T>;
 }
 
+/// Get a complete tree or errors for incomplete reasons.
 pub trait TryIntoDocumentTree<T> {
     fn try_into_document_tree(self, toml_version: TomlVersion) -> Result<T, Vec<crate::Error>>;
 }
