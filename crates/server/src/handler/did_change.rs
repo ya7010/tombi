@@ -1,4 +1,3 @@
-use dashmap::try_result::TryResult;
 use tower_lsp::lsp_types::DidChangeTextDocumentParams;
 
 use crate::backend::Backend;
@@ -13,17 +12,8 @@ pub async fn handle_did_change(
 ) {
     tracing::info!("handle_did_change");
 
-    let uri = &text_document.uri;
-    let mut document = match backend.document_sources.try_get_mut(uri) {
-        TryResult::Present(document) => document,
-        TryResult::Absent => {
-            tracing::warn!("document not found: {}", uri);
-            return;
-        }
-        TryResult::Locked => {
-            tracing::warn!("document is locked: {}", uri);
-            return;
-        }
+    let Some(mut document) = backend.get_source_mut(&text_document.uri) else {
+        return;
     };
 
     for content_change in content_changes {

@@ -15,7 +15,7 @@ use crate::{
 };
 
 use config::{Config, TomlVersion};
-use dashmap::{try_result::TryResult, DashMap};
+use dashmap::{mapref::one::RefMut, try_result::TryResult, DashMap};
 use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
@@ -74,6 +74,20 @@ impl Backend {
         }
 
         p.cast::<ast::Root>().map(|root| root.tree())
+    }
+
+    pub fn get_source_mut(&self, uri: &Url) -> Option<RefMut<Url, DocumentSource>> {
+        match self.document_sources.try_get_mut(uri) {
+            TryResult::Present(document_info) => Some(document_info),
+            TryResult::Absent => {
+                tracing::warn!("document not found: {}", uri);
+                None
+            }
+            TryResult::Locked => {
+                tracing::warn!("document is locked: {}", uri);
+                None
+            }
+        }
     }
 
     pub async fn config(&self) -> Config {
