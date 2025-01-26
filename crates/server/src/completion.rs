@@ -6,6 +6,7 @@ use ast::{algo::ancestors_at_position, AstNode};
 use config::TomlVersion;
 use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 pub use hint::CompletionHint;
+use itertools::Itertools;
 use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
@@ -90,10 +91,27 @@ pub fn get_completion_contents(
         completion_hint,
     );
 
+    // NOTE: If there are completion contents with the same priority,
+    //       remove the completion contents with lower priority.
     completion_contents
+        .into_iter()
+        .fold(dashmap::DashMap::new(), |acc, content| {
+            acc.entry(content.label.clone())
+                .or_insert_with(Vec::new)
+                .push(content);
+            acc
+        })
+        .into_iter()
+        .filter_map(|(_, contents)| {
+            contents
+                .into_iter()
+                .sorted_by(|a, b| a.priority.cmp(&b.priority))
+                .next()
+        })
+        .collect()
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum CompletionPriority {
     DefaultValue = 0,

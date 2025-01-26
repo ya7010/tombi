@@ -292,6 +292,20 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn tombi_server_completion(
+            tombi_schema_path(),
+            r#"
+            [server]
+            completion = █
+            "#
+        ) -> Ok([
+            "true",
+            "false",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn pyproject_empty(
             pyproject_schema_path(),
             "█"
