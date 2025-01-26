@@ -49,6 +49,13 @@ pub async fn handle_completion(
         tracing::debug!("schema not found: {}", text_document.uri);
         return Ok(None);
     };
+    let Some(document_source) = backend.get_document_source(&text_document.uri) else {
+        return Ok(None);
+    };
+    let mut position: text::Position = position.into();
+    while position.char_at_left(&document_source.source) == Some(' ') {
+        position = text::Position::new(position.line(), position.column() - 1);
+    }
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
     let Some(root) = backend.get_incomplete_ast(&text_document.uri, toml_version) else {
@@ -57,7 +64,7 @@ pub async fn handle_completion(
 
     Ok(Some(get_completion_contents(
         root,
-        position.into(),
+        position,
         document_schema,
         toml_version,
     )))
@@ -249,6 +256,20 @@ mod test {
             r#"
             [schema.catalog]
             path =█
+            "#
+        ) -> Ok([
+            format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "[]",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog_path2(
+            tombi_schema_path(),
+            r#"
+            [schema.catalog]
+            path = █
             "#
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),

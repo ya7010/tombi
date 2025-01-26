@@ -64,7 +64,7 @@ impl Backend {
     }
 
     #[inline]
-    pub fn get_source(&self, uri: &Url) -> Option<Ref<Url, DocumentSource>> {
+    pub fn get_document_source(&self, uri: &Url) -> Option<Ref<Url, DocumentSource>> {
         match self.document_sources.get(uri) {
             Some(document_info) => Some(document_info),
             None => {
@@ -75,7 +75,7 @@ impl Backend {
     }
 
     #[inline]
-    pub fn get_source_mut(&self, uri: &Url) -> Option<RefMut<Url, DocumentSource>> {
+    pub fn get_document_source_mut(&self, uri: &Url) -> Option<RefMut<Url, DocumentSource>> {
         match self.document_sources.try_get_mut(uri) {
             TryResult::Present(document_info) => Some(document_info),
             TryResult::Absent => {

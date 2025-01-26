@@ -12,7 +12,7 @@ pub async fn handle_did_change(
 ) {
     tracing::info!("handle_did_change");
 
-    let Some(mut document) = backend.get_source_mut(&text_document.uri) else {
+    let Some(mut document) = backend.get_document_source_mut(&text_document.uri) else {
         return;
     };
 

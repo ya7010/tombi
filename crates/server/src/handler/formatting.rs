@@ -15,7 +15,7 @@ pub async fn handle_formatting(
     tracing::info!("handle_formatting");
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(mut document_source) = backend.get_source_mut(&text_document.uri) else {
+    let Some(mut document_source) = backend.get_document_source_mut(&text_document.uri) else {
         return Ok(None);
     };
 
