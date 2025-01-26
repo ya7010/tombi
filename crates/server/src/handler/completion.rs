@@ -152,10 +152,7 @@ fn get_completion_items(
 mod test {
     use itertools::Itertools;
 
-    use crate::{
-        handler::handle_did_open,
-        test::{cargo_schema_path, pyproject_schema_path, tombi_schema_path},
-    };
+    use crate::test::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
 
     use super::*;
 
@@ -180,6 +177,7 @@ mod test {
                     },
                     LspService,
                 };
+                use crate::handler::handle_did_open;
 
                 let (service, _) = LspService::new(|client| Backend::new(client));
 

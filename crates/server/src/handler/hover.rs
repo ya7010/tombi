@@ -1,7 +1,6 @@
 use crate::{
     backend,
     hover::{get_hover_content, HoverContent},
-    toml,
 };
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::TryIntoDocumentTree;
@@ -22,7 +21,6 @@ pub async fn handle_hover(
 ) -> Result<Option<HoverContent>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_hover");
 
-    let source = toml::try_load(&text_document.uri)?;
     let position = position.into();
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
@@ -33,8 +31,7 @@ pub async fn handle_hover(
         .ok()
         .flatten();
 
-    let Some(root) = ast::Root::cast(parser::parse(&source, toml_version).into_syntax_node())
-    else {
+    let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 
@@ -167,10 +164,14 @@ mod test {
                 use backend::Backend;
                 use std::io::Write;
                 use tower_lsp::{
-                    lsp_types::{TextDocumentIdentifier, Url, WorkDoneProgressParams},
+                    lsp_types::{
+                        TextDocumentIdentifier, Url, WorkDoneProgressParams, DidOpenTextDocumentParams,
+                        TextDocumentItem,
+                    },
                     LspService,
                 };
                 use schema_store::JsonCatalogSchema;
+                use crate::handler::handle_did_open;
 
                 let (service, _) = LspService::new(|client| Backend::new(client));
 
@@ -213,14 +214,28 @@ mod test {
                     "failed to write test data to the temporary file, which is used as a text document",
                 );
 
+                let toml_file_url = Url::from_file_path(temp_file.path())
+                    .expect("failed to convert temporary file path to URL");
+
+                handle_did_open(
+                    backend,
+                    DidOpenTextDocumentParams {
+                        text_document: TextDocumentItem {
+                            uri: toml_file_url.clone(),
+                            language_id: "toml".to_string(),
+                            version: 0,
+                            text: toml_data.clone(),
+                        },
+                    },
+                )
+                .await;
+
                 let hover_content = handle_hover(
                     &backend,
                     HoverParams {
                         text_document_position_params: TextDocumentPositionParams {
                             text_document: TextDocumentIdentifier {
-                                uri: Url::from_file_path(temp_file.path()).expect(
-                                    "failed to convert temporary file path to URL for the text document",
-                                ),
+                                uri: toml_file_url,
                             },
                             position: (text::Position::default()
                                 + text::RelativePosition::of(&toml_data[..index]))
