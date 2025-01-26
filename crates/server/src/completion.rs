@@ -22,7 +22,7 @@ pub struct CompletionContent {
     pub kind: Option<tower_lsp::lsp_types::CompletionItemKind>,
     pub priority: CompletionPriority,
     pub detail: Option<String>,
-    pub documentation: Option<tower_lsp::lsp_types::Documentation>,
+    pub documentation: Option<String>,
 }
 
 impl CompletionContent {
@@ -57,7 +57,12 @@ impl Into<tower_lsp::lsp_types::CompletionItem> for CompletionContent {
                     .unwrap_or(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             ),
             detail: self.detail,
-            documentation: self.documentation,
+            documentation: self.documentation.map(|documentation| {
+                tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
+                    kind: MarkupKind::Markdown,
+                    value: documentation,
+                })
+            }),
             sort_text: Some(sorted_text),
             ..Default::default()
         }
@@ -96,21 +101,15 @@ pub trait CompletionCandidate {
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.title(definitions, completion_hint).map(|cow| cow)
+        self.title(definitions, completion_hint)
     }
 
     fn documentation(
         &self,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<tower_lsp::lsp_types::Documentation> {
+    ) -> Option<String> {
         self.description(definitions, completion_hint)
-            .map(|description| {
-                tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
-                    kind: MarkupKind::Markdown,
-                    value: description,
-                })
-            })
     }
 }
 

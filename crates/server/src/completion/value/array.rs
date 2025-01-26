@@ -21,7 +21,53 @@ impl FindCompletionContents for document_tree::Array {
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match value_schema {
-            ValueSchema::Array(_) => Vec::with_capacity(0),
+            ValueSchema::Array(array) => {
+                for (index, value) in self.values().iter().enumerate() {
+                    if value.range().contains(position) {
+                        let accessor = Accessor::Index(index);
+
+                        if let Some(items) = &array.items {
+                            if let Ok(mut item_schema) = items.write() {
+                                let Ok(value_schema) = item_schema.resolve(definitions) else {
+                                    continue;
+                                };
+
+                                let mut completion_contents = value.find_completion_contents(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    value_schema,
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    schema_url,
+                                    definitions,
+                                    completion_hint,
+                                );
+                                for completion_content in &mut completion_contents {
+                                    if completion_content.detail.is_none()
+                                        && completion_content.documentation.is_none()
+                                    {
+                                        if let Some(title) = &array.title {
+                                            completion_content.detail = Some(title.clone());
+                                        }
+                                        if let Some(description) = &array.description {
+                                            completion_content.documentation =
+                                                Some(description.clone());
+                                        }
+                                    }
+                                }
+                                return completion_contents;
+                            }
+                        }
+
+                        return Vec::with_capacity(0);
+                    }
+                }
+                Vec::with_capacity(0)
+            }
             ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
                 self,
                 accessors,
