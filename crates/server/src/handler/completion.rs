@@ -181,7 +181,7 @@ mod test {
 
                 pretty_assertions::assert_eq!(
                     labels,
-                    vec![$($label.to_string()),*]
+                    vec![$($label.to_string()),*] as Vec<String>,
                 );
             }
         };
@@ -225,6 +225,18 @@ mod test {
         async fn tombi_schema_catalog(
             tombi_schema_path(),
             r#"
+            [schema.catalog.█]
+            "#
+        ) -> Ok([
+            "path",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog_path(
+            tombi_schema_path(),
+            r#"
             [schema.catalog]
             path =█
             "#
@@ -236,7 +248,7 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
-        async fn tombi_schema_catalog_inline(
+        async fn tombi_schema_catalog_path_inline(
             tombi_schema_path(),
             r#"
             schema.catalog.path =█
