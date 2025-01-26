@@ -127,6 +127,7 @@ pub struct CompletionContent {
     pub priority: CompletionPriority,
     pub detail: Option<String>,
     pub documentation: Option<String>,
+    pub text_edit: Option<tower_lsp::lsp_types::CompletionTextEdit>,
 }
 
 impl CompletionContent {
@@ -137,6 +138,7 @@ impl CompletionContent {
             priority: CompletionPriority::DefaultValue,
             detail: Some("default".to_string()),
             documentation: None,
+            text_edit: None,
         }
     }
 
@@ -147,6 +149,7 @@ impl CompletionContent {
             priority: CompletionPriority::Current,
             detail: Some("current".to_string()),
             documentation: None,
+            text_edit: None,
         }
     }
 }
@@ -168,6 +171,7 @@ impl Into<tower_lsp::lsp_types::CompletionItem> for CompletionContent {
                 })
             }),
             sort_text: Some(sorted_text),
+            text_edit: self.text_edit,
             ..Default::default()
         }
     }
