@@ -98,11 +98,9 @@ impl FindCompletionContents for LocalTimeSchema {
         }
 
         if completion_items.is_empty() {
-            completion_items.push(CompletionContent {
-                label: chrono::Local::now().format("%H:%M:%S%.3f").to_string(),
-                detail: Some("Current".to_string()),
-                ..Default::default()
-            })
+            completion_items.push(CompletionContent::new_current_value(
+                chrono::Local::now().format("%H:%M:%S%.3f").to_string(),
+            ));
         }
 
         completion_items

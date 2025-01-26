@@ -98,13 +98,11 @@ impl FindCompletionContents for OffsetDateTimeSchema {
         }
 
         if completion_items.is_empty() {
-            completion_items.push(CompletionContent {
-                label: chrono::Local::now()
+            completion_items.push(CompletionContent::new_current_value(
+                chrono::Local::now()
                     .format("%Y-%m-%dT%H:%M:%S%.3f%:z")
                     .to_string(),
-                detail: Some("Current".to_string()),
-                ..Default::default()
-            });
+            ));
         }
 
         completion_items

@@ -8,10 +8,12 @@ use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum CompletionPriority {
     DefaultValue = 0,
     #[default]
     Normal = 1,
+    Current = 2,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -33,11 +35,21 @@ impl CompletionContent {
             documentation: None,
         }
     }
+
+    pub fn new_current_value(label: String) -> Self {
+        Self {
+            label,
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            priority: CompletionPriority::Current,
+            detail: Some("current".to_string()),
+            documentation: None,
+        }
+    }
 }
 
 impl Into<tower_lsp::lsp_types::CompletionItem> for CompletionContent {
     fn into(self) -> tower_lsp::lsp_types::CompletionItem {
-        let sorted_text = format!("{}_{}", (self.priority as usize), &self.label);
+        let sorted_text = format!("{}_{}", (self.priority as u8), &self.label);
         tower_lsp::lsp_types::CompletionItem {
             label: self.label,
             kind: Some(

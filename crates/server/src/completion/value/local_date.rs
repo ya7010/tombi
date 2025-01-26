@@ -98,11 +98,9 @@ impl FindCompletionContents for LocalDateSchema {
         }
 
         if completion_items.is_empty() {
-            completion_items.push(CompletionContent {
-                label: chrono::Local::now().format("%Y-%m-%d").to_string(),
-                detail: Some("Current".to_string()),
-                ..Default::default()
-            });
+            completion_items.push(CompletionContent::new_current_value(
+                chrono::Local::now().format("%Y-%m-%d").to_string(),
+            ));
         }
 
         completion_items
