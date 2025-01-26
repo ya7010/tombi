@@ -322,6 +322,31 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn pyproject_project(
+            pyproject_schema_path(),
+            r#"
+            [project]
+            █
+            "#
+        ) -> Ok([
+            "authors",
+            "classifiers",
+            "dependencies",
+            "description",
+            "dynamic",
+            "keywords",
+            "license",
+            "license-files",
+            "maintainers",
+            "name",
+            "readme",
+            "requires-python",
+            "version",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn cargo_empty(
             cargo_schema_path(),
             "█"

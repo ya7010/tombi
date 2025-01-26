@@ -60,23 +60,15 @@ impl FindSchemaCandidates for ArraySchema {
         let Some(ref items) = self.items else {
             return (candidates, errors);
         };
-        if let Ok(referable_schema) = items.read() {
-            if let Some(value_schema) = referable_schema.resolved() {
+
+        if let Ok(mut referable_schema) = items.write() {
+            if let Ok(value_schema) = referable_schema.resolve(definitions) {
                 let (mut item_candidates, mut item_errors) =
-                    value_schema.find_schema_candidates(accessors, definitions);
+                    value_schema.find_schema_candidates(&accessors[1..], definitions);
                 candidates.append(&mut item_candidates);
                 errors.append(&mut item_errors);
-            } else {
-                if let Ok(mut referable_schema) = items.write() {
-                    if let Ok(value_schema) = referable_schema.resolve(definitions) {
-                        let (mut item_candidates, mut item_errors) =
-                            value_schema.find_schema_candidates(&accessors[1..], definitions);
-                        candidates.append(&mut item_candidates);
-                        errors.append(&mut item_errors);
-                    };
-                };
-            }
-        }
+            };
+        };
 
         (candidates, errors)
     }
