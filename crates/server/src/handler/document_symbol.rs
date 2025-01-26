@@ -1,5 +1,5 @@
 use crate::backend::Backend;
-use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
+use document_tree::TryIntoDocumentTree;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
