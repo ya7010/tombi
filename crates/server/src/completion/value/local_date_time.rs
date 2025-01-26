@@ -5,11 +5,11 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionContent, CompletionHint, FindCompletionItems,
+    CompletionContent, CompletionHint, FindCompletionContents,
 };
 
-impl FindCompletionItems for document_tree::LocalDateTime {
-    fn find_completion_items(
+impl FindCompletionContents for document_tree::LocalDateTime {
+    fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
@@ -22,7 +22,7 @@ impl FindCompletionItems for document_tree::LocalDateTime {
     ) -> Vec<CompletionContent> {
         match value_schema {
             ValueSchema::LocalDateTime(local_date_time_schema) => local_date_time_schema
-                .find_completion_items(
+                .find_completion_contents(
                     accessors,
                     value_schema,
                     toml_version,
@@ -70,8 +70,8 @@ impl FindCompletionItems for document_tree::LocalDateTime {
     }
 }
 
-impl FindCompletionItems for LocalDateTimeSchema {
-    fn find_completion_items(
+impl FindCompletionContents for LocalDateTimeSchema {
+    fn find_completion_contents(
         &self,
         _accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,

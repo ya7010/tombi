@@ -3,13 +3,13 @@ use crate::completion::{
     CompletionContent,
 };
 
-use super::{CompletionHint, FindCompletionItems};
+use super::{CompletionHint, FindCompletionContents};
 use config::TomlVersion;
 use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-impl FindCompletionItems for document_tree::Array {
-    fn find_completion_items(
+impl FindCompletionContents for document_tree::Array {
+    fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,

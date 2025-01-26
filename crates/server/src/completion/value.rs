@@ -14,7 +14,7 @@ mod table;
 
 use super::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionCandidate, CompletionContent, CompletionHint, FindCompletionItems,
+    CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
 use schema_store::{
@@ -24,8 +24,8 @@ use schema_store::{
 };
 use tower_lsp::lsp_types::Url;
 
-impl FindCompletionItems for document_tree::Value {
-    fn find_completion_items(
+impl FindCompletionContents for document_tree::Value {
+    fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
@@ -37,7 +37,7 @@ impl FindCompletionItems for document_tree::Value {
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match self {
-            Self::Boolean(boolean) => boolean.find_completion_items(
+            Self::Boolean(boolean) => boolean.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -47,7 +47,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::Integer(integer) => integer.find_completion_items(
+            Self::Integer(integer) => integer.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -57,7 +57,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::Float(float) => float.find_completion_items(
+            Self::Float(float) => float.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -67,7 +67,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::String(string) => string.find_completion_items(
+            Self::String(string) => string.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -77,7 +77,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::OffsetDateTime(offset_date_time) => offset_date_time.find_completion_items(
+            Self::OffsetDateTime(offset_date_time) => offset_date_time.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -87,7 +87,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::LocalDateTime(local_date_time) => local_date_time.find_completion_items(
+            Self::LocalDateTime(local_date_time) => local_date_time.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -97,7 +97,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::LocalDate(local_date) => local_date.find_completion_items(
+            Self::LocalDate(local_date) => local_date.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -107,7 +107,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::LocalTime(local_time) => local_time.find_completion_items(
+            Self::LocalTime(local_time) => local_time.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -117,7 +117,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::Array(array) => array.find_completion_items(
+            Self::Array(array) => array.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -127,7 +127,7 @@ impl FindCompletionItems for document_tree::Value {
                 definitions,
                 completion_hint,
             ),
-            Self::Table(table) => table.find_completion_items(
+            Self::Table(table) => table.find_completion_contents(
                 accessors,
                 value_schema,
                 toml_version,
@@ -138,7 +138,7 @@ impl FindCompletionItems for document_tree::Value {
                 completion_hint,
             ),
             Self::Incomplete { .. } => match value_schema {
-                ValueSchema::Boolean(boolean_schema) => boolean_schema.find_completion_items(
+                ValueSchema::Boolean(boolean_schema) => boolean_schema.find_completion_contents(
                     accessors,
                     value_schema,
                     toml_version,
@@ -148,7 +148,7 @@ impl FindCompletionItems for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
-                ValueSchema::Integer(integer_schema) => integer_schema.find_completion_items(
+                ValueSchema::Integer(integer_schema) => integer_schema.find_completion_contents(
                     accessors,
                     value_schema,
                     toml_version,
@@ -158,7 +158,7 @@ impl FindCompletionItems for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
-                ValueSchema::Float(float_schema) => float_schema.find_completion_items(
+                ValueSchema::Float(float_schema) => float_schema.find_completion_contents(
                     accessors,
                     value_schema,
                     toml_version,
@@ -168,7 +168,7 @@ impl FindCompletionItems for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
-                ValueSchema::String(string_schema) => string_schema.find_completion_items(
+                ValueSchema::String(string_schema) => string_schema.find_completion_contents(
                     accessors,
                     value_schema,
                     toml_version,
@@ -179,7 +179,7 @@ impl FindCompletionItems for document_tree::Value {
                     completion_hint,
                 ),
                 ValueSchema::OffsetDateTime(offset_date_time_schema) => offset_date_time_schema
-                    .find_completion_items(
+                    .find_completion_contents(
                         accessors,
                         value_schema,
                         toml_version,
@@ -190,7 +190,7 @@ impl FindCompletionItems for document_tree::Value {
                         completion_hint,
                     ),
                 ValueSchema::LocalDateTime(local_date_time_schema) => local_date_time_schema
-                    .find_completion_items(
+                    .find_completion_contents(
                         accessors,
                         value_schema,
                         toml_version,
@@ -201,7 +201,7 @@ impl FindCompletionItems for document_tree::Value {
                         completion_hint,
                     ),
                 ValueSchema::LocalDate(local_date_schema) => local_date_schema
-                    .find_completion_items(
+                    .find_completion_contents(
                         accessors,
                         value_schema,
                         toml_version,
@@ -212,7 +212,7 @@ impl FindCompletionItems for document_tree::Value {
                         completion_hint,
                     ),
                 ValueSchema::LocalTime(local_time_schema) => local_time_schema
-                    .find_completion_items(
+                    .find_completion_contents(
                         accessors,
                         value_schema,
                         toml_version,
@@ -233,7 +233,7 @@ impl FindCompletionItems for document_tree::Value {
                     };
                     completion_items
                 }
-                ValueSchema::Table(table_schema) => table_schema.find_completion_items(
+                ValueSchema::Table(table_schema) => table_schema.find_completion_contents(
                     accessors,
                     value_schema,
                     toml_version,

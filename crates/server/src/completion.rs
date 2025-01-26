@@ -52,8 +52,8 @@ impl Into<tower_lsp::lsp_types::CompletionItem> for CompletionContent {
     }
 }
 
-pub trait FindCompletionItems {
-    fn find_completion_items(
+pub trait FindCompletionContents {
+    fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
@@ -190,14 +190,14 @@ fn find_one_of_completion_items<T>(
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>
 where
-    T: FindCompletionItems,
+    T: FindCompletionContents,
 {
     let mut completion_items = Vec::new();
 
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let schema_completions = value.find_completion_items(
+                let schema_completions = value.find_completion_contents(
                     accessors,
                     schema,
                     toml_version,
@@ -242,14 +242,14 @@ fn find_any_of_completion_items<T>(
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>
 where
-    T: FindCompletionItems,
+    T: FindCompletionContents,
 {
     let mut completion_items = Vec::new();
 
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let schema_completions = value.find_completion_items(
+                let schema_completions = value.find_completion_contents(
                     accessors,
                     schema,
                     toml_version,
@@ -294,14 +294,14 @@ fn find_all_if_completion_items<T>(
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>
 where
-    T: FindCompletionItems,
+    T: FindCompletionContents,
 {
     let mut completion_items = Vec::new();
 
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
             if let Ok(schema) = schema.resolve(definitions) {
-                let schema_completions = value.find_completion_items(
+                let schema_completions = value.find_completion_contents(
                     accessors,
                     schema,
                     toml_version,

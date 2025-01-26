@@ -3,13 +3,13 @@ use crate::completion::{
     CompletionContent,
 };
 
-use super::{find_all_if_completion_items, CompletionHint, FindCompletionItems};
+use super::{find_all_if_completion_items, CompletionHint, FindCompletionContents};
 use config::TomlVersion;
 use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
 use tower_lsp::lsp_types::{CompletionItemKind, Url};
 
-impl FindCompletionItems for document_tree::Table {
-    fn find_completion_items(
+impl FindCompletionContents for document_tree::Table {
+    fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
         value_schema: &ValueSchema,
@@ -35,7 +35,7 @@ impl FindCompletionItems for document_tree::Table {
                                     if let Ok(property_schema) =
                                         property.value_mut().resolve(&definitions)
                                     {
-                                        return value.find_completion_items(
+                                        return value.find_completion_contents(
                                             &accessors
                                                 .clone()
                                                 .into_iter()
@@ -191,8 +191,8 @@ impl FindCompletionItems for document_tree::Table {
     }
 }
 
-impl FindCompletionItems for TableSchema {
-    fn find_completion_items(
+impl FindCompletionContents for TableSchema {
+    fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
