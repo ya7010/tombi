@@ -80,17 +80,26 @@ impl FindCompletionItems for IntegerSchema {
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
     ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+        let mut completion_items = vec![];
+
         if let Some(enumerate) = &self.enumerate {
-            enumerate
-                .iter()
-                .map(|value| tower_lsp::lsp_types::CompletionItem {
-                    label: value.to_string(),
+            for item in enumerate {
+                completion_items.push(tower_lsp::lsp_types::CompletionItem {
+                    label: item.to_string(),
                     kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
                     ..Default::default()
-                })
-                .collect()
-        } else {
-            Vec::with_capacity(0)
+                });
+            }
         }
+
+        if let Some(default) = &self.default {
+            completion_items.push(tower_lsp::lsp_types::CompletionItem {
+                label: default.to_string(),
+                kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                ..Default::default()
+            });
+        }
+
+        completion_items
     }
 }

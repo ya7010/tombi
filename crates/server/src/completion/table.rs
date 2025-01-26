@@ -195,9 +195,9 @@ impl FindCompletionItems for TableSchema {
         &self,
         accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
-        toml_version: TomlVersion,
+        _toml_version: TomlVersion,
         _position: text::Position,
-        keys: &[document_tree::Key],
+        _keys: &[document_tree::Key],
         _schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
@@ -206,7 +206,7 @@ impl FindCompletionItems for TableSchema {
 
         for mut property in self.properties.iter_mut() {
             let label = property.key().to_string();
-            let key = keys.first().map(|k| k.to_raw_text(toml_version));
+
             if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                 let (schema_candidates, errors) =
                     value_schema.find_schema_candidates(accessors, definitions);
