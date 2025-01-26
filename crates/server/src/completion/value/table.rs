@@ -111,32 +111,7 @@ impl FindCompletionContents for document_tree::Table {
                             for schema_candidate in schema_candidates {
                                 match completion_hint {
                                     Some(CompletionHint::InTableHeader) => {
-                                        let table_or_array = |value_schema: &ValueSchema| {
-                                            matches!(
-                                                value_schema,
-                                                ValueSchema::Table(_) | ValueSchema::Array(_)
-                                            )
-                                        };
-
-                                        if value_schema
-                                            .match_schemas(&table_or_array)
-                                            .into_iter()
-                                            .filter(|schema| {
-                                                match schema {
-                                                    ValueSchema::Array(array_schema) => {
-                                                        array_schema.items.as_ref().map_or(true, |item_schema| {
-                                                            item_schema.read().map_or(true, |item_schema| {
-                                                                matches!(*item_schema, Referable::Resolved(ref item_schema) if item_schema.is_match(&table_or_array))
-                                                            })
-                                                        })
-                                                    }
-                                                    ValueSchema::Table(_) => true,
-                                                    _ => unreachable!("only table and array are allowed"),
-                                                }
-                                            })
-                                            .count()
-                                            == 0
-                                        {
+                                        if count_header_table_or_array(value_schema) == 0 {
                                             continue;
                                         }
                                     }
@@ -241,9 +216,7 @@ impl FindCompletionContents for TableSchema {
                 for schema_candidate in schema_candidates {
                     match completion_hint {
                         Some(CompletionHint::InTableHeader) => {
-                            if !value_schema.is_match(&|s| {
-                                matches!(s, ValueSchema::Table(_) | ValueSchema::Array(_))
-                            }) {
+                            if count_header_table_or_array(value_schema) == 0 {
                                 continue;
                             }
                         }
@@ -262,4 +235,28 @@ impl FindCompletionContents for TableSchema {
         }
         completions
     }
+}
+
+fn table_or_array(value_schema: &ValueSchema) -> bool {
+    matches!(value_schema, ValueSchema::Table(_) | ValueSchema::Array(_))
+}
+
+fn count_header_table_or_array(value_schema: &ValueSchema) -> usize {
+    value_schema
+        .match_schemas(&table_or_array)
+        .into_iter()
+        .filter(|schema| {
+            match schema {
+                ValueSchema::Array(array_schema) => {
+                    array_schema.items.as_ref().map_or(true, |item_schema| {
+                        item_schema.read().map_or(true, |item_schema| {
+                            matches!(*item_schema, Referable::Resolved(ref item_schema) if item_schema.is_match(&table_or_array))
+                        })
+                    })
+                }
+                ValueSchema::Table(_) => true,
+                _ => unreachable!("only table and array are allowed"),
+            }
+        })
+        .count()
 }
