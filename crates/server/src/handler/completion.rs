@@ -53,7 +53,7 @@ pub async fn handle_completion(
         return Ok(None);
     };
     let mut position: text::Position = position.into();
-    while position.char_at_left(&document_source.source) == Some(' ') {
+    while position.column() != 0 && position.char_at_left(&document_source.source) == Some(' ') {
         position = text::Position::new(position.line(), position.column() - 1);
     }
 
