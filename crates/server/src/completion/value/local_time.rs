@@ -97,6 +97,7 @@ impl FindCompletionItems for LocalTimeSchema {
             completion_items.push(tower_lsp::lsp_types::CompletionItem {
                 label: default.to_string(),
                 kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                detail: Some("default".to_string()),
                 ..Default::default()
             });
         }

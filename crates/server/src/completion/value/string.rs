@@ -96,6 +96,7 @@ impl FindCompletionItems for StringSchema {
             completion_items.push(tower_lsp::lsp_types::CompletionItem {
                 label: format!("\"{default}\""),
                 kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                detail: Some("default".to_string()),
                 ..Default::default()
             });
         }

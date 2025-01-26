@@ -178,6 +178,15 @@ where
         }
     }
 
+    if let Some(default) = &one_of_schema.default {
+        completion_items.push(tower_lsp::lsp_types::CompletionItem {
+            label: default.to_string(),
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            detail: Some("default".to_string()),
+            ..Default::default()
+        });
+    }
+
     completion_items
 }
 
@@ -226,6 +235,15 @@ where
         }
     }
 
+    if let Some(default) = &any_of_schema.default {
+        completion_items.push(tower_lsp::lsp_types::CompletionItem {
+            label: default.to_string(),
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            detail: Some("default".to_string()),
+            ..Default::default()
+        });
+    }
+
     completion_items
 }
 
@@ -272,6 +290,15 @@ where
             completion_item.documentation =
                 all_of_schema.documentation(definitions, completion_hint);
         }
+    }
+
+    if let Some(default) = &all_of_schema.default {
+        completion_items.push(tower_lsp::lsp_types::CompletionItem {
+            label: default.to_string(),
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            detail: Some("default".to_string()),
+            ..Default::default()
+        });
     }
 
     completion_items
