@@ -90,6 +90,11 @@ impl Backend {
         }
     }
 
+    pub fn insert_source(&self, uri: Url, source: String, version: i32) {
+        self.document_sources
+            .insert(uri, DocumentSource::new(source, version));
+    }
+
     pub async fn config(&self) -> Config {
         self.config.read().await.clone()
     }
