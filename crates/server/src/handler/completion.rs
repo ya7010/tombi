@@ -220,19 +220,32 @@ mod test {
         ]);
     }
 
-    // test_completion_labels! {
-    //     #[tokio::test]
-    //     async fn tombi_schema_catalog(
-    //         tombi_schema_path(),
-    //         r#"
-    //         [schema.catalog]
-    //         path = █
-    //         "#
-    //     ) -> Ok([
-    //         format!("\"{}\"", DEFAULT_CATALOG_URL),
-    //         "[]",
-    //     ]);
-    // }
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog(
+            tombi_schema_path(),
+            r#"
+            [schema.catalog]
+            path =█
+            "#
+        ) -> Ok([
+            format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "[]",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog_inline(
+            tombi_schema_path(),
+            r#"
+            schema.catalog.path =█
+            "#
+        ) -> Ok([
+            format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "[]",
+        ]);
+    }
 
     test_completion_labels! {
         #[tokio::test]
