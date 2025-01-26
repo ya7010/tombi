@@ -4,7 +4,6 @@ mod document;
 mod handler;
 mod hover;
 mod semantic_tokens;
-mod toml;
 
 use backend::Backend;
 
