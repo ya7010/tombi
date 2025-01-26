@@ -202,15 +202,15 @@ mod test {
                     )
                     .expect("failed to create temporary file");
 
-                let mut toml_data = textwrap::dedent($source).trim().to_string();
+                let mut toml_text = textwrap::dedent($source).trim().to_string();
 
-                let index = toml_data
+                let index = toml_text
                     .as_str()
                     .find("█")
                     .expect("failed to find hover position marker (█) in the test data");
 
-                toml_data.remove(index);
-                temp_file.as_file().write_all(toml_data.as_bytes()).expect(
+                toml_text.remove(index);
+                temp_file.as_file().write_all(toml_text.as_bytes()).expect(
                     "failed to write test data to the temporary file, which is used as a text document",
                 );
 
@@ -224,7 +224,7 @@ mod test {
                             uri: toml_file_url.clone(),
                             language_id: "toml".to_string(),
                             version: 0,
-                            text: toml_data.clone(),
+                            text: toml_text.clone(),
                         },
                     },
                 )
@@ -238,7 +238,7 @@ mod test {
                                 uri: toml_file_url,
                             },
                             position: (text::Position::default()
-                                + text::RelativePosition::of(&toml_data[..index]))
+                                + text::RelativePosition::of(&toml_text[..index]))
                             .into(),
                         },
                         work_done_progress_params: WorkDoneProgressParams::default(),

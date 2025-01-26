@@ -66,6 +66,7 @@ pub async fn handle_completion(
 #[cfg(test)]
 mod test {
     use itertools::Itertools;
+    use schema_store::DEFAULT_CATALOG_URL;
 
     use crate::test::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
 
@@ -121,15 +122,15 @@ mod test {
                 )
                 .expect("failed to create temporary file");
 
-                let mut toml_data = textwrap::dedent($source).trim().to_string();
+                let mut toml_text = textwrap::dedent($source).trim().to_string();
 
-                let index = toml_data
+                let index = toml_text
                     .as_str()
                     .find("█")
                     .expect("failed to find completion position marker (█) in the test data");
 
-                toml_data.remove(index);
-                temp_file.as_file().write_all(toml_data.as_bytes()).expect(
+                toml_text.remove(index);
+                temp_file.as_file().write_all(toml_text.as_bytes()).expect(
                     "failed to write test data to the temporary file, which is used as a text document",
                 );
 
@@ -143,7 +144,7 @@ mod test {
                             uri: toml_file_url.clone(),
                             language_id: "toml".to_string(),
                             version: 0,
-                            text: toml_data.clone(),
+                            text: toml_text.clone(),
                         },
                     },
                 )
@@ -155,7 +156,7 @@ mod test {
                         text_document_position: TextDocumentPositionParams {
                             text_document: TextDocumentIdentifier { uri: toml_file_url },
                             position: (text::Position::default()
-                                + text::RelativePosition::of(&toml_data[..index]))
+                                + text::RelativePosition::of(&toml_text[..index]))
                             .into(),
                         },
                         work_done_progress_params: WorkDoneProgressParams::default(),
@@ -218,6 +219,20 @@ mod test {
             // "toml-version",
         ]);
     }
+
+    // test_completion_labels! {
+    //     #[tokio::test]
+    //     async fn tombi_schema_catalog(
+    //         tombi_schema_path(),
+    //         r#"
+    //         [schema.catalog]
+    //         path = █
+    //         "#
+    //     ) -> Ok([
+    //         format!("\"{}\"", DEFAULT_CATALOG_URL),
+    //         "[]",
+    //     ]);
+    // }
 
     test_completion_labels! {
         #[tokio::test]
