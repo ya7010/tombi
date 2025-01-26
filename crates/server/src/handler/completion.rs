@@ -1,5 +1,4 @@
 use ast::{algo::ancestors_at_position, AstNode};
-use dashmap::try_result::TryResult;
 use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 use tower_lsp::lsp_types::{
     CompletionItem, CompletionParams, CompletionResponse, TextDocumentPositionParams,
@@ -46,19 +45,6 @@ pub async fn handle_completion(
         return Ok(None);
     }
 
-    let uri = &text_document.uri;
-    let document_info = match backend.document_sources.try_get_mut(uri) {
-        TryResult::Present(document_info) => document_info,
-        TryResult::Absent => {
-            tracing::warn!("document not found: {}", uri);
-            return Ok(None);
-        }
-        TryResult::Locked => {
-            tracing::warn!("document is locked: {}", uri);
-            return Ok(None);
-        }
-    };
-
     let Ok(Some(document_schema)) = &backend
         .schema_store
         .try_get_schema_from_url(&text_document.uri)
@@ -69,11 +55,7 @@ pub async fn handle_completion(
     };
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-
-    let Some(root) =
-        ast::Root::cast(parser::parse(&document_info.source, toml_version).into_syntax_node())
-    else {
-        tracing::warn!("failed to parse document: {}", uri);
+    let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 

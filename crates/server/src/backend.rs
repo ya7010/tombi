@@ -13,9 +13,9 @@ use crate::{
         GetTomlVersionResponse,
     },
 };
-use ast::AstNode;
+
 use config::{Config, TomlVersion};
-use dashmap::DashMap;
+use dashmap::{try_result::TryResult, DashMap};
 use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
@@ -55,15 +55,25 @@ impl Backend {
     }
 
     pub fn get_ast(&self, uri: &Url, toml_version: TomlVersion) -> Option<ast::Root> {
-        if let Some(document_info) = self.document_sources.get(uri) {
-            let p = parser::parse(&document_info.source, toml_version);
-            if !p.errors().is_empty() {
+        let document_info = match self.document_sources.try_get_mut(uri) {
+            TryResult::Present(document_info) => document_info,
+            TryResult::Absent => {
+                tracing::warn!("document not found: {}", uri);
                 return None;
             }
+            TryResult::Locked => {
+                tracing::warn!("document is locked: {}", uri);
+                return None;
+            }
+        };
 
-            return ast::Root::cast(p.into_syntax_node());
+        let p = parser::parse(&document_info.source, toml_version);
+        if !p.errors().is_empty() {
+            tracing::warn!("failed to parse document: {}", uri);
+            return None;
         }
-        None
+
+        p.cast::<ast::Root>().map(|root| root.tree())
     }
 
     pub async fn config(&self) -> Config {
