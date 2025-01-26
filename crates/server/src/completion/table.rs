@@ -4,7 +4,7 @@ use crate::completion::{
 
 use super::{find_all_if_completion_items, CompletionHint, FindCompletionItems};
 use config::TomlVersion;
-use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, ValueSchema};
+use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
 use tower_lsp::lsp_types::{CompletionItemKind, Url};
 
 impl FindCompletionItems for document_tree::Table {
@@ -187,5 +187,56 @@ impl FindCompletionItems for document_tree::Table {
             ),
             _ => Vec::with_capacity(0),
         }
+    }
+}
+
+impl FindCompletionItems for TableSchema {
+    fn find_completion_items(
+        &self,
+        accessors: &Vec<Accessor>,
+        _value_schema: &ValueSchema,
+        toml_version: TomlVersion,
+        _position: text::Position,
+        keys: &[document_tree::Key],
+        _schema_url: Option<&Url>,
+        definitions: &SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
+    ) -> Vec<tower_lsp::lsp_types::CompletionItem> {
+        let mut completions = Vec::new();
+
+        for mut property in self.properties.iter_mut() {
+            let label = property.key().to_string();
+            let key = keys.first().map(|k| k.to_raw_text(toml_version));
+            if let Ok(value_schema) = property.value_mut().resolve(definitions) {
+                let (schema_candidates, errors) =
+                    value_schema.find_schema_candidates(accessors, definitions);
+
+                for error in errors {
+                    tracing::error!("{}", error);
+                }
+
+                for schema_candidate in schema_candidates {
+                    match completion_hint {
+                        Some(CompletionHint::InTableHeader) => {
+                            if !value_schema.is_match(&|s| {
+                                matches!(s, ValueSchema::Table(_) | ValueSchema::Array(_))
+                            }) {
+                                continue;
+                            }
+                        }
+                        _ => {}
+                    }
+                    let completion_item = tower_lsp::lsp_types::CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::PROPERTY),
+                        detail: schema_candidate.detail(definitions, completion_hint),
+                        documentation: schema_candidate.documentation(definitions, completion_hint),
+                        ..Default::default()
+                    };
+                    completions.push(completion_item);
+                }
+            }
+        }
+        completions
     }
 }

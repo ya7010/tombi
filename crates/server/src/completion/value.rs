@@ -232,17 +232,16 @@ impl FindCompletionItems for document_tree::Value {
                     };
                     completion_items
                 }
-                ValueSchema::Table(_) => {
-                    let completion_items = match completion_hint {
-                        Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-                        _ => vec![tower_lsp::lsp_types::CompletionItem {
-                            label: format!("{{}}"),
-                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                            ..Default::default()
-                        }],
-                    };
-                    completion_items
-                }
+                ValueSchema::Table(table_schema) => table_schema.find_completion_items(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
                 ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
                     self,
                     accessors,
