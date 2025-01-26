@@ -1,6 +1,5 @@
 mod document;
 mod hint;
-mod table;
 mod value;
 
 use config::TomlVersion;

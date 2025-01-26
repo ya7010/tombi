@@ -10,6 +10,7 @@ mod local_time;
 mod offset_date_time;
 mod one_of;
 mod string;
+mod table;
 
 use super::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
