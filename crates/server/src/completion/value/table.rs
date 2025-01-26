@@ -5,7 +5,9 @@ use crate::completion::{
 
 use super::{find_all_if_completion_items, CompletionHint, FindCompletionContents};
 use config::TomlVersion;
-use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
+use schema_store::{
+    Accessor, FindSchemaCandidates, Referable, SchemaDefinitions, TableSchema, ValueSchema,
+};
 use tower_lsp::lsp_types::{CompletionItemKind, Url};
 
 impl FindCompletionContents for document_tree::Table {
@@ -109,12 +111,32 @@ impl FindCompletionContents for document_tree::Table {
                             for schema_candidate in schema_candidates {
                                 match completion_hint {
                                     Some(CompletionHint::InTableHeader) => {
-                                        if !value_schema.is_match(&|s| {
+                                        let table_or_array = |value_schema: &ValueSchema| {
                                             matches!(
-                                                s,
+                                                value_schema,
                                                 ValueSchema::Table(_) | ValueSchema::Array(_)
                                             )
-                                        }) {
+                                        };
+
+                                        if value_schema
+                                            .match_schemas(&table_or_array)
+                                            .into_iter()
+                                            .filter(|schema| {
+                                                match schema {
+                                                    ValueSchema::Array(array_schema) => {
+                                                        array_schema.items.as_ref().map_or(true, |item_schema| {
+                                                            item_schema.read().map_or(true, |item_schema| {
+                                                                matches!(*item_schema, Referable::Resolved(ref item_schema) if item_schema.is_match(&table_or_array))
+                                                            })
+                                                        })
+                                                    }
+                                                    ValueSchema::Table(_) => true,
+                                                    _ => unreachable!("only table and array are allowed"),
+                                                }
+                                            })
+                                            .count()
+                                            == 0
+                                        {
                                             continue;
                                         }
                                     }

@@ -222,14 +222,24 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn tombi_schema(
+            tombi_schema_path(),
+            r#"
+            [schema.█]
+            "#
+        ) -> Ok([
+            "catalog",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn tombi_schema_catalog(
             tombi_schema_path(),
             r#"
             [schema.catalog.█]
             "#
-        ) -> Ok([
-            "path",
-        ]);
+        ) -> Ok([]);
     }
 
     test_completion_labels! {

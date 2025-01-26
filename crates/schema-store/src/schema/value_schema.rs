@@ -206,6 +206,30 @@ impl ValueSchema {
         }
     }
 
+    pub fn match_schemas<T: Fn(&ValueSchema) -> bool>(&self, condition: &T) -> Vec<ValueSchema> {
+        let mut matched_schemas = Vec::new();
+        match self {
+            ValueSchema::OneOf(OneOfSchema { schemas, .. })
+            | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+            | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
+                if let Ok(mut schemas) = schemas.write() {
+                    for schema in schemas.iter_mut() {
+                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
+                            matched_schemas.extend(schema.match_schemas(condition))
+                        }
+                    }
+                }
+            }
+            _ => {
+                if condition(self) {
+                    matched_schemas.push(self.clone());
+                }
+            }
+        };
+
+        matched_schemas
+    }
+
     pub fn is_match<T: Fn(&ValueSchema) -> bool>(&self, condition: &T) -> bool {
         match self {
             ValueSchema::OneOf(one_of) => {
