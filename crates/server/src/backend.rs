@@ -15,7 +15,11 @@ use crate::{
 };
 
 use config::{Config, TomlVersion};
-use dashmap::{mapref::one::RefMut, try_result::TryResult, DashMap};
+use dashmap::{
+    mapref::one::{Ref, RefMut},
+    try_result::TryResult,
+    DashMap,
+};
 use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
@@ -33,7 +37,7 @@ use tower_lsp::{
 pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
-    pub document_sources: DashMap<Url, DocumentSource>,
+    document_sources: DashMap<Url, DocumentSource>,
     config: Arc<RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
@@ -51,6 +55,16 @@ impl Backend {
                 }
             })),
             schema_store: schema_store::SchemaStore::new(),
+        }
+    }
+
+    pub fn get_source(&self, uri: &Url) -> Option<Ref<Url, DocumentSource>> {
+        match self.document_sources.get(uri) {
+            Some(document_info) => Some(document_info),
+            None => {
+                tracing::warn!("document not found: {}", uri);
+                None
+            }
         }
     }
 
