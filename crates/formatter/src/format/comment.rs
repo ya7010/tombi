@@ -151,6 +151,11 @@ mod tests {
 
     test_format! {
         #[test]
+        fn strip_prefix_space(r"#    hello") -> Ok(r"# hello");
+    }
+
+    test_format! {
+        #[test]
         fn multiline_comment_with_ident(
             r#"
             # NOTE: Tombi preserves spaces at the beginning of a comment line.
