@@ -1,5 +1,4 @@
 use crate::backend::Backend;
-use document_tree::TryIntoDocumentTree;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
@@ -13,15 +12,11 @@ pub async fn handle_document_symbol(
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
-    let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
+    let Some(tree) = backend.get_incomplete_document_tree(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 
-    let Ok(root) = root.try_into_document_tree(toml_version) else {
-        return Ok(None);
-    };
-
-    let symbols = create_symbols(&root);
+    let symbols = create_symbols(&tree);
 
     tracing::trace!("DocumentSymbols: {symbols:#?}");
 

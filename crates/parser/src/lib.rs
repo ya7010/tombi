@@ -13,7 +13,7 @@ pub use error::{Error, ErrorKind};
 pub use event::Event;
 use output::Output;
 use parse::Parse;
-use parsed::Parsed;
+pub use parsed::Parsed;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {

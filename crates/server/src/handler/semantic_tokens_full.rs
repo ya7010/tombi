@@ -10,12 +10,12 @@ pub async fn handle_semantic_tokens_full(
     tracing::info!("handle_semantic_tokens_full");
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(ast) = backend.get_ast(&text_document.uri, toml_version) else {
+    let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 
     let mut tokens_builder = SemanticTokensBuilder::new();
-    ast.append_semantic_tokens(&mut tokens_builder);
+    root.append_semantic_tokens(&mut tokens_builder);
     let tokens = tokens_builder.build();
 
     tracing::trace!("SemanticTokens: {tokens:#?}");

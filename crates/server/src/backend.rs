@@ -20,6 +20,10 @@ use dashmap::{
     try_result::TryResult,
     DashMap,
 };
+use diagnostic::Diagnostic;
+use diagnostic::SetDiagnostics;
+use document_tree::TryIntoDocumentTree;
+use syntax::SyntaxNode;
 use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
@@ -43,6 +47,7 @@ pub struct Backend {
 }
 
 impl Backend {
+    #[inline]
     pub fn new(client: tower_lsp::Client) -> Self {
         Self {
             client,
@@ -58,6 +63,7 @@ impl Backend {
         }
     }
 
+    #[inline]
     pub fn get_source(&self, uri: &Url) -> Option<Ref<Url, DocumentSource>> {
         match self.document_sources.get(uri) {
             Some(document_info) => Some(document_info),
@@ -68,28 +74,7 @@ impl Backend {
         }
     }
 
-    pub fn get_ast(&self, uri: &Url, toml_version: TomlVersion) -> Option<ast::Root> {
-        let document_info = match self.document_sources.try_get_mut(uri) {
-            TryResult::Present(document_info) => document_info,
-            TryResult::Absent => {
-                tracing::warn!("document not found: {}", uri);
-                return None;
-            }
-            TryResult::Locked => {
-                tracing::warn!("document is locked: {}", uri);
-                return None;
-            }
-        };
-
-        let p = parser::parse(&document_info.source, toml_version);
-        if !p.errors().is_empty() {
-            tracing::warn!("failed to parse document: {}", uri);
-            return None;
-        }
-
-        p.cast::<ast::Root>().map(|root| root.tree())
-    }
-
+    #[inline]
     pub fn get_source_mut(&self, uri: &Url) -> Option<RefMut<Url, DocumentSource>> {
         match self.document_sources.try_get_mut(uri) {
             TryResult::Present(document_info) => Some(document_info),
@@ -104,21 +89,89 @@ impl Backend {
         }
     }
 
+    #[inline]
+    fn get_parsed(
+        &self,
+        uri: &Url,
+        toml_version: TomlVersion,
+    ) -> Option<parser::Parsed<SyntaxNode>> {
+        let document_info = match self.document_sources.get(uri) {
+            Some(document_info) => document_info,
+            None => {
+                tracing::warn!("document not found: {}", uri);
+                return None;
+            }
+        };
+
+        Some(parser::parse(&document_info.source, toml_version))
+    }
+
+    #[inline]
+    pub fn get_incomplete_ast(&self, uri: &Url, toml_version: TomlVersion) -> Option<ast::Root> {
+        let Some(p) = self.get_parsed(uri, toml_version) else {
+            return None;
+        };
+        p.cast::<ast::Root>().map(|root| root.tree())
+    }
+
+    #[inline]
+    pub fn try_get_ast(
+        &self,
+        uri: &Url,
+        toml_version: TomlVersion,
+    ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
+        let Some(p) = self.get_parsed(uri, toml_version) else {
+            return None;
+        };
+
+        let Some(p) = p.cast::<ast::Root>() else {
+            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
+        };
+
+        if p.errors().is_empty() {
+            Some(Ok(p.tree()))
+        } else {
+            let mut diagnostics = Vec::with_capacity(p.errors().len());
+            p.errors().into_iter().for_each(|error| {
+                error.set_diagnostic(&mut diagnostics);
+            });
+
+            Some(Err(diagnostics))
+        }
+    }
+
+    #[inline]
+    pub fn get_incomplete_document_tree(
+        &self,
+        uri: &Url,
+        toml_version: TomlVersion,
+    ) -> Option<document_tree::DocumentTree> {
+        let Some(root) = self.get_incomplete_ast(uri, toml_version) else {
+            return None;
+        };
+
+        root.try_into_document_tree(toml_version).ok()
+    }
+
+    #[inline]
     pub fn insert_source(&self, uri: Url, source: String, version: i32) {
         self.document_sources
             .insert(uri, DocumentSource::new(source, version));
     }
 
+    #[inline]
     pub async fn config(&self) -> Config {
         self.config.read().await.clone()
     }
 
+    #[inline]
     pub async fn update_workspace_config(&self, workspace_config_url: Url, config: Config) {
         tracing::info!("Updated workspace config: {workspace_config_url}");
 
         *self.config.write().await = config;
     }
 
+    #[inline]
     pub async fn toml_version(&self) -> Option<TomlVersion> {
         self.config.read().await.toml_version
     }

@@ -31,7 +31,7 @@ pub async fn handle_hover(
         .ok()
         .flatten();
 
-    let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
+    let Some(root) = backend.get_incomplete_ast(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 

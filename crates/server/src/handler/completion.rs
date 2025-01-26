@@ -55,7 +55,7 @@ pub async fn handle_completion(
     };
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(root) = backend.get_ast(&text_document.uri, toml_version) else {
+    let Some(root) = backend.get_incomplete_ast(&text_document.uri, toml_version) else {
         return Ok(None);
     };
 
