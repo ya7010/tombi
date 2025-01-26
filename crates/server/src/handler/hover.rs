@@ -203,12 +203,12 @@ mod test {
 
                 let mut toml_data = textwrap::dedent($source).trim().to_string();
 
-                let pos = toml_data
+                let index = toml_data
                     .as_str()
                     .find("█")
                     .expect("failed to find hover position marker (█) in the test data");
 
-                toml_data.remove(pos);
+                toml_data.remove(index);
                 temp_file.as_file().write_all(toml_data.as_bytes()).expect(
                     "failed to write test data to the temporary file, which is used as a text document",
                 );
@@ -223,7 +223,7 @@ mod test {
                                 ),
                             },
                             position: (text::Position::default()
-                                + text::RelativePosition::of(&toml_data[..pos]))
+                                + text::RelativePosition::of(&toml_data[..index]))
                             .into(),
                         },
                         work_done_progress_params: WorkDoneProgressParams::default(),
