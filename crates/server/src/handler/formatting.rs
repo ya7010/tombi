@@ -14,6 +14,19 @@ pub async fn handle_formatting(
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_formatting");
 
+    let config = backend.config().await;
+
+    if !config
+        .server
+        .and_then(|server| server.formatting)
+        .and_then(|formatting| formatting.enabled)
+        .unwrap_or_default()
+        .value()
+    {
+        tracing::debug!("`server.formatting.enabled` is false");
+        return Ok(None);
+    }
+
     let toml_version = backend.toml_version().await.unwrap_or_default();
     let Some(mut document_source) = backend.get_document_source_mut(&text_document.uri) else {
         return Ok(None);

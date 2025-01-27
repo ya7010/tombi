@@ -119,6 +119,17 @@
             }
           ]
         },
+        "formatting": {
+          "title": "Formatting Feature options.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServerFormatting"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "diagnostics": {
           "title": "Diagnostics Feature options.",
           "anyOf": [
@@ -161,6 +172,25 @@
         "enabled": {
           "title": "Enable completion feature.",
           "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Enabled"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ServerFormatting": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "title": "Enable formatting feature.",
+          "description": "Whether to enable formatting.",
           "anyOf": [
             {
               "$ref": "#/$defs/Enabled"
