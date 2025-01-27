@@ -247,6 +247,58 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn tombi_empty_bracket2(
+            tombi_schema_path(),
+            r#"
+            toml-version = "v1.0.0"
+
+            [█]
+            "#
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty_bracket3(
+            tombi_schema_path(),
+            r#"
+            toml-version = "v1.0.0"
+
+            [█]
+
+            [format]
+            "#
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty_double_bracket(
+            tombi_schema_path(),
+            "[[█]]"
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn tombi_schema(
             tombi_schema_path(),
             r#"
