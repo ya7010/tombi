@@ -94,9 +94,27 @@
       "additionalProperties": false
     },
     "ServerOptions": {
+      "title": "Language Server options.",
       "type": "object",
       "properties": {
         "completion": {
+          "title": "Completion Feature options.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServerCompletion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ServerCompletion": {
+      "type": "object",
+      "properties": {
+        "enabled": {
           "title": "Enable completion.",
           "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
           "anyOf": [

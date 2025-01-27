@@ -23,7 +23,8 @@ pub async fn handle_completion(
 
     if !config
         .server
-        .and_then(|s| s.completion)
+        .and_then(|server| server.completion)
+        .and_then(|completion| completion.enabled)
         .unwrap_or_default()
         .value()
     {
