@@ -372,6 +372,41 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn tombi_server2(
+            tombi_schema_path(),
+            r#"
+            [server]
+            █
+            completion.enabled = true
+            "#
+        ) -> Ok([
+            "completion",
+            "diagnostics",
+            "formatting",
+            "hover",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server3(
+            tombi_schema_path(),
+            r#"
+            [server]
+            formatting.enabled = true
+            █
+            completion.enabled = true
+            "#
+        ) -> Ok([
+            "completion",
+            "diagnostics",
+            "formatting",
+            "hover",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn tombi_server_completion(
             tombi_schema_path(),
             r#"
