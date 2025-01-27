@@ -28,7 +28,7 @@ pub async fn handle_completion(
         .unwrap_or_default()
         .value()
     {
-        tracing::debug!("`server.completion` is false");
+        tracing::debug!("`server.completion.enabled` is false");
         return Ok(None);
     }
 

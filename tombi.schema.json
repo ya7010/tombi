@@ -97,6 +97,17 @@
       "title": "Language Server options.",
       "type": "object",
       "properties": {
+        "hover": {
+          "title": "Hover Feature options.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServerHover"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "completion": {
           "title": "Completion Feature options.",
           "anyOf": [
@@ -111,12 +122,12 @@
       },
       "additionalProperties": false
     },
-    "ServerCompletion": {
+    "ServerHover": {
       "type": "object",
       "properties": {
         "enabled": {
-          "title": "Enable completion.",
-          "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
+          "title": "Enable hover feature.",
+          "description": "Whether to enable hover.",
           "anyOf": [
             {
               "$ref": "#/$defs/Enabled"
@@ -132,6 +143,25 @@
     },
     "Enabled": {
       "type": "boolean"
+    },
+    "ServerCompletion": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "title": "Enable completion feature.",
+          "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Enabled"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": true
+        }
+      },
+      "additionalProperties": false
     },
     "SchemaOptions": {
       "type": "object",

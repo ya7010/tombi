@@ -21,6 +21,19 @@ pub async fn handle_hover(
 ) -> Result<Option<HoverContent>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_hover");
 
+    let config = backend.config().await;
+
+    if !config
+        .server
+        .and_then(|server| server.hover)
+        .and_then(|hover| hover.enabled)
+        .unwrap_or_default()
+        .value()
+    {
+        tracing::debug!("`server.hover.enabled` is false");
+        return Ok(None);
+    }
+
     let position = position.into();
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
