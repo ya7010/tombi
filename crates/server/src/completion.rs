@@ -23,8 +23,14 @@ pub fn get_completion_contents(
         let ast_keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
             kv.keys()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            if position < table.bracket_start().unwrap().range().start() {
-                None
+            let bracket_start_range = table.bracket_start().unwrap().range();
+            let bracket_end_range = table.bracket_end().unwrap().range();
+
+            if position < bracket_start_range.start()
+                || (bracket_end_range.end() <= position
+                    && position.line() == bracket_end_range.end().line())
+            {
+                return vec![];
             } else {
                 if table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
@@ -32,14 +38,15 @@ pub fn get_completion_contents(
                 table.header()
             }
         } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            if position
-                < array_of_tables
-                    .double_bracket_start()
-                    .unwrap()
-                    .range()
-                    .start()
+            let double_bracket_start_range =
+                array_of_tables.double_bracket_start().unwrap().range();
+            let double_bracket_end_range = array_of_tables.double_bracket_end().unwrap().range();
+
+            if position < double_bracket_start_range.start()
+                && (double_bracket_end_range.end() <= position
+                    && position.line() == double_bracket_end_range.end().line())
             {
-                None
+                return vec![];
             } else {
                 if array_of_tables.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);

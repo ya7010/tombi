@@ -245,6 +245,16 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn tombi_schema_after_bracket(
+            tombi_schema_path(),
+            r#"
+            [schema]█
+            "#
+        ) -> Ok([]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn tombi_schema_catalog(
             tombi_schema_path(),
             r#"
@@ -300,7 +310,7 @@ mod test {
             tombi_schema_path(),
             r#"
             [server]
-            completion = █
+            completion.enabled = █
             "#
         ) -> Ok([
             "true",
