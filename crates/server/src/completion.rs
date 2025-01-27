@@ -23,8 +23,13 @@ pub fn get_completion_contents(
         let ast_keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
             kv.keys()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            let bracket_start_range = table.bracket_start().unwrap().range();
-            let bracket_end_range = table.bracket_end().unwrap().range();
+            let (bracket_start_range, bracket_end_range) =
+                match (table.bracket_start(), table.bracket_end()) {
+                    (Some(bracket_start), Some(blacket_end)) => {
+                        (bracket_start.range(), blacket_end.range())
+                    }
+                    _ => return Vec::with_capacity(0),
+                };
 
             if position < bracket_start_range.start()
                 || (bracket_end_range.end() <= position
@@ -38,9 +43,17 @@ pub fn get_completion_contents(
                 table.header()
             }
         } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            let double_bracket_start_range =
-                array_of_tables.double_bracket_start().unwrap().range();
-            let double_bracket_end_range = array_of_tables.double_bracket_end().unwrap().range();
+            let (double_bracket_start_range, double_bracket_end_range) = {
+                match (
+                    array_of_tables.double_bracket_start(),
+                    array_of_tables.double_bracket_end(),
+                ) {
+                    (Some(double_bracket_start), Some(double_bracket_end)) => {
+                        (double_bracket_start.range(), double_bracket_end.range())
+                    }
+                    _ => return Vec::with_capacity(0),
+                }
+            };
 
             if position < double_bracket_start_range.start()
                 && (double_bracket_end_range.end() <= position

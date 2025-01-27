@@ -250,7 +250,7 @@ fn count_header_table_or_array(value_schema: &ValueSchema) -> usize {
                 ValueSchema::Array(array_schema) => {
                     array_schema.items.as_ref().map_or(true, |item_schema| {
                         item_schema.read().map_or(true, |item_schema| {
-                            matches!(*item_schema, Referable::Resolved(ref item_schema) if item_schema.is_match(&table_or_array))
+                            matches!(*item_schema, Referable::Resolved(ref item_schema) if item_schema.is_match(&|schema| matches!(schema, ValueSchema::Table(_))))
                         })
                     })
                 }
