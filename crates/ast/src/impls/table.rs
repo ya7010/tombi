@@ -62,7 +62,8 @@ impl crate::Table {
 
     pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {
         support::node::prev_siblings_nodes(self)
-            .map(|node: ArrayOfTables| node.header().unwrap().keys())
+            .map(|node: ArrayOfTables| node.header().map(|header| header.keys()))
+            .flatten()
             .take_while(|keys| {
                 match (
                     self.header().map(|header| header.keys().next()).flatten(),
