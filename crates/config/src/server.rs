@@ -12,6 +12,9 @@ pub struct ServerOptions {
 
     /// # Completion Feature options.
     pub completion: Option<ServerCompletion>,
+
+    /// # Diagnostics Feature options.
+    pub diagnostics: Option<ServerDiagnostics>,
 }
 
 impl ServerOptions {
@@ -19,6 +22,7 @@ impl ServerOptions {
         Self {
             hover: None,
             completion: None,
+            diagnostics: None,
         }
     }
 }
@@ -47,6 +51,19 @@ pub struct ServerCompletion {
     /// Whether to enable completion.
     ///
     /// **WARNING**: 🚧 This feature is experimental 🚧
+    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
+    pub enabled: Option<Enabled>,
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Default, Clone)]
+pub struct ServerDiagnostics {
+    /// # Enable diagnostics feature.
+    ///
+    /// Whether to enable diagnostics.
     #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
     pub enabled: Option<Enabled>,
 }

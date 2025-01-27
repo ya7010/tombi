@@ -15,6 +15,21 @@ pub async fn handle_diagnostic(
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_diagnostic");
 
+    let config = backend.config().await;
+
+    if !config
+        .server
+        .and_then(|server| server.diagnostics)
+        .and_then(|diagnostics| diagnostics.enabled)
+        .unwrap_or_default()
+        .value()
+    {
+        tracing::debug!("`server.diagnostics.enabled` is false");
+        return Ok(DocumentDiagnosticReportResult::Report(
+            DocumentDiagnosticReport::Full(Default::default()),
+        ));
+    }
+
     let diagnostics = match backend.get_document_source(&text_document.uri) {
         Some(document) => {
             match linter::Linter::try_new(
