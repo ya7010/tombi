@@ -30,7 +30,7 @@ pub fn get_completion_contents(
                 || (bracket_end_range.end() <= position
                     && position.line() == bracket_end_range.end().line())
             {
-                return vec![];
+                return Vec::with_capacity(0);
             } else {
                 if table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
@@ -46,7 +46,7 @@ pub fn get_completion_contents(
                 && (double_bracket_end_range.end() <= position
                     && position.line() == double_bracket_end_range.end().line())
             {
-                return vec![];
+                return Vec::with_capacity(0);
             } else {
                 if array_of_tables.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
