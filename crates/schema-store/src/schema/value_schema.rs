@@ -37,7 +37,7 @@ impl ValueSchema {
                             .iter()
                             .filter_map(|type_value| {
                                 if let serde_json::Value::String(type_str) = type_value {
-                                    Self::new_single(type_str, object)
+                                    Self::new_single(&type_str, object)
                                 } else {
                                     None
                                 }
@@ -359,14 +359,41 @@ impl FindSchemaCandidates for ValueSchema {
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
     ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
-        if accessors.is_empty() {
-            (vec![self.clone()], Vec::new())
-        } else {
-            match self {
-                Self::Table(table) => table.find_schema_candidates(accessors, definitions),
-                Self::Array(array) => array.find_schema_candidates(accessors, definitions),
-                _ => (vec![self.clone()], Vec::new()),
+        match self {
+            Self::Table(table) => {
+                if accessors.is_empty() {
+                    (vec![self.clone()], Vec::new())
+                } else {
+                    table.find_schema_candidates(accessors, definitions)
+                }
             }
+            Self::Array(array) => {
+                if accessors.is_empty() {
+                    (vec![self.clone()], Vec::new())
+                } else {
+                    array.find_schema_candidates(accessors, definitions)
+                }
+            }
+            Self::OneOf(OneOfSchema { schemas, .. })
+            | Self::AnyOf(AnyOfSchema { schemas, .. })
+            | Self::AllOf(AllOfSchema { schemas, .. }) => {
+                let mut candidates = Vec::new();
+                let mut errors = Vec::new();
+
+                if let Ok(mut schemas) = schemas.write() {
+                    for schema in schemas.iter_mut() {
+                        let Ok(schema) = schema.resolve(definitions) else {
+                            continue;
+                        };
+                        let (schema_candidates, schema_errors) =
+                            schema.find_schema_candidates(accessors, definitions);
+                        candidates.extend(schema_candidates);
+                        errors.extend(schema_errors);
+                    }
+                }
+                (candidates, errors)
+            }
+            _ => (vec![self.clone()], Vec::new()),
         }
     }
 }

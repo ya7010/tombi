@@ -5,9 +5,7 @@ use crate::completion::{
 
 use super::{find_all_if_completion_items, CompletionHint, FindCompletionContents};
 use config::TomlVersion;
-use schema_store::{
-    Accessor, FindSchemaCandidates, Referable, SchemaDefinitions, TableSchema, ValueSchema,
-};
+use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
 use tower_lsp::lsp_types::{CompletionItemKind, Url};
 
 impl FindCompletionContents for document_tree::Table {
@@ -107,11 +105,12 @@ impl FindCompletionContents for document_tree::Table {
                             for error in errors {
                                 tracing::error!("{}", error);
                             }
-
                             for schema_candidate in schema_candidates {
                                 match completion_hint {
                                     Some(CompletionHint::InTableHeader) => {
-                                        if count_header_table_or_array(value_schema) == 0 {
+                                        if count_header_table_or_array(value_schema, definitions)
+                                            == 0
+                                        {
                                             continue;
                                         }
                                     }
@@ -216,7 +215,7 @@ impl FindCompletionContents for TableSchema {
                 for schema_candidate in schema_candidates {
                     match completion_hint {
                         Some(CompletionHint::InTableHeader) => {
-                            if count_header_table_or_array(value_schema) == 0 {
+                            if count_header_table_or_array(value_schema, definitions) == 0 {
                                 continue;
                             }
                         }
@@ -241,22 +240,24 @@ fn table_or_array(value_schema: &ValueSchema) -> bool {
     matches!(value_schema, ValueSchema::Table(_) | ValueSchema::Array(_))
 }
 
-fn count_header_table_or_array(value_schema: &ValueSchema) -> usize {
+fn count_header_table_or_array(
+    value_schema: &ValueSchema,
+    definitions: &SchemaDefinitions,
+) -> usize {
     value_schema
         .match_schemas(&table_or_array)
         .into_iter()
-        .filter(|schema| {
-            match schema {
-                ValueSchema::Array(array_schema) => {
-                    array_schema.items.as_ref().map_or(true, |item_schema| {
-                        item_schema.read().map_or(true, |item_schema| {
-                            matches!(*item_schema, Referable::Resolved(ref item_schema) if item_schema.is_match(&|schema| matches!(schema, ValueSchema::Table(_))))
-                        })
-                    })
-                }
-                ValueSchema::Table(_) => true,
-                _ => unreachable!("only table and array are allowed"),
-            }
+        .filter(|schema| match schema {
+            ValueSchema::Array(array_schema) => array_schema
+                .operate_item(
+                    |item_schema| {
+                        item_schema.is_match(&|schema| matches!(schema, ValueSchema::Table(_)))
+                    },
+                    definitions,
+                )
+                .unwrap_or(true),
+            ValueSchema::Table(_) => true,
+            _ => unreachable!("only table and array are allowed"),
         })
         .count()
 }

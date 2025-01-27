@@ -8,7 +8,7 @@ use super::{FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItem, Valu
 pub struct ArraySchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub items: Option<SchemaItem>,
+    items: Option<SchemaItem>,
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
@@ -45,6 +45,31 @@ impl ArraySchema {
 
     pub fn value_type(&self) -> crate::ValueType {
         crate::ValueType::Array
+    }
+
+    pub fn operate_item<F, T>(&self, operation: F, definitions: &SchemaDefinitions) -> Option<T>
+    where
+        F: FnOnce(&ValueSchema) -> T,
+    {
+        if let Some(ref items) = self.items {
+            let is_ref = if let Ok(referable_schema) = items.read() {
+                match *referable_schema {
+                    Referable::Resolved(ref value_schema) => return Some(operation(value_schema)),
+                    Referable::Ref { .. } => true,
+                }
+            } else {
+                false
+            };
+
+            if is_ref {
+                if let Ok(mut referable_schema) = items.write() {
+                    if let Ok(value_schema) = referable_schema.resolve(definitions) {
+                        return Some(operation(&value_schema));
+                    }
+                }
+            }
+        }
+        None
     }
 }
 

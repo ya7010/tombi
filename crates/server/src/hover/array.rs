@@ -18,61 +18,64 @@ impl GetHoverContent for document_tree::Array {
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         match value_schema {
-            Some(ValueSchema::Array(array)) => {
+            Some(ValueSchema::Array(array_schema)) => {
                 for (index, value) in self.values().iter().enumerate() {
                     if value.range().contains(position) {
                         let accessor = Accessor::Index(index);
 
-                        if let Some(items) = &array.items {
-                            if let Ok(mut item_schema) = items.write() {
-                                let Some(mut hover_content) = value.get_hover_content(
+                        return array_schema
+                            .operate_item(
+                                |item_schema| {
+                                    let Some(mut hover_content) = value.get_hover_content(
+                                        &accessors
+                                            .clone()
+                                            .into_iter()
+                                            .chain(std::iter::once(accessor.clone()))
+                                            .collect(),
+                                        Some(item_schema),
+                                        toml_version,
+                                        position,
+                                        keys,
+                                        schema_url,
+                                        definitions,
+                                    ) else {
+                                        return None;
+                                    };
+
+                                    if hover_content.title.is_none()
+                                        && hover_content.description.is_none()
+                                    {
+                                        if let Some(title) = &array_schema.title {
+                                            hover_content.title = Some(title.clone());
+                                        }
+                                        if let Some(description) = &array_schema.description {
+                                            hover_content.description = Some(description.clone());
+                                        }
+                                    }
+                                    Some(hover_content)
+                                },
+                                definitions,
+                            )
+                            .unwrap_or_else(|| {
+                                value.get_hover_content(
                                     &accessors
                                         .clone()
                                         .into_iter()
                                         .chain(std::iter::once(accessor))
                                         .collect(),
-                                    item_schema.resolve(definitions).ok(),
+                                    None,
                                     toml_version,
                                     position,
                                     keys,
                                     schema_url,
                                     definitions,
-                                ) else {
-                                    return None;
-                                };
-
-                                if hover_content.title.is_none()
-                                    && hover_content.description.is_none()
-                                {
-                                    if let Some(title) = &array.title {
-                                        hover_content.title = Some(title.clone());
-                                    }
-                                    if let Some(description) = &array.description {
-                                        hover_content.description = Some(description.clone());
-                                    }
-                                }
-                                return Some(hover_content);
-                            }
-                        }
-
-                        return value.get_hover_content(
-                            &accessors
-                                .clone()
-                                .into_iter()
-                                .chain(std::iter::once(accessor))
-                                .collect(),
-                            None,
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            definitions,
-                        );
+                                )
+                            });
                     }
                 }
                 Some(HoverContent {
-                    title: array.title.clone(),
-                    description: array.description.clone(),
+                    title: array_schema.title.clone(),
+                    description: array_schema.description.clone(),
                     accessors: Accessors::new(accessors.clone()),
                     value_type: ValueType::Array,
                     enumerated_values: vec![],

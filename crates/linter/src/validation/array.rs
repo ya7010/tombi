@@ -41,15 +41,14 @@ impl Validate for document_tree::Array {
 
         let mut errors = vec![];
         for value in self.values() {
-            if let Some(items) = &array_schema.items {
-                if let Ok(mut referable_schema) = items.write() {
-                    if let Ok(item_schema) = referable_schema.resolve(definitions) {
-                        if let Err(errs) = value.validate(toml_version, item_schema, &definitions) {
-                            errors.extend(errs);
-                        }
+            array_schema.operate_item(
+                |item_schema| {
+                    if let Err(errs) = value.validate(toml_version, item_schema, definitions) {
+                        errors.extend(errs);
                     }
-                }
-            }
+                },
+                definitions,
+            );
         }
 
         if let Some(max_items) = array_schema.max_items {
