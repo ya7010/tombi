@@ -186,7 +186,7 @@ mod test {
             "Keys": $keys:expr,
             "Value": $value_type:expr$(,)?
         });) => {
-            test_hover_keys_value!(#[tokio::test] async fn __$name($source, None) -> Ok({
+            test_hover_keys_value!(#[tokio::test] async fn __$name($source, Option::<std::path::PathBuf>::None ) -> Ok({
                 "Keys": $keys,
                 "Value": $value_type
             }););
@@ -216,7 +216,7 @@ mod test {
 
                 let backend = service.inner();
 
-                if let Some(schema_file_path) = $schema_file_path {
+                if let Some(schema_file_path) = &$schema_file_path {
                     let schema_file_url = Url::from_file_path(schema_file_path).expect(
                         format!(
                             "failed to convert schema path to URL: {}",
@@ -289,9 +289,13 @@ mod test {
                 .expect("failed to handle hover")
                 .expect("failed to get hover content");
 
-                assert!(hover_content.schema_url.is_some(), "The hover target is not defined in the schema.");
-                pretty_assertions::assert_eq!(hover_content.accessors.to_string(), $keys);
-                pretty_assertions::assert_eq!(hover_content.value_type.to_string(), $value_type);
+                if $schema_file_path.is_some() {
+                    assert!(hover_content.schema_url.is_some(), "The hover target is not defined in the schema.");
+                } else {
+                    assert!(hover_content.schema_url.is_none(), "The hover target is defined in the schema.");
+                }
+                pretty_assertions::assert_eq!(hover_content.accessors.to_string(), $keys, "Keys are not equal");
+                pretty_assertions::assert_eq!(hover_content.value_type.to_string(), $value_type, "Value type are not equal");
             }
         }
     }
