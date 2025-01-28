@@ -315,6 +315,18 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn tombi_toml_version_without_schema(
+            r#"
+            toml-version = "█v1.0.0"
+            "#,
+        ) -> Ok({
+            "Keys": "toml-version",
+            "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         async fn tombi_schema_catalog_path(
             r#"
             [schema.catalog]

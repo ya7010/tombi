@@ -194,15 +194,36 @@ impl GetHoverContent for document_tree::Table {
                 definitions,
             ),
             Some(_) => None,
-            None => Some(HoverContent {
-                title: None,
-                description: None,
-                accessors: Accessors::new(accessors.clone()),
-                value_type: ValueType::Table,
-                enumerated_values: vec![],
-                schema_url: None,
-                range: Some(self.range()),
-            }),
+            None => {
+                if let Some(key) = keys.first() {
+                    if let Some(value) = self.get(key) {
+                        let accessor = Accessor::Key(key.to_raw_text(toml_version));
+
+                        return value.get_hover_content(
+                            &accessors
+                                .clone()
+                                .into_iter()
+                                .chain(std::iter::once(accessor))
+                                .collect(),
+                            None,
+                            toml_version,
+                            position,
+                            &keys[1..],
+                            schema_url,
+                            definitions,
+                        );
+                    }
+                }
+                Some(HoverContent {
+                    title: None,
+                    description: None,
+                    accessors: Accessors::new(accessors.clone()),
+                    value_type: ValueType::Table,
+                    enumerated_values: vec![],
+                    schema_url: None,
+                    range: Some(self.range()),
+                })
+            }
         }
     }
 }

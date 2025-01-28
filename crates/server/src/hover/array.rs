@@ -114,15 +114,35 @@ impl GetHoverContent for document_tree::Array {
                 definitions,
             ),
             Some(_) => None,
-            None => Some(super::HoverContent {
-                title: None,
-                description: None,
-                accessors: Accessors::new(accessors.clone()),
-                value_type: ValueType::Array,
-                enumerated_values: vec![],
-                schema_url: None,
-                range: Some(self.range()),
-            }),
+            None => {
+                for (index, value) in self.values().iter().enumerate() {
+                    if value.range().contains(position) {
+                        let accessor = Accessor::Index(index);
+                        return value.get_hover_content(
+                            &accessors
+                                .clone()
+                                .into_iter()
+                                .chain(std::iter::once(accessor))
+                                .collect(),
+                            None,
+                            toml_version,
+                            position,
+                            keys,
+                            schema_url,
+                            definitions,
+                        );
+                    }
+                }
+                Some(super::HoverContent {
+                    title: None,
+                    description: None,
+                    accessors: Accessors::new(accessors.clone()),
+                    value_type: ValueType::Array,
+                    enumerated_values: vec![],
+                    schema_url: None,
+                    range: Some(self.range()),
+                })
+            }
         }
     }
 }
