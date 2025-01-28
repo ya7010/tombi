@@ -341,6 +341,19 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn tombi_schema_catalog_path_without_schema(
+            r#"
+            [schema.catalog]
+            path = "█https://www.schemastore.org/api/json/catalog.json"
+            "#,
+        ) -> Ok({
+            "Keys": "schema.catalog.path",
+            "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         // NOTE: This test is correct. When you hover over the last key of the header of ArrayOfTables,
         //       the Keys in the hover content is `schema[$index]`, not `schemas`.
         //       Therefore, the Value is `Table`.
@@ -349,6 +362,18 @@ mod test {
             [[schemas█]]
             "#,
             tombi_schema_path(),
+        ) -> Ok({
+            "Keys": "schemas[0]",
+            "Value": "Table"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn tombi_schemas_without_schema(
+            r#"
+            [[schemas█]]
+            "#,
         ) -> Ok({
             "Keys": "schemas[0]",
             "Value": "Table"
@@ -399,6 +424,20 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn cargo_package_readme_without_schema(
+            r#"
+            [package]
+            readme = "█README.md"
+            "#,
+            cargo_schema_path(),
+        ) -> Ok({
+            "Keys": "package.readme",
+            "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         async fn cargo_dependencies_key(
             r#"
             [dependencies]
@@ -427,6 +466,19 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn cargo_dependencies_version_without_schema(
+            r#"
+            [dependencies]
+            serde = "█1.0"
+            "#,
+        ) -> Ok({
+            "Keys": "dependencies.serde",
+            "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         async fn cargo_dependencies_workspace(
             r#"
             [dependencies]
@@ -436,6 +488,19 @@ mod test {
         ) -> Ok({
             "Keys": "dependencies.serde.workspace",
             "Value": "Boolean?"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn cargo_dependencies_workspace_without_schema(
+            r#"
+            [dependencies]
+            serde = { workspace█ = true }
+            "#,
+        ) -> Ok({
+            "Keys": "dependencies.serde.workspace",
+            "Value": "Boolean"
         });
     );
 
@@ -469,6 +534,19 @@ mod test {
 
     test_hover_keys_value!(
         #[tokio::test]
+        async fn cargo_dependencies_features_item_without_schema(
+            r#"
+            [dependencies]
+            serde = { version = "^1.0.0", features = ["derive█"] }
+            "#,
+        ) -> Ok({
+            "Keys": "dependencies.serde.features[0]",
+            "Value": "String"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
         async fn pyprpoject_project_readme(
             r#"
             [project]
@@ -494,6 +572,21 @@ mod test {
         ) -> Ok({
             "Keys": "dependency-groups.dev[0]",
             "Value": "String ^ Table"
+        });
+    );
+
+    test_hover_keys_value!(
+        #[tokio::test]
+        async fn pyprpoject_dependency_groups_without_schema(
+            r#"
+            [dependency-groups]
+            dev = [
+                "█pytest>=8.3.3",
+            ]
+            "#,
+        ) -> Ok({
+            "Keys": "dependency-groups.dev[0]",
+            "Value": "String"
         });
     );
 }
