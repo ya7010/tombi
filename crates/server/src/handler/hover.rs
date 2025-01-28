@@ -210,7 +210,7 @@ mod test {
                     LspService,
                 };
                 use schema_store::JsonCatalogSchema;
-                use crate::handler::handle_did_open;
+                use $crate::handler::handle_did_open;
 
                 let (service, _) = LspService::new(|client| Backend::new(client));
 

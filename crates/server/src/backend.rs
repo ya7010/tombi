@@ -132,7 +132,7 @@ impl Backend {
             Some(Ok(p.tree()))
         } else {
             let mut diagnostics = Vec::with_capacity(p.errors().len());
-            p.errors().into_iter().for_each(|error| {
+            p.errors().iter().for_each(|error| {
                 error.set_diagnostic(&mut diagnostics);
             });
 

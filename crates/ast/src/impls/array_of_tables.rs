@@ -46,7 +46,7 @@ impl crate::ArrayOfTables {
             .filter_map(|node: ArrayOfTables| node.header().map(|header| header.keys()))
             .take_while(move |keys| {
                 match (
-                    self.header().map(|header| header.keys().next()).flatten(),
+                    self.header().and_then(|header| header.keys().next()),
                     keys.clone().next(),
                 ) {
                     (Some(a), Some(b)) => match (

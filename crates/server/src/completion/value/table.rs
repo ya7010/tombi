@@ -33,7 +33,7 @@ impl FindCompletionContents for document_tree::Table {
                                     table_schema.properties.get_mut(&accessor)
                                 {
                                     if let Ok(property_schema) =
-                                        property.value_mut().resolve(&definitions)
+                                        property.value_mut().resolve(definitions)
                                     {
                                         return value.find_completion_contents(
                                             &accessors
@@ -106,15 +106,12 @@ impl FindCompletionContents for document_tree::Table {
                                 tracing::error!("{}", error);
                             }
                             for schema_candidate in schema_candidates {
-                                match completion_hint {
-                                    Some(CompletionHint::InTableHeader) => {
-                                        if count_header_table_or_array(value_schema, definitions)
-                                            == 0
-                                        {
-                                            continue;
-                                        }
+                                if let Some(CompletionHint::InTableHeader) = completion_hint {
+                                    if count_header_table_or_array(value_schema, definitions)
+                                        == 0
+                                    {
+                                        continue;
                                     }
-                                    _ => {}
                                 }
                                 if let Some(key) = key {
                                     if let Some(value) = self.get(key) {
@@ -213,13 +210,10 @@ impl FindCompletionContents for TableSchema {
                 }
 
                 for schema_candidate in schema_candidates {
-                    match completion_hint {
-                        Some(CompletionHint::InTableHeader) => {
-                            if count_header_table_or_array(value_schema, definitions) == 0 {
-                                continue;
-                            }
+                    if let Some(CompletionHint::InTableHeader) = completion_hint {
+                        if count_header_table_or_array(value_schema, definitions) == 0 {
+                            continue;
                         }
-                        _ => {}
                     }
                     let completion_content = CompletionContent {
                         label: label.clone(),

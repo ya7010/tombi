@@ -172,7 +172,7 @@ where
             };
             if let Some(mut hover_content) = value.get_hover_content(
                 accessors,
-                Some(&value_schema),
+                Some(value_schema),
                 toml_version,
                 position,
                 keys,
@@ -267,7 +267,7 @@ where
 
             if let Some(mut hover_content) = value.get_hover_content(
                 accessors,
-                Some(&value_schema),
+                Some(value_schema),
                 toml_version,
                 position,
                 keys,
@@ -325,7 +325,7 @@ where
             };
             if let Some(hover_content) = value.get_hover_content(
                 accessors,
-                Some(&value_schema),
+                Some(value_schema),
                 toml_version,
                 position,
                 keys,

@@ -50,7 +50,7 @@ impl Validate for document_tree::Table {
             if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                 matche_key = true;
                 if let Ok(value_schema) = property.resolve(definitions) {
-                    if let Err(errs) = value.validate(toml_version, value_schema, &definitions) {
+                    if let Err(errs) = value.validate(toml_version, value_schema, definitions) {
                         errors.extend(errs);
                     }
                 }
@@ -68,7 +68,7 @@ impl Validate for document_tree::Table {
                         let property_schema = pattern_property.value_mut();
                         if let Ok(value_schema) = property_schema.resolve(definitions) {
                             if let Err(errs) =
-                                value.validate(toml_version, value_schema, &definitions)
+                                value.validate(toml_version, value_schema, definitions)
                             {
                                 errors.extend(errs);
                             }
@@ -81,7 +81,7 @@ impl Validate for document_tree::Table {
                     if let Ok(mut additional_property_schema) = additional_property_schema.write() {
                         if let Ok(value_schema) = additional_property_schema.resolve(definitions) {
                             if let Err(errs) =
-                                value.validate(toml_version, value_schema, &definitions)
+                                value.validate(toml_version, value_schema, definitions)
                             {
                                 errors.extend(errs);
                             }

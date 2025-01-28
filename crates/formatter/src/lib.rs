@@ -31,7 +31,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr) -> Ok($expected:expr);) => {
-        $crate::test_format!(#[test] fn $name($source, $toml_version, $definitions, &crate::FormatOptions::default()) -> Ok($expected););
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $definitions, &$crate::FormatOptions::default()) -> Ok($expected););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Ok($expected:expr);) => {

@@ -105,7 +105,7 @@ pub struct Patterns(pub Vec<String>);
 impl std::fmt::Display for Patterns {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.0.len() == 1 {
-            return write!(f, "{}", self.0[0]);
+            write!(f, "{}", self.0[0])
         } else {
             write!(f, "{}", self.0.iter().map(|p| format!("({})", p)).join("|"))
         }

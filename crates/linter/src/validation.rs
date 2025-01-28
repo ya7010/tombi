@@ -109,7 +109,7 @@ where
                     }
                 }
                 (_, ValueSchema::AnyOf(any_of_schema)) => {
-                    match validate_any_of(value, toml_version, &any_of_schema, definitions) {
+                    match validate_any_of(value, toml_version, any_of_schema, definitions) {
                         Ok(()) => {
                             valid_count += 1;
                             break;
@@ -118,7 +118,7 @@ where
                     }
                 }
                 (_, ValueSchema::AllOf(all_of_schema)) => {
-                    match validate_all_of(value, toml_version, &all_of_schema, definitions) {
+                    match validate_all_of(value, toml_version, all_of_schema, definitions) {
                         Ok(()) => {
                             valid_count += 1;
                             break;
@@ -198,7 +198,7 @@ where
                     });
                 }
                 (_, ValueSchema::OneOf(one_of_schema)) => {
-                    match validate_one_of(value, toml_version, &one_of_schema, definitions) {
+                    match validate_one_of(value, toml_version, one_of_schema, definitions) {
                         Ok(()) => {
                             return Ok(());
                         }
@@ -206,7 +206,7 @@ where
                     }
                 }
                 (_, ValueSchema::AnyOf(any_of_schema)) => {
-                    match validate_any_of(value, toml_version, &any_of_schema, definitions) {
+                    match validate_any_of(value, toml_version, any_of_schema, definitions) {
                         Ok(()) => {
                             return Ok(());
                         }
@@ -214,7 +214,7 @@ where
                     }
                 }
                 (_, ValueSchema::AllOf(all_of_schema)) => {
-                    match validate_all_of(value, toml_version, &all_of_schema, definitions) {
+                    match validate_all_of(value, toml_version, all_of_schema, definitions) {
                         Ok(()) => {
                             return Ok(());
                         }

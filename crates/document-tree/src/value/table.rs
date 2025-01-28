@@ -345,11 +345,9 @@ impl IntoDocumentTreeResult<crate::Table> for ast::Table {
                     errors.extend(errs);
                     return make_keys_table(header_keys, table, errors);
                 };
-            } else {
-                if let Err(errs) = insert_table(&mut table, key, |table| table.new_parent_table()) {
-                    errors.extend(errs);
-                    return make_keys_table(header_keys, table, errors);
-                }
+            } else if let Err(errs) = insert_table(&mut table, key, |table| table.new_parent_table()) {
+                errors.extend(errs);
+                return make_keys_table(header_keys, table, errors);
             };
 
             is_array_of_table = array_of_table_keys.contains(&header_keys);
@@ -424,11 +422,9 @@ impl IntoDocumentTreeResult<Table> for ast::ArrayOfTables {
                     errors.extend(errs);
                     return make_keys_table(header_keys, table, errors);
                 };
-            } else {
-                if let Err(errs) = insert_table(&mut table, key, |table| table.new_parent_table()) {
-                    errors.extend(errs);
-                    return make_keys_table(header_keys, table, errors);
-                }
+            } else if let Err(errs) = insert_table(&mut table, key, |table| table.new_parent_table()) {
+                errors.extend(errs);
+                return make_keys_table(header_keys, table, errors);
             };
 
             is_array_of_table = array_of_table_keys.contains(&header_keys);
@@ -646,8 +642,8 @@ fn make_keys_table(
             }
         }
     }
-    return DocumentTreeResult {
+    DocumentTreeResult {
         tree: table,
         errors,
-    };
+    }
 }

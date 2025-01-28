@@ -174,24 +174,24 @@ impl CompletionContent {
     }
 }
 
-impl Into<tower_lsp::lsp_types::CompletionItem> for CompletionContent {
-    fn into(self) -> tower_lsp::lsp_types::CompletionItem {
-        let sorted_text = format!("{}_{}", (self.priority as u8), &self.label);
+impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
+    fn from(val: CompletionContent) -> Self {
+        let sorted_text = format!("{}_{}", (val.priority as u8), &val.label);
         tower_lsp::lsp_types::CompletionItem {
-            label: self.label,
+            label: val.label,
             kind: Some(
-                self.kind
+                val.kind
                     .unwrap_or(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             ),
-            detail: self.detail,
-            documentation: self.documentation.map(|documentation| {
+            detail: val.detail,
+            documentation: val.documentation.map(|documentation| {
                 tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value: documentation,
                 })
             }),
             sort_text: Some(sorted_text),
-            text_edit: self.text_edit,
+            text_edit: val.text_edit,
             ..Default::default()
         }
     }

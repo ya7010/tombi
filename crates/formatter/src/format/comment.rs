@@ -114,7 +114,7 @@ fn format_comment(
         write!(f, "{}", c)?;
     }
     if strip_leading_spaces {
-        while let Some(c) = iter.next() {
+        for c in iter.by_ref() {
             if c != ' ' && c != '\t' {
                 write!(f, "{}", c)?;
                 break;

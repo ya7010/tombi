@@ -1,4 +1,3 @@
-use chrono;
 use config::TomlVersion;
 use schema_store::{Accessor, LocalDateTimeSchema, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
