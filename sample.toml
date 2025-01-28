@@ -1,6 +1,8 @@
 # root begin dangling comment1
 # root begin dangling comment2
 
+value1 = 1
+
 # table header leading comment1
 # table header leading comment2
 [aaaa]
