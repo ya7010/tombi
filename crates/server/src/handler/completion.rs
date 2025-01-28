@@ -88,8 +88,8 @@ mod test {
         (
             #[tokio::test]
             async fn $name:ident(
-                $schema_file_path:expr,
-                $source:expr
+                $source:expr,
+                $schema_file_path:expr$(,)?
             ) -> Ok([$($label:expr),*$(,)?]);
         ) => {
             #[tokio::test]
@@ -201,8 +201,8 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_empty(
+            "█",
             tombi_schema_path(),
-            "█"
         ) -> Ok([
             "format",
             "lint",
@@ -216,11 +216,11 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_used_toml_version(
-            tombi_schema_path(),
             r#"
             toml-version = "v1.0.0"
             █
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "format",
             "lint",
@@ -234,8 +234,8 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_empty_bracket(
+            "[█]",
             tombi_schema_path(),
-            "[█]"
         ) -> Ok([
             "format",
             "lint",
@@ -248,12 +248,12 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_empty_bracket2(
-            tombi_schema_path(),
             r#"
             toml-version = "v1.0.0"
 
             [█]
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "format",
             "lint",
@@ -266,14 +266,14 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_empty_bracket3(
-            tombi_schema_path(),
             r#"
             toml-version = "v1.0.0"
 
             [█]
 
             [format]
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "format",
             "lint",
@@ -286,8 +286,8 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_empty_double_bracket(
+            "[[█]]",
             tombi_schema_path(),
-            "[[█]]"
         ) -> Ok([
             "format",
             "lint",
@@ -300,10 +300,10 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_schema(
-            tombi_schema_path(),
             r#"
             [schema.█]
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "catalog",
         ]);
@@ -312,31 +312,31 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_schema_after_bracket(
-            tombi_schema_path(),
             r#"
             [schema]█
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([]);
     }
 
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_schema_catalog(
-            tombi_schema_path(),
             r#"
             [schema.catalog.█]
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([]);
     }
 
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_schema_catalog_path(
-            tombi_schema_path(),
             r#"
             [schema.catalog]
             path =█
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "[]",
@@ -346,11 +346,11 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_schema_catalog_path2(
-            tombi_schema_path(),
             r#"
             [schema.catalog]
             path = █
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "[]",
@@ -360,10 +360,10 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_schema_catalog_path_inline(
-            tombi_schema_path(),
             r#"
             schema.catalog.path =█
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "[]",
@@ -373,12 +373,12 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_server2(
-            tombi_schema_path(),
             r#"
             [server]
             █
             completion.enabled = true
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "completion",
             "diagnostics",
@@ -390,13 +390,13 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_server3(
-            tombi_schema_path(),
             r#"
             [server]
             formatting.enabled = true
             █
             completion.enabled = true
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "completion",
             "diagnostics",
@@ -408,11 +408,11 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn tombi_server_completion(
-            tombi_schema_path(),
             r#"
             [server]
             completion.enabled = █
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok([
             "true",
             "false",
@@ -422,8 +422,8 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn pyproject_empty(
+            "█",
             pyproject_schema_path(),
-            "█"
         ) -> Ok([
             "build-system",
             "dependency-groups",
@@ -435,11 +435,11 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn pyproject_project(
-            pyproject_schema_path(),
             r#"
             [project]
             █
-            "#
+            "#,
+            pyproject_schema_path(),
         ) -> Ok([
             "authors",
             "classifiers",
@@ -460,8 +460,8 @@ mod test {
     test_completion_labels! {
         #[tokio::test]
         async fn cargo_empty(
+            "█",
             cargo_schema_path(),
-            "█"
         ) -> Ok([
             "badges",
             "bench",
