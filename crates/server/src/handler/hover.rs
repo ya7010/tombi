@@ -429,7 +429,6 @@ mod test {
             [package]
             readme = "█README.md"
             "#,
-            cargo_schema_path(),
         ) -> Ok({
             "Keys": "package.readme",
             "Value": "String"
