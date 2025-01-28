@@ -168,9 +168,12 @@ mod test {
 
     #[macro_export]
     macro_rules! test_hover_keys_value {
-        (#[tokio::test] async fn $name:ident($schema_file_path:expr, $source:expr) -> Ok({
+        (#[tokio::test] async fn $name:ident(
+            $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok({
             "Keys": $keys:expr,
-            "Value": $value_type:expr
+            "Value": $value_type:expr$(,)?
         });) => {
             #[tokio::test]
             async fn $name() {
@@ -271,10 +274,10 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn tombi_toml_version(
-            tombi_schema_path(),
             r#"
             toml-version = "█v1.0.0"
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok({
             "Keys": "toml-version",
             "Value": "String?"
@@ -284,11 +287,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn tombi_schema_catalog_path(
-            tombi_schema_path(),
             r#"
             [schema.catalog]
             path = "█https://www.schemastore.org/api/json/catalog.json"
-            "#
+            "#,
+            tombi_schema_path()
         ) -> Ok({
             "Keys": "schema.catalog.path",
             "Value": "(String | Array)?"
@@ -301,10 +304,10 @@ mod test {
         //       the Keys in the hover content is `schema[$index]`, not `schemas`.
         //       Therefore, the Value is `Table`.
         async fn tombi_schemas(
-            tombi_schema_path(),
             r#"
             [[schemas█]]
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok({
             "Keys": "schemas[0]",
             "Value": "Table"
@@ -314,11 +317,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn tombi_schemas_path(
-            tombi_schema_path(),
             r#"
             [[schemas]]
             path = "█tombi.schema.json"
-            "#
+            "#,
+            tombi_schema_path(),
         ) -> Ok({
             "Keys": "schemas[0].path",
             "Value": "String"
@@ -328,11 +331,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_package_name(
-            cargo_schema_path(),
             r#"
             [package]
             name█ = "tombi"
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "package.name",
             "Value": "String" // Yes; the value is required.
@@ -342,11 +345,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_package_readme(
-            cargo_schema_path(),
             r#"
             [package]
             readme = "█README.md"
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "package.readme",
             "Value": "(String | Boolean | Table)?"
@@ -356,11 +359,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_dependencies_key(
-            cargo_schema_path(),
             r#"
             [dependencies]
             serde█ = { workspace = true }
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "dependencies.serde",
             "Value": "(String | Table)?"
@@ -370,11 +373,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_dependencies_version(
-            cargo_schema_path(),
             r#"
             [dependencies]
             serde = "█1.0"
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "dependencies.serde",
             "Value": "(String | Table)?"
@@ -384,11 +387,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_dependencies_workspace(
-            cargo_schema_path(),
             r#"
             [dependencies]
             serde = { workspace█ = true }
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "dependencies.serde.workspace",
             "Value": "Boolean?"
@@ -398,11 +401,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_dependencies_features(
-            cargo_schema_path(),
             r#"
             [dependencies]
             serde = { version = "^1.0.0", features█ = ["derive"] }
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "dependencies.serde.features",
             "Value": "Array?"
@@ -412,11 +415,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn cargo_dependencies_features_item(
-            cargo_schema_path(),
             r#"
             [dependencies]
             serde = { version = "^1.0.0", features = ["derive█"] }
-            "#
+            "#,
+            cargo_schema_path(),
         ) -> Ok({
             "Keys": "dependencies.serde.features[0]",
             "Value": "String"
@@ -426,11 +429,11 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn pyprpoject_project_readme(
-            pyproject_schema_path(),
             r#"
             [project]
             readme = "█1.0.0"
-            "#
+            "#,
+            pyproject_schema_path(),
         ) -> Ok({
             "Keys": "project.readme",
             "Value": "(String ^ Table)?"
@@ -440,13 +443,13 @@ mod test {
     test_hover_keys_value!(
         #[tokio::test]
         async fn pyprpoject_dependency_groups(
-            pyproject_schema_path(),
             r#"
             [dependency-groups]
             dev = [
                 "█pytest>=8.3.3",
             ]
-            "#
+            "#,
+            pyproject_schema_path(),
         ) -> Ok({
             "Keys": "dependency-groups.dev[0]",
             "Value": "String ^ Table"
