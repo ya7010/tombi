@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionContent, CompletionHint, FindCompletionContents,
+    CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
 };
 
 impl FindCompletionContents for document_tree::LocalDateTime {
@@ -75,11 +75,11 @@ impl FindCompletionContents for LocalDateTimeSchema {
         _accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
         _toml_version: TomlVersion,
-        _position: text::Position,
+        position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
-        _completion_hint: Option<CompletionHint>,
+        completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         let mut completion_items = vec![];
 
@@ -94,9 +94,10 @@ impl FindCompletionContents for LocalDateTimeSchema {
         }
 
         if let Some(default) = &self.default {
+            let default = default.to_string();
+            let edit = CompletionEdit::new_literal(&default, position, completion_hint);
             completion_items.push(CompletionContent::new_default_value(
-                default.to_string(),
-                schema_url,
+                default, edit, schema_url,
             ));
         }
 

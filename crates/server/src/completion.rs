@@ -218,7 +218,11 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_default_value(label: String, schema_url: Option<&Url>) -> Self {
+    pub fn new_default_value(
+        label: String,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
@@ -226,7 +230,7 @@ impl CompletionContent {
             detail: Some("default".to_string()),
             documentation: None,
             schema_url: schema_url.cloned(),
-            edit: None,
+            edit,
             preselect: Some(true),
         }
     }
@@ -510,10 +514,19 @@ where
     }
 
     if let Some(default) = &one_of_schema.default {
-        completion_items.push(CompletionContent::new_default_value(
-            default.to_string(),
-            schema_url,
-        ));
+        let literal = match default {
+            serde_json::Value::String(value) => Some(format!("\"{value}\"")),
+            serde_json::Value::Number(value) => Some(value.to_string()),
+            serde_json::Value::Bool(value) => Some(value.to_string()),
+            _ => None,
+        };
+        if let Some(literal) = literal {
+            completion_items.push(CompletionContent::new_default_value(
+                default.to_string(),
+                CompletionEdit::new_literal(&literal, position, completion_hint),
+                schema_url,
+            ));
+        }
     }
 
     completion_items
@@ -565,10 +578,19 @@ where
     }
 
     if let Some(default) = &any_of_schema.default {
-        completion_items.push(CompletionContent::new_default_value(
-            default.to_string(),
-            schema_url,
-        ));
+        let literal = match default {
+            serde_json::Value::String(value) => Some(format!("\"{value}\"")),
+            serde_json::Value::Number(value) => Some(value.to_string()),
+            serde_json::Value::Bool(value) => Some(value.to_string()),
+            _ => None,
+        };
+        if let Some(literal) = literal {
+            completion_items.push(CompletionContent::new_default_value(
+                default.to_string(),
+                CompletionEdit::new_literal(&literal, position, completion_hint),
+                schema_url,
+            ));
+        }
     }
 
     completion_items
@@ -620,10 +642,19 @@ where
     }
 
     if let Some(default) = &all_of_schema.default {
-        completion_items.push(CompletionContent::new_default_value(
-            default.to_string(),
-            schema_url,
-        ));
+        let literal = match default {
+            serde_json::Value::String(value) => Some(format!("\"{value}\"")),
+            serde_json::Value::Number(value) => Some(value.to_string()),
+            serde_json::Value::Bool(value) => Some(value.to_string()),
+            _ => None,
+        };
+        if let Some(literal) = literal {
+            completion_items.push(CompletionContent::new_default_value(
+                default.to_string(),
+                CompletionEdit::new_literal(&literal, position, completion_hint),
+                schema_url,
+            ));
+        }
     }
 
     completion_items
