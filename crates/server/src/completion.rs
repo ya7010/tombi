@@ -49,9 +49,11 @@ pub fn get_completion_contents(
                     SyntaxKind::BARE_KEY
                     | SyntaxKind::BASIC_STRING
                     | SyntaxKind::LITERAL_STRING => {
-                        completion_hint = Some(CompletionHint::SpaceTrigger {
-                            range: text::Range::new(last_node.range().end(), position),
-                        })
+                        if last_node.range().end() != position {
+                            completion_hint = Some(CompletionHint::SpaceTrigger {
+                                range: text::Range::new(last_node.range().end(), position),
+                            })
+                        }
                     }
                     _ => {}
                 },
