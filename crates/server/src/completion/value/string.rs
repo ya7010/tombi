@@ -83,12 +83,12 @@ impl FindCompletionContents for StringSchema {
         let mut completion_items = vec![];
 
         if let Some(enumerate) = &self.enumerate {
-            for value in enumerate {
-                completion_items.push(CompletionContent {
-                    label: format!("\"{value}\""),
-                    schema_url: schema_url.cloned(),
-                    ..Default::default()
-                });
+            for item in enumerate {
+                let label = item.to_string();
+                let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                completion_items.push(CompletionContent::new_enumerate_value(
+                    label, edit, schema_url,
+                ));
             }
         }
 

@@ -85,11 +85,11 @@ impl FindCompletionContents for OffsetDateTimeSchema {
 
         if let Some(enumerate) = &self.enumerate {
             for item in enumerate {
-                completion_items.push(CompletionContent {
-                    label: item.to_string(),
-                    schema_url: schema_url.cloned(),
-                    ..Default::default()
-                });
+                let label = item.to_string();
+                let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                completion_items.push(CompletionContent::new_enumerate_value(
+                    label, edit, schema_url,
+                ));
             }
         }
 
