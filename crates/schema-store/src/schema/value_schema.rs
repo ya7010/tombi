@@ -149,22 +149,22 @@ impl ValueSchema {
         }
     }
 
-    pub fn title_mut(&mut self) -> Option<&mut String> {
+    pub fn set_title(&mut self, title: Option<String>) {
         match self {
-            ValueSchema::Null => None,
-            ValueSchema::Boolean(schema) => schema.title.as_mut(),
-            ValueSchema::Integer(schema) => schema.title.as_mut(),
-            ValueSchema::Float(schema) => schema.title.as_mut(),
-            ValueSchema::String(schema) => schema.title.as_mut(),
-            ValueSchema::LocalDate(schema) => schema.title.as_mut(),
-            ValueSchema::LocalDateTime(schema) => schema.title.as_mut(),
-            ValueSchema::LocalTime(schema) => schema.title.as_mut(),
-            ValueSchema::OffsetDateTime(schema) => schema.title.as_mut(),
-            ValueSchema::Array(schema) => schema.title.as_mut(),
-            ValueSchema::Table(schema) => schema.title.as_mut(),
-            ValueSchema::OneOf(schema) => schema.title.as_mut(),
-            ValueSchema::AnyOf(schema) => schema.title.as_mut(),
-            ValueSchema::AllOf(schema) => schema.title.as_mut(),
+            ValueSchema::Null => {}
+            ValueSchema::Boolean(schema) => schema.title = title,
+            ValueSchema::Integer(schema) => schema.title = title,
+            ValueSchema::Float(schema) => schema.title = title,
+            ValueSchema::String(schema) => schema.title = title,
+            ValueSchema::LocalDate(schema) => schema.title = title,
+            ValueSchema::LocalDateTime(schema) => schema.title = title,
+            ValueSchema::LocalTime(schema) => schema.title = title,
+            ValueSchema::OffsetDateTime(schema) => schema.title = title,
+            ValueSchema::Array(schema) => schema.title = title,
+            ValueSchema::Table(schema) => schema.title = title,
+            ValueSchema::OneOf(schema) => schema.title = title,
+            ValueSchema::AnyOf(schema) => schema.title = title,
+            ValueSchema::AllOf(schema) => schema.title = title,
         }
     }
 
@@ -187,22 +187,22 @@ impl ValueSchema {
         }
     }
 
-    pub fn description_mut(&mut self) -> Option<&mut String> {
+    pub fn set_description(&mut self, description: Option<String>) {
         match self {
-            ValueSchema::Null => None,
-            ValueSchema::Boolean(schema) => schema.description.as_mut(),
-            ValueSchema::Integer(schema) => schema.description.as_mut(),
-            ValueSchema::Float(schema) => schema.description.as_mut(),
-            ValueSchema::String(schema) => schema.description.as_mut(),
-            ValueSchema::LocalDate(schema) => schema.description.as_mut(),
-            ValueSchema::LocalDateTime(schema) => schema.description.as_mut(),
-            ValueSchema::LocalTime(schema) => schema.description.as_mut(),
-            ValueSchema::OffsetDateTime(schema) => schema.description.as_mut(),
-            ValueSchema::Array(schema) => schema.description.as_mut(),
-            ValueSchema::Table(schema) => schema.description.as_mut(),
-            ValueSchema::OneOf(schema) => schema.description.as_mut(),
-            ValueSchema::AnyOf(schema) => schema.description.as_mut(),
-            ValueSchema::AllOf(schema) => schema.description.as_mut(),
+            ValueSchema::Null => {}
+            ValueSchema::Boolean(schema) => schema.description = description,
+            ValueSchema::Integer(schema) => schema.description = description,
+            ValueSchema::Float(schema) => schema.description = description,
+            ValueSchema::String(schema) => schema.description = description,
+            ValueSchema::LocalDate(schema) => schema.description = description,
+            ValueSchema::LocalDateTime(schema) => schema.description = description,
+            ValueSchema::LocalTime(schema) => schema.description = description,
+            ValueSchema::OffsetDateTime(schema) => schema.description = description,
+            ValueSchema::Array(schema) => schema.description = description,
+            ValueSchema::Table(schema) => schema.description = description,
+            ValueSchema::OneOf(schema) => schema.description = description,
+            ValueSchema::AnyOf(schema) => schema.description = description,
+            ValueSchema::AllOf(schema) => schema.description = description,
         }
     }
 
@@ -313,15 +313,9 @@ impl Referable<ValueSchema> {
                     if let Some(definition_schema) = definitions.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
                         if let Referable::Resolved(ref mut schema) = &mut referable_schema {
-                            if let Some(schema_title) = schema.title_mut() {
-                                if let Some(title) = title {
-                                    *schema_title = title.clone();
-                                }
-                            }
-                            if let Some(schema_description) = schema.description_mut() {
-                                if let Some(description) = description {
-                                    *schema_description = description.clone();
-                                }
+                            if title.is_some() || description.is_some() {
+                                schema.set_title(title.to_owned());
+                                schema.set_description(description.to_owned());
                             }
                         }
 
