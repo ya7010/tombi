@@ -7,7 +7,7 @@ use config::TomlVersion;
 use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 pub use hint::CompletionHint;
 use itertools::Itertools;
-use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
+use schema_store::{get_schema_name, Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
 
 pub fn get_completion_contents(
@@ -147,17 +147,19 @@ pub struct CompletionContent {
     pub priority: CompletionPriority,
     pub detail: Option<String>,
     pub documentation: Option<String>,
+    pub schema_url: Option<Url>,
     pub text_edit: Option<tower_lsp::lsp_types::CompletionTextEdit>,
 }
 
 impl CompletionContent {
-    pub fn new_default_value(label: String) -> Self {
+    pub fn new_default_value(label: String, schema_url: Option<&Url>) -> Self {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             priority: CompletionPriority::DefaultValue,
             detail: Some("default".to_string()),
             documentation: None,
+            schema_url: schema_url.cloned(),
             text_edit: None,
         }
     }
@@ -169,29 +171,56 @@ impl CompletionContent {
             priority: CompletionPriority::Current,
             detail: Some("current".to_string()),
             documentation: None,
+            schema_url: None,
             text_edit: None,
         }
     }
 }
 
 impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
-    fn from(val: CompletionContent) -> Self {
-        let sorted_text = format!("{}_{}", (val.priority as u8), &val.label);
+    fn from(completion_content: CompletionContent) -> Self {
+        const SECTION_SEPARATOR: &str = "-----";
+
+        let sorted_text = format!(
+            "{}_{}",
+            (completion_content.priority as u8),
+            &completion_content.label
+        );
+
+        let mut schema_text = None;
+        if let Some(schema_url) = &completion_content.schema_url {
+            if let Some(schema_filename) = get_schema_name(schema_url) {
+                schema_text = Some(format!("Schema: [{schema_filename}]({schema_url})\n"));
+            }
+        }
+        let documentation = match completion_content.documentation {
+            Some(documentation) => {
+                let mut documentation = documentation;
+                if let Some(schema_text) = schema_text {
+                    documentation.push_str(&format!("\n\n{}\n\n", SECTION_SEPARATOR));
+                    documentation.push_str(&schema_text);
+                }
+                Some(documentation)
+            }
+            None => schema_text,
+        };
+
         tower_lsp::lsp_types::CompletionItem {
-            label: val.label,
+            label: completion_content.label,
             kind: Some(
-                val.kind
+                completion_content
+                    .kind
                     .unwrap_or(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             ),
-            detail: val.detail,
-            documentation: val.documentation.map(|documentation| {
+            detail: completion_content.detail,
+            documentation: documentation.map(|documentation| {
                 tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value: documentation,
                 })
             }),
             sort_text: Some(sorted_text),
-            text_edit: val.text_edit,
+            text_edit: completion_content.text_edit,
             ..Default::default()
         }
     }
@@ -363,7 +392,10 @@ where
     }
 
     if let Some(default) = &one_of_schema.default {
-        completion_items.push(CompletionContent::new_default_value(default.to_string()));
+        completion_items.push(CompletionContent::new_default_value(
+            default.to_string(),
+            schema_url,
+        ));
     }
 
     completion_items
@@ -415,7 +447,10 @@ where
     }
 
     if let Some(default) = &any_of_schema.default {
-        completion_items.push(CompletionContent::new_default_value(default.to_string()));
+        completion_items.push(CompletionContent::new_default_value(
+            default.to_string(),
+            schema_url,
+        ));
     }
 
     completion_items
@@ -467,7 +502,10 @@ where
     }
 
     if let Some(default) = &all_of_schema.default {
-        completion_items.push(CompletionContent::new_default_value(default.to_string()));
+        completion_items.push(CompletionContent::new_default_value(
+            default.to_string(),
+            schema_url,
+        ));
     }
 
     completion_items

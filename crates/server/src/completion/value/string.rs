@@ -76,7 +76,7 @@ impl FindCompletionContents for StringSchema {
         _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        _schema_url: Option<&Url>,
+        schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -86,15 +86,17 @@ impl FindCompletionContents for StringSchema {
             for value in enumerate {
                 completion_items.push(CompletionContent {
                     label: format!("\"{value}\""),
+                    schema_url: schema_url.cloned(),
                     ..Default::default()
                 });
             }
         }
 
         if let Some(default) = &self.default {
-            completion_items.push(CompletionContent::new_default_value(format!(
-                "\"{default}\""
-            )));
+            completion_items.push(CompletionContent::new_default_value(
+                format!("\"{default}\""),
+                schema_url,
+            ));
         }
 
         completion_items

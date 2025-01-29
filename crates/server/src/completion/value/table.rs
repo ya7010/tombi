@@ -107,9 +107,7 @@ impl FindCompletionContents for document_tree::Table {
                             }
                             for schema_candidate in schema_candidates {
                                 if let Some(CompletionHint::InTableHeader) = completion_hint {
-                                    if count_header_table_or_array(value_schema, definitions)
-                                        == 0
-                                    {
+                                    if count_header_table_or_array(value_schema, definitions) == 0 {
                                         continue;
                                     }
                                 }
@@ -137,6 +135,7 @@ impl FindCompletionContents for document_tree::Table {
                                     detail: schema_candidate.detail(definitions, completion_hint),
                                     documentation: schema_candidate
                                         .documentation(definitions, completion_hint),
+                                    schema_url: schema_url.cloned(),
                                     ..Default::default()
                                 };
                                 completions.push(completion_content);
@@ -192,7 +191,7 @@ impl FindCompletionContents for TableSchema {
         _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        _schema_url: Option<&Url>,
+        schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -220,6 +219,7 @@ impl FindCompletionContents for TableSchema {
                         kind: Some(CompletionItemKind::PROPERTY),
                         detail: schema_candidate.detail(definitions, completion_hint),
                         documentation: schema_candidate.documentation(definitions, completion_hint),
+                        schema_url: schema_url.cloned(),
                         ..Default::default()
                     };
                     completions.push(completion_content);

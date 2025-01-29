@@ -77,7 +77,7 @@ impl FindCompletionContents for LocalDateTimeSchema {
         _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        _schema_url: Option<&Url>,
+        schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -87,13 +87,17 @@ impl FindCompletionContents for LocalDateTimeSchema {
             for item in enumerate {
                 completion_items.push(CompletionContent {
                     label: item.to_string(),
+                    schema_url: schema_url.cloned(),
                     ..Default::default()
                 });
             }
         }
 
         if let Some(default) = &self.default {
-            completion_items.push(CompletionContent::new_default_value(default.to_string()));
+            completion_items.push(CompletionContent::new_default_value(
+                default.to_string(),
+                schema_url,
+            ));
         }
 
         if completion_items.is_empty() {

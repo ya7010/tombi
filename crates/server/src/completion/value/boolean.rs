@@ -76,7 +76,7 @@ impl FindCompletionContents for BooleanSchema {
         _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        _schema_url: Option<&Url>,
+        schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         _completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -85,6 +85,7 @@ impl FindCompletionContents for BooleanSchema {
                 .iter()
                 .map(|value| CompletionContent {
                     label: value.to_string(),
+                    schema_url: schema_url.cloned(),
                     ..Default::default()
                 })
                 .collect()

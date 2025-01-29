@@ -222,17 +222,15 @@ impl FindCompletionContents for document_tree::Value {
                         definitions,
                         completion_hint,
                     ),
-                ValueSchema::Array(_) => {
-                    
-                    match completion_hint {
-                        Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-                        _ => vec![CompletionContent {
-                            label: "[]".to_string(),
-                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                            ..Default::default()
-                        }],
-                    }
-                }
+                ValueSchema::Array(_) => match completion_hint {
+                    Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+                    _ => vec![CompletionContent {
+                        label: "[]".to_string(),
+                        kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                        schema_url: schema_url.cloned(),
+                        ..Default::default()
+                    }],
+                },
                 ValueSchema::Table(table_schema) => table_schema.find_completion_contents(
                     accessors,
                     value_schema,

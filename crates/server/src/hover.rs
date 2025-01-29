@@ -15,7 +15,7 @@ mod value;
 
 use config::TomlVersion;
 use dashmap::DashMap;
-use schema_store::{Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
+use schema_store::{get_schema_name, Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 use tower_lsp::lsp_types::Url;
 
@@ -129,15 +129,6 @@ impl From<HoverContent> for tower_lsp::lsp_types::Hover {
             range: value.range.map(Into::into),
         }
     }
-}
-
-fn get_schema_name(schema_url: &tower_lsp::lsp_types::Url) -> Option<&str> {
-    if let Some(path) = schema_url.path().split('/').last() {
-        if !path.is_empty() {
-            return Some(path);
-        }
-    }
-    schema_url.host_str()
 }
 
 #[cfg(test)]
