@@ -8,7 +8,10 @@ use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 pub use hint::CompletionHint;
 use itertools::Itertools;
 use schema_store::{get_schema_name, Accessor, SchemaDefinitions, Schemas, ValueSchema};
-use tower_lsp::lsp_types::{MarkupContent, MarkupKind, Url};
+use syntax::{SyntaxElement, SyntaxKind};
+use tower_lsp::lsp_types::{
+    CompletionTextEdit, InsertReplaceEdit, MarkupContent, MarkupKind, TextEdit, Url,
+};
 
 pub fn get_completion_contents(
     root: ast::Root,
@@ -20,7 +23,52 @@ pub fn get_completion_contents(
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        let ast_keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+        // tracing::debug!("node: {:?}", node);
+        // tracing::debug!(
+        //     "prev_sibling_or_token(): {:?}",
+        //     node.prev_sibling_or_token()
+        // );
+        // tracing::debug!(
+        //     "next_sibling_or_token(): {:?}",
+        //     node.next_sibling_or_token()
+        // );
+        // tracing::debug!("first_child_or_token(): {:?}", node.first_child_or_token());
+        // tracing::debug!("last_child_or_token(): {:?}", node.last_child_or_token());
+
+        let ast_keys = if ast::Keys::cast(node.to_owned()).is_some() {
+            match node.last_child_or_token() {
+                Some(SyntaxElement::Token(last_token)) => match last_token.kind() {
+                    SyntaxKind::DOT => {
+                        completion_hint = Some(CompletionHint::DotTrigger {
+                            range: last_token.range(),
+                        });
+                    }
+                    _ => {}
+                },
+                Some(SyntaxElement::Node(last_node)) => match last_node.kind() {
+                    SyntaxKind::BARE_KEY
+                    | SyntaxKind::BASIC_STRING
+                    | SyntaxKind::LITERAL_STRING => {
+                        completion_hint = Some(CompletionHint::SpaceTrigger {
+                            range: text::Range::new(last_node.range().end(), position),
+                        })
+                    }
+                    _ => {}
+                },
+                None => {}
+            }
+            continue;
+        } else if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+            if let Some(SyntaxElement::Token(last_token)) = node.last_child_or_token() {
+                match last_token.kind() {
+                    SyntaxKind::EQUAL => {
+                        completion_hint = Some(CompletionHint::EqualTrigger {
+                            range: last_token.range(),
+                        });
+                    }
+                    _ => {}
+                }
+            }
             kv.keys()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
             let (bracket_start_range, bracket_end_range) =
@@ -148,10 +196,28 @@ pub struct CompletionContent {
     pub detail: Option<String>,
     pub documentation: Option<String>,
     pub schema_url: Option<Url>,
-    pub text_edit: Option<tower_lsp::lsp_types::CompletionTextEdit>,
+    pub edit: Option<CompletionEdit>,
+    pub preselect: Option<bool>,
 }
 
 impl CompletionContent {
+    pub fn new_enumerate_value(
+        label: String,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
+        Self {
+            label: label.clone(),
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            priority: CompletionPriority::Normal,
+            detail: Some("enum".to_string()),
+            documentation: None,
+            schema_url: schema_url.cloned(),
+            edit,
+            preselect: None,
+        }
+    }
+
     pub fn new_default_value(label: String, schema_url: Option<&Url>) -> Self {
         Self {
             label,
@@ -160,7 +226,8 @@ impl CompletionContent {
             detail: Some("default".to_string()),
             documentation: None,
             schema_url: schema_url.cloned(),
-            text_edit: None,
+            edit: None,
+            preselect: Some(true),
         }
     }
 
@@ -172,7 +239,8 @@ impl CompletionContent {
             detail: Some("current".to_string()),
             documentation: None,
             schema_url: None,
-            text_edit: None,
+            edit: None,
+            preselect: None,
         }
     }
 }
@@ -205,6 +273,15 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             None => schema_text,
         };
 
+        let (insert_text_format, text_edit, additional_text_edits) = match completion_content.edit {
+            Some(edit) => (
+                edit.insert_text_format,
+                Some(edit.text_edit),
+                edit.additional_text_edits,
+            ),
+            None => (None, None, None),
+        };
+
         tower_lsp::lsp_types::CompletionItem {
             label: completion_content.label,
             kind: Some(
@@ -220,8 +297,49 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                 })
             }),
             sort_text: Some(sorted_text),
-            text_edit: completion_content.text_edit,
+            insert_text_format,
+            text_edit,
+            additional_text_edits,
+            preselect: completion_content.preselect,
             ..Default::default()
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CompletionEdit {
+    pub insert_text_format: Option<tower_lsp::lsp_types::InsertTextFormat>,
+    pub text_edit: tower_lsp::lsp_types::CompletionTextEdit,
+    pub additional_text_edits: Option<Vec<tower_lsp::lsp_types::TextEdit>>,
+}
+
+impl CompletionEdit {
+    pub fn new_literal(
+        value: &str,
+        position: text::Position,
+        completion_hint: Option<CompletionHint>,
+    ) -> Option<Self> {
+        match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { range }
+                | CompletionHint::EqualTrigger { range }
+                | CompletionHint::SpaceTrigger { range },
+            ) => {
+                let edit_range = text::Range::new(position, position).into();
+                Some(Self {
+                    insert_text_format: None,
+                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
+                        new_text: format!(" = {}", value),
+                        insert: edit_range,
+                        replace: edit_range,
+                    }),
+                    additional_text_edits: Some(vec![TextEdit {
+                        range: range.into(),
+                        new_text: "".to_string(),
+                    }]),
+                })
+            }
+            _ => None,
         }
     }
 }

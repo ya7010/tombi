@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionContent, CompletionHint, FindCompletionContents,
+    CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
 };
 
 impl FindCompletionContents for document_tree::Boolean {
@@ -74,19 +74,19 @@ impl FindCompletionContents for BooleanSchema {
         _accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
         _toml_version: TomlVersion,
-        _position: text::Position,
+        position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
-        _completion_hint: Option<CompletionHint>,
+        completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         if let Some(enumerate) = &self.enumerate {
             enumerate
                 .iter()
-                .map(|value| CompletionContent {
-                    label: value.to_string(),
-                    schema_url: schema_url.cloned(),
-                    ..Default::default()
+                .map(|value| {
+                    let label = value.to_string();
+                    let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                    CompletionContent::new_enumerate_value(value.to_string(), edit, schema_url)
                 })
                 .collect()
         } else {
@@ -94,6 +94,7 @@ impl FindCompletionContents for BooleanSchema {
                 .into_iter()
                 .map(|value| CompletionContent {
                     label: value.to_string(),
+                    edit: CompletionEdit::new_literal(value, position, completion_hint),
                     ..Default::default()
                 })
                 .collect()
