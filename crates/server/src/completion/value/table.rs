@@ -121,9 +121,9 @@ impl FindCompletionContents for document_tree::Table {
                                             | document_tree::Value::OffsetDateTime(_)
                                             | document_tree::Value::LocalDateTime(_)
                                             | document_tree::Value::LocalDate(_)
-                                            | document_tree::Value::LocalTime(_)
-                                            | document_tree::Value::Array(_) => continue,
-                                            document_tree::Value::Table(_)
+                                            | document_tree::Value::LocalTime(_) => continue,
+                                            document_tree::Value::Array(_)
+                                            | document_tree::Value::Table(_)
                                             | document_tree::Value::Incomplete { .. } => {}
                                         }
                                     }
