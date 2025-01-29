@@ -3,7 +3,7 @@ use crate::{
     hover::{get_hover_content, HoverContent},
 };
 use ast::{algo::ancestors_at_position, AstNode};
-use document_tree::TryIntoDocumentTree;
+use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 use itertools::Itertools;
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
@@ -56,12 +56,10 @@ pub async fn handle_hover(
         return Ok(None);
     }
 
-    let Ok(root) = root.try_into_document_tree(toml_version) else {
-        return Ok(None);
-    };
+    let document_tree = root.into_document_tree_result(toml_version).tree;
 
     return Ok(get_hover_content(
-        &root,
+        &document_tree,
         toml_version,
         position,
         &keys,
