@@ -93,10 +93,10 @@ impl FindCompletionContents for FloatSchema {
         }
 
         if let Some(default) = &self.default {
-            let default = default.to_string();
-            let edit = CompletionEdit::new_literal(&default, position, completion_hint);
+            let label = default.to_string();
+            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
             completion_items.push(CompletionContent::new_default_value(
-                default, edit, schema_url,
+                label, edit, schema_url,
             ));
         }
 

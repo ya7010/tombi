@@ -93,10 +93,10 @@ impl FindCompletionContents for StringSchema {
         }
 
         if let Some(default) = &self.default {
-            let default = format!("\"{default}\"");
-            let edit = CompletionEdit::new_literal(&default, position, completion_hint);
+            let label = format!("\"{default}\"");
+            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
             completion_items.push(CompletionContent::new_default_value(
-                default, edit, schema_url,
+                label, edit, schema_url,
             ));
         }
 
