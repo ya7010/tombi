@@ -235,7 +235,7 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_current_value(label: String) -> Self {
+    pub fn new_current_value(label: String, edit: Option<CompletionEdit>) -> Self {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
@@ -243,7 +243,7 @@ impl CompletionContent {
             detail: Some("current".to_string()),
             documentation: None,
             schema_url: None,
-            edit: None,
+            edit,
             preselect: None,
         }
     }

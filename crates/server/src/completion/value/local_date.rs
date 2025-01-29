@@ -94,17 +94,17 @@ impl FindCompletionContents for LocalDateSchema {
         }
 
         if let Some(default) = &self.default {
-            let default = default.to_string();
-            let edit = CompletionEdit::new_literal(&default, position, completion_hint);
+            let label = default.to_string();
+            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
             completion_items.push(CompletionContent::new_default_value(
-                default, edit, schema_url,
+                label, edit, schema_url,
             ));
         }
 
         if completion_items.is_empty() {
-            completion_items.push(CompletionContent::new_current_value(
-                chrono::Local::now().format("%Y-%m-%d").to_string(),
-            ));
+            let label = chrono::Local::now().format("%Y-%m-%d").to_string();
+            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+            completion_items.push(CompletionContent::new_current_value(label, edit));
         }
 
         completion_items
