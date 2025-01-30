@@ -416,7 +416,7 @@ impl NodeData {
     #[inline]
     fn range(&self) -> text::Range {
         let start = self.position();
-        text::Range::at(start, self.green().text_relative_position())
+        text::Range::new(start, start + self.green().text_relative_position())
     }
 
     #[inline]

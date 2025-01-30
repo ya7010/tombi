@@ -1,4 +1,4 @@
-use tower_lsp::lsp_types::{CompletionTextEdit, InsertReplaceEdit, InsertTextFormat, TextEdit};
+use tower_lsp::lsp_types::{CompletionTextEdit, InsertTextFormat, TextEdit};
 
 use super::CompletionHint;
 
@@ -20,21 +20,17 @@ impl CompletionEdit {
                 CompletionHint::DotTrigger { range, .. }
                 | CompletionHint::EqualTrigger { range, .. }
                 | CompletionHint::SpaceTrigger { range, .. },
-            ) => {
-                let edit_range = text::Range::new(position, position).into();
-                Some(Self {
-                    insert_text_format: None,
-                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
-                        new_text: format!(" = {}", value),
-                        insert: edit_range,
-                        replace: edit_range,
-                    }),
-                    additional_text_edits: Some(vec![TextEdit {
-                        range: range.into(),
-                        new_text: "".to_string(),
-                    }]),
-                })
-            }
+            ) => Some(Self {
+                insert_text_format: None,
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!(" = {}", value),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
             _ => None,
         }
     }
@@ -48,21 +44,17 @@ impl CompletionEdit {
                 CompletionHint::DotTrigger { range, .. }
                 | CompletionHint::EqualTrigger { range, .. }
                 | CompletionHint::SpaceTrigger { range, .. },
-            ) => {
-                let edit_range = text::Range::new(position, position).into();
-                Some(Self {
-                    insert_text_format: Some(InsertTextFormat::SNIPPET),
-                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
-                        new_text: " = \"$0\"".to_string(),
-                        insert: edit_range,
-                        replace: edit_range,
-                    }),
-                    additional_text_edits: Some(vec![TextEdit {
-                        range: range.into(),
-                        new_text: "".to_string(),
-                    }]),
-                })
-            }
+            ) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: " = \"$0\"".to_string(),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
             Some(CompletionHint::InTableHeader) | None => None,
         }
     }
@@ -76,26 +68,22 @@ impl CompletionEdit {
             Some(
                 CompletionHint::SpaceTrigger { range, .. }
                 | CompletionHint::EqualTrigger { range, .. },
-            ) => {
-                let edit_range = text::Range::new(position, position).into();
-                Some(Self {
-                    insert_text_format: Some(InsertTextFormat::SNIPPET),
-                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
-                        new_text: format!(" = {{ {property_name}$1 }}"),
-                        insert: edit_range,
-                        replace: edit_range,
-                    }),
-                    additional_text_edits: Some(vec![TextEdit {
-                        range: range.into(),
-                        new_text: "".to_string(),
-                    }]),
-                })
-            }
+            ) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!(" = {{ {property_name}$1 }}"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
             Some(CompletionHint::DotTrigger { range, .. }) => Some(Self {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(".{property_name}"),
-                    range: text::Range::new(position, position).into(),
+                    range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),

@@ -26,8 +26,8 @@ impl Range {
     }
 
     #[inline]
-    pub fn at(position: Position, relative_position: RelativePosition) -> Self {
-        Self::new(position, position + relative_position)
+    pub fn at(position: Position) -> Self {
+        Self::new(position, position)
     }
 
     #[inline]
