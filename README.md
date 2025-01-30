@@ -130,7 +130,7 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 
 #### Equal Trigger Completion
 
-| Type | Select | Trigger | Completion |
+| Type | Trigger | Select | Completion |
 | --- | --- | --- | --- |
 | Boolean | `key=█` | `true` | `key = true█` |
 | Integer | `key=█` | `42` | `key = ${█:42}` |
