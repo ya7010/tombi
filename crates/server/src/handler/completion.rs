@@ -339,6 +339,7 @@ mod test {
             tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "\"\"",
             "[]",
         ]);
     }
@@ -353,6 +354,7 @@ mod test {
             tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "\"\"",
             "[]",
         ]);
     }
@@ -366,6 +368,7 @@ mod test {
             tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "\"\"",
             "[]",
         ]);
     }
