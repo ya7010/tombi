@@ -1875,6 +1875,7 @@ dependencies = [
  "serde_json",
  "syntax",
  "tempfile",
+ "test-lib",
  "text",
  "textwrap",
  "thiserror",
@@ -2014,6 +2015,10 @@ dependencies = [
  "rustix",
  "windows-sys 0.59.0",
 ]
+
+[[package]]
+name = "test-lib"
+version = "0.0.0"
 
 [[package]]
 name = "text"

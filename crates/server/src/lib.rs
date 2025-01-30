@@ -1,11 +1,11 @@
 mod backend;
 mod completion;
 mod document;
-mod handler;
+pub mod handler;
 mod hover;
 mod semantic_tokens;
 
-use backend::Backend;
+pub use backend::Backend;
 
 /// Run TOML Language Server
 #[derive(Debug)]

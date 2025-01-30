@@ -52,6 +52,7 @@ serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = { version = "1.0.130", features = ["preserve_order"] }
 server = { path = "crates/server" }
 syntax = { path = "crates/syntax" }
+test-lib = { path = "crates/test-lib" }
 text = { path = "crates/text" }
 textwrap = { version = "0.16.1" }
 thiserror = { version = "2.0.3" }
