@@ -1,6 +1,6 @@
 use crate::completion::{
     find_any_of_completion_items, find_one_of_completion_items, CompletionCandidate,
-    CompletionContent,
+    CompletionContent, CompletionEdit,
 };
 
 use super::{find_all_if_completion_items, CompletionHint, FindCompletionContents};
@@ -86,6 +86,11 @@ impl FindCompletionContents for document_tree::Table {
                                                         .detail(definitions, completion_hint),
                                                     documentation: schema_candidate.documentation(
                                                         definitions,
+                                                        completion_hint,
+                                                    ),
+                                                    edit: CompletionEdit::new_propery(
+                                                        &label,
+                                                        position,
                                                         completion_hint,
                                                     ),
                                                     schema_url: schema_url.cloned(),
@@ -183,6 +188,11 @@ impl FindCompletionContents for document_tree::Table {
                                     detail: schema_candidate.detail(definitions, completion_hint),
                                     documentation: schema_candidate
                                         .documentation(definitions, completion_hint),
+                                    edit: CompletionEdit::new_propery(
+                                        &label,
+                                        position,
+                                        completion_hint,
+                                    ),
                                     schema_url: schema_url.cloned(),
                                     ..Default::default()
                                 };
@@ -237,7 +247,7 @@ impl FindCompletionContents for TableSchema {
         accessors: &Vec<Accessor>,
         _value_schema: &ValueSchema,
         _toml_version: TomlVersion,
-        _position: text::Position,
+        position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
@@ -267,6 +277,7 @@ impl FindCompletionContents for TableSchema {
                         kind: Some(CompletionItemKind::PROPERTY),
                         detail: schema_candidate.detail(definitions, completion_hint),
                         documentation: schema_candidate.documentation(definitions, completion_hint),
+                        edit: CompletionEdit::new_propery(&label, position, completion_hint),
                         schema_url: schema_url.cloned(),
                         ..Default::default()
                     };
