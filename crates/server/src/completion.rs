@@ -10,7 +10,8 @@ use itertools::Itertools;
 use schema_store::{get_schema_name, Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use syntax::{SyntaxElement, SyntaxKind};
 use tower_lsp::lsp_types::{
-    CompletionTextEdit, InsertReplaceEdit, MarkupContent, MarkupKind, TextEdit, Url,
+    CompletionTextEdit, InsertReplaceEdit, InsertTextFormat, MarkupContent, MarkupKind, TextEdit,
+    Url,
 };
 
 pub fn get_completion_contents(
@@ -336,6 +337,34 @@ impl CompletionEdit {
                     insert_text_format: None,
                     text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
                         new_text: format!(" = {}", value),
+                        insert: edit_range,
+                        replace: edit_range,
+                    }),
+                    additional_text_edits: Some(vec![TextEdit {
+                        range: range.into(),
+                        new_text: "".to_string(),
+                    }]),
+                })
+            }
+            _ => None,
+        }
+    }
+
+    pub fn new_string_literal(
+        position: text::Position,
+        completion_hint: Option<CompletionHint>,
+    ) -> Option<Self> {
+        match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { range }
+                | CompletionHint::EqualTrigger { range }
+                | CompletionHint::SpaceTrigger { range },
+            ) => {
+                let edit_range = text::Range::new(position, position).into();
+                Some(Self {
+                    insert_text_format: Some(InsertTextFormat::SNIPPET),
+                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
+                        new_text: " = \"$0\"".to_string(),
                         insert: edit_range,
                         replace: edit_range,
                     }),

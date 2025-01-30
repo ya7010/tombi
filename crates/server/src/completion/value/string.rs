@@ -84,7 +84,7 @@ impl FindCompletionContents for StringSchema {
 
         if let Some(enumerate) = &self.enumerate {
             for item in enumerate {
-                let label = item.to_string();
+                let label = format!("\"{item}\"");
                 let edit = CompletionEdit::new_literal(&label, position, completion_hint);
                 completion_items.push(CompletionContent::new_enumerate_value(
                     label, edit, schema_url,
@@ -98,6 +98,17 @@ impl FindCompletionContents for StringSchema {
             completion_items.push(CompletionContent::new_default_value(
                 label, edit, schema_url,
             ));
+        }
+
+        if completion_items.is_empty() {
+            let edit = CompletionEdit::new_string_literal(position, completion_hint);
+            completion_items.push(CompletionContent {
+                label: "\"\"".to_string(),
+                kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+                schema_url: schema_url.cloned(),
+                edit,
+                ..Default::default()
+            });
         }
 
         completion_items
