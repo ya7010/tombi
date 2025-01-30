@@ -1,11 +1,11 @@
 use crate::completion::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionContent,
+    CompletionContent, CompletionEdit,
 };
 
 use super::{CompletionHint, FindCompletionContents};
 use config::TomlVersion;
-use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
+use schema_store::{Accessor, ArraySchema, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
 impl FindCompletionContents for document_tree::Array {
@@ -84,6 +84,29 @@ impl FindCompletionContents for document_tree::Array {
                 completion_hint,
             ),
             _ => Vec::with_capacity(0),
+        }
+    }
+}
+
+impl FindCompletionContents for ArraySchema {
+    fn find_completion_contents(
+        &self,
+        _accessors: &Vec<Accessor>,
+        _value_schema: &ValueSchema,
+        _toml_version: TomlVersion,
+        position: text::Position,
+        _keys: &[document_tree::Key],
+        _schema_url: Option<&Url>,
+        _definitions: &SchemaDefinitions,
+        completion_hint: Option<CompletionHint>,
+    ) -> Vec<CompletionContent> {
+        match completion_hint {
+            Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+            _ => {
+                let label = "[]".to_string();
+                let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                vec![CompletionContent::new_type_hint_value(label, edit)]
+            }
         }
     }
 }

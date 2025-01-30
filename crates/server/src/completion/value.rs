@@ -12,8 +12,6 @@ mod one_of;
 mod string;
 mod table;
 
-use crate::completion::CompletionEdit;
-
 use super::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
     CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
@@ -224,20 +222,16 @@ impl FindCompletionContents for document_tree::Value {
                         definitions,
                         completion_hint,
                     ),
-                ValueSchema::Array(_) => match completion_hint {
-                    Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-                    _ => {
-                        let label = "[]".to_string();
-                        let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                        vec![CompletionContent {
-                            label,
-                            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-                            edit,
-                            schema_url: schema_url.cloned(),
-                            ..Default::default()
-                        }]
-                    }
-                },
+                ValueSchema::Array(array_schema) => array_schema.find_completion_contents(
+                    accessors,
+                    value_schema,
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                    completion_hint,
+                ),
                 ValueSchema::Table(table_schema) => table_schema.find_completion_contents(
                     accessors,
                     value_schema,

@@ -61,8 +61,60 @@
         "null"
       ],
       "format": "partial-time"
+    },
+    "literal": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LiteralValue"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "additionalProperties": false,
-  "x-tombi-toml-version": "v1.1.0-preview"
+  "x-tombi-toml-version": "v1.1.0-preview",
+  "$defs": {
+    "LiteralValue": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "integer",
+          "format": "int64"
+        },
+        {
+          "type": "number",
+          "format": "double"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "string",
+          "format": "partial-date-time"
+        },
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "string",
+          "format": "partial-time"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LiteralValue"
+          }
+        }
+      ]
+    }
+  }
 }

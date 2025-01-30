@@ -30,4 +30,22 @@ struct TypeTest {
     local_date_time: Option<chrono::NaiveDateTime>,
     local_date: Option<chrono::NaiveDate>,
     local_time: Option<chrono::NaiveTime>,
+    literal: Option<LiteralValue>,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, serde::Serialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "kebab-case")]
+#[serde(untagged)]
+enum LiteralValue {
+    Boolean(bool),
+    Integer(i64),
+    Float(f64),
+    String(String),
+    OffsetDateTime(chrono::DateTime<chrono::FixedOffset>),
+    LocalDateTime(chrono::NaiveDateTime),
+    LocalDate(chrono::NaiveDate),
+    LocalTime(chrono::NaiveTime),
+    Array(Vec<LiteralValue>),
 }
