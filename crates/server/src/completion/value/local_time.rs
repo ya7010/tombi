@@ -102,7 +102,14 @@ impl FindCompletionContents for LocalTimeSchema {
         }
 
         if completion_items.is_empty() {
-            let label = chrono::Local::now().format("%H:%M:%S%.3f").to_string();
+            let mut today = chrono::Local::now();
+            if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
+                today = match today.with_time(time) {
+                    chrono::LocalResult::Single(today) => today,
+                    _ => today,
+                };
+            };
+            let label = today.format("%H:%M:%S%.3f").to_string();
             let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
             completion_items.push(CompletionContent::new_type_hint_value(label, edit));
         }
