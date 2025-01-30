@@ -83,6 +83,8 @@ mod test {
 
     use super::*;
 
+    struct Select(pub &'static str);
+
     #[macro_export]
     macro_rules! test_completion_labels {
         (
@@ -196,6 +198,162 @@ mod test {
                 );
             }
         };
+    }
+
+    #[tokio::test]
+    async fn edit_test() {
+        use crate::handler::handle_did_open;
+        use backend::Backend;
+        use schema_store::JsonCatalogSchema;
+        use std::io::Write;
+        use tower_lsp::{
+            lsp_types::{
+                DidOpenTextDocumentParams, PartialResultParams, TextDocumentIdentifier,
+                TextDocumentItem, Url, WorkDoneProgressParams,
+            },
+            LspService,
+        };
+
+        let (service, _) = LspService::new(|client| Backend::new(client));
+
+        let backend = service.inner();
+
+        let schema_url = Url::from_file_path(tombi_schema_path()).expect(
+            format!(
+                "failed to convert schema path to URL: {}",
+                tombi_schema_path().display()
+            )
+            .as_str(),
+        );
+        backend
+            .schema_store
+            .add_catalog(JsonCatalogSchema {
+                name: "test_schema".to_string(),
+                description: "schema for testing".to_string(),
+                file_match: vec!["*.toml".to_string()],
+                url: schema_url.clone(),
+            })
+            .await;
+
+        let temp_file = tempfile::NamedTempFile::with_suffix_in(
+            ".toml",
+            std::env::current_dir().expect("failed to get current directory"),
+        )
+        .expect("failed to create temporary file");
+
+        let mut toml_text = textwrap::dedent(
+            r#"
+[server]
+completion=█
+"#,
+        )
+        .trim()
+        .to_string();
+
+        let index = toml_text
+            .as_str()
+            .find("█")
+            .expect("failed to find completion position marker (█) in the test data");
+
+        toml_text.remove(index);
+        temp_file.as_file().write_all(toml_text.as_bytes()).expect(
+            "failed to write test data to the temporary file, which is used as a text document",
+        );
+
+        let toml_file_url = Url::from_file_path(temp_file.path())
+            .expect("failed to convert temporary file path to URL");
+
+        handle_did_open(
+            backend,
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: toml_file_url.clone(),
+                    language_id: "toml".to_string(),
+                    version: 0,
+                    text: toml_text.clone(),
+                },
+            },
+        )
+        .await;
+
+        let completions = handle_completion(
+            &backend,
+            CompletionParams {
+                text_document_position: TextDocumentPositionParams {
+                    text_document: TextDocumentIdentifier { uri: toml_file_url },
+                    position: (text::Position::default()
+                        + text::RelativePosition::of(&toml_text[..index]))
+                    .into(),
+                },
+                work_done_progress_params: WorkDoneProgressParams::default(),
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+                context: None,
+            },
+        )
+        .await
+        .expect("failed to handle completion")
+        .expect("failed to get completion items");
+
+        let selected = Select("enabled").0;
+        let completion = completions
+            .into_iter()
+            .find(|content| content.label == selected)
+            .expect(format!("failed to find the selected completion item: {}", selected).as_str());
+
+        let Some(completion_edit) = completion.edit else {
+            panic!(
+                "failed to get the edit of the selected completion item: {}",
+                selected
+            );
+        };
+        let mut new_text = "".to_string();
+        match completion_edit.text_edit {
+            tower_lsp::lsp_types::CompletionTextEdit::Edit(edit) => {
+                for (index, line) in toml_text.split('\n').enumerate() {
+                    if index != 0 {
+                        new_text.push('\n');
+                    }
+                    if edit.range.start.line as usize == index {
+                        new_text.push_str(&line[..edit.range.start.character as usize]);
+                        new_text.push_str(&edit.new_text);
+                        new_text.push_str(&line[edit.range.end.character as usize..]);
+                    } else {
+                        new_text.push_str(line);
+                    }
+                }
+            }
+            _ => panic!("unexpected completion text edit type"),
+        }
+        if let Some(text_edits) = completion_edit.additional_text_edits {
+            for text_edit in text_edits {
+                let mut additional_new_text = "".to_string();
+                for (index, line) in new_text.split('\n').enumerate() {
+                    if index != 0 {
+                        additional_new_text.push('\n');
+                    }
+                    if text_edit.range.start.line as usize == index {
+                        additional_new_text
+                            .push_str(&line[..text_edit.range.start.character as usize]);
+                        additional_new_text.push_str(&text_edit.new_text);
+                        additional_new_text
+                            .push_str(&line[text_edit.range.end.character as usize..]);
+                    } else {
+                        additional_new_text.push_str(line);
+                    }
+                }
+                new_text = additional_new_text;
+            }
+        }
+        pretty_assertions::assert_eq!(
+            new_text,
+            r#"
+[server]
+completion = { enabled$1 }
+"#
+            .trim()
+        );
     }
 
     test_completion_labels! {
