@@ -111,3 +111,29 @@ Also, the following abbreviations are used for Composition Type and Null describ
 >
 > Therefore, the `&` that indicates the relationship of `allOf` does not appear on hover
 > if you are using the correct JSON Schema.
+
+### Completion Magic Trigger
+Tombi provides a magic trigger to complete rhythmically.
+TOML uses doted keys or inline tables for nested structures,
+but Tombi controls the form of completion by selecting triggers with `.` and `=`.
+
+#### Completion Dot Trigger
+| Type | Select | Trigger | Completion |
+| --- | --- | --- | --- |
+| Boolean | `true` | `key.█` | `key = true█` |
+| Integer | `42` | `key.█` | `key = 42█` |
+| Float | `3.14` | `key.█` | `key = 3.14█` |
+| String | `""` | `key.█` | `key = "█"` |
+| Array | `[]` | `key.█` | `key = [█]` |
+| Table | `completion` | `server.█` | `server.completion = █` |
+
+#### Completion Equal Trigger
+
+| Type | Select | Trigger | Completion |
+| --- | --- | --- | --- |
+| Boolean | `true` | `key=█` | `key = true█` |
+| Integer | `42` | `key=█` | `key = 42█` |
+| Float | `3.14` | `key=█` | `key = 3.14█` |
+| String | `""` | `key=█` | `key = "█"` |
+| Array | `[]` | `key=█` | `key = [█]` |
+| Table | `completion` | `server=█` | `server = { completion█ }` |
