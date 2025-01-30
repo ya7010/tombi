@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TypeTest",
+  "type": "object",
+  "properties": {
+    "boolean": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "integer": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64"
+    },
+    "float": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "array": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "integer",
+        "format": "uint64",
+        "minimum": 0
+      }
+    },
+    "offset-date-time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "local-date-time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "partial-date-time"
+    },
+    "local-date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "partial-time"
+    },
+    "local-time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "partial-time"
+    }
+  },
+  "additionalProperties": false,
+  "x-tombi-toml-version": "v1.1.0-preview"
+}

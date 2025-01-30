@@ -16,7 +16,7 @@ assert_matches = "1.5.0"
 ast = { path = "crates/ast" }
 ast-editor = { path = "crates/ast-editor" }
 camino = "1.1.9"
-chrono = "0.4.38"
+chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.20", features = ["derive", "string"] }
 clap-verbosity-flag = "3.0.1"
 config = { path = "crates/config" }
