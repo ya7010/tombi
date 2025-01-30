@@ -6,10 +6,11 @@ use super::completion_edit::CompletionEdit;
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum CompletionPriority {
-    DefaultValue = 0,
+    Default = 0,
+    Enum = 1,
     #[default]
-    Normal = 1,
-    TypeHint = 2,
+    Normal = 2,
+    TypeHint = 3,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -33,7 +34,7 @@ impl CompletionContent {
         Self {
             label: label.clone(),
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            priority: CompletionPriority::Normal,
+            priority: CompletionPriority::Enum,
             detail: Some("enum".to_string()),
             documentation: None,
             schema_url: schema_url.cloned(),
@@ -50,7 +51,7 @@ impl CompletionContent {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            priority: CompletionPriority::DefaultValue,
+            priority: CompletionPriority::Default,
             detail: Some("default".to_string()),
             documentation: None,
             schema_url: schema_url.cloned(),
@@ -113,16 +114,16 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
         tower_lsp::lsp_types::CompletionItem {
             label: completion_content.label,
             label_details: match completion_content.priority {
-                CompletionPriority::DefaultValue => {
+                CompletionPriority::Default => {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
-                        description: Some("default value".to_string()),
+                        description: Some("default".to_string()),
                     })
                 }
-                CompletionPriority::TypeHint => {
+                CompletionPriority::Enum => {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
-                        description: Some("type hint".to_string()),
+                        description: Some("enum".to_string()),
                     })
                 }
                 CompletionPriority::Normal => {
@@ -136,6 +137,12 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     } else {
                         None
                     }
+                }
+                CompletionPriority::TypeHint => {
+                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                        detail: None,
+                        description: Some("type hint".to_string()),
+                    })
                 }
             },
             kind: Some(
