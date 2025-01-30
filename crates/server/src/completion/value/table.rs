@@ -6,7 +6,7 @@ use crate::completion::{
 use super::{find_all_if_completion_items, CompletionHint, FindCompletionContents};
 use config::TomlVersion;
 use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
-use tower_lsp::lsp_types::{CompletionItemKind, Url};
+use tower_lsp::lsp_types::Url;
 
 impl FindCompletionContents for document_tree::Table {
     fn find_completion_contents(
@@ -78,25 +78,21 @@ impl FindCompletionContents for document_tree::Table {
                                                         continue;
                                                     }
                                                 }
-
-                                                let completion_content = CompletionContent {
-                                                    label: label.clone(),
-                                                    kind: Some(CompletionItemKind::PROPERTY),
-                                                    detail: schema_candidate
+                                                completions.push(CompletionContent::new_property(
+                                                    label.clone(),
+                                                    schema_candidate
                                                         .detail(definitions, completion_hint),
-                                                    documentation: schema_candidate.documentation(
+                                                    schema_candidate.documentation(
                                                         definitions,
                                                         completion_hint,
                                                     ),
-                                                    edit: CompletionEdit::new_propery(
+                                                    CompletionEdit::new_propery(
                                                         &label,
                                                         position,
                                                         completion_hint,
                                                     ),
-                                                    schema_url: schema_url.cloned(),
-                                                    ..Default::default()
-                                                };
-                                                completions.push(completion_content);
+                                                    schema_url,
+                                                ));
                                             }
                                         }
                                     }
@@ -158,6 +154,7 @@ impl FindCompletionContents for document_tree::Table {
                             for error in errors {
                                 tracing::error!("{}", error);
                             }
+
                             for schema_candidate in schema_candidates {
                                 if let Some(CompletionHint::InTableHeader) = completion_hint {
                                     if count_header_table_or_array(value_schema, definitions) == 0 {
@@ -182,21 +179,13 @@ impl FindCompletionContents for document_tree::Table {
                                     }
                                 }
 
-                                let completion_content = CompletionContent {
-                                    label: label.clone(),
-                                    kind: Some(CompletionItemKind::PROPERTY),
-                                    detail: schema_candidate.detail(definitions, completion_hint),
-                                    documentation: schema_candidate
-                                        .documentation(definitions, completion_hint),
-                                    edit: CompletionEdit::new_propery(
-                                        &label,
-                                        position,
-                                        completion_hint,
-                                    ),
-                                    schema_url: schema_url.cloned(),
-                                    ..Default::default()
-                                };
-                                completions.push(completion_content);
+                                completions.push(CompletionContent::new_property(
+                                    label.clone(),
+                                    schema_candidate.detail(definitions, completion_hint),
+                                    schema_candidate.documentation(definitions, completion_hint),
+                                    CompletionEdit::new_propery(&label, position, completion_hint),
+                                    schema_url,
+                                ));
                             }
                         }
                     }
@@ -272,16 +261,14 @@ impl FindCompletionContents for TableSchema {
                             continue;
                         }
                     }
-                    let completion_content = CompletionContent {
-                        label: label.clone(),
-                        kind: Some(CompletionItemKind::PROPERTY),
-                        detail: schema_candidate.detail(definitions, completion_hint),
-                        documentation: schema_candidate.documentation(definitions, completion_hint),
-                        edit: CompletionEdit::new_propery(&label, position, completion_hint),
-                        schema_url: schema_url.cloned(),
-                        ..Default::default()
-                    };
-                    completions.push(completion_content);
+
+                    completions.push(CompletionContent::new_property(
+                        label.clone(),
+                        schema_candidate.detail(definitions, completion_hint),
+                        schema_candidate.documentation(definitions, completion_hint),
+                        CompletionEdit::new_propery(&label, position, completion_hint),
+                        schema_url,
+                    ));
                 }
             }
         }

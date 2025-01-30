@@ -361,21 +361,36 @@ impl FindSchemaCandidates for ValueSchema {
         match self {
             Self::Table(table) => {
                 if accessors.is_empty() {
-                    (vec![self.clone()], Vec::new())
+                    (vec![self.clone()], Vec::with_capacity(0))
                 } else {
-                    table.find_schema_candidates(accessors, definitions)
+                    table.find_schema_candidates(&accessors[1..], definitions)
                 }
             }
             Self::Array(array) => {
                 if accessors.is_empty() {
-                    (vec![self.clone()], Vec::new())
+                    (vec![self.clone()], Vec::with_capacity(0))
                 } else {
                     array.find_schema_candidates(accessors, definitions)
                 }
             }
-            Self::OneOf(OneOfSchema { schemas, .. })
-            | Self::AnyOf(AnyOfSchema { schemas, .. })
-            | Self::AllOf(AllOfSchema { schemas, .. }) => {
+            Self::OneOf(OneOfSchema {
+                title,
+                description,
+                schemas,
+                ..
+            })
+            | Self::AnyOf(AnyOfSchema {
+                title,
+                description,
+                schemas,
+                ..
+            })
+            | Self::AllOf(AllOfSchema {
+                title,
+                description,
+                schemas,
+                ..
+            }) => {
                 let mut candidates = Vec::new();
                 let mut errors = Vec::new();
 
@@ -384,15 +399,25 @@ impl FindSchemaCandidates for ValueSchema {
                         let Ok(schema) = schema.resolve(definitions) else {
                             continue;
                         };
-                        let (schema_candidates, schema_errors) =
+
+                        let (mut schema_candidates, schema_errors) =
                             schema.find_schema_candidates(accessors, definitions);
+
+                        for schema_candidate in &mut schema_candidates {
+                            if title.is_some() || description.is_some() {
+                                schema_candidate.set_title(title.clone());
+                                schema_candidate.set_description(description.clone());
+                            }
+                        }
+
                         candidates.extend(schema_candidates);
                         errors.extend(schema_errors);
                     }
                 }
                 (candidates, errors)
             }
-            _ => (vec![self.clone()], Vec::new()),
+            ValueSchema::Null => (Vec::with_capacity(0), Vec::with_capacity(0)),
+            _ => (vec![self.clone()], Vec::with_capacity(0)),
         }
     }
 }

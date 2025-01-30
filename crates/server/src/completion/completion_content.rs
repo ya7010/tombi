@@ -72,6 +72,25 @@ impl CompletionContent {
             preselect: None,
         }
     }
+
+    pub fn new_property(
+        label: String,
+        detail: Option<String>,
+        documentation: Option<String>,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
+        Self {
+            label,
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
+            priority: CompletionPriority::Normal,
+            detail,
+            documentation,
+            edit,
+            schema_url: schema_url.cloned(),
+            preselect: None,
+        }
+    }
 }
 
 impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {

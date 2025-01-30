@@ -233,32 +233,28 @@ impl<T: CompositeSchema> CompletionCandidate for T {
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        match self.title().as_deref() {
-            Some(title) => Some(title.into()),
-            None => {
-                let mut candidates = ahash::AHashSet::new();
-                {
-                    if let Ok(mut schemas) = self.schemas().write() {
-                        for schema in schemas.iter_mut() {
-                            if let Ok(schema) = schema.resolve(definitions) {
-                                if matches!(schema, ValueSchema::Null) {
-                                    continue;
-                                }
-                                if let Some(candidate) =
-                                    CompletionCandidate::title(schema, definitions, completion_hint)
-                                {
-                                    candidates.insert(candidate.to_string());
-                                }
-                            }
+        let mut candidates = ahash::AHashSet::new();
+        {
+            if let Ok(mut schemas) = self.schemas().write() {
+                for schema in schemas.iter_mut() {
+                    if let Ok(schema) = schema.resolve(definitions) {
+                        if matches!(schema, ValueSchema::Null) {
+                            continue;
+                        }
+                        if let Some(candidate) =
+                            CompletionCandidate::title(schema, definitions, completion_hint)
+                        {
+                            candidates.insert(candidate.to_string());
                         }
                     }
                 }
-                if candidates.len() == 1 {
-                    return candidates.into_iter().next();
-                }
-                None
             }
         }
+        if candidates.len() == 1 {
+            return candidates.into_iter().next();
+        }
+
+        self.title().as_deref().map(|title| title.into())
     }
 
     fn description(
@@ -266,34 +262,31 @@ impl<T: CompositeSchema> CompletionCandidate for T {
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        match self.description().as_deref() {
-            Some(description) => Some(description.into()),
-            None => {
-                let mut candidates = ahash::AHashSet::new();
-                {
-                    if let Ok(mut schemas) = self.schemas().write() {
-                        for schema in schemas.iter_mut() {
-                            if let Ok(schema) = schema.resolve(definitions) {
-                                if matches!(schema, ValueSchema::Null) {
-                                    continue;
-                                }
-                                if let Some(candidate) = CompletionCandidate::description(
-                                    schema,
-                                    definitions,
-                                    completion_hint,
-                                ) {
-                                    candidates.insert(candidate.to_string());
-                                }
-                            }
+        let mut candidates = ahash::AHashSet::new();
+        {
+            if let Ok(mut schemas) = self.schemas().write() {
+                for schema in schemas.iter_mut() {
+                    if let Ok(schema) = schema.resolve(definitions) {
+                        if matches!(schema, ValueSchema::Null) {
+                            continue;
+                        }
+                        if let Some(candidate) =
+                            CompletionCandidate::description(schema, definitions, completion_hint)
+                        {
+                            candidates.insert(candidate.to_string());
                         }
                     }
                 }
-                if candidates.len() == 1 {
-                    return candidates.into_iter().next();
-                }
-                None
             }
         }
+
+        if candidates.len() == 1 {
+            return candidates.into_iter().next();
+        }
+
+        self.description()
+            .as_deref()
+            .map(|description| description.into())
     }
 }
 
