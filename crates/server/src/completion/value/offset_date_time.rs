@@ -105,7 +105,7 @@ impl FindCompletionContents for OffsetDateTimeSchema {
             let label = chrono::Local::now()
                 .format("%Y-%m-%dT%H:%M:%S%.3f%:z")
                 .to_string();
-            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+            let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
             completion_items.push(CompletionContent::new_type_hint_value(label, edit));
         }
 

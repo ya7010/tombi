@@ -53,7 +53,7 @@
         "string",
         "null"
       ],
-      "format": "partial-time"
+      "format": "date"
     },
     "local-time": {
       "type": [

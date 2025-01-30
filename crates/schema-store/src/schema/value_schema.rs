@@ -78,10 +78,10 @@ impl ValueSchema {
                     // See: https://json-schema.org/understanding-json-schema/reference/type#built-in-formats
                     match format_str.as_str() {
                         "date" => {
-                            Some(ValueSchema::LocalDate(LocalDateSchema::new(object)));
+                            return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)))
                         }
                         "date-time" => {
-                            Some(ValueSchema::OneOf(OneOfSchema {
+                            return Some(ValueSchema::OneOf(OneOfSchema {
                                 schemas: Arc::new(RwLock::new(
                                     [
                                         ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
@@ -95,10 +95,15 @@ impl ValueSchema {
                                     .to_vec(),
                                 )),
                                 ..Default::default()
-                            }));
+                            }))
                         }
-                        "time" => {
-                            Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)));
+                        "partial-date-time" => {
+                            return Some(ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
+                                object,
+                            )))
+                        }
+                        "time" | "partial-time" => {
+                            return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)))
                         }
                         _ => {}
                     }
