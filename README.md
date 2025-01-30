@@ -112,12 +112,13 @@ Also, the following abbreviations are used for Composition Type and Null describ
 > Therefore, the `&` that indicates the relationship of `allOf` does not appear on hover
 > if you are using the correct JSON Schema.
 
-### Completion Magic Trigger
+### Completion
 Tombi provides a magic trigger to complete rhythmically.
 TOML uses doted keys or inline tables for nested structures,
 but Tombi controls the form of completion by selecting triggers with `.` and `=`.
 
-#### Completion Dot Trigger
+#### Dot Trigger Completion
+
 | Type | Trigger | Select | Completion |
 | --- | --- | --- | --- |
 | Boolean  | `key.█` | `true` | `key = true█` |
@@ -127,7 +128,7 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 | Array | `key.█` | `[]` | `key = [█]` |
 | Table  | `server.█` | `completion` | `server.completion = █` |
 
-#### Completion Equal Trigger
+#### Equal Trigger Completion
 
 | Type | Select | Trigger | Completion |
 | --- | --- | --- | --- |
