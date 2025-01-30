@@ -112,6 +112,32 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
 
         tower_lsp::lsp_types::CompletionItem {
             label: completion_content.label,
+            label_details: match completion_content.priority {
+                CompletionPriority::DefaultValue => {
+                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                        detail: None,
+                        description: Some("default value".to_string()),
+                    })
+                }
+                CompletionPriority::TypeHint => {
+                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                        detail: None,
+                        description: Some("type hint".to_string()),
+                    })
+                }
+                CompletionPriority::Normal => {
+                    if completion_content.kind
+                        == Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY)
+                    {
+                        Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                            detail: None,
+                            description: completion_content.detail.clone(),
+                        })
+                    } else {
+                        None
+                    }
+                }
+            },
             kind: Some(
                 completion_content
                     .kind
