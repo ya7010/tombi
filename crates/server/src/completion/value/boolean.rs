@@ -96,6 +96,7 @@ impl FindCompletionContents for BooleanSchema {
                     CompletionContent::new_type_hint_value(
                         value.to_string(),
                         CompletionEdit::new_literal(value, position, completion_hint),
+                        schema_url,
                     )
                 })
                 .collect()

@@ -111,7 +111,9 @@ impl FindCompletionContents for LocalTimeSchema {
             };
             let label = today.format("%H:%M:%S%.3f").to_string();
             let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
-            completion_items.push(CompletionContent::new_type_hint_value(label, edit));
+            completion_items.push(CompletionContent::new_type_hint_value(
+                label, edit, schema_url,
+            ));
         }
 
         completion_items

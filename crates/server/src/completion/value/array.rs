@@ -96,7 +96,7 @@ impl FindCompletionContents for ArraySchema {
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],
-        _schema_url: Option<&Url>,
+        schema_url: Option<&Url>,
         _definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -105,7 +105,9 @@ impl FindCompletionContents for ArraySchema {
             _ => {
                 let label = "[]".to_string();
                 let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                vec![CompletionContent::new_type_hint_value(label, edit)]
+                vec![CompletionContent::new_type_hint_value(
+                    label, edit, schema_url,
+                )]
             }
         }
     }

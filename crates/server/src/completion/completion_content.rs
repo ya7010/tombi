@@ -60,14 +60,18 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_type_hint_value(label: String, edit: Option<CompletionEdit>) -> Self {
+    pub fn new_type_hint_value(
+        label: String,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             priority: CompletionPriority::TypeHint,
             detail: Some("type hint".to_string()),
             documentation: None,
-            schema_url: None,
+            schema_url: schema_url.cloned(),
             edit,
             preselect: None,
         }
@@ -160,7 +164,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                 CompletionPriority::TypeHint => {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
-                        description: Some("type hint".to_string()),
+                        description: Some("🦅 type hint".to_string()),
                     })
                 }
             },
