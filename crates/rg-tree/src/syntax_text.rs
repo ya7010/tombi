@@ -61,19 +61,8 @@ impl SyntaxText {
         let len = end - start;
         let start = self.span.start() + start;
         let end = start + len;
-        assert!(
-            start <= end,
-            "invalid slice, span: {:?}, slice: {:?}",
-            self.span,
-            (span.start(), span.end()),
-        );
         let span = text::Span::new(start, end);
-        assert!(
-            self.span.contains_span(span),
-            "invalid slice, span: {:?}, slice: {:?}",
-            self.span,
-            span,
-        );
+
         SyntaxText {
             node: self.node.clone(),
             span,

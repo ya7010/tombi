@@ -2028,6 +2028,7 @@ dependencies = [
  "rstest",
  "serde",
  "tower-lsp",
+ "tracing",
 ]
 
 [[package]]

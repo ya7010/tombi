@@ -21,8 +21,16 @@ impl Range {
 
     #[inline]
     pub fn new(start: Position, end: Position) -> Self {
-        assert!(start <= end);
-        Self { start, end }
+        // assert!(start <= end);
+        Self {
+            start,
+            end: if start <= end {
+                end
+            } else {
+                tracing::error!("Invalid text::Range: start: {:?} > end: {:?}", start, end);
+                start
+            },
+        }
     }
 
     #[inline]

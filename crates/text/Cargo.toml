@@ -13,6 +13,7 @@ serde = ["dep:serde"]
 [dependencies]
 serde = { workspace = true, optional = true }
 tower-lsp = { workspace = true, optional = true }
+tracing.workspace = true
 
 [dev-dependencies]
 rstest.workspace = true
