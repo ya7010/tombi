@@ -92,10 +92,11 @@ impl FindCompletionContents for BooleanSchema {
         } else {
             ["true", "false"]
                 .into_iter()
-                .map(|value| CompletionContent {
-                    label: value.to_string(),
-                    edit: CompletionEdit::new_literal(value, position, completion_hint),
-                    ..Default::default()
+                .map(|value| {
+                    CompletionContent::new_type_hint_value(
+                        value.to_string(),
+                        CompletionEdit::new_literal(value, position, completion_hint),
+                    )
                 })
                 .collect()
         }

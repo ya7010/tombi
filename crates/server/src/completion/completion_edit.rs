@@ -11,7 +11,7 @@ pub struct CompletionEdit {
 
 impl CompletionEdit {
     pub fn new_literal(
-        value: &str,
+        label: &str,
         position: text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
@@ -23,7 +23,32 @@ impl CompletionEdit {
             ) => Some(Self {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(" = {}", value),
+                    new_text: format!(" = {}", label),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
+            _ => None,
+        }
+    }
+
+    pub fn new_selectable_literal(
+        label: &str,
+        position: text::Position,
+        completion_hint: Option<CompletionHint>,
+    ) -> Option<Self> {
+        match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { range, .. }
+                | CompletionHint::EqualTrigger { range, .. }
+                | CompletionHint::SpaceTrigger { range, .. },
+            ) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!(" = ${{1:{}}}", label),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {

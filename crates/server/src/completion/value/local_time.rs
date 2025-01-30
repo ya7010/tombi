@@ -104,7 +104,7 @@ impl FindCompletionContents for LocalTimeSchema {
         if completion_items.is_empty() {
             let label = chrono::Local::now().format("%H:%M:%S%.3f").to_string();
             let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-            completion_items.push(CompletionContent::new_current_value(label, edit));
+            completion_items.push(CompletionContent::new_type_hint_value(label, edit));
         }
 
         completion_items

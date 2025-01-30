@@ -9,7 +9,7 @@ pub enum CompletionPriority {
     DefaultValue = 0,
     #[default]
     Normal = 1,
-    Current = 2,
+    TypeHint = 2,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -59,12 +59,12 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_current_value(label: String, edit: Option<CompletionEdit>) -> Self {
+    pub fn new_type_hint_value(label: String, edit: Option<CompletionEdit>) -> Self {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            priority: CompletionPriority::Current,
-            detail: Some("current".to_string()),
+            priority: CompletionPriority::TypeHint,
+            detail: Some("type hint".to_string()),
             documentation: None,
             schema_url: None,
             edit,
