@@ -25,7 +25,8 @@ impl FindCompletionContents for document_tree::Table {
                 let mut completions = Vec::new();
 
                 if let Some(key) = keys.first() {
-                    let accessor = Accessor::Key(key.to_raw_text(toml_version));
+                    let accessor_str = key.to_raw_text(toml_version);
+                    let accessor = Accessor::Key(accessor_str.clone());
                     if let Some(value) = self.get(key) {
                         match value_schema {
                             ValueSchema::Table(table_schema) => {
@@ -49,6 +50,50 @@ impl FindCompletionContents for document_tree::Table {
                                             definitions,
                                             completion_hint,
                                         );
+                                    }
+                                } else if keys.len() == 1 {
+                                    for mut property in table_schema.properties.iter_mut() {
+                                        let label = property.key().to_string();
+                                        if !label.starts_with(accessor_str.as_str()) {
+                                            continue;
+                                        }
+                                        if let Ok(value_schema) =
+                                            property.value_mut().resolve(definitions)
+                                        {
+                                            let (schema_candidates, errors) = value_schema
+                                                .find_schema_candidates(accessors, definitions);
+
+                                            for error in errors {
+                                                tracing::error!("{}", error);
+                                            }
+                                            for schema_candidate in schema_candidates {
+                                                if let Some(CompletionHint::InTableHeader) =
+                                                    completion_hint
+                                                {
+                                                    if count_header_table_or_array(
+                                                        value_schema,
+                                                        definitions,
+                                                    ) == 0
+                                                    {
+                                                        continue;
+                                                    }
+                                                }
+
+                                                let completion_content = CompletionContent {
+                                                    label: label.clone(),
+                                                    kind: Some(CompletionItemKind::PROPERTY),
+                                                    detail: schema_candidate
+                                                        .detail(definitions, completion_hint),
+                                                    documentation: schema_candidate.documentation(
+                                                        definitions,
+                                                        completion_hint,
+                                                    ),
+                                                    schema_url: schema_url.cloned(),
+                                                    ..Default::default()
+                                                };
+                                                completions.push(completion_content);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -97,7 +142,10 @@ impl FindCompletionContents for document_tree::Table {
                 } else {
                     for mut property in table_schema.properties.iter_mut() {
                         let label = property.key().to_string();
-                        let key = self.keys().find(|k| k.to_raw_text(toml_version) == label);
+                        let key = self
+                            .keys()
+                            .last()
+                            .filter(|k| label == k.to_raw_text(toml_version));
                         if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                             let (schema_candidates, errors) =
                                 value_schema.find_schema_candidates(accessors, definitions);

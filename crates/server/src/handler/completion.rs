@@ -424,6 +424,46 @@ mod test {
 
     test_completion_labels! {
         #[tokio::test]
+        async fn tombi_server_comp(
+            r#"
+            [server]
+            comp█
+            "#,
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server_comp2(
+            r#"
+            [server.comp█]
+            "#,
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server_comp3(
+            r#"
+            [server]
+            comp█
+
+            [schema]
+            "#,
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
         async fn pyproject_empty(
             "█",
             pyproject_schema_path(),
