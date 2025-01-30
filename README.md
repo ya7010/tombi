@@ -118,22 +118,22 @@ TOML uses doted keys or inline tables for nested structures,
 but Tombi controls the form of completion by selecting triggers with `.` and `=`.
 
 #### Completion Dot Trigger
-| Type | Select | Trigger | Completion |
+| Type | Trigger | Select | Completion |
 | --- | --- | --- | --- |
-| Boolean | `true` | `key.█` | `key = true█` |
-| Integer | `42` | `key.█` | `key = 42█` |
-| Float | `3.14` | `key.█` | `key = 3.14█` |
-| String | `""` | `key.█` | `key = "█"` |
-| Array | `[]` | `key.█` | `key = [█]` |
-| Table | `completion` | `server.█` | `server.completion = █` |
+| Boolean  | `key.█` | `true` | `key = true█` |
+| Integer  | `key.█` | `42` | `key = 42█` |
+| Float 14` | `key.█` | `3.12` | `key = 3.14█` |
+| String | `key.█` | `""` | `key = "█"` |
+| Array | `key.█` | `[]` | `key = [█]` |
+| Table  | `server.█` | `completion` | `server.completion = █` |
 
 #### Completion Equal Trigger
 
 | Type | Select | Trigger | Completion |
 | --- | --- | --- | --- |
-| Boolean | `true` | `key=█` | `key = true█` |
-| Integer | `42` | `key=█` | `key = 42█` |
-| Float | `3.14` | `key=█` | `key = 3.14█` |
-| String | `""` | `key=█` | `key = "█"` |
-| Array | `[]` | `key=█` | `key = [█]` |
-| Table | `completion` | `server=█` | `server = { completion█ }` |
+| Boolean | `key.█` | `true` | `key = true█` |
+| Integer | `key.█` | `42` | `key = 42█` |
+| Float | `key.█` | `3.14` | `key = 3.14█` |
+| String | `key.█` | `""` | `key = "█"` |
+| Array | `key.█` | `[]` | `key = [█]` |
+| Table | `server=█` | `completion` | `server = { completion█ }` |
