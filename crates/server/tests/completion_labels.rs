@@ -12,7 +12,7 @@ macro_rules! test_completion_labels {
             ) -> Ok([$($label:expr),*$(,)?]);
         ) => {
             #[tokio::test]
-            async fn $name() {
+            async fn $name() -> Result<(), Box<dyn std::error::Error>> {
                 use itertools::Itertools;
                 use server::Backend;
                 use schema_store::JsonCatalogSchema;
@@ -48,26 +48,30 @@ macro_rules! test_completion_labels {
                     })
                     .await;
 
-                let temp_file = tempfile::NamedTempFile::with_suffix_in(
+                let Ok(temp_file) = tempfile::NamedTempFile::with_suffix_in(
                     ".toml",
                     std::env::current_dir().expect("failed to get current directory"),
-                )
-                .expect("failed to create temporary file");
+                ) else {
+                    return Err("failed to create a temporary file for the test data".into());
+                };
 
                 let mut toml_text = textwrap::dedent($source).trim().to_string();
 
-                let index = toml_text
+                let Some(index) = toml_text
                     .as_str()
                     .find("█")
-                    .expect("failed to find completion position marker (█) in the test data");
+                    else {
+                        return Err("failed to find completion position marker (█) in the test data".into());
+                    };
 
                 toml_text.remove(index);
-                temp_file.as_file().write_all(toml_text.as_bytes()).expect(
-                    "failed to write test data to the temporary file, which is used as a text document",
-                );
+                if temp_file.as_file().write_all(toml_text.as_bytes()).is_err() {
+                   return  Err("failed to write test data to the temporary file, which is used as a text document".into());
+                };
 
-                let toml_file_url = Url::from_file_path(temp_file.path())
-                    .expect("failed to convert temporary file path to URL");
+                let Ok(toml_file_url) = Url::from_file_path(temp_file.path()) else {
+                    return Err("failed to convert temporary file path to URL".into());
+                };
 
                 handle_did_open(
                     backend,
@@ -82,7 +86,7 @@ macro_rules! test_completion_labels {
                 )
                 .await;
 
-                let completions = server::handler::handle_completion(
+                let Ok(Some(completions)) = server::handler::handle_completion(
                     &backend,
                     CompletionParams {
                         text_document_position: TextDocumentPositionParams {
@@ -98,9 +102,9 @@ macro_rules! test_completion_labels {
                         context: None,
                     },
                 )
-                .await
-                .expect("failed to handle completion")
-                .expect("failed to get completion items");
+                .await else {
+                    return Err("failed to handle completion".into());
+                };
 
                 let labels = completions
                     .into_iter()
@@ -115,6 +119,8 @@ macro_rules! test_completion_labels {
                     labels,
                     vec![$($label.to_string()),*] as Vec<String>,
                 );
+
+                Ok(())
             }
         };
     }
