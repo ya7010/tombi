@@ -1,18 +1,17 @@
+mod completion_edit;
 mod document;
 mod hint;
 mod value;
 
 use ast::{algo::ancestors_at_position, AstNode};
+use completion_edit::CompletionEdit;
 use config::TomlVersion;
 use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 pub use hint::CompletionHint;
 use itertools::Itertools;
 use schema_store::{get_schema_name, Accessor, SchemaDefinitions, Schemas, ValueSchema};
 use syntax::{SyntaxElement, SyntaxKind};
-use tower_lsp::lsp_types::{
-    CompletionTextEdit, InsertReplaceEdit, InsertTextFormat, MarkupContent, MarkupKind, TextEdit,
-    Url,
-};
+use tower_lsp::lsp_types::Url;
 
 pub fn get_completion_contents(
     root: ast::Root,
@@ -298,10 +297,12 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             ),
             detail: completion_content.detail,
             documentation: documentation.map(|documentation| {
-                tower_lsp::lsp_types::Documentation::MarkupContent(MarkupContent {
-                    kind: MarkupKind::Markdown,
-                    value: documentation,
-                })
+                tower_lsp::lsp_types::Documentation::MarkupContent(
+                    tower_lsp::lsp_types::MarkupContent {
+                        kind: tower_lsp::lsp_types::MarkupKind::Markdown,
+                        value: documentation,
+                    },
+                )
             }),
             sort_text: Some(sorted_text),
             insert_text_format,
@@ -309,72 +310,6 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             additional_text_edits,
             preselect: completion_content.preselect,
             ..Default::default()
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CompletionEdit {
-    pub insert_text_format: Option<tower_lsp::lsp_types::InsertTextFormat>,
-    pub text_edit: tower_lsp::lsp_types::CompletionTextEdit,
-    pub additional_text_edits: Option<Vec<tower_lsp::lsp_types::TextEdit>>,
-}
-
-impl CompletionEdit {
-    pub fn new_literal(
-        value: &str,
-        position: text::Position,
-        completion_hint: Option<CompletionHint>,
-    ) -> Option<Self> {
-        match completion_hint {
-            Some(
-                CompletionHint::DotTrigger { range }
-                | CompletionHint::EqualTrigger { range }
-                | CompletionHint::SpaceTrigger { range },
-            ) => {
-                let edit_range = text::Range::new(position, position).into();
-                Some(Self {
-                    insert_text_format: None,
-                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
-                        new_text: format!(" = {}", value),
-                        insert: edit_range,
-                        replace: edit_range,
-                    }),
-                    additional_text_edits: Some(vec![TextEdit {
-                        range: range.into(),
-                        new_text: "".to_string(),
-                    }]),
-                })
-            }
-            _ => None,
-        }
-    }
-
-    pub fn new_string_literal(
-        position: text::Position,
-        completion_hint: Option<CompletionHint>,
-    ) -> Option<Self> {
-        match completion_hint {
-            Some(
-                CompletionHint::DotTrigger { range }
-                | CompletionHint::EqualTrigger { range }
-                | CompletionHint::SpaceTrigger { range },
-            ) => {
-                let edit_range = text::Range::new(position, position).into();
-                Some(Self {
-                    insert_text_format: Some(InsertTextFormat::SNIPPET),
-                    text_edit: CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
-                        new_text: " = \"$0\"".to_string(),
-                        insert: edit_range,
-                        replace: edit_range,
-                    }),
-                    additional_text_edits: Some(vec![TextEdit {
-                        range: range.into(),
-                        new_text: "".to_string(),
-                    }]),
-                })
-            }
-            _ => None,
         }
     }
 }
