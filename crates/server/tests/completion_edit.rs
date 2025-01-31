@@ -5,13 +5,13 @@ struct Select(&'static str);
 #[macro_export]
 macro_rules! test_completion_edit {
     (
-            #[tokio::test]
-            async fn $name:ident(
-                $source:expr,
-                $select:expr,
-                $schema_file_path:expr$(,)?
-            ) -> Ok($expected:expr);
-        ) => {
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr,
+            $select:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok($expected:expr);
+    ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
             use schema_store::JsonCatalogSchema;
@@ -59,7 +59,7 @@ macro_rules! test_completion_edit {
             let Some(index) = toml_text
                 .as_str()
                 .find("█")
-                 else {
+                    else {
                     return Err("failed to find completion position marker (█) in the test data".into())
                 };
 
@@ -110,7 +110,7 @@ macro_rules! test_completion_edit {
                 .clone()
                 .into_iter()
                 .find(|content| content.label == selected)
-                 else {
+                    else {
                     return Err(
                         format!(
                             "failed to find the selected completion item \"{}\" in [{}]",
