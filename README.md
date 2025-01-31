@@ -123,7 +123,7 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 | --- | --- | --- | --- |
 | Boolean  | `key.█` | `true` | `key = true█` |
 | Integer  | `key.█` | `42` | `key = ${█:42}` |
-| Float | `key.█` | `3.12` | `key = ${█:3.12}` |
+| Float | `key.█` | `3.14` | `key = ${█:3.14}` |
 | String | `key.█` | `""` | `key = "█"` |
 | Array | `key.█` | `[]` | `key = [█]` |
 | Table  | `server.█` | `completion` | `server.completion = █` |
@@ -134,7 +134,7 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 | --- | --- | --- | --- |
 | Boolean | `key=█` | `true` | `key = true█` |
 | Integer | `key=█` | `42` | `key = ${█:42}` |
-| Float | `key=█` | `3.14` | `key = ${█:3.12}` |
+| Float | `key=█` | `3.14` | `key = ${█:3.14}` |
 | String | `key=█` | `""` | `key = "█"` |
 | Array | `key=█` | `[]` | `key = [█]` |
 | Table | `server=█` | `completion` | `server = { completion█ }` |
