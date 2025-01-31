@@ -3,26 +3,14 @@ use tower_lsp::lsp_types::Url;
 
 use super::completion_edit::CompletionEdit;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[repr(u8)]
 pub enum CompletionPriority {
-    Default,
-    Enum,
+    Default = 0,
+    Enum = 1,
     #[default]
-    Normal,
-    TypeHint {
-        label_description: String,
-    },
-}
-
-impl std::fmt::Display for CompletionPriority {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CompletionPriority::Default => write!(f, "0"),
-            CompletionPriority::Enum => write!(f, "1"),
-            CompletionPriority::Normal => write!(f, "2"),
-            CompletionPriority::TypeHint { .. } => write!(f, "3"),
-        }
-    }
+    Normal = 2,
+    TypeHint = 3,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -80,7 +68,7 @@ impl CompletionContent {
 
     pub fn new_type_hint_value(
         label: impl Into<String>,
-        label_description: impl Into<String>,
+        detail: impl Into<String>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
@@ -88,10 +76,8 @@ impl CompletionContent {
             label: label.into(),
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             emoji_icon: Some('🦅'),
-            priority: CompletionPriority::TypeHint {
-                label_description: label_description.into(),
-            },
-            detail: Some("type hint".to_string()),
+            priority: CompletionPriority::TypeHint,
+            detail: Some(detail.into()),
             documentation: None,
             filter_text: None,
             schema_url: schema_url.cloned(),
@@ -105,17 +91,15 @@ impl CompletionContent {
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
-        let priority = CompletionPriority::TypeHint {
-            label_description: "InlineTable".to_string(),
-        };
-        let filter_text = Some(format!("{}_{}", &priority, label.into()));
+        let priority = CompletionPriority::TypeHint;
+        let filter_text = Some(format!("{}_{}", priority as u8, label.into()));
 
         Self {
             label: "{}".to_string(),
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
             emoji_icon: Some('🦅'),
             priority,
-            detail: Some("type hint".to_string()),
+            detail: Some("InlineTable".to_string()),
             documentation: None,
             filter_text,
             schema_url: schema_url.cloned(),
@@ -152,7 +136,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
 
         let sorted_text = format!(
             "{}_{}",
-            completion_content.priority, &completion_content.label
+            completion_content.priority as u8, &completion_content.label
         );
 
         let mut schema_text = None;
@@ -203,10 +187,10 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     None
                 }
             }
-            CompletionPriority::TypeHint { label_description } => {
+            CompletionPriority::TypeHint => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
-                    description: Some(label_description),
+                    description: Some("type hint".to_string()),
                 })
             }
         }
