@@ -34,7 +34,7 @@ macro_rules! test_completion_edit {
             async fn _$name(
                 $source,
                 $select,
-                None,
+                Option::<std::path::PathBuf>::None,
             ) -> Ok($expected);
         }
     };
