@@ -1,6 +1,9 @@
-use test_lib::{cargo_schema_path, pyproject_schema_path, today_local_date, tombi_schema_path};
+use test_lib::{
+    cargo_schema_path, pyproject_schema_path, today_local_date, today_local_date_time,
+    today_local_time, today_offset_date_time, tombi_schema_path,
+};
 
-struct Select(&'static str);
+struct Select<T>(T);
 
 #[macro_export]
 macro_rules! test_completion_edit {
@@ -143,6 +146,8 @@ macro_rules! test_completion_edit {
             };
 
             let selected = $select.0;
+            let selected: &str = selected.as_ref();
+
             let Some(completion) = completions
                 .clone()
                 .into_iter()
@@ -280,7 +285,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [project]
-        authors = [$0]
+        authors = [$1]
         "#
     );
 }
@@ -297,7 +302,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [project]
-        authors = [$0]
+        authors = [$1]
         "#
     );
 }
@@ -329,5 +334,65 @@ test_completion_edit! {
         Select("42"),
     ) -> Ok(
         "key = ${1:42}"
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_float_without_schema(
+        "key.█",
+        Select("3.14"),
+    ) -> Ok(
+        "key = ${1:3.14}"
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_today_offset_date_time_without_schema(
+        "key.█",
+        Select(today_offset_date_time()),
+    ) -> Ok(
+        &format!("key = ${{1:{}}}",  today_offset_date_time())
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_today_local_date_time_without_schema(
+        "key.█",
+        Select(today_local_date_time()),
+    ) -> Ok(
+        &format!("key = ${{1:{}}}",  today_local_date_time())
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_today_local_date_without_schema(
+        "key.█",
+        Select(today_local_date()),
+    ) -> Ok(
+        &format!("key = ${{1:{}}}",  today_local_date())
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_today_local_time_without_schema(
+        "key.█",
+        Select(today_local_time()),
+    ) -> Ok(
+        &format!("key = ${{1:{}}}",  today_local_time())
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_array_without_schema(
+        "key.█",
+        Select("[]"),
+    ) -> Ok(
+        "key = [$1]"
     );
 }
