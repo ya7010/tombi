@@ -39,7 +39,7 @@ impl FindCompletionContents for OffsetDateTimeSchema {
         }
 
         if completion_items.is_empty() {
-            completion_items.extend(offset_date_time_type_hint(
+            completion_items.extend(type_hint_offset_date_time(
                 position,
                 schema_url,
                 completion_hint,
@@ -50,7 +50,7 @@ impl FindCompletionContents for OffsetDateTimeSchema {
     }
 }
 
-pub fn offset_date_time_type_hint(
+pub fn type_hint_offset_date_time(
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,

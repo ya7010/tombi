@@ -28,12 +28,12 @@ impl FindCompletionContents for BooleanSchema {
                 })
                 .collect()
         } else {
-            boolean_type_hint(position, schema_url, completion_hint)
+            type_hint_boolean(position, schema_url, completion_hint)
         }
     }
 }
 
-pub fn boolean_type_hint(
+pub fn type_hint_boolean(
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,

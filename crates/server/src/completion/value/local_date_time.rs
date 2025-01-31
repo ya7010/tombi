@@ -39,7 +39,7 @@ impl FindCompletionContents for LocalDateTimeSchema {
         }
 
         if completion_items.is_empty() {
-            completion_items.extend(local_date_time_type_hint(
+            completion_items.extend(type_hint_local_date_time(
                 position,
                 schema_url,
                 completion_hint,
@@ -50,7 +50,7 @@ impl FindCompletionContents for LocalDateTimeSchema {
     }
 }
 
-pub fn local_date_time_type_hint(
+pub fn type_hint_local_date_time(
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,

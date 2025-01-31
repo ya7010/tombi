@@ -16,15 +16,15 @@ use super::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
     CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
-use array::array_type_hint;
-use boolean::boolean_type_hint;
+use array::type_hint_array;
+use boolean::type_hint_boolean;
 use config::TomlVersion;
-use float::float_type_hint;
-use integer::integer_type_hint;
-use local_date::local_date_type_hint;
-use local_date_time::local_date_time_type_hint;
-use local_time::local_time_type_hint;
-use offset_date_time::offset_date_time_type_hint;
+use float::type_hint_float;
+use integer::type_hint_integer;
+use local_date::type_hint_local_date;
+use local_date_time::type_hint_local_date_time;
+use local_time::type_hint_local_time;
+use offset_date_time::type_hint_offset_date_time;
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
     LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
@@ -216,14 +216,14 @@ impl FindCompletionContents for document_tree::Value {
                 ),
                 Some(ValueSchema::Null) => Vec::with_capacity(0),
                 None => itertools::concat([
-                    boolean_type_hint(position, schema_url, completion_hint),
-                    integer_type_hint(position, schema_url, completion_hint),
-                    float_type_hint(position, schema_url, completion_hint),
-                    local_date_time_type_hint(position, schema_url, completion_hint),
-                    local_date_type_hint(position, schema_url, completion_hint),
-                    local_time_type_hint(position, schema_url, completion_hint),
-                    offset_date_time_type_hint(position, schema_url, completion_hint),
-                    array_type_hint(position, schema_url, completion_hint),
+                    type_hint_boolean(position, schema_url, completion_hint),
+                    type_hint_integer(position, schema_url, completion_hint),
+                    type_hint_float(position, schema_url, completion_hint),
+                    type_hint_local_date_time(position, schema_url, completion_hint),
+                    type_hint_local_date(position, schema_url, completion_hint),
+                    type_hint_local_time(position, schema_url, completion_hint),
+                    type_hint_offset_date_time(position, schema_url, completion_hint),
+                    type_hint_array(position, schema_url, completion_hint),
                 ]),
             },
         }

@@ -39,14 +39,14 @@ impl FindCompletionContents for IntegerSchema {
         }
 
         if completion_items.is_empty() {
-            completion_items.extend(integer_type_hint(position, schema_url, completion_hint));
+            completion_items.extend(type_hint_integer(position, schema_url, completion_hint));
         }
 
         completion_items
     }
 }
 
-pub fn integer_type_hint(
+pub fn type_hint_integer(
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,

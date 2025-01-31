@@ -128,12 +128,12 @@ impl FindCompletionContents for ArraySchema {
     ) -> Vec<CompletionContent> {
         match completion_hint {
             Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-            _ => array_type_hint(position, schema_url, completion_hint),
+            _ => type_hint_array(position, schema_url, completion_hint),
         }
     }
 }
 
-pub fn array_type_hint(
+pub fn type_hint_array(
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
