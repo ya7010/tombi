@@ -21,6 +21,7 @@ macro_rules! test_completion_edit {
             ) -> Ok($expected);
         }
     };
+
     (
         #[tokio::test]
         async fn $name:ident(
@@ -37,6 +38,7 @@ macro_rules! test_completion_edit {
             ) -> Ok($expected);
         }
     };
+
     (
         #[tokio::test]
         async fn _$name:ident(

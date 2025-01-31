@@ -11,6 +11,37 @@ macro_rules! test_completion_labels {
             $schema_file_path:expr$(,)?
         ) -> Ok([$($label:expr),*$(,)?]);
     ) => {
+        test_completion_labels! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                Some($schema_file_path),
+            ) -> Ok([$($label),*]);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr$(,)?
+        ) -> Ok([$($label:expr),*$(,)?]);
+    ) => {
+        test_completion_labels! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                None,
+            ) -> Ok([$($label),*]);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn _$name:ident(
+            $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok([$($label:expr),*$(,)?]);
+    ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
             use itertools::Itertools;
@@ -31,22 +62,24 @@ macro_rules! test_completion_labels {
 
             let backend = service.inner();
 
-            let schema_url = Url::from_file_path($schema_file_path).expect(
-                format!(
-                    "failed to convert schema path to URL: {}",
-                    tombi_schema_path().display()
-                )
-                .as_str(),
-            );
-            backend
-                .schema_store
-                .add_catalog(JsonCatalogSchema {
-                    name: "test_schema".to_string(),
-                    description: "schema for testing".to_string(),
-                    file_match: vec!["*.toml".to_string()],
-                    url: schema_url.clone(),
-                })
-                .await;
+            if let Some(schema_file_path) = $schema_file_path.as_ref() {
+                let schema_url = Url::from_file_path(schema_file_path).expect(
+                    format!(
+                        "failed to convert schema path to URL: {}",
+                        tombi_schema_path().display()
+                    )
+                    .as_str(),
+                );
+                backend
+                    .schema_store
+                    .add_catalog(JsonCatalogSchema {
+                        name: "test_schema".to_string(),
+                        description: "schema for testing".to_string(),
+                        file_match: vec!["*.toml".to_string()],
+                        url: schema_url.clone(),
+                    })
+                    .await;
+            }
 
             let Ok(temp_file) = tempfile::NamedTempFile::with_suffix_in(
                 ".toml",
