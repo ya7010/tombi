@@ -43,7 +43,7 @@ pub fn type_hint_boolean(
         .map(|value| {
             CompletionContent::new_type_hint_value(
                 value.to_string(),
-                CompletionEdit::new_selectable_literal(value, position, completion_hint),
+                CompletionEdit::new_literal(value, position, completion_hint),
                 schema_url,
             )
         })

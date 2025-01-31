@@ -1,4 +1,4 @@
-use test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
+use test_lib::{cargo_schema_path, pyproject_schema_path, today_local_date, tombi_schema_path};
 
 struct Select(&'static str);
 
@@ -299,5 +299,35 @@ test_completion_edit! {
         [project]
         authors = [$0]
         "#
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_true_without_schema(
+        "key.█",
+        Select("true"),
+    ) -> Ok(
+        "key = true"
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_false_without_schema(
+        "key.█",
+        Select("false"),
+    ) -> Ok(
+        "key = false"
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
+    async fn key_dot_select_integer_without_schema(
+        "key.█",
+        Select("42"),
+    ) -> Ok(
+        "key = ${1:42}"
     );
 }
