@@ -10,7 +10,7 @@ impl FindCompletionContents for BooleanSchema {
     fn find_completion_contents(
         &self,
         _accessors: &Vec<Accessor>,
-        _value_schema: &ValueSchema,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],

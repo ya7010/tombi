@@ -12,7 +12,7 @@ impl FindCompletionContents for document_tree::Table {
     fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
-        value_schema: &ValueSchema,
+        value_schema: Option<&ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -21,123 +21,70 @@ impl FindCompletionContents for document_tree::Table {
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match value_schema {
-            ValueSchema::Table(table_schema) => {
+            Some(ValueSchema::Table(table_schema)) => {
                 let mut completions = Vec::new();
 
                 if let Some(key) = keys.first() {
                     let accessor_str = key.to_raw_text(toml_version);
                     let accessor = Accessor::Key(accessor_str.clone());
                     if let Some(value) = self.get(key) {
-                        match value_schema {
-                            ValueSchema::Table(table_schema) => {
-                                if let Some(mut property) =
-                                    table_schema.properties.get_mut(&accessor)
+                        if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                            if let Ok(property_schema) = property.value_mut().resolve(definitions) {
+                                return value.find_completion_contents(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    Some(property_schema),
+                                    toml_version,
+                                    position,
+                                    &keys[1..],
+                                    schema_url,
+                                    definitions,
+                                    completion_hint,
+                                );
+                            }
+                        } else if keys.len() == 1 {
+                            for mut property in table_schema.properties.iter_mut() {
+                                let label = property.key().to_string();
+                                if !label.starts_with(accessor_str.as_str()) {
+                                    continue;
+                                }
+                                if let Ok(value_schema) = property.value_mut().resolve(definitions)
                                 {
-                                    if let Ok(property_schema) =
-                                        property.value_mut().resolve(definitions)
-                                    {
-                                        return value.find_completion_contents(
-                                            &accessors
-                                                .clone()
-                                                .into_iter()
-                                                .chain(std::iter::once(accessor))
-                                                .collect(),
-                                            property_schema,
-                                            toml_version,
-                                            position,
-                                            &keys[1..],
-                                            schema_url,
-                                            definitions,
-                                            completion_hint,
-                                        );
-                                    }
-                                } else if keys.len() == 1 {
-                                    for mut property in table_schema.properties.iter_mut() {
-                                        let label = property.key().to_string();
-                                        if !label.starts_with(accessor_str.as_str()) {
-                                            continue;
-                                        }
-                                        if let Ok(value_schema) =
-                                            property.value_mut().resolve(definitions)
-                                        {
-                                            let (schema_candidates, errors) = value_schema
-                                                .find_schema_candidates(accessors, definitions);
+                                    let (schema_candidates, errors) =
+                                        value_schema.find_schema_candidates(accessors, definitions);
 
-                                            for error in errors {
-                                                tracing::error!("{}", error);
-                                            }
-                                            for schema_candidate in schema_candidates {
-                                                if let Some(CompletionHint::InTableHeader) =
-                                                    completion_hint
-                                                {
-                                                    if count_header_table_or_array(
-                                                        value_schema,
-                                                        definitions,
-                                                    ) == 0
-                                                    {
-                                                        continue;
-                                                    }
-                                                }
-                                                completions.push(CompletionContent::new_property(
-                                                    label.clone(),
-                                                    schema_candidate
-                                                        .detail(definitions, completion_hint),
-                                                    schema_candidate.documentation(
-                                                        definitions,
-                                                        completion_hint,
-                                                    ),
-                                                    CompletionEdit::new_propery(
-                                                        &label,
-                                                        position,
-                                                        completion_hint,
-                                                    ),
-                                                    schema_url,
-                                                ));
+                                    for error in errors {
+                                        tracing::error!("{}", error);
+                                    }
+                                    for schema_candidate in schema_candidates {
+                                        if let Some(CompletionHint::InTableHeader) = completion_hint
+                                        {
+                                            if count_header_table_or_array(
+                                                value_schema,
+                                                definitions,
+                                            ) == 0
+                                            {
+                                                continue;
                                             }
                                         }
+                                        completions.push(CompletionContent::new_property(
+                                            label.clone(),
+                                            schema_candidate.detail(definitions, completion_hint),
+                                            schema_candidate
+                                                .documentation(definitions, completion_hint),
+                                            CompletionEdit::new_propery(
+                                                &label,
+                                                position,
+                                                completion_hint,
+                                            ),
+                                            schema_url,
+                                        ));
                                     }
                                 }
                             }
-                            ValueSchema::OneOf(one_of_schema) => {
-                                return find_one_of_completion_items(
-                                    self,
-                                    accessors,
-                                    one_of_schema,
-                                    toml_version,
-                                    position,
-                                    keys,
-                                    schema_url,
-                                    definitions,
-                                    completion_hint,
-                                );
-                            }
-                            ValueSchema::AnyOf(any_of_schema) => {
-                                return find_any_of_completion_items(
-                                    self,
-                                    accessors,
-                                    any_of_schema,
-                                    toml_version,
-                                    position,
-                                    keys,
-                                    schema_url,
-                                    definitions,
-                                    completion_hint,
-                                );
-                            }
-                            ValueSchema::AllOf(all_of_schema) => {
-                                return find_all_if_completion_items(
-                                    self,
-                                    accessors,
-                                    all_of_schema,
-                                    toml_version,
-                                    position,
-                                    keys,
-                                    schema_url,
-                                    definitions,
-                                    completion_hint,
-                                );
-                            }
-                            _ => {}
                         }
                     }
                 } else {
@@ -192,7 +139,7 @@ impl FindCompletionContents for document_tree::Table {
                 }
                 completions
             }
-            ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
+            Some(ValueSchema::OneOf(one_of_schema)) => find_one_of_completion_items(
                 self,
                 accessors,
                 one_of_schema,
@@ -203,7 +150,7 @@ impl FindCompletionContents for document_tree::Table {
                 definitions,
                 completion_hint,
             ),
-            ValueSchema::AnyOf(any_of_schema) => find_any_of_completion_items(
+            Some(ValueSchema::AnyOf(any_of_schema)) => find_any_of_completion_items(
                 self,
                 accessors,
                 any_of_schema,
@@ -214,7 +161,7 @@ impl FindCompletionContents for document_tree::Table {
                 definitions,
                 completion_hint,
             ),
-            ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+            Some(ValueSchema::AllOf(all_of_schema)) => find_all_if_completion_items(
                 self,
                 accessors,
                 all_of_schema,
@@ -234,7 +181,7 @@ impl FindCompletionContents for TableSchema {
     fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
-        _value_schema: &ValueSchema,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],

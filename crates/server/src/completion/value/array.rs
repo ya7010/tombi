@@ -12,7 +12,7 @@ impl FindCompletionContents for document_tree::Array {
     fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
-        value_schema: &ValueSchema,
+        value_schema: Option<&ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -21,7 +21,7 @@ impl FindCompletionContents for document_tree::Array {
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match value_schema {
-            ValueSchema::Array(array) => {
+            Some(ValueSchema::Array(array)) => {
                 for (index, value) in self.values().iter().enumerate() {
                     if value.range().contains(position) {
                         let accessor = Accessor::Index(index);
@@ -33,7 +33,7 @@ impl FindCompletionContents for document_tree::Array {
                                         .into_iter()
                                         .chain(std::iter::once(accessor))
                                         .collect(),
-                                    item_schema,
+                                    Some(item_schema),
                                     toml_version,
                                     position,
                                     keys,
@@ -50,7 +50,7 @@ impl FindCompletionContents for document_tree::Array {
                 }
                 Vec::with_capacity(0)
             }
-            ValueSchema::OneOf(one_of_schema) => find_one_of_completion_items(
+            Some(ValueSchema::OneOf(one_of_schema)) => find_one_of_completion_items(
                 self,
                 accessors,
                 one_of_schema,
@@ -61,7 +61,7 @@ impl FindCompletionContents for document_tree::Array {
                 definitions,
                 completion_hint,
             ),
-            ValueSchema::AnyOf(any_of_schema) => find_any_of_completion_items(
+            Some(ValueSchema::AnyOf(any_of_schema)) => find_any_of_completion_items(
                 self,
                 accessors,
                 any_of_schema,
@@ -72,7 +72,7 @@ impl FindCompletionContents for document_tree::Array {
                 definitions,
                 completion_hint,
             ),
-            ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+            Some(ValueSchema::AllOf(all_of_schema)) => find_all_if_completion_items(
                 self,
                 accessors,
                 all_of_schema,
@@ -92,7 +92,7 @@ impl FindCompletionContents for ArraySchema {
     fn find_completion_contents(
         &self,
         _accessors: &Vec<Accessor>,
-        _value_schema: &ValueSchema,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],

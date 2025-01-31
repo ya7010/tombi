@@ -154,7 +154,7 @@ pub fn get_completion_contents(
 
     let completion_contents = document_tree.find_completion_contents(
         &Vec::with_capacity(0),
-        document_schema.value_schema(),
+        Some(document_schema.value_schema()),
         toml_version,
         position,
         &keys,
@@ -187,7 +187,7 @@ pub trait FindCompletionContents {
     fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
-        value_schema: &ValueSchema,
+        value_schema: Option<&ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -317,7 +317,7 @@ where
             if let Ok(schema) = schema.resolve(definitions) {
                 let schema_completions = value.find_completion_contents(
                     accessors,
-                    schema,
+                    Some(schema),
                     toml_version,
                     position,
                     keys,
@@ -381,7 +381,7 @@ where
             if let Ok(schema) = schema.resolve(definitions) {
                 let schema_completions = value.find_completion_contents(
                     accessors,
-                    schema,
+                    Some(schema),
                     toml_version,
                     position,
                     keys,
@@ -445,7 +445,7 @@ where
             if let Ok(schema) = schema.resolve(definitions) {
                 let schema_completions = value.find_completion_contents(
                     accessors,
-                    schema,
+                    Some(schema),
                     toml_version,
                     position,
                     keys,

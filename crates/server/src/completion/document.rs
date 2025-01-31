@@ -9,7 +9,7 @@ impl FindCompletionContents for document_tree::DocumentTree {
     fn find_completion_contents(
         &self,
         accessors: &Vec<Accessor>,
-        value_schema: &ValueSchema,
+        value_schema: Option<&ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
