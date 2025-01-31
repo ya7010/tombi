@@ -504,6 +504,7 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
+        "{}",
     ]);
 }
 
@@ -522,6 +523,7 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
+        "{}",
     ]);
 }
 
@@ -540,6 +542,7 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
+        "{}",
     ]);
 }
 
@@ -558,5 +561,6 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
+        "{}",
     ]);
 }

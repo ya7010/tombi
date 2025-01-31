@@ -195,7 +195,16 @@ impl FindCompletionContents for document_tree::Table {
                             completion_hint,
                         );
 
-                        if !completion_contents.is_empty() {
+                        if !completion_contents.is_empty()
+                            && matches!(
+                                completion_hint,
+                                Some(
+                                    CompletionHint::DotTrigger { .. }
+                                        | CompletionHint::EqualTrigger { .. }
+                                        | CompletionHint::SpaceTrigger { .. }
+                                )
+                            )
+                        {
                             completion_contents.push(CompletionContent::new_type_hint_property(
                                 &accessor_str,
                                 CompletionEdit::new_propery(
