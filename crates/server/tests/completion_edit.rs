@@ -243,7 +243,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [project]
-        authors = []
+        authors = [$0]
         "#
     );
 }
@@ -260,7 +260,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [project]
-        authors = []
+        authors = [$0]
         "#
     );
 }

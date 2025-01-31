@@ -16,7 +16,15 @@ use super::{
     find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
     CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
+use array::array_type_hint;
+use boolean::boolean_type_hint;
 use config::TomlVersion;
+use float::float_type_hint;
+use integer::integer_type_hint;
+use local_date::local_date_type_hint;
+use local_date_time::local_date_time_type_hint;
+use local_time::local_time_type_hint;
+use offset_date_time::offset_date_time_type_hint;
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
     LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
@@ -33,7 +41,7 @@ impl FindCompletionContents for document_tree::Value {
         position: text::Position,
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        definitions: &SchemaDefinitions,
+        definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match self {
@@ -207,7 +215,16 @@ impl FindCompletionContents for document_tree::Value {
                     completion_hint,
                 ),
                 Some(ValueSchema::Null) => Vec::with_capacity(0),
-                None => Vec::with_capacity(0),
+                None => itertools::concat([
+                    boolean_type_hint(position, schema_url, completion_hint),
+                    integer_type_hint(position, schema_url, completion_hint),
+                    float_type_hint(position, schema_url, completion_hint),
+                    local_date_time_type_hint(position, schema_url, completion_hint),
+                    local_date_type_hint(position, schema_url, completion_hint),
+                    local_time_type_hint(position, schema_url, completion_hint),
+                    offset_date_time_type_hint(position, schema_url, completion_hint),
+                    array_type_hint(position, schema_url, completion_hint),
+                ]),
             },
         }
     }

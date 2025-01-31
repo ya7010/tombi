@@ -17,15 +17,19 @@ impl FindCompletionContents for document_tree::Array {
         position: text::Position,
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        definitions: &SchemaDefinitions,
+        definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match value_schema {
-            Some(ValueSchema::Array(array)) => {
+            Some(ValueSchema::Array(array_schema)) => {
+                let Some(definitions) = definitions else {
+                    unreachable!("definitions must be provided");
+                };
+
                 for (index, value) in self.values().iter().enumerate() {
                     if value.range().contains(position) {
                         let accessor = Accessor::Index(index);
-                        if let Some(completion_items) = array.operate_item(
+                        if let Some(completion_items) = array_schema.operate_item(
                             |item_schema| {
                                 value.find_completion_contents(
                                     &accessors
@@ -38,7 +42,7 @@ impl FindCompletionContents for document_tree::Array {
                                     position,
                                     keys,
                                     schema_url,
-                                    definitions,
+                                    Some(definitions),
                                     completion_hint,
                                 )
                             },
@@ -83,7 +87,29 @@ impl FindCompletionContents for document_tree::Array {
                 definitions,
                 completion_hint,
             ),
-            _ => Vec::with_capacity(0),
+            Some(_) => Vec::with_capacity(0),
+            None => {
+                for (index, value) in self.values().iter().enumerate() {
+                    if value.range().contains(position) {
+                        let accessor = Accessor::Index(index);
+                        return value.find_completion_contents(
+                            &accessors
+                                .clone()
+                                .into_iter()
+                                .chain(std::iter::once(accessor))
+                                .collect(),
+                            None,
+                            toml_version,
+                            position,
+                            keys,
+                            None,
+                            None,
+                            completion_hint,
+                        );
+                    }
+                }
+                Vec::with_capacity(0)
+            }
         }
     }
 }
@@ -97,18 +123,25 @@ impl FindCompletionContents for ArraySchema {
         position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        _definitions: &SchemaDefinitions,
+        _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match completion_hint {
             Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-            _ => {
-                let label = "[]".to_string();
-                let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                vec![CompletionContent::new_type_hint_value(
-                    label, edit, schema_url,
-                )]
-            }
+            _ => array_type_hint(position, schema_url, completion_hint),
         }
     }
+}
+
+pub fn array_type_hint(
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    let label = "[]".to_string();
+    let edit = CompletionEdit::new_array_literal(position, completion_hint);
+
+    vec![CompletionContent::new_type_hint_value(
+        label, edit, schema_url,
+    )]
 }

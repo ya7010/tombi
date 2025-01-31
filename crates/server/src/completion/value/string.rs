@@ -15,7 +15,7 @@ impl FindCompletionContents for StringSchema {
         position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        _definitions: &SchemaDefinitions,
+        _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         let mut completion_items = vec![];

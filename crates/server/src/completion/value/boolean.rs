@@ -15,7 +15,7 @@ impl FindCompletionContents for BooleanSchema {
         position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        _definitions: &SchemaDefinitions,
+        _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         if let Some(enumerate) = &self.enumerate {
@@ -28,16 +28,24 @@ impl FindCompletionContents for BooleanSchema {
                 })
                 .collect()
         } else {
-            ["true", "false"]
-                .into_iter()
-                .map(|value| {
-                    CompletionContent::new_type_hint_value(
-                        value.to_string(),
-                        CompletionEdit::new_literal(value, position, completion_hint),
-                        schema_url,
-                    )
-                })
-                .collect()
+            boolean_type_hint(position, schema_url, completion_hint)
         }
     }
+}
+
+pub fn boolean_type_hint(
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    ["true", "false"]
+        .into_iter()
+        .map(|value| {
+            CompletionContent::new_type_hint_value(
+                value.to_string(),
+                CompletionEdit::new_selectable_literal(value, position, completion_hint),
+                schema_url,
+            )
+        })
+        .collect()
 }

@@ -1,8 +1,9 @@
 mod completion_content;
 mod completion_edit;
-mod document;
 mod hint;
 mod value;
+
+use std::ops::Deref;
 
 use ast::{algo::ancestors_at_position, AstNode};
 pub use completion_content::CompletionContent;
@@ -18,7 +19,7 @@ use tower_lsp::lsp_types::Url;
 pub fn get_completion_contents(
     root: ast::Root,
     position: text::Position,
-    document_schema: &schema_store::DocumentSchema,
+    document_schema: Option<&schema_store::DocumentSchema>,
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionContent> {
     let mut keys: Vec<document_tree::Key> = vec![];
@@ -152,14 +153,14 @@ pub fn get_completion_contents(
 
     let document_tree = root.into_document_tree_result(toml_version).tree;
 
-    let completion_contents = document_tree.find_completion_contents(
+    let completion_contents = document_tree.deref().find_completion_contents(
         &Vec::with_capacity(0),
-        Some(document_schema.value_schema()),
+        document_schema.map(|schema| schema.value_schema()),
         toml_version,
         position,
         &keys,
-        Some(&document_schema.schema_url),
-        &document_schema.definitions,
+        document_schema.as_ref().map(|schema| &schema.schema_url),
+        document_schema.as_ref().map(|schema| &schema.definitions),
         completion_hint,
     );
 
@@ -192,7 +193,7 @@ pub trait FindCompletionContents {
         position: text::Position,
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        definitions: &SchemaDefinitions,
+        definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent>;
 }
@@ -304,12 +305,16 @@ fn find_one_of_completion_items<T>(
     position: text::Position,
     keys: &[document_tree::Key],
     schema_url: Option<&Url>,
-    definitions: &SchemaDefinitions,
+    definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>
 where
     T: FindCompletionContents,
 {
+    let Some(definitions) = definitions else {
+        unreachable!("definitions must be provided");
+    };
+
     let mut completion_items = Vec::new();
 
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
@@ -322,7 +327,7 @@ where
                     position,
                     keys,
                     schema_url,
-                    definitions,
+                    Some(definitions),
                     completion_hint,
                 );
 
@@ -368,12 +373,16 @@ fn find_any_of_completion_items<T>(
     position: text::Position,
     keys: &[document_tree::Key],
     schema_url: Option<&Url>,
-    definitions: &SchemaDefinitions,
+    definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>
 where
     T: FindCompletionContents,
 {
+    let Some(definitions) = definitions else {
+        unreachable!("definitions must be provided");
+    };
+
     let mut completion_items = Vec::new();
 
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
@@ -386,7 +395,7 @@ where
                     position,
                     keys,
                     schema_url,
-                    definitions,
+                    Some(definitions),
                     completion_hint,
                 );
 
@@ -432,12 +441,16 @@ fn find_all_if_completion_items<T>(
     position: text::Position,
     keys: &[document_tree::Key],
     schema_url: Option<&Url>,
-    definitions: &SchemaDefinitions,
+    definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>
 where
     T: FindCompletionContents,
 {
+    let Some(definitions) = definitions else {
+        unreachable!("definitions must be provided");
+    };
+
     let mut completion_items = Vec::new();
 
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
@@ -450,7 +463,7 @@ where
                     position,
                     keys,
                     schema_url,
-                    definitions,
+                    Some(definitions),
                     completion_hint,
                 );
 

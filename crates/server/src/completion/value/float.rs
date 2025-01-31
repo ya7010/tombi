@@ -15,7 +15,7 @@ impl FindCompletionContents for FloatSchema {
         position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        _definitions: &SchemaDefinitions,
+        _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         let mut completion_items = vec![];
@@ -39,13 +39,21 @@ impl FindCompletionContents for FloatSchema {
         }
 
         if completion_items.is_empty() {
-            let label = "3.14".to_string();
-            let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
-            completion_items.push(CompletionContent::new_type_hint_value(
-                label, edit, schema_url,
-            ));
+            completion_items.extend(float_type_hint(position, schema_url, completion_hint));
         }
 
         completion_items
     }
+}
+
+pub fn float_type_hint(
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    let label = "3.14".to_string();
+    let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
+    vec![CompletionContent::new_type_hint_value(
+        label, edit, schema_url,
+    )]
 }

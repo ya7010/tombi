@@ -42,7 +42,7 @@ pub async fn handle_completion(
         return Ok(None);
     }
 
-    let Ok(Some(document_schema)) = &backend
+    let Ok(document_schema) = &backend
         .schema_store
         .try_get_schema_from_url(&text_document.uri)
         .await
@@ -69,7 +69,7 @@ pub async fn handle_completion(
     Ok(Some(get_completion_contents(
         root,
         position,
-        document_schema,
+        document_schema.as_ref(),
         toml_version,
     )))
 }

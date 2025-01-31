@@ -15,7 +15,7 @@ impl FindCompletionContents for OffsetDateTimeSchema {
         position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        _definitions: &SchemaDefinitions,
+        _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         let mut completion_items = vec![];
@@ -39,20 +39,33 @@ impl FindCompletionContents for OffsetDateTimeSchema {
         }
 
         if completion_items.is_empty() {
-            let mut today = chrono::Local::now();
-            if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
-                today = match today.with_time(time) {
-                    chrono::LocalResult::Single(today) => today,
-                    _ => today,
-                };
-            };
-            let label = today.format("%Y-%m-%dT%H:%M:%S%.3f%:z").to_string();
-            let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
-            completion_items.push(CompletionContent::new_type_hint_value(
-                label, edit, schema_url,
+            completion_items.extend(offset_date_time_type_hint(
+                position,
+                schema_url,
+                completion_hint,
             ));
         }
 
         completion_items
     }
+}
+
+pub fn offset_date_time_type_hint(
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    let mut today = chrono::Local::now();
+    if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
+        today = match today.with_time(time) {
+            chrono::LocalResult::Single(today) => today,
+            _ => today,
+        };
+    };
+    let label = today.format("%Y-%m-%dT%H:%M:%S%.3f%:z").to_string();
+    let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
+
+    vec![CompletionContent::new_type_hint_value(
+        label, edit, schema_url,
+    )]
 }

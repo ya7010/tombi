@@ -17,11 +17,14 @@ impl FindCompletionContents for document_tree::Table {
         position: text::Position,
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        definitions: &SchemaDefinitions,
+        definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match value_schema {
             Some(ValueSchema::Table(table_schema)) => {
+                let Some(definitions) = definitions else {
+                    unreachable!("definitions must be provided");
+                };
                 let mut completions = Vec::new();
 
                 if let Some(key) = keys.first() {
@@ -41,7 +44,7 @@ impl FindCompletionContents for document_tree::Table {
                                     position,
                                     &keys[1..],
                                     schema_url,
-                                    definitions,
+                                    Some(definitions),
                                     completion_hint,
                                 );
                             }
@@ -172,6 +175,30 @@ impl FindCompletionContents for document_tree::Table {
                 definitions,
                 completion_hint,
             ),
+            None => {
+                if let Some(key) = keys.first() {
+                    let accessor_str = key.to_raw_text(toml_version);
+                    let accessor = Accessor::Key(accessor_str.clone());
+                    if let Some(value) = self.get(key) {
+                        return value.find_completion_contents(
+                            &accessors
+                                .clone()
+                                .into_iter()
+                                .chain(std::iter::once(accessor))
+                                .collect(),
+                            None,
+                            toml_version,
+                            position,
+                            &keys[1..],
+                            None,
+                            None,
+                            completion_hint,
+                        );
+                    }
+                }
+
+                Vec::with_capacity(0)
+            }
             _ => Vec::with_capacity(0),
         }
     }
@@ -186,9 +213,13 @@ impl FindCompletionContents for TableSchema {
         position: text::Position,
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
-        definitions: &SchemaDefinitions,
+        definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
+        let Some(definitions) = definitions else {
+            unreachable!("definitions must be provided");
+        };
+
         let mut completions = Vec::new();
 
         for mut property in self.properties.iter_mut() {
