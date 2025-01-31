@@ -251,7 +251,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [server]
-        completion = { enabled$1 }
+        completion = { enabled$1 }$0
         "#
     );
 }
@@ -285,7 +285,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [project]
-        authors = [$1]
+        authors = [$1]$0
         "#
     );
 }
@@ -302,7 +302,7 @@ test_completion_edit! {
     ) -> Ok(
         r#"
         [project]
-        authors = [$1]
+        authors = [$1]$0
         "#
     );
 }
@@ -353,7 +353,7 @@ test_completion_edit! {
         "key.█",
         Select("\"\""),
     ) -> Ok(
-        "key = \"$1\""
+        "key = \"$1\"$0"
     );
 }
 
@@ -403,7 +403,7 @@ test_completion_edit! {
         "key.█",
         Select("[]"),
     ) -> Ok(
-        "key = [$1]"
+        "key = [$1]$0"
     );
 }
 
@@ -453,7 +453,7 @@ test_completion_edit! {
         "key=█",
         Select("\"\""),
     ) -> Ok(
-        "key = \"$1\""
+        "key = \"$1\"$0"
     );
 }
 
@@ -503,6 +503,6 @@ test_completion_edit! {
         "key=█",
         Select("[]"),
     ) -> Ok(
-        "key = [$1]"
+        "key = [$1]$0"
     );
 }
