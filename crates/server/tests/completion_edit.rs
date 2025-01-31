@@ -12,6 +12,39 @@ macro_rules! test_completion_edit {
             $schema_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
+        test_completion_edit! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                $select,
+                Some($schema_file_path),
+            ) -> Ok($expected);
+        }
+    };
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr,
+            $select:expr$(,)?
+        ) -> Ok($expected:expr);
+    ) => {
+        test_completion_edit! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                $select,
+                None,
+            ) -> Ok($expected);
+        }
+    };
+    (
+        #[tokio::test]
+        async fn _$name:ident(
+            $source:expr,
+            $select:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok($expected:expr);
+    ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
             use schema_store::JsonCatalogSchema;
@@ -30,22 +63,24 @@ macro_rules! test_completion_edit {
 
             let backend = service.inner();
 
-            let schema_url = Url::from_file_path($schema_file_path).expect(
-                format!(
-                    "failed to convert schema path to URL: {}",
-                    tombi_schema_path().display()
-                )
-                .as_str(),
-            );
-            backend
-                .schema_store
-                .add_catalog(JsonCatalogSchema {
-                    name: "test_schema".to_string(),
-                    description: "schema for testing".to_string(),
-                    file_match: vec!["*.toml".to_string()],
-                    url: schema_url.clone(),
-                })
-                .await;
+            if let Some(schema_file_path) = $schema_file_path.as_ref() {
+                let schema_url = Url::from_file_path(schema_file_path).expect(
+                    format!(
+                        "failed to convert schema path to URL: {}",
+                        schema_file_path.display()
+                    )
+                    .as_str(),
+                );
+                backend
+                    .schema_store
+                    .add_catalog(JsonCatalogSchema {
+                        name: "test_schema".to_string(),
+                        description: "schema for testing".to_string(),
+                        file_match: vec!["*.toml".to_string()],
+                        url: schema_url.clone(),
+                    })
+                    .await;
+            }
 
             let Ok(temp_file) = tempfile::NamedTempFile::with_suffix_in(
                 ".toml",
