@@ -91,17 +91,14 @@ impl CompletionContent {
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
-        let priority = CompletionPriority::TypeHint;
-        let filter_text = Some(format!("{}_{}", priority as u8, label.into()));
-
         Self {
             label: "{}".to_string(),
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
             emoji_icon: Some('🦅'),
-            priority,
+            priority: CompletionPriority::TypeHint,
             detail: Some("InlineTable".to_string()),
             documentation: None,
-            filter_text,
+            filter_text: Some(label.into()),
             schema_url: schema_url.cloned(),
             edit,
             preselect: None,
