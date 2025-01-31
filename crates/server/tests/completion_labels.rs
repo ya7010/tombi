@@ -505,3 +505,54 @@ test_completion_labels! {
         "true",
     ]);
 }
+
+test_completion_labels! {
+    #[tokio::test]
+    async fn key_equal_without_schema(
+        "key=█"
+    ) -> Ok([
+        today_local_time(),
+        today_local_date(),
+        today_local_date_time(),
+        today_offset_date_time(),
+        "3.14",
+        "42",
+        "[]",
+        "false",
+        "true",
+    ]);
+}
+
+test_completion_labels! {
+    #[tokio::test]
+    async fn keys_dot_without_schema(
+        "key1.key2.█"
+    ) -> Ok([
+        today_local_time(),
+        today_local_date(),
+        today_local_date_time(),
+        today_offset_date_time(),
+        "3.14",
+        "42",
+        "[]",
+        "false",
+        "true",
+    ]);
+}
+
+test_completion_labels! {
+    #[tokio::test]
+    async fn keys_equal_without_schema(
+        "key1.key2=█"
+    ) -> Ok([
+        today_local_time(),
+        today_local_date(),
+        today_local_date_time(),
+        today_offset_date_time(),
+        "3.14",
+        "42",
+        "[]",
+        "false",
+        "true",
+    ]);
+}
