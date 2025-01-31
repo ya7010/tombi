@@ -2020,6 +2020,9 @@ dependencies = [
 [[package]]
 name = "test-lib"
 version = "0.0.0"
+dependencies = [
+ "chrono",
+]
 
 [[package]]
 name = "text"

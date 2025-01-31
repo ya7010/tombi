@@ -1,43 +1,9 @@
 use schema_store::DEFAULT_CATALOG_URL;
 
-use test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
-
-fn today_offset_date_time() -> String {
-    let mut today = chrono::Local::now();
-    if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
-        today = match today.with_time(time) {
-            chrono::LocalResult::Single(today) => today,
-            _ => today,
-        };
-    };
-    today.format("%Y-%m-%dT%H:%M:%S%.3f%:z").to_string()
-}
-
-fn today_local_date_time() -> String {
-    let mut today = chrono::Local::now();
-    if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
-        today = match today.with_time(time) {
-            chrono::LocalResult::Single(today) => today,
-            _ => today,
-        };
-    };
-    today.format("%Y-%m-%dT%H:%M:%S%.3f").to_string()
-}
-
-fn today_local_date() -> String {
-    chrono::Local::now().format("%Y-%m-%d").to_string()
-}
-
-fn today_local_time() -> String {
-    let mut today = chrono::Local::now();
-    if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
-        today = match today.with_time(time) {
-            chrono::LocalResult::Single(today) => today,
-            _ => today,
-        };
-    };
-    today.format("%H:%M:%S%.3f").to_string()
-}
+use test_lib::{
+    cargo_schema_path, pyproject_schema_path, today_local_date, today_local_date_time,
+    today_local_time, today_offset_date_time, tombi_schema_path,
+};
 
 #[macro_export]
 macro_rules! test_completion_labels {
