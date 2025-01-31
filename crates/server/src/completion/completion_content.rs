@@ -17,6 +17,7 @@ pub enum CompletionPriority {
 pub struct CompletionContent {
     pub label: String,
     pub kind: Option<tower_lsp::lsp_types::CompletionItemKind>,
+    pub emoji_icon: Option<char>,
     pub priority: CompletionPriority,
     pub detail: Option<String>,
     pub documentation: Option<String>,
@@ -34,6 +35,7 @@ impl CompletionContent {
         Self {
             label: label.clone(),
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            emoji_icon: None,
             priority: CompletionPriority::Enum,
             detail: Some("enum".to_string()),
             documentation: None,
@@ -51,6 +53,7 @@ impl CompletionContent {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            emoji_icon: None,
             priority: CompletionPriority::Default,
             detail: Some("default".to_string()),
             documentation: None,
@@ -68,6 +71,7 @@ impl CompletionContent {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            emoji_icon: Some('🦅'),
             priority: CompletionPriority::TypeHint,
             detail: Some("type hint".to_string()),
             documentation: None,
@@ -87,6 +91,7 @@ impl CompletionContent {
         Self {
             label,
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
+            emoji_icon: None,
             priority: CompletionPriority::Normal,
             detail,
             documentation,
@@ -164,16 +169,32 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                 CompletionPriority::TypeHint => {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
-                        description: Some("🦅 type hint".to_string()),
+                        description: Some("type hint".to_string()),
                     })
                 }
-            },
+            }
+            .map(|mut details| {
+                if let Some(emoji_icon) = completion_content.emoji_icon {
+                    details.description = Some(format!(
+                        "{} {}",
+                        emoji_icon,
+                        details.description.unwrap_or_default()
+                    ));
+                }
+                details
+            }),
             kind: Some(
                 completion_content
                     .kind
                     .unwrap_or(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             ),
-            detail: completion_content.detail,
+            detail: completion_content.detail.map(|detail| {
+                if let Some(emoji_icon) = completion_content.emoji_icon {
+                    format!("{} {}", emoji_icon, detail)
+                } else {
+                    detail
+                }
+            }),
             documentation: documentation.map(|documentation| {
                 tower_lsp::lsp_types::Documentation::MarkupContent(
                     tower_lsp::lsp_types::MarkupContent {
