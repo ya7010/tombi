@@ -37,86 +37,14 @@ impl FindCompletionContents for document_tree::Value {
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
         match self {
-            Self::Boolean(boolean) => boolean.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::Integer(integer) => integer.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::Float(float) => float.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::String(string) => string.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::OffsetDateTime(offset_date_time) => offset_date_time.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::LocalDateTime(local_date_time) => local_date_time.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::LocalDate(local_date) => local_date.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::LocalTime(local_time) => local_time.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
+            Self::Boolean(_)
+            | Self::Integer(_)
+            | Self::Float(_)
+            | Self::String(_)
+            | Self::OffsetDateTime(_)
+            | Self::LocalDateTime(_)
+            | Self::LocalDate(_)
+            | Self::LocalTime(_) => Vec::with_capacity(0),
             Self::Array(array) => array.find_completion_contents(
                 accessors,
                 value_schema,
