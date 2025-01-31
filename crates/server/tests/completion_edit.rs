@@ -349,6 +349,16 @@ test_completion_edit! {
 
 test_completion_edit! {
     #[tokio::test]
+    async fn key_dot_select_basic_string_without_schema(
+        "key.█",
+        Select("\"\""),
+    ) -> Ok(
+        "key = \"$1\""
+    );
+}
+
+test_completion_edit! {
+    #[tokio::test]
     async fn key_dot_select_today_offset_date_time_without_schema(
         "key.█",
         Select(today_offset_date_time()),

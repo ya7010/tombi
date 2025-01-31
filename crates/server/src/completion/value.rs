@@ -30,6 +30,7 @@ use schema_store::{
     LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
     TableSchema, ValueSchema,
 };
+use string::type_hint_string;
 use tower_lsp::lsp_types::Url;
 
 impl FindCompletionContents for document_tree::Value {
@@ -219,6 +220,7 @@ impl FindCompletionContents for document_tree::Value {
                     type_hint_boolean(position, schema_url, completion_hint),
                     type_hint_integer(position, schema_url, completion_hint),
                     type_hint_float(position, schema_url, completion_hint),
+                    type_hint_string(position, schema_url, completion_hint),
                     type_hint_local_date_time(position, schema_url, completion_hint),
                     type_hint_local_date(position, schema_url, completion_hint),
                     type_hint_local_time(position, schema_url, completion_hint),

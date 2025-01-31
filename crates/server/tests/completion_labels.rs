@@ -494,6 +494,7 @@ test_completion_labels! {
     async fn key_dot_without_schema(
         "key.█"
     ) -> Ok([
+        "\"\"",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -511,6 +512,7 @@ test_completion_labels! {
     async fn key_equal_without_schema(
         "key=█"
     ) -> Ok([
+        "\"\"",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -528,6 +530,7 @@ test_completion_labels! {
     async fn keys_dot_without_schema(
         "key1.key2.█"
     ) -> Ok([
+        "\"\"",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -545,6 +548,7 @@ test_completion_labels! {
     async fn keys_equal_without_schema(
         "key1.key2=█"
     ) -> Ok([
+        "\"\"",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),

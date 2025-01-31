@@ -39,13 +39,21 @@ impl FindCompletionContents for StringSchema {
         }
 
         if completion_items.is_empty() {
-            let label = "\"\"".to_string();
-            let edit = CompletionEdit::new_string_literal(position, completion_hint);
-            completion_items.push(CompletionContent::new_type_hint_value(
-                label, edit, schema_url,
-            ));
+            completion_items.extend(type_hint_string(position, schema_url, completion_hint));
         }
 
         completion_items
     }
+}
+
+pub fn type_hint_string(
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    let label = "\"\"".to_string();
+    let edit = CompletionEdit::new_string_literal(position, completion_hint);
+    vec![CompletionContent::new_type_hint_value(
+        label, edit, schema_url,
+    )]
 }
