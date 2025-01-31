@@ -3,14 +3,26 @@ use tower_lsp::lsp_types::Url;
 
 use super::completion_edit::CompletionEdit;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[repr(u8)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum CompletionPriority {
-    Default = 0,
-    Enum = 1,
+    Default,
+    Enum,
     #[default]
-    Normal = 2,
-    TypeHint = 3,
+    Normal,
+    TypeHint {
+        label_description: String,
+    },
+}
+
+impl std::fmt::Display for CompletionPriority {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CompletionPriority::Default => write!(f, "0"),
+            CompletionPriority::Enum => write!(f, "1"),
+            CompletionPriority::Normal => write!(f, "2"),
+            CompletionPriority::TypeHint { .. } => write!(f, "3"),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -21,6 +33,7 @@ pub struct CompletionContent {
     pub priority: CompletionPriority,
     pub detail: Option<String>,
     pub documentation: Option<String>,
+    pub filter_text: Option<String>,
     pub schema_url: Option<Url>,
     pub edit: Option<CompletionEdit>,
     pub preselect: Option<bool>,
@@ -39,6 +52,7 @@ impl CompletionContent {
             priority: CompletionPriority::Enum,
             detail: Some("enum".to_string()),
             documentation: None,
+            filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
             preselect: None,
@@ -57,6 +71,7 @@ impl CompletionContent {
             priority: CompletionPriority::Default,
             detail: Some("default".to_string()),
             documentation: None,
+            filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
             preselect: Some(true),
@@ -64,17 +79,45 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_value(
-        label: String,
+        label: impl Into<String>,
+        label_description: impl Into<String>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
         Self {
-            label,
+            label: label.into(),
             kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
             emoji_icon: Some('🦅'),
-            priority: CompletionPriority::TypeHint,
+            priority: CompletionPriority::TypeHint {
+                label_description: label_description.into(),
+            },
             detail: Some("type hint".to_string()),
             documentation: None,
+            filter_text: None,
+            schema_url: schema_url.cloned(),
+            edit,
+            preselect: None,
+        }
+    }
+
+    pub fn new_type_hint_property(
+        label: impl Into<String>,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
+        let priority = CompletionPriority::TypeHint {
+            label_description: "InlineTable".to_string(),
+        };
+        let filter_text = Some(format!("{}_{}", &priority, label.into()));
+
+        Self {
+            label: "{}".to_string(),
+            kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
+            emoji_icon: Some('🦅'),
+            priority,
+            detail: Some("type hint".to_string()),
+            documentation: None,
+            filter_text,
             schema_url: schema_url.cloned(),
             edit,
             preselect: None,
@@ -95,6 +138,7 @@ impl CompletionContent {
             priority: CompletionPriority::Normal,
             detail,
             documentation,
+            filter_text: None,
             edit,
             schema_url: schema_url.cloned(),
             preselect: None,
@@ -108,8 +152,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
 
         let sorted_text = format!(
             "{}_{}",
-            (completion_content.priority as u8),
-            &completion_content.label
+            completion_content.priority, &completion_content.label
         );
 
         let mut schema_text = None;
@@ -139,50 +182,48 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             None => (None, None, None),
         };
 
-        tower_lsp::lsp_types::CompletionItem {
-            label: completion_content.label,
-            label_details: match completion_content.priority {
-                CompletionPriority::Default => {
+        let label_details = match completion_content.priority {
+            CompletionPriority::Default => Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                detail: None,
+                description: Some("default".to_string()),
+            }),
+            CompletionPriority::Enum => Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                detail: None,
+                description: Some("enum".to_string()),
+            }),
+            CompletionPriority::Normal => {
+                if completion_content.kind
+                    == Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY)
+                {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
-                        description: Some("default".to_string()),
+                        description: completion_content.detail.clone(),
                     })
-                }
-                CompletionPriority::Enum => {
-                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                        detail: None,
-                        description: Some("enum".to_string()),
-                    })
-                }
-                CompletionPriority::Normal => {
-                    if completion_content.kind
-                        == Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY)
-                    {
-                        Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                            detail: None,
-                            description: completion_content.detail.clone(),
-                        })
-                    } else {
-                        None
-                    }
-                }
-                CompletionPriority::TypeHint => {
-                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                        detail: None,
-                        description: Some("type hint".to_string()),
-                    })
+                } else {
+                    None
                 }
             }
-            .map(|mut details| {
-                if let Some(emoji_icon) = completion_content.emoji_icon {
-                    details.description = Some(format!(
-                        "{} {}",
-                        emoji_icon,
-                        details.description.unwrap_or_default()
-                    ));
-                }
-                details
-            }),
+            CompletionPriority::TypeHint { label_description } => {
+                Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                    detail: None,
+                    description: Some(label_description),
+                })
+            }
+        }
+        .map(|mut details| {
+            if let Some(emoji_icon) = completion_content.emoji_icon {
+                details.description = Some(format!(
+                    "{} {}",
+                    emoji_icon,
+                    details.description.unwrap_or_default()
+                ));
+            }
+            details
+        });
+
+        tower_lsp::lsp_types::CompletionItem {
+            label: completion_content.label,
+            label_details,
             kind: Some(
                 completion_content
                     .kind
@@ -204,6 +245,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                 )
             }),
             sort_text: Some(sorted_text),
+            filter_text: completion_content.filter_text,
             insert_text_format,
             text_edit,
             additional_text_edits,

@@ -66,6 +66,9 @@ pub fn type_hint_offset_date_time(
     let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
 
     vec![CompletionContent::new_type_hint_value(
-        label, edit, schema_url,
+        label,
+        "OffsetDateTime",
+        edit,
+        schema_url,
     )]
 }

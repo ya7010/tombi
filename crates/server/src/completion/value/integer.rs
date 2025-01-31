@@ -51,10 +51,10 @@ pub fn type_hint_integer(
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    let label = "42".to_string();
-    let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
+    let label = "42";
+    let edit = CompletionEdit::new_selectable_literal(label, position, completion_hint);
 
     vec![CompletionContent::new_type_hint_value(
-        label, edit, schema_url,
+        label, "Integer", edit, schema_url,
     )]
 }

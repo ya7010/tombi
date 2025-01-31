@@ -54,6 +54,9 @@ pub fn type_hint_string(
     let label = "\"\"".to_string();
     let edit = CompletionEdit::new_string_literal(position, completion_hint);
     vec![CompletionContent::new_type_hint_value(
-        label, edit, schema_url,
+        label,
+        "BasicString",
+        edit,
+        schema_url,
     )]
 }

@@ -138,10 +138,9 @@ pub fn type_hint_array(
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    let label = "[]".to_string();
     let edit = CompletionEdit::new_array_literal(position, completion_hint);
 
     vec![CompletionContent::new_type_hint_value(
-        label, edit, schema_url,
+        "[]", "Array", edit, schema_url,
     )]
 }

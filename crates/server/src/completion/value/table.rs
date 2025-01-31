@@ -180,7 +180,7 @@ impl FindCompletionContents for document_tree::Table {
                     let accessor_str = key.to_raw_text(toml_version);
                     let accessor = Accessor::Key(accessor_str.clone());
                     if let Some(value) = self.get(key) {
-                        return value.find_completion_contents(
+                        let mut completion_contents = value.find_completion_contents(
                             &accessors
                                 .clone()
                                 .into_iter()
@@ -194,6 +194,20 @@ impl FindCompletionContents for document_tree::Table {
                             None,
                             completion_hint,
                         );
+
+                        if !completion_contents.is_empty() {
+                            completion_contents.push(CompletionContent::new_type_hint_property(
+                                &accessor_str,
+                                CompletionEdit::new_propery(
+                                    &accessor_str,
+                                    position,
+                                    completion_hint,
+                                ),
+                                schema_url,
+                            ));
+                        }
+
+                        return completion_contents;
                     }
                 }
 

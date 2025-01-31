@@ -51,9 +51,9 @@ pub fn type_hint_float(
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    let label = "3.14".to_string();
-    let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
+    let label = "3.14";
+    let edit = CompletionEdit::new_selectable_literal(label, position, completion_hint);
     vec![CompletionContent::new_type_hint_value(
-        label, edit, schema_url,
+        label, "Float", edit, schema_url,
     )]
 }
