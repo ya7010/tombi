@@ -185,12 +185,23 @@ impl IntoDocumentTreeResult<crate::Value> for ast::Array {
             }
         }
 
-        for (value, comma) in self.values_with_comma() {
-            let (value, errs) = value.into_document_tree_result(toml_version).into();
-            if !errs.is_empty() {
-                errors.extend(errs);
+        for (value_or_key, comma) in self.value_or_key_values_with_commata() {
+            match value_or_key {
+                ast::ValueOrKeyValue::Value(value) => {
+                    let (value, errs) = value.into_document_tree_result(toml_version).into();
+                    if !errs.is_empty() {
+                        errors.extend(errs);
+                    }
+                    array.push(value);
+                }
+                ast::ValueOrKeyValue::KeyValue(key_value) => {
+                    let (table, errs) = key_value.into_document_tree_result(toml_version).into();
+                    if !errs.is_empty() {
+                        errors.extend(errs);
+                    }
+                    array.push(crate::Value::Table(table));
+                }
             }
-            array.push(value);
 
             if let Some(comma) = comma {
                 for comment in comma.leading_comments() {

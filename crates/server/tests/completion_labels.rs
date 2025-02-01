@@ -572,6 +572,19 @@ mod completion_labels {
                 "false",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn aaa_bbb_double_bracket_ccc(
+                r#"
+                [[aaa.bbb]]
+                ccc█
+                "#
+            ) -> Ok([
+                ".",
+                "=",
+            ]);
+        }
     }
 }
 

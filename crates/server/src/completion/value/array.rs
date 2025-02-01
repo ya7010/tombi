@@ -119,7 +119,7 @@ impl FindCompletionContents for document_tree::Array {
             Some(_) => Vec::with_capacity(0),
             None => {
                 for (index, value) in self.values().iter().enumerate() {
-                    if value.range().contains(position) {
+                    if value.range().contains(position) || value.range().end() == position {
                         let accessor = Accessor::Index(index);
                         return value.find_completion_contents(
                             &accessors

@@ -45,6 +45,24 @@ impl crate::Array {
             })
     }
 
+    #[inline]
+    pub fn value_or_key_values(&self) -> impl Iterator<Item = crate::ValueOrKeyValue> {
+        support::node::children(self.syntax())
+    }
+
+    #[inline]
+    pub fn value_or_key_values_with_commata(
+        &self,
+    ) -> impl Iterator<Item = (crate::ValueOrKeyValue, Option<crate::Comma>)> {
+        self.value_or_key_values()
+            .zip_longest(support::node::children::<crate::Comma>(self.syntax()))
+            .map(|value_or_key_with_comma| match value_or_key_with_comma {
+                itertools::EitherOrBoth::Both(value_or_key, comma) => (value_or_key, Some(comma)),
+                itertools::EitherOrBoth::Left(value_or_key) => (value_or_key, None),
+                itertools::EitherOrBoth::Right(_) => unreachable!(),
+            })
+    }
+
     pub fn should_be_multiline(&self, toml_version: TomlVersion) -> bool {
         self.has_tailing_comma_after_last_value()
             || self.has_multiline_values(toml_version)
