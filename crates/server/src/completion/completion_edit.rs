@@ -48,7 +48,7 @@ impl CompletionEdit {
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(" = ${{1:{}}}", label),
+                    new_text: format!(" = ${{1:{label}}}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
@@ -81,7 +81,14 @@ impl CompletionEdit {
                     new_text: "".to_string(),
                 }]),
             }),
-            Some(CompletionHint::InTableHeader) | None => None,
+            Some(CompletionHint::InTableHeader) | None => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!("{quote}$1{quote}$0"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
         }
     }
 
@@ -105,7 +112,14 @@ impl CompletionEdit {
                     new_text: "".to_string(),
                 }]),
             }),
-            Some(CompletionHint::InTableHeader) | None => None,
+            Some(CompletionHint::InTableHeader) | None => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: "[$1]$0".to_string(),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
         }
     }
 
