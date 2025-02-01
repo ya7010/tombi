@@ -243,13 +243,13 @@ pub trait CompletionCandidate {
     }
 }
 
-trait CompositeSchema {
+trait CompositeSchemaImpl {
     fn title(&self) -> Option<String>;
     fn description(&self) -> Option<String>;
     fn schemas(&self) -> &Schemas;
 }
 
-impl<T: CompositeSchema> CompletionCandidate for T {
+impl<T: CompositeSchemaImpl> CompletionCandidate for T {
     fn title(
         &self,
         definitions: &SchemaDefinitions,

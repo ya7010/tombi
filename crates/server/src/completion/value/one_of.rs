@@ -4,10 +4,10 @@ use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
-    CompositeSchema, FindCompletionContents,
+    CompositeSchemaImpl, FindCompletionContents,
 };
 
-impl CompositeSchema for OneOfSchema {
+impl CompositeSchemaImpl for OneOfSchema {
     fn title(&self) -> Option<String> {
         self.title.clone()
     }
