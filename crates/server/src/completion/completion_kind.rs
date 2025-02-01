@@ -27,7 +27,7 @@ impl From<CompletionKind> for tower_lsp::lsp_types::CompletionItemKind {
             CompletionKind::LocalTime => tower_lsp::lsp_types::CompletionItemKind::EVENT,
             CompletionKind::Array => tower_lsp::lsp_types::CompletionItemKind::VALUE,
             CompletionKind::Table => tower_lsp::lsp_types::CompletionItemKind::STRUCT,
-            CompletionKind::Property => tower_lsp::lsp_types::CompletionItemKind::PROPERTY,
+            CompletionKind::Property => tower_lsp::lsp_types::CompletionItemKind::FIELD,
         }
     }
 }
