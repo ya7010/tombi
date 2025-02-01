@@ -44,14 +44,12 @@ pub fn type_hint_boolean(
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    ["true", "false"]
+    [true, false]
         .into_iter()
-        .map(|label| {
-            CompletionContent::new_type_hint_value(
-                CompletionKind::Boolean,
-                label,
-                "Boolean",
-                CompletionEdit::new_literal(label, position, completion_hint),
+        .map(|value| {
+            CompletionContent::new_type_hint_boolean(
+                value,
+                CompletionEdit::new_literal(&value.to_string(), position, completion_hint),
                 schema_url,
             )
         })

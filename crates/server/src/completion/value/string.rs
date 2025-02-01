@@ -21,19 +21,6 @@ impl FindCompletionContents for StringSchema {
     ) -> Vec<CompletionContent> {
         let mut completion_items = vec![];
 
-        if let Some(enumerate) = &self.enumerate {
-            for item in enumerate {
-                let label = format!("\"{item}\"");
-                let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                completion_items.push(CompletionContent::new_enumerate_value(
-                    CompletionKind::String,
-                    label,
-                    edit,
-                    schema_url,
-                ));
-            }
-        }
-
         if let Some(default) = &self.default {
             let label = format!("\"{default}\"");
             let edit = CompletionEdit::new_literal(&label, position, completion_hint);
@@ -45,9 +32,30 @@ impl FindCompletionContents for StringSchema {
             ));
         }
 
-        if completion_items.is_empty() {
-            completion_items.extend(type_hint_string(position, schema_url, completion_hint));
+        if let Some(enumerate) = &self.enumerate {
+            for item in enumerate {
+                let label = format!("\"{item}\"");
+                let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                completion_items.push(CompletionContent::new_enumerate_value(
+                    CompletionKind::String,
+                    label,
+                    edit,
+                    schema_url,
+                ));
+            }
+            return completion_items;
         }
+
+        completion_items.extend(
+            type_hint_string(position, schema_url, completion_hint)
+                .into_iter()
+                .filter(|completion_content| {
+                    self.default
+                        .as_ref()
+                        .map(|default| default != &completion_content.label)
+                        .unwrap_or(true)
+                }),
+        );
 
         completion_items
     }

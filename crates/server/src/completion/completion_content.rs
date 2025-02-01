@@ -11,6 +11,8 @@ pub enum CompletionPriority {
     #[default]
     Normal = 2,
     TypeHint = 3,
+    TypeHintTrue = 4,
+    TypeHintFalse = 5,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -81,6 +83,29 @@ impl CompletionContent {
             emoji_icon: Some('🦅'),
             priority: CompletionPriority::TypeHint,
             detail: Some(detail.into()),
+            documentation: None,
+            filter_text: None,
+            schema_url: schema_url.cloned(),
+            edit,
+            preselect: None,
+        }
+    }
+
+    pub fn new_type_hint_boolean(
+        value: bool,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
+        Self {
+            label: value.to_string(),
+            kind: CompletionKind::Boolean,
+            emoji_icon: Some('🦅'),
+            priority: if value {
+                CompletionPriority::TypeHintTrue
+            } else {
+                CompletionPriority::TypeHintFalse
+            },
+            detail: Some("Boolean".to_string()),
             documentation: None,
             filter_text: None,
             schema_url: schema_url.cloned(),
@@ -206,7 +231,9 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     None
                 }
             }
-            CompletionPriority::TypeHint => {
+            CompletionPriority::TypeHint
+            | CompletionPriority::TypeHintTrue
+            | CompletionPriority::TypeHintFalse => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
                     description: Some("type hint".to_string()),

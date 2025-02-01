@@ -531,8 +531,8 @@ mod cargo_schema {
             "#,
             cargo_schema_path(),
         ) -> Ok([
-            "false",
             "true",
+            "false",
         ]);
     }
 }
@@ -554,8 +554,8 @@ mod without_schema {
             "3.14",
             "42",
             "[]",
-            "false",
             "true",
+            "false",
         ]);
     }
 
@@ -573,8 +573,8 @@ mod without_schema {
             "3.14",
             "42",
             "[]",
-            "false",
             "true",
+            "false",
         ]);
     }
 
@@ -592,8 +592,8 @@ mod without_schema {
             "3.14",
             "42",
             "[]",
-            "false",
             "true",
+            "false",
         ]);
     }
 
@@ -611,8 +611,8 @@ mod without_schema {
             "3.14",
             "42",
             "[]",
-            "false",
             "true",
+            "false",
         ]);
     }
 }
