@@ -46,6 +46,12 @@ macro_rules! test_hover_keys_value {
                 use schema_store::JsonCatalogSchema;
                 use server::handler::handle_did_open;
 
+                if let Ok(level) = std::env::var("RUST_LOG") {
+                    let _ = tracing_subscriber::fmt()
+                        .with_env_filter(level)
+                        .try_init();
+                }
+
                 let (service, _) = LspService::new(|client| Backend::new(client));
 
                 let backend = service.inner();

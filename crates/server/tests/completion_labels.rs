@@ -1,9 +1,6 @@
 use schema_store::DEFAULT_CATALOG_URL;
 
-use test_lib::{
-    cargo_schema_path, pyproject_schema_path, today_local_date, today_local_date_time,
-    today_local_time, today_offset_date_time, tombi_schema_path,
-};
+use test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
 
 #[macro_export]
 macro_rules! test_completion_labels {
@@ -61,6 +58,12 @@ macro_rules! test_completion_labels {
             };
             use server::handler::handle_did_open;
 
+            if let Ok(level) = std::env::var("RUST_LOG") {
+                    let _ = tracing_subscriber::fmt()
+                        .with_env_filter(level)
+                        .try_init();
+            }
+
             let (service, _) = LspService::new(|client| Backend::new(client));
 
             let backend = service.inner();
@@ -69,7 +72,7 @@ macro_rules! test_completion_labels {
                 let schema_url = Url::from_file_path(schema_file_path).expect(
                     format!(
                         "failed to convert schema path to URL: {}",
-                        tombi_schema_path().display()
+                        schema_file_path.display()
                     )
                     .as_str(),
                 );
@@ -163,6 +166,7 @@ macro_rules! test_completion_labels {
 
 mod tombi_schema {
     use super::*;
+    use test_lib::tombi_schema_path;
 
     test_completion_labels! {
         #[tokio::test]
@@ -302,6 +306,7 @@ mod tombi_schema {
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "\"\"",
+            "''",
             "[]",
         ]);
     }
@@ -317,6 +322,7 @@ mod tombi_schema {
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "\"\"",
+            "''",
             "[]",
         ]);
     }
@@ -331,6 +337,7 @@ mod tombi_schema {
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "\"\"",
+            "''",
             "[]",
         ]);
     }
@@ -427,6 +434,7 @@ mod tombi_schema {
 
 mod pyproject_schema {
     use super::*;
+    use test_lib::pyproject_schema_path;
 
     test_completion_labels! {
         #[tokio::test]
@@ -469,6 +477,7 @@ mod pyproject_schema {
 
 mod cargo_schema {
     use super::*;
+    use test_lib::cargo_schema_path;
 
     test_completion_labels! {
         #[tokio::test]
@@ -497,6 +506,33 @@ mod cargo_schema {
             "target",
             "test",
             "workspace",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn cargo_dependencies_serde_work(
+            r#"
+            [dependencies]
+            serde = { work█ }
+            "#,
+            cargo_schema_path(),
+        ) -> Ok([
+            "workspace",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn cargo_dependencies_serde_workspace_dot(
+            r#"
+            [dependencies]
+            serde = { workspace.█ }
+            "#,
+            cargo_schema_path(),
+        ) -> Ok([
+            "false",
+            "true",
         ]);
     }
 }

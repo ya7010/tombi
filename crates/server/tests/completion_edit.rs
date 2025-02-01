@@ -1,7 +1,4 @@
-use test_lib::{
-    cargo_schema_path, pyproject_schema_path, today_local_date, today_local_date_time,
-    today_local_time, today_offset_date_time, tombi_schema_path,
-};
+use test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
 
 struct Select<T>(T);
 
@@ -63,6 +60,12 @@ macro_rules! test_completion_edit {
                 },
                 LspService,
             };
+
+            if let Ok(level) = std::env::var("RUST_LOG") {
+                    let _ = tracing_subscriber::fmt()
+                        .with_env_filter(level)
+                        .try_init();
+            }
 
             let (service, _) = LspService::new(|client| Backend::new(client));
 
@@ -224,6 +227,7 @@ macro_rules! test_completion_edit {
 
 mod tombi_schema {
     use super::*;
+    use test_lib::tombi_schema_path;
 
     test_completion_edit! {
         #[tokio::test]
@@ -262,6 +266,7 @@ mod tombi_schema {
 
 mod cargo_schema {
     use super::*;
+    use test_lib::cargo_schema_path;
 
     test_completion_edit! {
         #[tokio::test]
@@ -279,9 +284,28 @@ mod cargo_schema {
         "#
         );
     }
+
+    test_completion_edit! {
+        #[tokio::test]
+        async fn cargo_dependencies_serde_workspace_dot(
+            r#"
+            [dependencies]
+            serde = { workspace.█ }
+            "#,
+            Select("true"),
+            cargo_schema_path(),
+        ) -> Ok(
+            r#"
+            [dependencies]
+            serde = { workspace = true }
+        "#
+        );
+    }
 }
+
 mod pyproject_schema {
     use super::*;
+    use test_lib::pyproject_schema_path;
 
     test_completion_edit! {
         #[tokio::test]
