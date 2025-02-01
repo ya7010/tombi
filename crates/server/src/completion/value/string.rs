@@ -58,7 +58,7 @@ pub fn type_hint_string(
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    [("\"", "BasicString"), ("'", "LiteralString")]
+    [('\"', "BasicString"), ('\'', "LiteralString")]
         .into_iter()
         .map(|(quote, detail)| {
             CompletionContent::new_type_hint_string(

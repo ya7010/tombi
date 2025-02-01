@@ -61,7 +61,7 @@ impl CompletionEdit {
     }
 
     pub fn new_string_literal(
-        quote: &'static str,
+        quote: char,
         position: text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {

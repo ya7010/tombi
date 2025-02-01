@@ -91,7 +91,7 @@ impl CompletionContent {
 
     pub fn new_type_hint_string(
         kind: CompletionKind,
-        quote: &'static str,
+        quote: char,
         detail: impl Into<String>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
