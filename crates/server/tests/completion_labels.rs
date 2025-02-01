@@ -492,6 +492,25 @@ mod completion_labels {
                 "false",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn keys_equal_array(
+                "key1= [█]"
+            ) -> Ok([
+                "\"\"",
+                "''",
+                today_local_time(),
+                today_local_date(),
+                today_local_date_time(),
+                today_offset_date_time(),
+                "3.14",
+                "42",
+                "[]",
+                "true",
+                "false",
+            ]);
+        }
     }
 }
 

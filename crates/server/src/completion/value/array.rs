@@ -5,7 +5,7 @@ use crate::completion::{
 
 use super::{
     all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
-    one_of::find_one_of_completion_items, CompletionHint, FindCompletionContents,
+    one_of::find_one_of_completion_items, type_hint_value, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
 use schema_store::{Accessor, ArraySchema, SchemaDefinitions, ValueSchema};
@@ -137,7 +137,7 @@ impl FindCompletionContents for document_tree::Array {
                         );
                     }
                 }
-                Vec::with_capacity(0)
+                type_hint_value(position, schema_url, completion_hint)
             }
         }
     }
