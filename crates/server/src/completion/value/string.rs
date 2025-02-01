@@ -58,13 +58,16 @@ pub fn type_hint_string(
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    let label = "\"\"".to_string();
-    let edit = CompletionEdit::new_string_literal(position, completion_hint);
-    vec![CompletionContent::new_type_hint_value(
-        CompletionKind::String,
-        label,
-        "BasicString",
-        edit,
-        schema_url,
-    )]
+    [("\"", "BasicString"), ("'", "LiteralString")]
+        .into_iter()
+        .map(|(quote, detail)| {
+            CompletionContent::new_type_hint_string(
+                CompletionKind::String,
+                quote,
+                detail,
+                CompletionEdit::new_string_literal(quote, position, completion_hint),
+                schema_url,
+            )
+        })
+        .collect()
 }

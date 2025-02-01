@@ -89,6 +89,27 @@ impl CompletionContent {
         }
     }
 
+    pub fn new_type_hint_string(
+        kind: CompletionKind,
+        quote: &'static str,
+        detail: impl Into<String>,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Self {
+        Self {
+            label: format!("{}{}", quote, quote),
+            kind,
+            emoji_icon: Some('🦅'),
+            priority: CompletionPriority::TypeHint,
+            detail: Some(detail.into()),
+            documentation: None,
+            filter_text: None,
+            schema_url: schema_url.cloned(),
+            edit,
+            preselect: None,
+        }
+    }
+
     pub fn new_type_hint_property(
         label: impl Into<String>,
         edit: Option<CompletionEdit>,

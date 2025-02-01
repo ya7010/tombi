@@ -61,6 +61,7 @@ impl CompletionEdit {
     }
 
     pub fn new_string_literal(
+        quote: &'static str,
         position: text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
@@ -72,7 +73,7 @@ impl CompletionEdit {
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: " = \"$1\"$0".to_string(),
+                    new_text: format!(" = {quote}$1{quote}$0"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
