@@ -1,5 +1,6 @@
 mod completion_content;
 mod completion_edit;
+mod completion_kind;
 mod hint;
 mod value;
 
@@ -8,6 +9,7 @@ use std::ops::Deref;
 use ast::{algo::ancestors_at_position, AstNode};
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
+use completion_kind::CompletionKind;
 use config::TomlVersion;
 use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
 pub use hint::CompletionHint;
@@ -347,18 +349,10 @@ where
     }
 
     if let Some(default) = &one_of_schema.default {
-        let literal = match default {
-            serde_json::Value::String(value) => Some(format!("\"{value}\"")),
-            serde_json::Value::Number(value) => Some(value.to_string()),
-            serde_json::Value::Bool(value) => Some(value.to_string()),
-            _ => None,
-        };
-        if let Some(literal) = literal {
-            completion_items.push(CompletionContent::new_default_value(
-                default.to_string(),
-                CompletionEdit::new_literal(&literal, position, completion_hint),
-                schema_url,
-            ));
+        if let Some(completion_item) =
+            serde_value_to_completion_item(default, position, schema_url, completion_hint)
+        {
+            completion_items.push(completion_item);
         }
     }
 
@@ -415,18 +409,10 @@ where
     }
 
     if let Some(default) = &any_of_schema.default {
-        let literal = match default {
-            serde_json::Value::String(value) => Some(format!("\"{value}\"")),
-            serde_json::Value::Number(value) => Some(value.to_string()),
-            serde_json::Value::Bool(value) => Some(value.to_string()),
-            _ => None,
-        };
-        if let Some(literal) = literal {
-            completion_items.push(CompletionContent::new_default_value(
-                default.to_string(),
-                CompletionEdit::new_literal(&literal, position, completion_hint),
-                schema_url,
-            ));
+        if let Some(completion_item) =
+            serde_value_to_completion_item(default, position, schema_url, completion_hint)
+        {
+            completion_items.push(completion_item);
         }
     }
 
@@ -483,20 +469,39 @@ where
     }
 
     if let Some(default) = &all_of_schema.default {
-        let literal = match default {
-            serde_json::Value::String(value) => Some(format!("\"{value}\"")),
-            serde_json::Value::Number(value) => Some(value.to_string()),
-            serde_json::Value::Bool(value) => Some(value.to_string()),
-            _ => None,
-        };
-        if let Some(literal) = literal {
-            completion_items.push(CompletionContent::new_default_value(
-                default.to_string(),
-                CompletionEdit::new_literal(&literal, position, completion_hint),
-                schema_url,
-            ));
+        if let Some(completion_item) =
+            serde_value_to_completion_item(default, position, schema_url, completion_hint)
+        {
+            completion_items.push(completion_item);
         }
     }
 
     completion_items
+}
+
+fn serde_value_to_completion_item(
+    value: &serde_json::Value,
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Option<CompletionContent> {
+    let (kind, value) = match value {
+        serde_json::Value::String(value) => (CompletionKind::String, format!("\"{value}\"")),
+        serde_json::Value::Number(value) => {
+            if value.is_i64() {
+                (CompletionKind::Integer, value.to_string())
+            } else {
+                (CompletionKind::Float, value.to_string())
+            }
+        }
+        serde_json::Value::Bool(value) => (CompletionKind::Boolean, value.to_string()),
+        _ => return None,
+    };
+
+    Some(CompletionContent::new_default_value(
+        kind,
+        value.to_string(),
+        CompletionEdit::new_literal(&value, position, completion_hint),
+        schema_url,
+    ))
 }

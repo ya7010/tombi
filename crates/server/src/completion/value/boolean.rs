@@ -3,7 +3,8 @@ use schema_store::{Accessor, BooleanSchema, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
-    CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
+    completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
+    FindCompletionContents,
 };
 
 impl FindCompletionContents for BooleanSchema {
@@ -24,7 +25,12 @@ impl FindCompletionContents for BooleanSchema {
                 .map(|value| {
                     let label = value.to_string();
                     let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                    CompletionContent::new_enumerate_value(value.to_string(), edit, schema_url)
+                    CompletionContent::new_enumerate_value(
+                        CompletionKind::Boolean,
+                        value.to_string(),
+                        edit,
+                        schema_url,
+                    )
                 })
                 .collect()
         } else {
@@ -42,6 +48,7 @@ pub fn type_hint_boolean(
         .into_iter()
         .map(|label| {
             CompletionContent::new_type_hint_value(
+                CompletionKind::Boolean,
                 label,
                 "Boolean",
                 CompletionEdit::new_literal(label, position, completion_hint),

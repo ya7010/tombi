@@ -1,6 +1,6 @@
 use crate::completion::{
-    find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
-    CompletionContent, CompletionEdit,
+    completion_kind::CompletionKind, find_all_if_completion_items, find_any_of_completion_items,
+    find_one_of_completion_items, CompletionContent, CompletionEdit,
 };
 
 use super::{CompletionHint, FindCompletionContents};
@@ -141,6 +141,10 @@ pub fn type_hint_array(
     let edit = CompletionEdit::new_array_literal(position, completion_hint);
 
     vec![CompletionContent::new_type_hint_value(
-        "[]", "Array", edit, schema_url,
+        CompletionKind::Array,
+        "[]",
+        "Array",
+        edit,
+        schema_url,
     )]
 }

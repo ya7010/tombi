@@ -1,7 +1,7 @@
 use schema_store::get_schema_name;
 use tower_lsp::lsp_types::Url;
 
-use super::completion_edit::CompletionEdit;
+use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -13,10 +13,10 @@ pub enum CompletionPriority {
     TypeHint = 3,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompletionContent {
     pub label: String,
-    pub kind: Option<tower_lsp::lsp_types::CompletionItemKind>,
+    pub kind: CompletionKind,
     pub emoji_icon: Option<char>,
     pub priority: CompletionPriority,
     pub detail: Option<String>,
@@ -29,13 +29,14 @@ pub struct CompletionContent {
 
 impl CompletionContent {
     pub fn new_enumerate_value(
+        kind: CompletionKind,
         label: String,
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
         Self {
             label: label.clone(),
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            kind,
             emoji_icon: None,
             priority: CompletionPriority::Enum,
             detail: Some("enum".to_string()),
@@ -48,13 +49,14 @@ impl CompletionContent {
     }
 
     pub fn new_default_value(
+        kind: CompletionKind,
         label: String,
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
         Self {
             label,
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            kind,
             emoji_icon: None,
             priority: CompletionPriority::Default,
             detail: Some("default".to_string()),
@@ -67,6 +69,7 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_value(
+        kind: CompletionKind,
         label: impl Into<String>,
         detail: impl Into<String>,
         edit: Option<CompletionEdit>,
@@ -74,7 +77,7 @@ impl CompletionContent {
     ) -> Self {
         Self {
             label: label.into(),
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::VALUE),
+            kind,
             emoji_icon: Some('🦅'),
             priority: CompletionPriority::TypeHint,
             detail: Some(detail.into()),
@@ -93,7 +96,7 @@ impl CompletionContent {
     ) -> Self {
         Self {
             label: "{}".to_string(),
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
+            kind: CompletionKind::Table,
             emoji_icon: Some('🦅'),
             priority: CompletionPriority::TypeHint,
             detail: Some("InlineTable".to_string()),
@@ -114,7 +117,7 @@ impl CompletionContent {
     ) -> Self {
         Self {
             label,
-            kind: Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY),
+            kind: CompletionKind::Property,
             emoji_icon: None,
             priority: CompletionPriority::Normal,
             detail,
@@ -173,9 +176,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                 description: Some("enum".to_string()),
             }),
             CompletionPriority::Normal => {
-                if completion_content.kind
-                    == Some(tower_lsp::lsp_types::CompletionItemKind::PROPERTY)
-                {
+                if completion_content.kind == CompletionKind::Property {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
                         description: completion_content.detail.clone(),
@@ -205,11 +206,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
         tower_lsp::lsp_types::CompletionItem {
             label: completion_content.label,
             label_details,
-            kind: Some(
-                completion_content
-                    .kind
-                    .unwrap_or(tower_lsp::lsp_types::CompletionItemKind::VALUE),
-            ),
+            kind: Some(completion_content.kind.into()),
             detail: completion_content.detail.map(|detail| {
                 if let Some(emoji_icon) = completion_content.emoji_icon {
                     format!("{} {}", emoji_icon, detail)

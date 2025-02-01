@@ -3,7 +3,8 @@ use schema_store::{Accessor, LocalDateTimeSchema, SchemaDefinitions, ValueSchema
 use tower_lsp::lsp_types::Url;
 
 use crate::completion::{
-    CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
+    completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
+    FindCompletionContents,
 };
 
 impl FindCompletionContents for LocalDateTimeSchema {
@@ -25,7 +26,10 @@ impl FindCompletionContents for LocalDateTimeSchema {
                 let label = item.to_string();
                 let edit = CompletionEdit::new_literal(&label, position, completion_hint);
                 completion_items.push(CompletionContent::new_enumerate_value(
-                    label, edit, schema_url,
+                    CompletionKind::LocalDateTime,
+                    label,
+                    edit,
+                    schema_url,
                 ));
             }
         }
@@ -34,7 +38,10 @@ impl FindCompletionContents for LocalDateTimeSchema {
             let label = default.to_string();
             let edit = CompletionEdit::new_literal(&label, position, completion_hint);
             completion_items.push(CompletionContent::new_default_value(
-                label, edit, schema_url,
+                CompletionKind::LocalDateTime,
+                label,
+                edit,
+                schema_url,
             ));
         }
 
@@ -67,6 +74,7 @@ pub fn type_hint_local_date_time(
     let edit = CompletionEdit::new_selectable_literal(&label, position, completion_hint);
 
     vec![CompletionContent::new_type_hint_value(
+        CompletionKind::LocalDateTime,
         &label,
         "LocalDateTime",
         edit,
