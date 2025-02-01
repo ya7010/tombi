@@ -545,11 +545,31 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn keys_equal_inline_table_bbb(
+            async fn aaa_equal_inline_table_bbb(
                 "aaa = { bbb█ }"
             ) -> Ok([
                 ".",
                 "=",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn aaa_equal_array_bbb(
+                "aaa = [bbb█]"
+            ) -> Ok([
+                "\"\"",
+                "''",
+                today_local_time(),
+                today_local_date(),
+                today_local_date_time(),
+                today_offset_date_time(),
+                "3.14",
+                "42",
+                "[]",
+                "{}",
+                "true",
+                "false",
             ]);
         }
     }
