@@ -1,7 +1,9 @@
 use crate::completion::{
-    value::all_of::find_all_of_completion_items, value::any_of::find_any_of_completion_items,
-    value::one_of::find_one_of_completion_items, CompletionCandidate, CompletionContent,
-    CompletionEdit, CompletionHint, FindCompletionContents,
+    value::{
+        all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
+        one_of::find_one_of_completion_items, type_hint_value,
+    },
+    CompletionCandidate, CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
 use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
@@ -116,17 +118,32 @@ impl FindCompletionContents for document_tree::Table {
 
                             if table_schema.additional_properties {
                                 if keys.len() == 1 {
-                                    completion_contents.push(
-                                        CompletionContent::new_type_hint_property(
-                                            &accessor_string,
-                                            CompletionEdit::new_propery(
-                                                &accessor_string,
+                                    match completion_hint {
+                                        Some(
+                                            CompletionHint::DotTrigger { .. }
+                                            | CompletionHint::EqualTrigger { .. }
+                                            | CompletionHint::SpaceTrigger { .. },
+                                        ) => {
+                                            completion_contents.extend(type_hint_value(
                                                 position,
+                                                schema_url,
                                                 completion_hint,
-                                            ),
-                                            schema_url,
-                                        ),
-                                    )
+                                            ));
+                                        }
+                                        Some(CompletionHint::InTableHeader) | None => {
+                                            completion_contents.push(
+                                                CompletionContent::new_type_hint_property(
+                                                    &accessor_string,
+                                                    CompletionEdit::new_propery(
+                                                        &accessor_string,
+                                                        position,
+                                                        completion_hint,
+                                                    ),
+                                                    schema_url,
+                                                ),
+                                            );
+                                        }
+                                    }
                                 } else {
                                     completion_contents.extend(
                                         value.find_completion_contents(

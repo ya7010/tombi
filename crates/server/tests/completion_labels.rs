@@ -327,6 +327,29 @@ mod completion_labels {
                 "{}",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn pyproject_tool_third_party_field_equal(
+                r#"
+                [tool.third_party]
+                field=█
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok([
+                "\"\"",
+                "''",
+                today_local_time(),
+                today_local_date(),
+                today_local_date_time(),
+                today_offset_date_time(),
+                "3.14",
+                "42",
+                "[]",
+                "true",
+                "false",
+            ]);
+        }
     }
 
     mod cargo_schema {
