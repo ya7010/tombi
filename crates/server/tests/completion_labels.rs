@@ -542,6 +542,16 @@ mod completion_labels {
                 "false",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn keys_equal_inline_table_bbb(
+                "aaa = { bbb█ }"
+            ) -> Ok([
+                ".",
+                "=",
+            ]);
+        }
     }
 }
 

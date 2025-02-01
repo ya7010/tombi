@@ -266,48 +266,43 @@ impl FindCompletionContents for document_tree::Table {
             ),
             None => {
                 if let Some(key) = keys.first() {
-                    let accessor_str = key.to_raw_text(toml_version);
-                    let accessor = Accessor::Key(accessor_str.clone());
+                    let accessor_string = key.to_raw_text(toml_version);
+                    let accessor = Accessor::Key(accessor_string.clone());
+
                     if let Some(value) = self.get(key) {
-                        let mut completion_contents = value.find_completion_contents(
-                            &accessors
-                                .clone()
-                                .into_iter()
-                                .chain(std::iter::once(accessor))
-                                .collect(),
-                            None,
-                            toml_version,
-                            position,
-                            &keys[1..],
-                            None,
-                            None,
-                            completion_hint,
-                        );
-
-                        if false
-                            && !completion_contents.is_empty()
-                            && matches!(value, document_tree::Value::Incomplete { .. })
-                            && matches!(
-                                completion_hint,
-                                Some(
-                                    CompletionHint::DotTrigger { .. }
-                                        | CompletionHint::EqualTrigger { .. }
-                                        | CompletionHint::SpaceTrigger { .. }
-                                )
-                            )
-                        {
-                            completion_contents.push(CompletionContent::new_type_hint_property(
-                                &accessor_str,
-                                CompletionEdit::new_propery(
-                                    &accessor_str,
-                                    position,
-                                    completion_hint,
-                                ),
-                                schema_url,
-                            ));
+                        match completion_hint {
+                            Some(
+                                CompletionHint::DotTrigger { .. }
+                                | CompletionHint::EqualTrigger { .. }
+                                | CompletionHint::SpaceTrigger { .. },
+                            ) => {
+                                return type_hint_value(position, None, completion_hint);
+                            }
+                            Some(CompletionHint::InTableHeader) | None => {
+                                if matches!(value, document_tree::Value::Incomplete { .. }) {
+                                    return CompletionContent::new_magic_triggers(
+                                        &accessor_string,
+                                        None,
+                                        schema_url,
+                                    );
+                                } else {
+                                    return value.find_completion_contents(
+                                        &accessors
+                                            .clone()
+                                            .into_iter()
+                                            .chain(std::iter::once(accessor))
+                                            .collect(),
+                                        None,
+                                        toml_version,
+                                        position,
+                                        &keys[1..],
+                                        None,
+                                        None,
+                                        completion_hint,
+                                    );
+                                }
+                            }
                         }
-
-                        return completion_contents;
                     }
                 }
 
