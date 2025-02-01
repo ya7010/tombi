@@ -12,6 +12,7 @@ pub enum CompletionKind {
     Array,
     Table,
     Property,
+    MagicTrigger,
 }
 
 impl From<CompletionKind> for tower_lsp::lsp_types::CompletionItemKind {
@@ -28,6 +29,7 @@ impl From<CompletionKind> for tower_lsp::lsp_types::CompletionItemKind {
             CompletionKind::Array => tower_lsp::lsp_types::CompletionItemKind::VALUE,
             CompletionKind::Table => tower_lsp::lsp_types::CompletionItemKind::STRUCT,
             CompletionKind::Property => tower_lsp::lsp_types::CompletionItemKind::FIELD,
+            CompletionKind::MagicTrigger => tower_lsp::lsp_types::CompletionItemKind::METHOD,
         }
     }
 }

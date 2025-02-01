@@ -126,22 +126,36 @@ impl FindCompletionContents for document_tree::Table {
                                         ) => {
                                             completion_contents.extend(type_hint_value(
                                                 position,
-                                                schema_url,
+                                                None,
                                                 completion_hint,
                                             ));
                                         }
                                         Some(CompletionHint::InTableHeader) | None => {
-                                            completion_contents.push(
-                                                CompletionContent::new_type_hint_property(
-                                                    &accessor_string,
-                                                    CompletionEdit::new_propery(
+                                            if matches!(
+                                                value,
+                                                document_tree::Value::Incomplete { .. }
+                                            ) {
+                                                completion_contents.extend(
+                                                    CompletionContent::new_magic_triggers(
                                                         &accessor_string,
+                                                        None,
+                                                        schema_url,
+                                                    ),
+                                                );
+                                            } else {
+                                                completion_contents.extend(
+                                                    value.find_completion_contents(
+                                                        accessors,
+                                                        None,
+                                                        toml_version,
                                                         position,
+                                                        keys,
+                                                        None,
+                                                        Some(definitions),
                                                         completion_hint,
                                                     ),
-                                                    schema_url,
-                                                ),
-                                            );
+                                                );
+                                            }
                                         }
                                     }
                                 } else {
@@ -156,7 +170,7 @@ impl FindCompletionContents for document_tree::Table {
                                             toml_version,
                                             position,
                                             &keys[1..],
-                                            schema_url,
+                                            None,
                                             Some(definitions),
                                             completion_hint,
                                         ),

@@ -174,6 +174,28 @@ impl CompletionContent {
             preselect: None,
         }
     }
+
+    pub fn new_magic_triggers(
+        key: &str,
+        edit: Option<CompletionEdit>,
+        schema_url: Option<&Url>,
+    ) -> Vec<Self> {
+        [(".", "Dot Trigger"), ("=", "Equal Trigger")]
+            .into_iter()
+            .map(|(operator, detail)| Self {
+                label: operator.to_string(),
+                kind: CompletionKind::MagicTrigger,
+                emoji_icon: Some('🦅'),
+                priority: CompletionPriority::TypeHint,
+                detail: Some(detail.to_string()),
+                documentation: None,
+                filter_text: Some(format!("{key}{operator}")),
+                edit: edit.clone(),
+                schema_url: schema_url.cloned(),
+                preselect: None,
+            })
+            .collect()
+    }
 }
 
 impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
