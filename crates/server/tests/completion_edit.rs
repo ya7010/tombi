@@ -1,6 +1,347 @@
 use test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
 
 struct Select<T>(T);
+mod completion_edit {
+    use super::*;
+
+    mod tombi_schema {
+        use super::*;
+        use test_lib::tombi_schema_path;
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn tombi_server_completion_dot(
+                r#"
+                [server]
+                completion.█
+                "#,
+                Select("enabled"),
+                tombi_schema_path(),
+            ) -> Ok(
+                r#"
+                [server]
+                completion.enabled
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn tombi_server_completion_equal(
+                r#"
+                [server]
+                completion=█
+                "#,
+                Select("enabled"),
+                tombi_schema_path(),
+            ) -> Ok(
+                r#"
+                [server]
+                completion = { enabled$1 }$0
+                "#
+            );
+        }
+    }
+
+    mod cargo_schema {
+        use super::*;
+        use test_lib::cargo_schema_path;
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn cargo_package_version(
+                r#"
+                [package]
+                version=█
+                "#,
+                Select("\"0.1.0\""),
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [package]
+                version = "0.1.0"
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn cargo_dependencies_serde_dot_work(
+                r#"
+                [dependencies]
+                serde.work█
+                "#,
+                Select("workspace"),
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependencies]
+                serde.workspace
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn cargo_dependencies_serde_workspace_dot(
+                r#"
+                [dependencies]
+                serde = { workspace.█ }
+                "#,
+                Select("true"),
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependencies]
+                serde = { workspace = true }
+                "#
+            );
+        }
+    }
+
+    mod pyproject_schema {
+        use super::*;
+        use test_lib::pyproject_schema_path;
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn pyproject_project_authors_dot(
+                r#"
+                [project]
+                authors.█
+                "#,
+                Select("[]"),
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                authors = [$1]$0
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn pyproject_project_authors_equal(
+                r#"
+                [project]
+                authors=█
+                "#,
+                Select("[]"),
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                authors = [$1]$0
+                "#
+            );
+        }
+    }
+
+    mod without_schema {
+        use super::*;
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_true(
+                "key.█",
+                Select("true"),
+            ) -> Ok(
+                "key = true"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_false(
+                "key.█",
+                Select("false"),
+            ) -> Ok(
+                "key = false"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_integer(
+                "key.█",
+                Select("42"),
+            ) -> Ok(
+                "key = ${1:42}"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_float(
+                "key.█",
+                Select("3.14"),
+            ) -> Ok(
+                "key = ${1:3.14}"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_basic_string(
+                "key.█",
+                Select("\"\""),
+            ) -> Ok(
+                "key = \"$1\"$0"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_today_offset_date_time(
+                "key.█",
+                Select(today_offset_date_time()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_offset_date_time())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_today_local_date_time(
+                "key.█",
+                Select(today_local_date_time()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_local_date_time())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_today_local_date(
+                "key.█",
+                Select(today_local_date()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_local_date())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_today_local_time(
+                "key.█",
+                Select(today_local_time()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_local_time())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_dot_select_array(
+                "key.█",
+                Select("[]"),
+            ) -> Ok(
+                "key = [$1]$0"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_true(
+                "key=█",
+                Select("true"),
+            ) -> Ok(
+                "key = true"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_false(
+                "key=█",
+                Select("false"),
+            ) -> Ok(
+                "key = false"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_integer(
+                "key=█",
+                Select("42"),
+            ) -> Ok(
+                "key = ${1:42}"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_float(
+                "key=█",
+                Select("3.14"),
+            ) -> Ok(
+                "key = ${1:3.14}"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_basic_string(
+                "key=█",
+                Select("\"\""),
+            ) -> Ok(
+                "key = \"$1\"$0"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_today_offset_date_time(
+                "key=█",
+                Select(today_offset_date_time()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_offset_date_time())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_today_local_date_time(
+                "key=█",
+                Select(today_local_date_time()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_local_date_time())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_today_local_date(
+                "key=█",
+                Select(today_local_date()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_local_date())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_today_local_time(
+                "key=█",
+                Select(today_local_time()),
+            ) -> Ok(
+                &format!("key = ${{1:{}}}", today_local_time())
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_select_array(
+                "key=█",
+                Select("[]"),
+            ) -> Ok(
+                "key = [$1]$0"
+            );
+        }
+    }
+}
 
 #[macro_export]
 macro_rules! test_completion_edit {
@@ -223,325 +564,4 @@ macro_rules! test_completion_edit {
             Ok(())
         }
     };
-}
-
-mod tombi_schema {
-    use super::*;
-    use test_lib::tombi_schema_path;
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn tombi_server_completion_dot(
-            r#"
-        [server]
-        completion.█
-        "#,
-            Select("enabled"),
-            tombi_schema_path(),
-        ) -> Ok(
-            r#"
-        [server]
-        completion.enabled
-        "#
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn tombi_server_completion_equal(
-            r#"
-        [server]
-        completion=█
-        "#,
-            Select("enabled"),
-            tombi_schema_path(),
-        ) -> Ok(
-            r#"
-        [server]
-        completion = { enabled$1 }$0
-        "#
-        );
-    }
-}
-
-mod cargo_schema {
-    use super::*;
-    use test_lib::cargo_schema_path;
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn cargo_package_version(
-            r#"
-        [package]
-        version=█
-        "#,
-            Select("\"0.1.0\""),
-            cargo_schema_path(),
-        ) -> Ok(
-            r#"
-        [package]
-        version = "0.1.0"
-        "#
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn cargo_dependencies_serde_workspace_dot(
-            r#"
-            [dependencies]
-            serde = { workspace.█ }
-            "#,
-            Select("true"),
-            cargo_schema_path(),
-        ) -> Ok(
-            r#"
-            [dependencies]
-            serde = { workspace = true }
-        "#
-        );
-    }
-}
-
-mod pyproject_schema {
-    use super::*;
-    use test_lib::pyproject_schema_path;
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn pyproject_project_authors_dot(
-            r#"
-        [project]
-        authors.█
-        "#,
-            Select("[]"),
-            pyproject_schema_path(),
-        ) -> Ok(
-            r#"
-        [project]
-        authors = [$1]$0
-        "#
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn pyproject_project_authors_equal(
-            r#"
-        [project]
-        authors=█
-        "#,
-            Select("[]"),
-            pyproject_schema_path(),
-        ) -> Ok(
-            r#"
-        [project]
-        authors = [$1]$0
-        "#
-        );
-    }
-}
-
-mod without_schema {
-    use super::*;
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_true(
-            "key.█",
-            Select("true"),
-        ) -> Ok(
-            "key = true"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_false(
-            "key.█",
-            Select("false"),
-        ) -> Ok(
-            "key = false"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_integer(
-            "key.█",
-            Select("42"),
-        ) -> Ok(
-            "key = ${1:42}"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_float(
-            "key.█",
-            Select("3.14"),
-        ) -> Ok(
-            "key = ${1:3.14}"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_basic_string(
-            "key.█",
-            Select("\"\""),
-        ) -> Ok(
-            "key = \"$1\"$0"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_today_offset_date_time(
-            "key.█",
-            Select(today_offset_date_time()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_offset_date_time())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_today_local_date_time(
-            "key.█",
-            Select(today_local_date_time()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_local_date_time())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_today_local_date(
-            "key.█",
-            Select(today_local_date()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_local_date())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_today_local_time(
-            "key.█",
-            Select(today_local_time()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_local_time())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_dot_select_array(
-            "key.█",
-            Select("[]"),
-        ) -> Ok(
-            "key = [$1]$0"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_true(
-            "key=█",
-            Select("true"),
-        ) -> Ok(
-            "key = true"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_false(
-            "key=█",
-            Select("false"),
-        ) -> Ok(
-            "key = false"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_integer(
-            "key=█",
-            Select("42"),
-        ) -> Ok(
-            "key = ${1:42}"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_float(
-            "key=█",
-            Select("3.14"),
-        ) -> Ok(
-            "key = ${1:3.14}"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_basic_string(
-            "key=█",
-            Select("\"\""),
-        ) -> Ok(
-            "key = \"$1\"$0"
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_today_offset_date_time(
-            "key=█",
-            Select(today_offset_date_time()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_offset_date_time())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_today_local_date_time(
-            "key=█",
-            Select(today_local_date_time()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_local_date_time())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_today_local_date(
-            "key=█",
-            Select(today_local_date()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_local_date())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_today_local_time(
-            "key=█",
-            Select(today_local_time()),
-        ) -> Ok(
-            &format!("key = ${{1:{}}}",  today_local_time())
-        );
-    }
-
-    test_completion_edit! {
-        #[tokio::test]
-        async fn key_equal_select_array(
-            "key=█",
-            Select("[]"),
-        ) -> Ok(
-            "key = [$1]$0"
-        );
-    }
 }
