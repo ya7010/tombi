@@ -347,6 +347,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);
@@ -370,6 +371,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);
@@ -455,6 +457,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);
@@ -474,6 +477,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);
@@ -493,6 +497,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);
@@ -512,6 +517,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);
@@ -531,6 +537,7 @@ mod completion_labels {
                 "3.14",
                 "42",
                 "[]",
+                "{}",
                 "true",
                 "false",
             ]);

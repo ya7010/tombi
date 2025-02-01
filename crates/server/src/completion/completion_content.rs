@@ -1,7 +1,7 @@
 use schema_store::get_schema_name;
 use tower_lsp::lsp_types::Url;
 
-use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind};
+use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -131,6 +131,25 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
+            preselect: None,
+        }
+    }
+
+    pub fn new_type_hint_inline_table(
+        position: text::Position,
+        schema_url: Option<&Url>,
+        completion_hint: Option<CompletionHint>,
+    ) -> Self {
+        Self {
+            label: "{}".to_string(),
+            kind: CompletionKind::Table,
+            emoji_icon: Some('🦅'),
+            priority: CompletionPriority::TypeHint,
+            detail: Some("InlineTable".to_string()),
+            documentation: None,
+            filter_text: None,
+            schema_url: schema_url.cloned(),
+            edit: CompletionEdit::new_inline_table(position, completion_hint),
             preselect: None,
         }
     }

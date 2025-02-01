@@ -123,6 +123,37 @@ impl CompletionEdit {
         }
     }
 
+    pub fn new_inline_table(
+        position: text::Position,
+        completion_hint: Option<CompletionHint>,
+    ) -> Option<Self> {
+        match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { range, .. }
+                | CompletionHint::EqualTrigger { range, .. }
+                | CompletionHint::SpaceTrigger { range, .. },
+            ) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: " = { $1 }$0".to_string(),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
+            Some(CompletionHint::InTableHeader) | None => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: "{ $1 }$0".to_string(),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
+        }
+    }
+
     pub fn new_propery(
         property_name: &str,
         position: text::Position,

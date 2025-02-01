@@ -109,7 +109,11 @@ pub fn type_hint_value(
         type_hint_local_time(position, schema_url, completion_hint),
         type_hint_offset_date_time(position, schema_url, completion_hint),
         type_hint_array(position, schema_url, completion_hint),
-        // type_hint_table(position, schema_url, completion_hint),
+        vec![CompletionContent::new_type_hint_inline_table(
+            position,
+            schema_url,
+            completion_hint,
+        )],
     ])
 }
 
