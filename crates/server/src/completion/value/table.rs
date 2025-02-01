@@ -1,9 +1,8 @@
 use crate::completion::{
-    find_any_of_completion_items, find_one_of_completion_items, CompletionCandidate,
-    CompletionContent, CompletionEdit,
+    value::all_of::find_all_if_completion_items, value::any_of::find_any_of_completion_items,
+    value::one_of::find_one_of_completion_items, CompletionCandidate, CompletionContent,
+    CompletionEdit, CompletionHint, FindCompletionContents,
 };
-
-use super::{find_all_if_completion_items, CompletionHint, FindCompletionContents};
 use config::TomlVersion;
 use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
