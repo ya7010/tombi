@@ -183,9 +183,9 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_used_toml_version(
             r#"
-        toml-version = "v1.0.0"
-        █
-        "#,
+            toml-version = "v1.0.0"
+            █
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "format",
@@ -215,10 +215,10 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_empty_bracket2(
             r#"
-        toml-version = "v1.0.0"
+            toml-version = "v1.0.0"
 
-        [█]
-        "#,
+            [█]
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "format",
@@ -233,12 +233,12 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_empty_bracket3(
             r#"
-        toml-version = "v1.0.0"
+            toml-version = "v1.0.0"
 
-        [█]
+            [█]
 
-        [format]
-        "#,
+            [format]
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "format",
@@ -267,8 +267,8 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_schema(
             r#"
-        [schema.█]
-        "#,
+            [schema.█]
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "catalog",
@@ -295,14 +295,13 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_schema_catalog_path(
             r#"
-        [schema.catalog]
-        path =█
-        "#,
+            [schema.catalog]
+            path =█
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "\"\"",
-            "''",
             "[]",
         ]);
     }
@@ -311,14 +310,13 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_schema_catalog_path2(
             r#"
-        [schema.catalog]
-        path = █
-        "#,
+            [schema.catalog]
+            path = █
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "\"\"",
-            "''",
             "[]",
         ]);
     }
@@ -327,13 +325,12 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_schema_catalog_path_inline(
             r#"
-        schema.catalog.path =█
-        "#,
+            schema.catalog.path =█
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             format!("\"{}\"", DEFAULT_CATALOG_URL),
             "\"\"",
-            "''",
             "[]",
         ]);
     }
@@ -342,10 +339,10 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_server2(
             r#"
-        [server]
-        █
-        completion.enabled = true
-        "#,
+            [server]
+            █
+            completion.enabled = true
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "completion",
@@ -359,11 +356,11 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_server3(
             r#"
-        [server]
-        formatting.enabled = true
-        █
-        completion.enabled = true
-        "#,
+            [server]
+            formatting.enabled = true
+            █
+            completion.enabled = true
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "completion",
@@ -377,9 +374,9 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_server_completion(
             r#"
-        [server]
-        completion.enabled = █
-        "#,
+            [server]
+            completion.enabled = █
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "true",
@@ -391,9 +388,9 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_server_comp(
             r#"
-        [server]
-        comp█
-        "#,
+            [server]
+            comp█
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "completion",
@@ -404,8 +401,8 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_server_comp2(
             r#"
-        [server.comp█]
-        "#,
+            [server.comp█]
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "completion",
@@ -416,11 +413,11 @@ mod tombi_schema {
         #[tokio::test]
         async fn tombi_server_comp3(
             r#"
-        [server]
-        comp█
+            [server]
+            comp█
 
-        [schema]
-        "#,
+            [schema]
+            "#,
             tombi_schema_path(),
         ) -> Ok([
             "completion",
@@ -448,9 +445,9 @@ mod pyproject_schema {
         #[tokio::test]
         async fn pyproject_project(
             r#"
-        [project]
-        █
-        "#,
+            [project]
+            █
+            "#,
             pyproject_schema_path(),
         ) -> Ok([
             "authors",
