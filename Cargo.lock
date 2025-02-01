@@ -496,6 +496,7 @@ dependencies = [
  "text",
  "thiserror",
  "toml-version",
+ "tracing",
 ]
 
 [[package]]
