@@ -154,7 +154,14 @@ impl CompletionEdit {
                     new_text: "".to_string(),
                 }]),
             }),
-            Some(CompletionHint::InTableHeader) | None => None,
+            Some(CompletionHint::InTableHeader) | None => Some(Self {
+                insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: property_name.to_string(),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
         }
     }
 }

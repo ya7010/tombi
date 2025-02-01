@@ -321,10 +321,10 @@ where
 
     if let Ok(mut schemas) = one_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
-            if let Ok(schema) = schema.resolve(definitions) {
+            if let Ok(value_schema) = schema.resolve(definitions) {
                 let schema_completions = value.find_completion_contents(
                     accessors,
-                    Some(schema),
+                    Some(value_schema),
                     toml_version,
                     position,
                     keys,
@@ -381,10 +381,10 @@ where
 
     if let Ok(mut schemas) = any_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
-            if let Ok(schema) = schema.resolve(definitions) {
+            if let Ok(value_schema) = schema.resolve(definitions) {
                 let schema_completions = value.find_completion_contents(
                     accessors,
-                    Some(schema),
+                    Some(value_schema),
                     toml_version,
                     position,
                     keys,
@@ -441,10 +441,10 @@ where
 
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
         for schema in schemas.iter_mut() {
-            if let Ok(schema) = schema.resolve(definitions) {
+            if let Ok(value_schema) = schema.resolve(definitions) {
                 let schema_completions = value.find_completion_contents(
                     accessors,
-                    Some(schema),
+                    Some(value_schema),
                     toml_version,
                     position,
                     keys,
