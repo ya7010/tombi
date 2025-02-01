@@ -216,20 +216,28 @@ impl FindCompletionContents for document_tree::Value {
                     completion_hint,
                 ),
                 Some(ValueSchema::Null) => Vec::with_capacity(0),
-                None => itertools::concat([
-                    type_hint_boolean(position, schema_url, completion_hint),
-                    type_hint_integer(position, schema_url, completion_hint),
-                    type_hint_float(position, schema_url, completion_hint),
-                    type_hint_string(position, schema_url, completion_hint),
-                    type_hint_local_date_time(position, schema_url, completion_hint),
-                    type_hint_local_date(position, schema_url, completion_hint),
-                    type_hint_local_time(position, schema_url, completion_hint),
-                    type_hint_offset_date_time(position, schema_url, completion_hint),
-                    type_hint_array(position, schema_url, completion_hint),
-                ]),
+                None => type_hint_value(position, schema_url, completion_hint),
             },
         }
     }
+}
+
+pub fn type_hint_value(
+    position: text::Position,
+    schema_url: Option<&Url>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    itertools::concat([
+        type_hint_boolean(position, schema_url, completion_hint),
+        type_hint_integer(position, schema_url, completion_hint),
+        type_hint_float(position, schema_url, completion_hint),
+        type_hint_string(position, schema_url, completion_hint),
+        type_hint_local_date_time(position, schema_url, completion_hint),
+        type_hint_local_date(position, schema_url, completion_hint),
+        type_hint_local_time(position, schema_url, completion_hint),
+        type_hint_offset_date_time(position, schema_url, completion_hint),
+        type_hint_array(position, schema_url, completion_hint),
+    ])
 }
 
 impl CompletionCandidate for ValueSchema {
