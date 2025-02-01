@@ -161,409 +161,425 @@ macro_rules! test_completion_labels {
     };
 }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_empty(
-        "█",
-        tombi_schema_path(),
-    ) -> Ok([
-        "format",
-        "lint",
-        "schema",
-        "schemas",
-        "server",
-        "toml-version",
-    ]);
-}
+mod tombi_schema {
+    use super::*;
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_used_toml_version(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty(
+            "█",
+            tombi_schema_path(),
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+            "toml-version",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_used_toml_version(
+            r#"
         toml-version = "v1.0.0"
         █
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "format",
-        "lint",
-        "schema",
-        "schemas",
-        "server",
-        // "toml-version",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+            // "toml-version",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_empty_bracket(
-        "[█]",
-        tombi_schema_path(),
-    ) -> Ok([
-        "format",
-        "lint",
-        "schema",
-        "schemas",
-        "server",
-    ]);
-}
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty_bracket(
+            "[█]",
+            tombi_schema_path(),
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_empty_bracket2(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty_bracket2(
+            r#"
         toml-version = "v1.0.0"
 
         [█]
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "format",
-        "lint",
-        "schema",
-        "schemas",
-        "server",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_empty_bracket3(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty_bracket3(
+            r#"
         toml-version = "v1.0.0"
 
         [█]
 
         [format]
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "format",
-        "lint",
-        "schema",
-        "schemas",
-        "server",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_empty_double_bracket(
-        "[[█]]",
-        tombi_schema_path(),
-    ) -> Ok([
-        "format",
-        "lint",
-        "schema",
-        "schemas",
-        "server",
-    ]);
-}
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_empty_double_bracket(
+            "[[█]]",
+            tombi_schema_path(),
+        ) -> Ok([
+            "format",
+            "lint",
+            "schema",
+            "schemas",
+            "server",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_schema(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema(
+            r#"
         [schema.█]
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "catalog",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "catalog",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_schema_after_bracket(
-        "[schema]█",
-        tombi_schema_path(),
-    ) -> Ok([]);
-}
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_after_bracket(
+            "[schema]█",
+            tombi_schema_path(),
+        ) -> Ok([]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_schema_catalog(
-        "[schema.catalog.█]",
-        tombi_schema_path(),
-    ) -> Ok([]);
-}
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog(
+            "[schema.catalog.█]",
+            tombi_schema_path(),
+        ) -> Ok([]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_schema_catalog_path(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog_path(
+            r#"
         [schema.catalog]
         path =█
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        format!("\"{}\"", DEFAULT_CATALOG_URL),
-        "\"\"",
-        "''",
-        "[]",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "\"\"",
+            "''",
+            "[]",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_schema_catalog_path2(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog_path2(
+            r#"
         [schema.catalog]
         path = █
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        format!("\"{}\"", DEFAULT_CATALOG_URL),
-        "\"\"",
-        "''",
-        "[]",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "\"\"",
+            "''",
+            "[]",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_schema_catalog_path_inline(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_schema_catalog_path_inline(
+            r#"
         schema.catalog.path =█
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        format!("\"{}\"", DEFAULT_CATALOG_URL),
-        "\"\"",
-        "''",
-        "[]",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            format!("\"{}\"", DEFAULT_CATALOG_URL),
+            "\"\"",
+            "''",
+            "[]",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_server2(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server2(
+            r#"
         [server]
         █
         completion.enabled = true
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "completion",
-        "diagnostics",
-        "formatting",
-        "hover",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+            "diagnostics",
+            "formatting",
+            "hover",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_server3(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server3(
+            r#"
         [server]
         formatting.enabled = true
         █
         completion.enabled = true
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "completion",
-        "diagnostics",
-        "formatting",
-        "hover",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+            "diagnostics",
+            "formatting",
+            "hover",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_server_completion(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server_completion(
+            r#"
         [server]
         completion.enabled = █
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "true",
-        "false",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "true",
+            "false",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_server_comp(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server_comp(
+            r#"
         [server]
         comp█
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "completion",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_server_comp2(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server_comp2(
+            r#"
         [server.comp█]
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "completion",
-    ]);
-}
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn tombi_server_comp3(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn tombi_server_comp3(
+            r#"
         [server]
         comp█
 
         [schema]
         "#,
-        tombi_schema_path(),
-    ) -> Ok([
-        "completion",
-    ]);
+            tombi_schema_path(),
+        ) -> Ok([
+            "completion",
+        ]);
+    }
 }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn pyproject_empty(
-        "█",
-        pyproject_schema_path(),
-    ) -> Ok([
-        "build-system",
-        "dependency-groups",
-        "project",
-        "tool",
-    ]);
-}
+mod pyproject_schema {
+    use super::*;
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn pyproject_project(
-        r#"
+    test_completion_labels! {
+        #[tokio::test]
+        async fn pyproject_empty(
+            "█",
+            pyproject_schema_path(),
+        ) -> Ok([
+            "build-system",
+            "dependency-groups",
+            "project",
+            "tool",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn pyproject_project(
+            r#"
         [project]
         █
         "#,
-        pyproject_schema_path(),
-    ) -> Ok([
-        "authors",
-        "classifiers",
-        "dependencies",
-        "description",
-        "dynamic",
-        "keywords",
-        "license",
-        "license-files",
-        "maintainers",
-        "name",
-        "readme",
-        "requires-python",
-        "version",
-    ]);
+            pyproject_schema_path(),
+        ) -> Ok([
+            "authors",
+            "classifiers",
+            "dependencies",
+            "description",
+            "dynamic",
+            "keywords",
+            "license",
+            "license-files",
+            "maintainers",
+            "name",
+            "readme",
+            "requires-python",
+            "version",
+        ]);
+    }
 }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn cargo_empty(
-        "█",
-        cargo_schema_path(),
-    ) -> Ok([
-        "badges",
-        "bench",
-        "bin",
-        "build-dependencies",
-        "build_dependencies",
-        "cargo-features",
-        "dependencies",
-        "dev-dependencies",
-        "dev_dependencies",
-        "example",
-        "features",
-        "lib",
-        "lints",
-        "package",
-        "patch",
-        "profile",
-        "project",
-        "replace",
-        "target",
-        "test",
-        "workspace",
-    ]);
+mod cargo_schema {
+    use super::*;
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn cargo_empty(
+            "█",
+            cargo_schema_path(),
+        ) -> Ok([
+            "badges",
+            "bench",
+            "bin",
+            "build-dependencies",
+            "build_dependencies",
+            "cargo-features",
+            "dependencies",
+            "dev-dependencies",
+            "dev_dependencies",
+            "example",
+            "features",
+            "lib",
+            "lints",
+            "package",
+            "patch",
+            "profile",
+            "project",
+            "replace",
+            "target",
+            "test",
+            "workspace",
+        ]);
+    }
 }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn key_dot_without_schema(
-        "key.█"
-    ) -> Ok([
-        "\"\"",
-        "''",
-        today_local_time(),
-        today_local_date(),
-        today_local_date_time(),
-        today_offset_date_time(),
-        "3.14",
-        "42",
-        "[]",
-        "false",
-        "true",
-    ]);
-}
+mod without_schema {
+    use super::*;
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn key_equal_without_schema(
-        "key=█"
-    ) -> Ok([
-        "\"\"",
-        "''",
-        today_local_time(),
-        today_local_date(),
-        today_local_date_time(),
-        today_offset_date_time(),
-        "3.14",
-        "42",
-        "[]",
-        "false",
-        "true",
-    ]);
-}
+    test_completion_labels! {
+        #[tokio::test]
+        async fn key_dot(
+            "key.█"
+        ) -> Ok([
+            "\"\"",
+            "''",
+            today_local_time(),
+            today_local_date(),
+            today_local_date_time(),
+            today_offset_date_time(),
+            "3.14",
+            "42",
+            "[]",
+            "false",
+            "true",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn keys_dot_without_schema(
-        "key1.key2.█"
-    ) -> Ok([
-        "\"\"",
-        "''",
-        today_local_time(),
-        today_local_date(),
-        today_local_date_time(),
-        today_offset_date_time(),
-        "3.14",
-        "42",
-        "[]",
-        "false",
-        "true",
-    ]);
-}
+    test_completion_labels! {
+        #[tokio::test]
+        async fn key_equal(
+            "key=█"
+        ) -> Ok([
+            "\"\"",
+            "''",
+            today_local_time(),
+            today_local_date(),
+            today_local_date_time(),
+            today_offset_date_time(),
+            "3.14",
+            "42",
+            "[]",
+            "false",
+            "true",
+        ]);
+    }
 
-test_completion_labels! {
-    #[tokio::test]
-    async fn keys_equal_without_schema(
-        "key1.key2=█"
-    ) -> Ok([
-        "\"\"",
-        "''",
-        today_local_time(),
-        today_local_date(),
-        today_local_date_time(),
-        today_offset_date_time(),
-        "3.14",
-        "42",
-        "[]",
-        "false",
-        "true",
-    ]);
+    test_completion_labels! {
+        #[tokio::test]
+        async fn keys_dot(
+            "key1.key2.█"
+        ) -> Ok([
+            "\"\"",
+            "''",
+            today_local_time(),
+            today_local_date(),
+            today_local_date_time(),
+            today_offset_date_time(),
+            "3.14",
+            "42",
+            "[]",
+            "false",
+            "true",
+        ]);
+    }
+
+    test_completion_labels! {
+        #[tokio::test]
+        async fn keys_equal(
+            "key1.key2=█"
+        ) -> Ok([
+            "\"\"",
+            "''",
+            today_local_time(),
+            today_local_date(),
+            today_local_date_time(),
+            today_offset_date_time(),
+            "3.14",
+            "42",
+            "[]",
+            "false",
+            "true",
+        ]);
+    }
 }
