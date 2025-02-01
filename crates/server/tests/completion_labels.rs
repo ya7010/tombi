@@ -314,6 +314,19 @@ mod completion_labels {
                 "version",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn pyproject_tool_third_party_field(
+                r#"
+                [tool.third_party]
+                field█
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok([
+                "{}",
+            ]);
+        }
     }
 
     mod cargo_schema {

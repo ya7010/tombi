@@ -24,7 +24,7 @@ impl FindCompletionContents for document_tree::Table {
                 let Some(definitions) = definitions else {
                     unreachable!("definitions must be provided");
                 };
-                let mut completions = Vec::new();
+                let mut completion_contents = Vec::new();
 
                 if let Some(key) = keys.first() {
                     let accessor_string = key.to_raw_text(toml_version);
@@ -72,7 +72,7 @@ impl FindCompletionContents for document_tree::Table {
                                                 continue;
                                             }
                                         }
-                                        completions.push(CompletionContent::new_property(
+                                        completion_contents.push(CompletionContent::new_property(
                                             label.clone(),
                                             schema_candidate.detail(definitions, completion_hint),
                                             schema_candidate
@@ -89,7 +89,7 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         }
 
-                        if completions.is_empty() {
+                        if completion_contents.is_empty() {
                             if let Some(completion_items) = table_schema
                                 .operate_additional_property_schema(
                                     |property_schema| {
@@ -115,20 +115,36 @@ impl FindCompletionContents for document_tree::Table {
                             }
 
                             if table_schema.additional_properties {
-                                return value.find_completion_contents(
-                                    &accessors
-                                        .clone()
-                                        .into_iter()
-                                        .chain(std::iter::once(accessor))
-                                        .collect(),
-                                    None,
-                                    toml_version,
-                                    position,
-                                    &keys[1..],
-                                    schema_url,
-                                    Some(definitions),
-                                    completion_hint,
-                                );
+                                if keys.len() == 1 {
+                                    completion_contents.push(
+                                        CompletionContent::new_type_hint_property(
+                                            &accessor_string,
+                                            CompletionEdit::new_propery(
+                                                &accessor_string,
+                                                position,
+                                                completion_hint,
+                                            ),
+                                            schema_url,
+                                        ),
+                                    )
+                                } else {
+                                    completion_contents.extend(
+                                        value.find_completion_contents(
+                                            &accessors
+                                                .clone()
+                                                .into_iter()
+                                                .chain(std::iter::once(accessor))
+                                                .collect(),
+                                            None,
+                                            toml_version,
+                                            position,
+                                            &keys[1..],
+                                            schema_url,
+                                            Some(definitions),
+                                            completion_hint,
+                                        ),
+                                    );
+                                }
                             }
                         }
                     }
@@ -171,7 +187,7 @@ impl FindCompletionContents for document_tree::Table {
                                     }
                                 }
 
-                                completions.push(CompletionContent::new_property(
+                                completion_contents.push(CompletionContent::new_property(
                                     label.clone(),
                                     schema_candidate.detail(definitions, completion_hint),
                                     schema_candidate.documentation(definitions, completion_hint),
@@ -182,7 +198,7 @@ impl FindCompletionContents for document_tree::Table {
                         }
                     }
                 }
-                completions
+                completion_contents
             }
             Some(ValueSchema::OneOf(one_of_schema)) => find_one_of_completion_items(
                 self,
