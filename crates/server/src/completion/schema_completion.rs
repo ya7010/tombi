@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::Url;
 
 use super::{
     value::{
-        find_all_if_completion_items, find_any_of_completion_items, find_one_of_completion_items,
+        find_all_of_completion_items, find_any_of_completion_items, find_one_of_completion_items,
     },
     CompletionContent, CompletionHint, FindCompletionContents,
 };
@@ -157,7 +157,7 @@ impl FindCompletionContents for SchemaCompletion {
                 definitions,
                 completion_hint,
             ),
-            ValueSchema::AllOf(all_of_schema) => find_all_if_completion_items(
+            ValueSchema::AllOf(all_of_schema) => find_all_of_completion_items(
                 self,
                 accessors,
                 all_of_schema,

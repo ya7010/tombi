@@ -4,7 +4,7 @@ use crate::completion::{
 };
 
 use super::{
-    all_of::find_all_if_completion_items, any_of::find_any_of_completion_items,
+    all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
     one_of::find_one_of_completion_items, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
@@ -105,7 +105,7 @@ impl FindCompletionContents for document_tree::Array {
                 definitions,
                 completion_hint,
             ),
-            Some(ValueSchema::AllOf(all_of_schema)) => find_all_if_completion_items(
+            Some(ValueSchema::AllOf(all_of_schema)) => find_all_of_completion_items(
                 self,
                 accessors,
                 all_of_schema,

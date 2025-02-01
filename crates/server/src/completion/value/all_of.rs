@@ -22,7 +22,7 @@ impl CompositeSchemaImpl for AllOfSchema {
     }
 }
 
-pub fn find_all_if_completion_items<T>(
+pub fn find_all_of_completion_items<T>(
     value: &T,
     accessors: &Vec<Accessor>,
     all_of_schema: &schema_store::AllOfSchema,

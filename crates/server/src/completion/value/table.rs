@@ -1,5 +1,5 @@
 use crate::completion::{
-    value::all_of::find_all_if_completion_items, value::any_of::find_any_of_completion_items,
+    value::all_of::find_all_of_completion_items, value::any_of::find_any_of_completion_items,
     value::one_of::find_one_of_completion_items, CompletionCandidate, CompletionContent,
     CompletionEdit, CompletionHint, FindCompletionContents,
 };
@@ -206,7 +206,7 @@ impl FindCompletionContents for document_tree::Table {
                 definitions,
                 completion_hint,
             ),
-            Some(ValueSchema::AllOf(all_of_schema)) => find_all_if_completion_items(
+            Some(ValueSchema::AllOf(all_of_schema)) => find_all_of_completion_items(
                 self,
                 accessors,
                 all_of_schema,

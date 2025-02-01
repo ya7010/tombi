@@ -16,7 +16,7 @@ use super::{
     schema_completion::SchemaCompletion, CompletionCandidate, CompletionContent, CompletionHint,
     FindCompletionContents,
 };
-pub use all_of::find_all_if_completion_items;
+pub use all_of::find_all_of_completion_items;
 pub use any_of::find_any_of_completion_items;
 use array::type_hint_array;
 use boolean::type_hint_boolean;
