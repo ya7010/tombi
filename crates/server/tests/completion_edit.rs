@@ -307,202 +307,206 @@ test_completion_edit! {
     );
 }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_true_without_schema(
-        "key.█",
-        Select("true"),
-    ) -> Ok(
-        "key = true"
-    );
-}
+mod without_schema {
+    use super::*;
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_false_without_schema(
-        "key.█",
-        Select("false"),
-    ) -> Ok(
-        "key = false"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_true(
+            "key.█",
+            Select("true"),
+        ) -> Ok(
+            "key = true"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_integer_without_schema(
-        "key.█",
-        Select("42"),
-    ) -> Ok(
-        "key = ${1:42}"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_false(
+            "key.█",
+            Select("false"),
+        ) -> Ok(
+            "key = false"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_float_without_schema(
-        "key.█",
-        Select("3.14"),
-    ) -> Ok(
-        "key = ${1:3.14}"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_integer(
+            "key.█",
+            Select("42"),
+        ) -> Ok(
+            "key = ${1:42}"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_basic_string_without_schema(
-        "key.█",
-        Select("\"\""),
-    ) -> Ok(
-        "key = \"$1\"$0"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_float(
+            "key.█",
+            Select("3.14"),
+        ) -> Ok(
+            "key = ${1:3.14}"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_today_offset_date_time_without_schema(
-        "key.█",
-        Select(today_offset_date_time()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_offset_date_time())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_basic_string(
+            "key.█",
+            Select("\"\""),
+        ) -> Ok(
+            "key = \"$1\"$0"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_today_local_date_time_without_schema(
-        "key.█",
-        Select(today_local_date_time()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_local_date_time())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_today_offset_date_time(
+            "key.█",
+            Select(today_offset_date_time()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_offset_date_time())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_today_local_date_without_schema(
-        "key.█",
-        Select(today_local_date()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_local_date())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_today_local_date_time(
+            "key.█",
+            Select(today_local_date_time()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_local_date_time())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_today_local_time_without_schema(
-        "key.█",
-        Select(today_local_time()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_local_time())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_today_local_date(
+            "key.█",
+            Select(today_local_date()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_local_date())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_dot_select_array_without_schema(
-        "key.█",
-        Select("[]"),
-    ) -> Ok(
-        "key = [$1]$0"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_today_local_time(
+            "key.█",
+            Select(today_local_time()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_local_time())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_true_without_schema(
-        "key=█",
-        Select("true"),
-    ) -> Ok(
-        "key = true"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_dot_select_array(
+            "key.█",
+            Select("[]"),
+        ) -> Ok(
+            "key = [$1]$0"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_false_without_schema(
-        "key=█",
-        Select("false"),
-    ) -> Ok(
-        "key = false"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_true(
+            "key=█",
+            Select("true"),
+        ) -> Ok(
+            "key = true"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_integer_without_schema(
-        "key=█",
-        Select("42"),
-    ) -> Ok(
-        "key = ${1:42}"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_false(
+            "key=█",
+            Select("false"),
+        ) -> Ok(
+            "key = false"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_float_without_schema(
-        "key=█",
-        Select("3.14"),
-    ) -> Ok(
-        "key = ${1:3.14}"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_integer(
+            "key=█",
+            Select("42"),
+        ) -> Ok(
+            "key = ${1:42}"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_basic_string_without_schema(
-        "key=█",
-        Select("\"\""),
-    ) -> Ok(
-        "key = \"$1\"$0"
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_float(
+            "key=█",
+            Select("3.14"),
+        ) -> Ok(
+            "key = ${1:3.14}"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_today_offset_date_time_without_schema(
-        "key=█",
-        Select(today_offset_date_time()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_offset_date_time())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_basic_string(
+            "key=█",
+            Select("\"\""),
+        ) -> Ok(
+            "key = \"$1\"$0"
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_today_local_date_time_without_schema(
-        "key=█",
-        Select(today_local_date_time()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_local_date_time())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_today_offset_date_time(
+            "key=█",
+            Select(today_offset_date_time()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_offset_date_time())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_today_local_date_without_schema(
-        "key=█",
-        Select(today_local_date()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_local_date())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_today_local_date_time(
+            "key=█",
+            Select(today_local_date_time()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_local_date_time())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_today_local_time_without_schema(
-        "key=█",
-        Select(today_local_time()),
-    ) -> Ok(
-        &format!("key = ${{1:{}}}",  today_local_time())
-    );
-}
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_today_local_date(
+            "key=█",
+            Select(today_local_date()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_local_date())
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn key_equal_select_array_without_schema(
-        "key=█",
-        Select("[]"),
-    ) -> Ok(
-        "key = [$1]$0"
-    );
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_today_local_time(
+            "key=█",
+            Select(today_local_time()),
+        ) -> Ok(
+            &format!("key = ${{1:{}}}",  today_local_time())
+        );
+    }
+
+    test_completion_edit! {
+        #[tokio::test]
+        async fn key_equal_select_array(
+            "key=█",
+            Select("[]"),
+        ) -> Ok(
+            "key = [$1]$0"
+        );
+    }
 }
