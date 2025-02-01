@@ -66,16 +66,29 @@ pub fn get_completion_contents(
             }
             continue;
         } else if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
-            if let Some(SyntaxElement::Token(last_token)) = node.last_child_or_token() {
-                match last_token.kind() {
-                    SyntaxKind::EQUAL => {
-                        completion_hint = Some(CompletionHint::EqualTrigger {
-                            range: last_token.range(),
+            match (kv.keys(), kv.eq(), kv.value()) {
+                (Some(_), Some(_), Some(_)) => {}
+                (Some(_), Some(eq), None) => {
+                    completion_hint = Some(CompletionHint::EqualTrigger { range: eq.range() });
+                }
+                (Some(keys), None, None) => {
+                    if let Some(last_dot) = keys
+                        .syntax()
+                        .children_with_tokens()
+                        .filter(|node_or_token| match node_or_token {
+                            SyntaxElement::Token(token) => token.kind() == SyntaxKind::DOT,
+                            _ => false,
+                        })
+                        .last()
+                    {
+                        completion_hint = Some(CompletionHint::DotTrigger {
+                            range: text::Range::new(last_dot.range().start(), keys.range().end()),
                         });
                     }
-                    _ => {}
                 }
+                _ => {}
             }
+
             kv.keys()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
             let (bracket_start_range, bracket_end_range) =
