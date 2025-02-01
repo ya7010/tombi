@@ -230,6 +230,12 @@ pub trait CompletionCandidate {
     }
 }
 
+trait CompositeSchema {
+    fn title(&self) -> Option<String>;
+    fn description(&self) -> Option<String>;
+    fn schemas(&self) -> &Schemas;
+}
+
 impl<T: CompositeSchema> CompletionCandidate for T {
     fn title(
         &self,
@@ -291,12 +297,6 @@ impl<T: CompositeSchema> CompletionCandidate for T {
             .as_deref()
             .map(|description| description.into())
     }
-}
-
-pub trait CompositeSchema {
-    fn title(&self) -> Option<String>;
-    fn description(&self) -> Option<String>;
-    fn schemas(&self) -> &Schemas;
 }
 
 fn serde_value_to_completion_item(
