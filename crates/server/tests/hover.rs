@@ -49,6 +49,7 @@ macro_rules! test_hover_keys_value {
                 if let Ok(level) = std::env::var("RUST_LOG") {
                     let _ = tracing_subscriber::fmt()
                         .with_env_filter(level)
+                        .pretty()
                         .try_init();
                 }
 

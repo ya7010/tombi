@@ -518,6 +518,7 @@ macro_rules! test_completion_labels {
             if let Ok(level) = std::env::var("RUST_LOG") {
                     let _ = tracing_subscriber::fmt()
                         .with_env_filter(level)
+                        .pretty()
                         .try_init();
             }
 
