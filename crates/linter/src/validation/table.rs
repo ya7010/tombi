@@ -77,18 +77,24 @@ impl Validate for document_tree::Table {
                 }
             }
             if !matche_key {
-                if let Some(additional_property_schema) = &table_schema.additional_property_schema {
-                    if let Ok(mut additional_property_schema) = additional_property_schema.write() {
-                        if let Ok(value_schema) = additional_property_schema.resolve(definitions) {
-                            if let Err(errs) =
-                                value.validate(toml_version, value_schema, definitions)
-                            {
+                if table_schema
+                    .operate_additional_property_schema(
+                        |additional_property_schema| {
+                            if let Err(errs) = value.validate(
+                                toml_version,
+                                additional_property_schema,
+                                definitions,
+                            ) {
                                 errors.extend(errs);
                             }
-                        }
-                    }
+                        },
+                        definitions,
+                    )
+                    .is_some()
+                {
                     continue;
-                }
+                };
+
                 if let Some(pattern_properties) = &table_schema.pattern_properties {
                     errors.push(crate::Error {
                         kind: crate::ErrorKind::PatternProperty {

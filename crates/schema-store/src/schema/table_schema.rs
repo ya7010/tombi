@@ -15,7 +15,7 @@ pub struct TableSchema {
     pub properties: SchemaProperties,
     pub pattern_properties: Option<SchemaPatternProperties>,
     pub additional_properties: bool,
-    pub additional_property_schema: Option<SchemaItem>,
+    additional_property_schema: Option<SchemaItem>,
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
@@ -93,6 +93,35 @@ impl TableSchema {
 
     pub fn value_type(&self) -> crate::ValueType {
         crate::ValueType::Table
+    }
+
+    pub fn operate_additional_property_schema<F, T>(
+        &self,
+        operation: F,
+        definitions: &crate::SchemaDefinitions,
+    ) -> Option<T>
+    where
+        F: FnOnce(&ValueSchema) -> T,
+    {
+        if let Some(ref additional_property_schema) = self.additional_property_schema {
+            let is_ref = if let Ok(referable_schema) = additional_property_schema.read() {
+                match *referable_schema {
+                    Referable::Resolved(ref value_schema) => return Some(operation(value_schema)),
+                    Referable::Ref { .. } => true,
+                }
+            } else {
+                false
+            };
+
+            if is_ref {
+                if let Ok(mut referable_schema) = additional_property_schema.write() {
+                    if let Ok(value_schema) = referable_schema.resolve(definitions) {
+                        return Some(operation(&value_schema));
+                    }
+                }
+            }
+        }
+        None
     }
 }
 

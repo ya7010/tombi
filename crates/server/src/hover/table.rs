@@ -99,40 +99,42 @@ impl GetHoverContent for document_tree::Table {
                                 };
                             }
                         }
-                        if let Some(additiona_property_schema) =
-                            &table_schema.additional_property_schema
+
+                        if let Some(hover_content) = table_schema
+                            .operate_additional_property_schema(
+                                |additional_property_schema| {
+                                    value
+                                        .get_hover_content(
+                                            &accessors
+                                                .clone()
+                                                .into_iter()
+                                                .chain(std::iter::once(accessor.clone()))
+                                                .collect(),
+                                            Some(additional_property_schema),
+                                            toml_version,
+                                            position,
+                                            &keys[1..],
+                                            schema_url,
+                                            definitions,
+                                        )
+                                        .map(|hover_content| {
+                                            if keys.len() == 1
+                                                && hover_content
+                                                    .accessors
+                                                    .last()
+                                                    .map(|accessor| accessor.is_key())
+                                                    .unwrap_or_default()
+                                            {
+                                                hover_content.into_nullable()
+                                            } else {
+                                                hover_content
+                                            }
+                                        })
+                                },
+                                definitions,
+                            )
                         {
-                            if let Ok(mut additiona_property_schema) =
-                                additiona_property_schema.write()
-                            {
-                                return value
-                                    .get_hover_content(
-                                        &accessors
-                                            .clone()
-                                            .into_iter()
-                                            .chain(std::iter::once(accessor))
-                                            .collect(),
-                                        additiona_property_schema.resolve(definitions).ok(),
-                                        toml_version,
-                                        position,
-                                        &keys[1..],
-                                        schema_url,
-                                        definitions,
-                                    )
-                                    .map(|hover_content| {
-                                        if keys.len() == 1
-                                            && hover_content
-                                                .accessors
-                                                .last()
-                                                .map(|accessor| accessor.is_key())
-                                                .unwrap_or_default()
-                                        {
-                                            hover_content.into_nullable()
-                                        } else {
-                                            hover_content
-                                        }
-                                    });
-                            }
+                            return hover_content;
                         }
 
                         value.get_hover_content(

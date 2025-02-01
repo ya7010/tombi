@@ -28,8 +28,8 @@ impl FindCompletionContents for document_tree::Table {
                 let mut completions = Vec::new();
 
                 if let Some(key) = keys.first() {
-                    let accessor_str = key.to_raw_text(toml_version);
-                    let accessor = Accessor::Key(accessor_str.clone());
+                    let accessor_string = key.to_raw_text(toml_version);
+                    let accessor = Accessor::Key(accessor_string.clone());
                     if let Some(value) = self.get(key) {
                         if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                             if let Ok(property_schema) = property.value_mut().resolve(definitions) {
@@ -51,7 +51,7 @@ impl FindCompletionContents for document_tree::Table {
                         } else if keys.len() == 1 {
                             for mut property in table_schema.properties.iter_mut() {
                                 let label = property.key().to_string();
-                                if !label.starts_with(accessor_str.as_str()) {
+                                if !label.starts_with(accessor_string.as_str()) {
                                     continue;
                                 }
                                 if let Ok(value_schema) = property.value_mut().resolve(definitions)
@@ -87,6 +87,32 @@ impl FindCompletionContents for document_tree::Table {
                                         ));
                                     }
                                 }
+                            }
+                        }
+
+                        if completions.is_empty() {
+                            if let Some(completion_items) = table_schema
+                                .operate_additional_property_schema(
+                                    |property_schema| {
+                                        value.find_completion_contents(
+                                            &accessors
+                                                .clone()
+                                                .into_iter()
+                                                .chain(std::iter::once(accessor))
+                                                .collect(),
+                                            Some(property_schema),
+                                            toml_version,
+                                            position,
+                                            &keys[1..],
+                                            schema_url,
+                                            Some(definitions),
+                                            completion_hint,
+                                        )
+                                    },
+                                    definitions,
+                                )
+                            {
+                                return completion_items;
                             }
                         }
                     }
