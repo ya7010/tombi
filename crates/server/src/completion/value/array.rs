@@ -26,7 +26,11 @@ impl FindCompletionContents for document_tree::Array {
                     unreachable!("definitions must be provided");
                 };
 
+                let mut new_item_index = 0;
                 for (index, value) in self.values().iter().enumerate() {
+                    if value.range().end() < position {
+                        new_item_index = index + 1;
+                    }
                     if value.range().contains(position) {
                         let accessor = Accessor::Index(index);
                         if let Some(completion_items) = array_schema.operate_item(
@@ -52,6 +56,28 @@ impl FindCompletionContents for document_tree::Array {
                         }
                     }
                 }
+                if let Some(completion_items) = array_schema.operate_item(
+                    |item_schema| {
+                        item_schema.find_completion_contents(
+                            &accessors
+                                .clone()
+                                .into_iter()
+                                .chain(std::iter::once(Accessor::Index(new_item_index)))
+                                .collect(),
+                            Some(item_schema),
+                            toml_version,
+                            position,
+                            keys,
+                            schema_url,
+                            Some(definitions),
+                            completion_hint,
+                        )
+                    },
+                    definitions,
+                ) {
+                    return completion_items;
+                }
+
                 Vec::with_capacity(0)
             }
             Some(ValueSchema::OneOf(one_of_schema)) => find_one_of_completion_items(
