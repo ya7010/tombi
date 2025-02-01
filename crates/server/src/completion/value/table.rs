@@ -195,7 +195,9 @@ impl FindCompletionContents for document_tree::Table {
                             completion_hint,
                         );
 
-                        if !completion_contents.is_empty()
+                        if false
+                            && !completion_contents.is_empty()
+                            && matches!(value, document_tree::Value::Incomplete { .. })
                             && matches!(
                                 completion_hint,
                                 Some(

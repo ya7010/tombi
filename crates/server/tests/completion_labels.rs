@@ -299,6 +299,7 @@ test_completion_labels! {
     ) -> Ok([
         format!("\"{}\"", DEFAULT_CATALOG_URL),
         "\"\"",
+        "''",
         "[]",
     ]);
 }
@@ -314,6 +315,7 @@ test_completion_labels! {
     ) -> Ok([
         format!("\"{}\"", DEFAULT_CATALOG_URL),
         "\"\"",
+        "''",
         "[]",
     ]);
 }
@@ -328,6 +330,7 @@ test_completion_labels! {
     ) -> Ok([
         format!("\"{}\"", DEFAULT_CATALOG_URL),
         "\"\"",
+        "''",
         "[]",
     ]);
 }
@@ -495,6 +498,7 @@ test_completion_labels! {
         "key.█"
     ) -> Ok([
         "\"\"",
+        "''",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -504,7 +508,6 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
-        "{}",
     ]);
 }
 
@@ -514,6 +517,7 @@ test_completion_labels! {
         "key=█"
     ) -> Ok([
         "\"\"",
+        "''",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -523,7 +527,6 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
-        "{}",
     ]);
 }
 
@@ -533,6 +536,7 @@ test_completion_labels! {
         "key1.key2.█"
     ) -> Ok([
         "\"\"",
+        "''",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -542,7 +546,6 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
-        "{}",
     ]);
 }
 
@@ -552,6 +555,7 @@ test_completion_labels! {
         "key1.key2=█"
     ) -> Ok([
         "\"\"",
+        "''",
         today_local_time(),
         today_local_date(),
         today_local_date_time(),
@@ -561,6 +565,5 @@ test_completion_labels! {
         "[]",
         "false",
         "true",
-        "{}",
     ]);
 }
