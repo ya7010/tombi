@@ -337,20 +337,7 @@ mod completion_labels {
                 field=█
                 "#,
                 pyproject_schema_path(),
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
@@ -361,20 +348,7 @@ mod completion_labels {
                 field = [█]
                 "#,
                 pyproject_schema_path(),
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
     }
 
@@ -447,100 +421,35 @@ mod completion_labels {
             #[tokio::test]
             async fn key_dot(
                 "key.█"
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
             #[tokio::test]
             async fn key_equal(
                 "key=█"
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
             #[tokio::test]
             async fn keys_dot(
                 "key1.key2.█"
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
             #[tokio::test]
             async fn keys_equal(
                 "key1.key2=█"
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
             #[tokio::test]
             async fn keys_equal_array(
                 "key1= [█]"
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
@@ -557,20 +466,7 @@ mod completion_labels {
             #[tokio::test]
             async fn aaa_equal_array_bbb(
                 "aaa = [bbb█]"
-            ) -> Ok([
-                "\"\"",
-                "''",
-                today_local_time(),
-                today_local_date(),
-                today_local_date_time(),
-                today_offset_date_time(),
-                "3.14",
-                "42",
-                "[]",
-                "{}",
-                "true",
-                "false",
-            ]);
+            ) -> Ok(AnyValue);
         }
 
         test_completion_labels! {
@@ -584,6 +480,16 @@ mod completion_labels {
                 ".",
                 "=",
             ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn aaa_bbb_double_bracket_ccc_equal(
+                r#"
+                [[aaa.bbb]]
+                ccc=█
+                "#
+            ) -> Ok(AnyValue);
         }
     }
 }
@@ -618,6 +524,66 @@ macro_rules! test_completion_labels {
                 $source,
                 Option::<std::path::PathBuf>::None,
             ) -> Ok([$($label),*]);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok(AnyValue);
+    ) => {
+        test_completion_labels! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                Some($schema_file_path),
+            ) -> Ok(AnyValue);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr$(,)?
+        ) -> Ok(AnyValue);
+    ) => {
+        test_completion_labels! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                Option::<std::path::PathBuf>::None,
+            ) -> Ok(AnyValue);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn _$name:ident(
+            $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok(AnyValue);
+    ) => {
+        test_completion_labels! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                $schema_file_path,
+            ) -> Ok([
+                "\"\"",
+                "''",
+                today_local_time(),
+                today_local_date(),
+                today_local_date_time(),
+                today_offset_date_time(),
+                "3.14",
+                "42",
+                "[]",
+                "{}",
+                "true",
+                "false",
+            ]);
         }
     };
 
