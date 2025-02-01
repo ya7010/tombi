@@ -97,7 +97,7 @@ impl FindCompletionContents for document_tree::Table {
                                             &accessors
                                                 .clone()
                                                 .into_iter()
-                                                .chain(std::iter::once(accessor))
+                                                .chain(std::iter::once(accessor.clone()))
                                                 .collect(),
                                             Some(property_schema),
                                             toml_version,
@@ -112,6 +112,23 @@ impl FindCompletionContents for document_tree::Table {
                                 )
                             {
                                 return completion_items;
+                            }
+
+                            if table_schema.additional_properties {
+                                return value.find_completion_contents(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    None,
+                                    toml_version,
+                                    position,
+                                    &keys[1..],
+                                    schema_url,
+                                    Some(definitions),
+                                    completion_hint,
+                                );
                             }
                         }
                     }
