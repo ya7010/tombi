@@ -2,6 +2,7 @@ mod completion_content;
 mod completion_edit;
 mod completion_kind;
 mod hint;
+mod schema_completion;
 mod value;
 
 use std::ops::Deref;

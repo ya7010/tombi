@@ -1,4 +1,7 @@
-use crate::completion::{completion_kind::CompletionKind, CompletionContent, CompletionEdit};
+use crate::completion::{
+    completion_kind::CompletionKind, schema_completion::SchemaCompletion, CompletionContent,
+    CompletionEdit,
+};
 
 use super::{
     all_of::find_all_if_completion_items, any_of::find_any_of_completion_items,
@@ -58,7 +61,7 @@ impl FindCompletionContents for document_tree::Array {
                 }
                 if let Some(completion_items) = array_schema.operate_item(
                     |item_schema| {
-                        item_schema.find_completion_contents(
+                        SchemaCompletion.find_completion_contents(
                             &accessors
                                 .clone()
                                 .into_iter()
