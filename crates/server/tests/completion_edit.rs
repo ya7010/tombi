@@ -222,89 +222,100 @@ macro_rules! test_completion_edit {
     };
 }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn tombi_server_completion_dot(
-        r#"
+mod tombi_schema {
+    use super::*;
+
+    test_completion_edit! {
+        #[tokio::test]
+        async fn tombi_server_completion_dot(
+            r#"
         [server]
         completion.█
         "#,
-        Select("enabled"),
-        tombi_schema_path(),
-    ) -> Ok(
-        r#"
+            Select("enabled"),
+            tombi_schema_path(),
+        ) -> Ok(
+            r#"
         [server]
         completion.enabled
         "#
-    );
-}
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn tombi_server_completion_equal(
-        r#"
+    test_completion_edit! {
+        #[tokio::test]
+        async fn tombi_server_completion_equal(
+            r#"
         [server]
         completion=█
         "#,
-        Select("enabled"),
-        tombi_schema_path(),
-    ) -> Ok(
-        r#"
+            Select("enabled"),
+            tombi_schema_path(),
+        ) -> Ok(
+            r#"
         [server]
         completion = { enabled$1 }$0
         "#
-    );
+        );
+    }
 }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn cargo_package_version(
-        r#"
+mod cargo_schema {
+    use super::*;
+
+    test_completion_edit! {
+        #[tokio::test]
+        async fn cargo_package_version(
+            r#"
         [package]
         version=█
         "#,
-        Select("\"0.1.0\""),
-        cargo_schema_path(),
-    ) -> Ok(
-        r#"
+            Select("\"0.1.0\""),
+            cargo_schema_path(),
+        ) -> Ok(
+            r#"
         [package]
         version = "0.1.0"
         "#
-    );
+        );
+    }
 }
+mod pyproject_schema {
+    use super::*;
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn pyproject_project_authors_dot(
-        r#"
+    test_completion_edit! {
+        #[tokio::test]
+        async fn pyproject_project_authors_dot(
+            r#"
         [project]
         authors.█
         "#,
-        Select("[]"),
-        pyproject_schema_path(),
-    ) -> Ok(
-        r#"
+            Select("[]"),
+            pyproject_schema_path(),
+        ) -> Ok(
+            r#"
         [project]
         authors = [$1]$0
         "#
-    );
-}
+        );
+    }
 
-test_completion_edit! {
-    #[tokio::test]
-    async fn pyproject_project_authors_equal(
-        r#"
+    test_completion_edit! {
+        #[tokio::test]
+        async fn pyproject_project_authors_equal(
+            r#"
         [project]
         authors=█
         "#,
-        Select("[]"),
-        pyproject_schema_path(),
-    ) -> Ok(
-        r#"
+            Select("[]"),
+            pyproject_schema_path(),
+        ) -> Ok(
+            r#"
         [project]
         authors = [$1]$0
         "#
-    );
+        );
+    }
 }
 
 mod without_schema {
