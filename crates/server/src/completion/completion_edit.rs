@@ -130,7 +130,6 @@ impl CompletionEdit {
         match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. }
                 | CompletionHint::SpaceTrigger { range, .. },
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
@@ -143,7 +142,8 @@ impl CompletionEdit {
                     new_text: "".to_string(),
                 }]),
             }),
-            Some(CompletionHint::InTableHeader) | None => Some(Self {
+            Some(CompletionHint::InTableHeader) => None,
+            Some(CompletionHint::EqualTrigger { .. }) | None => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: "{ $1 }$0".to_string(),

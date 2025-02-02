@@ -337,6 +337,13 @@ impl FindCompletionContents for TableSchema {
                 }
             }
         }
+
+        completion_items.push(CompletionContent::new_type_hint_inline_table(
+            position,
+            schema_url,
+            completion_hint,
+        ));
+
         completion_items
     }
 }
