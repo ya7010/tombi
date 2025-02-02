@@ -29,17 +29,17 @@ pub fn get_completion_contents(
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        // tracing::debug!("node: {:?}", node);
-        // tracing::debug!(
-        //     "prev_sibling_or_token(): {:?}",
-        //     node.prev_sibling_or_token()
-        // );
-        // tracing::debug!(
-        //     "next_sibling_or_token(): {:?}",
-        //     node.next_sibling_or_token()
-        // );
-        // tracing::debug!("first_child_or_token(): {:?}", node.first_child_or_token());
-        // tracing::debug!("last_child_or_token(): {:?}", node.last_child_or_token());
+        tracing::trace!("node: {:?}", node);
+        tracing::trace!(
+            "prev_sibling_or_token(): {:?}",
+            node.prev_sibling_or_token()
+        );
+        tracing::trace!(
+            "next_sibling_or_token(): {:?}",
+            node.next_sibling_or_token()
+        );
+        tracing::trace!("first_child_or_token(): {:?}", node.first_child_or_token());
+        tracing::trace!("last_child_or_token(): {:?}", node.last_child_or_token());
 
         let ast_keys = if ast::Keys::cast(node.to_owned()).is_some() {
             match node.last_child_or_token() {
