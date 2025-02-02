@@ -79,7 +79,7 @@ impl FindCompletionContents for document_tree::Array {
                             keys,
                             schema_url,
                             Some(definitions),
-                            completion_hint,
+                            Some(CompletionHint::InArray),
                         )
                     },
                     definitions,

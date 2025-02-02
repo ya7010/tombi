@@ -81,7 +81,7 @@ impl CompletionEdit {
                     new_text: "".to_string(),
                 }]),
             }),
-            Some(CompletionHint::InTableHeader) | None => Some(Self {
+            Some(CompletionHint::InArray | CompletionHint::InTableHeader) | None => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!("{quote}$1{quote}$0"),
@@ -112,7 +112,7 @@ impl CompletionEdit {
                     new_text: "".to_string(),
                 }]),
             }),
-            Some(CompletionHint::InTableHeader) | None => Some(Self {
+            Some(CompletionHint::InArray | CompletionHint::InTableHeader) | None => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: "[$1]$0".to_string(),
@@ -143,14 +143,16 @@ impl CompletionEdit {
                 }]),
             }),
             Some(CompletionHint::InTableHeader) => None,
-            Some(CompletionHint::EqualTrigger { .. }) | None => Some(Self {
-                insert_text_format: Some(InsertTextFormat::SNIPPET),
-                text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: "{ $1 }$0".to_string(),
-                    range: text::Range::at(position).into(),
-                }),
-                additional_text_edits: None,
-            }),
+            Some(CompletionHint::InArray | CompletionHint::EqualTrigger { .. }) | None => {
+                Some(Self {
+                    insert_text_format: Some(InsertTextFormat::SNIPPET),
+                    text_edit: CompletionTextEdit::Edit(TextEdit {
+                        new_text: "{ $1 }$0".to_string(),
+                        range: text::Range::at(position).into(),
+                    }),
+                    additional_text_edits: None,
+                })
+            }
         }
     }
 
@@ -160,6 +162,14 @@ impl CompletionEdit {
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
+            Some(CompletionHint::InArray) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!("{{ {property_name}$1 }}$0"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
             Some(
                 CompletionHint::SpaceTrigger { range, .. }
                 | CompletionHint::EqualTrigger { range, .. },

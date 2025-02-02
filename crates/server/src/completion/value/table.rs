@@ -389,7 +389,8 @@ fn get_property_value_completion_contents(
     if keys.len() == 1 {
         match completion_hint {
             Some(
-                CompletionHint::DotTrigger { .. }
+                CompletionHint::InArray
+                | CompletionHint::DotTrigger { .. }
                 | CompletionHint::EqualTrigger { .. }
                 | CompletionHint::SpaceTrigger { .. },
             ) => {

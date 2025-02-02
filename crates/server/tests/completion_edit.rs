@@ -156,6 +156,40 @@ mod completion_edit {
 
         test_completion_edit! {
             #[tokio::test]
+            async fn pyproject_dependency_groups_dev_eq_array_select_single_quote(
+                r#"
+                [dependency-groups]
+                dev=[█]
+                "#,
+                Select("''"),
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependency-groups]
+                dev=['$1'$0]
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn pyproject_dependency_groups_dev_eq_array_select_include_group(
+                r#"
+                [dependency-groups]
+                dev=[█]
+                "#,
+                Select("include-group"),
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependency-groups]
+                dev=[{ include-group$1 }$0]
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
             async fn pyproject_tool_mytool_key_select_dot(
                 r#"
                 [tool.mytool]
