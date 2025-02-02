@@ -313,6 +313,22 @@ mod completion_labels {
                 "completion",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_schemars(
+                r#"
+                [[schemas]]
+                █
+                "#,
+                tombi_schema_path(),
+            ) -> Ok([
+                "include",
+                "path",
+                "toml-version",
+                "{}",
+            ]);
+        }
     }
 
     mod pyproject_schema {
