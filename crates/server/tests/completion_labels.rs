@@ -326,7 +326,6 @@ mod completion_labels {
                 "include",
                 "path",
                 "toml-version",
-                "{}",
             ]);
         }
 
