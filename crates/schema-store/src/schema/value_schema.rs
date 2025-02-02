@@ -359,20 +359,6 @@ impl FindSchemaCandidates for ValueSchema {
         definitions: &SchemaDefinitions,
     ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
         match self {
-            Self::Table(table) => {
-                if accessors.is_empty() {
-                    (vec![self.clone()], Vec::with_capacity(0))
-                } else {
-                    table.find_schema_candidates(&accessors[1..], definitions)
-                }
-            }
-            Self::Array(array) => {
-                if accessors.is_empty() {
-                    (vec![self.clone()], Vec::with_capacity(0))
-                } else {
-                    array.find_schema_candidates(accessors, definitions)
-                }
-            }
             Self::OneOf(OneOfSchema {
                 title,
                 description,

@@ -84,7 +84,7 @@ impl FindCompletionContents for document_tree::Table {
                                     for schema_candidate in schema_candidates {
                                         if let Some(CompletionHint::InTableHeader) = completion_hint
                                         {
-                                            if count_header_table_or_array(
+                                            if count_table_or_array_schema(
                                                 value_schema,
                                                 definitions,
                                             ) == 0
@@ -182,12 +182,37 @@ impl FindCompletionContents for document_tree::Table {
                         }
                     }
                 } else {
-                    for mut property in table_schema.properties.iter_mut() {
-                        let label = property.key().to_string();
-                        let key = self
-                            .keys()
-                            .last()
-                            .filter(|k| label == k.to_raw_text(toml_version));
+                    'property: for mut property in table_schema.properties.iter_mut() {
+                        let schema_key_str = &property.key().to_string();
+
+                        for (key, value) in self.key_values() {
+                            if key.value() == schema_key_str {
+                                match value {
+                                    document_tree::Value::Boolean(_)
+                                    | document_tree::Value::Integer(_)
+                                    | document_tree::Value::Float(_)
+                                    | document_tree::Value::String(_)
+                                    | document_tree::Value::OffsetDateTime(_)
+                                    | document_tree::Value::LocalDateTime(_)
+                                    | document_tree::Value::LocalDate(_)
+                                    | document_tree::Value::LocalTime(_) => {
+                                        continue 'property;
+                                    }
+                                    document_tree::Value::Array(array) => {
+                                        if array.kind() == document_tree::ArrayKind::Array {
+                                            continue 'property;
+                                        }
+                                    }
+                                    document_tree::Value::Table(table) => {
+                                        if table.kind() == document_tree::TableKind::InlineTable {
+                                            continue 'property;
+                                        }
+                                    }
+                                    document_tree::Value::Incomplete { .. } => {}
+                                }
+                            }
+                        }
+
                         if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                             let (schema_candidates, errors) =
                                 value_schema.find_schema_candidates(accessors, definitions);
@@ -195,37 +220,54 @@ impl FindCompletionContents for document_tree::Table {
                             for error in errors {
                                 tracing::error!("{}", error);
                             }
-
                             for schema_candidate in schema_candidates {
-                                if let Some(CompletionHint::InTableHeader) = completion_hint {
-                                    if count_header_table_or_array(value_schema, definitions) == 0 {
-                                        continue;
-                                    }
-                                }
-                                if let Some(key) = key {
-                                    if let Some(value) = self.get(key) {
-                                        match value {
-                                            document_tree::Value::Boolean(_)
-                                            | document_tree::Value::Integer(_)
-                                            | document_tree::Value::Float(_)
-                                            | document_tree::Value::String(_)
-                                            | document_tree::Value::OffsetDateTime(_)
-                                            | document_tree::Value::LocalDateTime(_)
-                                            | document_tree::Value::LocalDate(_)
-                                            | document_tree::Value::LocalTime(_) => continue,
-                                            document_tree::Value::Array(_)
-                                            | document_tree::Value::Table(_)
-                                            | document_tree::Value::Incomplete { .. } => {}
+                                match schema_candidate {
+                                    ValueSchema::Boolean(_)
+                                    | ValueSchema::Integer(_)
+                                    | ValueSchema::Float(_)
+                                    | ValueSchema::String(_)
+                                    | ValueSchema::OffsetDateTime(_)
+                                    | ValueSchema::LocalDateTime(_)
+                                    | ValueSchema::LocalDate(_)
+                                    | ValueSchema::LocalTime(_) => {
+                                        if matches!(
+                                            completion_hint,
+                                            Some(CompletionHint::InTableHeader)
+                                        ) || self.keys().any(|k| k.value() == schema_key_str)
+                                        {
+                                            continue 'property;
                                         }
+                                    }
+                                    ValueSchema::Array(_) | ValueSchema::Table(_) => {
+                                        if matches!(
+                                            completion_hint,
+                                            Some(CompletionHint::InTableHeader)
+                                        ) && count_table_or_array_schema(
+                                            value_schema,
+                                            definitions,
+                                        ) == 0
+                                        {
+                                            continue 'property;
+                                        }
+                                    }
+                                    ValueSchema::Null
+                                    | ValueSchema::OneOf(_)
+                                    | ValueSchema::AnyOf(_)
+                                    | ValueSchema::AllOf(_) => {
+                                        unreachable!("Null, OneOf, AnyOf, and AllOf are not allowed in table schema");
                                     }
                                 }
 
                                 completion_contents.push(CompletionContent::new_property(
-                                    label.clone(),
+                                    schema_key_str.to_string(),
                                     schema_candidate.detail(definitions, completion_hint),
                                     schema_candidate.documentation(definitions, completion_hint),
                                     table_schema.required.as_ref(),
-                                    CompletionEdit::new_propery(&label, position, completion_hint),
+                                    CompletionEdit::new_propery(
+                                        &schema_key_str,
+                                        position,
+                                        completion_hint,
+                                    ),
                                     schema_url,
                                 ));
                             }
@@ -324,7 +366,7 @@ impl FindCompletionContents for TableSchema {
 
                 for schema_candidate in schema_candidates {
                     if let Some(CompletionHint::InTableHeader) = completion_hint {
-                        if count_header_table_or_array(value_schema, definitions) == 0 {
+                        if count_table_or_array_schema(value_schema, definitions) == 0 {
                             continue;
                         }
                     }
@@ -351,16 +393,12 @@ impl FindCompletionContents for TableSchema {
     }
 }
 
-fn table_or_array(value_schema: &ValueSchema) -> bool {
-    matches!(value_schema, ValueSchema::Table(_) | ValueSchema::Array(_))
-}
-
-fn count_header_table_or_array(
+fn count_table_or_array_schema(
     value_schema: &ValueSchema,
     definitions: &SchemaDefinitions,
 ) -> usize {
     value_schema
-        .match_schemas(&table_or_array)
+        .match_schemas(&|schema| matches!(schema, ValueSchema::Table(_) | ValueSchema::Array(_)))
         .into_iter()
         .filter(|schema| match schema {
             ValueSchema::Array(array_schema) => array_schema
@@ -403,7 +441,7 @@ fn get_property_value_completion_contents(
             }
             Some(CompletionHint::InTableHeader) => {
                 if let (Some(value_schema), Some(definitions)) = (value_schema, definitions) {
-                    if count_header_table_or_array(value_schema, definitions) == 0 {
+                    if count_table_or_array_schema(value_schema, definitions) == 0 {
                         return Vec::with_capacity(0);
                     }
                 }

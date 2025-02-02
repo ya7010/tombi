@@ -376,13 +376,33 @@ mod completion_labels {
                 "dependencies",
                 "description",
                 "dynamic",
+                "entry-points",
+                "gui-scripts",
                 "keywords",
                 "license",
                 "license-files",
                 "maintainers",
+                "optional-dependencies",
                 "readme",
                 "requires-python",
+                "scripts",
+                "urls",
                 "version",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn pyproject_build_system(
+                r#"
+                [build-system]
+                requires = ["maturin>=1.5,<2.0"]
+                build-backend = "maturin"
+                █
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok([
+                "backend-path",
             ]);
         }
 
