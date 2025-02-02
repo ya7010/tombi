@@ -38,10 +38,10 @@ impl crate::Array {
     pub fn values_with_comma(&self) -> impl Iterator<Item = (crate::Value, Option<crate::Comma>)> {
         self.values()
             .zip_longest(support::node::children::<crate::Comma>(self.syntax()))
-            .map(|value_with_comma| match value_with_comma {
-                itertools::EitherOrBoth::Both(value, comma) => (value, Some(comma)),
-                itertools::EitherOrBoth::Left(value) => (value, None),
-                itertools::EitherOrBoth::Right(_) => unreachable!(),
+            .filter_map(|value_with_comma| match value_with_comma {
+                itertools::EitherOrBoth::Both(value, comma) => Some((value, Some(comma))),
+                itertools::EitherOrBoth::Left(value) => Some((value, None)),
+                itertools::EitherOrBoth::Right(_) => None,
             })
     }
 
@@ -56,10 +56,12 @@ impl crate::Array {
     ) -> impl Iterator<Item = (crate::ValueOrKeyValue, Option<crate::Comma>)> {
         self.value_or_key_values()
             .zip_longest(support::node::children::<crate::Comma>(self.syntax()))
-            .map(|value_or_key_with_comma| match value_or_key_with_comma {
-                itertools::EitherOrBoth::Both(value_or_key, comma) => (value_or_key, Some(comma)),
-                itertools::EitherOrBoth::Left(value_or_key) => (value_or_key, None),
-                itertools::EitherOrBoth::Right(_) => unreachable!(),
+            .filter_map(|value_or_key_with_comma| match value_or_key_with_comma {
+                itertools::EitherOrBoth::Both(value_or_key, comma) => {
+                    Some((value_or_key, Some(comma)))
+                }
+                itertools::EitherOrBoth::Left(value_or_key) => Some((value_or_key, None)),
+                itertools::EitherOrBoth::Right(_) => None,
             })
     }
 
