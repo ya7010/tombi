@@ -329,6 +329,20 @@ mod completion_labels {
                 "{}",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_schemars_path(
+                r#"
+                [[schemas]]
+                path.█
+                "#,
+                tombi_schema_path(),
+            ) -> Ok([
+                "\"\"",
+                "''",
+            ]);
+        }
     }
 
     mod pyproject_schema {

@@ -8,6 +8,7 @@ use super::{
     one_of::find_one_of_completion_items, type_hint_value, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
+use document_tree::ArrayKind;
 use schema_store::{Accessor, ArraySchema, SchemaDefinitions, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
@@ -40,7 +41,7 @@ impl FindCompletionContents for document_tree::Array {
                     if value.range().end() < position {
                         new_item_index = index + 1;
                     }
-                    if value.range().contains(position) {
+                    if value.range().contains(position) || value.range().end() == position {
                         let accessor = Accessor::Index(index);
                         if let Some(completion_items) = array_schema.operate_item(
                             |item_schema| {
@@ -79,7 +80,11 @@ impl FindCompletionContents for document_tree::Array {
                             keys,
                             schema_url,
                             Some(definitions),
-                            Some(CompletionHint::InArray),
+                            if self.kind() == ArrayKind::Array {
+                                Some(CompletionHint::InArray)
+                            } else {
+                                completion_hint
+                            },
                         )
                     },
                     definitions,
