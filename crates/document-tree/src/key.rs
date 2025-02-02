@@ -17,6 +17,12 @@ pub struct Key {
     range: text::Range,
 }
 
+impl std::borrow::Borrow<String> for Key {
+    fn borrow(&self) -> &String {
+        &self.value
+    }
+}
+
 impl Key {
     pub fn try_new(
         kind: KeyKind,

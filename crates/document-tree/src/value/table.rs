@@ -247,11 +247,17 @@ impl Table {
         self.key_values.entry(key)
     }
 
-    pub fn get(&self, key: &Key) -> Option<&Value> {
+    pub fn get<K>(&self, key: &K) -> Option<&Value>
+    where
+        K: std::hash::Hash + indexmap::Equivalent<Key>,
+    {
         self.key_values.get(key)
     }
 
-    pub fn get_mut(&mut self, key: &Key) -> Option<&mut Value> {
+    pub fn get_mut<K>(&mut self, key: &K) -> Option<&mut Value>
+    where
+        K: std::hash::Hash + indexmap::Equivalent<Key>,
+    {
         self.key_values.get_mut(key)
     }
 

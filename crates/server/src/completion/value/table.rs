@@ -185,31 +185,29 @@ impl FindCompletionContents for document_tree::Table {
                     'property: for mut property in table_schema.properties.iter_mut() {
                         let schema_key_str = &property.key().to_string();
 
-                        for (key, value) in self.key_values() {
-                            if key.value() == schema_key_str {
-                                match value {
-                                    document_tree::Value::Boolean(_)
-                                    | document_tree::Value::Integer(_)
-                                    | document_tree::Value::Float(_)
-                                    | document_tree::Value::String(_)
-                                    | document_tree::Value::OffsetDateTime(_)
-                                    | document_tree::Value::LocalDateTime(_)
-                                    | document_tree::Value::LocalDate(_)
-                                    | document_tree::Value::LocalTime(_) => {
+                        if let Some(value) = self.get(schema_key_str) {
+                            match value {
+                                document_tree::Value::Boolean(_)
+                                | document_tree::Value::Integer(_)
+                                | document_tree::Value::Float(_)
+                                | document_tree::Value::String(_)
+                                | document_tree::Value::OffsetDateTime(_)
+                                | document_tree::Value::LocalDateTime(_)
+                                | document_tree::Value::LocalDate(_)
+                                | document_tree::Value::LocalTime(_) => {
+                                    continue 'property;
+                                }
+                                document_tree::Value::Array(array) => {
+                                    if array.kind() == document_tree::ArrayKind::Array {
                                         continue 'property;
                                     }
-                                    document_tree::Value::Array(array) => {
-                                        if array.kind() == document_tree::ArrayKind::Array {
-                                            continue 'property;
-                                        }
-                                    }
-                                    document_tree::Value::Table(table) => {
-                                        if table.kind() == document_tree::TableKind::InlineTable {
-                                            continue 'property;
-                                        }
-                                    }
-                                    document_tree::Value::Incomplete { .. } => {}
                                 }
+                                document_tree::Value::Table(table) => {
+                                    if table.kind() == document_tree::TableKind::InlineTable {
+                                        continue 'property;
+                                    }
+                                }
+                                document_tree::Value::Incomplete { .. } => {}
                             }
                         }
 
@@ -233,7 +231,7 @@ impl FindCompletionContents for document_tree::Table {
                                         if matches!(
                                             completion_hint,
                                             Some(CompletionHint::InTableHeader)
-                                        ) || self.keys().any(|k| k.value() == schema_key_str)
+                                        ) || self.get(schema_key_str).is_some()
                                         {
                                             continue 'property;
                                         }
@@ -255,13 +253,8 @@ impl FindCompletionContents for document_tree::Table {
                                                 && table_schema.pattern_properties.is_none()
                                             {
                                                 if table_schema.properties.iter().all(|property| {
-                                                    for key in self.keys() {
-                                                        if key.value() == property.key().to_string()
-                                                        {
-                                                            return true;
-                                                        }
-                                                    }
-                                                    false
+                                                    let key_str = &property.key().to_string();
+                                                    self.get(key_str).is_some()
                                                 }) {
                                                     continue 'property;
                                                 }
