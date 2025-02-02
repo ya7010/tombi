@@ -130,10 +130,50 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_schema_catalog(
+            async fn tombi_schema_catalog_dot_on_header(
                 "[schema.catalog.█]",
                 tombi_schema_path(),
             ) -> Ok([]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_schema_catalog(
+                r#"
+                [schema]
+                catalog█
+                "#,
+                tombi_schema_path(),
+            ) -> Ok([
+                ".",
+                "=",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_server_completion_dot(
+                r#"
+                [server]
+                completion.█
+                "#,
+                tombi_schema_path(),
+            ) -> Ok([
+                "enabled",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_server_completion_equal(
+                r#"
+                [server]
+                completion=█
+                "#,
+                tombi_schema_path(),
+            ) -> Ok([
+                "enabled",
+            ]);
         }
 
         test_completion_labels! {

@@ -38,7 +38,18 @@ impl FindCompletionContents for document_tree::Table {
                     let accessor_str = &key.to_raw_text(toml_version);
                     if let Some(value) = self.get(key) {
                         let accessor = Accessor::Key(accessor_str.to_string());
+
                         if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                            if matches!(value, document_tree::Value::Incomplete { .. })
+                                && completion_hint.is_none()
+                            {
+                                return CompletionContent::new_magic_triggers(
+                                    &accessor_str,
+                                    position,
+                                    schema_url,
+                                );
+                            }
+
                             if let Ok(property_schema) = property.value_mut().resolve(definitions) {
                                 return value.find_completion_contents(
                                     &accessors
