@@ -153,6 +153,40 @@ mod completion_edit {
                 "#
             );
         }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn pyproject_tool_mytool_key_select_dot(
+                r#"
+                [tool.mytool]
+                key█
+                "#,
+                Select("."),
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [tool.mytool]
+                key.
+                "#
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn pyproject_tool_mytool_key_select_equal(
+                r#"
+                [tool.mytool]
+                key█
+                "#,
+                Select("="),
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [tool.mytool]
+                key=
+                "#
+            );
+        }
     }
 
     mod without_schema {
@@ -487,7 +521,7 @@ macro_rules! test_completion_edit {
             )
             .await;
 
-            let Ok(Some(completions)) = server::handler::handle_completion(
+            let Ok(Some(completion_contents)) = server::handler::handle_completion(
                 &backend,
                 tower_lsp::lsp_types::CompletionParams {
                     text_document_position: tower_lsp::lsp_types::TextDocumentPositionParams {
@@ -510,7 +544,7 @@ macro_rules! test_completion_edit {
             let selected = $select.0;
             let selected: &str = selected.as_ref();
 
-            let Some(completion) = completions
+            let Some(completion_content) = completion_contents
                 .clone()
                 .into_iter()
                 .find(|content| content.label == selected)
@@ -519,7 +553,7 @@ macro_rules! test_completion_edit {
                         format!(
                             "failed to find the selected completion item \"{}\" in [{}]",
                             selected,
-                            completions
+                            completion_contents
                                 .iter()
                                 .map(|content| content.label.as_str())
                                 .collect::<Vec<&str>>()
@@ -528,10 +562,10 @@ macro_rules! test_completion_edit {
                     );
                 };
 
-            let Some(completion_edit) = completion.edit else {
+            let Some(completion_edit) = completion_content.edit else {
                 return Err(
                     format!(
-                        "failed to get the edit of the selected completion item: {}",
+                        "failed to get the edit of the selected completion item {}",
                         selected
                     ).into()
                 );

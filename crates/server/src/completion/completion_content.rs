@@ -196,20 +196,20 @@ impl CompletionContent {
 
     pub fn new_magic_triggers(
         key: &str,
-        edit: Option<CompletionEdit>,
+        position: text::Position,
         schema_url: Option<&Url>,
     ) -> Vec<Self> {
         [(".", "Dot Trigger"), ("=", "Equal Trigger")]
             .into_iter()
-            .map(|(operator, detail)| Self {
-                label: operator.to_string(),
+            .map(|(trigger, detail)| Self {
+                label: trigger.to_string(),
                 kind: CompletionKind::MagicTrigger,
                 emoji_icon: Some('🦅'),
                 priority: CompletionPriority::TypeHint,
                 detail: Some(detail.to_string()),
                 documentation: None,
-                filter_text: Some(format!("{key}{operator}")),
-                edit: edit.clone(),
+                filter_text: Some(format!("{key}{trigger}")),
+                edit: CompletionEdit::new_magic_trigger(trigger, position),
                 schema_url: schema_url.cloned(),
                 preselect: None,
             })

@@ -188,4 +188,15 @@ impl CompletionEdit {
             Some(CompletionHint::InTableHeader) | None => None,
         }
     }
+
+    pub fn new_magic_trigger(trigger: &str, position: text::Position) -> Option<Self> {
+        Some(Self {
+            insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
+            text_edit: CompletionTextEdit::Edit(TextEdit {
+                new_text: format!("{trigger}"),
+                range: text::Range::at(position).into(),
+            }),
+            additional_text_edits: None,
+        })
+    }
 }

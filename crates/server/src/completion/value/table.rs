@@ -239,7 +239,7 @@ impl FindCompletionContents for document_tree::Table {
                                 if matches!(value, document_tree::Value::Incomplete { .. }) {
                                     return CompletionContent::new_magic_triggers(
                                         &accessor_string,
-                                        None,
+                                        position,
                                         schema_url,
                                     );
                                 } else {
@@ -378,7 +378,11 @@ fn get_property_value_completion_contents(
             }
             None => {
                 if matches!(value, document_tree::Value::Incomplete { .. }) {
-                    return CompletionContent::new_magic_triggers(&accessor_str, None, schema_url);
+                    return CompletionContent::new_magic_triggers(
+                        &accessor_str,
+                        position,
+                        schema_url,
+                    );
                 }
             }
         }
