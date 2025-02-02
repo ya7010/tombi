@@ -6,10 +6,10 @@ export function clientOptions(
   workspaceFolder?: vscode.WorkspaceFolder,
 ): languageclient.LanguageClientOptions {
   const options = {
-    documentSelector: SUPPORT_TOML_LANGUAGES.map((language) => ({
-      scheme: "file",
-      language,
-    })),
+    documentSelector: SUPPORT_TOML_LANGUAGES.flatMap((language) => [
+      { scheme: "file", language },
+      { scheme: "untitled", language },
+    ]),
     workspaceFolder,
     synchronize: {
       // Notify the server about file changes to tombi.toml and JSON files contained in the workspace

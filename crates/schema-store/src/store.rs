@@ -192,6 +192,7 @@ impl SchemaStore {
                         })?;
                 self.try_get_schema_from_path(&source_path).await
             }
+            "untitled" => Ok(None),
             _ => Err(crate::Error::SourceUrlUnsupported {
                 source_url: source_url.to_owned(),
             }),
