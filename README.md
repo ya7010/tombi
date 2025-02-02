@@ -126,7 +126,7 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 | Float | `key.█` | `3.14` | `key = ${█:3.14}` |
 | String | `key.█` | `""` | `key = "█"` |
 | Array | `key.█` | `[]` | `key = [█]` |
-| Table  | `server.█` | `completion` | `server.completion = █` |
+| Table  | `server.█` | `completion` | `server.completion█` |
 
 #### Equal Trigger Completion
 
