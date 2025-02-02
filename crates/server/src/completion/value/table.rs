@@ -35,9 +35,9 @@ impl FindCompletionContents for document_tree::Table {
                 let mut completion_contents = Vec::new();
 
                 if let Some(key) = keys.first() {
-                    let accessor_string = key.to_raw_text(toml_version);
-                    let accessor = Accessor::Key(accessor_string.clone());
+                    let accessor_str = &key.to_raw_text(toml_version);
                     if let Some(value) = self.get(key) {
+                        let accessor = Accessor::Key(accessor_str.to_string());
                         if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                             if let Ok(property_schema) = property.value_mut().resolve(definitions) {
                                 return value.find_completion_contents(
@@ -58,7 +58,7 @@ impl FindCompletionContents for document_tree::Table {
                         } else if keys.len() == 1 {
                             for mut property in table_schema.properties.iter_mut() {
                                 let label = property.key().to_string();
-                                if !label.starts_with(accessor_string.as_str()) {
+                                if !label.starts_with(accessor_str.as_str()) {
                                     continue;
                                 }
                                 if let Ok(value_schema) = property.value_mut().resolve(definitions)
@@ -100,17 +100,15 @@ impl FindCompletionContents for document_tree::Table {
                         if completion_contents.is_empty() {
                             if let Some(completion_items) = table_schema
                                 .operate_additional_property_schema(
-                                    |property_schema| {
-                                        value.find_completion_contents(
-                                            &accessors
-                                                .clone()
-                                                .into_iter()
-                                                .chain(std::iter::once(accessor.clone()))
-                                                .collect(),
-                                            Some(property_schema),
+                                    |additional_property_schema| {
+                                        get_property_value_completion_contents(
+                                            &accessor_str,
+                                            value,
+                                            accessors,
+                                            Some(additional_property_schema),
                                             toml_version,
                                             position,
-                                            &keys[1..],
+                                            keys,
                                             schema_url,
                                             Some(definitions),
                                             completion_hint,
@@ -123,65 +121,18 @@ impl FindCompletionContents for document_tree::Table {
                             }
 
                             if table_schema.additional_properties {
-                                if keys.len() == 1 {
-                                    match completion_hint {
-                                        Some(
-                                            CompletionHint::DotTrigger { .. }
-                                            | CompletionHint::EqualTrigger { .. }
-                                            | CompletionHint::SpaceTrigger { .. },
-                                        ) => {
-                                            completion_contents.extend(type_hint_value(
-                                                position,
-                                                None,
-                                                completion_hint,
-                                            ));
-                                        }
-                                        Some(CompletionHint::InTableHeader) | None => {
-                                            if matches!(
-                                                value,
-                                                document_tree::Value::Incomplete { .. }
-                                            ) {
-                                                completion_contents.extend(
-                                                    CompletionContent::new_magic_triggers(
-                                                        &accessor_string,
-                                                        None,
-                                                        schema_url,
-                                                    ),
-                                                );
-                                            } else {
-                                                completion_contents.extend(
-                                                    value.find_completion_contents(
-                                                        accessors,
-                                                        None,
-                                                        toml_version,
-                                                        position,
-                                                        keys,
-                                                        None,
-                                                        Some(definitions),
-                                                        completion_hint,
-                                                    ),
-                                                );
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    completion_contents.extend(
-                                        value.find_completion_contents(
-                                            &accessors
-                                                .clone()
-                                                .into_iter()
-                                                .chain(std::iter::once(accessor))
-                                                .collect(),
-                                            None,
-                                            toml_version,
-                                            position,
-                                            &keys[1..],
-                                            None,
-                                            Some(definitions),
-                                            completion_hint,
-                                        ),
-                                    );
-                                }
+                                return get_property_value_completion_contents(
+                                    &accessor_str,
+                                    value,
+                                    accessors,
+                                    None,
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    None,
+                                    None,
+                                    completion_hint,
+                                );
                             }
                         }
                     }
@@ -393,4 +344,57 @@ fn count_header_table_or_array(
             _ => unreachable!("only table and array are allowed"),
         })
         .count()
+}
+
+fn get_property_value_completion_contents(
+    accessor_str: &str,
+    value: &document_tree::Value,
+    accessors: &Vec<Accessor>,
+    value_schema: Option<&ValueSchema>,
+    toml_version: TomlVersion,
+    position: text::Position,
+    keys: &[document_tree::Key],
+    schema_url: Option<&Url>,
+    definitions: Option<&SchemaDefinitions>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
+    if keys.len() == 1 {
+        match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { .. }
+                | CompletionHint::EqualTrigger { .. }
+                | CompletionHint::SpaceTrigger { .. },
+            ) => {
+                if value_schema.is_none() {
+                    return type_hint_value(position, None, completion_hint);
+                }
+            }
+            Some(CompletionHint::InTableHeader) => {
+                if let (Some(value_schema), Some(definitions)) = (value_schema, definitions) {
+                    if count_header_table_or_array(value_schema, definitions) == 0 {
+                        return Vec::with_capacity(0);
+                    }
+                }
+            }
+            None => {
+                if matches!(value, document_tree::Value::Incomplete { .. }) {
+                    return CompletionContent::new_magic_triggers(&accessor_str, None, schema_url);
+                }
+            }
+        }
+    }
+    return value.find_completion_contents(
+        &accessors
+            .clone()
+            .into_iter()
+            .chain(std::iter::once(Accessor::Key(accessor_str.to_string())))
+            .collect(),
+        value_schema,
+        toml_version,
+        position,
+        &keys[1..],
+        schema_url,
+        definitions,
+        completion_hint,
+    );
 }

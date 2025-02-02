@@ -388,6 +388,20 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn cargo_dependencies_serde(
+                r#"
+                [dependencies]
+                serde█
+                "#,
+                cargo_schema_path(),
+            ) -> Ok([
+                ".",
+                "=",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn cargo_dependencies_serde_work(
                 r#"
                 [dependencies]
