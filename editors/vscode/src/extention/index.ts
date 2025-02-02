@@ -84,11 +84,11 @@ export class Extension {
 
   private registerEvents(): void {
     this.context.subscriptions.push(
-      vscode.window.onDidChangeActiveTextEditor(() => {
-        this.updateStatusBarItem();
+      vscode.window.onDidChangeActiveTextEditor(async () => {
+        await this.updateStatusBarItem();
       }),
-      vscode.workspace.onDidSaveTextDocument((document) => {
-        this.onDidSaveTextDocument(document);
+      vscode.workspace.onDidSaveTextDocument(async (document) => {
+        await this.onDidSaveTextDocument(document);
       }),
     );
   }
