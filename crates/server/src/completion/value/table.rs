@@ -96,8 +96,39 @@ impl FindCompletionContents for document_tree::Table {
                                 }
                             }
                         }
+
                         if !completion_contents.is_empty() {
                             return completion_contents;
+                        }
+
+                        if let Some(pattern_properties) = &table_schema.pattern_properties {
+                            for mut pattern_property in pattern_properties.iter_mut() {
+                                let property_key = pattern_property.key();
+                                let Ok(pattern) = regex::Regex::new(property_key) else {
+                                    tracing::error!(
+                                        "Invalid regex pattern property: {}",
+                                        property_key
+                                    );
+                                    continue;
+                                };
+                                if pattern.is_match(accessor_str) {
+                                    let property_schema = pattern_property.value_mut();
+                                    if let Ok(value_schema) = property_schema.resolve(definitions) {
+                                        return get_property_value_completion_contents(
+                                            &accessor_str,
+                                            value,
+                                            accessors,
+                                            Some(value_schema),
+                                            toml_version,
+                                            position,
+                                            keys,
+                                            schema_url,
+                                            Some(definitions),
+                                            completion_hint,
+                                        );
+                                    }
+                                }
+                            }
                         }
 
                         if let Some(completion_items) = table_schema

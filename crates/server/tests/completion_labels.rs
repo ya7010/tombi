@@ -317,6 +317,25 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn pyproject_dependency_groups_last(
+                r#"
+                [dependency-groups]
+                dev = [
+                    "pytest>=8.3.3",
+                    "ruff>=0.7.4",
+                    █
+                ]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok([
+                "include-group",
+                "\"\"",
+                "''",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn pyproject_tool_third_party_field(
                 r#"
                 [tool.third_party]
