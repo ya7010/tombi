@@ -26,7 +26,7 @@ impl GetHoverContent for document_tree::Array {
                         return array_schema
                             .operate_item(
                                 |item_schema| {
-                                    let Some(mut hover_content) = value.get_hover_content(
+                                    let mut hover_content = value.get_hover_content(
                                         &accessors
                                             .clone()
                                             .into_iter()
@@ -38,9 +38,7 @@ impl GetHoverContent for document_tree::Array {
                                         keys,
                                         schema_url,
                                         definitions,
-                                    ) else {
-                                        return None;
-                                    };
+                                    )?;
 
                                     if hover_content.title.is_none()
                                         && hover_content.description.is_none()
