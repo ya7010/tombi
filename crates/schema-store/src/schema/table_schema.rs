@@ -95,6 +95,10 @@ impl TableSchema {
         crate::ValueType::Table
     }
 
+    pub fn has_additional_property_schema(&self) -> bool {
+        self.additional_property_schema.is_some()
+    }
+
     pub fn operate_additional_property_schema<F, T>(
         &self,
         operation: F,

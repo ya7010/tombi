@@ -249,6 +249,24 @@ impl FindCompletionContents for document_tree::Table {
                                         {
                                             continue 'property;
                                         }
+                                        if let ValueSchema::Table(table_schema) = value_schema {
+                                            if !table_schema.additional_properties
+                                                && !table_schema.has_additional_property_schema()
+                                                && table_schema.pattern_properties.is_none()
+                                            {
+                                                if table_schema.properties.iter().all(|property| {
+                                                    for key in self.keys() {
+                                                        if key.value() == property.key().to_string()
+                                                        {
+                                                            return true;
+                                                        }
+                                                    }
+                                                    false
+                                                }) {
+                                                    continue 'property;
+                                                }
+                                            }
+                                        }
                                     }
                                     ValueSchema::Null
                                     | ValueSchema::OneOf(_)
