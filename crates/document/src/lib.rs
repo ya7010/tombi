@@ -70,14 +70,14 @@ macro_rules! test_serialize {
         #[test]
         fn $name() {
             use ast::AstNode;
-            use document_tree::IntoDocumentTreeResult;
+            use document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
             pretty_assertions::assert_eq!(p.errors(), &[]);
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
-            let (document_tree, errors) = root.into_document_tree_result($toml_version).into();
+            let (document_tree, errors) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(errors, vec![]);
             let document: $crate::Document = document_tree.into_document($toml_version);
             let serialized = serde_json::to_string(&document).unwrap();
@@ -95,7 +95,7 @@ macro_rules! test_serialize {
         fn $name() {
             use ast::AstNode;
             use itertools::Itertools;
-            use document_tree::IntoDocumentTreeResult;
+            use document_tree::IntoDocumentTreeAndErrors;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
@@ -114,7 +114,7 @@ macro_rules! test_serialize {
                 );
             }
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
-            let (_, errs) = root.into_document_tree_result($toml_version).into();
+            let (_, errs) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(
                         errs
                             .iter()
