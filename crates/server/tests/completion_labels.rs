@@ -499,6 +499,19 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn cargo_dependencies(
+                r#"
+                [dependencies]
+                █
+                "#,
+                cargo_schema_path(),
+            ) -> Ok([
+                "key",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn cargo_dependencies_serde(
                 r#"
                 [dependencies]

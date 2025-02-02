@@ -10,6 +10,7 @@ pub enum CompletionContentPriority {
     Enum,
     Property,
     OptionalProperty,
+    AdditionalProperty,
     TypeHint,
     TypeHintTrue,
     TypeHintFalse,
@@ -203,6 +204,55 @@ impl CompletionContent {
         }
     }
 
+    pub fn new_pattern_property(
+        patterns: &[String],
+        position: text::Position,
+        schema_url: Option<&Url>,
+        completion_hint: Option<CompletionHint>,
+    ) -> Self {
+        let label = "key";
+        Self {
+            label: label.to_string(),
+            kind: CompletionKind::Property,
+            emoji_icon: None,
+            priority: CompletionContentPriority::AdditionalProperty,
+            detail: Some("Pattern Property".to_string()),
+            documentation: if !patterns.is_empty() {
+                let mut documentation = "Allowed Patterns:\n\n".to_string();
+                for pattern in patterns {
+                    documentation.push_str(&format!("- `{}`\n", pattern));
+                }
+                Some(documentation)
+            } else {
+                None
+            },
+            filter_text: None,
+            edit: CompletionEdit::new_propery(label, position, completion_hint),
+            schema_url: schema_url.cloned(),
+            preselect: None,
+        }
+    }
+
+    pub fn new_additional_property(
+        position: text::Position,
+        schema_url: Option<&Url>,
+        completion_hint: Option<CompletionHint>,
+    ) -> Self {
+        let label = "key";
+        Self {
+            label: label.to_string(),
+            kind: CompletionKind::Property,
+            emoji_icon: None,
+            priority: CompletionContentPriority::AdditionalProperty,
+            detail: Some("Additinal Property".to_string()),
+            documentation: None,
+            filter_text: None,
+            edit: CompletionEdit::new_propery(label, position, completion_hint),
+            schema_url: schema_url.cloned(),
+            preselect: None,
+        }
+    }
+
     pub fn new_magic_triggers(
         key: &str,
         position: text::Position,
@@ -281,7 +331,8 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     description: completion_content.detail.clone(),
                 })
             }
-            CompletionContentPriority::OptionalProperty => {
+            CompletionContentPriority::OptionalProperty
+            | CompletionContentPriority::AdditionalProperty => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: Some("?".to_string()),
                     description: completion_content.detail.clone(),

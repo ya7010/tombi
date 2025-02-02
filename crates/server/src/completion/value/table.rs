@@ -284,6 +284,27 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         }
                     }
+
+                    if completion_contents.is_empty() {
+                        if let Some(pattern_properties) = &table_schema.pattern_properties {
+                            let patterns = pattern_properties
+                                .iter()
+                                .map(|pattern_property| pattern_property.key().clone())
+                                .collect::<Vec<_>>();
+                            completion_contents.push(CompletionContent::new_pattern_property(
+                                patterns.as_ref(),
+                                position,
+                                schema_url,
+                                completion_hint,
+                            ))
+                        } else if table_schema.has_additional_property_schema() {
+                            completion_contents.push(CompletionContent::new_additional_property(
+                                position,
+                                schema_url,
+                                completion_hint,
+                            ));
+                        }
+                    }
                 }
                 completion_contents
             }
