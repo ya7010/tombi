@@ -34,7 +34,7 @@ impl DocumentSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
                     definitions.insert(format!("#/definitions/{key}"), value_schema);
                 }
             }
@@ -44,7 +44,7 @@ impl DocumentSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
                     definitions.insert(format!("#/$defs/{key}"), value_schema);
                 }
             }

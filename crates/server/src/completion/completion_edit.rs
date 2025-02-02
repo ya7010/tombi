@@ -203,7 +203,7 @@ impl CompletionEdit {
         Some(Self {
             insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
             text_edit: CompletionTextEdit::Edit(TextEdit {
-                new_text: format!("{trigger}"),
+                new_text: trigger.to_string(),
                 range: text::Range::at(position).into(),
             }),
             additional_text_edits: None,

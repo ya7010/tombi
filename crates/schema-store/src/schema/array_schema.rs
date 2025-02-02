@@ -37,9 +37,7 @@ impl ArraySchema {
                 .get("maxItems")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),
             unique_items: object.get("uniqueItems").and_then(|v| v.as_bool()),
-            default: object
-                .get("default")
-                .and_then(|v| v.as_array().map(|arr| arr.clone())),
+            default: object.get("default").and_then(|v| v.as_array().cloned()),
         }
     }
 
@@ -64,7 +62,7 @@ impl ArraySchema {
             if is_ref {
                 if let Ok(mut referable_schema) = items.write() {
                     if let Ok(value_schema) = referable_schema.resolve(definitions) {
-                        return Some(operation(&value_schema));
+                        return Some(operation(value_schema));
                     }
                 }
             }

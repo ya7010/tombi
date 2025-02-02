@@ -43,14 +43,13 @@ pub fn get_completion_contents(
 
         let ast_keys = if ast::Keys::cast(node.to_owned()).is_some() {
             match node.last_child_or_token() {
-                Some(SyntaxElement::Token(last_token)) => match last_token.kind() {
-                    SyntaxKind::DOT => {
+                Some(SyntaxElement::Token(last_token)) => {
+                    if last_token.kind() == SyntaxKind::DOT {
                         completion_hint = Some(CompletionHint::DotTrigger {
                             range: last_token.range(),
                         });
                     }
-                    _ => {}
-                },
+                }
                 Some(SyntaxElement::Node(last_node)) => match last_node.kind() {
                     SyntaxKind::BARE_KEY
                     | SyntaxKind::BASIC_STRING

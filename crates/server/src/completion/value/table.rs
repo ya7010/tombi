@@ -44,7 +44,7 @@ impl FindCompletionContents for document_tree::Table {
                                 && completion_hint.is_none()
                             {
                                 return CompletionContent::new_magic_triggers(
-                                    &accessor_str,
+                                    accessor_str,
                                     position,
                                     schema_url,
                                 );
@@ -128,7 +128,7 @@ impl FindCompletionContents for document_tree::Table {
                                     let property_schema = pattern_property.value_mut();
                                     if let Ok(value_schema) = property_schema.resolve(definitions) {
                                         return get_property_value_completion_contents(
-                                            &accessor_str,
+                                            accessor_str,
                                             value,
                                             accessors,
                                             Some(value_schema),
@@ -148,7 +148,7 @@ impl FindCompletionContents for document_tree::Table {
                             .operate_additional_property_schema(
                                 |additional_property_schema| {
                                     get_property_value_completion_contents(
-                                        &accessor_str,
+                                        accessor_str,
                                         value,
                                         accessors,
                                         Some(additional_property_schema),
@@ -168,7 +168,7 @@ impl FindCompletionContents for document_tree::Table {
 
                         if table_schema.additional_properties {
                             return get_property_value_completion_contents(
-                                &accessor_str,
+                                accessor_str,
                                 value,
                                 accessors,
                                 None,
@@ -264,7 +264,7 @@ impl FindCompletionContents for document_tree::Table {
                                     schema_candidate.documentation(definitions, completion_hint),
                                     table_schema.required.as_ref(),
                                     CompletionEdit::new_propery(
-                                        &schema_key_str,
+                                        schema_key_str,
                                         position,
                                         completion_hint,
                                     ),
@@ -315,7 +315,7 @@ impl FindCompletionContents for document_tree::Table {
                     let accessor_str = &key.to_raw_text(toml_version);
                     if let Some(value) = self.get(key) {
                         return get_property_value_completion_contents(
-                            &accessor_str,
+                            accessor_str,
                             value,
                             accessors,
                             None,
@@ -449,7 +449,7 @@ fn get_property_value_completion_contents(
             None => {
                 if matches!(value, document_tree::Value::Incomplete { .. }) {
                     return CompletionContent::new_magic_triggers(
-                        &accessor_str,
+                        accessor_str,
                         position,
                         schema_url,
                     );
@@ -457,7 +457,7 @@ fn get_property_value_completion_contents(
             }
         }
     }
-    return value.find_completion_contents(
+    value.find_completion_contents(
         &accessors
             .clone()
             .into_iter()
@@ -470,5 +470,5 @@ fn get_property_value_completion_contents(
         schema_url,
         definitions,
         completion_hint,
-    );
+    )
 }

@@ -30,7 +30,7 @@ impl TableSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
                     properties.insert(Accessor::Key(key.into()), value_schema);
                 }
             }
@@ -42,7 +42,7 @@ impl TableSchema {
                     let Some(object) = value.as_object() else {
                         continue;
                     };
-                    if let Some(value_schema) = Referable::<ValueSchema>::new(&object) {
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
                         pattern_properties.insert(pattern.clone(), value_schema);
                     }
                 }
@@ -116,7 +116,7 @@ impl TableSchema {
             if is_ref {
                 if let Ok(mut referable_schema) = additional_property_schema.write() {
                     if let Ok(value_schema) = referable_schema.resolve(definitions) {
-                        return Some(operation(&value_schema));
+                        return Some(operation(value_schema));
                     }
                 }
             }
@@ -148,8 +148,8 @@ impl FindSchemaCandidates for TableSchema {
         }
 
         if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
-            if let Ok(schema) = value.resolve(&definitions) {
-                return schema.find_schema_candidates(&accessors[1..], &definitions);
+            if let Ok(schema) = value.resolve(definitions) {
+                return schema.find_schema_candidates(&accessors[1..], definitions);
             }
         }
 

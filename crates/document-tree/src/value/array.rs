@@ -195,7 +195,8 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::Array {
                     array.push(value);
                 }
                 ast::ValueOrKeyValue::KeyValue(key_value) => {
-                    let (table, errs) = key_value.into_document_tree_and_errors(toml_version).into();
+                    let (table, errs) =
+                        key_value.into_document_tree_and_errors(toml_version).into();
                     if !errs.is_empty() {
                         errors.extend(errs);
                     }

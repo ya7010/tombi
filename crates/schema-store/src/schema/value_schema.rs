@@ -37,7 +37,7 @@ impl ValueSchema {
                             .iter()
                             .filter_map(|type_value| {
                                 if let serde_json::Value::String(type_str) = type_value {
-                                    Self::new_single(&type_str, object)
+                                    Self::new_single(type_str, object)
                                 } else {
                                     None
                                 }

@@ -59,7 +59,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
-        $crate::test_format!(#[test] fn $name($source, $toml_version, crate::FormatDefinitions::default()) -> Err(_););
+        $crate::test_format!(#[test] fn $name($source, $toml_version, $crate::FormatDefinitions::default()) -> Err(_););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr) -> Err(_);) => {

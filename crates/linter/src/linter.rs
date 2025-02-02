@@ -65,7 +65,8 @@ impl<'a> Linter<'a> {
 
             root.lint(&mut self);
 
-            let (document_tree, errs) = root.into_document_tree_and_errors(self.toml_version).into();
+            let (document_tree, errs) =
+                root.into_document_tree_and_errors(self.toml_version).into();
 
             for err in errs {
                 err.set_diagnostic(&mut errors);

@@ -28,7 +28,7 @@ impl AnyOfSchema {
             .map(|a| {
                 a.iter()
                     .filter_map(|v| v.as_object())
-                    .filter_map(|object| Referable::<ValueSchema>::new(object))
+                    .filter_map(Referable::<ValueSchema>::new)
                     .collect()
             })
             .unwrap_or_default();

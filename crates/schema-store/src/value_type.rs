@@ -324,7 +324,7 @@ impl From<document_tree::ValueType> for ValueType {
 fn fmt_composit_types(types: &[ValueType], separator: char, is_root: bool) -> String {
     let mut nullable = false;
     let non_null_types = types
-        .into_iter()
+        .iter()
         .filter(|t| {
             if let ValueType::Null = t {
                 nullable = true;
@@ -347,28 +347,22 @@ fn fmt_composit_types(types: &[ValueType], separator: char, is_root: bool) -> St
                     .join(&format!(" {} ", separator)),
             )
         }
+    } else if is_root {
+        non_null_types
+            .iter()
+            .map(|t| t.to_display(false))
+            .join(&format!(" {} ", separator))
+            .to_string()
+    } else if non_null_types.len() == 1 {
+        non_null_types[0].to_display(false).to_string()
     } else {
-        if is_root {
-            format!(
-                "{}",
-                non_null_types
-                    .iter()
-                    .map(|t| t.to_display(false))
-                    .join(&format!(" {} ", separator))
-            )
-        } else {
-            if non_null_types.len() == 1 {
-                format!("{}", non_null_types[0].to_display(false))
-            } else {
-                format!(
-                    "({})",
-                    non_null_types
-                        .iter()
-                        .map(|t| t.to_display(false))
-                        .join(&format!(" {} ", separator)),
-                )
-            }
-        }
+        format!(
+            "({})",
+            non_null_types
+                .iter()
+                .map(|t| t.to_display(false))
+                .join(&format!(" {} ", separator)),
+        )
     }
 }
 
