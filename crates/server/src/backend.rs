@@ -8,7 +8,7 @@ use super::handler::{
 use crate::{
     document::DocumentSource,
     handler::{
-        handle_completion, handle_did_change_watched_files, handle_folding_range,
+        handle_completion, handle_did_change_watched_files, handle_did_close, handle_folding_range,
         handle_get_toml_version, handle_initialized, handle_update_config, handle_update_schema,
         GetTomlVersionResponse,
     },
@@ -28,11 +28,11 @@ use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
         CompletionParams, CompletionResponse, DidChangeConfigurationParams,
-        DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidOpenTextDocumentParams,
-        DidSaveTextDocumentParams, DocumentDiagnosticParams, DocumentDiagnosticReportResult,
-        DocumentSymbolParams, DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover,
-        HoverParams, InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
-        SemanticTokensResult, TextDocumentIdentifier, Url,
+        DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidCloseTextDocumentParams,
+        DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
+        DocumentDiagnosticReportResult, DocumentSymbolParams, DocumentSymbolResponse, FoldingRange,
+        FoldingRangeParams, Hover, HoverParams, InitializeParams, InitializeResult,
+        InitializedParams, SemanticTokensParams, SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
 };
@@ -87,6 +87,13 @@ impl Backend {
                 None
             }
         }
+    }
+
+    #[inline]
+    pub fn remove_document_source(&self, uri: &Url) -> Option<DocumentSource> {
+        self.document_sources
+            .remove(uri)
+            .map(|(_, document_info)| document_info)
     }
 
     #[inline]
@@ -196,6 +203,10 @@ impl LanguageServer for Backend {
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         handle_did_open(self, params).await
+    }
+
+    async fn did_close(&self, params: DidCloseTextDocumentParams) {
+        handle_did_close(self, params).await
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
