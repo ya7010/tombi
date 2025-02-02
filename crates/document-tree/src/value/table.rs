@@ -5,8 +5,8 @@ use itertools::Itertools;
 use toml_version::TomlVersion;
 
 use crate::{
-    support::comment::try_new_comment, Array, DocumentTreeResult, IntoDocumentTreeResult, Key,
-    Value, ValueImpl, ValueType,
+    support::comment::try_new_comment, Array, DocumentTreeAndErrors, IntoDocumentTreeAndErrors,
+    Key, Value, ValueImpl, ValueType,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -287,11 +287,11 @@ impl ValueImpl for Table {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Table> for ast::Table {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Table> for ast::Table {
+    fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Table> {
+    ) -> DocumentTreeAndErrors<crate::Table> {
         let mut table = Table::new_table(&self);
         let mut errors = Vec::new();
 
@@ -311,20 +311,22 @@ impl IntoDocumentTreeResult<crate::Table> for ast::Table {
             errors.push(crate::Error::IncompleteNode {
                 range: self.range(),
             });
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: table,
                 errors,
             };
         };
 
-        let (mut header_keys, errs) = header_keys.into_document_tree_result(toml_version).into();
+        let (mut header_keys, errs) = header_keys
+            .into_document_tree_and_errors(toml_version)
+            .into();
         if !errs.is_empty() {
             errors.extend(errs);
             return make_keys_table(header_keys, table, errors);
         }
 
         for key_value in self.key_values() {
-            let (other, errs) = key_value.into_document_tree_result(toml_version).into();
+            let (other, errs) = key_value.into_document_tree_and_errors(toml_version).into();
             if !errs.is_empty() {
                 errors.extend(errs);
             }
@@ -355,15 +357,18 @@ impl IntoDocumentTreeResult<crate::Table> for ast::Table {
             is_array_of_table = array_of_table_keys.contains(&header_keys);
         }
 
-        DocumentTreeResult {
+        DocumentTreeAndErrors {
             tree: table,
             errors,
         }
     }
 }
 
-impl IntoDocumentTreeResult<Table> for ast::ArrayOfTables {
-    fn into_document_tree_result(self, toml_version: TomlVersion) -> DocumentTreeResult<Table> {
+impl IntoDocumentTreeAndErrors<Table> for ast::ArrayOfTables {
+    fn into_document_tree_and_errors(
+        self,
+        toml_version: TomlVersion,
+    ) -> DocumentTreeAndErrors<Table> {
         let mut table = Table::new_array_of_tables(&self);
         let mut errors = Vec::new();
 
@@ -383,20 +388,22 @@ impl IntoDocumentTreeResult<Table> for ast::ArrayOfTables {
             errors.push(crate::Error::IncompleteNode {
                 range: self.range(),
             });
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: table,
                 errors,
             };
         };
 
-        let (mut header_keys, errs) = header_keys.into_document_tree_result(toml_version).into();
+        let (mut header_keys, errs) = header_keys
+            .into_document_tree_and_errors(toml_version)
+            .into();
         if !errs.is_empty() {
             errors.extend(errs);
             return make_keys_table(header_keys, table, errors);
         }
 
         for key_value in self.key_values() {
-            let (other, errs) = key_value.into_document_tree_result(toml_version).into();
+            let (other, errs) = key_value.into_document_tree_and_errors(toml_version).into();
             if !errs.is_empty() {
                 errors.extend(errs);
             }
@@ -434,18 +441,18 @@ impl IntoDocumentTreeResult<Table> for ast::ArrayOfTables {
             is_array_of_table = array_of_table_keys.contains(&header_keys);
         }
 
-        DocumentTreeResult {
+        DocumentTreeAndErrors {
             tree: table,
             errors,
         }
     }
 }
 
-impl IntoDocumentTreeResult<Table> for ast::KeyValue {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<Table> for ast::KeyValue {
+    fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> DocumentTreeResult<Table> {
+    ) -> DocumentTreeAndErrors<Table> {
         let table = Table::new_key_value(&self);
         let mut errors = Vec::new();
 
@@ -459,13 +466,13 @@ impl IntoDocumentTreeResult<Table> for ast::KeyValue {
             errors.push(crate::Error::IncompleteNode {
                 range: self.range(),
             });
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: table,
                 errors,
             };
         };
 
-        let (mut keys, errs) = keys.into_document_tree_result(toml_version).into();
+        let (mut keys, errs) = keys.into_document_tree_and_errors(toml_version).into();
         if !errs.is_empty() {
             errors.extend(errs);
             return make_keys_table(keys, table, errors);
@@ -473,7 +480,7 @@ impl IntoDocumentTreeResult<Table> for ast::KeyValue {
 
         let value = match self.value() {
             Some(value) => {
-                let (value, errs) = value.into_document_tree_result(toml_version).into();
+                let (value, errs) = value.into_document_tree_and_errors(toml_version).into();
                 if !errs.is_empty() {
                     errors.extend(errs);
                 }
@@ -505,11 +512,11 @@ impl IntoDocumentTreeResult<Table> for ast::KeyValue {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::InlineTable {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::InlineTable {
+    fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let mut table = Table::new_inline_table(&self);
         let mut errors = Vec::new();
 
@@ -524,7 +531,7 @@ impl IntoDocumentTreeResult<crate::Value> for ast::InlineTable {
         table.kind = TableKind::Table;
 
         for (key_value, comma) in self.key_values_with_comma() {
-            let (other, errs) = key_value.into_document_tree_result(toml_version).into();
+            let (other, errs) = key_value.into_document_tree_and_errors(toml_version).into();
 
             if !errs.is_empty() {
                 errors.extend(errs)
@@ -557,7 +564,7 @@ impl IntoDocumentTreeResult<crate::Value> for ast::InlineTable {
             }
         }
 
-        DocumentTreeResult {
+        DocumentTreeAndErrors {
             tree: crate::Value::Table(table),
             errors,
         }
@@ -582,7 +589,7 @@ fn get_array_of_tables_keys(
         .filter_map(|keys| {
             let mut new_keys = vec![];
             for key in keys {
-                let (key, errs) = key.into_document_tree_result(toml_version).into();
+                let (key, errs) = key.into_document_tree_and_errors(toml_version).into();
                 if !errs.is_empty() {
                     errors.extend(errs);
                     return None;
@@ -633,7 +640,7 @@ fn make_keys_table(
     keys: Vec<crate::Key>,
     mut table: crate::Table,
     mut errors: Vec<crate::Error>,
-) -> DocumentTreeResult<crate::Table> {
+) -> DocumentTreeAndErrors<crate::Table> {
     for key in keys.into_iter().rev() {
         let dummy_table = table.clone();
         match table.new_parent_key().insert(
@@ -646,7 +653,7 @@ fn make_keys_table(
             }
         }
     }
-    DocumentTreeResult {
+    DocumentTreeAndErrors {
         tree: table,
         errors,
     }

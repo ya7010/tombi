@@ -12,7 +12,7 @@ pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
 use completion_kind::CompletionKind;
 use config::TomlVersion;
-use document_tree::{IntoDocumentTreeResult, TryIntoDocumentTree};
+use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 pub use hint::CompletionHint;
 use itertools::Itertools;
 use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
@@ -167,7 +167,7 @@ pub fn get_completion_contents(
         keys = new_keys;
     }
 
-    let document_tree = root.into_document_tree_result(toml_version).tree;
+    let document_tree = root.into_document_tree_and_errors(toml_version).tree;
 
     let completion_contents = document_tree.deref().find_completion_contents(
         &Vec::with_capacity(0),

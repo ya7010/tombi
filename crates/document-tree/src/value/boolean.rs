@@ -1,6 +1,6 @@
 use toml_version::TomlVersion;
 
-use crate::{DocumentTreeResult, IntoDocumentTreeResult, ValueImpl, ValueType};
+use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors, ValueImpl, ValueType};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
@@ -40,14 +40,14 @@ impl ValueImpl for Boolean {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::Boolean {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::Boolean {
+    fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
@@ -59,7 +59,7 @@ impl IntoDocumentTreeResult<crate::Value> for ast::Boolean {
             _ => unreachable!(),
         };
 
-        DocumentTreeResult {
+        DocumentTreeAndErrors {
             tree: crate::Value::Boolean(crate::Boolean { value, node: self }),
             errors: Vec::with_capacity(0),
         }

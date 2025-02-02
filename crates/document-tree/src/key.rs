@@ -1,7 +1,7 @@
 use ast::AstNode;
 use toml_version::TomlVersion;
 
-use crate::{DocumentTreeResult, IntoDocumentTreeResult};
+use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyKind {
@@ -90,14 +90,14 @@ impl std::fmt::Display for Key {
     }
 }
 
-impl IntoDocumentTreeResult<Option<Key>> for ast::Key {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<Option<Key>> for ast::Key {
+    fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
-    ) -> crate::DocumentTreeResult<Option<Key>> {
+    ) -> crate::DocumentTreeAndErrors<Option<Key>> {
         let range = self.syntax().range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: None,
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
@@ -113,11 +113,11 @@ impl IntoDocumentTreeResult<Option<Key>> for ast::Key {
             token.range(),
             toml_version,
         ) {
-            Ok(key) => DocumentTreeResult {
+            Ok(key) => DocumentTreeAndErrors {
                 tree: Some(key),
                 errors: Vec::with_capacity(0),
             },
-            Err(error) => DocumentTreeResult {
+            Err(error) => DocumentTreeAndErrors {
                 tree: None,
                 errors: vec![error],
             },
@@ -125,26 +125,26 @@ impl IntoDocumentTreeResult<Option<Key>> for ast::Key {
     }
 }
 
-impl IntoDocumentTreeResult<Vec<crate::Key>> for ast::Keys {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<Vec<crate::Key>> for ast::Keys {
+    fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> DocumentTreeResult<Vec<crate::Key>> {
+    ) -> DocumentTreeAndErrors<Vec<crate::Key>> {
         let mut keys = Vec::new();
         let mut errors = Vec::new();
 
         for key in self.keys() {
-            let result = key.into_document_tree_result(toml_version);
+            let result = key.into_document_tree_and_errors(toml_version);
             if !result.errors.is_empty() {
                 errors.extend(result.errors);
 
-                return DocumentTreeResult { tree: keys, errors };
+                return DocumentTreeAndErrors { tree: keys, errors };
             }
             if let Some(key) = result.tree {
                 keys.push(key);
             }
         }
 
-        DocumentTreeResult { tree: keys, errors }
+        DocumentTreeAndErrors { tree: keys, errors }
     }
 }

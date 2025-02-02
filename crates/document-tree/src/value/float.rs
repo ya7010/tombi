@@ -1,7 +1,7 @@
 use toml_version::TomlVersion;
 
 use crate::{
-    support::float::try_from_float, DocumentTreeResult, IntoDocumentTreeResult, ValueImpl,
+    support::float::try_from_float, DocumentTreeAndErrors, IntoDocumentTreeAndErrors, ValueImpl,
     ValueType,
 };
 
@@ -43,25 +43,25 @@ impl ValueImpl for Float {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::Float {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::Float {
+    fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
         };
 
         match try_from_float(token.text()) {
-            Ok(value) => DocumentTreeResult {
+            Ok(value) => DocumentTreeAndErrors {
                 tree: crate::Value::Float(crate::Float { value, node: self }),
                 errors: Vec::with_capacity(0),
             },
-            Err(error) => DocumentTreeResult {
+            Err(error) => DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::ParseFloatError { error, range }],
             },

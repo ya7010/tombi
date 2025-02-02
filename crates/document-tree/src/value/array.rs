@@ -1,7 +1,7 @@
 use ast::AstNode;
 
 use crate::{
-    support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult, Value,
+    support::comment::try_new_comment, DocumentTreeAndErrors, IntoDocumentTreeAndErrors, Value,
     ValueImpl, ValueType,
 };
 
@@ -168,11 +168,11 @@ impl ValueImpl for Array {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::Array {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::Array {
+    fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> crate::DocumentTreeResult<crate::Value> {
+    ) -> crate::DocumentTreeAndErrors<crate::Value> {
         let mut array = Array::new_array(&self);
 
         let mut errors = Vec::new();
@@ -188,14 +188,14 @@ impl IntoDocumentTreeResult<crate::Value> for ast::Array {
         for (value_or_key, comma) in self.value_or_key_values_with_commata() {
             match value_or_key {
                 ast::ValueOrKeyValue::Value(value) => {
-                    let (value, errs) = value.into_document_tree_result(toml_version).into();
+                    let (value, errs) = value.into_document_tree_and_errors(toml_version).into();
                     if !errs.is_empty() {
                         errors.extend(errs);
                     }
                     array.push(value);
                 }
                 ast::ValueOrKeyValue::KeyValue(key_value) => {
-                    let (table, errs) = key_value.into_document_tree_result(toml_version).into();
+                    let (table, errs) = key_value.into_document_tree_and_errors(toml_version).into();
                     if !errs.is_empty() {
                         errors.extend(errs);
                     }
@@ -225,7 +225,7 @@ impl IntoDocumentTreeResult<crate::Value> for ast::Array {
             }
         }
 
-        DocumentTreeResult {
+        DocumentTreeAndErrors {
             tree: crate::Value::Array(array),
             errors,
         }

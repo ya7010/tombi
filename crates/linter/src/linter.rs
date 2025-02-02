@@ -5,7 +5,7 @@ use ast::AstNode;
 use config::TomlVersion;
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
-use document_tree::IntoDocumentTreeResult;
+use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
 use schema_store::DocumentSchema;
 use url::Url;
@@ -65,7 +65,7 @@ impl<'a> Linter<'a> {
 
             root.lint(&mut self);
 
-            let (document_tree, errs) = root.into_document_tree_result(self.toml_version).into();
+            let (document_tree, errs) = root.into_document_tree_and_errors(self.toml_version).into();
 
             for err in errs {
                 err.set_diagnostic(&mut errors);

@@ -2,7 +2,9 @@ use std::ops::Deref;
 
 use toml_version::TomlVersion;
 
-use crate::{support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult, Table};
+use crate::{
+    support::comment::try_new_comment, DocumentTreeAndErrors, IntoDocumentTreeAndErrors, Table,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct DocumentTree(pub(crate) Table);
@@ -27,11 +29,11 @@ pub(crate) enum RootItem {
     KeyValue(Table),
 }
 
-impl IntoDocumentTreeResult<crate::DocumentTree> for ast::Root {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
+    fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
-    ) -> crate::DocumentTreeResult<crate::DocumentTree> {
+    ) -> crate::DocumentTreeAndErrors<crate::DocumentTree> {
         let mut tree = crate::DocumentTree(crate::Table::new_root(&self));
         let mut errors = Vec::new();
 
@@ -44,7 +46,7 @@ impl IntoDocumentTreeResult<crate::DocumentTree> for ast::Root {
         }
 
         for item in self.items() {
-            let (item, errs) = item.into_document_tree_result(toml_version).into();
+            let (item, errs) = item.into_document_tree_and_errors(toml_version).into();
 
             if !errs.is_empty() {
                 errors.extend(errs);
@@ -69,24 +71,24 @@ impl IntoDocumentTreeResult<crate::DocumentTree> for ast::Root {
             }
         }
 
-        DocumentTreeResult { tree, errors }
+        DocumentTreeAndErrors { tree, errors }
     }
 }
 
-impl IntoDocumentTreeResult<crate::RootItem> for ast::RootItem {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::RootItem> for ast::RootItem {
+    fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
-    ) -> crate::DocumentTreeResult<crate::RootItem> {
+    ) -> crate::DocumentTreeAndErrors<crate::RootItem> {
         match self {
             ast::RootItem::Table(table) => table
-                .into_document_tree_result(toml_version)
+                .into_document_tree_and_errors(toml_version)
                 .map(crate::RootItem::Table),
             ast::RootItem::ArrayOfTables(array) => array
-                .into_document_tree_result(toml_version)
+                .into_document_tree_and_errors(toml_version)
                 .map(crate::RootItem::ArrayOfTables),
             ast::RootItem::KeyValue(key_value) => key_value
-                .into_document_tree_result(toml_version)
+                .into_document_tree_and_errors(toml_version)
                 .map(crate::RootItem::KeyValue),
         }
     }

@@ -15,7 +15,7 @@ pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
-use crate::{support::comment::try_new_comment, DocumentTreeResult, IntoDocumentTreeResult};
+use crate::{support::comment::try_new_comment, DocumentTreeAndErrors, IntoDocumentTreeAndErrors};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -90,11 +90,11 @@ impl crate::ValueImpl for Value {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::Value {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::Value {
+    fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let mut errors = Vec::new();
         for comment in self.leading_comments() {
             if let Err(error) = try_new_comment(comment.as_ref()) {
@@ -109,27 +109,27 @@ impl IntoDocumentTreeResult<crate::Value> for ast::Value {
         }
 
         let mut document_tree_result = match self {
-            ast::Value::BasicString(string) => string.into_document_tree_result(toml_version),
-            ast::Value::LiteralString(string) => string.into_document_tree_result(toml_version),
+            ast::Value::BasicString(string) => string.into_document_tree_and_errors(toml_version),
+            ast::Value::LiteralString(string) => string.into_document_tree_and_errors(toml_version),
             ast::Value::MultiLineBasicString(string) => {
-                string.into_document_tree_result(toml_version)
+                string.into_document_tree_and_errors(toml_version)
             }
             ast::Value::MultiLineLiteralString(string) => {
-                string.into_document_tree_result(toml_version)
+                string.into_document_tree_and_errors(toml_version)
             }
-            ast::Value::IntegerBin(integer) => integer.into_document_tree_result(toml_version),
-            ast::Value::IntegerOct(integer) => integer.into_document_tree_result(toml_version),
-            ast::Value::IntegerDec(integer) => integer.into_document_tree_result(toml_version),
-            ast::Value::IntegerHex(integer) => integer.into_document_tree_result(toml_version),
-            ast::Value::Float(float) => float.into_document_tree_result(toml_version),
-            ast::Value::Boolean(boolean) => boolean.into_document_tree_result(toml_version),
-            ast::Value::OffsetDateTime(dt) => dt.into_document_tree_result(toml_version),
-            ast::Value::LocalDateTime(dt) => dt.into_document_tree_result(toml_version),
-            ast::Value::LocalDate(date) => date.into_document_tree_result(toml_version),
-            ast::Value::LocalTime(time) => time.into_document_tree_result(toml_version),
-            ast::Value::Array(array) => array.into_document_tree_result(toml_version),
+            ast::Value::IntegerBin(integer) => integer.into_document_tree_and_errors(toml_version),
+            ast::Value::IntegerOct(integer) => integer.into_document_tree_and_errors(toml_version),
+            ast::Value::IntegerDec(integer) => integer.into_document_tree_and_errors(toml_version),
+            ast::Value::IntegerHex(integer) => integer.into_document_tree_and_errors(toml_version),
+            ast::Value::Float(float) => float.into_document_tree_and_errors(toml_version),
+            ast::Value::Boolean(boolean) => boolean.into_document_tree_and_errors(toml_version),
+            ast::Value::OffsetDateTime(dt) => dt.into_document_tree_and_errors(toml_version),
+            ast::Value::LocalDateTime(dt) => dt.into_document_tree_and_errors(toml_version),
+            ast::Value::LocalDate(date) => date.into_document_tree_and_errors(toml_version),
+            ast::Value::LocalTime(time) => time.into_document_tree_and_errors(toml_version),
+            ast::Value::Array(array) => array.into_document_tree_and_errors(toml_version),
             ast::Value::InlineTable(inline_table) => {
-                inline_table.into_document_tree_result(toml_version)
+                inline_table.into_document_tree_and_errors(toml_version)
             }
         };
 

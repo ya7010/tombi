@@ -2,7 +2,7 @@ use toml_version::TomlVersion;
 
 use crate::{
     support::integer::{try_from_binary, try_from_decimal, try_from_hexadecimal, try_from_octal},
-    DocumentTreeResult, IntoDocumentTreeResult, ValueImpl, ValueType,
+    DocumentTreeAndErrors, IntoDocumentTreeAndErrors, ValueImpl, ValueType,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -58,28 +58,28 @@ impl ValueImpl for Integer {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::IntegerBin {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerBin {
+    fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
         };
 
         match try_from_binary(token.text()) {
-            Ok(value) => DocumentTreeResult {
+            Ok(value) => DocumentTreeAndErrors {
                 tree: crate::Value::Integer(crate::Integer {
                     kind: IntegerKind::Binary(self),
                     value,
                 }),
                 errors: Vec::with_capacity(0),
             },
-            Err(error) => DocumentTreeResult {
+            Err(error) => DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::ParseIntError { error, range }],
             },
@@ -87,28 +87,28 @@ impl IntoDocumentTreeResult<crate::Value> for ast::IntegerBin {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::IntegerOct {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerOct {
+    fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
         };
 
         match try_from_octal(token.text()) {
-            Ok(value) => DocumentTreeResult {
+            Ok(value) => DocumentTreeAndErrors {
                 tree: crate::Value::Integer(crate::Integer {
                     kind: IntegerKind::Octal(self),
                     value,
                 }),
                 errors: Vec::with_capacity(0),
             },
-            Err(error) => DocumentTreeResult {
+            Err(error) => DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::ParseIntError { error, range }],
             },
@@ -116,28 +116,28 @@ impl IntoDocumentTreeResult<crate::Value> for ast::IntegerOct {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::IntegerDec {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerDec {
+    fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
         };
 
         match try_from_decimal(token.text()) {
-            Ok(value) => DocumentTreeResult {
+            Ok(value) => DocumentTreeAndErrors {
                 tree: crate::Value::Integer(crate::Integer {
                     kind: IntegerKind::Decimal(self),
                     value,
                 }),
                 errors: Vec::with_capacity(0),
             },
-            Err(error) => DocumentTreeResult {
+            Err(error) => DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::ParseIntError { error, range }],
             },
@@ -145,28 +145,28 @@ impl IntoDocumentTreeResult<crate::Value> for ast::IntegerDec {
     }
 }
 
-impl IntoDocumentTreeResult<crate::Value> for ast::IntegerHex {
-    fn into_document_tree_result(
+impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerHex {
+    fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
-    ) -> DocumentTreeResult<crate::Value> {
+    ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(token) = self.token() else {
-            return DocumentTreeResult {
+            return DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::IncompleteNode { range }],
             };
         };
 
         match try_from_hexadecimal(token.text()) {
-            Ok(value) => DocumentTreeResult {
+            Ok(value) => DocumentTreeAndErrors {
                 tree: crate::Value::Integer(crate::Integer {
                     kind: IntegerKind::Hexadecimal(self),
                     value,
                 }),
                 errors: Vec::with_capacity(0),
             },
-            Err(error) => DocumentTreeResult {
+            Err(error) => DocumentTreeAndErrors {
                 tree: crate::Value::Incomplete { range },
                 errors: vec![crate::Error::ParseIntError { error, range }],
             },
