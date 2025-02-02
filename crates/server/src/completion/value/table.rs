@@ -223,43 +223,20 @@ impl FindCompletionContents for document_tree::Table {
             ),
             None => {
                 if let Some(key) = keys.first() {
-                    let accessor_string = key.to_raw_text(toml_version);
-                    let accessor = Accessor::Key(accessor_string.clone());
-
+                    let accessor_str = &key.to_raw_text(toml_version);
                     if let Some(value) = self.get(key) {
-                        match completion_hint {
-                            Some(
-                                CompletionHint::DotTrigger { .. }
-                                | CompletionHint::EqualTrigger { .. }
-                                | CompletionHint::SpaceTrigger { .. },
-                            ) => {
-                                return type_hint_value(position, None, completion_hint);
-                            }
-                            Some(CompletionHint::InTableHeader) | None => {
-                                if matches!(value, document_tree::Value::Incomplete { .. }) {
-                                    return CompletionContent::new_magic_triggers(
-                                        &accessor_string,
-                                        position,
-                                        schema_url,
-                                    );
-                                } else {
-                                    return value.find_completion_contents(
-                                        &accessors
-                                            .clone()
-                                            .into_iter()
-                                            .chain(std::iter::once(accessor))
-                                            .collect(),
-                                        None,
-                                        toml_version,
-                                        position,
-                                        &keys[1..],
-                                        None,
-                                        None,
-                                        completion_hint,
-                                    );
-                                }
-                            }
-                        }
+                        return get_property_value_completion_contents(
+                            &accessor_str,
+                            value,
+                            accessors,
+                            None,
+                            toml_version,
+                            position,
+                            keys,
+                            None,
+                            None,
+                            completion_hint,
+                        );
                     }
                 }
 
