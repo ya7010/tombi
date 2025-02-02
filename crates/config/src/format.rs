@@ -7,8 +7,6 @@
 //! but considering the recent trend of formatters to avoid such discussions by restricting the settings and its results,
 //! this structure is currently empty.
 
-mod split_doc_comment_section_for_schemars {}
-
 /// # Formatter options.
 ///
 /// To avoid needless discussion of formatting rules,
