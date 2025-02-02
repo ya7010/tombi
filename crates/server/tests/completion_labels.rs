@@ -370,6 +370,7 @@ mod completion_labels {
                 "#,
                 pyproject_schema_path(),
             ) -> Ok([
+                "name",
                 "authors",
                 "classifiers",
                 "dependencies",
@@ -379,7 +380,6 @@ mod completion_labels {
                 "license",
                 "license-files",
                 "maintainers",
-                "name",
                 "readme",
                 "requires-python",
                 "version",

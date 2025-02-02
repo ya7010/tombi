@@ -5,14 +5,15 @@ use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, Co
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
-pub enum CompletionPriority {
+pub enum CompletionContentPriority {
     Default = 0,
-    Enum = 1,
+    Enum,
+    Required,
     #[default]
-    Normal = 2,
-    TypeHint = 3,
-    TypeHintTrue = 4,
-    TypeHintFalse = 5,
+    Normal,
+    TypeHint,
+    TypeHintTrue,
+    TypeHintFalse,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,7 +21,7 @@ pub struct CompletionContent {
     pub label: String,
     pub kind: CompletionKind,
     pub emoji_icon: Option<char>,
-    pub priority: CompletionPriority,
+    pub priority: CompletionContentPriority,
     pub detail: Option<String>,
     pub documentation: Option<String>,
     pub filter_text: Option<String>,
@@ -40,7 +41,7 @@ impl CompletionContent {
             label: label.clone(),
             kind,
             emoji_icon: None,
-            priority: CompletionPriority::Enum,
+            priority: CompletionContentPriority::Enum,
             detail: Some("enum".to_string()),
             documentation: None,
             filter_text: None,
@@ -60,7 +61,7 @@ impl CompletionContent {
             label,
             kind,
             emoji_icon: None,
-            priority: CompletionPriority::Default,
+            priority: CompletionContentPriority::Default,
             detail: Some("default".to_string()),
             documentation: None,
             filter_text: None,
@@ -81,7 +82,7 @@ impl CompletionContent {
             label: label.into(),
             kind,
             emoji_icon: Some('🦅'),
-            priority: CompletionPriority::TypeHint,
+            priority: CompletionContentPriority::TypeHint,
             detail: Some(detail.into()),
             documentation: None,
             filter_text: None,
@@ -101,9 +102,9 @@ impl CompletionContent {
             kind: CompletionKind::Boolean,
             emoji_icon: Some('🦅'),
             priority: if value {
-                CompletionPriority::TypeHintTrue
+                CompletionContentPriority::TypeHintTrue
             } else {
-                CompletionPriority::TypeHintFalse
+                CompletionContentPriority::TypeHintFalse
             },
             detail: Some("Boolean".to_string()),
             documentation: None,
@@ -125,7 +126,7 @@ impl CompletionContent {
             label: format!("{}{}", quote, quote),
             kind,
             emoji_icon: Some('🦅'),
-            priority: CompletionPriority::TypeHint,
+            priority: CompletionContentPriority::TypeHint,
             detail: Some(detail.into()),
             documentation: None,
             filter_text: None,
@@ -144,7 +145,7 @@ impl CompletionContent {
             label: "{}".to_string(),
             kind: CompletionKind::Table,
             emoji_icon: Some('🦅'),
-            priority: CompletionPriority::TypeHint,
+            priority: CompletionContentPriority::TypeHint,
             detail: Some("InlineTable".to_string()),
             documentation: None,
             filter_text: None,
@@ -163,7 +164,7 @@ impl CompletionContent {
             label: "{}".to_string(),
             kind: CompletionKind::Table,
             emoji_icon: Some('🦅'),
-            priority: CompletionPriority::TypeHint,
+            priority: CompletionContentPriority::TypeHint,
             detail: Some("InlineTable".to_string()),
             documentation: None,
             filter_text: Some(label.into()),
@@ -177,14 +178,23 @@ impl CompletionContent {
         label: String,
         detail: Option<String>,
         documentation: Option<String>,
+        required_keys: Option<&Vec<String>>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&Url>,
     ) -> Self {
+        let required = required_keys
+            .map(|required_keys| required_keys.contains(&label))
+            .unwrap_or_default();
+
         Self {
             label,
             kind: CompletionKind::Property,
             emoji_icon: None,
-            priority: CompletionPriority::Normal,
+            priority: if required {
+                CompletionContentPriority::Required
+            } else {
+                CompletionContentPriority::Normal
+            },
             detail,
             documentation,
             filter_text: None,
@@ -205,7 +215,7 @@ impl CompletionContent {
                 label: trigger.to_string(),
                 kind: CompletionKind::MagicTrigger,
                 emoji_icon: Some('🦅'),
-                priority: CompletionPriority::TypeHint,
+                priority: CompletionContentPriority::TypeHint,
                 detail: Some(detail.to_string()),
                 documentation: None,
                 filter_text: Some(format!("{key}{trigger}")),
@@ -254,15 +264,28 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
         };
 
         let label_details = match completion_content.priority {
-            CompletionPriority::Default => Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                detail: None,
-                description: Some("default".to_string()),
-            }),
-            CompletionPriority::Enum => Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                detail: None,
-                description: Some("enum".to_string()),
-            }),
-            CompletionPriority::Normal => {
+            CompletionContentPriority::Default => {
+                Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                    detail: None,
+                    description: Some("default".to_string()),
+                })
+            }
+            CompletionContentPriority::Enum => {
+                Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                    detail: None,
+                    description: Some("enum".to_string()),
+                })
+            }
+            CompletionContentPriority::Required => match completion_content.kind {
+                CompletionKind::Property => {
+                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                        detail: Some(" required".to_string()),
+                        description: completion_content.detail.clone(),
+                    })
+                }
+                _ => unreachable!("Required priority is only for property"),
+            },
+            CompletionContentPriority::Normal => {
                 if completion_content.kind == CompletionKind::Property {
                     Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                         detail: None,
@@ -272,9 +295,9 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     None
                 }
             }
-            CompletionPriority::TypeHint
-            | CompletionPriority::TypeHintTrue
-            | CompletionPriority::TypeHintFalse => {
+            CompletionContentPriority::TypeHint
+            | CompletionContentPriority::TypeHintTrue
+            | CompletionContentPriority::TypeHintFalse => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
                     description: Some("type hint".to_string()),

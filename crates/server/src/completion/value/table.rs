@@ -97,6 +97,7 @@ impl FindCompletionContents for document_tree::Table {
                                             schema_candidate.detail(definitions, completion_hint),
                                             schema_candidate
                                                 .documentation(definitions, completion_hint),
+                                            table_schema.required.as_ref(),
                                             CompletionEdit::new_propery(
                                                 &label,
                                                 position,
@@ -223,6 +224,7 @@ impl FindCompletionContents for document_tree::Table {
                                     label.clone(),
                                     schema_candidate.detail(definitions, completion_hint),
                                     schema_candidate.documentation(definitions, completion_hint),
+                                    table_schema.required.as_ref(),
                                     CompletionEdit::new_propery(&label, position, completion_hint),
                                     schema_url,
                                 ));
@@ -331,6 +333,7 @@ impl FindCompletionContents for TableSchema {
                         label.clone(),
                         schema_candidate.detail(definitions, completion_hint),
                         schema_candidate.documentation(definitions, completion_hint),
+                        self.required.as_ref(),
                         CompletionEdit::new_propery(&label, position, completion_hint),
                         schema_url,
                     ));
