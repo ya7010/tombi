@@ -307,7 +307,7 @@ impl FindCompletionContents for TableSchema {
             unreachable!("definitions must be provided");
         };
 
-        let mut completions = Vec::new();
+        let mut completion_items = Vec::new();
 
         for mut property in self.properties.iter_mut() {
             let label = property.key().to_string();
@@ -327,7 +327,7 @@ impl FindCompletionContents for TableSchema {
                         }
                     }
 
-                    completions.push(CompletionContent::new_property(
+                    completion_items.push(CompletionContent::new_property(
                         label.clone(),
                         schema_candidate.detail(definitions, completion_hint),
                         schema_candidate.documentation(definitions, completion_hint),
@@ -337,7 +337,7 @@ impl FindCompletionContents for TableSchema {
                 }
             }
         }
-        completions
+        completion_items
     }
 }
 
