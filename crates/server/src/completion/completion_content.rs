@@ -3,14 +3,13 @@ use tower_lsp::lsp_types::Url;
 
 use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum CompletionContentPriority {
     Default = 0,
     Enum,
-    Required,
-    #[default]
-    Normal,
+    Property,
+    OptionalProperty,
     TypeHint,
     TypeHintTrue,
     TypeHintFalse,
@@ -191,9 +190,9 @@ impl CompletionContent {
             kind: CompletionKind::Property,
             emoji_icon: None,
             priority: if required {
-                CompletionContentPriority::Required
+                CompletionContentPriority::Property
             } else {
-                CompletionContentPriority::Normal
+                CompletionContentPriority::OptionalProperty
             },
             detail,
             documentation,
@@ -276,24 +275,17 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     description: Some("enum".to_string()),
                 })
             }
-            CompletionContentPriority::Required => match completion_content.kind {
-                CompletionKind::Property => {
-                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                        detail: Some(" required".to_string()),
-                        description: completion_content.detail.clone(),
-                    })
-                }
-                _ => unreachable!("Required priority is only for property"),
-            },
-            CompletionContentPriority::Normal => {
-                if completion_content.kind == CompletionKind::Property {
-                    Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
-                        detail: None,
-                        description: completion_content.detail.clone(),
-                    })
-                } else {
-                    None
-                }
+            CompletionContentPriority::Property => {
+                Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                    detail: None,
+                    description: completion_content.detail.clone(),
+                })
+            }
+            CompletionContentPriority::OptionalProperty => {
+                Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                    detail: Some("?".to_string()),
+                    description: completion_content.detail.clone(),
+                })
             }
             CompletionContentPriority::TypeHint
             | CompletionContentPriority::TypeHintTrue
