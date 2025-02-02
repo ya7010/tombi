@@ -51,6 +51,7 @@ impl FindCompletionContents for document_tree::Table {
                             }
 
                             if let Ok(property_schema) = property.value_mut().resolve(definitions) {
+                                tracing::trace!("property schema: {:?}", property_schema);
                                 return value.find_completion_contents(
                                     &accessors
                                         .clone()

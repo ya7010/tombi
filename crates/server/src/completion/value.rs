@@ -48,6 +48,12 @@ impl FindCompletionContents for document_tree::Value {
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
+        tracing::trace!("self: {:?}", self);
+        tracing::trace!("accessors: {:?}", accessors);
+        tracing::trace!("keys: {:?}", keys);
+        tracing::trace!("value_schema: {:?}", value_schema);
+        tracing::trace!("completion_hint: {:?}", completion_hint);
+
         match self {
             Self::Boolean(_)
             | Self::Integer(_)

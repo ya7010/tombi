@@ -24,6 +24,11 @@ impl FindCompletionContents for SchemaCompletion {
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
+        tracing::trace!("accessors: {:?}", accessors);
+        tracing::trace!("keys: {:?}", keys);
+        tracing::trace!("value_schema: {:?}", value_schema);
+        tracing::trace!("completion_hint: {:?}", completion_hint);
+
         let Some(value_schema) = value_schema else {
             unreachable!(
                 "SchemaCompletion::find_completion_contents called without a value schema"
