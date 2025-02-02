@@ -96,44 +96,45 @@ impl FindCompletionContents for document_tree::Table {
                                 }
                             }
                         }
+                        if !completion_contents.is_empty() {
+                            return completion_contents;
+                        }
 
-                        if completion_contents.is_empty() {
-                            if let Some(completion_items) = table_schema
-                                .operate_additional_property_schema(
-                                    |additional_property_schema| {
-                                        get_property_value_completion_contents(
-                                            &accessor_str,
-                                            value,
-                                            accessors,
-                                            Some(additional_property_schema),
-                                            toml_version,
-                                            position,
-                                            keys,
-                                            schema_url,
-                                            Some(definitions),
-                                            completion_hint,
-                                        )
-                                    },
-                                    definitions,
-                                )
-                            {
-                                return completion_items;
-                            }
+                        if let Some(completion_items) = table_schema
+                            .operate_additional_property_schema(
+                                |additional_property_schema| {
+                                    get_property_value_completion_contents(
+                                        &accessor_str,
+                                        value,
+                                        accessors,
+                                        Some(additional_property_schema),
+                                        toml_version,
+                                        position,
+                                        keys,
+                                        schema_url,
+                                        Some(definitions),
+                                        completion_hint,
+                                    )
+                                },
+                                definitions,
+                            )
+                        {
+                            return completion_items;
+                        }
 
-                            if table_schema.additional_properties {
-                                return get_property_value_completion_contents(
-                                    &accessor_str,
-                                    value,
-                                    accessors,
-                                    None,
-                                    toml_version,
-                                    position,
-                                    keys,
-                                    None,
-                                    None,
-                                    completion_hint,
-                                );
-                            }
+                        if table_schema.additional_properties {
+                            return get_property_value_completion_contents(
+                                &accessor_str,
+                                value,
+                                accessors,
+                                None,
+                                toml_version,
+                                position,
+                                keys,
+                                None,
+                                None,
+                                completion_hint,
+                            );
                         }
                     }
                 } else {
@@ -221,6 +222,7 @@ impl FindCompletionContents for document_tree::Table {
                 definitions,
                 completion_hint,
             ),
+            Some(_) => Vec::with_capacity(0),
             None => {
                 if let Some(key) = keys.first() {
                     let accessor_str = &key.to_raw_text(toml_version);
@@ -242,7 +244,6 @@ impl FindCompletionContents for document_tree::Table {
 
                 Vec::with_capacity(0)
             }
-            _ => Vec::with_capacity(0),
         }
     }
 }
