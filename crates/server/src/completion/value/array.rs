@@ -23,6 +23,12 @@ impl FindCompletionContents for document_tree::Array {
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
+        tracing::trace!("self: {:?}", self);
+        tracing::trace!("keys: {:?}", keys);
+        tracing::trace!("accessors: {:?}", accessors);
+        tracing::trace!("value schema: {:?}", value_schema);
+        tracing::trace!("completion hint: {:?}", completion_hint);
+
         match value_schema {
             Some(ValueSchema::Array(array_schema)) => {
                 let Some(definitions) = definitions else {
