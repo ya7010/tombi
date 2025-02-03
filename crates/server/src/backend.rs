@@ -198,7 +198,7 @@ impl LanguageServer for Backend {
     }
 
     async fn shutdown(&self) -> Result<(), tower_lsp::jsonrpc::Error> {
-        handle_shutdown()
+        handle_shutdown().await
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
