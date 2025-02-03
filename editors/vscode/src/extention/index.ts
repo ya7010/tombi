@@ -50,6 +50,8 @@ export class Extension {
       process.env["__TOMBI_LANGUAGE_SERVER_DEBUG"] !== undefined,
     );
 
+    await client.start();
+
     const extenstion = new Extension(context, client, server);
 
     // NOTE: When VSCode starts, if a TOML document is open in a tab and the focus is not on it,
