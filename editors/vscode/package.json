@@ -67,6 +67,11 @@
         "command": "tombi.showLanguageServerVersion",
         "title": "Show Language Server Version",
         "category": "Tombi"
+      },
+      {
+        "command": "tombi.restartLanguageServer",
+        "title": "Restart Language Server",
+        "category": "Tombi"
       }
     ],
     "configuration": {

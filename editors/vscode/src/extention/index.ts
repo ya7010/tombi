@@ -82,6 +82,12 @@ export class Extension {
         async () => command.showLanguageServerVersion(this.server),
       ),
     );
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        `${EXTENTION_ID}.restartLanguageServer`,
+        async () => command.restartLanguageServer(this.client),
+      ),
+    );
   }
 
   private registerEvents(): void {
