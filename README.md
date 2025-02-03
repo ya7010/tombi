@@ -88,7 +88,7 @@ If there is JSON Schema information, Tombi will display executable types as hove
 | --- | --- |
 | `type: boolean` | `Boolean` |
 | `type: integer` | `Integer` |
-| `type: number, ` | `Float` |
+| `type: number` | `Float` |
 | `type: string` | `String` |
 | `type: string, format: date-time` | `OffsetDateTime ^ LocalDateTime` |
 | `type: string, format: date` | `LocalDate` |
