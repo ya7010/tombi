@@ -45,10 +45,7 @@ impl SchemaStore {
 
             catalogs.push(CatalogSchema {
                 url,
-                include: match schema.include.as_ref() {
-                    Some(include) => include.clone(),
-                    None => Vec::with_capacity(0),
-                },
+                include: schema.include.clone(),
             });
         }
     }
