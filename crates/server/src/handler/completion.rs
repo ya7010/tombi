@@ -18,7 +18,7 @@ pub async fn handle_completion(
     }: CompletionParams,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_completion");
-    tracing::debug!("text_document: {:#?}", text_document);
+    tracing::trace!("text_document: {:#?}", text_document);
 
     let config = backend.config().await;
 
