@@ -618,6 +618,13 @@ mod completion_labels {
             #[tokio::test]
             async fn aaa_equal_array_bbb(
                 "aaa = [bbb█]"
+            ) -> Ok(["$key"]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn aaa_equal_array_1_comma_bbb(
+                "aaa = [1, bbb.█]"
             ) -> Ok(AnyValue);
         }
 

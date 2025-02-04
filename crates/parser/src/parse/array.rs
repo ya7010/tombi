@@ -1,5 +1,6 @@
 use syntax::T;
 
+use crate::parse::key::eat_key;
 use crate::ErrorKind::*;
 use crate::{
     parse::{
@@ -28,7 +29,25 @@ impl Parse for ast::Array {
                 break;
             }
 
-            ast::Value::parse(p);
+            let n = peek_leading_comments(p);
+            if p.nth_at(n, BARE_KEY) {
+                // NOTE: This is a hack to make code completion more comfortable.
+
+                let key_range = p.nth_range(n);
+                p.error(crate::Error::new(ExpectedValue, key_range));
+                let m = p.start();
+                leading_comments(p);
+                {
+                    let m = p.start();
+                    if eat_key(p) {
+                        m.complete(p, KEYS);
+                    }
+                }
+                tailing_comment(p);
+                m.complete(p, KEY_VALUE);
+            } else {
+                ast::Value::parse(p);
+            }
 
             let n = peek_leading_comments(p);
             if p.nth_at(n, T![,]) {
@@ -48,5 +67,41 @@ impl Parse for ast::Array {
         tailing_comment(p);
 
         m.complete(p, ARRAY);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::test_parser;
+    use crate::ErrorKind::*;
+
+    test_parser! {
+        #[test]
+        fn empty_array("key = []") -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn number_array("key = [1, 2]") -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn number_array_with_tailing_comma("key = [1, 2,]") -> Ok(_)
+    }
+
+    test_parser! {
+        #[test]
+        fn array_only_key("key = [key]") -> Err([
+            SyntaxError(ExpectedValue, 0:7..0:10),
+        ])
+    }
+
+    test_parser! {
+        #[test]
+        fn array_only_key_dot("key = [key.]") -> Err([
+            SyntaxError(ExpectedValue, 0:7..0:10),
+            SyntaxError(ExpectedComma, 0:10..0:11),
+        ])
     }
 }

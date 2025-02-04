@@ -199,8 +199,8 @@ impl CompletionEdit {
         }
     }
 
-    pub fn new_additional_propery(
-        property_name: &str,
+    pub fn new_additional_key(
+        key_name: &str,
         position: text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
@@ -208,7 +208,7 @@ impl CompletionEdit {
             Some(CompletionHint::InArray) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!("{{ ${{0:{property_name}}} }}"),
+                    new_text: format!("{{ ${{0:{key_name}}} }}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: None,
@@ -219,7 +219,7 @@ impl CompletionEdit {
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(" = {{ ${{0:{property_name}}} }}"),
+                    new_text: format!(" = {{ ${{0:{key_name}}} }}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
@@ -230,7 +230,7 @@ impl CompletionEdit {
             Some(CompletionHint::DotTrigger { range, .. }) => Some(Self {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(".${{0:{property_name}}}"),
+                    new_text: format!(".${{0:{key_name}}}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
@@ -241,7 +241,7 @@ impl CompletionEdit {
             Some(CompletionHint::InTableHeader) | None => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!("${{0:{property_name}}}"),
+                    new_text: format!("${{0:{key_name}}}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: None,

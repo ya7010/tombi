@@ -108,7 +108,7 @@ impl FindCompletionContents for document_tree::Value {
 }
 
 pub fn type_hint_value(
-    key: Option<&str>,
+    key_name: Option<&str>,
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
@@ -130,9 +130,9 @@ pub fn type_hint_value(
         )],
     ]);
 
-    if let Some(key) = key {
+    if let Some(key_name) = key_name {
         completion_contents.push(CompletionContent::new_type_hint_key(
-            key,
+            key_name,
             position,
             schema_url,
             completion_hint,

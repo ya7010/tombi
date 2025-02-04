@@ -491,11 +491,29 @@ fn get_property_value_completion_contents(
             }
             None => {
                 if matches!(value, document_tree::Value::Incomplete { .. }) {
-                    return CompletionContent::new_magic_triggers(
-                        accessor_str,
-                        position,
-                        schema_url,
-                    );
+                    match completion_hint {
+                        Some(
+                            CompletionHint::InTableHeader
+                            | CompletionHint::DotTrigger { .. }
+                            | CompletionHint::EqualTrigger { .. }
+                            | CompletionHint::SpaceTrigger { .. },
+                        )
+                        | None => {
+                            return CompletionContent::new_magic_triggers(
+                                accessor_str,
+                                position,
+                                schema_url,
+                            );
+                        }
+                        Some(CompletionHint::InArray) => {
+                            return vec![CompletionContent::new_type_hint_key(
+                                accessor_str,
+                                position,
+                                schema_url,
+                                completion_hint,
+                            )];
+                        }
+                    }
                 }
             }
         }

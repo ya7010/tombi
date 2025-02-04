@@ -131,6 +131,18 @@ impl FindCompletionContents for document_tree::Array {
             None => {
                 for (index, value) in self.values().iter().enumerate() {
                     if value.range().contains(position) || value.range().end() == position {
+                        if let document_tree::Value::Table(table) = value {
+                            if keys.len() == 1 && table.kind() == document_tree::TableKind::KeyValue
+                            {
+                                return vec![CompletionContent::new_type_hint_key(
+                                    &keys.first().unwrap().to_raw_text(toml_version),
+                                    position,
+                                    schema_url,
+                                    Some(CompletionHint::InArray),
+                                )];
+                            }
+                        }
+
                         let accessor = Accessor::Index(index);
                         return value.find_completion_contents(
                             &accessors
