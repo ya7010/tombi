@@ -733,6 +733,7 @@ macro_rules! test_completion_labels {
                 "42",
                 "[]",
                 "{}",
+                "$key",
                 "true",
                 "false",
             ]);
