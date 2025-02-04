@@ -171,7 +171,7 @@ impl CompletionContent {
             documentation: None,
             filter_text: Some(key_name.to_string()),
             schema_url: schema_url.cloned(),
-            edit: CompletionEdit::new_key(key_name, position, completion_hint),
+            edit: CompletionEdit::new_key(key_name, text::Range::at(position), completion_hint),
             preselect: None,
         }
     }
@@ -189,7 +189,11 @@ impl CompletionContent {
             detail: Some("Key".to_string()),
             documentation: None,
             filter_text: None,
-            edit: CompletionEdit::new_additional_key("key", position, completion_hint),
+            edit: CompletionEdit::new_additional_key(
+                "key",
+                text::Range::at(position),
+                completion_hint,
+            ),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
@@ -221,7 +225,7 @@ impl CompletionContent {
             detail,
             documentation,
             filter_text: None,
-            edit: CompletionEdit::new_key(&key_name, position, completion_hint),
+            edit: CompletionEdit::new_key(&key_name, text::Range::at(position), completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
@@ -249,7 +253,11 @@ impl CompletionContent {
                 None
             },
             filter_text: None,
-            edit: CompletionEdit::new_additional_key("key", position, completion_hint),
+            edit: CompletionEdit::new_additional_key(
+                "key",
+                text::Range::at(position),
+                completion_hint,
+            ),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
@@ -268,7 +276,11 @@ impl CompletionContent {
             detail: Some("Additinal Key".to_string()),
             documentation: None,
             filter_text: None,
-            edit: CompletionEdit::new_additional_key("key", position, completion_hint),
+            edit: CompletionEdit::new_additional_key(
+                "key",
+                text::Range::at(position),
+                completion_hint,
+            ),
             schema_url: schema_url.cloned(),
             preselect: None,
         }

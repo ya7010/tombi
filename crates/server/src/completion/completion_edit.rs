@@ -158,7 +158,7 @@ impl CompletionEdit {
 
     pub fn new_key(
         key_name: &str,
-        position: text::Position,
+        key_range: text::Range,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -166,7 +166,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!("{{ {key_name}$1 }}$0"),
-                    range: text::Range::at(position).into(),
+                    range: key_range.into(),
                 }),
                 additional_text_edits: None,
             }),
@@ -177,7 +177,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = {{ {key_name}$1 }}$0"),
-                    range: text::Range::at(position).into(),
+                    range: key_range.into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -188,7 +188,7 @@ impl CompletionEdit {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(".{key_name}"),
-                    range: text::Range::at(position).into(),
+                    range: key_range.into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -201,7 +201,7 @@ impl CompletionEdit {
 
     pub fn new_additional_key(
         key_name: &str,
-        position: text::Position,
+        key_range: text::Range,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -209,7 +209,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!("{{ ${{0:{key_name}}} }}"),
-                    range: text::Range::at(position).into(),
+                    range: key_range.into(),
                 }),
                 additional_text_edits: None,
             }),
@@ -220,7 +220,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = {{ ${{0:{key_name}}} }}"),
-                    range: text::Range::at(position).into(),
+                    range: range.into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -231,7 +231,7 @@ impl CompletionEdit {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(".${{0:{key_name}}}"),
-                    range: text::Range::at(position).into(),
+                    range: range.into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -242,7 +242,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!("${{0:{key_name}}}"),
-                    range: text::Range::at(position).into(),
+                    range: key_range.into(),
                 }),
                 additional_text_edits: None,
             }),
