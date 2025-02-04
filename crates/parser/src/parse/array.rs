@@ -1,6 +1,5 @@
 use syntax::T;
 
-use crate::parse::key::eat_key;
 use crate::ErrorKind::*;
 use crate::{
     parse::{
@@ -29,25 +28,7 @@ impl Parse for ast::Array {
                 break;
             }
 
-            let n = peek_leading_comments(p);
-            if p.nth_at(n, BARE_KEY) {
-                // NOTE: This is a hack to make code completion more comfortable.
-
-                let key_range = p.nth_range(n);
-                p.error(crate::Error::new(ExpectedValue, key_range));
-                let m = p.start();
-                leading_comments(p);
-                {
-                    let m = p.start();
-                    if eat_key(p) {
-                        m.complete(p, KEYS);
-                    }
-                }
-                tailing_comment(p);
-                m.complete(p, KEY_VALUE);
-            } else {
-                ast::Value::parse(p);
-            }
+            ast::Value::parse(p);
 
             let n = peek_leading_comments(p);
             if p.nth_at(n, T![,]) {

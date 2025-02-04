@@ -1,3 +1,4 @@
+use super::key::eat_key;
 use super::{leading_comments, peek_leading_comments, tailing_comment, Parse};
 use crate::ErrorKind::*;
 use crate::{parser::Parser, token_set::TS_COMMEMT_OR_LINE_END};
@@ -23,6 +24,22 @@ impl Parse for ast::Value {
             | LOCAL_TIME => parse_literal_value(p),
             T!('[') => ast::Array::parse(p),
             T!('{') => ast::InlineTable::parse(p),
+            BARE_KEY => {
+                // NOTE: This is a hack to make code completion more comfortable.
+
+                let key_range = p.nth_range(n);
+                p.error(crate::Error::new(ExpectedValue, key_range));
+                let m = p.start();
+                leading_comments(p);
+                {
+                    let m = p.start();
+                    if eat_key(p) {
+                        m.complete(p, KEYS);
+                    }
+                }
+                tailing_comment(p);
+                m.complete(p, KEY_VALUE);
+            }
             _ => parse_invalid_value(p, n),
         }
     }

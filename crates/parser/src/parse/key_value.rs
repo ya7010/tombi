@@ -167,4 +167,15 @@ mod test {
             SyntaxError(ExpectedValue, 0:4..0:9),
         ])
     }
+
+    test_parser! {
+        #[test]
+        fn value_is_key(
+            r#"
+            key=value
+            "#
+        ) -> Err([
+            SyntaxError(ExpectedValue, 0:4..0:9),
+        ])
+    }
 }

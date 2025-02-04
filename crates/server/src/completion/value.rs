@@ -95,12 +95,30 @@ impl FindCompletionContents for document_tree::Value {
                     completion_hint,
                 ),
                 None => {
-                    let key = if let Some(Accessor::Key(key)) = accessors.last() {
-                        Some(key.as_ref())
+                    let key_name = if let Some(key) = keys.last() {
+                        Some(key.to_raw_text(toml_version))
                     } else {
                         None
                     };
-                    type_hint_value(key, position, schema_url, completion_hint)
+
+                    match (&key_name, completion_hint) {
+                        (Some(key_name), Some(CompletionHint::EqualTrigger { range }))
+                            if range.end() < position =>
+                        {
+                            vec![CompletionContent::new_type_hint_key(
+                                key_name,
+                                text::Range::new(range.end(), position),
+                                schema_url,
+                                completion_hint,
+                            )]
+                        }
+                        _ => type_hint_value(
+                            key_name.as_deref(),
+                            position,
+                            schema_url,
+                            completion_hint,
+                        ),
+                    }
                 }
             },
         }

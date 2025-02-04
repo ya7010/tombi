@@ -428,6 +428,26 @@ mod completion_edit {
 
         test_completion_edit! {
             #[tokio::test]
+            async fn key_dot_abc(
+                "key.abc█",
+                Select("$key"),
+            ) -> Ok(
+                "key.abc"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_abc(
+                "key=abc█",
+                Select("$key"),
+            ) -> Ok(
+                "key = { abc$1 }$0"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
             async fn key_equal_array(
                 "key=[█]",
                 Select("$key"),

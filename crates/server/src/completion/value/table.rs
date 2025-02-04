@@ -460,6 +460,13 @@ fn get_property_value_completion_contents(
     definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
+    tracing::debug!("accessor_str: {:?}", accessor_str);
+    tracing::debug!("value: {:?}", value);
+    tracing::debug!("keys: {:?}", keys);
+    tracing::debug!("accessors: {:?}", accessors);
+    tracing::debug!("value schema: {:?}", value_schema);
+    tracing::debug!("completion hint: {:?}", completion_hint);
+
     if keys.len() == 1 {
         match completion_hint {
             Some(
@@ -469,12 +476,7 @@ fn get_property_value_completion_contents(
                 | CompletionHint::SpaceTrigger { .. },
             ) => {
                 if value_schema.is_none() {
-                    return type_hint_value(
-                        Some(&keys[0].to_raw_text(toml_version)),
-                        position,
-                        None,
-                        completion_hint,
-                    );
+                    return type_hint_value(Some(accessor_str), position, None, completion_hint);
                 }
             }
             Some(CompletionHint::InTableHeader) => {
