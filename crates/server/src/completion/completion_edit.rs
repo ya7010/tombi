@@ -18,8 +18,7 @@ impl CompletionEdit {
         match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. }
-                | CompletionHint::SpaceTrigger { range, .. },
+                | CompletionHint::EqualTrigger { range, .. },
             ) => Some(Self {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
@@ -43,8 +42,7 @@ impl CompletionEdit {
         match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. }
-                | CompletionHint::SpaceTrigger { range, .. },
+                | CompletionHint::EqualTrigger { range, .. },
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
@@ -68,8 +66,7 @@ impl CompletionEdit {
         match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. }
-                | CompletionHint::SpaceTrigger { range, .. },
+                | CompletionHint::EqualTrigger { range, .. },
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
@@ -99,8 +96,7 @@ impl CompletionEdit {
         match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. }
-                | CompletionHint::SpaceTrigger { range, .. },
+                | CompletionHint::EqualTrigger { range, .. },
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
@@ -128,10 +124,7 @@ impl CompletionEdit {
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
-            Some(
-                CompletionHint::DotTrigger { range, .. }
-                | CompletionHint::SpaceTrigger { range, .. },
-            ) => Some(Self {
+            Some(CompletionHint::DotTrigger { range, .. }) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: " = { $1 }$0".to_string(),
@@ -170,10 +163,7 @@ impl CompletionEdit {
                 }),
                 additional_text_edits: None,
             }),
-            Some(
-                CompletionHint::SpaceTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. },
-            ) => Some(Self {
+            Some(CompletionHint::EqualTrigger { range, .. }) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = {{ {key_name}$1 }}$0"),
@@ -213,10 +203,7 @@ impl CompletionEdit {
                 }),
                 additional_text_edits: None,
             }),
-            Some(
-                CompletionHint::SpaceTrigger { range, .. }
-                | CompletionHint::EqualTrigger { range, .. },
-            ) => Some(Self {
+            Some(CompletionHint::EqualTrigger { range, .. }) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = {{ ${{0:{key_name}}} }}"),

@@ -472,8 +472,7 @@ fn get_property_value_completion_contents(
             Some(
                 CompletionHint::InArray
                 | CompletionHint::DotTrigger { .. }
-                | CompletionHint::EqualTrigger { .. }
-                | CompletionHint::SpaceTrigger { .. },
+                | CompletionHint::EqualTrigger { .. },
             ) => {
                 if value_schema.is_none() {
                     return type_hint_value(Some(accessor_str), position, None, completion_hint);
@@ -492,8 +491,7 @@ fn get_property_value_completion_contents(
                         Some(
                             CompletionHint::InTableHeader
                             | CompletionHint::DotTrigger { .. }
-                            | CompletionHint::EqualTrigger { .. }
-                            | CompletionHint::SpaceTrigger { .. },
+                            | CompletionHint::EqualTrigger { .. },
                         )
                         | None => {
                             return CompletionContent::new_magic_triggers(

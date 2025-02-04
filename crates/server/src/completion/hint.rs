@@ -4,5 +4,4 @@ pub enum CompletionHint {
     InArray,
     DotTrigger { range: text::Range },
     EqualTrigger { range: text::Range },
-    SpaceTrigger { range: text::Range },
 }
