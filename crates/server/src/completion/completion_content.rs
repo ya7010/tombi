@@ -201,10 +201,10 @@ impl CompletionContent {
 
     pub fn new_key(
         key_name: &str,
+        key_range: text::Range,
         detail: Option<String>,
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
-        position: text::Position,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -225,7 +225,7 @@ impl CompletionContent {
             detail,
             documentation,
             filter_text: None,
-            edit: CompletionEdit::new_key(&key_name, text::Range::at(position), completion_hint),
+            edit: CompletionEdit::new_key(&key_name, key_range, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
@@ -233,7 +233,7 @@ impl CompletionContent {
 
     pub fn new_pattern_key(
         patterns: &[String],
-        position: text::Position,
+        key_range: text::Range,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -253,18 +253,14 @@ impl CompletionContent {
                 None
             },
             filter_text: None,
-            edit: CompletionEdit::new_additional_key(
-                "key",
-                text::Range::at(position),
-                completion_hint,
-            ),
+            edit: CompletionEdit::new_additional_key("key", key_range, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
     }
 
     pub fn new_additional_key(
-        position: text::Position,
+        key_range: text::Range,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -276,11 +272,7 @@ impl CompletionContent {
             detail: Some("Additinal Key".to_string()),
             documentation: None,
             filter_text: None,
-            edit: CompletionEdit::new_additional_key(
-                "key",
-                text::Range::at(position),
-                completion_hint,
-            ),
+            edit: CompletionEdit::new_additional_key("key", key_range, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }

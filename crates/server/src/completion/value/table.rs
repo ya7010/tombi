@@ -94,11 +94,11 @@ impl FindCompletionContents for document_tree::Table {
                                         }
                                         completion_contents.push(CompletionContent::new_key(
                                             &key_name,
+                                            text::Range::at(position),
                                             schema_candidate.detail(definitions, completion_hint),
                                             schema_candidate
                                                 .documentation(definitions, completion_hint),
                                             table_schema.required.as_ref(),
-                                            position,
                                             schema_url,
                                             completion_hint,
                                         ));
@@ -268,10 +268,10 @@ impl FindCompletionContents for document_tree::Table {
 
                                 completion_contents.push(CompletionContent::new_key(
                                     schema_key_str,
+                                    text::Range::at(position),
                                     schema_candidate.detail(definitions, completion_hint),
                                     schema_candidate.documentation(definitions, completion_hint),
                                     table_schema.required.as_ref(),
-                                    position,
                                     schema_url,
                                     completion_hint,
                                 ));
@@ -287,13 +287,13 @@ impl FindCompletionContents for document_tree::Table {
                                 .collect::<Vec<_>>();
                             completion_contents.push(CompletionContent::new_pattern_key(
                                 patterns.as_ref(),
-                                position,
+                                text::Range::at(position),
                                 schema_url,
                                 completion_hint,
                             ))
                         } else if table_schema.has_additional_property_schema() {
                             completion_contents.push(CompletionContent::new_additional_key(
-                                position,
+                                text::Range::at(position),
                                 schema_url,
                                 completion_hint,
                             ));
@@ -405,10 +405,10 @@ impl FindCompletionContents for TableSchema {
 
                     completion_items.push(CompletionContent::new_key(
                         label,
+                        text::Range::at(position),
                         schema_candidate.detail(definitions, completion_hint),
                         schema_candidate.documentation(definitions, completion_hint),
                         self.required.as_ref(),
-                        position,
                         schema_url,
                         completion_hint,
                     ));
