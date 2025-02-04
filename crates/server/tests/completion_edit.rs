@@ -445,6 +445,16 @@ mod completion_edit {
                 "key=[{ abc$1 }$0]"
             );
         }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_array_bra_abc_dot_def_ket(
+                "key=[{ abc.def█ }]",
+                Select("$key"),
+            ) -> Ok(
+                "key=[{ abc.def }]"
+            );
+        }
     }
 }
 
