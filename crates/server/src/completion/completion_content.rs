@@ -314,13 +314,13 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             CompletionContentPriority::Default => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
-                    description: Some("default".to_string()),
+                    description: Some("Default".to_string()),
                 })
             }
             CompletionContentPriority::Enum => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
-                    description: Some("enum".to_string()),
+                    description: Some("Enum".to_string()),
                 })
             }
             CompletionContentPriority::Property => {
@@ -341,7 +341,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             | CompletionContentPriority::TypeHintFalse => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
-                    description: Some("type hint".to_string()),
+                    description: Some("Type Hint".to_string()),
                 })
             }
         }
