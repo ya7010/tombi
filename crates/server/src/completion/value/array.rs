@@ -134,9 +134,18 @@ impl FindCompletionContents for document_tree::Array {
                         if let document_tree::Value::Table(table) = value {
                             if keys.len() == 1 && table.kind() == document_tree::TableKind::KeyValue
                             {
+                                let key_str = &keys.first().unwrap().to_raw_text(toml_version);
                                 return vec![CompletionContent::new_type_hint_key(
-                                    &keys.first().unwrap().to_raw_text(toml_version),
-                                    text::Range::at(position),
+                                    &key_str,
+                                    text::Range::new(
+                                        text::Position::new(
+                                            position.line(),
+                                            position
+                                                .column()
+                                                .saturating_sub(key_str.len() as text::Column),
+                                        ),
+                                        position,
+                                    ),
                                     schema_url,
                                     Some(CompletionHint::InArray),
                                 )];
