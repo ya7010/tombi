@@ -557,6 +557,20 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn empty(
+                "█"
+            ) -> Ok(["$key"]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn key(
+                "key█"
+            ) -> Ok([".", "="]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn key_dot(
                 "key.█"
             ) -> Ok(AnyValue);

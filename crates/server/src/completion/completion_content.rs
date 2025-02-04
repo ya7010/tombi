@@ -8,10 +8,11 @@ use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, Co
 pub enum CompletionContentPriority {
     Default = 0,
     Enum,
-    Property,
-    OptionalProperty,
-    AdditionalProperty,
+    Key,
+    OptionalKey,
+    AdditionalKey,
     TypeHint,
+    TypeHintKey,
     TypeHintTrue,
     TypeHintFalse,
 }
@@ -155,27 +156,50 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_type_hint_property(
+    pub fn new_type_hint_key(
         label: impl Into<String>,
-        edit: Option<CompletionEdit>,
+        position: text::Position,
         schema_url: Option<&Url>,
+        completion_hint: Option<CompletionHint>,
     ) -> Self {
+        let label = label.into();
+        let edit = CompletionEdit::new_key(&label, position, completion_hint);
+
         Self {
-            label: "{}".to_string(),
+            label: "$key".to_string(),
             kind: CompletionKind::Table,
             emoji_icon: Some('🦅'),
-            priority: CompletionContentPriority::TypeHint,
-            detail: Some("InlineTable".to_string()),
+            priority: CompletionContentPriority::TypeHintKey,
+            detail: Some("Key".to_string()),
             documentation: None,
-            filter_text: Some(label.into()),
+            filter_text: Some(label),
             schema_url: schema_url.cloned(),
             edit,
             preselect: None,
         }
     }
 
-    pub fn new_property(
-        label: String,
+    pub fn new_type_hint_empty_key(
+        position: text::Position,
+        schema_url: Option<&Url>,
+        completion_hint: Option<CompletionHint>,
+    ) -> Self {
+        Self {
+            label: "$key".to_string(),
+            kind: CompletionKind::Key,
+            emoji_icon: Some('🦅'),
+            priority: CompletionContentPriority::TypeHintKey,
+            detail: Some("Key".to_string()),
+            documentation: None,
+            filter_text: None,
+            edit: CompletionEdit::new_additional_propery("key", position, completion_hint),
+            schema_url: schema_url.cloned(),
+            preselect: None,
+        }
+    }
+
+    pub fn new_key(
+        key_name: String,
         detail: Option<String>,
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
@@ -183,17 +207,17 @@ impl CompletionContent {
         schema_url: Option<&Url>,
     ) -> Self {
         let required = required_keys
-            .map(|required_keys| required_keys.contains(&label))
+            .map(|required_keys| required_keys.contains(&key_name))
             .unwrap_or_default();
 
         Self {
-            label,
-            kind: CompletionKind::Property,
+            label: key_name,
+            kind: CompletionKind::Key,
             emoji_icon: None,
             priority: if required {
-                CompletionContentPriority::Property
+                CompletionContentPriority::Key
             } else {
-                CompletionContentPriority::OptionalProperty
+                CompletionContentPriority::OptionalKey
             },
             detail,
             documentation,
@@ -204,7 +228,7 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_pattern_property(
+    pub fn new_pattern_key(
         patterns: &[String],
         position: text::Position,
         schema_url: Option<&Url>,
@@ -212,10 +236,10 @@ impl CompletionContent {
     ) -> Self {
         Self {
             label: "$key".to_string(),
-            kind: CompletionKind::Property,
+            kind: CompletionKind::Key,
             emoji_icon: None,
-            priority: CompletionContentPriority::AdditionalProperty,
-            detail: Some("Pattern Property".to_string()),
+            priority: CompletionContentPriority::AdditionalKey,
+            detail: Some("Pattern Key".to_string()),
             documentation: if !patterns.is_empty() {
                 let mut documentation = "Allowed Patterns:\n\n".to_string();
                 for pattern in patterns {
@@ -232,17 +256,17 @@ impl CompletionContent {
         }
     }
 
-    pub fn new_additional_property(
+    pub fn new_additional_key(
         position: text::Position,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
             label: "$key".to_string(),
-            kind: CompletionKind::Property,
+            kind: CompletionKind::Key,
             emoji_icon: None,
-            priority: CompletionContentPriority::AdditionalProperty,
-            detail: Some("Additinal Property".to_string()),
+            priority: CompletionContentPriority::AdditionalKey,
+            detail: Some("Additinal Key".to_string()),
             documentation: None,
             filter_text: None,
             edit: CompletionEdit::new_additional_propery("key", position, completion_hint),
@@ -323,20 +347,20 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
                     description: Some("Enum".to_string()),
                 })
             }
-            CompletionContentPriority::Property => {
+            CompletionContentPriority::Key => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,
                     description: completion_content.detail.clone(),
                 })
             }
-            CompletionContentPriority::OptionalProperty
-            | CompletionContentPriority::AdditionalProperty => {
+            CompletionContentPriority::OptionalKey | CompletionContentPriority::AdditionalKey => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: Some("?".to_string()),
                     description: completion_content.detail.clone(),
                 })
             }
             CompletionContentPriority::TypeHint
+            | CompletionContentPriority::TypeHintKey
             | CompletionContentPriority::TypeHintTrue
             | CompletionContentPriority::TypeHintFalse => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {

@@ -92,13 +92,13 @@ impl FindCompletionContents for document_tree::Table {
                                                 continue;
                                             }
                                         }
-                                        completion_contents.push(CompletionContent::new_property(
+                                        completion_contents.push(CompletionContent::new_key(
                                             label.clone(),
                                             schema_candidate.detail(definitions, completion_hint),
                                             schema_candidate
                                                 .documentation(definitions, completion_hint),
                                             table_schema.required.as_ref(),
-                                            CompletionEdit::new_propery(
+                                            CompletionEdit::new_key(
                                                 &label,
                                                 position,
                                                 completion_hint,
@@ -269,12 +269,12 @@ impl FindCompletionContents for document_tree::Table {
                                     }
                                 }
 
-                                completion_contents.push(CompletionContent::new_property(
+                                completion_contents.push(CompletionContent::new_key(
                                     schema_key_str.to_string(),
                                     schema_candidate.detail(definitions, completion_hint),
                                     schema_candidate.documentation(definitions, completion_hint),
                                     table_schema.required.as_ref(),
-                                    CompletionEdit::new_propery(
+                                    CompletionEdit::new_key(
                                         schema_key_str,
                                         position,
                                         completion_hint,
@@ -291,14 +291,14 @@ impl FindCompletionContents for document_tree::Table {
                                 .iter()
                                 .map(|pattern_property| pattern_property.key().clone())
                                 .collect::<Vec<_>>();
-                            completion_contents.push(CompletionContent::new_pattern_property(
+                            completion_contents.push(CompletionContent::new_pattern_key(
                                 patterns.as_ref(),
                                 position,
                                 schema_url,
                                 completion_hint,
                             ))
                         } else if table_schema.has_additional_property_schema() {
-                            completion_contents.push(CompletionContent::new_additional_property(
+                            completion_contents.push(CompletionContent::new_additional_key(
                                 position,
                                 schema_url,
                                 completion_hint,
@@ -346,7 +346,7 @@ impl FindCompletionContents for document_tree::Table {
                 if let Some(key) = keys.first() {
                     let accessor_str = &key.to_raw_text(toml_version);
                     if let Some(value) = self.get(key) {
-                        return get_property_value_completion_contents(
+                        get_property_value_completion_contents(
                             accessor_str,
                             value,
                             accessors,
@@ -357,11 +357,17 @@ impl FindCompletionContents for document_tree::Table {
                             None,
                             None,
                             completion_hint,
-                        );
+                        )
+                    } else {
+                        Vec::with_capacity(0)
                     }
+                } else {
+                    vec![CompletionContent::new_type_hint_empty_key(
+                        position,
+                        schema_url,
+                        completion_hint,
+                    )]
                 }
-
-                Vec::with_capacity(0)
             }
         }
     }
@@ -403,12 +409,12 @@ impl FindCompletionContents for TableSchema {
                         }
                     }
 
-                    completion_items.push(CompletionContent::new_property(
+                    completion_items.push(CompletionContent::new_key(
                         label.clone(),
                         schema_candidate.detail(definitions, completion_hint),
                         schema_candidate.documentation(definitions, completion_hint),
                         self.required.as_ref(),
-                        CompletionEdit::new_propery(&label, position, completion_hint),
+                        CompletionEdit::new_key(&label, position, completion_hint),
                         schema_url,
                     ));
                 }
@@ -468,7 +474,12 @@ fn get_property_value_completion_contents(
                 | CompletionHint::SpaceTrigger { .. },
             ) => {
                 if value_schema.is_none() {
-                    return type_hint_value(position, None, completion_hint);
+                    return type_hint_value(
+                        Some(&keys[0].to_raw_text(toml_version)),
+                        position,
+                        None,
+                        completion_hint,
+                    );
                 }
             }
             Some(CompletionHint::InTableHeader) => {

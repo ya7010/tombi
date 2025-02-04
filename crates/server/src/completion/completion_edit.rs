@@ -156,8 +156,8 @@ impl CompletionEdit {
         }
     }
 
-    pub fn new_propery(
-        property_name: &str,
+    pub fn new_key(
+        key_name: &str,
         position: text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
@@ -165,7 +165,7 @@ impl CompletionEdit {
             Some(CompletionHint::InArray) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!("{{ {property_name}$1 }}$0"),
+                    new_text: format!("{{ {key_name}$1 }}$0"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: None,
@@ -176,7 +176,7 @@ impl CompletionEdit {
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(" = {{ {property_name}$1 }}$0"),
+                    new_text: format!(" = {{ {key_name}$1 }}$0"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
@@ -187,7 +187,7 @@ impl CompletionEdit {
             Some(CompletionHint::DotTrigger { range, .. }) => Some(Self {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(".{property_name}"),
+                    new_text: format!(".{key_name}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {

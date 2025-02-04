@@ -11,7 +11,7 @@ pub enum CompletionKind {
     LocalTime,
     Array,
     Table,
-    Property,
+    Key,
     MagicTrigger,
 }
 
@@ -31,7 +31,7 @@ impl From<CompletionKind> for tower_lsp::lsp_types::CompletionItemKind {
             CompletionKind::LocalTime => tower_lsp::lsp_types::CompletionItemKind::EVENT,
             CompletionKind::Array => tower_lsp::lsp_types::CompletionItemKind::STRUCT,
             CompletionKind::Table => tower_lsp::lsp_types::CompletionItemKind::STRUCT,
-            CompletionKind::Property => tower_lsp::lsp_types::CompletionItemKind::FIELD,
+            CompletionKind::Key => tower_lsp::lsp_types::CompletionItemKind::FIELD,
             // NOTE: To give a writing taste close to method chaining
             CompletionKind::MagicTrigger => tower_lsp::lsp_types::CompletionItemKind::METHOD,
         }

@@ -148,7 +148,7 @@ impl FindCompletionContents for document_tree::Array {
                         );
                     }
                 }
-                type_hint_value(position, schema_url, completion_hint)
+                type_hint_value(None, position, schema_url, completion_hint)
             }
         }
     }

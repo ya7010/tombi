@@ -94,18 +94,26 @@ impl FindCompletionContents for document_tree::Value {
                     definitions,
                     completion_hint,
                 ),
-                None => type_hint_value(position, schema_url, completion_hint),
+                None => {
+                    let key = if let Some(Accessor::Key(key)) = accessors.last() {
+                        Some(key.as_ref())
+                    } else {
+                        None
+                    };
+                    type_hint_value(key, position, schema_url, completion_hint)
+                }
             },
         }
     }
 }
 
 pub fn type_hint_value(
+    key: Option<&str>,
     position: text::Position,
     schema_url: Option<&Url>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    itertools::concat([
+    let mut completion_contents = itertools::concat([
         type_hint_boolean(position, schema_url, completion_hint),
         type_hint_integer(position, schema_url, completion_hint),
         type_hint_float(position, schema_url, completion_hint),
@@ -120,7 +128,24 @@ pub fn type_hint_value(
             schema_url,
             completion_hint,
         )],
-    ])
+    ]);
+
+    if let Some(key) = key {
+        completion_contents.push(CompletionContent::new_type_hint_key(
+            key,
+            position,
+            schema_url,
+            completion_hint,
+        ))
+    } else {
+        completion_contents.push(CompletionContent::new_type_hint_empty_key(
+            position,
+            schema_url,
+            completion_hint,
+        ))
+    }
+
+    completion_contents
 }
 
 impl CompletionCandidate for ValueSchema {
