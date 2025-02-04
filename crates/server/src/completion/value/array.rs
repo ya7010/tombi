@@ -136,7 +136,7 @@ impl FindCompletionContents for document_tree::Array {
                             {
                                 return vec![CompletionContent::new_type_hint_key(
                                     &keys.first().unwrap().to_raw_text(toml_version),
-                                    position,
+                                    text::Range::at(position),
                                     schema_url,
                                     Some(CompletionHint::InArray),
                                 )];

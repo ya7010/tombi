@@ -133,7 +133,7 @@ pub fn type_hint_value(
     if let Some(key_name) = key_name {
         completion_contents.push(CompletionContent::new_type_hint_key(
             key_name,
-            position,
+            text::Range::at(position),
             schema_url,
             completion_hint,
         ))

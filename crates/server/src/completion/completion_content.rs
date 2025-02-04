@@ -158,7 +158,7 @@ impl CompletionContent {
 
     pub fn new_type_hint_key(
         key_name: &str,
-        position: text::Position,
+        key_range: text::Range,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -171,7 +171,7 @@ impl CompletionContent {
             documentation: None,
             filter_text: Some(key_name.to_string()),
             schema_url: schema_url.cloned(),
-            edit: CompletionEdit::new_key(key_name, text::Range::at(position), completion_hint),
+            edit: CompletionEdit::new_key(key_name, key_range, completion_hint),
             preselect: None,
         }
     }

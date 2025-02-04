@@ -503,7 +503,7 @@ fn get_property_value_completion_contents(
                         Some(CompletionHint::InArray) => {
                             return vec![CompletionContent::new_type_hint_key(
                                 accessor_str,
-                                position,
+                                text::Range::at(position),
                                 schema_url,
                                 completion_hint,
                             )];
