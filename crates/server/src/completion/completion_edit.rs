@@ -48,7 +48,7 @@ impl CompletionEdit {
             ) => Some(Self {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    new_text: format!(" = ${{1:{label}}}"),
+                    new_text: format!(" = ${{0:{label}}}"),
                     range: text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {

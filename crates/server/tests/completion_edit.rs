@@ -252,7 +252,7 @@ mod completion_edit {
                 "key.█",
                 Select("42"),
             ) -> Ok(
-                "key = ${1:42}"
+                "key = ${0:42}"
             );
         }
 
@@ -262,7 +262,7 @@ mod completion_edit {
                 "key.█",
                 Select("3.14"),
             ) -> Ok(
-                "key = ${1:3.14}"
+                "key = ${0:3.14}"
             );
         }
 
@@ -282,7 +282,7 @@ mod completion_edit {
                 "key.█",
                 Select(today_offset_date_time()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_offset_date_time())
+                &format!("key = ${{0:{}}}", today_offset_date_time())
             );
         }
 
@@ -292,7 +292,7 @@ mod completion_edit {
                 "key.█",
                 Select(today_local_date_time()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_local_date_time())
+                &format!("key = ${{0:{}}}", today_local_date_time())
             );
         }
 
@@ -302,7 +302,7 @@ mod completion_edit {
                 "key.█",
                 Select(today_local_date()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_local_date())
+                &format!("key = ${{0:{}}}", today_local_date())
             );
         }
 
@@ -312,7 +312,7 @@ mod completion_edit {
                 "key.█",
                 Select(today_local_time()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_local_time())
+                &format!("key = ${{0:{}}}", today_local_time())
             );
         }
 
@@ -352,7 +352,7 @@ mod completion_edit {
                 "key=█",
                 Select("42"),
             ) -> Ok(
-                "key = ${1:42}"
+                "key = ${0:42}"
             );
         }
 
@@ -362,7 +362,7 @@ mod completion_edit {
                 "key=█",
                 Select("3.14"),
             ) -> Ok(
-                "key = ${1:3.14}"
+                "key = ${0:3.14}"
             );
         }
 
@@ -382,7 +382,7 @@ mod completion_edit {
                 "key=█",
                 Select(today_offset_date_time()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_offset_date_time())
+                &format!("key = ${{0:{}}}", today_offset_date_time())
             );
         }
 
@@ -392,7 +392,7 @@ mod completion_edit {
                 "key=█",
                 Select(today_local_date_time()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_local_date_time())
+                &format!("key = ${{0:{}}}", today_local_date_time())
             );
         }
 
@@ -402,7 +402,7 @@ mod completion_edit {
                 "key=█",
                 Select(today_local_date()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_local_date())
+                &format!("key = ${{0:{}}}", today_local_date())
             );
         }
 
@@ -412,7 +412,7 @@ mod completion_edit {
                 "key=█",
                 Select(today_local_time()),
             ) -> Ok(
-                &format!("key = ${{1:{}}}", today_local_time())
+                &format!("key = ${{0:{}}}", today_local_time())
             );
         }
 
