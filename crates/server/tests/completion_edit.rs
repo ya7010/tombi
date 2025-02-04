@@ -425,6 +425,26 @@ mod completion_edit {
                 "key = [$1]$0"
             );
         }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_array(
+                "key=[█]",
+                Select("$key"),
+            ) -> Ok(
+                "key=[${0:key}]"
+            );
+        }
+
+        test_completion_edit! {
+            #[tokio::test]
+            async fn key_equal_array_abc(
+                "key=[abc█]",
+                Select("$key"),
+            ) -> Ok(
+                "key=[{ abc$1 }$0]"
+            );
+        }
     }
 }
 
