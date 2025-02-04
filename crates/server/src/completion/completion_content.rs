@@ -196,19 +196,21 @@ impl CompletionContent {
     }
 
     pub fn new_key(
-        key_name: String,
+        key_name: &str,
         detail: Option<String>,
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
-        edit: Option<CompletionEdit>,
+        position: text::Position,
         schema_url: Option<&Url>,
+        completion_hint: Option<CompletionHint>,
     ) -> Self {
+        let label = key_name.to_string();
         let required = required_keys
-            .map(|required_keys| required_keys.contains(&key_name))
+            .map(|required_keys| required_keys.contains(&label))
             .unwrap_or_default();
 
         Self {
-            label: key_name,
+            label,
             kind: CompletionKind::Key,
             emoji_icon: None,
             priority: if required {
@@ -219,7 +221,7 @@ impl CompletionContent {
             detail,
             documentation,
             filter_text: None,
-            edit,
+            edit: CompletionEdit::new_key(&key_name, position, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }

@@ -3,7 +3,7 @@ use crate::completion::{
         all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
         one_of::find_one_of_completion_items, type_hint_value,
     },
-    CompletionCandidate, CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
+    CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
 use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
@@ -69,8 +69,8 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         } else if keys.len() == 1 {
                             for mut property in table_schema.properties.iter_mut() {
-                                let label = property.key().to_string();
-                                if !label.starts_with(accessor_str.as_str()) {
+                                let key_name = property.key().to_string();
+                                if !key_name.starts_with(accessor_str.as_str()) {
                                     continue;
                                 }
                                 if let Ok(value_schema) = property.value_mut().resolve(definitions)
@@ -93,17 +93,14 @@ impl FindCompletionContents for document_tree::Table {
                                             }
                                         }
                                         completion_contents.push(CompletionContent::new_key(
-                                            label.clone(),
+                                            &key_name,
                                             schema_candidate.detail(definitions, completion_hint),
                                             schema_candidate
                                                 .documentation(definitions, completion_hint),
                                             table_schema.required.as_ref(),
-                                            CompletionEdit::new_key(
-                                                &label,
-                                                position,
-                                                completion_hint,
-                                            ),
+                                            position,
                                             schema_url,
+                                            completion_hint,
                                         ));
                                     }
                                 }
@@ -270,16 +267,13 @@ impl FindCompletionContents for document_tree::Table {
                                 }
 
                                 completion_contents.push(CompletionContent::new_key(
-                                    schema_key_str.to_string(),
+                                    schema_key_str,
                                     schema_candidate.detail(definitions, completion_hint),
                                     schema_candidate.documentation(definitions, completion_hint),
                                     table_schema.required.as_ref(),
-                                    CompletionEdit::new_key(
-                                        schema_key_str,
-                                        position,
-                                        completion_hint,
-                                    ),
+                                    position,
                                     schema_url,
+                                    completion_hint,
                                 ));
                             }
                         }
@@ -392,7 +386,7 @@ impl FindCompletionContents for TableSchema {
         let mut completion_items = Vec::new();
 
         for mut property in self.properties.iter_mut() {
-            let label = property.key().to_string();
+            let label = &property.key().to_string();
 
             if let Ok(value_schema) = property.value_mut().resolve(definitions) {
                 let (schema_candidates, errors) =
@@ -410,12 +404,13 @@ impl FindCompletionContents for TableSchema {
                     }
 
                     completion_items.push(CompletionContent::new_key(
-                        label.clone(),
+                        label,
                         schema_candidate.detail(definitions, completion_hint),
                         schema_candidate.documentation(definitions, completion_hint),
                         self.required.as_ref(),
-                        CompletionEdit::new_key(&label, position, completion_hint),
+                        position,
                         schema_url,
+                        completion_hint,
                     ));
                 }
             }
