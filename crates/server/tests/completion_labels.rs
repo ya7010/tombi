@@ -506,7 +506,7 @@ mod completion_labels {
                 "#,
                 cargo_schema_path(),
             ) -> Ok([
-                "key",
+                "$key",
             ]);
         }
 

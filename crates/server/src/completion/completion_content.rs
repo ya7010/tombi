@@ -210,9 +210,8 @@ impl CompletionContent {
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
-        let label = "key";
         Self {
-            label: label.to_string(),
+            label: "$key".to_string(),
             kind: CompletionKind::Property,
             emoji_icon: None,
             priority: CompletionContentPriority::AdditionalProperty,
@@ -227,7 +226,7 @@ impl CompletionContent {
                 None
             },
             filter_text: None,
-            edit: CompletionEdit::new_propery(label, position, completion_hint),
+            edit: CompletionEdit::new_additional_propery("key", position, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
@@ -238,16 +237,15 @@ impl CompletionContent {
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
-        let label = "key";
         Self {
-            label: label.to_string(),
+            label: "$key".to_string(),
             kind: CompletionKind::Property,
             emoji_icon: None,
             priority: CompletionContentPriority::AdditionalProperty,
             detail: Some("Additinal Property".to_string()),
             documentation: None,
             filter_text: None,
-            edit: CompletionEdit::new_propery(label, position, completion_hint),
+            edit: CompletionEdit::new_additional_propery("key", position, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }

@@ -199,6 +199,56 @@ impl CompletionEdit {
         }
     }
 
+    pub fn new_additional_propery(
+        property_name: &str,
+        position: text::Position,
+        completion_hint: Option<CompletionHint>,
+    ) -> Option<Self> {
+        match completion_hint {
+            Some(CompletionHint::InArray) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!("{{ ${{0:{property_name}}} }}"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
+            Some(
+                CompletionHint::SpaceTrigger { range, .. }
+                | CompletionHint::EqualTrigger { range, .. },
+            ) => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!(" = {{ ${{0:{property_name}}} }}"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
+            Some(CompletionHint::DotTrigger { range, .. }) => Some(Self {
+                insert_text_format: None,
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!(".${{0:{property_name}}}"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: Some(vec![TextEdit {
+                    range: range.into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
+            Some(CompletionHint::InTableHeader) | None => Some(Self {
+                insert_text_format: Some(InsertTextFormat::SNIPPET),
+                text_edit: CompletionTextEdit::Edit(TextEdit {
+                    new_text: format!("${{0:{property_name}}}"),
+                    range: text::Range::at(position).into(),
+                }),
+                additional_text_edits: None,
+            }),
+        }
+    }
+
     pub fn new_magic_trigger(trigger: &str, position: text::Position) -> Option<Self> {
         Some(Self {
             insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
