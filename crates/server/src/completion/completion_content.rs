@@ -201,7 +201,7 @@ impl CompletionContent {
 
     pub fn new_key(
         key_name: &str,
-        key_range: text::Range,
+        position: text::Position,
         detail: Option<String>,
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
@@ -216,8 +216,8 @@ impl CompletionContent {
         let key_range = match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range } | CompletionHint::EqualTrigger { range, .. },
-            ) => text::Range::new(range.end(), key_range.end()),
-            _ => key_range,
+            ) => text::Range::new(range.end(), position),
+            _ => text::Range::at(position),
         };
 
         Self {
@@ -240,7 +240,7 @@ impl CompletionContent {
 
     pub fn new_pattern_key(
         patterns: &[String],
-        key_range: text::Range,
+        position: text::Position,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -260,14 +260,18 @@ impl CompletionContent {
                 None
             },
             filter_text: None,
-            edit: CompletionEdit::new_additional_key("key", key_range, completion_hint),
+            edit: CompletionEdit::new_additional_key(
+                "key",
+                text::Range::at(position),
+                completion_hint,
+            ),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
     }
 
     pub fn new_additional_key(
-        key_range: text::Range,
+        position: text::Position,
         schema_url: Option<&Url>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -279,7 +283,11 @@ impl CompletionContent {
             detail: Some("Additinal Key".to_string()),
             documentation: None,
             filter_text: None,
-            edit: CompletionEdit::new_additional_key("key", key_range, completion_hint),
+            edit: CompletionEdit::new_additional_key(
+                "key",
+                text::Range::at(position),
+                completion_hint,
+            ),
             schema_url: schema_url.cloned(),
             preselect: None,
         }
