@@ -213,6 +213,13 @@ impl CompletionContent {
             .map(|required_keys| required_keys.contains(&label))
             .unwrap_or_default();
 
+        let key_range = match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { range } | CompletionHint::EqualTrigger { range, .. },
+            ) => text::Range::new(range.end(), key_range.end()),
+            _ => key_range,
+        };
+
         Self {
             label,
             kind: CompletionKind::Key,

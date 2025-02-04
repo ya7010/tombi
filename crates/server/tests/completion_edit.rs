@@ -93,7 +93,7 @@ mod completion_edit {
             ) -> Ok(
                 r#"
                 [dependencies]
-                serdework = { workspace$1 }$0
+                serde = { workspace$1 }$0
                 "#
             );
         }

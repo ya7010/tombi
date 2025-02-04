@@ -73,10 +73,12 @@ impl FindCompletionContents for document_tree::Table {
                                 if !key_name.starts_with(accessor_str.as_str()) {
                                     continue;
                                 }
-                                if let Ok(value_schema) = property.value_mut().resolve(definitions)
+                                if let Ok(property_schema) =
+                                    property.value_mut().resolve(definitions)
                                 {
-                                    let (schema_candidates, errors) =
-                                        value_schema.find_schema_candidates(accessors, definitions);
+                                    tracing::trace!("property schema: {:?}", property_schema);
+                                    let (schema_candidates, errors) = property_schema
+                                        .find_schema_candidates(accessors, definitions);
 
                                     for error in errors {
                                         tracing::error!("{}", error);
@@ -85,7 +87,7 @@ impl FindCompletionContents for document_tree::Table {
                                         if let Some(CompletionHint::InTableHeader) = completion_hint
                                         {
                                             if count_table_or_array_schema(
-                                                value_schema,
+                                                property_schema,
                                                 definitions,
                                             ) == 0
                                             {
@@ -122,8 +124,14 @@ impl FindCompletionContents for document_tree::Table {
                                     continue;
                                 };
                                 if pattern.is_match(accessor_str) {
-                                    let property_schema = pattern_property.value_mut();
-                                    if let Ok(value_schema) = property_schema.resolve(definitions) {
+                                    let pattern_property_schema = pattern_property.value_mut();
+                                    tracing::trace!(
+                                        "pattern property schema: {:?}",
+                                        pattern_property_schema
+                                    );
+                                    if let Ok(value_schema) =
+                                        pattern_property_schema.resolve(definitions)
+                                    {
                                         return get_property_value_completion_contents(
                                             accessor_str,
                                             value,
@@ -144,6 +152,11 @@ impl FindCompletionContents for document_tree::Table {
                         if let Some(completion_items) = table_schema
                             .operate_additional_property_schema(
                                 |additional_property_schema| {
+                                    tracing::trace!(
+                                        "additional property schema: {:?}",
+                                        additional_property_schema
+                                    );
+
                                     get_property_value_completion_contents(
                                         accessor_str,
                                         value,
@@ -469,12 +482,20 @@ fn get_property_value_completion_contents(
 
     if keys.len() == 1 {
         match completion_hint {
-            Some(
-                CompletionHint::InArray
-                | CompletionHint::DotTrigger { .. }
-                | CompletionHint::EqualTrigger { .. },
-            ) => {
+            Some(CompletionHint::InArray) => {
+                return type_hint_value(Some(accessor_str), position, None, completion_hint)
+            }
+            Some(CompletionHint::DotTrigger { range } | CompletionHint::EqualTrigger { range }) => {
+                let key = keys.first().unwrap();
                 if value_schema.is_none() {
+                    if range.end() <= key.range().start() {
+                        return vec![CompletionContent::new_type_hint_key(
+                            accessor_str,
+                            text::Range::new(range.end(), position),
+                            schema_url,
+                            completion_hint,
+                        )];
+                    }
                     return type_hint_value(Some(accessor_str), position, None, completion_hint);
                 }
             }

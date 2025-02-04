@@ -67,7 +67,7 @@ pub fn get_completion_contents(
                         .last()
                     {
                         completion_hint = Some(CompletionHint::DotTrigger {
-                            range: text::Range::new(last_dot.range().start(), keys.range().end()),
+                            range: last_dot.range(),
                         });
                     }
                 }
