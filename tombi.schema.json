@@ -309,10 +309,7 @@
         "include": {
           "title": "The file match pattern of the schema.",
           "description": "The file match pattern to include the target to apply the schema.\n Supports glob pattern.",
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
@@ -321,7 +318,8 @@
       },
       "additionalProperties": false,
       "required": [
-        "path"
+        "path",
+        "include"
       ]
     }
   }

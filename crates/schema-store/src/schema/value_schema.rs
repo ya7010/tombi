@@ -77,30 +77,20 @@ impl ValueSchema {
                 if let Some(serde_json::Value::String(format_str)) = object.get("format") {
                     // See: https://json-schema.org/understanding-json-schema/reference/type#built-in-formats
                     match format_str.as_str() {
-                        "date" => {
-                            return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)))
-                        }
                         "date-time" => {
-                            return Some(ValueSchema::OneOf(OneOfSchema {
-                                schemas: Arc::new(RwLock::new(
-                                    [
-                                        ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
-                                            object,
-                                        )),
-                                        ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
-                                            object,
-                                        )),
-                                    ]
-                                    .map(Referable::Resolved)
-                                    .to_vec(),
-                                )),
-                                ..Default::default()
-                            }))
-                        }
-                        "partial-date-time" => {
-                            return Some(ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
+                            return Some(ValueSchema::OffsetDateTime(OffsetDateTimeSchema::new(
                                 object,
                             )))
+                        }
+                        "partial-date-time" => {
+                            // NOTE: It's not a standard format.
+                            //       partial-date-time: used [schemars](https://github.com/GREsau/schemars).
+                            return Some(ValueSchema::LocalDateTime(LocalDateTimeSchema::new(
+                                object,
+                            )));
+                        }
+                        "date" => {
+                            return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)))
                         }
                         "time" | "partial-time" => {
                             return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)))
