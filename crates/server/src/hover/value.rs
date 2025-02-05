@@ -1,3 +1,14 @@
+mod array;
+mod boolean;
+mod float;
+mod integer;
+mod local_date;
+mod local_date_time;
+mod local_time;
+mod offset_date_time;
+mod string;
+mod table;
+
 use schema_store::ValueSchema;
 use tower_lsp::lsp_types::Url;
 

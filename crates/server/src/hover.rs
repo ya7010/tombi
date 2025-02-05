@@ -1,17 +1,7 @@
 mod all_of;
 mod any_of;
-mod array;
-mod boolean;
-mod float;
-mod integer;
-mod local_date;
-mod local_date_time;
-mod local_time;
-mod offset_date_time;
 mod one_of;
 mod schema_constraints;
-mod string;
-mod table;
 mod value;
 
 use config::TomlVersion;

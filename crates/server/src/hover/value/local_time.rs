@@ -1,12 +1,12 @@
-use schema_store::{IntegerSchema, ValueSchema};
+use schema_store::{LocalTimeSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent,
+    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::Integer {
+impl GetHoverContent for document_tree::LocalTime {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -16,9 +16,9 @@ impl GetHoverContent for document_tree::Integer {
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
+    ) -> Option<HoverContent> {
         match value_schema {
-            Some(ValueSchema::Integer(integer_schema)) => integer_schema
+            Some(ValueSchema::LocalTime(schema)) => schema
                 .get_hover_content(
                     accessors,
                     value_schema,
@@ -63,11 +63,11 @@ impl GetHoverContent for document_tree::Integer {
                 definitions,
             ),
             Some(_) => None,
-            None => Some(super::HoverContent {
+            None => Some(HoverContent {
                 title: None,
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
-                value_type: schema_store::ValueType::Integer,
+                value_type: schema_store::ValueType::LocalTime,
                 constraints: None,
                 enumerated_values: vec![],
                 schema_url: None,
@@ -77,7 +77,7 @@ impl GetHoverContent for document_tree::Integer {
     }
 }
 
-impl GetHoverContent for IntegerSchema {
+impl GetHoverContent for LocalTimeSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -87,12 +87,12 @@ impl GetHoverContent for IntegerSchema {
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         _definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
-        Some(super::HoverContent {
+    ) -> Option<HoverContent> {
+        Some(HoverContent {
             title: self.title.clone(),
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::Integer,
+            value_type: schema_store::ValueType::LocalTime,
             constraints: None,
             enumerated_values: self
                 .enumerate

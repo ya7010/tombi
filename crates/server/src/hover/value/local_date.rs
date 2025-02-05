@@ -1,9 +1,9 @@
 use schema_store::{LocalDateSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent,
+    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
 impl GetHoverContent for document_tree::LocalDate {
@@ -16,7 +16,7 @@ impl GetHoverContent for document_tree::LocalDate {
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
+    ) -> Option<HoverContent> {
         match value_schema {
             Some(ValueSchema::LocalDate(local_date_schema)) => local_date_schema
                 .get_hover_content(
@@ -63,7 +63,7 @@ impl GetHoverContent for document_tree::LocalDate {
                 definitions,
             ),
             Some(_) => None,
-            None => Some(super::HoverContent {
+            None => Some(HoverContent {
                 title: None,
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
@@ -87,8 +87,8 @@ impl GetHoverContent for LocalDateSchema {
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         _definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
-        Some(super::HoverContent {
+    ) -> Option<HoverContent> {
+        Some(HoverContent {
             title: self.title.clone(),
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),

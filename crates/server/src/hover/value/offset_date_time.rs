@@ -1,16 +1,16 @@
-use schema_store::FloatSchema;
+use schema_store::{OffsetDateTimeSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
     one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::Float {
+impl GetHoverContent for document_tree::OffsetDateTime {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        value_schema: Option<&schema_store::ValueSchema>,
+        value_schema: Option<&ValueSchema>,
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
@@ -18,7 +18,7 @@ impl GetHoverContent for document_tree::Float {
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         match value_schema {
-            Some(schema_store::ValueSchema::Float(float_schema)) => float_schema
+            Some(ValueSchema::OffsetDateTime(offset_date_time_schema)) => offset_date_time_schema
                 .get_hover_content(
                     accessors,
                     value_schema,
@@ -32,7 +32,7 @@ impl GetHoverContent for document_tree::Float {
                     hover_content.range = Some(self.range());
                     hover_content
                 }),
-            Some(schema_store::ValueSchema::OneOf(one_of_schema)) => get_one_of_hover_content(
+            Some(ValueSchema::OneOf(one_of_schema)) => get_one_of_hover_content(
                 self,
                 accessors,
                 one_of_schema,
@@ -42,7 +42,7 @@ impl GetHoverContent for document_tree::Float {
                 schema_url,
                 definitions,
             ),
-            Some(schema_store::ValueSchema::AnyOf(any_of_schema)) => get_any_of_hover_content(
+            Some(ValueSchema::AnyOf(any_of_schema)) => get_any_of_hover_content(
                 self,
                 accessors,
                 any_of_schema,
@@ -52,7 +52,7 @@ impl GetHoverContent for document_tree::Float {
                 schema_url,
                 definitions,
             ),
-            Some(schema_store::ValueSchema::AllOf(all_of_schema)) => get_all_of_hover_content(
+            Some(ValueSchema::AllOf(all_of_schema)) => get_all_of_hover_content(
                 self,
                 accessors,
                 all_of_schema,
@@ -67,7 +67,7 @@ impl GetHoverContent for document_tree::Float {
                 title: None,
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
-                value_type: schema_store::ValueType::Float,
+                value_type: schema_store::ValueType::OffsetDateTime,
                 constraints: None,
                 enumerated_values: vec![],
                 schema_url: None,
@@ -77,11 +77,11 @@ impl GetHoverContent for document_tree::Float {
     }
 }
 
-impl GetHoverContent for FloatSchema {
+impl GetHoverContent for OffsetDateTimeSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        _value_schema: Option<&schema_store::ValueSchema>,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
@@ -92,7 +92,7 @@ impl GetHoverContent for FloatSchema {
             title: self.title.clone(),
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::Float,
+            value_type: schema_store::ValueType::OffsetDateTime,
             constraints: None,
             enumerated_values: self
                 .enumerate

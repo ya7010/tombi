@@ -1,12 +1,12 @@
-use schema_store::{LocalTimeSchema, ValueSchema};
+use schema_store::{StringSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent,
+    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::LocalTime {
+impl GetHoverContent for document_tree::String {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -16,9 +16,9 @@ impl GetHoverContent for document_tree::LocalTime {
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
+    ) -> Option<HoverContent> {
         match value_schema {
-            Some(ValueSchema::LocalTime(schema)) => schema
+            Some(ValueSchema::String(schema)) => schema
                 .get_hover_content(
                     accessors,
                     value_schema,
@@ -63,11 +63,11 @@ impl GetHoverContent for document_tree::LocalTime {
                 definitions,
             ),
             Some(_) => None,
-            None => Some(super::HoverContent {
+            None => Some(HoverContent {
                 title: None,
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
-                value_type: schema_store::ValueType::LocalTime,
+                value_type: schema_store::ValueType::String,
                 constraints: None,
                 enumerated_values: vec![],
                 schema_url: None,
@@ -77,7 +77,7 @@ impl GetHoverContent for document_tree::LocalTime {
     }
 }
 
-impl GetHoverContent for LocalTimeSchema {
+impl GetHoverContent for StringSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -87,17 +87,17 @@ impl GetHoverContent for LocalTimeSchema {
         _keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         _definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
-        Some(super::HoverContent {
+    ) -> Option<HoverContent> {
+        Some(HoverContent {
             title: self.title.clone(),
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::LocalTime,
+            value_type: schema_store::ValueType::String,
             constraints: None,
             enumerated_values: self
                 .enumerate
                 .as_ref()
-                .map(|v| v.iter().map(ToString::to_string).collect())
+                .map(|v| v.iter().map(|s| format!("\"{s}\"")).collect())
                 .unwrap_or_default(),
             schema_url: schema_url.cloned(),
             range: None,

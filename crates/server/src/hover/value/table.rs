@@ -2,7 +2,7 @@ use config::TomlVersion;
 use schema_store::{Accessor, Accessors, SchemaDefinitions, TableSchema, ValueSchema, ValueType};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
     one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };

@@ -1,12 +1,12 @@
-use schema_store::{BooleanSchema, ValueSchema};
+use schema_store::{IntegerSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
     one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::Boolean {
+impl GetHoverContent for document_tree::Integer {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -18,7 +18,7 @@ impl GetHoverContent for document_tree::Boolean {
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         match value_schema {
-            Some(ValueSchema::Boolean(boolean_schema)) => boolean_schema
+            Some(ValueSchema::Integer(integer_schema)) => integer_schema
                 .get_hover_content(
                     accessors,
                     value_schema,
@@ -67,7 +67,7 @@ impl GetHoverContent for document_tree::Boolean {
                 title: None,
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
-                value_type: schema_store::ValueType::Boolean,
+                value_type: schema_store::ValueType::Integer,
                 constraints: None,
                 enumerated_values: vec![],
                 schema_url: None,
@@ -77,7 +77,7 @@ impl GetHoverContent for document_tree::Boolean {
     }
 }
 
-impl GetHoverContent for BooleanSchema {
+impl GetHoverContent for IntegerSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -92,7 +92,7 @@ impl GetHoverContent for BooleanSchema {
             title: self.title.clone(),
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::Boolean,
+            value_type: schema_store::ValueType::Integer,
             constraints: None,
             enumerated_values: self
                 .enumerate

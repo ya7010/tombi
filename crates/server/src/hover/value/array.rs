@@ -1,7 +1,7 @@
 use schema_store::{Accessor, Accessors, ArraySchema, ValueSchema, ValueType};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
     one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
@@ -16,7 +16,7 @@ impl GetHoverContent for document_tree::Array {
         keys: &[document_tree::Key],
         schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<super::HoverContent> {
+    ) -> Option<HoverContent> {
         match value_schema {
             Some(ValueSchema::Array(array_schema)) => {
                 for (index, value) in self.values().iter().enumerate() {
@@ -136,7 +136,7 @@ impl GetHoverContent for document_tree::Array {
                         );
                     }
                 }
-                Some(super::HoverContent {
+                Some(HoverContent {
                     title: None,
                     description: None,
                     accessors: Accessors::new(accessors.clone()),

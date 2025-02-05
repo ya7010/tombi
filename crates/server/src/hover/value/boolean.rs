@@ -1,12 +1,12 @@
-use schema_store::{StringSchema, ValueSchema};
+use schema_store::{BooleanSchema, ValueSchema};
 use tower_lsp::lsp_types::Url;
 
-use super::{
+use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
     one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::String {
+impl GetHoverContent for document_tree::Boolean {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -18,7 +18,7 @@ impl GetHoverContent for document_tree::String {
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         match value_schema {
-            Some(ValueSchema::String(schema)) => schema
+            Some(ValueSchema::Boolean(boolean_schema)) => boolean_schema
                 .get_hover_content(
                     accessors,
                     value_schema,
@@ -67,7 +67,7 @@ impl GetHoverContent for document_tree::String {
                 title: None,
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
-                value_type: schema_store::ValueType::String,
+                value_type: schema_store::ValueType::Boolean,
                 constraints: None,
                 enumerated_values: vec![],
                 schema_url: None,
@@ -77,7 +77,7 @@ impl GetHoverContent for document_tree::String {
     }
 }
 
-impl GetHoverContent for StringSchema {
+impl GetHoverContent for BooleanSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
@@ -92,12 +92,12 @@ impl GetHoverContent for StringSchema {
             title: self.title.clone(),
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: schema_store::ValueType::String,
+            value_type: schema_store::ValueType::Boolean,
             constraints: None,
             enumerated_values: self
                 .enumerate
                 .as_ref()
-                .map(|v| v.iter().map(|s| format!("\"{s}\"")).collect())
+                .map(|v| v.iter().map(ToString::to_string).collect())
                 .unwrap_or_default(),
             schema_url: schema_url.cloned(),
             range: None,
