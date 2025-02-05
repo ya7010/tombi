@@ -68,6 +68,7 @@ impl GetHoverContent for document_tree::Integer {
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
                 value_type: schema_store::ValueType::Integer,
+                constraints: None,
                 enumerated_values: vec![],
                 schema_url: None,
                 range: Some(self.range()),
@@ -92,6 +93,7 @@ impl GetHoverContent for IntegerSchema {
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Integer,
+            constraints: None,
             enumerated_values: self
                 .enumerate
                 .as_ref()
