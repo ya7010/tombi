@@ -323,8 +323,8 @@ mod completion_labels {
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
-                "path",
                 "include",
+                "path",
                 "toml-version",
             ]);
         }
