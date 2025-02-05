@@ -421,6 +421,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             filter_text: completion_content.filter_text,
             insert_text_format,
             text_edit,
+            insert_text_mode: Some(tower_lsp::lsp_types::InsertTextMode::ADJUST_INDENTATION),
             additional_text_edits,
             preselect: completion_content.preselect,
             ..Default::default()
