@@ -15,7 +15,7 @@ impl SchemaHoverContent for TableSchema {
         }
 
         if let Some(pattern_properties) = &self.pattern_properties {
-            content.push_str("Pattern Keys:\n\n");
+            content.push_str("Key Patterns:\n\n");
             for pattern_property in pattern_properties.iter() {
                 content.push_str(&format!("- `{}`\n\n", pattern_property.key()));
             }
