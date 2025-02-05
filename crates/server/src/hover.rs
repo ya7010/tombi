@@ -1,12 +1,10 @@
 mod all_of;
 mod any_of;
 mod one_of;
-mod schema_constraints;
 mod value;
 
 use config::TomlVersion;
 use dashmap::DashMap;
-use schema_constraints::SchemaConstraints;
 use schema_store::{get_schema_name, Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 use tower_lsp::lsp_types::Url;
@@ -54,14 +52,14 @@ trait GetHoverContent {
     ) -> Option<HoverContent>;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug)]
 pub struct HoverContent {
     pub title: Option<String>,
     pub description: Option<String>,
     pub accessors: Accessors,
     pub value_type: ValueType,
     pub enumerated_values: Vec<String>,
-    pub constraints: Option<SchemaConstraints>,
+    pub schema: Option<ValueSchema>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
     pub range: Option<text::Range>,
 }
@@ -70,6 +68,28 @@ impl HoverContent {
     pub fn into_nullable(mut self) -> HoverContent {
         self.value_type = self.value_type.into_nullable();
         self
+    }
+}
+
+impl PartialEq for HoverContent {
+    fn eq(&self, other: &Self) -> bool {
+        self.title == other.title
+            && self.description == other.description
+            && self.accessors == other.accessors
+            && self.value_type == other.value_type
+            && self.range == other.range
+    }
+}
+
+impl Eq for HoverContent {}
+
+impl std::hash::Hash for HoverContent {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.title.hash(state);
+        self.description.hash(state);
+        self.accessors.hash(state);
+        self.value_type.hash(state);
+        self.range.hash(state);
     }
 }
 

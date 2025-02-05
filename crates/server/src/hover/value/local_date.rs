@@ -68,7 +68,7 @@ impl GetHoverContent for document_tree::LocalDate {
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
                 value_type: schema_store::ValueType::LocalDate,
-                constraints: None,
+                schema: None,
                 enumerated_values: vec![],
                 schema_url: None,
                 range: Some(self.range()),
@@ -81,7 +81,7 @@ impl GetHoverContent for LocalDateSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        _value_schema: Option<&ValueSchema>,
+        value_schema: Option<&ValueSchema>,
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
@@ -93,7 +93,7 @@ impl GetHoverContent for LocalDateSchema {
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::LocalDate,
-            constraints: None,
+            schema: value_schema.cloned(),
             enumerated_values: self
                 .enumerate
                 .as_ref()

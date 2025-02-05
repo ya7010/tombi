@@ -18,6 +18,7 @@ where
 {
     let mut title_description_set = ahash::AHashSet::new();
     let mut value_type_set = indexmap::IndexSet::new();
+    let mut schema = None;
     if let Ok(mut schemas) = all_of_schema.schemas.write() {
         for referable_schema in schemas.iter_mut() {
             let Ok(value_schema) = referable_schema.resolve(definitions) else {
@@ -38,6 +39,10 @@ where
                         hover_content.description.clone(),
                     ));
                     value_type_set.insert(hover_content.value_type);
+                }
+
+                if let Some(s) = hover_content.schema {
+                    schema = Some(s);
                 }
             }
         }
@@ -69,7 +74,7 @@ where
         description,
         accessors: schema_store::Accessors::new(accessors.clone()),
         value_type,
-        constraints: None,
+        schema,
         enumerated_values: Vec::new(),
         schema_url: schema_url.cloned(),
         range: None,
@@ -130,7 +135,7 @@ impl GetHoverContent for schema_store::AllOfSchema {
             description,
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type,
-            constraints: None,
+            schema: None,
             enumerated_values: Vec::new(),
             schema_url: schema_url.cloned(),
             range: None,
