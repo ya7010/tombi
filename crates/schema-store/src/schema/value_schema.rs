@@ -92,8 +92,10 @@ impl ValueSchema {
                         "date" => {
                             return Some(ValueSchema::LocalDate(LocalDateSchema::new(object)))
                         }
-                        "time" | "partial-time" => {
-                            return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)))
+                        "partial-time" => {
+                            // NOTE: It's not a standard format.
+                            //       partial-time: used [schemars](https://github.com/GREsau/schemars).
+                            return Some(ValueSchema::LocalTime(LocalTimeSchema::new(object)));
                         }
                         _ => {}
                     }

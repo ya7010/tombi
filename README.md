@@ -93,7 +93,7 @@ If there is JSON Schema information, Tombi will display executable types as hove
 | `type: string, format: date-time` | `OffsetDateTime` |
 | `type: string, format: partial-date-time` | `LocalDateTime` |
 | `type: string, format: date` | `LocalDate` |
-| `type: string, format: time` | `LocalTime` |
+| `type: string, format: partial-time` | `LocalTime` |
 | `type: array` | `Array` |
 | `type: object` | `Table` |
 
