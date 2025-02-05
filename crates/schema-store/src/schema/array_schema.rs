@@ -12,7 +12,6 @@ pub struct ArraySchema {
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
-    pub default: Option<Vec<serde_json::Value>>,
 }
 
 impl ArraySchema {
@@ -37,7 +36,6 @@ impl ArraySchema {
                 .get("maxItems")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),
             unique_items: object.get("uniqueItems").and_then(|v| v.as_bool()),
-            default: object.get("default").and_then(|v| v.as_array().cloned()),
         }
     }
 

@@ -69,7 +69,6 @@ impl GetHoverContent for document_tree::Boolean {
                 accessors: schema_store::Accessors::new(accessors.clone()),
                 value_type: schema_store::ValueType::Boolean,
                 schema: None,
-                enumerated_values: vec![],
                 schema_url: None,
                 range: Some(self.range()),
             }),
@@ -94,11 +93,6 @@ impl GetHoverContent for BooleanSchema {
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Boolean,
             schema: value_schema.cloned(),
-            enumerated_values: self
-                .enumerate
-                .as_ref()
-                .map(|v| v.iter().map(ToString::to_string).collect())
-                .unwrap_or_default(),
             schema_url: schema_url.cloned(),
             range: None,
         })

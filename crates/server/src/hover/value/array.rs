@@ -142,7 +142,6 @@ impl GetHoverContent for document_tree::Array {
                     accessors: Accessors::new(accessors.clone()),
                     value_type: ValueType::Array,
                     schema: None,
-                    enumerated_values: vec![],
                     schema_url: None,
                     range: Some(self.range()),
                 })
@@ -168,7 +167,6 @@ impl GetHoverContent for ArraySchema {
             accessors: Accessors::new(accessors.clone()),
             value_type: ValueType::Array,
             schema: value_schema.cloned(),
-            enumerated_values: vec![],
             schema_url: schema_url.cloned(),
             range: None,
         })

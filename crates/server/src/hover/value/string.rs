@@ -69,7 +69,6 @@ impl GetHoverContent for document_tree::String {
                 accessors: schema_store::Accessors::new(accessors.clone()),
                 value_type: schema_store::ValueType::String,
                 schema: None,
-                enumerated_values: vec![],
                 schema_url: None,
                 range: Some(self.range()),
             }),
@@ -94,11 +93,6 @@ impl GetHoverContent for StringSchema {
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::String,
             schema: value_schema.cloned(),
-            enumerated_values: self
-                .enumerate
-                .as_ref()
-                .map(|v| v.iter().map(|s| format!("\"{s}\"")).collect())
-                .unwrap_or_default(),
             schema_url: schema_url.cloned(),
             range: None,
         })

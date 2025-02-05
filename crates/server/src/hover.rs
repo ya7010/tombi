@@ -1,10 +1,12 @@
 mod all_of;
 mod any_of;
 mod one_of;
+mod schema_content;
 mod value;
 
 use config::TomlVersion;
 use dashmap::DashMap;
+use schema_content::SchemaHoverContent;
 use schema_store::{get_schema_name, Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 use tower_lsp::lsp_types::Url;
@@ -58,7 +60,6 @@ pub struct HoverContent {
     pub description: Option<String>,
     pub accessors: Accessors,
     pub value_type: ValueType,
-    pub enumerated_values: Vec<String>,
     pub schema: Option<ValueSchema>,
     pub schema_url: Option<tower_lsp::lsp_types::Url>,
     pub range: Option<text::Range>,
@@ -112,12 +113,8 @@ impl std::fmt::Display for HoverContent {
         writeln!(f, "Keys: `{}`\n", self.accessors)?;
         writeln!(f, "Value: `{}`\n", self.value_type)?;
 
-        if !self.enumerated_values.is_empty() {
-            writeln!(f, "Allowed Values:\n")?;
-            for value in &self.enumerated_values {
-                writeln!(f, "- `{}`", value)?;
-            }
-            writeln!(f)?;
+        if let Some(schema) = self.schema.as_ref().and_then(|s| s.schema_content()) {
+            writeln!(f, "{}\n", schema)?;
         }
 
         if let Some(schema_url) = &self.schema_url {

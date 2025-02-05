@@ -19,7 +19,6 @@ pub struct TableSchema {
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
-    pub default: Option<serde_json::Value>,
 }
 
 impl TableSchema {
@@ -87,7 +86,6 @@ impl TableSchema {
             max_properties: object
                 .get("maxProperties")
                 .and_then(|v| v.as_u64().map(|u| u as usize)),
-            default: object.get("default").cloned(),
         }
     }
 

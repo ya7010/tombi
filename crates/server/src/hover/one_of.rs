@@ -92,7 +92,6 @@ where
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: value.value_type().into(),
             schema: None,
-            enumerated_values: Vec::new(),
             schema_url: schema_url.cloned(),
             range: None,
         })
@@ -154,7 +153,6 @@ impl GetHoverContent for schema_store::OneOfSchema {
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type,
             schema: None,
-            enumerated_values: Vec::new(),
             schema_url: schema_url.cloned(),
             range: None,
         })
