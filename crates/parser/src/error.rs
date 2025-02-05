@@ -69,10 +69,10 @@ pub enum ErrorKind {
     #[error("forbidden last period in keys")]
     ForbiddenKeysLastPeriod,
 
-    #[error("inline table must be single line")]
+    #[error("inline table must be single line in TOML v1.0.0 or earlier")]
     InlineTableMustSingleLine,
 
-    #[error("forbidden last comma in inline table")]
+    #[error("trailing comma in inline table not allowed in TOML v1.0.0 or earlier")]
     ForbiddenInlineTableLastComma,
 }
 
