@@ -203,7 +203,10 @@ impl ValueSchema {
         }
     }
 
-    pub fn match_schemas<T: Fn(&ValueSchema) -> bool>(&self, condition: &T) -> Vec<ValueSchema> {
+    pub fn match_flattened_schemas<T: Fn(&ValueSchema) -> bool>(
+        &self,
+        condition: &T,
+    ) -> Vec<ValueSchema> {
         let mut matched_schemas = Vec::new();
         match self {
             ValueSchema::OneOf(OneOfSchema { schemas, .. })
@@ -212,7 +215,7 @@ impl ValueSchema {
                 if let Ok(mut schemas) = schemas.write() {
                     for schema in schemas.iter_mut() {
                         if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
-                            matched_schemas.extend(schema.match_schemas(condition))
+                            matched_schemas.extend(schema.match_flattened_schemas(condition))
                         }
                     }
                 }

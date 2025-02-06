@@ -444,7 +444,9 @@ fn count_table_or_array_schema(
     definitions: &SchemaDefinitions,
 ) -> usize {
     value_schema
-        .match_schemas(&|schema| matches!(schema, ValueSchema::Table(_) | ValueSchema::Array(_)))
+        .match_flattened_schemas(&|schema| {
+            matches!(schema, ValueSchema::Table(_) | ValueSchema::Array(_))
+        })
         .into_iter()
         .filter(|schema| match schema {
             ValueSchema::Array(array_schema) => array_schema
