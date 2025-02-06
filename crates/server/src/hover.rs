@@ -1,7 +1,7 @@
 mod all_of;
 mod any_of;
+mod constraints;
 mod one_of;
-mod schema_content;
 mod value;
 
 use config::TomlVersion;
