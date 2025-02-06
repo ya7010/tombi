@@ -79,7 +79,6 @@
     "DetailedDependency": {
       "title": "Detailed Dependency",
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "branch": {
           "description": "Specify the Git branch to use in case of a [Git dependency](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories).",
@@ -215,6 +214,8 @@
           }
         }
       },
+      "minProperties": 1,
+      "additionalProperties": false,
       "x-taplo": {
         "initFields": ["version"]
       }
@@ -290,6 +291,13 @@
         },
         "rust": {
           "description": "Lint settings for the Rust compiler. See the Rust compiler's [individual lints](https://doc.rust-lang.org/rustc/lints/listing/index.html) or [lint groups](https://doc.rust-lang.org/rustc/lints/groups.html).",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Lint"
+          }
+        },
+        "rustdoc": {
+          "description": "Lint settings for [Rustdoc](https://doc.rust-lang.org/rustdoc/). See Rustdoc's [individual lints](https://doc.rust-lang.org/rustdoc/lints.html) (rustdoc does not have lint groups)",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/Lint"
@@ -671,6 +679,7 @@
           }
         }
       },
+      "additionalProperties": false,
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-package-section"
@@ -1493,7 +1502,9 @@
           "type": "boolean",
           "enum": [true]
         }
-      }
+      },
+      "required": ["workspace"],
+      "additionalProperties": false
     },
     "PlaydateMetadata": {
       "title": "Playdate Package Metadata",
@@ -1905,6 +1916,7 @@
               "description": "Inherit lints from the workspace manifest."
             }
           },
+          "required": ["workspace"],
           "additionalProperties": false
         }
       ],
