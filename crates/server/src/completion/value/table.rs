@@ -40,8 +40,18 @@ impl FindCompletionContents for document_tree::Table {
                         let accessor = Accessor::Key(accessor_str.to_string());
 
                         if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                            let need_magic_trigger = match completion_hint {
+                                Some(
+                                    CompletionHint::DotTrigger { range, .. }
+                                    | CompletionHint::EqualTrigger { range, .. },
+                                ) => range.end() <= key.range().start(),
+                                Some(CompletionHint::InArray | CompletionHint::InTableHeader) => {
+                                    false
+                                }
+                                None => true,
+                            };
                             if matches!(value, document_tree::Value::Incomplete { .. })
-                                && completion_hint.is_none()
+                                && need_magic_trigger
                             {
                                 return CompletionContent::new_magic_triggers(
                                     accessor_str,

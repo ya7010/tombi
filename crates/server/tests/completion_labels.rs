@@ -526,7 +526,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn cargo_dependencies_serde_work(
+            async fn cargo_dependencies_serde_bra_work_key(
                 r#"
                 [dependencies]
                 serde = { work█ }
@@ -534,6 +534,20 @@ mod completion_labels {
                 cargo_schema_path(),
             ) -> Ok([
                 "workspace",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn cargo_dependencies_serde_workspace(
+                r#"
+                [dependencies]
+                serde.workspace█
+                "#,
+                cargo_schema_path(),
+            ) -> Ok([
+                ".",
+                "=",
             ]);
         }
 
