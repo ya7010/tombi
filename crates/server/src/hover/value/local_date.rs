@@ -3,7 +3,8 @@ use tower_lsp::lsp_types::Url;
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
+    constraints::DataConstraints, default_value::DefaultValue, one_of::get_one_of_hover_content,
+    GetHoverContent, HoverContent,
 };
 
 impl GetHoverContent for document_tree::LocalDate {
@@ -68,7 +69,7 @@ impl GetHoverContent for document_tree::LocalDate {
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
                 value_type: schema_store::ValueType::LocalDate,
-                schema: None,
+                constraints: None,
                 schema_url: None,
                 range: Some(self.range()),
             }),
@@ -80,7 +81,7 @@ impl GetHoverContent for LocalDateSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        value_schema: Option<&ValueSchema>,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
@@ -92,7 +93,19 @@ impl GetHoverContent for LocalDateSchema {
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::LocalDate,
-            schema: value_schema.cloned(),
+            constraints: Some(DataConstraints {
+                default: self
+                    .default
+                    .as_ref()
+                    .map(|value| DefaultValue::LocalDate(value.clone())),
+                enumerate: self.enumerate.as_ref().map(|value| {
+                    value
+                        .iter()
+                        .map(|value| DefaultValue::LocalDate(value.clone()))
+                        .collect()
+                }),
+                ..Default::default()
+            }),
             schema_url: schema_url.cloned(),
             range: None,
         })

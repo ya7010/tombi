@@ -1,4 +1,7 @@
-pub struct CompletionConstraints {
+use super::default_value::DefaultValue;
+
+#[derive(Debug, Default)]
+pub struct DataConstraints {
     // Common
     pub enumerate: Option<Vec<DefaultValue>>,
     pub default: Option<DefaultValue>,
@@ -23,10 +26,10 @@ pub struct CompletionConstraints {
     pub min_keys: Option<usize>,
     pub max_keys: Option<usize>,
     pub key_patterns: Option<Vec<String>>,
-    pub additional_keys: bool,
+    pub additional_keys: Option<bool>,
 }
 
-impl std::fmt::Display for CompletionConstraints {
+impl std::fmt::Display for DataConstraints {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(enumerate) = &self.enumerate {
             write!(f, "Enumerated Values:\n\n")?;
@@ -80,7 +83,7 @@ impl std::fmt::Display for CompletionConstraints {
             write!(f, "Maximum Items: `{}`\n\n", max_items)?;
         }
 
-        if self.unique_items.unwrap_or_else(false) {
+        if self.unique_items.unwrap_or(false) {
             write!(f, "Unique Items: `true`\n\n")?;
         }
 
@@ -92,65 +95,17 @@ impl std::fmt::Display for CompletionConstraints {
             write!(f, "Maximum Keys: `{}`\n\n", max_keys)?;
         }
 
-        if let Some(pattern_properties) = &self.pattern_properties {
-            content.push_str("Key Patterns:\n\n");
-            for pattern_property in pattern_properties.iter() {
-                content.push_str(&format!("- `{}`\n\n", pattern_property.key()));
+        if let Some(key_patterns) = &self.key_patterns {
+            write!(f, "Key Patterns:\n\n")?;
+            for pattern_property in key_patterns.iter() {
+                write!(f, "- `{}`\n\n", pattern_property)?;
             }
         }
 
-        if self.additional_keys {
+        if self.additional_keys.unwrap_or(false) {
             write!(f, "Additional Keys: `true`\n\n")?;
         }
 
         Ok(())
-    }
-}
-
-pub enum DefaultValue {
-    Boolean(bool),
-    Integer(i64),
-    Float(f64),
-    String(String),
-    OffsetDateTime(String),
-    LocalDateTime(String),
-    LocalDate(String),
-    LocalTime(String),
-    Array(Vec<DefaultValue>),
-    Table(Vec<(String, DefaultValue)>),
-}
-
-impl std::fmt::Display for DefaultValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            DefaultValue::Boolean(boolean) => write!(f, "{}", boolean),
-            DefaultValue::Integer(integer) => write!(f, "{}", integer),
-            DefaultValue::Float(float) => write!(f, "{}", float),
-            DefaultValue::String(string) => write!(f, "\"{}\"", string.replace("\"", "\\\"")),
-            DefaultValue::OffsetDateTime(offset_date_time) => write!(f, "{}", offset_date_time),
-            DefaultValue::LocalDateTime(local_date_time) => write!(f, "{}", local_date_time),
-            DefaultValue::LocalDate(local_date) => write!(f, "{}", local_date),
-            DefaultValue::LocalTime(local_time) => write!(f, "{}", local_time),
-            DefaultValue::Array(array) => {
-                write!(f, "[")?;
-                for (i, value) in array.iter().enumerate() {
-                    if i > 0 {
-                        write!(f, ", ")?;
-                    }
-                    write!(f, "{}", value)?;
-                }
-                write!(f, "]")
-            }
-            DefaultValue::Table(table) => {
-                write!(f, "{{ ")?;
-                for (i, (key, value)) in table.iter().enumerate() {
-                    if i > 0 {
-                        write!(f, ", ")?;
-                    }
-                    write!(f, "{}: {}", key, value)?;
-                }
-                write!(f, " }}")
-            }
-        }
     }
 }

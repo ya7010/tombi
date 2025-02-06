@@ -3,7 +3,7 @@ use tower_lsp::lsp_types::Url;
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
+    constraints::DataConstraints, one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
 impl GetHoverContent for document_tree::Array {
@@ -141,7 +141,7 @@ impl GetHoverContent for document_tree::Array {
                     description: None,
                     accessors: Accessors::new(accessors.clone()),
                     value_type: ValueType::Array,
-                    schema: None,
+                    constraints: None,
                     schema_url: None,
                     range: Some(self.range()),
                 })
@@ -154,7 +154,7 @@ impl GetHoverContent for ArraySchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<Accessor>,
-        value_schema: Option<&ValueSchema>,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
@@ -166,7 +166,12 @@ impl GetHoverContent for ArraySchema {
             description: self.description.clone(),
             accessors: Accessors::new(accessors.clone()),
             value_type: ValueType::Array,
-            schema: value_schema.cloned(),
+            constraints: Some(DataConstraints {
+                min_items: self.min_items,
+                max_items: self.max_items,
+                unique_items: self.unique_items,
+                ..Default::default()
+            }),
             schema_url: schema_url.cloned(),
             range: None,
         })

@@ -91,7 +91,7 @@ where
             description: None,
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: value.value_type().into(),
-            schema: None,
+            constraints: None,
             schema_url: schema_url.cloned(),
             range: None,
         })
@@ -152,7 +152,7 @@ impl GetHoverContent for schema_store::OneOfSchema {
             description,
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type,
-            schema: None,
+            constraints: None,
             schema_url: schema_url.cloned(),
             range: None,
         })
