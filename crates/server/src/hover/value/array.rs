@@ -45,6 +45,16 @@ impl GetHoverContent for document_tree::Array {
                                         definitions,
                                     )?;
 
+                                    if keys.is_empty()
+                                        && self.kind() == document_tree::ArrayKind::ArrayOfTables
+                                    {
+                                        if let Some(constraints) = &mut hover_content.constraints {
+                                            constraints.min_items = array_schema.min_items;
+                                            constraints.max_items = array_schema.max_items;
+                                            constraints.unique_items = array_schema.unique_items;
+                                        }
+                                    }
+
                                     if hover_content.title.is_none()
                                         && hover_content.description.is_none()
                                     {
