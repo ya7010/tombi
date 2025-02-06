@@ -275,7 +275,7 @@ impl FindCompletionContents for document_tree::Table {
                                     | ValueSchema::OneOf(_)
                                     | ValueSchema::AnyOf(_)
                                     | ValueSchema::AllOf(_) => {
-                                        unreachable!("Null, OneOf, AnyOf, and AllOf are not allowed in table schema");
+                                        unreachable!("Null, OneOf, AnyOf, and AllOf are not allowed in flattened schema");
                                     }
                                 }
 
