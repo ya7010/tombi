@@ -41,7 +41,7 @@ where
                     value_type_set.insert(hover_content.value_type);
                 }
 
-                if let Some(s) = hover_content.schema {
+                if let Some(s) = hover_content.constraints {
                     schema = Some(s);
                 }
             }
@@ -74,7 +74,7 @@ where
         description,
         accessors: schema_store::Accessors::new(accessors.clone()),
         value_type,
-        schema,
+        constraints: schema,
         schema_url: schema_url.cloned(),
         range: None,
     })
@@ -134,7 +134,7 @@ impl GetHoverContent for schema_store::AllOfSchema {
             description,
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type,
-            schema: None,
+            constraints: None,
             schema_url: schema_url.cloned(),
             range: None,
         })

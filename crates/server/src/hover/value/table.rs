@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::Url;
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
+    constraints::DataConstraints, one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
 impl GetHoverContent for document_tree::Table {
@@ -18,12 +18,27 @@ impl GetHoverContent for document_tree::Table {
         schema_url: Option<&Url>,
         definitions: &SchemaDefinitions,
     ) -> Option<HoverContent> {
+        tracing::debug!("self: {:?}", self);
+        tracing::trace!("keys: {:?}", keys);
+        tracing::trace!("accessors: {:?}", accessors);
+        tracing::trace!("value_schema: {:?}", value_schema);
+
         match value_schema {
             Some(ValueSchema::Table(table_schema)) => {
                 if let Some(key) = keys.first() {
                     if let Some(value) = self.get(key) {
                         let key_str = key.to_raw_text(toml_version);
                         let accessor = Accessor::Key(key_str.clone());
+                        let key_patterns =
+                            table_schema
+                                .pattern_properties
+                                .as_ref()
+                                .map(|pattern_properties| {
+                                    pattern_properties
+                                        .iter()
+                                        .map(|pattern_property| pattern_property.key().to_string())
+                                        .collect::<Vec<_>>()
+                                });
 
                         if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                             let required = table_schema
@@ -46,7 +61,7 @@ impl GetHoverContent for document_tree::Table {
                                     schema_url,
                                     definitions,
                                 )
-                                .map(|hover_content| {
+                                .map(|mut hover_content| {
                                     if keys.len() == 1
                                         && !required
                                         && hover_content
@@ -55,6 +70,9 @@ impl GetHoverContent for document_tree::Table {
                                             .map(|accessor| accessor.is_key())
                                             .unwrap_or_default()
                                     {
+                                        if let Some(constraints) = &mut hover_content.constraints {
+                                            constraints.key_patterns = key_patterns;
+                                        }
                                         hover_content.into_nullable()
                                     } else {
                                         hover_content
@@ -82,7 +100,7 @@ impl GetHoverContent for document_tree::Table {
                                                 schema_url,
                                                 definitions,
                                             )
-                                            .map(|hover_content| {
+                                            .map(|mut hover_content| {
                                                 if keys.len() == 1
                                                     && hover_content
                                                         .accessors
@@ -90,6 +108,11 @@ impl GetHoverContent for document_tree::Table {
                                                         .map(|accessor| accessor.is_key())
                                                         .unwrap_or_default()
                                                 {
+                                                    if let Some(constraints) =
+                                                        &mut hover_content.constraints
+                                                    {
+                                                        constraints.key_patterns = key_patterns;
+                                                    }
                                                     hover_content.into_nullable()
                                                 } else {
                                                     hover_content
@@ -226,7 +249,7 @@ impl GetHoverContent for document_tree::Table {
                     description: None,
                     accessors: Accessors::new(accessors.clone()),
                     value_type: ValueType::Table,
-                    schema: None,
+                    constraints: None,
                     schema_url: None,
                     range: Some(self.range()),
                 })
@@ -239,7 +262,7 @@ impl GetHoverContent for TableSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<Accessor>,
-        value_schema: Option<&ValueSchema>,
+        _value_schema: Option<&ValueSchema>,
         _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
@@ -251,7 +274,14 @@ impl GetHoverContent for TableSchema {
             description: self.description.clone(),
             accessors: Accessors::new(accessors.clone()),
             value_type: ValueType::Table,
-            schema: value_schema.cloned(),
+            constraints: Some(DataConstraints {
+                max_keys: self.max_properties,
+                min_keys: self.min_properties,
+                // NOTE: key_patterns are output for keys, not this tables.
+                key_patterns: None,
+                additional_keys: Some(self.additional_properties),
+                ..Default::default()
+            }),
             schema_url: schema_url.cloned(),
             range: None,
         })

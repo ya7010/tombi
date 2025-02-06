@@ -3,7 +3,8 @@ use tower_lsp::lsp_types::Url;
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
+    constraints::DataConstraints, default_value::DefaultValue, one_of::get_one_of_hover_content,
+    GetHoverContent, HoverContent,
 };
 
 impl GetHoverContent for document_tree::Float {
@@ -68,7 +69,7 @@ impl GetHoverContent for document_tree::Float {
                 description: None,
                 accessors: schema_store::Accessors::new(accessors.clone()),
                 value_type: schema_store::ValueType::Float,
-                schema: None,
+                constraints: None,
                 schema_url: None,
                 range: Some(self.range()),
             }),
@@ -80,7 +81,7 @@ impl GetHoverContent for FloatSchema {
     fn get_hover_content(
         &self,
         accessors: &Vec<schema_store::Accessor>,
-        value_schema: Option<&schema_store::ValueSchema>,
+        _value_schema: Option<&schema_store::ValueSchema>,
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
@@ -92,7 +93,25 @@ impl GetHoverContent for FloatSchema {
             description: self.description.clone(),
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Float,
-            schema: value_schema.cloned(),
+            constraints: Some(DataConstraints {
+                default: self.default.map(|value| DefaultValue::Float(value)),
+                enumerate: self.enumerate.as_ref().map(|value| {
+                    value
+                        .iter()
+                        .map(|value| DefaultValue::Float(*value))
+                        .collect()
+                }),
+                minimum: self.minimum.map(|value| DefaultValue::Float(value)),
+                maximum: self.maximum.map(|value| DefaultValue::Float(value)),
+                exclusive_minimum: self
+                    .exclusive_minimum
+                    .map(|value| DefaultValue::Float(value)),
+                exclusive_maximum: self
+                    .exclusive_maximum
+                    .map(|value| DefaultValue::Float(value)),
+                multiple_of: self.multiple_of.map(|value| DefaultValue::Float(value)),
+                ..Default::default()
+            }),
             schema_url: schema_url.cloned(),
             range: None,
         })
