@@ -564,6 +564,18 @@ mod completion_labels {
                 "false",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn cargo_dependencies_serde_workspace_duplicated(
+                r#"
+                [dependencies]
+                serde.workspace = true
+                serde.work█
+                "#,
+                cargo_schema_path(),
+            ) -> Ok([]);
+        }
     }
 
     mod without_schema {

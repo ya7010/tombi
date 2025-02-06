@@ -79,41 +79,38 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         } else if keys.len() == 1 {
                             for mut property in table_schema.properties.iter_mut() {
-                                let key_name = property.key().to_string();
-                                if !key_name.starts_with(accessor_str.as_str()) {
+                                let key_name = &property.key().to_string();
+                                if !key_name.starts_with(accessor_str) {
                                     continue;
                                 }
+
+                                if let Some(value) = self.get(key_name) {
+                                    if check_used_table_value(value) {
+                                        continue;
+                                    }
+                                }
+
                                 if let Ok(property_schema) =
                                     property.value_mut().resolve(definitions)
                                 {
                                     tracing::trace!("property schema: {:?}", property_schema);
-                                    let (schema_candidates, errors) = property_schema
-                                        .find_schema_candidates(accessors, definitions);
-
-                                    for error in errors {
-                                        tracing::error!("{}", error);
-                                    }
-                                    for schema_candidate in schema_candidates {
-                                        if let Some(CompletionHint::InTableHeader) = completion_hint
-                                        {
-                                            if count_table_or_array_schema(
-                                                property_schema,
-                                                definitions,
-                                            ) == 0
-                                            {
-                                                continue;
-                                            }
-                                        }
-                                        completion_contents.push(CompletionContent::new_key(
-                                            &key_name,
+                                    if let Ok(value_schema) =
+                                        property.value_mut().resolve(definitions)
+                                    {
+                                        let Some(contents) = collect_table_key_completion_contents(
+                                            self,
+                                            table_schema,
+                                            key_name,
                                             position,
-                                            schema_candidate.detail(definitions, completion_hint),
-                                            schema_candidate
-                                                .documentation(definitions, completion_hint),
-                                            table_schema.required.as_ref(),
-                                            schema_url,
+                                            accessors,
                                             completion_hint,
-                                        ));
+                                            schema_url,
+                                            &value_schema,
+                                            definitions,
+                                        ) else {
+                                            continue;
+                                        };
+                                        completion_contents.extend(contents);
                                     }
                                 }
                             }
@@ -202,103 +199,30 @@ impl FindCompletionContents for document_tree::Table {
                         }
                     }
                 } else {
-                    'property: for mut property in table_schema.properties.iter_mut() {
-                        let schema_key_str = &property.key().to_string();
+                    for mut property in table_schema.properties.iter_mut() {
+                        let key_name = &property.key().to_string();
 
-                        if let Some(value) = self.get(schema_key_str) {
-                            match value {
-                                document_tree::Value::Boolean(_)
-                                | document_tree::Value::Integer(_)
-                                | document_tree::Value::Float(_)
-                                | document_tree::Value::String(_)
-                                | document_tree::Value::OffsetDateTime(_)
-                                | document_tree::Value::LocalDateTime(_)
-                                | document_tree::Value::LocalDate(_)
-                                | document_tree::Value::LocalTime(_) => {
-                                    continue 'property;
-                                }
-                                document_tree::Value::Array(array) => {
-                                    if array.kind() == document_tree::ArrayKind::Array {
-                                        continue 'property;
-                                    }
-                                }
-                                document_tree::Value::Table(table) => {
-                                    if table.kind() == document_tree::TableKind::InlineTable {
-                                        continue 'property;
-                                    }
-                                }
-                                document_tree::Value::Incomplete { .. } => {}
+                        if let Some(value) = self.get(key_name) {
+                            if check_used_table_value(value) {
+                                continue;
                             }
                         }
 
                         if let Ok(value_schema) = property.value_mut().resolve(definitions) {
-                            let (schema_candidates, errors) =
-                                value_schema.find_schema_candidates(accessors, definitions);
-
-                            for error in errors {
-                                tracing::error!("{}", error);
-                            }
-                            for schema_candidate in schema_candidates {
-                                match schema_candidate {
-                                    ValueSchema::Boolean(_)
-                                    | ValueSchema::Integer(_)
-                                    | ValueSchema::Float(_)
-                                    | ValueSchema::String(_)
-                                    | ValueSchema::OffsetDateTime(_)
-                                    | ValueSchema::LocalDateTime(_)
-                                    | ValueSchema::LocalDate(_)
-                                    | ValueSchema::LocalTime(_) => {
-                                        if matches!(
-                                            completion_hint,
-                                            Some(CompletionHint::InTableHeader)
-                                        ) || self.get(schema_key_str).is_some()
-                                        {
-                                            continue 'property;
-                                        }
-                                    }
-                                    ValueSchema::Array(_) | ValueSchema::Table(_) => {
-                                        if matches!(
-                                            completion_hint,
-                                            Some(CompletionHint::InTableHeader)
-                                        ) && count_table_or_array_schema(
-                                            value_schema,
-                                            definitions,
-                                        ) == 0
-                                        {
-                                            continue 'property;
-                                        }
-                                        if let ValueSchema::Table(table_schema) = value_schema {
-                                            if !table_schema.additional_properties
-                                                && !table_schema.has_additional_property_schema()
-                                                && table_schema.pattern_properties.is_none()
-                                            {
-                                                if table_schema.properties.iter().all(|property| {
-                                                    let key_str = &property.key().to_string();
-                                                    self.get(key_str).is_some()
-                                                }) {
-                                                    continue 'property;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    ValueSchema::Null
-                                    | ValueSchema::OneOf(_)
-                                    | ValueSchema::AnyOf(_)
-                                    | ValueSchema::AllOf(_) => {
-                                        unreachable!("Null, OneOf, AnyOf, and AllOf are not allowed in flattened schema");
-                                    }
-                                }
-
-                                completion_contents.push(CompletionContent::new_key(
-                                    schema_key_str,
-                                    position,
-                                    schema_candidate.detail(definitions, completion_hint),
-                                    schema_candidate.documentation(definitions, completion_hint),
-                                    table_schema.required.as_ref(),
-                                    schema_url,
-                                    completion_hint,
-                                ));
-                            }
+                            let Some(contents) = collect_table_key_completion_contents(
+                                self,
+                                table_schema,
+                                key_name,
+                                position,
+                                accessors,
+                                completion_hint,
+                                schema_url,
+                                &value_schema,
+                                definitions,
+                            ) else {
+                                continue;
+                            };
+                            completion_contents.extend(contents);
                         }
                     }
 
@@ -485,12 +409,12 @@ fn get_property_value_completion_contents(
     definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
-    tracing::debug!("accessor_str: {:?}", accessor_str);
-    tracing::debug!("value: {:?}", value);
-    tracing::debug!("keys: {:?}", keys);
-    tracing::debug!("accessors: {:?}", accessors);
-    tracing::debug!("value schema: {:?}", value_schema);
-    tracing::debug!("completion hint: {:?}", completion_hint);
+    tracing::trace!("accessor_str: {:?}", accessor_str);
+    tracing::trace!("value: {:?}", value);
+    tracing::trace!("keys: {:?}", keys);
+    tracing::trace!("accessors: {:?}", accessors);
+    tracing::trace!("value schema: {:?}", value_schema);
+    tracing::trace!("completion hint: {:?}", completion_hint);
 
     if keys.len() == 1 {
         match completion_hint {
@@ -560,4 +484,106 @@ fn get_property_value_completion_contents(
         definitions,
         completion_hint,
     )
+}
+
+fn check_used_table_value(value: &document_tree::Value) -> bool {
+    match value {
+        document_tree::Value::Boolean(_)
+        | document_tree::Value::Integer(_)
+        | document_tree::Value::Float(_)
+        | document_tree::Value::String(_)
+        | document_tree::Value::OffsetDateTime(_)
+        | document_tree::Value::LocalDateTime(_)
+        | document_tree::Value::LocalDate(_)
+        | document_tree::Value::LocalTime(_) => return true,
+        document_tree::Value::Array(array) => {
+            if array.kind() == document_tree::ArrayKind::Array {
+                return true;
+            }
+        }
+        document_tree::Value::Table(table) => {
+            if table.kind() == document_tree::TableKind::InlineTable {
+                return true;
+            }
+        }
+        document_tree::Value::Incomplete { .. } => {}
+    }
+    false
+}
+
+fn collect_table_key_completion_contents(
+    table: &document_tree::Table,
+    table_schema: &TableSchema,
+    key_name: &String,
+    position: text::Position,
+    accessors: &Vec<Accessor>,
+    completion_hint: Option<CompletionHint>,
+    schema_url: Option<&Url>,
+    value_schema: &ValueSchema,
+    definitions: &SchemaDefinitions,
+) -> Option<Vec<CompletionContent>> {
+    let mut completion_contents = Vec::new();
+
+    let (schema_candidates, errors) = value_schema.find_schema_candidates(accessors, definitions);
+
+    for error in errors {
+        tracing::error!("{}", error);
+    }
+
+    for schema_candidate in schema_candidates {
+        match schema_candidate {
+            ValueSchema::Boolean(_)
+            | ValueSchema::Integer(_)
+            | ValueSchema::Float(_)
+            | ValueSchema::String(_)
+            | ValueSchema::OffsetDateTime(_)
+            | ValueSchema::LocalDateTime(_)
+            | ValueSchema::LocalDate(_)
+            | ValueSchema::LocalTime(_) => {
+                if matches!(completion_hint, Some(CompletionHint::InTableHeader))
+                    || table.get(key_name).is_some()
+                {
+                    return None;
+                }
+            }
+            ValueSchema::Array(_) | ValueSchema::Table(_) => {
+                if matches!(completion_hint, Some(CompletionHint::InTableHeader))
+                    && count_table_or_array_schema(value_schema, definitions) == 0
+                {
+                    return None;
+                }
+                if let ValueSchema::Table(table_schema) = value_schema {
+                    if !table_schema.additional_properties
+                        && !table_schema.has_additional_property_schema()
+                        && table_schema.pattern_properties.is_none()
+                    {
+                        if table_schema.properties.iter().all(|property| {
+                            let key_str = &property.key().to_string();
+                            table.get(key_str).is_some()
+                        }) {
+                            return None;
+                        }
+                    }
+                }
+            }
+            ValueSchema::Null
+            | ValueSchema::OneOf(_)
+            | ValueSchema::AnyOf(_)
+            | ValueSchema::AllOf(_) => {
+                unreachable!("Null, OneOf, AnyOf, and AllOf are not allowed in flattened schema");
+            }
+        }
+
+        completion_contents.push(CompletionContent::new_key(
+            key_name,
+            position,
+            schema_candidate.detail(definitions, completion_hint),
+            schema_candidate.documentation(definitions, completion_hint),
+            table_schema.required.as_ref(),
+            schema_url,
+            completion_hint,
+        ));
+    }
+
+    Some(completion_contents)
 }
