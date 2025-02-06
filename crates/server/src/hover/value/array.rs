@@ -17,6 +17,11 @@ impl GetHoverContent for document_tree::Array {
         schema_url: Option<&Url>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
+        tracing::debug!("self: {:?}", self);
+        tracing::trace!("keys: {:?}", keys);
+        tracing::trace!("accessors: {:?}", accessors);
+        tracing::trace!("value_schema: {:?}", value_schema);
+
         match value_schema {
             Some(ValueSchema::Array(array_schema)) => {
                 for (index, value) in self.values().iter().enumerate() {
