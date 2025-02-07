@@ -120,6 +120,7 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 
 > [!TIP]
 > If you prefer inline tables, select the trigger `=`, and completion will prioritize inline tables.
+>
 > If you prefer Dotted Keys, select the trigger `.`.
 
 #### Dot Trigger Completion
