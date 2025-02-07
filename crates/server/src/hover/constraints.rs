@@ -23,6 +23,7 @@ pub struct DataConstraints {
     pub unique_items: Option<bool>,
 
     // Table
+    pub required_keys: Option<Vec<String>>,
     pub min_keys: Option<usize>,
     pub max_keys: Option<usize>,
     pub key_patterns: Option<Vec<String>>,
@@ -85,6 +86,13 @@ impl std::fmt::Display for DataConstraints {
 
         if self.unique_items.unwrap_or(false) {
             write!(f, "Unique Items: `true`\n\n")?;
+        }
+
+        if let Some(required_keys) = &self.required_keys {
+            write!(f, "Required Keys:\n\n")?;
+            for key in required_keys.iter() {
+                write!(f, "- `{}`\n\n", key)?;
+            }
         }
 
         if let Some(min_keys) = self.min_keys {

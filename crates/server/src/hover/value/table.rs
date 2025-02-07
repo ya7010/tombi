@@ -275,6 +275,7 @@ impl GetHoverContent for TableSchema {
             accessors: Accessors::new(accessors.clone()),
             value_type: ValueType::Table,
             constraints: Some(DataConstraints {
+                required_keys: self.required.clone(),
                 max_keys: self.max_properties,
                 min_keys: self.min_properties,
                 // NOTE: key_patterns are output for keys, not this tables.
