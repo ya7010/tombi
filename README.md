@@ -118,6 +118,10 @@ Tombi provides a magic trigger to complete rhythmically.
 TOML uses doted keys or inline tables for nested structures,
 but Tombi controls the form of completion by selecting triggers with `.` and `=`.
 
+> [!HINT]
+> If you prefer inline tables, select the trigger `=`, and completion will prioritize inline tables.
+> If you prefer Dotted Keys, select the trigger `.`.
+
 #### Dot Trigger Completion
 
 | Type | Trigger | Select | Completion |
