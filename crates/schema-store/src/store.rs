@@ -90,7 +90,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn add_json_schema_catalog(
+    pub async fn add_json_catalog_schema(
         &self,
         json_catalog_schema: crate::json_schema::CatalogSchema,
     ) {
