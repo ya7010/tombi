@@ -90,16 +90,19 @@ impl SchemaStore {
         }
     }
 
-    pub async fn add_json_schema_catalog(&self, catalog_schema: crate::json_schema::CatalogSchema) {
+    pub async fn add_json_schema_catalog(
+        &self,
+        json_catalog_schema: crate::json_schema::CatalogSchema,
+    ) {
         let mut catalogs = self.catalogs.write().await;
-        if catalog_schema
+        if json_catalog_schema
             .file_match
             .iter()
             .any(|pattern| pattern.ends_with(".toml"))
         {
             catalogs.push(crate::CatalogSchema {
-                url: catalog_schema.url,
-                include: catalog_schema.file_match,
+                url: json_catalog_schema.url,
+                include: json_catalog_schema.file_match,
             });
         }
     }
