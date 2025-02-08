@@ -66,8 +66,8 @@ macro_rules! test_hover_keys_value {
                     );
                     backend
                         .schema_store
-                        .add_json_catalog_schema(
-                            schema_store::json::CatalogSchema{
+                        .add_json_schema(
+                            schema_store::json::JsonSchema{
                                 name: "test_schema".to_string(),
                                 description: "schema for testing".to_string(),
                                 file_match: vec!["*.toml".to_string()],
