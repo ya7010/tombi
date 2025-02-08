@@ -156,7 +156,7 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    async fn try_load_schema(
+    pub async fn try_load_schema(
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {

@@ -1,5 +1,6 @@
 use super::{
-    AllOfSchema, AnyOfSchema, DocumentSchema, OneOfSchema, SchemaDefinitions, ValueSchema,
+    AllOfSchema, AnyOfSchema, DocumentSchema, OneOfSchema, SchemaDefinitions, SchemaUrl,
+    ValueSchema,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -122,9 +123,33 @@ impl Referable<ValueSchema> {
 
                             *self = referable_schema;
                         } else {
-                            Err(crate::Error::DefinitionNotFound {
-                                definition_ref: reference.clone(),
-                            })?;
+                            match reference.as_str() {
+                                https_url if https_url.starts_with("https://") => {
+                                    if let Ok(schema_url) = SchemaUrl::parse(https_url) {
+                                        if let Ok(document_schema) =
+                                            schema_store.try_load_schema(&schema_url).await
+                                        {
+                                            if let Some(value_schema) = document_schema.value_schema
+                                            {
+                                                *self = Referable::Resolved(value_schema);
+                                            }
+                                        }
+                                    }
+                                }
+                                http_url if http_url.starts_with("http://") => {
+                                    if let Ok(schema_url) = SchemaUrl::parse(http_url) {
+                                        if let Ok(document_schema) =
+                                            schema_store.try_load_schema(&schema_url).await
+                                        {
+                                            if let Some(value_schema) = document_schema.value_schema
+                                            {
+                                                *self = Referable::Resolved(value_schema);
+                                            }
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
                         }
                     }
                     self.resolve_async(document_schema, schema_store)
