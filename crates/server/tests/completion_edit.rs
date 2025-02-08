@@ -557,7 +557,7 @@ macro_rules! test_completion_edit {
                 );
                 backend
                     .schema_store
-                    .add_json_catalog_schema(schema_store::json_schema::CatalogSchema {
+                    .add_json_catalog_schema(schema_store::json::CatalogSchema {
                         name: "test_schema".to_string(),
                         description: "schema for testing".to_string(),
                         file_match: vec!["*.toml".to_string()],

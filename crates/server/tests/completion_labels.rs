@@ -1,4 +1,4 @@
-use schema_store::json_schema::DEFAULT_CATALOG_URL;
+use schema_store::json::DEFAULT_CATALOG_URL;
 
 use test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
 
@@ -816,7 +816,7 @@ macro_rules! test_completion_labels {
                 );
                 backend
                     .schema_store
-                    .add_json_catalog_schema(schema_store::json_schema::CatalogSchema {
+                    .add_json_catalog_schema(schema_store::json::CatalogSchema {
                         name: "test_schema".to_string(),
                         description: "schema for testing".to_string(),
                         file_match: vec!["*.toml".to_string()],

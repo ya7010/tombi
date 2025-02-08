@@ -1,6 +1,6 @@
 mod accessor;
 mod error;
-pub mod json_schema;
+pub mod json;
 mod schema;
 mod store;
 mod value_type;

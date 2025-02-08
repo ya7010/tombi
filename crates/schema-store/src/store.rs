@@ -63,7 +63,7 @@ impl SchemaStore {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
-            if let Ok(catalog) = response.json::<crate::json_schema::Catalog>().await {
+            if let Ok(catalog) = response.json::<crate::json::Catalog>().await {
                 let mut catalogs = self.catalogs.write().await;
                 for catalog_schema in catalog.schemas {
                     if catalog_schema
@@ -90,10 +90,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn add_json_catalog_schema(
-        &self,
-        json_catalog_schema: crate::json_schema::CatalogSchema,
-    ) {
+    pub async fn add_json_catalog_schema(&self, json_catalog_schema: crate::json::CatalogSchema) {
         let mut catalogs = self.catalogs.write().await;
         if json_catalog_schema
             .file_match
