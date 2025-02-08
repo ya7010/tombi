@@ -91,4 +91,56 @@ impl Referable<ValueSchema> {
             }
         }
     }
+
+    #[allow(unused)]
+    async fn resolve_async<'a>(
+        &'a mut self,
+        definitions: &'a SchemaDefinitions,
+    ) -> std::pin::Pin<
+        Box<dyn std::future::Future<Output = Result<&'a ValueSchema, crate::Error>> + 'a>,
+    > {
+        Box::pin(async move {
+            match self {
+                Referable::Ref {
+                    reference,
+                    title,
+                    description,
+                } => {
+                    {
+                        if let Some(definition_schema) = definitions.get(reference) {
+                            let mut referable_schema = definition_schema.to_owned();
+                            if let Referable::Resolved(ref mut schema) = &mut referable_schema {
+                                if title.is_some() || description.is_some() {
+                                    schema.set_title(title.to_owned());
+                                    schema.set_description(description.to_owned());
+                                }
+                            }
+
+                            *self = referable_schema;
+                        } else {
+                            Err(crate::Error::DefinitionNotFound {
+                                definition_ref: reference.clone(),
+                            })?;
+                        }
+                    }
+                    self.resolve_async(definitions).await.await
+                }
+                Referable::Resolved(resolved) => {
+                    match resolved {
+                        ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                        | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+                        | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
+                            if let Ok(mut schemas) = schemas.write() {
+                                for schema in schemas.iter_mut() {
+                                    schema.resolve_async(definitions).await.await?;
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                    Result::<&ValueSchema, crate::Error>::Ok(resolved)
+                }
+            }
+        })
+    }
 }
