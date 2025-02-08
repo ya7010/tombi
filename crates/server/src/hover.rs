@@ -23,7 +23,7 @@ pub fn get_hover_content(
     match document_schema {
         Some(document_schema) => table.get_hover_content(
             &Vec::with_capacity(0),
-            Some(document_schema.value_schema()),
+            document_schema.value_schema.as_ref(),
             toml_version,
             position,
             keys,

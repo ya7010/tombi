@@ -1,5 +1,5 @@
+use super::FindSchemaCandidates;
 use super::{referable_schema::Referable, SchemaDefinitions, ValueSchema};
-use super::{FindSchemaCandidates, TableSchema};
 use crate::Accessor;
 use config::TomlVersion;
 use dashmap::DashMap;
@@ -9,7 +9,7 @@ pub struct DocumentSchema {
     pub schema_url: url::Url,
     pub schema_id: Option<url::Url>,
     pub(crate) toml_version: Option<TomlVersion>,
-    table_schema: ValueSchema,
+    pub value_schema: Option<ValueSchema>,
     pub definitions: SchemaDefinitions,
 }
 
@@ -26,8 +26,7 @@ impl DocumentSchema {
             .and_then(|v| v.as_str())
             .and_then(|s| url::Url::parse(s).ok());
 
-        let table_schema = TableSchema::new(&value);
-
+        let value_schema = ValueSchema::new(&value);
         let definitions = DashMap::default();
         if let Some(serde_json::Value::Object(object)) = value.get("definitions") {
             for (key, value) in object.into_iter() {
@@ -54,7 +53,7 @@ impl DocumentSchema {
             schema_url,
             schema_id,
             toml_version,
-            table_schema: ValueSchema::Table(table_schema),
+            value_schema,
             definitions,
         }
     }
@@ -64,21 +63,6 @@ impl DocumentSchema {
             tracing::debug!("use schema TOML version: {version}");
         })
     }
-
-    pub fn value_type(&self) -> crate::ValueType {
-        crate::ValueType::Table
-    }
-
-    pub fn table_schema(&self) -> &TableSchema {
-        match &self.table_schema {
-            ValueSchema::Table(table_schema) => table_schema,
-            _ => unreachable!(),
-        }
-    }
-
-    pub fn value_schema(&self) -> &ValueSchema {
-        &self.table_schema
-    }
 }
 
 impl FindSchemaCandidates for DocumentSchema {
@@ -87,7 +71,10 @@ impl FindSchemaCandidates for DocumentSchema {
         accessors: &[Accessor],
         definitions: &SchemaDefinitions,
     ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
-        self.table_schema
-            .find_schema_candidates(accessors, definitions)
+        if let Some(value_schema) = &self.value_schema {
+            value_schema.find_schema_candidates(accessors, definitions)
+        } else {
+            (Vec::with_capacity(0), Vec::with_capacity(0))
+        }
     }
 }

@@ -155,7 +155,7 @@ pub fn get_completion_contents(
 
     let completion_contents = document_tree.deref().find_completion_contents(
         &Vec::with_capacity(0),
-        document_schema.map(|schema| schema.value_schema()),
+        document_schema.and_then(|schema| schema.value_schema.as_ref()),
         toml_version,
         position,
         &keys,

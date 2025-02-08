@@ -33,11 +33,11 @@ pub fn validate(
 ) -> Result<(), Vec<crate::Error>> {
     let table = tree.deref();
 
-    table.validate(
-        toml_version,
-        document_schema.value_schema(),
-        &document_schema.definitions,
-    )
+    if let Some(value_schema) = &document_schema.value_schema {
+        table.validate(toml_version, value_schema, &document_schema.definitions)?;
+    }
+
+    Ok(())
 }
 
 fn validate_one_of<T>(
