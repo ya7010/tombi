@@ -231,7 +231,7 @@ impl CompletionContent {
             detail,
             documentation,
             filter_text: None,
-            edit: CompletionEdit::new_key(&key_name, key_range, completion_hint),
+            edit: CompletionEdit::new_key(key_name, key_range, completion_hint),
             schema_url: schema_url.cloned(),
             preselect: None,
         }

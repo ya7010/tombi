@@ -106,7 +106,7 @@ impl FindCompletionContents for document_tree::Table {
                                             accessors,
                                             completion_hint,
                                             schema_url,
-                                            &value_schema,
+                                            value_schema,
                                             definitions,
                                         ) else {
                                             continue;
@@ -218,7 +218,7 @@ impl FindCompletionContents for document_tree::Table {
                                 accessors,
                                 completion_hint,
                                 schema_url,
-                                &value_schema,
+                                value_schema,
                                 definitions,
                             ) else {
                                 continue;
@@ -555,15 +555,11 @@ fn collect_table_key_completion_contents(
                 }
                 if let ValueSchema::Table(table_schema) = value_schema {
                     if !table_schema.additional_properties
-                        && !table_schema.has_additional_property_schema()
-                        && table_schema.pattern_properties.is_none()
-                    {
-                        if table_schema.properties.iter().all(|property| {
+                        && !table_schema.has_additional_property_schema() && table_schema.pattern_properties.is_none() && table_schema.properties.iter().all(|property| {
                             let key_str = &property.key().to_string();
                             table.get(key_str).is_some()
                         }) {
-                            return None;
-                        }
+                        return None;
                     }
                 }
             }

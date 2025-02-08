@@ -93,7 +93,7 @@ impl GetHoverContent for BooleanSchema {
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Boolean,
             constraints: Some(DataConstraints {
-                default: self.default.map(|default| DefaultValue::Boolean(default)),
+                default: self.default.map(DefaultValue::Boolean),
                 enumerate: self.enumerate.as_ref().map(|value| {
                     value
                         .iter()

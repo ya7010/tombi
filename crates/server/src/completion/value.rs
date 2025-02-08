@@ -94,11 +94,7 @@ impl FindCompletionContents for document_tree::Value {
                     completion_hint,
                 ),
                 None => {
-                    let key_name = if let Some(key) = keys.last() {
-                        Some(key.to_raw_text(toml_version))
-                    } else {
-                        None
-                    };
+                    let key_name = keys.last().map(|key| key.to_raw_text(toml_version));
 
                     match (&key_name, completion_hint) {
                         (Some(key_name), Some(CompletionHint::EqualTrigger { range }))

@@ -93,22 +93,22 @@ impl GetHoverContent for FloatSchema {
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Float,
             constraints: Some(DataConstraints {
-                default: self.default.map(|value| DefaultValue::Float(value)),
+                default: self.default.map(DefaultValue::Float),
                 enumerate: self.enumerate.as_ref().map(|value| {
                     value
                         .iter()
                         .map(|value| DefaultValue::Float(*value))
                         .collect()
                 }),
-                minimum: self.minimum.map(|value| DefaultValue::Float(value)),
-                maximum: self.maximum.map(|value| DefaultValue::Float(value)),
+                minimum: self.minimum.map(DefaultValue::Float),
+                maximum: self.maximum.map(DefaultValue::Float),
                 exclusive_minimum: self
                     .exclusive_minimum
-                    .map(|value| DefaultValue::Float(value)),
+                    .map(DefaultValue::Float),
                 exclusive_maximum: self
                     .exclusive_maximum
-                    .map(|value| DefaultValue::Float(value)),
-                multiple_of: self.multiple_of.map(|value| DefaultValue::Float(value)),
+                    .map(DefaultValue::Float),
+                multiple_of: self.multiple_of.map(DefaultValue::Float),
                 ..Default::default()
             }),
             schema_url: schema_url.cloned(),

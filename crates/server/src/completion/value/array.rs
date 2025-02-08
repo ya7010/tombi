@@ -135,7 +135,7 @@ impl FindCompletionContents for document_tree::Array {
                             {
                                 let key_str = &keys.first().unwrap().to_raw_text(toml_version);
                                 return vec![CompletionContent::new_type_hint_key(
-                                    &key_str,
+                                    key_str,
                                     text::Range::new(
                                         text::Position::new(
                                             position.line(),

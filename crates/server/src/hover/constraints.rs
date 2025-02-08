@@ -37,7 +37,7 @@ impl std::fmt::Display for DataConstraints {
             for value in enumerate {
                 write!(f, "- `{}`\n\n", value)?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
         if let Some(default) = &self.default {

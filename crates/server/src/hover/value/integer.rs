@@ -93,22 +93,22 @@ impl GetHoverContent for IntegerSchema {
             accessors: schema_store::Accessors::new(accessors.clone()),
             value_type: schema_store::ValueType::Integer,
             constraints: Some(DataConstraints {
-                default: self.default.map(|value| DefaultValue::Integer(value)),
+                default: self.default.map(DefaultValue::Integer),
                 enumerate: self.enumerate.as_ref().map(|value| {
                     value
                         .iter()
                         .map(|value| DefaultValue::Integer(*value))
                         .collect()
                 }),
-                minimum: self.minimum.map(|value| DefaultValue::Integer(value)),
-                maximum: self.maximum.map(|value| DefaultValue::Integer(value)),
+                minimum: self.minimum.map(DefaultValue::Integer),
+                maximum: self.maximum.map(DefaultValue::Integer),
                 exclusive_minimum: self
                     .exclusive_minimum
-                    .map(|value| DefaultValue::Integer(value)),
+                    .map(DefaultValue::Integer),
                 exclusive_maximum: self
                     .exclusive_maximum
-                    .map(|value| DefaultValue::Integer(value)),
-                multiple_of: self.multiple_of.map(|value| DefaultValue::Integer(value)),
+                    .map(DefaultValue::Integer),
+                multiple_of: self.multiple_of.map(DefaultValue::Integer),
                 ..Default::default()
             }),
             schema_url: schema_url.cloned(),
