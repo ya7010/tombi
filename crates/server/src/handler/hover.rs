@@ -40,7 +40,7 @@ pub async fn handle_hover(
 
     let document_schema = backend
         .schema_store
-        .try_get_schema_from_url(&text_document.uri)
+        .try_get_source_schema_from_url(&text_document.uri)
         .await
         .ok()
         .flatten();

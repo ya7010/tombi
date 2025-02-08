@@ -29,9 +29,11 @@ impl<'a> Linter<'a> {
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
         let document_schema = match schema_url_or_path {
-            Some(schema_url_or_path) => {
-                Some(schema_store.try_get_schema(schema_url_or_path).await?)
-            }
+            Some(schema_url_or_path) => Some(
+                schema_store
+                    .try_get_source_schema(schema_url_or_path)
+                    .await?,
+            ),
             None => None,
         }
         .flatten();

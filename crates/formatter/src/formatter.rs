@@ -34,9 +34,11 @@ impl<'a> Formatter<'a> {
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
         let schema = match source_url_or_path {
-            Some(source_url_or_path) => {
-                Some(schema_store.try_get_schema(source_url_or_path).await?)
-            }
+            Some(source_url_or_path) => Some(
+                schema_store
+                    .try_get_source_schema(source_url_or_path)
+                    .await?,
+            ),
             None => None,
         }
         .flatten();
