@@ -8,9 +8,10 @@ mod value;
 use config::TomlVersion;
 use constraints::DataConstraints;
 use dashmap::DashMap;
-use schema_store::{get_schema_name, Accessor, Accessors, DocumentSchema, ValueSchema, ValueType};
+use schema_store::{
+    get_schema_name, Accessor, Accessors, DocumentSchema, SchemaUrl, ValueSchema, ValueType,
+};
 use std::{fmt::Debug, ops::Deref};
-use tower_lsp::lsp_types::Url;
 
 pub fn get_hover_content(
     tree: &document_tree::DocumentTree,
@@ -50,7 +51,7 @@ trait GetHoverContent {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent>;
 }
@@ -62,7 +63,7 @@ pub struct HoverContent {
     pub accessors: Accessors,
     pub value_type: ValueType,
     pub constraints: Option<DataConstraints>,
-    pub schema_url: Option<tower_lsp::lsp_types::Url>,
+    pub schema_url: Option<SchemaUrl>,
     pub range: Option<text::Range>,
 }
 
@@ -146,7 +147,7 @@ impl From<HoverContent> for tower_lsp::lsp_types::Hover {
 mod test {
     use super::*;
     use rstest::rstest;
-    use tower_lsp::lsp_types::Url;
+    use schema_store::SchemaUrl;
 
     #[rstest]
     #[case("https://json.schemastore.org/tombi.schema.json")]
@@ -154,7 +155,7 @@ mod test {
     #[case("file://./tombi.schema.json")]
     #[case("file://tombi.schema.json")]
     fn url_content(#[case] url: &str) {
-        let url = Url::parse(url).unwrap();
+        let url = SchemaUrl::parse(url).unwrap();
         assert_eq!(get_schema_name(&url).unwrap(), "tombi.schema.json");
     }
 }

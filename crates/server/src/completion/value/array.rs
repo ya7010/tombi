@@ -9,8 +9,7 @@ use super::{
 };
 use config::TomlVersion;
 use document_tree::ArrayKind;
-use schema_store::{Accessor, ArraySchema, SchemaDefinitions, ValueSchema};
-use tower_lsp::lsp_types::Url;
+use schema_store::{Accessor, ArraySchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 impl FindCompletionContents for document_tree::Array {
     fn find_completion_contents(
@@ -20,7 +19,7 @@ impl FindCompletionContents for document_tree::Array {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -183,7 +182,7 @@ impl FindCompletionContents for ArraySchema {
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -196,7 +195,7 @@ impl FindCompletionContents for ArraySchema {
 
 pub fn type_hint_array(
     position: text::Position,
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
     let edit = CompletionEdit::new_array_literal(position, completion_hint);

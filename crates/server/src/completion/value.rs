@@ -30,11 +30,10 @@ use offset_date_time::type_hint_offset_date_time;
 pub use one_of::find_one_of_completion_items;
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
-    LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, StringSchema,
-    TableSchema, ValueSchema,
+    LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, SchemaUrl,
+    StringSchema, TableSchema, ValueSchema,
 };
 use string::type_hint_string;
-use tower_lsp::lsp_types::Url;
 
 impl FindCompletionContents for document_tree::Value {
     fn find_completion_contents(
@@ -44,7 +43,7 @@ impl FindCompletionContents for document_tree::Value {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -128,7 +127,7 @@ impl FindCompletionContents for document_tree::Value {
 pub fn type_hint_value(
     key_name: Option<&str>,
     position: text::Position,
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
     let mut completion_contents = itertools::concat([

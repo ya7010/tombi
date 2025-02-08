@@ -3,14 +3,13 @@ use dashmap::DashMap;
 use itertools::Either;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use url::Url;
 
-use crate::DocumentSchema;
+use crate::{json::CatalogUrl, DocumentSchema, SchemaUrl};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    schemas: DashMap<Url, Result<DocumentSchema, crate::Error>>,
+    schemas: DashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>,
     catalogs: Arc<RwLock<Vec<crate::CatalogSchema>>>,
 }
 
@@ -34,7 +33,7 @@ impl SchemaStore {
         };
         let mut catalogs = self.catalogs.write().await;
         for schema in schemas.iter() {
-            let Ok(url) = Url::from_file_path(config_dirpath.join(&schema.path)) else {
+            let Ok(url) = SchemaUrl::from_file_path(config_dirpath.join(&schema.path)) else {
                 continue;
             };
             tracing::debug!("load config schema from: {}", url);
@@ -46,7 +45,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn update_schema(&self, schema_url: &Url) -> Result<bool, crate::Error> {
+    pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
         if self.schemas.contains_key(schema_url) {
             let document_schema = self.try_get_schema_from_schema_url(schema_url).await?;
 
@@ -59,7 +58,10 @@ impl SchemaStore {
         }
     }
 
-    pub async fn load_catalog_from_url(&self, catalog_url: &url::Url) -> Result<(), crate::Error> {
+    pub async fn load_catalog_from_url(
+        &self,
+        catalog_url: &CatalogUrl,
+    ) -> Result<(), crate::Error> {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
@@ -106,7 +108,7 @@ impl SchemaStore {
 
     async fn try_get_schema_from_schema_url(
         &self,
-        schema_url: &Url,
+        schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {
         let schema: serde_json::Map<String, serde_json::Value> = match schema_url.scheme() {
             "file" => {
@@ -154,7 +156,10 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    async fn try_load_schema(&self, schema_url: &Url) -> Result<DocumentSchema, crate::Error> {
+    async fn try_load_schema(
+        &self,
+        schema_url: &SchemaUrl,
+    ) -> Result<DocumentSchema, crate::Error> {
         match self.schemas.get(schema_url) {
             Some(document_schema) => match document_schema.value() {
                 Ok(document_schema) => Ok(document_schema.clone()),
@@ -228,7 +233,7 @@ impl SchemaStore {
 
     pub async fn try_get_schema(
         &self,
-        source_url_or_path: Either<&Url, &std::path::Path>,
+        source_url_or_path: Either<&url::Url, &std::path::Path>,
     ) -> Result<Option<DocumentSchema>, crate::Error> {
         match source_url_or_path {
             Either::Left(source_url) => {
@@ -244,14 +249,5 @@ impl SchemaStore {
                     })
             }
         }
-    }
-
-    pub async fn catalog_urls(&self) -> Vec<Url> {
-        self.catalogs
-            .read()
-            .await
-            .iter()
-            .map(|catalog| catalog.url.clone())
-            .collect::<Vec<_>>()
     }
 }

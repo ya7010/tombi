@@ -2,6 +2,7 @@ use crate::app::arg;
 use config::{FormatOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
 use formatter::formatter::definitions::FormatDefinitions;
+use schema_store::json::CatalogUrl;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 /// Format TOML files.
@@ -94,7 +95,7 @@ where
 
             for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
                 schema_store
-                    .load_catalog_from_url(&catalog_path.try_into()?)
+                    .load_catalog_from_url(&CatalogUrl::new(catalog_path.try_into()?))
                     .await?;
             }
         }

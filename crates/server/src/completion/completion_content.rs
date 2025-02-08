@@ -1,5 +1,4 @@
-use schema_store::get_schema_name;
-use tower_lsp::lsp_types::Url;
+use schema_store::{get_schema_name, SchemaUrl};
 
 use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
 
@@ -26,7 +25,7 @@ pub struct CompletionContent {
     pub detail: Option<String>,
     pub documentation: Option<String>,
     pub filter_text: Option<String>,
-    pub schema_url: Option<Url>,
+    pub schema_url: Option<SchemaUrl>,
     pub edit: Option<CompletionEdit>,
     pub preselect: Option<bool>,
 }
@@ -36,7 +35,7 @@ impl CompletionContent {
         kind: CompletionKind,
         label: String,
         edit: Option<CompletionEdit>,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
     ) -> Self {
         Self {
             label: label.clone(),
@@ -56,7 +55,7 @@ impl CompletionContent {
         kind: CompletionKind,
         label: String,
         edit: Option<CompletionEdit>,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
     ) -> Self {
         Self {
             label,
@@ -77,7 +76,7 @@ impl CompletionContent {
         label: impl Into<String>,
         detail: impl Into<String>,
         edit: Option<CompletionEdit>,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
     ) -> Self {
         Self {
             label: label.into(),
@@ -96,7 +95,7 @@ impl CompletionContent {
     pub fn new_type_hint_boolean(
         value: bool,
         edit: Option<CompletionEdit>,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
     ) -> Self {
         Self {
             label: value.to_string(),
@@ -121,7 +120,7 @@ impl CompletionContent {
         quote: char,
         detail: impl Into<String>,
         edit: Option<CompletionEdit>,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
     ) -> Self {
         Self {
             label: format!("{}{}", quote, quote),
@@ -139,7 +138,7 @@ impl CompletionContent {
 
     pub fn new_type_hint_inline_table(
         position: text::Position,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
@@ -159,7 +158,7 @@ impl CompletionContent {
     pub fn new_type_hint_key(
         key_name: &str,
         key_range: text::Range,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
@@ -178,7 +177,7 @@ impl CompletionContent {
 
     pub fn new_type_hint_empty_key(
         position: text::Position,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
@@ -205,7 +204,7 @@ impl CompletionContent {
         detail: Option<String>,
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         let label = key_name.to_string();
@@ -241,7 +240,7 @@ impl CompletionContent {
     pub fn new_pattern_key(
         patterns: &[String],
         position: text::Position,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
@@ -272,7 +271,7 @@ impl CompletionContent {
 
     pub fn new_additional_key(
         position: text::Position,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
@@ -296,7 +295,7 @@ impl CompletionContent {
     pub fn new_magic_triggers(
         key: &str,
         position: text::Position,
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
     ) -> Vec<Self> {
         [(".", "Dot Trigger"), ("=", "Equal Trigger")]
             .into_iter()

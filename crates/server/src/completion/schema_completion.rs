@@ -1,6 +1,5 @@
 use config::TomlVersion;
-use schema_store::{Accessor, SchemaDefinitions, ValueSchema};
-use tower_lsp::lsp_types::Url;
+use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 use super::{
     value::{
@@ -20,7 +19,7 @@ impl FindCompletionContents for SchemaCompletion {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {

@@ -1,5 +1,4 @@
-use schema_store::ValueSchema;
-use tower_lsp::lsp_types::Url;
+use schema_store::{SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -10,7 +9,7 @@ pub fn get_one_of_hover_content<T>(
     toml_version: config::TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     definitions: &schema_store::SchemaDefinitions,
 ) -> Option<HoverContent>
 where
@@ -106,7 +105,7 @@ impl GetHoverContent for schema_store::OneOfSchema {
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         let mut title_description_set = ahash::AHashSet::new();

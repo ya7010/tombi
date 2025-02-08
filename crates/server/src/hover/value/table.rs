@@ -1,6 +1,7 @@
 use config::TomlVersion;
-use schema_store::{Accessor, Accessors, SchemaDefinitions, TableSchema, ValueSchema, ValueType};
-use tower_lsp::lsp_types::Url;
+use schema_store::{
+    Accessor, Accessors, SchemaDefinitions, SchemaUrl, TableSchema, ValueSchema, ValueType,
+};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
@@ -15,7 +16,7 @@ impl GetHoverContent for document_tree::Table {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: &SchemaDefinitions,
     ) -> Option<HoverContent> {
         tracing::debug!("self: {:?}", self);
@@ -266,7 +267,7 @@ impl GetHoverContent for TableSchema {
         _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         _definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         Some(HoverContent {

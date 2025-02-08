@@ -1,6 +1,5 @@
 use config::TomlVersion;
-use schema_store::{Accessor, SchemaDefinitions, StringSchema, ValueSchema};
-use tower_lsp::lsp_types::Url;
+use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, StringSchema, ValueSchema};
 
 use crate::completion::{
     completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
@@ -15,7 +14,7 @@ impl FindCompletionContents for StringSchema {
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -63,7 +62,7 @@ impl FindCompletionContents for StringSchema {
 
 pub fn type_hint_string(
     position: text::Position,
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
     [('\"', "BasicString"), ('\'', "LiteralString")]

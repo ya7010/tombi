@@ -1,6 +1,5 @@
 use config::TomlVersion;
-use schema_store::{Accessor, LocalDateSchema, SchemaDefinitions, ValueSchema};
-use tower_lsp::lsp_types::Url;
+use schema_store::{Accessor, LocalDateSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 use crate::completion::{
     completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
@@ -15,7 +14,7 @@ impl FindCompletionContents for LocalDateSchema {
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         _definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -55,7 +54,7 @@ impl FindCompletionContents for LocalDateSchema {
 
 pub fn type_hint_local_date(
     position: text::Position,
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
     let label = chrono::Local::now().format("%Y-%m-%d").to_string();

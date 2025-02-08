@@ -1,5 +1,4 @@
-use schema_store::{Accessor, Accessors, ArraySchema, ValueSchema, ValueType};
-use tower_lsp::lsp_types::Url;
+use schema_store::{Accessor, Accessors, ArraySchema, SchemaUrl, ValueSchema, ValueType};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
@@ -14,7 +13,7 @@ impl GetHoverContent for document_tree::Array {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         tracing::debug!("self: {:?}", self);
@@ -173,7 +172,7 @@ impl GetHoverContent for ArraySchema {
         _toml_version: config::TomlVersion,
         _position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         _definitions: &schema_store::SchemaDefinitions,
     ) -> Option<HoverContent> {
         Some(HoverContent {

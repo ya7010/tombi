@@ -1,5 +1,5 @@
 #[derive(Debug, Clone)]
 pub struct CatalogSchema {
-    pub url: url::Url,
+    pub url: crate::SchemaUrl,
     pub include: Vec<String>,
 }

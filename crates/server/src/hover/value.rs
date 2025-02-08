@@ -9,8 +9,7 @@ mod offset_date_time;
 mod string;
 mod table;
 
-use schema_store::ValueSchema;
-use tower_lsp::lsp_types::Url;
+use schema_store::{SchemaUrl, ValueSchema};
 
 use super::GetHoverContent;
 
@@ -22,7 +21,7 @@ impl GetHoverContent for document_tree::Value {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         match self {
@@ -144,7 +143,7 @@ impl GetHoverContent for ValueSchema {
         toml_version: config::TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: &schema_store::SchemaDefinitions,
     ) -> Option<super::HoverContent> {
         match self {

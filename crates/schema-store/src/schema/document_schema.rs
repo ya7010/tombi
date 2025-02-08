@@ -1,20 +1,20 @@
-use super::FindSchemaCandidates;
 use super::{referable_schema::Referable, SchemaDefinitions, ValueSchema};
+use super::{FindSchemaCandidates, SchemaUrl};
 use crate::Accessor;
 use config::TomlVersion;
 use dashmap::DashMap;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {
-    pub schema_url: url::Url,
-    pub schema_id: Option<url::Url>,
+    pub schema_url: SchemaUrl,
+    pub schema_id: Option<SchemaUrl>,
     pub(crate) toml_version: Option<TomlVersion>,
     pub value_schema: Option<ValueSchema>,
     pub definitions: SchemaDefinitions,
 }
 
 impl DocumentSchema {
-    pub fn new(value: serde_json::Map<String, serde_json::Value>, schema_url: url::Url) -> Self {
+    pub fn new(value: serde_json::Map<String, serde_json::Value>, schema_url: SchemaUrl) -> Self {
         let toml_version = value.get("x-tombi-toml-version").and_then(|obj| match obj {
             serde_json::Value::String(version) => {
                 serde_json::from_str(&format!("\"{version}\"")).ok()
@@ -24,7 +24,7 @@ impl DocumentSchema {
         let schema_id = value
             .get("$id")
             .and_then(|v| v.as_str())
-            .and_then(|s| url::Url::parse(s).ok());
+            .and_then(|s| SchemaUrl::parse(s).ok());
 
         let value_schema = ValueSchema::new(&value);
         let definitions = DashMap::default();

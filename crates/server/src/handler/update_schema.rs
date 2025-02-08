@@ -1,3 +1,4 @@
+use schema_store::SchemaUrl;
 use tower_lsp::lsp_types::{
     notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier,
 };
@@ -13,7 +14,11 @@ pub async fn handle_update_schema(
 ) -> Result<bool, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_update_schema");
 
-    match backend.schema_store.update_schema(&schema_url).await {
+    match backend
+        .schema_store
+        .update_schema(&SchemaUrl::new(schema_url))
+        .await
+    {
         Ok(is_updated) => Ok(is_updated),
         Err(err) => {
             backend

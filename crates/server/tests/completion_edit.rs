@@ -548,7 +548,7 @@ macro_rules! test_completion_edit {
             let backend = service.inner();
 
             if let Some(schema_file_path) = $schema_file_path.as_ref() {
-                let schema_url = Url::from_file_path(schema_file_path).expect(
+                let schema_url = schema_store::SchemaUrl::from_file_path(schema_file_path).expect(
                     format!(
                         "failed to convert schema path to URL: {}",
                         schema_file_path.display()

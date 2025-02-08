@@ -45,6 +45,40 @@ pub type SchemaItem = Arc<RwLock<Referable<ValueSchema>>>;
 pub type SchemaDefinitions = dashmap::DashMap<String, Referable<ValueSchema>>;
 pub type Schemas = Arc<RwLock<Vec<Referable<ValueSchema>>>>;
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
+pub struct SchemaUrl(url::Url);
+
+impl SchemaUrl {
+    #[inline]
+    pub fn new(url: url::Url) -> Self {
+        Self(url)
+    }
+
+    #[inline]
+    pub fn parse(s: &str) -> Result<Self, url::ParseError> {
+        url::Url::parse(s).map(Self)
+    }
+
+    #[inline]
+    pub fn from_file_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, ()> {
+        url::Url::from_file_path(&path).map(Self)
+    }
+}
+
+impl std::ops::Deref for SchemaUrl {
+    type Target = url::Url;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for SchemaUrl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 pub trait FindSchemaCandidates {
     fn find_schema_candidates(
         &self,

@@ -6,8 +6,9 @@ use crate::completion::{
     CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
 use config::TomlVersion;
-use schema_store::{Accessor, FindSchemaCandidates, SchemaDefinitions, TableSchema, ValueSchema};
-use tower_lsp::lsp_types::Url;
+use schema_store::{
+    Accessor, FindSchemaCandidates, SchemaDefinitions, SchemaUrl, TableSchema, ValueSchema,
+};
 
 impl FindCompletionContents for document_tree::Table {
     fn find_completion_contents(
@@ -17,7 +18,7 @@ impl FindCompletionContents for document_tree::Table {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -322,7 +323,7 @@ impl FindCompletionContents for TableSchema {
         _toml_version: TomlVersion,
         position: text::Position,
         _keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent> {
@@ -405,7 +406,7 @@ fn get_property_value_completion_contents(
     toml_version: TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
@@ -518,7 +519,7 @@ fn collect_table_key_completion_contents(
     position: text::Position,
     accessors: &Vec<Accessor>,
     completion_hint: Option<CompletionHint>,
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     value_schema: &ValueSchema,
     definitions: &SchemaDefinitions,
 ) -> Option<Vec<CompletionContent>> {

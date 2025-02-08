@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use schema_store::DocumentSchema;
+use schema_store::{DocumentSchema, SchemaUrl};
 
 fn project_root() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let cargo_manifest_dir = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);
@@ -33,7 +33,7 @@ fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
 
     let document_schema = DocumentSchema::new(
         serde_json::from_str(&contents)?,
-        url::Url::from_file_path(&document_path).unwrap(),
+        SchemaUrl::from_file_path(&document_path).unwrap(),
     );
 
     dbg!(document_schema);

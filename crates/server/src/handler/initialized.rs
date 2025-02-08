@@ -1,3 +1,4 @@
+use schema_store::json::CatalogUrl;
 use tower_lsp::lsp_types::{InitializedParams, MessageType};
 
 use crate::backend::Backend;
@@ -27,7 +28,7 @@ async fn load_schemas(backend: &Backend) {
             if let Ok(catalog_url) = catalog_path.try_into() {
                 if let Err(err) = backend
                     .schema_store
-                    .load_catalog_from_url(&catalog_url)
+                    .load_catalog_from_url(&CatalogUrl::new(catalog_url))
                     .await
                 {
                     let Ok(_) = backend

@@ -1,7 +1,6 @@
 use config::TomlVersion;
-use schema_store::AnyOfSchema;
 use schema_store::{Accessor, SchemaDefinitions, Schemas};
-use tower_lsp::lsp_types::Url;
+use schema_store::{AnyOfSchema, SchemaUrl};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
@@ -29,7 +28,7 @@ pub fn find_any_of_completion_items<T>(
     toml_version: TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     definitions: Option<&SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent>

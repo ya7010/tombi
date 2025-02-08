@@ -15,9 +15,8 @@ use config::TomlVersion;
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 pub use hint::CompletionHint;
 use itertools::Itertools;
-use schema_store::{Accessor, SchemaDefinitions, Schemas, ValueSchema};
+use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, Schemas, ValueSchema};
 use syntax::{SyntaxElement, SyntaxKind};
-use tower_lsp::lsp_types::Url;
 
 pub fn get_completion_contents(
     root: ast::Root,
@@ -192,7 +191,7 @@ pub trait FindCompletionContents {
         toml_version: TomlVersion,
         position: text::Position,
         keys: &[document_tree::Key],
-        schema_url: Option<&Url>,
+        schema_url: Option<&SchemaUrl>,
         definitions: Option<&SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
     ) -> Vec<CompletionContent>;
@@ -300,7 +299,7 @@ impl<T: CompositeSchemaImpl> CompletionCandidate for T {
 fn serde_value_to_completion_item(
     value: &serde_json::Value,
     position: text::Position,
-    schema_url: Option<&Url>,
+    schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Option<CompletionContent> {
     let (kind, value) = match value {
