@@ -1,4 +1,6 @@
-use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, ValueSchema};
+use super::{
+    AllOfSchema, AnyOfSchema, DocumentSchema, OneOfSchema, SchemaDefinitions, ValueSchema,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Referable<T> {
@@ -95,7 +97,8 @@ impl Referable<ValueSchema> {
     #[allow(unused)]
     async fn resolve_async<'a>(
         &'a mut self,
-        definitions: &'a SchemaDefinitions,
+        document_schema: &'a DocumentSchema,
+        schema_store: &'a crate::SchemaStore,
     ) -> std::pin::Pin<
         Box<dyn std::future::Future<Output = Result<&'a ValueSchema, crate::Error>> + 'a>,
     > {
@@ -107,7 +110,8 @@ impl Referable<ValueSchema> {
                     description,
                 } => {
                     {
-                        if let Some(definition_schema) = definitions.get(reference) {
+                        if let Some(definition_schema) = document_schema.definitions.get(reference)
+                        {
                             let mut referable_schema = definition_schema.to_owned();
                             if let Referable::Resolved(ref mut schema) = &mut referable_schema {
                                 if title.is_some() || description.is_some() {
@@ -123,7 +127,9 @@ impl Referable<ValueSchema> {
                             })?;
                         }
                     }
-                    self.resolve_async(definitions).await.await
+                    self.resolve_async(document_schema, schema_store)
+                        .await
+                        .await
                 }
                 Referable::Resolved(resolved) => {
                     match resolved {
@@ -132,7 +138,10 @@ impl Referable<ValueSchema> {
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                             if let Ok(mut schemas) = schemas.write() {
                                 for schema in schemas.iter_mut() {
-                                    schema.resolve_async(definitions).await.await?;
+                                    schema
+                                        .resolve_async(document_schema, schema_store)
+                                        .await
+                                        .await?;
                                 }
                             }
                         }
