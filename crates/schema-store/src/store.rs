@@ -90,7 +90,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn add_catalog(&self, catalog_schema: crate::json_schema::CatalogSchema) {
+    pub async fn add_json_schema_catalog(&self, catalog_schema: crate::json_schema::CatalogSchema) {
         let mut catalogs = self.catalogs.write().await;
         if catalog_schema
             .file_match
