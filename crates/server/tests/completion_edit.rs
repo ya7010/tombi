@@ -525,7 +525,6 @@ macro_rules! test_completion_edit {
     ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-            use schema_store::JsonCatalogSchema;
             use server::handler::handle_did_open;
             use server::Backend;
             use std::io::Write;
@@ -558,7 +557,7 @@ macro_rules! test_completion_edit {
                 );
                 backend
                     .schema_store
-                    .add_catalog(JsonCatalogSchema {
+                    .add_catalog(schema_store::json_schema::CatalogSchema {
                         name: "test_schema".to_string(),
                         description: "schema for testing".to_string(),
                         file_match: vec!["*.toml".to_string()],

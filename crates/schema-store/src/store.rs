@@ -5,17 +5,13 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use url::Url;
 
-use crate::{
-    json_schema::{JsonCatalog, JsonCatalogSchema},
-    schema::CatalogSchema,
-    DocumentSchema,
-};
+use crate::DocumentSchema;
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
     schemas: DashMap<Url, Result<DocumentSchema, crate::Error>>,
-    catalogs: Arc<RwLock<Vec<CatalogSchema>>>,
+    catalogs: Arc<RwLock<Vec<crate::CatalogSchema>>>,
 }
 
 impl SchemaStore {
@@ -43,7 +39,7 @@ impl SchemaStore {
             };
             tracing::debug!("load config schema from: {}", url);
 
-            catalogs.push(CatalogSchema {
+            catalogs.push(crate::CatalogSchema {
                 url,
                 include: schema.include.clone(),
             });
@@ -67,7 +63,7 @@ impl SchemaStore {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
-            if let Ok(catalog) = response.json::<JsonCatalog>().await {
+            if let Ok(catalog) = response.json::<crate::json_schema::Catalog>().await {
                 let mut catalogs = self.catalogs.write().await;
                 for catalog_schema in catalog.schemas {
                     if catalog_schema
@@ -75,7 +71,7 @@ impl SchemaStore {
                         .iter()
                         .any(|pattern| pattern.ends_with(".toml"))
                     {
-                        catalogs.push(CatalogSchema {
+                        catalogs.push(crate::CatalogSchema {
                             url: catalog_schema.url,
                             include: catalog_schema.file_match,
                         });
@@ -94,14 +90,14 @@ impl SchemaStore {
         }
     }
 
-    pub async fn add_catalog(&self, catalog_schema: JsonCatalogSchema) {
+    pub async fn add_catalog(&self, catalog_schema: crate::json_schema::CatalogSchema) {
         let mut catalogs = self.catalogs.write().await;
         if catalog_schema
             .file_match
             .iter()
             .any(|pattern| pattern.ends_with(".toml"))
         {
-            catalogs.push(CatalogSchema {
+            catalogs.push(crate::CatalogSchema {
                 url: catalog_schema.url,
                 include: catalog_schema.file_match,
             });

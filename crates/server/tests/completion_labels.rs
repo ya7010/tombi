@@ -1,4 +1,4 @@
-use schema_store::DEFAULT_CATALOG_URL;
+use schema_store::json_schema::DEFAULT_CATALOG_URL;
 
 use test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
 
@@ -784,7 +784,6 @@ macro_rules! test_completion_labels {
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
             use itertools::Itertools;
             use server::Backend;
-            use schema_store::JsonCatalogSchema;
             use std::io::Write;
             use tower_lsp::{
                 lsp_types::{
@@ -817,7 +816,7 @@ macro_rules! test_completion_labels {
                 );
                 backend
                     .schema_store
-                    .add_catalog(JsonCatalogSchema {
+                    .add_catalog(schema_store::json_schema::CatalogSchema {
                         name: "test_schema".to_string(),
                         description: "schema for testing".to_string(),
                         file_match: vec!["*.toml".to_string()],
