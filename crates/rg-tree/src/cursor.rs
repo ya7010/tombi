@@ -151,6 +151,9 @@ pub struct SyntaxNode {
     ptr: ptr::NonNull<NodeData>,
 }
 
+unsafe impl Send for SyntaxNode {}
+unsafe impl Sync for SyntaxNode {}
+
 impl Clone for SyntaxNode {
     #[inline]
     fn clone(&self) -> Self {
@@ -172,6 +175,9 @@ impl Drop for SyntaxNode {
 pub struct SyntaxToken {
     ptr: ptr::NonNull<NodeData>,
 }
+
+unsafe impl Send for SyntaxToken {}
+unsafe impl Sync for SyntaxToken {}
 
 impl Clone for SyntaxToken {
     #[inline]

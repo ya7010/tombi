@@ -66,6 +66,7 @@ pub async fn handle_hover(
         &keys,
         document_schema.as_ref(),
     )
+    .await
     .map(|mut content| {
         content.range = range;
         content

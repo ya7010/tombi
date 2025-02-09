@@ -13,7 +13,7 @@ use schema_store::{
 };
 use std::{fmt::Debug, ops::Deref};
 
-pub fn get_hover_content(
+pub async fn get_hover_content(
     tree: &document_tree::DocumentTree,
     toml_version: TomlVersion,
     position: text::Position,
