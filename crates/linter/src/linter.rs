@@ -21,22 +21,19 @@ pub struct Linter<'a> {
 }
 
 impl<'a> Linter<'a> {
-    #[inline]
     pub async fn try_new(
         toml_version: TomlVersion,
         options: &'a crate::LintOptions,
         schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
-        let document_schema = match schema_url_or_path {
-            Some(schema_url_or_path) => Some(
-                schema_store
-                    .try_get_source_schema(schema_url_or_path)
-                    .await?,
-            ),
-            None => None,
-        }
-        .flatten();
+        let document_schema = if let Some(schema_url_or_path) = schema_url_or_path {
+            schema_store
+                .try_get_source_schema(schema_url_or_path)
+                .await?
+        } else {
+            None
+        };
 
         let toml_version = document_schema
             .as_ref()
@@ -77,6 +74,7 @@ impl<'a> Linter<'a> {
             if let Some(document_schema) = self.document_schema {
                 if let Err(errs) =
                     crate::validation::validate(document_tree, self.toml_version, &document_schema)
+                        .await
                 {
                     for err in errs {
                         err.set_diagnostic(&mut errors);

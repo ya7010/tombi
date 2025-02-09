@@ -102,12 +102,8 @@ impl GetHoverContent for IntegerSchema {
                 }),
                 minimum: self.minimum.map(DefaultValue::Integer),
                 maximum: self.maximum.map(DefaultValue::Integer),
-                exclusive_minimum: self
-                    .exclusive_minimum
-                    .map(DefaultValue::Integer),
-                exclusive_maximum: self
-                    .exclusive_maximum
-                    .map(DefaultValue::Integer),
+                exclusive_minimum: self.exclusive_minimum.map(DefaultValue::Integer),
+                exclusive_maximum: self.exclusive_maximum.map(DefaultValue::Integer),
                 multiple_of: self.multiple_of.map(DefaultValue::Integer),
                 ..Default::default()
             }),

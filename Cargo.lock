@@ -1080,6 +1080,7 @@ dependencies = [
  "dashmap 6.1.0",
  "diagnostic",
  "document-tree",
+ "futures",
  "itertools",
  "parser",
  "regex",

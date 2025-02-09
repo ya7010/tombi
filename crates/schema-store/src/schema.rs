@@ -42,8 +42,10 @@ use crate::Accessor;
 pub type SchemaProperties = dashmap::DashMap<Accessor, Referable<ValueSchema>>;
 pub type SchemaPatternProperties = dashmap::DashMap<String, Referable<ValueSchema>>;
 pub type SchemaItem = Arc<RwLock<Referable<ValueSchema>>>;
+pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
 pub type SchemaDefinitions = dashmap::DashMap<String, Referable<ValueSchema>>;
 pub type Schemas = Arc<RwLock<Vec<Referable<ValueSchema>>>>;
+pub type SchemasTokio = Arc<tokio::sync::RwLock<Vec<Referable<ValueSchema>>>>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
 pub struct SchemaUrl(url::Url);

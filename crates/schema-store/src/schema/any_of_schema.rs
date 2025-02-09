@@ -2,15 +2,21 @@ use std::sync::{Arc, RwLock};
 
 use crate::{Referable, Schemas};
 
-use super::ValueSchema;
+use super::{SchemasTokio, ValueSchema};
 
 #[derive(Debug, Default, Clone)]
 pub struct AnyOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub schemas: Schemas,
+    pub schemas_tokio: SchemasTokio,
     pub default: Option<serde_json::Value>,
 }
+
+// FIXME: remove thoes traits.
+// FIXME: remove schemas for async version
+unsafe impl Send for AnyOfSchema {}
+unsafe impl Sync for AnyOfSchema {}
 
 impl AnyOfSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
@@ -29,7 +35,7 @@ impl AnyOfSchema {
                 a.iter()
                     .filter_map(|v| v.as_object())
                     .filter_map(Referable::<ValueSchema>::new)
-                    .collect()
+                    .collect::<Vec<_>>()
             })
             .unwrap_or_default();
         let default = object.get("default").cloned();
@@ -37,7 +43,8 @@ impl AnyOfSchema {
         Self {
             title,
             description,
-            schemas: Arc::new(RwLock::new(schemas)),
+            schemas: Arc::new(RwLock::new(schemas.clone())),
+            schemas_tokio: Arc::new(tokio::sync::RwLock::new(schemas.clone())),
             default,
         }
     }

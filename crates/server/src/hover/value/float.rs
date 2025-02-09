@@ -102,12 +102,8 @@ impl GetHoverContent for FloatSchema {
                 }),
                 minimum: self.minimum.map(DefaultValue::Float),
                 maximum: self.maximum.map(DefaultValue::Float),
-                exclusive_minimum: self
-                    .exclusive_minimum
-                    .map(DefaultValue::Float),
-                exclusive_maximum: self
-                    .exclusive_maximum
-                    .map(DefaultValue::Float),
+                exclusive_minimum: self.exclusive_minimum.map(DefaultValue::Float),
+                exclusive_maximum: self.exclusive_maximum.map(DefaultValue::Float),
                 multiple_of: self.multiple_of.map(DefaultValue::Float),
                 ..Default::default()
             }),

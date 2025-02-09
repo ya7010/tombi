@@ -3,6 +3,7 @@ use std::sync::RwLock;
 
 use super::FindSchemaCandidates;
 use super::SchemaItem;
+use super::SchemaItemTokio;
 use super::SchemaPatternProperties;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
@@ -16,10 +17,16 @@ pub struct TableSchema {
     pub pattern_properties: Option<SchemaPatternProperties>,
     pub additional_properties: bool,
     additional_property_schema: Option<SchemaItem>,
+    pub additional_property_schema_tokio: Option<SchemaItemTokio>,
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
 }
+
+// FIXME: remove thoes traits.
+// FIXME: remove schemas for async version
+unsafe impl Send for TableSchema {}
+unsafe impl Sync for TableSchema {}
 
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
@@ -49,17 +56,20 @@ impl TableSchema {
             }
             _ => None,
         };
-        let (additional_properties, additional_property_schema) =
+        let (additional_properties, additional_property_schema, additional_property_schema_tokio) =
             match object.get("additionalProperties") {
-                Some(serde_json::Value::Bool(allow)) => (*allow, None),
+                Some(serde_json::Value::Bool(allow)) => (*allow, None, None),
                 Some(serde_json::Value::Object(object)) => {
                     let value_schema = Referable::<ValueSchema>::new(object);
                     (
                         true,
-                        value_schema.map(|schema| Arc::new(RwLock::new(schema))),
+                        value_schema
+                            .clone()
+                            .map(|schema| Arc::new(RwLock::new(schema))),
+                        value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),
                     )
                 }
-                _ => (true, None),
+                _ => (true, None, None),
             };
 
         Self {
@@ -73,6 +83,7 @@ impl TableSchema {
             pattern_properties,
             additional_properties,
             additional_property_schema,
+            additional_property_schema_tokio,
             required: object.get("required").and_then(|v| {
                 v.as_array().map(|arr| {
                     arr.iter()
@@ -94,7 +105,7 @@ impl TableSchema {
     }
 
     pub fn has_additional_property_schema(&self) -> bool {
-        self.additional_property_schema.is_some()
+        self.additional_property_schema.is_some() || self.additional_property_schema_tokio.is_some()
     }
 
     pub fn operate_additional_property_schema<F, T>(
