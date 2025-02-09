@@ -49,7 +49,7 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    let Some((keys, range)) = get_hover_range(&root, position, toml_version) else {
+    let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 
@@ -73,7 +73,7 @@ pub async fn handle_hover(
     }));
 }
 
-fn get_hover_range(
+async fn get_hover_range(
     root: &ast::Root,
     position: text::Position,
     toml_version: config::TomlVersion,
