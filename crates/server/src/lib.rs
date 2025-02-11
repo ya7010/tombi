@@ -14,7 +14,7 @@ pub struct Args {}
 
 pub async fn serve(_args: impl Into<Args>) {
     tracing::info!(
-        "Tombi LSP Server Version \"{}\" will start.",
+        "Tombi Language Server version \"{}\" will start.",
         env!("CARGO_PKG_VERSION")
     );
 

@@ -21,7 +21,7 @@ pub async fn handle_initialize(
 
     if let Some(ClientInfo { name, version }) = client_info {
         let version = version.unwrap_or_default();
-        tracing::info!("Client {name} version: {version}",);
+        tracing::info!("{name} version: {version}",);
     }
 
     Ok(InitializeResult {
