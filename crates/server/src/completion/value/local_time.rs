@@ -1,6 +1,8 @@
 use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, LocalTimeSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
+use schema_store::{
+    Accessor, LocalTimeSchema, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema,
+};
 
 use crate::completion::{
     completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
@@ -17,6 +19,7 @@ impl FindCompletionContents for LocalTimeSchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: Option<&'a SchemaDefinitions>,
+        _schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {

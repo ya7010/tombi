@@ -84,7 +84,7 @@ where
     runtime.block_on(async {
         if schema_options.enabled.unwrap_or_default().value() {
             schema_store
-                .load_config_schema(
+                .load_schemas_from_config(
                     config_dirpath,
                     match &config.schemas {
                         Some(schemas) => schemas,

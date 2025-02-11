@@ -12,6 +12,7 @@ impl Validate for document_tree::Boolean {
         toml_version: TomlVersion,
         value_schema: &'a ValueSchema,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
             let mut errors = vec![];
@@ -35,13 +36,34 @@ impl Validate for document_tree::Boolean {
             let boolean_schema = match value_schema {
                 ValueSchema::Boolean(boolean_schema) => boolean_schema,
                 ValueSchema::OneOf(one_of_schema) => {
-                    return validate_one_of(self, toml_version, one_of_schema, definitions).await
+                    return validate_one_of(
+                        self,
+                        toml_version,
+                        one_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 ValueSchema::AnyOf(any_of_schema) => {
-                    return validate_any_of(self, toml_version, any_of_schema, definitions).await
+                    return validate_any_of(
+                        self,
+                        toml_version,
+                        any_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 ValueSchema::AllOf(all_of_schema) => {
-                    return validate_all_of(self, toml_version, all_of_schema, definitions).await
+                    return validate_all_of(
+                        self,
+                        toml_version,
+                        all_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 _ => unreachable!("Expected a Boolean schema"),
             };

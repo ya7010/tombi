@@ -1,9 +1,6 @@
 use futures::{future::BoxFuture, FutureExt};
 
-use super::{
-    AllOfSchema, AnyOfSchema, DocumentSchema, OneOfSchema, SchemaDefinitions, SchemaUrl,
-    ValueSchema,
-};
+use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Referable<T> {
@@ -50,60 +47,15 @@ impl Referable<ValueSchema> {
         }
     }
 
+    #[allow(unused)]
     pub fn resolve<'a: 'b, 'b>(
         &'a mut self,
         definitions: &'a SchemaDefinitions,
-    ) -> BoxFuture<'b, Result<&'a ValueSchema, crate::Error>> {
-        async move {
-            match self {
-                Referable::Ref {
-                    reference,
-                    title,
-                    description,
-                } => {
-                    {
-                        if let Some(definition_schema) = definitions.get(reference) {
-                            let mut referable_schema = definition_schema.to_owned();
-                            if let Referable::Resolved(ref mut schema) = &mut referable_schema {
-                                if title.is_some() || description.is_some() {
-                                    schema.set_title(title.to_owned());
-                                    schema.set_description(description.to_owned());
-                                }
-                            }
-
-                            *self = referable_schema;
-                        } else {
-                            Err(crate::Error::DefinitionNotFound {
-                                definition_ref: reference.clone(),
-                            })?;
-                        }
-                    }
-                    self.resolve(definitions).await
-                }
-                Referable::Resolved(resolved) => {
-                    match resolved {
-                        ValueSchema::OneOf(OneOfSchema { schemas, .. })
-                        | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
-                        | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                            for schema in schemas.write().await.iter_mut() {
-                                schema.resolve(definitions).await?;
-                            }
-                        }
-                        _ => {}
-                    }
-                    Result::<&ValueSchema, crate::Error>::Ok(resolved)
-                }
-            }
-        }
-        .boxed()
-    }
-
-    #[allow(unused)]
-    fn resolve_async<'a: 'b, 'b>(
-        &'a mut self,
-        document_schema: &'a DocumentSchema,
         schema_store: &'a crate::SchemaStore,
-    ) -> BoxFuture<'b, Result<(&'a ValueSchema, Option<SchemaUrl>), crate::Error>> {
+    ) -> BoxFuture<
+        'b,
+        Result<(&'a ValueSchema, Option<(SchemaUrl, SchemaDefinitions)>), crate::Error>,
+    > {
         Box::pin(async move {
             match self {
                 Referable::Ref {
@@ -111,8 +63,8 @@ impl Referable<ValueSchema> {
                     title,
                     description,
                 } => {
-                    let mut new_schema_url = None;
-                    if let Some(definition_schema) = document_schema.definitions.get(reference) {
+                    let mut new_schema = None;
+                    if let Some(definition_schema) = definitions.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
                         if let Referable::Resolved(ref mut schema) = &mut referable_schema {
                             if title.is_some() || description.is_some() {
@@ -127,11 +79,14 @@ impl Referable<ValueSchema> {
                             https_url if https_url.starts_with("https://") => {
                                 if let Ok(schema_url) = SchemaUrl::parse(https_url) {
                                     if let Ok(document_schema) =
-                                        schema_store.try_load_schema(&schema_url).await
+                                        schema_store.try_load_document_schema(&schema_url).await
                                     {
                                         if let Some(value_schema) = document_schema.value_schema {
                                             *self = Referable::Resolved(value_schema);
-                                            new_schema_url = Some(schema_url);
+                                            new_schema = Some((
+                                                schema_url,
+                                                document_schema.definitions.clone(),
+                                            ));
                                         }
                                     }
                                 }
@@ -139,11 +94,14 @@ impl Referable<ValueSchema> {
                             http_url if http_url.starts_with("http://") => {
                                 if let Ok(schema_url) = SchemaUrl::parse(http_url) {
                                     if let Ok(document_schema) =
-                                        schema_store.try_load_schema(&schema_url).await
+                                        schema_store.try_load_document_schema(&schema_url).await
                                     {
                                         if let Some(value_schema) = document_schema.value_schema {
                                             *self = Referable::Resolved(value_schema);
-                                            new_schema_url = Some(schema_url);
+                                            new_schema = Some((
+                                                schema_url,
+                                                document_schema.definitions.clone(),
+                                            ));
                                         }
                                     }
                                 }
@@ -152,9 +110,9 @@ impl Referable<ValueSchema> {
                         }
                     }
 
-                    self.resolve_async(document_schema, schema_store)
+                    self.resolve(&definitions, schema_store)
                         .await
-                        .map(|(value_schema, _)| (value_schema, new_schema_url))
+                        .map(|(value_schema, _)| (value_schema, new_schema))
                 }
                 Referable::Resolved(resolved) => {
                     match resolved {
@@ -162,13 +120,13 @@ impl Referable<ValueSchema> {
                         | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                             for schema in schemas.write().await.iter_mut() {
-                                schema.resolve_async(document_schema, schema_store).await?;
+                                schema.resolve(&definitions, schema_store).await?;
                             }
                         }
                         _ => {}
                     }
 
-                    Result::<(&ValueSchema, Option<SchemaUrl>), crate::Error>::Ok((resolved, None))
+                    Result::<(&ValueSchema, _), _>::Ok((resolved, None))
                 }
             }
         })

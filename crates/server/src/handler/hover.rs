@@ -65,6 +65,7 @@ pub async fn handle_hover(
         position,
         &keys,
         document_schema.as_ref(),
+        &backend.schema_store,
     )
     .await
     .map(|mut content| {

@@ -13,6 +13,7 @@ pub fn get_all_of_hover_content<'a: 'b, 'b, T>(
     keys: &'a [document_tree::Key],
     schema_url: Option<&'a SchemaUrl>,
     definitions: &'a schema_store::SchemaDefinitions,
+    schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
     T: GetHoverContent + Sync + Send,
@@ -22,9 +23,19 @@ where
         let mut value_type_set = indexmap::IndexSet::new();
         let mut schema = None;
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
+            let Ok((value_schema, new_schema)) = referable_schema
+                .resolve(definitions, schema_store)
+                .await
+            else {
                 return None;
             };
+
+            let (schema_url, definitions) = if let Some((schema_url, definitions)) = &new_schema {
+                (Some(schema_url), definitions)
+            } else {
+                (schema_url, definitions)
+            };
+
             if let Some(hover_content) = value
                 .get_hover_content(
                     accessors,
@@ -34,6 +45,7 @@ where
                     keys,
                     schema_url,
                     definitions,
+                    &schema_store,
                 )
                 .await
             {
@@ -95,6 +107,7 @@ impl GetHoverContent for schema_store::AllOfSchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             let mut title_description_set = ahash::AHashSet::new();
@@ -102,7 +115,10 @@ impl GetHoverContent for schema_store::AllOfSchema {
             let mut schemas = self.schemas.write().await;
 
             for referable_schema in schemas.iter_mut() {
-                let Ok(value_schema) = referable_schema.resolve(definitions).await else {
+                let Ok((value_schema, _)) = referable_schema
+                    .resolve(definitions, schema_store)
+                    .await
+                else {
                     return None;
                 };
                 if value_schema.title().is_some() || value_schema.description().is_some() {

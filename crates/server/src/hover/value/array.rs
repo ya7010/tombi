@@ -17,6 +17,7 @@ impl GetHoverContent for document_tree::Array {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         tracing::debug!("self: {:?}", self);
         tracing::trace!("keys: {:?}", keys);
@@ -32,8 +33,17 @@ impl GetHoverContent for document_tree::Array {
 
                             if let Some(items) = &array_schema.items {
                                 let mut referable_schema = items.write().await;
-                                if let Ok(item_schema) = referable_schema.resolve(definitions).await
+                                if let Ok((item_schema, new_schema)) = referable_schema
+                                    .resolve(definitions, &schema_store)
+                                    .await
                                 {
+                                    let (schema_url, definitions) =
+                                        if let Some((schema_url, definitions)) = &new_schema {
+                                            (Some(schema_url), definitions)
+                                        } else {
+                                            (schema_url, definitions)
+                                        };
+
                                     let mut hover_content = value
                                         .get_hover_content(
                                             &accessors
@@ -47,6 +57,7 @@ impl GetHoverContent for document_tree::Array {
                                             keys,
                                             schema_url,
                                             definitions,
+                                            &schema_store,
                                         )
                                         .await?;
 
@@ -87,6 +98,7 @@ impl GetHoverContent for document_tree::Array {
                                     keys,
                                     schema_url,
                                     definitions,
+                                    &schema_store,
                                 )
                                 .await;
                         }
@@ -100,6 +112,7 @@ impl GetHoverContent for document_tree::Array {
                             keys,
                             schema_url,
                             definitions,
+                            &schema_store,
                         )
                         .await
                         .map(|mut hover_content| {
@@ -117,6 +130,7 @@ impl GetHoverContent for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                     )
                     .await
                 }
@@ -130,6 +144,7 @@ impl GetHoverContent for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                     )
                     .await
                 }
@@ -143,6 +158,7 @@ impl GetHoverContent for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                     )
                     .await
                 }
@@ -164,6 +180,7 @@ impl GetHoverContent for document_tree::Array {
                                     keys,
                                     schema_url,
                                     definitions,
+                                    &schema_store,
                                 )
                                 .await;
                         }
@@ -194,6 +211,7 @@ impl GetHoverContent for ArraySchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: &'a schema_store::SchemaDefinitions,
+        _schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             Some(HoverContent {

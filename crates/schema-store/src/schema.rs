@@ -38,7 +38,7 @@ pub use document_schema::DocumentSchema;
 pub use referable_schema::Referable;
 pub use value_schema::*;
 
-use crate::Accessor;
+use crate::{Accessor, SchemaStore};
 
 pub type SchemaProperties = dashmap::DashMap<Accessor, Referable<ValueSchema>>;
 pub type SchemaPatternProperties = dashmap::DashMap<String, Referable<ValueSchema>>;
@@ -85,5 +85,6 @@ pub trait FindSchemaCandidates {
         &'a self,
         accessors: &'a [Accessor],
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)>;
 }

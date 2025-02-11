@@ -13,6 +13,7 @@ impl Validate for document_tree::Table {
         toml_version: TomlVersion,
         value_schema: &'a ValueSchema,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
             let mut errors = vec![];
@@ -36,13 +37,34 @@ impl Validate for document_tree::Table {
             let table_schema = match value_schema {
                 ValueSchema::Table(table_schema) => table_schema,
                 ValueSchema::OneOf(one_of_schema) => {
-                    return validate_one_of(self, toml_version, one_of_schema, definitions).await
+                    return validate_one_of(
+                        self,
+                        toml_version,
+                        one_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 ValueSchema::AnyOf(any_of_schema) => {
-                    return validate_any_of(self, toml_version, any_of_schema, definitions).await
+                    return validate_any_of(
+                        self,
+                        toml_version,
+                        any_of_schema,
+                        definitions,
+                        schema_store,
+                    )
+                    .await
                 }
                 ValueSchema::AllOf(all_of_schema) => {
-                    return validate_all_of(self, toml_version, all_of_schema, definitions).await
+                    return validate_all_of(
+                        self,
+                        toml_version,
+                        all_of_schema,
+                        definitions,
+                        schema_store,
+                    )
+                    .await
                 }
                 _ => unreachable!("Expected a Table schema"),
             };
@@ -54,9 +76,16 @@ impl Validate for document_tree::Table {
                 let mut matche_key = false;
                 if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                     matche_key = true;
-                    if let Ok(value_schema) = property.resolve(definitions).await {
+                    if let Ok((value_schema, new_schema)) =
+                        property.resolve(definitions, &schema_store).await
+                    {
+                        let definitions = if let Some((_, new_definitions)) = &new_schema {
+                            new_definitions
+                        } else {
+                            definitions
+                        };
                         if let Err(errs) = value
-                            .validate(toml_version, value_schema, definitions)
+                            .validate(toml_version, value_schema, definitions, &schema_store)
                             .await
                         {
                             errors.extend(errs);
@@ -74,11 +103,23 @@ impl Validate for document_tree::Table {
                         if pattern.is_match(&accessor_raw_text) {
                             matche_key = true;
                             let property_schema = pattern_property.value_mut();
-                            if let Ok(value_schema) =
-                                property_schema.resolve(definitions).await
+                            if let Ok((value_schema, new_schema)) = property_schema
+                                .resolve(definitions, &schema_store)
+                                .await
                             {
+                                let definitions = if let Some((_, new_definitions)) = &new_schema {
+                                    new_definitions
+                                } else {
+                                    definitions
+                                };
+
                                 if let Err(errs) = value
-                                    .validate(toml_version, value_schema, definitions)
+                                    .validate(
+                                        toml_version,
+                                        value_schema,
+                                        definitions,
+                                        &schema_store,
+                                    )
                                     .await
                                 {
                                     errors.extend(errs);
@@ -92,16 +133,19 @@ impl Validate for document_tree::Table {
                         &table_schema.additional_property_schema
                     {
                         let mut referable_schema = additional_property_schema.write().await;
-                        let value_schema =
-                            if let Ok(schema) = referable_schema.resolve(definitions).await {
-                                Some(schema.clone())
+                        if let Ok((value_schema, new_schema)) = referable_schema
+                            .resolve(definitions, &schema_store)
+                            .await
+                        {
+                            let definitions = if let Some((_, new_definitions)) = &new_schema {
+                                new_definitions
                             } else {
-                                None
+                                definitions
                             };
 
-                        if let Some(schema) = value_schema {
-                            if let Err(errs) =
-                                value.validate(toml_version, &schema, definitions).await
+                            if let Err(errs) = value
+                                .validate(toml_version, &value_schema, definitions, &schema_store)
+                                .await
                             {
                                 errors.extend(errs);
                             }

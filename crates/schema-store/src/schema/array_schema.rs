@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use futures::{future::BoxFuture, FutureExt};
 
-use crate::Accessor;
+use crate::{Accessor, SchemaStore};
 
 use super::{FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, ValueSchema};
 
@@ -51,6 +51,7 @@ impl FindSchemaCandidates for ArraySchema {
         &'a self,
         accessors: &'a [Accessor],
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
         async move {
             let mut errors = Vec::new();
@@ -61,9 +62,17 @@ impl FindSchemaCandidates for ArraySchema {
             };
 
             let mut referable_schema = items.write().await;
-            if let Ok(value_schema) = referable_schema.resolve(definitions).await {
+            if let Ok((value_schema, new_schema)) = referable_schema
+                .resolve(definitions, &schema_store)
+                .await
+            {
+                let definitions = if let Some((_, definitions)) = &new_schema {
+                    definitions
+                } else {
+                    definitions
+                };
                 let (mut item_candidates, mut item_errors) = value_schema
-                    .find_schema_candidates(&accessors[1..], definitions)
+                    .find_schema_candidates(&accessors[1..], definitions, &schema_store)
                     .await;
                 candidates.append(&mut item_candidates);
                 errors.append(&mut item_errors);

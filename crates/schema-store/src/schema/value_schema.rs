@@ -7,8 +7,8 @@ use super::{
     LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema,
     StringSchema, TableSchema,
 };
-use crate::Referable;
 use crate::{Accessor, SchemaDefinitions};
+use crate::{Referable, SchemaStore};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -209,6 +209,8 @@ impl ValueSchema {
     pub fn match_flattened_schemas<'a: 'b, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
+        definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, Vec<ValueSchema>> {
         async move {
             let mut matched_schemas = Vec::new();
@@ -216,9 +218,21 @@ impl ValueSchema {
                 ValueSchema::OneOf(OneOfSchema { schemas, .. })
                 | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                    for schema in schemas.write().await.iter_mut() {
-                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()).await {
-                            matched_schemas.extend(schema.match_flattened_schemas(condition).await)
+                    for referable_schema in schemas.write().await.iter_mut() {
+                        if let Ok((value_schema, new_schema)) = referable_schema
+                            .resolve(&definitions, &schema_store)
+                            .await
+                        {
+                            let definitions = if let Some((_, definitions)) = &new_schema {
+                                definitions
+                            } else {
+                                definitions
+                            };
+                            matched_schemas.extend(
+                                value_schema
+                                    .match_flattened_schemas(condition, &definitions, &schema_store)
+                                    .await,
+                            )
                         }
                     }
                 }
@@ -237,6 +251,8 @@ impl ValueSchema {
     pub fn is_match<'a, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
+        definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, bool>
     where
         'a: 'b,
@@ -244,30 +260,58 @@ impl ValueSchema {
         async move {
             match self {
                 ValueSchema::OneOf(OneOfSchema { schemas, .. })
-                | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => {
-                    join_all(schemas.write().await.iter_mut().map(|schema| async {
-                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()).await {
-                            schema.is_match(condition).await
-                        } else {
-                            false
-                        }
-                    }))
-                    .await
-                    .into_iter()
-                    .any(|is_matched| is_matched)
-                }
-                ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                    join_all(schemas.write().await.iter_mut().map(|schema| async {
-                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()).await {
-                            schema.is_match(condition).await
-                        } else {
-                            false
-                        }
-                    }))
-                    .await
-                    .into_iter()
-                    .all(|is_matched| is_matched)
-                }
+                | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => join_all(
+                    schemas
+                        .write()
+                        .await
+                        .iter_mut()
+                        .map(|referable_schema| async {
+                            if let Ok((value_schema, new_schema)) = referable_schema
+                                .resolve(&definitions, &schema_store)
+                                .await
+                            {
+                                let definitions = if let Some((_, definitions)) = &new_schema {
+                                    definitions
+                                } else {
+                                    definitions
+                                };
+                                value_schema
+                                    .is_match(condition, definitions, schema_store)
+                                    .await
+                            } else {
+                                false
+                            }
+                        }),
+                )
+                .await
+                .into_iter()
+                .any(|is_matched| is_matched),
+                ValueSchema::AllOf(AllOfSchema { schemas, .. }) => join_all(
+                    schemas
+                        .write()
+                        .await
+                        .iter_mut()
+                        .map(|referable_schema| async {
+                            if let Ok((value_schema, new_schema)) = referable_schema
+                                .resolve(&definitions, &schema_store)
+                                .await
+                            {
+                                let definitions = if let Some((_, definitions)) = &new_schema {
+                                    definitions
+                                } else {
+                                    definitions
+                                };
+                                value_schema
+                                    .is_match(condition, definitions, schema_store)
+                                    .await
+                            } else {
+                                false
+                            }
+                        }),
+                )
+                .await
+                .into_iter()
+                .all(|is_matched| is_matched),
                 _ => condition(self),
             }
         }
@@ -280,6 +324,7 @@ impl FindSchemaCandidates for ValueSchema {
         &'a self,
         accessors: &'a [Accessor],
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
         async move {
             match self {
@@ -305,12 +350,22 @@ impl FindSchemaCandidates for ValueSchema {
                     let mut errors = Vec::new();
 
                     for referable_schema in schemas.write().await.iter_mut() {
-                        let Ok(schema) = referable_schema.resolve(definitions).await else {
+                        let Ok((value_schema, new_schema)) = referable_schema
+                            .resolve(definitions, schema_store)
+                            .await
+                        else {
                             continue;
                         };
 
-                        let (mut schema_candidates, schema_errors) =
-                            schema.find_schema_candidates(accessors, definitions).await;
+                        let definitions = if let Some((_, definitions)) = &new_schema {
+                            definitions
+                        } else {
+                            definitions
+                        };
+
+                        let (mut schema_candidates, schema_errors) = value_schema
+                            .find_schema_candidates(accessors, definitions, schema_store)
+                            .await;
 
                         for schema_candidate in &mut schema_candidates {
                             if title.is_some() || description.is_some() {

@@ -16,13 +16,14 @@ use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
-use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, Schemas, ValueSchema};
+use schema_store::{Accessor, SchemaDefinitions, SchemaStore, SchemaUrl, Schemas, ValueSchema};
 use syntax::{SyntaxElement, SyntaxKind};
 
 pub async fn get_completion_contents(
     root: ast::Root,
     position: text::Position,
     document_schema: Option<&schema_store::DocumentSchema>,
+    schema_store: &SchemaStore,
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionContent> {
     let mut keys: Vec<document_tree::Key> = vec![];
@@ -163,6 +164,7 @@ pub async fn get_completion_contents(
             &keys,
             document_schema.as_ref().map(|schema| &schema.schema_url),
             document_schema.as_ref().map(|schema| &schema.definitions),
+            schema_store,
             completion_hint,
         )
         .await;
@@ -197,6 +199,7 @@ pub trait FindCompletionContents {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>>;
 }
@@ -205,29 +208,34 @@ pub trait CompletionCandidate {
     fn title<'a: 'b, 'b>(
         &'a self,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Option<String>>;
 
     fn description<'a: 'b, 'b>(
         &'a self,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Option<String>>;
 
     async fn detail(
         &self,
         definitions: &SchemaDefinitions,
+        schema_store: &SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.title(definitions, completion_hint).await
+        self.title(definitions, schema_store, completion_hint).await
     }
 
     async fn documentation(
         &self,
         definitions: &SchemaDefinitions,
+        schema_store: &SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.description(definitions, completion_hint).await
+        self.description(definitions, schema_store, completion_hint)
+            .await
     }
 }
 
@@ -241,18 +249,33 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
     fn title<'a: 'b, 'b>(
         &'a self,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Option<String>> {
         async move {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok(schema) = referable_schema.resolve(definitions).await {
-                        if matches!(schema, ValueSchema::Null) {
+                    if let Ok((value_schema, new_schema)) = referable_schema
+                        .resolve(definitions, &schema_store)
+                        .await
+                    {
+                        if matches!(value_schema, ValueSchema::Null) {
                             continue;
                         }
-                        if let Some(candidate) =
-                            CompletionCandidate::title(schema, definitions, completion_hint).await
+
+                        let definitions = if let Some((_, definitions)) = &new_schema {
+                            definitions
+                        } else {
+                            definitions
+                        };
+                        if let Some(candidate) = CompletionCandidate::title(
+                            value_schema,
+                            definitions,
+                            &schema_store,
+                            completion_hint,
+                        )
+                        .await
                         {
                             candidates.insert(candidate.to_string());
                         }
@@ -271,19 +294,34 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
     fn description<'a: 'b, 'b>(
         &'a self,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Option<String>> {
         async move {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok(schema) = referable_schema.resolve(definitions).await {
-                        if matches!(schema, ValueSchema::Null) {
+                    if let Ok((value_schema, new_schema)) = referable_schema
+                        .resolve(definitions, &schema_store)
+                        .await
+                    {
+                        if matches!(value_schema, ValueSchema::Null) {
                             continue;
                         }
-                        if let Some(candidate) =
-                            CompletionCandidate::description(schema, definitions, completion_hint)
-                                .await
+
+                        let definitions = if let Some((_, definitions)) = &new_schema {
+                            definitions
+                        } else {
+                            definitions
+                        };
+
+                        if let Some(candidate) = CompletionCandidate::description(
+                            value_schema,
+                            definitions,
+                            &schema_store,
+                            completion_hint,
+                        )
+                        .await
                         {
                             candidates.insert(candidate.to_string());
                         }

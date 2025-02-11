@@ -30,6 +30,7 @@ pub fn find_one_of_completion_items<'a: 'b, 'b, T>(
     keys: &'a [document_tree::Key],
     schema_url: Option<&'a SchemaUrl>,
     definitions: Option<&'a SchemaDefinitions>,
+    schema_store: &'a schema_store::SchemaStore,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
 where
@@ -43,7 +44,16 @@ where
         let mut completion_items = Vec::new();
 
         for referable_schema in one_of_schema.schemas.write().await.iter_mut() {
-            if let Ok(value_schema) = referable_schema.resolve(definitions).await {
+            if let Ok((value_schema, new_schema)) =
+                referable_schema.resolve(definitions, schema_store).await
+            {
+                let (schema_url, definitions) = if let Some((schema_url, definitions)) = &new_schema
+                {
+                    (Some(schema_url), Some(definitions))
+                } else {
+                    (schema_url, Some(definitions))
+                };
+
                 let schema_completions = value
                     .find_completion_contents(
                         accessors,
@@ -52,7 +62,8 @@ where
                         position,
                         keys,
                         schema_url,
-                        Some(definitions),
+                        definitions,
+                        schema_store,
                         completion_hint,
                     )
                     .await;
@@ -63,11 +74,13 @@ where
 
         for completion_item in completion_items.iter_mut() {
             if completion_item.detail.is_none() {
-                completion_item.detail = one_of_schema.detail(definitions, completion_hint).await;
+                completion_item.detail = one_of_schema
+                    .detail(definitions, &schema_store, completion_hint)
+                    .await;
             }
             if completion_item.documentation.is_none() {
                 completion_item.documentation = one_of_schema
-                    .documentation(definitions, completion_hint)
+                    .documentation(definitions, &schema_store, completion_hint)
                     .await;
             }
         }

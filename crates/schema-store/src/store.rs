@@ -22,7 +22,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn load_config_schema(
+    pub async fn load_schemas_from_config(
         &self,
         config_dirpath: Option<std::path::PathBuf>,
         schemas: &[SchemaCatalogItem],
@@ -47,7 +47,7 @@ impl SchemaStore {
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
         if self.schemas.read().await.contains_key(schema_url) {
-            let document_schema = self.try_get_schema_from_url(schema_url).await?;
+            let document_schema = self.try_get_document_schema_from_url(schema_url).await?;
 
             self.schemas
                 .write()
@@ -109,7 +109,7 @@ impl SchemaStore {
         }
     }
 
-    async fn try_get_schema_from_url(
+    async fn try_get_document_schema_from_url(
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {
@@ -159,7 +159,7 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    pub async fn try_load_schema(
+    pub async fn try_load_document_schema(
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {
@@ -170,7 +170,7 @@ impl SchemaStore {
             };
         }
 
-        let document_schema = self.try_get_schema_from_url(schema_url).await?;
+        let document_schema = self.try_get_document_schema_from_url(schema_url).await?;
 
         self.schemas
             .write()
@@ -228,7 +228,7 @@ impl SchemaStore {
         };
 
         for schema_url in matching_schema_urls {
-            if let Ok(schema) = self.try_load_schema(&schema_url).await {
+            if let Ok(schema) = self.try_load_document_schema(&schema_url).await {
                 return Ok(Some(schema));
             }
         }

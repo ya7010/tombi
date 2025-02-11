@@ -1,6 +1,6 @@
 use super::{referable_schema::Referable, SchemaDefinitions, ValueSchema};
 use super::{FindSchemaCandidates, SchemaUrl};
-use crate::Accessor;
+use crate::{Accessor, SchemaStore};
 use config::TomlVersion;
 use dashmap::DashMap;
 use futures::future::BoxFuture;
@@ -72,11 +72,12 @@ impl FindSchemaCandidates for DocumentSchema {
         &'a self,
         accessors: &'a [Accessor],
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
         async move {
             if let Some(value_schema) = &self.value_schema {
                 value_schema
-                    .find_schema_candidates(accessors, definitions)
+                    .find_schema_candidates(accessors, definitions, &schema_store)
                     .await
             } else {
                 (Vec::with_capacity(0), Vec::with_capacity(0))

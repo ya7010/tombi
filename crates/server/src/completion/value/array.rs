@@ -10,7 +10,7 @@ use super::{
 use config::TomlVersion;
 use document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, ArraySchema, SchemaDefinitions, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, ArraySchema, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema};
 
 impl FindCompletionContents for document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
@@ -22,6 +22,7 @@ impl FindCompletionContents for document_tree::Array {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
@@ -45,9 +46,18 @@ impl FindCompletionContents for document_tree::Array {
                         if value.range().contains(position) || value.range().end() == position {
                             let accessor = Accessor::Index(index);
                             if let Some(items) = &array_schema.items {
-                                if let Ok(item_schema) =
-                                    items.write().await.resolve(definitions).await
+                                if let Ok((item_schema, new_schema)) = items
+                                    .write()
+                                    .await
+                                    .resolve(definitions, schema_store)
+                                    .await
                                 {
+                                    let (schema_url, definitions) =
+                                        if let Some((schema_url, definitions)) = &new_schema {
+                                            (Some(schema_url), Some(definitions))
+                                        } else {
+                                            (schema_url, Some(definitions))
+                                        };
                                     return value
                                         .find_completion_contents(
                                             &accessors
@@ -60,7 +70,8 @@ impl FindCompletionContents for document_tree::Array {
                                             position,
                                             keys,
                                             schema_url,
-                                            Some(definitions),
+                                            definitions,
+                                            &schema_store,
                                             completion_hint,
                                         )
                                         .await;
@@ -69,7 +80,18 @@ impl FindCompletionContents for document_tree::Array {
                         }
                     }
                     if let Some(items) = &array_schema.items {
-                        if let Ok(item_schema) = items.write().await.resolve(definitions).await {
+                        if let Ok((item_schema, new_schema)) = items
+                            .write()
+                            .await
+                            .resolve(definitions, &schema_store)
+                            .await
+                        {
+                            let (schema_url, definitions) =
+                                if let Some((schema_url, definitions)) = &new_schema {
+                                    (Some(schema_url), Some(definitions))
+                                } else {
+                                    (schema_url, Some(definitions))
+                                };
                             return SchemaCompletion
                                 .find_completion_contents(
                                     &accessors
@@ -82,7 +104,8 @@ impl FindCompletionContents for document_tree::Array {
                                     position,
                                     keys,
                                     schema_url,
-                                    Some(definitions),
+                                    definitions,
+                                    &schema_store,
                                     if self.kind() == ArrayKind::Array {
                                         Some(CompletionHint::InArray)
                                     } else {
@@ -105,6 +128,7 @@ impl FindCompletionContents for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                         completion_hint,
                     )
                     .await
@@ -119,6 +143,7 @@ impl FindCompletionContents for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                         completion_hint,
                     )
                     .await
@@ -133,6 +158,7 @@ impl FindCompletionContents for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                         completion_hint,
                     )
                     .await
@@ -177,6 +203,7 @@ impl FindCompletionContents for document_tree::Array {
                                     keys,
                                     None,
                                     None,
+                                    &schema_store,
                                     completion_hint,
                                 )
                                 .await;
@@ -200,6 +227,7 @@ impl FindCompletionContents for ArraySchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: Option<&'a SchemaDefinitions>,
+        _schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {

@@ -72,9 +72,13 @@ impl<'a> Linter<'a> {
             }
 
             if let Some(document_schema) = self.document_schema {
-                if let Err(errs) =
-                    crate::validation::validate(document_tree, self.toml_version, &document_schema)
-                        .await
+                if let Err(errs) = crate::validation::validate(
+                    document_tree,
+                    self.toml_version,
+                    &document_schema,
+                    &self.schema_store,
+                )
+                .await
                 {
                     for err in errs {
                         err.set_diagnostic(&mut errors);

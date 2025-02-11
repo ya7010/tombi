@@ -5,6 +5,7 @@ use super::SchemaDefinitions;
 use super::SchemaItemTokio;
 use super::SchemaPatternProperties;
 use super::ValueSchema;
+use crate::SchemaStore;
 use crate::{Accessor, Referable, SchemaProperties};
 use dashmap::DashMap;
 use futures::future::BoxFuture;
@@ -105,6 +106,7 @@ impl FindSchemaCandidates for TableSchema {
         &'a self,
         accessors: &'a [Accessor],
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
         async move {
             let mut candidates = Vec::new();
@@ -112,9 +114,18 @@ impl FindSchemaCandidates for TableSchema {
 
             if accessors.is_empty() {
                 for mut property in self.properties.iter_mut() {
-                    if let Ok(value_schema) = property.value_mut().resolve(definitions).await {
+                    if let Ok((value_schema, new_schema)) = property
+                        .value_mut()
+                        .resolve(definitions, &schema_store)
+                        .await
+                    {
+                        let definitions = if let Some((_, definitions)) = &new_schema {
+                            definitions
+                        } else {
+                            definitions
+                        };
                         let (schema_candidates, schema_errors) = value_schema
-                            .find_schema_candidates(accessors, definitions)
+                            .find_schema_candidates(accessors, definitions, schema_store)
                             .await;
                         candidates.extend(schema_candidates);
                         errors.extend(schema_errors);
@@ -125,9 +136,17 @@ impl FindSchemaCandidates for TableSchema {
             }
 
             if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
-                if let Ok(schema) = value.resolve(definitions).await {
-                    return schema
-                        .find_schema_candidates(&accessors[1..], definitions)
+                if let Ok((value_schema, new_schema)) =
+                    value.resolve(definitions, &schema_store).await
+                {
+                    let definitions = if let Some((_, definitions)) = &new_schema {
+                        definitions
+                    } else {
+                        definitions
+                    };
+
+                    return value_schema
+                        .find_schema_candidates(&accessors[1..], definitions, &schema_store)
                         .await;
                 }
             }

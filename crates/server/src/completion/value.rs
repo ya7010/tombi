@@ -31,8 +31,8 @@ use offset_date_time::type_hint_offset_date_time;
 pub use one_of::find_one_of_completion_items;
 use schema_store::{
     Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
-    LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, SchemaUrl,
-    StringSchema, TableSchema, ValueSchema,
+    LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, SchemaStore,
+    SchemaUrl, StringSchema, TableSchema, ValueSchema,
 };
 use string::type_hint_string;
 
@@ -46,6 +46,7 @@ impl FindCompletionContents for document_tree::Value {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
@@ -74,6 +75,7 @@ impl FindCompletionContents for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            &schema_store,
                             completion_hint,
                         )
                         .await
@@ -88,6 +90,7 @@ impl FindCompletionContents for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            &schema_store,
                             completion_hint,
                         )
                         .await
@@ -103,6 +106,7 @@ impl FindCompletionContents for document_tree::Value {
                                 keys,
                                 schema_url,
                                 definitions,
+                                &schema_store,
                                 completion_hint,
                             )
                             .await
@@ -181,6 +185,7 @@ impl CompletionCandidate for ValueSchema {
     fn title<'a: 'b, 'b>(
         &'a self,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Option<String>> {
         async move {
@@ -197,9 +202,21 @@ impl CompletionCandidate for ValueSchema {
                 | Self::Table(TableSchema { title, .. }) => {
                     title.as_deref().map(ToString::to_string)
                 }
-                Self::OneOf(one_of) => one_of.title(definitions, completion_hint).await,
-                Self::AnyOf(any_of) => any_of.title(definitions, completion_hint).await,
-                Self::AllOf(all_of) => all_of.title(definitions, completion_hint).await,
+                Self::OneOf(one_of) => {
+                    one_of
+                        .title(definitions, &schema_store, completion_hint)
+                        .await
+                }
+                Self::AnyOf(any_of) => {
+                    any_of
+                        .title(definitions, schema_store, completion_hint)
+                        .await
+                }
+                Self::AllOf(all_of) => {
+                    all_of
+                        .title(definitions, schema_store, completion_hint)
+                        .await
+                }
                 Self::Null => None,
             }
         }
@@ -209,6 +226,7 @@ impl CompletionCandidate for ValueSchema {
     fn description<'a: 'b, 'b>(
         &'a self,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Option<String>> {
         async move {
@@ -225,9 +243,21 @@ impl CompletionCandidate for ValueSchema {
                 | Self::Table(TableSchema { description, .. }) => {
                     description.as_deref().map(ToString::to_string)
                 }
-                Self::OneOf(one_of) => one_of.description(definitions, completion_hint).await,
-                Self::AnyOf(any_of) => any_of.description(definitions, completion_hint).await,
-                Self::AllOf(all_of) => all_of.description(definitions, completion_hint).await,
+                Self::OneOf(one_of) => {
+                    one_of
+                        .description(definitions, &schema_store, completion_hint)
+                        .await
+                }
+                Self::AnyOf(any_of) => {
+                    any_of
+                        .description(definitions, schema_store, completion_hint)
+                        .await
+                }
+                Self::AllOf(all_of) => {
+                    all_of
+                        .description(definitions, schema_store, completion_hint)
+                        .await
+                }
                 Self::Null => None,
             }
         }

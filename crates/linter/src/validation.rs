@@ -25,6 +25,7 @@ trait Validate {
         toml_version: TomlVersion,
         value_schema: &'a ValueSchema,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>;
 }
 
@@ -32,13 +33,19 @@ pub fn validate<'a: 'b, 'b>(
     tree: document_tree::DocumentTree,
     toml_version: TomlVersion,
     document_schema: &'a schema_store::DocumentSchema,
+    schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
     async move {
         let table = tree.deref();
 
         if let Some(value_schema) = &document_schema.value_schema {
             table
-                .validate(toml_version, value_schema, &document_schema.definitions)
+                .validate(
+                    toml_version,
+                    value_schema,
+                    &document_schema.definitions,
+                    &schema_store,
+                )
                 .await?;
         }
 
@@ -52,6 +59,7 @@ fn validate_one_of<'a: 'b, 'b, T>(
     toml_version: TomlVersion,
     one_of_schema: &'a OneOfSchema,
     definitions: &'a SchemaDefinitions,
+    schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
     T: Validate + ValueImpl + Sync + Send,
@@ -64,8 +72,17 @@ where
 
         let mut schemas = one_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
+            let Ok((value_schema, new_schema)) = referable_schema
+                .resolve(definitions, &schema_store)
+                .await
+            else {
                 continue;
+            };
+
+            let definitions = if let Some((_, definitions)) = &new_schema {
+                definitions
+            } else {
+                definitions
             };
 
             match (value.value_type(), value_schema) {
@@ -81,7 +98,7 @@ where
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
                     is_type_match = true;
                     match value
-                        .validate(toml_version, value_schema, definitions)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                     {
                         Ok(()) => {
@@ -111,7 +128,15 @@ where
                     });
                 }
                 (_, ValueSchema::OneOf(one_of_schema)) => {
-                    match validate_one_of(value, toml_version, one_of_schema, definitions).await {
+                    match validate_one_of(
+                        value,
+                        toml_version,
+                        one_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
+                    {
                         Ok(()) => {
                             valid_count += 1;
                             break;
@@ -120,7 +145,15 @@ where
                     }
                 }
                 (_, ValueSchema::AnyOf(any_of_schema)) => {
-                    match validate_any_of(value, toml_version, any_of_schema, definitions).await {
+                    match validate_any_of(
+                        value,
+                        toml_version,
+                        any_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
+                    {
                         Ok(()) => {
                             valid_count += 1;
                             break;
@@ -129,7 +162,15 @@ where
                     }
                 }
                 (_, ValueSchema::AllOf(all_of_schema)) => {
-                    match validate_all_of(value, toml_version, all_of_schema, definitions).await {
+                    match validate_all_of(
+                        value,
+                        toml_version,
+                        all_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
+                    {
                         Ok(()) => {
                             valid_count += 1;
                             break;
@@ -158,6 +199,7 @@ fn validate_any_of<'a: 'b, 'b, T>(
     toml_version: TomlVersion,
     any_of_schema: &'a schema_store::AnyOfSchema,
     definitions: &'a schema_store::SchemaDefinitions,
+    schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
     T: Validate + ValueImpl + Sync + Send,
@@ -169,9 +211,19 @@ where
 
         let mut schemas = any_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
+            let Ok((value_schema, new_schema)) = referable_schema
+                .resolve(definitions, &schema_store)
+                .await
+            else {
                 continue;
             };
+
+            let definitions = if let Some((_, definitions)) = &new_schema {
+                definitions
+            } else {
+                definitions
+            };
+
             match (value.value_type(), value_schema) {
                 (document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
                 | (document_tree::ValueType::Integer, ValueSchema::Integer(_))
@@ -185,7 +237,7 @@ where
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
                     is_type_match = true;
                     match value
-                        .validate(toml_version, value_schema, definitions)
+                        .validate(toml_version, value_schema, definitions, &schema_store)
                         .await
                     {
                         Ok(()) => {
@@ -214,7 +266,15 @@ where
                     });
                 }
                 (_, ValueSchema::OneOf(one_of_schema)) => {
-                    match validate_one_of(value, toml_version, one_of_schema, definitions).await {
+                    match validate_one_of(
+                        value,
+                        toml_version,
+                        one_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
+                    {
                         Ok(()) => {
                             return Ok(());
                         }
@@ -222,7 +282,15 @@ where
                     }
                 }
                 (_, ValueSchema::AnyOf(any_of_schema)) => {
-                    match validate_any_of(value, toml_version, any_of_schema, definitions).await {
+                    match validate_any_of(
+                        value,
+                        toml_version,
+                        any_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
+                    {
                         Ok(()) => {
                             return Ok(());
                         }
@@ -230,7 +298,15 @@ where
                     }
                 }
                 (_, ValueSchema::AllOf(all_of_schema)) => {
-                    match validate_all_of(value, toml_version, all_of_schema, definitions).await {
+                    match validate_all_of(
+                        value,
+                        toml_version,
+                        all_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
+                    {
                         Ok(()) => {
                             return Ok(());
                         }
@@ -254,6 +330,7 @@ fn validate_all_of<'a: 'b, 'b, T>(
     toml_version: TomlVersion,
     all_of_schema: &'a schema_store::AllOfSchema,
     definitions: &'a schema_store::SchemaDefinitions,
+    schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
     T: Validate + Sync + Send,
@@ -263,11 +340,21 @@ where
 
         let mut schemas = all_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
+            let Ok((value_schema, new_schema)) = referable_schema
+                .resolve(definitions, schema_store)
+                .await
+            else {
                 continue;
             };
+
+            let definitions = if let Some((_, definitions)) = &new_schema {
+                definitions
+            } else {
+                definitions
+            };
+
             match value
-                .validate(toml_version, value_schema, definitions)
+                .validate(toml_version, value_schema, definitions, &schema_store)
                 .await
             {
                 Ok(()) => {}

@@ -15,7 +15,7 @@ async fn load_schemas(backend: &Backend) {
     if schema_options.enabled.unwrap_or_default().value() {
         backend
             .schema_store
-            .load_config_schema(
+            .load_schemas_from_config(
                 None,
                 match &config.schemas {
                     Some(schemas) => schemas,

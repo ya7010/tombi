@@ -11,6 +11,7 @@ impl Validate for document_tree::Integer {
         toml_version: TomlVersion,
         value_schema: &'a ValueSchema,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
             let mut errors = vec![];
@@ -35,13 +36,34 @@ impl Validate for document_tree::Integer {
             let integer_schema = match value_schema {
                 schema_store::ValueSchema::Integer(integer_schema) => integer_schema,
                 schema_store::ValueSchema::OneOf(one_of_schema) => {
-                    return validate_one_of(self, toml_version, one_of_schema, definitions).await
+                    return validate_one_of(
+                        self,
+                        toml_version,
+                        one_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 schema_store::ValueSchema::AnyOf(any_of_schema) => {
-                    return validate_any_of(self, toml_version, any_of_schema, definitions).await
+                    return validate_any_of(
+                        self,
+                        toml_version,
+                        any_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 schema_store::ValueSchema::AllOf(all_of_schema) => {
-                    return validate_all_of(self, toml_version, all_of_schema, definitions).await
+                    return validate_all_of(
+                        self,
+                        toml_version,
+                        all_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 _ => unreachable!("Expected an Integer schema"),
             };

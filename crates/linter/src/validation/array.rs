@@ -12,6 +12,7 @@ impl Validate for document_tree::Array {
         toml_version: TomlVersion,
         value_schema: &'a ValueSchema,
         definitions: &'a SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
             match value_schema.value_type().await {
@@ -34,13 +35,34 @@ impl Validate for document_tree::Array {
             let array_schema = match value_schema {
                 ValueSchema::Array(array_schema) => array_schema,
                 ValueSchema::OneOf(one_of_schema) => {
-                    return validate_one_of(self, toml_version, one_of_schema, definitions).await
+                    return validate_one_of(
+                        self,
+                        toml_version,
+                        one_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 ValueSchema::AnyOf(any_of_schema) => {
-                    return validate_any_of(self, toml_version, any_of_schema, definitions).await
+                    return validate_any_of(
+                        self,
+                        toml_version,
+                        any_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 ValueSchema::AllOf(all_of_schema) => {
-                    return validate_all_of(self, toml_version, all_of_schema, definitions).await
+                    return validate_all_of(
+                        self,
+                        toml_version,
+                        all_of_schema,
+                        definitions,
+                        &schema_store,
+                    )
+                    .await
                 }
                 _ => unreachable!("Expected an Array schema"),
             };
@@ -48,10 +70,19 @@ impl Validate for document_tree::Array {
             let mut errors = vec![];
             if let Some(items) = &array_schema.items {
                 let mut referable_schema = items.write().await;
-                if let Ok(item_schema) = referable_schema.resolve(definitions).await {
+                if let Ok((item_schema, new_schema)) = referable_schema
+                    .resolve(definitions, &schema_store)
+                    .await
+                {
+                    let definitions = if let Some((_, new_definitions)) = &new_schema {
+                        new_definitions
+                    } else {
+                        definitions
+                    };
                     for value in self.values() {
-                        if let Err(errs) =
-                            value.validate(toml_version, item_schema, definitions).await
+                        if let Err(errs) = value
+                            .validate(toml_version, item_schema, definitions, &schema_store)
+                            .await
                         {
                             errors.extend(errs);
                         }

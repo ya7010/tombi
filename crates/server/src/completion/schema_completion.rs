@@ -1,6 +1,6 @@
 use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema};
 
 use super::{
     value::{
@@ -22,6 +22,7 @@ impl FindCompletionContents for SchemaCompletion {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
+        schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("accessors: {:?}", accessors);
@@ -47,6 +48,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -61,6 +63,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -75,6 +78,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -89,6 +93,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -103,6 +108,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -117,6 +123,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -131,6 +138,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -145,6 +153,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -159,6 +168,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -173,6 +183,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -187,6 +198,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -201,6 +213,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                         completion_hint,
                     )
                     .await
@@ -215,6 +228,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
+                        schema_store,
                         completion_hint,
                     )
                     .await

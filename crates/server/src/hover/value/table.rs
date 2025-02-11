@@ -17,6 +17,7 @@ impl GetHoverContent for document_tree::Table {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         tracing::debug!("self: {:?}", self);
         tracing::trace!("keys: {:?}", keys);
@@ -46,6 +47,52 @@ impl GetHoverContent for document_tree::Table {
                                     .map(|r| r.contains(&key_str))
                                     .unwrap_or(false);
 
+                                if let Ok((property_schema, new_schema)) =
+                                    property.resolve(definitions, &schema_store).await
+                                {
+                                    let (schema_url, definitions) =
+                                        if let Some((schema_url, definitions)) = &new_schema {
+                                            (Some(schema_url), definitions)
+                                        } else {
+                                            (schema_url, definitions)
+                                        };
+                                    return value
+                                        .get_hover_content(
+                                            &accessors
+                                                .clone()
+                                                .into_iter()
+                                                .chain(std::iter::once(accessor))
+                                                .collect(),
+                                            Some(property_schema),
+                                            toml_version,
+                                            position,
+                                            &keys[1..],
+                                            schema_url,
+                                            definitions,
+                                            &schema_store,
+                                        )
+                                        .await
+                                        .map(|mut hover_content| {
+                                            if keys.len() == 1
+                                                && !required
+                                                && hover_content
+                                                    .accessors
+                                                    .last()
+                                                    .map(|accessor| accessor.is_key())
+                                                    .unwrap_or_default()
+                                            {
+                                                if let Some(constraints) =
+                                                    &mut hover_content.constraints
+                                                {
+                                                    constraints.key_patterns = key_patterns;
+                                                }
+                                                hover_content.into_nullable()
+                                            } else {
+                                                hover_content
+                                            }
+                                        });
+                                }
+
                                 return value
                                     .get_hover_content(
                                         &accessors
@@ -53,12 +100,13 @@ impl GetHoverContent for document_tree::Table {
                                             .into_iter()
                                             .chain(std::iter::once(accessor))
                                             .collect(),
-                                        property.resolve(definitions).await.ok(),
+                                        None,
                                         toml_version,
                                         position,
                                         &keys[1..],
                                         schema_url,
                                         definitions,
+                                        &schema_store,
                                     )
                                     .await
                                     .map(|mut hover_content| {
@@ -86,7 +134,56 @@ impl GetHoverContent for document_tree::Table {
                                     let property_key = pattern_property.key();
                                     if let Ok(pattern) = regex::Regex::new(property_key) {
                                         if pattern.is_match(&key_str) {
-                                            let property_schema = pattern_property.value_mut();
+                                            if let Ok((property_schema, new_schema)) =
+                                                pattern_property
+                                                    .value_mut()
+                                                    .resolve(definitions, &schema_store)
+                                                    .await
+                                            {
+                                                let (schema_url, definitions) =
+                                                    if let Some((schema_url, definitions)) =
+                                                        &new_schema
+                                                    {
+                                                        (Some(schema_url), definitions)
+                                                    } else {
+                                                        (schema_url, definitions)
+                                                    };
+                                                return value
+                                                    .get_hover_content(
+                                                        &accessors
+                                                            .clone()
+                                                            .into_iter()
+                                                            .chain(std::iter::once(accessor))
+                                                            .collect(),
+                                                        Some(property_schema),
+                                                        toml_version,
+                                                        position,
+                                                        &keys[1..],
+                                                        schema_url,
+                                                        definitions,
+                                                        &schema_store,
+                                                    )
+                                                    .await
+                                                    .map(|mut hover_content| {
+                                                        if keys.len() == 1
+                                                            && hover_content
+                                                                .accessors
+                                                                .last()
+                                                                .map(|accessor| accessor.is_key())
+                                                                .unwrap_or_default()
+                                                        {
+                                                            if let Some(constraints) =
+                                                                &mut hover_content.constraints
+                                                            {
+                                                                constraints.key_patterns =
+                                                                    key_patterns;
+                                                            }
+                                                            hover_content.into_nullable()
+                                                        } else {
+                                                            hover_content
+                                                        }
+                                                    });
+                                            }
 
                                             return value
                                                 .get_hover_content(
@@ -95,12 +192,13 @@ impl GetHoverContent for document_tree::Table {
                                                         .into_iter()
                                                         .chain(std::iter::once(accessor))
                                                         .collect(),
-                                                    property_schema.resolve(definitions).await.ok(),
+                                                    None,
                                                     toml_version,
                                                     position,
                                                     &keys[1..],
                                                     schema_url,
                                                     definitions,
+                                                    &schema_store,
                                                 )
                                                 .await
                                                 .map(|mut hover_content| {
@@ -131,9 +229,18 @@ impl GetHoverContent for document_tree::Table {
                             {
                                 let mut referable_schema =
                                     referable_additional_property_schema.write().await;
-                                if let Ok(additional_property_schema) =
-                                    referable_schema.resolve(definitions).await
+                                if let Ok((additional_property_schema, new_schema)) =
+                                    referable_schema
+                                        .resolve(definitions, &schema_store)
+                                        .await
                                 {
+                                    let (schema_url, definitions) =
+                                        if let Some((schema_url, definitions)) = &new_schema {
+                                            (Some(schema_url), definitions)
+                                        } else {
+                                            (schema_url, definitions)
+                                        };
+
                                     return value
                                         .get_hover_content(
                                             &accessors
@@ -147,6 +254,7 @@ impl GetHoverContent for document_tree::Table {
                                             &keys[1..],
                                             schema_url,
                                             definitions,
+                                            &schema_store,
                                         )
                                         .await
                                         .map(|hover_content| {
@@ -178,6 +286,7 @@ impl GetHoverContent for document_tree::Table {
                                     &keys[1..],
                                     schema_url,
                                     definitions,
+                                    &schema_store,
                                 )
                                 .await
                         } else {
@@ -193,6 +302,7 @@ impl GetHoverContent for document_tree::Table {
                                 keys,
                                 schema_url,
                                 definitions,
+                                &schema_store,
                             )
                             .await
                             .map(|mut hover_content| {
@@ -211,6 +321,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                     )
                     .await
                 }
@@ -224,6 +335,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                     )
                     .await
                 }
@@ -237,6 +349,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
+                        &schema_store,
                     )
                     .await
                 }
@@ -259,6 +372,7 @@ impl GetHoverContent for document_tree::Table {
                                     &keys[1..],
                                     schema_url,
                                     definitions,
+                                    &schema_store,
                                 )
                                 .await;
                         }
@@ -289,6 +403,7 @@ impl GetHoverContent for TableSchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: &'a schema_store::SchemaDefinitions,
+        _schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             Some(HoverContent {
