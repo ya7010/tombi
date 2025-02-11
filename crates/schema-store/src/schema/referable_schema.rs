@@ -76,22 +76,10 @@ impl Referable<ValueSchema> {
                         *self = referable_schema;
                     } else {
                         match reference.as_str() {
-                            https_url if https_url.starts_with("https://") => {
-                                if let Ok(schema_url) = SchemaUrl::parse(https_url) {
-                                    if let Ok(document_schema) =
-                                        schema_store.try_load_document_schema(&schema_url).await
-                                    {
-                                        if let Some(value_schema) = document_schema.value_schema {
-                                            *self = Referable::Resolved(value_schema);
-                                            new_schema = Some((
-                                                schema_url,
-                                                document_schema.definitions.clone(),
-                                            ));
-                                        }
-                                    }
-                                }
-                            }
-                            http_url if http_url.starts_with("http://") => {
+                            http_url
+                                if http_url.starts_with("https://")
+                                    || http_url.starts_with("http://") =>
+                            {
                                 if let Ok(schema_url) = SchemaUrl::parse(http_url) {
                                     if let Ok(document_schema) =
                                         schema_store.try_load_document_schema(&schema_url).await

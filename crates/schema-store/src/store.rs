@@ -127,6 +127,8 @@ impl SchemaStore {
                 serde_json::from_reader(file)
             }
             "http" | "https" => {
+                tracing::info!("fetch schema from url: {}", schema_url);
+
                 let response = self
                     .http_client
                     .get(schema_url.as_str())
