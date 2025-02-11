@@ -1,7 +1,7 @@
 use ahash::AHashMap;
 use config::SchemaCatalogItem;
 use itertools::Either;
-use std::sync::Arc;
+use std::{ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
 use crate::{json::CatalogUrl, DocumentSchema, SchemaUrl};
@@ -84,8 +84,8 @@ impl SchemaStore {
                 }
                 Ok(())
             } else {
-                Err(crate::Error::CatalogUrlParseFailed {
-                    catalog_url: catalog_url.clone(),
+                Err(crate::Error::InvalidJsonFormat {
+                    url: catalog_url.deref().clone(),
                 })
             }
         } else {
@@ -118,8 +118,8 @@ impl SchemaStore {
                 let schema_path =
                     schema_url
                         .to_file_path()
-                        .map_err(|_| crate::Error::SchemaUrlParseFailed {
-                            schema_url: schema_url.to_owned(),
+                        .map_err(|_| crate::Error::InvalidFilePath {
+                            url: schema_url.deref().to_owned(),
                         })?;
                 let file = std::fs::File::open(&schema_path)
                     .map_err(|_| crate::Error::SchemaFileReadFailed { schema_path })?;

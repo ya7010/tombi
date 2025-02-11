@@ -15,16 +15,6 @@ impl CatalogUrl {
     pub fn new(url: url::Url) -> Self {
         Self(url)
     }
-
-    #[inline]
-    pub fn parse(s: &str) -> Result<Self, url::ParseError> {
-        url::Url::parse(s).map(Self)
-    }
-
-    #[inline]
-    pub fn from_file_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, ()> {
-        url::Url::from_file_path(&path).map(Self)
-    }
 }
 
 impl std::ops::Deref for CatalogUrl {

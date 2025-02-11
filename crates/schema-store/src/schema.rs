@@ -56,13 +56,23 @@ impl SchemaUrl {
     }
 
     #[inline]
-    pub fn parse(s: &str) -> Result<Self, url::ParseError> {
-        url::Url::parse(s).map(Self)
+    pub fn parse(url: &str) -> Result<Self, crate::Error> {
+        match url::Url::parse(url) {
+            Ok(url) => Ok(Self(url)),
+            Err(_) => Err(crate::Error::InvalidSchemaUrl {
+                schema_url: url.to_string(),
+            }),
+        }
     }
 
     #[inline]
-    pub fn from_file_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, ()> {
-        url::Url::from_file_path(&path).map(Self)
+    pub fn from_file_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, crate::Error> {
+        match url::Url::from_file_path(&path) {
+            Ok(url) => Ok(Self(url)),
+            Err(_) => Err(crate::Error::InvalidSchemaUrl {
+                schema_url: path.as_ref().to_string_lossy().to_string(),
+            }),
+        }
     }
 }
 

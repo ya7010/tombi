@@ -80,21 +80,25 @@ impl Referable<ValueSchema> {
                                 if http_url.starts_with("https://")
                                     || http_url.starts_with("http://") =>
                             {
-                                if let Ok(schema_url) = SchemaUrl::parse(http_url) {
-                                    if let Ok(document_schema) =
-                                        schema_store.try_load_document_schema(&schema_url).await
-                                    {
-                                        if let Some(value_schema) = document_schema.value_schema {
-                                            *self = Referable::Resolved(value_schema);
-                                            new_schema = Some((
-                                                schema_url,
-                                                document_schema.definitions.clone(),
-                                            ));
-                                        }
-                                    }
+                                let schema_url = SchemaUrl::parse(http_url)?;
+                                let document_schema =
+                                    schema_store.try_load_document_schema(&schema_url).await?;
+
+                                if let Some(value_schema) = document_schema.value_schema {
+                                    *self = Referable::Resolved(value_schema);
+                                    new_schema =
+                                        Some((schema_url, document_schema.definitions.clone()));
+                                } else {
+                                    return Err(crate::Error::InvalidJsonSchemaReference {
+                                        reference: reference.to_owned(),
+                                    });
                                 }
                             }
-                            _ => {}
+                            _ => {
+                                return Err(crate::Error::UnsupportedReference {
+                                    reference: reference.to_owned(),
+                                })
+                            }
                         }
                     }
 

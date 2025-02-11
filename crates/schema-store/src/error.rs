@@ -16,22 +16,19 @@ pub enum Error {
     #[error("definition ref not found: {definition_ref}")]
     DefinitionNotFound { definition_ref: String },
 
-    #[error("failed to parse catalog: {catalog_url}")]
-    CatalogUrlParseFailed { catalog_url: CatalogUrl },
-
     #[error("failed to fetch catalog: {catalog_url}")]
     CatalogUrlFetchFailed { catalog_url: CatalogUrl },
 
     #[error("unsupported schema url: {schema_url}")]
     SchemaUrlUnsupported { schema_url: SchemaUrl },
 
-    #[error("failed to parse schema url: {schema_url}")]
-    SchemaUrlParseFailed { schema_url: SchemaUrl },
+    #[error("invalid schema url: {schema_url}")]
+    InvalidSchemaUrl { schema_url: String },
 
     #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: PathBuf },
 
-    #[error("failed to parse schema: \"{schema_url}\"")]
+    #[error("invalid schema file: \"{schema_url}\"")]
     SchemaFileParseFailed { schema_url: SchemaUrl },
 
     #[error("failed to fetch schema: {schema_url}")]
@@ -40,6 +37,18 @@ pub enum Error {
     #[error("unsupported source url: {source_url}")]
     SourceUrlUnsupported { source_url: url::Url },
 
-    #[error("failed to parse source url: {source_url}")]
+    #[error("invalid source url: {source_url}")]
     SourceUrlParseFailed { source_url: url::Url },
+
+    #[error("invalid file path: {url}")]
+    InvalidFilePath { url: url::Url },
+
+    #[error("invalid json format: {url}")]
+    InvalidJsonFormat { url: url::Url },
+
+    #[error("invalid json schema reference: {reference}")]
+    InvalidJsonSchemaReference { reference: String },
+
+    #[error("unsupported reference: {reference}")]
+    UnsupportedReference { reference: String },
 }
