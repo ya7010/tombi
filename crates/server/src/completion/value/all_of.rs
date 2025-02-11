@@ -1,4 +1,6 @@
 use config::TomlVersion;
+use futures::future::BoxFuture;
+use futures::FutureExt;
 use schema_store::{Accessor, SchemaDefinitions, Schemas};
 use schema_store::{AllOfSchema, SchemaUrl};
 
@@ -21,62 +23,66 @@ impl CompositeSchemaImpl for AllOfSchema {
     }
 }
 
-pub fn find_all_of_completion_items<T>(
-    value: &T,
-    accessors: &Vec<Accessor>,
-    all_of_schema: &schema_store::AllOfSchema,
+pub fn find_all_of_completion_items<'a: 'b, 'b, T>(
+    value: &'a T,
+    accessors: &'a Vec<Accessor>,
+    all_of_schema: &'a schema_store::AllOfSchema,
     toml_version: TomlVersion,
     position: text::Position,
-    keys: &[document_tree::Key],
-    schema_url: Option<&SchemaUrl>,
-    definitions: Option<&SchemaDefinitions>,
+    keys: &'a [document_tree::Key],
+    schema_url: Option<&'a SchemaUrl>,
+    definitions: Option<&'a SchemaDefinitions>,
     completion_hint: Option<CompletionHint>,
-) -> Vec<CompletionContent>
+) -> BoxFuture<'b, Vec<CompletionContent>>
 where
-    T: FindCompletionContents,
+    T: FindCompletionContents + Sync + Send,
 {
-    let Some(definitions) = definitions else {
-        unreachable!("definitions must be provided");
-    };
+    async move {
+        let Some(definitions) = definitions else {
+            unreachable!("definitions must be provided");
+        };
 
-    let mut completion_items = Vec::new();
+        let mut completion_items = Vec::new();
 
-    if let Ok(mut schemas) = all_of_schema.schemas.write() {
-        for schema in schemas.iter_mut() {
-            if let Ok(value_schema) = schema.resolve(definitions) {
-                let schema_completions = value.find_completion_contents(
-                    accessors,
-                    Some(value_schema),
-                    toml_version,
-                    position,
-                    keys,
-                    schema_url,
-                    Some(definitions),
-                    completion_hint,
-                );
+        for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
+            if let Ok(value_schema) = referable_schema.resolve(definitions).await {
+                let schema_completions = value
+                    .find_completion_contents(
+                        accessors,
+                        Some(value_schema),
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        Some(definitions),
+                        completion_hint,
+                    )
+                    .await;
 
                 completion_items.extend(schema_completions);
             }
         }
-    }
 
-    for completion_item in completion_items.iter_mut() {
-        if completion_item.detail.is_none() {
-            completion_item.detail = all_of_schema.detail(definitions, completion_hint);
+        for completion_item in completion_items.iter_mut() {
+            if completion_item.detail.is_none() {
+                completion_item.detail = all_of_schema.detail(definitions, completion_hint).await;
+            }
+            if completion_item.documentation.is_none() {
+                completion_item.documentation = all_of_schema
+                    .documentation(definitions, completion_hint)
+                    .await;
+            }
         }
-        if completion_item.documentation.is_none() {
-            completion_item.documentation =
-                all_of_schema.documentation(definitions, completion_hint);
-        }
-    }
 
-    if let Some(default) = &all_of_schema.default {
-        if let Some(completion_item) =
-            serde_value_to_completion_item(default, position, schema_url, completion_hint)
-        {
-            completion_items.push(completion_item);
+        if let Some(default) = &all_of_schema.default {
+            if let Some(completion_item) =
+                serde_value_to_completion_item(default, position, schema_url, completion_hint)
+            {
+                completion_items.push(completion_item);
+            }
         }
-    }
 
-    completion_items
+        completion_items
+    }
+    .boxed()
 }

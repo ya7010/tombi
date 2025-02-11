@@ -1,4 +1,5 @@
 use config::TomlVersion;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, BooleanSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 use crate::completion::{
@@ -7,34 +8,37 @@ use crate::completion::{
 };
 
 impl FindCompletionContents for BooleanSchema {
-    fn find_completion_contents(
-        &self,
-        _accessors: &Vec<Accessor>,
-        _value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        _accessors: &'a Vec<Accessor>,
+        _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        _definitions: Option<&SchemaDefinitions>,
+        _keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        _definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent> {
-        if let Some(enumerate) = &self.enumerate {
-            enumerate
-                .iter()
-                .map(|value| {
-                    let label = value.to_string();
-                    let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                    CompletionContent::new_enumerate_value(
-                        CompletionKind::Boolean,
-                        value.to_string(),
-                        edit,
-                        schema_url,
-                    )
-                })
-                .collect()
-        } else {
-            type_hint_boolean(position, schema_url, completion_hint)
+    ) -> BoxFuture<'b, Vec<CompletionContent>> {
+        async move {
+            if let Some(enumerate) = &self.enumerate {
+                enumerate
+                    .iter()
+                    .map(|value| {
+                        let label = value.to_string();
+                        let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                        CompletionContent::new_enumerate_value(
+                            CompletionKind::Boolean,
+                            value.to_string(),
+                            edit,
+                            schema_url,
+                        )
+                    })
+                    .collect()
+            } else {
+                type_hint_boolean(position, schema_url, completion_hint)
+            }
         }
+        .boxed()
     }
 }
 

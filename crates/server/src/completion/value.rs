@@ -22,6 +22,7 @@ use array::type_hint_array;
 use boolean::type_hint_boolean;
 use config::TomlVersion;
 use float::type_hint_float;
+use futures::{future::BoxFuture, FutureExt};
 use integer::type_hint_integer;
 use local_date::type_hint_local_date;
 use local_date_time::type_hint_local_date_time;
@@ -36,87 +37,102 @@ use schema_store::{
 use string::type_hint_string;
 
 impl FindCompletionContents for document_tree::Value {
-    fn find_completion_contents(
-        &self,
-        accessors: &Vec<Accessor>,
-        value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a Vec<Accessor>,
+        value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
-        keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        definitions: Option<&SchemaDefinitions>,
+        keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent> {
+    ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
         tracing::trace!("accessors: {:?}", accessors);
         tracing::trace!("keys: {:?}", keys);
         tracing::trace!("value_schema: {:?}", value_schema);
         tracing::trace!("completion_hint: {:?}", completion_hint);
 
-        match self {
-            Self::Boolean(_)
-            | Self::Integer(_)
-            | Self::Float(_)
-            | Self::String(_)
-            | Self::OffsetDateTime(_)
-            | Self::LocalDateTime(_)
-            | Self::LocalDate(_)
-            | Self::LocalTime(_) => Vec::with_capacity(0),
-            Self::Array(array) => array.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::Table(table) => table.find_completion_contents(
-                accessors,
-                value_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Self::Incomplete { .. } => match value_schema {
-                Some(value_schema) => SchemaCompletion.find_completion_contents(
-                    accessors,
-                    Some(value_schema),
-                    toml_version,
-                    position,
-                    keys,
-                    schema_url,
-                    definitions,
-                    completion_hint,
-                ),
-                None => {
-                    let key_name = keys.last().map(|key| key.to_raw_text(toml_version));
+        async move {
+            match self {
+                Self::Boolean(_)
+                | Self::Integer(_)
+                | Self::Float(_)
+                | Self::String(_)
+                | Self::OffsetDateTime(_)
+                | Self::LocalDateTime(_)
+                | Self::LocalDate(_)
+                | Self::LocalTime(_) => Vec::with_capacity(0),
+                Self::Array(array) => {
+                    array
+                        .find_completion_contents(
+                            accessors,
+                            value_schema,
+                            toml_version,
+                            position,
+                            keys,
+                            schema_url,
+                            definitions,
+                            completion_hint,
+                        )
+                        .await
+                }
+                Self::Table(table) => {
+                    table
+                        .find_completion_contents(
+                            accessors,
+                            value_schema,
+                            toml_version,
+                            position,
+                            keys,
+                            schema_url,
+                            definitions,
+                            completion_hint,
+                        )
+                        .await
+                }
+                Self::Incomplete { .. } => match value_schema {
+                    Some(value_schema) => {
+                        SchemaCompletion
+                            .find_completion_contents(
+                                accessors,
+                                Some(value_schema),
+                                toml_version,
+                                position,
+                                keys,
+                                schema_url,
+                                definitions,
+                                completion_hint,
+                            )
+                            .await
+                    }
+                    None => {
+                        let key_name = keys.last().map(|key| key.to_raw_text(toml_version));
 
-                    match (&key_name, completion_hint) {
-                        (Some(key_name), Some(CompletionHint::EqualTrigger { range }))
-                            if range.end() < position =>
-                        {
-                            vec![CompletionContent::new_type_hint_key(
-                                key_name,
-                                text::Range::new(range.end(), position),
+                        match (&key_name, completion_hint) {
+                            (Some(key_name), Some(CompletionHint::EqualTrigger { range }))
+                                if range.end() < position =>
+                            {
+                                vec![CompletionContent::new_type_hint_key(
+                                    key_name,
+                                    text::Range::new(range.end(), position),
+                                    schema_url,
+                                    completion_hint,
+                                )]
+                            }
+                            _ => type_hint_value(
+                                key_name.as_deref(),
+                                position,
                                 schema_url,
                                 completion_hint,
-                            )]
+                            ),
                         }
-                        _ => type_hint_value(
-                            key_name.as_deref(),
-                            position,
-                            schema_url,
-                            completion_hint,
-                        ),
                     }
-                }
-            },
+                },
+            }
         }
+        .boxed()
     }
 }
 
@@ -162,51 +178,59 @@ pub fn type_hint_value(
 }
 
 impl CompletionCandidate for ValueSchema {
-    fn title(
-        &self,
-        definitions: &SchemaDefinitions,
+    fn title<'a: 'b, 'b>(
+        &'a self,
+        definitions: &'a SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<String> {
-        match self {
-            Self::Boolean(BooleanSchema { title, .. })
-            | Self::Integer(IntegerSchema { title, .. })
-            | Self::Float(FloatSchema { title, .. })
-            | Self::String(StringSchema { title, .. })
-            | Self::OffsetDateTime(OffsetDateTimeSchema { title, .. })
-            | Self::LocalDateTime(LocalDateTimeSchema { title, .. })
-            | Self::LocalDate(LocalDateSchema { title, .. })
-            | Self::LocalTime(LocalTimeSchema { title, .. })
-            | Self::Array(ArraySchema { title, .. })
-            | Self::Table(TableSchema { title, .. }) => title.as_deref().map(ToString::to_string),
-            Self::OneOf(one_of) => one_of.title(definitions, completion_hint),
-            Self::AnyOf(any_of) => any_of.title(definitions, completion_hint),
-            Self::AllOf(all_of) => all_of.title(definitions, completion_hint),
-            Self::Null => None,
+    ) -> BoxFuture<'b, Option<String>> {
+        async move {
+            match self {
+                Self::Boolean(BooleanSchema { title, .. })
+                | Self::Integer(IntegerSchema { title, .. })
+                | Self::Float(FloatSchema { title, .. })
+                | Self::String(StringSchema { title, .. })
+                | Self::OffsetDateTime(OffsetDateTimeSchema { title, .. })
+                | Self::LocalDateTime(LocalDateTimeSchema { title, .. })
+                | Self::LocalDate(LocalDateSchema { title, .. })
+                | Self::LocalTime(LocalTimeSchema { title, .. })
+                | Self::Array(ArraySchema { title, .. })
+                | Self::Table(TableSchema { title, .. }) => {
+                    title.as_deref().map(ToString::to_string)
+                }
+                Self::OneOf(one_of) => one_of.title(definitions, completion_hint).await,
+                Self::AnyOf(any_of) => any_of.title(definitions, completion_hint).await,
+                Self::AllOf(all_of) => all_of.title(definitions, completion_hint).await,
+                Self::Null => None,
+            }
         }
+        .boxed()
     }
 
-    fn description(
-        &self,
-        definitions: &SchemaDefinitions,
+    fn description<'a: 'b, 'b>(
+        &'a self,
+        definitions: &'a SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<String> {
-        match self {
-            Self::Boolean(BooleanSchema { description, .. })
-            | Self::Integer(IntegerSchema { description, .. })
-            | Self::Float(FloatSchema { description, .. })
-            | Self::String(StringSchema { description, .. })
-            | Self::OffsetDateTime(OffsetDateTimeSchema { description, .. })
-            | Self::LocalDateTime(LocalDateTimeSchema { description, .. })
-            | Self::LocalDate(LocalDateSchema { description, .. })
-            | Self::LocalTime(LocalTimeSchema { description, .. })
-            | Self::Array(ArraySchema { description, .. })
-            | Self::Table(TableSchema { description, .. }) => {
-                description.as_deref().map(ToString::to_string)
+    ) -> BoxFuture<'b, Option<String>> {
+        async move {
+            match self {
+                Self::Boolean(BooleanSchema { description, .. })
+                | Self::Integer(IntegerSchema { description, .. })
+                | Self::Float(FloatSchema { description, .. })
+                | Self::String(StringSchema { description, .. })
+                | Self::OffsetDateTime(OffsetDateTimeSchema { description, .. })
+                | Self::LocalDateTime(LocalDateTimeSchema { description, .. })
+                | Self::LocalDate(LocalDateSchema { description, .. })
+                | Self::LocalTime(LocalTimeSchema { description, .. })
+                | Self::Array(ArraySchema { description, .. })
+                | Self::Table(TableSchema { description, .. }) => {
+                    description.as_deref().map(ToString::to_string)
+                }
+                Self::OneOf(one_of) => one_of.description(definitions, completion_hint).await,
+                Self::AnyOf(any_of) => any_of.description(definitions, completion_hint).await,
+                Self::AllOf(all_of) => all_of.description(definitions, completion_hint).await,
+                Self::Null => None,
             }
-            Self::OneOf(one_of) => one_of.description(definitions, completion_hint),
-            Self::AnyOf(any_of) => any_of.description(definitions, completion_hint),
-            Self::AllOf(all_of) => all_of.description(definitions, completion_hint),
-            Self::Null => None,
         }
+        .boxed()
     }
 }

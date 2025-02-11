@@ -1,22 +1,18 @@
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
-use crate::{Referable, Schemas};
+use futures::future::join_all;
 
-use super::{SchemasTokio, ValueSchema};
+use crate::Referable;
+
+use super::{Schemas, ValueSchema};
 
 #[derive(Debug, Default, Clone)]
 pub struct AnyOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub schemas: Schemas,
-    pub schemas_tokio: SchemasTokio,
     pub default: Option<serde_json::Value>,
 }
-
-// FIXME: remove thoes traits.
-// FIXME: remove schemas for async version
-unsafe impl Send for AnyOfSchema {}
-unsafe impl Sync for AnyOfSchema {}
 
 impl AnyOfSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
@@ -43,20 +39,23 @@ impl AnyOfSchema {
         Self {
             title,
             description,
-            schemas: Arc::new(RwLock::new(schemas.clone())),
-            schemas_tokio: Arc::new(tokio::sync::RwLock::new(schemas.clone())),
+            schemas: Arc::new(tokio::sync::RwLock::new(schemas)),
             default,
         }
     }
 
-    pub fn value_type(&self) -> crate::ValueType {
+    pub async fn value_type(&self) -> crate::ValueType {
         crate::ValueType::AnyOf(
-            self.schemas
-                .read()
-                .unwrap()
-                .iter()
-                .map(|schema| schema.value_type())
-                .collect(),
+            join_all(
+                self.schemas
+                    .read()
+                    .await
+                    .iter()
+                    .map(|schema| async { schema.value_type().await }),
+            )
+            .await
+            .into_iter()
+            .collect(),
         )
     }
 }

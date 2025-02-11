@@ -62,9 +62,9 @@ where
         let mut type_mismatch_errors = vec![];
         let mut valid_count = 0;
 
-        let mut schemas = one_of_schema.schemas_tokio.write().await;
+        let mut schemas = one_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
                 continue;
             };
 
@@ -104,7 +104,7 @@ where
                 | (_, ValueSchema::Null) => {
                     type_mismatch_errors.push(crate::Error {
                         kind: crate::ErrorKind::TypeMismatch {
-                            expected: value_schema.value_type(),
+                            expected: value_schema.value_type().await,
                             actual: value.value_type(),
                         },
                         range: value.range(),
@@ -167,9 +167,9 @@ where
         let mut is_type_match = false;
         let mut type_mismatch_errors = vec![];
 
-        let mut schemas = any_of_schema.schemas_tokio.write().await;
+        let mut schemas = any_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
                 continue;
             };
             match (value.value_type(), value_schema) {
@@ -207,7 +207,7 @@ where
                 | (_, ValueSchema::Null) => {
                     type_mismatch_errors.push(crate::Error {
                         kind: crate::ErrorKind::TypeMismatch {
-                            expected: value_schema.value_type(),
+                            expected: value_schema.value_type().await,
                             actual: value.value_type(),
                         },
                         range: value.range(),
@@ -261,9 +261,9 @@ where
     async move {
         let mut errors = vec![];
 
-        let mut schemas = all_of_schema.schemas_tokio.write().await;
+        let mut schemas = all_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
                 continue;
             };
             match value

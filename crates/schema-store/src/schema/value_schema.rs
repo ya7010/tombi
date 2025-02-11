@@ -1,3 +1,6 @@
+use futures::future::{join_all, BoxFuture};
+use futures::FutureExt;
+
 use super::FindSchemaCandidates;
 use super::{
     AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema,
@@ -6,7 +9,7 @@ use super::{
 };
 use crate::Referable;
 use crate::{Accessor, SchemaDefinitions};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub enum ValueSchema {
@@ -32,7 +35,7 @@ impl ValueSchema {
             Some(serde_json::Value::String(type_str)) => return Self::new_single(type_str, object),
             Some(serde_json::Value::Array(types)) => {
                 return Some(Self::OneOf(OneOfSchema {
-                    schemas: Arc::new(RwLock::new(
+                    schemas: Arc::new(tokio::sync::RwLock::new(
                         types
                             .iter()
                             .filter_map(|type_value| {
@@ -108,7 +111,7 @@ impl ValueSchema {
         }
     }
 
-    pub fn value_type(&self) -> crate::ValueType {
+    pub async fn value_type(&self) -> crate::ValueType {
         match self {
             Self::Null => crate::ValueType::Null,
             Self::Boolean(boolean) => boolean.value_type(),
@@ -121,9 +124,9 @@ impl ValueSchema {
             Self::OffsetDateTime(offset_date_time) => offset_date_time.value_type(),
             Self::Array(array) => array.value_type(),
             Self::Table(table) => table.value_type(),
-            Self::OneOf(one_of) => one_of.value_type(),
-            Self::AnyOf(any_of) => any_of.value_type(),
-            Self::AllOf(all_of) => all_of.value_type(),
+            Self::OneOf(one_of) => one_of.value_type().await,
+            Self::AnyOf(any_of) => any_of.value_type().await,
+            Self::AllOf(all_of) => all_of.value_type().await,
         }
     }
 
@@ -203,112 +206,111 @@ impl ValueSchema {
         }
     }
 
-    pub fn match_flattened_schemas<T: Fn(&ValueSchema) -> bool>(
-        &self,
-        condition: &T,
-    ) -> Vec<ValueSchema> {
-        let mut matched_schemas = Vec::new();
-        match self {
-            ValueSchema::OneOf(OneOfSchema { schemas, .. })
-            | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
-            | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                if let Ok(mut schemas) = schemas.write() {
-                    for schema in schemas.iter_mut() {
-                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
-                            matched_schemas.extend(schema.match_flattened_schemas(condition))
+    pub fn match_flattened_schemas<'a: 'b, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
+        &'a self,
+        condition: &'a T,
+    ) -> BoxFuture<'b, Vec<ValueSchema>> {
+        async move {
+            let mut matched_schemas = Vec::new();
+            match self {
+                ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+                | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
+                    for schema in schemas.write().await.iter_mut() {
+                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()).await {
+                            matched_schemas.extend(schema.match_flattened_schemas(condition).await)
                         }
                     }
                 }
-            }
-            _ => {
-                if condition(self) {
-                    matched_schemas.push(self.clone());
+                _ => {
+                    if condition(self) {
+                        matched_schemas.push(self.clone());
+                    }
                 }
-            }
-        };
+            };
 
-        matched_schemas
+            matched_schemas
+        }
+        .boxed()
     }
 
-    pub fn is_match<T: Fn(&ValueSchema) -> bool>(&self, condition: &T) -> bool {
-        match self {
-            ValueSchema::OneOf(one_of) => {
-                let Ok(mut schemas) = one_of.schemas.write() else {
-                    return false;
-                };
-                schemas.iter_mut().any(|schema| {
-                    if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
-                        schema.is_match(condition)
-                    } else {
-                        false
-                    }
-                })
+    pub fn is_match<'a, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
+        &'a self,
+        condition: &'a T,
+    ) -> BoxFuture<'b, bool>
+    where
+        'a: 'b,
+    {
+        async move {
+            match self {
+                ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => {
+                    join_all(schemas.write().await.iter_mut().map(|schema| async {
+                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()).await {
+                            schema.is_match(condition).await
+                        } else {
+                            false
+                        }
+                    }))
+                    .await
+                    .into_iter()
+                    .any(|is_matched| is_matched)
+                }
+                ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
+                    join_all(schemas.write().await.iter_mut().map(|schema| async {
+                        if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()).await {
+                            schema.is_match(condition).await
+                        } else {
+                            false
+                        }
+                    }))
+                    .await
+                    .into_iter()
+                    .all(|is_matched| is_matched)
+                }
+                _ => condition(self),
             }
-            ValueSchema::AnyOf(any_of) => {
-                let Ok(mut schemas) = any_of.schemas.write() else {
-                    return false;
-                };
-                schemas.iter_mut().any(|schema| {
-                    if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
-                        schema.is_match(condition)
-                    } else {
-                        false
-                    }
-                })
-            }
-            ValueSchema::AllOf(all_of) => {
-                let Ok(mut schemas) = all_of.schemas.write() else {
-                    return false;
-                };
-                schemas.iter_mut().all(|schema| {
-                    if let Ok(schema) = schema.resolve(&SchemaDefinitions::default()) {
-                        schema.is_match(condition)
-                    } else {
-                        false
-                    }
-                })
-            }
-            _ => condition(self),
         }
+        .boxed()
     }
 }
 
 impl FindSchemaCandidates for ValueSchema {
-    fn find_schema_candidates(
-        &self,
-        accessors: &[Accessor],
-        definitions: &SchemaDefinitions,
-    ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
-        match self {
-            Self::OneOf(OneOfSchema {
-                title,
-                description,
-                schemas,
-                ..
-            })
-            | Self::AnyOf(AnyOfSchema {
-                title,
-                description,
-                schemas,
-                ..
-            })
-            | Self::AllOf(AllOfSchema {
-                title,
-                description,
-                schemas,
-                ..
-            }) => {
-                let mut candidates = Vec::new();
-                let mut errors = Vec::new();
+    fn find_schema_candidates<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a [Accessor],
+        definitions: &'a SchemaDefinitions,
+    ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
+        async move {
+            match self {
+                Self::OneOf(OneOfSchema {
+                    title,
+                    description,
+                    schemas,
+                    ..
+                })
+                | Self::AnyOf(AnyOfSchema {
+                    title,
+                    description,
+                    schemas,
+                    ..
+                })
+                | Self::AllOf(AllOfSchema {
+                    title,
+                    description,
+                    schemas,
+                    ..
+                }) => {
+                    let mut candidates = Vec::new();
+                    let mut errors = Vec::new();
 
-                if let Ok(mut schemas) = schemas.write() {
-                    for schema in schemas.iter_mut() {
-                        let Ok(schema) = schema.resolve(definitions) else {
+                    for referable_schema in schemas.write().await.iter_mut() {
+                        let Ok(schema) = referable_schema.resolve(definitions).await else {
                             continue;
                         };
 
                         let (mut schema_candidates, schema_errors) =
-                            schema.find_schema_candidates(accessors, definitions);
+                            schema.find_schema_candidates(accessors, definitions).await;
 
                         for schema_candidate in &mut schema_candidates {
                             if title.is_some() || description.is_some() {
@@ -320,11 +322,13 @@ impl FindSchemaCandidates for ValueSchema {
                         candidates.extend(schema_candidates);
                         errors.extend(schema_errors);
                     }
+
+                    (candidates, errors)
                 }
-                (candidates, errors)
+                ValueSchema::Null => (Vec::with_capacity(0), Vec::with_capacity(0)),
+                _ => (vec![self.clone()], Vec::with_capacity(0)),
             }
-            ValueSchema::Null => (Vec::with_capacity(0), Vec::with_capacity(0)),
-            _ => (vec![self.clone()], Vec::with_capacity(0)),
         }
+        .boxed()
     }
 }

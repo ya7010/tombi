@@ -9,46 +9,73 @@ use super::{
 };
 use config::TomlVersion;
 use document_tree::ArrayKind;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, ArraySchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 impl FindCompletionContents for document_tree::Array {
-    fn find_completion_contents(
-        &self,
-        accessors: &Vec<Accessor>,
-        value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a Vec<Accessor>,
+        value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
-        keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        definitions: Option<&SchemaDefinitions>,
+        keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent> {
+    ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
         tracing::trace!("keys: {:?}", keys);
         tracing::trace!("accessors: {:?}", accessors);
         tracing::trace!("value schema: {:?}", value_schema);
         tracing::trace!("completion hint: {:?}", completion_hint);
 
-        match value_schema {
-            Some(ValueSchema::Array(array_schema)) => {
-                let Some(definitions) = definitions else {
-                    unreachable!("definitions must be provided");
-                };
+        async move {
+            match value_schema {
+                Some(ValueSchema::Array(array_schema)) => {
+                    let Some(definitions) = definitions else {
+                        unreachable!("definitions must be provided");
+                    };
 
-                let mut new_item_index = 0;
-                for (index, value) in self.values().iter().enumerate() {
-                    if value.range().end() < position {
-                        new_item_index = index + 1;
+                    let mut new_item_index = 0;
+                    for (index, value) in self.values().iter().enumerate() {
+                        if value.range().end() < position {
+                            new_item_index = index + 1;
+                        }
+                        if value.range().contains(position) || value.range().end() == position {
+                            let accessor = Accessor::Index(index);
+                            if let Some(items) = &array_schema.items {
+                                if let Ok(item_schema) =
+                                    items.write().await.resolve(definitions).await
+                                {
+                                    return value
+                                        .find_completion_contents(
+                                            &accessors
+                                                .clone()
+                                                .into_iter()
+                                                .chain(std::iter::once(accessor))
+                                                .collect(),
+                                            Some(item_schema),
+                                            toml_version,
+                                            position,
+                                            keys,
+                                            schema_url,
+                                            Some(definitions),
+                                            completion_hint,
+                                        )
+                                        .await;
+                                }
+                            }
+                        }
                     }
-                    if value.range().contains(position) || value.range().end() == position {
-                        let accessor = Accessor::Index(index);
-                        if let Some(completion_items) = array_schema.operate_item(
-                            |item_schema| {
-                                value.find_completion_contents(
+                    if let Some(items) = &array_schema.items {
+                        if let Ok(item_schema) = items.write().await.resolve(definitions).await {
+                            return SchemaCompletion
+                                .find_completion_contents(
                                     &accessors
                                         .clone()
                                         .into_iter()
-                                        .chain(std::iter::once(accessor))
+                                        .chain(std::iter::once(Accessor::Index(new_item_index)))
                                         .collect(),
                                     Some(item_schema),
                                     toml_version,
@@ -56,140 +83,132 @@ impl FindCompletionContents for document_tree::Array {
                                     keys,
                                     schema_url,
                                     Some(definitions),
+                                    if self.kind() == ArrayKind::Array {
+                                        Some(CompletionHint::InArray)
+                                    } else {
+                                        completion_hint
+                                    },
+                                )
+                                .await;
+                        }
+                    }
+
+                    Vec::with_capacity(0)
+                }
+                Some(ValueSchema::OneOf(one_of_schema)) => {
+                    find_one_of_completion_items(
+                        self,
+                        accessors,
+                        one_of_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    )
+                    .await
+                }
+                Some(ValueSchema::AnyOf(any_of_schema)) => {
+                    find_any_of_completion_items(
+                        self,
+                        accessors,
+                        any_of_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    )
+                    .await
+                }
+                Some(ValueSchema::AllOf(all_of_schema)) => {
+                    find_all_of_completion_items(
+                        self,
+                        accessors,
+                        all_of_schema,
+                        toml_version,
+                        position,
+                        keys,
+                        schema_url,
+                        definitions,
+                        completion_hint,
+                    )
+                    .await
+                }
+                Some(_) => Vec::with_capacity(0),
+                None => {
+                    for (index, value) in self.values().iter().enumerate() {
+                        if value.range().contains(position) || value.range().end() == position {
+                            if let document_tree::Value::Table(table) = value {
+                                if keys.len() == 1
+                                    && table.kind() == document_tree::TableKind::KeyValue
+                                {
+                                    let key_str = &keys.first().unwrap().to_raw_text(toml_version);
+                                    return vec![CompletionContent::new_type_hint_key(
+                                        key_str,
+                                        text::Range::new(
+                                            text::Position::new(
+                                                position.line(),
+                                                position
+                                                    .column()
+                                                    .saturating_sub(key_str.len() as text::Column),
+                                            ),
+                                            position,
+                                        ),
+                                        schema_url,
+                                        Some(CompletionHint::InArray),
+                                    )];
+                                }
+                            }
+
+                            let accessor = Accessor::Index(index);
+                            return value
+                                .find_completion_contents(
+                                    &accessors
+                                        .clone()
+                                        .into_iter()
+                                        .chain(std::iter::once(accessor))
+                                        .collect(),
+                                    None,
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    None,
+                                    None,
                                     completion_hint,
                                 )
-                            },
-                            definitions,
-                        ) {
-                            return completion_items;
+                                .await;
                         }
                     }
+                    type_hint_value(None, position, schema_url, completion_hint)
                 }
-                if let Some(completion_items) = array_schema.operate_item(
-                    |item_schema| {
-                        SchemaCompletion.find_completion_contents(
-                            &accessors
-                                .clone()
-                                .into_iter()
-                                .chain(std::iter::once(Accessor::Index(new_item_index)))
-                                .collect(),
-                            Some(item_schema),
-                            toml_version,
-                            position,
-                            keys,
-                            schema_url,
-                            Some(definitions),
-                            if self.kind() == ArrayKind::Array {
-                                Some(CompletionHint::InArray)
-                            } else {
-                                completion_hint
-                            },
-                        )
-                    },
-                    definitions,
-                ) {
-                    return completion_items;
-                }
-
-                Vec::with_capacity(0)
-            }
-            Some(ValueSchema::OneOf(one_of_schema)) => find_one_of_completion_items(
-                self,
-                accessors,
-                one_of_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Some(ValueSchema::AnyOf(any_of_schema)) => find_any_of_completion_items(
-                self,
-                accessors,
-                any_of_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Some(ValueSchema::AllOf(all_of_schema)) => find_all_of_completion_items(
-                self,
-                accessors,
-                all_of_schema,
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-                completion_hint,
-            ),
-            Some(_) => Vec::with_capacity(0),
-            None => {
-                for (index, value) in self.values().iter().enumerate() {
-                    if value.range().contains(position) || value.range().end() == position {
-                        if let document_tree::Value::Table(table) = value {
-                            if keys.len() == 1 && table.kind() == document_tree::TableKind::KeyValue
-                            {
-                                let key_str = &keys.first().unwrap().to_raw_text(toml_version);
-                                return vec![CompletionContent::new_type_hint_key(
-                                    key_str,
-                                    text::Range::new(
-                                        text::Position::new(
-                                            position.line(),
-                                            position
-                                                .column()
-                                                .saturating_sub(key_str.len() as text::Column),
-                                        ),
-                                        position,
-                                    ),
-                                    schema_url,
-                                    Some(CompletionHint::InArray),
-                                )];
-                            }
-                        }
-
-                        let accessor = Accessor::Index(index);
-                        return value.find_completion_contents(
-                            &accessors
-                                .clone()
-                                .into_iter()
-                                .chain(std::iter::once(accessor))
-                                .collect(),
-                            None,
-                            toml_version,
-                            position,
-                            keys,
-                            None,
-                            None,
-                            completion_hint,
-                        );
-                    }
-                }
-                type_hint_value(None, position, schema_url, completion_hint)
             }
         }
+        .boxed()
     }
 }
 
 impl FindCompletionContents for ArraySchema {
-    fn find_completion_contents(
-        &self,
-        _accessors: &Vec<Accessor>,
-        _value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        _accessors: &'a Vec<Accessor>,
+        _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        _definitions: Option<&SchemaDefinitions>,
+        _keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        _definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent> {
-        match completion_hint {
-            Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-            _ => type_hint_array(position, schema_url, completion_hint),
+    ) -> BoxFuture<'b, Vec<CompletionContent>> {
+        async move {
+            match completion_hint {
+                Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
+                _ => type_hint_array(position, schema_url, completion_hint),
+            }
         }
+        .boxed()
     }
 }
 

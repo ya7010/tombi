@@ -14,7 +14,7 @@ impl Validate for document_tree::Array {
         definitions: &'a SchemaDefinitions,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
-            match value_schema.value_type() {
+            match value_schema.value_type().await {
                 ValueType::Array
                 | ValueType::OneOf(_)
                 | ValueType::AnyOf(_)
@@ -46,9 +46,9 @@ impl Validate for document_tree::Array {
             };
 
             let mut errors = vec![];
-            if let Some(items) = &array_schema.items_tokio {
+            if let Some(items) = &array_schema.items {
                 let mut referable_schema = items.write().await;
-                if let Ok(item_schema) = referable_schema.resolve(definitions) {
+                if let Ok(item_schema) = referable_schema.resolve(definitions).await {
                     for value in self.values() {
                         if let Err(errs) =
                             value.validate(toml_version, item_schema, definitions).await

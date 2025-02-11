@@ -1715,6 +1715,7 @@ dependencies = [
  "dashmap 6.1.0",
  "document",
  "document-tree",
+ "futures",
  "glob",
  "indexmap",
  "itertools",

@@ -8,6 +8,7 @@ mod value;
 use config::TomlVersion;
 use constraints::DataConstraints;
 use dashmap::DashMap;
+use futures::future::BoxFuture;
 use schema_store::{
     get_schema_name, Accessor, Accessors, DocumentSchema, SchemaUrl, ValueSchema, ValueType,
 };
@@ -22,38 +23,46 @@ pub async fn get_hover_content(
 ) -> Option<HoverContent> {
     let table = tree.deref();
     match document_schema {
-        Some(document_schema) => table.get_hover_content(
-            &Vec::with_capacity(0),
-            document_schema.value_schema.as_ref(),
-            toml_version,
-            position,
-            keys,
-            Some(&document_schema.schema_url),
-            &document_schema.definitions,
-        ),
-        None => table.get_hover_content(
-            &Vec::with_capacity(0),
-            None,
-            toml_version,
-            position,
-            keys,
-            None,
-            &DashMap::new(),
-        ),
+        Some(document_schema) => {
+            table
+                .get_hover_content(
+                    &Vec::with_capacity(0),
+                    document_schema.value_schema.as_ref(),
+                    toml_version,
+                    position,
+                    keys,
+                    Some(&document_schema.schema_url),
+                    &document_schema.definitions,
+                )
+                .await
+        }
+        None => {
+            table
+                .get_hover_content(
+                    &Vec::with_capacity(0),
+                    None,
+                    toml_version,
+                    position,
+                    keys,
+                    None,
+                    &DashMap::new(),
+                )
+                .await
+        }
     }
 }
 
 trait GetHoverContent {
-    fn get_hover_content(
-        &self,
-        accessors: &Vec<Accessor>,
-        value_schema: Option<&ValueSchema>,
+    fn get_hover_content<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a Vec<Accessor>,
+        value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
-        keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<HoverContent>;
+        keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        definitions: &'a schema_store::SchemaDefinitions,
+    ) -> BoxFuture<'b, Option<HoverContent>>;
 }
 
 #[derive(Debug)]

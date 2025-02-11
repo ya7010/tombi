@@ -15,7 +15,7 @@ impl Validate for document_tree::Float {
         async move {
             let mut errors = vec![];
 
-            match value_schema.value_type() {
+            match value_schema.value_type().await {
                 ValueType::Float
                 | ValueType::OneOf(_)
                 | ValueType::AnyOf(_)

@@ -15,7 +15,7 @@ impl Validate for LocalDateTime {
         async move {
             let mut errors = vec![];
 
-            match value_schema.value_type() {
+            match value_schema.value_type().await {
                 ValueType::LocalDateTime
                 | ValueType::OneOf(_)
                 | ValueType::AnyOf(_)

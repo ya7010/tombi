@@ -13,12 +13,13 @@ pub use completion_edit::CompletionEdit;
 use completion_kind::CompletionKind;
 use config::TomlVersion;
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
+use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
 use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, Schemas, ValueSchema};
 use syntax::{SyntaxElement, SyntaxKind};
 
-pub fn get_completion_contents(
+pub async fn get_completion_contents(
     root: ast::Root,
     position: text::Position,
     document_schema: Option<&schema_store::DocumentSchema>,
@@ -152,16 +153,19 @@ pub fn get_completion_contents(
 
     let document_tree = root.into_document_tree_and_errors(toml_version).tree;
 
-    let completion_contents = document_tree.deref().find_completion_contents(
-        &Vec::with_capacity(0),
-        document_schema.and_then(|schema| schema.value_schema.as_ref()),
-        toml_version,
-        position,
-        &keys,
-        document_schema.as_ref().map(|schema| &schema.schema_url),
-        document_schema.as_ref().map(|schema| &schema.definitions),
-        completion_hint,
-    );
+    let completion_contents = document_tree
+        .deref()
+        .find_completion_contents(
+            &Vec::with_capacity(0),
+            document_schema.and_then(|schema| schema.value_schema.as_ref()),
+            toml_version,
+            position,
+            &keys,
+            document_schema.as_ref().map(|schema| &schema.schema_url),
+            document_schema.as_ref().map(|schema| &schema.definitions),
+            completion_hint,
+        )
+        .await;
 
     // NOTE: If there are completion contents with the same priority,
     //       remove the completion contents with lower priority.
@@ -184,46 +188,46 @@ pub fn get_completion_contents(
 }
 
 pub trait FindCompletionContents {
-    fn find_completion_contents(
-        &self,
-        accessors: &Vec<Accessor>,
-        value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a Vec<Accessor>,
+        value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
-        keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        definitions: Option<&SchemaDefinitions>,
+        keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent>;
+    ) -> BoxFuture<'b, Vec<CompletionContent>>;
 }
 
 pub trait CompletionCandidate {
-    fn title(
-        &self,
-        definitions: &SchemaDefinitions,
+    fn title<'a: 'b, 'b>(
+        &'a self,
+        definitions: &'a SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<String>;
+    ) -> BoxFuture<'b, Option<String>>;
 
-    fn description(
-        &self,
-        definitions: &SchemaDefinitions,
+    fn description<'a: 'b, 'b>(
+        &'a self,
+        definitions: &'a SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<String>;
+    ) -> BoxFuture<'b, Option<String>>;
 
-    fn detail(
+    async fn detail(
         &self,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.title(definitions, completion_hint)
+        self.title(definitions, completion_hint).await
     }
 
-    fn documentation(
+    async fn documentation(
         &self,
         definitions: &SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.description(definitions, completion_hint)
+        self.description(definitions, completion_hint).await
     }
 }
 
@@ -233,66 +237,69 @@ trait CompositeSchemaImpl {
     fn schemas(&self) -> &Schemas;
 }
 
-impl<T: CompositeSchemaImpl> CompletionCandidate for T {
-    fn title(
-        &self,
-        definitions: &SchemaDefinitions,
+impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
+    fn title<'a: 'b, 'b>(
+        &'a self,
+        definitions: &'a SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<String> {
-        let mut candidates = ahash::AHashSet::new();
-        {
-            if let Ok(mut schemas) = self.schemas().write() {
-                for schema in schemas.iter_mut() {
-                    if let Ok(schema) = schema.resolve(definitions) {
+    ) -> BoxFuture<'b, Option<String>> {
+        async move {
+            let mut candidates = ahash::AHashSet::new();
+            {
+                for referable_schema in self.schemas().write().await.iter_mut() {
+                    if let Ok(schema) = referable_schema.resolve(definitions).await {
                         if matches!(schema, ValueSchema::Null) {
                             continue;
                         }
                         if let Some(candidate) =
-                            CompletionCandidate::title(schema, definitions, completion_hint)
+                            CompletionCandidate::title(schema, definitions, completion_hint).await
                         {
                             candidates.insert(candidate.to_string());
                         }
                     }
                 }
             }
-        }
-        if candidates.len() == 1 {
-            return candidates.into_iter().next();
-        }
+            if candidates.len() == 1 {
+                return candidates.into_iter().next();
+            }
 
-        self.title().as_deref().map(|title| title.into())
+            self.title().as_deref().map(|title| title.into())
+        }
+        .boxed()
     }
 
-    fn description(
-        &self,
-        definitions: &SchemaDefinitions,
+    fn description<'a: 'b, 'b>(
+        &'a self,
+        definitions: &'a SchemaDefinitions,
         completion_hint: Option<CompletionHint>,
-    ) -> Option<String> {
-        let mut candidates = ahash::AHashSet::new();
-        {
-            if let Ok(mut schemas) = self.schemas().write() {
-                for schema in schemas.iter_mut() {
-                    if let Ok(schema) = schema.resolve(definitions) {
+    ) -> BoxFuture<'b, Option<String>> {
+        async move {
+            let mut candidates = ahash::AHashSet::new();
+            {
+                for referable_schema in self.schemas().write().await.iter_mut() {
+                    if let Ok(schema) = referable_schema.resolve(definitions).await {
                         if matches!(schema, ValueSchema::Null) {
                             continue;
                         }
                         if let Some(candidate) =
                             CompletionCandidate::description(schema, definitions, completion_hint)
+                                .await
                         {
                             candidates.insert(candidate.to_string());
                         }
                     }
                 }
             }
-        }
 
-        if candidates.len() == 1 {
-            return candidates.into_iter().next();
-        }
+            if candidates.len() == 1 {
+                return candidates.into_iter().next();
+            }
 
-        self.description()
-            .as_deref()
-            .map(|description| description.into())
+            self.description()
+                .as_deref()
+                .map(|description| description.into())
+        }
+        .boxed()
     }
 }
 

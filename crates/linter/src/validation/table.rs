@@ -16,7 +16,7 @@ impl Validate for document_tree::Table {
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
             let mut errors = vec![];
-            match value_schema.value_type() {
+            match value_schema.value_type().await {
                 ValueType::Table
                 | ValueType::OneOf(_)
                 | ValueType::AnyOf(_)
@@ -54,7 +54,7 @@ impl Validate for document_tree::Table {
                 let mut matche_key = false;
                 if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                     matche_key = true;
-                    if let Ok(value_schema) = property.resolve(definitions) {
+                    if let Ok(value_schema) = property.resolve(definitions).await {
                         if let Err(errs) = value
                             .validate(toml_version, value_schema, definitions)
                             .await
@@ -74,7 +74,9 @@ impl Validate for document_tree::Table {
                         if pattern.is_match(&accessor_raw_text) {
                             matche_key = true;
                             let property_schema = pattern_property.value_mut();
-                            if let Ok(value_schema) = property_schema.resolve(definitions) {
+                            if let Ok(value_schema) =
+                                property_schema.resolve(definitions).await
+                            {
                                 if let Err(errs) = value
                                     .validate(toml_version, value_schema, definitions)
                                     .await
@@ -87,15 +89,15 @@ impl Validate for document_tree::Table {
                 }
                 if !matche_key {
                     if let Some(additional_property_schema) =
-                        &table_schema.additional_property_schema_tokio
+                        &table_schema.additional_property_schema
                     {
                         let mut referable_schema = additional_property_schema.write().await;
-                        let value_schema = if let Ok(schema) = referable_schema.resolve(definitions)
-                        {
-                            Some(schema.clone())
-                        } else {
-                            None
-                        };
+                        let value_schema =
+                            if let Ok(schema) = referable_schema.resolve(definitions).await {
+                                Some(schema.clone())
+                            } else {
+                                None
+                            };
 
                         if let Some(schema) = value_schema {
                             if let Err(errs) =

@@ -1,4 +1,5 @@
 use config::TomlVersion;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, LocalTimeSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 use crate::completion::{
@@ -7,48 +8,55 @@ use crate::completion::{
 };
 
 impl FindCompletionContents for LocalTimeSchema {
-    fn find_completion_contents(
-        &self,
-        _accessors: &Vec<Accessor>,
-        _value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        _accessors: &'a Vec<Accessor>,
+        _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        _definitions: Option<&SchemaDefinitions>,
+        _keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        _definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent> {
-        let mut completion_items = vec![];
+    ) -> BoxFuture<'b, Vec<CompletionContent>> {
+        async move {
+            let mut completion_items = vec![];
 
-        if let Some(enumerate) = &self.enumerate {
-            for item in enumerate {
-                let label = item.to_string();
+            if let Some(enumerate) = &self.enumerate {
+                for item in enumerate {
+                    let label = item.to_string();
+                    let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                    completion_items.push(CompletionContent::new_enumerate_value(
+                        CompletionKind::LocalTime,
+                        label,
+                        edit,
+                        schema_url,
+                    ));
+                }
+            }
+
+            if let Some(default) = &self.default {
+                let label = default.to_string();
                 let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                completion_items.push(CompletionContent::new_enumerate_value(
+                completion_items.push(CompletionContent::new_default_value(
                     CompletionKind::LocalTime,
                     label,
                     edit,
                     schema_url,
                 ));
             }
-        }
 
-        if let Some(default) = &self.default {
-            let label = default.to_string();
-            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-            completion_items.push(CompletionContent::new_default_value(
-                CompletionKind::LocalTime,
-                label,
-                edit,
-                schema_url,
-            ));
-        }
+            if completion_items.is_empty() {
+                completion_items.extend(type_hint_local_time(
+                    position,
+                    schema_url,
+                    completion_hint,
+                ));
+            }
 
-        if completion_items.is_empty() {
-            completion_items.extend(type_hint_local_time(position, schema_url, completion_hint));
+            completion_items
         }
-
-        completion_items
+        .boxed()
     }
 }
 

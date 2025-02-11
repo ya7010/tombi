@@ -1,28 +1,31 @@
-use schema_store::{SchemaUrl, ValueSchema};
+use config::TomlVersion;
+use futures::{future::BoxFuture, FutureExt};
+use schema_store::{Accessor, SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
-pub fn get_one_of_hover_content<T>(
-    value: &T,
-    accessors: &Vec<schema_store::Accessor>,
-    one_of_schema: &schema_store::OneOfSchema,
+pub fn get_one_of_hover_content<'a: 'b, 'b, T>(
+    value: &'a T,
+    accessors: &'a Vec<schema_store::Accessor>,
+    one_of_schema: &'a schema_store::OneOfSchema,
     toml_version: config::TomlVersion,
     position: text::Position,
-    keys: &[document_tree::Key],
-    schema_url: Option<&SchemaUrl>,
-    definitions: &schema_store::SchemaDefinitions,
-) -> Option<HoverContent>
+    keys: &'a [document_tree::Key],
+    schema_url: Option<&'a SchemaUrl>,
+    definitions: &'a schema_store::SchemaDefinitions,
+) -> BoxFuture<'b, Option<HoverContent>>
 where
-    T: GetHoverContent + document_tree::ValueImpl,
+    T: GetHoverContent + document_tree::ValueImpl + Sync + Send,
 {
-    let mut one_hover_contents = ahash::AHashSet::new();
-    if let Ok(mut schemas) = one_of_schema.schemas.write() {
+    async move {
+        let mut one_hover_contents = ahash::AHashSet::new();
         let mut value_type_set = indexmap::IndexSet::new();
-        for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+
+        for referable_schema in one_of_schema.schemas.write().await.iter_mut() {
+            let Ok(value_schema) = referable_schema.resolve(definitions).await else {
                 continue;
             };
-            value_type_set.insert(value_schema.value_type());
+            value_type_set.insert(value_schema.value_type().await);
         }
 
         let value_type = if value_type_set.len() == 1 {
@@ -31,19 +34,22 @@ where
             schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
         };
 
-        for referable_schema in schemas.iter_mut() {
-            let Ok(value_schema) = referable_schema.resolve(definitions) else {
+        for referable_schema in one_of_schema.schemas.read().await.iter() {
+            let Some(value_schema) = referable_schema.resolved() else {
                 continue;
             };
-            if let Some(mut hover_content) = value.get_hover_content(
-                accessors,
-                Some(value_schema),
-                toml_version,
-                position,
-                keys,
-                schema_url,
-                definitions,
-            ) {
+            if let Some(mut hover_content) = value
+                .get_hover_content(
+                    accessors,
+                    Some(value_schema),
+                    toml_version,
+                    position,
+                    keys,
+                    schema_url,
+                    definitions,
+                )
+                .await
+            {
                 if hover_content.title.is_none() && hover_content.description.is_none() {
                     if let Some(title) = &one_of_schema.title {
                         hover_content.title = Some(title.clone());
@@ -57,7 +63,7 @@ where
                     hover_content.value_type = value_type.clone();
                 }
 
-                if value_schema.value_type() == schema_store::ValueType::Array
+                if value_schema.value_type().await == schema_store::ValueType::Array
                     && hover_content.value_type != schema_store::ValueType::Array
                 {
                     return Some(hover_content);
@@ -66,53 +72,55 @@ where
                 one_hover_contents.insert(hover_content);
             }
         }
-    }
 
-    if one_hover_contents.len() == 1 {
-        one_hover_contents
-            .into_iter()
-            .next()
-            .map(|mut hover_content| {
-                if hover_content.title.is_none() && hover_content.description.is_none() {
-                    if let Some(title) = &one_of_schema.title {
-                        hover_content.title = Some(title.clone());
+        if one_hover_contents.len() == 1 {
+            one_hover_contents
+                .into_iter()
+                .next()
+                .map(|mut hover_content| {
+                    if hover_content.title.is_none() && hover_content.description.is_none() {
+                        if let Some(title) = &one_of_schema.title {
+                            hover_content.title = Some(title.clone());
+                        }
+                        if let Some(description) = &one_of_schema.description {
+                            hover_content.description = Some(description.clone());
+                        }
                     }
-                    if let Some(description) = &one_of_schema.description {
-                        hover_content.description = Some(description.clone());
-                    }
-                }
 
-                hover_content
+                    hover_content
+                })
+        } else {
+            Some(HoverContent {
+                title: None,
+                description: None,
+                accessors: schema_store::Accessors::new(accessors.clone()),
+                value_type: value.value_type().into(),
+                constraints: None,
+                schema_url: schema_url.cloned(),
+                range: None,
             })
-    } else {
-        Some(HoverContent {
-            title: None,
-            description: None,
-            accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type: value.value_type().into(),
-            constraints: None,
-            schema_url: schema_url.cloned(),
-            range: None,
-        })
+        }
     }
+    .boxed()
 }
 
 impl GetHoverContent for schema_store::OneOfSchema {
-    fn get_hover_content(
-        &self,
-        accessors: &Vec<schema_store::Accessor>,
-        _value_schema: Option<&ValueSchema>,
-        _toml_version: config::TomlVersion,
+    fn get_hover_content<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a Vec<Accessor>,
+        _value_schema: Option<&'a ValueSchema>,
+        _toml_version: TomlVersion,
         _position: text::Position,
-        _keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        definitions: &schema_store::SchemaDefinitions,
-    ) -> Option<HoverContent> {
-        let mut title_description_set = ahash::AHashSet::new();
-        let mut value_type_set = indexmap::IndexSet::new();
-        if let Ok(mut schemas) = self.schemas.write() {
-            for referable_schema in schemas.iter_mut() {
-                let Ok(value_schema) = referable_schema.resolve(definitions) else {
+        _keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        definitions: &'a schema_store::SchemaDefinitions,
+    ) -> BoxFuture<'b, Option<HoverContent>> {
+        async move {
+            let mut title_description_set = ahash::AHashSet::new();
+            let mut value_type_set = indexmap::IndexSet::new();
+
+            for referable_schema in self.schemas.write().await.iter_mut() {
+                let Ok(value_schema) = referable_schema.resolve(definitions).await else {
                     return None;
                 };
                 if value_schema.title().is_some() || value_schema.description().is_some() {
@@ -121,39 +129,40 @@ impl GetHoverContent for schema_store::OneOfSchema {
                         value_schema.description().map(ToString::to_string),
                     ));
                 }
-                value_type_set.insert(value_schema.value_type());
+                value_type_set.insert(value_schema.value_type().await);
             }
+
+            let (mut title, mut description) = if title_description_set.len() == 1 {
+                title_description_set.into_iter().next().unwrap()
+            } else {
+                (None, None)
+            };
+
+            if title.is_none() && description.is_none() {
+                if let Some(t) = &self.title {
+                    title = Some(t.clone());
+                }
+                if let Some(d) = &self.description {
+                    description = Some(d.clone());
+                }
+            }
+
+            let value_type: schema_store::ValueType = if value_type_set.len() == 1 {
+                value_type_set.into_iter().next().unwrap()
+            } else {
+                schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
+            };
+
+            Some(HoverContent {
+                title,
+                description,
+                accessors: schema_store::Accessors::new(accessors.clone()),
+                value_type,
+                constraints: None,
+                schema_url: schema_url.cloned(),
+                range: None,
+            })
         }
-
-        let (mut title, mut description) = if title_description_set.len() == 1 {
-            title_description_set.into_iter().next().unwrap()
-        } else {
-            (None, None)
-        };
-
-        if title.is_none() && description.is_none() {
-            if let Some(t) = &self.title {
-                title = Some(t.clone());
-            }
-            if let Some(d) = &self.description {
-                description = Some(d.clone());
-            }
-        }
-
-        let value_type: schema_store::ValueType = if value_type_set.len() == 1 {
-            value_type_set.into_iter().next().unwrap()
-        } else {
-            schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
-        };
-
-        Some(HoverContent {
-            title,
-            description,
-            accessors: schema_store::Accessors::new(accessors.clone()),
-            value_type,
-            constraints: None,
-            schema_url: schema_url.cloned(),
-            range: None,
-        })
+        .boxed()
     }
 }

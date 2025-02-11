@@ -16,7 +16,7 @@ impl Validate for document_tree::Boolean {
         async move {
             let mut errors = vec![];
 
-            match value_schema.value_type() {
+            match value_schema.value_type().await {
                 ValueType::Boolean
                 | ValueType::OneOf(_)
                 | ValueType::AnyOf(_)

@@ -1,13 +1,14 @@
 use std::sync::Arc;
-use std::sync::RwLock;
 
 use super::FindSchemaCandidates;
-use super::SchemaItem;
+use super::SchemaDefinitions;
 use super::SchemaItemTokio;
 use super::SchemaPatternProperties;
 use super::ValueSchema;
 use crate::{Accessor, Referable, SchemaProperties};
 use dashmap::DashMap;
+use futures::future::BoxFuture;
+use futures::FutureExt;
 
 #[derive(Debug, Default, Clone)]
 pub struct TableSchema {
@@ -16,17 +17,11 @@ pub struct TableSchema {
     pub properties: SchemaProperties,
     pub pattern_properties: Option<SchemaPatternProperties>,
     pub additional_properties: bool,
-    additional_property_schema: Option<SchemaItem>,
-    pub additional_property_schema_tokio: Option<SchemaItemTokio>,
+    pub additional_property_schema: Option<SchemaItemTokio>,
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
 }
-
-// FIXME: remove thoes traits.
-// FIXME: remove schemas for async version
-unsafe impl Send for TableSchema {}
-unsafe impl Sync for TableSchema {}
 
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
@@ -56,20 +51,17 @@ impl TableSchema {
             }
             _ => None,
         };
-        let (additional_properties, additional_property_schema, additional_property_schema_tokio) =
+        let (additional_properties, additional_property_schema) =
             match object.get("additionalProperties") {
-                Some(serde_json::Value::Bool(allow)) => (*allow, None, None),
+                Some(serde_json::Value::Bool(allow)) => (*allow, None),
                 Some(serde_json::Value::Object(object)) => {
                     let value_schema = Referable::<ValueSchema>::new(object);
                     (
                         true,
-                        value_schema
-                            .clone()
-                            .map(|schema| Arc::new(RwLock::new(schema))),
                         value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),
                     )
                 }
-                _ => (true, None, None),
+                _ => (true, None),
             };
 
         Self {
@@ -83,7 +75,6 @@ impl TableSchema {
             pattern_properties,
             additional_properties,
             additional_property_schema,
-            additional_property_schema_tokio,
             required: object.get("required").and_then(|v| {
                 v.as_array().map(|arr| {
                     arr.iter()
@@ -105,67 +96,44 @@ impl TableSchema {
     }
 
     pub fn has_additional_property_schema(&self) -> bool {
-        self.additional_property_schema.is_some() || self.additional_property_schema_tokio.is_some()
-    }
-
-    pub fn operate_additional_property_schema<F, T>(
-        &self,
-        operation: F,
-        definitions: &crate::SchemaDefinitions,
-    ) -> Option<T>
-    where
-        F: FnOnce(&ValueSchema) -> T,
-    {
-        if let Some(ref additional_property_schema) = self.additional_property_schema {
-            let is_ref = if let Ok(referable_schema) = additional_property_schema.read() {
-                match *referable_schema {
-                    Referable::Resolved(ref value_schema) => return Some(operation(value_schema)),
-                    Referable::Ref { .. } => true,
-                }
-            } else {
-                false
-            };
-
-            if is_ref {
-                if let Ok(mut referable_schema) = additional_property_schema.write() {
-                    if let Ok(value_schema) = referable_schema.resolve(definitions) {
-                        return Some(operation(value_schema));
-                    }
-                }
-            }
-        }
-        None
+        self.additional_property_schema.is_some()
     }
 }
 
 impl FindSchemaCandidates for TableSchema {
-    fn find_schema_candidates(
-        &self,
-        accessors: &[crate::Accessor],
-        definitions: &crate::SchemaDefinitions,
-    ) -> (Vec<crate::ValueSchema>, Vec<crate::Error>) {
-        let mut candidates = Vec::new();
-        let mut errors = Vec::new();
+    fn find_schema_candidates<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a [Accessor],
+        definitions: &'a SchemaDefinitions,
+    ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
+        async move {
+            let mut candidates = Vec::new();
+            let mut errors = Vec::new();
 
-        if accessors.is_empty() {
-            for mut property in self.properties.iter_mut() {
-                if let Ok(value_schema) = property.value_mut().resolve(definitions) {
-                    let (schema_candidates, schema_errors) =
-                        value_schema.find_schema_candidates(accessors, definitions);
-                    candidates.extend(schema_candidates);
-                    errors.extend(schema_errors);
+            if accessors.is_empty() {
+                for mut property in self.properties.iter_mut() {
+                    if let Ok(value_schema) = property.value_mut().resolve(definitions).await {
+                        let (schema_candidates, schema_errors) = value_schema
+                            .find_schema_candidates(accessors, definitions)
+                            .await;
+                        candidates.extend(schema_candidates);
+                        errors.extend(schema_errors);
+                    }
+                }
+
+                return (candidates, errors);
+            }
+
+            if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
+                if let Ok(schema) = value.resolve(definitions).await {
+                    return schema
+                        .find_schema_candidates(&accessors[1..], definitions)
+                        .await;
                 }
             }
 
-            return (candidates, errors);
+            (candidates, errors)
         }
-
-        if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
-            if let Ok(schema) = value.resolve(definitions) {
-                return schema.find_schema_candidates(&accessors[1..], definitions);
-            }
-        }
-
-        (candidates, errors)
+        .boxed()
     }
 }

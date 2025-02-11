@@ -21,6 +21,7 @@ pub use any_of_schema::AnyOfSchema;
 pub use array_schema::ArraySchema;
 pub use boolean_schema::BooleanSchema;
 pub use float_schema::FloatSchema;
+use futures::future::BoxFuture;
 pub use integer_schema::IntegerSchema;
 pub use local_date_schema::LocalDateSchema;
 pub use local_date_time_schema::LocalDateTimeSchema;
@@ -30,7 +31,7 @@ pub use one_of_schema::OneOfSchema;
 pub use string_schema::StringSchema;
 pub use table_schema::TableSchema;
 
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 pub use catalog_schema::CatalogSchema;
 pub use document_schema::DocumentSchema;
@@ -41,11 +42,9 @@ use crate::Accessor;
 
 pub type SchemaProperties = dashmap::DashMap<Accessor, Referable<ValueSchema>>;
 pub type SchemaPatternProperties = dashmap::DashMap<String, Referable<ValueSchema>>;
-pub type SchemaItem = Arc<RwLock<Referable<ValueSchema>>>;
 pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
 pub type SchemaDefinitions = dashmap::DashMap<String, Referable<ValueSchema>>;
-pub type Schemas = Arc<RwLock<Vec<Referable<ValueSchema>>>>;
-pub type SchemasTokio = Arc<tokio::sync::RwLock<Vec<Referable<ValueSchema>>>>;
+pub type Schemas = Arc<tokio::sync::RwLock<Vec<Referable<ValueSchema>>>>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
 pub struct SchemaUrl(url::Url);
@@ -82,9 +81,9 @@ impl std::fmt::Display for SchemaUrl {
 }
 
 pub trait FindSchemaCandidates {
-    fn find_schema_candidates(
-        &self,
-        accessors: &[Accessor],
-        definitions: &SchemaDefinitions,
-    ) -> (Vec<ValueSchema>, Vec<crate::Error>);
+    fn find_schema_candidates<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a [Accessor],
+        definitions: &'a SchemaDefinitions,
+    ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)>;
 }

@@ -67,10 +67,7 @@ pub async fn handle_completion(
         return Ok(None);
     };
 
-    Ok(Some(get_completion_contents(
-        root,
-        position,
-        document_schema.as_ref(),
-        toml_version,
-    )))
+    Ok(Some(
+        get_completion_contents(root, position, document_schema.as_ref(), toml_version).await,
+    ))
 }

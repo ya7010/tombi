@@ -1,3 +1,5 @@
+use futures::{future::BoxFuture, FutureExt};
+
 use super::{
     AllOfSchema, AnyOfSchema, DocumentSchema, OneOfSchema, SchemaDefinitions, SchemaUrl,
     ValueSchema,
@@ -41,58 +43,59 @@ impl Referable<ValueSchema> {
         ValueSchema::new(object).map(Referable::Resolved)
     }
 
-    pub fn value_type(&self) -> crate::ValueType {
+    pub async fn value_type(&self) -> crate::ValueType {
         match self {
-            Referable::Resolved(schema) => schema.value_type(),
+            Referable::Resolved(schema) => schema.value_type().await,
             Referable::Ref { .. } => unreachable!("unreachable ref value_tyle."),
         }
     }
 
-    pub fn resolve<'a>(
+    pub fn resolve<'a: 'b, 'b>(
         &'a mut self,
-        definitions: &SchemaDefinitions,
-    ) -> Result<&'a ValueSchema, crate::Error> {
-        match self {
-            Referable::Ref {
-                reference,
-                title,
-                description,
-            } => {
-                {
-                    if let Some(definition_schema) = definitions.get(reference) {
-                        let mut referable_schema = definition_schema.to_owned();
-                        if let Referable::Resolved(ref mut schema) = &mut referable_schema {
-                            if title.is_some() || description.is_some() {
-                                schema.set_title(title.to_owned());
-                                schema.set_description(description.to_owned());
+        definitions: &'a SchemaDefinitions,
+    ) -> BoxFuture<'b, Result<&'a ValueSchema, crate::Error>> {
+        async move {
+            match self {
+                Referable::Ref {
+                    reference,
+                    title,
+                    description,
+                } => {
+                    {
+                        if let Some(definition_schema) = definitions.get(reference) {
+                            let mut referable_schema = definition_schema.to_owned();
+                            if let Referable::Resolved(ref mut schema) = &mut referable_schema {
+                                if title.is_some() || description.is_some() {
+                                    schema.set_title(title.to_owned());
+                                    schema.set_description(description.to_owned());
+                                }
                             }
-                        }
 
-                        *self = referable_schema;
-                    } else {
-                        Err(crate::Error::DefinitionNotFound {
-                            definition_ref: reference.clone(),
-                        })?;
-                    }
-                }
-                self.resolve(definitions)
-            }
-            Referable::Resolved(resolved) => {
-                match resolved {
-                    ValueSchema::OneOf(OneOfSchema { schemas, .. })
-                    | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
-                    | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                        if let Ok(mut schemas) = schemas.write() {
-                            for schema in schemas.iter_mut() {
-                                schema.resolve(definitions)?;
-                            }
+                            *self = referable_schema;
+                        } else {
+                            Err(crate::Error::DefinitionNotFound {
+                                definition_ref: reference.clone(),
+                            })?;
                         }
                     }
-                    _ => {}
+                    self.resolve(definitions).await
                 }
-                Ok(resolved)
+                Referable::Resolved(resolved) => {
+                    match resolved {
+                        ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                        | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+                        | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
+                            for schema in schemas.write().await.iter_mut() {
+                                schema.resolve(definitions).await?;
+                            }
+                        }
+                        _ => {}
+                    }
+                    Result::<&ValueSchema, crate::Error>::Ok(resolved)
+                }
             }
         }
+        .boxed()
     }
 
     #[allow(unused)]
@@ -161,13 +164,11 @@ impl Referable<ValueSchema> {
                         ValueSchema::OneOf(OneOfSchema { schemas, .. })
                         | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                            if let Ok(mut schemas) = schemas.write() {
-                                for schema in schemas.iter_mut() {
-                                    schema
-                                        .resolve_async(document_schema, schema_store)
-                                        .await
-                                        .await?;
-                                }
+                            for schema in schemas.write().await.iter_mut() {
+                                schema
+                                    .resolve_async(document_schema, schema_store)
+                                    .await
+                                    .await?;
                             }
                         }
                         _ => {}

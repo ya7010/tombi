@@ -1,26 +1,20 @@
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+
+use futures::{future::BoxFuture, FutureExt};
 
 use crate::Accessor;
 
-use super::{
-    FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItem, SchemaItemTokio, ValueSchema,
-};
+use super::{FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, ValueSchema};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    items: Option<SchemaItem>,
-    pub items_tokio: Option<SchemaItemTokio>,
+    pub items: Option<SchemaItemTokio>,
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
 }
-
-// FIXME: remove thoes traits.
-// FIXME: remove schemas for async version
-unsafe impl Send for ArraySchema {}
-unsafe impl Sync for ArraySchema {}
 
 impl ArraySchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
@@ -32,12 +26,6 @@ impl ArraySchema {
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             items: object.get("items").and_then(|value| {
-                value
-                    .as_object()
-                    .and_then(Referable::<ValueSchema>::new)
-                    .map(|schema| Arc::new(RwLock::new(schema)))
-            }),
-            items_tokio: object.get("items").and_then(|value| {
                 value
                     .as_object()
                     .and_then(Referable::<ValueSchema>::new)
@@ -56,55 +44,33 @@ impl ArraySchema {
     pub fn value_type(&self) -> crate::ValueType {
         crate::ValueType::Array
     }
-
-    pub fn operate_item<F, T>(&self, operation: F, definitions: &SchemaDefinitions) -> Option<T>
-    where
-        F: FnOnce(&ValueSchema) -> T,
-    {
-        if let Some(ref items) = self.items {
-            let is_ref = if let Ok(referable_schema) = items.read() {
-                match *referable_schema {
-                    Referable::Resolved(ref value_schema) => return Some(operation(value_schema)),
-                    Referable::Ref { .. } => true,
-                }
-            } else {
-                false
-            };
-
-            if is_ref {
-                if let Ok(mut referable_schema) = items.write() {
-                    if let Ok(value_schema) = referable_schema.resolve(definitions) {
-                        return Some(operation(value_schema));
-                    }
-                }
-            }
-        }
-        None
-    }
 }
 
 impl FindSchemaCandidates for ArraySchema {
-    fn find_schema_candidates(
-        &self,
-        accessors: &[Accessor],
-        definitions: &SchemaDefinitions,
-    ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
-        let mut errors = Vec::new();
-        let mut candidates = Vec::new();
+    fn find_schema_candidates<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a [Accessor],
+        definitions: &'a SchemaDefinitions,
+    ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
+        async move {
+            let mut errors = Vec::new();
+            let mut candidates = Vec::new();
 
-        let Some(ref items) = self.items else {
-            return (candidates, errors);
-        };
+            let Some(ref items) = self.items else {
+                return (candidates, errors);
+            };
 
-        if let Ok(mut referable_schema) = items.write() {
-            if let Ok(value_schema) = referable_schema.resolve(definitions) {
-                let (mut item_candidates, mut item_errors) =
-                    value_schema.find_schema_candidates(&accessors[1..], definitions);
+            let mut referable_schema = items.write().await;
+            if let Ok(value_schema) = referable_schema.resolve(definitions).await {
+                let (mut item_candidates, mut item_errors) = value_schema
+                    .find_schema_candidates(&accessors[1..], definitions)
+                    .await;
                 candidates.append(&mut item_candidates);
                 errors.append(&mut item_errors);
             };
-        };
 
-        (candidates, errors)
+            (candidates, errors)
+        }
+        .boxed()
     }
 }

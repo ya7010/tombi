@@ -1,4 +1,5 @@
 use config::TomlVersion;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, StringSchema, ValueSchema};
 
 use crate::completion::{
@@ -7,56 +8,59 @@ use crate::completion::{
 };
 
 impl FindCompletionContents for StringSchema {
-    fn find_completion_contents(
-        &self,
-        _accessors: &Vec<Accessor>,
-        _value_schema: Option<&ValueSchema>,
+    fn find_completion_contents<'a: 'b, 'b>(
+        &'a self,
+        _accessors: &'a Vec<Accessor>,
+        _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &[document_tree::Key],
-        schema_url: Option<&SchemaUrl>,
-        _definitions: Option<&SchemaDefinitions>,
+        _keys: &'a [document_tree::Key],
+        schema_url: Option<&'a SchemaUrl>,
+        _definitions: Option<&'a SchemaDefinitions>,
         completion_hint: Option<CompletionHint>,
-    ) -> Vec<CompletionContent> {
-        let mut completion_items = vec![];
+    ) -> BoxFuture<'b, Vec<CompletionContent>> {
+        async move {
+            let mut completion_items = vec![];
 
-        if let Some(default) = &self.default {
-            let label = format!("\"{default}\"");
-            let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-            completion_items.push(CompletionContent::new_default_value(
-                CompletionKind::String,
-                label,
-                edit,
-                schema_url,
-            ));
-        }
-
-        if let Some(enumerate) = &self.enumerate {
-            for item in enumerate {
-                let label = format!("\"{item}\"");
+            if let Some(default) = &self.default {
+                let label = format!("\"{default}\"");
                 let edit = CompletionEdit::new_literal(&label, position, completion_hint);
-                completion_items.push(CompletionContent::new_enumerate_value(
+                completion_items.push(CompletionContent::new_default_value(
                     CompletionKind::String,
                     label,
                     edit,
                     schema_url,
                 ));
             }
-            return completion_items;
+
+            if let Some(enumerate) = &self.enumerate {
+                for item in enumerate {
+                    let label = format!("\"{item}\"");
+                    let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                    completion_items.push(CompletionContent::new_enumerate_value(
+                        CompletionKind::String,
+                        label,
+                        edit,
+                        schema_url,
+                    ));
+                }
+                return completion_items;
+            }
+
+            completion_items.extend(
+                type_hint_string(position, schema_url, completion_hint)
+                    .into_iter()
+                    .filter(|completion_content| {
+                        self.default
+                            .as_ref()
+                            .map(|default| default != &completion_content.label)
+                            .unwrap_or(true)
+                    }),
+            );
+
+            completion_items
         }
-
-        completion_items.extend(
-            type_hint_string(position, schema_url, completion_hint)
-                .into_iter()
-                .filter(|completion_content| {
-                    self.default
-                        .as_ref()
-                        .map(|default| default != &completion_content.label)
-                        .unwrap_or(true)
-                }),
-        );
-
-        completion_items
+        .boxed()
     }
 }
 

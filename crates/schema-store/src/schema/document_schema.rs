@@ -3,6 +3,8 @@ use super::{FindSchemaCandidates, SchemaUrl};
 use crate::Accessor;
 use config::TomlVersion;
 use dashmap::DashMap;
+use futures::future::BoxFuture;
+use futures::FutureExt;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {
@@ -66,15 +68,20 @@ impl DocumentSchema {
 }
 
 impl FindSchemaCandidates for DocumentSchema {
-    fn find_schema_candidates(
-        &self,
-        accessors: &[Accessor],
-        definitions: &SchemaDefinitions,
-    ) -> (Vec<ValueSchema>, Vec<crate::Error>) {
-        if let Some(value_schema) = &self.value_schema {
-            value_schema.find_schema_candidates(accessors, definitions)
-        } else {
-            (Vec::with_capacity(0), Vec::with_capacity(0))
+    fn find_schema_candidates<'a: 'b, 'b>(
+        &'a self,
+        accessors: &'a [Accessor],
+        definitions: &'a SchemaDefinitions,
+    ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
+        async move {
+            if let Some(value_schema) = &self.value_schema {
+                value_schema
+                    .find_schema_candidates(accessors, definitions)
+                    .await
+            } else {
+                (Vec::with_capacity(0), Vec::with_capacity(0))
+            }
         }
+        .boxed()
     }
 }
