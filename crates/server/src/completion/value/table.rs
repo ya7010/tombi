@@ -11,8 +11,8 @@ use futures::{
     FutureExt,
 };
 use schema_store::{
-    Accessor, FindSchemaCandidates, SchemaDefinitions, SchemaStore, SchemaUrl, TableSchema,
-    ValueSchema,
+    is_online_url, Accessor, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaStore,
+    SchemaUrl, TableSchema, ValueSchema,
 };
 
 impl FindCompletionContents for document_tree::Table {
@@ -263,6 +263,29 @@ impl FindCompletionContents for document_tree::Table {
                                 if check_used_table_value(value) {
                                     continue;
                                 }
+                            }
+
+                            // NOTE: To avoid downloading unnecessary schema files,
+                            //       if the property is an unresolved online URL(like https:// or http://),
+                            //       only the overview is used to generate completion candidates.
+                            match property.value() {
+                                Referable::Ref {
+                                    reference,
+                                    title,
+                                    description,
+                                } if is_online_url(reference) => {
+                                    completion_contents.push(CompletionContent::new_key(
+                                        key_name,
+                                        position,
+                                        title.clone(),
+                                        description.clone(),
+                                        table_schema.required.as_ref(),
+                                        schema_url,
+                                        completion_hint,
+                                    ));
+                                    continue;
+                                }
+                                _ => {}
                             }
 
                             if let Ok((value_schema, new_schema)) = property

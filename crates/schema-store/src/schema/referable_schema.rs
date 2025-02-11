@@ -75,30 +75,24 @@ impl Referable<ValueSchema> {
 
                         *self = referable_schema;
                     } else {
-                        match reference.as_str() {
-                            http_url
-                                if http_url.starts_with("https://")
-                                    || http_url.starts_with("http://") =>
-                            {
-                                let schema_url = SchemaUrl::parse(http_url)?;
-                                let document_schema =
-                                    schema_store.try_load_document_schema(&schema_url).await?;
+                        if is_online_url(reference) {
+                            let schema_url = SchemaUrl::parse(reference)?;
+                            let document_schema =
+                                schema_store.try_load_document_schema(&schema_url).await?;
 
-                                if let Some(value_schema) = document_schema.value_schema {
-                                    *self = Referable::Resolved(value_schema);
-                                    new_schema =
-                                        Some((schema_url, document_schema.definitions.clone()));
-                                } else {
-                                    return Err(crate::Error::InvalidJsonSchemaReference {
-                                        reference: reference.to_owned(),
-                                    });
-                                }
-                            }
-                            _ => {
-                                return Err(crate::Error::UnsupportedReference {
+                            if let Some(value_schema) = document_schema.value_schema {
+                                *self = Referable::Resolved(value_schema);
+                                new_schema =
+                                    Some((schema_url, document_schema.definitions.clone()));
+                            } else {
+                                return Err(crate::Error::InvalidJsonSchemaReference {
                                     reference: reference.to_owned(),
-                                })
+                                });
                             }
+                        } else {
+                            return Err(crate::Error::UnsupportedReference {
+                                reference: reference.to_owned(),
+                            });
                         }
                     }
 
@@ -123,4 +117,8 @@ impl Referable<ValueSchema> {
             }
         })
     }
+}
+
+pub fn is_online_url(reference: &str) -> bool {
+    reference.starts_with("https://") || reference.starts_with("http://")
 }

@@ -35,7 +35,7 @@ use std::sync::Arc;
 
 pub use catalog_schema::CatalogSchema;
 pub use document_schema::DocumentSchema;
-pub use referable_schema::Referable;
+pub use referable_schema::{is_online_url, Referable};
 pub use value_schema::*;
 
 use crate::{Accessor, SchemaStore};

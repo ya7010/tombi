@@ -428,6 +428,31 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn pyproject_tool(
+                r#"
+                [tool.█]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok([
+                "black",
+                "cibuildwheel",
+                "hatch",
+                "mypy",
+                "pdm",
+                "poe",
+                "poetry",
+                "pyright",
+                "ruff",
+                "scikit-build",
+                "setuptools",
+                "setuptools_scm",
+                "tox",
+                "uv",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn pyproject_tool_third_party_field(
                 r#"
                 [tool.third_party]
