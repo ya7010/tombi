@@ -68,25 +68,27 @@ impl SchemaStore {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
-            if let Ok(catalog) = response.json::<crate::json::Catalog>().await {
-                let mut catalogs = self.catalogs.write().await;
-                for catalog_schema in catalog.schemas {
-                    if catalog_schema
-                        .file_match
-                        .iter()
-                        .any(|pattern| pattern.ends_with(".toml"))
-                    {
-                        catalogs.push(crate::CatalogSchema {
-                            url: catalog_schema.url,
-                            include: catalog_schema.file_match,
-                        });
+            match response.json::<crate::json::Catalog>().await {
+                Ok(catalog) => {
+                    let mut catalogs = self.catalogs.write().await;
+                    for catalog_schema in catalog.schemas {
+                        if catalog_schema
+                            .file_match
+                            .iter()
+                            .any(|pattern| pattern.ends_with(".toml"))
+                        {
+                            catalogs.push(crate::CatalogSchema {
+                                url: catalog_schema.url,
+                                include: catalog_schema.file_match,
+                            });
+                        }
                     }
+                    Ok(())
                 }
-                Ok(())
-            } else {
-                Err(crate::Error::InvalidJsonFormat {
+                Err(err) => Err(crate::Error::InvalidJsonFormat {
                     url: catalog_url.deref().clone(),
-                })
+                    reason: err.to_string(),
+                }),
             }
         } else {
             Err(crate::Error::CatalogUrlFetchFailed {
@@ -134,16 +136,18 @@ impl SchemaStore {
                     .get(schema_url.as_str())
                     .send()
                     .await
-                    .map_err(|_| crate::Error::SchemaFetchFailed {
+                    .map_err(|err| crate::Error::SchemaFetchFailed {
                         schema_url: schema_url.clone(),
+                        reason: err.to_string(),
                     })?;
 
                 let bytes =
                     response
                         .bytes()
                         .await
-                        .map_err(|_| crate::Error::SchemaFetchFailed {
+                        .map_err(|err| crate::Error::SchemaFetchFailed {
                             schema_url: schema_url.clone(),
+                            reason: err.to_string(),
                         })?;
 
                 serde_json::from_reader(std::io::Cursor::new(bytes))
@@ -154,8 +158,9 @@ impl SchemaStore {
                 })
             }
         }
-        .map_err(|_| crate::Error::SchemaFileParseFailed {
+        .map_err(|err| crate::Error::SchemaFileParseFailed {
             schema_url: schema_url.to_owned(),
+            reason: err.to_string(),
         })?;
 
         Ok(DocumentSchema::new(schema, schema_url.clone()))

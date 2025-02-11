@@ -28,11 +28,17 @@ pub enum Error {
     #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: PathBuf },
 
-    #[error("invalid schema file: \"{schema_url}\"")]
-    SchemaFileParseFailed { schema_url: SchemaUrl },
+    #[error("failed to parse schema: {schema_url}, reason: {reason}")]
+    SchemaFileParseFailed {
+        schema_url: SchemaUrl,
+        reason: String,
+    },
 
-    #[error("failed to fetch schema: {schema_url}")]
-    SchemaFetchFailed { schema_url: SchemaUrl },
+    #[error("failed to fetch schema: {schema_url}, reason: {reason}")]
+    SchemaFetchFailed {
+        schema_url: SchemaUrl,
+        reason: String,
+    },
 
     #[error("unsupported source url: {source_url}")]
     SourceUrlUnsupported { source_url: url::Url },
@@ -43,8 +49,8 @@ pub enum Error {
     #[error("invalid file path: {url}")]
     InvalidFilePath { url: url::Url },
 
-    #[error("invalid json format: {url}")]
-    InvalidJsonFormat { url: url::Url },
+    #[error("invalid json format: {url}, reason: {reason}")]
+    InvalidJsonFormat { url: url::Url, reason: String },
 
     #[error("invalid json schema reference: {reference}")]
     InvalidJsonSchemaReference { reference: String },
