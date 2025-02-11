@@ -48,7 +48,7 @@ impl GetHoverContent for document_tree::Table {
                                     .unwrap_or(false);
 
                                 if let Ok((property_schema, new_schema)) =
-                                    property.resolve(definitions, &schema_store).await
+                                    property.resolve(definitions, schema_store).await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {
@@ -69,7 +69,7 @@ impl GetHoverContent for document_tree::Table {
                                             &keys[1..],
                                             schema_url,
                                             definitions,
-                                            &schema_store,
+                                            schema_store,
                                         )
                                         .await
                                         .map(|mut hover_content| {
@@ -106,7 +106,7 @@ impl GetHoverContent for document_tree::Table {
                                         &keys[1..],
                                         schema_url,
                                         definitions,
-                                        &schema_store,
+                                        schema_store,
                                     )
                                     .await
                                     .map(|mut hover_content| {
@@ -137,7 +137,7 @@ impl GetHoverContent for document_tree::Table {
                                             if let Ok((property_schema, new_schema)) =
                                                 pattern_property
                                                     .value_mut()
-                                                    .resolve(definitions, &schema_store)
+                                                    .resolve(definitions, schema_store)
                                                     .await
                                             {
                                                 let (schema_url, definitions) =
@@ -161,7 +161,7 @@ impl GetHoverContent for document_tree::Table {
                                                         &keys[1..],
                                                         schema_url,
                                                         definitions,
-                                                        &schema_store,
+                                                        schema_store,
                                                     )
                                                     .await
                                                     .map(|mut hover_content| {
@@ -198,7 +198,7 @@ impl GetHoverContent for document_tree::Table {
                                                     &keys[1..],
                                                     schema_url,
                                                     definitions,
-                                                    &schema_store,
+                                                    schema_store,
                                                 )
                                                 .await
                                                 .map(|mut hover_content| {
@@ -235,7 +235,7 @@ impl GetHoverContent for document_tree::Table {
                                 let mut referable_schema =
                                     referable_additional_property_schema.write().await;
                                 if let Ok((additional_property_schema, new_schema)) =
-                                    referable_schema.resolve(definitions, &schema_store).await
+                                    referable_schema.resolve(definitions, schema_store).await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {
@@ -257,7 +257,7 @@ impl GetHoverContent for document_tree::Table {
                                             &keys[1..],
                                             schema_url,
                                             definitions,
-                                            &schema_store,
+                                            schema_store,
                                         )
                                         .await
                                         .map(|hover_content| {
@@ -289,7 +289,7 @@ impl GetHoverContent for document_tree::Table {
                                     &keys[1..],
                                     schema_url,
                                     definitions,
-                                    &schema_store,
+                                    schema_store,
                                 )
                                 .await
                         } else {
@@ -305,7 +305,7 @@ impl GetHoverContent for document_tree::Table {
                                 keys,
                                 schema_url,
                                 definitions,
-                                &schema_store,
+                                schema_store,
                             )
                             .await
                             .map(|mut hover_content| {
@@ -324,7 +324,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -338,7 +338,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -352,7 +352,7 @@ impl GetHoverContent for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -375,7 +375,7 @@ impl GetHoverContent for document_tree::Table {
                                     &keys[1..],
                                     schema_url,
                                     definitions,
-                                    &schema_store,
+                                    schema_store,
                                 )
                                 .await;
                         }

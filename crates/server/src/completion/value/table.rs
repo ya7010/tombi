@@ -190,7 +190,7 @@ impl FindCompletionContents for document_tree::Table {
                                                 keys,
                                                 schema_url,
                                                 definitions,
-                                                &schema_store,
+                                                schema_store,
                                                 completion_hint,
                                             )
                                             .await;
@@ -211,7 +211,7 @@ impl FindCompletionContents for document_tree::Table {
                                     referable_additional_property_schema
                                         .write()
                                         .await
-                                        .resolve(definitions, &schema_store)
+                                        .resolve(definitions, schema_store)
                                         .await
                                 {
                                     let (schema_url, definitions) =
@@ -231,7 +231,7 @@ impl FindCompletionContents for document_tree::Table {
                                         keys,
                                         schema_url,
                                         definitions,
-                                        &schema_store,
+                                        schema_store,
                                         completion_hint,
                                     )
                                     .await;
@@ -249,7 +249,7 @@ impl FindCompletionContents for document_tree::Table {
                                     keys,
                                     None,
                                     None,
-                                    &schema_store,
+                                    schema_store,
                                     completion_hint,
                                 )
                                 .await;
@@ -287,7 +287,7 @@ impl FindCompletionContents for document_tree::Table {
                                     schema_url,
                                     value_schema,
                                     definitions,
-                                    &schema_store,
+                                    schema_store,
                                 )
                                 .await
                                 else {
@@ -330,7 +330,7 @@ impl FindCompletionContents for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -345,7 +345,7 @@ impl FindCompletionContents for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -360,7 +360,7 @@ impl FindCompletionContents for document_tree::Table {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -380,7 +380,7 @@ impl FindCompletionContents for document_tree::Table {
                                 keys,
                                 None,
                                 None,
-                                &schema_store,
+                                schema_store,
                                 completion_hint,
                             )
                             .await
@@ -435,7 +435,7 @@ impl FindCompletionContents for TableSchema {
                         definitions
                     };
                     let (schema_candidates, errors) = value_schema
-                        .find_schema_candidates(accessors, definitions, &schema_store)
+                        .find_schema_candidates(accessors, definitions, schema_store)
                         .await;
 
                     for error in errors {
@@ -456,10 +456,10 @@ impl FindCompletionContents for TableSchema {
                             label,
                             position,
                             schema_candidate
-                                .detail(definitions, &schema_store, completion_hint)
+                                .detail(definitions, schema_store, completion_hint)
                                 .await,
                             schema_candidate
-                                .documentation(definitions, &schema_store, completion_hint)
+                                .documentation(definitions, schema_store, completion_hint)
                                 .await,
                             self.required.as_ref(),
                             schema_url,
@@ -579,7 +579,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                 }
                 Some(CompletionHint::InTableHeader) => {
                     if let (Some(value_schema), Some(definitions)) = (value_schema, definitions) {
-                        if count_table_or_array_schema(value_schema, definitions, &schema_store)
+                        if count_table_or_array_schema(value_schema, definitions, schema_store)
                             .await
                             == 0
                         {
@@ -678,7 +678,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
         let mut completion_contents = Vec::new();
 
         let (schema_candidates, errors) = value_schema
-            .find_schema_candidates(accessors, definitions, &schema_store)
+            .find_schema_candidates(accessors, definitions, schema_store)
             .await;
 
         for error in errors {
@@ -703,7 +703,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                 }
                 ValueSchema::Array(_) | ValueSchema::Table(_) => {
                     if matches!(completion_hint, Some(CompletionHint::InTableHeader))
-                        && count_table_or_array_schema(value_schema, definitions, &schema_store)
+                        && count_table_or_array_schema(value_schema, definitions, schema_store)
                             .await
                             == 0
                     {
@@ -736,10 +736,10 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                 key_name,
                 position,
                 schema_candidate
-                    .detail(definitions, &schema_store, completion_hint)
+                    .detail(definitions, schema_store, completion_hint)
                     .await,
                 schema_candidate
-                    .documentation(definitions, &schema_store, completion_hint)
+                    .documentation(definitions, schema_store, completion_hint)
                     .await,
                 table_schema.required.as_ref(),
                 schema_url,

@@ -77,7 +77,7 @@ impl FindSchemaCandidates for DocumentSchema {
         async move {
             if let Some(value_schema) = &self.value_schema {
                 value_schema
-                    .find_schema_candidates(accessors, definitions, &schema_store)
+                    .find_schema_candidates(accessors, definitions, schema_store)
                     .await
             } else {
                 (Vec::with_capacity(0), Vec::with_capacity(0))

@@ -44,7 +44,7 @@ where
                     keys,
                     schema_url,
                     definitions,
-                    &schema_store,
+                    schema_store,
                 )
                 .await
             {

@@ -41,7 +41,7 @@ impl Validate for LocalDate {
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }

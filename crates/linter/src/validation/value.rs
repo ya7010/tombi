@@ -16,32 +16,32 @@ impl Validate for document_tree::Value {
             match self {
                 Self::Boolean(boolean) => {
                     boolean
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::Integer(integer) => {
                     integer
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::Float(float) => {
                     float
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::String(string) => {
                     string
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::OffsetDateTime(offset_date_time) => {
                     offset_date_time
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::LocalDateTime(local_date_time) => {
                     local_date_time
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::LocalDate(local_date) => {
@@ -56,7 +56,7 @@ impl Validate for document_tree::Value {
                 }
                 Self::Array(array) => {
                     array
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                 }
                 Self::Table(table) => {

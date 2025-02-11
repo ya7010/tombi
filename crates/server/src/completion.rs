@@ -257,7 +257,7 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
                     if let Ok((value_schema, new_schema)) =
-                        referable_schema.resolve(definitions, &schema_store).await
+                        referable_schema.resolve(definitions, schema_store).await
                     {
                         if matches!(value_schema, ValueSchema::Null) {
                             continue;
@@ -271,7 +271,7 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
                         if let Some(candidate) = CompletionCandidate::title(
                             value_schema,
                             definitions,
-                            &schema_store,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -301,7 +301,7 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
                     if let Ok((value_schema, new_schema)) =
-                        referable_schema.resolve(definitions, &schema_store).await
+                        referable_schema.resolve(definitions, schema_store).await
                     {
                         if matches!(value_schema, ValueSchema::Null) {
                             continue;
@@ -316,7 +316,7 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
                         if let Some(candidate) = CompletionCandidate::description(
                             value_schema,
                             definitions,
-                            &schema_store,
+                            schema_store,
                             completion_hint,
                         )
                         .await

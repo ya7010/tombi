@@ -39,7 +39,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -53,7 +53,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -67,7 +67,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -81,7 +81,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -95,7 +95,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -109,7 +109,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -123,7 +123,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -137,7 +137,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -151,7 +151,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -165,7 +165,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -179,7 +179,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                         .map(|mut hover_content| {
@@ -218,7 +218,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -232,7 +232,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -246,7 +246,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -260,7 +260,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -274,7 +274,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -288,7 +288,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -302,7 +302,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -316,7 +316,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -330,7 +330,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -344,7 +344,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -358,7 +358,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -372,7 +372,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }
@@ -386,7 +386,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                 }

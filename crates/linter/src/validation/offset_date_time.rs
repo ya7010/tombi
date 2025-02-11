@@ -43,7 +43,7 @@ impl Validate for OffsetDateTime {
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }

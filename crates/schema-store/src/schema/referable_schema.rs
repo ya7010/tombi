@@ -110,7 +110,7 @@ impl Referable<ValueSchema> {
                         }
                     }
 
-                    self.resolve(&definitions, schema_store)
+                    self.resolve(definitions, schema_store)
                         .await
                         .map(|(value_schema, _)| (value_schema, new_schema))
                 }
@@ -120,7 +120,7 @@ impl Referable<ValueSchema> {
                         | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                             for schema in schemas.write().await.iter_mut() {
-                                schema.resolve(&definitions, schema_store).await?;
+                                schema.resolve(definitions, schema_store).await?;
                             }
                         }
                         _ => {}

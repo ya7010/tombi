@@ -40,7 +40,7 @@ impl Validate for document_tree::Array {
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -50,7 +50,7 @@ impl Validate for document_tree::Array {
                         toml_version,
                         any_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -60,7 +60,7 @@ impl Validate for document_tree::Array {
                         toml_version,
                         all_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -71,7 +71,7 @@ impl Validate for document_tree::Array {
             if let Some(items) = &array_schema.items {
                 let mut referable_schema = items.write().await;
                 if let Ok((item_schema, new_schema)) =
-                    referable_schema.resolve(definitions, &schema_store).await
+                    referable_schema.resolve(definitions, schema_store).await
                 {
                     let definitions = if let Some((_, new_definitions)) = &new_schema {
                         new_definitions
@@ -80,7 +80,7 @@ impl Validate for document_tree::Array {
                     };
                     for value in self.values() {
                         if let Err(errs) = value
-                            .validate(toml_version, item_schema, definitions, &schema_store)
+                            .validate(toml_version, item_schema, definitions, schema_store)
                             .await
                         {
                             errors.extend(errs);

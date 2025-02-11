@@ -76,7 +76,7 @@ impl<'a> Linter<'a> {
                     document_tree,
                     self.toml_version,
                     &document_schema,
-                    &self.schema_store,
+                    self.schema_store,
                 )
                 .await
                 {

@@ -213,7 +213,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await

@@ -42,7 +42,7 @@ impl Validate for document_tree::Table {
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -77,7 +77,7 @@ impl Validate for document_tree::Table {
                 if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                     matche_key = true;
                     if let Ok((value_schema, new_schema)) =
-                        property.resolve(definitions, &schema_store).await
+                        property.resolve(definitions, schema_store).await
                     {
                         let definitions = if let Some((_, new_definitions)) = &new_schema {
                             new_definitions
@@ -85,7 +85,7 @@ impl Validate for document_tree::Table {
                             definitions
                         };
                         if let Err(errs) = value
-                            .validate(toml_version, value_schema, definitions, &schema_store)
+                            .validate(toml_version, value_schema, definitions, schema_store)
                             .await
                         {
                             errors.extend(errs);
@@ -104,7 +104,7 @@ impl Validate for document_tree::Table {
                             matche_key = true;
                             if let Ok((pattern_property, new_schema)) = refferable_pattern_property
                                 .value_mut()
-                                .resolve(definitions, &schema_store)
+                                .resolve(definitions, schema_store)
                                 .await
                             {
                                 let definitions = if let Some((_, new_definitions)) = &new_schema {
@@ -118,7 +118,7 @@ impl Validate for document_tree::Table {
                                         toml_version,
                                         pattern_property,
                                         definitions,
-                                        &schema_store,
+                                        schema_store,
                                     )
                                     .await
                                 {
@@ -146,7 +146,7 @@ impl Validate for document_tree::Table {
                     {
                         let mut referable_schema = additional_property_schema.write().await;
                         if let Ok((value_schema, new_schema)) =
-                            referable_schema.resolve(definitions, &schema_store).await
+                            referable_schema.resolve(definitions, schema_store).await
                         {
                             let definitions = if let Some((_, new_definitions)) = &new_schema {
                                 new_definitions
@@ -155,7 +155,7 @@ impl Validate for document_tree::Table {
                             };
 
                             if let Err(errs) = value
-                                .validate(toml_version, &value_schema, definitions, &schema_store)
+                                .validate(toml_version, value_schema, definitions, schema_store)
                                 .await
                             {
                                 errors.extend(errs);

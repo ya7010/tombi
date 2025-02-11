@@ -63,7 +63,7 @@ impl FindSchemaCandidates for ArraySchema {
 
             let mut referable_schema = items.write().await;
             if let Ok((value_schema, new_schema)) =
-                referable_schema.resolve(definitions, &schema_store).await
+                referable_schema.resolve(definitions, schema_store).await
             {
                 let definitions = if let Some((_, definitions)) = &new_schema {
                     definitions
@@ -71,7 +71,7 @@ impl FindSchemaCandidates for ArraySchema {
                     definitions
                 };
                 let (mut item_candidates, mut item_errors) = value_schema
-                    .find_schema_candidates(&accessors[1..], definitions, &schema_store)
+                    .find_schema_candidates(&accessors[1..], definitions, schema_store)
                     .await;
                 candidates.append(&mut item_candidates);
                 errors.append(&mut item_errors);

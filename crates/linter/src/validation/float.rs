@@ -41,7 +41,7 @@ impl Validate for document_tree::Float {
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -51,7 +51,7 @@ impl Validate for document_tree::Float {
                         toml_version,
                         any_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -61,7 +61,7 @@ impl Validate for document_tree::Float {
                         toml_version,
                         all_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }

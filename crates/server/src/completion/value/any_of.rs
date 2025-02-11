@@ -65,7 +65,7 @@ where
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await;
@@ -77,12 +77,12 @@ where
         for completion_item in completion_items.iter_mut() {
             if completion_item.detail.is_none() {
                 completion_item.detail = any_of_schema
-                    .detail(definitions, &schema_store, completion_hint)
+                    .detail(definitions, schema_store, completion_hint)
                     .await;
             }
             if completion_item.documentation.is_none() {
                 completion_item.documentation = any_of_schema
-                    .documentation(definitions, &schema_store, completion_hint)
+                    .documentation(definitions, schema_store, completion_hint)
                     .await;
             }
         }

@@ -32,7 +32,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                         )
                         .await
                         .map(|mut hover_content| {
@@ -50,7 +50,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -64,7 +64,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }
@@ -78,7 +78,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                 }

@@ -68,7 +68,7 @@ impl FindCompletionContents for document_tree::Array {
                                             keys,
                                             schema_url,
                                             definitions,
-                                            &schema_store,
+                                            schema_store,
                                             completion_hint,
                                         )
                                         .await;
@@ -80,7 +80,7 @@ impl FindCompletionContents for document_tree::Array {
                         if let Ok((item_schema, new_schema)) = items
                             .write()
                             .await
-                            .resolve(definitions, &schema_store)
+                            .resolve(definitions, schema_store)
                             .await
                         {
                             let (schema_url, definitions) =
@@ -102,7 +102,7 @@ impl FindCompletionContents for document_tree::Array {
                                     keys,
                                     schema_url,
                                     definitions,
-                                    &schema_store,
+                                    schema_store,
                                     if self.kind() == ArrayKind::Array {
                                         Some(CompletionHint::InArray)
                                     } else {
@@ -125,7 +125,7 @@ impl FindCompletionContents for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -140,7 +140,7 @@ impl FindCompletionContents for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -155,7 +155,7 @@ impl FindCompletionContents for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
-                        &schema_store,
+                        schema_store,
                         completion_hint,
                     )
                     .await
@@ -200,7 +200,7 @@ impl FindCompletionContents for document_tree::Array {
                                     keys,
                                     None,
                                     None,
-                                    &schema_store,
+                                    schema_store,
                                     completion_hint,
                                 )
                                 .await;

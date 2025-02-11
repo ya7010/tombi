@@ -116,7 +116,7 @@ impl FindSchemaCandidates for TableSchema {
                 for mut property in self.properties.iter_mut() {
                     if let Ok((value_schema, new_schema)) = property
                         .value_mut()
-                        .resolve(definitions, &schema_store)
+                        .resolve(definitions, schema_store)
                         .await
                     {
                         let definitions = if let Some((_, definitions)) = &new_schema {
@@ -137,7 +137,7 @@ impl FindSchemaCandidates for TableSchema {
 
             if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
                 if let Ok((value_schema, new_schema)) =
-                    value.resolve(definitions, &schema_store).await
+                    value.resolve(definitions, schema_store).await
                 {
                     let definitions = if let Some((_, definitions)) = &new_schema {
                         definitions
@@ -146,7 +146,7 @@ impl FindSchemaCandidates for TableSchema {
                     };
 
                     return value_schema
-                        .find_schema_candidates(&accessors[1..], definitions, &schema_store)
+                        .find_schema_candidates(&accessors[1..], definitions, schema_store)
                         .await;
                 }
             }

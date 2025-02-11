@@ -75,7 +75,7 @@ impl FindCompletionContents for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -90,7 +90,7 @@ impl FindCompletionContents for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
-                            &schema_store,
+                            schema_store,
                             completion_hint,
                         )
                         .await
@@ -106,7 +106,7 @@ impl FindCompletionContents for document_tree::Value {
                                 keys,
                                 schema_url,
                                 definitions,
-                                &schema_store,
+                                schema_store,
                                 completion_hint,
                             )
                             .await
@@ -204,7 +204,7 @@ impl CompletionCandidate for ValueSchema {
                 }
                 Self::OneOf(one_of) => {
                     one_of
-                        .title(definitions, &schema_store, completion_hint)
+                        .title(definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::AnyOf(any_of) => {
@@ -245,7 +245,7 @@ impl CompletionCandidate for ValueSchema {
                 }
                 Self::OneOf(one_of) => {
                     one_of
-                        .description(definitions, &schema_store, completion_hint)
+                        .description(definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::AnyOf(any_of) => {

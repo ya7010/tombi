@@ -220,7 +220,7 @@ impl ValueSchema {
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                     for referable_schema in schemas.write().await.iter_mut() {
                         if let Ok((value_schema, new_schema)) =
-                            referable_schema.resolve(&definitions, &schema_store).await
+                            referable_schema.resolve(definitions, schema_store).await
                         {
                             let definitions = if let Some((_, definitions)) = &new_schema {
                                 definitions
@@ -229,7 +229,7 @@ impl ValueSchema {
                             };
                             matched_schemas.extend(
                                 value_schema
-                                    .match_flattened_schemas(condition, &definitions, &schema_store)
+                                    .match_flattened_schemas(condition, definitions, schema_store)
                                     .await,
                             )
                         }
@@ -266,7 +266,7 @@ impl ValueSchema {
                         .iter_mut()
                         .map(|referable_schema| async {
                             if let Ok((value_schema, new_schema)) =
-                                referable_schema.resolve(&definitions, &schema_store).await
+                                referable_schema.resolve(definitions, schema_store).await
                             {
                                 let definitions = if let Some((_, definitions)) = &new_schema {
                                     definitions
@@ -291,7 +291,7 @@ impl ValueSchema {
                         .iter_mut()
                         .map(|referable_schema| async {
                             if let Ok((value_schema, new_schema)) =
-                                referable_schema.resolve(&definitions, &schema_store).await
+                                referable_schema.resolve(definitions, schema_store).await
                             {
                                 let definitions = if let Some((_, definitions)) = &new_schema {
                                     definitions

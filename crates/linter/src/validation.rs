@@ -44,7 +44,7 @@ pub fn validate<'a: 'b, 'b>(
                     toml_version,
                     value_schema,
                     &document_schema.definitions,
-                    &schema_store,
+                    schema_store,
                 )
                 .await?;
         }
@@ -73,7 +73,7 @@ where
         let mut schemas = one_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
             let Ok((value_schema, new_schema)) =
-                referable_schema.resolve(definitions, &schema_store).await
+                referable_schema.resolve(definitions, schema_store).await
             else {
                 continue;
             };
@@ -132,7 +132,7 @@ where
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                     {
@@ -149,7 +149,7 @@ where
                         toml_version,
                         any_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                     {
@@ -166,7 +166,7 @@ where
                         toml_version,
                         all_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                     {
@@ -211,7 +211,7 @@ where
         let mut schemas = any_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
             let Ok((value_schema, new_schema)) =
-                referable_schema.resolve(definitions, &schema_store).await
+                referable_schema.resolve(definitions, schema_store).await
             else {
                 continue;
             };
@@ -235,7 +235,7 @@ where
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
                     is_type_match = true;
                     match value
-                        .validate(toml_version, value_schema, definitions, &schema_store)
+                        .validate(toml_version, value_schema, definitions, schema_store)
                         .await
                     {
                         Ok(()) => {
@@ -269,7 +269,7 @@ where
                         toml_version,
                         one_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                     {
@@ -285,7 +285,7 @@ where
                         toml_version,
                         any_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                     {
@@ -301,7 +301,7 @@ where
                         toml_version,
                         all_of_schema,
                         definitions,
-                        &schema_store,
+                        schema_store,
                     )
                     .await
                     {
@@ -351,7 +351,7 @@ where
             };
 
             match value
-                .validate(toml_version, value_schema, definitions, &schema_store)
+                .validate(toml_version, value_schema, definitions, schema_store)
                 .await
             {
                 Ok(()) => {}
