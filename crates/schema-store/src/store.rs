@@ -1,5 +1,5 @@
+use ahash::AHashMap;
 use config::SchemaCatalogItem;
-use dashmap::DashMap;
 use itertools::Either;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -9,7 +9,7 @@ use crate::{json::CatalogUrl, DocumentSchema, SchemaUrl};
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    schemas: DashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>,
+    schemas: Arc<RwLock<AHashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>>>,
     catalogs: Arc<RwLock<Vec<crate::CatalogSchema>>>,
 }
 
@@ -17,7 +17,7 @@ impl SchemaStore {
     pub fn new() -> Self {
         Self {
             http_client: reqwest::Client::new(),
-            schemas: DashMap::new(),
+            schemas: Arc::new(RwLock::new(AHashMap::new())),
             catalogs: Arc::new(RwLock::new(Vec::new())),
         }
     }
@@ -46,10 +46,13 @@ impl SchemaStore {
     }
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
-        if self.schemas.contains_key(schema_url) {
+        if self.schemas.read().await.contains_key(schema_url) {
             let document_schema = self.try_get_schema_from_url(schema_url).await?;
 
-            self.schemas.insert(schema_url.clone(), Ok(document_schema));
+            self.schemas
+                .write()
+                .await
+                .insert(schema_url.clone(), Ok(document_schema));
             tracing::debug!("update schema: {}", schema_url);
 
             Ok(true)
@@ -160,20 +163,21 @@ impl SchemaStore {
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {
-        match self.schemas.get(schema_url) {
-            Some(document_schema) => match document_schema.value() {
+        if let Some(document_schema) = self.schemas.read().await.get(schema_url) {
+            return match document_schema {
                 Ok(document_schema) => Ok(document_schema.clone()),
                 Err(err) => Err(err.clone()),
-            },
-            None => {
-                let document_schema = self.try_get_schema_from_url(schema_url).await?;
-
-                self.schemas
-                    .insert(schema_url.to_owned(), Ok(document_schema.clone()));
-
-                Ok(document_schema)
-            }
+            };
         }
+
+        let document_schema = self.try_get_schema_from_url(schema_url).await?;
+
+        self.schemas
+            .write()
+            .await
+            .insert(schema_url.to_owned(), Ok(document_schema.clone()));
+
+        Ok(document_schema)
     }
 
     pub async fn try_get_source_schema_from_url(
