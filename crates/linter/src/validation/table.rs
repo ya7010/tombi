@@ -94,16 +94,16 @@ impl Validate for document_tree::Table {
                 }
 
                 if let Some(pattern_properties) = &table_schema.pattern_properties {
-                    for mut pattern_property in pattern_properties.iter_mut() {
-                        let property_key = pattern_property.key();
+                    for mut refferable_pattern_property in pattern_properties.iter_mut() {
+                        let property_key = refferable_pattern_property.key();
                         let Ok(pattern) = regex::Regex::new(property_key) else {
                             tracing::error!("Invalid regex pattern property: {}", property_key);
                             continue;
                         };
                         if pattern.is_match(&accessor_raw_text) {
                             matche_key = true;
-                            let property_schema = pattern_property.value_mut();
-                            if let Ok((value_schema, new_schema)) = property_schema
+                            if let Ok((pattern_property, new_schema)) = refferable_pattern_property
+                                .value_mut()
                                 .resolve(definitions, &schema_store)
                                 .await
                             {
@@ -116,7 +116,7 @@ impl Validate for document_tree::Table {
                                 if let Err(errs) = value
                                     .validate(
                                         toml_version,
-                                        value_schema,
+                                        pattern_property,
                                         definitions,
                                         &schema_store,
                                     )
@@ -125,6 +125,18 @@ impl Validate for document_tree::Table {
                                     errors.extend(errs);
                                 }
                             }
+                        } else if !table_schema.additional_properties {
+                            errors.push(crate::Error {
+                                kind: crate::ErrorKind::PatternProperty {
+                                    patterns: Patterns(
+                                        pattern_properties
+                                            .iter()
+                                            .map(|p| p.key().to_string())
+                                            .collect(),
+                                    ),
+                                },
+                                range: key.range(),
+                            });
                         }
                     }
                 }
@@ -133,9 +145,8 @@ impl Validate for document_tree::Table {
                         &table_schema.additional_property_schema
                     {
                         let mut referable_schema = additional_property_schema.write().await;
-                        if let Ok((value_schema, new_schema)) = referable_schema
-                            .resolve(definitions, &schema_store)
-                            .await
+                        if let Ok((value_schema, new_schema)) =
+                            referable_schema.resolve(definitions, &schema_store).await
                         {
                             let definitions = if let Some((_, new_definitions)) = &new_schema {
                                 new_definitions
@@ -150,21 +161,6 @@ impl Validate for document_tree::Table {
                                 errors.extend(errs);
                             }
                         }
-                        continue;
-                    }
-
-                    if let Some(pattern_properties) = &table_schema.pattern_properties {
-                        errors.push(crate::Error {
-                            kind: crate::ErrorKind::PatternProperty {
-                                patterns: Patterns(
-                                    pattern_properties
-                                        .iter()
-                                        .map(|p| p.key().to_string())
-                                        .collect(),
-                                ),
-                            },
-                            range: key.range(),
-                        });
                         continue;
                     }
                     if !table_schema.additional_properties {
