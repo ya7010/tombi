@@ -1,4 +1,4 @@
-use futures::{future::BoxFuture, FutureExt};
+use futures::future::BoxFuture;
 
 use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
