@@ -155,6 +155,10 @@ pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
 
             let Some(config) = Config::try_from_path(&pyproject_toml_path)? else {
                 tracing::debug!("No [tool.tombi] found in {:?}", &config_path);
+
+                if !current_dir.pop() {
+                    break;
+                }
                 continue;
             };
             return Ok((config, Some(pyproject_toml_path)));

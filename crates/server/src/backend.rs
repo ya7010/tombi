@@ -24,7 +24,6 @@ use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use document_tree::TryIntoDocumentTree;
 use syntax::SyntaxNode;
-use tokio::sync::RwLock;
 use tower_lsp::{
     lsp_types::{
         CompletionParams, CompletionResponse, DidChangeConfigurationParams,
@@ -42,7 +41,7 @@ pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
     document_sources: DashMap<Url, DocumentSource>,
-    config: Arc<RwLock<Config>>,
+    config: Arc<tokio::sync::RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
 
@@ -52,7 +51,7 @@ impl Backend {
         Self {
             client,
             document_sources: Default::default(),
-            config: Arc::new(RwLock::new(match config::load() {
+            config: Arc::new(tokio::sync::RwLock::new(match config::load() {
                 Ok(config) => config,
                 Err(err) => {
                     tracing::error!("{err}");
