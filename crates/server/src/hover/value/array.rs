@@ -33,9 +33,8 @@ impl GetHoverContent for document_tree::Array {
 
                             if let Some(items) = &array_schema.items {
                                 let mut referable_schema = items.write().await;
-                                if let Ok((item_schema, new_schema)) = referable_schema
-                                    .resolve(definitions, &schema_store)
-                                    .await
+                                if let Ok((item_schema, new_schema)) =
+                                    referable_schema.resolve(definitions, &schema_store).await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {

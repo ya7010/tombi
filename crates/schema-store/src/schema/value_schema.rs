@@ -219,9 +219,8 @@ impl ValueSchema {
                 | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                     for referable_schema in schemas.write().await.iter_mut() {
-                        if let Ok((value_schema, new_schema)) = referable_schema
-                            .resolve(&definitions, &schema_store)
-                            .await
+                        if let Ok((value_schema, new_schema)) =
+                            referable_schema.resolve(&definitions, &schema_store).await
                         {
                             let definitions = if let Some((_, definitions)) = &new_schema {
                                 definitions
@@ -266,9 +265,8 @@ impl ValueSchema {
                         .await
                         .iter_mut()
                         .map(|referable_schema| async {
-                            if let Ok((value_schema, new_schema)) = referable_schema
-                                .resolve(&definitions, &schema_store)
-                                .await
+                            if let Ok((value_schema, new_schema)) =
+                                referable_schema.resolve(&definitions, &schema_store).await
                             {
                                 let definitions = if let Some((_, definitions)) = &new_schema {
                                     definitions
@@ -292,9 +290,8 @@ impl ValueSchema {
                         .await
                         .iter_mut()
                         .map(|referable_schema| async {
-                            if let Ok((value_schema, new_schema)) = referable_schema
-                                .resolve(&definitions, &schema_store)
-                                .await
+                            if let Ok((value_schema, new_schema)) =
+                                referable_schema.resolve(&definitions, &schema_store).await
                             {
                                 let definitions = if let Some((_, definitions)) = &new_schema {
                                     definitions
@@ -350,9 +347,8 @@ impl FindSchemaCandidates for ValueSchema {
                     let mut errors = Vec::new();
 
                     for referable_schema in schemas.write().await.iter_mut() {
-                        let Ok((value_schema, new_schema)) = referable_schema
-                            .resolve(definitions, schema_store)
-                            .await
+                        let Ok((value_schema, new_schema)) =
+                            referable_schema.resolve(definitions, schema_store).await
                         else {
                             continue;
                         };

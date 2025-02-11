@@ -23,9 +23,8 @@ where
         let mut value_type_set = indexmap::IndexSet::new();
         let mut schema = None;
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
-            let Ok((value_schema, new_schema)) = referable_schema
-                .resolve(definitions, schema_store)
-                .await
+            let Ok((value_schema, new_schema)) =
+                referable_schema.resolve(definitions, schema_store).await
             else {
                 return None;
             };
@@ -115,9 +114,8 @@ impl GetHoverContent for schema_store::AllOfSchema {
             let mut schemas = self.schemas.write().await;
 
             for referable_schema in schemas.iter_mut() {
-                let Ok((value_schema, _)) = referable_schema
-                    .resolve(definitions, schema_store)
-                    .await
+                let Ok((value_schema, _)) =
+                    referable_schema.resolve(definitions, schema_store).await
                 else {
                     return None;
                 };

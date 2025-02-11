@@ -72,9 +72,8 @@ where
 
         let mut schemas = one_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok((value_schema, new_schema)) = referable_schema
-                .resolve(definitions, &schema_store)
-                .await
+            let Ok((value_schema, new_schema)) =
+                referable_schema.resolve(definitions, &schema_store).await
             else {
                 continue;
             };
@@ -211,9 +210,8 @@ where
 
         let mut schemas = any_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok((value_schema, new_schema)) = referable_schema
-                .resolve(definitions, &schema_store)
-                .await
+            let Ok((value_schema, new_schema)) =
+                referable_schema.resolve(definitions, &schema_store).await
             else {
                 continue;
             };
@@ -340,9 +338,8 @@ where
 
         let mut schemas = all_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok((value_schema, new_schema)) = referable_schema
-                .resolve(definitions, schema_store)
-                .await
+            let Ok((value_schema, new_schema)) =
+                referable_schema.resolve(definitions, schema_store).await
             else {
                 continue;
             };

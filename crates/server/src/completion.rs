@@ -256,9 +256,8 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok((value_schema, new_schema)) = referable_schema
-                        .resolve(definitions, &schema_store)
-                        .await
+                    if let Ok((value_schema, new_schema)) =
+                        referable_schema.resolve(definitions, &schema_store).await
                     {
                         if matches!(value_schema, ValueSchema::Null) {
                             continue;
@@ -301,9 +300,8 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok((value_schema, new_schema)) = referable_schema
-                        .resolve(definitions, &schema_store)
-                        .await
+                    if let Ok((value_schema, new_schema)) =
+                        referable_schema.resolve(definitions, &schema_store).await
                     {
                         if matches!(value_schema, ValueSchema::Null) {
                             continue;

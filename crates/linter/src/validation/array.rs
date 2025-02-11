@@ -70,9 +70,8 @@ impl Validate for document_tree::Array {
             let mut errors = vec![];
             if let Some(items) = &array_schema.items {
                 let mut referable_schema = items.write().await;
-                if let Ok((item_schema, new_schema)) = referable_schema
-                    .resolve(definitions, &schema_store)
-                    .await
+                if let Ok((item_schema, new_schema)) =
+                    referable_schema.resolve(definitions, &schema_store).await
                 {
                     let definitions = if let Some((_, new_definitions)) = &new_schema {
                         new_definitions

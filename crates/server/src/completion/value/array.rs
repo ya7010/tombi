@@ -46,11 +46,8 @@ impl FindCompletionContents for document_tree::Array {
                         if value.range().contains(position) || value.range().end() == position {
                             let accessor = Accessor::Index(index);
                             if let Some(items) = &array_schema.items {
-                                if let Ok((item_schema, new_schema)) = items
-                                    .write()
-                                    .await
-                                    .resolve(definitions, schema_store)
-                                    .await
+                                if let Ok((item_schema, new_schema)) =
+                                    items.write().await.resolve(definitions, schema_store).await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {

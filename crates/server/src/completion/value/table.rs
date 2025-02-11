@@ -499,11 +499,8 @@ async fn count_table_or_array_schema(
                 match schema {
                     ValueSchema::Array(array_schema) => {
                         if let Some(item) = array_schema.items {
-                            if let Ok((value_schema, new_schema)) = item
-                                .write()
-                                .await
-                                .resolve(definitions, schema_store)
-                                .await
+                            if let Ok((value_schema, new_schema)) =
+                                item.write().await.resolve(definitions, schema_store).await
                             {
                                 let definitions = if let Some((_, definitions)) = &new_schema {
                                     definitions
