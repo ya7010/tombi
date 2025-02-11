@@ -220,6 +220,11 @@ impl GetHoverContent for document_tree::Table {
                                                     }
                                                 });
                                         }
+                                    } else {
+                                        tracing::error!(
+                                            "Invalid regex pattern property: {}",
+                                            property_key
+                                        );
                                     };
                                 }
                             }
@@ -230,9 +235,7 @@ impl GetHoverContent for document_tree::Table {
                                 let mut referable_schema =
                                     referable_additional_property_schema.write().await;
                                 if let Ok((additional_property_schema, new_schema)) =
-                                    referable_schema
-                                        .resolve(definitions, &schema_store)
-                                        .await
+                                    referable_schema.resolve(definitions, &schema_store).await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {
