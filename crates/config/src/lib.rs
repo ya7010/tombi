@@ -134,7 +134,7 @@ pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
             tracing::debug!("\"{}\" found at {:?}", CONFIG_FILENAME, &config_path);
 
             let Some(config) = Config::try_from_path(&config_path)? else {
-                unreachable!("tombi.toml must be Some(config)")
+                unreachable!("tombi.toml should always be parsed successfully.");
             };
 
             let config_dirpath = match config_path.parent() {
