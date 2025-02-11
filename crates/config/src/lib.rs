@@ -43,7 +43,7 @@ pub struct Config {
     pub lint: Option<LintOptions>,
 
     /// # Language server options.
-    pub server: Option<server::ServerOptions>,
+    pub server: Option<ServerOptions>,
 
     /// # Schema options.
     pub schema: Option<SchemaOptions>,
