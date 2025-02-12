@@ -3,7 +3,7 @@ use config::TomlVersion;
 use schemars::{generate::SchemaSettings, SchemaGenerator};
 
 pub fn run() -> Result<(), anyhow::Error> {
-    let settings = SchemaSettings::draft2020_12();
+    let settings = SchemaSettings::draft07();
     let generator = SchemaGenerator::new(settings);
 
     std::fs::write(
