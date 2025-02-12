@@ -22,5 +22,9 @@ path = "schemas/cargo.schema.json"
 include = ["Cargo.toml"]
 
 [[schemas]]
+path = "schemas/pyproject.schema.json"
+include = ["pyproject.toml"]
+
+[[schemas]]
 path = "schemas/type-test.schema.json"
 include = ["type-test.toml"]
