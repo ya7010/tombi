@@ -66,13 +66,13 @@ export default function Home() {
           <div class="flex gap-4 justify-center">
             <a
               href="/documentation/getting-started/installation"
-              class="px-8 py-4 bg-tombi-900 text-white rounded-xl hover:bg-tombi-800 transition-colors shadow-lg hover:shadow-xl"
+              class="px-8 py-4 bg-tombi-900 text-white rounded-xl hover:bg-tombi-800 transition-colors shadow-lg hover:shadow-xl no-underline"
             >
               Get Started
             </a>
             <a
               href="/documentation"
-              class="px-8 py-4 bg-white dark:bg-tombi-900/30 border border-tombi-200 dark:border-tombi-700 rounded-xl hover:bg-tombi-50 dark:hover:bg-tombi-900/50 transition-colors text-tombi-900 dark:text-white shadow-lg hover:shadow-xl"
+              class="px-8 py-4 bg-white dark:bg-tombi-900/30 border border-tombi-200 dark:border-tombi-700 rounded-xl hover:bg-tombi-50 dark:hover:bg-tombi-900/50 transition-colors text-tombi-900 dark:text-white shadow-lg hover:shadow-xl no-underline"
             >
               View Docs
             </a>
