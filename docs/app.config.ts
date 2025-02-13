@@ -10,8 +10,8 @@ export default defineConfig({
       mdx.withImports({})({
         jsx: true,
         jsxImportSource: "solid-js",
-        providerImportSource: "solid-mdx"
-      })
-    ]
-  }
+        providerImportSource: "solid-mdx",
+      }),
+    ],
+  },
 });
