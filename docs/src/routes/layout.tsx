@@ -1,4 +1,4 @@
-import { Header } from "~/components/Header";
+import { Header } from "~/components/header/index";
 
 export default function Layout(props: { children: any }) {
   return (
