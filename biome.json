@@ -1,4 +1,8 @@
 {
+  "files": {
+    "include": ["docs/**/*.ts", "editors/vscode/**/*.ts", "typescript/**/*.ts"],
+    "ignore": ["**/*.js"]
+  },
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2
