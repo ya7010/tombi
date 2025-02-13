@@ -1,0 +1,65 @@
+# Formatter Overview
+
+Tombi's formatter ensures consistent styling of your TOML files by automatically applying formatting rules.
+
+## Key Features
+
+## Basic Example
+
+Before formatting:
+
+```toml
+[package]
+name="my-package"
+version="1.0.0"
+authors=["John Doe <john@example.com>", "Jane Smith <jane@example.com>"]
+description="""
+A multi-line
+description of
+the package
+"""
+```
+
+After formatting:
+
+```toml
+[package]
+name = "my-package"
+version = "1.0.0"
+authors = [
+  "John Doe <john@example.com>",
+  "Jane Smith <jane@example.com>",
+]
+description = """
+A multi-line
+description of
+the package
+"""
+```
+
+## Usage
+
+### Command Line
+
+```bash
+# Format a single file
+tombi fmt path/to/file.toml
+
+# Format multiple files
+tombi fmt path/to/file1.toml path/to/file2.toml
+
+# Format all TOML files in a directory
+tombi fmt .
+```
+
+### Editor Integration
+
+Tombi provides extensions for popular editors:
+
+- VS Code
+
+## Next Steps
+
+- Learn about [CLI Usage](/formatter/cli-usage)
+- Configure [Formatting Options](/formatter/configuration)
+- Understand [Magic Trailing Comma](/formatter/magic-trailing-comma)
