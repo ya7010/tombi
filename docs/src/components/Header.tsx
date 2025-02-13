@@ -2,23 +2,21 @@ import { A } from "@solidjs/router";
 
 export function Header() {
   return (
-    <header class="bg-white shadow-sm">
-      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <A href="/" class="text-xl font-bold">
-                Tombi
-              </A>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <A
-                href="/documentation"
-                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Documentation
-              </A>
-            </div>
+    <header class="fixed top-0 left-0 right-0 bg-[rgb(0,0,102)] shadow-lg z-50">
+      <nav class="max-w-7xl mx-auto">
+        <div class="flex h-20">
+          <div class="flex-shrink-0 flex items-center px-4">
+            <A href="/" class="flex items-center">
+              <img src="/icon.svg" alt="Tombi Logo" class="h-16 w-16" />
+            </A>
+          </div>
+          <div class="flex items-center px-8 space-x-8">
+            <A
+              href="/documentation"
+              class="text-gray-300 hover:text-white text-base font-medium"
+            >
+              Documentation
+            </A>
           </div>
         </div>
       </nav>
