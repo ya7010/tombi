@@ -1,43 +1,48 @@
 import { Title } from "@solidjs/meta";
-import styles from "./index.module.css";
 
 export default function Home() {
   return (
-    <div class={styles.container}>
+    <div class="max-w-6xl mx-auto px-4 py-12">
       <Title>Tombi - Modern TOML Formatter</Title>
 
-      <section class={styles.hero}>
-        <h1 class={styles.title}>Tombi</h1>
-        <p class={styles.subtitle}>Next Generation TOML Formatter</p>
+      <section class="text-center mb-16">
+        <h1 class="text-5xl font-bold mb-4">Tombi</h1>
+        <p class="text-xl text-gray-600 mb-12">Next Generation TOML Formatter</p>
 
-        <div class={styles.features}>
-          <div class={styles.feature}>
-            <h3>⚡️ Fast</h3>
-            <p>High-performance formatter implemented in Rust</p>
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+          <div class="p-6 rounded-lg bg-gray-50">
+            <h3 class="text-xl font-semibold mb-2">⚡️ Fast</h3>
+            <p class="text-gray-600">High-performance formatter implemented in Rust</p>
           </div>
-          <div class={styles.feature}>
-            <h3>🎯 Accurate</h3>
-            <p>Full compliance with TOML specification</p>
+          <div class="p-6 rounded-lg bg-gray-50">
+            <h3 class="text-xl font-semibold mb-2">🎯 Accurate</h3>
+            <p class="text-gray-600">Full compliance with TOML specification</p>
           </div>
-          <div class={styles.feature}>
-            <h3>🛠 Customizable</h3>
-            <p>Flexible configuration for your project needs</p>
+          <div class="p-6 rounded-lg bg-gray-50">
+            <h3 class="text-xl font-semibold mb-2">🛠 Customizable</h3>
+            <p class="text-gray-600">Flexible configuration for your project needs</p>
           </div>
         </div>
 
-        <div class={styles.cta}>
-          <a href="/documentation/getting-started/installation" class={styles.primaryButton}>
+        <div class="flex gap-4 justify-center">
+          <a
+            href="/documentation/getting-started/installation"
+            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
             Get Started
           </a>
-          <a href="/documentation" class={styles.secondaryButton}>
+          <a
+            href="/documentation"
+            class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
             View Docs
           </a>
         </div>
       </section>
 
-      <section class={styles.demo}>
-        <h2>Simple and Easy to Use</h2>
-        <pre class={styles.codeBlock}>
+      <section class="max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-8">Simple and Easy to Use</h2>
+        <pre class="p-6 bg-gray-900 text-white rounded-lg overflow-x-auto">
           <code>{`# Before
 title="TOML Example"
 [package]

@@ -18,5 +18,8 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "unocss": "^65.4.3"
   }
 }
