@@ -57,7 +57,7 @@ export function Header() {
             <button
               id="dark-mode-toggle"
               onClick={toggleDarkMode}
-              class="text-white hover:text-[#FFFFFF]/80 p-2 rounded-lg transition-colors"
+              class="text-[#FFFFFF] hover:text-[#FFFFFF]/80 p-2 transition-colors bg-transparent border-0 outline-none"
               aria-label="Toggle dark mode"
             >
               {isDark() ? (
@@ -97,7 +97,7 @@ export function Header() {
             </a>
             <button
               onClick={toggleMenu}
-              class="md:hidden text-[#FFFFFF] hover:text-[#FFFFFF]/80 p-2 rounded-lg transition-colors"
+              class="md:hidden text-[#FFFFFF] hover:text-[#FFFFFF]/80 p-2 transition-colors bg-transparent border-0 outline-none"
               aria-label="Toggle menu"
             >
               <svg
