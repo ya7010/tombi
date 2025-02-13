@@ -37,7 +37,7 @@ export function Header() {
   };
 
   return (
-    <header class="fixed top-0 left-0 right-0 bg-[rgb(0,0,102)] shadow-lg z-50">
+    <header class="fixed top-0 left-0 right-0 bg-tombi-900 shadow-lg z-50">
       <nav class="max-w-7xl mx-auto">
         <div class="flex justify-between h-20">
           <div class="flex items-center">
@@ -58,7 +58,7 @@ export function Header() {
             <div class="hidden md:flex items-center px-8 space-x-8">
               <A
                 href="/documentation"
-                class="text-[#FFFFFF] hover:text-[#FFFFFF]/80 text-lg font-medium no-underline"
+                class="text-white hover:text-white/80 text-lg font-medium no-underline"
               >
                 Docs
               </A>
@@ -75,7 +75,7 @@ export function Header() {
                   setTimeout(() => searchInputRef?.focus(), 100);
                 }
               }}
-              class="md:hidden flex items-center justify-center p-2 text-[#FFFFFF] hover:text-[#FFFFFF]/80 transition-colors bg-transparent border-0 outline-none"
+              class="md:hidden flex items-center justify-center p-2 text-white hover:text-white/80 transition-colors bg-transparent border-0 outline-none"
               aria-label={isSearchOpen() ? "Close search" : "Search"}
             >
               {isSearchOpen() ? (
@@ -91,11 +91,11 @@ export function Header() {
             {/* デスクトップ用検索バー */}
             <div class={`${
               isSearchOpen()
-                ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-[rgb(0,0,102)]'
+                ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-tombi-900'
                 : 'hidden'
               } md:static md:flex md:items-center md:w-full md:max-w-[320px] md:mx-auto`}>
               <div class="relative w-full">
-                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.6)]">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -104,9 +104,9 @@ export function Header() {
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search"
-                  class="w-full bg-[rgba(255,255,255,0.1)] text-[#FFFFFF] placeholder-[rgba(255,255,255,0.6)] rounded-lg pl-10 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-[rgba(255,255,255,0.3)] transition-all"
+                  class="w-full bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
                 />
-                <div class="absolute right-2 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.6)] text-sm">
+                <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 text-sm">
                   ⌘K
                 </div>
               </div>
@@ -118,7 +118,7 @@ export function Header() {
             <button
               id="dark-mode-toggle"
               onClick={toggleDarkMode}
-              class="text-[#FFFFFF] hover:text-[#FFFFFF]/80 p-2 transition-colors bg-transparent border-0 outline-none"
+              class="text-white hover:text-white/80 p-2 transition-colors bg-transparent border-0 outline-none"
               aria-label="Toggle dark mode"
             >
               {isDark() ? (
@@ -143,7 +143,7 @@ export function Header() {
               href="https://github.com/tombi-toml/tombi"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-[#FFFFFF] hover:text-[#FFFFFF]/80 transition-colors no-underline"
+              class="text-white hover:text-white/80 transition-colors no-underline"
               aria-label="GitHub repository"
             >
               <svg
@@ -164,13 +164,13 @@ export function Header() {
           <div class="px-2 pt-2 pb-3 space-y-1">
             <A
               href="/"
-              class="block px-3 py-2 rounded-md text-lg font-medium text-[#FFFFFF] hover:text-[#FFFFFF]/80 hover:bg-[rgba(255,255,255,0.1)] transition-colors no-underline"
+              class="block px-3 py-2 rounded-md text-lg font-medium text-white hover:text-white/80 hover:bg-white/10 transition-colors no-underline"
             >
               Home
             </A>
             <A
               href="/documentation"
-              class="block px-3 py-2 rounded-md text-lg font-medium text-[#FFFFFF] hover:text-[#FFFFFF]/80 hover:bg-[rgba(255,255,255,0.1)] transition-colors no-underline"
+              class="block px-3 py-2 rounded-md text-lg font-medium text-white hover:text-white/80 hover:bg-white/10 transition-colors no-underline"
             >
               Documentation
             </A>
