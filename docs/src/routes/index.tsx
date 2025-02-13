@@ -1,4 +1,23 @@
 import { Title } from "@solidjs/meta";
+import { FeatureCard } from "~/components/FeatureCard";
+
+const FEATURES = [
+  {
+    emoji: "⚡️",
+    title: "Fast",
+    description: "High-performance formatter implemented in Rust",
+  },
+  {
+    emoji: "🎯",
+    title: "Accurate",
+    description: "Full compliance with TOML specification",
+  },
+  {
+    emoji: "🛠",
+    title: "Customizable",
+    description: "Flexible configuration for your project needs",
+  },
+] as const;
 
 export default function Home() {
   return (
@@ -7,21 +26,12 @@ export default function Home() {
 
       <section class="text-center mb-16">
         <h1 class="text-5xl font-bold mb-4">Tombi</h1>
-        <p class="text-xl text-gray-600 mb-12">Next Generation TOML Formatter</p>
+        <p class="text-xl text-gray-600 dark:text-gray-400 mb-12">Next Generation TOML Formatter</p>
 
         <div class="grid md:grid-cols-3 gap-8 mb-12">
-          <div class="p-6 rounded-lg bg-gray-50">
-            <h3 class="text-xl font-semibold mb-2">⚡️ Fast</h3>
-            <p class="text-gray-600">High-performance formatter implemented in Rust</p>
-          </div>
-          <div class="p-6 rounded-lg bg-gray-50">
-            <h3 class="text-xl font-semibold mb-2">🎯 Accurate</h3>
-            <p class="text-gray-600">Full compliance with TOML specification</p>
-          </div>
-          <div class="p-6 rounded-lg bg-gray-50">
-            <h3 class="text-xl font-semibold mb-2">🛠 Customizable</h3>
-            <p class="text-gray-600">Flexible configuration for your project needs</p>
-          </div>
+          {FEATURES.map((feature) => (
+            <FeatureCard {...feature} />
+          ))}
         </div>
 
         <div class="flex gap-4 justify-center">
@@ -33,7 +43,7 @@ export default function Home() {
           </a>
           <a
             href="/documentation"
-            class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            class="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors dark:text-gray-300"
           >
             View Docs
           </a>
