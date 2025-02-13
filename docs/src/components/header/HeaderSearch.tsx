@@ -26,7 +26,7 @@ export function HeaderSearch() {
             setTimeout(() => searchInputRef?.focus(), 100);
           }
         }}
-        class="md:hidden flex items-center justify-center p-2 text-white hover:text-white/80 transition-colors bg-transparent border-0 outline-none"
+        class="md:hidden flex items-center justify-center text-white hover:text-white/80 transition-colors bg-transparent border-0 btn-focus"
         aria-label={isSearchOpen() ? "Close search" : "Search"}
       >
         {isSearchOpen() ? (
@@ -55,7 +55,7 @@ export function HeaderSearch() {
             ref={searchInputRef}
             type="text"
             placeholder="Search"
-            class="w-full h-10 bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
+            class="w-full h-10 bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 input-focus focus:bg-white/[0.15]"
           />
           <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 text-sm">
             ⌘K

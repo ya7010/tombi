@@ -24,7 +24,7 @@ export function HeaderIcons() {
       <button
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
-        class="text-white hover:text-white/80 p-2 transition-colors bg-transparent border-0 outline-none"
+        class="text-white hover:text-white/80 transition-colors bg-transparent border-0 btn-focus"
         aria-label="Toggle dark mode"
       >
         {isDark() ? (
@@ -49,7 +49,7 @@ export function HeaderIcons() {
         href="https://github.com/tombi-toml/tombi"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-white hover:text-white/80 transition-colors no-underline"
+        class="text-white hover:text-white/80 transition-colors no-underline btn-focus"
         aria-label="GitHub repository"
       >
         <svg
