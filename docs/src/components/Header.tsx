@@ -42,23 +42,18 @@ export function Header() {
         <div class="flex justify-between h-20">
           <div class="flex items-center">
             <div class="flex-shrink-0 flex items-center px-4">
-              <A href="/" class="hidden md:flex items-center no-underline">
-                <img
-                  src="/tombi.svg"
-                  alt="Tombi Logo"
-                  class="h-16 w-auto"
-                />
-              </A>
-              <button
-                onClick={toggleMenu}
-                class="md:hidden flex items-center no-underline bg-transparent border-0 outline-none"
-              >
+              <A href="/" class="flex items-center no-underline">
                 <img
                   src="/icon.svg"
                   alt="Tombi Logo"
-                  class="h-16 w-16"
+                  class="h-16 w-16 md:hidden"
                 />
-              </button>
+                <img
+                  src="/tombi.svg"
+                  alt="Tombi Logo"
+                  class="hidden md:block h-16 w-auto"
+                />
+              </A>
             </div>
             <div class="hidden md:flex items-center px-8 space-x-8">
               <A
@@ -71,7 +66,7 @@ export function Header() {
           </div>
 
           {/* 検索バー */}
-          <div class="flex-1 flex items-center justify-center mx-4">
+          <div class="flex-1 flex items-center justify-end md:justify-center mx-4">
             {/* モバイル用検索アイコン */}
             <button
               onClick={() => {
@@ -81,33 +76,45 @@ export function Header() {
                 }
               }}
               class="md:hidden flex items-center justify-center p-2 text-[#FFFFFF] hover:text-[#FFFFFF]/80 transition-colors bg-transparent border-0 outline-none"
-              aria-label="Search"
+              aria-label={isSearchOpen() ? "Close search" : "Search"}
             >
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-            {/* デスクトップ用検索バー */}
-            <div class={`${isSearchOpen() ? 'block' : 'hidden'} md:block w-full max-w-[320px] relative`}>
-              <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.6)]">
+              {isSearchOpen() ? (
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-              </div>
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search"
-                class="w-full bg-[rgba(255,255,255,0.1)] text-[#FFFFFF] placeholder-[rgba(255,255,255,0.6)] rounded-lg pl-10 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-[rgba(255,255,255,0.3)] transition-all"
-              />
-              <div class="absolute right-2 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.6)] text-sm">
-                ⌘K
+              )}
+            </button>
+            {/* デスクトップ用検索バー */}
+            <div class={`${
+              isSearchOpen()
+                ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-[rgb(0,0,102)]'
+                : 'hidden'
+              } md:static md:flex md:items-center md:w-full md:max-w-[320px] md:mx-auto`}>
+              <div class="relative w-full">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.6)]">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search"
+                  class="w-full bg-[rgba(255,255,255,0.1)] text-[#FFFFFF] placeholder-[rgba(255,255,255,0.6)] rounded-lg pl-10 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-[rgba(255,255,255,0.3)] transition-all"
+                />
+                <div class="absolute right-2 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.6)] text-sm">
+                  ⌘K
+                </div>
               </div>
             </div>
           </div>
 
           {/* アイコングループ */}
-          <div class="flex items-center px-4 space-x-4 flex-shrink-0">
+          <div class="hidden md:flex items-center px-4 space-x-4 flex-shrink-0">
             <button
               id="dark-mode-toggle"
               onClick={toggleDarkMode}
