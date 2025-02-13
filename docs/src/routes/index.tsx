@@ -27,8 +27,9 @@ export default function Home() {
       <section class="text-center mb-24">
         <div class="max-w-6xl mx-auto px-4">
           <h1 class="sr-only">Tombi</h1>
-          <div class="relative mb-16 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gradient-to-b from-gray via-tombi-1000/10 to-gray dark:from-gray-900 dark:via-tombi-900/10 dark:to-gray-900">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,102,0.05),transparent_70%)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)]" />
+          <div class="relative mb-16 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gray-900">
+            <div class="absolute inset-0" />
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)]" />
               <svg width="100%" height="100%" viewBox="0 0 800 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
                   <g transform="matrix(1.00856,0,0,1.00856,131.954,-3.20241)">
                       <g transform="matrix(10.3281,0,0,10.5452,407.206,154.298)">
