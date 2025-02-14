@@ -29,23 +29,4 @@ export default defineConfig({
     "btn-focus":
       "p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-tombi-border-focus transition-colors rounded-lg",
   },
-  rules: [
-    [
-      "material-symbols-rounded",
-      {
-        "font-family": '"Material Symbols Rounded"',
-        "font-weight": "400",
-        "font-style": "normal",
-        display: "inline-block",
-        "line-height": "1",
-        "text-transform": "none",
-        "letter-spacing": "normal",
-        "word-wrap": "normal",
-        "white-space": "nowrap",
-        direction: "ltr",
-        "-webkit-font-smoothing": "antialiased",
-        "font-variation-settings": "'FILL' 1",
-      },
-    ],
-  ],
 });

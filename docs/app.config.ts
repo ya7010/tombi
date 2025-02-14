@@ -7,18 +7,10 @@ const { default: mdx } = pkg;
 export default defineConfig({
   extensions: ["mdx", "md"],
   ssr: true,
-  islands: true,
   server: {
     preset: "static",
     prerender: {
       crawlLinks: true,
-      urlMap: {
-        "/": { type: "page" },
-        "/documentation": { type: "page" },
-        "/documentation/getting-started/installation": { type: "page" },
-        "/playground": { type: "page" },
-        "/concepts": { type: "page" },
-      },
     },
   },
   vite: {
