@@ -25,18 +25,13 @@ export default function Home() {
       <Title>Tombi - Modern TOML Formatter</Title>
 
       <section class="text-center mb-24">
-        <div class="max-w-6xl mx-auto px-4">
           <h1 class="sr-only">Tombi</h1>
           <div class="relative mb-16 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gray-900">
-            <div class="absolute inset-0" />
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03),transparent_70%)]" />
-            <div class="relative py-16">
               <img
                 src="/tombi-transparent.svg"
                 alt="Tombi Logo"
                 class="w-auto max-h-80 mx-auto"
               />
-            </div>
           </div>
 
           <p class="text-xl text-tombi-800/80 dark:text-gray-300 mb-16 max-w-2xl mx-auto">
@@ -63,7 +58,6 @@ export default function Home() {
               View Docs
             </a>
           </div>
-        </div>
       </section>
 
       <section class="max-w-3xl mx-auto px-4">
