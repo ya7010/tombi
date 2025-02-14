@@ -14,7 +14,7 @@ const logoModes: LogoMode[] = [
   {
     id: "mobile-logo",
     src: "/icon.svg",
-    class: "h-16 w-16",
+    class: "h-16 w-16 pl-4",
     linkClass: "md:hidden flex",
     preventDefault: true,
   },

@@ -1,3 +1,4 @@
+import { TbSearch, TbX } from "solid-icons/tb";
 import { createSignal, onMount } from "solid-js";
 import { detectOperatingSystem } from "~/utils/platform";
 
@@ -34,13 +35,9 @@ export function HeaderSearch() {
         aria-label={isSearchOpen() ? "Close search" : "Search"}
       >
         {isSearchOpen() ? (
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <TbX size={28}/>
         ) : (
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <TbSearch size={28}/>
         )}
       </button>
       {/* Desktop search bar */}
@@ -51,9 +48,7 @@ export function HeaderSearch() {
         } md:static md:flex md:items-center md:w-full md:max-w-[320px] md:h-10 md:my-auto`}>
         <div class="relative w-full">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <TbSearch size={28}/>
           </div>
           <input
             ref={searchInputRef}

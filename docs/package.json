@@ -13,7 +13,7 @@
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.1.0",
     "@vinxi/plugin-mdx": "^3.7.2",
-    "material-symbols": "^0.28.2",
+    "solid-icons": "^1.1.0",
     "solid-js": "^1.9.2",
     "solid-mdx": "^0.0.7",
     "vinxi": "^0.5.3"

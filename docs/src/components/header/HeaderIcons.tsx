@@ -1,5 +1,5 @@
 import { createSignal, onMount } from "solid-js";
-import 'material-symbols';
+import { TbMoonFilled, TbSunFilled } from "solid-icons/tb";
 
 export function HeaderIcons() {
   const [isDark, setIsDark] = createSignal(false);
@@ -28,9 +28,7 @@ export function HeaderIcons() {
         class="text-white hover:text-white/80 transition-colors bg-transparent border-0 btn-focus"
         aria-label="Toggle dark mode"
       >
-        <span class="material-symbols-rounded text-2xl">
-          {isDark() ? 'dark_mode' : 'light_mode'}
-        </span>
+        {isDark() ? <TbMoonFilled size={28}/> : <TbSunFilled size={28}/>}
       </button>
       <a
         href="https://github.com/tombi-toml/tombi"
