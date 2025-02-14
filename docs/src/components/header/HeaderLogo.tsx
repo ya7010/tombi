@@ -39,7 +39,7 @@ export function HeaderLogo() {
   };
 
   return (
-    <div class="flex-shrink-0 flex items-center px-4 relative">
+    <div class="flex-shrink-0 flex items-center relative">
       <div onClick={toggleMenu} class="cursor-pointer md:cursor-default">
         <For each={logoModes}>
           {(config) => (
