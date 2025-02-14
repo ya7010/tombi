@@ -16,16 +16,18 @@ export function HeaderLogo() {
   return (
     <div class="flex-shrink-0 flex items-center px-4 relative">
       <div onClick={toggleMenu} class="cursor-pointer md:cursor-default">
-        <A href="/" class="flex items-center no-underline" onClick={(e) => e.preventDefault()}>
+        <A id="mobile-logo" href="/" class="md:hidden flex items-center no-underline" onClick={(e) => e.preventDefault()}>
           <img
             src="/icon.svg"
             alt="Tombi Logo"
-            class="h-16 w-16 md:hidden"
+            class="h-16 w-16"
           />
+        </A>
+        <A id="desktop-logo" href="/" class="hidden md:flex items-center no-underline">
           <img
             src="/tombi.svg"
             alt="Tombi Logo"
-            class="hidden md:block h-16 w-auto"
+            class="h-16 w-auto"
           />
         </A>
       </div>
