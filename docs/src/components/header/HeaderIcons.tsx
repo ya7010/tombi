@@ -1,4 +1,5 @@
 import { createSignal, onMount } from "solid-js";
+import 'material-symbols';
 
 export function HeaderIcons() {
   const [isDark, setIsDark] = createSignal(false);
@@ -27,19 +28,9 @@ export function HeaderIcons() {
         class="text-white hover:text-white/80 transition-colors bg-transparent border-0 btn-focus"
         aria-label="Toggle dark mode"
       >
-        {isDark() ? (
-          <img
-            src="/dark-mode-icon.svg"
-            alt="Dark mode"
-            class="w-6 h-6"
-          />
-        ) : (
-          <img
-            src="/light-mode-icon.svg"
-            alt="Light mode"
-            class="w-6 h-6"
-          />
-        )}
+        <span class="material-symbols-rounded text-2xl">
+          {isDark() ? 'dark_mode' : 'light_mode'}
+        </span>
       </button>
       <a
         href="https://github.com/tombi-toml/tombi"
