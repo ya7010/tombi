@@ -1,5 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { FeatureCard } from "~/components/FeatureCard";
+import { Button } from "~/components/Button";
 
 const FEATURES = [
   {
@@ -45,18 +46,18 @@ export default function Home() {
           </div>
 
           <div class="flex gap-4 justify-center">
-            <a
+            <Button
               href="/documentation/getting-started/installation"
-              class="px-8 py-4 bg-tombi-900 text-white rounded-xl hover:bg-tombi-800 transition-colors shadow-lg hover:shadow-xl no-underline"
+              variant="primary"
             >
               Get Started
-            </a>
-            <a
+            </Button>
+            <Button
               href="/documentation"
-              class="px-8 py-4 bg-white dark:bg-tombi-900/30 border border-tombi-200 dark:border-tombi-700 rounded-xl hover:bg-tombi-50 dark:hover:bg-tombi-900/50 transition-colors text-tombi-900 dark:text-white shadow-lg hover:shadow-xl no-underline"
+              variant="secondary"
             >
               View Docs
-            </a>
+            </Button>
           </div>
       </section>
 
