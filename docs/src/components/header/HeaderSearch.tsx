@@ -1,10 +1,14 @@
 import { createSignal, onMount } from "solid-js";
+import { detectOperatingSystem } from "~/utils/platform";
 
 export function HeaderSearch() {
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
+  const [isMac, setIsMac] = createSignal(false);
   let searchInputRef: HTMLInputElement | undefined;
 
   onMount(() => {
+    setIsMac(detectOperatingSystem() === 'mac');
+
     if (typeof window !== 'undefined') {
       document.addEventListener('keydown', (e) => {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -18,7 +22,7 @@ export function HeaderSearch() {
 
   return (
     <div class="flex-1 flex items-center justify-end md:justify-center mx-4 h-full">
-      {/* モバイル用検索アイコン */}
+      {/* Mobile search icon */}
       <button
         onClick={() => {
           setIsSearchOpen(!isSearchOpen());
@@ -39,7 +43,7 @@ export function HeaderSearch() {
           </svg>
         )}
       </button>
-      {/* デスクトップ用検索バー */}
+      {/* Desktop search bar */}
       <div class={`${
         isSearchOpen()
           ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-tombi-900'
@@ -58,7 +62,7 @@ export function HeaderSearch() {
             class="w-full h-10 bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 input-focus focus:bg-white/[0.15]"
           />
           <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 text-sm">
-            ⌘K
+            {isMac() ? '⌘K' : 'Ctrl+K'}
           </div>
         </div>
       </div>
