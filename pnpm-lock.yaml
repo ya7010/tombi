@@ -23,12 +23,15 @@ importers:
       '@mdx-js/mdx':
         specifier: ^2.3.0
         version: 2.3.0
+      '@solidjs/meta':
+        specifier: ^0.29.4
+        version: 0.29.4(solid-js@1.9.4)
       '@solidjs/router':
         specifier: ^0.15.0
         version: 0.15.3(solid-js@1.9.4)
       '@solidjs/start':
         specifier: ^1.1.0
-        version: 1.1.0(solid-js@1.9.4)(vinxi@0.5.3(@azure/identity@4.5.0)(@types/node@22.10.2)(db0@0.2.4)(ioredis@5.5.0)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2)(typescript@5.7.2))(vite@6.1.0(@types/node@22.10.2)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2))
+        version: 1.1.1(solid-js@1.9.4)(vinxi@0.5.3(@azure/identity@4.5.0)(@types/node@22.10.2)(db0@0.2.4)(ioredis@5.5.0)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2)(typescript@5.7.2))(vite@6.1.0(@types/node@22.10.2)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2))
       '@vinxi/plugin-mdx':
         specifier: ^3.7.2
         version: 3.7.2(@mdx-js/mdx@2.3.0)
@@ -1613,26 +1616,31 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
+  '@solidjs/meta@0.29.4':
+    resolution: {integrity: sha512-zdIWBGpR9zGx1p1bzIPqF5Gs+Ks/BH8R6fWhmUa/dcK1L2rUC8BAcZJzNRYBQv74kScf1TSOs0EY//Vd/I0V8g==}
+    peerDependencies:
+      solid-js: '>=1.8.4'
+
   '@solidjs/router@0.15.3':
     resolution: {integrity: sha512-iEbW8UKok2Oio7o6Y4VTzLj+KFCmQPGEpm1fS3xixwFBdclFVBvaQVeibl1jys4cujfAK5Kn6+uG2uBm3lxOMw==}
     peerDependencies:
       solid-js: ^1.8.6
 
-  '@solidjs/start@1.1.0':
-    resolution: {integrity: sha512-7MNhNVt8uF7tdvLkvJhj4357vg3Ha+yqJP8XhQ6IbSZbsyk/xMkYmfc1h6w4GWiWZ5tn1DvS1uqGXjLFbKRy6g==}
+  '@solidjs/start@1.1.1':
+    resolution: {integrity: sha512-vJuXJlhHvP/hSdKQ+iuvBU2bw0S+IKQYOyldnRoCvrX7Nmu1p3npnACSlhNNkN06IqSX3MVde8D8Lr9xXEMjRQ==}
     peerDependencies:
       vinxi: ^0.5.3
 
-  '@tanstack/directive-functions-plugin@1.102.2':
-    resolution: {integrity: sha512-wM4ovyuYx0rBvcaR9ay+CtuPK8AEqFv6rF4LbPqHx7EufzBi7aJt70RqPdHt3bP3dcEuJbcRGFxthZ+WUt/Q5Q==}
+  '@tanstack/directive-functions-plugin@1.103.1':
+    resolution: {integrity: sha512-HzeX+fLWj4oT/07ImAZFIWHX/tfhbs89VSZEIuH8vTaJZ3/P/gN7pQ6ZWfdD/1NWpkrtJqhxrwT9LJlBG5rPiQ==}
     engines: {node: '>=12'}
 
   '@tanstack/router-utils@1.102.2':
     resolution: {integrity: sha512-Uwl2nbrxhCzviaHHBLNPhSC/OMpZLdOTxTJndUSsXTzWUP4IoQcVmngaIsxi9iriE3ArC1VXuanUAkfGmimNOQ==}
     engines: {node: '>=12'}
 
-  '@tanstack/server-functions-plugin@1.102.2':
-    resolution: {integrity: sha512-l7nPcYjUaiO4ogjfE5hAPsuByFsn/5LqtdsC7f0I1VVgMxHp08OVVRH2rrgdR24ehRr3RkrUQoFviVyBSxcfCA==}
+  '@tanstack/server-functions-plugin@1.103.1':
+    resolution: {integrity: sha512-FtbC3JbdWI8IE29wTxNBkS7vFQJqovxNWk5Saq046zQxgxzNTgILaAU/Woz+b88lqMUWu6S+XxLt/+yIlqp63g==}
     engines: {node: '>=12'}
 
   '@tsconfig/strictest@2.0.5':
@@ -2494,8 +2502,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  electron-to-chromium@1.5.98:
-    resolution: {integrity: sha512-bI/LbtRBxU2GzK7KK5xxFd2y9Lf9XguHooPYbcXWy6wUoT8NMnffsvRhPmSeUHLSDKAEtKuTaEtK4Ms15zkIEA==}
+  electron-to-chromium@1.5.99:
+    resolution: {integrity: sha512-77c/+fCyL2U+aOyqfIFi89wYLBeSTCs55xCZL0oFH0KjqsvSvyh6AdQ+UIl1vgpnQQE6g+/KK8hOIupH6VwPtg==}
 
   emoji-regex-xs@1.0.0:
     resolution: {integrity: sha512-LRlerrMYoIDrT6jgpeZ2YYl/L8EulRTt5hQcYjy5AInh7HWXKimpqx68aknBFpGL2+/IcogTcaydJEgaTmOpDg==}
@@ -5738,13 +5746,17 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
+  '@solidjs/meta@0.29.4(solid-js@1.9.4)':
+    dependencies:
+      solid-js: 1.9.4
+
   '@solidjs/router@0.15.3(solid-js@1.9.4)':
     dependencies:
       solid-js: 1.9.4
 
-  '@solidjs/start@1.1.0(solid-js@1.9.4)(vinxi@0.5.3(@azure/identity@4.5.0)(@types/node@22.10.2)(db0@0.2.4)(ioredis@5.5.0)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2)(typescript@5.7.2))(vite@6.1.0(@types/node@22.10.2)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2))':
+  '@solidjs/start@1.1.1(solid-js@1.9.4)(vinxi@0.5.3(@azure/identity@4.5.0)(@types/node@22.10.2)(db0@0.2.4)(ioredis@5.5.0)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2)(typescript@5.7.2))(vite@6.1.0(@types/node@22.10.2)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2))':
     dependencies:
-      '@tanstack/server-functions-plugin': 1.102.2
+      '@tanstack/server-functions-plugin': 1.103.1
       '@vinxi/plugin-directives': 0.5.0(vinxi@0.5.3(@azure/identity@4.5.0)(@types/node@22.10.2)(db0@0.2.4)(ioredis@5.5.0)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2)(typescript@5.7.2))
       '@vinxi/server-components': 0.5.0(vinxi@0.5.3(@azure/identity@4.5.0)(@types/node@22.10.2)(db0@0.2.4)(ioredis@5.5.0)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2)(typescript@5.7.2))
       defu: 6.1.4
@@ -5766,7 +5778,7 @@ snapshots:
       - supports-color
       - vite
 
-  '@tanstack/directive-functions-plugin@1.102.2':
+  '@tanstack/directive-functions-plugin@1.103.1':
     dependencies:
       '@babel/code-frame': 7.26.2
       '@babel/core': 7.26.8
@@ -5794,7 +5806,7 @@ snapshots:
       ansis: 3.14.0
       diff: 7.0.0
 
-  '@tanstack/server-functions-plugin@1.102.2':
+  '@tanstack/server-functions-plugin@1.103.1':
     dependencies:
       '@babel/code-frame': 7.26.2
       '@babel/core': 7.26.8
@@ -5803,7 +5815,7 @@ snapshots:
       '@babel/template': 7.26.8
       '@babel/traverse': 7.26.8
       '@babel/types': 7.26.8
-      '@tanstack/directive-functions-plugin': 1.102.2
+      '@tanstack/directive-functions-plugin': 1.103.1
       '@types/babel__code-frame': 7.0.6
       '@types/babel__core': 7.20.5
       '@types/babel__template': 7.4.4
@@ -6469,7 +6481,7 @@ snapshots:
   browserslist@4.24.4:
     dependencies:
       caniuse-lite: 1.0.30001699
-      electron-to-chromium: 1.5.98
+      electron-to-chromium: 1.5.99
       node-releases: 2.0.19
       update-browserslist-db: 1.1.2(browserslist@4.24.4)
 
@@ -6492,9 +6504,9 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
-  bundle-require@5.1.0(esbuild@0.24.2):
+  bundle-require@5.1.0(esbuild@0.24.1):
     dependencies:
-      esbuild: 0.24.2
+      esbuild: 0.24.1
       load-tsconfig: 0.2.5
 
   c12@2.0.1(magicast@0.3.5):
@@ -6821,7 +6833,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  electron-to-chromium@1.5.98: {}
+  electron-to-chromium@1.5.99: {}
 
   emoji-regex-xs@1.0.0: {}
 
@@ -7371,9 +7383,9 @@ snapshots:
 
   importx@0.5.1:
     dependencies:
-      bundle-require: 5.1.0(esbuild@0.24.2)
+      bundle-require: 5.1.0(esbuild@0.24.1)
       debug: 4.4.0(supports-color@9.4.0)
-      esbuild: 0.24.2
+      esbuild: 0.24.1
       jiti: 2.4.2
       pathe: 1.1.2
       tsx: 4.19.2
