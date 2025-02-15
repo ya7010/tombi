@@ -1,5 +1,6 @@
 import { createSignal, onMount } from "solid-js";
 import { TbMoonFilled, TbSunFilled } from "solid-icons/tb";
+import { LinkImageButton } from "../common/LinkImageButton";
 
 export function HeaderIcons() {
   const [isDark, setIsDark] = createSignal(false);
@@ -30,19 +31,12 @@ export function HeaderIcons() {
       >
         {isDark() ? <TbMoonFilled size={28}/> : <TbSunFilled size={28}/>}
       </button>
-      <a
+      <LinkImageButton
         href="https://github.com/tombi-toml/tombi"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-white hover:text-white/80 transition-colors no-underline btn-focus"
-        aria-label="GitHub repository"
-      >
-        <img
-          src="/github-mark.svg"
-          alt="GitHub"
-          class="w-6 h-6"
-        />
-      </a>
+        src="/github-mark.svg"
+        alt="GitHub"
+        classes="w-6 h-6"
+      />
     </div>
   );
 }
