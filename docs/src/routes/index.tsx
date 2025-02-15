@@ -1,6 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { FeatureCard } from "~/components/FeatureCard";
-import { Button } from "~/components/Button";
+import { LinkButton } from "~/components/button/LinkButton";
 
 const FEATURES = [
   {
@@ -46,18 +46,18 @@ export default function Home() {
           </div>
 
           <div class="flex gap-4 justify-center">
-            <Button
+            <LinkButton
               href="/documentation/getting-started/installation"
               variant="primary"
             >
               Get Started
-            </Button>
-            <Button
+            </LinkButton>
+            <LinkButton
               href="/documentation"
               variant="secondary"
             >
               View Docs
-            </Button>
+            </LinkButton>
           </div>
       </section>
 

@@ -8,7 +8,7 @@ interface ButtonProps {
   variant?: ButtonVariant;
 }
 
-export const Button: ParentComponent<ButtonProps> = (props) => {
+export const LinkButton: ParentComponent<ButtonProps> = (props) => {
   const baseClasses = "px-8 py-4 rounded-xl transition-colors shadow-lg hover:shadow-xl no-underline btn-focus";
 
   const variantClasses = {
