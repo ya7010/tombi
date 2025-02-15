@@ -68,7 +68,7 @@ export function HeaderSearch() {
             onBlur={() => setIsFocused(false)}
             class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
           />
-          <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg">
+          <div class={`absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg transition-opacity duration-50 ${isFocused() ? 'opacity-0' : 'opacity-100'}`}>
             {isMac() ? '⌘K' : 'Ctrl+K'}
           </div>
         </div>
