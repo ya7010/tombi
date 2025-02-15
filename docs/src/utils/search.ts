@@ -58,14 +58,14 @@ export async function searchDocumentation(
     // Calculate scores and merge
     for (const result of [...titleResults, ...contentResults]) {
       if (result.result) {
-        for (const docId of result.result) {
-          const doc = searchIndex.find((d) => d.id === Number(docId));
+        for (const docResult of result.result) {
+          const doc = searchIndex.find((d) => d.id === Number(docResult.id));
           if (doc && !resultMap.has(doc.id)) {
             resultMap.set(doc.id, {
               title: doc.title,
               content: doc.content,
               url: doc.url,
-              score: docId.doc.score || 0,
+              score: 0,
             });
           }
         }
