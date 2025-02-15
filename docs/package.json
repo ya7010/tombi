@@ -22,7 +22,7 @@
     "vinxi": "^0.5.3"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "devDependencies": {
     "glob": "^11.0.1",
