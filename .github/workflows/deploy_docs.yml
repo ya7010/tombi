@@ -39,7 +39,7 @@ jobs:
 
       - name: Build
         working-directory: ./docs
-        run: pnpm run build
+        run: pnpm install &&pnpm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
