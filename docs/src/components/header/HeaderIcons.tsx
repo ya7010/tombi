@@ -28,7 +28,7 @@ export function HeaderIcons() {
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
         alt="Toggle dark mode"
-        class={`flex items-center justify-center md:btn-focus transition-transform duration-300 ease-out forwards ${isDark() ? 'rotate-0' : '-rotate-90'}`}
+        class={`flex items-center justify-center transition-transform duration-300 ease-out forwards ${isDark() ? 'rotate-0' : '-rotate-90'}`}
       >
         {
           isDark()

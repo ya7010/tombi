@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import { createSignal, For } from "solid-js";
 import { HeaderDropdown } from "./HeaderDropdown";
 
-type LogoMode = {
+type LogoProps = {
   id: string;
   src: string;
   class: string;
@@ -10,7 +10,7 @@ type LogoMode = {
   preventDefault: boolean;
 };
 
-const logoModes: LogoMode[] = [
+const logoProps: LogoProps[] = [
   {
     id: "mobile-logo",
     src: "/icon.svg",
@@ -39,20 +39,20 @@ export function HeaderLogo() {
   };
 
   return (
-    <div class="flex-shrink-0 flex items-center relative">
+    <div class="flex-shrink-0 flex items-center relative ">
       <div onClick={toggleMenu} class="cursor-pointer md:cursor-default">
-        <For each={logoModes}>
-          {(config) => (
+        <For each={logoProps}>
+          {(props) => (
             <A
-              id={config.id}
+              id={props.id}
               href="/"
-              class={`ml-4 ${config.linkClass} items-center no-underline`}
-              onClick={(e) => config.preventDefault && e.preventDefault()}
+              class={`ml-4 ${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
+              onClick={(e) => props.preventDefault && e.preventDefault()}
             >
               <img
-                src={config.src}
+                src={props.src}
                 alt="Tombi Logo"
-                class={config.class}
+                class={`${props.class}`}
               />
             </A>
           )}
