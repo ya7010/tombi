@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { ParentComponent } from "solid-js";
+import type { ParentComponent } from "solid-js";
 
 interface LinkIconButtonProps {
   id?: string;

@@ -40,7 +40,11 @@ export function HeaderLogo() {
 
   return (
     <div class="flex-shrink-0 flex items-center relative ">
-      <div onClick={toggleMenu} class="cursor-pointer md:cursor-default">
+      <div
+        onClick={toggleMenu}
+        onKeyUp={toggleMenu}
+        class="cursor-pointer md:cursor-default"
+      >
         <For each={logoProps}>
           {(props) => (
             <A
