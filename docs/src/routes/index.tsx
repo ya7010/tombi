@@ -62,10 +62,10 @@ export default function Home() {
       </section>
 
       <section class="max-w-3xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-tombi-900 to-tombi-700 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
+        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-tombi-primary to-tombi-700 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
           Simple and Easy to Use
         </h2>
-        <pre class="p-8 bg-tombi-900 text-white rounded-xl overflow-x-auto shadow-lg text-left">
+        <pre class="p-8 bg-tombi-primary text-white rounded-xl overflow-x-auto shadow-lg text-left">
           <code class="text-left">{`# Before
 title="TOML Example"
 [package]

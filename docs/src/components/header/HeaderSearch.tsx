@@ -43,7 +43,7 @@ export function HeaderSearch() {
       {/* Desktop search bar */}
       <div class={`${
         isSearchOpen()
-          ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-tombi-900'
+          ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-tombi-primary'
           : 'hidden'
         } md:static md:flex md:items-center md:w-full md:max-w-[320px] md:h-10 md:my-auto`}>
         <div class="relative w-full">

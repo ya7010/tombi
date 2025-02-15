@@ -20,7 +20,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
 
   return (
     <div
-      class={`fixed inset-x-0 top-[64px] bg-tombi-900 shadow-lg z-50 md:hidden
+      class={`fixed inset-x-0 top-[64px] bg-tombi-primary shadow-lg z-50 md:hidden
               overflow-hidden transition-[height] duration-300 ease-out`}
       style={{ height: props.isOpen() ? `${totalHeight}px` : '0px' }}
     >
