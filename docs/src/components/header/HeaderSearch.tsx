@@ -1,4 +1,4 @@
-import { TbSearch, TbX } from "solid-icons/tb";
+import { TbSearch, TbX, TbLoader, TbLoaderQuarter } from "solid-icons/tb";
 import { createSignal, onMount } from "solid-js";
 import { detectOperatingSystem } from "~/utils/platform";
 import { IconButton } from "../button/IconButton";
@@ -70,6 +70,9 @@ export function HeaderSearch() {
           />
           <div class={`absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg transition-opacity duration-50 ${isFocused() ? 'opacity-0' : 'opacity-100'}`}>
             {isMac() ? '⌘K' : 'Ctrl+K'}
+          </div>
+          <div class={`absolute right-4 top-1/2 -translate-y-1/2 text-white/60 transition-opacity duration-0 ${isFocused() && isLoading() ? 'opacity-100' : 'opacity-0'}`}>
+            <TbLoaderQuarter class="animate-spin-fast" size={24} />
           </div>
         </div>
         <SearchResults

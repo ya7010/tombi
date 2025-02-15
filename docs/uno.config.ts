@@ -19,6 +19,21 @@ export default defineConfig({
         border: "rgba(255,255,255,0.2)", // 枠線用の半透明白
       },
     },
+    animation: {
+      keyframes: {
+        "spin-fast":
+          "{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}",
+      },
+      durations: {
+        "spin-fast": "0.5s",
+      },
+      timingFns: {
+        "spin-fast": "linear",
+      },
+      counts: {
+        "spin-fast": "infinite",
+      },
+    },
   },
   // カスタムルールやショートカットが必要な場合はここに追加
   shortcuts: {
