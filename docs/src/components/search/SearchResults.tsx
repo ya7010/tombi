@@ -1,3 +1,4 @@
+import { A } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import type { SearchResult } from "~/utils/search";
 
@@ -73,7 +74,7 @@ export function SearchResults(props: SearchResultsProps) {
         <div class="p-4">
           <For each={props.results}>
             {(result) => (
-              <a
+              <A
                 href={result.url}
                 class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg mb-2 transition-colors"
               >
@@ -89,7 +90,7 @@ export function SearchResults(props: SearchResultsProps) {
                     matches={result.highlight.content.matches}
                   />
                 </p>
-              </a>
+              </A>
             )}
           </For>
         </div>
