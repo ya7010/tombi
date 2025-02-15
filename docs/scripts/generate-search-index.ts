@@ -27,11 +27,15 @@ function generateSearchIndex() {
     const fileContent = readFileSync(fullPath, "utf-8");
     const { data, content } = matter(fileContent);
 
+    const url = `/documentation/${file
+      .replace(/\.mdx$/, "")
+      .replace(/\/index$/, "")}`;
+
     return {
       id: index + 1,
-      title: data.title || file.replace(/\.md$/, ""),
+      title: data.title || url,
       content: extractTextContent(content),
-      url: `/${file.replace(/\.md$/, "")}`,
+      url,
     };
   });
 
