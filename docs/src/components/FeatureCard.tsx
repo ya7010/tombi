@@ -10,7 +10,9 @@ export function FeatureCard(props: FeatureCardProps) {
       <h3 class="text-xl font-semibold mb-2">
         {props.emoji} {props.title}
       </h3>
-      <p class="text-gray-600 dark:text-gray-400">{props.description}</p>
+      <p class="text-lg text-gray-600 dark:text-gray-400">
+        {props.description}
+      </p>
     </div>
   );
 }
