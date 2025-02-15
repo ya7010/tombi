@@ -2,7 +2,7 @@ import { Title } from "@solidjs/meta";
 import { FeatureCard } from "~/components/FeatureCard";
 import { LinkButton } from "~/components/button/LinkButton";
 
-const FEATURES = [
+const FEATURES  = [
   {
     emoji: "⚡️",
     title: "Fast",
@@ -14,10 +14,15 @@ const FEATURES = [
     description: "Full compliance with TOML specification",
   },
   {
-    emoji: "🛠",
-    title: "Customizable",
-    description: "Flexible configuration for your project needs",
+    emoji: "🚂",
+    title: "Schema Driven",
+    description: "Validate and format your TOML files using a JSON Schema",
   },
+  {
+    emoji: "🪄",
+    title: "Magic Experience",
+    description: "Magic tailing comma (like black), and magic trigger for writing",
+  }
 ] as const;
 
 export default function Home() {
@@ -39,7 +44,7 @@ export default function Home() {
             Next Generation TOML Formatter - Bringing elegance and precision to your TOML configurations
           </p>
 
-          <div class="grid md:grid-cols-3 gap-8 mb-16">
+          <div class="grid md:grid-cols-2 gap-x-16 gap-y-8 mb-16">
             {FEATURES.map((feature) => (
               <FeatureCard {...feature} />
             ))}
