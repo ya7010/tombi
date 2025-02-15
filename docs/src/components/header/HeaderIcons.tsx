@@ -1,5 +1,5 @@
 import { createSignal, onMount } from "solid-js";
-import { TbBrandGithub, TbMoonFilled, TbSunFilled } from "solid-icons/tb";
+import { TbBrandGithubFilled, TbMoonFilled, TbSunFilled } from "solid-icons/tb";
 import { LinkIconButton } from "../button/LinkIconButton";
 import { IconButton } from "../button/IconButton";
 
@@ -41,7 +41,7 @@ export function HeaderIcons() {
         alt="GitHub"
         class="w-6 h-6"
       >
-        <TbBrandGithub size={28} aria-label="GitHub"/>
+        <TbBrandGithubFilled size={28} aria-label="GitHub"/>
       </LinkIconButton>
     </div>
   );

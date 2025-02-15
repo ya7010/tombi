@@ -1,4 +1,6 @@
 import { Title } from "@solidjs/meta";
+import { FaSolidFeather } from "solid-icons/fa";
+import { TbBrandGithubFilled } from "solid-icons/tb";
 import { FeatureCard } from "~/components/FeatureCard";
 import { LinkButton } from "~/components/button/LinkButton";
 
@@ -61,14 +63,18 @@ export default function Home() {
               variant="primary"
               class="text-xl"
             >
-              Get Started
+              <div class="flex items-center gap-2">
+                Get Started <FaSolidFeather class="w-5 h-5" />
+              </div>
             </LinkButton>
             <LinkButton
-              href="/documentation"
+              href="https://github.com/tombi-toml/tombi"
               variant="secondary"
               class="text-xl"
             >
-              View Docs
+              <div class="flex items-center gap-2">
+                View on GitHub <TbBrandGithubFilled class="w-6 h-6" />
+              </div>
             </LinkButton>
           </div>
       </section>
