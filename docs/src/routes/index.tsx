@@ -59,12 +59,14 @@ export default function Home() {
             <LinkButton
               href="/documentation/getting-started/installation"
               variant="primary"
+              class="text-xl"
             >
               Get Started
             </LinkButton>
             <LinkButton
               href="/documentation"
               variant="secondary"
+              class="text-xl"
             >
               View Docs
             </LinkButton>
