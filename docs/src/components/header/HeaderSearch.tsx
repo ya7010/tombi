@@ -23,23 +23,23 @@ export function HeaderSearch() {
   });
 
   return (
-    <div class="flex flex-auto items-center justify-end md:justify-center mx-4 h-full">
+    <div class="flex justify-end w-full items-center">
       <div class={`${
         isSearchOpen()
-          ? 'absolute left-32 right-12 top-1/2 -translate-y-1/2 bg-tombi-primary'
+          ? 'items-center'
           : 'hidden'
-        } md:static md:flex md:items-center md:w-auto md:max-w-[320px] md:h-10 md:my-auto`}>
+        } md:flex md:items-center w-full`}>
         <div class="relative w-full">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-            <TbSearch size={28}/>
+            <TbSearch size={24}/>
           </div>
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search"
-            class="w-full h-10 bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 focus:bg-white/[0.15]"
+            class="w-full h-12 pl-12 bg-white/10 text-white placeholder-white/60 rounded-0 text-lg focus:bg-white/[0.15] border-white outline-none box-border rounded-2"
           />
-          <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 text-sm">
+          <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg">
             {isMac() ? '⌘K' : 'Ctrl+K'}
           </div>
         </div>
@@ -47,17 +47,14 @@ export function HeaderSearch() {
       <IconButton
         onClick={() => {
           setIsSearchOpen(!isSearchOpen());
-          if (!isSearchOpen()) {
-            setTimeout(() => searchInputRef?.focus(), 100);
-          }
         }}
-        classes="md:hidden flex items-center justify-center"
+        classes="md:hidden px-6"
         alt={isSearchOpen() ? "Close Search" : "Search"}
       >
         {isSearchOpen() ? (
-          <TbX size={28}/>
+          <TbX size={24}/>
         ) : (
-          <TbSearch size={28}/>
+          <TbSearch size={24}/>
         )}
       </IconButton>
     </div>

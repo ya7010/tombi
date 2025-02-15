@@ -23,7 +23,7 @@ export function HeaderIcons() {
   };
 
   return (
-    <div class="hidden md:flex items-center px-4 space-x-4 flex-end flex-shrink-0 input-focus">
+    <div class="hidden md:flex items-center px-4 space-x-4">
       <LinkIconButton
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
