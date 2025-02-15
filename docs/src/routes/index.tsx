@@ -53,7 +53,13 @@ export default function Home() {
 
         <div class="grid md:grid-cols-2 gap-x-16 gap-y-8 mb-16">
           {FEATURES.map((feature) => (
-            <FeatureCard {...feature} />
+            <FeatureCard
+              // @ts-ignore
+              key={feature.title}
+              emoji={feature.emoji}
+              title={feature.title}
+              description={feature.description}
+            />
           ))}
         </div>
 

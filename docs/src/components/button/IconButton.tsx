@@ -13,6 +13,7 @@ export const IconButton: ParentComponent<IconButtonProps> = (props) => {
 
   return (
     <button
+      type="button"
       id={props.id}
       onClick={props.onClick}
       class={`${baseClasses} ${props.class || ""}`}

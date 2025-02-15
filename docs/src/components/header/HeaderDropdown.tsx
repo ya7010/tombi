@@ -28,6 +28,8 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
         {props.isOpen() &&
           menuItems.map((item, index) => (
             <HeaderDropdownItem
+              // @ts-ignore
+              key={item.href}
               href={item.href}
               hasBorder={index < menuItems.length - 1}
               onSelect={props.onSelect}
