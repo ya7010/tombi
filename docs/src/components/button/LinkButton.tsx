@@ -6,7 +6,7 @@ type ButtonVariant = "primary" | "secondary";
 interface ButtonProps {
   href: string;
   variant?: ButtonVariant;
-  classes?: string;
+  class?: string;
 }
 
 export const LinkButton: ParentComponent<ButtonProps> = (props) => {
@@ -19,7 +19,7 @@ export const LinkButton: ParentComponent<ButtonProps> = (props) => {
     secondary: "bg-white hover:bg-tombi-50 text-tombi-primary "
   };
 
-  const classes = `${baseClasses} ${variantClasses[props.variant || "primary"]} ${props.classes || ""}`;
+  const classes = `${baseClasses} ${variantClasses[props.variant || "primary"]} ${props.class || ""}`;
 
   return (
       <A href={props.href} class={classes}>

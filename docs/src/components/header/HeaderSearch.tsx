@@ -48,7 +48,7 @@ export function HeaderSearch() {
         onClick={() => {
           setIsSearchOpen(!isSearchOpen());
         }}
-        classes="md:hidden px-6 relative"
+        class="md:hidden px-6 relative"
         alt={isSearchOpen() ? "Close Search" : "Search"}
       >
         <div class={`absolute transition-all duration-300 ${isSearchOpen() ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}>

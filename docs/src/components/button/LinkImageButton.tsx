@@ -5,7 +5,7 @@ interface ImageButtonProps {
   href: string;
   src: string;
   alt: string;
-  classes?: string;
+  class?: string;
 }
 
 export const LinkImageButton: ParentComponent<ImageButtonProps> = (props) => {
@@ -20,7 +20,7 @@ export const LinkImageButton: ParentComponent<ImageButtonProps> = (props) => {
       <img
         src={props.src}
         alt={props.alt}
-        class={props.classes}
+        class={props.class}
       />
     </A>
   );

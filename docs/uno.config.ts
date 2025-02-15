@@ -17,13 +17,12 @@ export default defineConfig({
         800: "rgb(0,0,102)",
         900: "rgb(0,0,102)", // メインカラー（濃い青）
         border: "rgba(255,255,255,0.2)", // 枠線用の半透明白
-        "border-focus": "rgba(255,255,255,0.3)", // フォーカス時の枠線用
       },
     },
   },
   // カスタムルールやショートカットが必要な場合はここに追加
   shortcuts: {
     "btn-focus":
-      "p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-tombi-border-focus transition-colors rounded-lg",
+      "p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-tombi-border transition-colors rounded-lg",
   },
 });

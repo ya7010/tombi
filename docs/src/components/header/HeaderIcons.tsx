@@ -28,15 +28,19 @@ export function HeaderIcons() {
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
         alt="Toggle dark mode"
-        classes="w-6 h-6"
+        class={`flex items-center justify-center transition-transform duration-300 ease-out forwards ${isDark() ? 'rotate-0' : '-rotate-90'}`}
       >
-        {isDark() ? <TbMoonFilled size={28}/> : <TbSunFilled size={28}/>}
+        {
+          isDark()
+            ? <TbMoonFilled size={28}/>
+            : <TbSunFilled size={28}/>
+        }
       </LinkIconButton>
       <LinkImageButton
         href="https://github.com/tombi-toml/tombi"
         src="/github-mark.svg"
         alt="GitHub"
-        classes="w-6 h-6"
+        class="w-6 h-6"
       />
     </div>
   );
