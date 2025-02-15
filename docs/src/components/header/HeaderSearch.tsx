@@ -26,10 +26,10 @@ export function HeaderSearch() {
     <div class="flex justify-end w-full items-center">
       <div class={`${
         isSearchOpen()
-          ? 'items-center'
-          : 'hidden'
-        } md:flex md:items-center w-full`}>
-        <div class="relative w-full">
+          ? 'w-full opacity-100'
+          : 'w-0 opacity-0'
+        } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center`}>
+        <div class="relative w-full min-w-[200px]">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
             <TbSearch size={24}/>
           </div>
@@ -48,14 +48,15 @@ export function HeaderSearch() {
         onClick={() => {
           setIsSearchOpen(!isSearchOpen());
         }}
-        classes="md:hidden px-6"
+        classes="md:hidden px-6 relative"
         alt={isSearchOpen() ? "Close Search" : "Search"}
       >
-        {isSearchOpen() ? (
+        <div class={`absolute transition-all duration-300 ${isSearchOpen() ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}>
           <TbX size={24}/>
-        ) : (
+        </div>
+        <div class={`transition-all duration-300 ${isSearchOpen() ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}>
           <TbSearch size={24}/>
-        )}
+        </div>
       </IconButton>
     </div>
   );
