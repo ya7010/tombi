@@ -52,7 +52,7 @@ export function HeaderLogo() {
               <img
                 src={props.src}
                 alt="Tombi Logo"
-                class={`${props.class}`}
+                class={`${props.class} rounded-lg`}
               />
             </A>
           )}
