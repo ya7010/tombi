@@ -6,6 +6,66 @@ interface SearchResultsProps {
   isVisible: boolean;
 }
 
+function HighlightedText(props: { text: string; matches: [number, number][] }) {
+  const segments: { text: string; isHighlight: boolean }[] = [];
+  let lastIndex = 0;
+
+  // マッチした部分をソートして重複を解決
+  const sortedMatches = [...props.matches].sort((a, b) => a[0] - b[0]);
+  const mergedMatches: [number, number][] = [];
+
+  for (const match of sortedMatches) {
+    if (mergedMatches.length === 0 || match[0] > mergedMatches[mergedMatches.length - 1][1]) {
+      mergedMatches.push(match);
+    } else {
+      mergedMatches[mergedMatches.length - 1][1] = Math.max(
+        mergedMatches[mergedMatches.length - 1][1],
+        match[1]
+      );
+    }
+  }
+
+  // セグメントを作成
+  for (const [start, end] of mergedMatches) {
+    if (start > lastIndex) {
+      segments.push({
+        text: props.text.slice(lastIndex, start),
+        isHighlight: false,
+      });
+    }
+    segments.push({
+      text: props.text.slice(start, end),
+      isHighlight: true,
+    });
+    lastIndex = end;
+  }
+
+  if (lastIndex < props.text.length) {
+    segments.push({
+      text: props.text.slice(lastIndex),
+      isHighlight: false,
+    });
+  }
+
+  return (
+    <span>
+      <For each={segments}>
+        {(segment) => (
+          <span
+            class={
+              segment.isHighlight
+                ? "bg-yellow-200 dark:bg-yellow-800 rounded px-1"
+                : ""
+            }
+          >
+            {segment.text}
+          </span>
+        )}
+      </For>
+    </span>
+  );
+}
+
 export function SearchResults(props: SearchResultsProps) {
   return (
     <Show when={props.isVisible && props.results.length > 0}>
@@ -18,9 +78,17 @@ export function SearchResults(props: SearchResultsProps) {
                 class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg mb-2 transition-colors"
               >
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                  {result.title}
+                  <HighlightedText
+                    text={result.highlight.title.text}
+                    matches={result.highlight.title.matches}
+                  />
                 </h3>
-                <p class="text-gray-600 dark:text-gray-300">{result.content}</p>
+                <p class="text-gray-600 dark:text-gray-300">
+                  <HighlightedText
+                    text={result.highlight.content.text}
+                    matches={result.highlight.content.matches}
+                  />
+                </p>
               </a>
             )}
           </For>
