@@ -14,14 +14,14 @@ export const LinkButton: ParentComponent<ButtonProps> = (props) => {
 
   const variantClasses = {
     primary: [
-      "bg-tombi-primary text-white ring-transparent ring-3",
-      "hover:bg-tombi-50 hover:text-tombi-primary hover:ring-tombi-300",
-      "focus:bg-tombi-50 focus:text-tombi-primary focus:ring-tombi-300"
+      "bg-tombi-primary text-white ring-transparent ring-3 ring-inset",
+      "hover:bg-tombi-50 hover:text-tombi-primary hover:ring-tombi-600",
+      "focus:bg-tombi-50 focus:text-tombi-primary focus:ring-tombi-600"
     ].join(" "),
     secondary:[
-      "bg-white text-tombi-primary ring-transparent ring-3",
-      "hover:bg-tombi-50 hover:ring-tombi-300",
-      "focus:bg-tombi-50 focus:ring-tombi-300"
+      "bg-white text-tombi-primary ring-transparent ring-3 ring-inset",
+      "hover:bg-tombi-50 hover:ring-tombi-600",
+      "focus:bg-tombi-50 focus:ring-tombi-600"
     ].join(" ")
   };
 
