@@ -3,6 +3,7 @@ import { FaSolidFeather } from "solid-icons/fa";
 import { TbBrandGithubFilled } from "solid-icons/tb";
 import { FeatureCard } from "~/components/FeatureCard";
 import { LinkButton } from "~/components/button/LinkButton";
+import { Highlight } from "solid-highlight";
 
 const FEATURES = [
   {
@@ -89,9 +90,10 @@ export default function Home() {
         <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-tombi-primary to-tombi-700 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
           Simple and Easy to Use
         </h2>
-        <pre class="p-8 bg-tombi-primary text-white rounded-xl overflow-x-auto shadow-lg text-left">
-          <code class="text-left">{`# Before
+        <Highlight language="toml">
+          {`# Before
 title="TOML Example"
+
 [package]
 name="my-project"
 version="0.1.0"
@@ -105,8 +107,8 @@ name = "my-project"
 version = "0.1.0"
 authors = [
   "John Doe <john@example.com>",
-]`}</code>
-        </pre>
+]`}
+        </Highlight>
       </section>
     </div>
   );
