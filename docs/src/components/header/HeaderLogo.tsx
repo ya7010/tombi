@@ -14,14 +14,14 @@ const logoModes: LogoMode[] = [
   {
     id: "mobile-logo",
     src: "/icon.svg",
-    class: "h-16 w-16 px-4",
+    class: "h-16 w-16",
     linkClass: "md:hidden flex",
     preventDefault: true,
   },
   {
     id: "desktop-logo",
     src: "/tombi-transparent.svg",
-    class: "h-16 w-auto px-4",
+    class: "h-16 w-auto",
     linkClass: "hidden md:flex",
     preventDefault: false,
   },
@@ -46,7 +46,7 @@ export function HeaderLogo() {
             <A
               id={config.id}
               href="/"
-              class={`${config.linkClass} items-center no-underline`}
+              class={`ml-4 ${config.linkClass} items-center no-underline`}
               onClick={(e) => config.preventDefault && e.preventDefault()}
             >
               <img

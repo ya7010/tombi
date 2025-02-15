@@ -25,7 +25,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
       style={{ height: props.isOpen() ? `${totalHeight}px` : '0px' }}
     >
       <div class="flex flex-col">
-        {menuItems.map((item, index) => (
+        {props.isOpen() && menuItems.map((item, index) => (
           <HeaderDropdownItem
             href={item.href}
             hasBorder={index < menuItems.length - 1}
