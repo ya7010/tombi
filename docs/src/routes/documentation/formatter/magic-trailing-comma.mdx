@@ -1,3 +1,72 @@
 # Magic Trailing Comma
 
-Tombi's Magic Trailing Comma feature automatically manages trailing commas in arrays and tables for better Git diffs and easier editing.
+Magic Trailing Comma is a feature inspired by the Black formatter, which automatically adds trailing commas to arrays and tables that span multiple lines. This feature makes version control more efficient by ensuring clean diffs when adding new elements in the future.
+
+## Basic Usage
+
+When array elements fit on a single line, no trailing comma is added:
+
+```toml
+# Before formatting
+dependencies = ["tombi", "biome", "prettier"]
+
+# After formatting
+dependencies = ["tombi", "biome", "prettier"]
+```
+
+When elements span multiple lines, a trailing comma is automatically added:
+
+```toml
+# Before formatting
+dependencies = [
+  "tombi",
+  "biome",
+  "prettier"
+]
+
+# After formatting
+dependencies = [
+  "tombi",
+  "biome",
+  "prettier",
+]
+```
+
+## Table Examples
+
+The same behavior applies to TOML tables:
+
+```toml
+# Before formatting
+[package]
+name = "my-app"
+version = "1.0.0"
+authors = [
+  "John Doe",
+  "Jane Smith"
+]
+
+[dependencies]
+tombi = "1.0.0"
+biome = "1.0.0"
+
+# After formatting
+[package]
+name = "my-app"
+version = "1.0.0"
+authors = [
+  "John Doe",
+  "Jane Smith",
+]
+
+[dependencies]
+tombi = "1.0.0",
+biome = "1.0.0",
+```
+
+This feature provides several benefits:
+
+- Creates cleaner diffs when adding new elements
+- Makes reordering elements easier
+- Improves code consistency
+- Reduces version control conflicts in multi-developer environments
