@@ -4,7 +4,7 @@
     "enabled": true
   },
   "files": {
-    "include": ["**/*.ts", "**/*.mdx"],
+    "include": ["**/*.ts", "**/*.tsx", "**/*.md", "**/*.mdx", "**/*.json"],
     "ignore": ["**/*.js"]
   },
   "formatter": {

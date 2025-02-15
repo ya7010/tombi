@@ -11,7 +11,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
     { href: "/", label: "Home" },
     { href: "/documentation/concepts", label: "Concepts" },
     { href: "/documentation", label: "Docs" },
-    { href: "/playground", label: "Playground" }
+    { href: "/playground", label: "Playground" },
   ];
 
   // h-16 = 64px
@@ -22,18 +22,19 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
     <div
       class={`fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden
               overflow-hidden transition-[height] duration-300 ease-out`}
-      style={{ height: props.isOpen() ? `${totalHeight}px` : '0px' }}
+      style={{ height: props.isOpen() ? `${totalHeight}px` : "0px" }}
     >
       <div class="flex flex-col">
-        {props.isOpen() && menuItems.map((item, index) => (
-          <HeaderDropdownItem
-            href={item.href}
-            hasBorder={index < menuItems.length - 1}
-            onSelect={props.onSelect}
-          >
-            {item.label}
-          </HeaderDropdownItem>
-        ))}
+        {props.isOpen() &&
+          menuItems.map((item, index) => (
+            <HeaderDropdownItem
+              href={item.href}
+              hasBorder={index < menuItems.length - 1}
+              onSelect={props.onSelect}
+            >
+              {item.label}
+            </HeaderDropdownItem>
+          ))}
       </div>
     </div>
   );

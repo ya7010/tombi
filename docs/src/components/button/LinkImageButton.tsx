@@ -10,7 +10,8 @@ interface ImageButtonProps {
 }
 
 export const LinkImageButton: ParentComponent<ImageButtonProps> = (props) => {
-  const baseClasses = "text-white hover:text-white/80 transition-colors no-underline btn-focus"
+  const baseClasses =
+    "text-white hover:text-white/80 transition-colors no-underline btn-focus";
 
   return (
     <A
@@ -21,11 +22,7 @@ export const LinkImageButton: ParentComponent<ImageButtonProps> = (props) => {
       class={`${baseClasses} ${props.class}`}
       aria-label={props.alt}
     >
-      <img
-        src={props.src}
-        alt={props.alt}
-        class={props.class}
-      />
+      <img src={props.src} alt={props.alt} class={props.class} />
     </A>
   );
 };

@@ -21,6 +21,10 @@
     "editor.tabSize": 2,
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[typescriptreact]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "[javascript]": {
     "editor.tabSize": 4,
     "editor.defaultFormatter": "biomejs.biome"

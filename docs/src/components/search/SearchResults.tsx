@@ -15,12 +15,15 @@ function HighlightedText(props: { text: string; matches: [number, number][] }) {
   const mergedMatches: [number, number][] = [];
 
   for (const match of sortedMatches) {
-    if (mergedMatches.length === 0 || match[0] > mergedMatches[mergedMatches.length - 1][1]) {
+    if (
+      mergedMatches.length === 0 ||
+      match[0] > mergedMatches[mergedMatches.length - 1][1]
+    ) {
       mergedMatches.push(match);
     } else {
       mergedMatches[mergedMatches.length - 1][1] = Math.max(
         mergedMatches[mergedMatches.length - 1][1],
-        match[1]
+        match[1],
       );
     }
   }
@@ -69,7 +72,10 @@ function HighlightedText(props: { text: string; matches: [number, number][] }) {
 export function SearchResults(props: SearchResultsProps) {
   return (
     <Show when={props.results.length > 0}>
-      <div class="fixed left-0 right-0 mt-2 mx-auto max-w-150 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto z-[60]" style={{ top: "calc(5rem + 4px)" }}>
+      <div
+        class="fixed left-0 right-0 mt-2 mx-auto max-w-150 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto z-[60]"
+        style={{ top: "calc(5rem + 4px)" }}
+      >
         <div class="p-4">
           <For each={props.results}>
             {(result) => (

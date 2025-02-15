@@ -9,7 +9,8 @@ interface LinkIconButtonProps {
 }
 
 export const LinkIconButton: ParentComponent<LinkIconButtonProps> = (props) => {
-  const baseClasses = "text-white hover:text-white/80 bg-transparent border-0 p-2 btn-focus";
+  const baseClasses =
+    "text-white hover:text-white/80 bg-transparent border-0 p-2 btn-focus";
 
   return (
     <A
