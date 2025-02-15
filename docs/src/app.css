@@ -10,9 +10,32 @@ a {
 }
 
 main {
-  text-align: center;
+  text-align: left;
   padding: 1em;
   margin: 0 auto;
+}
+
+/* MDX Content Styles */
+.mdx-content {
+  text-align: left;
+  line-height: 1.6;
+}
+
+.mdx-content h1,
+.mdx-content h2,
+.mdx-content h3,
+.mdx-content h4,
+.mdx-content h5,
+.mdx-content h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.mdx-content p {
+  margin: 1rem 0;
+  max-width: none;
 }
 
 h1 {

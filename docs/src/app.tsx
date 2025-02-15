@@ -1,3 +1,6 @@
+import "prismjs";
+import "prismjs/components/prism-toml";
+
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
@@ -5,8 +8,6 @@ import { MetaProvider } from "@solidjs/meta";
 import "virtual:uno.css";
 import "./app.css";
 import Layout from "./routes/layout";
-import "prismjs";
-import "prismjs/components/prism-toml";
 
 export default function App() {
   return (
