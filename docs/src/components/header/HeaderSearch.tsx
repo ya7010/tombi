@@ -23,7 +23,7 @@ export function HeaderSearch() {
   });
 
   return (
-    <div class="flex justify-end w-full items-center">
+    <div class="flex justify-end w-full items-center max-w-150">
       <div class={`${
         isSearchOpen()
           ? 'w-full opacity-100'
@@ -37,7 +37,7 @@ export function HeaderSearch() {
             ref={searchInputRef}
             type="text"
             placeholder="Search"
-            class="w-full h-12 pl-12 bg-white/10 text-white placeholder-white/60 rounded-0 text-lg focus:bg-white/[0.15] border-white outline-none box-border rounded-2"
+            class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
           />
           <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg">
             {isMac() ? '⌘K' : 'Ctrl+K'}
