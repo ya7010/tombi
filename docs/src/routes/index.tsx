@@ -32,11 +32,11 @@ export default function Home() {
 
       <section class="text-center mb-24">
           <h1 class="sr-only">Tombi</h1>
-          <div class="relative mb-16 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gradient-to-b from-gray-900 to-gray-500">
+          <div class="relative py-8 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gradient-to-b from-gray-900 to-gray-500">
               <img
                 src="/tombi-transparent.svg"
                 alt="Tombi Logo"
-                class="w-auto max-h-80 mx-auto"
+                class="w-auto max-h-80 mx-auto px-8"
               />
           </div>
 
