@@ -32,7 +32,7 @@ export default function Home() {
 
       <section class="text-center mb-24">
           <h1 class="sr-only">Tombi</h1>
-          <div class="relative mb-16 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gray-900">
+          <div class="relative mb-16 w-screen -mx-[calc((100vw-100%)/2)] overflow-hidden bg-gradient-to-b from-gray-900 to-gray-500">
               <img
                 src="/tombi-transparent.svg"
                 alt="Tombi Logo"
@@ -40,9 +40,14 @@ export default function Home() {
               />
           </div>
 
-          <p class="text-xl text-tombi-primary dark:text-gray-300 mb-16 max-w-2xl mx-auto">
-            Next Generation TOML Formatter - Bringing elegance and precision to your TOML configurations
-          </p>
+          <div class="mb-16">
+            <p class="text-4xl text-tombi-primary dark:text-gray-300 mb-2 max-w-2xl mx-auto">
+              Full-featured TOML Toolkit
+            </p>
+            <p class="text-xl text-tombi-primary dark:text-gray-300 mb-2 max-w-2xl mx-auto">
+              Bringing elegance and precision to your TOML configurations
+            </p>
+          </div>
 
           <div class="grid md:grid-cols-2 gap-x-16 gap-y-8 mb-16">
             {FEATURES.map((feature) => (
