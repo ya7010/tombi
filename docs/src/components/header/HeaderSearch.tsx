@@ -1,6 +1,7 @@
 import { TbSearch, TbX } from "solid-icons/tb";
 import { createSignal, onMount } from "solid-js";
 import { detectOperatingSystem } from "~/utils/platform";
+import { IconButton } from "../button/IconButton";
 
 export function HeaderSearch() {
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
@@ -22,30 +23,12 @@ export function HeaderSearch() {
   });
 
   return (
-    <div class="flex-1 flex items-center justify-end md:justify-center mx-4 h-full">
-      {/* Mobile search icon */}
-      <button
-        onClick={() => {
-          setIsSearchOpen(!isSearchOpen());
-          if (!isSearchOpen()) {
-            setTimeout(() => searchInputRef?.focus(), 100);
-          }
-        }}
-        class="md:hidden flex items-center justify-center text-white hover:text-white/80 transition-colors bg-transparent border-0 btn-focus"
-        aria-label={isSearchOpen() ? "Close search" : "Search"}
-      >
-        {isSearchOpen() ? (
-          <TbX size={28}/>
-        ) : (
-          <TbSearch size={28}/>
-        )}
-      </button>
-      {/* Desktop search bar */}
+    <div class="flex flex-auto items-center justify-end md:justify-center mx-4 h-full">
       <div class={`${
         isSearchOpen()
-          ? 'absolute left-24 right-12 top-1/2 -translate-y-1/2 bg-tombi-primary'
+          ? 'absolute left-32 right-12 top-1/2 -translate-y-1/2 bg-tombi-primary'
           : 'hidden'
-        } md:static md:flex md:items-center md:w-full md:max-w-[320px] md:h-10 md:my-auto`}>
+        } md:static md:flex md:items-center md:w-auto md:max-w-[320px] md:h-10 md:my-auto`}>
         <div class="relative w-full">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
             <TbSearch size={28}/>
@@ -61,6 +44,22 @@ export function HeaderSearch() {
           </div>
         </div>
       </div>
+      <IconButton
+        onClick={() => {
+          setIsSearchOpen(!isSearchOpen());
+          if (!isSearchOpen()) {
+            setTimeout(() => searchInputRef?.focus(), 100);
+          }
+        }}
+        classes="md:hidden flex items-center justify-center"
+        alt={isSearchOpen() ? "Close Search" : "Search"}
+      >
+        {isSearchOpen() ? (
+          <TbX size={28}/>
+        ) : (
+          <TbSearch size={28}/>
+        )}
+      </IconButton>
     </div>
   );
 }

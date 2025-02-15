@@ -1,7 +1,7 @@
 import { createSignal, onMount } from "solid-js";
 import { TbMoonFilled, TbSunFilled } from "solid-icons/tb";
-import { LinkImageButton } from "../common/LinkImageButton";
-import { LinkIconButton } from "../common/LinkIconButton";
+import { LinkImageButton } from "../button/LinkImageButton";
+import { LinkIconButton } from "../button/LinkIconButton";
 
 export function HeaderIcons() {
   const [isDark, setIsDark] = createSignal(false);
@@ -23,11 +23,12 @@ export function HeaderIcons() {
   };
 
   return (
-    <div class="hidden md:flex items-center px-4 space-x-4 flex-shrink-0 input-focus">
+    <div class="hidden md:flex items-center px-4 space-x-4 flex-end flex-shrink-0 input-focus">
       <LinkIconButton
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
         alt="Toggle dark mode"
+        classes="w-6 h-6"
       >
         {isDark() ? <TbMoonFilled size={28}/> : <TbSunFilled size={28}/>}
       </LinkIconButton>

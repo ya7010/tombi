@@ -1,3 +1,4 @@
+import { A } from "@solidjs/router";
 import { ParentComponent } from "solid-js";
 
 interface ImageButtonProps {
@@ -9,7 +10,7 @@ interface ImageButtonProps {
 
 export const LinkImageButton: ParentComponent<ImageButtonProps> = (props) => {
   return (
-    <a
+    <A
       href={props.href}
       target="_blank"
       rel="noopener noreferrer"
@@ -21,6 +22,6 @@ export const LinkImageButton: ParentComponent<ImageButtonProps> = (props) => {
         alt={props.alt}
         class={props.classes}
       />
-    </a>
+    </A>
   );
 };
