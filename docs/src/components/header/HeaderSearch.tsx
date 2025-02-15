@@ -2,10 +2,15 @@ import { TbSearch, TbX } from "solid-icons/tb";
 import { createSignal, onMount } from "solid-js";
 import { detectOperatingSystem } from "~/utils/platform";
 import { IconButton } from "../button/IconButton";
+import { searchDocumentation, type SearchResult } from "~/utils/search";
+import { SearchResults } from "../search/SearchResults";
 
 export function HeaderSearch() {
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
   const [isMac, setIsMac] = createSignal(false);
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = createSignal(false);
   let searchInputRef: HTMLInputElement | undefined;
 
   onMount(() => {
@@ -22,13 +27,32 @@ export function HeaderSearch() {
     }
   });
 
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      setIsLoading(true);
+      try {
+        const results = await searchDocumentation(query);
+        console.log(results);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('検索中にエラーが発生しました:', error);
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  };
+
   return (
     <div class="flex justify-end w-full items-center max-w-150">
       <div class={`${
         isSearchOpen()
           ? 'w-full opacity-100'
           : 'w-0 opacity-0'
-        } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center`}>
+        } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center relative`}>
         <div class="relative w-full min-w-[200px]">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
             <TbSearch size={24}/>
@@ -37,16 +61,26 @@ export function HeaderSearch() {
             ref={searchInputRef}
             type="text"
             placeholder="Search"
+            value={searchQuery()}
+            onInput={(e) => handleSearch(e.currentTarget.value)}
             class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
           />
           <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg">
             {isMac() ? '⌘K' : 'Ctrl+K'}
           </div>
         </div>
+        <SearchResults
+          results={searchResults()}
+          isVisible={searchQuery().trim().length > 0}
+        />
       </div>
       <IconButton
         onClick={() => {
           setIsSearchOpen(!isSearchOpen());
+          if (!isSearchOpen()) {
+            setSearchQuery("");
+            setSearchResults([]);
+          }
         }}
         class="md:hidden px-6 relative"
         alt={isSearchOpen() ? "Close Search" : "Search"}
