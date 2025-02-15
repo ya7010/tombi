@@ -1,6 +1,7 @@
 import { createSignal, onMount } from "solid-js";
 import { TbMoonFilled, TbSunFilled } from "solid-icons/tb";
 import { LinkImageButton } from "../common/LinkImageButton";
+import { LinkIconButton } from "../common/LinkIconButton";
 
 export function HeaderIcons() {
   const [isDark, setIsDark] = createSignal(false);
@@ -23,14 +24,13 @@ export function HeaderIcons() {
 
   return (
     <div class="hidden md:flex items-center px-4 space-x-4 flex-shrink-0 input-focus">
-      <button
+      <LinkIconButton
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
-        class="text-white hover:text-white/80 transition-colors bg-transparent border-0 btn-focus"
-        aria-label="Toggle dark mode"
+        alt="Toggle dark mode"
       >
         {isDark() ? <TbMoonFilled size={28}/> : <TbSunFilled size={28}/>}
-      </button>
+      </LinkIconButton>
       <LinkImageButton
         href="https://github.com/tombi-toml/tombi"
         src="/github-mark.svg"
