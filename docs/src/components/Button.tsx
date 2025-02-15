@@ -9,7 +9,7 @@ interface ButtonProps {
 }
 
 export const Button: ParentComponent<ButtonProps> = (props) => {
-  const baseClasses = "px-8 py-4 rounded-xl transition-colors shadow-lg hover:shadow-xl no-underline";
+  const baseClasses = "px-8 py-4 rounded-xl transition-colors shadow-lg hover:shadow-xl no-underline btn-focus";
 
   const variantClasses = {
     primary: ["bg-tombi-primary text-white",
