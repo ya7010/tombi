@@ -6,6 +6,11 @@
     "dev": "vinxi dev",
     "build": "pnpm run generate-search-index && vinxi build",
     "start": "vinxi start",
+    "format": "biome format --fix",
+    "format:check": "biome format",
+    "lint": "biome lint --fix",
+    "lint:check": "biome lint",
+    "typecheck": "tsc",
     "generate-search-index": "tsx scripts/generate-search-index.ts"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "files": {
-    "include": ["docs/**/*.ts", "editors/vscode/**/*.ts", "typescript/**/*.ts"],
+    "include": ["**/*.ts", "**/*.mdx"],
     "ignore": ["**/*.js"]
   },
   "formatter": {
