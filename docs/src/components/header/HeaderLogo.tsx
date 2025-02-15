@@ -14,14 +14,14 @@ const logoModes: LogoMode[] = [
   {
     id: "mobile-logo",
     src: "/icon.svg",
-    class: "h-16 w-16 pl-4",
+    class: "h-16 w-16 px-4",
     linkClass: "md:hidden flex",
     preventDefault: true,
   },
   {
     id: "desktop-logo",
-    src: "/tombi.svg",
-    class: "h-16 w-auto",
+    src: "/tombi-transparent.svg",
+    class: "h-16 w-auto px-4",
     linkClass: "hidden md:flex",
     preventDefault: false,
   },
