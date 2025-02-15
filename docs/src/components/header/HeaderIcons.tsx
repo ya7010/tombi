@@ -1,7 +1,7 @@
 import { createSignal, onMount } from "solid-js";
-import { TbMoonFilled, TbSunFilled } from "solid-icons/tb";
-import { LinkImageButton } from "../button/LinkImageButton";
+import { TbBrandGithub, TbMoonFilled, TbSunFilled } from "solid-icons/tb";
 import { LinkIconButton } from "../button/LinkIconButton";
+import { IconButton } from "../button/IconButton";
 
 export function HeaderIcons() {
   const [isDark, setIsDark] = createSignal(false);
@@ -24,7 +24,7 @@ export function HeaderIcons() {
 
   return (
     <div class="hidden md:flex items-center px-4 space-x-4">
-      <LinkIconButton
+      <IconButton
         id="dark-mode-toggle"
         onClick={toggleDarkMode}
         alt="Toggle dark mode"
@@ -35,13 +35,14 @@ export function HeaderIcons() {
             ? <TbMoonFilled size={28}/>
             : <TbSunFilled size={28}/>
         }
-      </LinkIconButton>
-      <LinkImageButton
+      </IconButton>
+      <LinkIconButton
         href="https://github.com/tombi-toml/tombi"
-        src="/github-mark.svg"
         alt="GitHub"
         class="w-6 h-6"
-      />
+      >
+        <TbBrandGithub size={28} aria-label="GitHub"/>
+      </LinkIconButton>
     </div>
   );
 }
