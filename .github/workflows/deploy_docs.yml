@@ -34,6 +34,7 @@ jobs:
           node-version-file: '.node-version'
 
       - name: Install dependencies
+        working-directory: ./docs
         run: pnpm install
 
       - name: Build
