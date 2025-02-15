@@ -11,7 +11,7 @@ function HighlightedText(props: { text: string; matches: [number, number][] }) {
   const segments: { text: string; isHighlight: boolean }[] = [];
   let lastIndex = 0;
 
-  // マッチした部分をソートして重複を解決
+  // Sort matches and resolve overlaps
   const sortedMatches = [...props.matches].sort((a, b) => a[0] - b[0]);
   const mergedMatches: [number, number][] = [];
 
@@ -26,7 +26,7 @@ function HighlightedText(props: { text: string; matches: [number, number][] }) {
     }
   }
 
-  // セグメントを作成
+  // Create segments
   for (const [start, end] of mergedMatches) {
     if (start > lastIndex) {
       segments.push({
