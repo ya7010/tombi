@@ -93,7 +93,7 @@ export function HeaderSearch() {
             setSearchResults([]);
           }
         }}
-        class="md:hidden px-6 relative"
+        class="md:hidden m-4 py-1 relative"
         alt={isSearchOpen() ? "Close Search" : "Search"}
       >
         <div class={`absolute transition-all duration-300 ${isSearchOpen() ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}>
