@@ -11,6 +11,7 @@ export function HeaderSearch() {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [isLoading, setIsLoading] = createSignal(false);
+  const [isFocused, setIsFocused] = createSignal(false);
   let searchInputRef: HTMLInputElement | undefined;
 
   onMount(() => {
@@ -63,6 +64,8 @@ export function HeaderSearch() {
             placeholder="Search"
             value={searchQuery()}
             onInput={(e) => handleSearch(e.currentTarget.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
           />
           <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg">
@@ -71,7 +74,7 @@ export function HeaderSearch() {
         </div>
         <SearchResults
           results={searchResults()}
-          isVisible={searchQuery().trim().length > 0}
+          isVisible={isFocused() && searchQuery().trim().length > 0}
         />
       </div>
       <IconButton
