@@ -75,10 +75,15 @@ export function HeaderSearch() {
             <TbLoaderQuarter class="animate-spin-fast" size={24} />
           </div>
         </div>
-        <SearchResults
-          results={searchResults()}
-          isVisible={isFocused() && searchQuery().trim().length > 0}
-        />
+        <div class={`${
+          isFocused() && searchQuery().trim().length > 0
+            ? 'opacity-100'
+            : 'opacity-0'
+        }`}>
+          <SearchResults
+            results={searchResults()}
+          />
+        </div>
       </div>
       <IconButton
         onClick={() => {
