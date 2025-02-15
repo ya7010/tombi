@@ -21,7 +21,7 @@ export function HeaderIcons() {
   };
 
   return (
-    <div class="hidden md:flex items-center px-4 space-x-4 flex-shrink-0">
+    <div class="hidden md:flex items-center px-4 space-x-4 flex-shrink-0 input-focus">
       <button
         id="dark-mode-toggle"
         onClick={toggleDarkMode}

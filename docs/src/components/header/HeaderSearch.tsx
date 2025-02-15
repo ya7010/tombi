@@ -54,7 +54,7 @@ export function HeaderSearch() {
             ref={searchInputRef}
             type="text"
             placeholder="Search"
-            class="w-full h-10 bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 input-focus focus:bg-white/[0.15]"
+            class="w-full h-10 bg-white/10 text-white placeholder-white/60 rounded-lg pl-10 pr-12 focus:bg-white/[0.15]"
           />
           <div class="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 text-sm">
             {isMac() ? '⌘K' : 'Ctrl+K'}
