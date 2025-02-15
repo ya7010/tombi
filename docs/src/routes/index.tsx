@@ -19,9 +19,9 @@ const FEATURES  = [
     description: "Validate and format your TOML files using a JSON Schema",
   },
   {
-    emoji: "🪄",
+    emoji: "✨",
     title: "Magic Experience",
-    description: "Magic tailing comma (like black), and magic trigger for writing",
+    description: "Magic tailing comma formatting, and magic trigger completion",
   }
 ] as const;
 
