@@ -35,7 +35,7 @@ export default function Home() {
               />
           </div>
 
-          <p class="text-xl text-tombi-800/80 dark:text-gray-300 mb-16 max-w-2xl mx-auto">
+          <p class="text-xl text-tombi-primary dark:text-gray-300 mb-16 max-w-2xl mx-auto">
             Next Generation TOML Formatter - Bringing elegance and precision to your TOML configurations
           </p>
 
