@@ -38,19 +38,16 @@ jobs:
         run: pnpm install
 
       - name: Build
-        env:
-          BASE_URL: /tombi
         working-directory: ./docs
         run: pnpm add -D tsx && pnpm run build
+        env:
+          BASE_URL: /tombi
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: create .nojekyll
+        run: touch .output/public/.nojekyll
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: deploy pages
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
-          path: './docs/.output/public'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          branch: gh-pages
+          folder: .output/public

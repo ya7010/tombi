@@ -14,6 +14,7 @@ export default defineConfig({
   ssr: true,
   server: {
     preset: "static",
+    baseURL: process.env.BASE_URL,
     prerender: {
       crawlLinks: true,
       failOnError: true,
