@@ -66,7 +66,7 @@ export default function Home() {
 
         <div class="flex gap-4 justify-center">
           <LinkButton
-            href="/documentation/getting-started/installation"
+            href="/documentation/installation"
             variant="primary"
             class="text-xl"
           >

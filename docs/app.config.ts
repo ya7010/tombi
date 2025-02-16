@@ -27,7 +27,7 @@ export default defineConfig({
       unocssPlugin(),
     ],
     build: {
-      minify: false,
+      minify: true,
     },
   },
 });
