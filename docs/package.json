@@ -4,14 +4,16 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "vinxi dev",
-    "build": "pnpm run generate-search-index && vinxi build",
+    "prebuild": "pnpm run generate-search-index && pnpm run collect-ogp",
+    "build": "pnpm run prebuild && vinxi build",
     "start": "vinxi start",
     "format": "biome format --fix",
     "format:check": "biome format",
     "lint": "biome lint --fix",
     "lint:check": "biome lint",
     "typecheck": "tsc",
-    "generate-search-index": "tsx scripts/generate-search-index.ts"
+    "generate-search-index": "tsx scripts/generate-search-index.ts",
+    "collect-ogp": "tsx scripts/collect-ogp.ts"
   },
   "dependencies": {
     "@mdx-js/mdx": "^2.3.0",
@@ -32,8 +34,10 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.7",
     "glob": "^11.0.1",
     "gray-matter": "^4.0.3",
+    "jsdom": "^26.0.0",
     "tsx": "^4.19.2",
     "unocss": "^65.4.3"
   }
