@@ -43,12 +43,14 @@ jobs:
         env:
           BASE_URL: /tombi
 
-      - name: create .nojekyll
-        working-directory: ./docs
-        run: touch .output/public/.nojekyll
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-      - name: deploy pages
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages
-          folder: ./docs/.output/public
+          path: './docs/.output/public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
