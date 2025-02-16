@@ -4,6 +4,11 @@ import pkg from "@vinxi/plugin-mdx";
 import unocssPlugin from "unocss/vite";
 
 const { default: mdx } = pkg;
+
+if (!process.env.BASE_URL) {
+  process.env.BASE_URL = "/tombi/";
+}
+
 export default defineConfig({
   extensions: ["mdx", "md"],
   ssr: true,
@@ -16,7 +21,7 @@ export default defineConfig({
   },
   vite: {
     // @ts-ignore
-    base: process.env.BASE_URL || "/tombi",
+    base: process.env.BASE_URL,
     plugins: [
       mdx.withImports({})({
         jsx: true,
