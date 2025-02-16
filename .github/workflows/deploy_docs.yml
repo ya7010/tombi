@@ -38,6 +38,8 @@ jobs:
         run: pnpm install
 
       - name: Build
+        env:
+          BASE_URL: /tombi
         working-directory: ./docs
         run: pnpm add -D tsx && pnpm run build
 
