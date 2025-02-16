@@ -1,4 +1,4 @@
-@import "prismjs/themes/prism-tomorrow.min.css";
+@import "https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.5.0/prism-vsc-dark-plus.min.css";
 
 body {
   font-family: Gordita, Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",

@@ -14,14 +14,12 @@ const menuItems: MenuItem[] = [
     path: "/documentation",
   },
   {
+    title: "Installation",
+    path: "/documentation/installation",
+  },
+  {
     title: "Concept",
     path: "/documentation/concept",
-    children: [
-      {
-        title: "Overview",
-        path: "/concept/overview",
-      },
-    ],
   },
   {
     title: "Formatter",

@@ -1,5 +1,6 @@
 import "prismjs";
 import "prismjs/components/prism-toml";
+import "prismjs/components/prism-bash";
 
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
