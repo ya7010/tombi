@@ -11,6 +11,8 @@ export default defineConfig({
     preset: "static",
     prerender: {
       crawlLinks: true,
+      failOnError: true,
+      concurrency: 1,
     },
   },
   vite: {
