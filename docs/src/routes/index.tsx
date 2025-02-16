@@ -17,7 +17,7 @@ const FEATURES = [
     description: "Full compliance with TOML specification",
   },
   {
-    emoji: "🚂",
+    emoji: "🛤️",
     title: "Schema Driven",
     description: "Validate and format your TOML files using a JSON Schema",
   },
