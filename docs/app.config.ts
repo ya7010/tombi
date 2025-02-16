@@ -12,12 +12,11 @@ export default defineConfig({
     prerender: {
       crawlLinks: true,
       failOnError: true,
-      concurrency: 1,
     },
   },
   vite: {
     // @ts-ignore
-    base: process.env.BASE_URL,
+    base: process.env.BASE_URL || "/tombi",
     plugins: [
       mdx.withImports({})({
         jsx: true,
