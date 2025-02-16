@@ -15,9 +15,13 @@ export default function App() {
       root={(props) => (
         <MetaProvider>
           <Layout>
-            <Suspense fallback={<div class="text-center">Loading...</div>}>
-              {props.children}
-            </Suspense>
+            <main class="flex-1 mt-20 pt-0">
+              <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <Suspense fallback={<div class="text-center">Loading...</div>}>
+                  {props.children}
+                </Suspense>
+              </div>
+            </main>
           </Layout>
         </MetaProvider>
       )}
