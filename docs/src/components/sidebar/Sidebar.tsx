@@ -18,8 +18,8 @@ const menuItems: MenuItem[] = [
     path: "/documentation/installation",
   },
   {
-    title: "Concept",
-    path: "/documentation/concept",
+    title: "Concepts",
+    path: "/documentation/concepts",
   },
   {
     title: "Formatter",

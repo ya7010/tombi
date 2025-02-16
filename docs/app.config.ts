@@ -16,6 +16,8 @@ export default defineConfig({
     },
   },
   vite: {
+    // @ts-ignore
+    base: process.env.BASE_URL,
     plugins: [
       mdx.withImports({})({
         jsx: true,
