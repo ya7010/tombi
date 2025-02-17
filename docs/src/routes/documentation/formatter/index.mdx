@@ -2,52 +2,20 @@
 
 Tombi's formatter ensures consistent styling of your TOML files by automatically applying formatting rules.
 
-## Key Features
+## CLI
 
-## Basic Example
-
-Before formatting:
-
-```toml
-[package]
-name="my-package"
-version="1.0.0"
-authors=["John Doe <john@example.com>", "Jane Smith <jane@example.com>"]
-description="""
-A multi-line
-description of
-the package
-"""
-```
-
-After formatting:
-
-```toml
-[package]
-name = "my-package"
-version = "1.0.0"
-authors = [
-  "John Doe <john@example.com>",
-  "Jane Smith <jane@example.com>",
-]
-description = """
-A multi-line
-description of
-the package
-"""
-```
-
-## Usage
-
-### Command Line
+Tombi's formatter can be run via the CLI.
 
 ```bash
+# Format all TOML files in the current directory
+tombi format
+
 # Format a single file
-tombi fmt path/to/file.toml
+tombi format path/to/file.toml
 
 # Format multiple files
-tombi fmt path/to/file1.toml path/to/file2.toml
+tombi format path/to/file1.toml path/to/file2.toml
 
 # Format all TOML files in a directory
-tombi fmt .
+tombi format .
 ```

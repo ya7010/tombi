@@ -22,6 +22,38 @@
     ]
   },
   {
+    "title": "Linter",
+    "path": "/documentation/linter",
+    "children": [
+      {
+        "title": "JSON Schema Validation",
+        "path": "/documentation/linter/json-schema"
+      }
+    ]
+  },
+  {
+    "title": "Language Server",
+    "path": "/documentation/language-server",
+    "children": [
+      {
+        "title": "Formatting",
+        "path": "/documentation/language-server/formatting"
+      },
+      {
+        "title": "Diagnostics",
+        "path": "/documentation/language-server/diagnostics"
+      },
+      {
+        "title": "Completion",
+        "path": "/documentation/language-server/completion"
+      },
+      {
+        "title": "Hover",
+        "path": "/documentation/language-server/hover"
+      }
+    ]
+  },
+  {
     "title": "Configuration",
     "path": "/documentation/configuration"
   }
