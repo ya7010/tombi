@@ -1,5 +1,5 @@
-import { For, createSignal, Show } from "solid-js";
-import { A } from "@solidjs/router";
+import { For, createSignal, Show, createMemo } from "solid-js";
+import { A, useLocation } from "@solidjs/router";
 import { IoChevronDown } from "solid-icons/io";
 import docIndex from "../../doc-index.json";
 import type { DicIndex } from "~/utils/doc-index";
@@ -7,18 +7,45 @@ import type { DicIndex } from "~/utils/doc-index";
 const docIndexs: DicIndex[] = docIndex;
 
 const TreeItem = (props: { item: DicIndex; level: number }) => {
-  const [isExpanded, setIsExpanded] = createSignal(false);
+  const location = useLocation();
+  const isCurrentPage = createMemo(
+    () => location.pathname === `${import.meta.env.BASE_URL}${props.item.path}`,
+  );
+
   const hasChildren = props.item.children && props.item.children.length > 0;
+  const shouldBeExpanded = createMemo(
+    () =>
+      hasChildren &&
+      (isCurrentPage() ||
+        props.item.children?.some(
+          (child) =>
+            `${import.meta.env.BASE_URL}${child.path}` === location.pathname,
+        )),
+  );
+
+  const [isExpanded, setIsExpanded] = createSignal(shouldBeExpanded());
+
+  createMemo(() => {
+    if (shouldBeExpanded()) {
+      setIsExpanded(true);
+    }
+  });
 
   return (
     <div class={`my-2 pl-${props.level}`}>
       <div class="flex items-center">
-        <A
-          href={props.item.path}
-          class="text-[--color-text] no-underline text-sm block py-1 hover:text-[--color-primary] flex-grow"
-        >
-          {props.item.title}
-        </A>
+        {isCurrentPage() ? (
+          <span class="font-bold text-tombi-700 text-sm block py-1 flex-grow">
+            {props.item.title}
+          </span>
+        ) : (
+          <A
+            href={props.item.path}
+            class="text-[--color-text] no-underline text-sm block py-1 hover:text-[--color-primary] flex-grow"
+          >
+            {props.item.title}
+          </A>
+        )}
         {hasChildren && (
           <button
             type="button"
