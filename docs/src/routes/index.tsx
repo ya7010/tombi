@@ -55,10 +55,10 @@ export default function Home() {
         </div>
 
         <div class="mb-16">
-          <p class="text-4xl text-tombi-primary dark:text-gray-300 mb-2 max-w-2xl mx-auto">
-            Feature Rich TOML Toolkit
+          <p class="text-4xl text-tombi-primary dark:text-gray-400 mb-4 max-w-2xl mx-auto">
+            🦅&nbsp;&nbsp; TOML Toolkit &nbsp;&nbsp;🦅
           </p>
-          <p class="text-xl text-tombi-primary dark:text-gray-300 mb-2 max-w-2xl mx-auto">
+          <p class="text-xl text-tombi-primary dark:text-gray-400 mb-2 max-w-2xl mx-auto">
             Bringing elegance and precision to your TOML configurations
           </p>
         </div>
