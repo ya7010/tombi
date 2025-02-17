@@ -10,7 +10,7 @@
 
 Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and language server.
 
-See [Documentation](https://tombi-toml.github.io/tombi) for more information.
+See 🚧[Documentation](https://tombi-toml.github.io/tombi)🚧 for more information.
 
 ## Purpose of Tombi
 Tombi aims to make more services and tools use TOML.

@@ -1,6 +1,7 @@
 import { For } from "solid-js";
 import { A } from "@solidjs/router";
 import styles from "./Sidebar.module.css";
+import docIndex from "../../../doc-index.json";
 
 type MenuItem = {
   title: string;
@@ -8,30 +9,16 @@ type MenuItem = {
   children?: MenuItem[];
 };
 
-const menuItems: MenuItem[] = [
-  {
-    title: "Overview",
-    path: "/documentation",
-  },
-  {
-    title: "Installation",
-    path: "/documentation/installation",
-  },
-  {
-    title: "Concepts",
-    path: "/documentation/concepts",
-  },
-  {
-    title: "Formatter",
-    path: "/documentation/formatter",
-    children: [
-      {
-        title: "Magic Trailing Comma",
-        path: "/documentation/formatter/magic-trailing-comma",
-      },
-    ],
-  },
-];
+const menuItems: MenuItem[] = docIndex.map((item) => ({
+  title: item.title,
+  path: item.path,
+  children: item.children
+    ? item.children.map((child) => ({
+        title: child.title,
+        path: child.path,
+      }))
+    : undefined,
+}));
 
 const TreeItem = (props: { item: MenuItem; level: number }) => {
   return (

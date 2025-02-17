@@ -15,8 +15,16 @@ toml-version = "1.0.0"
 
 [lint]
 
-[language-server]
+[server]
 completion.enabled = true
+
+[schema]
+[schema.catalog]
+path = "https://www.schemastore.org/api/json/catalog.json"
+
+[[schemas]]
+path = "https://example.com/schema.json"
+include = ["my.toml"]
 ```
 
 ## Configuration Options

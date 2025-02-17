@@ -1,0 +1,28 @@
+[
+  {
+    "title": "Overview",
+    "path": "/documentation"
+  },
+  {
+    "title": "Installation",
+    "path": "/documentation/installation"
+  },
+  {
+    "title": "Concepts",
+    "path": "/documentation/concepts"
+  },
+  {
+    "title": "Formatter",
+    "path": "/documentation/formatter",
+    "children": [
+      {
+        "title": "Magic Trailing Comma",
+        "path": "/documentation/formatter/magic-trailing-comma"
+      }
+    ]
+  },
+  {
+    "title": "Configuration",
+    "path": "/documentation/configuration"
+  }
+]
