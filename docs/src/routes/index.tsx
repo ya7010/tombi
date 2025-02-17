@@ -80,7 +80,7 @@ export default function Home() {
             class="text-xl"
           >
             <div class="flex items-center gap-2">
-              View on GitHub <TbBrandGithubFilled class="w-6 h-6" />
+              Go to GitHub <TbBrandGithubFilled class="w-6 h-6" />
             </div>
           </LinkButton>
         </div>
