@@ -79,10 +79,11 @@ export default function Home() {
           <LinkButton
             href="/documentation/installation"
             variant="primary"
-            class="text-xl"
+            class="text-xl group"
           >
             <div class="flex items-center gap-2">
-              Get Started <FaSolidFeather class="w-5 h-5" />
+              Get Started{" "}
+              <FaSolidFeather class="w-5 h-5 group-hover:animate-shake" />
             </div>
           </LinkButton>
           <LinkButton

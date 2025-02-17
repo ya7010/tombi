@@ -23,15 +23,20 @@ export default defineConfig({
       keyframes: {
         "spin-fast":
           "{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}",
+        shake:
+          "{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}",
       },
       durations: {
         "spin-fast": "0.5s",
+        shake: "0.7s",
       },
       timingFns: {
         "spin-fast": "linear",
+        shake: "ease-in-out",
       },
       counts: {
         "spin-fast": "infinite",
+        shake: "infinite",
       },
     },
   },
