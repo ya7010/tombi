@@ -22,7 +22,7 @@ const FEATURES = [
     description: "Validate and format your TOML files using a JSON Schema",
   },
   {
-    emoji: "🌟",
+    emoji: "🏬",
     title: "SchemaStore Integration",
     description:
       "Rich schema validation and completion through JSON Schema Store",
