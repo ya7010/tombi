@@ -6,20 +6,9 @@ import { flattenDocPages, type FlattenedDocPage } from "~/utils/doc-index";
 
 export default function DocumentationLayout(props: RouteSectionProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <div class="flex w-full h-full">
       <Sidebar />
-      <main
-        style={{
-          flex: 1,
-          padding: "1rem",
-        }}
-      >
+      <main class="flex-1 p-4">
         {props.children}
         <DocNavigation />
       </main>
@@ -45,22 +34,11 @@ function DocNavigation() {
   }
 
   return (
-    <div
-      style={{
-        "margin-top": "2rem",
-        "padding-top": "2rem",
-        "border-top": "1px solid #eaeaea",
-        display: "flex",
-        "justify-content": "space-between",
-      }}
-    >
+    <div class="mt-8 pt-8 border-t border-gray-200 flex justify-between">
       {prevPage && (
         <A
           href={prevPage.path}
-          style={{
-            "text-decoration": "none",
-            color: "#0070f3",
-          }}
+          class="no-underline text-blue-500 hover:text-blue-600"
         >
           ← {prevPage.title}
         </A>
@@ -68,11 +46,7 @@ function DocNavigation() {
       {nextPage && (
         <A
           href={nextPage.path}
-          style={{
-            "text-decoration": "none",
-            color: "#0070f3",
-            "margin-left": "auto",
-          }}
+          class="no-underline text-blue-500 hover:text-blue-600 ml-auto"
         >
           {nextPage.title} →
         </A>
