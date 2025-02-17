@@ -1,25 +1,11 @@
 import { For } from "solid-js";
 import { A } from "@solidjs/router";
 import docIndex from "../../doc-index.json";
+import type { DicIndex } from "~/utils/doc-index";
 
-type MenuItem = {
-  title: string;
-  path: string;
-  children?: MenuItem[];
-};
+const docIndexs: DicIndex[] = docIndex;
 
-const menuItems: MenuItem[] = docIndex.map((item) => ({
-  title: item.title,
-  path: item.path,
-  children: item.children
-    ? item.children.map((child) => ({
-        title: child.title,
-        path: child.path,
-      }))
-    : undefined,
-}));
-
-const TreeItem = (props: { item: MenuItem; level: number }) => {
+const TreeItem = (props: { item: DicIndex; level: number }) => {
   return (
     <div class={`my-2 pl-${props.level}`}>
       <A
@@ -42,7 +28,7 @@ const TreeItem = (props: { item: MenuItem; level: number }) => {
 export function Sidebar() {
   return (
     <nav class="w-[250px] h-full p-4 bg-[--color-bg-secondary] border-r border-[--color-border] sm:block hidden">
-      <For each={menuItems}>{(item) => <TreeItem item={item} level={0} />}</For>
+      <For each={docIndexs}>{(item) => <TreeItem item={item} level={0} />}</For>
     </nav>
   );
 }
