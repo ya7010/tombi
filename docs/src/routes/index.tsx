@@ -63,7 +63,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-x-16 gap-y-8 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 mb-16">
           {FEATURES.map((feature) => (
             <FeatureCard
               // @ts-ignore
