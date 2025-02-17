@@ -23,7 +23,7 @@ const FEATURES = [
   },
   {
     emoji: "🏬",
-    title: "SchemaStore Integration",
+    title: "Schema Store",
     description:
       "Rich schema validation and completion through JSON Schema Store",
   },
