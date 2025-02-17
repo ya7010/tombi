@@ -22,6 +22,17 @@ const FEATURES = [
     description: "Validate and format your TOML files using a JSON Schema",
   },
   {
+    emoji: "🌟",
+    title: "SchemaStore Integration",
+    description:
+      "Rich schema validation and completion through JSON Schema Store",
+  },
+  {
+    emoji: "🚀",
+    title: "Zero Configuration",
+    description: "Start using powerful features instantly without any setup",
+  },
+  {
     emoji: "✨",
     title: "Magic Experience",
     description: "Magic tailing comma formatting, and magic trigger completion",
@@ -45,7 +56,7 @@ export default function Home() {
 
         <div class="mb-16">
           <p class="text-4xl text-tombi-primary dark:text-gray-300 mb-2 max-w-2xl mx-auto">
-            Full-featured TOML Toolkit
+            Feature Rich TOML Toolkit
           </p>
           <p class="text-xl text-tombi-primary dark:text-gray-300 mb-2 max-w-2xl mx-auto">
             Bringing elegance and precision to your TOML configurations
