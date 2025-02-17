@@ -1,5 +1,5 @@
 import type { RouteSectionProps } from "@solidjs/router";
-import { Sidebar } from "~/components/sidebar/Sidebar";
+import { Sidebar } from "~/components/Sidebar";
 
 export default function DocumentationLayout(props: RouteSectionProps) {
   return (
