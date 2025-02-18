@@ -56,11 +56,11 @@ export default function Home() {
 
         <div class="mb-16">
           <p class="text-4xl mb-4 max-w-2xl mx-auto">
-            🦅&nbsp;&nbsp;
+            <span class="mr-6">🦅</span>
             <span class="font-bold bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
               TOML Toolkit
             </span>
-            &nbsp;&nbsp; 🦅
+            <span class="ml-6">🦅</span>
           </p>
           <p class="text-xl text-tombi-primary dark:text-gray-400 mb-2 max-w-2xl mx-auto">
             Bringing elegance and precision to your TOML configurations
