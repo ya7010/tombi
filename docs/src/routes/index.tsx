@@ -79,7 +79,7 @@ export default function Home() {
               🦅
             </span>
             <span class="font-bold bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
-              TOML Toolkit
+              Feature-Rich TOML Toolkit
             </span>
             <span class="ml-6 inline-block" style={getEagleStyle()}>
               🦅
