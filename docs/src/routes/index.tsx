@@ -4,6 +4,7 @@ import { TbBrandGithubFilled } from "solid-icons/tb";
 import { FeatureCard } from "~/components/FeatureCard";
 import { LinkButton } from "~/components/button/LinkButton";
 import { Highlight } from "solid-highlight";
+import { createSignal, onMount, onCleanup } from "solid-js";
 
 const FEATURES = [
   {
@@ -40,6 +41,24 @@ const FEATURES = [
 ] as const;
 
 export default function Home() {
+  const [scrollY, setScrollY] = createSignal(0);
+
+  onMount(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll);
+    onCleanup(() => window.removeEventListener("scroll", handleScroll));
+  });
+
+  const getEagleStyle = () => {
+    const rotation = Math.sin(scrollY() * 0.04) * 20;
+    return {
+      transform: `rotate(${rotation}deg)`,
+      transition: "transform 0.1s ease-out",
+    };
+  };
+
   return (
     <div>
       <Title>Tombi - Modern TOML Formatter</Title>
@@ -56,11 +75,15 @@ export default function Home() {
 
         <div class="mb-16">
           <p class="text-4xl mb-4 max-w-2xl mx-auto">
-            <span class="mr-6">🦅</span>
+            <span class="mr-6 inline-block" style={getEagleStyle()}>
+              🦅
+            </span>
             <span class="font-bold bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
               TOML Toolkit
             </span>
-            <span class="ml-6">🦅</span>
+            <span class="ml-6 inline-block" style={getEagleStyle()}>
+              🦅
+            </span>
           </p>
           <p class="text-xl text-tombi-primary dark:text-gray-400 mb-2 max-w-2xl mx-auto">
             Bringing elegance and precision to your TOML configurations
