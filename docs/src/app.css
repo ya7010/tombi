@@ -46,19 +46,31 @@ main {
 /* Table Styles */
 .mdx-content table {
   border-collapse: collapse;
-  width: 100%;
-  margin: 1rem 0;
+  margin: 1rem 0rem;
 }
 
 .mdx-content th,
 .mdx-content td {
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem 1rem;
   text-align: left;
   min-width: 100px;
+  background-color: rgba(119, 170, 221, 0.1);
 }
 
 .mdx-content th {
   font-weight: 600;
+  background-color: rgba(119, 170, 221, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .mdx-content th,
+  .mdx-content td {
+    background-color: rgba(119, 170, 221, 0.05);
+  }
+
+  .mdx-content th {
+    background-color: rgba(119, 170, 221, 0.1);
+  }
 }
 
 p {
