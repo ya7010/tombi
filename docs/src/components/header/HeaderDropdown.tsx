@@ -9,7 +9,6 @@ interface HeaderDropdownProps {
 export function HeaderDropdown(props: HeaderDropdownProps) {
   const menuItems = [
     { href: "/", label: "Home" },
-    { href: "/documentation/concepts", label: "Concepts" },
     { href: "/documentation", label: "Docs" },
     { href: "/playground", label: "Playground" },
   ];
