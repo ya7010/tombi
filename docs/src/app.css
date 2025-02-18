@@ -34,17 +34,31 @@ main {
   position: relative;
 }
 
+.mdx-content h1 {
+  margin-top: 0rem;
+}
+
 .mdx-content p {
   margin: 1rem 0;
   max-width: none;
 }
 
-h1 {
-  color: #335d92;
-  font-size: 2rem;
-  font-weight: 400;
-  line-height: 1.1;
-  margin: auto auto 1rem auto;
+/* Table Styles */
+.mdx-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.mdx-content th,
+.mdx-content td {
+  padding: 0.5rem 0.5rem;
+  text-align: left;
+  min-width: 100px;
+}
+
+.mdx-content th {
+  font-weight: 600;
 }
 
 p {

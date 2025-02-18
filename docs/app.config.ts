@@ -2,6 +2,7 @@ import { defineConfig } from "@solidjs/start/config";
 /* @ts-ignore */
 import pkg from "@vinxi/plugin-mdx";
 import unocssPlugin from "unocss/vite";
+import remarkGfm from "remark-gfm";
 
 const { default: mdx } = pkg;
 
@@ -24,6 +25,7 @@ export default defineConfig({
         jsx: true,
         jsxImportSource: "solid-js",
         providerImportSource: "solid-mdx",
+        remarkPlugins: [[remarkGfm, { tablePipeAlign: false }]],
       }),
       unocssPlugin(),
     ],
