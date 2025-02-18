@@ -15,7 +15,7 @@ const FEATURES = [
   {
     emoji: "🎯",
     title: "Accurate",
-    description: "Full compliance with TOML specification",
+    description: "Full compliance with TOML specification and toml-test",
   },
   {
     emoji: "🛤️",
