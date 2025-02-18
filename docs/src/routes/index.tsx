@@ -57,7 +57,7 @@ export default function Home() {
         <div class="mb-16">
           <p class="text-4xl mb-4 max-w-2xl mx-auto">
             🦅&nbsp;&nbsp;
-            <span class="bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
+            <span class="font-bold bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
               TOML Toolkit
             </span>
             &nbsp;&nbsp; 🦅
