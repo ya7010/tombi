@@ -55,8 +55,12 @@ export default function Home() {
         </div>
 
         <div class="mb-16">
-          <p class="text-4xl text-tombi-primary dark:text-gray-400 mb-4 max-w-2xl mx-auto">
-            🦅&nbsp;&nbsp; TOML Toolkit &nbsp;&nbsp;🦅
+          <p class="text-4xl mb-4 max-w-2xl mx-auto">
+            🦅&nbsp;&nbsp;
+            <span class="bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
+              TOML Toolkit
+            </span>
+            &nbsp;&nbsp; 🦅
           </p>
           <p class="text-xl text-tombi-primary dark:text-gray-400 mb-2 max-w-2xl mx-auto">
             Bringing elegance and precision to your TOML configurations
@@ -99,7 +103,7 @@ export default function Home() {
       </section>
 
       <section class="max-w-3xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-tombi-primary to-tombi-700 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
+        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
           Simple and Easy to Use
         </h2>
         <Highlight language="toml">
