@@ -35,7 +35,7 @@ const TreeItem = (props: { item: DicIndex; level: number }) => {
     <div class={`my-2 pl-${props.level}`}>
       <div class="flex items-center">
         {isCurrentPage() ? (
-          <span class="font-bold text-tombi-700 text-sm block py-1 flex-grow">
+          <span class="font-bold text-tombi-700 dark:text-color-yellow text-sm block py-1 flex-grow">
             {props.item.title}
           </span>
         ) : (
