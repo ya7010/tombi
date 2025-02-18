@@ -5,18 +5,18 @@ export default defineConfig({
   theme: {
     colors: {
       tombi: {
-        primary: "rgb(0,0,102)", // メインカラー
-        50: "rgb(230,230,255)",
-        100: "rgb(204,204,255)",
-        200: "rgb(153,153,255)",
-        300: "rgb(102,102,255)",
-        400: "rgb(51,51,255)",
-        500: "rgb(0,0,255)",
-        600: "rgb(0,0,204)",
-        700: "rgb(0,0,153)",
-        800: "rgb(0,0,102)",
-        900: "rgb(0,0,102)", // メインカラー（濃い青）
-        focus: "rgba(255,255,255, 0.8)", // 枠線用の半透明白
+        primary: "#000066", // Primary color
+        50: "#E6E6FF",
+        100: "#CCCCFF",
+        200: "#9999FF",
+        300: "#6666FF",
+        400: "#3333FF",
+        500: "#0000FF",
+        600: "#0000CC",
+        700: "#000099",
+        800: "#000066",
+        900: "#000066", // Primary color
+        focus: "rgba(255,255,255, 0.8)",
       },
     },
     animation: {
@@ -40,7 +40,6 @@ export default defineConfig({
       },
     },
   },
-  // カスタムルールやショートカットが必要な場合はここに追加
   shortcuts: {
     "btn-focus":
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-tombi-focus transition-colors focus:rounded-lg",
