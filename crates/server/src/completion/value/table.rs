@@ -181,7 +181,7 @@ impl FindCompletionContents for document_tree::Table {
                                                 (schema_url, Some(definitions))
                                             };
                                             return get_property_value_completion_contents(
-                                                accessor_str,
+                                                key,
                                                 value,
                                                 accessors,
                                                 Some(value_schema),
@@ -222,7 +222,7 @@ impl FindCompletionContents for document_tree::Table {
                                         };
 
                                     return get_property_value_completion_contents(
-                                        accessor_str,
+                                        key,
                                         value,
                                         accessors,
                                         Some(additional_property_schema),
@@ -240,7 +240,7 @@ impl FindCompletionContents for document_tree::Table {
 
                             if table_schema.additional_properties {
                                 return get_property_value_completion_contents(
-                                    accessor_str,
+                                    key,
                                     value,
                                     accessors,
                                     None,
@@ -391,10 +391,9 @@ impl FindCompletionContents for document_tree::Table {
                 Some(_) => Vec::with_capacity(0),
                 None => {
                     if let Some(key) = keys.first() {
-                        let accessor_str = &key.to_raw_text(toml_version);
                         if let Some(value) = self.get(key) {
                             get_property_value_completion_contents(
-                                accessor_str,
+                                key,
                                 value,
                                 accessors,
                                 None,
@@ -554,7 +553,7 @@ async fn count_table_or_array_schema(
 }
 
 fn get_property_value_completion_contents<'a: 'b, 'b>(
-    accessor_str: &'a str,
+    key: &'a document_tree::Key,
     value: &'a document_tree::Value,
     accessors: &'a Vec<Accessor>,
     value_schema: Option<&'a ValueSchema>,
@@ -566,7 +565,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
     schema_store: &'a SchemaStore,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>> {
-    tracing::trace!("accessor_str: {:?}", accessor_str);
+    tracing::trace!("key: {:?}", key);
     tracing::trace!("value: {:?}", value);
     tracing::trace!("keys: {:?}", keys);
     tracing::trace!("accessors: {:?}", accessors);
@@ -577,7 +576,13 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
         if keys.len() == 1 {
             match completion_hint {
                 Some(CompletionHint::InArray) => {
-                    return type_hint_value(Some(accessor_str), position, None, completion_hint)
+                    return type_hint_value(
+                        Some(key),
+                        position,
+                        toml_version,
+                        None,
+                        completion_hint,
+                    )
                 }
                 Some(
                     CompletionHint::DotTrigger { range } | CompletionHint::EqualTrigger { range },
@@ -586,16 +591,17 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                     if value_schema.is_none() {
                         if range.end() <= key.range().start() {
                             return vec![CompletionContent::new_type_hint_key(
-                                accessor_str,
-                                text::Range::new(range.end(), position),
+                                key,
+                                toml_version,
                                 schema_url,
                                 completion_hint,
                             )];
                         }
                         return type_hint_value(
-                            Some(accessor_str),
+                            Some(key),
                             position,
-                            None,
+                            toml_version,
+                            schema_url,
                             completion_hint,
                         );
                     }
@@ -620,15 +626,15 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                             )
                             | None => {
                                 return CompletionContent::new_magic_triggers(
-                                    accessor_str,
+                                    &key.to_raw_text(toml_version),
                                     position,
                                     schema_url,
                                 );
                             }
                             Some(CompletionHint::InArray) => {
                                 return vec![CompletionContent::new_type_hint_key(
-                                    accessor_str,
-                                    text::Range::at(position),
+                                    &key,
+                                    toml_version,
                                     schema_url,
                                     completion_hint,
                                 )];
@@ -644,7 +650,9 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                 &accessors
                     .clone()
                     .into_iter()
-                    .chain(std::iter::once(Accessor::Key(accessor_str.to_string())))
+                    .chain(std::iter::once(Accessor::Key(
+                        key.to_raw_text(toml_version),
+                    )))
                     .collect(),
                 value_schema,
                 toml_version,

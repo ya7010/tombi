@@ -112,22 +112,23 @@ impl FindCompletionContents for document_tree::Value {
                             .await
                     }
                     None => {
-                        let key_name = keys.last().map(|key| key.to_raw_text(toml_version));
+                        let last_key = keys.last();
 
-                        match (&key_name, completion_hint) {
-                            (Some(key_name), Some(CompletionHint::EqualTrigger { range }))
+                        match (&last_key, completion_hint) {
+                            (Some(last_key), Some(CompletionHint::EqualTrigger { range }))
                                 if range.end() < position =>
                             {
                                 vec![CompletionContent::new_type_hint_key(
-                                    key_name,
-                                    text::Range::new(range.end(), position),
+                                    last_key,
+                                    toml_version,
                                     schema_url,
                                     completion_hint,
                                 )]
                             }
                             _ => type_hint_value(
-                                key_name.as_deref(),
+                                last_key,
                                 position,
+                                toml_version,
                                 schema_url,
                                 completion_hint,
                             ),
@@ -141,8 +142,9 @@ impl FindCompletionContents for document_tree::Value {
 }
 
 pub fn type_hint_value(
-    key_name: Option<&str>,
+    key: Option<&document_tree::Key>,
     position: text::Position,
+    toml_version: TomlVersion,
     schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {
@@ -163,13 +165,21 @@ pub fn type_hint_value(
         )],
     ]);
 
-    if let Some(key_name) = key_name {
-        completion_contents.push(CompletionContent::new_type_hint_key(
-            key_name,
-            text::Range::at(position),
-            schema_url,
-            completion_hint,
-        ))
+    if let Some(key) = key {
+        let need_key_hint = match completion_hint {
+            Some(
+                CompletionHint::DotTrigger { range, .. } | CompletionHint::EqualTrigger { range },
+            ) => range.end() == position || range.end() <= key.range().start(),
+            Some(CompletionHint::InTableHeader | CompletionHint::InArray) | None => true,
+        };
+        if need_key_hint {
+            completion_contents.push(CompletionContent::new_type_hint_key(
+                &key,
+                toml_version,
+                schema_url,
+                completion_hint,
+            ));
+        }
     } else {
         completion_contents.push(CompletionContent::new_type_hint_empty_key(
             position,

@@ -1,3 +1,4 @@
+use config::TomlVersion;
 use schema_store::{get_schema_name, SchemaUrl};
 
 use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
@@ -156,11 +157,14 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_key(
-        key_name: &str,
-        key_range: text::Range,
+        key: &document_tree::Key,
+        toml_version: TomlVersion,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
+        let key_name = key.to_raw_text(toml_version);
+        let edit = CompletionEdit::new_key(&key_name, key.range(), completion_hint);
+
         Self {
             label: "$key".to_string(),
             kind: CompletionKind::Table,
@@ -168,9 +172,9 @@ impl CompletionContent {
             priority: CompletionContentPriority::TypeHintKey,
             detail: Some("Key".to_string()),
             documentation: None,
-            filter_text: Some(key_name.to_string()),
+            filter_text: Some(key_name),
             schema_url: schema_url.cloned(),
-            edit: CompletionEdit::new_key(key_name, key_range, completion_hint),
+            edit,
             preselect: None,
         }
     }

@@ -77,11 +77,8 @@ impl FindCompletionContents for document_tree::Array {
                         }
                     }
                     if let Some(items) = &array_schema.items {
-                        if let Ok((item_schema, new_schema)) = items
-                            .write()
-                            .await
-                            .resolve(definitions, schema_store)
-                            .await
+                        if let Ok((item_schema, new_schema)) =
+                            items.write().await.resolve(definitions, schema_store).await
                         {
                             let (schema_url, definitions) =
                                 if let Some((schema_url, definitions)) = &new_schema {
@@ -168,18 +165,10 @@ impl FindCompletionContents for document_tree::Array {
                                 if keys.len() == 1
                                     && table.kind() == document_tree::TableKind::KeyValue
                                 {
-                                    let key_str = &keys.first().unwrap().to_raw_text(toml_version);
+                                    let key = &keys.first().unwrap();
                                     return vec![CompletionContent::new_type_hint_key(
-                                        key_str,
-                                        text::Range::new(
-                                            text::Position::new(
-                                                position.line(),
-                                                position
-                                                    .column()
-                                                    .saturating_sub(key_str.len() as text::Column),
-                                            ),
-                                            position,
-                                        ),
+                                        key,
+                                        toml_version,
                                         schema_url,
                                         Some(CompletionHint::InArray),
                                     )];
@@ -206,7 +195,7 @@ impl FindCompletionContents for document_tree::Array {
                                 .await;
                         }
                     }
-                    type_hint_value(None, position, schema_url, completion_hint)
+                    type_hint_value(None, position, toml_version, schema_url, completion_hint)
                 }
             }
         }
