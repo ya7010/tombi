@@ -1,3 +1,52 @@
-# Code Completion
+# Completion
 
-Tombi's Language Server provides intelligent code completion for TOML files.
+Tombi provides code completion for TOML.
+The most simple form is to provide the type that can be input as TOML grammar.
+All of them have the description `🦅 Type Hint`.
+
+<img src="/completion_without_schema.png" alt="Type Hint" width="600" />
+
+If a JSON Schema is applied to the editing file, more specific candidates are provided.
+
+<img src="/completion_with_schema.png" alt="Type Hint" width="600" />
+
+
+## Magic Trigger
+Tombi provides a magic trigger to complete rhythmically.
+TOML uses doted keys or inline tables for nested structures,
+but Tombi controls the form of completion by selecting triggers with `.` and `=`.
+
+> [!TIP]
+> If you prefer inline tables, select the trigger `=`, and completion will prioritize inline tables.
+>
+> ```toml
+> inline = { table = true }
+> ```
+>
+> If you prefer dotted keys, select the trigger `.`.
+>
+> ```toml
+> dotted.keys = true
+> ```
+
+#### Dot Trigger Completion
+
+| Type | Trigger | Select | Completion |
+| --- | --- | --- | --- |
+| Boolean  | `key.█` | `true` | `key = true█` |
+| Integer  | `key.█` | `42` | `key = ${█:42}` |
+| Float | `key.█` | `3.14` | `key = ${█:3.14}` |
+| String | `key.█` | `""` | `key = "█"` |
+| Array | `key.█` | `[]` | `key = [█]` |
+| Table  | `server.█` | `completion` | `server.completion█` |
+
+#### Equal Trigger Completion
+
+| Type | Trigger | Select | Completion |
+| --- | --- | --- | --- |
+| Boolean | `key=█` | `true` | `key = true█` |
+| Integer | `key=█` | `42` | `key = ${█:42}` |
+| Float | `key=█` | `3.14` | `key = ${█:3.14}` |
+| String | `key=█` | `""` | `key = "█"` |
+| Array | `key=█` | `[]` | `key = [█]` |
+| Table | `server=█` | `completion` | `server = { completion█ }` |
