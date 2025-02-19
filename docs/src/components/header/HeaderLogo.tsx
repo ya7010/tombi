@@ -14,14 +14,14 @@ const logoProps: LogoProps[] = [
   {
     id: "mobile-logo",
     src: `${import.meta.env.BASE_URL}/icon.svg`,
-    class: "h-16 w-16",
+    class: "mx-4 h-16 w-16",
     linkClass: "md:hidden flex",
     preventDefault: true,
   },
   {
     id: "desktop-logo",
     src: `${import.meta.env.BASE_URL}/tombi-transparent.svg`,
-    class: "h-16 w-auto",
+    class: "ml-4 mr-0 h-16 w-auto",
     linkClass: "hidden md:flex",
     preventDefault: false,
   },
@@ -50,7 +50,7 @@ export function HeaderLogo() {
             <A
               id={props.id}
               href="/"
-              class={`ml-4 mr-6 ${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
+              class={`${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
               onClick={(e) => props.preventDefault && e.preventDefault()}
             >
               <img
