@@ -12,16 +12,6 @@ Tombi (鳶) is a toolkit for TOML; providing a formatter/linter and language ser
 
 See 🚧[Documentation](https://tombi-toml.github.io/tombi)🚧 for more information.
 
-## Purpose of Tombi
-Tombi aims to make more services and tools use TOML.
-
-JSON is excellent as a data description language, but it does not support comments and lacks convenience.
-
-YAML has a [Great VSCode Extension by RedHat](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml),
-but the language specification is complex and may exhibit unexpected behavior.
-
-Tombi aims to provide TOML with features like RedHat's YAML extension to improve developers' experience.
-
 ## Differences from Taplo
 
 [Taplo](https://github.com/tamasfe/taplo) is already famous as a TOML Language Server.
@@ -30,17 +20,6 @@ However, I rewrote a new Language Server for the following purposes.
 - Support for TOML v1.1.0 (preview)
 - Formatter inspired by Python's [Black](https://github.com/psf/black) (Support for [magic trailing comma](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#the-magic-trailing-comma))
 - A formatter with stable behavior
-
-## Usage
-### Formatting
-```sh
-tombi format
-```
-
-### Linting
-```sh
-tombi lint
-```
 
 ## Config file
 The documentation site has not been built yet,
