@@ -25,6 +25,7 @@
     "flexsearch": "^0.7.43",
     "mdast-util-gfm": "^2.0.0",
     "mdast-util-gfm-table": "^1.0.0",
+    "mdast-util-mdx": "^3.0.0",
     "prismjs": "^1.29.0",
     "remark-gfm": "^3.0.1",
     "solid-highlight": "^0.1.26",

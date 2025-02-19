@@ -1,5 +1,6 @@
 import { visit } from "unist-util-visit";
-import type { Link, Root, Image } from "mdast";
+import type { Link, Root } from "mdast";
+import type { MdxJsxFlowElement } from "mdast-util-mdx";
 
 export function remarkBaseUrl() {
   return (tree: Root) => {
@@ -20,8 +21,18 @@ export function remarkBaseUrl() {
     });
 
     // Process URLs in images
-    visit(tree, "image", (node: Image) => {
-      node.url = processUrl(node.url);
+    visit(tree, "mdxJsxFlowElement", (node: MdxJsxFlowElement) => {
+      if (node.name === "img") {
+        for (const attr of node.attributes) {
+          if (
+            attr.type === "mdxJsxAttribute" &&
+            attr.name === "src" &&
+            typeof attr.value === "string"
+          ) {
+            attr.value = processUrl(attr.value);
+          }
+        }
+      }
     });
   };
 }
