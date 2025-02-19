@@ -1,18 +1,27 @@
 import { visit } from "unist-util-visit";
-import type { Link, Root } from "mdast";
+import type { Link, Root, Image } from "mdast";
 
 export function remarkBaseUrl() {
   return (tree: Root) => {
-    visit(tree, "link", (node: Link) => {
-      console.log(`before: ${node.url}`);
-      if (node.url.startsWith("/")) {
+    const processUrl = (url: string): string => {
+      if (url.startsWith("/")) {
         let baseUrl = process.env.BASE_URL || import.meta.env.BASE_URL || "/";
         if (baseUrl === "/") {
           baseUrl = "/_build/";
         }
-        node.url = `${baseUrl}${node.url.slice(1)}`;
+        return `${baseUrl}${url.slice(1)}`;
       }
-      console.log(`after: ${node.url}`);
+      return url;
+    };
+
+    // Process URLs in links
+    visit(tree, "link", (node: Link) => {
+      node.url = processUrl(node.url);
+    });
+
+    // Process URLs in images
+    visit(tree, "image", (node: Image) => {
+      node.url = processUrl(node.url);
     });
   };
 }
