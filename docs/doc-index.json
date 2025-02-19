@@ -1,60 +1,60 @@
 [
   {
     "title": "Overview",
-    "path": "/documentation"
+    "path": "/docs"
   },
   {
     "title": "Installation",
-    "path": "/documentation/installation"
+    "path": "/docs/installation"
   },
   {
     "title": "Concepts",
-    "path": "/documentation/concepts"
+    "path": "/docs/concepts"
   },
   {
     "title": "Formatter",
-    "path": "/documentation/formatter",
+    "path": "/docs/formatter",
     "children": [
       {
         "title": "Magic Trailing Comma",
-        "path": "/documentation/formatter/magic-trailing-comma"
+        "path": "/docs/formatter/magic-trailing-comma"
       }
     ]
   },
   {
     "title": "Linter",
-    "path": "/documentation/linter",
+    "path": "/docs/linter",
     "children": [
       {
         "title": "JSON Schema Validation",
-        "path": "/documentation/linter/json-schema"
+        "path": "/docs/linter/json-schema"
       }
     ]
   },
   {
     "title": "Language Server",
-    "path": "/documentation/language-server",
+    "path": "/docs/language-server",
     "children": [
       {
         "title": "Formatting",
-        "path": "/documentation/language-server/formatting"
+        "path": "/docs/language-server/formatting"
       },
       {
         "title": "Diagnostics",
-        "path": "/documentation/language-server/diagnostics"
+        "path": "/docs/language-server/diagnostics"
       },
       {
         "title": "Completion",
-        "path": "/documentation/language-server/completion"
+        "path": "/docs/language-server/completion"
       },
       {
         "title": "Hover",
-        "path": "/documentation/language-server/hover"
+        "path": "/docs/language-server/hover"
       }
     ]
   },
   {
     "title": "Configuration",
-    "path": "/documentation/configuration"
+    "path": "/docs/configuration"
   }
 ]

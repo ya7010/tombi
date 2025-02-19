@@ -19,7 +19,7 @@ function extractTextContent(markdown: string): string {
 }
 
 function generateSearchIndex() {
-  const docsDir = join(process.cwd(), "src/routes/documentation");
+  const docsDir = join(process.cwd(), "src/routes/docs");
   const files = globSync("**/*.mdx", { cwd: docsDir });
 
   const documents: DocumentData[] = files.map((file: string, index: number) => {
@@ -27,9 +27,7 @@ function generateSearchIndex() {
     const fileContent = readFileSync(fullPath, "utf-8");
     const { data, content } = matter(fileContent);
 
-    const url = `/documentation/${file
-      .replace(/\.mdx$/, "")
-      .replace(/\/index$/, "")}`;
+    const url = `/docs/${file.replace(/\.mdx$/, "").replace(/\/index$/, "")}`;
 
     return {
       id: index + 1,
