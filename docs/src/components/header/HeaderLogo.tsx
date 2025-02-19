@@ -50,7 +50,7 @@ export function HeaderLogo() {
             <A
               id={props.id}
               href="/"
-              class={`ml-4 ${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
+              class={`ml-4 mr-6 ${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
               onClick={(e) => props.preventDefault && e.preventDefault()}
             >
               <img
