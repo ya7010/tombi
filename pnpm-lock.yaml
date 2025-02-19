@@ -72,6 +72,9 @@ importers:
       '@types/jsdom':
         specifier: ^21.1.7
         version: 21.1.7
+      '@types/mdast':
+        specifier: ^4.0.4
+        version: 4.0.4
       glob:
         specifier: ^11.0.1
         version: 11.0.1
@@ -84,6 +87,9 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
       unocss:
         specifier: ^65.4.3
         version: 65.5.0(postcss@8.5.2)(vite@6.1.0(@types/node@22.10.2)(jiti@2.4.2)(terser@5.38.2)(tsx@4.19.2))(vue@3.5.13(typescript@5.7.2))
