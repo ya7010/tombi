@@ -2,7 +2,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { useLocation, A } from "@solidjs/router";
 import { Sidebar } from "~/components/Sidebar";
 import docIndex from "../../doc-index.json";
-import { flattenDocPages, type FlattenedDocPage } from "~/utils/doc-index";
+import { flattenDocPages } from "~/utils/doc-index";
 import { createEffect } from "solid-js";
 import Prism from "prismjs";
 
