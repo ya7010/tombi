@@ -43,6 +43,22 @@ main {
   max-width: none;
 }
 
+/* Inline code styles */
+.mdx-content code:not(pre code) {
+  background-color: rgba(119, 170, 221, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: 'Fira Code', 'Consolas', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mdx-content code:not(pre code) {
+    background-color: rgba(119, 170, 221, 0.05);
+    color: #e6e6e6;
+  }
+}
+
 /* Table Styles */
 .mdx-content table {
   border-collapse: collapse;
