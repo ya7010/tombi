@@ -44,12 +44,12 @@
         "path": "/docs/language-server/diagnostics"
       },
       {
-        "title": "Completion",
-        "path": "/docs/language-server/completion"
-      },
-      {
         "title": "Hover",
         "path": "/docs/language-server/hover"
+      },
+      {
+        "title": "Completion",
+        "path": "/docs/language-server/completion"
       }
     ]
   },
