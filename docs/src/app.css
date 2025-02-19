@@ -35,6 +35,15 @@ main {
   margin-top: 0rem;
 }
 
+.mdx-content a {
+  color: #3B82F6; /* text-blue-500 */
+  text-decoration: none;
+}
+
+.mdx-content a:hover {
+  color: #2563EB; /* hover:text-blue-600 */
+}
+
 .mdx-content p {
   margin: 1rem 0;
   max-width: none;
