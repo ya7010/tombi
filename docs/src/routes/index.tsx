@@ -52,7 +52,7 @@ export default function Home() {
   });
 
   const getEagleStyle = () => {
-    const rotation = Math.sin(scrollY() * 0.04) * 20;
+    const rotation = Math.sin(scrollY() * 0.015) * 20;
     return {
       transform: `rotate(${rotation}deg)`,
       transition: "transform 0.1s ease-out",
