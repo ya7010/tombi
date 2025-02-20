@@ -10,7 +10,6 @@ repository = { workspace = true }
 ahash = { workspace = true }
 ast = { workspace = true }
 config.workspace = true
-dashmap = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
 futures = { workspace = true }

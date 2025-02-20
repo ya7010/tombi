@@ -63,7 +63,7 @@ impl Referable<ValueSchema> {
                     description,
                 } => {
                     let mut new_schema = None;
-                    if let Some(definition_schema) = definitions.get(reference) {
+                    if let Some(definition_schema) = definitions.read().await.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
                         if let Referable::Resolved(ref mut schema) = &mut referable_schema {
                             if title.is_some() || description.is_some() {

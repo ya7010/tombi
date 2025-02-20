@@ -7,6 +7,7 @@ mod value;
 
 use std::ops::Deref;
 
+use ahash::AHashMap;
 use ast::{algo::ancestors_at_position, AstNode};
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
@@ -173,7 +174,7 @@ pub async fn get_completion_contents(
     //       remove the completion contents with lower priority.
     completion_contents
         .into_iter()
-        .fold(dashmap::DashMap::new(), |acc, content| {
+        .fold(AHashMap::new(), |mut acc, content| {
             acc.entry(content.label.clone())
                 .or_insert_with(Vec::new)
                 .push(content);

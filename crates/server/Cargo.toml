@@ -15,7 +15,6 @@ camino = { workspace = true }
 clap = { workspace = true, optional = true }
 config = { workspace = true }
 crossbeam-channel = "0.5.13"
-dashmap = { workspace = true }
 diagnostic = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }

@@ -8,7 +8,6 @@ license = { workspace = true }
 [dependencies]
 ast = { workspace = true }
 config = { workspace = true }
-dashmap.workspace = true
 diagnostic = { workspace = true }
 document-tree = { workspace = true }
 futures.workspace = true
