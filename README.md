@@ -9,7 +9,7 @@
 [![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js?style=flat-square)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 
 <div align="center" style="font-size: 1.5em; margin-top: 20px;">
-    <div align="center" style="font-size: 2.0em; margin-bottom: 30px;">
+    <div align="center" style="font-size: 3.0em; margin-bottom: 30px;">
         <strong> 🦅&nbsp; Tombi (鳶) is a Feature-Rich TOML Toolkit &nbsp 🦅</strong>
     </div>
     It provides a Formatter, Linter, and Language Server
