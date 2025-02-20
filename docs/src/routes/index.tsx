@@ -73,7 +73,7 @@ export default function Home() {
           />
         </div>
 
-        <div class="mb-16">
+        <div>
           <p class="text-4xl mb-4 max-w-2xl mx-auto">
             <span class="mr-6 inline-block" style={getEagleStyle()}>
               🦅
@@ -89,6 +89,12 @@ export default function Home() {
             Bringing elegance and precision to your TOML configurations
           </p>
         </div>
+
+        <img
+          src={`${import.meta.env.BASE_URL}/demo.gif`}
+          alt="Tombi Demo"
+          class="w-full my-16"
+        />
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 mb-16">
           {FEATURES.map((feature) => (
@@ -123,31 +129,6 @@ export default function Home() {
             </div>
           </LinkButton>
         </div>
-      </section>
-
-      <section class="max-w-3xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-tombi-primary to-tombi-200 dark:from-white dark:to-tombi-200 bg-clip-text text-transparent">
-          Simple and Easy to Use
-        </h2>
-        <Highlight language="toml">
-          {`# Before
-title="TOML Example"
-
-[package]
-name="my-project"
-version="0.1.0"
-authors=["John Doe <john@example.com>",]
-
-# After
-title = "TOML Example"
-
-[package]
-name = "my-project"
-version = "0.1.0"
-authors = [
-  "John Doe <john@example.com>",
-]`}
-        </Highlight>
       </section>
     </div>
   );
