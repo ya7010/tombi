@@ -1,5 +1,6 @@
-<div align="center">
-    <img src="https://raw.githubusercontent.com/tombi-toml/tombi/refs/heads/main/docs/public/tombi.svg" alt="Logo">
+<div align="center" style="display: flex; flex-direction: column; gap: 0;">
+    <img src="https://raw.githubusercontent.com/tombi-toml/tombi/refs/heads/main/docs/public/tombi.svg" alt="Logo" style="display: block; margin: 0;">
+    <img src="https://raw.githubusercontent.com/tombi-toml/tombi/refs/heads/main/docs/public/demo.gif" style="display: block; margin: 0;" />
 </div>
 
 [![Marketplace Version](https://vsmarketplacebadges.dev/version/yassun7010.tombi.png?label=VS%20Code%20Marketplace&logo=visual-studio-code "Current Release")](https://marketplace.visualstudio.com/items?itemName=yassun7010.tombi)
