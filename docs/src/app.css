@@ -109,3 +109,13 @@ p {
     max-width: none;
   }
 }
+
+/* TOML Syntax Highlighting Fix */
+.language-toml .token.punctuation,
+.language-toml .token.property {
+  white-space: pre;
+}
+.language-toml .token.table {
+  display: inline;
+  white-space: pre;
+}
