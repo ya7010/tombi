@@ -14,12 +14,8 @@ use crate::{
     },
 };
 
+use ahash::AHashMap;
 use config::{Config, TomlVersion};
-use dashmap::{
-    mapref::one::{Ref, RefMut},
-    try_result::TryResult,
-    DashMap,
-};
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use document_tree::TryIntoDocumentTree;
@@ -40,7 +36,7 @@ use tower_lsp::{
 pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
-    document_sources: DashMap<Url, DocumentSource>,
+    pub document_sources: Arc<tokio::sync::RwLock<AHashMap<Url, DocumentSource>>>,
     config: Arc<tokio::sync::RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
@@ -63,45 +59,13 @@ impl Backend {
     }
 
     #[inline]
-    pub fn get_document_source(&self, uri: &Url) -> Option<Ref<Url, DocumentSource>> {
-        match self.document_sources.get(uri) {
-            Some(document_info) => Some(document_info),
-            None => {
-                tracing::warn!("document not found: {}", uri);
-                None
-            }
-        }
-    }
-
-    #[inline]
-    pub fn get_document_source_mut(&self, uri: &Url) -> Option<RefMut<Url, DocumentSource>> {
-        match self.document_sources.try_get_mut(uri) {
-            TryResult::Present(document_info) => Some(document_info),
-            TryResult::Absent => {
-                tracing::warn!("document not found: {}", uri);
-                None
-            }
-            TryResult::Locked => {
-                tracing::warn!("document is locked: {}", uri);
-                None
-            }
-        }
-    }
-
-    #[inline]
-    pub fn remove_document_source(&self, uri: &Url) -> Option<DocumentSource> {
-        self.document_sources
-            .remove(uri)
-            .map(|(_, document_info)| document_info)
-    }
-
-    #[inline]
-    fn get_parsed(
+    async fn get_parsed(
         &self,
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<parser::Parsed<SyntaxNode>> {
-        let document_info = match self.document_sources.get(uri) {
+        let document_source = self.document_sources.read().await;
+        let document_info = match document_source.get(uri) {
             Some(document_info) => document_info,
             None => {
                 tracing::warn!("document not found: {}", uri);
@@ -113,20 +77,24 @@ impl Backend {
     }
 
     #[inline]
-    pub fn get_incomplete_ast(&self, uri: &Url, toml_version: TomlVersion) -> Option<ast::Root> {
-        let Some(p) = self.get_parsed(uri, toml_version) else {
+    pub async fn get_incomplete_ast(
+        &self,
+        uri: &Url,
+        toml_version: TomlVersion,
+    ) -> Option<ast::Root> {
+        let Some(p) = self.get_parsed(uri, toml_version).await else {
             return None;
         };
         p.cast::<ast::Root>().map(|root| root.tree())
     }
 
     #[inline]
-    pub fn try_get_ast(
+    pub async fn try_get_ast(
         &self,
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
-        let Some(p) = self.get_parsed(uri, toml_version) else {
+        let Some(p) = self.get_parsed(uri, toml_version).await else {
             return None;
         };
 
@@ -147,22 +115,16 @@ impl Backend {
     }
 
     #[inline]
-    pub fn get_incomplete_document_tree(
+    pub async fn get_incomplete_document_tree(
         &self,
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<document_tree::DocumentTree> {
-        let Some(root) = self.get_incomplete_ast(uri, toml_version) else {
+        let Some(root) = self.get_incomplete_ast(uri, toml_version).await else {
             return None;
         };
 
         root.try_into_document_tree(toml_version).ok()
-    }
-
-    #[inline]
-    pub fn insert_source(&self, uri: Url, source: String, version: i32) {
-        self.document_sources
-            .insert(uri, DocumentSource::new(source, version));
     }
 
     #[inline]

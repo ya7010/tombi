@@ -12,7 +12,10 @@ pub async fn handle_document_symbol(
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
-    let Some(tree) = backend.get_incomplete_document_tree(&text_document.uri, toml_version) else {
+    let Some(tree) = backend
+        .get_incomplete_document_tree(&text_document.uri, toml_version)
+        .await
+    else {
         return Ok(None);
     };
 

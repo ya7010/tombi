@@ -47,7 +47,6 @@ impl Referable<ValueSchema> {
         }
     }
 
-    #[allow(unused)]
     pub fn resolve<'a: 'b, 'b>(
         &'a mut self,
         definitions: &'a SchemaDefinitions,

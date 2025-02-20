@@ -12,6 +12,9 @@ impl Validate for document_tree::Value {
         definitions: &'a SchemaDefinitions,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+        tracing::trace!("self = {:?}", self);
+        tracing::trace!("value_schema = {:?}", value_schema);
+
         async move {
             match self {
                 Self::Boolean(boolean) => {

@@ -51,7 +51,8 @@ pub async fn handle_completion(
         tracing::debug!("schema not found: {}", text_document.uri);
         return Ok(None);
     };
-    let Some(document_source) = backend.get_document_source(&text_document.uri) else {
+    let document_sources = backend.document_sources.read().await;
+    let Some(document_source) = document_sources.get(&text_document.uri) else {
         return Ok(None);
     };
 
@@ -63,7 +64,10 @@ pub async fn handle_completion(
     }
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(root) = backend.get_incomplete_ast(&text_document.uri, toml_version) else {
+    let Some(root) = backend
+        .get_incomplete_ast(&text_document.uri, toml_version)
+        .await
+    else {
         return Ok(None);
     };
 

@@ -29,7 +29,8 @@ pub async fn handle_formatting(
     }
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(mut document_source) = backend.get_document_source_mut(&text_document.uri) else {
+    let mut document_sources = backend.document_sources.write().await;
+    let Some(document_source) = document_sources.get_mut(&text_document.uri) else {
         return Ok(None);
     };
 

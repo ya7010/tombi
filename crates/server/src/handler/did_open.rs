@@ -1,6 +1,6 @@
 use tower_lsp::lsp_types::DidOpenTextDocumentParams;
 
-use crate::backend::Backend;
+use crate::{backend::Backend, document::DocumentSource};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_did_open(
@@ -10,5 +10,9 @@ pub async fn handle_did_open(
     tracing::info!("handle_did_open");
     tracing::trace!("text_document: {:#?}", text_document);
 
-    backend.insert_source(text_document.uri, text_document.text, text_document.version);
+    let mut document_sources = backend.document_sources.write().await;
+    document_sources.insert(
+        text_document.uri,
+        DocumentSource::new(text_document.text, text_document.version),
+    );
 }

@@ -17,6 +17,7 @@ use futures::FutureExt;
 use schema_store::OneOfSchema;
 use schema_store::SchemaDefinitions;
 use schema_store::ValueSchema;
+use std::fmt::Debug;
 use std::ops::Deref;
 
 trait Validate {
@@ -62,8 +63,11 @@ fn validate_one_of<'a: 'b, 'b, T>(
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
-    T: Validate + ValueImpl + Sync + Send,
+    T: Validate + ValueImpl + Sync + Send + Debug,
 {
+    tracing::trace!("value = {:?}", value);
+    tracing::trace!("one_of_schema = {:?}", one_of_schema);
+
     async move {
         let mut errors = vec![];
         let mut is_type_match = false;
@@ -201,8 +205,11 @@ fn validate_any_of<'a: 'b, 'b, T>(
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
-    T: Validate + ValueImpl + Sync + Send,
+    T: Validate + ValueImpl + Sync + Send + Debug,
 {
+    tracing::trace!("value = {:?}", value);
+    tracing::trace!("any_of_schema = {:?}", any_of_schema);
+
     async move {
         let mut errors = vec![];
         let mut is_type_match = false;
@@ -331,8 +338,11 @@ fn validate_all_of<'a: 'b, 'b, T>(
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
-    T: Validate + Sync + Send,
+    T: Validate + Sync + Send + Debug,
 {
+    tracing::trace!("value = {:?}", value);
+    tracing::trace!("all_of_schema = {:?}", all_of_schema);
+
     async move {
         let mut errors = vec![];
 

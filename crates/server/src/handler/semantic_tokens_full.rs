@@ -10,7 +10,7 @@ pub async fn handle_semantic_tokens_full(
     tracing::info!("handle_semantic_tokens_full");
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version) else {
+    let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version).await else {
         return Ok(None);
     };
 

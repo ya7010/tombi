@@ -15,6 +15,9 @@ impl Validate for document_tree::Table {
         definitions: &'a SchemaDefinitions,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+        tracing::trace!("self = {:?}", self);
+        tracing::trace!("value_schema = {:?}", value_schema);
+
         async move {
             let mut errors = vec![];
             match value_schema.value_type().await {
@@ -76,19 +79,22 @@ impl Validate for document_tree::Table {
                 let mut matche_key = false;
                 if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
                     matche_key = true;
-                    if let Ok((value_schema, new_schema)) =
-                        property.resolve(definitions, schema_store).await
-                    {
-                        let definitions = if let Some((_, new_definitions)) = &new_schema {
-                            new_definitions
-                        } else {
-                            definitions
-                        };
-                        if let Err(errs) = value
-                            .validate(toml_version, value_schema, definitions, schema_store)
-                            .await
-                        {
-                            errors.extend(errs);
+                    match property.resolve(definitions, schema_store).await {
+                        Ok((value_schema, new_schema)) => {
+                            let definitions = if let Some((_, new_definitions)) = &new_schema {
+                                new_definitions
+                            } else {
+                                definitions
+                            };
+                            if let Err(errs) = value
+                                .validate(toml_version, value_schema, definitions, schema_store)
+                                .await
+                            {
+                                errors.extend(errs);
+                            }
+                        }
+                        Err(err) => {
+                            tracing::error!("{}", err);
                         }
                     }
                 }

@@ -133,7 +133,7 @@ impl SchemaStore {
 
                 let response = self
                     .http_client
-                    .get(schema_url.as_str())
+                    .get(schema_url.as_ref())
                     .send()
                     .await
                     .map_err(|err| crate::Error::SchemaFetchFailed {
