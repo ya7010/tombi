@@ -10,7 +10,10 @@ export function remarkBaseUrl() {
         if (baseUrl === "/") {
           baseUrl = "/_build/";
         }
-        return `${baseUrl}${url.slice(1)}`;
+        if (baseUrl.endsWith("/")) {
+          baseUrl = baseUrl.slice(0, -1);
+        }
+        return `${baseUrl}${url}`;
       }
       return url;
     };
