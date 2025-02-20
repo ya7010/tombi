@@ -9,6 +9,13 @@
 [![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 [![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js?style=flat-square)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 
-Tombi (鳶) is a Feature-Rich TOML Toolkit; providing a formatter/linter and language server.
-
-See [Documentation](https://tombi-toml.github.io/tombi) for more information.
+<div align="center" style="font-size: 1.5em; margin-top: 20px;">
+    <div align="center" style="font-size: 1.2em; margin-bottom: 20px;">
+        <strong> 🦅&nbsp; Tombi (鳶) is a Feature-Rich TOML Toolkit &nbsp 🦅</strong>
+    </div>
+    It provides a Formatter, Linter, and Language Server
+    <br><br>
+    <a href="https://tombi-toml.github.io/tombi" style="font-size: 1.2em; color: #007acc; text-decoration: none;">
+        📚 Documentation here 📚
+    </a>
+</div>
