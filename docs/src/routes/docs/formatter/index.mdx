@@ -2,24 +2,6 @@
 
 Tombi's formatter ensures consistent styling of your TOML files by automatically applying formatting rules.
 
-## CLI
-
-Tombi's formatter can be run via the CLI.
-
-```bash
-# Format all TOML files in the current directory
-tombi format
-
-# Format a single file
-tombi format path/to/file.toml
-
-# Format multiple files
-tombi format path/to/file1.toml path/to/file2.toml
-
-# Format all TOML files in a directory
-tombi format .
-```
-
-## VSCode Extension
-
-Tombi's formatter is available as a VSCode extension.
+Tombi's formatter is inspired by [black](https://black.readthedocs.io/en/stable/index.html).  
+The current policy is more strict, and there is no line-width specification.  
+The default line width is 80 characters.

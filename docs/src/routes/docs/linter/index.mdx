@@ -1,24 +1,11 @@
+import { Note } from "~/components/highlight/Note";
+
 # Linter
 
+Tombi implements TOML syntax checking, warnings for deprecated writing methods, and validation based on JSON Schema.
 
-## CLI
-
-Tombi's linter can be run via the CLI.
-
-```bash
-# Lint all TOML files in the current directory
-tombi lint
-
-# Lint a single file
-tombi lint path/to/file.toml
-
-# Lint multiple files
-tombi lint path/to/file1.toml path/to/file2.toml
-
-# Lint all TOML files in a directory
-tombi lint .
-```
-
-## VSCode
-
-Tombi's linter can be run via the VSCode extension.
+<Note>
+Although the configuration items in the configuration file are currently not available,
+we plan to add a feature to adjust the level of deprecated warnings.  
+(Currently, a warning is issued if an empty key is specified.)
+</Note>

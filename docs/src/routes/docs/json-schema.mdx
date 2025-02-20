@@ -1,0 +1,34 @@
+import { Note } from "~/components/highlight/Note";
+
+# Json Scheema
+
+TOML itself may add [schema specifications](https://github.com/toml-lang/toml/issues/792),
+but like Taplo, Tombi is also trying to add validation functions to the linter that support [JSON Schema](https://json-schema.org/).
+
+Currently, we are considering adding special information called `x-tombi-*` to JSON Schema.
+
+
+## Formatting
+### x-tombi-toml-version
+This key is for automatically determining the TOML version.
+Currently, only `v1.0.0` is supported.
+`v1.1.0-preview` is also available to experience, which proposes awesome features such as allowing the trailing comma in Inline Table.
+
+Until `v1.1.0` is released officially, please specify `v1.0.0`.
+
+
+### x-tombi-table-key-order-by
+
+🚧 This feature is not implemented yet 🚧
+
+For automatically sorting tables like `[dependencies]`
+
+There are three strategies.
+- `ascending-order`
+- `descending-order`
+- `schema-order`
+
+<Note>
+If you use `schema-order`, it is not recommended to use `additionalProperties` or `patternProperties`.
+  They are not sorted after `properties` and placed at the end.
+</Note>

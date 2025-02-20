@@ -18,6 +18,10 @@
       {
         "title": "Magic Trailing Comma",
         "path": "/docs/formatter/magic-trailing-comma"
+      },
+      {
+        "title": "Json Schema",
+        "path": "/docs/formatter/json-schema"
       }
     ]
   },
@@ -26,8 +30,22 @@
     "path": "/docs/linter",
     "children": [
       {
-        "title": "JSON Schema Validation",
+        "title": "JSON Schema",
         "path": "/docs/linter/json-schema"
+      }
+    ]
+  },
+  {
+    "title": "CLI",
+    "path": "/docs/cli",
+    "children": [
+      {
+        "title": "Formatter",
+        "path": "/docs/cli/formatter"
+      },
+      {
+        "title": "Linter",
+        "path": "/docs/cli/linter"
       }
     ]
   },
@@ -56,5 +74,27 @@
   {
     "title": "Configuration",
     "path": "/docs/configuration"
+  },
+  {
+    "title": "JSON Schema",
+    "path": "/docs/json-schema"
+  },
+  {
+    "title": "Reference",
+    "path": "/docs/reference",
+    "children": [
+      {
+        "title": "toml-test",
+        "path": "/docs/reference/toml-test"
+      },
+      {
+        "title": "toml-versions",
+        "path": "/docs/reference/toml-versions"
+      },
+      {
+        "title": "difference-taplo",
+        "path": "/docs/reference/difference-taplo"
+      }
+    ]
   }
 ]
