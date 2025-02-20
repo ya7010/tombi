@@ -6,7 +6,7 @@ export function remarkBaseUrl() {
   return (tree: Root) => {
     const processUrl = (url: string): string => {
       if (url.startsWith("/")) {
-        let baseUrl = process.env.BASE_URL || import.meta.env.BASE_URL || "/";
+        let baseUrl = process.env.BASE_URL || "/";
         if (baseUrl === "/") {
           baseUrl = "/_build/";
         }
