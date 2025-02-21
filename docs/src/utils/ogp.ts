@@ -7,7 +7,7 @@ export interface OGPData {
 
 export const OgpUrlMap = {
   vscode:
-    "https://marketplace.visualstudio.com/items?itemName=yassun7010.tombi",
+    "https://marketplace.visualstudio.com/items?itemName=tombi-toml.tombi",
 } as const;
 
 export type OgpId = keyof typeof OgpUrlMap;

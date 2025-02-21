@@ -56,6 +56,6 @@
   },
   "[toml]": {
     "editor.tabSize": 2,
-    "editor.defaultFormatter": "yassun7010.tombi"
+    "editor.defaultFormatter": "tombi-toml.tombi"
   }
 }
