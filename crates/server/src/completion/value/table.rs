@@ -45,11 +45,10 @@ impl FindCompletionContents for document_tree::Table {
                     if let Some(key) = keys.first() {
                         let accessor_str = &key.to_raw_text(toml_version);
                         if let Some(value) = self.get(key) {
-                            let accessor = Accessor::Key(accessor_str.to_string());
+                            let accessor: Accessor = Accessor::Key(accessor_str.to_string());
 
-                            if let Some(property) =
-                                table_schema.properties.write().await.get_mut(&accessor)
-                            {
+                            let mut properties = table_schema.properties.write().await;
+                            if let Some(property) = properties.get_mut(&accessor) {
                                 let need_magic_trigger = match completion_hint {
                                     Some(
                                         CompletionHint::DotTrigger { range, .. }
@@ -100,9 +99,7 @@ impl FindCompletionContents for document_tree::Table {
                                         .await;
                                 }
                             } else if keys.len() == 1 {
-                                for (key, property) in
-                                    table_schema.properties.write().await.iter_mut()
-                                {
+                                for (key, property) in properties.iter_mut() {
                                     let key_name = &key.to_string();
                                     if !key_name.starts_with(accessor_str) {
                                         continue;
