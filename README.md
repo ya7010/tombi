@@ -8,7 +8,9 @@
 [![toml-test](https://github.com/tombi-toml/tombi/actions/workflows/toml-test.yml/badge.svg)](https://github.com/tombi-toml/tombi/actions)
 [![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js?style=flat-square)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 
-<div align="center" style="margin-top: 20px;">
+<br><br>
+
+<div align="center">
     <div align="center" style="font-size: 2.0em; margin-bottom: 30px;">
         <strong> 🦅&nbsp; Tombi (鳶) is a Feature-Rich TOML Toolkit &nbsp 🦅</strong>
     </div>
