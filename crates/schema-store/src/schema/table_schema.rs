@@ -7,7 +7,7 @@ use super::SchemaPatternProperties;
 use super::ValueSchema;
 use crate::SchemaStore;
 use crate::{Accessor, Referable, SchemaProperties};
-use dashmap::DashMap;
+use ahash::AHashMap;
 use futures::future::BoxFuture;
 use futures::FutureExt;
 
@@ -26,7 +26,7 @@ pub struct TableSchema {
 
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
-        let properties = DashMap::new();
+        let mut properties = AHashMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
                 let Some(object) = value.as_object() else {
@@ -39,7 +39,7 @@ impl TableSchema {
         }
         let pattern_properties = match object.get("patternProperties") {
             Some(serde_json::Value::Object(props)) => {
-                let pattern_properties = DashMap::new();
+                let mut pattern_properties = AHashMap::new();
                 for (pattern, value) in props {
                     let Some(object) = value.as_object() else {
                         continue;
@@ -72,8 +72,8 @@ impl TableSchema {
             description: object
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
-            properties,
-            pattern_properties,
+            properties: Arc::new(properties.into()),
+            pattern_properties: pattern_properties.map(|props| Arc::new(props.into())),
             additional_properties,
             additional_property_schema,
             required: object.get("required").and_then(|v| {
@@ -113,11 +113,9 @@ impl FindSchemaCandidates for TableSchema {
             let mut errors = Vec::new();
 
             if accessors.is_empty() {
-                for mut property in self.properties.iter_mut() {
-                    if let Ok((value_schema, new_schema)) = property
-                        .value_mut()
-                        .resolve(definitions, schema_store)
-                        .await
+                for property in self.properties.write().await.values_mut() {
+                    if let Ok((value_schema, new_schema)) =
+                        property.resolve(definitions, schema_store).await
                     {
                         let definitions = if let Some((_, definitions)) = &new_schema {
                             definitions
@@ -135,7 +133,7 @@ impl FindSchemaCandidates for TableSchema {
                 return (candidates, errors);
             }
 
-            if let Some(mut value) = self.properties.get_mut(&accessors[0]) {
+            if let Some(value) = self.properties.write().await.get_mut(&accessors[0]) {
                 if let Ok((value_schema, new_schema)) =
                     value.resolve(definitions, schema_store).await
                 {

@@ -31,16 +31,21 @@ impl GetHoverContent for document_tree::Table {
                         if let Some(value) = self.get(key) {
                             let key_str = key.to_raw_text(toml_version);
                             let accessor = Accessor::Key(key_str.clone());
-                            let key_patterns = table_schema.pattern_properties.as_ref().map(
-                                |pattern_properties| {
+                            let key_patterns = match table_schema.pattern_properties.as_ref() {
+                                Some(pattern_properties) => Some(
                                     pattern_properties
-                                        .iter()
-                                        .map(|pattern_property| pattern_property.key().to_string())
-                                        .collect::<Vec<_>>()
-                                },
-                            );
+                                        .read()
+                                        .await
+                                        .keys()
+                                        .map(ToString::to_string)
+                                        .collect::<Vec<_>>(),
+                                ),
+                                None => None,
+                            };
 
-                            if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                            if let Some(property) =
+                                table_schema.properties.write().await.get_mut(&accessor)
+                            {
                                 let required = table_schema
                                     .required
                                     .as_ref()
@@ -130,13 +135,13 @@ impl GetHoverContent for document_tree::Table {
                                     });
                             }
                             if let Some(pattern_properties) = &table_schema.pattern_properties {
-                                for mut pattern_property in pattern_properties.iter_mut() {
-                                    let property_key = pattern_property.key();
+                                for (property_key, pattern_property) in
+                                    pattern_properties.write().await.iter_mut()
+                                {
                                     if let Ok(pattern) = regex::Regex::new(property_key) {
                                         if pattern.is_match(&key_str) {
                                             if let Ok((property_schema, new_schema)) =
                                                 pattern_property
-                                                    .value_mut()
                                                     .resolve(definitions, schema_store)
                                                     .await
                                             {

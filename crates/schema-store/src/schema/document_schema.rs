@@ -1,8 +1,8 @@
 use super::{referable_schema::Referable, SchemaDefinitions, ValueSchema};
 use super::{FindSchemaCandidates, SchemaUrl};
 use crate::{Accessor, SchemaStore};
+use ahash::AHashMap;
 use config::TomlVersion;
-use dashmap::DashMap;
 use futures::future::BoxFuture;
 use futures::FutureExt;
 
@@ -29,7 +29,7 @@ impl DocumentSchema {
             .and_then(|s| SchemaUrl::parse(s).ok());
 
         let value_schema = ValueSchema::new(&value);
-        let definitions = DashMap::default();
+        let mut definitions = AHashMap::default();
         if let Some(serde_json::Value::Object(object)) = value.get("definitions") {
             for (key, value) in object.into_iter() {
                 let Some(object) = value.as_object() else {
@@ -56,7 +56,7 @@ impl DocumentSchema {
             schema_id,
             toml_version,
             value_schema,
-            definitions,
+            definitions: SchemaDefinitions::new(definitions.into()),
         }
     }
 

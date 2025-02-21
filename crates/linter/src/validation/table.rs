@@ -77,7 +77,7 @@ impl Validate for document_tree::Table {
                 let accessor = Accessor::Key(accessor_raw_text.clone());
 
                 let mut matche_key = false;
-                if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                if let Some(property) = table_schema.properties.write().await.get_mut(&accessor) {
                     matche_key = true;
                     match property.resolve(definitions, schema_store).await {
                         Ok((value_schema, new_schema)) => {
@@ -100,8 +100,9 @@ impl Validate for document_tree::Table {
                 }
 
                 if let Some(pattern_properties) = &table_schema.pattern_properties {
-                    for mut refferable_pattern_property in pattern_properties.iter_mut() {
-                        let property_key = refferable_pattern_property.key();
+                    for (property_key, refferable_pattern_property) in
+                        pattern_properties.write().await.iter_mut()
+                    {
                         let Ok(pattern) = regex::Regex::new(property_key) else {
                             tracing::error!("Invalid regex pattern property: {}", property_key);
                             continue;
@@ -109,7 +110,6 @@ impl Validate for document_tree::Table {
                         if pattern.is_match(&accessor_raw_text) {
                             matche_key = true;
                             if let Ok((pattern_property, new_schema)) = refferable_pattern_property
-                                .value_mut()
                                 .resolve(definitions, schema_store)
                                 .await
                             {
@@ -136,8 +136,10 @@ impl Validate for document_tree::Table {
                                 kind: crate::ErrorKind::PatternProperty {
                                     patterns: Patterns(
                                         pattern_properties
-                                            .iter()
-                                            .map(|p| p.key().to_string())
+                                            .read()
+                                            .await
+                                            .keys()
+                                            .map(ToString::to_string)
                                             .collect(),
                                     ),
                                 },

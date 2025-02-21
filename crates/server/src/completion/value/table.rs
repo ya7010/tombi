@@ -45,9 +45,10 @@ impl FindCompletionContents for document_tree::Table {
                     if let Some(key) = keys.first() {
                         let accessor_str = &key.to_raw_text(toml_version);
                         if let Some(value) = self.get(key) {
-                            let accessor = Accessor::Key(accessor_str.to_string());
+                            let accessor: Accessor = Accessor::Key(accessor_str.to_string());
 
-                            if let Some(mut property) = table_schema.properties.get_mut(&accessor) {
+                            let mut properties = table_schema.properties.write().await;
+                            if let Some(property) = properties.get_mut(&accessor) {
                                 let need_magic_trigger = match completion_hint {
                                     Some(
                                         CompletionHint::DotTrigger { range, .. }
@@ -68,10 +69,8 @@ impl FindCompletionContents for document_tree::Table {
                                     );
                                 }
 
-                                if let Ok((property_schema, new_schema)) = property
-                                    .value_mut()
-                                    .resolve(definitions, schema_store)
-                                    .await
+                                if let Ok((property_schema, new_schema)) =
+                                    property.resolve(definitions, schema_store).await
                                 {
                                     tracing::trace!("property schema: {:?}", property_schema);
                                     let (schema_url, definitions) =
@@ -100,8 +99,8 @@ impl FindCompletionContents for document_tree::Table {
                                         .await;
                                 }
                             } else if keys.len() == 1 {
-                                for mut property in table_schema.properties.iter_mut() {
-                                    let key_name = &property.key().to_string();
+                                for (key, property) in properties.iter_mut() {
+                                    let key_name = &key.to_string();
                                     if !key_name.starts_with(accessor_str) {
                                         continue;
                                     }
@@ -112,10 +111,8 @@ impl FindCompletionContents for document_tree::Table {
                                         }
                                     }
 
-                                    if let Ok((property_schema, new_schema)) = property
-                                        .value_mut()
-                                        .resolve(definitions, schema_store)
-                                        .await
+                                    if let Ok((property_schema, new_schema)) =
+                                        property.resolve(definitions, schema_store).await
                                     {
                                         tracing::trace!("property schema: {:?}", property_schema);
                                         let (schema_url, definitions) =
@@ -151,8 +148,9 @@ impl FindCompletionContents for document_tree::Table {
                             }
 
                             if let Some(pattern_properties) = &table_schema.pattern_properties {
-                                for mut pattern_property in pattern_properties.iter_mut() {
-                                    let property_key = pattern_property.key();
+                                for (property_key, pattern_property_schema) in
+                                    pattern_properties.write().await.iter_mut()
+                                {
                                     let Ok(pattern) = regex::Regex::new(property_key) else {
                                         tracing::error!(
                                             "Invalid regex pattern property: {}",
@@ -161,7 +159,6 @@ impl FindCompletionContents for document_tree::Table {
                                         continue;
                                     };
                                     if pattern.is_match(accessor_str) {
-                                        let pattern_property_schema = pattern_property.value_mut();
                                         tracing::trace!(
                                             "pattern property schema: {:?}",
                                             pattern_property_schema
@@ -256,8 +253,9 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         }
                     } else {
-                        for mut property in table_schema.properties.iter_mut() {
-                            let key_name = &property.key().to_string();
+                        for (accessor, property) in table_schema.properties.write().await.iter_mut()
+                        {
+                            let key_name = &accessor.to_string();
 
                             if let Some(value) = self.get(key_name) {
                                 if check_used_table_value(value) {
@@ -268,7 +266,7 @@ impl FindCompletionContents for document_tree::Table {
                             // NOTE: To avoid downloading unnecessary schema files,
                             //       if the property is an unresolved online URL(like https:// or http://),
                             //       only the overview is used to generate completion candidates.
-                            match property.value() {
+                            match property {
                                 Referable::Ref {
                                     reference,
                                     title,
@@ -288,10 +286,8 @@ impl FindCompletionContents for document_tree::Table {
                                 _ => {}
                             }
 
-                            if let Ok((value_schema, new_schema)) = property
-                                .value_mut()
-                                .resolve(definitions, schema_store)
-                                .await
+                            if let Ok((value_schema, new_schema)) =
+                                property.resolve(definitions, schema_store).await
                             {
                                 let (schema_url, definitions) =
                                     if let Some((schema_url, definitions)) = &new_schema {
@@ -323,8 +319,10 @@ impl FindCompletionContents for document_tree::Table {
                         if completion_contents.is_empty() {
                             if let Some(pattern_properties) = &table_schema.pattern_properties {
                                 let patterns = pattern_properties
-                                    .iter()
-                                    .map(|pattern_property| pattern_property.key().clone())
+                                    .read()
+                                    .await
+                                    .keys()
+                                    .map(ToString::to_string)
                                     .collect::<Vec<_>>();
                                 completion_contents.push(CompletionContent::new_pattern_key(
                                     patterns.as_ref(),
@@ -443,13 +441,11 @@ impl FindCompletionContents for TableSchema {
 
             let mut completion_items = Vec::new();
 
-            for mut property in self.properties.iter_mut() {
-                let label = &property.key().to_string();
+            for (key, property) in self.properties.write().await.iter_mut() {
+                let label = &key.to_string();
 
-                if let Ok((value_schema, new_schema)) = property
-                    .value_mut()
-                    .resolve(definitions, schema_store)
-                    .await
+                if let Ok((value_schema, new_schema)) =
+                    property.resolve(definitions, schema_store).await
                 {
                     let definitions = if let Some((_, definitions)) = &new_schema {
                         definitions
@@ -744,9 +740,9 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                         if !table_schema.additional_properties
                             && !table_schema.has_additional_property_schema()
                             && table_schema.pattern_properties.is_none()
-                            && table_schema.properties.iter().all(|property| {
-                                let key_str = &property.key().to_string();
-                                table.get(key_str).is_some()
+                            && table_schema.properties.read().await.keys().all(|key| {
+                                let property_name = &key.to_string();
+                                table.get(property_name).is_some()
                             })
                         {
                             return None;

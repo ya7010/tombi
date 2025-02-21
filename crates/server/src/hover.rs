@@ -7,7 +7,6 @@ mod value;
 
 use config::TomlVersion;
 use constraints::DataConstraints;
-use dashmap::DashMap;
 use futures::future::BoxFuture;
 use schema_store::{
     get_schema_name, Accessor, Accessors, DocumentSchema, SchemaUrl, ValueSchema, ValueType,
@@ -47,7 +46,7 @@ pub async fn get_hover_content(
                     position,
                     keys,
                     None,
-                    &DashMap::new(),
+                    &Default::default(),
                     schema_store,
                 )
                 .await

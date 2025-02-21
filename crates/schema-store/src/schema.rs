@@ -40,10 +40,13 @@ pub use value_schema::*;
 
 use crate::{Accessor, SchemaStore};
 
-pub type SchemaProperties = dashmap::DashMap<Accessor, Referable<ValueSchema>>;
-pub type SchemaPatternProperties = dashmap::DashMap<String, Referable<ValueSchema>>;
+pub type SchemaProperties =
+    Arc<tokio::sync::RwLock<ahash::AHashMap<Accessor, Referable<ValueSchema>>>>;
+pub type SchemaPatternProperties =
+    Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
 pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
-pub type SchemaDefinitions = dashmap::DashMap<String, Referable<ValueSchema>>;
+pub type SchemaDefinitions =
+    Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
 pub type Schemas = Arc<tokio::sync::RwLock<Vec<Referable<ValueSchema>>>>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
