@@ -12,8 +12,6 @@
 
 </div>
 
-<br><br>
-
 <div align="center">
     <div align="center" style="font-size: 2.0em; margin-bottom: 30px;">
         <strong> 🦅&nbsp; Tombi (鳶) is a Feature-Rich TOML Toolkit &nbsp 🦅</strong>
