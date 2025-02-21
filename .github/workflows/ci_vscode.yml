@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 jobs:
-  ci-vscode-extension:
+  ci-vscode:
     runs-on: ubuntu-latest
 
     steps:
