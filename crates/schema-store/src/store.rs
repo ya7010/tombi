@@ -249,9 +249,9 @@ impl SchemaStore {
             if let Ok(mut schema) = self.try_load_document_schema(&matching_schema.url).await {
                 match &matching_schema.root_keys {
                     Some(root_keys) => {
-                        if !source_schema.sub_schema_urls.contains_key(root_keys) {
+                        if !source_schema.sub_schema_url_map.contains_key(root_keys) {
                             source_schema
-                                .sub_schema_urls
+                                .sub_schema_url_map
                                 .insert(root_keys.clone(), schema.schema_url);
                         }
                     }

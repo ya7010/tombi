@@ -30,7 +30,7 @@ pub use local_time_schema::LocalTimeSchema;
 pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
 pub use source_schema::SourceSchema;
-pub use source_schema::SubSchemaUrls;
+pub use source_schema::SubSchemaUrlMap;
 pub use string_schema::StringSchema;
 pub use table_schema::TableSchema;
 
