@@ -24,7 +24,7 @@ pub async fn get_completion_contents(
     root: ast::Root,
     position: text::Position,
     document_schema: Option<&schema_store::DocumentSchema>,
-    _sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
+    sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
     schema_store: &SchemaStore,
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionContent> {
@@ -166,6 +166,7 @@ pub async fn get_completion_contents(
             &keys,
             document_schema.as_ref().map(|schema| &schema.schema_url),
             document_schema.as_ref().map(|schema| &schema.definitions),
+            sub_schema_url_map,
             schema_store,
             completion_hint,
         )
@@ -201,6 +202,7 @@ pub trait FindCompletionContents {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>>;

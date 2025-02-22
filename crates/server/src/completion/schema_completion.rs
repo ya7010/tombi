@@ -22,6 +22,7 @@ impl FindCompletionContents for SchemaCompletion {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
@@ -48,6 +49,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -63,6 +65,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -78,6 +81,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -93,6 +97,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -108,6 +113,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -123,6 +129,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -138,6 +145,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -153,6 +161,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -168,6 +177,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -183,6 +193,7 @@ impl FindCompletionContents for SchemaCompletion {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                             completion_hint,
                         )
@@ -198,6 +209,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                         completion_hint,
                     )
@@ -213,6 +225,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                         completion_hint,
                     )
@@ -228,6 +241,7 @@ impl FindCompletionContents for SchemaCompletion {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                         completion_hint,
                     )
