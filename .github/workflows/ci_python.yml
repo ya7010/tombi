@@ -4,15 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - python/**
-      - .github/workflows/ci_python.yml
   pull_request:
     branches:
       - main
-    paths:
-      - python/**
-      - .github/workflows/ci_python.yml
   workflow_dispatch:
 
 permissions:

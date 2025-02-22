@@ -17,6 +17,7 @@ impl FindCompletionContents for FloatSchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: Option<&'a SchemaDefinitions>,
+        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         _schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {

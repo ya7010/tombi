@@ -4,22 +4,16 @@ on:
   push:
     branches:
       - main
-    paths:
-      - editors/vscode/**
-      - .github/workflows/ci_vscode.yml
   pull_request:
     branches:
       - main
-    paths:
-      - editors/vscode/**
-      - .github/workflows/ci_vscode.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  ci-vscode:
+  ci-vscode-extensions:
     runs-on: ubuntu-latest
 
     steps:
