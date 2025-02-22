@@ -84,13 +84,13 @@ impl SchemaAccessor {
     /// # Examples
     ///
     /// ```
-    /// use schema_store::SchemaAccessor;
+    /// use schema_store::{SchemaAccessor, Accessor};
     ///
-    /// let accessors = SchemaAccessor::parse("key1[*].key2");
+    /// let accessors = SchemaAccessor::parse("key1[*].key2").unwrap();
     /// assert_eq!(accessors.len(), 3);
-    /// assert!(matches!(accessors[0], Accessor::Key("key1".to_string())));
-    /// assert!(matches!(accessors[1], Accessor::Index(_)));
-    /// assert!(matches!(accessors[2], Accessor::Key("key2".to_string())));
+    /// assert_eq!(accessors[0], SchemaAccessor::Key("key1".to_string()));
+    /// assert_eq!(accessors[1], SchemaAccessor::Index);
+    /// assert_eq!(accessors[2], SchemaAccessor::Key("key2".to_string()));
     /// ```
     pub fn parse(path: &str) -> Option<Vec<SchemaAccessor>> {
         let mut accessors = Vec::new();
