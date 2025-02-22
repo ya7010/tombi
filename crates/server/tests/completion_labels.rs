@@ -325,6 +325,7 @@ mod completion_labels {
             ) -> Ok([
                 "include",
                 "path",
+                "root-keys",
                 "toml-version",
             ]);
         }

@@ -9,15 +9,15 @@ pub async fn handle_get_toml_version(
 ) -> Result<GetTomlVersionResponse, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_get_toml_version");
 
-    let schema = backend
+    let source_schema = backend
         .schema_store
         .try_get_source_schema_from_url(&uri)
         .await
-        .ok()
-        .flatten();
+        .ok();
 
-    let (toml_version, source) = schema
+    let (toml_version, source) = source_schema
         .as_ref()
+        .and_then(|source_schema| source_schema.root.as_ref())
         .and_then(|document_schema| {
             document_schema
                 .toml_version()

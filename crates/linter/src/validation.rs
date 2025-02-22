@@ -33,11 +33,14 @@ trait Validate {
 pub fn validate<'a: 'b, 'b>(
     tree: document_tree::DocumentTree,
     toml_version: TomlVersion,
-    document_schema: &'a schema_store::DocumentSchema,
+    schema_schema: &'a schema_store::SourceSchema,
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
     async move {
         let table = tree.deref();
+        let Some(document_schema) = schema_schema.root.as_ref() else {
+            return Ok(());
+        };
 
         if let Some(value_schema) = &document_schema.value_schema {
             table

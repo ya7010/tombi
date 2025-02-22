@@ -5,7 +5,7 @@ use config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use itertools::Either;
-use schema_store::DocumentSchema;
+use schema_store::SourceSchema;
 use std::fmt::Write;
 use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
@@ -18,7 +18,7 @@ pub struct Formatter<'a> {
     #[allow(dead_code)]
     options: &'a crate::FormatOptions,
     #[allow(dead_code)]
-    schema: Option<DocumentSchema>,
+    source_schema: Option<SourceSchema>,
     #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
     buf: String,
@@ -33,19 +33,18 @@ impl<'a> Formatter<'a> {
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
-        let schema = match source_url_or_path {
+        let source_schema = match source_url_or_path {
             Some(source_url_or_path) => Some(
                 schema_store
                     .try_get_source_schema(source_url_or_path)
                     .await?,
             ),
             None => None,
-        }
-        .flatten();
+        };
 
-        let toml_version = schema
+        let toml_version = source_schema
             .as_ref()
-            .and_then(|s| s.toml_version())
+            .and_then(|schema| schema.root.as_ref().and_then(|root| root.toml_version()))
             .unwrap_or(toml_version);
 
         Ok(Self {
@@ -54,7 +53,7 @@ impl<'a> Formatter<'a> {
             skip_indent: false,
             definitions,
             options,
-            schema,
+            source_schema,
             schema_store,
             buf: String::new(),
         })

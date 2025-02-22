@@ -7,14 +7,14 @@ use diagnostic::Diagnostic;
 use diagnostic::SetDiagnostics;
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
-use schema_store::DocumentSchema;
+use schema_store::SourceSchema;
 use url::Url;
 
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
     #[allow(dead_code)]
-    document_schema: Option<DocumentSchema>,
+    source_schema: Option<SourceSchema>,
     #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
     pub(crate) diagnostics: Vec<crate::Diagnostic>,
@@ -27,23 +27,30 @@ impl<'a> Linter<'a> {
         schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
-        let document_schema = if let Some(schema_url_or_path) = schema_url_or_path {
-            schema_store
-                .try_get_source_schema(schema_url_or_path)
-                .await?
+        let source_schema = if let Some(schema_url_or_path) = schema_url_or_path {
+            Some(
+                schema_store
+                    .try_get_source_schema(schema_url_or_path)
+                    .await?,
+            )
         } else {
             None
         };
 
-        let toml_version = document_schema
+        let toml_version = source_schema
             .as_ref()
-            .and_then(|s| s.toml_version())
+            .and_then(|source_schema| {
+                source_schema
+                    .root
+                    .as_ref()
+                    .and_then(|document_schema| document_schema.toml_version())
+            })
             .unwrap_or(toml_version);
 
         Ok(Self {
             toml_version,
             options: Cow::Borrowed(options),
-            document_schema,
+            source_schema,
             schema_store,
             diagnostics: Vec::new(),
         })
@@ -71,11 +78,11 @@ impl<'a> Linter<'a> {
                 err.set_diagnostic(&mut errors);
             }
 
-            if let Some(document_schema) = self.document_schema {
+            if let Some(source_schema) = self.source_schema {
                 if let Err(errs) = crate::validation::validate(
                     document_tree,
                     self.toml_version,
-                    &document_schema,
+                    &source_schema,
                     self.schema_store,
                 )
                 .await

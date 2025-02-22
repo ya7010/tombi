@@ -43,7 +43,7 @@ pub async fn handle_hover(
         .try_get_source_schema_from_url(&text_document.uri)
         .await
         .ok()
-        .flatten();
+        .and_then(|source_schema| source_schema.root);
 
     let Some(root) = backend
         .get_incomplete_ast(&text_document.uri, toml_version)

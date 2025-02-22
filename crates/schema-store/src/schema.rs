@@ -12,6 +12,7 @@ mod local_time_schema;
 mod offset_date_time_schema;
 mod one_of_schema;
 mod referable_schema;
+mod source_schema;
 mod string_schema;
 mod table_schema;
 mod value_schema;
@@ -28,6 +29,7 @@ pub use local_date_time_schema::LocalDateTimeSchema;
 pub use local_time_schema::LocalTimeSchema;
 pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
+pub use source_schema::SourceSchema;
 pub use string_schema::StringSchema;
 pub use table_schema::TableSchema;
 

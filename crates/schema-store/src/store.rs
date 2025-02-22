@@ -4,7 +4,7 @@ use itertools::Either;
 use std::{ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
-use crate::{json::CatalogUrl, DocumentSchema, SchemaUrl};
+use crate::{json::CatalogUrl, DocumentSchema, SchemaUrl, SourceSchema};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
@@ -41,6 +41,12 @@ impl SchemaStore {
             catalogs.push(crate::CatalogSchema {
                 url,
                 include: schema.include.clone(),
+                root_keys: match schema.root_keys.as_ref() {
+                    Some(keys) if !keys.is_empty() => {
+                        Some(keys.split('.').map(String::from).collect())
+                    }
+                    _ => None,
+                },
             });
         }
     }
@@ -80,6 +86,7 @@ impl SchemaStore {
                             catalogs.push(crate::CatalogSchema {
                                 url: catalog_schema.url,
                                 include: catalog_schema.file_match,
+                                root_keys: None,
                             });
                         }
                     }
@@ -107,6 +114,7 @@ impl SchemaStore {
             catalogs.push(crate::CatalogSchema {
                 url: json_schema.url,
                 include: json_schema.file_match,
+                root_keys: None,
             });
         }
     }
@@ -190,7 +198,7 @@ impl SchemaStore {
     pub async fn try_get_source_schema_from_url(
         &self,
         source_url: &url::Url,
-    ) -> Result<Option<DocumentSchema>, crate::Error> {
+    ) -> Result<SourceSchema, crate::Error> {
         match source_url.scheme() {
             "file" => {
                 let source_path =
@@ -201,7 +209,7 @@ impl SchemaStore {
                         })?;
                 self.try_get_source_schema_from_path(&source_path).await
             }
-            "untitled" => Ok(None),
+            "untitled" => Ok(SourceSchema::default()),
             _ => Err(crate::Error::SourceUrlUnsupported {
                 source_url: source_url.to_owned(),
             }),
@@ -211,7 +219,9 @@ impl SchemaStore {
     pub async fn try_get_source_schema_from_path(
         &self,
         source_path: &std::path::Path,
-    ) -> Result<Option<DocumentSchema>, crate::Error> {
+    ) -> Result<SourceSchema, crate::Error> {
+        let mut source_schema = SourceSchema::default();
+
         let catalogs = self.catalogs.read().await;
         let matching_schemas: Vec<_> = {
             catalogs
@@ -234,16 +244,28 @@ impl SchemaStore {
 
         for matching_schema in matching_schemas {
             if let Ok(schema) = self.try_load_document_schema(&matching_schema.url).await {
-                return Ok(Some(schema));
+                match &matching_schema.root_keys {
+                    Some(root_keys) => {
+                        if !source_schema.sub_schemas.contains_key(root_keys) {
+                            source_schema.sub_schemas.insert(root_keys.clone(), schema);
+                        }
+                    }
+                    None => {
+                        if source_schema.root.is_none() {
+                            source_schema.root = Some(schema);
+                        }
+                    }
+                }
             }
         }
-        Ok(None)
+
+        Ok(source_schema)
     }
 
     pub async fn try_get_source_schema(
         &self,
         source_url_or_path: Either<&url::Url, &std::path::Path>,
-    ) -> Result<Option<DocumentSchema>, crate::Error> {
+    ) -> Result<SourceSchema, crate::Error> {
         match source_url_or_path {
             Either::Left(source_url) => self
                 .try_get_source_schema_from_url(source_url)
