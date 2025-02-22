@@ -1,6 +1,7 @@
 import "prismjs";
 import "prismjs/components/prism-toml";
 import "prismjs/components/prism-bash";
+import "prismjs/components/prism-json";
 import Prism from "prismjs";
 
 import { Router } from "@solidjs/router";
