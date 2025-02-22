@@ -20,16 +20,20 @@ use one_of::validate_one_of;
 use config::TomlVersion;
 use futures::future::BoxFuture;
 use futures::FutureExt;
+use schema_store::Accessor;
 use schema_store::SchemaDefinitions;
+use schema_store::SchemaUrl;
 use schema_store::ValueSchema;
-use std::ops::Deref;
 
 pub trait Validate {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        value_schema: &'a ValueSchema,
-        definitions: &'a SchemaDefinitions,
+        accessors: &'a Vec<Accessor>,
+        value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
+        definitions: Option<&'a SchemaDefinitions>,
+        sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>;
 }
@@ -37,25 +41,23 @@ pub trait Validate {
 pub fn validate<'a: 'b, 'b>(
     tree: document_tree::DocumentTree,
     toml_version: TomlVersion,
-    schema_schema: &'a schema_store::SourceSchema,
+    source_schema: &'a schema_store::SourceSchema,
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
     async move {
-        let table = tree.deref();
-        let Some(document_schema) = schema_schema.root.as_ref() else {
-            return Ok(());
-        };
-
-        if let Some(value_schema) = &document_schema.value_schema {
-            table
-                .validate(
-                    toml_version,
-                    value_schema,
-                    &document_schema.definitions,
-                    schema_store,
-                )
-                .await?;
-        }
+        tree.validate(
+            toml_version,
+            &Vec::with_capacity(0),
+            source_schema
+                .root
+                .as_ref()
+                .and_then(|s| s.value_schema.as_ref()),
+            source_schema.root.as_ref().map(|s| &s.schema_url),
+            source_schema.root.as_ref().map(|s| &s.definitions),
+            &source_schema.sub_schema_url_map,
+            schema_store,
+        )
+        .await?;
 
         Ok(())
     }
