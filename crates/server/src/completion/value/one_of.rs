@@ -54,16 +54,6 @@ where
                     (schema_url, Some(definitions))
                 };
 
-                if let Some(definitions) = definitions {
-                    if value
-                        .validate(toml_version, value_schema, definitions, schema_store)
-                        .await
-                        .is_err()
-                    {
-                        continue;
-                    }
-                }
-
                 let schema_completions = value
                     .find_completion_contents(
                         accessors,
