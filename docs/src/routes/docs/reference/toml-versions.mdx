@@ -6,3 +6,11 @@
 The formatter of Tombi will show its true power in `v1.1.0-preview`, but be careful.
 
 Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/manifest.html), [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)) are `v1.0.0`, and the default TOML version of Tombi is also `v1.0.0`.
+
+## TOML Version Control
+
+Tombi determines the TOML version for the target file in the following order of priority.
+
+- The value of `toml-version` specified in `[[schemas]]` of Config
+- The value specified in `x-tombi-toml-version` on the root object of JSON Schema
+- The value of `toml-version` specified in the root of Config
