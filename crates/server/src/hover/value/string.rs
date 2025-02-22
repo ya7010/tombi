@@ -19,6 +19,7 @@ impl GetHoverContent for document_tree::String {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -32,6 +33,7 @@ impl GetHoverContent for document_tree::String {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -49,6 +51,7 @@ impl GetHoverContent for document_tree::String {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -63,6 +66,7 @@ impl GetHoverContent for document_tree::String {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -77,6 +81,7 @@ impl GetHoverContent for document_tree::String {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -107,6 +112,7 @@ impl GetHoverContent for StringSchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: &'a schema_store::SchemaDefinitions,
+        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         _schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {

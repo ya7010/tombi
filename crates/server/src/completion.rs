@@ -22,11 +22,11 @@ use syntax::{SyntaxElement, SyntaxKind};
 
 pub async fn get_completion_contents(
     root: ast::Root,
+    toml_version: config::TomlVersion,
     position: text::Position,
     document_schema: Option<&schema_store::DocumentSchema>,
     sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
     schema_store: &SchemaStore,
-    toml_version: config::TomlVersion,
 ) -> Vec<CompletionContent> {
     let mut keys: Vec<document_tree::Key> = vec![];
     let mut completion_hint = None;

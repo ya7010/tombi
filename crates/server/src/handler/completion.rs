@@ -74,6 +74,7 @@ pub async fn handle_completion(
     Ok(Some(
         get_completion_contents(
             root,
+            toml_version,
             position,
             source_schema
                 .as_ref()
@@ -82,7 +83,6 @@ pub async fn handle_completion(
                 .as_ref()
                 .map(|source_schema| &source_schema.sub_schema_url_map),
             &backend.schema_store,
-            toml_version,
         )
         .await,
     ))
