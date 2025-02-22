@@ -13,7 +13,7 @@ Also, we supports `[tool.tombi]` in `pyproject.toml`.
 2. `[tool.tombi]` in `pyproject.toml` in the current directory
 3. ...search parent directory recursively
 
-## Structure
+## Full Structure
 
 ```toml
 toml-version = "1.0.0"
@@ -29,10 +29,20 @@ hover.enabled = true
 completion.enabled = true
 
 [schema]
+enabled = true
+
 [schema.catalog]
 path = "https://www.schemastore.org/api/json/catalog.json"
 
+# Root Schema
 [[schemas]]
+toml-version = "1.0.0"
 path = "https://example.com/schema.json"
 include = ["example.toml"]
+
+# Sub Schema
+[[schemas]]
+path = "schemas/partial-taskipy.schema.json"
+include = ["pyproject.toml"]
+root-keys = "tool.taskipy"
 ```
