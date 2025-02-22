@@ -258,8 +258,11 @@ impl linter::Validate for SchemaCompletion {
     fn validate<'a: 'b, 'b>(
         &'a self,
         _toml_version: TomlVersion,
-        _value_schema: &'a ValueSchema,
-        _definitions: &'a SchemaDefinitions,
+        _accessors: &'a Vec<Accessor>,
+        _value_schema: Option<&'a ValueSchema>,
+        _schema_url: Option<&'a schema_store::SchemaUrl>,
+        _definitions: Option<&'a SchemaDefinitions>,
+        _sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
         _schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Result<(), Vec<linter::Error>>> {
         async move { Ok(()) }.boxed()

@@ -9,8 +9,11 @@ use super::Validate;
 pub fn validate_all_of<'a: 'b, 'b, T>(
     value: &'a T,
     toml_version: TomlVersion,
+    accessors: &'a Vec<schema_store::Accessor>,
     all_of_schema: &'a schema_store::AllOfSchema,
+    schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a schema_store::SchemaDefinitions,
+    sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
@@ -37,7 +40,15 @@ where
             };
 
             match value
-                .validate(toml_version, value_schema, definitions, schema_store)
+                .validate(
+                    toml_version,
+                    accessors,
+                    Some(value_schema),
+                    Some(schema_url),
+                    Some(definitions),
+                    sub_schema_url_map,
+                    schema_store,
+                )
                 .await
             {
                 Ok(()) => {}

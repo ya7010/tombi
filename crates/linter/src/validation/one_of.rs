@@ -13,8 +13,11 @@ use super::Validate;
 pub fn validate_one_of<'a: 'b, 'b, T>(
     value: &'a T,
     toml_version: TomlVersion,
+    accessors: &'a Vec<schema_store::Accessor>,
     one_of_schema: &'a OneOfSchema,
+    schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a SchemaDefinitions,
+    sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
     schema_store: &'a schema_store::SchemaStore,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
@@ -56,7 +59,15 @@ where
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
                     is_type_match = true;
                     match value
-                        .validate(toml_version, value_schema, definitions, schema_store)
+                        .validate(
+                            toml_version,
+                            &accessors,
+                            Some(value_schema),
+                            Some(schema_url),
+                            Some(definitions),
+                            sub_schema_url_map,
+                            schema_store,
+                        )
                         .await
                     {
                         Ok(()) => {
@@ -89,8 +100,11 @@ where
                     match validate_one_of(
                         value,
                         toml_version,
+                        &accessors,
                         one_of_schema,
+                        schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -106,8 +120,11 @@ where
                     match validate_any_of(
                         value,
                         toml_version,
+                        &accessors,
                         any_of_schema,
+                        &schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -123,8 +140,11 @@ where
                     match validate_all_of(
                         value,
                         toml_version,
+                        &accessors,
                         all_of_schema,
+                        &schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
