@@ -38,13 +38,12 @@ pub async fn handle_hover(
     let position = position.into();
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
-    let document_schema = backend
+    let source_schema = backend
         .schema_store
         .try_get_source_schema_from_url(&text_document.uri)
         .await
         .ok()
-        .flatten()
-        .and_then(|source_schema| source_schema.root);
+        .flatten();
 
     let Some(root) = backend
         .get_incomplete_ast(&text_document.uri, toml_version)
@@ -68,7 +67,8 @@ pub async fn handle_hover(
         toml_version,
         position,
         &keys,
-        document_schema.as_ref(),
+        source_schema.as_ref().and_then(|s| s.root.as_ref()),
+        source_schema.as_ref().map(|s| &s.sub_schema_url_map),
         &backend.schema_store,
     )
     .await

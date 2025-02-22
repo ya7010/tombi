@@ -25,6 +25,7 @@ impl GetHoverContent for document_tree::Value {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -39,6 +40,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -53,6 +55,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -67,6 +70,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -81,6 +85,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -95,6 +100,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -109,6 +115,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -123,6 +130,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -137,6 +145,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -151,6 +160,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -165,6 +175,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -179,6 +190,7 @@ impl GetHoverContent for document_tree::Value {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -204,6 +216,7 @@ impl GetHoverContent for ValueSchema {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -218,6 +231,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -232,6 +246,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -246,6 +261,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -260,6 +276,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -274,6 +291,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -288,6 +306,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -302,6 +321,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -316,6 +336,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -330,6 +351,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -344,6 +366,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -358,6 +381,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -372,6 +396,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -386,6 +411,7 @@ impl GetHoverContent for ValueSchema {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await

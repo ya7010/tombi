@@ -1,6 +1,8 @@
 use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, Accessors, ArraySchema, SchemaUrl, ValueSchema, ValueType};
+use schema_store::{
+    Accessor, Accessors, ArraySchema, SchemaAccessor, SchemaUrl, ValueSchema, ValueType,
+};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
@@ -17,6 +19,7 @@ impl GetHoverContent for document_tree::Array {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         tracing::debug!("self: {:?}", self);
@@ -25,6 +28,36 @@ impl GetHoverContent for document_tree::Array {
         tracing::trace!("value_schema: {:?}", value_schema);
 
         async move {
+            if let Some(sub_schema_url_map) = sub_schema_url_map {
+                if let Some(sub_schema_url) = sub_schema_url_map.get(
+                    &accessors
+                        .into_iter()
+                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .collect::<Vec<_>>(),
+                ) {
+                    if schema_url != Some(sub_schema_url) {
+                        if let Ok(document_schema) = schema_store
+                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .await
+                        {
+                            return self
+                                .get_hover_content(
+                                    accessors,
+                                    document_schema.value_schema.as_ref(),
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    Some(&document_schema.schema_url),
+                                    &document_schema.definitions,
+                                    Some(sub_schema_url_map),
+                                    schema_store,
+                                )
+                                .await;
+                        }
+                    }
+                }
+            }
+
             match value_schema {
                 Some(ValueSchema::Array(array_schema)) => {
                     for (index, value) in self.values().iter().enumerate() {
@@ -56,6 +89,7 @@ impl GetHoverContent for document_tree::Array {
                                             keys,
                                             schema_url,
                                             definitions,
+                                            sub_schema_url_map,
                                             schema_store,
                                         )
                                         .await?;
@@ -97,6 +131,7 @@ impl GetHoverContent for document_tree::Array {
                                     keys,
                                     schema_url,
                                     definitions,
+                                    sub_schema_url_map,
                                     schema_store,
                                 )
                                 .await;
@@ -111,6 +146,7 @@ impl GetHoverContent for document_tree::Array {
                             keys,
                             schema_url,
                             definitions,
+                            sub_schema_url_map,
                             schema_store,
                         )
                         .await
@@ -129,6 +165,7 @@ impl GetHoverContent for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -143,6 +180,7 @@ impl GetHoverContent for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -157,6 +195,7 @@ impl GetHoverContent for document_tree::Array {
                         keys,
                         schema_url,
                         definitions,
+                        sub_schema_url_map,
                         schema_store,
                     )
                     .await
@@ -179,6 +218,7 @@ impl GetHoverContent for document_tree::Array {
                                     keys,
                                     schema_url,
                                     definitions,
+                                    sub_schema_url_map,
                                     schema_store,
                                 )
                                 .await;
@@ -210,6 +250,7 @@ impl GetHoverContent for ArraySchema {
         _keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         _definitions: &'a schema_store::SchemaDefinitions,
+        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         _schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {

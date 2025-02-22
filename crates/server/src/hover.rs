@@ -19,6 +19,7 @@ pub async fn get_hover_content(
     position: text::Position,
     keys: &[document_tree::Key],
     document_schema: Option<&DocumentSchema>,
+    sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
     schema_store: &schema_store::SchemaStore,
 ) -> Option<HoverContent> {
     let table = tree.deref();
@@ -33,6 +34,7 @@ pub async fn get_hover_content(
                     keys,
                     Some(&document_schema.schema_url),
                     &document_schema.definitions,
+                    sub_schema_url_map,
                     schema_store,
                 )
                 .await
@@ -47,6 +49,7 @@ pub async fn get_hover_content(
                     keys,
                     None,
                     &Default::default(),
+                    sub_schema_url_map,
                     schema_store,
                 )
                 .await
@@ -64,6 +67,7 @@ trait GetHoverContent {
         keys: &'a [document_tree::Key],
         schema_url: Option<&'a SchemaUrl>,
         definitions: &'a schema_store::SchemaDefinitions,
+        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
         schema_store: &'a schema_store::SchemaStore,
     ) -> BoxFuture<'b, Option<HoverContent>>;
 }
