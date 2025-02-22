@@ -71,7 +71,7 @@
     }
   },
   "additionalProperties": false,
-  "x-tombi-toml-version": "v1.1.0-preview",
+  "x-tombi-toml-version": "v1.0.0",
   "definitions": {
     "TomlVersion": {
       "title": "TOML version.",
