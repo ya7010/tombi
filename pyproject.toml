@@ -24,3 +24,6 @@ bindings = "bin"
 manifest-path = "rust/tombi-cli/Cargo.toml"
 module-name = "tombi"
 python-source = "python/src"
+
+[tool.taskipy]
+settings.cwd = "."
