@@ -1,6 +1,8 @@
 use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, Accessors, SchemaUrl, TableSchema, ValueSchema, ValueType};
+use schema_store::{
+    Accessor, Accessors, SchemaAccessor, SchemaUrl, TableSchema, ValueSchema, ValueType,
+};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
@@ -26,6 +28,36 @@ impl GetHoverContent for document_tree::Table {
         tracing::trace!("value_schema: {:?}", value_schema);
 
         async move {
+            if let Some(sub_schema_url_map) = sub_schema_url_map {
+                if let Some(sub_schema_url) = sub_schema_url_map.get(
+                    &accessors
+                        .into_iter()
+                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .collect::<Vec<_>>(),
+                ) {
+                    if schema_url != Some(sub_schema_url) {
+                        if let Ok(document_schema) = schema_store
+                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .await
+                        {
+                            return self
+                                .get_hover_content(
+                                    accessors,
+                                    document_schema.value_schema.as_ref(),
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    Some(&document_schema.schema_url),
+                                    &document_schema.definitions,
+                                    Some(sub_schema_url_map),
+                                    schema_store,
+                                )
+                                .await;
+                        }
+                    }
+                }
+            }
+
             match value_schema {
                 Some(ValueSchema::Table(table_schema)) => {
                     if let Some(key) = keys.first() {
