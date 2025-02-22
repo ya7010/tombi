@@ -28,3 +28,8 @@ include = ["pyproject.toml"]
 [[schemas]]
 path = "schemas/type-test.schema.json"
 include = ["type-test.toml"]
+
+[[schemas]]
+path = "schemas/partial-taskipy.schema.json"
+include = ["pyproject.toml"]
+root-keys = "tool.taskipy"

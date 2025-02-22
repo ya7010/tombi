@@ -73,23 +73,11 @@ pub struct SchemaCatalogItem {
     /// Supports glob pattern.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     pub include: Vec<String>,
-    // /// # The schema options for specific keys.
-    // #[cfg_attr(feature = "jsonschema", schemars(default))]
-    // subschemas: Option<Vec<SubSchemaOptions>>,
+
+    /// # The key to apply the schema as the root.
+    #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
+    pub root_keys: Option<String>,
 }
-
-// #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-// #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
-// #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
-// #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
-// #[derive(Debug, Clone)]
-// pub struct SubSchemaOptions {
-//     /// # The schema path.
-//     path: String,
-
-//     /// The path of the key to apply the schema.
-//     keys: String,
-// }
 
 #[cfg(test)]
 mod tests {

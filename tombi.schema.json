@@ -309,6 +309,11 @@
             "type": "string"
           },
           "minItems": 1
+        },
+        "root-keys": {
+          "title": "The key to apply the schema as the root.",
+          "type": ["string", "null"],
+          "minLength": 1
         }
       },
       "additionalProperties": false,
