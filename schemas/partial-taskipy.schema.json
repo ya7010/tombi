@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "taskipy",
+  "description": "tasks runner for python projects",
+  "type": "object",
+  "properties": {
+    "tasks": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9a-zA-Z]+$": { "$ref": "#/definitions/Task" }
+      },
+      "additionalProperties": false
+    },
+    "variables": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9a-zA-Z]+$": {
+          "title": "variable",
+          "description": "variable in your tasks",
+          "oneOf": [
+            { "$ref": "#/definitions/VariableValue" },
+            { "$ref": "#/definitions/Variable" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "settings": {
+      "$ref": "#/definitions/Settings"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "Task": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/Command"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "$ref": "#/definitions/Command"
+            },
+            "help": {
+              "type": "string",
+              "minLength": 1
+            },
+            "use_vars": {
+              "$ref": "#/definitions/UseVars"
+            },
+            "cwd": {
+              "$ref": "#/definitions/Cwd"
+            }
+          },
+          "required": ["cmd"]
+        }
+      ]
+    },
+    "Command": {
+      "type": "string",
+      "title": "command",
+      "description": "command as a string",
+      "minLength": 1
+    },
+    "Variable": {
+      "type": "object",
+      "properties": {
+        "var": { "$ref": "#/definitions/VariableValue" },
+        "recursive": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "VariableValue": {
+      "type": "string",
+      "title": "variable value",
+      "minLength": 1
+    },
+    "Settings": {
+      "type": "object",
+      "title": "settings",
+      "properties": {
+        "use_vars": {
+          "$ref": "#/definitions/UseVars"
+        },
+        "cwd": {
+          "$ref": "#/definitions/Cwd"
+        }
+      },
+      "additionalProperties": false
+    },
+    "UseVars": {
+      "type": "boolean",
+      "title": "use variables",
+      "description": "use variables flag",
+      "default": false
+    },
+    "Cwd": {
+      "type": "string",
+      "title": "current working directory",
+      "description": "Set the working directory of the task relative to the root of the project (where the pyproject.toml file is)",
+      "minLength": 1
+    }
+  }
+}
