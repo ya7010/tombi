@@ -5,6 +5,8 @@
   "type": "object",
   "properties": {
     "tasks": {
+      "title": "tasks",
+      "description": "task definitions",
       "type": "object",
       "patternProperties": {
         "^[0-9a-zA-Z]+$": { "$ref": "#/definitions/Task" }
@@ -12,6 +14,8 @@
       "additionalProperties": false
     },
     "variables": {
+      "title": "variables",
+      "description": "variables used in your tasks",
       "type": "object",
       "patternProperties": {
         "^[0-9a-zA-Z]+$": {
@@ -81,6 +85,7 @@
     "Settings": {
       "type": "object",
       "title": "settings",
+      "description": "global scope settings for taskipy",
       "properties": {
         "use_vars": {
           "$ref": "#/definitions/UseVars"
