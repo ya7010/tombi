@@ -44,7 +44,6 @@
   },
   "activationEvents": ["onLanguage:cargoLock"],
   "icon": "icon.png",
-  "preview": true,
   "contributes": {
     "languages": [
       {
