@@ -177,42 +177,29 @@ impl From<&Accessor> for SchemaAccessor {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn test_schema_accessor() {
-        let cases = vec![
-            (
-                "key1[*].key2",
-                vec![
-                    Accessor::Key("key1".to_string()),
-                    Accessor::Index(0),
-                    Accessor::Key("key2".to_string()),
-                ],
-            ),
-            (
-                "key1[0].key2",
-                vec![
-                    Accessor::Key("key1".to_string()),
-                    Accessor::Index(0),
-                    Accessor::Key("key2".to_string()),
-                ],
-            ),
-            (
-                "simple.key",
-                vec![
-                    Accessor::Key("simple".to_string()),
-                    Accessor::Key("key".to_string()),
-                ],
-            ),
-            (
-                "array[5]",
-                vec![Accessor::Key("array".to_string()), Accessor::Index(5)],
-            ),
-        ];
-
-        for (input, expected) in cases {
-            let result = SchemaAccessor::parse(input).unwrap();
-            assert_eq!(result, expected, "Failed for input: {}", input);
-        }
+    #[rstest]
+    #[case("key1[*].key2", vec![
+        SchemaAccessor::Key("key1".to_string()),
+        SchemaAccessor::Index,
+        SchemaAccessor::Key("key2".to_string()),
+    ])]
+    #[case("key1[0].key2", vec![
+        SchemaAccessor::Key("key1".to_string()),
+        SchemaAccessor::Index,
+        SchemaAccessor::Key("key2".to_string()),
+    ])]
+    #[case("simple.key", vec![
+        SchemaAccessor::Key("simple".to_string()),
+        SchemaAccessor::Key("key".to_string()),
+    ])]
+    #[case("array[5]", vec![
+        SchemaAccessor::Key("array".to_string()),
+        SchemaAccessor::Index,
+    ])]
+    fn test_schema_accessor(#[case] input: &str, #[case] expected: Vec<SchemaAccessor>) {
+        let result = SchemaAccessor::parse(input).unwrap();
+        assert_eq!(result, expected, "Failed for input: {}", input);
     }
 }

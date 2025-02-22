@@ -1706,6 +1706,7 @@ dependencies = [
  "pretty_assertions",
  "regex",
  "reqwest",
+ "rstest",
  "schemars",
  "serde",
  "serde_json",
