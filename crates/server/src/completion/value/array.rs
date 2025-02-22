@@ -10,7 +10,9 @@ use super::{
 use config::TomlVersion;
 use document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, ArraySchema, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema};
+use schema_store::{
+    Accessor, ArraySchema, SchemaAccessor, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema,
+};
 
 impl FindCompletionContents for document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
@@ -33,6 +35,37 @@ impl FindCompletionContents for document_tree::Array {
         tracing::trace!("completion hint: {:?}", completion_hint);
 
         async move {
+            if let Some(sub_schema_url_map) = sub_schema_url_map {
+                if let Some(sub_schema_url) = sub_schema_url_map.get(
+                    &accessors
+                        .into_iter()
+                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .collect::<Vec<_>>(),
+                ) {
+                    if schema_url != Some(sub_schema_url) {
+                        if let Ok(document_schema) = schema_store
+                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .await
+                        {
+                            return self
+                                .find_completion_contents(
+                                    accessors,
+                                    document_schema.value_schema.as_ref(),
+                                    toml_version,
+                                    position,
+                                    keys,
+                                    Some(&document_schema.schema_url),
+                                    Some(&document_schema.definitions),
+                                    Some(sub_schema_url_map),
+                                    schema_store,
+                                    completion_hint,
+                                )
+                                .await;
+                        }
+                    }
+                }
+            }
+
             match value_schema {
                 Some(ValueSchema::Array(array_schema)) => {
                     let Some(definitions) = definitions else {

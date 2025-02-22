@@ -28,11 +28,9 @@ impl<'a> Linter<'a> {
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
         let source_schema = if let Some(schema_url_or_path) = schema_url_or_path {
-            Some(
-                schema_store
-                    .try_get_source_schema(schema_url_or_path)
-                    .await?,
-            )
+            schema_store
+                .try_get_source_schema(schema_url_or_path)
+                .await?
         } else {
             None
         };

@@ -34,11 +34,11 @@ impl<'a> Formatter<'a> {
         schema_store: &'a schema_store::SchemaStore,
     ) -> Result<Self, schema_store::Error> {
         let source_schema = match source_url_or_path {
-            Some(source_url_or_path) => Some(
+            Some(source_url_or_path) => {
                 schema_store
                     .try_get_source_schema(source_url_or_path)
-                    .await?,
-            ),
+                    .await?
+            }
             None => None,
         };
 
