@@ -41,6 +41,7 @@ impl SchemaStore {
             catalogs.push(crate::CatalogSchema {
                 url,
                 include: schema.include().to_vec(),
+                toml_version: schema.toml_version(),
                 root_keys: match schema.root_keys().as_ref() {
                     Some(keys) if !keys.is_empty() => {
                         Some(keys.split('.').map(String::from).collect())
@@ -86,6 +87,7 @@ impl SchemaStore {
                             catalogs.push(crate::CatalogSchema {
                                 url: catalog_schema.url,
                                 include: catalog_schema.file_match,
+                                toml_version: None,
                                 root_keys: None,
                             });
                         }
@@ -114,6 +116,7 @@ impl SchemaStore {
             catalogs.push(crate::CatalogSchema {
                 url: json_schema.url,
                 include: json_schema.file_match,
+                toml_version: None,
                 root_keys: None,
             });
         }
@@ -243,7 +246,7 @@ impl SchemaStore {
         };
 
         for matching_schema in matching_schemas {
-            if let Ok(schema) = self.try_load_document_schema(&matching_schema.url).await {
+            if let Ok(mut schema) = self.try_load_document_schema(&matching_schema.url).await {
                 match &matching_schema.root_keys {
                     Some(root_keys) => {
                         if !source_schema.sub_schemas.contains_key(root_keys) {
@@ -252,6 +255,9 @@ impl SchemaStore {
                     }
                     None => {
                         if source_schema.root.is_none() {
+                            if let Some(toml_version) = matching_schema.toml_version {
+                                schema.toml_version = Some(toml_version);
+                            }
                             source_schema.root = Some(schema);
                         }
                     }

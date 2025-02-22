@@ -82,6 +82,13 @@ impl SchemaCatalogItem {
         }
     }
 
+    pub fn toml_version(&self) -> Option<TomlVersion> {
+        match self {
+            Self::Root(item) => item.toml_version,
+            Self::Sub(_) => None,
+        }
+    }
+
     pub fn root_keys(&self) -> Option<&str> {
         match self {
             Self::Root(_) => None,
