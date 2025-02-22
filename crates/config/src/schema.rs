@@ -46,7 +46,10 @@ impl SchemaOptions {
 pub struct SchemaCatalog {
     /// # The schema catalog path or url.
     ///
+    /// The catalog is evaluated after the schemas specified by [[schemas]].
+    ///
     /// You can specify multiple catalogs by making it an array.
+    /// If you specify an array, the catalogs are searched in order of priority starting from the first catalog.
     /// If you want to disable the default catalog, specify an empty array.
     #[cfg_attr(
         feature = "jsonschema",

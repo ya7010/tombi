@@ -252,7 +252,7 @@
       "properties": {
         "path": {
           "title": "The schema catalog path or url.",
-          "description": "You can specify multiple catalogs by making it an array.\n If you want to disable the default catalog, specify an empty array.",
+          "description": "The catalog is evaluated after the schemas specified by [[schemas]].\n\n You can specify multiple catalogs by making it an array.\n If you specify an array, the catalogs are searched in order of priority starting from the first catalog.\n If you want to disable the default catalog, specify an empty array.",
           "anyOf": [
             {
               "$ref": "#/definitions/OneOrMany_for_SchemaCatalogPath"
