@@ -13,7 +13,8 @@ pub async fn handle_get_toml_version(
         .schema_store
         .try_get_source_schema_from_url(&uri)
         .await
-        .ok();
+        .ok()
+        .flatten();
 
     let (toml_version, source) = source_schema
         .as_ref()
