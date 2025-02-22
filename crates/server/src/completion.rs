@@ -24,7 +24,7 @@ pub async fn get_completion_contents(
     root: ast::Root,
     position: text::Position,
     document_schema: Option<&schema_store::DocumentSchema>,
-    _sub_schema_urls: Option<&schema_store::SubSchemaUrlMap>,
+    _sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
     schema_store: &SchemaStore,
     toml_version: config::TomlVersion,
 ) -> Vec<CompletionContent> {
