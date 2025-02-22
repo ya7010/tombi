@@ -59,14 +59,63 @@ pub struct SchemaCatalog {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(untagged))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone)]
+pub enum SchemaCatalogItem {
+    Root(RootSchemaCatalogItem),
+    Sub(SubSchemaCatalogItem),
+}
+
+impl SchemaCatalogItem {
+    pub fn path(&self) -> &str {
+        match self {
+            Self::Root(item) => &item.path,
+            Self::Sub(item) => &item.path,
+        }
+    }
+
+    pub fn include(&self) -> &[String] {
+        match self {
+            Self::Root(item) => &item.include,
+            Self::Sub(item) => &item.include,
+        }
+    }
+
+    pub fn root_keys(&self) -> Option<&str> {
+        match self {
+            Self::Root(_) => None,
+            Self::Sub(item) => item.root_keys.as_deref(),
+        }
+    }
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone)]
-pub struct SchemaCatalogItem {
+pub struct RootSchemaCatalogItem {
     /// # The TOML version that the schema is available.
     pub toml_version: Option<TomlVersion>,
 
+    /// # The schema path.
+    pub path: String,
+
+    /// # The file match pattern of the schema.
+    ///
+    /// The file match pattern to include the target to apply the schema.
+    /// Supports glob pattern.
+    #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
+    pub include: Vec<String>,
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone)]
+pub struct SubSchemaCatalogItem {
     /// # The schema path.
     pub path: String,
 

@@ -33,15 +33,15 @@ impl SchemaStore {
         };
         let mut catalogs = self.catalogs.write().await;
         for schema in schemas.iter() {
-            let Ok(url) = SchemaUrl::from_file_path(config_dirpath.join(&schema.path)) else {
+            let Ok(url) = SchemaUrl::from_file_path(config_dirpath.join(&schema.path())) else {
                 continue;
             };
             tracing::debug!("load config schema from: {}", url);
 
             catalogs.push(crate::CatalogSchema {
                 url,
-                include: schema.include.clone(),
-                root_keys: match schema.root_keys.as_ref() {
+                include: schema.include().to_vec(),
+                root_keys: match schema.root_keys().as_ref() {
                     Some(keys) if !keys.is_empty() => {
                         Some(keys.split('.').map(String::from).collect())
                     }

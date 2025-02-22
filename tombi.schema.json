@@ -284,6 +284,16 @@
       "type": "string"
     },
     "SchemaCatalogItem": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RootSchemaCatalogItem"
+        },
+        {
+          "$ref": "#/definitions/SubSchemaCatalogItem"
+        }
+      ]
+    },
+    "RootSchemaCatalogItem": {
       "type": "object",
       "properties": {
         "toml-version": {
@@ -297,6 +307,26 @@
             }
           ]
         },
+        "path": {
+          "title": "The schema path.",
+          "type": "string"
+        },
+        "include": {
+          "title": "The file match pattern of the schema.",
+          "description": "The file match pattern to include the target to apply the schema.\n Supports glob pattern.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": ["path", "include"]
+    },
+    "SubSchemaCatalogItem": {
+      "type": "object",
+      "properties": {
         "path": {
           "title": "The schema path.",
           "type": "string"
