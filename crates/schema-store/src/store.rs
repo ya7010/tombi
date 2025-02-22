@@ -212,10 +212,9 @@ impl SchemaStore {
         &self,
         source_path: &std::path::Path,
     ) -> Result<Option<DocumentSchema>, crate::Error> {
-        let matching_schema_urls: Vec<_> = {
-            self.catalogs
-                .read()
-                .await
+        let catalogs = self.catalogs.read().await;
+        let matching_schemas: Vec<_> = {
+            catalogs
                 .iter()
                 .filter(|catalog| {
                     catalog.include.iter().any(|pat| {
@@ -230,12 +229,11 @@ impl SchemaStore {
                             .unwrap_or(false)
                     })
                 })
-                .map(|catalog| catalog.url.clone())
                 .collect()
         };
 
-        for schema_url in matching_schema_urls {
-            if let Ok(schema) = self.try_load_document_schema(&schema_url).await {
+        for matching_schema in matching_schemas {
+            if let Ok(schema) = self.try_load_document_schema(&matching_schema.url).await {
                 return Ok(Some(schema));
             }
         }
