@@ -133,7 +133,7 @@ pub struct SubSchemaCatalogItem {
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     pub include: Vec<String>,
 
-    /// # The key to apply the schema as the root.
+    /// # The keys to apply the schema.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     pub root_keys: Option<String>,
 }

@@ -341,7 +341,7 @@
           "minItems": 1
         },
         "root-keys": {
-          "title": "The key to apply the schema as the root.",
+          "title": "The keys to apply the schema.",
           "type": ["string", "null"],
           "minLength": 1
         }
