@@ -239,3 +239,15 @@ impl FindCompletionContents for SchemaCompletion {
         .boxed()
     }
 }
+
+impl linter::Validate for SchemaCompletion {
+    fn validate<'a: 'b, 'b>(
+        &'a self,
+        _toml_version: TomlVersion,
+        _value_schema: &'a ValueSchema,
+        _definitions: &'a SchemaDefinitions,
+        _schema_store: &'a schema_store::SchemaStore,
+    ) -> BoxFuture<'b, Result<(), Vec<linter::Error>>> {
+        async move { Ok(()) }.boxed()
+    }
+}

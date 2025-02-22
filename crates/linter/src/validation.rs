@@ -24,7 +24,7 @@ use schema_store::SchemaDefinitions;
 use schema_store::ValueSchema;
 use std::ops::Deref;
 
-trait Validate {
+pub trait Validate {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,

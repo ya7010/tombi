@@ -34,7 +34,7 @@ pub fn find_one_of_completion_items<'a: 'b, 'b, T>(
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
 where
-    T: FindCompletionContents + Sync + Send,
+    T: FindCompletionContents + linter::Validate + Sync + Send,
 {
     async move {
         let Some(definitions) = definitions else {
@@ -53,6 +53,16 @@ where
                 } else {
                     (schema_url, Some(definitions))
                 };
+
+                if let Some(definitions) = definitions {
+                    if value
+                        .validate(toml_version, value_schema, definitions, schema_store)
+                        .await
+                        .is_err()
+                    {
+                        continue;
+                    }
+                }
 
                 let schema_completions = value
                     .find_completion_contents(
