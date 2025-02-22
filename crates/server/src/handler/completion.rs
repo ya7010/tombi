@@ -76,6 +76,7 @@ pub async fn handle_completion(
             root,
             position,
             source_schema.root.as_ref(),
+            Some(&source_schema.sub_schema_urls),
             &backend.schema_store,
             toml_version,
         )
