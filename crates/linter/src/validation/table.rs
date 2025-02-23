@@ -137,8 +137,8 @@ impl Validate for document_tree::Table {
                                         .validate(
                                             toml_version,
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
                                             Some(value_schema),
@@ -189,8 +189,8 @@ impl Validate for document_tree::Table {
                                             .validate(
                                                 toml_version,
                                                 &accessors
-                                                    .to_vec()
-                                                    .into_iter()
+                                                    .iter()
+                                                    .cloned()
                                                     .chain(std::iter::once(accessor.clone()))
                                                     .collect::<Vec<_>>(),
                                                 Some(pattern_property_schema),
@@ -243,8 +243,8 @@ impl Validate for document_tree::Table {
                                         .validate(
                                             toml_version,
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
                                             Some(value_schema),
@@ -320,8 +320,8 @@ impl Validate for document_tree::Table {
                             .validate(
                                 toml_version,
                                 &accessors
-                                    .to_vec()
-                                    .into_iter()
+                                    .iter()
+                                    .cloned()
                                     .chain(std::iter::once(Accessor::Key(
                                         key.to_raw_text(toml_version),
                                     )))

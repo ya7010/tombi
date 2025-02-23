@@ -92,8 +92,8 @@ impl FindCompletionContents for document_tree::Array {
                                     return value
                                         .find_completion_contents(
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
                                             Some(item_schema),
@@ -124,8 +124,8 @@ impl FindCompletionContents for document_tree::Array {
                             return SchemaCompletion
                                 .find_completion_contents(
                                     &accessors
-                                        .to_vec()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(Accessor::Index(new_item_index)))
                                         .collect::<Vec<_>>(),
                                     Some(item_schema),
@@ -218,8 +218,8 @@ impl FindCompletionContents for document_tree::Array {
                             return value
                                 .find_completion_contents(
                                     &accessors
-                                        .to_vec()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
                                     None,

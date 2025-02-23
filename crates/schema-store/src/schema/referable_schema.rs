@@ -12,6 +12,8 @@ pub enum Referable<T> {
     },
 }
 
+type NewValueSchemaInfo<'a> = (&'a ValueSchema, Option<(SchemaUrl, SchemaDefinitions)>);
+
 impl<T> Referable<T> {
     pub fn resolved(&self) -> Option<&T> {
         match self {
@@ -23,18 +25,16 @@ impl<T> Referable<T> {
 
 impl Referable<ValueSchema> {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
-        if let Some(ref_value) = object.get("$ref") {
-            if let serde_json::Value::String(ref_string) = ref_value {
-                return Some(Referable::Ref {
-                    reference: ref_string.clone(),
-                    title: object
-                        .get("title")
-                        .and_then(|title| title.as_str().map(|s| s.to_string())),
-                    description: object
-                        .get("description")
-                        .and_then(|description| description.as_str().map(|s| s.to_string())),
-                });
-            }
+        if let Some(serde_json::Value::String(ref_string)) = object.get("$ref") {
+            return Some(Referable::Ref {
+                reference: ref_string.clone(),
+                title: object
+                    .get("title")
+                    .and_then(|title| title.as_str().map(|s| s.to_string())),
+                description: object
+                    .get("description")
+                    .and_then(|description| description.as_str().map(|s| s.to_string())),
+            });
         }
 
         ValueSchema::new(object).map(Referable::Resolved)
@@ -51,10 +51,7 @@ impl Referable<ValueSchema> {
         &'a mut self,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a crate::SchemaStore,
-    ) -> BoxFuture<
-        'b,
-        Result<(&'a ValueSchema, Option<(SchemaUrl, SchemaDefinitions)>), crate::Error>,
-    > {
+    ) -> BoxFuture<'b, Result<NewValueSchemaInfo<'a>, crate::Error>> {
         Box::pin(async move {
             match self {
                 Referable::Ref {
@@ -80,8 +77,7 @@ impl Referable<ValueSchema> {
 
                         if let Some(value_schema) = document_schema.value_schema {
                             *self = Referable::Resolved(value_schema);
-                            new_schema =
-                                Some((schema_url, document_schema.definitions.clone()));
+                            new_schema = Some((schema_url, document_schema.definitions.clone()));
                         } else {
                             return Err(crate::Error::InvalidJsonSchemaReference {
                                 reference: reference.to_owned(),

@@ -115,8 +115,8 @@ impl FindCompletionContents for document_tree::Table {
                                     return value
                                         .find_completion_contents(
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
                                             Some(property_schema),
@@ -728,8 +728,8 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
         value
             .find_completion_contents(
                 &accessors
-                    .to_vec()
-                    .into_iter()
+                    .iter()
+                    .cloned()
                     .chain(std::iter::once(Accessor::Key(
                         key.to_raw_text(toml_version),
                     )))

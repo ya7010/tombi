@@ -124,8 +124,8 @@ impl Validate for document_tree::Array {
                                     .validate(
                                         toml_version,
                                         &accessors
-                                            .to_vec()
-                                            .into_iter()
+                                            .iter()
+                                            .cloned()
                                             .chain(std::iter::once(schema_store::Accessor::Index(
                                                 index,
                                             )))
@@ -174,8 +174,8 @@ impl Validate for document_tree::Array {
                             .validate(
                                 toml_version,
                                 &accessors
-                                    .to_vec()
-                                    .into_iter()
+                                    .iter()
+                                    .cloned()
                                     .chain(std::iter::once(schema_store::Accessor::Index(index)))
                                     .collect::<Vec<_>>(),
                                 None,

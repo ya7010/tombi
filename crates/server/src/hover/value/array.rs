@@ -79,8 +79,8 @@ impl GetHoverContent for document_tree::Array {
                                     let mut hover_content = value
                                         .get_hover_content(
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
                                             Some(item_schema),
@@ -121,8 +121,8 @@ impl GetHoverContent for document_tree::Array {
                             return value
                                 .get_hover_content(
                                     &accessors
-                                        .to_vec()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
                                     None,
@@ -208,8 +208,8 @@ impl GetHoverContent for document_tree::Array {
                             return value
                                 .get_hover_content(
                                     &accessors
-                                        .to_vec()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
                                     None,

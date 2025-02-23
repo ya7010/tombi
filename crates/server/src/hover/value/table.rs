@@ -97,8 +97,8 @@ impl GetHoverContent for document_tree::Table {
                                     return value
                                         .get_hover_content(
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
                                             Some(property_schema),
@@ -135,8 +135,8 @@ impl GetHoverContent for document_tree::Table {
                                 return value
                                     .get_hover_content(
                                         &accessors
-                                            .to_vec()
-                                            .into_iter()
+                                            .iter()
+                                            .cloned()
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
                                         None,
@@ -191,8 +191,8 @@ impl GetHoverContent for document_tree::Table {
                                                 return value
                                                     .get_hover_content(
                                                         &accessors
-                                                            .to_vec()
-                                                            .into_iter()
+                                                            .iter()
+                                                            .cloned()
                                                             .chain(std::iter::once(accessor))
                                                             .collect::<Vec<_>>(),
                                                         Some(property_schema),
@@ -229,8 +229,8 @@ impl GetHoverContent for document_tree::Table {
                                             return value
                                                 .get_hover_content(
                                                     &accessors
-                                                        .to_vec()
-                                                        .into_iter()
+                                                        .iter()
+                                                        .cloned()
                                                         .chain(std::iter::once(accessor))
                                                         .collect::<Vec<_>>(),
                                                     None,
@@ -289,8 +289,8 @@ impl GetHoverContent for document_tree::Table {
                                     return value
                                         .get_hover_content(
                                             &accessors
-                                                .to_vec()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
                                             Some(additional_property_schema),
@@ -322,8 +322,8 @@ impl GetHoverContent for document_tree::Table {
                             value
                                 .get_hover_content(
                                     &accessors
-                                        .to_vec()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
                                     None,
@@ -413,8 +413,8 @@ impl GetHoverContent for document_tree::Table {
                             return value
                                 .get_hover_content(
                                     &accessors
-                                        .to_vec()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
                                     None,
