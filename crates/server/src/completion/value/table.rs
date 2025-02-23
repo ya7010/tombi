@@ -352,6 +352,48 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         }
 
+                        if let Some(sub_schema_url_map) = sub_schema_url_map {
+                            for (root_accessors, sub_schema_url) in sub_schema_url_map {
+                                if let Some(SchemaAccessor::Key(last_key)) = root_accessors.last() {
+                                    let head_accessors =
+                                        &root_accessors[..root_accessors.len() - 1];
+                                    if head_accessors == accessors {
+                                        if let Ok(document_schema) = schema_store
+                                            .try_get_document_schema_from_url(&sub_schema_url)
+                                            .await
+                                        {
+                                            if let Some(value_schema) = document_schema.value_schema
+                                            {
+                                                completion_contents.push(
+                                                    CompletionContent::new_key(
+                                                        &last_key,
+                                                        position,
+                                                        value_schema
+                                                            .detail(
+                                                                &document_schema.definitions,
+                                                                schema_store,
+                                                                completion_hint,
+                                                            )
+                                                            .await,
+                                                        value_schema
+                                                            .documentation(
+                                                                &document_schema.definitions,
+                                                                schema_store,
+                                                                completion_hint,
+                                                            )
+                                                            .await,
+                                                        None,
+                                                        schema_url,
+                                                        completion_hint,
+                                                    ),
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         if completion_contents.is_empty() {
                             if let Some(pattern_properties) = &table_schema.pattern_properties {
                                 let patterns = pattern_properties
