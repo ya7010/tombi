@@ -3,6 +3,37 @@
 [Taplo](https://github.com/tamasfe/taplo) is already famous as a TOML Language Server.
 However, I rewrote a new Language Server for the following purposes.
 
-- Support for TOML v1.1.0 (preview)
-- Formatter inspired by Python's [Black](https://github.com/psf/black) (Support for [magic trailing comma](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#the-magic-trailing-comma))
-- A formatter with stable behavior
+## Magic Trailing Comma
+Formatter inspired by Python's [Black](https://github.com/psf/black) (Support for [magic trailing comma](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#the-magic-trailing-comma))
+
+This idea is great, it allows the user's code formatting intent to be expressed in code, not in a configuration.
+
+I wanted to bring this idea to TOML.
+
+## Support for TOML v1.1.0 (preview)
+TOML will allow multi-line inline tables and trailing commas in the future v1.1.0.  
+This feature makes the magic trailing comma feature more valuable.  
+To provide that experience, Tombi will support TOML v1.1.0 features ahead of time.
+
+## Stable Behavior Formatting
+Taplo has a fundamental problem with the lexer.  
+When formatting an incomplete TOML file, the AST deletes elements.  
+I uninstalled Taplo 😢
+
+## Personal Study
+I was writing a [PostgreSQL Language Server](https://github.com/UniqueVision/plpgsql-lsp).
+At that time, I was using the official parser of PostgreSQL, so I can't implement formatter and other features.
+
+So, I wanted to create a complete Language Server.
+And I still want to get a SQL Language Server.
+
+As a simple exercise, I wanted to create a Language Server for a language with a smaller language specification and practical use.
+
+So I chose TOML.
+
+## Use TOML for project configuration file
+I liked TOML better than JSON/YAML for the project's configuration file;
+
+but I was using the project's configuration file in YAML for the team's project because of the excellent [RedHat Language Server](https://github.com/redhat-developer/yaml-language-server).
+
+I wanted to replace it with TOML.
