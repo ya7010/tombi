@@ -1,5 +1,5 @@
 ## TODO
-### TODO
+### Milestone 1
 - [x] parser を書き直す
   - [x] エラー出力のロジックの改善
   - [x] Red-Tree のPosition, Range のバグ修正
@@ -9,13 +9,16 @@
 - [x] https://github.com/toml-lang/toml-test に対応
 
 ### Milestone 2
-- [ ] JSON Schema のサポート
+- [x] JSON Schema のサポート
+- [x] document site の立ち上げ
 
 ### Milestone 3
 - [ ] ast-editor の実装
-    - [ ] 末尾カンマとコメントの関係の差し替え
     - [ ] テーブルのキーの並び替えに対応
-- [ ] document site の立ち上げ
+    - [ ] 末尾カンマとコメントの関係の差し替え
+
+### Milestone 4
+- [ ] JSON Schema への「定義へ移動」機能の追加
 
 ### Bugs
 - [x] Local Date 型が誤って IntegerDec としてパースされる
@@ -31,4 +34,3 @@
 
 ### Refactor
 - [ ] 各crateのエラー型の整理
-- [ ] parser のスリム化
