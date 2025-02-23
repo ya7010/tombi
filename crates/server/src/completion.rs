@@ -178,7 +178,7 @@ pub async fn get_completion_contents(
         .into_iter()
         .fold(AHashMap::new(), |mut acc: AHashMap<_, Vec<_>>, content| {
             acc.entry(content.label.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(content);
             acc
         })

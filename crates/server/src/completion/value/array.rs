@@ -38,13 +38,13 @@ impl FindCompletionContents for document_tree::Array {
             if let Some(sub_schema_url_map) = sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
-                        .into_iter()
-                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .iter()
+                        .map(SchemaAccessor::from)
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
                         if let Ok(document_schema) = schema_store
-                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self

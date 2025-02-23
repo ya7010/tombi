@@ -178,7 +178,7 @@ pub fn type_hint_value(
         };
         if need_key_hint {
             completion_contents.push(CompletionContent::new_type_hint_key(
-                &key,
+                key,
                 toml_version,
                 schema_url,
                 completion_hint,

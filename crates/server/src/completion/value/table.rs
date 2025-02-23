@@ -39,13 +39,13 @@ impl FindCompletionContents for document_tree::Table {
             if let Some(sub_schema_url_map) = sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
-                        .into_iter()
-                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .iter()
+                        .map(SchemaAccessor::from)
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
                         if let Ok(document_schema) = schema_store
-                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self
@@ -359,14 +359,14 @@ impl FindCompletionContents for document_tree::Table {
                                         &root_accessors[..root_accessors.len() - 1];
                                     if head_accessors == accessors {
                                         if let Ok(document_schema) = schema_store
-                                            .try_get_document_schema_from_url(&sub_schema_url)
+                                            .try_get_document_schema_from_url(sub_schema_url)
                                             .await
                                         {
                                             if let Some(value_schema) = document_schema.value_schema
                                             {
                                                 completion_contents.push(
                                                     CompletionContent::new_key(
-                                                        &last_key,
+                                                        last_key,
                                                         position,
                                                         value_schema
                                                             .detail(
@@ -713,7 +713,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                             }
                             Some(CompletionHint::InArray) => {
                                 return vec![CompletionContent::new_type_hint_key(
-                                    &key,
+                                    key,
                                     toml_version,
                                     schema_url,
                                     completion_hint,
