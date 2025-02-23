@@ -18,7 +18,7 @@ use super::{GetHoverContent, HoverContent};
 impl GetHoverContent for document_tree::Value {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -209,7 +209,7 @@ impl GetHoverContent for document_tree::Value {
 impl GetHoverContent for ValueSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,

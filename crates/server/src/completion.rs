@@ -176,10 +176,8 @@ pub async fn get_completion_contents(
     //       remove the completion contents with lower priority.
     completion_contents
         .into_iter()
-        .fold(AHashMap::new(), |mut acc, content| {
-            acc.entry(content.label.clone())
-                .or_insert_with(Vec::new)
-                .push(content);
+        .fold(AHashMap::new(), |mut acc: AHashMap<_, Vec<_>>, content| {
+            acc.entry(content.label.clone()).or_default().push(content);
             acc
         })
         .into_iter()
@@ -195,7 +193,7 @@ pub async fn get_completion_contents(
 pub trait FindCompletionContents {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,

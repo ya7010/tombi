@@ -82,10 +82,10 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<ast::Root> {
-        let Some(p) = self.get_parsed(uri, toml_version).await else {
-            return None;
-        };
-        p.cast::<ast::Root>().map(|root| root.tree())
+        self.get_parsed(uri, toml_version)
+            .await?
+            .cast::<ast::Root>()
+            .map(|root| root.tree())
     }
 
     #[inline]
@@ -94,11 +94,11 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
-        let Some(p) = self.get_parsed(uri, toml_version).await else {
-            return None;
-        };
-
-        let Some(p) = p.cast::<ast::Root>() else {
+        let Some(p) = self
+            .get_parsed(uri, toml_version)
+            .await?
+            .cast::<ast::Root>()
+        else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };
 
@@ -120,11 +120,10 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<document_tree::DocumentTree> {
-        let Some(root) = self.get_incomplete_ast(uri, toml_version).await else {
-            return None;
-        };
-
-        root.try_into_document_tree(toml_version).ok()
+        self.get_incomplete_ast(uri, toml_version)
+            .await?
+            .try_into_document_tree(toml_version)
+            .ok()
     }
 
     #[inline]

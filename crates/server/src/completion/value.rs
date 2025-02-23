@@ -39,7 +39,7 @@ use string::type_hint_string;
 impl FindCompletionContents for document_tree::Value {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -178,7 +178,7 @@ pub fn type_hint_value(
         };
         if need_key_hint {
             completion_contents.push(CompletionContent::new_type_hint_key(
-                &key,
+                key,
                 toml_version,
                 schema_url,
                 completion_hint,

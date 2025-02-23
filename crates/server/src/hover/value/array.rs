@@ -12,7 +12,7 @@ use crate::hover::{
 impl GetHoverContent for document_tree::Array {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -31,13 +31,13 @@ impl GetHoverContent for document_tree::Array {
             if let Some(sub_schema_url_map) = sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
-                        .into_iter()
-                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .iter()
+                        .map(SchemaAccessor::from)
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
                         if let Ok(document_schema) = schema_store
-                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self
@@ -79,10 +79,10 @@ impl GetHoverContent for document_tree::Array {
                                     let mut hover_content = value
                                         .get_hover_content(
                                             &accessors
-                                                .clone()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
-                                                .collect(),
+                                                .collect::<Vec<_>>(),
                                             Some(item_schema),
                                             toml_version,
                                             position,
@@ -121,10 +121,10 @@ impl GetHoverContent for document_tree::Array {
                             return value
                                 .get_hover_content(
                                     &accessors
-                                        .clone()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
-                                        .collect(),
+                                        .collect::<Vec<_>>(),
                                     None,
                                     toml_version,
                                     position,
@@ -208,10 +208,10 @@ impl GetHoverContent for document_tree::Array {
                             return value
                                 .get_hover_content(
                                     &accessors
-                                        .clone()
-                                        .into_iter()
+                                        .iter()
+                                        .cloned()
                                         .chain(std::iter::once(accessor))
-                                        .collect(),
+                                        .collect::<Vec<_>>(),
                                     None,
                                     toml_version,
                                     position,
@@ -227,7 +227,7 @@ impl GetHoverContent for document_tree::Array {
                     Some(HoverContent {
                         title: None,
                         description: None,
-                        accessors: Accessors::new(accessors.clone()),
+                        accessors: Accessors::new(accessors.to_vec()),
                         value_type: ValueType::Array,
                         constraints: None,
                         schema_url: None,
@@ -243,7 +243,7 @@ impl GetHoverContent for document_tree::Array {
 impl GetHoverContent for ArraySchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         _position: text::Position,
@@ -257,7 +257,7 @@ impl GetHoverContent for ArraySchema {
             Some(HoverContent {
                 title: self.title.clone(),
                 description: self.description.clone(),
-                accessors: Accessors::new(accessors.clone()),
+                accessors: Accessors::new(accessors.to_vec()),
                 value_type: ValueType::Array,
                 constraints: Some(DataConstraints {
                     min_items: self.min_items,

@@ -15,7 +15,7 @@ pub struct SchemaCompletion;
 impl FindCompletionContents for SchemaCompletion {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -258,7 +258,7 @@ impl linter::Validate for SchemaCompletion {
     fn validate<'a: 'b, 'b>(
         &'a self,
         _toml_version: TomlVersion,
-        _accessors: &'a Vec<Accessor>,
+        _accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _schema_url: Option<&'a schema_store::SchemaUrl>,
         _definitions: Option<&'a SchemaDefinitions>,

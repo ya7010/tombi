@@ -12,7 +12,7 @@ use crate::hover::{
 impl GetHoverContent for document_tree::String {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -90,7 +90,7 @@ impl GetHoverContent for document_tree::String {
                 None => Some(HoverContent {
                     title: None,
                     description: None,
-                    accessors: schema_store::Accessors::new(accessors.clone()),
+                    accessors: schema_store::Accessors::new(accessors.to_vec()),
                     value_type: schema_store::ValueType::String,
                     constraints: None,
                     schema_url: None,
@@ -105,7 +105,7 @@ impl GetHoverContent for document_tree::String {
 impl GetHoverContent for StringSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         _position: text::Position,
@@ -119,7 +119,7 @@ impl GetHoverContent for StringSchema {
             Some(HoverContent {
                 title: self.title.clone(),
                 description: self.description.clone(),
-                accessors: schema_store::Accessors::new(accessors.clone()),
+                accessors: schema_store::Accessors::new(accessors.to_vec()),
                 value_type: schema_store::ValueType::String,
                 constraints: Some(DataConstraints {
                     default: self

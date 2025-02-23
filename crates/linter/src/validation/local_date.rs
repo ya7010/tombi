@@ -9,7 +9,7 @@ impl Validate for LocalDate {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
@@ -46,7 +46,7 @@ impl Validate for LocalDate {
                             return validate_one_of(
                                 self,
                                 toml_version,
-                                &accessors,
+                                accessors,
                                 one_of_schema,
                                 schema_url,
                                 definitions,

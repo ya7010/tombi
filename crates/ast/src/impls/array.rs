@@ -81,7 +81,7 @@ impl crate::Array {
             .skip_while(|item| item.kind() != T!(']'))
             .skip(1)
             .find(|item| !matches!(item.kind(), WHITESPACE | COMMENT | LINE_BREAK))
-            .map_or(false, |it| it.kind() == T!(,))
+            .is_some_and(|it| it.kind() == T!(,))
     }
 
     pub fn has_multiline_values(&self, toml_version: TomlVersion) -> bool {
