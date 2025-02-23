@@ -85,7 +85,10 @@ where
                     .await?;
             }
         }
+        Ok::<(), Box<dyn std::error::Error>>(())
+    })?;
 
+    runtime.block_on(async {
         let input = arg::FileInput::from(args.files.as_ref());
         let total_num = input.len();
         let mut success_num = 0;
