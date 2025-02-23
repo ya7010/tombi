@@ -46,7 +46,7 @@ impl Validate for LocalTime {
                             return validate_one_of(
                                 self,
                                 toml_version,
-                                &accessors,
+                                accessors,
                                 one_of_schema,
                                 schema_url,
                                 definitions,
@@ -61,7 +61,7 @@ impl Validate for LocalTime {
                                 toml_version,
                                 accessors,
                                 any_of_schema,
-                                &schema_url,
+                                schema_url,
                                 definitions,
                                 sub_schema_url_map,
                                 schema_store,

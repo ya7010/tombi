@@ -24,13 +24,13 @@ impl Validate for document_tree::Table {
         async move {
             if let Some(sub_schema_url) = sub_schema_url_map.get(
                 &accessors
-                    .into_iter()
-                    .map(|accessor| SchemaAccessor::from(accessor))
+                    .iter()
+                    .map(SchemaAccessor::from)
                     .collect::<Vec<_>>(),
             ) {
                 if schema_url != Some(sub_schema_url) {
                     if let Ok(document_schema) = schema_store
-                        .try_get_document_schema_from_url(&sub_schema_url)
+                        .try_get_document_schema_from_url(sub_schema_url)
                         .await
                     {
                         return self
@@ -91,7 +91,7 @@ impl Validate for document_tree::Table {
                                 any_of_schema,
                                 schema_url,
                                 definitions,
-                                &sub_schema_url_map,
+                                sub_schema_url_map,
                                 schema_store,
                             )
                             .await
@@ -104,7 +104,7 @@ impl Validate for document_tree::Table {
                                 all_of_schema,
                                 schema_url,
                                 definitions,
-                                &sub_schema_url_map,
+                                sub_schema_url_map,
                                 schema_store,
                             )
                             .await
@@ -144,7 +144,7 @@ impl Validate for document_tree::Table {
                                             Some(value_schema),
                                             Some(new_schema_url),
                                             Some(new_definitions),
-                                            &sub_schema_url_map,
+                                            sub_schema_url_map,
                                             schema_store,
                                         )
                                         .await
@@ -196,7 +196,7 @@ impl Validate for document_tree::Table {
                                                 Some(pattern_property_schema),
                                                 Some(new_schema_url),
                                                 Some(new_definitions),
-                                                &sub_schema_url_map,
+                                                sub_schema_url_map,
                                                 schema_store,
                                             )
                                             .await
@@ -250,7 +250,7 @@ impl Validate for document_tree::Table {
                                             Some(value_schema),
                                             Some(new_schema_url),
                                             Some(new_definitions),
-                                            &sub_schema_url_map,
+                                            sub_schema_url_map,
                                             schema_store,
                                         )
                                         .await

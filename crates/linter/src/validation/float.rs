@@ -43,7 +43,7 @@ impl Validate for document_tree::Float {
                             return validate_one_of(
                                 self,
                                 toml_version,
-                                &accessors,
+                                accessors,
                                 one_of_schema,
                                 schema_url,
                                 definitions,

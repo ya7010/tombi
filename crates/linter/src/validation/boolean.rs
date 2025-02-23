@@ -72,7 +72,7 @@ impl Validate for document_tree::Boolean {
                                 toml_version,
                                 accessors,
                                 all_of_schema,
-                                &schema_url,
+                                schema_url,
                                 definitions,
                                 sub_schema_url_map,
                                 schema_store,

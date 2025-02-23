@@ -33,7 +33,7 @@ impl SchemaStore {
         };
         let mut catalogs = self.catalogs.write().await;
         for schema in schemas.iter() {
-            let Ok(url) = SchemaUrl::from_file_path(config_dirpath.join(&schema.path())) else {
+            let Ok(url) = SchemaUrl::from_file_path(config_dirpath.join(schema.path())) else {
                 continue;
             };
             tracing::debug!("load config schema from: {}", url);
