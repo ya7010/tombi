@@ -10,7 +10,7 @@ impl Validate for document_tree::Array {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<schema_store::Accessor>,
+        accessors: &'a [schema_store::Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
@@ -20,13 +20,13 @@ impl Validate for document_tree::Array {
         async move {
             if let Some(sub_schema_url) = sub_schema_url_map.get(
                 &accessors
-                    .into_iter()
-                    .map(|accessor| SchemaAccessor::from(accessor))
+                    .iter()
+                    .map(SchemaAccessor::from)
                     .collect::<Vec<_>>(),
             ) {
                 if schema_url != Some(sub_schema_url) {
                     if let Ok(document_schema) = schema_store
-                        .try_get_document_schema_from_url(&sub_schema_url)
+                        .try_get_document_schema_from_url(sub_schema_url)
                         .await
                     {
                         return self
@@ -84,11 +84,11 @@ impl Validate for document_tree::Array {
                             return validate_any_of(
                                 self,
                                 toml_version,
-                                &accessors,
+                                accessors,
                                 any_of_schema,
-                                &schema_url,
+                                schema_url,
                                 definitions,
-                                &sub_schema_url_map,
+                                sub_schema_url_map,
                                 schema_store,
                             )
                             .await
@@ -97,11 +97,11 @@ impl Validate for document_tree::Array {
                             return validate_all_of(
                                 self,
                                 toml_version,
-                                &accessors,
+                                accessors,
                                 all_of_schema,
-                                &schema_url,
+                                schema_url,
                                 definitions,
-                                &sub_schema_url_map,
+                                sub_schema_url_map,
                                 schema_store,
                             )
                             .await
@@ -124,12 +124,12 @@ impl Validate for document_tree::Array {
                                     .validate(
                                         toml_version,
                                         &accessors
-                                            .clone()
-                                            .into_iter()
+                                            .iter()
+                                            .cloned()
                                             .chain(std::iter::once(schema_store::Accessor::Index(
                                                 index,
                                             )))
-                                            .collect(),
+                                            .collect::<Vec<_>>(),
                                         Some(item_schema),
                                         Some(schema_url),
                                         Some(definitions),
@@ -174,10 +174,10 @@ impl Validate for document_tree::Array {
                             .validate(
                                 toml_version,
                                 &accessors
-                                    .clone()
-                                    .into_iter()
+                                    .iter()
+                                    .cloned()
                                     .chain(std::iter::once(schema_store::Accessor::Index(index)))
-                                    .collect(),
+                                    .collect::<Vec<_>>(),
                                 None,
                                 schema_url,
                                 definitions,

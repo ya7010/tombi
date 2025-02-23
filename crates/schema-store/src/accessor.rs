@@ -118,7 +118,7 @@ impl SchemaAccessor {
                     }
                     if index_str == "*" {
                         accessors.push(SchemaAccessor::Index); // Use 0 as a placeholder for [*]
-                    } else if let Ok(_) = index_str.parse::<usize>() {
+                    } else if index_str.parse::<usize>().is_ok() {
                         accessors.push(SchemaAccessor::Index);
                     } else {
                         tracing::error!("Invalid schema accessor: {path}");

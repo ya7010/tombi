@@ -65,12 +65,12 @@ impl crate::InlineTable {
             .skip_while(|item| item.kind() != T!('}'))
             .skip(1)
             .find(|item| !matches!(item.kind(), WHITESPACE | COMMENT | LINE_BREAK))
-            .map_or(false, |it| it.kind() == T!(,))
+            .is_some_and(|it| it.kind() == T!(,))
     }
 
     pub fn has_multiline_values(&self, toml_version: TomlVersion) -> bool {
         self.key_values().any(|key_value| {
-            key_value.value().map_or(false, |value| match value {
+            key_value.value().is_some_and(|value| match value {
                 crate::Value::Array(array) => array.should_be_multiline(toml_version),
                 crate::Value::InlineTable(inline_table) => {
                     inline_table.should_be_multiline(toml_version)

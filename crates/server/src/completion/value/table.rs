@@ -18,7 +18,7 @@ use schema_store::{
 impl FindCompletionContents for document_tree::Table {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -39,13 +39,13 @@ impl FindCompletionContents for document_tree::Table {
             if let Some(sub_schema_url_map) = sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
-                        .into_iter()
-                        .map(|accessor| SchemaAccessor::from(accessor))
+                        .iter()
+                        .map(SchemaAccessor::from)
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
                         if let Ok(document_schema) = schema_store
-                            .try_get_document_schema_from_url(&sub_schema_url)
+                            .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self
@@ -115,10 +115,10 @@ impl FindCompletionContents for document_tree::Table {
                                     return value
                                         .find_completion_contents(
                                             &accessors
-                                                .clone()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor))
-                                                .collect(),
+                                                .collect::<Vec<_>>(),
                                             Some(property_schema),
                                             toml_version,
                                             position,
@@ -359,14 +359,14 @@ impl FindCompletionContents for document_tree::Table {
                                         &root_accessors[..root_accessors.len() - 1];
                                     if head_accessors == accessors {
                                         if let Ok(document_schema) = schema_store
-                                            .try_get_document_schema_from_url(&sub_schema_url)
+                                            .try_get_document_schema_from_url(sub_schema_url)
                                             .await
                                         {
                                             if let Some(value_schema) = document_schema.value_schema
                                             {
                                                 completion_contents.push(
                                                     CompletionContent::new_key(
-                                                        &last_key,
+                                                        last_key,
                                                         position,
                                                         value_schema
                                                             .detail(
@@ -506,7 +506,7 @@ impl FindCompletionContents for document_tree::Table {
 impl FindCompletionContents for TableSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
@@ -634,7 +634,7 @@ async fn count_table_or_array_schema(
 fn get_property_value_completion_contents<'a: 'b, 'b>(
     key: &'a document_tree::Key,
     value: &'a document_tree::Value,
-    accessors: &'a Vec<Accessor>,
+    accessors: &'a [Accessor],
     value_schema: Option<&'a ValueSchema>,
     toml_version: TomlVersion,
     position: text::Position,
@@ -713,7 +713,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                             }
                             Some(CompletionHint::InArray) => {
                                 return vec![CompletionContent::new_type_hint_key(
-                                    &key,
+                                    key,
                                     toml_version,
                                     schema_url,
                                     completion_hint,
@@ -728,12 +728,12 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
         value
             .find_completion_contents(
                 &accessors
-                    .clone()
-                    .into_iter()
+                    .iter()
+                    .cloned()
                     .chain(std::iter::once(Accessor::Key(
                         key.to_raw_text(toml_version),
                     )))
-                    .collect(),
+                    .collect::<Vec<_>>(),
                 value_schema,
                 toml_version,
                 position,
@@ -779,7 +779,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
     table_schema: &'a TableSchema,
     key_name: &'a String,
     position: text::Position,
-    accessors: &'a Vec<Accessor>,
+    accessors: &'a [Accessor],
     completion_hint: Option<CompletionHint>,
     schema_url: Option<&'a SchemaUrl>,
     value_schema: &'a ValueSchema,

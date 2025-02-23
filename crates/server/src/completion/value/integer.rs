@@ -12,7 +12,7 @@ use crate::completion::{
 impl FindCompletionContents for IntegerSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a Vec<Accessor>,
+        _accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,

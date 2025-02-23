@@ -13,7 +13,7 @@ use super::Validate;
 pub fn validate_one_of<'a: 'b, 'b, T>(
     value: &'a T,
     toml_version: TomlVersion,
-    accessors: &'a Vec<schema_store::Accessor>,
+    accessors: &'a [schema_store::Accessor],
     one_of_schema: &'a OneOfSchema,
     schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a SchemaDefinitions,
@@ -61,7 +61,7 @@ where
                     match value
                         .validate(
                             toml_version,
-                            &accessors,
+                            accessors,
                             Some(value_schema),
                             Some(schema_url),
                             Some(definitions),
@@ -100,7 +100,7 @@ where
                     match validate_one_of(
                         value,
                         toml_version,
-                        &accessors,
+                        accessors,
                         one_of_schema,
                         schema_url,
                         definitions,
@@ -120,9 +120,9 @@ where
                     match validate_any_of(
                         value,
                         toml_version,
-                        &accessors,
+                        accessors,
                         any_of_schema,
-                        &schema_url,
+                        schema_url,
                         definitions,
                         sub_schema_url_map,
                         schema_store,
@@ -140,9 +140,9 @@ where
                     match validate_all_of(
                         value,
                         toml_version,
-                        &accessors,
+                        accessors,
                         all_of_schema,
-                        &schema_url,
+                        schema_url,
                         definitions,
                         sub_schema_url_map,
                         schema_store,

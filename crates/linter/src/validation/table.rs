@@ -11,7 +11,7 @@ impl Validate for document_tree::Table {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
@@ -24,13 +24,13 @@ impl Validate for document_tree::Table {
         async move {
             if let Some(sub_schema_url) = sub_schema_url_map.get(
                 &accessors
-                    .into_iter()
-                    .map(|accessor| SchemaAccessor::from(accessor))
+                    .iter()
+                    .map(SchemaAccessor::from)
                     .collect::<Vec<_>>(),
             ) {
                 if schema_url != Some(sub_schema_url) {
                     if let Ok(document_schema) = schema_store
-                        .try_get_document_schema_from_url(&sub_schema_url)
+                        .try_get_document_schema_from_url(sub_schema_url)
                         .await
                     {
                         return self
@@ -91,7 +91,7 @@ impl Validate for document_tree::Table {
                                 any_of_schema,
                                 schema_url,
                                 definitions,
-                                &sub_schema_url_map,
+                                sub_schema_url_map,
                                 schema_store,
                             )
                             .await
@@ -104,7 +104,7 @@ impl Validate for document_tree::Table {
                                 all_of_schema,
                                 schema_url,
                                 definitions,
-                                &sub_schema_url_map,
+                                sub_schema_url_map,
                                 schema_store,
                             )
                             .await
@@ -137,14 +137,14 @@ impl Validate for document_tree::Table {
                                         .validate(
                                             toml_version,
                                             &accessors
-                                                .clone()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
-                                                .collect(),
+                                                .collect::<Vec<_>>(),
                                             Some(value_schema),
                                             Some(new_schema_url),
                                             Some(new_definitions),
-                                            &sub_schema_url_map,
+                                            sub_schema_url_map,
                                             schema_store,
                                         )
                                         .await
@@ -189,14 +189,14 @@ impl Validate for document_tree::Table {
                                             .validate(
                                                 toml_version,
                                                 &accessors
-                                                    .clone()
-                                                    .into_iter()
+                                                    .iter()
+                                                    .cloned()
                                                     .chain(std::iter::once(accessor.clone()))
-                                                    .collect(),
+                                                    .collect::<Vec<_>>(),
                                                 Some(pattern_property_schema),
                                                 Some(new_schema_url),
                                                 Some(new_definitions),
-                                                &sub_schema_url_map,
+                                                sub_schema_url_map,
                                                 schema_store,
                                             )
                                             .await
@@ -243,14 +243,14 @@ impl Validate for document_tree::Table {
                                         .validate(
                                             toml_version,
                                             &accessors
-                                                .clone()
-                                                .into_iter()
+                                                .iter()
+                                                .cloned()
                                                 .chain(std::iter::once(accessor))
-                                                .collect(),
+                                                .collect::<Vec<_>>(),
                                             Some(value_schema),
                                             Some(new_schema_url),
                                             Some(new_definitions),
-                                            &sub_schema_url_map,
+                                            sub_schema_url_map,
                                             schema_store,
                                         )
                                         .await
@@ -320,12 +320,12 @@ impl Validate for document_tree::Table {
                             .validate(
                                 toml_version,
                                 &accessors
-                                    .clone()
-                                    .into_iter()
+                                    .iter()
+                                    .cloned()
                                     .chain(std::iter::once(Accessor::Key(
                                         key.to_raw_text(toml_version),
                                     )))
-                                    .collect(),
+                                    .collect::<Vec<_>>(),
                                 None,
                                 None,
                                 None,

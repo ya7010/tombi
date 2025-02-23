@@ -23,7 +23,7 @@ impl CompositeSchemaImpl for OneOfSchema {
 
 pub fn find_one_of_completion_items<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a Vec<Accessor>,
+    accessors: &'a [Accessor],
     one_of_schema: &'a schema_store::OneOfSchema,
     toml_version: TomlVersion,
     position: text::Position,

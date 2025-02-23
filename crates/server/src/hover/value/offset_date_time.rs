@@ -11,7 +11,7 @@ use crate::hover::{
 impl GetHoverContent for document_tree::OffsetDateTime {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -91,7 +91,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                 None => Some(HoverContent {
                     title: None,
                     description: None,
-                    accessors: schema_store::Accessors::new(accessors.clone()),
+                    accessors: schema_store::Accessors::new(accessors.to_vec()),
                     value_type: schema_store::ValueType::OffsetDateTime,
                     constraints: None,
                     schema_url: None,
@@ -106,7 +106,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
 impl GetHoverContent for OffsetDateTimeSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         _position: text::Position,
@@ -120,7 +120,7 @@ impl GetHoverContent for OffsetDateTimeSchema {
             Some(HoverContent {
                 title: self.title.clone(),
                 description: self.description.clone(),
-                accessors: schema_store::Accessors::new(accessors.clone()),
+                accessors: schema_store::Accessors::new(accessors.to_vec()),
                 value_type: schema_store::ValueType::OffsetDateTime,
                 constraints: Some(DataConstraints {
                     default: self
