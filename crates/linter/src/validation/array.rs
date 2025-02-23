@@ -10,7 +10,7 @@ impl Validate for document_tree::Array {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<schema_store::Accessor>,
+        accessors: &'a [schema_store::Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
@@ -124,12 +124,12 @@ impl Validate for document_tree::Array {
                                     .validate(
                                         toml_version,
                                         &accessors
-                                            .clone()
+                                            .to_vec()
                                             .into_iter()
                                             .chain(std::iter::once(schema_store::Accessor::Index(
                                                 index,
                                             )))
-                                            .collect(),
+                                            .collect::<Vec<_>>(),
                                         Some(item_schema),
                                         Some(schema_url),
                                         Some(definitions),
@@ -174,10 +174,10 @@ impl Validate for document_tree::Array {
                             .validate(
                                 toml_version,
                                 &accessors
-                                    .clone()
+                                    .to_vec()
                                     .into_iter()
                                     .chain(std::iter::once(schema_store::Accessor::Index(index)))
-                                    .collect(),
+                                    .collect::<Vec<_>>(),
                                 None,
                                 schema_url,
                                 definitions,

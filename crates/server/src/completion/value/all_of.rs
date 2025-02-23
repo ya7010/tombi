@@ -25,7 +25,7 @@ impl CompositeSchemaImpl for AllOfSchema {
 
 pub fn find_all_of_completion_items<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a Vec<Accessor>,
+    accessors: &'a [Accessor],
     all_of_schema: &'a schema_store::AllOfSchema,
     toml_version: TomlVersion,
     position: text::Position,

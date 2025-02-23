@@ -13,7 +13,7 @@ use super::Validate;
 pub fn validate_any_of<'a: 'b, 'b, T>(
     value: &'a T,
     toml_version: TomlVersion,
-    accessors: &'a Vec<schema_store::Accessor>,
+    accessors: &'a [schema_store::Accessor],
     any_of_schema: &'a schema_store::AnyOfSchema,
     schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a schema_store::SchemaDefinitions,

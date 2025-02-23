@@ -9,7 +9,7 @@ impl Validate for OffsetDateTime {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,

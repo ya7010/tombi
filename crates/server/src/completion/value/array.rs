@@ -17,7 +17,7 @@ use schema_store::{
 impl FindCompletionContents for document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -92,10 +92,10 @@ impl FindCompletionContents for document_tree::Array {
                                     return value
                                         .find_completion_contents(
                                             &accessors
-                                                .clone()
+                                                .to_vec()
                                                 .into_iter()
                                                 .chain(std::iter::once(accessor))
-                                                .collect(),
+                                                .collect::<Vec<_>>(),
                                             Some(item_schema),
                                             toml_version,
                                             position,
@@ -124,10 +124,10 @@ impl FindCompletionContents for document_tree::Array {
                             return SchemaCompletion
                                 .find_completion_contents(
                                     &accessors
-                                        .clone()
+                                        .to_vec()
                                         .into_iter()
                                         .chain(std::iter::once(Accessor::Index(new_item_index)))
-                                        .collect(),
+                                        .collect::<Vec<_>>(),
                                     Some(item_schema),
                                     toml_version,
                                     position,
@@ -218,10 +218,10 @@ impl FindCompletionContents for document_tree::Array {
                             return value
                                 .find_completion_contents(
                                     &accessors
-                                        .clone()
+                                        .to_vec()
                                         .into_iter()
                                         .chain(std::iter::once(accessor))
-                                        .collect(),
+                                        .collect::<Vec<_>>(),
                                     None,
                                     toml_version,
                                     position,
@@ -246,7 +246,7 @@ impl FindCompletionContents for document_tree::Array {
 impl FindCompletionContents for ArraySchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a Vec<Accessor>,
+        _accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,

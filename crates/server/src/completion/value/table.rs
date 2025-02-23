@@ -18,7 +18,7 @@ use schema_store::{
 impl FindCompletionContents for document_tree::Table {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         toml_version: TomlVersion,
         position: text::Position,
@@ -115,10 +115,10 @@ impl FindCompletionContents for document_tree::Table {
                                     return value
                                         .find_completion_contents(
                                             &accessors
-                                                .clone()
+                                                .to_vec()
                                                 .into_iter()
                                                 .chain(std::iter::once(accessor))
-                                                .collect(),
+                                                .collect::<Vec<_>>(),
                                             Some(property_schema),
                                             toml_version,
                                             position,
@@ -506,7 +506,7 @@ impl FindCompletionContents for document_tree::Table {
 impl FindCompletionContents for TableSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         position: text::Position,
@@ -634,7 +634,7 @@ async fn count_table_or_array_schema(
 fn get_property_value_completion_contents<'a: 'b, 'b>(
     key: &'a document_tree::Key,
     value: &'a document_tree::Value,
-    accessors: &'a Vec<Accessor>,
+    accessors: &'a [Accessor],
     value_schema: Option<&'a ValueSchema>,
     toml_version: TomlVersion,
     position: text::Position,
@@ -728,12 +728,12 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
         value
             .find_completion_contents(
                 &accessors
-                    .clone()
+                    .to_vec()
                     .into_iter()
                     .chain(std::iter::once(Accessor::Key(
                         key.to_raw_text(toml_version),
                     )))
-                    .collect(),
+                    .collect::<Vec<_>>(),
                 value_schema,
                 toml_version,
                 position,
@@ -779,7 +779,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
     table_schema: &'a TableSchema,
     key_name: &'a String,
     position: text::Position,
-    accessors: &'a Vec<Accessor>,
+    accessors: &'a [Accessor],
     completion_hint: Option<CompletionHint>,
     schema_url: Option<&'a SchemaUrl>,
     value_schema: &'a ValueSchema,

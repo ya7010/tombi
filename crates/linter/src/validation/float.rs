@@ -9,7 +9,7 @@ impl Validate for document_tree::Float {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<schema_store::Accessor>,
+        accessors: &'a [schema_store::Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,

@@ -29,7 +29,7 @@ pub trait Validate {
     fn validate<'a: 'b, 'b>(
         &'a self,
         toml_version: TomlVersion,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,

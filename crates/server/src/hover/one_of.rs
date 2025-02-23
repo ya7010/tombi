@@ -6,7 +6,7 @@ use super::{GetHoverContent, HoverContent};
 
 pub fn get_one_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a Vec<schema_store::Accessor>,
+    accessors: &'a [schema_store::Accessor],
     one_of_schema: &'a schema_store::OneOfSchema,
     toml_version: config::TomlVersion,
     position: text::Position,
@@ -98,7 +98,7 @@ where
             Some(HoverContent {
                 title: None,
                 description: None,
-                accessors: schema_store::Accessors::new(accessors.clone()),
+                accessors: schema_store::Accessors::new(accessors.to_vec()),
                 value_type: value.value_type().into(),
                 constraints: None,
                 schema_url: schema_url.cloned(),
@@ -112,7 +112,7 @@ where
 impl GetHoverContent for schema_store::OneOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a Vec<Accessor>,
+        accessors: &'a [Accessor],
         _value_schema: Option<&'a ValueSchema>,
         _toml_version: TomlVersion,
         _position: text::Position,
@@ -165,7 +165,7 @@ impl GetHoverContent for schema_store::OneOfSchema {
             Some(HoverContent {
                 title,
                 description,
-                accessors: schema_store::Accessors::new(accessors.clone()),
+                accessors: schema_store::Accessors::new(accessors.to_vec()),
                 value_type,
                 constraints: None,
                 schema_url: schema_url.cloned(),
