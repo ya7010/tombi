@@ -176,7 +176,7 @@ pub async fn get_completion_contents(
     //       remove the completion contents with lower priority.
     completion_contents
         .into_iter()
-        .fold(AHashMap::new(), |mut acc, content| {
+        .fold(AHashMap::new(), |mut acc: AHashMap<_, Vec<_>>, content| {
             acc.entry(content.label.clone())
                 .or_insert_with(Vec::new)
                 .push(content);
