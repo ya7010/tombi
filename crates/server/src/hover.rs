@@ -5,52 +5,44 @@ mod default_value;
 mod one_of;
 mod value;
 
-use config::TomlVersion;
 use constraints::DataConstraints;
 use futures::future::BoxFuture;
 use schema_store::{
-    get_schema_name, Accessor, Accessors, DocumentSchema, SchemaUrl, ValueSchema, ValueType,
+    get_schema_name, Accessor, Accessors, SchemaDefinitions, SchemaUrl, ValueSchema, ValueType,
 };
 use std::{fmt::Debug, ops::Deref};
 
 pub async fn get_hover_content(
     tree: &document_tree::DocumentTree,
-    toml_version: TomlVersion,
     position: text::Position,
     keys: &[document_tree::Key],
-    document_schema: Option<&DocumentSchema>,
-    sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
-    schema_store: &schema_store::SchemaStore,
+    schema_context: &schema_store::SchemaContext<'_>,
 ) -> Option<HoverContent> {
     let table = tree.deref();
-    match document_schema {
+    match schema_context.root_schema {
         Some(document_schema) => {
             table
                 .get_hover_content(
-                    &Vec::with_capacity(0),
-                    document_schema.value_schema.as_ref(),
-                    toml_version,
                     position,
                     keys,
+                    &[],
                     Some(&document_schema.schema_url),
+                    document_schema.value_schema.as_ref(),
                     &document_schema.definitions,
-                    sub_schema_url_map,
-                    schema_store,
+                    schema_context,
                 )
                 .await
         }
         None => {
             table
                 .get_hover_content(
-                    &Vec::with_capacity(0),
-                    None,
-                    toml_version,
                     position,
                     keys,
+                    &[],
                     None,
-                    &Default::default(),
-                    sub_schema_url_map,
-                    schema_store,
+                    None,
+                    &SchemaDefinitions::default(),
+                    schema_context,
                 )
                 .await
         }
@@ -60,15 +52,13 @@ pub async fn get_hover_content(
 trait GetHoverContent {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: &'a schema_store::SchemaDefinitions,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a schema_store::SchemaStore,
+        schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>>;
 }
 
