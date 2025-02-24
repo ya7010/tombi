@@ -1,14 +1,16 @@
 use futures::future::{join_all, BoxFuture};
 use futures::FutureExt;
 
-use super::FindSchemaCandidates;
+use super::referable_schema::CurrentSchema;
 use super::{
     AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema,
     LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema,
     StringSchema, TableSchema,
 };
+use super::{FindSchemaCandidates, SchemaUrl};
 use crate::{Accessor, SchemaDefinitions};
 use crate::{Referable, SchemaStore};
+use std::borrow::Cow;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -209,6 +211,7 @@ impl ValueSchema {
     pub fn match_flattened_schemas<'a: 'b, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, Vec<ValueSchema>> {
@@ -219,17 +222,22 @@ impl ValueSchema {
                 | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                     for referable_schema in schemas.write().await.iter_mut() {
-                        if let Ok((value_schema, new_schema)) =
-                            referable_schema.resolve(definitions, schema_store).await
+                        if let Ok(CurrentSchema {
+                            value_schema,
+                            schema_url,
+                            definitions,
+                        }) = referable_schema
+                            .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                            .await
                         {
-                            let definitions = if let Some((_, definitions)) = &new_schema {
-                                definitions
-                            } else {
-                                definitions
-                            };
                             matched_schemas.extend(
                                 value_schema
-                                    .match_flattened_schemas(condition, definitions, schema_store)
+                                    .match_flattened_schemas(
+                                        condition,
+                                        schema_url.as_deref(),
+                                        &definitions,
+                                        schema_store,
+                                    )
                                     .await,
                             )
                         }
@@ -250,6 +258,7 @@ impl ValueSchema {
     pub fn is_match<'a, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, bool>
@@ -265,16 +274,21 @@ impl ValueSchema {
                         .await
                         .iter_mut()
                         .map(|referable_schema| async {
-                            if let Ok((value_schema, new_schema)) =
-                                referable_schema.resolve(definitions, schema_store).await
+                            if let Ok(CurrentSchema {
+                                value_schema,
+                                schema_url,
+                                definitions,
+                            }) = referable_schema
+                                .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                                .await
                             {
-                                let definitions = if let Some((_, definitions)) = &new_schema {
-                                    definitions
-                                } else {
-                                    definitions
-                                };
                                 value_schema
-                                    .is_match(condition, definitions, schema_store)
+                                    .is_match(
+                                        condition,
+                                        schema_url.as_deref(),
+                                        &definitions,
+                                        schema_store,
+                                    )
                                     .await
                             } else {
                                 false
@@ -290,16 +304,21 @@ impl ValueSchema {
                         .await
                         .iter_mut()
                         .map(|referable_schema| async {
-                            if let Ok((value_schema, new_schema)) =
-                                referable_schema.resolve(definitions, schema_store).await
+                            if let Ok(CurrentSchema {
+                                value_schema,
+                                schema_url,
+                                definitions,
+                            }) = referable_schema
+                                .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                                .await
                             {
-                                let definitions = if let Some((_, definitions)) = &new_schema {
-                                    definitions
-                                } else {
-                                    definitions
-                                };
                                 value_schema
-                                    .is_match(condition, definitions, schema_store)
+                                    .is_match(
+                                        condition,
+                                        schema_url.as_deref(),
+                                        &definitions,
+                                        schema_store,
+                                    )
                                     .await
                             } else {
                                 false
@@ -320,6 +339,7 @@ impl FindSchemaCandidates for ValueSchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
@@ -347,20 +367,24 @@ impl FindSchemaCandidates for ValueSchema {
                     let mut errors = Vec::new();
 
                     for referable_schema in schemas.write().await.iter_mut() {
-                        let Ok((value_schema, new_schema)) =
-                            referable_schema.resolve(definitions, schema_store).await
+                        let Ok(CurrentSchema {
+                            value_schema,
+                            schema_url,
+                            definitions,
+                        }) = referable_schema
+                            .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                            .await
                         else {
                             continue;
                         };
 
-                        let definitions = if let Some((_, definitions)) = &new_schema {
-                            definitions
-                        } else {
-                            definitions
-                        };
-
                         let (mut schema_candidates, schema_errors) = value_schema
-                            .find_schema_candidates(accessors, definitions, schema_store)
+                            .find_schema_candidates(
+                                accessors,
+                                schema_url.as_deref(),
+                                definitions,
+                                schema_store,
+                            )
                             .await;
 
                         for schema_candidate in &mut schema_candidates {

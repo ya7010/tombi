@@ -71,13 +71,14 @@ impl FindSchemaCandidates for DocumentSchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
         async move {
             if let Some(value_schema) = &self.value_schema {
                 value_schema
-                    .find_schema_candidates(accessors, definitions, schema_store)
+                    .find_schema_candidates(accessors, schema_url, definitions, schema_store)
                     .await
             } else {
                 (Vec::with_capacity(0), Vec::with_capacity(0))

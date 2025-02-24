@@ -33,7 +33,7 @@ pub use local_date_time_schema::LocalDateTimeSchema;
 pub use local_time_schema::LocalTimeSchema;
 pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
-pub use referable_schema::{is_online_url, Referable};
+pub use referable_schema::{is_online_url, CurrentSchema, Referable};
 pub use schema_context::SchemaContext;
 pub use source_schema::SourceSchema;
 pub use source_schema::SubSchemaUrlMap;
@@ -99,6 +99,7 @@ pub trait FindSchemaCandidates {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)>;

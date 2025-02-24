@@ -190,6 +190,7 @@ pub fn type_hint_value(
 impl CompletionCandidate for ValueSchema {
     fn title<'a: 'b, 'b>(
         &'a self,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -210,17 +211,17 @@ impl CompletionCandidate for ValueSchema {
                 }
                 Self::OneOf(one_of) => {
                     one_of
-                        .title(definitions, schema_store, completion_hint)
+                        .title(schema_url, definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::AnyOf(any_of) => {
                     any_of
-                        .title(definitions, schema_store, completion_hint)
+                        .title(schema_url, definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::AllOf(all_of) => {
                     all_of
-                        .title(definitions, schema_store, completion_hint)
+                        .title(schema_url, definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::Null => None,
@@ -231,6 +232,7 @@ impl CompletionCandidate for ValueSchema {
 
     fn description<'a: 'b, 'b>(
         &'a self,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -251,17 +253,17 @@ impl CompletionCandidate for ValueSchema {
                 }
                 Self::OneOf(one_of) => {
                     one_of
-                        .description(definitions, schema_store, completion_hint)
+                        .description(schema_url, definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::AnyOf(any_of) => {
                     any_of
-                        .description(definitions, schema_store, completion_hint)
+                        .description(schema_url, definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::AllOf(all_of) => {
                     all_of
-                        .description(definitions, schema_store, completion_hint)
+                        .description(schema_url, definitions, schema_store, completion_hint)
                         .await
                 }
                 Self::Null => None,

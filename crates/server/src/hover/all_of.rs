@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaContext, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -21,17 +23,19 @@ where
         let mut value_type_set = indexmap::IndexSet::new();
         let mut schema = None;
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
-            let Ok((value_schema, new_schema)) = referable_schema
-                .resolve(definitions, schema_context.store)
+            let Ok(CurrentSchema {
+                value_schema,
+                schema_url,
+                definitions,
+            }) = referable_schema
+                .resolve(
+                    schema_url.map(Cow::Borrowed),
+                    definitions,
+                    schema_context.store,
+                )
                 .await
             else {
                 return None;
-            };
-
-            let (schema_url, definitions) = if let Some((schema_url, definitions)) = &new_schema {
-                (Some(schema_url), definitions)
-            } else {
-                (schema_url, definitions)
             };
 
             if let Some(hover_content) = value
@@ -39,7 +43,7 @@ where
                     position,
                     keys,
                     accessors,
-                    schema_url,
+                    schema_url.as_deref(),
                     Some(value_schema),
                     definitions,
                     schema_context,
@@ -111,8 +115,12 @@ impl GetHoverContent for schema_store::AllOfSchema {
             let mut schemas = self.schemas.write().await;
 
             for referable_schema in schemas.iter_mut() {
-                let Ok((value_schema, _)) = referable_schema
-                    .resolve(definitions, schema_context.store)
+                let Ok(CurrentSchema { value_schema, .. }) = referable_schema
+                    .resolve(
+                        schema_url.map(Cow::Borrowed),
+                        definitions,
+                        schema_context.store,
+                    )
                     .await
                 else {
                     return None;

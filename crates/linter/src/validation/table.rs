@@ -1,7 +1,11 @@
+use std::borrow::Cow;
+
 use config::TomlVersion;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType};
+use schema_store::{
+    Accessor, CurrentSchema, SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType,
+};
 
 use crate::error::Patterns;
 
@@ -121,18 +125,15 @@ impl Validate for document_tree::Table {
                             table_schema.properties.write().await.get_mut(&accessor)
                         {
                             matche_key = true;
-                            match property_schema.resolve(definitions, schema_store).await {
-                                Ok((value_schema, new_schema)) => {
-                                    let (new_schema_url, new_definitions) = if let Some((
-                                        new_schema_url,
-                                        new_definitions,
-                                    )) = &new_schema
-                                    {
-                                        (new_schema_url, new_definitions)
-                                    } else {
-                                        (schema_url, definitions)
-                                    };
-
+                            match property_schema
+                                .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                                .await
+                            {
+                                Ok(CurrentSchema {
+                                    value_schema,
+                                    schema_url,
+                                    definitions,
+                                }) => {
                                     if let Err(errs) = value
                                         .validate(
                                             toml_version,
@@ -142,8 +143,8 @@ impl Validate for document_tree::Table {
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
                                             Some(value_schema),
-                                            Some(new_schema_url),
-                                            Some(new_definitions),
+                                            schema_url.as_deref(),
+                                            Some(definitions),
                                             sub_schema_url_map,
                                             schema_store,
                                         )
@@ -171,20 +172,18 @@ impl Validate for document_tree::Table {
                                 };
                                 if pattern.is_match(&accessor_raw_text) {
                                     matche_key = true;
-                                    if let Ok((pattern_property_schema, new_schema)) =
-                                        refferable_pattern_property
-                                            .resolve(definitions, schema_store)
-                                            .await
+                                    if let Ok(CurrentSchema {
+                                        value_schema: pattern_property_schema,
+                                        schema_url,
+                                        definitions,
+                                    }) = refferable_pattern_property
+                                        .resolve(
+                                            Some(Cow::Borrowed(schema_url)),
+                                            definitions,
+                                            schema_store,
+                                        )
+                                        .await
                                     {
-                                        let (new_schema_url, new_definitions) =
-                                            if let Some((new_schema_url, new_definitions)) =
-                                                &new_schema
-                                            {
-                                                (new_schema_url, new_definitions)
-                                            } else {
-                                                (schema_url, definitions)
-                                            };
-
                                         if let Err(errs) = value
                                             .validate(
                                                 toml_version,
@@ -194,8 +193,8 @@ impl Validate for document_tree::Table {
                                                     .chain(std::iter::once(accessor.clone()))
                                                     .collect::<Vec<_>>(),
                                                 Some(pattern_property_schema),
-                                                Some(new_schema_url),
-                                                Some(new_definitions),
+                                                schema_url.as_deref(),
+                                                Some(definitions),
                                                 sub_schema_url_map,
                                                 schema_store,
                                             )
@@ -222,23 +221,23 @@ impl Validate for document_tree::Table {
                             }
                         }
                         if !matche_key {
-                            if let Some(additional_property_schema) =
+                            if let Some(referable_additional_property_schema) =
                                 &table_schema.additional_property_schema
                             {
-                                let mut referable_schema = additional_property_schema.write().await;
-                                if let Ok((value_schema, new_schema)) =
-                                    referable_schema.resolve(definitions, schema_store).await
+                                let mut referable_schema =
+                                    referable_additional_property_schema.write().await;
+                                if let Ok(CurrentSchema {
+                                    value_schema: additional_property_schema,
+                                    schema_url,
+                                    definitions,
+                                }) = referable_schema
+                                    .resolve(
+                                        Some(Cow::Borrowed(schema_url)),
+                                        definitions,
+                                        schema_store,
+                                    )
+                                    .await
                                 {
-                                    let (new_schema_url, new_definitions) = if let Some((
-                                        new_schema_url,
-                                        new_definitions,
-                                    )) = &new_schema
-                                    {
-                                        (new_schema_url, new_definitions)
-                                    } else {
-                                        (schema_url, definitions)
-                                    };
-
                                     if let Err(errs) = value
                                         .validate(
                                             toml_version,
@@ -247,9 +246,9 @@ impl Validate for document_tree::Table {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            Some(value_schema),
-                                            Some(new_schema_url),
-                                            Some(new_definitions),
+                                            Some(additional_property_schema),
+                                            schema_url.as_deref(),
+                                            Some(definitions),
                                             sub_schema_url_map,
                                             schema_store,
                                         )

@@ -19,7 +19,8 @@
       "preLaunchTask": "Build CLI and Extension",
       "skipFiles": ["<node_internals>/**/*.js"],
       "env": {
-        "__TOMBI_LANGUAGE_SERVER_DEBUG": "${workspaceFolder}/target/debug/tombi"
+        "__TOMBI_LANGUAGE_SERVER_DEBUG": "${workspaceFolder}/target/debug/tombi",
+        "RUST_BACKTRACE": "1"
       }
     },
     {

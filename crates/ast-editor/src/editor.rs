@@ -1,12 +1,13 @@
 use schema_store::SchemaContext;
 
-use crate::ast_change::AstChange;
+use crate::change::Change;
 use crate::Edit;
+use ast::AstNode;
 
 pub struct Editor<'a> {
     root: ast::Root,
     #[allow(dead_code)]
-    changes: Vec<AstChange>,
+    changes: Vec<Change>,
     schema_context: &'a SchemaContext<'a>,
 }
 
@@ -20,7 +21,8 @@ impl<'a> Editor<'a> {
     }
 
     pub async fn edit(self) -> ast::Root {
-        self.root
+        let new_root = self.root.clone_for_update();
+        let changes = new_root
             .edit(
                 &[],
                 self.schema_context
@@ -36,6 +38,17 @@ impl<'a> Editor<'a> {
             )
             .await;
 
-        self.root
+        for change in changes {
+            match change {
+                Change::ReplaceRange { old, new } => {
+                    let start = old.start().index();
+                    let end = old.end().index();
+                    let parent = old.start().parent().unwrap();
+                    parent.splice_children(start..end + 1, new);
+                }
+            }
+        }
+
+        new_root
     }
 }

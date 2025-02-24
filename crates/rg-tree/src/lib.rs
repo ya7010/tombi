@@ -33,7 +33,8 @@ pub use crate::{
     },
     language::Language,
     red::{
-        RedElement, RedElementChildren, RedNode, RedNodeChildren, RedPreorderWithTokens, RedToken,
+        RedElement, RedElementChildren, RedNode, RedNodeChildren, RedNodePtr,
+        RedPreorderWithTokens, RedToken,
     },
     syntax_text::SyntaxText,
 };

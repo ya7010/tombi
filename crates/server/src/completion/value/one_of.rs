@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, OneOfSchema, SchemaDefinitions, SchemaUrl, Schemas};
+use schema_store::{Accessor, CurrentSchema, OneOfSchema, SchemaDefinitions, SchemaUrl, Schemas};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
@@ -42,25 +44,26 @@ where
         let mut completion_items = Vec::new();
 
         for referable_schema in one_of_schema.schemas.write().await.iter_mut() {
-            if let Ok((value_schema, new_schema)) = referable_schema
-                .resolve(definitions, schema_context.store)
+            if let Ok(CurrentSchema {
+                value_schema,
+                schema_url,
+                definitions,
+            }) = referable_schema
+                .resolve(
+                    schema_url.map(Cow::Borrowed),
+                    definitions,
+                    schema_context.store,
+                )
                 .await
             {
-                let (schema_url, definitions) = if let Some((schema_url, definitions)) = &new_schema
-                {
-                    (Some(schema_url), Some(definitions))
-                } else {
-                    (schema_url, Some(definitions))
-                };
-
                 let schema_completions = value
                     .find_completion_contents(
                         position,
                         keys,
                         accessors,
-                        schema_url,
+                        schema_url.as_deref(),
                         Some(value_schema),
-                        definitions,
+                        Some(definitions),
                         schema_context,
                         completion_hint,
                     )
@@ -73,12 +76,22 @@ where
         for completion_item in completion_items.iter_mut() {
             if completion_item.detail.is_none() {
                 completion_item.detail = one_of_schema
-                    .detail(definitions, schema_context.store, completion_hint)
+                    .detail(
+                        schema_url,
+                        definitions,
+                        schema_context.store,
+                        completion_hint,
+                    )
                     .await;
             }
             if completion_item.documentation.is_none() {
                 completion_item.documentation = one_of_schema
-                    .documentation(definitions, schema_context.store, completion_hint)
+                    .documentation(
+                        schema_url,
+                        definitions,
+                        schema_context.store,
+                        completion_hint,
+                    )
                     .await;
             }
         }

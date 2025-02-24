@@ -1,6 +1,9 @@
+use std::borrow::Cow;
+
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
-    Accessor, Accessors, SchemaAccessor, SchemaUrl, TableSchema, ValueSchema, ValueType,
+    Accessor, Accessors, CurrentSchema, SchemaAccessor, SchemaUrl, TableSchema, ValueSchema,
+    ValueType,
 };
 
 use crate::hover::{
@@ -81,15 +84,18 @@ impl GetHoverContent for document_tree::Table {
                                     .map(|r| r.contains(&key_str))
                                     .unwrap_or(false);
 
-                                if let Ok((property_schema, new_schema)) =
-                                    property.resolve(definitions, schema_context.store).await
+                                if let Ok(CurrentSchema {
+                                    schema_url,
+                                    value_schema: property_schema,
+                                    definitions,
+                                }) = property
+                                    .resolve(
+                                        schema_url.map(Cow::Borrowed),
+                                        definitions,
+                                        schema_context.store,
+                                    )
+                                    .await
                                 {
-                                    let (schema_url, definitions) =
-                                        if let Some((schema_url, definitions)) = &new_schema {
-                                            (Some(schema_url), definitions)
-                                        } else {
-                                            (schema_url, definitions)
-                                        };
                                     return value
                                         .get_hover_content(
                                             position,
@@ -99,7 +105,7 @@ impl GetHoverContent for document_tree::Table {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            schema_url,
+                                            schema_url.as_deref(),
                                             Some(property_schema),
                                             definitions,
                                             schema_context,
@@ -167,19 +173,18 @@ impl GetHoverContent for document_tree::Table {
                                 {
                                     if let Ok(pattern) = regex::Regex::new(property_key) {
                                         if pattern.is_match(&key_str) {
-                                            if let Ok((property_schema, new_schema)) =
-                                                pattern_property
-                                                    .resolve(definitions, schema_context.store)
-                                                    .await
+                                            if let Ok(CurrentSchema {
+                                                schema_url,
+                                                value_schema: property_schema,
+                                                definitions,
+                                            }) = pattern_property
+                                                .resolve(
+                                                    schema_url.map(Cow::Borrowed),
+                                                    definitions,
+                                                    schema_context.store,
+                                                )
+                                                .await
                                             {
-                                                let (schema_url, definitions) =
-                                                    if let Some((schema_url, definitions)) =
-                                                        &new_schema
-                                                    {
-                                                        (Some(schema_url), definitions)
-                                                    } else {
-                                                        (schema_url, definitions)
-                                                    };
                                                 return value
                                                     .get_hover_content(
                                                         position,
@@ -189,7 +194,7 @@ impl GetHoverContent for document_tree::Table {
                                                             .cloned()
                                                             .chain(std::iter::once(accessor))
                                                             .collect::<Vec<_>>(),
-                                                        schema_url,
+                                                        schema_url.as_deref(),
                                                         Some(property_schema),
                                                         definitions,
                                                         schema_context,
@@ -264,18 +269,18 @@ impl GetHoverContent for document_tree::Table {
                             {
                                 let mut referable_schema =
                                     referable_additional_property_schema.write().await;
-                                if let Ok((additional_property_schema, new_schema)) =
-                                    referable_schema
-                                        .resolve(definitions, schema_context.store)
-                                        .await
+                                if let Ok(CurrentSchema {
+                                    schema_url,
+                                    value_schema: additional_property_schema,
+                                    definitions,
+                                }) = referable_schema
+                                    .resolve(
+                                        schema_url.map(Cow::Borrowed),
+                                        definitions,
+                                        schema_context.store,
+                                    )
+                                    .await
                                 {
-                                    let (schema_url, definitions) =
-                                        if let Some((schema_url, definitions)) = &new_schema {
-                                            (Some(schema_url), definitions)
-                                        } else {
-                                            (schema_url, definitions)
-                                        };
-
                                     return value
                                         .get_hover_content(
                                             position,
@@ -285,7 +290,7 @@ impl GetHoverContent for document_tree::Table {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
-                                            schema_url,
+                                            schema_url.as_deref(),
                                             Some(additional_property_schema),
                                             definitions,
                                             schema_context,

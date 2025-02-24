@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::completion::{
     completion_kind::CompletionKind, schema_completion::SchemaCompletion, CompletionContent,
     CompletionEdit,
@@ -10,7 +12,7 @@ use super::{
 use document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
-    Accessor, ArraySchema, SchemaAccessor, SchemaDefinitions, SchemaUrl, ValueSchema,
+    Accessor, ArraySchema, CurrentSchema, SchemaAccessor, SchemaDefinitions, SchemaUrl, ValueSchema,
 };
 
 impl FindCompletionContents for document_tree::Array {
@@ -76,18 +78,20 @@ impl FindCompletionContents for document_tree::Array {
                         if value.range().contains(position) || value.range().end() == position {
                             let accessor = Accessor::Index(index);
                             if let Some(items) = &array_schema.items {
-                                if let Ok((item_schema, new_schema)) = items
+                                if let Ok(CurrentSchema {
+                                    schema_url,
+                                    value_schema,
+                                    definitions,
+                                }) = items
                                     .write()
                                     .await
-                                    .resolve(definitions, schema_context.store)
+                                    .resolve(
+                                        schema_url.map(Cow::Borrowed),
+                                        definitions,
+                                        schema_context.store,
+                                    )
                                     .await
                                 {
-                                    let (schema_url, definitions) =
-                                        if let Some((schema_url, definitions)) = &new_schema {
-                                            (Some(schema_url), Some(definitions))
-                                        } else {
-                                            (schema_url, Some(definitions))
-                                        };
                                     return value
                                         .find_completion_contents(
                                             position,
@@ -97,9 +101,9 @@ impl FindCompletionContents for document_tree::Array {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            schema_url,
-                                            Some(item_schema),
-                                            definitions,
+                                            schema_url.as_deref(),
+                                            Some(value_schema),
+                                            Some(definitions),
                                             schema_context,
                                             completion_hint,
                                         )
@@ -109,18 +113,20 @@ impl FindCompletionContents for document_tree::Array {
                         }
                     }
                     if let Some(items) = &array_schema.items {
-                        if let Ok((item_schema, new_schema)) = items
+                        if let Ok(CurrentSchema {
+                            value_schema,
+                            schema_url,
+                            definitions,
+                        }) = items
                             .write()
                             .await
-                            .resolve(definitions, schema_context.store)
+                            .resolve(
+                                schema_url.map(Cow::Borrowed),
+                                definitions,
+                                schema_context.store,
+                            )
                             .await
                         {
-                            let (schema_url, definitions) =
-                                if let Some((schema_url, definitions)) = &new_schema {
-                                    (Some(schema_url), Some(definitions))
-                                } else {
-                                    (schema_url, Some(definitions))
-                                };
                             return SchemaCompletion
                                 .find_completion_contents(
                                     position,
@@ -130,9 +136,9 @@ impl FindCompletionContents for document_tree::Array {
                                         .cloned()
                                         .chain(std::iter::once(Accessor::Index(new_item_index)))
                                         .collect::<Vec<_>>(),
-                                    schema_url,
-                                    Some(item_schema),
-                                    definitions,
+                                    schema_url.as_deref(),
+                                    Some(value_schema),
+                                    Some(definitions),
                                     schema_context,
                                     if self.kind() == ArrayKind::Array {
                                         Some(CompletionHint::InArray)

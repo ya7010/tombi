@@ -1,6 +1,9 @@
+use std::borrow::Cow;
+
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
-    Accessor, Accessors, ArraySchema, SchemaAccessor, SchemaUrl, ValueSchema, ValueType,
+    Accessor, Accessors, ArraySchema, CurrentSchema, SchemaAccessor, SchemaUrl, ValueSchema,
+    ValueType,
 };
 
 use crate::hover::{
@@ -62,17 +65,18 @@ impl GetHoverContent for document_tree::Array {
 
                             if let Some(items) = &array_schema.items {
                                 let mut referable_schema = items.write().await;
-                                if let Ok((item_schema, new_schema)) = referable_schema
-                                    .resolve(definitions, schema_context.store)
+                                if let Ok(CurrentSchema {
+                                    schema_url,
+                                    value_schema: item_schema,
+                                    definitions,
+                                }) = referable_schema
+                                    .resolve(
+                                        schema_url.map(Cow::Borrowed),
+                                        definitions,
+                                        schema_context.store,
+                                    )
                                     .await
                                 {
-                                    let (schema_url, definitions) =
-                                        if let Some((schema_url, definitions)) = &new_schema {
-                                            (Some(schema_url), definitions)
-                                        } else {
-                                            (schema_url, definitions)
-                                        };
-
                                     let mut hover_content = value
                                         .get_hover_content(
                                             position,
@@ -82,7 +86,7 @@ impl GetHoverContent for document_tree::Array {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
-                                            schema_url,
+                                            schema_url.as_deref(),
                                             Some(item_schema),
                                             definitions,
                                             schema_context,

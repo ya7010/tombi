@@ -1,9 +1,12 @@
+use std::borrow::Cow;
 use std::sync::Arc;
 
+use super::CurrentSchema;
 use super::FindSchemaCandidates;
 use super::SchemaDefinitions;
 use super::SchemaItemTokio;
 use super::SchemaPatternProperties;
+use super::SchemaUrl;
 use super::ValueSchema;
 use crate::SchemaStore;
 use crate::{Accessor, Referable, SchemaProperties};
@@ -131,6 +134,7 @@ impl FindSchemaCandidates for TableSchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
@@ -140,16 +144,21 @@ impl FindSchemaCandidates for TableSchema {
 
             if accessors.is_empty() {
                 for property in self.properties.write().await.values_mut() {
-                    if let Ok((value_schema, new_schema)) =
-                        property.resolve(definitions, schema_store).await
+                    if let Ok(CurrentSchema {
+                        value_schema,
+                        schema_url,
+                        definitions,
+                    }) = property
+                        .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                        .await
                     {
-                        let definitions = if let Some((_, definitions)) = &new_schema {
-                            definitions
-                        } else {
-                            definitions
-                        };
                         let (schema_candidates, schema_errors) = value_schema
-                            .find_schema_candidates(accessors, definitions, schema_store)
+                            .find_schema_candidates(
+                                accessors,
+                                schema_url.as_deref(),
+                                &definitions,
+                                schema_store,
+                            )
                             .await;
                         candidates.extend(schema_candidates);
                         errors.extend(schema_errors);
@@ -160,17 +169,21 @@ impl FindSchemaCandidates for TableSchema {
             }
 
             if let Some(value) = self.properties.write().await.get_mut(&accessors[0]) {
-                if let Ok((value_schema, new_schema)) =
-                    value.resolve(definitions, schema_store).await
+                if let Ok(CurrentSchema {
+                    value_schema,
+                    schema_url,
+                    definitions,
+                }) = value
+                    .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                    .await
                 {
-                    let definitions = if let Some((_, definitions)) = &new_schema {
-                        definitions
-                    } else {
-                        definitions
-                    };
-
                     return value_schema
-                        .find_schema_candidates(&accessors[1..], definitions, schema_store)
+                        .find_schema_candidates(
+                            &accessors[1..],
+                            schema_url.as_deref(),
+                            &definitions,
+                            schema_store,
+                        )
                         .await;
                 }
             }
