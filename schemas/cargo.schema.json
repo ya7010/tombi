@@ -1824,7 +1824,7 @@
     "dependencies": {
       "description": "Cargo is configured to look for dependencies on [crates.io](https://crates.io) by default. Only\nthe name and a version string are required in this case. In [the cargo\nguide](https://doc.rust-lang.org/cargo/guide/index.html), we specified a dependency on the `time` crate:\n\n```toml\n[dependencies]\ntime = \"0.1.12\"\n```\n\nThe string `\"0.1.12\"` is a [semver](https://github.com/steveklabnik/semver#requirements) version requirement. Since this\nstring does not have any operators in it, it is interpreted the same way as\nif we had specified `\"^0.1.12\"`, which is called a caret requirement.\n\nA dependency can also be defined by a table with additional options:\n\n```toml\n[dependencies]\ntime = { path = \"../time\", version = \"0.1.12\" }\n```",
       "type": "object",
-      "x-tombi-table-key-order-by": "ascending",
+      "x-tombi-table-keys-order-by": "ascending",
       "additionalProperties": {
         "$ref": "#/definitions/Dependency"
       },
