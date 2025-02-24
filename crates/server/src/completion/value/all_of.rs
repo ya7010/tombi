@@ -25,15 +25,13 @@ impl CompositeSchemaImpl for AllOfSchema {
 
 pub fn find_all_of_completion_items<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a [Accessor],
-    all_of_schema: &'a schema_store::AllOfSchema,
-    toml_version: TomlVersion,
     position: text::Position,
     keys: &'a [document_tree::Key],
+    accessors: &'a [Accessor],
     schema_url: Option<&'a SchemaUrl>,
+    all_of_schema: &'a schema_store::AllOfSchema,
     definitions: Option<&'a SchemaDefinitions>,
-    sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-    schema_store: &'a schema_store::SchemaStore,
+    schema_context: &'a schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
 where
@@ -47,8 +45,9 @@ where
         let mut completion_items = Vec::new();
 
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
-            if let Ok((value_schema, new_schema)) =
-                referable_schema.resolve(definitions, schema_store).await
+            if let Ok((value_schema, new_schema)) = referable_schema
+                .resolve(definitions, schema_context.store)
+                .await
             {
                 let (schema_url, definitions) = if let Some((schema_url, definitions)) = &new_schema
                 {
@@ -59,15 +58,13 @@ where
 
                 let schema_completions = value
                     .find_completion_contents(
-                        accessors,
-                        Some(value_schema),
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        Some(value_schema),
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await;
@@ -79,12 +76,12 @@ where
         for completion_item in completion_items.iter_mut() {
             if completion_item.detail.is_none() {
                 completion_item.detail = all_of_schema
-                    .detail(definitions, schema_store, completion_hint)
+                    .detail(definitions, schema_context.store, completion_hint)
                     .await;
             }
             if completion_item.documentation.is_none() {
                 completion_item.documentation = all_of_schema
-                    .documentation(definitions, schema_store, completion_hint)
+                    .documentation(definitions, schema_context.store, completion_hint)
                     .await;
             }
         }

@@ -18,15 +18,13 @@ use schema_store::{
 impl FindCompletionContents for document_tree::Table {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a SchemaStore,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
@@ -36,7 +34,7 @@ impl FindCompletionContents for document_tree::Table {
         tracing::trace!("completion hint: {:?}", completion_hint);
 
         async move {
-            if let Some(sub_schema_url_map) = sub_schema_url_map {
+            if let Some(sub_schema_url_map) = schema_context.sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
                         .iter()
@@ -44,21 +42,20 @@ impl FindCompletionContents for document_tree::Table {
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
-                        if let Ok(document_schema) = schema_store
+                        if let Ok(document_schema) = schema_context
+                            .store
                             .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self
                                 .find_completion_contents(
-                                    accessors,
-                                    document_schema.value_schema.as_ref(),
-                                    toml_version,
                                     position,
                                     keys,
+                                    accessors,
                                     Some(&document_schema.schema_url),
+                                    document_schema.value_schema.as_ref(),
                                     Some(&document_schema.definitions),
-                                    Some(sub_schema_url_map),
-                                    schema_store,
+                                    schema_context,
                                     completion_hint,
                                 )
                                 .await;
@@ -75,7 +72,7 @@ impl FindCompletionContents for document_tree::Table {
                     let mut completion_contents = Vec::new();
 
                     if let Some(key) = keys.first() {
-                        let accessor_str = &key.to_raw_text(toml_version);
+                        let accessor_str = &key.to_raw_text(schema_context.toml_version);
                         if let Some(value) = self.get(key) {
                             let accessor: Accessor = Accessor::Key(accessor_str.to_string());
 
@@ -102,7 +99,7 @@ impl FindCompletionContents for document_tree::Table {
                                 }
 
                                 if let Ok((property_schema, new_schema)) =
-                                    property.resolve(definitions, schema_store).await
+                                    property.resolve(definitions, schema_context.store).await
                                 {
                                     tracing::trace!("property schema: {:?}", property_schema);
                                     let (schema_url, definitions) =
@@ -114,19 +111,17 @@ impl FindCompletionContents for document_tree::Table {
 
                                     return value
                                         .find_completion_contents(
+                                            position,
+                                            &keys[1..],
                                             &accessors
                                                 .iter()
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            Some(property_schema),
-                                            toml_version,
-                                            position,
-                                            &keys[1..],
                                             schema_url,
+                                            Some(property_schema),
                                             definitions,
-                                            sub_schema_url_map,
-                                            schema_store,
+                                            schema_context,
                                             completion_hint,
                                         )
                                         .await;
@@ -145,7 +140,7 @@ impl FindCompletionContents for document_tree::Table {
                                     }
 
                                     if let Ok((property_schema, new_schema)) =
-                                        property.resolve(definitions, schema_store).await
+                                        property.resolve(definitions, schema_context.store).await
                                     {
                                         tracing::trace!("property schema: {:?}", property_schema);
                                         let (schema_url, definitions) =
@@ -157,15 +152,15 @@ impl FindCompletionContents for document_tree::Table {
 
                                         let Some(contents) = collect_table_key_completion_contents(
                                             self,
-                                            table_schema,
-                                            key_name,
                                             position,
+                                            key_name,
                                             accessors,
-                                            completion_hint,
                                             schema_url,
+                                            table_schema,
                                             property_schema,
                                             definitions,
-                                            schema_store,
+                                            schema_context,
+                                            completion_hint,
                                         )
                                         .await
                                         else {
@@ -198,7 +193,7 @@ impl FindCompletionContents for document_tree::Table {
                                         );
                                         if let Ok((value_schema, new_schema)) =
                                             pattern_property_schema
-                                                .resolve(definitions, schema_store)
+                                                .resolve(definitions, schema_context.store)
                                                 .await
                                         {
                                             let (schema_url, definitions) = if let Some((
@@ -211,17 +206,15 @@ impl FindCompletionContents for document_tree::Table {
                                                 (schema_url, Some(definitions))
                                             };
                                             return get_property_value_completion_contents(
-                                                key,
                                                 value,
-                                                accessors,
-                                                Some(value_schema),
-                                                toml_version,
                                                 position,
+                                                key,
                                                 keys,
+                                                accessors,
                                                 schema_url,
+                                                Some(value_schema),
                                                 definitions,
-                                                sub_schema_url_map,
-                                                schema_store,
+                                                schema_context,
                                                 completion_hint,
                                             )
                                             .await;
@@ -242,7 +235,7 @@ impl FindCompletionContents for document_tree::Table {
                                     referable_additional_property_schema
                                         .write()
                                         .await
-                                        .resolve(definitions, schema_store)
+                                        .resolve(definitions, schema_context.store)
                                         .await
                                 {
                                     let (schema_url, definitions) =
@@ -253,17 +246,15 @@ impl FindCompletionContents for document_tree::Table {
                                         };
 
                                     return get_property_value_completion_contents(
-                                        key,
                                         value,
-                                        accessors,
-                                        Some(additional_property_schema),
-                                        toml_version,
                                         position,
+                                        key,
                                         keys,
+                                        accessors,
                                         schema_url,
+                                        Some(additional_property_schema),
                                         definitions,
-                                        sub_schema_url_map,
-                                        schema_store,
+                                        schema_context,
                                         completion_hint,
                                     )
                                     .await;
@@ -272,17 +263,15 @@ impl FindCompletionContents for document_tree::Table {
 
                             if table_schema.additional_properties {
                                 return get_property_value_completion_contents(
-                                    key,
                                     value,
+                                    position,
+                                    key,
+                                    keys,
                                     accessors,
                                     None,
-                                    toml_version,
-                                    position,
-                                    keys,
                                     None,
                                     None,
-                                    sub_schema_url_map,
-                                    schema_store,
+                                    schema_context,
                                     completion_hint,
                                 )
                                 .await;
@@ -323,7 +312,7 @@ impl FindCompletionContents for document_tree::Table {
                             }
 
                             if let Ok((value_schema, new_schema)) =
-                                property.resolve(definitions, schema_store).await
+                                property.resolve(definitions, schema_context.store).await
                             {
                                 let (schema_url, definitions) =
                                     if let Some((schema_url, definitions)) = &new_schema {
@@ -334,15 +323,15 @@ impl FindCompletionContents for document_tree::Table {
 
                                 let Some(contents) = collect_table_key_completion_contents(
                                     self,
-                                    table_schema,
-                                    key_name,
                                     position,
+                                    key_name,
                                     accessors,
-                                    completion_hint,
                                     schema_url,
+                                    table_schema,
                                     value_schema,
                                     definitions,
-                                    schema_store,
+                                    schema_context,
+                                    completion_hint,
                                 )
                                 .await
                                 else {
@@ -352,13 +341,14 @@ impl FindCompletionContents for document_tree::Table {
                             }
                         }
 
-                        if let Some(sub_schema_url_map) = sub_schema_url_map {
+                        if let Some(sub_schema_url_map) = schema_context.sub_schema_url_map {
                             for (root_accessors, sub_schema_url) in sub_schema_url_map {
                                 if let Some(SchemaAccessor::Key(last_key)) = root_accessors.last() {
                                     let head_accessors =
                                         &root_accessors[..root_accessors.len() - 1];
                                     if head_accessors == accessors {
-                                        if let Ok(document_schema) = schema_store
+                                        if let Ok(document_schema) = schema_context
+                                            .store
                                             .try_get_document_schema_from_url(sub_schema_url)
                                             .await
                                         {
@@ -371,14 +361,14 @@ impl FindCompletionContents for document_tree::Table {
                                                         value_schema
                                                             .detail(
                                                                 &document_schema.definitions,
-                                                                schema_store,
+                                                                schema_context.store,
                                                                 completion_hint,
                                                             )
                                                             .await,
                                                         value_schema
                                                             .documentation(
                                                                 &document_schema.definitions,
-                                                                schema_store,
+                                                                schema_context.store,
                                                                 completion_hint,
                                                             )
                                                             .await,
@@ -422,15 +412,13 @@ impl FindCompletionContents for document_tree::Table {
                 Some(ValueSchema::OneOf(one_of_schema)) => {
                     find_one_of_completion_items(
                         self,
-                        accessors,
-                        one_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        one_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -438,15 +426,13 @@ impl FindCompletionContents for document_tree::Table {
                 Some(ValueSchema::AnyOf(any_of_schema)) => {
                     find_any_of_completion_items(
                         self,
-                        accessors,
-                        any_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        any_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -454,15 +440,13 @@ impl FindCompletionContents for document_tree::Table {
                 Some(ValueSchema::AllOf(all_of_schema)) => {
                     find_all_of_completion_items(
                         self,
-                        accessors,
-                        all_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        all_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -472,17 +456,15 @@ impl FindCompletionContents for document_tree::Table {
                     if let Some(key) = keys.first() {
                         if let Some(value) = self.get(key) {
                             get_property_value_completion_contents(
-                                key,
                                 value,
+                                position,
+                                key,
+                                keys,
                                 accessors,
                                 None,
-                                toml_version,
-                                position,
-                                keys,
                                 None,
                                 None,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                                 completion_hint,
                             )
                             .await
@@ -506,15 +488,13 @@ impl FindCompletionContents for document_tree::Table {
 impl FindCompletionContents for TableSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &'a [document_tree::Key],
+        keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a SchemaStore,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {
@@ -528,7 +508,7 @@ impl FindCompletionContents for TableSchema {
                 let label = &key.to_string();
 
                 if let Ok((value_schema, new_schema)) =
-                    property.resolve(definitions, schema_store).await
+                    property.resolve(definitions, schema_context.store).await
                 {
                     let definitions = if let Some((_, definitions)) = &new_schema {
                         definitions
@@ -536,7 +516,7 @@ impl FindCompletionContents for TableSchema {
                         definitions
                     };
                     let (schema_candidates, errors) = value_schema
-                        .find_schema_candidates(accessors, definitions, schema_store)
+                        .find_schema_candidates(accessors, definitions, schema_context.store)
                         .await;
 
                     for error in errors {
@@ -545,8 +525,12 @@ impl FindCompletionContents for TableSchema {
 
                     for schema_candidate in schema_candidates {
                         if let Some(CompletionHint::InTableHeader) = completion_hint {
-                            if count_table_or_array_schema(value_schema, definitions, schema_store)
-                                .await
+                            if count_table_or_array_schema(
+                                value_schema,
+                                definitions,
+                                schema_context.store,
+                            )
+                            .await
                                 == 0
                             {
                                 continue;
@@ -557,10 +541,10 @@ impl FindCompletionContents for TableSchema {
                             label,
                             position,
                             schema_candidate
-                                .detail(definitions, schema_store, completion_hint)
+                                .detail(definitions, schema_context.store, completion_hint)
                                 .await,
                             schema_candidate
-                                .documentation(definitions, schema_store, completion_hint)
+                                .documentation(definitions, schema_context.store, completion_hint)
                                 .await,
                             self.required.as_ref(),
                             schema_url,
@@ -632,17 +616,15 @@ async fn count_table_or_array_schema(
 }
 
 fn get_property_value_completion_contents<'a: 'b, 'b>(
-    key: &'a document_tree::Key,
     value: &'a document_tree::Value,
-    accessors: &'a [Accessor],
-    value_schema: Option<&'a ValueSchema>,
-    toml_version: TomlVersion,
     position: text::Position,
+    key: &'a document_tree::Key,
     keys: &'a [document_tree::Key],
+    accessors: &'a [Accessor],
     schema_url: Option<&'a SchemaUrl>,
+    value_schema: Option<&'a ValueSchema>,
     definitions: Option<&'a SchemaDefinitions>,
-    sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-    schema_store: &'a SchemaStore,
+    schema_context: &'a schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>> {
     tracing::trace!("key: {:?}", key);
@@ -659,7 +641,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                     return type_hint_value(
                         Some(key),
                         position,
-                        toml_version,
+                        schema_context.toml_version,
                         None,
                         completion_hint,
                     )
@@ -672,7 +654,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                         if range.end() <= key.range().start() {
                             return vec![CompletionContent::new_type_hint_key(
                                 key,
-                                toml_version,
+                                schema_context.toml_version,
                                 schema_url,
                                 completion_hint,
                             )];
@@ -680,7 +662,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                         return type_hint_value(
                             Some(key),
                             position,
-                            toml_version,
+                            schema_context.toml_version,
                             schema_url,
                             completion_hint,
                         );
@@ -688,8 +670,12 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                 }
                 Some(CompletionHint::InTableHeader) => {
                     if let (Some(value_schema), Some(definitions)) = (value_schema, definitions) {
-                        if count_table_or_array_schema(value_schema, definitions, schema_store)
-                            .await
+                        if count_table_or_array_schema(
+                            value_schema,
+                            definitions,
+                            schema_context.store,
+                        )
+                        .await
                             == 0
                         {
                             return Vec::with_capacity(0);
@@ -706,7 +692,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                             )
                             | None => {
                                 return CompletionContent::new_magic_triggers(
-                                    &key.to_raw_text(toml_version),
+                                    &key.to_raw_text(schema_context.toml_version),
                                     position,
                                     schema_url,
                                 );
@@ -714,7 +700,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                             Some(CompletionHint::InArray) => {
                                 return vec![CompletionContent::new_type_hint_key(
                                     key,
-                                    toml_version,
+                                    schema_context.toml_version,
                                     schema_url,
                                     completion_hint,
                                 )];
@@ -727,21 +713,19 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
 
         value
             .find_completion_contents(
+                position,
+                &keys[1..],
                 &accessors
                     .iter()
                     .cloned()
                     .chain(std::iter::once(Accessor::Key(
-                        key.to_raw_text(toml_version),
+                        key.to_raw_text(schema_context.toml_version),
                     )))
                     .collect::<Vec<_>>(),
-                value_schema,
-                toml_version,
-                position,
-                &keys[1..],
                 schema_url,
+                value_schema,
                 definitions,
-                sub_schema_url_map,
-                schema_store,
+                schema_context,
                 completion_hint,
             )
             .await
@@ -776,21 +760,21 @@ fn check_used_table_value(value: &document_tree::Value) -> bool {
 
 fn collect_table_key_completion_contents<'a: 'b, 'b>(
     table: &'a document_tree::Table,
-    table_schema: &'a TableSchema,
-    key_name: &'a String,
     position: text::Position,
+    key_name: &'a String,
     accessors: &'a [Accessor],
-    completion_hint: Option<CompletionHint>,
     schema_url: Option<&'a SchemaUrl>,
+    table_schema: &'a TableSchema,
     value_schema: &'a ValueSchema,
     definitions: &'a SchemaDefinitions,
-    schema_store: &'a SchemaStore,
+    schema_context: &'a schema_store::SchemaContext<'a>,
+    completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Option<Vec<CompletionContent>>> {
     async move {
         let mut completion_contents = Vec::new();
 
         let (schema_candidates, errors) = value_schema
-            .find_schema_candidates(accessors, definitions, schema_store)
+            .find_schema_candidates(accessors, definitions, schema_context.store)
             .await;
 
         for error in errors {
@@ -815,8 +799,12 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                 }
                 ValueSchema::Array(_) | ValueSchema::Table(_) => {
                     if matches!(completion_hint, Some(CompletionHint::InTableHeader))
-                        && count_table_or_array_schema(value_schema, definitions, schema_store)
-                            .await
+                        && count_table_or_array_schema(
+                            value_schema,
+                            definitions,
+                            schema_context.store,
+                        )
+                        .await
                             == 0
                     {
                         return None;
@@ -848,10 +836,10 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                 key_name,
                 position,
                 schema_candidate
-                    .detail(definitions, schema_store, completion_hint)
+                    .detail(definitions, schema_context.store, completion_hint)
                     .await,
                 schema_candidate
-                    .documentation(definitions, schema_store, completion_hint)
+                    .documentation(definitions, schema_context.store, completion_hint)
                     .await,
                 table_schema.required.as_ref(),
                 schema_url,

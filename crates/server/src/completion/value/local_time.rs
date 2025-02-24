@@ -12,15 +12,13 @@ use crate::completion::{
 impl FindCompletionContents for LocalTimeSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &'a [document_tree::Key],
+        keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
-        _definitions: Option<&'a SchemaDefinitions>,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        _schema_store: &'a SchemaStore,
+        value_schema: Option<&'a ValueSchema>,
+        definitions: Option<&'a SchemaDefinitions>,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {

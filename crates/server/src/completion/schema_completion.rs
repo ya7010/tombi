@@ -15,15 +15,13 @@ pub struct SchemaCompletion;
 impl FindCompletionContents for SchemaCompletion {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a SchemaStore,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("accessors: {:?}", accessors);
@@ -42,15 +40,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::Boolean(boolean_schema) => {
                     boolean_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -58,15 +54,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::Integer(integer_schema) => {
                     integer_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -74,15 +68,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::Float(float_schema) => {
                     float_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -90,15 +82,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::String(string_schema) => {
                     string_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -106,15 +96,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::OffsetDateTime(offset_date_time_schema) => {
                     offset_date_time_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -122,15 +110,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::LocalDateTime(local_date_time_schema) => {
                     local_date_time_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -138,15 +124,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::LocalDate(local_date_schema) => {
                     local_date_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -154,15 +138,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::LocalTime(local_time_schema) => {
                     local_time_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -170,15 +152,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::Array(array_schema) => {
                     array_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -186,15 +166,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::Table(table_schema) => {
                     table_schema
                         .find_completion_contents(
-                            accessors,
-                            None,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            None,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -202,15 +180,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::OneOf(one_of_schema) => {
                     find_one_of_completion_items(
                         self,
-                        accessors,
-                        one_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        one_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -218,15 +194,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::AnyOf(any_of_schema) => {
                     find_any_of_completion_items(
                         self,
-                        accessors,
-                        any_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        any_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -234,15 +208,13 @@ impl FindCompletionContents for SchemaCompletion {
                 ValueSchema::AllOf(all_of_schema) => {
                     find_all_of_completion_items(
                         self,
-                        accessors,
-                        all_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        all_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await

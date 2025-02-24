@@ -17,15 +17,13 @@ use schema_store::{
 impl FindCompletionContents for document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a SchemaStore,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
@@ -35,7 +33,7 @@ impl FindCompletionContents for document_tree::Array {
         tracing::trace!("completion hint: {:?}", completion_hint);
 
         async move {
-            if let Some(sub_schema_url_map) = sub_schema_url_map {
+            if let Some(sub_schema_url_map) = schema_context.sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
                         .iter()
@@ -43,21 +41,20 @@ impl FindCompletionContents for document_tree::Array {
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
-                        if let Ok(document_schema) = schema_store
+                        if let Ok(document_schema) = schema_context
+                            .store
                             .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self
                                 .find_completion_contents(
-                                    accessors,
-                                    document_schema.value_schema.as_ref(),
-                                    toml_version,
                                     position,
                                     keys,
+                                    accessors,
                                     Some(&document_schema.schema_url),
+                                    document_schema.value_schema.as_ref(),
                                     Some(&document_schema.definitions),
-                                    Some(sub_schema_url_map),
-                                    schema_store,
+                                    schema_context,
                                     completion_hint,
                                 )
                                 .await;
@@ -80,8 +77,11 @@ impl FindCompletionContents for document_tree::Array {
                         if value.range().contains(position) || value.range().end() == position {
                             let accessor = Accessor::Index(index);
                             if let Some(items) = &array_schema.items {
-                                if let Ok((item_schema, new_schema)) =
-                                    items.write().await.resolve(definitions, schema_store).await
+                                if let Ok((item_schema, new_schema)) = items
+                                    .write()
+                                    .await
+                                    .resolve(definitions, schema_context.store)
+                                    .await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {
@@ -91,19 +91,17 @@ impl FindCompletionContents for document_tree::Array {
                                         };
                                     return value
                                         .find_completion_contents(
+                                            position,
+                                            keys,
                                             &accessors
                                                 .iter()
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            Some(item_schema),
-                                            toml_version,
-                                            position,
-                                            keys,
                                             schema_url,
+                                            Some(item_schema),
                                             definitions,
-                                            sub_schema_url_map,
-                                            schema_store,
+                                            schema_context,
                                             completion_hint,
                                         )
                                         .await;
@@ -112,8 +110,11 @@ impl FindCompletionContents for document_tree::Array {
                         }
                     }
                     if let Some(items) = &array_schema.items {
-                        if let Ok((item_schema, new_schema)) =
-                            items.write().await.resolve(definitions, schema_store).await
+                        if let Ok((item_schema, new_schema)) = items
+                            .write()
+                            .await
+                            .resolve(definitions, schema_context.store)
+                            .await
                         {
                             let (schema_url, definitions) =
                                 if let Some((schema_url, definitions)) = &new_schema {
@@ -123,19 +124,17 @@ impl FindCompletionContents for document_tree::Array {
                                 };
                             return SchemaCompletion
                                 .find_completion_contents(
+                                    position,
+                                    keys,
                                     &accessors
                                         .iter()
                                         .cloned()
                                         .chain(std::iter::once(Accessor::Index(new_item_index)))
                                         .collect::<Vec<_>>(),
-                                    Some(item_schema),
-                                    toml_version,
-                                    position,
-                                    keys,
                                     schema_url,
+                                    Some(item_schema),
                                     definitions,
-                                    sub_schema_url_map,
-                                    schema_store,
+                                    schema_context,
                                     if self.kind() == ArrayKind::Array {
                                         Some(CompletionHint::InArray)
                                     } else {
@@ -151,15 +150,13 @@ impl FindCompletionContents for document_tree::Array {
                 Some(ValueSchema::OneOf(one_of_schema)) => {
                     find_one_of_completion_items(
                         self,
-                        accessors,
-                        one_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        one_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -167,15 +164,13 @@ impl FindCompletionContents for document_tree::Array {
                 Some(ValueSchema::AnyOf(any_of_schema)) => {
                     find_any_of_completion_items(
                         self,
-                        accessors,
-                        any_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        any_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -183,15 +178,13 @@ impl FindCompletionContents for document_tree::Array {
                 Some(ValueSchema::AllOf(all_of_schema)) => {
                     find_all_of_completion_items(
                         self,
-                        accessors,
-                        all_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        all_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                         completion_hint,
                     )
                     .await
@@ -207,7 +200,7 @@ impl FindCompletionContents for document_tree::Array {
                                     let key = &keys.first().unwrap();
                                     return vec![CompletionContent::new_type_hint_key(
                                         key,
-                                        toml_version,
+                                        schema_context.toml_version,
                                         schema_url,
                                         Some(CompletionHint::InArray),
                                     )];
@@ -217,25 +210,29 @@ impl FindCompletionContents for document_tree::Array {
                             let accessor = Accessor::Index(index);
                             return value
                                 .find_completion_contents(
+                                    position,
+                                    keys,
                                     &accessors
                                         .iter()
                                         .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
+                                    schema_url,
                                     None,
-                                    toml_version,
-                                    position,
-                                    keys,
-                                    None,
-                                    None,
-                                    sub_schema_url_map,
-                                    schema_store,
+                                    definitions,
+                                    schema_context,
                                     completion_hint,
                                 )
                                 .await;
                         }
                     }
-                    type_hint_value(None, position, toml_version, schema_url, completion_hint)
+                    type_hint_value(
+                        None,
+                        position,
+                        schema_context.toml_version,
+                        schema_url,
+                        completion_hint,
+                    )
                 }
             }
         }
@@ -246,15 +243,13 @@ impl FindCompletionContents for document_tree::Array {
 impl FindCompletionContents for ArraySchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        _toml_version: TomlVersion,
         position: text::Position,
-        _keys: &'a [document_tree::Key],
+        keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
-        _definitions: Option<&'a SchemaDefinitions>,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        _schema_store: &'a SchemaStore,
+        value_schema: Option<&'a ValueSchema>,
+        definitions: Option<&'a SchemaDefinitions>,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {
