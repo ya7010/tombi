@@ -7,11 +7,10 @@ use super::{
     all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
     one_of::find_one_of_completion_items, type_hint_value, CompletionHint, FindCompletionContents,
 };
-use config::TomlVersion;
 use document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
-    Accessor, ArraySchema, SchemaAccessor, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema,
+    Accessor, ArraySchema, SchemaAccessor, SchemaDefinitions, SchemaUrl, ValueSchema,
 };
 
 impl FindCompletionContents for document_tree::Array {
@@ -244,12 +243,12 @@ impl FindCompletionContents for ArraySchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
-        accessors: &'a [Accessor],
+        _keys: &'a [document_tree::Key],
+        _accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
-        value_schema: Option<&'a ValueSchema>,
-        definitions: Option<&'a SchemaDefinitions>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        _value_schema: Option<&'a ValueSchema>,
+        _definitions: Option<&'a SchemaDefinitions>,
+        _schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {

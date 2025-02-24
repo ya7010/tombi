@@ -5,7 +5,6 @@ use crate::completion::{
     },
     CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
-use config::TomlVersion;
 use futures::{
     future::{join_all, BoxFuture},
     FutureExt,
@@ -489,10 +488,10 @@ impl FindCompletionContents for TableSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        _keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
-        value_schema: Option<&'a ValueSchema>,
+        _value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,

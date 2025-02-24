@@ -1,4 +1,3 @@
-use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, OneOfSchema, SchemaDefinitions, SchemaUrl, Schemas};
 

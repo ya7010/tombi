@@ -1,6 +1,6 @@
 use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 use super::{
     value::{
