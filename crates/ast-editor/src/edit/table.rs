@@ -1,6 +1,8 @@
 use ast::AstNode;
 use futures::FutureExt;
-use schema_store::ValueSchema;
+use schema_store::Accessor;
+
+use super::search_table_schema;
 
 impl crate::Edit for ast::Table {
     fn edit<'a: 'b, 'b>(
@@ -13,45 +15,14 @@ impl crate::Edit for ast::Table {
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             let mut changes = vec![];
-
-            if self.header().unwrap().to_string() != "dependencies" {
-                return changes;
+            let mut accessor = vec![];
+            for key in self.header().unwrap().keys() {
+                let Ok(key_text) = key.try_to_raw_text(schema_context.toml_version) else {
+                    return changes;
+                };
+                accessor.push(Accessor::Key(key_text));
             }
-            // let table_schema = match (value_schema, definitions) {
-            //     (Some(ValueSchema::Table(ref mut table_schema)), Some(definitions)) => {
-            //         for key in self.header().unwrap().keys() {
-            //             let Ok(key_text) = key.try_to_raw_text(schema_context.toml_version) else {
-            //                 return;
-            //             };
-            //             if let Some(referable_schema) = table_schema
-            //                 .properties
-            //                 .read()
-            //                 .await
-            //                 .get(&Accessor::Key(key_text))
-            //             {
-            //                 if let Ok((mut new_value_schema, new_schema)) = referable_schema
-            //                     .resolve(definitions, schema_context.store)
-            //                     .await
-            //                 {
-            //                     (schema_url, definitions) =
-            //                         if let Some((new_schema_url, new_definitions)) = &new_schema {
-            //                             (Some(new_schema_url), new_definitions)
-            //                         } else {
-            //                             (schema_url, definitions)
-            //                         };
-            //                     match new_value_schema {
-            //                         ValueSchema::Table(new_table_schema) => {
-            //                             table_schema = new_table_schema;
-            //                         }
-            //                         _ => {}
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //         Some(table_schema)
-            //     }
-            //     _ => None,
-            // };
+
             for key_value in self.key_values() {
                 changes.extend(
                     key_value
@@ -66,8 +37,22 @@ impl crate::Edit for ast::Table {
                 );
             }
 
-            if let Some(ValueSchema::Table(table_schema)) = value_schema {
-                changes.extend(crate::rule::table_key_order(self.syntax(), table_schema));
+            match (schema_url, value_schema, definitions) {
+                (Some(schema_url), Some(value_schema), Some(definitions)) => {
+                    let Some(table_schema) = search_table_schema(
+                        &accessor,
+                        schema_url,
+                        value_schema,
+                        definitions,
+                        schema_context,
+                    )
+                    .await
+                    else {
+                        return changes;
+                    };
+                    changes.extend(crate::rule::table_key_order(self.syntax(), table_schema).await);
+                }
+                _ => {}
             }
 
             changes
