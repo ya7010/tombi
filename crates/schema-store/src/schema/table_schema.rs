@@ -76,18 +76,18 @@ impl TableSchema {
                 _ => (true, None),
             };
 
-        let key_order = match object.get("x-tombi-table-key-order-by") {
+        let key_order = match object.get("x-tombi-table-keys-order-by") {
             Some(serde_json::Value::String(order)) => match order.as_str() {
                 "ascending" => Some(TableKeyOrder::Ascending),
                 "descending" => Some(TableKeyOrder::Descending),
                 "schema" => Some(TableKeyOrder::Schema),
                 _ => {
-                    tracing::error!("invalid x-tombi-table-key-order-by: {order}");
+                    tracing::error!("invalid x-tombi-table-keys-order-by: {order}");
                     None
                 }
             },
             Some(order) => {
-                tracing::error!("invalid x-tombi-table-key-order-by: {}", order.to_string());
+                tracing::error!("invalid x-tombi-table-keys-order-by: {}", order.to_string());
                 None
             }
             None => None,
