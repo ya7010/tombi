@@ -5,7 +5,7 @@ use std::fmt::Write;
 use unicode_segmentation::UnicodeSegmentation;
 
 impl Format for ast::Array {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         if self.should_be_multiline(f.toml_version()) || exceeds_line_width(self, f)? {
             format_multiline_array(self, f)
         } else {
@@ -64,7 +64,7 @@ fn format_multiline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    array.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    array.leading_comments().collect::<Vec<_>>().format(f)?;
 
     f.write_indent()?;
     write!(f, "[{}", f.line_ending())?;
@@ -74,9 +74,9 @@ fn format_multiline_array(
     let values_with_comma = array.values_with_comma().collect_vec();
 
     if values_with_comma.is_empty() {
-        array.inner_dangling_comments().fmt(f)?;
+        array.inner_dangling_comments().format(f)?;
     } else {
-        array.inner_begin_dangling_comments().fmt(f)?;
+        array.inner_begin_dangling_comments().format(f)?;
 
         for (i, (value, comma)) in values_with_comma.into_iter().enumerate() {
             // value format
@@ -84,7 +84,7 @@ fn format_multiline_array(
                 if i > 0 {
                     write!(f, "{}", f.line_ending())?;
                 }
-                value.fmt(f)?;
+                value.format(f)?;
             }
 
             // comma format
@@ -99,7 +99,7 @@ fn format_multiline_array(
 
                 if !comma_leading_comments.is_empty() {
                     write!(f, "{}", f.line_ending())?;
-                    comma_leading_comments.fmt(f)?;
+                    comma_leading_comments.format(f)?;
                     f.write_indent()?;
                     write!(f, ",")?;
                 } else if value.tailing_comment().is_some() {
@@ -111,12 +111,12 @@ fn format_multiline_array(
                 }
 
                 if let Some(comment) = comma_tailing_comment {
-                    comment.fmt(f)?;
+                    comment.format(f)?;
                 }
             }
         }
 
-        array.inner_end_dangling_comments().fmt(f)?;
+        array.inner_end_dangling_comments().format(f)?;
     }
 
     f.dec_indent();
@@ -126,7 +126,7 @@ fn format_multiline_array(
     write!(f, "]")?;
 
     if let Some(comment) = array.tailing_comment() {
-        comment.fmt(f)?;
+        comment.format(f)?;
     }
 
     Ok(())
@@ -136,7 +136,7 @@ fn format_singleline_array(
     array: &ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    array.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    array.leading_comments().collect::<Vec<_>>().format(f)?;
 
     f.write_indent()?;
     write!(f, "[{}", f.singleline_array_bracket_inner_space())?;
@@ -146,13 +146,13 @@ fn format_singleline_array(
             write!(f, ",{}", f.singleline_array_space_after_comma())?;
         }
         f.skip_indent();
-        value.fmt(f)?;
+        value.format(f)?;
     }
 
     write!(f, "{}]", f.singleline_array_bracket_inner_space())?;
 
     if let Some(comment) = array.tailing_comment() {
-        comment.fmt(f)?;
+        comment.format(f)?;
     }
 
     Ok(())

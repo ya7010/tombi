@@ -11,3 +11,6 @@ ast.workspace = true
 syntax.workspace = true
 schema-store.workspace = true
 futures.workspace = true
+itertools.workspace = true
+text.workspace = true
+tracing.workspace = true

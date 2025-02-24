@@ -6,7 +6,7 @@ use std::fmt::Write;
 use unicode_segmentation::UnicodeSegmentation;
 
 impl Format for ast::InlineTable {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         if self.should_be_multiline(f.toml_version()) || exceeds_line_width(self, f)? {
             format_multiline_inline_table(self, f)
         } else {
@@ -70,7 +70,7 @@ fn format_multiline_inline_table(
     table: &ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    table.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    table.leading_comments().collect::<Vec<_>>().format(f)?;
 
     f.write_indent()?;
     write!(f, "{{{}", f.line_ending())?;
@@ -80,9 +80,9 @@ fn format_multiline_inline_table(
     let key_values_with_comma = table.key_values_with_comma().collect_vec();
 
     if key_values_with_comma.is_empty() {
-        table.inner_dangling_comments().fmt(f)?;
+        table.inner_dangling_comments().format(f)?;
     } else {
-        table.inner_begin_dangling_comments().fmt(f)?;
+        table.inner_begin_dangling_comments().format(f)?;
 
         for (i, (key_value, comma)) in key_values_with_comma.into_iter().enumerate() {
             // value format
@@ -90,7 +90,7 @@ fn format_multiline_inline_table(
                 if i > 0 {
                     write!(f, "{}", f.line_ending())?;
                 }
-                key_value.fmt(f)?;
+                key_value.format(f)?;
             }
 
             // comma format
@@ -105,7 +105,7 @@ fn format_multiline_inline_table(
 
                 if !comma_leading_comments.is_empty() {
                     write!(f, "{}", f.line_ending())?;
-                    comma_leading_comments.fmt(f)?;
+                    comma_leading_comments.format(f)?;
                     f.write_indent()?;
                     write!(f, ",")?;
                 } else if key_value.tailing_comment().is_some() {
@@ -117,12 +117,12 @@ fn format_multiline_inline_table(
                 }
 
                 if let Some(comment) = comma_tailing_comment {
-                    comment.fmt(f)?;
+                    comment.format(f)?;
                 }
             }
         }
 
-        table.inner_end_dangling_comments().fmt(f)?;
+        table.inner_end_dangling_comments().format(f)?;
     }
 
     f.dec_indent();
@@ -132,7 +132,7 @@ fn format_multiline_inline_table(
     write!(f, "}}")?;
 
     if let Some(comment) = table.tailing_comment() {
-        comment.fmt(f)?;
+        comment.format(f)?;
     }
 
     Ok(())
@@ -142,7 +142,7 @@ fn format_singleline_inline_table(
     table: &ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
-    table.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    table.leading_comments().collect::<Vec<_>>().format(f)?;
 
     f.write_indent()?;
     write!(f, "{{{}", f.singleline_inline_table_brace_inner_space())?;
@@ -152,13 +152,13 @@ fn format_singleline_inline_table(
             write!(f, ",{}", f.singleline_inline_table_space_after_comma())?;
         }
         f.skip_indent();
-        key_value.fmt(f)?;
+        key_value.format(f)?;
     }
 
     write!(f, "{}}}", f.singleline_inline_table_brace_inner_space())?;
 
     if let Some(comment) = table.tailing_comment() {
-        comment.fmt(f)?;
+        comment.format(f)?;
     }
 
     Ok(())

@@ -4,16 +4,16 @@ use crate::Format;
 use std::fmt::Write;
 
 impl Format for ast::KeyValue {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        self.leading_comments().collect::<Vec<_>>().format(f)?;
 
         f.write_indent()?;
-        self.keys().unwrap().fmt(f)?;
+        self.keys().unwrap().format(f)?;
 
         write!(f, " = ")?;
 
         f.skip_indent();
-        self.value().unwrap().fmt(f)?;
+        self.value().unwrap().format(f)?;
 
         // NOTE: tailing comment is output by `value.fmt(f)`.
 

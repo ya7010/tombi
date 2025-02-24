@@ -3,12 +3,12 @@ use itertools::Itertools;
 use std::fmt::Write;
 
 impl Format for ast::Root {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset();
 
         let items = self.items().collect_vec();
         if !items.is_empty() {
-            self.begin_dangling_comments().fmt(f)?;
+            self.begin_dangling_comments().format(f)?;
 
             items
                 .into_iter()
@@ -122,14 +122,14 @@ impl Format for ast::Root {
                 .enumerate()
                 .try_for_each(|(i, item)| {
                     if i > 0 && matches!(item, ItemOrNewLine::Item(_)) {
-                        ItemOrNewLine::NewLine.fmt(f)?;
+                        ItemOrNewLine::NewLine.format(f)?;
                     }
-                    item.fmt(f)
+                    item.format(f)
                 })?;
 
-            self.end_dangling_comments().fmt(f)?;
+            self.end_dangling_comments().format(f)?;
         } else {
-            self.dangling_comments().fmt(f)?;
+            self.dangling_comments().format(f)?;
         }
 
         Ok(())
@@ -137,11 +137,11 @@ impl Format for ast::Root {
 }
 
 impl Format for ast::RootItem {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            ast::RootItem::Table(it) => it.fmt(f),
-            ast::RootItem::ArrayOfTables(it) => it.fmt(f),
-            ast::RootItem::KeyValue(it) => it.fmt(f),
+            ast::RootItem::Table(it) => it.format(f),
+            ast::RootItem::ArrayOfTables(it) => it.format(f),
+            ast::RootItem::KeyValue(it) => it.format(f),
         }
     }
 }
@@ -152,9 +152,9 @@ enum ItemOrNewLine {
 }
 
 impl Format for ItemOrNewLine {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            Self::Item(it) => it.fmt(f),
+            Self::Item(it) => it.format(f),
             Self::NewLine => write!(f, "{}", f.line_ending()),
         }
     }

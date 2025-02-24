@@ -7,8 +7,8 @@ use super::LiteralNode;
 macro_rules! impl_date_time_format {
     (impl Format for $type:ty;) => {
         impl Format for $type {
-            fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-                self.leading_comments().collect::<Vec<_>>().fmt(f)?;
+            fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+                self.leading_comments().collect::<Vec<_>>().format(f)?;
 
                 let token = self.token().unwrap();
                 let mut text = token.text().to_string();
@@ -20,7 +20,7 @@ macro_rules! impl_date_time_format {
                 write!(f, "{}", text)?;
 
                 if let Some(comment) = self.tailing_comment() {
-                    comment.fmt(f)?;
+                    comment.format(f)?;
                 }
 
                 Ok(())

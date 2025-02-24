@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use toml_version::TomlVersion;
 
 use crate::{support, AstChildren};
@@ -23,6 +25,18 @@ impl crate::Key {
             Self::LiteralString(key) => {
                 support::string::try_from_literal_string(key.token().unwrap().text())
             }
+        }
+    }
+}
+
+impl PartialOrd for crate::Key {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match (
+            self.try_to_raw_text(TomlVersion::latest()),
+            other.try_to_raw_text(TomlVersion::latest()),
+        ) {
+            (Ok(a), Ok(b)) => Some(a.cmp(&b)),
+            _ => None,
         }
     }
 }

@@ -7,5 +7,5 @@ mod table;
 mod value;
 
 pub trait Format {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error>;
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error>;
 }
