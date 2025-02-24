@@ -32,6 +32,13 @@ where
         Self: Sized;
 
     fn syntax(&self) -> &syntax::SyntaxNode;
+
+    fn clone_for_update(&self) -> Self
+    where
+        Self: Sized,
+    {
+        Self::cast(self.syntax().clone_for_update()).unwrap()
+    }
 }
 
 /// Like `AstNode`, but wraps tokens rather than interior nodes.
