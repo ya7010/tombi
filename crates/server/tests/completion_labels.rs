@@ -15,7 +15,9 @@ mod completion_labels {
                 "█",
                 tombi_schema_path(),
             ) -> Ok([
+                "exclude",
                 "format",
+                "include",
                 "lint",
                 "schema",
                 "schemas",
@@ -33,7 +35,9 @@ mod completion_labels {
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
+                "exclude",
                 "format",
+                "include",
                 "lint",
                 "schema",
                 "schemas",
