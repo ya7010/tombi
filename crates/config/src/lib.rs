@@ -37,6 +37,20 @@ pub struct Config {
     #[cfg_attr(feature = "jsonschema", schemars(default = "TomlVersion::default"))]
     pub toml_version: Option<TomlVersion>,
 
+    /// # File patterns to include.
+    ///
+    /// The file match pattern to include in formatting and linting.
+    /// Supports glob pattern.
+    #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
+    pub include: Option<Vec<String>>,
+
+    /// # File patterns to exclude.
+    ///
+    /// The file match pattern to exclude from formatting and linting.
+    /// Supports glob pattern.
+    #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
+    pub exclude: Option<Vec<String>>,
+
     /// # Formatter options.
     pub format: Option<FormatOptions>,
 
