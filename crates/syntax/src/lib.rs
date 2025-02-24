@@ -12,6 +12,7 @@ pub use rg_tree::Direction;
 pub type SyntaxNode = rg_tree::RedNode<TomlLanguage>;
 pub type SyntaxToken = rg_tree::RedToken<TomlLanguage>;
 pub type SyntaxElement = rg_tree::RedElement<TomlLanguage>;
+pub type SyntaxNodePtr = rg_tree::RedNodePtr<TomlLanguage>;
 pub type SyntaxNodeChildren = rg_tree::RedNodeChildren<TomlLanguage>;
 pub type SyntaxElementChildren = rg_tree::RedElementChildren<TomlLanguage>;
 pub type PreorderWithTokens = rg_tree::RedPreorderWithTokens<TomlLanguage>;

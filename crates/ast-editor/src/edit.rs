@@ -11,5 +11,5 @@ pub trait Edit {
         value_schema: Option<&'a schema_store::ValueSchema>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
-    ) -> futures::future::BoxFuture<'b, ()>;
+    ) -> futures::future::BoxFuture<'b, Vec<crate::Change>>;
 }

@@ -8,19 +8,25 @@ impl crate::Edit for ast::ArrayOfTables {
         value_schema: Option<&'a schema_store::ValueSchema>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
-    ) -> futures::future::BoxFuture<'b, ()> {
+    ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
+            let mut changes = vec![];
+
             for key_value in self.key_values() {
-                key_value
-                    .edit(
-                        accessors,
-                        schema_url,
-                        value_schema,
-                        definitions,
-                        schema_context,
-                    )
-                    .await;
+                changes.extend(
+                    key_value
+                        .edit(
+                            accessors,
+                            schema_url,
+                            value_schema,
+                            definitions,
+                            schema_context,
+                        )
+                        .await,
+                );
             }
+
+            changes
         }
         .boxed()
     }

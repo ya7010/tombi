@@ -8,10 +8,12 @@ impl crate::Edit for ast::Root {
         value_schema: Option<&'a schema_store::ValueSchema>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
-    ) -> futures::future::BoxFuture<'b, ()> {
+    ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
+            let mut changes = vec![];
+
             for item in self.items() {
-                match item {
+                changes.extend(match item {
                     ast::RootItem::Table(table) => {
                         table
                             .edit(
@@ -21,7 +23,7 @@ impl crate::Edit for ast::Root {
                                 definitions,
                                 schema_context,
                             )
-                            .await;
+                            .await
                     }
                     ast::RootItem::ArrayOfTables(array_of_tables) => {
                         array_of_tables
@@ -32,7 +34,7 @@ impl crate::Edit for ast::Root {
                                 definitions,
                                 schema_context,
                             )
-                            .await;
+                            .await
                     }
                     ast::RootItem::KeyValue(key_value) => {
                         key_value
@@ -43,10 +45,12 @@ impl crate::Edit for ast::Root {
                                 definitions,
                                 schema_context,
                             )
-                            .await;
+                            .await
                     }
-                }
+                });
             }
+
+            changes
         }
         .boxed()
     }
