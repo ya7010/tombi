@@ -7,7 +7,7 @@ use std::fmt::Write;
 
 impl Format for Vec<Vec<DanglingComment>> {
     #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for (i, comments) in self.iter().enumerate() {
             assert!(!comments.is_empty());
             if i != 0 {
@@ -31,7 +31,7 @@ impl Format for Vec<Vec<DanglingComment>> {
 
 impl Format for Vec<Vec<BeginDanglingComment>> {
     #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for comments in self {
             assert!(!comments.is_empty());
 
@@ -53,7 +53,7 @@ impl Format for Vec<Vec<BeginDanglingComment>> {
 
 impl Format for Vec<Vec<EndDanglingComment>> {
     #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for (i, comments) in self.iter().enumerate() {
             if i != 0 {
                 write!(f, "{}", f.line_ending())?;
@@ -74,7 +74,7 @@ impl Format for Vec<Vec<EndDanglingComment>> {
 }
 
 impl Format for Vec<LeadingComment> {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         for (i, comment) in self.iter().enumerate() {
             f.write_indent()?;
             if i == 0 {
@@ -90,7 +90,7 @@ impl Format for Vec<LeadingComment> {
 
 impl Format for TailingComment {
     #[inline]
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", f.tailing_comment_space())?;
         format_comment(f, self.as_ref(), true)
     }

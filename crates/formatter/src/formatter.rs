@@ -95,7 +95,7 @@ impl<'a> Formatter<'a> {
             // let root = ast_editor::Editor::new(root, &schema_context).edit().await;
 
             let line_ending = {
-                root.fmt(&mut self).unwrap();
+                root.format(&mut self).unwrap();
                 self.line_ending()
             };
 
@@ -114,7 +114,7 @@ impl<'a> Formatter<'a> {
         let old_indent = self.indent_depth;
         let old_skip = self.skip_indent;
 
-        node.fmt(self)?;
+        node.format(self)?;
         let result = std::mem::take(&mut self.buf);
 
         self.buf = old_buf;

@@ -5,8 +5,8 @@ use config::QuoteStyle;
 use std::fmt::Write;
 
 impl Format for ast::BasicString {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        self.leading_comments().collect::<Vec<_>>().format(f)?;
 
         f.write_indent()?;
         let text = self.token().unwrap().text().to_owned();
@@ -24,7 +24,7 @@ impl Format for ast::BasicString {
         write!(f, "{text}")?;
 
         if let Some(comment) = self.tailing_comment() {
-            comment.fmt(f)?;
+            comment.format(f)?;
         }
 
         Ok(())
@@ -32,8 +32,8 @@ impl Format for ast::BasicString {
 }
 
 impl Format for ast::LiteralString {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        self.leading_comments().collect::<Vec<_>>().format(f)?;
 
         f.write_indent()?;
         let text = self.token().unwrap().text().to_owned();
@@ -51,7 +51,7 @@ impl Format for ast::LiteralString {
         write!(f, "{text}")?;
 
         if let Some(comment) = self.tailing_comment() {
-            comment.fmt(f)?;
+            comment.format(f)?;
         }
 
         Ok(())

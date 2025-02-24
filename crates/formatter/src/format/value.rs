@@ -11,24 +11,24 @@ use std::fmt::Write;
 use syntax::SyntaxToken;
 
 impl Format for ast::Value {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            Self::Array(it) => it.fmt(f),
-            Self::BasicString(it) => it.fmt(f),
-            Self::Boolean(it) => it.fmt(f),
-            Self::Float(it) => it.fmt(f),
-            Self::InlineTable(it) => it.fmt(f),
-            Self::IntegerBin(it) => it.fmt(f),
-            Self::IntegerDec(it) => it.fmt(f),
-            Self::IntegerHex(it) => it.fmt(f),
-            Self::IntegerOct(it) => it.fmt(f),
-            Self::LiteralString(it) => it.fmt(f),
-            Self::LocalDate(it) => it.fmt(f),
-            Self::LocalDateTime(it) => it.fmt(f),
-            Self::LocalTime(it) => it.fmt(f),
-            Self::MultiLineBasicString(it) => it.fmt(f),
-            Self::MultiLineLiteralString(it) => it.fmt(f),
-            Self::OffsetDateTime(it) => it.fmt(f),
+            Self::Array(it) => it.format(f),
+            Self::BasicString(it) => it.format(f),
+            Self::Boolean(it) => it.format(f),
+            Self::Float(it) => it.format(f),
+            Self::InlineTable(it) => it.format(f),
+            Self::IntegerBin(it) => it.format(f),
+            Self::IntegerDec(it) => it.format(f),
+            Self::IntegerHex(it) => it.format(f),
+            Self::IntegerOct(it) => it.format(f),
+            Self::LiteralString(it) => it.format(f),
+            Self::LocalDate(it) => it.format(f),
+            Self::LocalDateTime(it) => it.format(f),
+            Self::LocalTime(it) => it.format(f),
+            Self::MultiLineBasicString(it) => it.format(f),
+            Self::MultiLineLiteralString(it) => it.format(f),
+            Self::OffsetDateTime(it) => it.format(f),
         }
     }
 }
@@ -41,14 +41,14 @@ impl<T> Format for T
 where
     T: LiteralNode + ast::AstNode,
 {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        self.leading_comments().collect::<Vec<_>>().fmt(f)?;
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        self.leading_comments().collect::<Vec<_>>().format(f)?;
 
         f.write_indent()?;
         write!(f, "{}", self.token().unwrap())?;
 
         if let Some(comment) = self.tailing_comment() {
-            comment.fmt(f)?;
+            comment.format(f)?;
         }
 
         Ok(())

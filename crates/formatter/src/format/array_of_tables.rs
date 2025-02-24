@@ -3,15 +3,17 @@ use itertools::Itertools;
 use std::fmt::Write;
 
 impl Format for ast::ArrayOfTables {
-    fn fmt(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 
-        self.header_leading_comments().collect::<Vec<_>>().fmt(f)?;
+        self.header_leading_comments()
+            .collect::<Vec<_>>()
+            .format(f)?;
 
         write!(f, "[[{header}]]")?;
 
         if let Some(comment) = self.header_tailing_comment() {
-            comment.fmt(f)?;
+            comment.format(f)?;
         }
 
         let key_values = self.key_values().collect_vec();
@@ -21,23 +23,23 @@ impl Format for ast::ArrayOfTables {
 
             if !dangling_comments.is_empty() {
                 write!(f, "{}", f.line_ending())?;
-                dangling_comments.fmt(f)?;
+                dangling_comments.format(f)?;
             }
 
             return Ok(());
         } else {
             write!(f, "{}", f.line_ending())?;
 
-            self.begin_dangling_comments().fmt(f)?;
+            self.begin_dangling_comments().format(f)?;
 
             for (i, key_value) in key_values.into_iter().enumerate() {
                 if i != 0 {
                     write!(f, "{}", f.line_ending())?;
                 }
-                key_value.fmt(f)?;
+                key_value.format(f)?;
             }
 
-            self.end_dangling_comments().fmt(f)?;
+            self.end_dangling_comments().format(f)?;
         }
 
         Ok(())
