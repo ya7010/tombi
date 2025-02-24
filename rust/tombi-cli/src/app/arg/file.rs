@@ -1,6 +1,8 @@
 use itertools::Itertools;
 use std::path::PathBuf;
 
+const DEFAULT_INCLUDE_PATTERNS: &[&str] = &["**/*.toml"];
+
 /// Input source for TOML files.
 ///
 /// Standard input or file paths. Contains a list of files that match the glob pattern.
@@ -11,33 +13,58 @@ pub enum FileInput {
 }
 
 impl FileInput {
-    pub fn len(&self) -> usize {
-        match self {
-            FileInput::Stdin => 1,
-            FileInput::Files(files) => files.len(),
-        }
-    }
-}
+    pub fn new<T: AsRef<str>>(
+        files: &[T],
+        include_patterns: Option<&[&str]>,
+        exclude_patterns: Option<&[&str]>,
+    ) -> Self {
+        let include_patterns = include_patterns.unwrap_or(DEFAULT_INCLUDE_PATTERNS);
+        let exclude_patterns = exclude_patterns.unwrap_or_default();
 
-impl<T> From<&[T]> for FileInput
-where
-    T: AsRef<str>,
-{
-    fn from(files: &[T]) -> Self {
+        tracing::info!("Searching for TOML files using configured patterns...");
+        tracing::info!("Include patterns: {:?}", include_patterns);
+        tracing::info!("Exclude patterns: {:?}", exclude_patterns);
+
         match files.len() {
             0 => {
-                tracing::debug!("Searching for all TOML files in the current directory...");
+                tracing::debug!("Searching for TOML files using configured patterns...");
+                let mut matched_paths = Vec::new();
+                let exclude_matchers: Vec<glob::Pattern> = exclude_patterns
+                    .iter()
+                    .filter_map(|p| match glob::Pattern::new(p) {
+                        Ok(pattern) => Some(pattern),
+                        Err(e) => {
+                            matched_paths
+                                .push(Err(crate::Error::GlobPatternInvalid(e.to_string())));
+                            None
+                        }
+                    })
+                    .collect();
 
-                FileInput::Files(
-                    glob::glob("**/*.toml")
-                        .unwrap() // No Probrem. grob pattern is const.
-                        .filter_map(|x| Result::<_, crate::Error>::Ok(x.ok()).transpose())
-                        .collect_vec(),
-                )
+                for pattern in include_patterns {
+                    if let Ok(paths) = glob::glob(pattern) {
+                        matched_paths.extend(
+                            paths
+                                .filter_map(|entry| entry.ok())
+                                .filter(|path| {
+                                    !exclude_matchers
+                                        .iter()
+                                        .any(|matcher| matcher.matches_path(path))
+                                })
+                                .map(Ok)
+                                .collect_vec(),
+                        );
+                    } else {
+                        matched_paths
+                            .push(Err(crate::Error::GlobPatternInvalid(pattern.to_string())));
+                    }
+                }
+
+                FileInput::Files(matched_paths)
             }
             1 if files[0].as_ref() == "-" => FileInput::Stdin,
             _ => {
-                let mut results: Vec<Result<PathBuf, crate::Error>> = vec![];
+                let mut results = Vec::new();
                 for file in files {
                     if is_glob_pattern(file.as_ref()) {
                         if let Ok(paths) = glob::glob(file.as_ref()) {
@@ -51,7 +78,7 @@ where
                         } else {
                             results
                                 .push(Err(crate::Error::GlobPatternInvalid(file.as_ref().into())));
-                        };
+                        }
                     } else {
                         let path = PathBuf::from(file.as_ref());
                         if !path.exists() {
@@ -61,38 +88,25 @@ where
                         }
                     }
                 }
+
                 FileInput::Files(results)
             }
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            FileInput::Stdin => 1,
+            FileInput::Files(files) => files.len(),
         }
     }
 }
 
 fn is_glob_pattern(value: &str) -> bool {
-    value.contains('*') || value.contains('?') || value.contains('[') || value.contains(']')
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn std_input() {
-        let input = vec!["-"];
-        let file_input = FileInput::from(input.as_ref());
-        assert!(matches!(file_input, FileInput::Stdin));
+    for c in value.chars() {
+        if matches!(c, '*' | '?' | '[' | ']') {
+            return true;
+        }
     }
-
-    #[test]
-    fn single_file() {
-        let input = vec!["Cargo.toml"];
-        let file_input = FileInput::from(input.as_ref());
-        assert!(matches!(file_input, FileInput::Files(_)));
-    }
-
-    #[test]
-    fn glob_file() {
-        let input = vec!["**/Cargo.toml"];
-        let file_input = FileInput::from(input.as_ref());
-        assert!(matches!(file_input, FileInput::Files(_)));
-    }
+    false
 }

@@ -69,6 +69,14 @@ where
     let (config, config_dirpath) = config::load_with_path()?;
 
     let toml_version = config.toml_version.unwrap_or_default();
+    let include_patterns: Option<Vec<&str>> = config
+        .include
+        .as_deref()
+        .map(|p| p.iter().map(|s| s.as_str()).collect());
+    let exclude_patterns: Option<Vec<&str>> = config
+        .exclude
+        .as_deref()
+        .map(|p| p.iter().map(|s| s.as_str()).collect());
     let format_options = config.format.unwrap_or_default();
     let schema_options = config.schema.unwrap_or_default();
     let schema_store = schema_store::SchemaStore::default();
@@ -99,11 +107,12 @@ where
                     .await?;
             }
         }
-        Ok::<(), Box<dyn std::error::Error>>(())
-    })?;
 
-    runtime.block_on(async {
-        let input = arg::FileInput::from(args.files.as_ref());
+        let input = arg::FileInput::new(
+            &args.files,
+            include_patterns.as_ref().map(|v| &v[..]),
+            exclude_patterns.as_ref().map(|v| &v[..]),
+        );
         let total_num = input.len();
         let mut success_num = 0;
         let mut not_needed_num = 0;
