@@ -39,7 +39,7 @@ pub use source_schema::SourceSchema;
 pub use source_schema::SubSchemaUrlMap;
 use std::sync::Arc;
 pub use string_schema::StringSchema;
-pub use table_schema::TableSchema;
+pub use table_schema::{TableKeyOrder, TableSchema};
 pub use value_schema::*;
 
 pub type SchemaProperties =

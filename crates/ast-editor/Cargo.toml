@@ -8,3 +8,6 @@ repository.workspace = true
 
 [dependencies]
 ast.workspace = true
+syntax.workspace = true
+schema-store.workspace = true
+futures.workspace = true
