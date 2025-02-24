@@ -1,8 +1,8 @@
+use std::borrow::Cow;
+
 use ast::AstNode;
 use futures::FutureExt;
-use schema_store::Accessor;
-
-use super::search_table_schema;
+use schema_store::{AnyOfSchema, CurrentSchema, OneOfSchema, ValueSchema};
 
 impl crate::Edit for ast::Table {
     fn edit<'a: 'b, 'b>(
@@ -13,21 +13,17 @@ impl crate::Edit for ast::Table {
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
+        tracing::info!("accessors: {:?}", accessors);
+        tracing::info!("schema_url: {:?}", schema_url);
+        tracing::info!("value_schema: {:?}", value_schema);
+
         async move {
             let mut changes = vec![];
-            let mut accessor = vec![];
-            for key in self.header().unwrap().keys() {
-                let Ok(key_text) = key.try_to_raw_text(schema_context.toml_version) else {
-                    return changes;
-                };
-                accessor.push(Accessor::Key(key_text));
-            }
-
             for key_value in self.key_values() {
                 changes.extend(
                     key_value
                         .edit(
-                            accessors,
+                            &accessors,
                             schema_url,
                             value_schema,
                             definitions,
@@ -38,20 +34,74 @@ impl crate::Edit for ast::Table {
             }
 
             match (schema_url, value_schema, definitions) {
-                (Some(schema_url), Some(value_schema), Some(definitions)) => {
-                    let Some(table_schema) = search_table_schema(
-                        &accessor,
-                        schema_url,
-                        value_schema,
-                        definitions,
-                        schema_context,
-                    )
-                    .await
-                    else {
-                        return changes;
-                    };
-                    changes.extend(crate::rule::table_key_order(self.syntax(), table_schema).await);
-                }
+                (Some(schema_url), Some(value_schema), Some(definitions)) => match value_schema {
+                    ValueSchema::Table(table_schema) => {
+                        if accessors.is_empty() {
+                            changes.extend(
+                                crate::rule::table_key_order(self.syntax(), table_schema).await,
+                            );
+                            return changes;
+                        }
+                        let mut properties = table_schema.properties.write().await;
+                        if let Some(referable_property_schema) = properties.get_mut(&accessors[0]) {
+                            if let Ok(CurrentSchema {
+                                value_schema,
+                                schema_url: Some(schema_url),
+                                definitions,
+                            }) = referable_property_schema
+                                .resolve(
+                                    Some(Cow::Borrowed(schema_url)),
+                                    definitions,
+                                    schema_context.store,
+                                )
+                                .await
+                            {
+                                return self
+                                    .edit(
+                                        &accessors[1..],
+                                        Some(&schema_url),
+                                        Some(value_schema),
+                                        Some(definitions),
+                                        schema_context,
+                                    )
+                                    .await;
+                            };
+                        }
+                    }
+                    ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                    | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => {
+                        for schema in schemas.write().await.iter_mut() {
+                            if let Ok(CurrentSchema {
+                                value_schema,
+                                schema_url: Some(schema_url),
+                                definitions,
+                            }) = schema
+                                .resolve(
+                                    Some(Cow::Borrowed(schema_url)),
+                                    definitions,
+                                    schema_context.store,
+                                )
+                                .await
+                            {
+                                changes.extend(
+                                    self.edit(
+                                        &accessors,
+                                        Some(&schema_url),
+                                        Some(value_schema),
+                                        Some(definitions),
+                                        schema_context,
+                                    )
+                                    .await,
+                                );
+
+                                if !changes.is_empty() {
+                                    return changes;
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
 
