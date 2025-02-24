@@ -147,8 +147,11 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "futures",
+ "itertools",
  "schema-store",
  "syntax",
+ "text",
+ "tracing",
 ]
 
 [[package]]

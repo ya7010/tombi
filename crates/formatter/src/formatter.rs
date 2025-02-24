@@ -17,9 +17,7 @@ pub struct Formatter<'a> {
     definitions: crate::FormatDefinitions,
     #[allow(dead_code)]
     options: &'a crate::FormatOptions,
-    #[allow(dead_code)]
     source_schema: Option<SourceSchema>,
-    #[allow(dead_code)]
     schema_store: &'a schema_store::SchemaStore,
     buf: String,
 }
@@ -60,6 +58,19 @@ impl<'a> Formatter<'a> {
     }
 
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
+        let schema_context = schema_store::SchemaContext {
+            toml_version: self.toml_version,
+            root_schema: self
+                .source_schema
+                .as_ref()
+                .and_then(|schema| schema.root.as_ref()),
+            sub_schema_url_map: self
+                .source_schema
+                .as_ref()
+                .map(|schema| &schema.sub_schema_url_map),
+            store: self.schema_store,
+        };
+
         let parsed = parser::parse(source, self.toml_version);
 
         let diagnostics = if !parsed.errors().is_empty() {
@@ -80,6 +91,8 @@ impl<'a> Formatter<'a> {
         tracing::trace!("TOML AST: {:#?}", root);
 
         if diagnostics.is_empty() {
+            let root = ast_editor::Editor::new(root, &schema_context).edit().await;
+
             let line_ending = {
                 root.fmt(&mut self).unwrap();
                 self.line_ending()

@@ -1,3 +1,4 @@
+use ast::AstNode;
 use futures::FutureExt;
 
 impl crate::Edit for ast::Table {
@@ -20,6 +21,9 @@ impl crate::Edit for ast::Table {
                         schema_context,
                     )
                     .await;
+            }
+            if let Some(value_schema) = value_schema {
+                crate::rule::table_key_order(self.syntax(), value_schema);
             }
         }
         .boxed()

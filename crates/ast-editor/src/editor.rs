@@ -19,7 +19,7 @@ impl<'a> Editor<'a> {
         }
     }
 
-    pub async fn edit(&mut self) {
+    pub async fn edit(self) -> ast::Root {
         self.root
             .edit(
                 &[],
@@ -35,5 +35,7 @@ impl<'a> Editor<'a> {
                 self.schema_context,
             )
             .await;
+
+        self.root
     }
 }
