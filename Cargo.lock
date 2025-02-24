@@ -571,6 +571,7 @@ dependencies = [
  "ast-editor",
  "config",
  "diagnostic",
+ "document-tree",
  "itertools",
  "parser",
  "pretty_assertions",

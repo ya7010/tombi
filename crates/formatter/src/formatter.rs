@@ -58,7 +58,7 @@ impl<'a> Formatter<'a> {
     }
 
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let schema_context = schema_store::SchemaContext {
+        let _schema_context = schema_store::SchemaContext {
             toml_version: self.toml_version,
             root_schema: self
                 .source_schema
@@ -89,9 +89,10 @@ impl<'a> Formatter<'a> {
 
         let root = parsed.tree();
         tracing::trace!("TOML AST: {:#?}", root);
+        // let document_tree = root.into_document_tree_and_errors(self.toml_version);
 
         if diagnostics.is_empty() {
-            let root = ast_editor::Editor::new(root, &schema_context).edit().await;
+            // let root = ast_editor::Editor::new(root, &schema_context).edit().await;
 
             let line_ending = {
                 root.fmt(&mut self).unwrap();
