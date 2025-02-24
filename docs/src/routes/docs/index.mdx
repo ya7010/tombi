@@ -10,8 +10,12 @@ designed to help you maintain clean and consistent TOML files.
 Visit our [Quick Start Guide](/docs/installation) to begin using Tombi in your projects.
 
 ## Why Tombi?
-I liked TOML better than JSON/YAML for the project's configuration file;
+TOML is used in many projects such as [pyproject](https://peps.python.org/pep-0621/) and [cargo](https://doc.rust-lang.org/cargo/reference/manifest.html).  
 
-But I was using the project's configuration file in YAML for the team's project because of the excellent [RedHat Language Server](https://github.com/redhat-developer/yaml-language-server).
+TOML is a good configuration language better than JSON and YAML.  
+JSON is a data description language and cannot include comments.  
+YAML has a complex specification and may interpret data that the user did not intend implicitly.
 
-I wanted to replace it with TOML.
+YAML has an excellent [Language Server](https://github.com/redhat-developer/yaml-language-server) created by RedHat.  
+
+So, I needed a Language Server for TOML.
