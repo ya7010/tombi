@@ -1,10 +1,10 @@
-use std::fmt::Debug;
+use std::{borrow::Cow, fmt::Debug};
 
 use config::TomlVersion;
 use document_tree::ValueImpl;
 use futures::future::BoxFuture;
 use futures::FutureExt;
-use schema_store::{OneOfSchema, SchemaDefinitions, ValueSchema};
+use schema_store::{CurrentSchema, OneOfSchema, SchemaDefinitions, ValueSchema};
 
 use crate::validation::{all_of::validate_all_of, any_of::validate_any_of};
 
@@ -34,16 +34,15 @@ where
 
         let mut schemas = one_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok((value_schema, new_schema)) =
-                referable_schema.resolve(definitions, schema_store).await
+            let Ok(CurrentSchema {
+                value_schema,
+                schema_url: Some(schema_url),
+                definitions,
+            }) = referable_schema
+                .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                .await
             else {
                 continue;
-            };
-
-            let definitions = if let Some((_, definitions)) = &new_schema {
-                definitions
-            } else {
-                definitions
             };
 
             match (value.value_type(), value_schema) {
@@ -63,7 +62,7 @@ where
                             toml_version,
                             accessors,
                             Some(value_schema),
-                            Some(schema_url),
+                            Some(&schema_url),
                             Some(definitions),
                             sub_schema_url_map,
                             schema_store,
@@ -102,7 +101,7 @@ where
                         toml_version,
                         accessors,
                         one_of_schema,
-                        schema_url,
+                        &schema_url,
                         definitions,
                         sub_schema_url_map,
                         schema_store,
@@ -122,7 +121,7 @@ where
                         toml_version,
                         accessors,
                         any_of_schema,
-                        schema_url,
+                        &schema_url,
                         definitions,
                         sub_schema_url_map,
                         schema_store,
@@ -142,7 +141,7 @@ where
                         toml_version,
                         accessors,
                         all_of_schema,
-                        schema_url,
+                        &schema_url,
                         definitions,
                         sub_schema_url_map,
                         schema_store,

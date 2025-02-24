@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaContext, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -20,8 +22,12 @@ where
         let mut value_type_set = indexmap::IndexSet::new();
 
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
-            let Ok((value_schema, _)) = referable_schema
-                .resolve(definitions, schema_context.store)
+            let Ok(CurrentSchema { value_schema, .. }) = referable_schema
+                .resolve(
+                    schema_url.map(Cow::Borrowed),
+                    definitions,
+                    schema_context.store,
+                )
                 .await
             else {
                 continue;
@@ -98,8 +104,12 @@ impl GetHoverContent for schema_store::AnyOfSchema {
             let mut value_type_set = indexmap::IndexSet::new();
 
             for referable_schema in self.schemas.write().await.iter_mut() {
-                let Ok((value_schema, _)) = referable_schema
-                    .resolve(definitions, schema_context.store)
+                let Ok(CurrentSchema { value_schema, .. }) = referable_schema
+                    .resolve(
+                        schema_url.map(Cow::Borrowed),
+                        definitions,
+                        schema_context.store,
+                    )
                     .await
                 else {
                     return None;

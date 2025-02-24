@@ -5,7 +5,7 @@ mod hint;
 mod schema_completion;
 mod value;
 
-use std::ops::Deref;
+use std::{borrow::Cow, ops::Deref};
 
 use ahash::AHashMap;
 use ast::{algo::ancestors_at_position, AstNode};
@@ -16,7 +16,9 @@ use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
-use schema_store::{Accessor, SchemaDefinitions, SchemaStore, SchemaUrl, Schemas, ValueSchema};
+use schema_store::{
+    Accessor, CurrentSchema, SchemaDefinitions, SchemaStore, SchemaUrl, Schemas, ValueSchema,
+};
 use syntax::{SyntaxElement, SyntaxKind};
 
 pub async fn get_completion_contents(
@@ -211,6 +213,7 @@ pub trait FindCompletionContents {
 pub trait CompletionCandidate {
     fn title<'a: 'b, 'b>(
         &'a self,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -218,6 +221,7 @@ pub trait CompletionCandidate {
 
     fn description<'a: 'b, 'b>(
         &'a self,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -225,20 +229,23 @@ pub trait CompletionCandidate {
 
     async fn detail(
         &self,
+        schema_url: Option<&SchemaUrl>,
         definitions: &SchemaDefinitions,
         schema_store: &SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.title(definitions, schema_store, completion_hint).await
+        self.title(schema_url, definitions, schema_store, completion_hint)
+            .await
     }
 
     async fn documentation(
         &self,
+        schema_url: Option<&SchemaUrl>,
         definitions: &SchemaDefinitions,
         schema_store: &SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
-        self.description(definitions, schema_store, completion_hint)
+        self.description(schema_url, definitions, schema_store, completion_hint)
             .await
     }
 }
@@ -252,6 +259,7 @@ trait CompositeSchemaImpl {
 impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
     fn title<'a: 'b, 'b>(
         &'a self,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -260,20 +268,21 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok((value_schema, new_schema)) =
-                        referable_schema.resolve(definitions, schema_store).await
+                    if let Ok(CurrentSchema {
+                        value_schema,
+                        schema_url,
+                        definitions,
+                    }) = referable_schema
+                        .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                        .await
                     {
                         if matches!(value_schema, ValueSchema::Null) {
                             continue;
                         }
 
-                        let definitions = if let Some((_, definitions)) = &new_schema {
-                            definitions
-                        } else {
-                            definitions
-                        };
                         if let Some(candidate) = CompletionCandidate::title(
                             value_schema,
+                            schema_url.as_deref(),
                             definitions,
                             schema_store,
                             completion_hint,
@@ -296,6 +305,7 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
 
     fn description<'a: 'b, 'b>(
         &'a self,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -304,21 +314,21 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok((value_schema, new_schema)) =
-                        referable_schema.resolve(definitions, schema_store).await
+                    if let Ok(CurrentSchema {
+                        value_schema,
+                        schema_url,
+                        definitions,
+                    }) = referable_schema
+                        .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                        .await
                     {
                         if matches!(value_schema, ValueSchema::Null) {
                             continue;
                         }
 
-                        let definitions = if let Some((_, definitions)) = &new_schema {
-                            definitions
-                        } else {
-                            definitions
-                        };
-
                         if let Some(candidate) = CompletionCandidate::description(
                             value_schema,
+                            schema_url.as_deref(),
                             definitions,
                             schema_store,
                             completion_hint,

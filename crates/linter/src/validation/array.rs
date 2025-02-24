@@ -1,8 +1,10 @@
+use std::borrow::Cow;
+
 use config::TomlVersion;
 use document_tree::ValueImpl;
 use futures::future::BoxFuture;
 use futures::FutureExt;
-use schema_store::{SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType};
+use schema_store::{CurrentSchema, SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
@@ -111,14 +113,14 @@ impl Validate for document_tree::Array {
 
                     if let Some(items) = &array_schema.items {
                         let mut referable_schema = items.write().await;
-                        if let Ok((item_schema, new_schema)) =
-                            referable_schema.resolve(definitions, schema_store).await
+                        if let Ok(CurrentSchema {
+                            value_schema,
+                            schema_url,
+                            definitions,
+                        }) = referable_schema
+                            .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                            .await
                         {
-                            let definitions = if let Some((_, new_definitions)) = &new_schema {
-                                new_definitions
-                            } else {
-                                definitions
-                            };
                             for (index, value) in self.values().iter().enumerate() {
                                 if let Err(errs) = value
                                     .validate(
@@ -130,8 +132,8 @@ impl Validate for document_tree::Array {
                                                 index,
                                             )))
                                             .collect::<Vec<_>>(),
-                                        Some(item_schema),
-                                        Some(schema_url),
+                                        Some(value_schema),
+                                        schema_url.as_deref(),
                                         Some(definitions),
                                         sub_schema_url_map,
                                         schema_store,

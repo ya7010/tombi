@@ -1,8 +1,10 @@
+use std::borrow::Cow;
 use std::fmt::Debug;
 
 use config::TomlVersion;
 use futures::future::BoxFuture;
 use futures::FutureExt;
+use schema_store::CurrentSchema;
 
 use super::Validate;
 
@@ -27,16 +29,15 @@ where
 
         let mut schemas = all_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok((value_schema, new_schema)) =
-                referable_schema.resolve(definitions, schema_store).await
+            let Ok(CurrentSchema {
+                value_schema,
+                schema_url,
+                definitions,
+            }) = referable_schema
+                .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                .await
             else {
                 continue;
-            };
-
-            let definitions = if let Some((_, definitions)) = &new_schema {
-                definitions
-            } else {
-                definitions
             };
 
             match value
@@ -44,7 +45,7 @@ where
                     toml_version,
                     accessors,
                     Some(value_schema),
-                    Some(schema_url),
+                    schema_url.as_deref(),
                     Some(definitions),
                     sub_schema_url_map,
                     schema_store,

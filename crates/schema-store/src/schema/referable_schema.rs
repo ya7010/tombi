@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use futures::future::BoxFuture;
 
 use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
@@ -12,7 +14,11 @@ pub enum Referable<T> {
     },
 }
 
-type NewValueSchemaInfo<'a> = (&'a ValueSchema, Option<(SchemaUrl, SchemaDefinitions)>);
+pub struct CurrentSchema<'a> {
+    pub schema_url: Option<Cow<'a, SchemaUrl>>,
+    pub value_schema: &'a ValueSchema,
+    pub definitions: &'a SchemaDefinitions,
+}
 
 impl<T> Referable<T> {
     pub fn resolved(&self) -> Option<&T> {
@@ -49,9 +55,10 @@ impl Referable<ValueSchema> {
 
     pub fn resolve<'a: 'b, 'b>(
         &'a mut self,
+        schema_url: Option<Cow<'a, SchemaUrl>>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a crate::SchemaStore,
-    ) -> BoxFuture<'b, Result<NewValueSchemaInfo<'a>, crate::Error>> {
+    ) -> BoxFuture<'b, Result<CurrentSchema<'a>, crate::Error>> {
         Box::pin(async move {
             match self {
                 Referable::Ref {
@@ -59,7 +66,6 @@ impl Referable<ValueSchema> {
                     title,
                     description,
                 } => {
-                    let mut new_schema = None;
                     if let Some(definition_schema) = definitions.read().await.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
                         if let Referable::Resolved(ref mut schema) = &mut referable_schema {
@@ -77,7 +83,9 @@ impl Referable<ValueSchema> {
 
                         if let Some(value_schema) = document_schema.value_schema {
                             *self = Referable::Resolved(value_schema);
-                            new_schema = Some((schema_url, document_schema.definitions.clone()));
+                            return self
+                                .resolve(Some(Cow::Owned(schema_url)), definitions, schema_store)
+                                .await;
                         } else {
                             return Err(crate::Error::InvalidJsonSchemaReference {
                                 reference: reference.to_owned(),
@@ -89,23 +97,27 @@ impl Referable<ValueSchema> {
                         });
                     }
 
-                    self.resolve(definitions, schema_store)
-                        .await
-                        .map(|(value_schema, _)| (value_schema, new_schema))
+                    self.resolve(schema_url, definitions, schema_store).await
                 }
-                Referable::Resolved(resolved) => {
-                    match resolved {
+                Referable::Resolved(value_schema) => {
+                    match value_schema {
                         ValueSchema::OneOf(OneOfSchema { schemas, .. })
                         | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                             for schema in schemas.write().await.iter_mut() {
-                                schema.resolve(definitions, schema_store).await?;
+                                schema
+                                    .resolve(schema_url.clone(), definitions, schema_store)
+                                    .await?;
                             }
                         }
                         _ => {}
                     }
 
-                    Result::<(&ValueSchema, _), _>::Ok((resolved, None))
+                    Ok(CurrentSchema {
+                        value_schema,
+                        schema_url,
+                        definitions,
+                    })
                 }
             }
         })

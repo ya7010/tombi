@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::completion::{
     value::{
         all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
@@ -10,8 +12,8 @@ use futures::{
     FutureExt,
 };
 use schema_store::{
-    is_online_url, Accessor, FindSchemaCandidates, Referable, SchemaAccessor, SchemaDefinitions,
-    SchemaStore, SchemaUrl, TableSchema, ValueSchema,
+    is_online_url, Accessor, CurrentSchema, FindSchemaCandidates, Referable, SchemaAccessor,
+    SchemaDefinitions, SchemaStore, SchemaUrl, TableSchema, ValueSchema,
 };
 
 impl FindCompletionContents for document_tree::Table {
@@ -97,16 +99,19 @@ impl FindCompletionContents for document_tree::Table {
                                     );
                                 }
 
-                                if let Ok((property_schema, new_schema)) =
-                                    property.resolve(definitions, schema_context.store).await
+                                if let Ok(CurrentSchema {
+                                    schema_url,
+                                    value_schema: property_schema,
+                                    definitions,
+                                }) = property
+                                    .resolve(
+                                        schema_url.map(Cow::Borrowed),
+                                        definitions,
+                                        schema_context.store,
+                                    )
+                                    .await
                                 {
                                     tracing::trace!("property schema: {:?}", property_schema);
-                                    let (schema_url, definitions) =
-                                        if let Some((schema_url, definitions)) = &new_schema {
-                                            (Some(schema_url), Some(definitions))
-                                        } else {
-                                            (schema_url, Some(definitions))
-                                        };
 
                                     return value
                                         .find_completion_contents(
@@ -117,9 +122,9 @@ impl FindCompletionContents for document_tree::Table {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            schema_url,
+                                            schema_url.as_deref(),
                                             Some(property_schema),
-                                            definitions,
+                                            Some(definitions),
                                             schema_context,
                                             completion_hint,
                                         )
@@ -138,23 +143,26 @@ impl FindCompletionContents for document_tree::Table {
                                         }
                                     }
 
-                                    if let Ok((property_schema, new_schema)) =
-                                        property.resolve(definitions, schema_context.store).await
+                                    if let Ok(CurrentSchema {
+                                        schema_url,
+                                        value_schema: property_schema,
+                                        definitions,
+                                    }) = property
+                                        .resolve(
+                                            schema_url.map(Cow::Borrowed),
+                                            definitions,
+                                            schema_context.store,
+                                        )
+                                        .await
                                     {
                                         tracing::trace!("property schema: {:?}", property_schema);
-                                        let (schema_url, definitions) =
-                                            if let Some((schema_url, definitions)) = &new_schema {
-                                                (Some(schema_url), definitions)
-                                            } else {
-                                                (schema_url, definitions)
-                                            };
 
                                         let Some(contents) = collect_table_key_completion_contents(
                                             self,
                                             position,
                                             key_name,
                                             accessors,
-                                            schema_url,
+                                            schema_url.as_deref(),
                                             table_schema,
                                             property_schema,
                                             definitions,
@@ -190,29 +198,27 @@ impl FindCompletionContents for document_tree::Table {
                                             "pattern property schema: {:?}",
                                             pattern_property_schema
                                         );
-                                        if let Ok((value_schema, new_schema)) =
-                                            pattern_property_schema
-                                                .resolve(definitions, schema_context.store)
-                                                .await
-                                        {
-                                            let (schema_url, definitions) = if let Some((
-                                                schema_url,
+                                        if let Ok(CurrentSchema {
+                                            schema_url,
+                                            value_schema,
+                                            definitions,
+                                        }) = pattern_property_schema
+                                            .resolve(
+                                                schema_url.map(Cow::Borrowed),
                                                 definitions,
-                                            )) = &new_schema
-                                            {
-                                                (Some(schema_url), Some(definitions))
-                                            } else {
-                                                (schema_url, Some(definitions))
-                                            };
+                                                schema_context.store,
+                                            )
+                                            .await
+                                        {
                                             return get_property_value_completion_contents(
                                                 value,
                                                 position,
                                                 key,
                                                 keys,
                                                 accessors,
-                                                schema_url,
+                                                schema_url.as_deref(),
                                                 Some(value_schema),
-                                                definitions,
+                                                Some(definitions),
                                                 schema_context,
                                                 completion_hint,
                                             )
@@ -230,29 +236,29 @@ impl FindCompletionContents for document_tree::Table {
                                     referable_additional_property_schema
                                 );
 
-                                if let Ok((additional_property_schema, new_schema)) =
-                                    referable_additional_property_schema
-                                        .write()
-                                        .await
-                                        .resolve(definitions, schema_context.store)
-                                        .await
+                                if let Ok(CurrentSchema {
+                                    schema_url,
+                                    value_schema: additional_property_schema,
+                                    definitions,
+                                }) = referable_additional_property_schema
+                                    .write()
+                                    .await
+                                    .resolve(
+                                        schema_url.map(Cow::Borrowed),
+                                        definitions,
+                                        schema_context.store,
+                                    )
+                                    .await
                                 {
-                                    let (schema_url, definitions) =
-                                        if let Some((schema_url, definitions)) = &new_schema {
-                                            (Some(schema_url), Some(definitions))
-                                        } else {
-                                            (schema_url, Some(definitions))
-                                        };
-
                                     return get_property_value_completion_contents(
                                         value,
                                         position,
                                         key,
                                         keys,
                                         accessors,
-                                        schema_url,
+                                        schema_url.as_deref(),
                                         Some(additional_property_schema),
-                                        definitions,
+                                        Some(definitions),
                                         schema_context,
                                         completion_hint,
                                     )
@@ -310,22 +316,24 @@ impl FindCompletionContents for document_tree::Table {
                                 _ => {}
                             }
 
-                            if let Ok((value_schema, new_schema)) =
-                                property.resolve(definitions, schema_context.store).await
+                            if let Ok(CurrentSchema {
+                                schema_url,
+                                value_schema,
+                                definitions,
+                            }) = property
+                                .resolve(
+                                    schema_url.map(Cow::Borrowed),
+                                    definitions,
+                                    schema_context.store,
+                                )
+                                .await
                             {
-                                let (schema_url, definitions) =
-                                    if let Some((schema_url, definitions)) = &new_schema {
-                                        (Some(schema_url), definitions)
-                                    } else {
-                                        (schema_url, definitions)
-                                    };
-
                                 let Some(contents) = collect_table_key_completion_contents(
                                     self,
                                     position,
                                     key_name,
                                     accessors,
-                                    schema_url,
+                                    schema_url.as_deref(),
                                     table_schema,
                                     value_schema,
                                     definitions,
@@ -359,6 +367,7 @@ impl FindCompletionContents for document_tree::Table {
                                                         position,
                                                         value_schema
                                                             .detail(
+                                                                schema_url.as_deref(),
                                                                 &document_schema.definitions,
                                                                 schema_context.store,
                                                                 completion_hint,
@@ -366,6 +375,7 @@ impl FindCompletionContents for document_tree::Table {
                                                             .await,
                                                         value_schema
                                                             .documentation(
+                                                                schema_url.as_deref(),
                                                                 &document_schema.definitions,
                                                                 schema_context.store,
                                                                 completion_hint,
@@ -506,16 +516,25 @@ impl FindCompletionContents for TableSchema {
             for (key, property) in self.properties.write().await.iter_mut() {
                 let label = &key.to_string();
 
-                if let Ok((value_schema, new_schema)) =
-                    property.resolve(definitions, schema_context.store).await
+                if let Ok(CurrentSchema {
+                    schema_url,
+                    value_schema,
+                    definitions,
+                }) = property
+                    .resolve(
+                        schema_url.map(Cow::Borrowed),
+                        definitions,
+                        schema_context.store,
+                    )
+                    .await
                 {
-                    let definitions = if let Some((_, definitions)) = &new_schema {
-                        definitions
-                    } else {
-                        definitions
-                    };
                     let (schema_candidates, errors) = value_schema
-                        .find_schema_candidates(accessors, definitions, schema_context.store)
+                        .find_schema_candidates(
+                            accessors,
+                            schema_url.as_deref(),
+                            definitions,
+                            schema_context.store,
+                        )
                         .await;
 
                     for error in errors {
@@ -525,6 +544,7 @@ impl FindCompletionContents for TableSchema {
                     for schema_candidate in schema_candidates {
                         if let Some(CompletionHint::InTableHeader) = completion_hint {
                             if count_table_or_array_schema(
+                                schema_url.as_deref(),
                                 value_schema,
                                 definitions,
                                 schema_context.store,
@@ -540,13 +560,23 @@ impl FindCompletionContents for TableSchema {
                             label,
                             position,
                             schema_candidate
-                                .detail(definitions, schema_context.store, completion_hint)
+                                .detail(
+                                    schema_url.as_deref(),
+                                    definitions,
+                                    schema_context.store,
+                                    completion_hint,
+                                )
                                 .await,
                             schema_candidate
-                                .documentation(definitions, schema_context.store, completion_hint)
+                                .documentation(
+                                    schema_url.as_deref(),
+                                    definitions,
+                                    schema_context.store,
+                                    completion_hint,
+                                )
                                 .await,
                             self.required.as_ref(),
-                            schema_url,
+                            schema_url.as_deref(),
                             completion_hint,
                         ));
                     }
@@ -566,6 +596,7 @@ impl FindCompletionContents for TableSchema {
 }
 
 async fn count_table_or_array_schema(
+    schema_url: Option<&SchemaUrl>,
     value_schema: &ValueSchema,
     definitions: &SchemaDefinitions,
     schema_store: &SchemaStore,
@@ -574,6 +605,7 @@ async fn count_table_or_array_schema(
         value_schema
             .match_flattened_schemas(
                 &|schema| matches!(schema, ValueSchema::Table(_) | ValueSchema::Array(_)),
+                schema_url,
                 definitions,
                 schema_store,
             )
@@ -583,18 +615,20 @@ async fn count_table_or_array_schema(
                 match schema {
                     ValueSchema::Array(array_schema) => {
                         if let Some(item) = array_schema.items {
-                            if let Ok((value_schema, new_schema)) =
-                                item.write().await.resolve(definitions, schema_store).await
+                            if let Ok(CurrentSchema {
+                                schema_url,
+                                value_schema,
+                                definitions,
+                            }) = item
+                                .write()
+                                .await
+                                .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                                .await
                             {
-                                let definitions = if let Some((_, definitions)) = &new_schema {
-                                    definitions
-                                } else {
-                                    definitions
-                                };
-
                                 return value_schema
                                     .is_match(
                                         &|schema| matches!(schema, ValueSchema::Table(_)),
+                                        schema_url.as_deref(),
                                         definitions,
                                         schema_store,
                                     )
@@ -670,6 +704,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                 Some(CompletionHint::InTableHeader) => {
                     if let (Some(value_schema), Some(definitions)) = (value_schema, definitions) {
                         if count_table_or_array_schema(
+                            schema_url,
                             value_schema,
                             definitions,
                             schema_context.store,
@@ -773,7 +808,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
         let mut completion_contents = Vec::new();
 
         let (schema_candidates, errors) = value_schema
-            .find_schema_candidates(accessors, definitions, schema_context.store)
+            .find_schema_candidates(accessors, schema_url, definitions, schema_context.store)
             .await;
 
         for error in errors {
@@ -799,6 +834,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                 ValueSchema::Array(_) | ValueSchema::Table(_) => {
                     if matches!(completion_hint, Some(CompletionHint::InTableHeader))
                         && count_table_or_array_schema(
+                            schema_url,
                             value_schema,
                             definitions,
                             schema_context.store,
@@ -835,10 +871,20 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                 key_name,
                 position,
                 schema_candidate
-                    .detail(definitions, schema_context.store, completion_hint)
+                    .detail(
+                        schema_url,
+                        definitions,
+                        schema_context.store,
+                        completion_hint,
+                    )
                     .await,
                 schema_candidate
-                    .documentation(definitions, schema_context.store, completion_hint)
+                    .documentation(
+                        schema_url,
+                        definitions,
+                        schema_context.store,
+                        completion_hint,
+                    )
                     .await,
                 table_schema.required.as_ref(),
                 schema_url,

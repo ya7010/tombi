@@ -3,8 +3,10 @@ mod key_value;
 mod root;
 mod table;
 
+use std::borrow::Cow;
+
 use futures::FutureExt;
-use schema_store::ValueSchema;
+use schema_store::{CurrentSchema, ValueSchema};
 
 pub trait Edit {
     fn edit<'a: 'b, 'b>(
@@ -29,21 +31,23 @@ fn search_table_schema<'a: 'b, 'b>(
             ValueSchema::Table(table_schema) => return Some(table_schema),
             ValueSchema::OneOf(one_of_schema) => {
                 for schema in one_of_schema.schemas.write().await.iter_mut() {
-                    if let Ok((value_schema, new_schema)) =
-                        schema.resolve(definitions, schema_context.store).await
+                    if let Ok(CurrentSchema {
+                        value_schema,
+                        schema_url: Some(schema_url),
+                        definitions,
+                    }) = schema
+                        .resolve(
+                            Some(Cow::Borrowed(schema_url)),
+                            definitions,
+                            schema_context.store,
+                        )
+                        .await
                     {
-                        let (schema_url, definitions) = match &new_schema {
-                            Some((new_schema_url, new_definitions)) => {
-                                (new_schema_url, new_definitions)
-                            }
-                            None => (schema_url, definitions),
-                        };
-
                         if let Some(_table_schema) = search_table_schema(
                             accessors,
-                            schema_url,
+                            &schema_url,
                             &value_schema,
-                            definitions,
+                            &definitions,
                             schema_context,
                         )
                         .await
