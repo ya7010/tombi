@@ -12,7 +12,6 @@ use ast::{algo::ancestors_at_position, AstNode};
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
 use completion_kind::CompletionKind;
-use config::TomlVersion;
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
@@ -22,11 +21,8 @@ use syntax::{SyntaxElement, SyntaxKind};
 
 pub async fn get_completion_contents(
     root: ast::Root,
-    toml_version: config::TomlVersion,
     position: text::Position,
-    document_schema: Option<&schema_store::DocumentSchema>,
-    sub_schema_url_map: Option<&schema_store::SubSchemaUrlMap>,
-    schema_store: &SchemaStore,
+    schema_context: &schema_store::SchemaContext<'_>,
 ) -> Vec<CompletionContent> {
     let mut keys: Vec<document_tree::Key> = vec![];
     let mut completion_hint = None;
@@ -133,7 +129,7 @@ pub async fn get_completion_contents(
                 .keys()
                 .take_while(|key| key.token().unwrap().range().start() <= position)
             {
-                match key.try_into_document_tree(toml_version) {
+                match key.try_into_document_tree(schema_context.toml_version) {
                     Ok(Some(key)) => new_keys.push(key),
                     _ => return vec![],
                 }
@@ -142,7 +138,7 @@ pub async fn get_completion_contents(
         } else {
             let mut new_keys = Vec::with_capacity(ast_keys.keys().count());
             for key in ast_keys.keys() {
-                match key.try_into_document_tree(toml_version) {
+                match key.try_into_document_tree(schema_context.toml_version) {
                     Ok(Some(key)) => new_keys.push(key),
                     _ => return vec![],
                 }
@@ -154,20 +150,28 @@ pub async fn get_completion_contents(
         keys = new_keys;
     }
 
-    let document_tree = root.into_document_tree_and_errors(toml_version).tree;
+    let document_tree = root
+        .into_document_tree_and_errors(schema_context.toml_version)
+        .tree;
 
     let completion_contents = document_tree
         .deref()
         .find_completion_contents(
-            &Vec::with_capacity(0),
-            document_schema.and_then(|schema| schema.value_schema.as_ref()),
-            toml_version,
             position,
             &keys,
-            document_schema.as_ref().map(|schema| &schema.schema_url),
-            document_schema.as_ref().map(|schema| &schema.definitions),
-            sub_schema_url_map,
-            schema_store,
+            &[],
+            schema_context
+                .root_schema
+                .as_ref()
+                .map(|schema| &schema.schema_url),
+            schema_context
+                .root_schema
+                .and_then(|schema| schema.value_schema.as_ref()),
+            schema_context
+                .root_schema
+                .as_ref()
+                .map(|schema| &schema.definitions),
+            schema_context,
             completion_hint,
         )
         .await;
@@ -193,15 +197,13 @@ pub async fn get_completion_contents(
 pub trait FindCompletionContents {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a SchemaStore,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>>;
 }

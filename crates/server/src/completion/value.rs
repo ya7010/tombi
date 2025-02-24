@@ -39,15 +39,13 @@ use string::type_hint_string;
 impl FindCompletionContents for document_tree::Value {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a SchemaStore,
+        schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
@@ -69,15 +67,13 @@ impl FindCompletionContents for document_tree::Value {
                 Self::Array(array) => {
                     array
                         .find_completion_contents(
-                            accessors,
-                            value_schema,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            value_schema,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -85,15 +81,13 @@ impl FindCompletionContents for document_tree::Value {
                 Self::Table(table) => {
                     table
                         .find_completion_contents(
-                            accessors,
-                            value_schema,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            value_schema,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                             completion_hint,
                         )
                         .await
@@ -102,15 +96,13 @@ impl FindCompletionContents for document_tree::Value {
                     Some(value_schema) => {
                         SchemaCompletion
                             .find_completion_contents(
-                                accessors,
-                                Some(value_schema),
-                                toml_version,
                                 position,
                                 keys,
+                                accessors,
                                 schema_url,
+                                Some(value_schema),
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                                 completion_hint,
                             )
                             .await
@@ -124,7 +116,7 @@ impl FindCompletionContents for document_tree::Value {
                             {
                                 vec![CompletionContent::new_type_hint_key(
                                     last_key,
-                                    toml_version,
+                                    schema_context.toml_version,
                                     schema_url,
                                     completion_hint,
                                 )]
@@ -132,7 +124,7 @@ impl FindCompletionContents for document_tree::Value {
                             _ => type_hint_value(
                                 last_key,
                                 position,
-                                toml_version,
+                                schema_context.toml_version,
                                 schema_url,
                                 completion_hint,
                             ),

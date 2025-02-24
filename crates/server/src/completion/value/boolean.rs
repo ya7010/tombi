@@ -1,8 +1,5 @@
-use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{
-    Accessor, BooleanSchema, SchemaDefinitions, SchemaStore, SchemaUrl, ValueSchema,
-};
+use schema_store::{Accessor, BooleanSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 use crate::completion::{
     completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
@@ -12,15 +9,13 @@ use crate::completion::{
 impl FindCompletionContents for BooleanSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        _toml_version: TomlVersion,
         position: text::Position,
         _keys: &'a [document_tree::Key],
+        _accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        _value_schema: Option<&'a ValueSchema>,
         _definitions: Option<&'a SchemaDefinitions>,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        _schema_store: &'a SchemaStore,
+        _schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {
