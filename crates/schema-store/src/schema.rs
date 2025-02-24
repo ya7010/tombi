@@ -12,15 +12,19 @@ mod local_time_schema;
 mod offset_date_time_schema;
 mod one_of_schema;
 mod referable_schema;
+mod schema_context;
 mod source_schema;
 mod string_schema;
 mod table_schema;
 mod value_schema;
 
+use crate::{Accessor, SchemaStore};
 pub use all_of_schema::AllOfSchema;
 pub use any_of_schema::AnyOfSchema;
 pub use array_schema::ArraySchema;
 pub use boolean_schema::BooleanSchema;
+pub use catalog_schema::CatalogSchema;
+pub use document_schema::DocumentSchema;
 pub use float_schema::FloatSchema;
 use futures::future::BoxFuture;
 pub use integer_schema::IntegerSchema;
@@ -29,19 +33,14 @@ pub use local_date_time_schema::LocalDateTimeSchema;
 pub use local_time_schema::LocalTimeSchema;
 pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
+pub use referable_schema::{is_online_url, Referable};
+pub use schema_context::SchemaContext;
 pub use source_schema::SourceSchema;
 pub use source_schema::SubSchemaUrlMap;
+use std::sync::Arc;
 pub use string_schema::StringSchema;
 pub use table_schema::TableSchema;
-
-use std::sync::Arc;
-
-pub use catalog_schema::CatalogSchema;
-pub use document_schema::DocumentSchema;
-pub use referable_schema::{is_online_url, Referable};
 pub use value_schema::*;
-
-use crate::{Accessor, SchemaStore};
 
 pub type SchemaProperties =
     Arc<tokio::sync::RwLock<ahash::AHashMap<Accessor, Referable<ValueSchema>>>>;

@@ -5,6 +5,7 @@ use crate::{
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use itertools::Itertools;
+use schema_store::SchemaContext;
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -64,12 +65,14 @@ pub async fn handle_hover(
 
     return Ok(get_hover_content(
         &document_tree,
-        toml_version,
         position,
         &keys,
-        source_schema.as_ref().and_then(|s| s.root.as_ref()),
-        source_schema.as_ref().map(|s| &s.sub_schema_url_map),
-        &backend.schema_store,
+        &SchemaContext {
+            toml_version,
+            root_schema: source_schema.as_ref().and_then(|s| s.root.as_ref()),
+            sub_schema_url_map: source_schema.as_ref().map(|s| &s.sub_schema_url_map),
+            store: &backend.schema_store,
+        },
     )
     .await
     .map(|mut content| {

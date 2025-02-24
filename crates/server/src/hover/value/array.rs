@@ -1,4 +1,3 @@
-use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
     Accessor, Accessors, ArraySchema, SchemaAccessor, SchemaUrl, ValueSchema, ValueType,
@@ -12,15 +11,13 @@ use crate::hover::{
 impl GetHoverContent for document_tree::Array {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        toml_version: TomlVersion,
         position: text::Position,
         keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        value_schema: Option<&'a ValueSchema>,
         definitions: &'a schema_store::SchemaDefinitions,
-        sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a schema_store::SchemaStore,
+        schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         tracing::debug!("self: {:?}", self);
         tracing::trace!("keys: {:?}", keys);
@@ -28,7 +25,7 @@ impl GetHoverContent for document_tree::Array {
         tracing::trace!("value_schema: {:?}", value_schema);
 
         async move {
-            if let Some(sub_schema_url_map) = sub_schema_url_map {
+            if let Some(sub_schema_url_map) = schema_context.sub_schema_url_map {
                 if let Some(sub_schema_url) = sub_schema_url_map.get(
                     &accessors
                         .iter()
@@ -36,21 +33,20 @@ impl GetHoverContent for document_tree::Array {
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
-                        if let Ok(document_schema) = schema_store
+                        if let Ok(document_schema) = schema_context
+                            .store
                             .try_get_document_schema_from_url(sub_schema_url)
                             .await
                         {
                             return self
                                 .get_hover_content(
-                                    accessors,
-                                    document_schema.value_schema.as_ref(),
-                                    toml_version,
                                     position,
                                     keys,
+                                    accessors,
                                     Some(&document_schema.schema_url),
+                                    document_schema.value_schema.as_ref(),
                                     &document_schema.definitions,
-                                    Some(sub_schema_url_map),
-                                    schema_store,
+                                    schema_context,
                                 )
                                 .await;
                         }
@@ -66,8 +62,9 @@ impl GetHoverContent for document_tree::Array {
 
                             if let Some(items) = &array_schema.items {
                                 let mut referable_schema = items.write().await;
-                                if let Ok((item_schema, new_schema)) =
-                                    referable_schema.resolve(definitions, schema_store).await
+                                if let Ok((item_schema, new_schema)) = referable_schema
+                                    .resolve(definitions, schema_context.store)
+                                    .await
                                 {
                                     let (schema_url, definitions) =
                                         if let Some((schema_url, definitions)) = &new_schema {
@@ -78,19 +75,17 @@ impl GetHoverContent for document_tree::Array {
 
                                     let mut hover_content = value
                                         .get_hover_content(
+                                            position,
+                                            keys,
                                             &accessors
                                                 .iter()
                                                 .cloned()
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
-                                            Some(item_schema),
-                                            toml_version,
-                                            position,
-                                            keys,
                                             schema_url,
+                                            Some(item_schema),
                                             definitions,
-                                            sub_schema_url_map,
-                                            schema_store,
+                                            schema_context,
                                         )
                                         .await?;
 
@@ -120,34 +115,30 @@ impl GetHoverContent for document_tree::Array {
 
                             return value
                                 .get_hover_content(
+                                    position,
+                                    keys,
                                     &accessors
                                         .iter()
                                         .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
-                                    None,
-                                    toml_version,
-                                    position,
-                                    keys,
                                     schema_url,
+                                    value_schema,
                                     definitions,
-                                    sub_schema_url_map,
-                                    schema_store,
+                                    schema_context,
                                 )
                                 .await;
                         }
                     }
                     array_schema
                         .get_hover_content(
-                            accessors,
-                            value_schema,
-                            toml_version,
                             position,
                             keys,
+                            accessors,
                             schema_url,
+                            value_schema,
                             definitions,
-                            sub_schema_url_map,
-                            schema_store,
+                            schema_context,
                         )
                         .await
                         .map(|mut hover_content| {
@@ -158,45 +149,39 @@ impl GetHoverContent for document_tree::Array {
                 Some(ValueSchema::OneOf(one_of_schema)) => {
                     get_one_of_hover_content(
                         self,
-                        accessors,
-                        one_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        one_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                     )
                     .await
                 }
                 Some(ValueSchema::AnyOf(any_of_schema)) => {
                     get_any_of_hover_content(
                         self,
-                        accessors,
-                        any_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        any_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                     )
                     .await
                 }
                 Some(ValueSchema::AllOf(all_of_schema)) => {
                     get_all_of_hover_content(
                         self,
-                        accessors,
-                        all_of_schema,
-                        toml_version,
                         position,
                         keys,
+                        accessors,
                         schema_url,
+                        all_of_schema,
                         definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        schema_context,
                     )
                     .await
                 }
@@ -207,19 +192,17 @@ impl GetHoverContent for document_tree::Array {
                             let accessor = Accessor::Index(index);
                             return value
                                 .get_hover_content(
+                                    position,
+                                    keys,
                                     &accessors
                                         .iter()
                                         .cloned()
                                         .chain(std::iter::once(accessor))
                                         .collect::<Vec<_>>(),
-                                    None,
-                                    toml_version,
-                                    position,
-                                    keys,
                                     schema_url,
+                                    value_schema,
                                     definitions,
-                                    sub_schema_url_map,
-                                    schema_store,
+                                    schema_context,
                                 )
                                 .await;
                         }
@@ -243,15 +226,13 @@ impl GetHoverContent for document_tree::Array {
 impl GetHoverContent for ArraySchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        _value_schema: Option<&'a ValueSchema>,
         _definitions: &'a schema_store::SchemaDefinitions,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        _schema_store: &'a schema_store::SchemaStore,
+        _schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             Some(HoverContent {

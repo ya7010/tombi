@@ -1,20 +1,17 @@
-use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, SchemaContext, SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
 pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a [schema_store::Accessor],
-    any_of_schema: &'a schema_store::AnyOfSchema,
-    toml_version: config::TomlVersion,
     position: text::Position,
     keys: &'a [document_tree::Key],
+    accessors: &'a [schema_store::Accessor],
     schema_url: Option<&'a SchemaUrl>,
+    any_of_schema: &'a schema_store::AnyOfSchema,
     definitions: &'a schema_store::SchemaDefinitions,
-    sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-    schema_store: &'a schema_store::SchemaStore,
+    schema_context: &'a SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
     T: GetHoverContent + document_tree::ValueImpl + Sync + Send,
@@ -23,7 +20,9 @@ where
         let mut value_type_set = indexmap::IndexSet::new();
 
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
-            let Ok((value_schema, _)) = referable_schema.resolve(definitions, schema_store).await
+            let Ok((value_schema, _)) = referable_schema
+                .resolve(definitions, schema_context.store)
+                .await
             else {
                 continue;
             };
@@ -43,15 +42,13 @@ where
 
             if let Some(mut hover_content) = value
                 .get_hover_content(
-                    accessors,
-                    Some(value_schema),
-                    toml_version,
                     position,
                     keys,
+                    accessors,
                     schema_url,
+                    Some(value_schema),
                     definitions,
-                    sub_schema_url_map,
-                    schema_store,
+                    schema_context,
                 )
                 .await
             {
@@ -88,23 +85,22 @@ where
 impl GetHoverContent for schema_store::AnyOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        _toml_version: TomlVersion,
         _position: text::Position,
         _keys: &'a [document_tree::Key],
+        accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
+        _value_schema: Option<&'a ValueSchema>,
         definitions: &'a schema_store::SchemaDefinitions,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        schema_store: &'a schema_store::SchemaStore,
+        schema_context: &'a SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             let mut title_description_set = ahash::AHashSet::new();
             let mut value_type_set = indexmap::IndexSet::new();
 
             for referable_schema in self.schemas.write().await.iter_mut() {
-                let Ok((value_schema, _)) =
-                    referable_schema.resolve(definitions, schema_store).await
+                let Ok((value_schema, _)) = referable_schema
+                    .resolve(definitions, schema_context.store)
+                    .await
                 else {
                     return None;
                 };
