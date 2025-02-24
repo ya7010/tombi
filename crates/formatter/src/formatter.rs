@@ -80,8 +80,6 @@ impl<'a> Formatter<'a> {
         tracing::trace!("TOML AST: {:#?}", root);
 
         if diagnostics.is_empty() {
-            let root = ast_editor::edit(root);
-
             let line_ending = {
                 root.fmt(&mut self).unwrap();
                 self.line_ending()

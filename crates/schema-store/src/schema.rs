@@ -32,7 +32,7 @@ pub use one_of_schema::OneOfSchema;
 pub use source_schema::SourceSchema;
 pub use source_schema::SubSchemaUrlMap;
 pub use string_schema::StringSchema;
-pub use table_schema::TableSchema;
+pub use table_schema::{TableKeyOrder, TableSchema};
 
 use std::sync::Arc;
 

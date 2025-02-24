@@ -22,6 +22,14 @@ pub struct TableSchema {
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
+    pub key_order: Option<TableKeyOrder>,
+}
+
+#[derive(Debug, Clone)]
+pub enum TableKeyOrder {
+    Ascending,
+    Descending,
+    Schema,
 }
 
 impl TableSchema {
@@ -65,6 +73,23 @@ impl TableSchema {
                 _ => (true, None),
             };
 
+        let key_order = match object.get("x-tombi-table-key-order-by") {
+            Some(serde_json::Value::String(order)) => match order.as_str() {
+                "ascending" => Some(TableKeyOrder::Ascending),
+                "descending" => Some(TableKeyOrder::Descending),
+                "schema" => Some(TableKeyOrder::Schema),
+                _ => {
+                    tracing::error!("invalid x-tombi-table-key-order-by: {order}");
+                    None
+                }
+            },
+            Some(order) => {
+                tracing::error!("invalid x-tombi-table-key-order-by: {}", order.to_string());
+                None
+            }
+            None => None,
+        };
+
         Self {
             title: object
                 .get("title")
@@ -89,6 +114,7 @@ impl TableSchema {
             max_properties: object
                 .get("maxProperties")
                 .and_then(|v| v.as_u64().map(|u| u as usize)),
+            key_order,
         }
     }
 

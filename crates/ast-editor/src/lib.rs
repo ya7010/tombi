@@ -1,7 +1,6 @@
-mod editor;
+mod ast_change;
+mod ast_editor;
+mod edit;
 
-#[inline]
-pub fn edit(root: ast::Root) -> ast::Root {
-    // TODO: Implement the edit logic
-    root
-}
+pub use ast_editor::AstEditor;
+use edit::Edit;
