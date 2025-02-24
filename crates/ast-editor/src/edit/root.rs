@@ -7,8 +7,7 @@ impl crate::Edit for ast::Root {
         _schema_url: Option<&'a schema_store::SchemaUrl>,
         _value_schema: Option<&'a schema_store::ValueSchema>,
         _definitions: Option<&'a schema_store::SchemaDefinitions>,
-        _sub_schema_url_map: Option<&'a schema_store::SubSchemaUrlMap>,
-        _schema_store: &'a schema_store::SchemaStore,
+        _schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, ()> {
         async move {}.boxed()
     }

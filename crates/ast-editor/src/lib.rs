@@ -1,6 +1,6 @@
 mod ast_change;
-mod ast_editor;
 mod edit;
+mod editor;
 
-pub use ast_editor::AstEditor;
 use edit::Edit;
+pub use editor::Editor;
