@@ -1,7 +1,9 @@
+mod array;
 mod array_of_tables;
 mod key_value;
 mod root;
 mod table;
+mod value;
 
 pub trait Edit {
     fn edit<'a: 'b, 'b>(

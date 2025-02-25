@@ -146,11 +146,14 @@ name = "ast-editor"
 version = "0.0.0"
 dependencies = [
  "ast",
+ "document-tree",
  "futures",
  "itertools",
  "schema-store",
  "syntax",
  "text",
+ "thiserror",
+ "toml-version",
  "tracing",
 ]
 

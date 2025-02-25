@@ -1,6 +1,6 @@
 use futures::FutureExt;
 
-impl crate::Edit for ast::KeyValue {
+impl crate::Edit for ast::Value {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::Accessor],
@@ -10,8 +10,8 @@ impl crate::Edit for ast::KeyValue {
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
-            match self.value() {
-                Some(ast::Value::Array(array)) => {
+            match self {
+                ast::Value::Array(array) => {
                     array
                         .edit(
                             accessors,

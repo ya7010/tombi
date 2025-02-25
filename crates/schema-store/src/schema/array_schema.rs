@@ -2,7 +2,7 @@ use std::{borrow::Cow, sync::Arc};
 
 use futures::{future::BoxFuture, FutureExt};
 
-use crate::{Accessor, SchemaStore};
+use crate::{Accessor, SchemaStore, X_TOMBI_ARRAY_VALUES_ORDER_BY};
 
 use super::{
     CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, SchemaUrl,
@@ -17,6 +17,13 @@ pub struct ArraySchema {
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
+    pub values_order_by: Option<ArrayValuesOrderBy>,
+}
+
+#[derive(Debug, Clone)]
+pub enum ArrayValuesOrderBy {
+    Ascending,
+    Descending,
 }
 
 impl ArraySchema {
@@ -41,6 +48,21 @@ impl ArraySchema {
                 .get("maxItems")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),
             unique_items: object.get("uniqueItems").and_then(|v| v.as_bool()),
+            values_order_by: match object.get(X_TOMBI_ARRAY_VALUES_ORDER_BY) {
+                Some(serde_json::Value::String(order)) => match order.as_str() {
+                    "ascending" => Some(ArrayValuesOrderBy::Ascending),
+                    "descending" => Some(ArrayValuesOrderBy::Descending),
+                    _ => {
+                        tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER_BY}: {order}");
+                        None
+                    }
+                },
+                Some(order) => {
+                    tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER_BY}: {order}");
+                    None
+                }
+                None => None,
+            },
         }
     }
 
