@@ -22,7 +22,7 @@ impl GetHoverContent for document_tree::Table {
         definitions: &'a schema_store::SchemaDefinitions,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
-        tracing::debug!("self: {:?}", self);
+        tracing::trace!("self: {:?}", self);
         tracing::trace!("keys: {:?}", keys);
         tracing::trace!("accessors: {:?}", accessors);
         tracing::trace!("value_schema: {:?}", value_schema);

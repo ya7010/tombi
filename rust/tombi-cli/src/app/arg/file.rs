@@ -18,28 +18,25 @@ impl FileInput {
         include_patterns: Option<&[&str]>,
         exclude_patterns: Option<&[&str]>,
     ) -> Self {
+        let mut matched_paths = Vec::new();
         let include_patterns = include_patterns.unwrap_or(DEFAULT_INCLUDE_PATTERNS);
         let exclude_patterns = exclude_patterns.unwrap_or_default();
-
-        tracing::info!("Searching for TOML files using configured patterns...");
-        tracing::info!("Include patterns: {:?}", include_patterns);
-        tracing::info!("Exclude patterns: {:?}", exclude_patterns);
+        let exclude_matchers: Vec<glob::Pattern> = exclude_patterns
+            .iter()
+            .filter_map(|p| match glob::Pattern::new(p) {
+                Ok(pattern) => Some(pattern),
+                Err(e) => {
+                    matched_paths.push(Err(crate::Error::GlobPatternInvalid(e.to_string())));
+                    None
+                }
+            })
+            .collect();
 
         match files.len() {
             0 => {
                 tracing::debug!("Searching for TOML files using configured patterns...");
-                let mut matched_paths = Vec::new();
-                let exclude_matchers: Vec<glob::Pattern> = exclude_patterns
-                    .iter()
-                    .filter_map(|p| match glob::Pattern::new(p) {
-                        Ok(pattern) => Some(pattern),
-                        Err(e) => {
-                            matched_paths
-                                .push(Err(crate::Error::GlobPatternInvalid(e.to_string())));
-                            None
-                        }
-                    })
-                    .collect();
+                tracing::debug!("Include patterns: {:?}", include_patterns);
+                tracing::debug!("Exclude patterns: {:?}", exclude_patterns);
 
                 for pattern in include_patterns {
                     if let Ok(paths) = glob::glob(pattern) {
@@ -64,32 +61,39 @@ impl FileInput {
             }
             1 if files[0].as_ref() == "-" => FileInput::Stdin,
             _ => {
-                let mut results = Vec::new();
+                tracing::debug!("Searching for TOML files using user input patterns...");
+                tracing::debug!("Exclude patterns: {:?}", exclude_patterns);
+
                 for file in files {
                     if is_glob_pattern(file.as_ref()) {
                         if let Ok(paths) = glob::glob(file.as_ref()) {
-                            results.extend(
+                            matched_paths.extend(
                                 paths
-                                    .filter_map(|x| {
-                                        Result::<_, crate::Error>::Ok(x.ok()).transpose()
+                                    .filter_map(|entry| entry.ok())
+                                    .filter(|path| {
+                                        !exclude_matchers
+                                            .iter()
+                                            .any(|matcher| matcher.matches_path(path))
                                     })
+                                    .map(Ok)
                                     .collect_vec(),
                             );
                         } else {
-                            results
+                            matched_paths
                                 .push(Err(crate::Error::GlobPatternInvalid(file.as_ref().into())));
                         }
                     } else {
                         let path = PathBuf::from(file.as_ref());
                         if !path.exists() {
-                            results.push(Err(crate::Error::FileNotFound(file.as_ref().into())));
+                            matched_paths
+                                .push(Err(crate::Error::FileNotFound(file.as_ref().into())));
                         } else {
-                            results.push(Ok(path));
+                            matched_paths.push(Ok(path));
                         }
                     }
                 }
 
-                FileInput::Files(results)
+                FileInput::Files(matched_paths)
             }
         }
     }
