@@ -3,7 +3,7 @@ use itertools::{sorted, Itertools};
 use schema_store::{TableKeyOrder, TableSchema};
 use syntax::SyntaxElement;
 
-pub async fn table_key_order(
+pub async fn table_keys_order_by(
     node: &syntax::SyntaxNode,
     table_schema: &TableSchema,
 ) -> Vec<crate::Change> {
