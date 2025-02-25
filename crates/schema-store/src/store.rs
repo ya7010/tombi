@@ -212,7 +212,7 @@ impl SchemaStore {
                 let document_schema = self.try_load_document_schema(&schema_url).await?;
 
                 Ok(Some(SourceSchema {
-                    root: Some(document_schema),
+                    root_schema: Some(document_schema),
                     sub_schema_url_map: Default::default(),
                 }))
             }
@@ -262,7 +262,7 @@ impl SchemaStore {
                         }
                         None => {
                             let mut new_source_schema = SourceSchema {
-                                root: None,
+                                root_schema: None,
                                 sub_schema_url_map: Default::default(),
                             };
                             new_source_schema
@@ -274,13 +274,13 @@ impl SchemaStore {
                     },
                     None => match source_schema {
                         Some(ref mut source_schema) => {
-                            if source_schema.root.is_none() {
-                                source_schema.root = Some(document_schema);
+                            if source_schema.root_schema.is_none() {
+                                source_schema.root_schema = Some(document_schema);
                             }
                         }
                         None => {
                             source_schema = Some(SourceSchema {
-                                root: Some(document_schema),
+                                root_schema: Some(document_schema),
                                 sub_schema_url_map: Default::default(),
                             });
                         }

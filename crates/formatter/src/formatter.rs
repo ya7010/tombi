@@ -42,7 +42,12 @@ impl<'a> Formatter<'a> {
 
         let toml_version = source_schema
             .as_ref()
-            .and_then(|schema| schema.root.as_ref().and_then(|root| root.toml_version()))
+            .and_then(|schema| {
+                schema
+                    .root_schema
+                    .as_ref()
+                    .and_then(|root| root.toml_version())
+            })
             .unwrap_or(toml_version);
 
         Ok(Self {
@@ -63,7 +68,7 @@ impl<'a> Formatter<'a> {
             root_schema: self
                 .source_schema
                 .as_ref()
-                .and_then(|schema| schema.root.as_ref()),
+                .and_then(|schema| schema.root_schema.as_ref()),
             sub_schema_url_map: self
                 .source_schema
                 .as_ref()

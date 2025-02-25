@@ -18,7 +18,7 @@ pub async fn handle_get_toml_version(
 
     let (toml_version, source) = source_schema
         .as_ref()
-        .and_then(|source_schema| source_schema.root.as_ref())
+        .and_then(|source_schema| source_schema.root_schema.as_ref())
         .and_then(|document_schema| {
             document_schema
                 .toml_version()

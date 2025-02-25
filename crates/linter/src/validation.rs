@@ -49,11 +49,11 @@ pub fn validate<'a: 'b, 'b>(
             toml_version,
             &Vec::with_capacity(0),
             source_schema
-                .root
+                .root_schema
                 .as_ref()
                 .and_then(|s| s.value_schema.as_ref()),
-            source_schema.root.as_ref().map(|s| &s.schema_url),
-            source_schema.root.as_ref().map(|s| &s.definitions),
+            source_schema.root_schema.as_ref().map(|s| &s.schema_url),
+            source_schema.root_schema.as_ref().map(|s| &s.definitions),
             &source_schema.sub_schema_url_map,
             schema_store,
         )

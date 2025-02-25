@@ -79,7 +79,7 @@ pub async fn handle_completion(
                 toml_version,
                 root_schema: source_schema
                     .as_ref()
-                    .and_then(|source_schema| source_schema.root.as_ref()),
+                    .and_then(|source_schema| source_schema.root_schema.as_ref()),
                 sub_schema_url_map: source_schema
                     .as_ref()
                     .map(|source_schema| &source_schema.sub_schema_url_map),
