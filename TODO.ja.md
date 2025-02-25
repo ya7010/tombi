@@ -18,7 +18,11 @@
     - [ ] 末尾カンマとコメントの関係の差し替え
 
 ### Milestone 4
+- [ ] serde-tombi を内部用に作成し、 TOML の Preview バージョンをパースできるように修正
 - [ ] JSON Schema への「定義へ移動」機能の追加
+
+### Milestone ???
+- [ ] WASM サポート & ドキュメントサイトの Playground 作成
 
 ### Bugs
 - [x] Local Date 型が誤って IntegerDec としてパースされる
