@@ -1,15 +1,15 @@
 use ast::AstNode;
 use itertools::{sorted, Itertools};
-use schema_store::{TableKeyOrder, TableSchema};
+use schema_store::{TableKeysOrderBy, TableSchema};
 use syntax::SyntaxElement;
 
-pub async fn table_key_order(
+pub async fn table_keys_order_by(
     node: &syntax::SyntaxNode,
     table_schema: &TableSchema,
 ) -> Vec<crate::Change> {
     let key_order = match table_schema {
         TableSchema {
-            key_order: Some(key_order),
+            keys_order_by: Some(key_order),
             ..
         } => key_order,
         _ => return Vec::with_capacity(0),
@@ -17,6 +17,8 @@ pub async fn table_key_order(
 
     let mut key_values = if let Some(table) = ast::Table::cast(node.clone()) {
         table.key_values().collect_vec()
+    } else if let Some(array_of_table) = ast::ArrayOfTables::cast(node.clone()) {
+        array_of_table.key_values().collect_vec()
     } else {
         return Vec::with_capacity(0);
     };
@@ -31,28 +33,22 @@ pub async fn table_key_order(
     );
 
     match key_order {
-        TableKeyOrder::Ascending => {
-            let sorted_key_values = sorted(key_values)
+        TableKeysOrderBy::Ascending => {
+            let new = sorted(key_values)
                 .map(|kv| SyntaxElement::Node(kv.syntax().clone()))
                 .collect_vec();
 
-            vec![crate::Change::ReplaceRange {
-                old,
-                new: sorted_key_values,
-            }]
+            vec![crate::Change::ReplaceRange { old, new }]
         }
-        TableKeyOrder::Descending => {
-            let sorted_key_values = sorted(key_values)
+        TableKeysOrderBy::Descending => {
+            let new = sorted(key_values)
                 .rev()
                 .map(|kv| SyntaxElement::Node(kv.syntax().clone()))
                 .collect_vec();
 
-            vec![crate::Change::ReplaceRange {
-                old,
-                new: sorted_key_values,
-            }]
+            vec![crate::Change::ReplaceRange { old, new }]
         }
-        TableKeyOrder::Schema => {
+        TableKeysOrderBy::Schema => {
             let mut new = vec![];
             for (accessor, _) in table_schema.properties.write().await.iter_mut() {
                 key_values = key_values
