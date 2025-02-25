@@ -58,8 +58,8 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
 }
 
 fn app_about() -> String {
-    let name = "Tombi";
-    let name_style = Style::new()
+    let title = "Tombi";
+    let title_style = Style::new()
         .bold()
         .bg_color(Some(Color::Ansi(AnsiColor::Blue)))
         .fg_color(Some(Color::Ansi(AnsiColor::White)));
@@ -69,7 +69,7 @@ fn app_about() -> String {
         .fg_color(Some(Color::Ansi(AnsiColor::White)));
 
     format!(
-        "{name_style}       {name} {name_style:#}{desc_style}: TOML formatter and linter       {desc_style:#}"
+        "{title_style}              {title} {title_style:#}{desc_style}: TOML Toolkit              {desc_style:#}"
     )
 }
 
