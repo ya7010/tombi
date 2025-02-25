@@ -13,9 +13,9 @@ impl crate::Edit for ast::Table {
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
-        tracing::info!("accessors: {:?}", accessors);
-        tracing::info!("schema_url: {:?}", schema_url);
-        tracing::info!("value_schema: {:?}", value_schema);
+        tracing::trace!("accessors: {:?}", accessors);
+        tracing::trace!("schema_url: {:?}", schema_url);
+        tracing::trace!("value_schema: {:?}", value_schema);
 
         async move {
             let mut changes = vec![];
