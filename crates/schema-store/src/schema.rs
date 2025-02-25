@@ -13,6 +13,7 @@ mod offset_date_time_schema;
 mod one_of_schema;
 mod referable_schema;
 mod schema_context;
+mod schema_url;
 mod source_schema;
 mod string_schema;
 mod table_schema;
@@ -35,6 +36,7 @@ pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
 pub use referable_schema::{is_online_url, CurrentSchema, Referable};
 pub use schema_context::SchemaContext;
+pub use schema_url::SchemaUrl;
 pub use source_schema::SourceSchema;
 pub use source_schema::SubSchemaUrlMap;
 use std::sync::Arc;
@@ -50,50 +52,6 @@ pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
 pub type SchemaDefinitions =
     Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
 pub type Schemas = Arc<tokio::sync::RwLock<Vec<Referable<ValueSchema>>>>;
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
-pub struct SchemaUrl(url::Url);
-
-impl SchemaUrl {
-    #[inline]
-    pub fn new(url: url::Url) -> Self {
-        Self(url)
-    }
-
-    #[inline]
-    pub fn parse(url: &str) -> Result<Self, crate::Error> {
-        match url::Url::parse(url) {
-            Ok(url) => Ok(Self(url)),
-            Err(_) => Err(crate::Error::InvalidSchemaUrl {
-                schema_url: url.to_string(),
-            }),
-        }
-    }
-
-    #[inline]
-    pub fn from_file_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, crate::Error> {
-        match url::Url::from_file_path(&path) {
-            Ok(url) => Ok(Self(url)),
-            Err(_) => Err(crate::Error::InvalidSchemaUrl {
-                schema_url: path.as_ref().to_string_lossy().to_string(),
-            }),
-        }
-    }
-}
-
-impl std::ops::Deref for SchemaUrl {
-    type Target = url::Url;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl std::fmt::Display for SchemaUrl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 pub trait FindSchemaCandidates {
     fn find_schema_candidates<'a: 'b, 'b>(
