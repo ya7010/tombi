@@ -13,6 +13,6 @@ clap = ["dep:clap"]
 jsonschema = ["dep:schemars"]
 
 [dependencies]
+clap = { workspace = true, optional = true }
 schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-clap = { workspace = true, optional = true }

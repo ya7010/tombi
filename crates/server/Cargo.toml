@@ -10,8 +10,10 @@ default = ["clap"]
 clap = ["dep:clap"]
 
 [dependencies]
+ahash.workspace = true
 ast = { workspace = true }
 camino = { workspace = true }
+chrono.workspace = true
 clap = { workspace = true, optional = true }
 config = { workspace = true }
 crossbeam-channel = "0.5.13"
@@ -23,23 +25,21 @@ futures = { workspace = true }
 futures-util = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-schema-store = { workspace = true }
 linter = { workspace = true }
 parser = { workspace = true }
+regex.workspace = true
 rustc-hash = { workspace = true }
+schema-store = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+syntax.workspace = true
 text = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-syntax.workspace = true
-ahash.workspace = true
-chrono.workspace = true
-regex.workspace = true
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
