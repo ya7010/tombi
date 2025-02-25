@@ -69,7 +69,7 @@ pub async fn handle_hover(
         &keys,
         &SchemaContext {
             toml_version,
-            root_schema: source_schema.as_ref().and_then(|s| s.root.as_ref()),
+            root_schema: source_schema.as_ref().and_then(|s| s.root_schema.as_ref()),
             sub_schema_url_map: source_schema.as_ref().map(|s| &s.sub_schema_url_map),
             store: &backend.schema_store,
         },

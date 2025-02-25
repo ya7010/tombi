@@ -39,7 +39,7 @@ impl<'a> Linter<'a> {
             .as_ref()
             .and_then(|source_schema| {
                 source_schema
-                    .root
+                    .root_schema
                     .as_ref()
                     .and_then(|document_schema| document_schema.toml_version())
             })
