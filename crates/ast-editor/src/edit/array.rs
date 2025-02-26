@@ -17,7 +17,9 @@ impl crate::Edit for ast::Array {
         async move {
             let mut changes = vec![];
 
-            if let Some(ValueSchema::Array(array_schema)) = value_schema {
+            if let (Some(schema_url), Some(ValueSchema::Array(array_schema)), Some(definitions)) =
+                (schema_url, value_schema, definitions)
+            {
                 if let Some(item_schema) = &array_schema.items {
                     if let Ok(CurrentSchema {
                         schema_url,
@@ -27,8 +29,8 @@ impl crate::Edit for ast::Array {
                         .write()
                         .await
                         .resolve(
-                            schema_url.map(Cow::Borrowed),
-                            definitions.unwrap(),
+                            Cow::Borrowed(schema_url),
+                            definitions,
                             &schema_context.store,
                         )
                         .await
@@ -38,7 +40,7 @@ impl crate::Edit for ast::Array {
                                 value
                                     .edit(
                                         accessors,
-                                        schema_url.as_deref(),
+                                        Some(&schema_url),
                                         Some(value_schema),
                                         Some(definitions),
                                         schema_context,

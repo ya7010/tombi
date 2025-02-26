@@ -34,7 +34,7 @@ where
                 schema_url,
                 definitions,
             }) = referable_schema
-                .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                 .await
             else {
                 continue;
@@ -45,7 +45,7 @@ where
                     toml_version,
                     accessors,
                     Some(value_schema),
-                    schema_url.as_deref(),
+                    Some(&schema_url),
                     Some(definitions),
                     sub_schema_url_map,
                     schema_store,

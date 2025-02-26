@@ -126,7 +126,7 @@ impl Validate for document_tree::Table {
                         {
                             matche_key = true;
                             match property_schema
-                                .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                                .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                                 .await
                             {
                                 Ok(CurrentSchema {
@@ -143,7 +143,7 @@ impl Validate for document_tree::Table {
                                                 .chain(std::iter::once(accessor.clone()))
                                                 .collect::<Vec<_>>(),
                                             Some(value_schema),
-                                            schema_url.as_deref(),
+                                            Some(&schema_url),
                                             Some(definitions),
                                             sub_schema_url_map,
                                             schema_store,
@@ -178,7 +178,7 @@ impl Validate for document_tree::Table {
                                         definitions,
                                     }) = refferable_pattern_property
                                         .resolve(
-                                            Some(Cow::Borrowed(schema_url)),
+                                            Cow::Borrowed(schema_url),
                                             definitions,
                                             schema_store,
                                         )
@@ -193,7 +193,7 @@ impl Validate for document_tree::Table {
                                                     .chain(std::iter::once(accessor.clone()))
                                                     .collect::<Vec<_>>(),
                                                 Some(pattern_property_schema),
-                                                schema_url.as_deref(),
+                                                Some(&schema_url),
                                                 Some(definitions),
                                                 sub_schema_url_map,
                                                 schema_store,
@@ -231,11 +231,7 @@ impl Validate for document_tree::Table {
                                     schema_url,
                                     definitions,
                                 }) = referable_schema
-                                    .resolve(
-                                        Some(Cow::Borrowed(schema_url)),
-                                        definitions,
-                                        schema_store,
-                                    )
+                                    .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                                     .await
                                 {
                                     if let Err(errs) = value
@@ -247,7 +243,7 @@ impl Validate for document_tree::Table {
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
                                             Some(additional_property_schema),
-                                            schema_url.as_deref(),
+                                            Some(&schema_url),
                                             Some(definitions),
                                             sub_schema_url_map,
                                             schema_store,

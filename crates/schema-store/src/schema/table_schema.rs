@@ -134,7 +134,7 @@ impl FindSchemaCandidates for TableSchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
+        schema_url: &'a SchemaUrl,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
@@ -149,13 +149,13 @@ impl FindSchemaCandidates for TableSchema {
                         schema_url,
                         definitions,
                     }) = property
-                        .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                        .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                         .await
                     {
                         let (schema_candidates, schema_errors) = value_schema
                             .find_schema_candidates(
                                 accessors,
-                                schema_url.as_deref(),
+                                &schema_url,
                                 &definitions,
                                 schema_store,
                             )
@@ -174,13 +174,13 @@ impl FindSchemaCandidates for TableSchema {
                     schema_url,
                     definitions,
                 }) = value
-                    .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                    .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                     .await
                 {
                     return value_schema
                         .find_schema_candidates(
                             &accessors[1..],
-                            schema_url.as_deref(),
+                            &schema_url,
                             &definitions,
                             schema_store,
                         )

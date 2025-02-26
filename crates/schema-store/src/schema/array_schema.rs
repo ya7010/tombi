@@ -75,7 +75,7 @@ impl FindSchemaCandidates for ArraySchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
+        schema_url: &'a SchemaUrl,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {
@@ -93,13 +93,13 @@ impl FindSchemaCandidates for ArraySchema {
                 value_schema,
                 definitions,
             }) = referable_schema
-                .resolve(schema_url.map(Cow::Borrowed), definitions, schema_store)
+                .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                 .await
             {
                 let (mut item_candidates, mut item_errors) = value_schema
                     .find_schema_candidates(
                         &accessors[1..],
-                        schema_url.as_deref(),
+                        &schema_url,
                         &definitions,
                         schema_store,
                     )
