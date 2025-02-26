@@ -1,13 +1,13 @@
-use hashbrown::hash_map::RawEntryMut;
-use rustc_hash::FxHasher;
 use std::hash::{BuildHasherDefault, Hash, Hasher};
 
+use hashbrown::hash_map::RawEntryMut;
+use rustc_hash::FxHasher;
+
+use super::element::GreenElement;
 use crate::{
     green::GreenElementRef, GreenNode, GreenNodeData, GreenToken, GreenTokenData, NodeOrToken,
     SyntaxKind,
 };
-
-use super::element::GreenElement;
 
 type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasherDefault<FxHasher>>;
 

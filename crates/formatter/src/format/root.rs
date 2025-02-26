@@ -1,6 +1,8 @@
-use super::Format;
-use itertools::Itertools;
 use std::fmt::Write;
+
+use itertools::Itertools;
+
+use super::Format;
 
 impl Format for ast::Root {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {

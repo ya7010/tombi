@@ -2,10 +2,9 @@ mod format;
 pub mod formatter;
 
 pub use config::FormatOptions;
-pub use formatter::Formatter;
-
 use format::Format;
 use formatter::definitions::FormatDefinitions;
+pub use formatter::Formatter;
 
 #[cfg(test)]
 #[macro_export]
@@ -87,9 +86,10 @@ macro_rules! test_format {
 
 #[cfg(test)]
 mod test {
+    use config::{QuoteStyle, TomlVersion};
+
     use super::*;
     use crate::FormatDefinitions;
-    use config::{QuoteStyle, TomlVersion};
 
     test_format! {
         #[test]

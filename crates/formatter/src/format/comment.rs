@@ -1,9 +1,10 @@
+use std::fmt::Write;
+
 use ast::{
     BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
 };
 
 use super::Format;
-use std::fmt::Write;
 
 impl Format for Vec<Vec<DanglingComment>> {
     #[inline]

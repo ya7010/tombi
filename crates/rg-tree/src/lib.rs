@@ -24,7 +24,6 @@ mod cow_mut;
 #[allow(unsafe_code)]
 mod sll;
 
-pub use crate::utility_types::Direction;
 use crate::utility_types::{NodeOrToken, TokenAtOffset, WalkEvent};
 pub use crate::{
     green::{
@@ -37,4 +36,5 @@ pub use crate::{
         RedPreorderWithTokens, RedToken,
     },
     syntax_text::SyntaxText,
+    utility_types::Direction,
 };

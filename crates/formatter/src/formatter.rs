@@ -1,14 +1,15 @@
 pub mod definitions;
 
-use crate::Format;
+use std::fmt::Write;
+
 use config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
-use diagnostic::Diagnostic;
-use diagnostic::SetDiagnostics;
+use diagnostic::{Diagnostic, SetDiagnostics};
 use itertools::Either;
 use schema_store::SourceSchema;
-use std::fmt::Write;
 use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
+
+use crate::Format;
 
 pub struct Formatter<'a> {
     toml_version: TomlVersion,

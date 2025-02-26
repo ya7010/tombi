@@ -1,5 +1,6 @@
-use crate::command;
 use clap::Parser;
+
+use crate::command;
 
 #[derive(Debug, clap::Parser)]
 #[command(disable_help_subcommand(true))]

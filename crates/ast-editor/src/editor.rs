@@ -1,8 +1,7 @@
+use ast::AstNode;
 use schema_store::SchemaContext;
 
-use crate::change::Change;
-use crate::Edit;
-use ast::AstNode;
+use crate::{change::Change, Edit};
 
 pub struct Editor<'a> {
     root: ast::Root,

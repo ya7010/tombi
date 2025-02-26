@@ -1,6 +1,9 @@
-use crate::semantic_tokens::AppendSemanticTokens;
-use crate::{backend::Backend, semantic_tokens::SemanticTokensBuilder};
 use tower_lsp::lsp_types::{SemanticTokens, SemanticTokensParams, SemanticTokensResult};
+
+use crate::{
+    backend::Backend,
+    semantic_tokens::{AppendSemanticTokens, SemanticTokensBuilder},
+};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_semantic_tokens_full(

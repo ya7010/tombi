@@ -1,8 +1,7 @@
-use super::key::eat_key;
-use super::{leading_comments, peek_leading_comments, tailing_comment, Parse};
-use crate::ErrorKind::*;
-use crate::{parser::Parser, token_set::TS_COMMEMT_OR_LINE_END};
 use syntax::{SyntaxKind::*, T};
+
+use super::{key::eat_key, leading_comments, peek_leading_comments, tailing_comment, Parse};
+use crate::{parser::Parser, token_set::TS_COMMEMT_OR_LINE_END, ErrorKind::*};
 
 impl Parse for ast::Value {
     fn parse(p: &mut Parser<'_>) {

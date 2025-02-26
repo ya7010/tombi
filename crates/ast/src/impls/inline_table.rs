@@ -1,7 +1,8 @@
-use crate::{support, AstNode};
 use itertools::Itertools;
 use syntax::{SyntaxKind::*, T};
 use toml_version::TomlVersion;
+
+use crate::{support, AstNode};
 
 impl crate::InlineTable {
     pub fn inner_begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {

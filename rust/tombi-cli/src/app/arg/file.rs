@@ -1,5 +1,6 @@
-use itertools::Itertools;
 use std::path::PathBuf;
+
+use itertools::Itertools;
 
 const DEFAULT_INCLUDE_PATTERNS: &[&str] = &["**/*.toml"];
 

@@ -1,9 +1,7 @@
 use syntax::{SyntaxKind::*, T};
 
-use crate::{parser::Parser, token_set::TS_KEY_FIRST};
-
 use super::Parse;
-use crate::ErrorKind::*;
+use crate::{parser::Parser, token_set::TS_KEY_FIRST, ErrorKind::*};
 
 impl Parse for ast::Keys {
     fn parse(p: &mut Parser<'_>) {

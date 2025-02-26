@@ -96,8 +96,9 @@ impl AddAssign for RelativePosition {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use rstest::rstest;
+
+    use super::*;
 
     #[rstest]
     #[case("", (0, 0))]

@@ -5,8 +5,9 @@ mod completion_edit {
     use super::*;
 
     mod tombi_schema {
-        use super::*;
         use test_lib::tombi_schema_path;
+
+        use super::*;
 
         test_completion_edit! {
             #[tokio::test]
@@ -44,8 +45,9 @@ mod completion_edit {
     }
 
     mod cargo_schema {
-        use super::*;
         use test_lib::cargo_schema_path;
+
+        use super::*;
 
         test_completion_edit! {
             #[tokio::test]
@@ -117,8 +119,9 @@ mod completion_edit {
     }
 
     mod pyproject_schema {
-        use super::*;
         use test_lib::pyproject_schema_path;
+
+        use super::*;
 
         test_completion_edit! {
             #[tokio::test]

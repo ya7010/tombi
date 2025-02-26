@@ -9,9 +9,8 @@ use time::OffsetDateTime;
 use xshell::Shell;
 use zip::{write::FileOptions, DateTime, ZipWriter};
 
-use crate::utils::project_root;
-
 use super::set_version::DEV_VERSION;
+use crate::utils::project_root;
 
 pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
     let project_root = project_root();

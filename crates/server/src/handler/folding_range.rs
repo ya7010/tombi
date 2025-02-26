@@ -1,6 +1,7 @@
-use crate::backend::Backend;
 use ast::AstNode;
 use tower_lsp::lsp_types::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
+
+use crate::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_folding_range(

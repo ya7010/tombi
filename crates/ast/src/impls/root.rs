@@ -1,5 +1,4 @@
-use crate::support;
-use crate::AstNode;
+use crate::{support, AstNode};
 
 impl crate::Root {
     pub fn begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {

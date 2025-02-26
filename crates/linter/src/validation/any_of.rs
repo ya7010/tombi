@@ -2,13 +2,11 @@ use std::{borrow::Cow, fmt::Debug};
 
 use config::TomlVersion;
 use document_tree::ValueImpl;
-use futures::future::BoxFuture;
-use futures::FutureExt;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, ValueSchema};
 
-use crate::validation::{all_of::validate_all_of, one_of::validate_one_of};
-
 use super::Validate;
+use crate::validation::{all_of::validate_all_of, one_of::validate_one_of};
 
 pub fn validate_any_of<'a: 'b, 'b, T>(
     value: &'a T,

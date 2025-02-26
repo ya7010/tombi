@@ -2,6 +2,7 @@ use std::{
     fmt,
     ops::{AddAssign, Deref},
 };
+
 use text::Offset;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

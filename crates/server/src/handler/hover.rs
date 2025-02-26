@@ -1,12 +1,13 @@
-use crate::{
-    backend,
-    hover::{get_hover_content, HoverContent},
-};
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use itertools::Itertools;
 use schema_store::SchemaContext;
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
+
+use crate::{
+    backend,
+    hover::{get_hover_content, HoverContent},
+};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_hover(

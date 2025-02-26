@@ -1,7 +1,7 @@
-use super::{leading_comments, tailing_comment, Parse, TS_LINE_END};
-use crate::parser::Parser;
-use crate::ErrorKind::*;
 use syntax::{SyntaxKind::*, T};
+
+use super::{leading_comments, tailing_comment, Parse, TS_LINE_END};
+use crate::{parser::Parser, ErrorKind::*};
 
 impl Parse for ast::KeyValue {
     fn parse(p: &mut Parser) {
@@ -31,8 +31,7 @@ impl Parse for ast::KeyValue {
 
 #[cfg(test)]
 mod test {
-    use crate::test_parser;
-    use crate::ErrorKind::*;
+    use crate::{test_parser, ErrorKind::*};
 
     test_parser! {
         #[test]

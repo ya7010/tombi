@@ -1,5 +1,4 @@
-use futures::future::BoxFuture;
-use futures::FutureExt;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, SchemaUrl, StringSchema, ValueSchema};
 
 use crate::hover::{

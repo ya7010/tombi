@@ -1,5 +1,4 @@
-use indexmap::map::Entry;
-use indexmap::IndexMap;
+use indexmap::{map::Entry, IndexMap};
 
 use crate::{IntoDocument, Key, Value};
 

@@ -1,7 +1,6 @@
-use crate::Level;
 use nu_ansi_term::Style;
 
-use crate::{Diagnostic, Print};
+use crate::{Diagnostic, Level, Print};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Simple;

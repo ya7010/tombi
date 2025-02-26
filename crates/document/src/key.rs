@@ -111,8 +111,9 @@ impl<'de> serde::Deserialize<'de> for Key {
 
 #[cfg(test)]
 mod test {
-    use crate::test_serialize;
     use serde_json::json;
+
+    use crate::test_serialize;
 
     test_serialize! {
         #[test]

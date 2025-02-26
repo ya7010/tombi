@@ -1,6 +1,7 @@
-use crate::backend::Backend;
 use config::TomlVersion;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
+
+use crate::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_get_toml_version(

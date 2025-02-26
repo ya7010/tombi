@@ -1,6 +1,7 @@
-use crate::utils::project_root;
 use config::TomlVersion;
 use schemars::{generate::SchemaSettings, SchemaGenerator};
+
+use crate::utils::project_root;
 
 pub fn run() -> Result<(), anyhow::Error> {
     let settings = SchemaSettings::draft07();

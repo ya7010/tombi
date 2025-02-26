@@ -1,9 +1,11 @@
-use crate::Format;
+use std::fmt::Write;
+
 use ast::AstNode;
 use config::TomlVersion;
 use itertools::Itertools;
-use std::fmt::Write;
 use unicode_segmentation::UnicodeSegmentation;
+
+use crate::Format;
 
 impl Format for ast::InlineTable {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -166,8 +168,9 @@ fn format_singleline_inline_table(
 
 #[cfg(test)]
 mod tests {
-    use crate::{formatter::definitions::FormatDefinitions, test_format};
     use config::TomlVersion;
+
+    use crate::{formatter::definitions::FormatDefinitions, test_format};
 
     test_format! {
         #[test]

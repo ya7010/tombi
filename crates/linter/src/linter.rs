@@ -1,14 +1,14 @@
 use std::borrow::Cow;
 
-use crate::lint::Lint;
 use ast::AstNode;
 use config::TomlVersion;
-use diagnostic::Diagnostic;
-use diagnostic::SetDiagnostics;
+use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
 use schema_store::SourceSchema;
 use url::Url;
+
+use crate::lint::Lint;
 
 pub struct Linter<'a> {
     toml_version: TomlVersion,

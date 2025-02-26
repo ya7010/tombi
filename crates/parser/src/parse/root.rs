@@ -1,11 +1,10 @@
-use crate::{parser::Parser, token_set::TS_KEY_FIRST};
+use syntax::{SyntaxKind::*, T};
 
 use super::{
     begin_dangling_comments, end_dangling_comments, invalid_line, leading_comments,
     peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
 };
-use crate::ErrorKind::*;
-use syntax::{SyntaxKind::*, T};
+use crate::{parser::Parser, token_set::TS_KEY_FIRST, ErrorKind::*};
 
 impl Parse for ast::Root {
     fn parse(p: &mut Parser<'_>) {

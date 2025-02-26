@@ -2,9 +2,8 @@ use std::sync::Arc;
 
 use futures::future::join_all;
 
-use crate::Referable;
-
 use super::{Schemas, ValueSchema};
+use crate::Referable;
 
 #[derive(Debug, Default, Clone)]
 pub struct AnyOfSchema {

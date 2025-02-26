@@ -1,9 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/src/codegen`
 
-use crate::support;
-use crate::AstChildren;
-use crate::AstNode;
 use syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
+
+use crate::{support, AstChildren, AstNode};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Array {
