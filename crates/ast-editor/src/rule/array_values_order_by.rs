@@ -91,7 +91,7 @@ enum Error {
     #[error("Cannot sort array values because the values are incomplete.")]
     Incomplete,
 
-    #[error("Cannot sort array values because the values only support the following types: [Boolean, Integer, Float, String, OffsetDateTime, LocalDateTime, LocalDate, LocalTime]")]
+    #[error("Cannot sort array values because the values only support the following types: [Boolean, Integer, String, OffsetDateTime, LocalDateTime, LocalDate, LocalTime]")]
     UnsupportedTypes,
 
     #[error("Cannot sort array values because the values have different types.")]
