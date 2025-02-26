@@ -15,7 +15,7 @@ pub enum Referable<T> {
 }
 
 pub struct CurrentSchema<'a> {
-    pub schema_url: Option<Cow<'a, SchemaUrl>>,
+    pub schema_url: Cow<'a, SchemaUrl>,
     pub value_schema: &'a ValueSchema,
     pub definitions: &'a SchemaDefinitions,
 }
@@ -55,7 +55,7 @@ impl Referable<ValueSchema> {
 
     pub fn resolve<'a: 'b, 'b>(
         &'a mut self,
-        schema_url: Option<Cow<'a, SchemaUrl>>,
+        schema_url: Cow<'a, SchemaUrl>,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a crate::SchemaStore,
     ) -> BoxFuture<'b, Result<CurrentSchema<'a>, crate::Error>> {
@@ -84,7 +84,7 @@ impl Referable<ValueSchema> {
                         if let Some(value_schema) = document_schema.value_schema {
                             *self = Referable::Resolved(value_schema);
                             return self
-                                .resolve(Some(Cow::Owned(schema_url)), definitions, schema_store)
+                                .resolve(Cow::Owned(schema_url), definitions, schema_store)
                                 .await;
                         } else {
                             return Err(crate::Error::InvalidJsonSchemaReference {
@@ -114,8 +114,8 @@ impl Referable<ValueSchema> {
                     }
 
                     Ok(CurrentSchema {
-                        value_schema,
                         schema_url,
+                        value_schema,
                         definitions,
                     })
                 }

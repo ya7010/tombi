@@ -190,7 +190,7 @@ pub fn type_hint_value(
 impl CompletionCandidate for ValueSchema {
     fn title<'a: 'b, 'b>(
         &'a self,
-        schema_url: Option<&'a SchemaUrl>,
+        schema_url: &'a SchemaUrl,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,
@@ -232,7 +232,7 @@ impl CompletionCandidate for ValueSchema {
 
     fn description<'a: 'b, 'b>(
         &'a self,
-        schema_url: Option<&'a SchemaUrl>,
+        schema_url: &'a SchemaUrl,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
         completion_hint: Option<CompletionHint>,

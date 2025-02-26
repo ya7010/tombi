@@ -46,11 +46,11 @@ impl crate::Edit for ast::Table {
                         if let Some(referable_property_schema) = properties.get_mut(&accessors[0]) {
                             if let Ok(CurrentSchema {
                                 value_schema,
-                                schema_url: Some(schema_url),
+                                schema_url,
                                 definitions,
                             }) = referable_property_schema
                                 .resolve(
-                                    Some(Cow::Borrowed(schema_url)),
+                                    Cow::Borrowed(schema_url),
                                     definitions,
                                     schema_context.store,
                                 )
@@ -72,12 +72,12 @@ impl crate::Edit for ast::Table {
                     | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => {
                         for schema in schemas.write().await.iter_mut() {
                             if let Ok(CurrentSchema {
+                                schema_url,
                                 value_schema,
-                                schema_url: Some(schema_url),
                                 definitions,
                             }) = schema
                                 .resolve(
-                                    Some(Cow::Borrowed(schema_url)),
+                                    Cow::Borrowed(schema_url),
                                     definitions,
                                     schema_context.store,
                                 )

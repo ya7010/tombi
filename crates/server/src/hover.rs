@@ -7,9 +7,7 @@ mod value;
 
 use constraints::DataConstraints;
 use futures::future::BoxFuture;
-use schema_store::{
-    get_schema_name, Accessor, Accessors, SchemaDefinitions, SchemaUrl, ValueSchema, ValueType,
-};
+use schema_store::{get_schema_name, Accessor, Accessors, SchemaUrl, ValueSchema, ValueType};
 use std::{fmt::Debug, ops::Deref};
 
 pub async fn get_hover_content(
@@ -28,22 +26,14 @@ pub async fn get_hover_content(
                     &[],
                     Some(&document_schema.schema_url),
                     document_schema.value_schema.as_ref(),
-                    &document_schema.definitions,
+                    Some(&document_schema.definitions),
                     schema_context,
                 )
                 .await
         }
         None => {
             table
-                .get_hover_content(
-                    position,
-                    keys,
-                    &[],
-                    None,
-                    None,
-                    &SchemaDefinitions::default(),
-                    schema_context,
-                )
+                .get_hover_content(position, keys, &[], None, None, None, schema_context)
                 .await
         }
     }
@@ -57,7 +47,7 @@ trait GetHoverContent {
         accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
-        definitions: &'a schema_store::SchemaDefinitions,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>>;
 }

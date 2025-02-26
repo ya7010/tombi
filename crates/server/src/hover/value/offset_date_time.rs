@@ -15,69 +15,72 @@ impl GetHoverContent for document_tree::OffsetDateTime {
         accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
-        definitions: &'a schema_store::SchemaDefinitions,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
-            match value_schema {
-                Some(ValueSchema::OffsetDateTime(offset_date_time_schema)) => {
-                    offset_date_time_schema
+            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
+                (schema_url, value_schema, definitions)
+            {
+                match value_schema {
+                    ValueSchema::OffsetDateTime(offset_date_time_schema) => offset_date_time_schema
                         .get_hover_content(
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            value_schema,
-                            definitions,
+                            Some(&schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                         )
                         .await
                         .map(|mut hover_content| {
                             hover_content.range = Some(self.range());
                             hover_content
-                        })
+                        }),
+                    ValueSchema::OneOf(one_of_schema) => {
+                        get_one_of_hover_content(
+                            self,
+                            position,
+                            keys,
+                            accessors,
+                            schema_url,
+                            one_of_schema,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    ValueSchema::AnyOf(any_of_schema) => {
+                        get_any_of_hover_content(
+                            self,
+                            position,
+                            keys,
+                            accessors,
+                            schema_url,
+                            any_of_schema,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    ValueSchema::AllOf(all_of_schema) => {
+                        get_all_of_hover_content(
+                            self,
+                            position,
+                            keys,
+                            accessors,
+                            schema_url,
+                            all_of_schema,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    _ => None,
                 }
-                Some(ValueSchema::OneOf(one_of_schema)) => {
-                    get_one_of_hover_content(
-                        self,
-                        position,
-                        keys,
-                        accessors,
-                        schema_url,
-                        one_of_schema,
-                        definitions,
-                        schema_context,
-                    )
-                    .await
-                }
-                Some(ValueSchema::AnyOf(any_of_schema)) => {
-                    get_any_of_hover_content(
-                        self,
-                        position,
-                        keys,
-                        accessors,
-                        schema_url,
-                        any_of_schema,
-                        definitions,
-                        schema_context,
-                    )
-                    .await
-                }
-                Some(ValueSchema::AllOf(all_of_schema)) => {
-                    get_all_of_hover_content(
-                        self,
-                        position,
-                        keys,
-                        accessors,
-                        schema_url,
-                        all_of_schema,
-                        definitions,
-                        schema_context,
-                    )
-                    .await
-                }
-                Some(_) => None,
-                None => Some(HoverContent {
+            } else {
+                Some(HoverContent {
                     title: None,
                     description: None,
                     accessors: schema_store::Accessors::new(accessors.to_vec()),
@@ -85,7 +88,7 @@ impl GetHoverContent for document_tree::OffsetDateTime {
                     constraints: None,
                     schema_url: None,
                     range: Some(self.range()),
-                }),
+                })
             }
         }
         .boxed()
@@ -100,7 +103,7 @@ impl GetHoverContent for OffsetDateTimeSchema {
         accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
         _value_schema: Option<&'a ValueSchema>,
-        _definitions: &'a schema_store::SchemaDefinitions,
+        _definitions: Option<&'a schema_store::SchemaDefinitions>,
         _schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {

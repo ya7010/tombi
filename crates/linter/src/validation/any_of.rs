@@ -35,10 +35,10 @@ where
         for referable_schema in schemas.iter_mut() {
             let Ok(CurrentSchema {
                 value_schema,
-                schema_url: Some(schema_url),
+                schema_url,
                 definitions,
             }) = referable_schema
-                .resolve(Some(Cow::Borrowed(schema_url)), definitions, schema_store)
+                .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
                 .await
             else {
                 continue;

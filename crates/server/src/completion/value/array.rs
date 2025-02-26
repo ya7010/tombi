@@ -64,181 +64,179 @@ impl FindCompletionContents for document_tree::Array {
                 }
             }
 
-            match value_schema {
-                Some(ValueSchema::Array(array_schema)) => {
-                    let Some(definitions) = definitions else {
-                        unreachable!("definitions must be provided");
-                    };
-
-                    let mut new_item_index = 0;
-                    for (index, value) in self.values().iter().enumerate() {
-                        if value.range().end() < position {
-                            new_item_index = index + 1;
-                        }
-                        if value.range().contains(position) || value.range().end() == position {
-                            let accessor = Accessor::Index(index);
-                            if let Some(items) = &array_schema.items {
-                                if let Ok(CurrentSchema {
-                                    schema_url,
-                                    value_schema,
-                                    definitions,
-                                }) = items
-                                    .write()
-                                    .await
-                                    .resolve(
-                                        schema_url.map(Cow::Borrowed),
-                                        definitions,
-                                        schema_context.store,
-                                    )
-                                    .await
-                                {
-                                    return value
-                                        .find_completion_contents(
-                                            position,
-                                            keys,
-                                            &accessors
-                                                .iter()
-                                                .cloned()
-                                                .chain(std::iter::once(accessor))
-                                                .collect::<Vec<_>>(),
-                                            schema_url.as_deref(),
-                                            Some(value_schema),
-                                            Some(definitions),
-                                            schema_context,
-                                            completion_hint,
-                                        )
-                                        .await;
-                                }
+            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
+                (schema_url, value_schema, definitions)
+            {
+                match value_schema {
+                    ValueSchema::Array(array_schema) => {
+                        let mut new_item_index = 0;
+                        for (index, value) in self.values().iter().enumerate() {
+                            if value.range().end() < position {
+                                new_item_index = index + 1;
                             }
-                        }
-                    }
-                    if let Some(items) = &array_schema.items {
-                        if let Ok(CurrentSchema {
-                            value_schema,
-                            schema_url,
-                            definitions,
-                        }) = items
-                            .write()
-                            .await
-                            .resolve(
-                                schema_url.map(Cow::Borrowed),
-                                definitions,
-                                schema_context.store,
-                            )
-                            .await
-                        {
-                            return SchemaCompletion
-                                .find_completion_contents(
-                                    position,
-                                    keys,
-                                    &accessors
-                                        .iter()
-                                        .cloned()
-                                        .chain(std::iter::once(Accessor::Index(new_item_index)))
-                                        .collect::<Vec<_>>(),
-                                    schema_url.as_deref(),
-                                    Some(value_schema),
-                                    Some(definitions),
-                                    schema_context,
-                                    if self.kind() == ArrayKind::Array {
-                                        Some(CompletionHint::InArray)
-                                    } else {
-                                        completion_hint
-                                    },
-                                )
-                                .await;
-                        }
-                    }
-
-                    Vec::with_capacity(0)
-                }
-                Some(ValueSchema::OneOf(one_of_schema)) => {
-                    find_one_of_completion_items(
-                        self,
-                        position,
-                        keys,
-                        accessors,
-                        schema_url,
-                        one_of_schema,
-                        definitions,
-                        schema_context,
-                        completion_hint,
-                    )
-                    .await
-                }
-                Some(ValueSchema::AnyOf(any_of_schema)) => {
-                    find_any_of_completion_items(
-                        self,
-                        position,
-                        keys,
-                        accessors,
-                        schema_url,
-                        any_of_schema,
-                        definitions,
-                        schema_context,
-                        completion_hint,
-                    )
-                    .await
-                }
-                Some(ValueSchema::AllOf(all_of_schema)) => {
-                    find_all_of_completion_items(
-                        self,
-                        position,
-                        keys,
-                        accessors,
-                        schema_url,
-                        all_of_schema,
-                        definitions,
-                        schema_context,
-                        completion_hint,
-                    )
-                    .await
-                }
-                Some(_) => Vec::with_capacity(0),
-                None => {
-                    for (index, value) in self.values().iter().enumerate() {
-                        if value.range().contains(position) || value.range().end() == position {
-                            if let document_tree::Value::Table(table) = value {
-                                if keys.len() == 1
-                                    && table.kind() == document_tree::TableKind::KeyValue
-                                {
-                                    let key = &keys.first().unwrap();
-                                    return vec![CompletionContent::new_type_hint_key(
-                                        key,
-                                        schema_context.toml_version,
+                            if value.range().contains(position) || value.range().end() == position {
+                                let accessor = Accessor::Index(index);
+                                if let Some(items) = &array_schema.items {
+                                    if let Ok(CurrentSchema {
                                         schema_url,
-                                        Some(CompletionHint::InArray),
-                                    )];
+                                        value_schema,
+                                        definitions,
+                                    }) = items
+                                        .write()
+                                        .await
+                                        .resolve(
+                                            Cow::Borrowed(schema_url),
+                                            definitions,
+                                            schema_context.store,
+                                        )
+                                        .await
+                                    {
+                                        return value
+                                            .find_completion_contents(
+                                                position,
+                                                keys,
+                                                &accessors
+                                                    .iter()
+                                                    .cloned()
+                                                    .chain(std::iter::once(accessor))
+                                                    .collect::<Vec<_>>(),
+                                                Some(&schema_url),
+                                                Some(value_schema),
+                                                Some(definitions),
+                                                schema_context,
+                                                completion_hint,
+                                            )
+                                            .await;
+                                    }
                                 }
                             }
-
-                            let accessor = Accessor::Index(index);
-                            return value
-                                .find_completion_contents(
-                                    position,
-                                    keys,
-                                    &accessors
-                                        .iter()
-                                        .cloned()
-                                        .chain(std::iter::once(accessor))
-                                        .collect::<Vec<_>>(),
-                                    schema_url,
-                                    None,
-                                    definitions,
-                                    schema_context,
-                                    completion_hint,
-                                )
-                                .await;
                         }
+                        if let Some(items) = &array_schema.items {
+                            if let Ok(CurrentSchema {
+                                value_schema,
+                                schema_url,
+                                definitions,
+                            }) = items
+                                .write()
+                                .await
+                                .resolve(
+                                    Cow::Borrowed(schema_url),
+                                    definitions,
+                                    schema_context.store,
+                                )
+                                .await
+                            {
+                                return SchemaCompletion
+                                    .find_completion_contents(
+                                        position,
+                                        keys,
+                                        &accessors
+                                            .iter()
+                                            .cloned()
+                                            .chain(std::iter::once(Accessor::Index(new_item_index)))
+                                            .collect::<Vec<_>>(),
+                                        Some(&schema_url),
+                                        Some(value_schema),
+                                        Some(definitions),
+                                        schema_context,
+                                        if self.kind() == ArrayKind::Array {
+                                            Some(CompletionHint::InArray)
+                                        } else {
+                                            completion_hint
+                                        },
+                                    )
+                                    .await;
+                            }
+                        }
+
+                        Vec::with_capacity(0)
                     }
-                    type_hint_value(
-                        None,
-                        position,
-                        schema_context.toml_version,
-                        schema_url,
-                        completion_hint,
-                    )
+                    ValueSchema::OneOf(one_of_schema) => {
+                        find_one_of_completion_items(
+                            self,
+                            position,
+                            keys,
+                            accessors,
+                            schema_url,
+                            one_of_schema,
+                            definitions,
+                            schema_context,
+                            completion_hint,
+                        )
+                        .await
+                    }
+                    ValueSchema::AnyOf(any_of_schema) => {
+                        find_any_of_completion_items(
+                            self,
+                            position,
+                            keys,
+                            accessors,
+                            schema_url,
+                            any_of_schema,
+                            definitions,
+                            schema_context,
+                            completion_hint,
+                        )
+                        .await
+                    }
+                    ValueSchema::AllOf(all_of_schema) => {
+                        find_all_of_completion_items(
+                            self,
+                            position,
+                            keys,
+                            accessors,
+                            schema_url,
+                            all_of_schema,
+                            definitions,
+                            schema_context,
+                            completion_hint,
+                        )
+                        .await
+                    }
+                    _ => Vec::with_capacity(0),
                 }
+            } else {
+                for (index, value) in self.values().iter().enumerate() {
+                    if value.range().contains(position) || value.range().end() == position {
+                        if let document_tree::Value::Table(table) = value {
+                            if keys.len() == 1 && table.kind() == document_tree::TableKind::KeyValue
+                            {
+                                let key = &keys.first().unwrap();
+                                return vec![CompletionContent::new_type_hint_key(
+                                    key,
+                                    schema_context.toml_version,
+                                    schema_url,
+                                    Some(CompletionHint::InArray),
+                                )];
+                            }
+                        }
+
+                        let accessor = Accessor::Index(index);
+                        return value
+                            .find_completion_contents(
+                                position,
+                                keys,
+                                &accessors
+                                    .iter()
+                                    .cloned()
+                                    .chain(std::iter::once(accessor))
+                                    .collect::<Vec<_>>(),
+                                schema_url,
+                                None,
+                                definitions,
+                                schema_context,
+                                completion_hint,
+                            )
+                            .await;
+                    }
+                }
+                type_hint_value(
+                    None,
+                    position,
+                    schema_context.toml_version,
+                    schema_url,
+                    completion_hint,
+                )
             }
         }
         .boxed()

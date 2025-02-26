@@ -71,7 +71,7 @@ impl FindSchemaCandidates for DocumentSchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
+        schema_url: &'a SchemaUrl,
         definitions: &'a SchemaDefinitions,
         schema_store: &'a SchemaStore,
     ) -> BoxFuture<'b, (Vec<ValueSchema>, Vec<crate::Error>)> {

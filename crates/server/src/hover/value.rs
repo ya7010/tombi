@@ -22,7 +22,7 @@ impl GetHoverContent for document_tree::Value {
         accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
-        definitions: &'a schema_store::SchemaDefinitions,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -189,7 +189,7 @@ impl GetHoverContent for ValueSchema {
         accessors: &'a [Accessor],
         schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
-        definitions: &'a schema_store::SchemaDefinitions,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {

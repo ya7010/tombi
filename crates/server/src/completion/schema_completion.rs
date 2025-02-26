@@ -30,10 +30,10 @@ impl FindCompletionContents for SchemaCompletion {
         tracing::trace!("completion_hint: {:?}", completion_hint);
 
         async move {
-            let Some(value_schema) = value_schema else {
-                unreachable!(
-                    "SchemaCompletion::find_completion_contents called without a value schema"
-                );
+            let (Some(schema_url), Some(value_schema), Some(definitions)) =
+                (schema_url, value_schema, definitions)
+            else {
+                unreachable!("SchemaCompletion::find_completion_contents called without a schema");
             };
 
             match value_schema {
@@ -43,9 +43,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -57,9 +57,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -71,9 +71,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -85,9 +85,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -99,9 +99,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -113,9 +113,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -127,9 +127,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -141,9 +141,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -155,9 +155,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )
@@ -169,9 +169,9 @@ impl FindCompletionContents for SchemaCompletion {
                             position,
                             keys,
                             accessors,
-                            schema_url,
-                            None,
-                            definitions,
+                            Some(schema_url),
+                            Some(value_schema),
+                            Some(definitions),
                             schema_context,
                             completion_hint,
                         )

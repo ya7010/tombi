@@ -29,9 +29,9 @@ pub fn find_all_of_completion_items<'a: 'b, 'b, T>(
     position: text::Position,
     keys: &'a [document_tree::Key],
     accessors: &'a [Accessor],
-    schema_url: Option<&'a SchemaUrl>,
+    schema_url: &'a SchemaUrl,
     all_of_schema: &'a schema_store::AllOfSchema,
-    definitions: Option<&'a SchemaDefinitions>,
+    definitions: &'a SchemaDefinitions,
     schema_context: &'a schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
@@ -39,10 +39,6 @@ where
     T: FindCompletionContents + Sync + Send,
 {
     async move {
-        let Some(definitions) = definitions else {
-            unreachable!("definitions must be provided");
-        };
-
         let mut completion_items = Vec::new();
 
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
@@ -51,11 +47,7 @@ where
                 value_schema,
                 definitions,
             }) = referable_schema
-                .resolve(
-                    schema_url.map(Cow::Borrowed),
-                    definitions,
-                    schema_context.store,
-                )
+                .resolve(Cow::Borrowed(schema_url), definitions, schema_context.store)
                 .await
             {
                 let schema_completions = value
@@ -63,7 +55,7 @@ where
                         position,
                         keys,
                         accessors,
-                        schema_url.as_deref(),
+                        Some(&schema_url),
                         Some(value_schema),
                         Some(definitions),
                         schema_context,
@@ -100,7 +92,7 @@ where
 
         if let Some(default) = &all_of_schema.default {
             if let Some(completion_item) =
-                serde_value_to_completion_item(default, position, schema_url, completion_hint)
+                serde_value_to_completion_item(default, position, Some(schema_url), completion_hint)
             {
                 completion_items.push(completion_item);
             }
