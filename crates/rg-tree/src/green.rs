@@ -5,15 +5,13 @@ mod node_cache;
 mod token;
 
 use self::element::GreenElement;
-
-pub(crate) use self::{element::GreenElementRef, node::GreenChild};
-
 pub use self::{
     builder::{Checkpoint, GreenNodeBuilder},
     node::{Children, GreenNode, GreenNodeData},
     node_cache::NodeCache,
     token::{GreenToken, GreenTokenData},
 };
+pub(crate) use self::{element::GreenElementRef, node::GreenChild};
 
 /// SyntaxKind is a type tag for each token or node.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

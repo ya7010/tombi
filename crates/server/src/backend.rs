@@ -1,23 +1,8 @@
 use std::sync::Arc;
 
-use super::handler::{
-    handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
-    handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
-    handle_semantic_tokens_full, handle_shutdown,
-};
-use crate::{
-    document::DocumentSource,
-    handler::{
-        handle_completion, handle_did_change_watched_files, handle_did_close, handle_folding_range,
-        handle_get_toml_version, handle_initialized, handle_update_config, handle_update_schema,
-        GetTomlVersionResponse,
-    },
-};
-
 use ahash::AHashMap;
 use config::{Config, TomlVersion};
-use diagnostic::Diagnostic;
-use diagnostic::SetDiagnostics;
+use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
 use syntax::SyntaxNode;
 use tower_lsp::{
@@ -30,6 +15,20 @@ use tower_lsp::{
         InitializedParams, SemanticTokensParams, SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
+};
+
+use super::handler::{
+    handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
+    handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
+    handle_semantic_tokens_full, handle_shutdown,
+};
+use crate::{
+    document::DocumentSource,
+    handler::{
+        handle_completion, handle_did_change_watched_files, handle_did_close, handle_folding_range,
+        handle_get_toml_version, handle_initialized, handle_update_config, handle_update_schema,
+        GetTomlVersionResponse,
+    },
 };
 
 #[derive(Debug)]

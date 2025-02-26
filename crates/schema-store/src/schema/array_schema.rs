@@ -2,12 +2,11 @@ use std::{borrow::Cow, sync::Arc};
 
 use futures::{future::BoxFuture, FutureExt};
 
-use crate::{Accessor, SchemaStore, X_TOMBI_ARRAY_VALUES_ORDER_BY};
-
 use super::{
     CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, SchemaUrl,
     ValueSchema,
 };
+use crate::{Accessor, SchemaStore, X_TOMBI_ARRAY_VALUES_ORDER_BY};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {

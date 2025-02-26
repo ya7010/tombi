@@ -1,8 +1,9 @@
+use std::fmt::Write;
+
 use ast::AstNode;
 use itertools::Itertools;
 
 use crate::Format;
-use std::fmt::Write;
 
 impl Format for ast::Keys {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {

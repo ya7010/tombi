@@ -1,6 +1,9 @@
+use std::{
+    cmp::Ordering,
+    ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign},
+};
+
 use crate::{Offset, RawOffset, RawTextSize};
-use std::cmp::Ordering;
-use std::ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign};
 
 /// A span in text, represented as a pair of [`Offset`][struct@Offset].
 ///

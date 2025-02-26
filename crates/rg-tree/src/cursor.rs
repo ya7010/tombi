@@ -81,7 +81,6 @@
 //      when the tree is mutable.
 //    - TBD
 
-use countme::Count;
 use std::{
     borrow::Cow,
     cell::Cell,
@@ -92,6 +91,8 @@ use std::{
     ops::Range,
     ptr, slice,
 };
+
+use countme::Count;
 
 use crate::{
     green::{GreenChild, GreenElementRef, GreenNodeData, GreenTokenData, SyntaxKind},

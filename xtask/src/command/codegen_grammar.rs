@@ -1,3 +1,6 @@
+use anyhow::Context;
+use ungrammar::Grammar;
+
 use crate::{
     codegen::grammar::{
         ast_node::generate_ast_node, ast_token::generate_ast_token, lower,
@@ -5,8 +8,6 @@ use crate::{
     },
     utils::{ensure_rustfmt, project_root},
 };
-use anyhow::Context;
-use ungrammar::Grammar;
 
 pub fn run() -> Result<(), anyhow::Error> {
     let grammar = std::fs::read_to_string(project_root().join("toml.ungram"))

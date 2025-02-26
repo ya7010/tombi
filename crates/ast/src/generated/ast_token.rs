@@ -1,7 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/src/codegen`
 
-use crate::AstToken;
 use syntax::{SyntaxKind, SyntaxToken};
+
+use crate::AstToken;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Whitespace {

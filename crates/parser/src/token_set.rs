@@ -1,6 +1,4 @@
-use syntax::SyntaxKind;
-
-use syntax::{SyntaxKind::*, T};
+use syntax::{SyntaxKind, SyntaxKind::*, T};
 
 pub(crate) const TS_LINE_END: TokenSet = TokenSet::new(&[LINE_BREAK, EOF]);
 pub(crate) const TS_COMMEMT_OR_LINE_END: TokenSet = TokenSet::new(&[COMMENT, LINE_BREAK, EOF]);

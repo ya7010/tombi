@@ -1,10 +1,9 @@
 use std::io::Write;
 
+use config::TomlVersion;
 use xshell::Shell;
 
 use crate::utils::project_root;
-
-use config::TomlVersion;
 
 #[derive(clap::Args, Debug)]
 pub struct Args {

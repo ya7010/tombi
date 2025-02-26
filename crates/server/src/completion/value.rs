@@ -12,10 +12,6 @@ mod one_of;
 mod string;
 mod table;
 
-use super::{
-    schema_completion::SchemaCompletion, CompletionCandidate, CompletionContent, CompletionHint,
-    FindCompletionContents,
-};
 pub use all_of::find_all_of_completion_items;
 pub use any_of::find_any_of_completion_items;
 use array::type_hint_array;
@@ -35,6 +31,11 @@ use schema_store::{
     SchemaUrl, StringSchema, TableSchema, ValueSchema,
 };
 use string::type_hint_string;
+
+use super::{
+    schema_completion::SchemaCompletion, CompletionCandidate, CompletionContent, CompletionHint,
+    FindCompletionContents,
+};
 
 impl FindCompletionContents for document_tree::Value {
     fn find_completion_contents<'a: 'b, 'b>(

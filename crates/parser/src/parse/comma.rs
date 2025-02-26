@@ -1,8 +1,7 @@
 use syntax::T;
 
-use crate::parse::{leading_comments, tailing_comment};
-
 use super::{Parse, Parser};
+use crate::parse::{leading_comments, tailing_comment};
 
 impl Parse for ast::Comma {
     fn parse(p: &mut Parser<'_>) {

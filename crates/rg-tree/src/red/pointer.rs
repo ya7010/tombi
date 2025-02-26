@@ -1,8 +1,7 @@
 use std::iter::successors;
 
-use crate::Language;
-
 use super::RedNode;
+use crate::Language;
 
 /// A "pointer" to a [`RedNode`], via location in the source code.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]

@@ -1,6 +1,8 @@
-use crate::Format;
-use itertools::Itertools;
 use std::fmt::Write;
+
+use itertools::Itertools;
+
+use crate::Format;
 
 impl Format for ast::ArrayOfTables {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {

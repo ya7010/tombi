@@ -131,9 +131,11 @@ impl Add<Range> for Range {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use rstest::rstest;
     use std::cmp::Ordering;
+
+    use rstest::rstest;
+
+    use super::*;
 
     #[rstest]
     #[case(((1, 1), (1, 2)), ((1, 1), (1, 2)), Ordering::Equal)]

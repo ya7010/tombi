@@ -8,8 +8,9 @@ mod root;
 mod table;
 mod value;
 
-use crate::{parser::Parser, token_set::TS_LINE_END};
 use support::*;
+
+use crate::{parser::Parser, token_set::TS_LINE_END};
 
 pub(crate) trait Parse {
     fn parse(p: &mut Parser<'_>);

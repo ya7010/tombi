@@ -1,18 +1,13 @@
-use std::borrow::Cow;
-use std::sync::Arc;
+use std::{borrow::Cow, sync::Arc};
 
-use super::CurrentSchema;
-use super::FindSchemaCandidates;
-use super::SchemaDefinitions;
-use super::SchemaItemTokio;
-use super::SchemaPatternProperties;
-use super::SchemaUrl;
-use super::ValueSchema;
-use crate::SchemaStore;
-use crate::{Accessor, Referable, SchemaProperties};
 use ahash::AHashMap;
-use futures::future::BoxFuture;
-use futures::FutureExt;
+use futures::{future::BoxFuture, FutureExt};
+
+use super::{
+    CurrentSchema, FindSchemaCandidates, SchemaDefinitions, SchemaItemTokio,
+    SchemaPatternProperties, SchemaUrl, ValueSchema,
+};
+use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
 
 #[derive(Debug, Default, Clone)]
 pub struct TableSchema {

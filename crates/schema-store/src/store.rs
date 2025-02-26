@@ -1,7 +1,8 @@
+use std::{ops::Deref, sync::Arc};
+
 use ahash::AHashMap;
 use config::SchemaCatalogItem;
 use itertools::Either;
-use std::{ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
 use crate::{json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema};

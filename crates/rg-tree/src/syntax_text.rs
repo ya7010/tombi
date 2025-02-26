@@ -257,9 +257,8 @@ mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::{green::SyntaxKind, GreenNodeBuilder};
-
     use super::*;
+    use crate::{green::SyntaxKind, GreenNodeBuilder};
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode {
         let mut builder = GreenNodeBuilder::new();

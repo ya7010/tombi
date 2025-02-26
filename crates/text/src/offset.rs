@@ -1,12 +1,11 @@
-use {
-    crate::RawTextSize,
-    std::{
-        convert::TryFrom,
-        fmt, iter,
-        num::TryFromIntError,
-        ops::{Add, AddAssign, Sub, SubAssign},
-    },
+use std::{
+    convert::TryFrom,
+    fmt, iter,
+    num::TryFromIntError,
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
+
+use crate::RawTextSize;
 
 /// A measure of text length. Also, equivalently, an index into text.
 ///

@@ -1,8 +1,7 @@
 use std::iter;
 
-use crate::{cursor, Language, NodeOrToken};
-
 use super::{node::RedNode, token::RedToken};
+use crate::{cursor, Language, NodeOrToken};
 
 pub type RedElement<L> = NodeOrToken<RedNode<L>, RedToken<L>>;
 

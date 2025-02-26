@@ -5,10 +5,11 @@ mod default_value;
 mod one_of;
 mod value;
 
+use std::{fmt::Debug, ops::Deref};
+
 use constraints::DataConstraints;
 use futures::future::BoxFuture;
 use schema_store::{get_schema_name, Accessor, Accessors, SchemaUrl, ValueSchema, ValueType};
-use std::{fmt::Debug, ops::Deref};
 
 pub async fn get_hover_content(
     tree: &document_tree::DocumentTree,
@@ -141,9 +142,10 @@ impl From<HoverContent> for tower_lsp::lsp_types::Hover {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use rstest::rstest;
     use schema_store::SchemaUrl;
+
+    use super::*;
 
     #[rstest]
     #[case("https://json.schemastore.org/tombi.schema.json")]

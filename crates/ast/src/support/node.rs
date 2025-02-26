@@ -1,6 +1,5 @@
 use itertools::Itertools;
-use syntax::SyntaxKind;
-use syntax::{SyntaxElement, SyntaxKind::*};
+use syntax::{SyntaxElement, SyntaxKind, SyntaxKind::*};
 
 use crate::{AstChildren, AstNode, AstToken};
 

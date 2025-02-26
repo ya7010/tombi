@@ -20,7 +20,8 @@ mod table_schema;
 mod value_schema;
 mod x_tombi;
 
-use crate::{Accessor, SchemaStore};
+use std::sync::Arc;
+
 pub use all_of_schema::AllOfSchema;
 pub use any_of_schema::AnyOfSchema;
 pub use array_schema::{ArraySchema, ArrayValuesOrderBy};
@@ -38,13 +39,13 @@ pub use one_of_schema::OneOfSchema;
 pub use referable_schema::{is_online_url, CurrentSchema, Referable};
 pub use schema_context::SchemaContext;
 pub use schema_url::SchemaUrl;
-pub use source_schema::SourceSchema;
-pub use source_schema::SubSchemaUrlMap;
-use std::sync::Arc;
+pub use source_schema::{SourceSchema, SubSchemaUrlMap};
 pub use string_schema::StringSchema;
 pub use table_schema::{TableKeysOrderBy, TableSchema};
 pub use value_schema::*;
 pub use x_tombi::*;
+
+use crate::{Accessor, SchemaStore};
 
 pub type SchemaProperties =
     Arc<tokio::sync::RwLock<ahash::AHashMap<Accessor, Referable<ValueSchema>>>>;

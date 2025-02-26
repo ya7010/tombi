@@ -5,13 +5,13 @@ mod schema;
 mod server;
 mod types;
 
+use std::path::PathBuf;
+
 pub use error::Error;
 pub use format::FormatOptions;
 pub use lint::LintOptions;
-pub use schema::SchemaCatalogItem;
-pub use schema::SchemaOptions;
+pub use schema::{SchemaCatalogItem, SchemaOptions};
 pub use server::{ServerCompletion, ServerOptions};
-use std::path::PathBuf;
 pub use toml_version::TomlVersion;
 pub use types::*;
 
