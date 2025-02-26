@@ -49,7 +49,7 @@ impl SchemaStore {
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
         if self.schemas.read().await.contains_key(schema_url) {
-            let document_schema = self.try_get_document_schema_from_url(schema_url).await?;
+            let document_schema = self.try_fetch_document_schema_from_url(schema_url).await?;
 
             self.schemas
                 .write()
@@ -117,7 +117,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn try_get_document_schema_from_url(
+    async fn try_fetch_document_schema_from_url(
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {
@@ -183,12 +183,15 @@ impl SchemaStore {
             };
         }
 
-        let document_schema = self.try_get_document_schema_from_url(schema_url).await?;
+        let document_schema = {
+            let mut schemas = self.schemas.write().await;
 
-        self.schemas
-            .write()
-            .await
-            .insert(schema_url.to_owned(), Ok(document_schema.clone()));
+            let document_schema = self.try_fetch_document_schema_from_url(schema_url).await?;
+
+            schemas.insert(schema_url.to_owned(), Ok(document_schema.clone()));
+
+            document_schema
+        };
 
         Ok(document_schema)
     }
