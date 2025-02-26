@@ -11,7 +11,8 @@
       "patternProperties": {
         "^[0-9a-zA-Z]+$": { "$ref": "#/definitions/Task" }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-tombi-table-keys-order-by": "ascending"
     },
     "variables": {
       "title": "variables",
@@ -27,7 +28,8 @@
           ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-tombi-table-keys-order-by": "ascending"
     },
     "settings": {
       "$ref": "#/definitions/Settings"
