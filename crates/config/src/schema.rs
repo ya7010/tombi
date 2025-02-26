@@ -62,12 +62,12 @@ pub struct SchemaCatalog {
 #[cfg_attr(feature = "serde", serde(untagged))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone)]
-pub enum SchemaCatalogItem {
-    Root(RootSchemaCatalogItem),
-    Sub(SubSchemaCatalogItem),
+pub enum Schema {
+    Root(RootSchema),
+    Sub(SubSchema),
 }
 
-impl SchemaCatalogItem {
+impl Schema {
     pub fn path(&self) -> &str {
         match self {
             Self::Root(item) => &item.path,
@@ -102,7 +102,7 @@ impl SchemaCatalogItem {
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone)]
-pub struct RootSchemaCatalogItem {
+pub struct RootSchema {
     /// # The TOML version that the schema is available.
     pub toml_version: Option<TomlVersion>,
 
@@ -122,7 +122,7 @@ pub struct RootSchemaCatalogItem {
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone)]
-pub struct SubSchemaCatalogItem {
+pub struct SubSchema {
     /// # The schema path.
     pub path: String,
 

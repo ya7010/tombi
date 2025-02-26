@@ -92,12 +92,12 @@ where
     runtime.block_on(async {
         if schema_options.enabled.unwrap_or_default().value() {
             schema_store
-                .load_schemas_from_config(
-                    config_dirpath,
+                .load_schemas(
                     match &config.schemas {
                         Some(schemas) => schemas,
                         None => &[],
                     },
+                    config_dirpath.as_deref(),
                 )
                 .await;
 

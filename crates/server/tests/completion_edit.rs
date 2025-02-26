@@ -557,12 +557,16 @@ mod completion_edit {
                         );
                     backend
                         .schema_store
-                        .add_json_schema(schema_store::json::JsonSchema {
-                            name: "test_schema".to_string(),
-                            description: "schema for testing".to_string(),
-                            file_match: vec!["*.toml".to_string()],
-                            url: schema_url.clone(),
-                        })
+                        .load_schemas(
+                            &[
+                                config::Schema::Root(config::RootSchema {
+                                    toml_version: None,
+                                    path: schema_url.to_string(),
+                                    include: vec!["*.toml".to_string()],
+                                }),
+                            ],
+                            None
+                        )
                         .await;
                 }
 

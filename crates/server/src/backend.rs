@@ -37,6 +37,7 @@ pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
     pub document_sources: Arc<tokio::sync::RwLock<AHashMap<Url, DocumentSource>>>,
+    pub config_dirpath: Option<std::path::PathBuf>,
     config: Arc<tokio::sync::RwLock<Config>>,
     pub schema_store: schema_store::SchemaStore,
 }
@@ -44,16 +45,18 @@ pub struct Backend {
 impl Backend {
     #[inline]
     pub fn new(client: tower_lsp::Client) -> Self {
+        let (config, config_dirpath) = match config::load_with_path() {
+            Ok((config, config_dirpath)) => (config, config_dirpath),
+            Err(err) => {
+                tracing::error!("{err}");
+                (Config::default(), None)
+            }
+        };
         Self {
             client,
             document_sources: Default::default(),
-            config: Arc::new(tokio::sync::RwLock::new(match config::load() {
-                Ok(config) => config,
-                Err(err) => {
-                    tracing::error!("{err}");
-                    Config::default()
-                }
-            })),
+            config_dirpath,
+            config: Arc::new(tokio::sync::RwLock::new(config)),
             schema_store: schema_store::SchemaStore::new(),
         }
     }

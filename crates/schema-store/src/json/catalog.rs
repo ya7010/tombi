@@ -1,10 +1,10 @@
-use super::JsonSchema;
+use super::JsonCatalogSchema;
 
 pub const DEFAULT_CATALOG_URL: &str = "https://www.schemastore.org/api/json/catalog.json";
 
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct Catalog {
-    pub schemas: Vec<JsonSchema>,
+pub struct JsonCatalog {
+    pub schemas: Vec<JsonCatalogSchema>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

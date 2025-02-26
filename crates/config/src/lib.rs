@@ -8,8 +8,8 @@ mod types;
 pub use error::Error;
 pub use format::FormatOptions;
 pub use lint::LintOptions;
-pub use schema::SchemaCatalogItem;
 pub use schema::SchemaOptions;
+pub use schema::{RootSchema, Schema, SubSchema};
 pub use server::{ServerCompletion, ServerOptions};
 use std::path::PathBuf;
 pub use toml_version::TomlVersion;
@@ -64,7 +64,7 @@ pub struct Config {
     pub schema: Option<SchemaOptions>,
 
     /// # Schema catalog items.
-    pub schemas: Option<Vec<SchemaCatalogItem>>,
+    pub schemas: Option<Vec<Schema>>,
 }
 
 #[doc(hidden)]

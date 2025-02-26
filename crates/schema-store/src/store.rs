@@ -1,5 +1,5 @@
 use ahash::AHashMap;
-use config::SchemaCatalogItem;
+use config::Schema;
 use itertools::Either;
 use std::{ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
@@ -22,24 +22,25 @@ impl SchemaStore {
         }
     }
 
-    pub async fn load_schemas_from_config(
-        &self,
-        config_dirpath: Option<std::path::PathBuf>,
-        schemas: &[SchemaCatalogItem],
-    ) {
-        let config_dirpath = match config_dirpath {
-            Some(path) => path,
-            None => std::env::current_dir().unwrap(),
-        };
+    pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
         let mut catalogs = self.catalogs.write().await;
+
         for schema in schemas.iter() {
-            let Ok(url) = SchemaUrl::from_file_path(config_dirpath.join(schema.path())) else {
+            let schema_url = if let Ok(schema_url) = SchemaUrl::parse(schema.path()) {
+                schema_url
+            } else if let Some(Ok(schema_url)) = base_dirpath
+                .map(|base_dirpath| SchemaUrl::from_file_path(base_dirpath.join(schema.path())))
+            {
+                schema_url
+            } else {
+                tracing::error!("invalid schema path: {}", schema.path());
                 continue;
             };
-            tracing::debug!("load config schema from: {}", url);
+
+            tracing::debug!("load config schema from: {}", schema_url);
 
             catalogs.push(crate::CatalogSchema {
-                url,
+                url: schema_url,
                 include: schema.include().to_vec(),
                 toml_version: schema.toml_version(),
                 root_keys: schema.root_keys().and_then(SchemaAccessor::parse),
@@ -70,7 +71,7 @@ impl SchemaStore {
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
-            match response.json::<crate::json::Catalog>().await {
+            match response.json::<crate::json::JsonCatalog>().await {
                 Ok(catalog) => {
                     let mut catalogs = self.catalogs.write().await;
                     for catalog_schema in catalog.schemas {
@@ -98,22 +99,6 @@ impl SchemaStore {
             Err(crate::Error::CatalogUrlFetchFailed {
                 catalog_url: catalog_url.clone(),
             })
-        }
-    }
-
-    pub async fn add_json_schema(&self, json_schema: crate::json::JsonSchema) {
-        let mut catalogs = self.catalogs.write().await;
-        if json_schema
-            .file_match
-            .iter()
-            .any(|pattern| pattern.ends_with(".toml"))
-        {
-            catalogs.push(crate::CatalogSchema {
-                url: json_schema.url,
-                include: json_schema.file_match,
-                toml_version: None,
-                root_keys: None,
-            });
         }
     }
 
@@ -233,24 +218,22 @@ impl SchemaStore {
         let mut source_schema: Option<SourceSchema> = None;
 
         let catalogs = self.catalogs.read().await;
-        let matching_schemas: Vec<_> = {
-            catalogs
-                .iter()
-                .filter(|catalog| {
-                    catalog.include.iter().any(|pat| {
-                        let pattern = if !pat.contains("*") {
-                            format!("**/{}", pat)
-                        } else {
-                            pat.to_string()
-                        };
-                        glob::Pattern::new(&pattern)
-                            .ok()
-                            .map(|glob_pat| glob_pat.matches_path(source_path))
-                            .unwrap_or(false)
-                    })
+        let matching_schemas = catalogs
+            .iter()
+            .filter(|catalog| {
+                catalog.include.iter().any(|pat| {
+                    let pattern = if !pat.contains("*") {
+                        format!("**/{}", pat)
+                    } else {
+                        pat.to_string()
+                    };
+                    glob::Pattern::new(&pattern)
+                        .ok()
+                        .map(|glob_pat| glob_pat.matches_path(source_path))
+                        .unwrap_or(false)
                 })
-                .collect()
-        };
+            })
+            .collect::<Vec<_>>();
 
         for matching_schema in matching_schemas {
             if let Ok(document_schema) = self.try_load_document_schema(&matching_schema.url).await {
