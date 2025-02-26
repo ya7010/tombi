@@ -1,7 +1,8 @@
-use super::syntax_kind_src::{LITERALS, NODES, PUNCTUATIONS, TOKENS};
 use itertools::Itertools;
 use proc_macro2::{Punct, Spacing};
 use quote::{format_ident, quote};
+
+use super::syntax_kind_src::{LITERALS, NODES, PUNCTUATIONS, TOKENS};
 
 pub fn generate_syntax_kind() -> Result<String, anyhow::Error> {
     let punctuation_values = PUNCTUATIONS.iter().map(|item| {

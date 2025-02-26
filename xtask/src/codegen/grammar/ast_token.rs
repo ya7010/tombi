@@ -1,9 +1,8 @@
 use convert_case::{Case, Casing};
 use quote::{format_ident, quote};
 
-use crate::utils::reformat;
-
 use super::syntax_kind_src::TOKENS;
+use crate::utils::reformat;
 
 pub fn generate_ast_token() -> Result<String, anyhow::Error> {
     let tokens = TOKENS.iter().map(|token| {

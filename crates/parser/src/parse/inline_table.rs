@@ -1,13 +1,13 @@
 use config::TomlVersion;
 use syntax::{SyntaxKind::*, T};
 
-use crate::ErrorKind::*;
 use crate::{
     parse::{
         begin_dangling_comments, end_dangling_comments, leading_comments, peek_leading_comments,
         tailing_comment, Parse,
     },
     parser::Parser,
+    ErrorKind::*,
 };
 
 impl Parse for ast::InlineTable {
@@ -82,9 +82,9 @@ impl Parse for ast::InlineTable {
 
 #[cfg(test)]
 mod test {
-    use crate::test_parser;
-    use crate::ErrorKind::*;
     use config::TomlVersion;
+
+    use crate::{test_parser, ErrorKind::*};
 
     test_parser! {
         #[test]

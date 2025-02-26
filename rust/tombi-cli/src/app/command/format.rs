@@ -1,9 +1,10 @@
-use crate::app::arg;
 use config::{FormatOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
 use formatter::formatter::definitions::FormatDefinitions;
 use schema_store::json::CatalogUrl;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
+
+use crate::app::arg;
 
 /// Format TOML files.
 #[derive(clap::Args, Debug)]

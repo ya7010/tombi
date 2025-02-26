@@ -6,8 +6,7 @@ mod validation;
 
 pub use config::LintOptions;
 use diagnostic::Diagnostic;
-pub use error::Error;
-pub use error::ErrorKind;
+pub use error::{Error, ErrorKind};
 use lint::Lint;
 pub use linter::Linter;
 use rule::Rule;

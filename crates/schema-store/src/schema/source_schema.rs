@@ -1,8 +1,7 @@
 use ahash::AHashMap;
 
-use crate::SchemaAccessor;
-
 use super::{DocumentSchema, SchemaUrl};
+use crate::SchemaAccessor;
 
 pub type SubSchemaUrlMap = AHashMap<Vec<SchemaAccessor>, SchemaUrl>;
 

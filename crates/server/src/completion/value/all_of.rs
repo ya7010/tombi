@@ -1,9 +1,7 @@
 use std::borrow::Cow;
 
-use futures::future::BoxFuture;
-use futures::FutureExt;
-use schema_store::{Accessor, CurrentSchema, SchemaDefinitions, Schemas};
-use schema_store::{AllOfSchema, SchemaUrl};
+use futures::{future::BoxFuture, FutureExt};
+use schema_store::{Accessor, AllOfSchema, CurrentSchema, SchemaDefinitions, SchemaUrl, Schemas};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,

@@ -19,9 +19,10 @@ fn project_root() -> Result<PathBuf, Box<dyn std::error::Error>> {
 
 #[test]
 fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
-    use std::fs::File;
-    use std::io::BufReader;
-    use std::io::Read;
+    use std::{
+        fs::File,
+        io::{BufReader, Read},
+    };
 
     let path = project_root()?;
     let document_path = path.join("tombi.schema.json");

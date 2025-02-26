@@ -1,6 +1,7 @@
+use std::path::PathBuf;
+
 pub use crate::glue::pushenv;
 use crate::run;
-use std::path::PathBuf;
 
 /// Returns the path to the root directory of `tombi` project.
 pub fn project_root() -> PathBuf {

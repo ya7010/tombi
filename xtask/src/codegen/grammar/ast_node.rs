@@ -2,9 +2,8 @@ use convert_case::{Case, Casing};
 use itertools::Itertools;
 use quote::{format_ident, quote};
 
-use crate::utils::reformat;
-
 use super::ast_src::AstSrc;
+use crate::utils::reformat;
 
 pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
     let (node_defs, node_boilerplate_impls): (Vec<_>, Vec<_>) = ast

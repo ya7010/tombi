@@ -1,7 +1,8 @@
+use std::io::Read;
+
 use ast::AstNode;
 use clap::Parser;
 use document_tree::TryIntoDocumentTree;
-use std::io::Read;
 use toml_test::{IntoValue, Value, INVALID_MESSAGE};
 use toml_version::TomlVersion;
 

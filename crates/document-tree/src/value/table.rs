@@ -1,6 +1,5 @@
 use ast::{AstChildren, AstNode};
-use indexmap::map::Entry;
-use indexmap::IndexMap;
+use indexmap::{map::Entry, IndexMap};
 use itertools::Itertools;
 use toml_version::TomlVersion;
 

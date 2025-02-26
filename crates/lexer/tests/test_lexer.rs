@@ -1,6 +1,5 @@
 use itertools::Itertools;
-use lexer::ErrorKind::*;
-use lexer::{tokenize, Token};
+use lexer::{tokenize, ErrorKind::*, Token};
 use syntax::SyntaxKind::*;
 
 macro_rules! test_tokens {

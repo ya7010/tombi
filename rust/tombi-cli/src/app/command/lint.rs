@@ -1,8 +1,9 @@
-use crate::app::arg;
 use config::{LintOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
 use schema_store::json::CatalogUrl;
 use tokio::io::AsyncReadExt;
+
+use crate::app::arg;
 
 /// Lint TOML files.
 #[derive(clap::Args, Debug)]

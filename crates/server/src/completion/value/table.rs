@@ -1,12 +1,5 @@
 use std::borrow::Cow;
 
-use crate::completion::{
-    value::{
-        all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
-        one_of::find_one_of_completion_items, type_hint_value,
-    },
-    CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
-};
 use futures::{
     future::{join_all, BoxFuture},
     FutureExt,
@@ -14,6 +7,14 @@ use futures::{
 use schema_store::{
     is_online_url, Accessor, CurrentSchema, FindSchemaCandidates, Referable, SchemaAccessor,
     SchemaDefinitions, SchemaStore, SchemaUrl, TableSchema, ValueSchema,
+};
+
+use crate::completion::{
+    value::{
+        all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
+        one_of::find_one_of_completion_items, type_hint_value,
+    },
+    CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
 
 impl FindCompletionContents for document_tree::Table {

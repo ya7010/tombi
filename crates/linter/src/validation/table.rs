@@ -7,9 +7,8 @@ use schema_store::{
     Accessor, CurrentSchema, SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType,
 };
 
-use crate::error::Patterns;
-
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
+use crate::error::Patterns;
 
 impl Validate for document_tree::Table {
     fn validate<'a: 'b, 'b>(

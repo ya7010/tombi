@@ -1,7 +1,8 @@
-use crate::backend::Backend;
 use tower_lsp::lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind,
 };
+
+use crate::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_document_symbol(

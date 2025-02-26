@@ -1,17 +1,16 @@
-use futures::future::{join_all, BoxFuture};
-use futures::FutureExt;
+use std::{borrow::Cow, sync::Arc};
 
-use super::referable_schema::CurrentSchema;
-use super::{
-    AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema,
-    LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema,
-    StringSchema, TableSchema,
+use futures::{
+    future::{join_all, BoxFuture},
+    FutureExt,
 };
-use super::{FindSchemaCandidates, SchemaUrl};
-use crate::{Accessor, SchemaDefinitions};
-use crate::{Referable, SchemaStore};
-use std::borrow::Cow;
-use std::sync::Arc;
+
+use super::{
+    referable_schema::CurrentSchema, AllOfSchema, AnyOfSchema, ArraySchema, BooleanSchema,
+    FindSchemaCandidates, FloatSchema, IntegerSchema, LocalDateSchema, LocalDateTimeSchema,
+    LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema, SchemaUrl, StringSchema, TableSchema,
+};
+use crate::{Accessor, Referable, SchemaDefinitions, SchemaStore};
 
 #[derive(Debug, Clone)]
 pub enum ValueSchema {

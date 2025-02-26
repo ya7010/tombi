@@ -1,10 +1,11 @@
-use super::{referable_schema::Referable, SchemaDefinitions, ValueSchema};
-use super::{FindSchemaCandidates, SchemaUrl};
-use crate::{Accessor, SchemaStore};
 use ahash::AHashMap;
 use config::TomlVersion;
-use futures::future::BoxFuture;
-use futures::FutureExt;
+use futures::{future::BoxFuture, FutureExt};
+
+use super::{
+    referable_schema::Referable, FindSchemaCandidates, SchemaDefinitions, SchemaUrl, ValueSchema,
+};
+use crate::{Accessor, SchemaStore};
 
 #[derive(Debug, Clone)]
 pub struct DocumentSchema {

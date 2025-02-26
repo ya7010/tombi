@@ -1,5 +1,6 @@
-use crate::Rule;
 use ast::AstNode;
+
+use crate::Rule;
 
 pub struct KeyEmptyRule;
 

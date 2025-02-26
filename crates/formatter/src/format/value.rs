@@ -6,9 +6,11 @@ mod inline_table;
 mod integer;
 mod string;
 
-use crate::Format;
 use std::fmt::Write;
+
 use syntax::SyntaxToken;
+
+use crate::Format;
 
 impl Format for ast::Value {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {

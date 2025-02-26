@@ -1,15 +1,14 @@
-use syntax::T;
+use syntax::{SyntaxKind::*, T};
 
-use crate::parse::{begin_dangling_comments, end_dangling_comments};
-use crate::token_set::TS_NEXT_SECTION;
-use crate::ErrorKind::*;
 use crate::{
     parse::{
-        invalid_line, leading_comments, peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
+        begin_dangling_comments, end_dangling_comments, invalid_line, leading_comments,
+        peek_leading_comments, tailing_comment, Parse, TS_LINE_END,
     },
     parser::Parser,
+    token_set::TS_NEXT_SECTION,
+    ErrorKind::*,
 };
-use syntax::SyntaxKind::*;
 
 impl Parse for ast::Table {
     fn parse(p: &mut Parser<'_>) {
@@ -64,8 +63,7 @@ impl Parse for ast::Table {
 
 #[cfg(test)]
 mod test {
-    use crate::test_parser;
-    use crate::ErrorKind::*;
+    use crate::{test_parser, ErrorKind::*};
 
     test_parser! {
         #[test]

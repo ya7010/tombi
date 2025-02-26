@@ -1,14 +1,14 @@
-use itertools::Itertools;
 use std::{borrow::Cow, fmt, marker::PhantomData, ops::Range};
 
+use itertools::Itertools;
+
+use super::{RedElement, RedToken};
 use crate::{
     cursor,
     green::{GreenNode, GreenNodeData},
     red::{Preorder, RedElementChildren, RedNodeChildren, RedPreorderWithTokens},
     Direction, Language, NodeOrToken, SyntaxText, TokenAtOffset, WalkEvent,
 };
-
-use super::{RedElement, RedToken};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct RedNode<L: Language> {

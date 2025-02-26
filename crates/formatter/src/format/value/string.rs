@@ -1,8 +1,10 @@
-use super::LiteralNode;
-use crate::format::Format;
+use std::fmt::Write;
+
 use ast::AstNode;
 use config::QuoteStyle;
-use std::fmt::Write;
+
+use super::LiteralNode;
+use crate::format::Format;
 
 impl Format for ast::BasicString {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
@@ -71,8 +73,9 @@ impl LiteralNode for ast::MultiLineLiteralString {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_format, FormatDefinitions};
     use config::{QuoteStyle, TomlVersion};
+
+    use crate::{test_format, FormatDefinitions};
 
     test_format! {
         #[test]

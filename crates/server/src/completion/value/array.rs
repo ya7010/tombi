@@ -1,18 +1,18 @@
 use std::borrow::Cow;
 
-use crate::completion::{
-    completion_kind::CompletionKind, schema_completion::SchemaCompletion, CompletionContent,
-    CompletionEdit,
+use document_tree::ArrayKind;
+use futures::{future::BoxFuture, FutureExt};
+use schema_store::{
+    Accessor, ArraySchema, CurrentSchema, SchemaAccessor, SchemaDefinitions, SchemaUrl, ValueSchema,
 };
 
 use super::{
     all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
     one_of::find_one_of_completion_items, type_hint_value, CompletionHint, FindCompletionContents,
 };
-use document_tree::ArrayKind;
-use futures::{future::BoxFuture, FutureExt};
-use schema_store::{
-    Accessor, ArraySchema, CurrentSchema, SchemaAccessor, SchemaDefinitions, SchemaUrl, ValueSchema,
+use crate::completion::{
+    completion_kind::CompletionKind, schema_completion::SchemaCompletion, CompletionContent,
+    CompletionEdit,
 };
 
 impl FindCompletionContents for document_tree::Array {

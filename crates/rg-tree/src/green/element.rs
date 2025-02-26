@@ -1,11 +1,10 @@
 use std::borrow::Cow;
 
+use super::GreenTokenData;
 use crate::{
     green::{GreenNode, GreenToken, SyntaxKind},
     GreenNodeData, NodeOrToken,
 };
-
-use super::GreenTokenData;
 
 pub(super) type GreenElement = NodeOrToken<GreenNode, GreenToken>;
 pub(crate) type GreenElementRef<'a> = NodeOrToken<&'a GreenNodeData, &'a GreenTokenData>;

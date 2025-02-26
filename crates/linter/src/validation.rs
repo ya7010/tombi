@@ -15,15 +15,10 @@ mod value;
 
 use all_of::validate_all_of;
 use any_of::validate_any_of;
-use one_of::validate_one_of;
-
 use config::TomlVersion;
-use futures::future::BoxFuture;
-use futures::FutureExt;
-use schema_store::Accessor;
-use schema_store::SchemaDefinitions;
-use schema_store::SchemaUrl;
-use schema_store::ValueSchema;
+use futures::{future::BoxFuture, FutureExt};
+use one_of::validate_one_of;
+use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 pub trait Validate {
     fn validate<'a: 'b, 'b>(

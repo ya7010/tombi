@@ -1,9 +1,7 @@
-use std::borrow::Cow;
-use std::fmt::Debug;
+use std::{borrow::Cow, fmt::Debug};
 
 use config::TomlVersion;
-use futures::future::BoxFuture;
-use futures::FutureExt;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::CurrentSchema;
 
 use super::Validate;

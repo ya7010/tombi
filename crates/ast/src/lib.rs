@@ -4,9 +4,10 @@ mod impls;
 mod node;
 pub mod support;
 
+use std::{fmt::Debug, marker::PhantomData};
+
 pub use generated::*;
 pub use node::*;
-use std::{fmt::Debug, marker::PhantomData};
 
 pub trait AstNode
 where

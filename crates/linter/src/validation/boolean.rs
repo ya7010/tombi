@@ -1,7 +1,6 @@
 use config::TomlVersion;
 use document_tree::ValueImpl;
-use futures::future::BoxFuture;
-use futures::FutureExt;
+use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, SchemaDefinitions, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};

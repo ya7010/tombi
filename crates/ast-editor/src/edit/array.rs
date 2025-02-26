@@ -1,9 +1,10 @@
 use std::borrow::Cow;
 
-use crate::rule::array_values_order_by;
 use ast::AstNode;
 use futures::FutureExt;
 use schema_store::{CurrentSchema, ValueSchema};
+
+use crate::rule::array_values_order_by;
 
 impl crate::Edit for ast::Array {
     fn edit<'a: 'b, 'b>(
