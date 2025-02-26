@@ -1,3 +1,4 @@
+use config::SchemaOptions;
 use schema_store::json::CatalogUrl;
 use tower_lsp::lsp_types::{InitializedParams, MessageType};
 
@@ -10,17 +11,20 @@ pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: Ini
 
 async fn load_schemas(backend: &Backend) {
     let config = backend.config().await;
-    let schema_options = config.schema.unwrap_or_default();
+    let schema_options = match &config.schema {
+        Some(schema) => schema,
+        None => &SchemaOptions::default(),
+    };
 
     if schema_options.enabled.unwrap_or_default().value() {
         backend
             .schema_store
-            .load_schemas_from_config(
-                None,
+            .load_schemas(
                 match &config.schemas {
                     Some(schemas) => schemas,
                     None => &[],
                 },
+                backend.config_dirpath.as_deref(),
             )
             .await;
 

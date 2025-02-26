@@ -84,7 +84,7 @@
       "title": "Schema catalog items.",
       "type": ["array", "null"],
       "items": {
-        "$ref": "#/definitions/SchemaCatalogItem"
+        "$ref": "#/definitions/Schema"
       }
     }
   },
@@ -301,17 +301,17 @@
       "description": "Generic value that can be either single or multiple",
       "type": "string"
     },
-    "SchemaCatalogItem": {
+    "Schema": {
       "anyOf": [
         {
-          "$ref": "#/definitions/RootSchemaCatalogItem"
+          "$ref": "#/definitions/RootSchema"
         },
         {
-          "$ref": "#/definitions/SubSchemaCatalogItem"
+          "$ref": "#/definitions/SubSchema"
         }
       ]
     },
-    "RootSchemaCatalogItem": {
+    "RootSchema": {
       "type": "object",
       "properties": {
         "toml-version": {
@@ -342,7 +342,7 @@
       "additionalProperties": false,
       "required": ["path", "include"]
     },
-    "SubSchemaCatalogItem": {
+    "SubSchema": {
       "type": "object",
       "properties": {
         "path": {

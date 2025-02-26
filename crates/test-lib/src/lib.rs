@@ -23,6 +23,10 @@ pub fn pyproject_schema_path() -> PathBuf {
     project_root().join("schemas").join("pyproject.schema.json")
 }
 
+pub fn type_test_schema_path() -> PathBuf {
+    project_root().join("schemas").join("type-test.schema.json")
+}
+
 pub fn today_offset_date_time() -> String {
     let mut today = chrono::Local::now();
     if let Some(time) = chrono::NaiveTime::from_hms_opt(0, 0, 0) {
