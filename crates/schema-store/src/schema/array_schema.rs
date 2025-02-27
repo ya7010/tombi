@@ -25,6 +25,15 @@ pub enum ArrayValuesOrderBy {
     Descending,
 }
 
+impl std::fmt::Display for ArrayValuesOrderBy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Ascending => write!(f, "ascending"),
+            Self::Descending => write!(f, "descending"),
+        }
+    }
+}
+
 impl ArraySchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
         Self {
