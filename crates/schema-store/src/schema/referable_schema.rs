@@ -6,7 +6,10 @@ use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, SchemaUrl,
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Referable<T> {
-    Resolved(T),
+    Resolved {
+        schema_url: Option<SchemaUrl>,
+        value: T,
+    },
     Ref {
         reference: String,
         title: Option<String>,
@@ -23,7 +26,7 @@ pub struct CurrentSchema<'a> {
 impl<T> Referable<T> {
     pub fn resolved(&self) -> Option<&T> {
         match self {
-            Self::Resolved(t) => Some(t),
+            Self::Resolved { value, .. } => Some(value),
             Self::Ref { .. } => None,
         }
     }
@@ -43,12 +46,15 @@ impl Referable<ValueSchema> {
             });
         }
 
-        ValueSchema::new(object).map(Referable::Resolved)
+        ValueSchema::new(object).map(|value_schema| Referable::Resolved {
+            schema_url: None,
+            value: value_schema,
+        })
     }
 
     pub async fn value_type(&self) -> crate::ValueType {
         match self {
-            Referable::Resolved(schema) => schema.value_type().await,
+            Referable::Resolved { value, .. } => value.value_type().await,
             Referable::Ref { .. } => unreachable!("unreachable ref value_tyle."),
         }
     }
@@ -68,10 +74,10 @@ impl Referable<ValueSchema> {
                 } => {
                     if let Some(definition_schema) = definitions.read().await.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
-                        if let Referable::Resolved(ref mut schema) = &mut referable_schema {
+                        if let Referable::Resolved { ref mut value, .. } = &mut referable_schema {
                             if title.is_some() || description.is_some() {
-                                schema.set_title(title.to_owned());
-                                schema.set_description(description.to_owned());
+                                value.set_title(title.to_owned());
+                                value.set_description(description.to_owned());
                             }
                         }
 
@@ -82,7 +88,10 @@ impl Referable<ValueSchema> {
                             schema_store.try_load_document_schema(&schema_url).await?;
 
                         if let Some(value_schema) = document_schema.value_schema {
-                            *self = Referable::Resolved(value_schema);
+                            *self = Referable::Resolved {
+                                schema_url: Some(schema_url.clone()),
+                                value: value_schema,
+                            };
                             return self
                                 .resolve(Cow::Owned(schema_url), definitions, schema_store)
                                 .await;
@@ -99,8 +108,16 @@ impl Referable<ValueSchema> {
 
                     self.resolve(schema_url, definitions, schema_store).await
                 }
-                Referable::Resolved(value_schema) => {
-                    match value_schema {
+                Referable::Resolved {
+                    schema_url: reference_url,
+                    value,
+                    ..
+                } => {
+                    let schema_url = match reference_url {
+                        Some(reference_url) => Cow::Borrowed(reference_url),
+                        None => schema_url,
+                    };
+                    match value {
                         ValueSchema::OneOf(OneOfSchema { schemas, .. })
                         | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
@@ -115,7 +132,7 @@ impl Referable<ValueSchema> {
 
                     Ok(CurrentSchema {
                         schema_url,
-                        value_schema,
+                        value_schema: value,
                         definitions,
                     })
                 }
