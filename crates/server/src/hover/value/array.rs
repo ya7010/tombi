@@ -256,6 +256,7 @@ impl GetHoverContent for ArraySchema {
                     min_items: self.min_items,
                     max_items: self.max_items,
                     unique_items: self.unique_items,
+                    values_order_by: self.values_order_by.clone(),
                     ..Default::default()
                 }),
                 schema_url: schema_url.cloned(),

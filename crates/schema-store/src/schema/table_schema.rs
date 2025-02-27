@@ -30,6 +30,16 @@ pub enum TableKeysOrderBy {
     Schema,
 }
 
+impl std::fmt::Display for TableKeysOrderBy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Ascending => write!(f, "ascending"),
+            Self::Descending => write!(f, "descending"),
+            Self::Schema => write!(f, "schema"),
+        }
+    }
+}
+
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
         let mut properties = AHashMap::new();
