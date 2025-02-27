@@ -1,0 +1,9 @@
+---
+description: Rust COde
+globs: **/*.rs
+alwaysApply: false
+---
+
+# Your rule content
+
+- write all comment as English.
