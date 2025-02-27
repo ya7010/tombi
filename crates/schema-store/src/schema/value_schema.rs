@@ -46,7 +46,10 @@ impl ValueSchema {
                                     None
                                 }
                             })
-                            .map(Referable::Resolved)
+                            .map(|value_schema| Referable::Resolved {
+                                schema_url: None,
+                                value: value_schema,
+                            })
                             .collect(),
                     )),
                     ..Default::default()
