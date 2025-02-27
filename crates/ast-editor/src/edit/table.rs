@@ -66,6 +66,64 @@ impl crate::Edit for ast::Table {
                                     )
                                     .await;
                             };
+                        } else if let Some(pattern_properties) = &table_schema.pattern_properties {
+                            for (property_key, referable_property_schema) in
+                                pattern_properties.write().await.iter_mut()
+                            {
+                                if let Ok(pattern) = regex::Regex::new(property_key) {
+                                    if pattern.is_match(&accessors[0].to_string()) {
+                                        if let Ok(CurrentSchema {
+                                            value_schema,
+                                            schema_url,
+                                            definitions,
+                                        }) = referable_property_schema
+                                            .resolve(
+                                                Cow::Borrowed(schema_url),
+                                                definitions,
+                                                schema_context.store,
+                                            )
+                                            .await
+                                        {
+                                            return self
+                                                .edit(
+                                                    &accessors[1..],
+                                                    Some(&schema_url),
+                                                    Some(value_schema),
+                                                    Some(definitions),
+                                                    schema_context,
+                                                )
+                                                .await;
+                                        }
+                                    }
+                                }
+                            }
+                        } else if let Some(referable_additional_property_schema) =
+                            &table_schema.additional_property_schema
+                        {
+                            let mut referable_schema =
+                                referable_additional_property_schema.write().await;
+                            if let Ok(CurrentSchema {
+                                schema_url,
+                                value_schema,
+                                definitions,
+                            }) = referable_schema
+                                .resolve(
+                                    Cow::Borrowed(schema_url),
+                                    definitions,
+                                    schema_context.store,
+                                )
+                                .await
+                            {
+                                return self
+                                    .edit(
+                                        &accessors[1..],
+                                        Some(&schema_url),
+                                        Some(value_schema),
+                                        Some(definitions),
+                                        schema_context,
+                                    )
+                                    .await;
+                            }
                         }
                     }
                     ValueSchema::OneOf(OneOfSchema { schemas, .. })

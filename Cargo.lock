@@ -149,6 +149,7 @@ dependencies = [
  "document-tree",
  "futures",
  "itertools",
+ "regex",
  "schema-store",
  "syntax",
  "text",
