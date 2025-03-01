@@ -18,7 +18,7 @@ pub struct Formatter<'a> {
     definitions: crate::FormatDefinitions,
     #[allow(dead_code)]
     options: &'a crate::FormatOptions,
-    source_schema: Option<SourceSchema>,
+    source_schema: Option<SourceSchema<'a>>,
     schema_store: &'a schema_store::SchemaStore,
     buf: String,
 }
@@ -69,7 +69,7 @@ impl<'a> Formatter<'a> {
             root_schema: self
                 .source_schema
                 .as_ref()
-                .and_then(|schema| schema.root_schema.as_ref()),
+                .and_then(|schema| schema.root_schema),
             sub_schema_url_map: self
                 .source_schema
                 .as_ref()

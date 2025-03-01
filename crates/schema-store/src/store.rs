@@ -1,16 +1,17 @@
 use std::{ops::Deref, sync::Arc};
 
-use ahash::AHashMap;
 use config::Schema;
 use itertools::Either;
 use tokio::sync::RwLock;
 
-use crate::{json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema};
+use crate::{
+    arena::Arena, json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    schemas: Arc<RwLock<AHashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>>>,
+    schemas: Arena<SchemaUrl, Result<DocumentSchema, crate::Error>>,
     catalogs: Arc<RwLock<Vec<crate::CatalogSchema>>>,
 }
 
@@ -18,7 +19,7 @@ impl SchemaStore {
     pub fn new() -> Self {
         Self {
             http_client: reqwest::Client::new(),
-            schemas: Arc::new(RwLock::new(AHashMap::new())),
+            schemas: Arena::new(),
             catalogs: Arc::new(RwLock::new(Vec::new())),
         }
     }
@@ -50,13 +51,14 @@ impl SchemaStore {
     }
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
-        if self.schemas.read().await.contains_key(schema_url) {
-            let document_schema = self.try_fetch_document_schema_from_url(schema_url).await?;
-
+        if self.schemas.contains_key(schema_url).await {
             self.schemas
-                .write()
-                .await
-                .insert(schema_url.clone(), Ok(document_schema));
+                .update(
+                    schema_url,
+                    self.try_fetch_document_schema_from_url(schema_url).await,
+                )
+                .await;
+
             tracing::debug!("update schema: {}", schema_url);
 
             Ok(true)
@@ -158,28 +160,25 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    pub async fn try_load_document_schema(
+    pub async fn try_get_document_schema(
         &self,
         schema_url: &SchemaUrl,
-    ) -> Result<DocumentSchema, crate::Error> {
-        if let Some(document_schema) = self.schemas.read().await.get(schema_url) {
-            return match document_schema {
-                Ok(document_schema) => Ok(document_schema.clone()),
-                Err(err) => Err(err.clone()),
-            };
-        }
-
-        let document_schema = {
-            let mut schemas = self.schemas.write().await;
-
-            let document_schema = self.try_fetch_document_schema_from_url(schema_url).await?;
-
-            schemas.insert(schema_url.to_owned(), Ok(document_schema.clone()));
-
-            document_schema
+    ) -> Result<&DocumentSchema, crate::Error> {
+        let document_schema = match self.schemas.get(schema_url).await {
+            Some(document_schema) => document_schema,
+            None => {
+                self.schemas
+                    .insert(
+                        schema_url.clone(),
+                        self.try_fetch_document_schema_from_url(schema_url).await,
+                    )
+                    .await
+            }
         };
-
-        Ok(document_schema)
+        match document_schema {
+            Ok(document_schema) => Ok(document_schema),
+            Err(err) => Err(err.clone()),
+        }
     }
 
     pub async fn try_get_source_schema_from_url(
@@ -198,7 +197,7 @@ impl SchemaStore {
             }
             "http" | "https" => {
                 let schema_url = SchemaUrl::new(source_url.clone());
-                let document_schema = self.try_load_document_schema(&schema_url).await?;
+                let document_schema = self.try_get_document_schema(&schema_url).await?;
 
                 Ok(Some(SourceSchema {
                     root_schema: Some(document_schema),
@@ -237,14 +236,14 @@ impl SchemaStore {
             .collect::<Vec<_>>();
 
         for matching_schema in matching_schemas {
-            if let Ok(document_schema) = self.try_load_document_schema(&matching_schema.url).await {
+            if let Ok(document_schema) = self.try_get_document_schema(&matching_schema.url).await {
                 match &matching_schema.root_keys {
                     Some(root_keys) => match source_schema {
                         Some(ref mut source_schema) => {
                             if !source_schema.sub_schema_url_map.contains_key(root_keys) {
                                 source_schema
                                     .sub_schema_url_map
-                                    .insert(root_keys.clone(), document_schema.schema_url);
+                                    .insert(root_keys.clone(), document_schema.schema_url.clone());
                             }
                         }
                         None => {
@@ -254,7 +253,7 @@ impl SchemaStore {
                             };
                             new_source_schema
                                 .sub_schema_url_map
-                                .insert(root_keys.clone(), document_schema.schema_url);
+                                .insert(root_keys.clone(), document_schema.schema_url.clone());
 
                             source_schema = Some(new_source_schema);
                         }
