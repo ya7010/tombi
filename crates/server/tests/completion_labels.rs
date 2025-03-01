@@ -454,6 +454,7 @@ mod completion_labels {
                 "scikit-build",
                 "setuptools",
                 "setuptools_scm",
+                "taskipy",
                 "tombi",
                 "tox",
                 "uv",
