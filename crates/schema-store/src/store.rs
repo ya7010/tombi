@@ -8,24 +8,26 @@ use crate::{
     arena::Arena, json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema,
 };
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    schemas: Arena<SchemaUrl, Result<DocumentSchema, crate::Error>>,
-    catalogs: Arc<RwLock<Vec<crate::CatalogSchema>>>,
+    document_schemas: Arena<SchemaUrl, Result<DocumentSchema, crate::Error>>,
+    schemas: Arc<RwLock<Vec<crate::Schema>>>,
+    offline: bool,
 }
 
 impl SchemaStore {
-    pub fn new() -> Self {
+    pub fn new(offline: bool) -> Self {
         Self {
             http_client: reqwest::Client::new(),
-            schemas: Arena::new(),
-            catalogs: Arc::new(RwLock::new(Vec::new())),
+            document_schemas: Arena::new(),
+            schemas: Arc::new(RwLock::new(Vec::new())),
+            offline,
         }
     }
 
     pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
-        let mut catalogs = self.catalogs.write().await;
+        let mut store_schemas = self.schemas.write().await;
 
         for schema in schemas.iter() {
             let schema_url = if let Ok(schema_url) = SchemaUrl::parse(schema.path()) {
@@ -41,7 +43,7 @@ impl SchemaStore {
 
             tracing::debug!("load config schema from: {}", schema_url);
 
-            catalogs.push(crate::CatalogSchema {
+            store_schemas.push(crate::Schema {
                 url: schema_url,
                 include: schema.include().to_vec(),
                 toml_version: schema.toml_version(),
@@ -50,42 +52,32 @@ impl SchemaStore {
         }
     }
 
-    pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
-        if self.schemas.contains_key(schema_url).await {
-            self.schemas
-                .update(
-                    schema_url,
-                    self.try_fetch_document_schema_from_url(schema_url).await,
-                )
-                .await;
-
-            tracing::debug!("update schema: {}", schema_url);
-
-            Ok(true)
-        } else {
-            Ok(false)
-        }
-    }
-
-    pub async fn load_catalog_from_url(
+    pub async fn load_schemas_from_catalog_url(
         &self,
         catalog_url: &CatalogUrl,
     ) -> Result<(), crate::Error> {
+        if matches!(catalog_url.scheme(), "http" | "https") {
+            if self.offline {
+                tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
+                return Ok(());
+            }
+        }
+
         tracing::debug!("loading schema catalog: {}", catalog_url);
 
         if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
             match response.json::<crate::json::JsonCatalog>().await {
                 Ok(catalog) => {
-                    let mut catalogs = self.catalogs.write().await;
-                    for catalog_schema in catalog.schemas {
-                        if catalog_schema
+                    let mut schemas = self.schemas.write().await;
+                    for schema in catalog.schemas {
+                        if schema
                             .file_match
                             .iter()
                             .any(|pattern| pattern.ends_with(".toml"))
                         {
-                            catalogs.push(crate::CatalogSchema {
-                                url: catalog_schema.url,
-                                include: catalog_schema.file_match,
+                            schemas.push(crate::Schema {
+                                url: schema.url,
+                                include: schema.file_match,
                                 toml_version: None,
                                 root_keys: None,
                             });
@@ -105,6 +97,28 @@ impl SchemaStore {
         }
     }
 
+    pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
+        if self.document_schemas.contains_key(schema_url).await {
+            if matches!(schema_url.scheme(), "http" | "https") && self.offline {
+                tracing::debug!("offline mode, skip fetch schema from url: {}", schema_url);
+                return Ok(false);
+            }
+
+            self.document_schemas
+                .update(
+                    schema_url,
+                    self.try_fetch_document_schema_from_url(schema_url).await,
+                )
+                .await;
+
+            tracing::debug!("update schema: {}", schema_url);
+
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
     async fn try_fetch_document_schema_from_url(
         &self,
         schema_url: &SchemaUrl,
@@ -114,8 +128,8 @@ impl SchemaStore {
                 let schema_path =
                     schema_url
                         .to_file_path()
-                        .map_err(|_| crate::Error::InvalidFilePath {
-                            url: schema_url.deref().to_owned(),
+                        .map_err(|_| crate::Error::InvalidSchemaUrl {
+                            schema_url: schema_url.to_string(),
                         })?;
                 let file = std::fs::File::open(&schema_path)
                     .map_err(|_| crate::Error::SchemaFileReadFailed { schema_path })?;
@@ -123,6 +137,12 @@ impl SchemaStore {
                 serde_json::from_reader(file)
             }
             "http" | "https" => {
+                if self.offline {
+                    unreachable!(
+                        "offline mode, store don't have online schema url: {}",
+                        schema_url
+                    );
+                }
                 tracing::debug!("fetch schema from url: {}", schema_url);
 
                 let response = self
@@ -147,7 +167,7 @@ impl SchemaStore {
                 serde_json::from_reader(std::io::Cursor::new(bytes))
             }
             _ => {
-                return Err(crate::Error::SchemaUrlUnsupported {
+                return Err(crate::Error::UnsupportedSchemaUrl {
                     schema_url: schema_url.to_owned(),
                 })
             }
@@ -164,10 +184,10 @@ impl SchemaStore {
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<&DocumentSchema, crate::Error> {
-        let document_schema = match self.schemas.get(schema_url).await {
+        let document_schema = match self.document_schemas.get(schema_url).await {
             Some(document_schema) => document_schema,
             None => {
-                self.schemas
+                self.document_schemas
                     .insert(
                         schema_url.clone(),
                         self.try_fetch_document_schema_from_url(schema_url).await,
@@ -196,6 +216,10 @@ impl SchemaStore {
                 self.try_get_source_schema_from_path(&source_path).await
             }
             "http" | "https" => {
+                if self.offline {
+                    tracing::debug!("offline mode, skip fetch source from url: {}", source_url);
+                    return Ok(None);
+                }
                 let schema_url = SchemaUrl::new(source_url.clone());
                 let document_schema = self.try_get_document_schema(&schema_url).await?;
 
@@ -217,8 +241,8 @@ impl SchemaStore {
     ) -> Result<Option<SourceSchema>, crate::Error> {
         let mut source_schema: Option<SourceSchema> = None;
 
-        let catalogs = self.catalogs.read().await;
-        let matching_schemas = catalogs
+        let schemas = self.schemas.read().await;
+        let matching_schemas = schemas
             .iter()
             .filter(|catalog| {
                 catalog.include.iter().any(|pat| {

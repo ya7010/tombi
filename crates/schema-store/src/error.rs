@@ -20,7 +20,7 @@ pub enum Error {
     CatalogUrlFetchFailed { catalog_url: CatalogUrl },
 
     #[error("unsupported schema url: {schema_url}")]
-    SchemaUrlUnsupported { schema_url: SchemaUrl },
+    UnsupportedSchemaUrl { schema_url: SchemaUrl },
 
     #[error("invalid schema url: {schema_url}")]
     InvalidSchemaUrl { schema_url: String },

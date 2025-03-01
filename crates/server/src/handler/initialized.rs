@@ -32,7 +32,7 @@ async fn load_schemas(backend: &Backend) {
             if let Ok(catalog_url) = catalog_path.try_into() {
                 if let Err(err) = backend
                     .schema_store
-                    .load_catalog_from_url(&CatalogUrl::new(catalog_url))
+                    .load_schemas_from_catalog_url(&CatalogUrl::new(catalog_url))
                     .await
                 {
                     let Ok(_) = backend

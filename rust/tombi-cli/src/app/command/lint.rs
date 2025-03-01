@@ -15,8 +15,8 @@ pub struct Args {
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
-pub fn run(args: Args) -> Result<(), crate::Error> {
-    let (success_num, error_num) = match inner_run(args, Pretty) {
+pub fn run(args: Args, offline: bool) -> Result<(), crate::Error> {
+    let (success_num, error_num) = match inner_run(args, Pretty, offline) {
         Ok((success_num, error_num)) => (success_num, error_num),
         Err(error) => {
             tracing::error!("{}", error);
@@ -47,7 +47,11 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
     Ok(())
 }
 
-fn inner_run<P>(args: Args, printer: P) -> Result<(usize, usize), Box<dyn std::error::Error>>
+fn inner_run<P>(
+    args: Args,
+    printer: P,
+    offline: bool,
+) -> Result<(usize, usize), Box<dyn std::error::Error>>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
@@ -66,7 +70,7 @@ where
         .map(|p| p.iter().map(|s| s.as_str()).collect());
     let lint_options = config.lint.unwrap_or_default();
     let schema_options = config.schema.unwrap_or_default();
-    let schema_store = schema_store::SchemaStore::default();
+    let schema_store = schema_store::SchemaStore::new(offline);
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -90,7 +94,7 @@ where
 
             for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
                 schema_store
-                    .load_catalog_from_url(&CatalogUrl::new(catalog_path.try_into()?))
+                    .load_schemas_from_catalog_url(&CatalogUrl::new(catalog_path.try_into()?))
                     .await?;
             }
         }
