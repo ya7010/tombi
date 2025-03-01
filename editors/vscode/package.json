@@ -22,7 +22,6 @@
     "build": "pnpm run build-base --sourcemap",
     "watch": "pnpm run build-base --sourcemap --watch",
     "package": "pnpm run build && vsce package --no-dependencies -o tombi.vsix",
-    "publish": "vsce publish --no-dependencies",
     "format": "biome format --fix",
     "format:check": "biome format",
     "lint": "biome lint --fix",
