@@ -89,11 +89,15 @@ impl Referable<ValueSchema> {
 
                         if let Some(value_schema) = &document_schema.value_schema {
                             *self = Referable::Resolved {
-                                schema_url: Some(schema_url.clone()),
+                                schema_url: Some(document_schema.schema_url.clone()),
                                 value: value_schema.clone(),
                             };
                             return self
-                                .resolve(Cow::Owned(schema_url), definitions, schema_store)
+                                .resolve(
+                                    Cow::Borrowed(&document_schema.schema_url),
+                                    &document_schema.definitions,
+                                    schema_store,
+                                )
                                 .await;
                         } else {
                             return Err(crate::Error::InvalidJsonSchemaReference {
@@ -110,14 +114,21 @@ impl Referable<ValueSchema> {
                 }
                 Referable::Resolved {
                     schema_url: reference_url,
-                    value,
+                    value: value_schema,
                     ..
                 } => {
-                    let schema_url = match reference_url {
-                        Some(reference_url) => Cow::Borrowed(reference_url),
-                        None => schema_url,
+                    let (schema_url, definitions) = match reference_url {
+                        Some(reference_url) => (
+                            Cow::Borrowed(reference_url),
+                            &schema_store
+                                .try_get_document_schema(&reference_url)
+                                .await?
+                                .definitions,
+                        ),
+                        None => (schema_url, definitions),
                     };
-                    match value {
+
+                    match value_schema {
                         ValueSchema::OneOf(OneOfSchema { schemas, .. })
                         | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
@@ -132,7 +143,7 @@ impl Referable<ValueSchema> {
 
                     Ok(CurrentSchema {
                         schema_url,
-                        value_schema: value,
+                        value_schema,
                         definitions,
                     })
                 }
