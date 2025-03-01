@@ -1,4 +1,5 @@
 mod accessor;
+mod arena;
 mod error;
 pub mod json;
 mod schema;

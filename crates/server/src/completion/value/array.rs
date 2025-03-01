@@ -44,7 +44,7 @@ impl FindCompletionContents for document_tree::Array {
                     if schema_url != Some(sub_schema_url) {
                         if let Ok(document_schema) = schema_context
                             .store
-                            .try_load_document_schema(sub_schema_url)
+                            .try_get_document_schema(sub_schema_url)
                             .await
                         {
                             return self

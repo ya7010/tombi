@@ -13,9 +13,7 @@ use crate::lint::Lint;
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
-    #[allow(dead_code)]
-    source_schema: Option<SourceSchema>,
-    #[allow(dead_code)]
+    source_schema: Option<SourceSchema<'a>>,
     schema_store: &'a schema_store::SchemaStore,
     pub(crate) diagnostics: Vec<crate::Diagnostic>,
 }

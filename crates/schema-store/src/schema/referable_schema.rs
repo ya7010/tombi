@@ -85,12 +85,12 @@ impl Referable<ValueSchema> {
                     } else if is_online_url(reference) {
                         let schema_url = SchemaUrl::parse(reference)?;
                         let document_schema =
-                            schema_store.try_load_document_schema(&schema_url).await?;
+                            schema_store.try_get_document_schema(&schema_url).await?;
 
-                        if let Some(value_schema) = document_schema.value_schema {
+                        if let Some(value_schema) = &document_schema.value_schema {
                             *self = Referable::Resolved {
                                 schema_url: Some(schema_url.clone()),
-                                value: value_schema,
+                                value: value_schema.clone(),
                             };
                             return self
                                 .resolve(Cow::Owned(schema_url), definitions, schema_store)
