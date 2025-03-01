@@ -122,9 +122,15 @@ jobs:
         working-directory: ./editors/vscode
 
       - name: Publish VSCode Extension
-        run: pnpm run publish --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath "../../dist/tombi-vscode-${{ env.TOMBI_VERSION }}-${{ matrix.vscode_target }}.vsix"
+        run: npx vsce publish --no-dependencies --pat ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath "../../dist/tombi-vscode-${{ env.TOMBI_VERSION }}-${{ matrix.vscode_target }}.vsix"
         if: startsWith(github.ref, 'refs/tags/')
         working-directory: ./editors/vscode
+
+      - name: Publish OpenVSX Extension
+        run: npx ovsx publish --no-dependencies --pat ${{ secrets.OPEN_VSX_ACCESS_TOKEN }} --packagePath "../../dist/tombi-vscode-${{ env.TOMBI_VERSION }}-${{ matrix.vscode_target }}.vsix"
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ./editors/vscode
+        timeout-minutes: 2
 
       - name: Upload tombi-vscode artifacts
         uses: actions/upload-artifact@v4
