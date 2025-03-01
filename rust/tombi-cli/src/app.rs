@@ -24,6 +24,12 @@ pub struct Args {
 
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
+
+    /// Offline mode
+    ///
+    /// If set, the CLI will not fetch remote schemas.
+    #[clap(long, global = true)]
+    offline: bool,
 }
 
 impl<I, T> From<I> for Args
@@ -50,10 +56,11 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
         )
         .init();
 
+    let offline = args.offline;
     match args.subcommand {
-        command::TomlCommand::Format(args) => command::format::run(args),
-        command::TomlCommand::Lint(args) => command::lint::run(args),
-        command::TomlCommand::Serve(args) => command::serve::run(args),
+        command::TomlCommand::Format(args) => command::format::run(args, offline),
+        command::TomlCommand::Lint(args) => command::lint::run(args, offline),
+        command::TomlCommand::Serve(args) => command::serve::run(args, offline),
     }
 }
 

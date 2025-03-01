@@ -2,14 +2,14 @@ use std::sync::Arc;
 
 use futures::future::join_all;
 
-use super::{Schemas, ValueSchema};
+use super::{ReferableValueSchemas, ValueSchema};
 use crate::Referable;
 
 #[derive(Debug, Default, Clone)]
 pub struct AllOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub schemas: Schemas,
+    pub schemas: ReferableValueSchemas,
     pub default: Option<serde_json::Value>,
 }
 

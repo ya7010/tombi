@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, AnyOfSchema, CurrentSchema, SchemaDefinitions, SchemaUrl, Schemas};
+use schema_store::{Accessor, AnyOfSchema, CurrentSchema, SchemaDefinitions, SchemaUrl, ReferableValueSchemas};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
@@ -17,7 +17,7 @@ impl CompositeSchemaImpl for AnyOfSchema {
         self.description.clone()
     }
 
-    fn schemas(&self) -> &Schemas {
+    fn schemas(&self) -> &ReferableValueSchemas {
         &self.schemas
     }
 }

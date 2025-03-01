@@ -17,7 +17,7 @@ use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
 use schema_store::{
-    Accessor, CurrentSchema, SchemaDefinitions, SchemaStore, SchemaUrl, Schemas, ValueSchema,
+    Accessor, CurrentSchema, SchemaDefinitions, SchemaStore, SchemaUrl, ReferableValueSchemas, ValueSchema,
 };
 use syntax::{SyntaxElement, SyntaxKind};
 
@@ -253,7 +253,7 @@ pub trait CompletionCandidate {
 trait CompositeSchemaImpl {
     fn title(&self) -> Option<String>;
     fn description(&self) -> Option<String>;
-    fn schemas(&self) -> &Schemas;
+    fn schemas(&self) -> &ReferableValueSchemas;
 }
 
 impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {

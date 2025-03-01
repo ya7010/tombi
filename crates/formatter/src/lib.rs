@@ -41,7 +41,7 @@ macro_rules! test_format {
                 $definitions,
                 $options,
                 None,
-                &schema_store::SchemaStore::default()
+                &schema_store::SchemaStore::new(false)
             ).await.unwrap().format($source).await {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
@@ -73,7 +73,7 @@ macro_rules! test_format {
                 $definitions,
                 $options,
                 None,
-                &schema_store::SchemaStore::default()
+                &schema_store::SchemaStore::new(false)
             ).await.unwrap().format($source).await {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {

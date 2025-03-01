@@ -29,7 +29,7 @@ mod tests {
             config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
-            &schema_store::SchemaStore::default(),
+            &schema_store::SchemaStore::new(false),
         )
         .await
         .unwrap()

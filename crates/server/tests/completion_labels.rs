@@ -886,7 +886,7 @@ mod completion_labels {
                         .try_init();
                 }
 
-                let (service, _) = LspService::new(|client| Backend::new(client));
+                let (service, _) = LspService::new(|client| Backend::new(client, false));
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = $schema_file_path.as_ref() {
@@ -1135,7 +1135,7 @@ mod completion_labels {
                         .try_init();
                 }
 
-                let (service, _) = LspService::new(|client| Backend::new(client));
+                let (service, _) = LspService::new(|client| Backend::new(client, false));
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = $schema_file_path.as_ref() {
