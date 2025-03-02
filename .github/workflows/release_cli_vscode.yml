@@ -147,6 +147,7 @@ jobs:
   release:
     needs: [release-cli-and-vscode]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download tombi-cli artifacts
         uses: actions/download-artifact@v4
@@ -160,7 +161,6 @@ jobs:
           echo "ASSETS=$(find dist -name "tombi-cli-${{ env.TOMBI_VERSION }}-*" -type f | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -171,7 +171,6 @@ jobs:
           prerelease: false
 
       - name: Upload CLI Assets
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.ASSETS }}
