@@ -1,4 +1,5 @@
 import { Tip } from "~/components/highlight";
+import { CodeBlock } from "~/components/CodeBlock";
 
 # Completion
 
@@ -21,15 +22,12 @@ but Tombi controls the form of completion by selecting triggers with `.` and `=`
 <Tip>
 If you prefer inline tables, select the trigger `=`, and completion will prioritize inline tables
 
-```toml
-inline = { table = true }
-```
+<CodeBlock code="inline = { table = true }" language="toml" />
 
 If you prefer dotted keys, select the trigger `.`
 
-```toml
-dotted.keys = true
-```
+<CodeBlock code="dotted.keys = true" language="toml" />
+
 </Tip>
 
 #### Dot Trigger Completion
