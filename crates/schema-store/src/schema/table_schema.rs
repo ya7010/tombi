@@ -2,6 +2,7 @@ use std::{borrow::Cow, sync::Arc};
 
 use ahash::AHashMap;
 use futures::{future::BoxFuture, FutureExt};
+use indexmap::IndexMap;
 
 use super::{
     CurrentSchema, FindSchemaCandidates, SchemaDefinitions, SchemaItemTokio,
@@ -42,7 +43,7 @@ impl std::fmt::Display for TableKeysOrderBy {
 
 impl TableSchema {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
-        let mut properties = AHashMap::new();
+        let mut properties = IndexMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
                 let Some(object) = value.as_object() else {

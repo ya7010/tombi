@@ -47,7 +47,7 @@ use crate::SchemaAccessor;
 use crate::{Accessor, SchemaStore};
 
 pub type SchemaProperties =
-    Arc<tokio::sync::RwLock<ahash::AHashMap<Accessor, Referable<ValueSchema>>>>;
+    Arc<tokio::sync::RwLock<indexmap::IndexMap<Accessor, Referable<ValueSchema>>>>;
 pub type SchemaPatternProperties =
     Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
 pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
