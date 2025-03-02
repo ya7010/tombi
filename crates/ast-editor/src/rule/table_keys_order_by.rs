@@ -1,6 +1,6 @@
 use ast::AstNode;
 use itertools::{sorted, Itertools};
-use schema_store::{TableKeysOrderBy, TableSchema};
+use schema_store::{TableKeysOrder, TableSchema};
 use syntax::SyntaxElement;
 
 pub async fn table_keys_order_by(
@@ -9,7 +9,7 @@ pub async fn table_keys_order_by(
 ) -> Vec<crate::Change> {
     let key_order = match table_schema {
         TableSchema {
-            keys_order_by: Some(key_order),
+            keys_order: Some(key_order),
             ..
         } => key_order,
         _ => return Vec::with_capacity(0),
@@ -33,14 +33,14 @@ pub async fn table_keys_order_by(
     );
 
     match key_order {
-        TableKeysOrderBy::Ascending => {
+        TableKeysOrder::Ascending => {
             let new = sorted(key_values)
                 .map(|kv| SyntaxElement::Node(kv.syntax().clone()))
                 .collect_vec();
 
             vec![crate::Change::ReplaceRange { old, new }]
         }
-        TableKeysOrderBy::Descending => {
+        TableKeysOrder::Descending => {
             let new = sorted(key_values)
                 .rev()
                 .map(|kv| SyntaxElement::Node(kv.syntax().clone()))
@@ -48,7 +48,7 @@ pub async fn table_keys_order_by(
 
             vec![crate::Change::ReplaceRange { old, new }]
         }
-        TableKeysOrderBy::Schema => {
+        TableKeysOrder::Schema => {
             let mut new = vec![];
             for (accessor, _) in table_schema.properties.write().await.iter_mut() {
                 key_values = key_values

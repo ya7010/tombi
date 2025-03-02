@@ -23,7 +23,7 @@ use std::sync::Arc;
 
 pub use all_of_schema::AllOfSchema;
 pub use any_of_schema::AnyOfSchema;
-pub use array_schema::{ArraySchema, ArrayValuesOrderBy};
+pub use array_schema::{ArraySchema, ArrayValuesOrder};
 pub use boolean_schema::BooleanSchema;
 pub use document_schema::DocumentSchema;
 pub use float_schema::FloatSchema;
@@ -39,7 +39,7 @@ pub use schema_context::SchemaContext;
 pub use schema_url::SchemaUrl;
 pub use source_schema::{SourceSchema, SubSchemaUrlMap};
 pub use string_schema::StringSchema;
-pub use table_schema::{TableKeysOrderBy, TableSchema};
+pub use table_schema::{TableKeysOrder, TableSchema};
 pub use value_schema::*;
 pub use x_tombi::*;
 
