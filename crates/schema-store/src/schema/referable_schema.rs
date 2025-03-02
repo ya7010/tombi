@@ -128,7 +128,7 @@ impl Referable<ValueSchema> {
                                     schema_store.try_get_document_schema(reference_url).await?
                                 {
                                     (
-                                        Cow::Borrowed(reference_url),
+                                        Cow::Owned(document_schema.schema_url),
                                         Cow::Owned(document_schema.definitions),
                                     )
                                 } else {
