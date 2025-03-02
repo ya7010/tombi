@@ -33,9 +33,10 @@ impl SchemaStore {
         for schema in schemas.iter() {
             let schema_url = if let Ok(schema_url) = SchemaUrl::parse(schema.path()) {
                 schema_url
-            } else if let Some(Ok(schema_url)) = base_dirpath
-                .map(|base_dirpath| SchemaUrl::from_file_path(base_dirpath.join(schema.path())))
-            {
+            } else if let Ok(schema_url) = match base_dirpath {
+                Some(base_dirpath) => SchemaUrl::from_file_path(base_dirpath.join(schema.path())),
+                None => SchemaUrl::from_file_path(schema.path()),
+            } {
                 schema_url
             } else {
                 tracing::error!("invalid schema path: {}", schema.path());
