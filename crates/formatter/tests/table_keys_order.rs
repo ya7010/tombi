@@ -7,7 +7,7 @@ mod table_keys_order {
 
         test_table_keys_order! {
             #[tokio::test]
-            async fn test_project_section_keys_order(
+            async fn test_project(
                 r#"
                 [project]
                 version = "0.1.0"
@@ -29,7 +29,42 @@ mod table_keys_order {
                 readme = "README.md"
                 requires-python = ">=3.8"
                 authors = [{ name = "Test Author", email = "test@example.com" }]
-                "#);
+                "#
+            )
+        }
+
+        test_table_keys_order! {
+            #[tokio::test]
+            async fn test_tool_poetry_dependencies(
+                r#"
+                [project]
+                name = "test-project"
+                version = "0.1.0"
+                description = "A test project"
+                authors = [{ name = "test-user" }]
+                readme = "README.md"
+
+                [tool.poetry.dependencies]
+                python = ">=3.11 <3.13"
+                pydantic = "^2.5"
+                pandas = "^2.2.0"
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                name = "test-project"
+                version = "0.1.0"
+                description = "A test project"
+                readme = "README.md"
+                authors = [{ name = "test-user" }]
+
+                [tool.poetry.dependencies]
+                pandas = "^2.2.0"
+                pydantic = "^2.5"
+                python = ">=3.11 <3.13"
+                "#
+            )
         }
     }
 
@@ -40,7 +75,7 @@ mod table_keys_order {
                 async fn $name:ident(
                     $source:expr,
                     $schema_path:expr$(,)?
-                ) -> Ok($expected:expr);
+                ) -> Ok($expected:expr$(,)?)
             ) => {
             #[tokio::test]
             async fn $name() {
