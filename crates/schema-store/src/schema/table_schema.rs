@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 
 use super::{
     CurrentSchema, FindSchemaCandidates, SchemaDefinitions, SchemaItemTokio,
-    SchemaPatternProperties, SchemaUrl, ValueSchema,
+    SchemaPatternProperties, SchemaUrl, ValueSchema, X_TOMBI_TABLE_KEYS_ORDER,
 };
 use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
 
@@ -21,17 +21,17 @@ pub struct TableSchema {
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
-    pub keys_order_by: Option<TableKeysOrderBy>,
+    pub keys_order: Option<TableKeysOrder>,
 }
 
 #[derive(Debug, Clone)]
-pub enum TableKeysOrderBy {
+pub enum TableKeysOrder {
     Ascending,
     Descending,
     Schema,
 }
 
-impl std::fmt::Display for TableKeysOrderBy {
+impl std::fmt::Display for TableKeysOrder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Ascending => write!(f, "ascending"),
@@ -82,18 +82,22 @@ impl TableSchema {
                 _ => (true, None),
             };
 
-        let key_order = match object.get("x-tombi-table-keys-order-by") {
+        let keys_order = match object
+            .get(X_TOMBI_TABLE_KEYS_ORDER)
+            // NOTE: support old name
+            .and_then(|object| object.get("x-tombi-table-keys-order-by"))
+        {
             Some(serde_json::Value::String(order)) => match order.as_str() {
-                "ascending" => Some(TableKeysOrderBy::Ascending),
-                "descending" => Some(TableKeysOrderBy::Descending),
-                "schema" => Some(TableKeysOrderBy::Schema),
+                "ascending" => Some(TableKeysOrder::Ascending),
+                "descending" => Some(TableKeysOrder::Descending),
+                "schema" => Some(TableKeysOrder::Schema),
                 _ => {
-                    tracing::error!("invalid x-tombi-table-keys-order-by: {order}");
+                    tracing::error!("invalid {X_TOMBI_TABLE_KEYS_ORDER}: {order}");
                     None
                 }
             },
             Some(order) => {
-                tracing::error!("invalid x-tombi-table-keys-order-by: {}", order.to_string());
+                tracing::error!("invalid {X_TOMBI_TABLE_KEYS_ORDER}: {}", order.to_string());
                 None
             }
             None => None,
@@ -123,7 +127,7 @@ impl TableSchema {
             max_properties: object
                 .get("maxProperties")
                 .and_then(|v| v.as_u64().map(|u| u as usize)),
-            keys_order_by: key_order,
+            keys_order,
         }
     }
 

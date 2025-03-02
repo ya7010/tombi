@@ -1,7 +1,7 @@
 use ast::AstNode;
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use schema_store::{ArraySchema, ArrayValuesOrderBy};
+use schema_store::{ArraySchema, ArrayValuesOrder};
 use syntax::SyntaxElement;
 
 pub async fn array_values_order_by(
@@ -9,11 +9,11 @@ pub async fn array_values_order_by(
     array_schema: &ArraySchema,
     toml_version: toml_version::TomlVersion,
 ) -> Vec<crate::Change> {
-    let values_order_by = match array_schema {
+    let values_order = match array_schema {
         ArraySchema {
-            values_order_by: Some(values_order_by),
+            values_order: Some(values_order),
             ..
-        } => values_order_by,
+        } => values_order,
         _ => return Vec::with_capacity(0),
     };
 
@@ -40,8 +40,8 @@ pub async fn array_values_order_by(
         }
     };
 
-    match values_order_by {
-        ArrayValuesOrderBy::Ascending => {
+    match values_order {
+        ArrayValuesOrder::Ascending => {
             let new = sortable_values
                 .sorted()
                 .into_iter()
@@ -50,7 +50,7 @@ pub async fn array_values_order_by(
 
             vec![crate::Change::ReplaceRange { old, new }]
         }
-        ArrayValuesOrderBy::Descending => {
+        ArrayValuesOrder::Descending => {
             let new = sortable_values
                 .sorted()
                 .into_iter()
