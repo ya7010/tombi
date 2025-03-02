@@ -43,11 +43,11 @@ impl crate::Edit for ast::ArrayOfTables {
                         }
                         let mut properties = table_schema.properties.write().await;
                         if let Some(referable_property_schema) = properties.get_mut(&accessors[0]) {
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 value_schema,
                                 schema_url,
                                 definitions,
-                            }) = referable_property_schema
+                            })) = referable_property_schema
                                 .resolve(
                                     Cow::Borrowed(schema_url),
                                     Cow::Borrowed(definitions),
@@ -71,11 +71,11 @@ impl crate::Edit for ast::ArrayOfTables {
                             {
                                 if let Ok(pattern) = regex::Regex::new(property_key) {
                                     if pattern.is_match(&accessors[0].to_string()) {
-                                        if let Ok(CurrentSchema {
+                                        if let Ok(Some(CurrentSchema {
                                             value_schema,
                                             schema_url,
                                             definitions,
-                                        }) = referable_property_schema
+                                        })) = referable_property_schema
                                             .resolve(
                                                 Cow::Borrowed(schema_url),
                                                 Cow::Borrowed(definitions),
@@ -101,11 +101,11 @@ impl crate::Edit for ast::ArrayOfTables {
                         {
                             let mut referable_schema =
                                 referable_additional_property_schema.write().await;
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 schema_url,
                                 value_schema,
                                 definitions,
-                            }) = referable_schema
+                            })) = referable_schema
                                 .resolve(
                                     Cow::Borrowed(schema_url),
                                     Cow::Borrowed(definitions),
@@ -128,11 +128,11 @@ impl crate::Edit for ast::ArrayOfTables {
                     ValueSchema::OneOf(OneOfSchema { schemas, .. })
                     | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => {
                         for schema in schemas.write().await.iter_mut() {
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 schema_url,
                                 value_schema,
                                 definitions,
-                            }) = schema
+                            })) = schema
                                 .resolve(
                                     Cow::Borrowed(schema_url),
                                     Cow::Borrowed(definitions),

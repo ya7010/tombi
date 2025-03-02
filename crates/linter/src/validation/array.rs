@@ -26,7 +26,7 @@ impl Validate for document_tree::Array {
                     .collect::<Vec<_>>(),
             ) {
                 if schema_url != Some(sub_schema_url) {
-                    if let Ok(document_schema) =
+                    if let Ok(Some(document_schema)) =
                         schema_store.try_get_document_schema(sub_schema_url).await
                     {
                         return self
@@ -111,11 +111,11 @@ impl Validate for document_tree::Array {
 
                     if let Some(items) = &array_schema.items {
                         let mut referable_schema = items.write().await;
-                        if let Ok(CurrentSchema {
+                        if let Ok(Some(CurrentSchema {
                             value_schema,
                             schema_url,
                             definitions,
-                        }) = referable_schema
+                        })) = referable_schema
                             .resolve(
                                 Cow::Borrowed(schema_url),
                                 Cow::Borrowed(definitions),

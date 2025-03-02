@@ -269,11 +269,11 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok(CurrentSchema {
+                    if let Ok(Some(CurrentSchema {
                         value_schema,
                         schema_url,
                         definitions,
-                    }) = referable_schema
+                    })) = referable_schema
                         .resolve(
                             Cow::Borrowed(schema_url),
                             Cow::Borrowed(definitions),
@@ -319,11 +319,11 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
             let mut candidates = ahash::AHashSet::new();
             {
                 for referable_schema in self.schemas().write().await.iter_mut() {
-                    if let Ok(CurrentSchema {
+                    if let Ok(Some(CurrentSchema {
                         value_schema,
                         schema_url,
                         definitions,
-                    }) = referable_schema
+                    })) = referable_schema
                         .resolve(
                             Cow::Borrowed(schema_url),
                             Cow::Borrowed(definitions),

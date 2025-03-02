@@ -224,11 +224,11 @@ impl ValueSchema {
                 | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                     for referable_schema in schemas.write().await.iter_mut() {
-                        if let Ok(CurrentSchema {
+                        if let Ok(Some(CurrentSchema {
                             value_schema,
                             schema_url,
                             definitions,
-                        }) = referable_schema
+                        })) = referable_schema
                             .resolve(
                                 Cow::Borrowed(schema_url),
                                 Cow::Borrowed(definitions),
@@ -280,11 +280,11 @@ impl ValueSchema {
                         .await
                         .iter_mut()
                         .map(|referable_schema| async {
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 value_schema,
                                 schema_url,
                                 definitions,
-                            }) = referable_schema
+                            })) = referable_schema
                                 .resolve(
                                     Cow::Borrowed(schema_url),
                                     Cow::Borrowed(definitions),
@@ -309,11 +309,11 @@ impl ValueSchema {
                         .await
                         .iter_mut()
                         .map(|referable_schema| async {
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 value_schema,
                                 schema_url,
                                 definitions,
-                            }) = referable_schema
+                            })) = referable_schema
                                 .resolve(
                                     Cow::Borrowed(schema_url),
                                     Cow::Borrowed(definitions),
@@ -371,11 +371,11 @@ impl FindSchemaCandidates for ValueSchema {
                     let mut errors = Vec::new();
 
                     for referable_schema in schemas.write().await.iter_mut() {
-                        let Ok(CurrentSchema {
+                        let Ok(Some(CurrentSchema {
                             value_schema,
                             schema_url,
                             definitions,
-                        }) = referable_schema
+                        })) = referable_schema
                             .resolve(
                                 Cow::Borrowed(schema_url),
                                 Cow::Borrowed(definitions),

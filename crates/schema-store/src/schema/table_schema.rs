@@ -149,11 +149,11 @@ impl FindSchemaCandidates for TableSchema {
 
             if accessors.is_empty() {
                 for property in self.properties.write().await.values_mut() {
-                    if let Ok(CurrentSchema {
+                    if let Ok(Some(CurrentSchema {
                         value_schema,
                         schema_url,
                         definitions,
-                    }) = property
+                    })) = property
                         .resolve(
                             Cow::Borrowed(schema_url),
                             Cow::Borrowed(definitions),
@@ -178,11 +178,11 @@ impl FindSchemaCandidates for TableSchema {
             }
 
             if let Some(value) = self.properties.write().await.get_mut(&accessors[0]) {
-                if let Ok(CurrentSchema {
+                if let Ok(Some(CurrentSchema {
                     value_schema,
                     schema_url,
                     definitions,
-                }) = value
+                })) = value
                     .resolve(
                         Cow::Borrowed(schema_url),
                         Cow::Borrowed(definitions),

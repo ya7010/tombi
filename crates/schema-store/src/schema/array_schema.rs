@@ -96,11 +96,11 @@ impl FindSchemaCandidates for ArraySchema {
             };
 
             let mut referable_schema = items.write().await;
-            if let Ok(CurrentSchema {
+            if let Ok(Some(CurrentSchema {
                 schema_url,
                 value_schema,
                 definitions,
-            }) = referable_schema
+            })) = referable_schema
                 .resolve(
                     Cow::Borrowed(schema_url),
                     Cow::Borrowed(&definitions),

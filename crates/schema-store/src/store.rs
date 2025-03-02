@@ -99,13 +99,13 @@ impl SchemaStore {
     }
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
+        if matches!(schema_url.scheme(), "http" | "https") && self.offline {
+            tracing::debug!("offline mode, skip fetch schema from url: {}", schema_url);
+            return Ok(false);
+        }
+
         let has_key = { self.document_schemas.read().await.contains_key(schema_url) };
         if has_key {
-            if matches!(schema_url.scheme(), "http" | "https") && self.offline {
-                tracing::debug!("offline mode, skip fetch schema from url: {}", schema_url);
-                return Ok(false);
-            }
-
             self.document_schemas.write().await.insert(
                 schema_url.clone(),
                 self.try_fetch_document_schema_from_url(schema_url).await,
@@ -183,11 +183,15 @@ impl SchemaStore {
     pub fn try_get_document_schema<'a: 'b, 'b>(
         &'a self,
         schema_url: &'a SchemaUrl,
-    ) -> BoxFuture<'b, Result<DocumentSchema, crate::Error>> {
+    ) -> BoxFuture<'b, Result<Option<DocumentSchema>, crate::Error>> {
         async move {
+            if matches!(schema_url.scheme(), "http" | "https") && self.offline {
+                return Ok(None);
+            }
+
             if let Some(document_schema) = self.document_schemas.read().await.get(schema_url) {
                 return match document_schema {
-                    Ok(document_schema) => Ok(document_schema.clone()),
+                    Ok(document_schema) => Ok(Some(document_schema.clone())),
                     Err(err) => Err(err.clone()),
                 };
             }
@@ -222,10 +226,9 @@ impl SchemaStore {
                     return Ok(None);
                 }
                 let schema_url = SchemaUrl::new(source_url.clone());
-                let document_schema = self.try_get_document_schema(&schema_url).await?;
 
                 Ok(Some(SourceSchema {
-                    root_schema: Some(document_schema),
+                    root_schema: self.try_get_document_schema(&schema_url).await?,
                     sub_schema_url_map: Default::default(),
                 }))
             }
@@ -261,7 +264,9 @@ impl SchemaStore {
             .collect::<Vec<_>>();
 
         for matching_schema in matching_schemas {
-            if let Ok(document_schema) = self.try_get_document_schema(&matching_schema.url).await {
+            if let Ok(Some(document_schema)) =
+                self.try_get_document_schema(&matching_schema.url).await
+            {
                 match &matching_schema.root_keys {
                     Some(root_keys) => match source_schema {
                         Some(ref mut source_schema) => {

@@ -32,11 +32,11 @@ where
 
         let mut schemas = one_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(CurrentSchema {
+            let Ok(Some(CurrentSchema {
                 value_schema,
                 schema_url,
                 definitions,
-            }) = referable_schema
+            })) = referable_schema
                 .resolve(
                     Cow::Borrowed(schema_url),
                     Cow::Borrowed(definitions),

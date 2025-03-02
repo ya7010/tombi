@@ -64,7 +64,7 @@ impl Referable<ValueSchema> {
         schema_url: Cow<'a, SchemaUrl>,
         definitions: Cow<'a, SchemaDefinitions>,
         schema_store: &'a crate::SchemaStore,
-    ) -> BoxFuture<'b, Result<CurrentSchema<'a>, crate::Error>> {
+    ) -> BoxFuture<'b, Result<Option<CurrentSchema<'a>>, crate::Error>> {
         Box::pin(async move {
             match self {
                 Referable::Ref {
@@ -84,25 +84,29 @@ impl Referable<ValueSchema> {
                         *self = referable_schema;
                     } else if is_online_url(reference) {
                         let schema_url = SchemaUrl::parse(reference)?;
-                        let document_schema =
-                            schema_store.try_get_document_schema(&schema_url).await?;
 
-                        if let Some(value_schema) = &document_schema.value_schema {
-                            *self = Referable::Resolved {
-                                schema_url: Some(document_schema.schema_url.clone()),
-                                value: value_schema.clone(),
-                            };
-                            return self
-                                .resolve(
-                                    Cow::Owned(document_schema.schema_url),
-                                    Cow::Owned(document_schema.definitions),
-                                    schema_store,
-                                )
-                                .await;
+                        if let Some(document_schema) =
+                            schema_store.try_get_document_schema(&schema_url).await?
+                        {
+                            if let Some(value_schema) = &document_schema.value_schema {
+                                *self = Referable::Resolved {
+                                    schema_url: Some(document_schema.schema_url.clone()),
+                                    value: value_schema.clone(),
+                                };
+                                return self
+                                    .resolve(
+                                        Cow::Owned(document_schema.schema_url),
+                                        Cow::Owned(document_schema.definitions),
+                                        schema_store,
+                                    )
+                                    .await;
+                            } else {
+                                return Err(crate::Error::InvalidJsonSchemaReference {
+                                    reference: reference.to_owned(),
+                                });
+                            }
                         } else {
-                            return Err(crate::Error::InvalidJsonSchemaReference {
-                                reference: reference.to_owned(),
-                            });
+                            return Ok(None);
                         }
                     } else {
                         return Err(crate::Error::UnsupportedReference {
@@ -117,17 +121,22 @@ impl Referable<ValueSchema> {
                     value: value_schema,
                     ..
                 } => {
-                    let (schema_url, definitions) = match reference_url {
-                        Some(reference_url) => (
-                            Cow::Borrowed(reference_url),
-                            Cow::Owned(
-                                schema_store
-                                    .try_get_document_schema(&reference_url)
-                                    .await?
-                                    .definitions,
-                            ),
-                        ),
-                        None => (schema_url, definitions),
+                    let (schema_url, definitions) = {
+                        match reference_url {
+                            Some(reference_url) => {
+                                if let Some(document_schema) =
+                                    schema_store.try_get_document_schema(&reference_url).await?
+                                {
+                                    (
+                                        Cow::Borrowed(reference_url),
+                                        Cow::Owned(document_schema.definitions),
+                                    )
+                                } else {
+                                    (schema_url, definitions)
+                                }
+                            }
+                            None => (schema_url, definitions),
+                        }
                     };
 
                     match value_schema {
@@ -143,11 +152,11 @@ impl Referable<ValueSchema> {
                         _ => {}
                     }
 
-                    Ok(CurrentSchema {
+                    Ok(Some(CurrentSchema {
                         value_schema,
                         schema_url,
                         definitions,
-                    })
+                    }))
                 }
             }
         })

@@ -42,11 +42,11 @@ where
         let mut completion_items = Vec::new();
 
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
-            if let Ok(CurrentSchema {
+            if let Ok(Some(CurrentSchema {
                 schema_url,
                 value_schema,
                 definitions,
-            }) = referable_schema
+            })) = referable_schema
                 .resolve(
                     Cow::Borrowed(schema_url),
                     Cow::Borrowed(definitions),
