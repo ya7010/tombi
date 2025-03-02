@@ -130,11 +130,51 @@ jobs:
         working-directory: ./editors/vscode
         timeout-minutes: 2
 
+      - name: Upload tombi-cli artifacts
+        uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: tombi-cli-${{ env.TOMBI_VERSION }}-${{ matrix.target }}
+          path: dist/tombi-cli-${{ env.TOMBI_VERSION }}-*
+
       - name: Upload tombi-vscode artifacts
         uses: actions/upload-artifact@v4
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: tombi-vscode-${{ env.TOMBI_VERSION }}-${{ matrix.target }}
-          path: |
-            dist/tombi-cli-${{ env.TOMBI_VERSION }}-*
-            dist/tombi-vscode-${{ env.TOMBI_VERSION }}-*
+          path: dist/tombi-vscode-${{ env.TOMBI_VERSION }}-*
+
+  release:
+    needs: [release-cli-and-vscode]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download tombi-cli artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: tombi-cli-${{ env.TOMBI_VERSION }}-*
+
+      - name: Find CLI Assets
+        id: find_cli_assets
+        shell: bash
+        run: |
+          echo "ASSETS=$(find dist -name "tombi-cli-${{ env.TOMBI_VERSION }}-*" -type f | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload CLI Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.ASSETS }}
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
