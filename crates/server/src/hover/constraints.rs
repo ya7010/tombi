@@ -1,4 +1,4 @@
-use schema_store::{ArrayValuesOrderBy, TableKeysOrderBy};
+use schema_store::{ArrayValuesOrder, TableKeysOrder};
 
 use super::default_value::DefaultValue;
 
@@ -23,7 +23,7 @@ pub struct DataConstraints {
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
-    pub values_order_by: Option<ArrayValuesOrderBy>,
+    pub values_order: Option<ArrayValuesOrder>,
 
     // Table
     pub required_keys: Option<Vec<String>>,
@@ -31,7 +31,7 @@ pub struct DataConstraints {
     pub max_keys: Option<usize>,
     pub key_patterns: Option<Vec<String>>,
     pub additional_keys: Option<bool>,
-    pub keys_order_by: Option<TableKeysOrderBy>,
+    pub keys_order: Option<TableKeysOrder>,
 }
 
 impl std::fmt::Display for DataConstraints {
@@ -92,8 +92,8 @@ impl std::fmt::Display for DataConstraints {
             write!(f, "Unique Items: `true`\n\n")?;
         }
 
-        if let Some(values_order_by) = &self.values_order_by {
-            write!(f, "Values Order By: `{}`\n\n", values_order_by)?;
+        if let Some(values_order) = &self.values_order {
+            write!(f, "Values Order: `{}`\n\n", values_order)?;
         }
 
         if let Some(required_keys) = &self.required_keys {
@@ -122,8 +122,8 @@ impl std::fmt::Display for DataConstraints {
             write!(f, "Additional Keys: `true`\n\n")?;
         }
 
-        if let Some(keys_order_by) = &self.keys_order_by {
-            write!(f, "Keys Order By: `{}`\n\n", keys_order_by)?;
+        if let Some(keys_order) = &self.keys_order {
+            write!(f, "Keys Order: `{}`\n\n", keys_order)?;
         }
 
         Ok(())

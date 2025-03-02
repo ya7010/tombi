@@ -6,7 +6,7 @@ use super::{
     CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, SchemaUrl,
     ValueSchema,
 };
-use crate::{Accessor, SchemaStore, X_TOMBI_ARRAY_VALUES_ORDER_BY};
+use crate::{Accessor, SchemaStore, X_TOMBI_ARRAY_VALUES_ORDER};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
@@ -16,16 +16,16 @@ pub struct ArraySchema {
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
-    pub values_order_by: Option<ArrayValuesOrderBy>,
+    pub values_order: Option<ArrayValuesOrder>,
 }
 
 #[derive(Debug, Clone)]
-pub enum ArrayValuesOrderBy {
+pub enum ArrayValuesOrder {
     Ascending,
     Descending,
 }
 
-impl std::fmt::Display for ArrayValuesOrderBy {
+impl std::fmt::Display for ArrayValuesOrder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Ascending => write!(f, "ascending"),
@@ -56,17 +56,21 @@ impl ArraySchema {
                 .get("maxItems")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),
             unique_items: object.get("uniqueItems").and_then(|v| v.as_bool()),
-            values_order_by: match object.get(X_TOMBI_ARRAY_VALUES_ORDER_BY) {
+            values_order: match object
+                .get(X_TOMBI_ARRAY_VALUES_ORDER)
+                // NOTE: support old name
+                .and_then(|object| object.get("x-tombi-array-values-order-by"))
+            {
                 Some(serde_json::Value::String(order)) => match order.as_str() {
-                    "ascending" => Some(ArrayValuesOrderBy::Ascending),
-                    "descending" => Some(ArrayValuesOrderBy::Descending),
+                    "ascending" => Some(ArrayValuesOrder::Ascending),
+                    "descending" => Some(ArrayValuesOrder::Descending),
                     _ => {
-                        tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER_BY}: {order}");
+                        tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {order}");
                         None
                     }
                 },
                 Some(order) => {
-                    tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER_BY}: {order}");
+                    tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {order}");
                     None
                 }
                 None => None,

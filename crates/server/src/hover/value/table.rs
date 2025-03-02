@@ -456,7 +456,7 @@ impl GetHoverContent for TableSchema {
                     // NOTE: key_patterns are output for keys, not this tables.
                     key_patterns: None,
                     additional_keys: Some(self.additional_properties),
-                    keys_order_by: self.keys_order_by.clone(),
+                    keys_order: self.keys_order.clone(),
                     ..Default::default()
                 }),
                 schema_url: schema_url.cloned(),
