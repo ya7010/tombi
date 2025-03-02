@@ -8,8 +8,8 @@ impl crate::Edit for ast::Table {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::Accessor],
-        schema_url: Option<&'a schema_store::SchemaUrl>,
         value_schema: Option<&'a schema_store::ValueSchema>,
+        schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
@@ -24,8 +24,8 @@ impl crate::Edit for ast::Table {
                     key_value
                         .edit(
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -61,8 +61,8 @@ impl crate::Edit for ast::Table {
                                 return self
                                     .edit(
                                         &accessors[1..],
-                                        Some(&schema_url),
                                         Some(value_schema),
+                                        Some(&schema_url),
                                         Some(&definitions),
                                         schema_context,
                                     )
@@ -89,8 +89,8 @@ impl crate::Edit for ast::Table {
                                             return self
                                                 .edit(
                                                     &accessors[1..],
-                                                    Some(&schema_url),
                                                     Some(value_schema),
+                                                    Some(&schema_url),
                                                     Some(&definitions),
                                                     schema_context,
                                                 )
@@ -119,8 +119,8 @@ impl crate::Edit for ast::Table {
                                 return self
                                     .edit(
                                         &accessors[1..],
-                                        Some(&schema_url),
                                         Some(value_schema),
+                                        Some(&schema_url),
                                         Some(&definitions),
                                         schema_context,
                                     )
@@ -146,8 +146,8 @@ impl crate::Edit for ast::Table {
                                 changes.extend(
                                     self.edit(
                                         accessors,
-                                        Some(&schema_url),
                                         Some(value_schema),
+                                        Some(&schema_url),
                                         Some(&definitions),
                                         schema_context,
                                     )

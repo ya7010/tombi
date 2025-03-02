@@ -20,8 +20,8 @@ impl GetHoverContent for document_tree::Value {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
@@ -33,8 +33,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -46,8 +46,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -59,8 +59,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -72,8 +72,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -85,8 +85,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -98,8 +98,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -111,8 +111,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -124,8 +124,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -137,8 +137,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -150,8 +150,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -163,8 +163,8 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             Some(value_schema),
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -187,8 +187,8 @@ impl GetHoverContent for ValueSchema {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
@@ -200,8 +200,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -213,8 +213,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -226,8 +226,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -239,8 +239,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -252,8 +252,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -265,8 +265,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -278,8 +278,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -291,8 +291,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -304,8 +304,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -317,8 +317,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -330,8 +330,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -343,8 +343,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -356,8 +356,8 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             value_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )

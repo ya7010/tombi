@@ -26,10 +26,10 @@ impl<'a> Editor<'a> {
                 &[],
                 self.schema_context
                     .root_schema
-                    .map(|document_schema| &document_schema.schema_url),
+                    .and_then(|document_schema| document_schema.value_schema.as_ref()),
                 self.schema_context
                     .root_schema
-                    .and_then(|document_schema| document_schema.value_schema.as_ref()),
+                    .map(|document_schema| &document_schema.schema_url),
                 self.schema_context
                     .root_schema
                     .map(|document_schema| &document_schema.definitions),

@@ -5,8 +5,8 @@ impl crate::Edit for ast::Root {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::Accessor],
-        schema_url: Option<&'a schema_store::SchemaUrl>,
         value_schema: Option<&'a schema_store::ValueSchema>,
+        schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
@@ -27,8 +27,8 @@ impl crate::Edit for ast::Root {
                         table
                             .edit(
                                 &accessors,
-                                schema_url,
                                 value_schema,
+                                schema_url,
                                 definitions,
                                 schema_context,
                             )
@@ -38,8 +38,8 @@ impl crate::Edit for ast::Root {
                         array_of_tables
                             .edit(
                                 accessors,
-                                schema_url,
                                 value_schema,
+                                schema_url,
                                 definitions,
                                 schema_context,
                             )
@@ -49,8 +49,8 @@ impl crate::Edit for ast::Root {
                         key_value
                             .edit(
                                 accessors,
-                                schema_url,
                                 value_schema,
+                                schema_url,
                                 definitions,
                                 schema_context,
                             )
