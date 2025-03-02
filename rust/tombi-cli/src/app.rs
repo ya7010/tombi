@@ -22,9 +22,7 @@ pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
 
-    /// Offline mode
-    ///
-    /// If set, the CLI will not fetch remote schemas.
+    /// Do not fetch from remote
     #[clap(long, global = true)]
     offline: bool,
 
