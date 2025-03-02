@@ -17,15 +17,15 @@ NC='\033[0m' # No Color
 
 # Helper functions
 print_step() {
-    echo -e "${BLUE}==>${NC} $1"
+    echo "${BLUE}==>${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}Error:${NC} $1"
+    echo "${RED}Error:${NC} $1"
 }
 
 print_success() {
-    echo -e "${GREEN}Success:${NC} $1"
+    echo "${GREEN}Success:${NC} $1"
 }
 
 # Detect OS and architecture
@@ -96,9 +96,15 @@ download_and_install() {
     print_step "Downloading tombi v${VERSION} (${TARGET})..."
 
     if command -v curl >/dev/null 2>&1; then
-        curl -L -s "${DOWNLOAD_URL}" -o "${TEMP_FILE}"
+        if ! curl -L -f -s "${DOWNLOAD_URL}" -o "${TEMP_FILE}"; then
+            print_error "Download failed. Please check the URL: ${DOWNLOAD_URL}"
+            exit 1
+        fi
     elif command -v wget >/dev/null 2>&1; then
-        wget -q "${DOWNLOAD_URL}" -O "${TEMP_FILE}"
+        if ! wget --tries=1 -q "${DOWNLOAD_URL}" -O "${TEMP_FILE}"; then
+            print_error "Download failed. Please check the URL: ${DOWNLOAD_URL}"
+            exit 1
+        fi
     else
         print_error "Neither curl nor wget is installed. Please install one of them."
         exit 1
@@ -120,22 +126,24 @@ main() {
     print_step "Starting tombi installer..."
     detect_os_arch
     create_install_dir
-    download_and_install
+    if ! download_and_install; then
+        exit 1
+    fi
 
     # Verify installation
     if command -v tombi >/dev/null 2>&1; then
         if tombi --version >/dev/null 2>&1; then
             INSTALLED_VERSION=$(tombi --version 2>&1 | head -n 1 || echo "unknown")
             print_success "tombi ${INSTALLED_VERSION} has been successfully installed!"
-            echo -e "Usage: ${GREEN}tombi --help${NC}"
+            echo "Usage: ${GREEN}tombi --help${NC}"
         else
             print_error "Installation completed, but tombi command cannot be executed. "
-            echo -e "To run manually: ${GREEN}${BIN_DIR}/tombi --help${NC}"
+            echo "To run manually: ${GREEN}${BIN_DIR}/tombi --help${NC}"
             exit 1
         fi
     else
         print_error "Installation completed, but tombi command not found. Please check your PATH settings."
-        echo -e "To run manually: ${GREEN}${BIN_DIR}/tombi --help${NC}"
+        echo "To run manually: ${GREEN}${BIN_DIR}/tombi --help${NC}"
         exit 1
     fi
 }
