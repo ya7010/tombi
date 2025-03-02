@@ -36,7 +36,7 @@ impl GetHoverContent for document_tree::Table {
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
-                        if let Ok(document_schema) = schema_context
+                        if let Ok(Some(document_schema)) = schema_context
                             .store
                             .try_get_document_schema(sub_schema_url)
                             .await
@@ -87,11 +87,11 @@ impl GetHoverContent for document_tree::Table {
                                         .map(|r| r.contains(&key_str))
                                         .unwrap_or(false);
 
-                                    if let Ok(CurrentSchema {
+                                    if let Ok(Some(CurrentSchema {
                                         schema_url,
                                         value_schema: property_schema,
                                         definitions,
-                                    }) = property
+                                    })) = property
                                         .resolve(
                                             Cow::Borrowed(schema_url),
                                             Cow::Borrowed(definitions),
@@ -176,11 +176,11 @@ impl GetHoverContent for document_tree::Table {
                                     {
                                         if let Ok(pattern) = regex::Regex::new(property_key) {
                                             if pattern.is_match(&key_str) {
-                                                if let Ok(CurrentSchema {
+                                                if let Ok(Some(CurrentSchema {
                                                     schema_url,
                                                     value_schema: property_schema,
                                                     definitions,
-                                                }) = pattern_property
+                                                })) = pattern_property
                                                     .resolve(
                                                         Cow::Borrowed(schema_url),
                                                         Cow::Borrowed(definitions),
@@ -275,11 +275,11 @@ impl GetHoverContent for document_tree::Table {
                                 {
                                     let mut referable_schema =
                                         referable_additional_property_schema.write().await;
-                                    if let Ok(CurrentSchema {
+                                    if let Ok(Some(CurrentSchema {
                                         schema_url,
                                         value_schema: additional_property_schema,
                                         definitions,
-                                    }) = referable_schema
+                                    })) = referable_schema
                                         .resolve(
                                             Cow::Borrowed(schema_url),
                                             Cow::Borrowed(definitions),

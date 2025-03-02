@@ -32,7 +32,7 @@ impl Validate for document_tree::Table {
                     .collect::<Vec<_>>(),
             ) {
                 if schema_url != Some(sub_schema_url) {
-                    if let Ok(document_schema) =
+                    if let Ok(Some(document_schema)) =
                         schema_store.try_get_document_schema(sub_schema_url).await
                     {
                         return self
@@ -131,11 +131,11 @@ impl Validate for document_tree::Table {
                                 )
                                 .await
                             {
-                                Ok(CurrentSchema {
+                                Ok(Some(CurrentSchema {
                                     value_schema,
                                     schema_url,
                                     definitions,
-                                }) => {
+                                })) => {
                                     if let Err(errs) = value
                                         .validate(
                                             toml_version,
@@ -155,6 +155,7 @@ impl Validate for document_tree::Table {
                                         errors.extend(errs);
                                     }
                                 }
+                                Ok(None) => {}
                                 Err(err) => {
                                     tracing::error!("{}", err);
                                 }
@@ -174,11 +175,11 @@ impl Validate for document_tree::Table {
                                 };
                                 if pattern.is_match(&accessor_raw_text) {
                                     matche_key = true;
-                                    if let Ok(CurrentSchema {
+                                    if let Ok(Some(CurrentSchema {
                                         value_schema: pattern_property_schema,
                                         schema_url,
                                         definitions,
-                                    }) = refferable_pattern_property
+                                    })) = refferable_pattern_property
                                         .resolve(
                                             Cow::Borrowed(schema_url),
                                             Cow::Borrowed(definitions),
@@ -228,11 +229,11 @@ impl Validate for document_tree::Table {
                             {
                                 let mut referable_schema =
                                     referable_additional_property_schema.write().await;
-                                if let Ok(CurrentSchema {
+                                if let Ok(Some(CurrentSchema {
                                     value_schema: additional_property_schema,
                                     schema_url,
                                     definitions,
-                                }) = referable_schema
+                                })) = referable_schema
                                     .resolve(
                                         Cow::Borrowed(schema_url),
                                         Cow::Borrowed(definitions),

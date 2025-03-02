@@ -42,7 +42,7 @@ impl FindCompletionContents for document_tree::Array {
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
-                        if let Ok(document_schema) = schema_context
+                        if let Ok(Some(document_schema)) = schema_context
                             .store
                             .try_get_document_schema(sub_schema_url)
                             .await
@@ -77,11 +77,11 @@ impl FindCompletionContents for document_tree::Array {
                             if value.range().contains(position) || value.range().end() == position {
                                 let accessor = Accessor::Index(index);
                                 if let Some(items) = &array_schema.items {
-                                    if let Ok(CurrentSchema {
+                                    if let Ok(Some(CurrentSchema {
                                         schema_url,
                                         value_schema,
                                         definitions,
-                                    }) = items
+                                    })) = items
                                         .write()
                                         .await
                                         .resolve(
@@ -112,11 +112,11 @@ impl FindCompletionContents for document_tree::Array {
                             }
                         }
                         if let Some(items) = &array_schema.items {
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 value_schema,
                                 schema_url,
                                 definitions,
-                            }) = items
+                            })) = items
                                 .write()
                                 .await
                                 .resolve(

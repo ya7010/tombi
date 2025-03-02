@@ -22,11 +22,11 @@ impl crate::Edit for ast::Array {
                 (schema_url, value_schema, definitions)
             {
                 if let Some(item_schema) = &array_schema.items {
-                    if let Ok(CurrentSchema {
+                    if let Ok(Some(CurrentSchema {
                         schema_url,
                         value_schema,
                         definitions,
-                    }) = item_schema
+                    })) = item_schema
                         .write()
                         .await
                         .resolve(

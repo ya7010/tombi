@@ -44,7 +44,7 @@ impl FindCompletionContents for document_tree::Table {
                         .collect::<Vec<_>>(),
                 ) {
                     if schema_url != Some(sub_schema_url) {
-                        if let Ok(document_schema) = schema_context
+                        if let Ok(Some(document_schema)) = schema_context
                             .store
                             .try_get_document_schema(sub_schema_url)
                             .await
@@ -100,11 +100,11 @@ impl FindCompletionContents for document_tree::Table {
                                         );
                                     }
 
-                                    if let Ok(CurrentSchema {
+                                    if let Ok(Some(CurrentSchema {
                                         schema_url,
                                         value_schema: property_schema,
                                         definitions,
-                                    }) = property
+                                    })) = property
                                         .resolve(
                                             Cow::Borrowed(schema_url),
                                             Cow::Borrowed(definitions),
@@ -144,11 +144,11 @@ impl FindCompletionContents for document_tree::Table {
                                             }
                                         }
 
-                                        if let Ok(CurrentSchema {
+                                        if let Ok(Some(CurrentSchema {
                                             schema_url,
                                             value_schema: property_schema,
                                             definitions,
-                                        }) = property
+                                        })) = property
                                             .resolve(
                                                 Cow::Borrowed(schema_url),
                                                 Cow::Borrowed(definitions),
@@ -203,11 +203,11 @@ impl FindCompletionContents for document_tree::Table {
                                                 "pattern property schema: {:?}",
                                                 pattern_property_schema
                                             );
-                                            if let Ok(CurrentSchema {
+                                            if let Ok(Some(CurrentSchema {
                                                 schema_url,
                                                 value_schema,
                                                 definitions,
-                                            }) = pattern_property_schema
+                                            })) = pattern_property_schema
                                                 .resolve(
                                                     Cow::Borrowed(schema_url),
                                                     Cow::Borrowed(definitions),
@@ -241,11 +241,11 @@ impl FindCompletionContents for document_tree::Table {
                                         referable_additional_property_schema
                                     );
 
-                                    if let Ok(CurrentSchema {
+                                    if let Ok(Some(CurrentSchema {
                                         schema_url,
                                         value_schema: additional_property_schema,
                                         definitions,
-                                    }) = referable_additional_property_schema
+                                    })) = referable_additional_property_schema
                                         .write()
                                         .await
                                         .resolve(
@@ -322,11 +322,11 @@ impl FindCompletionContents for document_tree::Table {
                                     _ => {}
                                 }
 
-                                if let Ok(CurrentSchema {
+                                if let Ok(Some(CurrentSchema {
                                     schema_url,
                                     value_schema,
                                     definitions,
-                                }) = property
+                                })) = property
                                     .resolve(
                                         Cow::Borrowed(&schema_url),
                                         Cow::Borrowed(definitions),
@@ -362,7 +362,7 @@ impl FindCompletionContents for document_tree::Table {
                                         let head_accessors =
                                             &root_accessors[..root_accessors.len() - 1];
                                         if head_accessors == accessors {
-                                            if let Ok(document_schema) = schema_context
+                                            if let Ok(Some(document_schema)) = schema_context
                                                 .store
                                                 .try_get_document_schema(sub_schema_url)
                                                 .await
@@ -527,11 +527,11 @@ impl FindCompletionContents for TableSchema {
             for (key, property) in self.properties.write().await.iter_mut() {
                 let label = &key.to_string();
 
-                if let Ok(CurrentSchema {
+                if let Ok(Some(CurrentSchema {
                     schema_url,
                     value_schema,
                     definitions,
-                }) = property
+                })) = property
                     .resolve(
                         Cow::Borrowed(schema_url),
                         Cow::Borrowed(definitions),
@@ -626,11 +626,11 @@ async fn count_table_or_array_schema(
                 match schema {
                     ValueSchema::Array(array_schema) => {
                         if let Some(item) = array_schema.items {
-                            if let Ok(CurrentSchema {
+                            if let Ok(Some(CurrentSchema {
                                 schema_url,
                                 value_schema,
                                 definitions,
-                            }) = item
+                            })) = item
                                 .write()
                                 .await
                                 .resolve(
