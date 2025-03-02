@@ -110,7 +110,7 @@ impl GetHoverContent for schema_store::AnyOfSchema {
             for referable_schema in self.schemas.write().await.iter_mut() {
                 let Ok(Some(CurrentSchema { value_schema, .. })) = referable_schema
                     .resolve(
-                        Cow::Borrowed(&schema_url),
+                        Cow::Borrowed(schema_url),
                         Cow::Borrowed(definitions),
                         schema_context.store,
                     )

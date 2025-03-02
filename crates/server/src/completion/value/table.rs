@@ -314,7 +314,7 @@ impl FindCompletionContents for document_tree::Table {
                                             title.clone(),
                                             description.clone(),
                                             table_schema.required.as_ref(),
-                                            Some(&schema_url),
+                                            Some(schema_url),
                                             completion_hint,
                                         ));
                                         continue;
@@ -328,7 +328,7 @@ impl FindCompletionContents for document_tree::Table {
                                     definitions,
                                 })) = property
                                     .resolve(
-                                        Cow::Borrowed(&schema_url),
+                                        Cow::Borrowed(schema_url),
                                         Cow::Borrowed(definitions),
                                         schema_context.store,
                                     )
@@ -376,7 +376,7 @@ impl FindCompletionContents for document_tree::Table {
                                                             position,
                                                             value_schema
                                                                 .detail(
-                                                                    &schema_url,
+                                                                    schema_url,
                                                                     &document_schema.definitions,
                                                                     schema_context.store,
                                                                     completion_hint,
@@ -384,14 +384,14 @@ impl FindCompletionContents for document_tree::Table {
                                                                 .await,
                                                             value_schema
                                                                 .documentation(
-                                                                    &schema_url,
+                                                                    schema_url,
                                                                     &document_schema.definitions,
                                                                     schema_context.store,
                                                                     completion_hint,
                                                                 )
                                                                 .await,
                                                             None,
-                                                            Some(&schema_url),
+                                                            Some(schema_url),
                                                             completion_hint,
                                                         ),
                                                     );
@@ -413,14 +413,14 @@ impl FindCompletionContents for document_tree::Table {
                                     completion_contents.push(CompletionContent::new_pattern_key(
                                         patterns.as_ref(),
                                         position,
-                                        Some(&schema_url),
+                                        Some(schema_url),
                                         completion_hint,
                                     ))
                                 } else if table_schema.has_additional_property_schema() {
                                     completion_contents.push(
                                         CompletionContent::new_additional_key(
                                             position,
-                                            Some(&schema_url),
+                                            Some(schema_url),
                                             completion_hint,
                                         ),
                                     );
@@ -473,32 +473,30 @@ impl FindCompletionContents for document_tree::Table {
                     }
                     _ => Vec::with_capacity(0),
                 }
-            } else {
-                if let Some(key) = keys.first() {
-                    if let Some(value) = self.get(key) {
-                        get_property_value_completion_contents(
-                            value,
-                            position,
-                            key,
-                            keys,
-                            accessors,
-                            None,
-                            None,
-                            None,
-                            schema_context,
-                            completion_hint,
-                        )
-                        .await
-                    } else {
-                        Vec::with_capacity(0)
-                    }
-                } else {
-                    vec![CompletionContent::new_type_hint_empty_key(
+            } else if let Some(key) = keys.first() {
+                if let Some(value) = self.get(key) {
+                    get_property_value_completion_contents(
+                        value,
                         position,
-                        schema_url,
+                        key,
+                        keys,
+                        accessors,
+                        None,
+                        None,
+                        None,
+                        schema_context,
                         completion_hint,
-                    )]
+                    )
+                    .await
+                } else {
+                    Vec::with_capacity(0)
                 }
+            } else {
+                vec![CompletionContent::new_type_hint_empty_key(
+                    position,
+                    schema_url,
+                    completion_hint,
+                )]
             }
         }
         .boxed()
@@ -721,7 +719,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                         (schema_url, value_schema, definitions)
                     {
                         if count_table_or_array_schema(
-                            &schema_url,
+                            schema_url,
                             value_schema,
                             definitions,
                             schema_context.store,
@@ -904,7 +902,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                     )
                     .await,
                 table_schema.required.as_ref(),
-                Some(&schema_url),
+                Some(schema_url),
                 completion_hint,
             ));
         }

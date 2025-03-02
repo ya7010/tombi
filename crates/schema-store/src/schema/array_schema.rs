@@ -103,7 +103,7 @@ impl FindSchemaCandidates for ArraySchema {
             })) = referable_schema
                 .resolve(
                     Cow::Borrowed(schema_url),
-                    Cow::Borrowed(&definitions),
+                    Cow::Borrowed(definitions),
                     schema_store,
                 )
                 .await

@@ -32,7 +32,7 @@ impl crate::Edit for ast::Array {
                         .resolve(
                             Cow::Borrowed(schema_url),
                             Cow::Borrowed(definitions),
-                            &schema_context.store,
+                            schema_context.store,
                         )
                         .await
                     {

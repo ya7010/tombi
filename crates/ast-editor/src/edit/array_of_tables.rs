@@ -22,7 +22,7 @@ impl crate::Edit for ast::ArrayOfTables {
                 changes.extend(
                     key_value
                         .edit(
-                            &accessors,
+                            accessors,
                             schema_url,
                             value_schema,
                             definitions,
@@ -32,8 +32,10 @@ impl crate::Edit for ast::ArrayOfTables {
                 );
             }
 
-            match (schema_url, value_schema, definitions) {
-                (Some(schema_url), Some(value_schema), Some(definitions)) => match value_schema {
+            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
+                (schema_url, value_schema, definitions)
+            {
+                match value_schema {
                     ValueSchema::Table(table_schema) => {
                         if accessors.is_empty() {
                             changes.extend(
@@ -142,7 +144,7 @@ impl crate::Edit for ast::ArrayOfTables {
                             {
                                 changes.extend(
                                     self.edit(
-                                        &accessors,
+                                        accessors,
                                         Some(&schema_url),
                                         Some(value_schema),
                                         Some(&definitions),
@@ -158,8 +160,7 @@ impl crate::Edit for ast::ArrayOfTables {
                         }
                     }
                     _ => {}
-                },
-                _ => {}
+                }
             }
 
             changes

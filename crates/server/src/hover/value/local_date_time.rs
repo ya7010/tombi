@@ -28,7 +28,7 @@ impl GetHoverContent for document_tree::LocalDateTime {
                             position,
                             keys,
                             accessors,
-                            Some(&schema_url),
+                            Some(schema_url),
                             Some(value_schema),
                             Some(definitions),
                             schema_context,

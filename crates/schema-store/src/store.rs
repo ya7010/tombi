@@ -57,11 +57,9 @@ impl SchemaStore {
         &self,
         catalog_url: &CatalogUrl,
     ) -> Result<(), crate::Error> {
-        if matches!(catalog_url.scheme(), "http" | "https") {
-            if self.offline {
-                tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
-                return Ok(());
-            }
+        if matches!(catalog_url.scheme(), "http" | "https") && self.offline {
+            tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
+            return Ok(());
         }
 
         tracing::debug!("loading schema catalog: {}", catalog_url);
