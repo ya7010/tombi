@@ -1,5 +1,5 @@
 use futures::FutureExt;
-use schema_store::{Accessor, SchemaAccessor};
+use schema_store::SchemaAccessor;
 
 impl crate::Edit for ast::Root {
     fn edit<'a: 'b, 'b>(
