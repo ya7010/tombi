@@ -61,7 +61,7 @@ pub async fn handle_completion(
 
     let root_schema = source_schema
         .as_ref()
-        .and_then(|source_schema| source_schema.root_schema);
+        .and_then(|source_schema| source_schema.root_schema.as_ref());
 
     // Skip completion if the trigger character is a whitespace or if there is no schema.
     if let Some(CompletionContext {

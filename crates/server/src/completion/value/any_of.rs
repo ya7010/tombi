@@ -1,7 +1,9 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, AnyOfSchema, CurrentSchema, SchemaDefinitions, SchemaUrl, ReferableValueSchemas};
+use schema_store::{
+    Accessor, AnyOfSchema, CurrentSchema, ReferableValueSchemas, SchemaDefinitions, SchemaUrl,
+};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
@@ -46,8 +48,8 @@ where
                 definitions,
             }) = referable_schema
                 .resolve(
-                    Cow::Borrowed(&schema_url),
-                    definitions,
+                    Cow::Borrowed(schema_url),
+                    Cow::Borrowed(definitions),
                     schema_context.store,
                 )
                 .await
@@ -59,7 +61,7 @@ where
                         accessors,
                         Some(&schema_url),
                         Some(value_schema),
-                        Some(definitions),
+                        Some(&definitions),
                         schema_context,
                         completion_hint,
                     )
