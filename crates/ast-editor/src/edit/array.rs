@@ -4,7 +4,7 @@ use ast::AstNode;
 use futures::FutureExt;
 use schema_store::{CurrentSchema, ValueSchema};
 
-use crate::rule::array_values_order_by;
+use crate::rule::array_values_order;
 
 impl crate::Edit for ast::Array {
     fn edit<'a: 'b, 'b>(
@@ -52,7 +52,7 @@ impl crate::Edit for ast::Array {
                     }
                 }
                 changes.extend(
-                    array_values_order_by(self.syntax(), array_schema, schema_context.toml_version)
+                    array_values_order(self.syntax(), array_schema, schema_context.toml_version)
                         .await,
                 );
             } else {

@@ -40,7 +40,7 @@ impl crate::Edit for ast::Table {
                     ValueSchema::Table(table_schema) => {
                         if accessors.is_empty() {
                             changes.extend(
-                                crate::rule::table_keys_order_by(self.syntax(), table_schema).await,
+                                crate::rule::table_keys_order(self.syntax(), table_schema).await,
                             );
                             return changes;
                         }
