@@ -17,8 +17,8 @@ impl GetHoverContent for document_tree::Array {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
@@ -46,8 +46,8 @@ impl GetHoverContent for document_tree::Array {
                                     position,
                                     keys,
                                     accessors,
-                                    Some(&document_schema.schema_url),
                                     document_schema.value_schema.as_ref(),
+                                    Some(&document_schema.schema_url),
                                     Some(&document_schema.definitions),
                                     schema_context,
                                 )
@@ -89,8 +89,8 @@ impl GetHoverContent for document_tree::Array {
                                                     .cloned()
                                                     .chain(std::iter::once(accessor.clone()))
                                                     .collect::<Vec<_>>(),
-                                                Some(&schema_url),
                                                 Some(item_schema),
+                                                Some(&schema_url),
                                                 Some(&definitions),
                                                 schema_context,
                                             )
@@ -134,8 +134,8 @@ impl GetHoverContent for document_tree::Array {
                                             .cloned()
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
-                                        Some(schema_url),
                                         Some(value_schema),
+                                        Some(schema_url),
                                         Some(definitions),
                                         schema_context,
                                     )
@@ -147,8 +147,8 @@ impl GetHoverContent for document_tree::Array {
                                 position,
                                 keys,
                                 accessors,
-                                Some(schema_url),
                                 Some(value_schema),
+                                Some(schema_url),
                                 Some(definitions),
                                 schema_context,
                             )
@@ -164,8 +164,8 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             one_of_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -177,8 +177,8 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             any_of_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -190,8 +190,8 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            schema_url,
                             all_of_schema,
+                            schema_url,
                             definitions,
                             schema_context,
                         )
@@ -212,8 +212,8 @@ impl GetHoverContent for document_tree::Array {
                                     .cloned()
                                     .chain(std::iter::once(accessor))
                                     .collect::<Vec<_>>(),
-                                schema_url,
                                 value_schema,
+                                schema_url,
                                 definitions,
                                 schema_context,
                             )
@@ -241,8 +241,8 @@ impl GetHoverContent for ArraySchema {
         _position: text::Position,
         _keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         _value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         _definitions: Option<&'a schema_store::SchemaDefinitions>,
         _schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {

@@ -25,8 +25,8 @@ pub async fn get_hover_content(
                     position,
                     keys,
                     &[],
-                    Some(&document_schema.schema_url),
                     document_schema.value_schema.as_ref(),
+                    Some(&document_schema.schema_url),
                     Some(&document_schema.definitions),
                     schema_context,
                 )
@@ -46,8 +46,8 @@ trait GetHoverContent {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>>;

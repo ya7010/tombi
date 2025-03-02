@@ -10,8 +10,8 @@ pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
     position: text::Position,
     keys: &'a [document_tree::Key],
     accessors: &'a [schema_store::Accessor],
-    schema_url: &'a SchemaUrl,
     any_of_schema: &'a schema_store::AnyOfSchema,
+    schema_url: &'a SchemaUrl,
     definitions: &'a schema_store::SchemaDefinitions,
     schema_context: &'a SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
@@ -51,8 +51,8 @@ where
                     position,
                     keys,
                     accessors,
-                    Some(schema_url),
                     Some(value_schema),
+                    Some(schema_url),
                     Some(definitions),
                     schema_context,
                 )
@@ -94,8 +94,8 @@ impl GetHoverContent for schema_store::AnyOfSchema {
         _position: text::Position,
         _keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         _value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {

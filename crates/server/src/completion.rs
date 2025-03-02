@@ -165,11 +165,11 @@ pub async fn get_completion_contents(
             &[],
             schema_context
                 .root_schema
-                .as_ref()
-                .map(|schema| &schema.schema_url),
+                .and_then(|schema| schema.value_schema.as_ref()),
             schema_context
                 .root_schema
-                .and_then(|schema| schema.value_schema.as_ref()),
+                .as_ref()
+                .map(|schema| &schema.schema_url),
             schema_context
                 .root_schema
                 .as_ref()
@@ -203,8 +203,8 @@ pub trait FindCompletionContents {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        schema_url: Option<&'a SchemaUrl>,
         value_schema: Option<&'a ValueSchema>,
+        schema_url: Option<&'a SchemaUrl>,
         definitions: Option<&'a SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
