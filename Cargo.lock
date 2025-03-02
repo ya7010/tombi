@@ -584,6 +584,7 @@ dependencies = [
  "schemars",
  "serde",
  "syntax",
+ "test-lib",
  "text",
  "textwrap",
  "tokio",

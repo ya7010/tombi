@@ -22,8 +22,6 @@ pub async fn handle_document_symbol(
 
     let symbols = create_symbols(&tree);
 
-    tracing::trace!("DocumentSymbols: {symbols:#?}");
-
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 

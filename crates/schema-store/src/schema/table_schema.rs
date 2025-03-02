@@ -85,7 +85,7 @@ impl TableSchema {
         let keys_order = match object
             .get(X_TOMBI_TABLE_KEYS_ORDER)
             // NOTE: support old name
-            .and_then(|object| object.get("x-tombi-table-keys-order-by"))
+            .or_else(|| object.get("x-tombi-table-keys-order-by"))
         {
             Some(serde_json::Value::String(order)) => match order.as_str() {
                 "ascending" => Some(TableKeysOrder::Ascending),
