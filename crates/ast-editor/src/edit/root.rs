@@ -1,10 +1,10 @@
 use futures::FutureExt;
-use schema_store::Accessor;
+use schema_store::SchemaAccessor;
 
 impl crate::Edit for ast::Root {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::Accessor],
+        accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -22,7 +22,7 @@ impl crate::Edit for ast::Root {
                             else {
                                 return changes;
                             };
-                            accessors.push(Accessor::Key(key_text));
+                            accessors.push(SchemaAccessor::Key(key_text));
                         }
                         table
                             .edit(

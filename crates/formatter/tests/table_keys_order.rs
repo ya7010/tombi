@@ -11,9 +11,9 @@ mod table_keys_order {
                 r#"
                 [project]
                 version = "0.1.0"
+                readme = "README.md"
                 description = "A test project"
                 name = "test-project"
-                readme = "README.md"
                 requires-python = ">=3.8"
                 authors = [
                     {name = "Test Author", email = "test@example.com"}

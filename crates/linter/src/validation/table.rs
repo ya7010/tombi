@@ -119,8 +119,11 @@ impl Validate for document_tree::Table {
                         let accessor = Accessor::Key(accessor_raw_text.clone());
 
                         let mut matche_key = false;
-                        if let Some(property_schema) =
-                            table_schema.properties.write().await.get_mut(&accessor)
+                        if let Some(property_schema) = table_schema
+                            .properties
+                            .write()
+                            .await
+                            .get_mut(&SchemaAccessor::from(&accessor))
                         {
                             matche_key = true;
                             match property_schema
