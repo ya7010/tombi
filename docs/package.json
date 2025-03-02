@@ -40,6 +40,7 @@
   "devDependencies": {
     "@types/jsdom": "^21.1.7",
     "@types/mdast": "^4.0.4",
+    "@types/prismjs": "^1.26.5",
     "glob": "^11.0.1",
     "gray-matter": "^4.0.3",
     "jsdom": "^26.0.0",

@@ -78,6 +78,9 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
+      '@types/prismjs':
+        specifier: ^1.26.5
+        version: 1.26.5
       glob:
         specifier: ^11.0.1
         version: 11.0.1
@@ -1796,6 +1799,9 @@ packages:
 
   '@types/node@22.10.2':
     resolution: {integrity: sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==}
+
+  '@types/prismjs@1.26.5':
+    resolution: {integrity: sha512-AUZTa7hQ2KY5L7AmtSiqxlhWxb4ina0yd8hNbl4TWuqnv/pFP0nDMb3YrfSBf4hJVGLh2YEIBfKaBW/9UEl6IQ==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -6282,6 +6288,8 @@ snapshots:
   '@types/node@22.10.2':
     dependencies:
       undici-types: 6.20.0
+
+  '@types/prismjs@1.26.5': {}
 
   '@types/resolve@1.20.2': {}
 
