@@ -18,9 +18,9 @@ pub enum Referable<T> {
 }
 
 pub struct CurrentSchema<'a> {
-    pub schema_url: Cow<'a, SchemaUrl>,
     pub value_schema: &'a ValueSchema,
-    pub definitions: &'a SchemaDefinitions,
+    pub schema_url: Cow<'a, SchemaUrl>,
+    pub definitions: Cow<'a, SchemaDefinitions>,
 }
 
 impl<T> Referable<T> {
@@ -62,7 +62,7 @@ impl Referable<ValueSchema> {
     pub fn resolve<'a: 'b, 'b>(
         &'a mut self,
         schema_url: Cow<'a, SchemaUrl>,
-        definitions: &'a SchemaDefinitions,
+        definitions: Cow<'a, SchemaDefinitions>,
         schema_store: &'a crate::SchemaStore,
     ) -> BoxFuture<'b, Result<CurrentSchema<'a>, crate::Error>> {
         Box::pin(async move {
@@ -94,8 +94,8 @@ impl Referable<ValueSchema> {
                             };
                             return self
                                 .resolve(
-                                    Cow::Borrowed(&document_schema.schema_url),
-                                    &document_schema.definitions,
+                                    Cow::Owned(document_schema.schema_url),
+                                    Cow::Owned(document_schema.definitions),
                                     schema_store,
                                 )
                                 .await;
@@ -120,10 +120,12 @@ impl Referable<ValueSchema> {
                     let (schema_url, definitions) = match reference_url {
                         Some(reference_url) => (
                             Cow::Borrowed(reference_url),
-                            &schema_store
-                                .try_get_document_schema(&reference_url)
-                                .await?
-                                .definitions,
+                            Cow::Owned(
+                                schema_store
+                                    .try_get_document_schema(&reference_url)
+                                    .await?
+                                    .definitions,
+                            ),
                         ),
                         None => (schema_url, definitions),
                     };
@@ -134,7 +136,7 @@ impl Referable<ValueSchema> {
                         | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                             for schema in schemas.write().await.iter_mut() {
                                 schema
-                                    .resolve(schema_url.clone(), definitions, schema_store)
+                                    .resolve(schema_url.clone(), definitions.clone(), schema_store)
                                     .await?;
                             }
                         }
@@ -142,8 +144,8 @@ impl Referable<ValueSchema> {
                     }
 
                     Ok(CurrentSchema {
-                        schema_url,
                         value_schema,
+                        schema_url,
                         definitions,
                     })
                 }

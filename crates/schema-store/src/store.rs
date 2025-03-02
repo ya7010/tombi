@@ -1,17 +1,18 @@
 use std::{ops::Deref, sync::Arc};
 
+use ahash::AHashMap;
 use config::Schema;
+use futures::{future::BoxFuture, FutureExt};
 use itertools::Either;
 use tokio::sync::RwLock;
 
-use crate::{
-    arena::Arena, json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema,
-};
+use crate::{json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema};
 
 #[derive(Debug, Clone)]
 pub struct SchemaStore {
     http_client: reqwest::Client,
-    document_schemas: Arena<SchemaUrl, Result<DocumentSchema, crate::Error>>,
+    document_schemas:
+        Arc<tokio::sync::RwLock<AHashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>>>,
     schemas: Arc<RwLock<Vec<crate::Schema>>>,
     offline: bool,
 }
@@ -20,7 +21,7 @@ impl SchemaStore {
     pub fn new(offline: bool) -> Self {
         Self {
             http_client: reqwest::Client::new(),
-            document_schemas: Arena::new(),
+            document_schemas: Arc::new(RwLock::default()),
             schemas: Arc::new(RwLock::new(Vec::new())),
             offline,
         }
@@ -98,18 +99,17 @@ impl SchemaStore {
     }
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
-        if self.document_schemas.contains_key(schema_url).await {
+        let has_key = { self.document_schemas.read().await.contains_key(schema_url) };
+        if has_key {
             if matches!(schema_url.scheme(), "http" | "https") && self.offline {
                 tracing::debug!("offline mode, skip fetch schema from url: {}", schema_url);
                 return Ok(false);
             }
 
-            self.document_schemas
-                .update(
-                    schema_url,
-                    self.try_fetch_document_schema_from_url(schema_url).await,
-                )
-                .await;
+            self.document_schemas.write().await.insert(
+                schema_url.clone(),
+                self.try_fetch_document_schema_from_url(schema_url).await,
+            );
 
             tracing::debug!("update schema: {}", schema_url);
 
@@ -180,25 +180,26 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    pub async fn try_get_document_schema(
-        &self,
-        schema_url: &SchemaUrl,
-    ) -> Result<&DocumentSchema, crate::Error> {
-        let document_schema = match self.document_schemas.get(schema_url).await {
-            Some(document_schema) => document_schema,
-            None => {
-                self.document_schemas
-                    .insert(
-                        schema_url.clone(),
-                        self.try_fetch_document_schema_from_url(schema_url).await,
-                    )
-                    .await
+    pub fn try_get_document_schema<'a: 'b, 'b>(
+        &'a self,
+        schema_url: &'a SchemaUrl,
+    ) -> BoxFuture<'b, Result<DocumentSchema, crate::Error>> {
+        async move {
+            if let Some(document_schema) = self.document_schemas.read().await.get(schema_url) {
+                return match document_schema {
+                    Ok(document_schema) => Ok(document_schema.clone()),
+                    Err(err) => Err(err.clone()),
+                };
             }
-        };
-        match document_schema {
-            Ok(document_schema) => Ok(document_schema),
-            Err(err) => Err(err.clone()),
+
+            self.document_schemas.write().await.insert(
+                schema_url.clone(),
+                self.try_fetch_document_schema_from_url(schema_url).await,
+            );
+
+            self.try_get_document_schema(schema_url).await
         }
+        .boxed()
     }
 
     pub async fn try_get_source_schema_from_url(

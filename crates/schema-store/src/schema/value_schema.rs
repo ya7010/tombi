@@ -229,7 +229,11 @@ impl ValueSchema {
                             schema_url,
                             definitions,
                         }) = referable_schema
-                            .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
+                            .resolve(
+                                Cow::Borrowed(schema_url),
+                                Cow::Borrowed(definitions),
+                                schema_store,
+                            )
                             .await
                         {
                             matched_schemas.extend(
@@ -281,7 +285,11 @@ impl ValueSchema {
                                 schema_url,
                                 definitions,
                             }) = referable_schema
-                                .resolve(Cow::Borrowed(&schema_url), definitions, schema_store)
+                                .resolve(
+                                    Cow::Borrowed(schema_url),
+                                    Cow::Borrowed(definitions),
+                                    schema_store,
+                                )
                                 .await
                             {
                                 value_schema
@@ -306,7 +314,11 @@ impl ValueSchema {
                                 schema_url,
                                 definitions,
                             }) = referable_schema
-                                .resolve(Cow::Borrowed(&schema_url), definitions, schema_store)
+                                .resolve(
+                                    Cow::Borrowed(schema_url),
+                                    Cow::Borrowed(definitions),
+                                    schema_store,
+                                )
                                 .await
                             {
                                 value_schema
@@ -364,7 +376,11 @@ impl FindSchemaCandidates for ValueSchema {
                             schema_url,
                             definitions,
                         }) = referable_schema
-                            .resolve(Cow::Borrowed(schema_url), definitions, schema_store)
+                            .resolve(
+                                Cow::Borrowed(schema_url),
+                                Cow::Borrowed(definitions),
+                                schema_store,
+                            )
                             .await
                         else {
                             continue;
@@ -374,7 +390,7 @@ impl FindSchemaCandidates for ValueSchema {
                             .find_schema_candidates(
                                 accessors,
                                 &schema_url,
-                                definitions,
+                                &definitions,
                                 schema_store,
                             )
                             .await;
