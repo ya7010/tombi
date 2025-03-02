@@ -125,7 +125,7 @@ impl Referable<ValueSchema> {
                         match reference_url {
                             Some(reference_url) => {
                                 if let Some(document_schema) =
-                                    schema_store.try_get_document_schema(&reference_url).await?
+                                    schema_store.try_get_document_schema(reference_url).await?
                                 {
                                     (
                                         Cow::Borrowed(reference_url),

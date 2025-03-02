@@ -144,7 +144,7 @@ impl GetHoverContent for document_tree::Table {
                                                 .cloned()
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
-                                            Some(&schema_url),
+                                            Some(schema_url),
                                             None,
                                             Some(definitions),
                                             schema_context,
@@ -235,7 +235,7 @@ impl GetHoverContent for document_tree::Table {
                                                             .cloned()
                                                             .chain(std::iter::once(accessor))
                                                             .collect::<Vec<_>>(),
-                                                        Some(&schema_url),
+                                                        Some(schema_url),
                                                         None,
                                                         Some(definitions),
                                                         schema_context,
@@ -327,7 +327,7 @@ impl GetHoverContent for document_tree::Table {
                                             .cloned()
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
-                                        Some(&schema_url),
+                                        Some(schema_url),
                                         None,
                                         Some(definitions),
                                         schema_context,
@@ -342,7 +342,7 @@ impl GetHoverContent for document_tree::Table {
                                     position,
                                     keys,
                                     accessors,
-                                    Some(&schema_url),
+                                    Some(schema_url),
                                     Some(value_schema),
                                     Some(definitions),
                                     schema_context,
