@@ -22,14 +22,14 @@ pub struct Args {
     #[command(subcommand)]
     pub subcommand: command::TomlCommand,
 
-    #[command(flatten)]
-    verbose: Verbosity<InfoLevel>,
-
     /// Offline mode
     ///
     /// If set, the CLI will not fetch remote schemas.
     #[clap(long, global = true)]
     offline: bool,
+
+    #[command(flatten)]
+    verbose: Verbosity<InfoLevel>,
 }
 
 impl<I, T> From<I> for Args
