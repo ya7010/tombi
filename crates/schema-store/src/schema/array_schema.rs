@@ -59,7 +59,7 @@ impl ArraySchema {
             values_order: match object
                 .get(X_TOMBI_ARRAY_VALUES_ORDER)
                 // NOTE: support old name
-                .and_then(|object| object.get("x-tombi-array-values-order-by"))
+                .or_else(|| object.get("x-tombi-array-values-order-by"))
             {
                 Some(serde_json::Value::String(order)) => match order.as_str() {
                     "ascending" => Some(ArrayValuesOrder::Ascending),

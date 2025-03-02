@@ -21,8 +21,6 @@ pub async fn handle_semantic_tokens_full(
     root.append_semantic_tokens(&mut tokens_builder);
     let tokens = tokens_builder.build();
 
-    tracing::trace!("SemanticTokens: {tokens:#?}");
-
     Ok(Some(SemanticTokensResult::Tokens(SemanticTokens {
         result_id: None,
         data: tokens,
