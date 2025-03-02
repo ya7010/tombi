@@ -5,7 +5,9 @@ import { Note } from "~/components/highlight";
 
 Tombi supports `Offline Mode`; you can run Tombi without fetching remote schemas.
 
-<CodeBlock code="tombi format --offline" language="bash" />
+```bash
+tombi format --offline
+```
 
 <Note>
 Offline mode is specified by command line arguments, not by configuration files.
@@ -16,8 +18,10 @@ If you want to use different schema catalogs, write it in the configuration file
 <Note>
 If you are using VSCode, you can set offline mode in the VSCode settings file.
 
-<CodeBlock code={`{
+```json
+{
   "tombi.args": ["--offline"]
-}`} language="json" />
+}
+```
 
 </Note>

@@ -43,6 +43,7 @@
     "glob": "^11.0.1",
     "gray-matter": "^4.0.3",
     "jsdom": "^26.0.0",
+    "mdast-util-mdx-jsx": "^3.2.0",
     "tsx": "^4.19.2",
     "unist-util-visit": "^5.0.0",
     "unocss": "^65.4.3"

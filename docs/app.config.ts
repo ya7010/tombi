@@ -4,6 +4,7 @@ import pkg from "@vinxi/plugin-mdx";
 import unocssPlugin from "unocss/vite";
 import remarkGfm from "remark-gfm";
 import { remarkBaseUrl } from "./src/remark/base-url";
+import { remarkCode } from "./src/remark/code";
 
 const { default: mdx } = pkg;
 
@@ -26,7 +27,11 @@ export default defineConfig({
         jsx: true,
         jsxImportSource: "solid-js",
         providerImportSource: "solid-mdx",
-        remarkPlugins: [[remarkGfm, { tablePipeAlign: false }], remarkBaseUrl],
+        remarkPlugins: [
+          [remarkGfm, { tablePipeAlign: false }],
+          remarkBaseUrl,
+          remarkCode,
+        ],
       }),
       unocssPlugin(),
     ],
