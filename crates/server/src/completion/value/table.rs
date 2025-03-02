@@ -79,7 +79,9 @@ impl FindCompletionContents for document_tree::Table {
                                 let accessor: Accessor = Accessor::Key(accessor_str.to_string());
 
                                 let mut properties = table_schema.properties.write().await;
-                                if let Some(property) = properties.get_mut(&accessor) {
+                                if let Some(property) =
+                                    properties.get_mut(&SchemaAccessor::from(&accessor))
+                                {
                                     let need_magic_trigger = match completion_hint {
                                         Some(
                                             CompletionHint::DotTrigger { range, .. }

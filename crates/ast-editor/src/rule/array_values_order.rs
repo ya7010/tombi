@@ -4,7 +4,7 @@ use itertools::Itertools;
 use schema_store::{ArraySchema, ArrayValuesOrder};
 use syntax::SyntaxElement;
 
-pub async fn array_values_order_by(
+pub async fn array_values_order(
     node: &syntax::SyntaxNode,
     array_schema: &ArraySchema,
     toml_version: toml_version::TomlVersion,
