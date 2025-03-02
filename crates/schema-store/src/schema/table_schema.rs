@@ -5,7 +5,7 @@ use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
 
 use super::{
-    CurrentSchema, FindSchemaCandidates, SchemaDefinitions, SchemaItemTokio,
+    CurrentSchema, FindSchemaCandidates, SchemaAccessor, SchemaDefinitions, SchemaItemTokio,
     SchemaPatternProperties, SchemaUrl, ValueSchema, X_TOMBI_TABLE_KEYS_ORDER,
 };
 use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
@@ -50,7 +50,7 @@ impl TableSchema {
                     continue;
                 };
                 if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
-                    properties.insert(Accessor::Key(key.into()), value_schema);
+                    properties.insert(SchemaAccessor::Key(key.into()), value_schema);
                 }
             }
         }
@@ -182,7 +182,12 @@ impl FindSchemaCandidates for TableSchema {
                 return (candidates, errors);
             }
 
-            if let Some(value) = self.properties.write().await.get_mut(&accessors[0]) {
+            if let Some(value) = self
+                .properties
+                .write()
+                .await
+                .get_mut(&SchemaAccessor::from(&accessors[0]))
+            {
                 if let Ok(Some(CurrentSchema {
                     value_schema,
                     schema_url,

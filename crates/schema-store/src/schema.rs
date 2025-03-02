@@ -11,6 +11,7 @@ mod local_time_schema;
 mod offset_date_time_schema;
 mod one_of_schema;
 mod referable_schema;
+mod schema_accessor;
 mod schema_context;
 mod schema_url;
 mod source_schema;
@@ -21,6 +22,7 @@ mod x_tombi;
 
 use std::sync::Arc;
 
+use crate::{Accessor, SchemaStore};
 pub use all_of_schema::AllOfSchema;
 pub use any_of_schema::AnyOfSchema;
 pub use array_schema::{ArraySchema, ArrayValuesOrder};
@@ -35,6 +37,7 @@ pub use local_time_schema::LocalTimeSchema;
 pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
 pub use referable_schema::{is_online_url, CurrentSchema, Referable};
+pub use schema_accessor::SchemaAccessor;
 pub use schema_context::SchemaContext;
 pub use schema_url::SchemaUrl;
 pub use source_schema::{SourceSchema, SubSchemaUrlMap};
@@ -43,11 +46,8 @@ pub use table_schema::{TableKeysOrder, TableSchema};
 pub use value_schema::*;
 pub use x_tombi::*;
 
-use crate::SchemaAccessor;
-use crate::{Accessor, SchemaStore};
-
 pub type SchemaProperties =
-    Arc<tokio::sync::RwLock<indexmap::IndexMap<Accessor, Referable<ValueSchema>>>>;
+    Arc<tokio::sync::RwLock<indexmap::IndexMap<SchemaAccessor, Referable<ValueSchema>>>>;
 pub type SchemaPatternProperties =
     Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
 pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;

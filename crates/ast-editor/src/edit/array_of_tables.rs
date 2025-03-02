@@ -6,7 +6,7 @@ use std::borrow::Cow;
 impl crate::Edit for ast::ArrayOfTables {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::Accessor],
+        accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,

@@ -5,7 +5,7 @@ mod schema;
 mod store;
 mod value_type;
 
-pub use accessor::{Accessor, Accessors, SchemaAccessor};
+pub use accessor::{Accessor, Accessors};
 pub use error::Error;
 pub use schema::*;
 pub use store::SchemaStore;

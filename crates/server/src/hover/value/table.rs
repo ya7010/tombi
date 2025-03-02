@@ -78,8 +78,11 @@ impl GetHoverContent for document_tree::Table {
                                     None => None,
                                 };
 
-                                if let Some(property) =
-                                    table_schema.properties.write().await.get_mut(&accessor)
+                                if let Some(property) = table_schema
+                                    .properties
+                                    .write()
+                                    .await
+                                    .get_mut(&SchemaAccessor::from(&accessor))
                                 {
                                     let required = table_schema
                                         .required
