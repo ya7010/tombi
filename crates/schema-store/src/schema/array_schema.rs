@@ -58,6 +58,7 @@ impl ArraySchema {
             unique_items: object.get("uniqueItems").and_then(|v| v.as_bool()),
             values_order: match object
                 .get(X_TOMBI_ARRAY_VALUES_ORDER)
+                // NOTE: support old name
                 .and_then(|object| object.get("x-tombi-array-values-order-by"))
             {
                 Some(serde_json::Value::String(order)) => match order.as_str() {
