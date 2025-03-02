@@ -46,6 +46,10 @@
       {
         "title": "Linter",
         "path": "/docs/cli/linter"
+      },
+      {
+        "title": "Offline Mode",
+        "path": "/docs/cli/offline-mode"
       }
     ]
   },
