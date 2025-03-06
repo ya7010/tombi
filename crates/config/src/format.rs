@@ -15,6 +15,7 @@
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = x_tombi::TableKeysOrder::Schema)))]
 #[derive(Debug, Clone)]
 pub struct FormatOptions {}
 

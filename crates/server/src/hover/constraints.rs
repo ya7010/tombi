@@ -1,4 +1,4 @@
-use schema_store::{ArrayValuesOrder, TableKeysOrder};
+use x_tombi::{ArrayValuesOrder, TableKeysOrder};
 
 use super::default_value::DefaultValue;
 

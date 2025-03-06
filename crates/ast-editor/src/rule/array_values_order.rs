@@ -1,8 +1,9 @@
 use ast::AstNode;
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use schema_store::{ArraySchema, ArrayValuesOrder};
+use schema_store::ArraySchema;
 use syntax::SyntaxElement;
+use x_tombi::ArrayValuesOrder;
 
 pub async fn array_values_order(
     node: &syntax::SyntaxNode,

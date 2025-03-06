@@ -1,0 +1,18 @@
+[package]
+name = "x-tombi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["serde", "clap"]
+serde = ["dep:serde"]
+clap = ["dep:clap"]
+jsonschema = ["dep:schemars"]
+
+[dependencies]
+clap = { workspace = true, optional = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }

@@ -1,12 +1,13 @@
 use std::{borrow::Cow, sync::Arc};
 
 use futures::{future::BoxFuture, FutureExt};
+use x_tombi::{ArrayValuesOrder, X_TOMBI_ARRAY_VALUES_ORDER};
 
 use super::{
     CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, SchemaUrl,
     ValueSchema,
 };
-use crate::{Accessor, SchemaStore, X_TOMBI_ARRAY_VALUES_ORDER};
+use crate::{Accessor, SchemaStore};
 
 #[derive(Debug, Default, Clone)]
 pub struct ArraySchema {
@@ -17,21 +18,6 @@ pub struct ArraySchema {
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
     pub values_order: Option<ArrayValuesOrder>,
-}
-
-#[derive(Debug, Clone)]
-pub enum ArrayValuesOrder {
-    Ascending,
-    Descending,
-}
-
-impl std::fmt::Display for ArrayValuesOrder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Ascending => write!(f, "ascending"),
-            Self::Descending => write!(f, "descending"),
-        }
-    }
 }
 
 impl ArraySchema {

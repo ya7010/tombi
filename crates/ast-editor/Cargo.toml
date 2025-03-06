@@ -19,3 +19,4 @@ text.workspace = true
 thiserror.workspace = true
 toml-version.workspace = true
 tracing.workspace = true
+x-tombi.workspace = true

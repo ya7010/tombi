@@ -90,6 +90,7 @@
   },
   "additionalProperties": false,
   "x-tombi-toml-version": "v1.0.0",
+  "x-tombi-table-keys-order": "schema",
   "definitions": {
     "TomlVersion": {
       "title": "TOML version.",
@@ -100,11 +101,13 @@
       "title": "Formatter options.",
       "description": "To avoid needless discussion of formatting rules,\n we do not currently have a configuration item for formatting.",
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-tombi-table-keys-order": "schema"
     },
     "LintOptions": {
       "type": "object",
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-tombi-table-keys-order": "schema"
     },
     "ServerOptions": {
       "title": "Language Server options.",
@@ -155,7 +158,8 @@
           ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-tombi-table-keys-order": "schema"
     },
     "ServerHover": {
       "type": "object",
@@ -263,7 +267,8 @@
           ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "x-tombi-table-keys-order": "schema"
     },
     "SchemaCatalog": {
       "type": "object",
