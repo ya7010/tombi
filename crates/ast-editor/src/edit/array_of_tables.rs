@@ -39,7 +39,14 @@ impl crate::Edit for ast::ArrayOfTables {
                     ValueSchema::Table(table_schema) => {
                         if accessors.is_empty() {
                             changes.extend(
-                                crate::rule::table_keys_order(self.syntax(), table_schema).await,
+                                crate::rule::table_keys_order(
+                                    self.syntax(),
+                                    table_schema,
+                                    schema_url,
+                                    definitions,
+                                    schema_context,
+                                )
+                                .await,
                             );
                             return changes;
                         }

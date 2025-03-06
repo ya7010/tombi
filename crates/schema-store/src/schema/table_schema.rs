@@ -24,7 +24,7 @@ pub struct TableSchema {
     pub keys_order: Option<TableKeysOrder>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKeysOrder {
     Ascending,
     Descending,
