@@ -1,4 +1,3 @@
-use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, SchemaDefinitions, SchemaUrl, ValueSchema};
 
@@ -229,13 +228,11 @@ impl FindCompletionContents for SchemaCompletion {
 impl linter::Validate for SchemaCompletion {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        _toml_version: TomlVersion,
-        _accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
+        _accessors: &'a [schema_store::SchemaAccessor],
+        _value_schema: Option<&'a schema_store::ValueSchema>,
         _schema_url: Option<&'a schema_store::SchemaUrl>,
-        _definitions: Option<&'a SchemaDefinitions>,
-        _sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
-        _schema_store: &'a schema_store::SchemaStore,
+        _definitions: Option<&'a schema_store::SchemaDefinitions>,
+        _schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<linter::Error>>> {
         async move { Ok(()) }.boxed()
     }

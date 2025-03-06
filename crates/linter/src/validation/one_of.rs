@@ -1,6 +1,5 @@
 use std::{borrow::Cow, fmt::Debug};
 
-use config::TomlVersion;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, OneOfSchema, SchemaDefinitions, ValueSchema};
@@ -10,13 +9,11 @@ use crate::validation::{all_of::validate_all_of, any_of::validate_any_of};
 
 pub fn validate_one_of<'a: 'b, 'b, T>(
     value: &'a T,
-    toml_version: TomlVersion,
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [schema_store::SchemaAccessor],
     one_of_schema: &'a OneOfSchema,
     schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a SchemaDefinitions,
-    sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
-    schema_store: &'a schema_store::SchemaStore,
+    schema_context: &'a schema_store::SchemaContext<'a>,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
     T: Validate + ValueImpl + Sync + Send + Debug,
@@ -40,7 +37,7 @@ where
                 .resolve(
                     Cow::Borrowed(schema_url),
                     Cow::Borrowed(definitions),
-                    schema_store,
+                    schema_context.store,
                 )
                 .await
             else {
@@ -61,13 +58,11 @@ where
                     is_type_match = true;
                     match value
                         .validate(
-                            toml_version,
                             accessors,
                             Some(value_schema),
                             Some(&schema_url),
                             Some(&definitions),
-                            sub_schema_url_map,
-                            schema_store,
+                            &schema_context,
                         )
                         .await
                     {
@@ -100,13 +95,11 @@ where
                 (_, ValueSchema::OneOf(one_of_schema)) => {
                     match validate_one_of(
                         value,
-                        toml_version,
                         accessors,
                         one_of_schema,
                         &schema_url,
                         &definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        &schema_context,
                     )
                     .await
                     {
@@ -120,13 +113,11 @@ where
                 (_, ValueSchema::AnyOf(any_of_schema)) => {
                     match validate_any_of(
                         value,
-                        toml_version,
                         accessors,
                         any_of_schema,
                         &schema_url,
                         &definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        &schema_context,
                     )
                     .await
                     {
@@ -140,13 +131,11 @@ where
                 (_, ValueSchema::AllOf(all_of_schema)) => {
                     match validate_all_of(
                         value,
-                        toml_version,
                         accessors,
                         all_of_schema,
                         &schema_url,
                         &definitions,
-                        sub_schema_url_map,
-                        schema_store,
+                        &schema_context,
                     )
                     .await
                     {

@@ -74,14 +74,15 @@ impl<'a> Linter<'a> {
                 err.set_diagnostic(&mut errors);
             }
 
-            if let Some(source_schema) = self.source_schema {
-                if let Err(errs) = crate::validation::validate(
-                    document_tree,
-                    self.toml_version,
-                    &source_schema,
-                    self.schema_store,
-                )
-                .await
+            if let Some(source_schema) = &self.source_schema {
+                let schema_context = schema_store::SchemaContext {
+                    toml_version: self.toml_version,
+                    root_schema: source_schema.root_schema.as_ref(),
+                    sub_schema_url_map: Some(&source_schema.sub_schema_url_map),
+                    store: self.schema_store,
+                };
+                if let Err(errs) =
+                    crate::validation::validate(document_tree, source_schema, &schema_context).await
                 {
                     for err in errs {
                         err.set_diagnostic(&mut errors);
