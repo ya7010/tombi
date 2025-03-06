@@ -1,20 +1,17 @@
-use config::TomlVersion;
 use document_tree::{OffsetDateTime, ValueImpl};
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaDefinitions, ValueSchema, ValueType};
+use schema_store::ValueType;
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for OffsetDateTime {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        toml_version: TomlVersion,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
+        accessors: &'a [schema_store::SchemaAccessor],
+        value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
-        schema_store: &'a schema_store::SchemaStore,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
             let mut errors = vec![];
@@ -45,39 +42,33 @@ impl Validate for OffsetDateTime {
                         schema_store::ValueSchema::OneOf(one_of_schema) => {
                             return validate_one_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 one_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         }
                         schema_store::ValueSchema::AnyOf(any_of_schema) => {
                             return validate_any_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 any_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         }
                         schema_store::ValueSchema::AllOf(all_of_schema) => {
                             return validate_all_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 all_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         }

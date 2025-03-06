@@ -1,11 +1,8 @@
 use std::borrow::Cow;
 
-use config::TomlVersion;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{
-    Accessor, CurrentSchema, SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType,
-};
+use schema_store::{Accessor, CurrentSchema, SchemaAccessor, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 use crate::error::Patterns;
@@ -13,37 +10,33 @@ use crate::error::Patterns;
 impl Validate for document_tree::Table {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        toml_version: TomlVersion,
-        accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
+        accessors: &'a [schema_store::SchemaAccessor],
+        value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
-        schema_store: &'a schema_store::SchemaStore,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         tracing::trace!("self = {:?}", self);
         tracing::trace!("value_schema = {:?}", value_schema);
 
         async move {
-            if let Some(sub_schema_url) = sub_schema_url_map.get(
-                &accessors
-                    .iter()
-                    .map(SchemaAccessor::from)
-                    .collect::<Vec<_>>(),
-            ) {
+            if let Some(sub_schema_url) = schema_context
+                .sub_schema_url_map
+                .and_then(|map| map.get(accessors))
+            {
                 if schema_url != Some(sub_schema_url) {
-                    if let Ok(Some(document_schema)) =
-                        schema_store.try_get_document_schema(sub_schema_url).await
+                    if let Ok(Some(document_schema)) = schema_context
+                        .store
+                        .try_get_document_schema(sub_schema_url)
+                        .await
                     {
                         return self
                             .validate(
-                                toml_version,
                                 accessors,
                                 document_schema.value_schema.as_ref(),
                                 Some(&document_schema.schema_url),
                                 Some(&document_schema.definitions),
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await;
                     }
@@ -75,47 +68,41 @@ impl Validate for document_tree::Table {
                         ValueSchema::OneOf(one_of_schema) => {
                             return validate_one_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 one_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         }
                         ValueSchema::AnyOf(any_of_schema) => {
                             return validate_any_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 any_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                &schema_context,
                             )
                             .await
                         }
                         ValueSchema::AllOf(all_of_schema) => {
                             return validate_all_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 all_of_schema,
-                                schema_url,
-                                definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                &schema_url,
+                                &definitions,
+                                &schema_context,
                             )
-                            .await
+                            .await;
                         }
                         _ => unreachable!("Expected a Table schema"),
                     };
 
                     for (key, value) in self.key_values() {
-                        let accessor_raw_text = key.to_raw_text(toml_version);
+                        let accessor_raw_text = key.to_raw_text(schema_context.toml_version);
                         let accessor = Accessor::Key(accessor_raw_text.clone());
 
                         let mut matche_key = false;
@@ -130,7 +117,7 @@ impl Validate for document_tree::Table {
                                 .resolve(
                                     Cow::Borrowed(schema_url),
                                     Cow::Borrowed(definitions),
-                                    schema_store,
+                                    schema_context.store,
                                 )
                                 .await
                             {
@@ -141,17 +128,17 @@ impl Validate for document_tree::Table {
                                 })) => {
                                     if let Err(errs) = value
                                         .validate(
-                                            toml_version,
                                             &accessors
                                                 .iter()
                                                 .cloned()
-                                                .chain(std::iter::once(accessor.clone()))
+                                                .chain(std::iter::once(SchemaAccessor::Key(
+                                                    accessor_raw_text.clone(),
+                                                )))
                                                 .collect::<Vec<_>>(),
                                             Some(value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
-                                            sub_schema_url_map,
-                                            schema_store,
+                                            &schema_context,
                                         )
                                         .await
                                     {
@@ -186,23 +173,23 @@ impl Validate for document_tree::Table {
                                         .resolve(
                                             Cow::Borrowed(schema_url),
                                             Cow::Borrowed(definitions),
-                                            schema_store,
+                                            schema_context.store,
                                         )
                                         .await
                                     {
                                         if let Err(errs) = value
                                             .validate(
-                                                toml_version,
                                                 &accessors
                                                     .iter()
                                                     .cloned()
-                                                    .chain(std::iter::once(accessor.clone()))
+                                                    .chain(std::iter::once(SchemaAccessor::Key(
+                                                        accessor_raw_text.clone(),
+                                                    )))
                                                     .collect::<Vec<_>>(),
                                                 Some(pattern_property_schema),
                                                 Some(&schema_url),
                                                 Some(&definitions),
-                                                sub_schema_url_map,
-                                                schema_store,
+                                                schema_context,
                                             )
                                             .await
                                         {
@@ -240,23 +227,23 @@ impl Validate for document_tree::Table {
                                     .resolve(
                                         Cow::Borrowed(schema_url),
                                         Cow::Borrowed(definitions),
-                                        schema_store,
+                                        schema_context.store,
                                     )
                                     .await
                                 {
                                     if let Err(errs) = value
                                         .validate(
-                                            toml_version,
                                             &accessors
                                                 .iter()
                                                 .cloned()
-                                                .chain(std::iter::once(accessor))
+                                                .chain(std::iter::once(SchemaAccessor::Key(
+                                                    accessor_raw_text,
+                                                )))
                                                 .collect::<Vec<_>>(),
                                             Some(additional_property_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
-                                            sub_schema_url_map,
-                                            schema_store,
+                                            schema_context,
                                         )
                                         .await
                                     {
@@ -280,7 +267,7 @@ impl Validate for document_tree::Table {
                     if let Some(required) = &table_schema.required {
                         let keys = self
                             .keys()
-                            .map(|key| key.to_raw_text(toml_version))
+                            .map(|key| key.to_raw_text(schema_context.toml_version))
                             .collect::<Vec<_>>();
 
                         for required_key in required {
@@ -323,19 +310,17 @@ impl Validate for document_tree::Table {
                     for (key, value) in self.key_values() {
                         if let Err(errs) = value
                             .validate(
-                                toml_version,
                                 &accessors
                                     .iter()
                                     .cloned()
-                                    .chain(std::iter::once(Accessor::Key(
-                                        key.to_raw_text(toml_version),
+                                    .chain(std::iter::once(SchemaAccessor::Key(
+                                        key.to_raw_text(schema_context.toml_version),
                                     )))
                                     .collect::<Vec<_>>(),
                                 None,
                                 None,
                                 None,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         {

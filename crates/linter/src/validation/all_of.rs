@@ -1,6 +1,5 @@
 use std::{borrow::Cow, fmt::Debug};
 
-use config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::CurrentSchema;
 
@@ -8,13 +7,11 @@ use super::Validate;
 
 pub fn validate_all_of<'a: 'b, 'b, T>(
     value: &'a T,
-    toml_version: TomlVersion,
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [schema_store::SchemaAccessor],
     all_of_schema: &'a schema_store::AllOfSchema,
     schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a schema_store::SchemaDefinitions,
-    sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
-    schema_store: &'a schema_store::SchemaStore,
+    schema_context: &'a schema_store::SchemaContext<'a>,
 ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
 where
     T: Validate + Sync + Send + Debug,
@@ -35,7 +32,7 @@ where
                 .resolve(
                     Cow::Borrowed(schema_url),
                     Cow::Borrowed(definitions),
-                    schema_store,
+                    schema_context.store,
                 )
                 .await
             else {
@@ -44,13 +41,11 @@ where
 
             match value
                 .validate(
-                    toml_version,
                     accessors,
                     Some(value_schema),
                     Some(&schema_url),
                     Some(&definitions),
-                    sub_schema_url_map,
-                    schema_store,
+                    schema_context,
                 )
                 .await
             {
