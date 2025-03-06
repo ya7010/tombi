@@ -37,7 +37,7 @@ pub use local_time_schema::LocalTimeSchema;
 pub use offset_date_time_schema::OffsetDateTimeSchema;
 pub use one_of_schema::OneOfSchema;
 pub use referable_schema::{is_online_url, CurrentSchema, Referable};
-pub use schema_accessor::SchemaAccessor;
+pub use schema_accessor::{GetHeaderSchemarAccessors, SchemaAccessor};
 pub use schema_context::SchemaContext;
 pub use schema_url::SchemaUrl;
 pub use source_schema::{SourceSchema, SubSchemaUrlMap};

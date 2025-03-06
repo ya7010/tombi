@@ -11,6 +11,7 @@ ast.workspace = true
 document-tree.workspace = true
 futures.workspace = true
 itertools.workspace = true
+linter.workspace = true
 regex.workspace = true
 schema-store.workspace = true
 syntax.workspace = true

@@ -1,3 +1,6 @@
+use config::TomlVersion;
+use itertools::Itertools;
+
 use crate::Accessor;
 
 /// Represents an accessor to a value in a TOML-like structure.
@@ -110,6 +113,56 @@ impl std::fmt::Display for SchemaAccessor {
             SchemaAccessor::Key(key) => write!(f, "{}", key),
             SchemaAccessor::Index => write!(f, "[*]"),
         }
+    }
+}
+
+pub trait GetHeaderSchemarAccessors {
+    fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>>;
+}
+
+impl GetHeaderSchemarAccessors for ast::Table {
+    fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
+        let array_of_tables_keys = self
+            .array_of_tables_keys()
+            .map(|keys| keys.into_iter().collect_vec())
+            .collect_vec();
+
+        let mut accessors = vec![];
+        let mut header_keys = vec![];
+        for key in self.header().unwrap().keys() {
+            accessors.push(SchemaAccessor::Key(key.try_to_raw_text(toml_version).ok()?));
+            header_keys.push(key);
+
+            if array_of_tables_keys.contains(&header_keys) {
+                accessors.push(SchemaAccessor::Index);
+            }
+        }
+
+        Some(accessors)
+    }
+}
+
+impl GetHeaderSchemarAccessors for ast::ArrayOfTables {
+    fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
+        let array_of_tables_keys = self
+            .array_of_tables_keys()
+            .map(|keys| keys.into_iter().collect_vec())
+            .collect_vec();
+
+        let mut accessors = vec![];
+        let mut header_keys = vec![];
+        for key in self.header().unwrap().keys() {
+            accessors.push(SchemaAccessor::Key(key.try_to_raw_text(toml_version).ok()?));
+            header_keys.push(key);
+
+            if array_of_tables_keys.contains(&header_keys) {
+                accessors.push(SchemaAccessor::Index);
+            }
+        }
+
+        accessors.push(SchemaAccessor::Index);
+
+        Some(accessors)
     }
 }
 

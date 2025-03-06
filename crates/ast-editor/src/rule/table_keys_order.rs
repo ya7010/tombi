@@ -3,24 +3,30 @@ use std::borrow::Cow;
 use ast::AstNode;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::{sorted, Itertools};
+use linter::Validate;
 use schema_store::{
-    Accessor, AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,
+    AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,
     SchemaDefinitions, SchemaUrl, TableKeysOrder, TableSchema, ValueSchema,
 };
 use syntax::SyntaxElement;
 
 pub async fn table_keys_order<'a>(
     value: document_tree::Value,
-    accessors: &'a [Accessor],
-    key_values: &'a [ast::KeyValue],
+    header_accessors: &'a [SchemaAccessor],
+    key_values: Vec<ast::KeyValue>,
     value_schema: &'a ValueSchema,
     schema_url: &'a SchemaUrl,
     definitions: &'a SchemaDefinitions,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
-    let Some(key_order) = get_table_keys_order(
+    if key_values.is_empty() {
+        return Vec::with_capacity(0);
+    }
+
+    let Some(table_schema) = get_table_schema(
         &value,
-        accessors,
+        header_accessors,
+        header_accessors,
         value_schema,
         Cow::Borrowed(schema_url),
         Cow::Borrowed(definitions),
@@ -31,35 +37,9 @@ pub async fn table_keys_order<'a>(
         return Vec::with_capacity(0);
     };
 
-    let (table_schema, mut key_values) = if let Some(table) = ast::Table::cast(node.clone()) {
-        let array_of_tables_keys = table
-            .array_of_tables_keys()
-            .map(|keys| keys.into_iter().collect_vec())
-            .collect_vec();
-
-        let mut accessors = vec![];
-        let mut header_keys = vec![];
-        for key in table.header().unwrap().keys() {
-            accessors.push(SchemaAccessor::Key(
-                key.try_to_raw_text(schema_context.toml_version).unwrap(),
-            ));
-            header_keys.push(key);
-
-            if array_of_tables_keys.contains(&header_keys) {
-                accessors.push(SchemaAccessor::Index);
-            }
-        }
-
-        (table_schema, table.key_values().collect_vec())
-    } else if let Some(array_of_table) = ast::ArrayOfTables::cast(node.clone()) {
-        (table_schema, array_of_table.key_values().collect_vec())
-    } else {
+    let Some(key_order) = table_schema.keys_order else {
         return Vec::with_capacity(0);
     };
-
-    if key_values.is_empty() {
-        return Vec::with_capacity(0);
-    }
 
     let old = std::ops::RangeInclusive::new(
         SyntaxElement::Node(key_values.first().unwrap().syntax().clone()),
@@ -84,6 +64,7 @@ pub async fn table_keys_order<'a>(
         }
         TableKeysOrder::Schema => {
             let mut new = vec![];
+            let mut key_values = key_values;
             for (accessor, _) in table_schema.properties.write().await.iter_mut() {
                 key_values = key_values
                     .into_iter()
@@ -110,45 +91,48 @@ pub async fn table_keys_order<'a>(
     }
 }
 
-fn get_table_keys_order<'a: 'b, 'b>(
+fn get_table_schema<'a: 'b, 'b>(
     value: &'a document_tree::Value,
-    accessors: &'a [Accessor],
+    accessors: &'a [SchemaAccessor],
+    validation_accessors: &'a [SchemaAccessor],
     value_schema: &'a ValueSchema,
     schema_url: Cow<'a, SchemaUrl>,
     definitions: Cow<'a, SchemaDefinitions>,
     schema_context: &'a SchemaContext<'a>,
-) -> BoxFuture<'b, Option<Cow<'a, TableSchema>>> {
+) -> BoxFuture<'b, Option<TableSchema>> {
     async move {
-        match value_schema {
+        match &*value_schema {
             ValueSchema::Table(_) | ValueSchema::Array(_) => {}
             ValueSchema::OneOf(OneOfSchema { schemas, .. })
             | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
             | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
-                let mut result = None;
-                for referable_schema in schemas.write().await.iter_mut() {
-                    if let Ok(Some(CurrentSchema {
-                        value_schema,
-                        schema_url,
-                        definitions,
-                    })) = referable_schema
-                        .resolve(
-                            schema_url.clone(),
-                            definitions.clone(),
-                            schema_context.store,
-                        )
-                        .await
-                    {
-                        if let Some(table_schema) = get_table_keys_order(
-                            value,
-                            &accessors,
+                {
+                    for referable_schema in schemas.write().await.iter_mut() {
+                        if let Ok(Some(CurrentSchema {
                             value_schema,
                             schema_url,
                             definitions,
-                            schema_context,
-                        )
-                        .await
+                        })) = referable_schema
+                            .resolve(
+                                schema_url.clone(),
+                                definitions.clone(),
+                                schema_context.store,
+                            )
+                            .await
                         {
-                            return Some(table_schema);
+                            if let Some(table_schema) = get_table_schema(
+                                value,
+                                accessors,
+                                validation_accessors,
+                                value_schema,
+                                schema_url,
+                                definitions,
+                                schema_context,
+                            )
+                            .await
+                            {
+                                return Some(table_schema);
+                            }
                         }
                     }
                 }
@@ -158,26 +142,35 @@ fn get_table_keys_order<'a: 'b, 'b>(
         }
 
         if accessors.is_empty() {
-            match value_schema {
-                ValueSchema::Table(table_schema) => {
-                    if value.validate(schema_context.toml_version) {
-                        return Some(Cow::Borrowed(table_schema));
-                    }
+            if let ValueSchema::Table(table_schema) = &*value_schema {
+                if value
+                    .validate(
+                        validation_accessors,
+                        Some(&value_schema),
+                        Some(&schema_url),
+                        Some(&definitions),
+                        schema_context,
+                    )
+                    .await
+                    .is_ok()
+                {
+                    return Some(table_schema.to_owned());
                 }
-                _ => {}
             };
             return None;
         }
 
         match &accessors[0] {
-            Accessor::Key(key) => match value_schema {
-                ValueSchema::Table(value_schema) => {
-                    if let Some(referable_property_schema) = value_schema
-                        .properties
-                        .write()
-                        .await
-                        .get_mut(&SchemaAccessor::Key(key.to_string()))
-                    {
+            SchemaAccessor::Key(key) => match (value, &*value_schema) {
+                (document_tree::Value::Table(table), ValueSchema::Table(value_schema)) => {
+                    if let (Some(value), Some(referable_property_schema)) = (
+                        table.get(&key.to_string()),
+                        value_schema
+                            .properties
+                            .write()
+                            .await
+                            .get_mut(&SchemaAccessor::Key(key.to_string())),
+                    ) {
                         if let Ok(Some(CurrentSchema {
                             value_schema,
                             schema_url,
@@ -186,8 +179,10 @@ fn get_table_keys_order<'a: 'b, 'b>(
                             .resolve(schema_url, definitions, schema_context.store)
                             .await
                         {
-                            return get_table_keys_order(
+                            return get_table_schema(
+                                value,
                                 &accessors[1..],
+                                validation_accessors,
                                 value_schema,
                                 schema_url,
                                 definitions,
@@ -200,7 +195,7 @@ fn get_table_keys_order<'a: 'b, 'b>(
                 _ => return None,
             },
             SchemaAccessor::Index => {
-                if let ValueSchema::Array(array_schema) = value_schema {
+                if let ValueSchema::Array(array_schema) = &*value_schema {
                     if let Some(item_schema) = &array_schema.items {
                         if let Ok(Some(CurrentSchema {
                             value_schema,
@@ -212,8 +207,10 @@ fn get_table_keys_order<'a: 'b, 'b>(
                             .resolve(schema_url, definitions, schema_context.store)
                             .await
                         {
-                            return get_table_keys_order(
+                            return get_table_schema(
+                                value,
                                 &accessors[1..],
+                                validation_accessors,
                                 value_schema,
                                 schema_url,
                                 definitions,

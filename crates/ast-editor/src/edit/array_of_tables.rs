@@ -1,7 +1,9 @@
-use ast::AstNode;
+use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
-use schema_store::{AnyOfSchema, CurrentSchema, OneOfSchema, ValueSchema};
-use std::borrow::Cow;
+use itertools::Itertools;
+use schema_store::GetHeaderSchemarAccessors;
+
+use crate::rule::table_keys_order;
 
 impl crate::Edit for ast::ArrayOfTables {
     fn edit<'a: 'b, 'b>(
@@ -35,139 +37,24 @@ impl crate::Edit for ast::ArrayOfTables {
             if let (Some(schema_url), Some(value_schema), Some(definitions)) =
                 (schema_url, value_schema, definitions)
             {
-                match value_schema {
-                    ValueSchema::Table(table_schema) => {
-                        if accessors.is_empty() {
-                            changes.extend(
-                                crate::rule::table_keys_order(
-                                    self.syntax(),
-                                    table_schema,
-                                    schema_url,
-                                    definitions,
-                                    schema_context,
-                                )
-                                .await,
-                            );
-                            return changes;
-                        }
-                        let mut properties = table_schema.properties.write().await;
-                        if let Some(referable_property_schema) = properties.get_mut(&accessors[0]) {
-                            if let Ok(Some(CurrentSchema {
-                                value_schema,
-                                schema_url,
-                                definitions,
-                            })) = referable_property_schema
-                                .resolve(
-                                    Cow::Borrowed(schema_url),
-                                    Cow::Borrowed(definitions),
-                                    schema_context.store,
-                                )
-                                .await
-                            {
-                                return self
-                                    .edit(
-                                        &accessors[1..],
-                                        Some(value_schema),
-                                        Some(&schema_url),
-                                        Some(&definitions),
-                                        schema_context,
-                                    )
-                                    .await;
-                            };
-                        } else if let Some(pattern_properties) = &table_schema.pattern_properties {
-                            for (property_key, referable_property_schema) in
-                                pattern_properties.write().await.iter_mut()
-                            {
-                                if let Ok(pattern) = regex::Regex::new(property_key) {
-                                    if pattern.is_match(&accessors[0].to_string()) {
-                                        if let Ok(Some(CurrentSchema {
-                                            value_schema,
-                                            schema_url,
-                                            definitions,
-                                        })) = referable_property_schema
-                                            .resolve(
-                                                Cow::Borrowed(schema_url),
-                                                Cow::Borrowed(definitions),
-                                                schema_context.store,
-                                            )
-                                            .await
-                                        {
-                                            return self
-                                                .edit(
-                                                    &accessors[1..],
-                                                    Some(value_schema),
-                                                    Some(&schema_url),
-                                                    Some(&definitions),
-                                                    schema_context,
-                                                )
-                                                .await;
-                                        }
-                                    }
-                                }
-                            }
-                        } else if let Some(referable_additional_property_schema) =
-                            &table_schema.additional_property_schema
-                        {
-                            let mut referable_schema =
-                                referable_additional_property_schema.write().await;
-                            if let Ok(Some(CurrentSchema {
-                                schema_url,
-                                value_schema,
-                                definitions,
-                            })) = referable_schema
-                                .resolve(
-                                    Cow::Borrowed(schema_url),
-                                    Cow::Borrowed(definitions),
-                                    schema_context.store,
-                                )
-                                .await
-                            {
-                                return self
-                                    .edit(
-                                        &accessors[1..],
-                                        Some(value_schema),
-                                        Some(&schema_url),
-                                        Some(&definitions),
-                                        schema_context,
-                                    )
-                                    .await;
-                            }
-                        }
-                    }
-                    ValueSchema::OneOf(OneOfSchema { schemas, .. })
-                    | ValueSchema::AnyOf(AnyOfSchema { schemas, .. }) => {
-                        for schema in schemas.write().await.iter_mut() {
-                            if let Ok(Some(CurrentSchema {
-                                schema_url,
-                                value_schema,
-                                definitions,
-                            })) = schema
-                                .resolve(
-                                    Cow::Borrowed(schema_url),
-                                    Cow::Borrowed(definitions),
-                                    schema_context.store,
-                                )
-                                .await
-                            {
-                                changes.extend(
-                                    self.edit(
-                                        accessors,
-                                        Some(value_schema),
-                                        Some(&schema_url),
-                                        Some(&definitions),
-                                        schema_context,
-                                    )
-                                    .await,
-                                );
-
-                                if !changes.is_empty() {
-                                    return changes;
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
-                }
+                if let (Ok(table), Some(accessors)) = (
+                    self.clone()
+                        .try_into_document_tree(schema_context.toml_version),
+                    self.get_header_schema_accessor(schema_context.toml_version),
+                ) {
+                    changes.extend(
+                        table_keys_order(
+                            document_tree::Value::Table(table),
+                            &accessors,
+                            self.key_values().collect_vec(),
+                            value_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await,
+                    );
+                };
             }
 
             changes

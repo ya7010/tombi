@@ -1,8 +1,9 @@
-use std::borrow::Cow;
-
-use ast::AstNode;
+use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
-use schema_store::{AnyOfSchema, CurrentSchema, OneOfSchema, ValueSchema};
+use itertools::Itertools;
+use schema_store::GetHeaderSchemarAccessors;
+
+use crate::rule::table_keys_order;
 
 impl crate::Edit for ast::Table {
     fn edit<'a: 'b, 'b>(
@@ -36,7 +37,24 @@ impl crate::Edit for ast::Table {
             if let (Some(schema_url), Some(value_schema), Some(definitions)) =
                 (schema_url, value_schema, definitions)
             {
-                changes.extend(table_keys_order())
+                if let (Ok(table), Some(accessors)) = (
+                    self.clone()
+                        .try_into_document_tree(schema_context.toml_version),
+                    self.get_header_schema_accessor(schema_context.toml_version),
+                ) {
+                    changes.extend(
+                        table_keys_order(
+                            document_tree::Value::Table(table),
+                            &accessors,
+                            self.key_values().collect_vec(),
+                            value_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await,
+                    );
+                };
             }
 
             changes
