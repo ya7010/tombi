@@ -1,5 +1,4 @@
 use futures::FutureExt;
-use schema_store::SchemaAccessor;
 
 impl crate::Edit for ast::Root {
     fn edit<'a: 'b, 'b>(
@@ -16,14 +15,6 @@ impl crate::Edit for ast::Root {
             for item in self.items() {
                 changes.extend(match item {
                     ast::RootItem::Table(table) => {
-                        let mut accessors = vec![];
-                        for key in table.header().unwrap().keys() {
-                            let Ok(key_text) = key.try_to_raw_text(schema_context.toml_version)
-                            else {
-                                return changes;
-                            };
-                            accessors.push(SchemaAccessor::Key(key_text));
-                        }
                         table
                             .edit(
                                 &accessors,
