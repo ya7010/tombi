@@ -6,9 +6,10 @@ use itertools::{sorted, Itertools};
 use linter::Validate;
 use schema_store::{
     AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,
-    SchemaDefinitions, SchemaUrl, TableKeysOrder, TableSchema, ValueSchema,
+    SchemaDefinitions, SchemaUrl, TableSchema, ValueSchema,
 };
 use syntax::SyntaxElement;
+use x_tombi::TableKeysOrder;
 
 pub async fn table_keys_order<'a>(
     value: document_tree::Value,

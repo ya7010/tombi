@@ -3,10 +3,11 @@ use std::{borrow::Cow, sync::Arc};
 use ahash::AHashMap;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
+use x_tombi::{TableKeysOrder, X_TOMBI_TABLE_KEYS_ORDER};
 
 use super::{
     CurrentSchema, FindSchemaCandidates, SchemaAccessor, SchemaDefinitions, SchemaItemTokio,
-    SchemaPatternProperties, SchemaUrl, ValueSchema, X_TOMBI_TABLE_KEYS_ORDER,
+    SchemaPatternProperties, SchemaUrl, ValueSchema,
 };
 use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
 
@@ -22,23 +23,6 @@ pub struct TableSchema {
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
     pub keys_order: Option<TableKeysOrder>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum TableKeysOrder {
-    Ascending,
-    Descending,
-    Schema,
-}
-
-impl std::fmt::Display for TableKeysOrder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Ascending => write!(f, "ascending"),
-            Self::Descending => write!(f, "descending"),
-            Self::Schema => write!(f, "schema"),
-        }
-    }
 }
 
 impl TableSchema {

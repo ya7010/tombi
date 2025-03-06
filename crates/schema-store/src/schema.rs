@@ -18,14 +18,13 @@ mod source_schema;
 mod string_schema;
 mod table_schema;
 mod value_schema;
-mod x_tombi;
 
 use std::sync::Arc;
 
 use crate::{Accessor, SchemaStore};
 pub use all_of_schema::AllOfSchema;
 pub use any_of_schema::AnyOfSchema;
-pub use array_schema::{ArraySchema, ArrayValuesOrder};
+pub use array_schema::ArraySchema;
 pub use boolean_schema::BooleanSchema;
 pub use document_schema::DocumentSchema;
 pub use float_schema::FloatSchema;
@@ -42,9 +41,8 @@ pub use schema_context::SchemaContext;
 pub use schema_url::SchemaUrl;
 pub use source_schema::{SourceSchema, SubSchemaUrlMap};
 pub use string_schema::StringSchema;
-pub use table_schema::{TableKeysOrder, TableSchema};
+pub use table_schema::TableSchema;
 pub use value_schema::*;
-pub use x_tombi::*;
 
 pub type SchemaProperties =
     Arc<tokio::sync::RwLock<indexmap::IndexMap<SchemaAccessor, Referable<ValueSchema>>>>;
