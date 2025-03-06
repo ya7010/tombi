@@ -1,43 +1,38 @@
 use std::borrow::Cow;
 
-use config::TomlVersion;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{CurrentSchema, SchemaAccessor, SchemaDefinitions, ValueSchema, ValueType};
+use schema_store::{CurrentSchema, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for document_tree::Array {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        toml_version: TomlVersion,
-        accessors: &'a [schema_store::Accessor],
-        value_schema: Option<&'a ValueSchema>,
+        accessors: &'a [schema_store::SchemaAccessor],
+        value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a SchemaDefinitions>,
-        sub_schema_url_map: &'a schema_store::SubSchemaUrlMap,
-        schema_store: &'a schema_store::SchemaStore,
+        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
         async move {
-            if let Some(sub_schema_url) = sub_schema_url_map.get(
-                &accessors
-                    .iter()
-                    .map(SchemaAccessor::from)
-                    .collect::<Vec<_>>(),
-            ) {
+            if let Some(sub_schema_url) = schema_context
+                .sub_schema_url_map
+                .and_then(|map| map.get(accessors))
+            {
                 if schema_url != Some(sub_schema_url) {
-                    if let Ok(Some(document_schema)) =
-                        schema_store.try_get_document_schema(sub_schema_url).await
+                    if let Ok(Some(document_schema)) = schema_context
+                        .store
+                        .try_get_document_schema(sub_schema_url)
+                        .await
                     {
                         return self
                             .validate(
-                                toml_version,
                                 accessors,
                                 document_schema.value_schema.as_ref(),
                                 Some(&document_schema.schema_url),
                                 Some(&document_schema.definitions),
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await;
                     }
@@ -70,41 +65,35 @@ impl Validate for document_tree::Array {
                         ValueSchema::OneOf(one_of_schema) => {
                             return validate_one_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 one_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         }
                         ValueSchema::AnyOf(any_of_schema) => {
                             return validate_any_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 any_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         }
                         ValueSchema::AllOf(all_of_schema) => {
                             return validate_all_of(
                                 self,
-                                toml_version,
                                 accessors,
                                 all_of_schema,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
-                            .await
+                            .await;
                         }
                         _ => unreachable!("Expected an Array schema"),
                     };
@@ -119,26 +108,24 @@ impl Validate for document_tree::Array {
                             .resolve(
                                 Cow::Borrowed(schema_url),
                                 Cow::Borrowed(definitions),
-                                schema_store,
+                                schema_context.store,
                             )
                             .await
                         {
-                            for (index, value) in self.values().iter().enumerate() {
+                            for value in self.values().iter() {
                                 if let Err(errs) = value
                                     .validate(
-                                        toml_version,
                                         &accessors
                                             .iter()
                                             .cloned()
-                                            .chain(std::iter::once(schema_store::Accessor::Index(
-                                                index,
-                                            )))
+                                            .chain(std::iter::once(
+                                                schema_store::SchemaAccessor::Index,
+                                            ))
                                             .collect::<Vec<_>>(),
                                         Some(value_schema),
                                         Some(&schema_url),
                                         Some(&definitions),
-                                        sub_schema_url_map,
-                                        schema_store,
+                                        schema_context,
                                     )
                                     .await
                                 {
@@ -173,20 +160,18 @@ impl Validate for document_tree::Array {
                     }
                 }
                 _ => {
-                    for (index, value) in self.values().iter().enumerate() {
+                    for value in self.values().iter() {
                         if let Err(errs) = value
                             .validate(
-                                toml_version,
                                 &accessors
                                     .iter()
                                     .cloned()
-                                    .chain(std::iter::once(schema_store::Accessor::Index(index)))
+                                    .chain(std::iter::once(schema_store::SchemaAccessor::Index))
                                     .collect::<Vec<_>>(),
                                 None,
                                 schema_url,
                                 definitions,
-                                sub_schema_url_map,
-                                schema_store,
+                                schema_context,
                             )
                             .await
                         {
