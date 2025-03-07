@@ -523,7 +523,6 @@ mod completion_labels {
                 "package",
                 "patch",
                 "profile",
-                "project",
                 "target",
                 "test",
                 "workspace",
