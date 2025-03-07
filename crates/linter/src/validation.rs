@@ -26,14 +26,14 @@ pub trait Validate {
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>;
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>;
 }
 
 pub fn validate<'a: 'b, 'b>(
     tree: document_tree::DocumentTree,
     source_schema: &'a schema_store::SourceSchema,
     schema_context: &'a schema_store::SchemaContext,
-) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
     async move {
         tree.validate(
             &[],

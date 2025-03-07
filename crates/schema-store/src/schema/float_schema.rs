@@ -9,6 +9,7 @@ pub struct FloatSchema {
     pub multiple_of: Option<f64>,
     pub enumerate: Option<Vec<f64>>,
     pub default: Option<f64>,
+    pub deprecated: Option<bool>,
 }
 
 impl FloatSchema {
@@ -30,6 +31,7 @@ impl FloatSchema {
                 .and_then(|v| v.as_array())
                 .map(|v| v.iter().filter_map(|v| v.as_f64()).collect()),
             default: object.get("default").and_then(|v| v.as_f64()),
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

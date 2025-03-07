@@ -54,25 +54,23 @@ impl<'a> Linter<'a> {
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
         let p = parser::parse(source, self.toml_version);
-        let mut errors = vec![];
+        let mut diagnostics = vec![];
 
-        for err in p.errors() {
-            err.set_diagnostic(&mut errors);
+        for errors in p.errors() {
+            errors.set_diagnostics(&mut diagnostics);
         }
 
-        if errors.is_empty() {
+        if diagnostics.is_empty() {
             let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
                 unreachable!("Root node is always present");
             };
 
             root.lint(&mut self);
 
-            let (document_tree, errs) =
+            let (document_tree, errors) =
                 root.into_document_tree_and_errors(self.toml_version).into();
 
-            for err in errs {
-                err.set_diagnostic(&mut errors);
-            }
+            errors.set_diagnostics(&mut diagnostics);
 
             if let Some(source_schema) = &self.source_schema {
                 let schema_context = schema_store::SchemaContext {
@@ -81,22 +79,20 @@ impl<'a> Linter<'a> {
                     sub_schema_url_map: Some(&source_schema.sub_schema_url_map),
                     store: self.schema_store,
                 };
-                if let Err(errs) =
+                if let Err(schema_diagnostics) =
                     crate::validation::validate(document_tree, source_schema, &schema_context).await
                 {
-                    for err in errs {
-                        err.set_diagnostic(&mut errors);
-                    }
+                    diagnostics.extend(schema_diagnostics);
                 }
             }
 
-            errors.extend(self.diagnostics);
+            diagnostics.extend(self.diagnostics);
         }
 
-        if errors.is_empty() {
+        if diagnostics.is_empty() {
             Ok(())
         } else {
-            Err(errors)
+            Err(diagnostics)
         }
     }
 

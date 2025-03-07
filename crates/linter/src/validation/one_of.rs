@@ -1,5 +1,6 @@
 use std::{borrow::Cow, fmt::Debug};
 
+use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, OneOfSchema, SchemaDefinitions, ValueSchema};
@@ -14,7 +15,7 @@ pub fn validate_one_of<'a: 'b, 'b, T>(
     schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a SchemaDefinitions,
     schema_context: &'a schema_store::SchemaContext<'a>,
-) -> BoxFuture<'b, Result<(), Vec<crate::Error>>>
+) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>
 where
     T: Validate + ValueImpl + Sync + Send + Debug,
 {
@@ -22,7 +23,7 @@ where
     tracing::trace!("one_of_schema = {:?}", one_of_schema);
 
     async move {
-        let mut errors = vec![];
+        let mut diagnostics = vec![];
         let mut is_type_match = false;
         let mut type_mismatch_errors = vec![];
         let mut valid_count = 0;
@@ -70,7 +71,7 @@ where
                             valid_count += 1;
                             break;
                         }
-                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                        Err(mut schema_diagnostics) => diagnostics.append(&mut schema_diagnostics),
                     }
                 }
                 (_, ValueSchema::Boolean(_))
@@ -107,7 +108,7 @@ where
                             valid_count += 1;
                             break;
                         }
-                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                        Err(mut schema_errors) => diagnostics.append(&mut schema_errors),
                     }
                 }
                 (_, ValueSchema::AnyOf(any_of_schema)) => {
@@ -125,7 +126,7 @@ where
                             valid_count += 1;
                             break;
                         }
-                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                        Err(mut schema_diagnostics) => diagnostics.append(&mut schema_diagnostics),
                     }
                 }
                 (_, ValueSchema::AllOf(all_of_schema)) => {
@@ -143,7 +144,7 @@ where
                             valid_count += 1;
                             break;
                         }
-                        Err(mut schema_errors) => errors.append(&mut schema_errors),
+                        Err(mut schema_diagnostics) => diagnostics.append(&mut schema_diagnostics),
                     }
                 }
             }
@@ -154,10 +155,10 @@ where
         }
 
         if !is_type_match {
-            errors.append(&mut type_mismatch_errors);
+            type_mismatch_errors.set_diagnostics(&mut diagnostics);
         }
 
-        Err(errors)
+        Err(diagnostics)
     }
     .boxed()
 }

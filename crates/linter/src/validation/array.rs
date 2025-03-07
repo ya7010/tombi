@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, ValueSchema, ValueType};
@@ -14,7 +15,7 @@ impl Validate for document_tree::Array {
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         async move {
             if let Some(sub_schema_url) = schema_context
                 .sub_schema_url_map
@@ -39,8 +40,7 @@ impl Validate for document_tree::Array {
                 }
             }
 
-            let mut errors = vec![];
-
+            let mut diagnostics = vec![];
             match (value_schema, schema_url, definitions) {
                 (Some(value_schema), Some(schema_url), Some(definitions)) => {
                     match value_schema.value_type().await {
@@ -50,13 +50,16 @@ impl Validate for document_tree::Array {
                         | ValueType::AllOf(_) => {}
                         ValueType::Null => return Ok(()),
                         value_schema => {
-                            return Err(vec![crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::TypeMismatch {
                                     expected: value_schema,
                                     actual: self.value_type(),
                                 },
                                 range: self.range(),
-                            }])
+                            }
+                            .set_diagnostics(&mut diagnostics);
+
+                            return Err(diagnostics);
                         }
                     }
 
@@ -71,7 +74,7 @@ impl Validate for document_tree::Array {
                                 definitions,
                                 schema_context,
                             )
-                            .await
+                            .await;
                         }
                         ValueSchema::AnyOf(any_of_schema) => {
                             return validate_any_of(
@@ -82,7 +85,7 @@ impl Validate for document_tree::Array {
                                 definitions,
                                 schema_context,
                             )
-                            .await
+                            .await;
                         }
                         ValueSchema::AllOf(all_of_schema) => {
                             return validate_all_of(
@@ -112,8 +115,16 @@ impl Validate for document_tree::Array {
                             )
                             .await
                         {
+                            if value_schema.deprecated() == Some(true) {
+                                crate::Warning {
+                                    kind: crate::WarningKind::Deprecated,
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+
                             for value in self.values().iter() {
-                                if let Err(errs) = value
+                                if let Err(schema_diagnostics) = value
                                     .validate(
                                         &accessors
                                             .iter()
@@ -129,7 +140,7 @@ impl Validate for document_tree::Array {
                                     )
                                     .await
                                 {
-                                    errors.extend(errs);
+                                    diagnostics.extend(schema_diagnostics);
                                 }
                             }
                         }
@@ -137,31 +148,33 @@ impl Validate for document_tree::Array {
 
                     if let Some(max_items) = array_schema.max_items {
                         if self.values().len() > max_items {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::MaxItems {
                                     max_items,
                                     actual: self.values().len(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
 
                     if let Some(min_items) = array_schema.min_items {
                         if self.values().len() < min_items {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::MinItems {
                                     min_items,
                                     actual: self.values().len(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
                 }
                 _ => {
                     for value in self.values().iter() {
-                        if let Err(errs) = value
+                        if let Err(value_diagnostics) = value
                             .validate(
                                 &accessors
                                     .iter()
@@ -175,16 +188,16 @@ impl Validate for document_tree::Array {
                             )
                             .await
                         {
-                            errors.extend(errs);
+                            diagnostics.extend(value_diagnostics);
                         }
                     }
                 }
             }
 
-            if errors.is_empty() {
+            if diagnostics.is_empty() {
                 Ok(())
             } else {
-                Err(errors)
+                Err(diagnostics)
             }
         }
         .boxed()

@@ -7,6 +7,7 @@ pub struct StringSchema {
     pub pattern: Option<String>,
     pub enumerate: Option<Vec<String>>,
     pub default: Option<String>,
+    pub deprecated: Option<bool>,
 }
 
 impl StringSchema {
@@ -35,6 +36,7 @@ impl StringSchema {
             default: object
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

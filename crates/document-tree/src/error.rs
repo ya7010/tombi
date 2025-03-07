@@ -93,7 +93,7 @@ impl Error {
 
 #[cfg(feature = "diagnostic")]
 impl diagnostic::SetDiagnostics for Error {
-    fn set_diagnostic(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
+    fn set_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
         match self {
             Self::ConflictArray { range1, range2 } => {
                 let diagnostic1 = diagnostic::Diagnostic::new_error(self.to_message(), *range1);

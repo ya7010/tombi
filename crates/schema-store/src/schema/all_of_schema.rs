@@ -11,6 +11,7 @@ pub struct AllOfSchema {
     pub description: Option<String>,
     pub schemas: ReferableValueSchemas,
     pub default: Option<serde_json::Value>,
+    pub deprecated: Option<bool>,
 }
 
 impl AllOfSchema {
@@ -40,6 +41,7 @@ impl AllOfSchema {
             description,
             schemas: Arc::new(tokio::sync::RwLock::new(schemas)),
             default,
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

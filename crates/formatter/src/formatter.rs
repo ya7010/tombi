@@ -82,7 +82,7 @@ impl<'a> Formatter<'a> {
         let diagnostics = if !parsed.errors().is_empty() {
             let mut diagnostics = Vec::new();
             for error in parsed.errors() {
-                error.set_diagnostic(&mut diagnostics);
+                error.set_diagnostics(&mut diagnostics);
             }
             diagnostics
         } else {

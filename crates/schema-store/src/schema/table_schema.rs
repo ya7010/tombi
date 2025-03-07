@@ -23,6 +23,7 @@ pub struct TableSchema {
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
     pub keys_order: Option<TableKeysOrder>,
+    pub deprecated: Option<bool>,
 }
 
 impl TableSchema {
@@ -112,6 +113,7 @@ impl TableSchema {
                 .get("maxProperties")
                 .and_then(|v| v.as_u64().map(|u| u as usize)),
             keys_order,
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 
