@@ -91,7 +91,7 @@ pub struct Error {
 }
 
 impl diagnostic::SetDiagnostics for Error {
-    fn set_diagnostic(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
+    fn set_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
         diagnostics.push(diagnostic::Diagnostic::new_error(
             self.kind.to_string(),
             self.range,

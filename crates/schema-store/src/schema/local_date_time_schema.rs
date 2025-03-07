@@ -4,6 +4,7 @@ pub struct LocalDateTimeSchema {
     pub description: Option<String>,
     pub enumerate: Option<Vec<String>>,
     pub default: Option<String>,
+    pub deprecated: Option<bool>,
 }
 
 impl LocalDateTimeSchema {
@@ -22,6 +23,7 @@ impl LocalDateTimeSchema {
             default: object
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

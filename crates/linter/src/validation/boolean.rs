@@ -1,3 +1,4 @@
+use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{ValueSchema, ValueType};
@@ -12,9 +13,9 @@ impl Validate for document_tree::Boolean {
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         async move {
-            let mut errors = vec![];
+            let mut diagnostics = vec![];
 
             match (value_schema, schema_url, definitions) {
                 (Some(value_schema), Some(schema_url), Some(definitions)) => {
@@ -25,13 +26,16 @@ impl Validate for document_tree::Boolean {
                         | ValueType::AllOf(_) => {}
                         ValueType::Null => return Ok(()),
                         value_schema => {
-                            return Err(vec![crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::TypeMismatch {
                                     expected: value_schema,
                                     actual: self.value_type(),
                                 },
                                 range: self.range(),
-                            }]);
+                            }
+                            .set_diagnostics(&mut diagnostics);
+
+                            return Err(diagnostics);
                         }
                     }
                     let boolean_schema = match value_schema {
@@ -75,23 +79,24 @@ impl Validate for document_tree::Boolean {
                     let value = self.value();
                     if let Some(enumerate) = &boolean_schema.enumerate {
                         if !enumerate.contains(&value) {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::Eunmerate {
                                     expected: enumerate.iter().map(ToString::to_string).collect(),
                                     actual: value.to_string(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
                 }
                 _ => unreachable!("Expected a Boolean schema"),
             }
 
-            if errors.is_empty() {
+            if diagnostics.is_empty() {
                 Ok(())
             } else {
-                Err(errors)
+                Err(diagnostics)
             }
         }
         .boxed()

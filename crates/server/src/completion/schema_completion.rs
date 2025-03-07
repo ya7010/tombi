@@ -233,7 +233,7 @@ impl linter::Validate for SchemaCompletion {
         _schema_url: Option<&'a schema_store::SchemaUrl>,
         _definitions: Option<&'a schema_store::SchemaDefinitions>,
         _schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<linter::Error>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         async move { Ok(()) }.boxed()
     }
 }

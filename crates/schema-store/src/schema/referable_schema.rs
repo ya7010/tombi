@@ -16,6 +16,7 @@ pub enum Referable<T> {
         reference: String,
         title: Option<String>,
         description: Option<String>,
+        deprecated: Option<bool>,
     },
 }
 
@@ -52,6 +53,9 @@ impl Referable<ValueSchema> {
                 description: object
                     .get("description")
                     .and_then(|description| description.as_str().map(|s| s.to_string())),
+                deprecated: object
+                    .get("deprecated")
+                    .and_then(|deprecated| deprecated.as_bool()),
             });
         }
 
@@ -80,6 +84,7 @@ impl Referable<ValueSchema> {
                     reference,
                     title,
                     description,
+                    deprecated,
                 } => {
                     if let Some(definition_schema) = definitions.read().await.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
@@ -88,20 +93,28 @@ impl Referable<ValueSchema> {
                                 value.set_title(title.to_owned());
                                 value.set_description(description.to_owned());
                             }
+                            if deprecated == &Some(true) {
+                                value.set_deprecated(true);
+                            }
                         }
 
                         *self = referable_schema;
                     } else if is_online_url(reference) {
                         let schema_url = SchemaUrl::parse(reference)?;
 
-                        if let Some(document_schema) =
+                        if let Some(mut document_schema) =
                             schema_store.try_get_document_schema(&schema_url).await?
                         {
-                            if let Some(value_schema) = &document_schema.value_schema {
+                            if let Some(value_schema) = &mut document_schema.value_schema {
+                                if deprecated == &Some(true) {
+                                    value_schema.set_deprecated(true);
+                                }
+
                                 *self = Referable::Resolved {
                                     schema_url: Some(document_schema.schema_url.clone()),
                                     value: value_schema.clone(),
                                 };
+
                                 return self
                                     .resolve(
                                         Cow::Owned(document_schema.schema_url),

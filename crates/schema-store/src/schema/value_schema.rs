@@ -134,6 +134,46 @@ impl ValueSchema {
         }
     }
 
+    pub fn deprecated(&self) -> Option<bool> {
+        match self {
+            Self::Null => None,
+            Self::Boolean(boolean) => boolean.deprecated,
+            Self::Integer(integer) => integer.deprecated,
+            Self::Float(float) => float.deprecated,
+            Self::String(string) => string.deprecated,
+            Self::LocalDate(local_date) => local_date.deprecated,
+            Self::LocalDateTime(local_date_time) => local_date_time.deprecated,
+            Self::LocalTime(local_time) => local_time.deprecated,
+            Self::OffsetDateTime(offset_date_time) => offset_date_time.deprecated,
+            Self::Array(array) => array.deprecated,
+            Self::Table(table) => table.deprecated,
+            Self::OneOf(one_of) => one_of.deprecated,
+            Self::AnyOf(any_of) => any_of.deprecated,
+            Self::AllOf(all_of) => all_of.deprecated,
+        }
+    }
+
+    pub fn set_deprecated(&mut self, deprecated: bool) {
+        match self {
+            Self::Null => {}
+            Self::Boolean(boolean) => boolean.deprecated = Some(deprecated),
+            Self::Integer(integer) => integer.deprecated = Some(deprecated),
+            Self::Float(float) => float.deprecated = Some(deprecated),
+            Self::String(string) => string.deprecated = Some(deprecated),
+            Self::LocalDate(local_date) => local_date.deprecated = Some(deprecated),
+            Self::LocalDateTime(local_date_time) => local_date_time.deprecated = Some(deprecated),
+            Self::LocalTime(local_time) => local_time.deprecated = Some(deprecated),
+            Self::OffsetDateTime(offset_date_time) => {
+                offset_date_time.deprecated = Some(deprecated)
+            }
+            Self::Array(array) => array.deprecated = Some(deprecated),
+            Self::Table(table) => table.deprecated = Some(deprecated),
+            Self::OneOf(one_of) => one_of.deprecated = Some(deprecated),
+            Self::AnyOf(any_of) => any_of.deprecated = Some(deprecated),
+            Self::AllOf(all_of) => all_of.deprecated = Some(deprecated),
+        }
+    }
+
     pub fn title(&self) -> Option<&str> {
         match self {
             ValueSchema::Null => None,
