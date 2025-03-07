@@ -10,7 +10,7 @@ use super::{
     FindSchemaCandidates, FloatSchema, IntegerSchema, LocalDateSchema, LocalDateTimeSchema,
     LocalTimeSchema, OffsetDateTimeSchema, OneOfSchema, SchemaUrl, StringSchema, TableSchema,
 };
-use crate::{x_taplo::XTaplo, Accessor, Referable, SchemaDefinitions, SchemaStore};
+use crate::{Accessor, Referable, SchemaDefinitions, SchemaStore};
 
 #[derive(Debug, Clone)]
 pub enum ValueSchema {
@@ -75,14 +75,6 @@ impl ValueSchema {
         type_str: &str,
         object: &serde_json::Map<String, serde_json::Value>,
     ) -> Option<Self> {
-        if let Some(x_taplo) = object.get("x-taplo") {
-            if let Ok(x_taplo) = serde_json::from_value::<XTaplo>(x_taplo.to_owned()) {
-                if x_taplo.hidden == Some(true) {
-                    return None;
-                }
-            }
-        }
-
         match type_str {
             "null" => Some(ValueSchema::Null),
             "boolean" => Some(ValueSchema::Boolean(BooleanSchema::new(object))),
