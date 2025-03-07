@@ -65,7 +65,18 @@ impl Diagnostic {
 }
 
 pub trait SetDiagnostics {
-    fn set_diagnostic(&self, diagnostics: &mut Vec<Diagnostic>);
+    /// Set the diagnostic to the given diagnostics.
+    ///
+    /// We use set_diagnostic instead of to_diagnostic because self may have multiple diagnostics.
+    fn set_diagnostics(&self, diagnostics: &mut Vec<Diagnostic>);
+}
+
+impl<T: SetDiagnostics> SetDiagnostics for Vec<T> {
+    fn set_diagnostics(&self, diagnostics: &mut Vec<Diagnostic>) {
+        for item in self {
+            item.set_diagnostics(diagnostics);
+        }
+    }
 }
 
 impl From<Diagnostic> for tower_lsp::lsp_types::Diagnostic {

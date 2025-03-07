@@ -18,6 +18,7 @@ pub struct ArraySchema {
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,
     pub values_order: Option<ArrayValuesOrder>,
+    pub deprecated: Option<bool>,
 }
 
 impl ArraySchema {
@@ -61,6 +62,7 @@ impl ArraySchema {
                 }
                 None => None,
             },
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{Accessor, CurrentSchema, SchemaAccessor, ValueSchema, ValueType};
@@ -15,7 +16,7 @@ impl Validate for document_tree::Table {
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         tracing::trace!("self = {:?}", self);
         tracing::trace!("value_schema = {:?}", value_schema);
 
@@ -43,7 +44,7 @@ impl Validate for document_tree::Table {
                 }
             }
 
-            let mut errors = vec![];
+            let mut diagnostics = vec![];
             match (value_schema, schema_url, definitions) {
                 (Some(value_schema), Some(schema_url), Some(definitions)) => {
                     match value_schema.value_type().await {
@@ -53,13 +54,16 @@ impl Validate for document_tree::Table {
                         | ValueType::AllOf(_) => {}
                         ValueType::Null => return Ok(()),
                         value_schema => {
-                            return Err(vec![crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::TypeMismatch {
                                     expected: value_schema,
                                     actual: self.value_type(),
                                 },
                                 range: self.range(),
-                            }])
+                            }
+                            .set_diagnostics(&mut diagnostics);
+
+                            return Err(diagnostics);
                         }
                     }
 
@@ -74,7 +78,7 @@ impl Validate for document_tree::Table {
                                 definitions,
                                 schema_context,
                             )
-                            .await
+                            .await;
                         }
                         ValueSchema::AnyOf(any_of_schema) => {
                             return validate_any_of(
@@ -85,7 +89,7 @@ impl Validate for document_tree::Table {
                                 definitions,
                                 &schema_context,
                             )
-                            .await
+                            .await;
                         }
                         ValueSchema::AllOf(all_of_schema) => {
                             return validate_all_of(
@@ -126,7 +130,14 @@ impl Validate for document_tree::Table {
                                     schema_url,
                                     definitions,
                                 })) => {
-                                    if let Err(errs) = value
+                                    if value_schema.deprecated() == Some(true) {
+                                        crate::Warning {
+                                            kind: crate::WarningKind::Deprecated,
+                                            range: key.range() + value.range(),
+                                        }
+                                        .set_diagnostics(&mut diagnostics);
+                                    }
+                                    if let Err(schema_diagnostics) = value
                                         .validate(
                                             &accessors
                                                 .iter()
@@ -142,7 +153,7 @@ impl Validate for document_tree::Table {
                                         )
                                         .await
                                     {
-                                        errors.extend(errs);
+                                        diagnostics.extend(schema_diagnostics);
                                     }
                                 }
                                 Ok(None) => {}
@@ -166,7 +177,7 @@ impl Validate for document_tree::Table {
                                 if pattern.is_match(&accessor_raw_text) {
                                     matche_key = true;
                                     if let Ok(Some(CurrentSchema {
-                                        value_schema: pattern_property_schema,
+                                        value_schema,
                                         schema_url,
                                         definitions,
                                     })) = refferable_pattern_property
@@ -177,7 +188,14 @@ impl Validate for document_tree::Table {
                                         )
                                         .await
                                     {
-                                        if let Err(errs) = value
+                                        if value_schema.deprecated() == Some(true) {
+                                            crate::Warning {
+                                                kind: crate::WarningKind::Deprecated,
+                                                range: key.range() + value.range(),
+                                            }
+                                            .set_diagnostics(&mut diagnostics);
+                                        }
+                                        if let Err(schema_diagnostics) = value
                                             .validate(
                                                 &accessors
                                                     .iter()
@@ -186,18 +204,18 @@ impl Validate for document_tree::Table {
                                                         accessor_raw_text.clone(),
                                                     )))
                                                     .collect::<Vec<_>>(),
-                                                Some(pattern_property_schema),
+                                                Some(value_schema),
                                                 Some(&schema_url),
                                                 Some(&definitions),
                                                 schema_context,
                                             )
                                             .await
                                         {
-                                            errors.extend(errs);
+                                            diagnostics.extend(schema_diagnostics);
                                         }
                                     }
                                 } else if !table_schema.additional_properties {
-                                    errors.push(crate::Error {
+                                    crate::Error {
                                         kind: crate::ErrorKind::PatternProperty {
                                             patterns: Patterns(
                                                 pattern_properties
@@ -209,7 +227,8 @@ impl Validate for document_tree::Table {
                                             ),
                                         },
                                         range: key.range(),
-                                    });
+                                    }
+                                    .set_diagnostics(&mut diagnostics);
                                 }
                             }
                         }
@@ -220,7 +239,7 @@ impl Validate for document_tree::Table {
                                 let mut referable_schema =
                                     referable_additional_property_schema.write().await;
                                 if let Ok(Some(CurrentSchema {
-                                    value_schema: additional_property_schema,
+                                    value_schema,
                                     schema_url,
                                     definitions,
                                 })) = referable_schema
@@ -231,7 +250,15 @@ impl Validate for document_tree::Table {
                                     )
                                     .await
                                 {
-                                    if let Err(errs) = value
+                                    if value_schema.deprecated() == Some(true) {
+                                        crate::Warning {
+                                            kind: crate::WarningKind::Deprecated,
+                                            range: key.range() + value.range(),
+                                        }
+                                        .set_diagnostics(&mut diagnostics);
+                                    }
+
+                                    if let Err(schema_diagnostics) = value
                                         .validate(
                                             &accessors
                                                 .iter()
@@ -240,25 +267,27 @@ impl Validate for document_tree::Table {
                                                     accessor_raw_text,
                                                 )))
                                                 .collect::<Vec<_>>(),
-                                            Some(additional_property_schema),
+                                            Some(value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
                                             schema_context,
                                         )
                                         .await
                                     {
-                                        errors.extend(errs);
+                                        diagnostics.extend(schema_diagnostics);
                                     }
                                 }
                                 continue;
                             }
                             if !table_schema.additional_properties {
-                                errors.push(crate::Error {
+                                crate::Error {
                                     kind: crate::ErrorKind::KeyNotAllowed {
                                         key: key.to_string(),
                                     },
                                     range: key.range() + value.range(),
-                                });
+                                }
+                                .set_diagnostics(&mut diagnostics);
+
                                 continue;
                             }
                         }
@@ -272,43 +301,46 @@ impl Validate for document_tree::Table {
 
                         for required_key in required {
                             if !keys.contains(required_key) {
-                                errors.push(crate::Error {
+                                crate::Error {
                                     kind: crate::ErrorKind::KeyRequired {
                                         key: required_key.to_string(),
                                     },
                                     range: self.range(),
-                                });
+                                }
+                                .set_diagnostics(&mut diagnostics);
                             }
                         }
                     }
 
                     if let Some(max_properties) = table_schema.max_properties {
                         if self.keys().count() > max_properties {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::MaxProperties {
                                     max_properties,
                                     actual: self.keys().count(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
 
                     if let Some(min_properties) = table_schema.min_properties {
                         if self.keys().count() < min_properties {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::MinProperties {
                                     min_properties,
                                     actual: self.keys().count(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
                 }
                 _ => {
                     for (key, value) in self.key_values() {
-                        if let Err(errs) = value
+                        if let Err(schema_diagnostics) = value
                             .validate(
                                 &accessors
                                     .iter()
@@ -324,15 +356,15 @@ impl Validate for document_tree::Table {
                             )
                             .await
                         {
-                            errors.extend(errs);
+                            diagnostics.extend(schema_diagnostics);
                         }
                     }
                 }
             }
-            if errors.is_empty() {
+            if diagnostics.is_empty() {
                 Ok(())
             } else {
-                Err(errors)
+                Err(diagnostics)
             }
         }
         .boxed()

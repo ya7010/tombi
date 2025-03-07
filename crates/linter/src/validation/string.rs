@@ -1,3 +1,4 @@
+use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
@@ -13,9 +14,9 @@ impl Validate for document_tree::String {
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         async move {
-            let mut errors = vec![];
+            let mut diagnostics = vec![];
 
             match (value_schema, schema_url, definitions) {
                 (Some(value_schema), Some(schema_url), Some(definitions)) => {
@@ -26,13 +27,16 @@ impl Validate for document_tree::String {
                         | ValueType::AllOf(_) => {}
                         ValueType::Null => return Ok(()),
                         value_schema => {
-                            return Err(vec![crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::TypeMismatch {
                                     expected: value_schema,
                                     actual: self.value_type(),
                                 },
                                 range: self.range(),
-                            }]);
+                            }
+                            .set_diagnostics(&mut diagnostics);
+
+                            return Err(diagnostics);
                         }
                     }
 
@@ -77,7 +81,7 @@ impl Validate for document_tree::String {
                     let value = self.to_raw_string(schema_context.toml_version);
                     if let Some(enumerate) = &string_schema.enumerate {
                         if !enumerate.contains(&value) {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::Eunmerate {
                                     expected: enumerate
                                         .iter()
@@ -86,44 +90,48 @@ impl Validate for document_tree::String {
                                     actual: self.value().to_string(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
 
                     if let Some(max_length) = &string_schema.max_length {
                         if value.len() > *max_length {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::MaximumLength {
                                     maximum: *max_length,
                                     actual: value.len(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
 
                     if let Some(min_length) = &string_schema.min_length {
                         if value.len() < *min_length {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::MinimumLength {
                                     minimum: *min_length,
                                     actual: value.len(),
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
 
                     if let Some(pattern) = &string_schema.pattern {
                         if let Ok(regex) = Regex::new(pattern) {
                             if !regex.is_match(&value) {
-                                errors.push(crate::Error {
+                                crate::Error {
                                     kind: crate::ErrorKind::Pattern {
                                         pattern: pattern.clone(),
                                         actual: value,
                                     },
                                     range: self.range(),
-                                });
+                                }
+                                .set_diagnostics(&mut diagnostics);
                             }
                         } else {
                             tracing::error!("Invalid regex pattern: {:?}", pattern);
@@ -133,10 +141,10 @@ impl Validate for document_tree::String {
                 _ => unreachable!("Expected a String schema"),
             }
 
-            if errors.is_empty() {
+            if diagnostics.is_empty() {
                 Ok(())
             } else {
-                Err(errors)
+                Err(diagnostics)
             }
         }
         .boxed()

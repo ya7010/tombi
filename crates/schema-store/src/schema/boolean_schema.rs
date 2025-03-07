@@ -4,6 +4,7 @@ pub struct BooleanSchema {
     pub description: Option<String>,
     pub default: Option<bool>,
     pub enumerate: Option<Vec<bool>>,
+    pub deprecated: Option<bool>,
 }
 
 impl BooleanSchema {
@@ -20,6 +21,7 @@ impl BooleanSchema {
                 .get("enum")
                 .and_then(|v| v.as_array())
                 .map(|a| a.iter().filter_map(|v| v.as_bool()).collect()),
+            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

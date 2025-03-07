@@ -309,6 +309,7 @@ impl FindCompletionContents for document_tree::Table {
                                         reference,
                                         title,
                                         description,
+                                        ..
                                     } if is_online_url(reference) => {
                                         completion_contents.push(CompletionContent::new_key(
                                             key_name,

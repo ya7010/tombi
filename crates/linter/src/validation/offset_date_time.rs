@@ -1,3 +1,4 @@
+use diagnostic::SetDiagnostics;
 use document_tree::{OffsetDateTime, ValueImpl};
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::ValueType;
@@ -12,9 +13,9 @@ impl Validate for OffsetDateTime {
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<crate::Error>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         async move {
-            let mut errors = vec![];
+            let mut diagnostics = vec![];
 
             match (value_schema, schema_url, definitions) {
                 (Some(value_schema), Some(schema_url), Some(definitions)) => {
@@ -25,13 +26,16 @@ impl Validate for OffsetDateTime {
                         | ValueType::AllOf(_) => {}
                         ValueType::Null => return Ok(()),
                         value_schema => {
-                            return Err(vec![crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::TypeMismatch {
                                     expected: value_schema,
                                     actual: self.value_type(),
                                 },
                                 range: self.range(),
-                            }]);
+                            }
+                            .set_diagnostics(&mut diagnostics);
+
+                            return Err(diagnostics);
                         }
                     }
 
@@ -78,23 +82,24 @@ impl Validate for OffsetDateTime {
                     let value_string = self.node().to_string();
                     if let Some(enumerate) = &offset_date_time_schema.enumerate {
                         if !enumerate.contains(&value_string) {
-                            errors.push(crate::Error {
+                            crate::Error {
                                 kind: crate::ErrorKind::Eunmerate {
                                     expected: enumerate.iter().map(ToString::to_string).collect(),
                                     actual: value_string,
                                 },
                                 range: self.range(),
-                            });
+                            }
+                            .set_diagnostics(&mut diagnostics);
                         }
                     }
                 }
                 _ => unreachable!("Expected an OffsetDateTime schema"),
             }
 
-            if errors.is_empty() {
+            if diagnostics.is_empty() {
                 Ok(())
             } else {
-                Err(errors)
+                Err(diagnostics)
             }
         }
         .boxed()
