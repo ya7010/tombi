@@ -4,6 +4,7 @@ pub mod json;
 mod schema;
 mod store;
 mod value_type;
+mod x_taplo;
 
 pub use accessor::{Accessor, Accessors};
 pub use error::Error;
