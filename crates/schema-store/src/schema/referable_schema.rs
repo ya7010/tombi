@@ -2,6 +2,8 @@ use std::borrow::Cow;
 
 use futures::future::BoxFuture;
 
+use crate::x_taplo::XTaplo;
+
 use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -35,6 +37,13 @@ impl<T> Referable<T> {
 
 impl Referable<ValueSchema> {
     pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
+        if let Some(x_taplo) = object.get("x-taplo") {
+            if let Ok(x_taplo) = serde_json::from_value::<XTaplo>(x_taplo.to_owned()) {
+                if x_taplo.hidden == Some(true) {
+                    return None;
+                }
+            }
+        }
         if let Some(serde_json::Value::String(ref_string)) = object.get("$ref") {
             return Some(Referable::Ref {
                 reference: ref_string.clone(),
