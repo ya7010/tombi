@@ -83,12 +83,7 @@ impl Table {
             kind: TableKind::KeyValue,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: text::Range::new(
-                node.keys()
-                    .map(|key| key.range().start())
-                    .unwrap_or_else(|| node.syntax().range().start()),
-                node.syntax().range().end(),
-            ),
+            symbol_range: node.syntax().range(),
         }
     }
 
