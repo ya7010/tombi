@@ -1,39 +1,33 @@
 use ast::AstNode;
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use schema_store::ArraySchema;
+use schema_store::{SchemaContext, ValueSchema};
 use syntax::SyntaxElement;
 use x_tombi::ArrayValuesOrder;
 
-pub async fn array_values_order(
-    node: &syntax::SyntaxNode,
-    array_schema: &ArraySchema,
-    toml_version: toml_version::TomlVersion,
+pub async fn array_values_order<'a>(
+    values: Vec<ast::Value>,
+    value_schema: &'a ValueSchema,
+    schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
-    let values_order = match array_schema {
-        ArraySchema {
-            values_order: Some(values_order),
-            ..
-        } => values_order,
-        _ => return Vec::with_capacity(0),
-    };
-
-    let values = if let Some(array) = ast::Array::cast(node.clone()) {
-        array.values().collect_vec()
-    } else {
-        return Vec::with_capacity(0);
-    };
-
     if values.is_empty() {
         return Vec::with_capacity(0);
     }
+
+    let ValueSchema::Array(array_schema) = value_schema else {
+        return Vec::with_capacity(0);
+    };
+
+    let Some(values_order) = &array_schema.values_order else {
+        return Vec::with_capacity(0);
+    };
 
     let old = std::ops::RangeInclusive::new(
         SyntaxElement::Node(values.first().unwrap().syntax().clone()),
         SyntaxElement::Node(values.last().unwrap().syntax().clone()),
     );
 
-    let sortable_values = match SortableValues::new(values, toml_version) {
+    let sortable_values = match SortableValues::new(values, schema_context.toml_version) {
         Ok(sortable_values) => sortable_values,
         Err(err) => {
             tracing::error!("{err}");

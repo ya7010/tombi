@@ -35,6 +35,40 @@ mod table_keys_order {
 
         test_table_keys_order! {
             #[tokio::test]
+            async fn test_project_dependencies(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = [
+                  "tombi-linter>=0.0.0",
+                  "tombi-formatter>=0.0.0",
+                  "maturin>=1.5,<2.0",
+                  "tombi-cli>=0.0.0",
+                ]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = [
+                  "maturin>=1.5,<2.0",
+                  "tombi-cli>=0.0.0",
+                  "tombi-formatter>=0.0.0",
+                  "tombi-linter>=0.0.0",
+                ]
+                "#,
+            )
+        }
+
+        test_table_keys_order! {
+            #[tokio::test]
             async fn test_tool_poetry_dependencies(
                 r#"
                 [project]
