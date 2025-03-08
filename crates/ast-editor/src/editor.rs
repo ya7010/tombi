@@ -39,6 +39,18 @@ impl<'a> Editor<'a> {
 
         for change in changes {
             match change {
+                Change::Append { parent, new } => {
+                    let index = parent.index() + 1;
+                    parent
+                        .parent()
+                        .unwrap()
+                        .splice_children(index..index, vec![new]);
+                }
+                Change::Remove { target } => {
+                    let index = target.index();
+                    let parent = target.parent().unwrap();
+                    parent.splice_children(index..index + 1, Vec::with_capacity(0));
+                }
                 Change::ReplaceRange { old, new } => {
                     let start = old.start().index();
                     let end = old.end().index();

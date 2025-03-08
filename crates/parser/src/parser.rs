@@ -315,9 +315,6 @@ impl<'t> Parser<'t> {
     }
 
     /// Emit error with the `message`
-    /// FIXME: this should be much more fancy and support
-    /// structured errors with spans and notes, like rustc
-    /// does.
     pub(crate) fn error(&mut self, error: crate::Error) {
         self.push_event(Event::Error { error });
     }

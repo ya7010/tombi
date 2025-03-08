@@ -150,6 +150,7 @@ dependencies = [
  "futures",
  "itertools",
  "linter",
+ "parser",
  "regex",
  "schema-store",
  "syntax",

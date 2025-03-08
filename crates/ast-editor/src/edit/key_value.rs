@@ -1,4 +1,9 @@
+use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
+use itertools::Itertools;
+use schema_store::SchemaAccessor;
+
+use super::get_schema;
 
 impl crate::Edit for ast::KeyValue {
     fn edit<'a: 'b, 'b>(
@@ -10,20 +15,62 @@ impl crate::Edit for ast::KeyValue {
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
-            match self.value() {
-                Some(ast::Value::Array(array)) => {
-                    array
-                        .edit(
-                            accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
-                            schema_context,
-                        )
-                        .await
+            let mut changes = vec![];
+
+            let Some(keys) = self.keys() else {
+                return changes;
+            };
+
+            let keys_accessors = keys
+                .keys()
+                .filter_map(|key| {
+                    key.try_to_raw_text(schema_context.toml_version)
+                        .ok()
+                        .map(SchemaAccessor::Key)
+                })
+                .collect_vec();
+
+            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
+                (schema_url, value_schema, definitions)
+            {
+                if let Some(value_schema) = get_schema(
+                    &document_tree::Value::Table(
+                        self.clone()
+                            .try_into_document_tree(schema_context.toml_version)
+                            .unwrap(),
+                    ),
+                    &keys_accessors.clone(),
+                    value_schema,
+                    schema_url,
+                    definitions,
+                    schema_context,
+                )
+                .await
+                {
+                    match self.value() {
+                        Some(ast::Value::Array(array)) => {
+                            changes.extend(
+                                array
+                                    .edit(
+                                        &accessors
+                                            .to_vec()
+                                            .into_iter()
+                                            .chain(keys_accessors.into_iter())
+                                            .collect_vec(),
+                                        Some(&value_schema),
+                                        Some(&schema_url),
+                                        Some(&definitions),
+                                        schema_context,
+                                    )
+                                    .await,
+                            );
+                        }
+                        _ => {}
+                    }
                 }
-                _ => Vec::with_capacity(0),
             }
+
+            changes
         }
         .boxed()
     }

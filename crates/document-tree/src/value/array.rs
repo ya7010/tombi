@@ -88,6 +88,14 @@ impl Array {
         self.values.get_mut(index)
     }
 
+    pub fn first(&self) -> Option<&Value> {
+        self.values.first()
+    }
+
+    pub fn last(&self) -> Option<&Value> {
+        self.values.last()
+    }
+
     pub fn push(&mut self, value: Value) {
         self.range += value.range();
         self.symbol_range += value.symbol_range();
