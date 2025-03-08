@@ -94,33 +94,104 @@ async fn get_schema<'a: 'b, 'b>(
 
             match &accessors[0] {
                 SchemaAccessor::Key(key) => match (value, &*value_schema) {
-                    (document_tree::Value::Table(table), ValueSchema::Table(value_schema)) => {
-                        if let (Some(value), Some(referable_property_schema)) = (
-                            table.get(&key.to_string()),
-                            value_schema
+                    (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) => {
+                        if let Some(value) = table.get(&key.to_string()) {
+                            if let Some(referable_property_schema) = table_schema
                                 .properties
                                 .write()
                                 .await
-                                .get_mut(&SchemaAccessor::Key(key.to_string())),
-                        ) {
-                            if let Ok(Some(CurrentSchema {
-                                value_schema,
-                                schema_url,
-                                definitions,
-                            })) = referable_property_schema
-                                .resolve(schema_url, definitions, schema_context.store)
-                                .await
+                                .get_mut(&SchemaAccessor::Key(key.to_string()))
                             {
-                                return inner_get_schema(
-                                    value,
-                                    &accessors[1..],
-                                    validation_accessors,
+                                if let Ok(Some(CurrentSchema {
                                     value_schema,
                                     schema_url,
                                     definitions,
-                                    schema_context,
-                                )
-                                .await;
+                                })) = referable_property_schema
+                                    .resolve(
+                                        schema_url.clone(),
+                                        definitions.clone(),
+                                        schema_context.store,
+                                    )
+                                    .await
+                                {
+                                    return inner_get_schema(
+                                        value,
+                                        &accessors[1..],
+                                        validation_accessors,
+                                        value_schema,
+                                        schema_url,
+                                        definitions,
+                                        schema_context,
+                                    )
+                                    .await;
+                                }
+                            }
+                            if let Some(pattern_properties) = &table_schema.pattern_properties {
+                                for (property_key, pattern_property) in
+                                    pattern_properties.write().await.iter_mut()
+                                {
+                                    if let Ok(pattern) = regex::Regex::new(property_key) {
+                                        if pattern.is_match(&key.to_string()) {
+                                            if let Ok(Some(CurrentSchema {
+                                                schema_url,
+                                                value_schema,
+                                                definitions,
+                                            })) = pattern_property
+                                                .resolve(
+                                                    schema_url.clone(),
+                                                    definitions.clone(),
+                                                    schema_context.store,
+                                                )
+                                                .await
+                                            {
+                                                return inner_get_schema(
+                                                    value,
+                                                    &accessors[1..],
+                                                    validation_accessors,
+                                                    value_schema,
+                                                    schema_url,
+                                                    definitions,
+                                                    schema_context,
+                                                )
+                                                .await;
+                                            }
+                                        }
+                                    } else {
+                                        tracing::error!(
+                                            "Invalid regex pattern property: {}",
+                                            property_key
+                                        );
+                                    };
+                                }
+                            }
+                            if let Some(additional_properties_schema) =
+                                &table_schema.additional_property_schema
+                            {
+                                if let Ok(Some(CurrentSchema {
+                                    value_schema,
+                                    schema_url,
+                                    definitions,
+                                })) = additional_properties_schema
+                                    .write()
+                                    .await
+                                    .resolve(
+                                        schema_url.clone(),
+                                        definitions.clone(),
+                                        schema_context.store,
+                                    )
+                                    .await
+                                {
+                                    return inner_get_schema(
+                                        value,
+                                        &accessors[1..],
+                                        validation_accessors,
+                                        value_schema,
+                                        schema_url,
+                                        definitions,
+                                        schema_context,
+                                    )
+                                    .await;
+                                }
                             }
                         }
                     }
