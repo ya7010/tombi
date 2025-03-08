@@ -27,6 +27,10 @@ impl<T> Parsed<T> {
         SyntaxNode::new_root(self.green_tree)
     }
 
+    pub fn into_syntax_node_mut(self) -> SyntaxNode {
+        SyntaxNode::new_root_mut(self.green_tree)
+    }
+
     pub fn errors(&self) -> &[crate::Error] {
         &self.errors
     }

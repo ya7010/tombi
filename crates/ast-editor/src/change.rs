@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub enum Change {
     Append {
-        parent: syntax::SyntaxElement,
+        base: syntax::SyntaxElement,
         new: syntax::SyntaxElement,
     },
     Remove {

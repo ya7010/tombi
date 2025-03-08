@@ -47,26 +47,31 @@ impl crate::Edit for ast::KeyValue {
                 )
                 .await
                 {
-                    match self.value() {
-                        Some(ast::Value::Array(array)) => {
-                            changes.extend(
-                                array
-                                    .edit(
-                                        &accessors
-                                            .to_vec()
-                                            .into_iter()
-                                            .chain(keys_accessors.into_iter())
-                                            .collect_vec(),
-                                        Some(&value_schema),
-                                        Some(&schema_url),
-                                        Some(&definitions),
-                                        schema_context,
-                                    )
-                                    .await,
-                            );
-                        }
-                        _ => {}
+                    if let Some(value) = self.value() {
+                        changes.extend(
+                            value
+                                .edit(
+                                    &accessors
+                                        .to_vec()
+                                        .into_iter()
+                                        .chain(keys_accessors.into_iter())
+                                        .collect_vec(),
+                                    Some(&value_schema),
+                                    Some(&schema_url),
+                                    Some(&definitions),
+                                    schema_context,
+                                )
+                                .await,
+                        );
                     }
+                }
+            } else {
+                if let Some(value) = self.value() {
+                    changes.extend(
+                        value
+                            .edit(accessors, None, None, None, schema_context)
+                            .await,
+                    );
                 }
             }
 
