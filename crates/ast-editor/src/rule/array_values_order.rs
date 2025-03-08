@@ -1,7 +1,7 @@
 use ast::AstNode;
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use schema_store::{SchemaContext, ValueSchema};
+use schema_store::{ArraySchema, SchemaContext};
 use syntax::SyntaxElement;
 use x_tombi::ArrayValuesOrder;
 
@@ -11,27 +11,23 @@ use super::array_comma_tailing_comment;
 
 pub async fn array_values_order<'a>(
     values_with_comma: Vec<(ast::Value, Option<ast::Comma>)>,
-    value_schema: &'a ValueSchema,
+    array_schema: &'a ArraySchema,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
     if values_with_comma.is_empty() {
         return Vec::with_capacity(0);
     }
 
-    let is_last_comma = values_with_comma
-        .last()
-        .map(|(_, comma)| comma.is_some())
-        .unwrap_or(false);
-
-    let ValueSchema::Array(array_schema) = value_schema else {
-        return Vec::with_capacity(0);
-    };
-
     let Some(values_order) = &array_schema.values_order else {
         return Vec::with_capacity(0);
     };
 
     let mut changes = vec![];
+
+    let is_last_comma = values_with_comma
+        .last()
+        .map(|(_, comma)| comma.is_some())
+        .unwrap_or(false);
 
     let old = std::ops::RangeInclusive::new(
         SyntaxElement::Node(values_with_comma.first().unwrap().0.syntax().clone()),

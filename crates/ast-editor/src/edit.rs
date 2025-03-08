@@ -8,6 +8,7 @@ use schema_store::{
 
 mod array;
 mod array_of_tables;
+mod inline_table;
 mod key_value;
 mod root;
 mod table;

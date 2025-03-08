@@ -1,21 +1,17 @@
 use ast::AstNode;
 use itertools::{sorted, Itertools};
-use schema_store::{SchemaContext, ValueSchema};
+use schema_store::{SchemaContext, TableSchema};
 use syntax::SyntaxElement;
 use x_tombi::TableKeysOrder;
 
 pub async fn table_keys_order<'a>(
     key_values: Vec<ast::KeyValue>,
-    value_schema: &'a ValueSchema,
+    table_schema: &'a TableSchema,
     _schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
     if key_values.is_empty() {
         return Vec::with_capacity(0);
     }
-
-    let ValueSchema::Table(table_schema) = value_schema else {
-        return Vec::with_capacity(0);
-    };
 
     let Some(keys_order) = table_schema.keys_order else {
         return Vec::with_capacity(0);
