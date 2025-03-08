@@ -21,16 +21,16 @@ impl crate::Edit for ast::Array {
             if let (Some(schema_url), Some(value_schema), Some(definitions)) =
                 (schema_url, value_schema, definitions)
             {
-                changes.extend(
-                    array_values_order(
-                        self.values_with_comma().into_iter().collect_vec(),
-                        &value_schema,
-                        schema_context,
-                    )
-                    .await,
-                );
-
                 if let ValueSchema::Array(array_schema) = &value_schema {
+                    changes.extend(
+                        array_values_order(
+                            self.values_with_comma().into_iter().collect_vec(),
+                            &array_schema,
+                            schema_context,
+                        )
+                        .await,
+                    );
+
                     if let Some(item_schema) = &array_schema.items {
                         if let Ok(Some(CurrentSchema {
                             schema_url,
@@ -59,22 +59,24 @@ impl crate::Edit for ast::Array {
                                         .await,
                                 );
                             }
+
+                            return changes;
                         }
                     }
                 }
-            } else {
-                for (value, comma) in self.values_with_comma() {
-                    changes.extend(array_comma_tailing_comment(
-                        &value,
-                        comma.as_ref(),
-                        schema_context,
-                    ));
-                    changes.extend(
-                        value
-                            .edit(accessors, None, None, None, schema_context)
-                            .await,
-                    );
-                }
+            }
+
+            for (value, comma) in self.values_with_comma() {
+                changes.extend(array_comma_tailing_comment(
+                    &value,
+                    comma.as_ref(),
+                    schema_context,
+                ));
+                changes.extend(
+                    value
+                        .edit(accessors, None, None, None, schema_context)
+                        .await,
+                );
             }
 
             changes
