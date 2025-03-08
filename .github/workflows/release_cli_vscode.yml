@@ -160,6 +160,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Run xtask set-version
+        run: cargo xtask set-version >> $GITHUB_ENV
       - name: Download tombi-cli artifacts
         uses: actions/download-artifact@v4
         with:
