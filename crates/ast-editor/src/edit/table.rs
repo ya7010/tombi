@@ -14,7 +14,6 @@ impl crate::Edit for ast::Table {
         definitions: Option<&'a schema_store::SchemaDefinitions>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
-        tracing::trace!("accessors: {:?}", accessors);
         tracing::trace!("schema_url: {:?}", schema_url.map(|url| url.to_string()));
         tracing::trace!("value_schema: {:?}", value_schema);
 
