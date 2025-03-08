@@ -22,6 +22,17 @@ impl crate::Edit for ast::Value {
                         )
                         .await
                 }
+                ast::Value::InlineTable(inline_table) => {
+                    inline_table
+                        .edit(
+                            accessors,
+                            value_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                }
                 _ => Vec::with_capacity(0),
             }
         }

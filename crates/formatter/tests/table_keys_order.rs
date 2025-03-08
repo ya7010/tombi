@@ -162,6 +162,40 @@ mod table_keys_order {
 
         test_format! {
             #[tokio::test]
+            async fn test_dependency_groups_multiple_lines_with_comment(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                requires-python = ">=3.10"
+                dependencies = []
+
+                [dependency-groups]
+                dev = [
+                  "pytest>=8.3.3", # pytest tailing comment
+                  "ruff>=0.7.4"
+                ]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                requires-python = ">=3.10"
+                dependencies = []
+
+                [dependency-groups]
+                dev = [
+                  "pytest>=8.3.3",  # pytest tailing comment
+                  "ruff>=0.7.4",
+                ]
+                "#,
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
             async fn test_tool_poetry_dependencies(
                 r#"
                 [project]
