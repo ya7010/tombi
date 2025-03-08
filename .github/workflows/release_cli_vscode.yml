@@ -169,7 +169,7 @@ jobs:
         id: find_cli_assets
         shell: bash
         run: |
-          echo "ASSETS=$(find dist -name "tombi-cli-${{ env.TOMBI_VERSION }}-*" -type f | tr '\n' ' ')" >> $GITHUB_ENV
+          echo "ASSETS=$(find . -name "tombi-cli-${{ env.TOMBI_VERSION }}-*" -type f | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         env:
