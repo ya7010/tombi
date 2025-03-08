@@ -2,10 +2,10 @@ mod table_keys_order {
     use super::*;
 
     mod pyproject {
-        use super::test_table_keys_order;
+        use super::test_format;
         use test_lib::pyproject_schema_path;
 
-        test_table_keys_order! {
+        test_format! {
             #[tokio::test]
             async fn test_project(
                 r#"
@@ -33,9 +33,60 @@ mod table_keys_order {
             )
         }
 
-        test_table_keys_order! {
+        test_format! {
             #[tokio::test]
-            async fn test_project_dependencies(
+            async fn test_project_dependencies_single_line(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = ["tombi-cli>=0.0.0", "maturin>=1.5,<2.0"]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = ["maturin>=1.5,<2.0", "tombi-cli>=0.0.0"]
+                "#,
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_project_dependencies_single_line_with_comma(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = ["tombi-cli>=0.0.0", "maturin>=1.5,<2.0",]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = [
+                  "maturin>=1.5,<2.0",
+                  "tombi-cli>=0.0.0",
+                ]
+                "#,
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_project_dependencies_multiple_lines(
                 r#"
                 [project]
                 name = "tombi"
@@ -46,7 +97,7 @@ mod table_keys_order {
                   "tombi-linter>=0.0.0",
                   "tombi-formatter>=0.0.0",
                   "maturin>=1.5,<2.0",
-                  "tombi-cli>=0.0.0",
+                  "tombi-cli>=0.0.0"
                 ]
                 "#,
                 pyproject_schema_path(),
@@ -67,7 +118,49 @@ mod table_keys_order {
             )
         }
 
-        test_table_keys_order! {
+        test_format! {
+            #[tokio::test]
+            async fn test_project_dependencies_multiple_lines_with_comment(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = [
+                  "tombi-linter>=0.0.0",
+                  "tombi-formatter>=0.0.0",
+                  # maturin leading comment1
+                  # maturin leading comment2
+                  "maturin>=1.5,<2.0", # maturin tailing comment
+                  # tombi-cli leading comment1
+                  # tombi-cli leading comment2
+                  "tombi-cli>=0.0.0" # tombi-cli tailing comment
+                ]
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [project]
+                name = "tombi"
+                version = "1.0.0"
+                description = "Reserved package for tombi"
+                requires-python = ">=3.10"
+                dependencies = [
+                  # maturin leading comment1
+                  # maturin leading comment2
+                  "maturin>=1.5,<2.0",  # maturin tailing comment
+                  # tombi-cli leading comment1
+                  # tombi-cli leading comment2
+                  "tombi-cli>=0.0.0",  # tombi-cli tailing comment
+                  "tombi-formatter>=0.0.0",
+                  "tombi-linter>=0.0.0",
+                ]
+                "#,
+            )
+        }
+
+        test_format! {
             #[tokio::test]
             async fn test_tool_poetry_dependencies(
                 r#"
@@ -103,7 +196,7 @@ mod table_keys_order {
     }
 
     #[macro_export]
-    macro_rules! test_table_keys_order {
+    macro_rules! test_format {
         (
                 #[tokio::test]
                 async fn $name:ident(
