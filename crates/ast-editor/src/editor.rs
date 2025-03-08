@@ -39,23 +39,29 @@ impl<'a> Editor<'a> {
 
         for change in changes {
             match change {
-                Change::Append { parent, new } => {
-                    let index = parent.index() + 1;
-                    parent
-                        .parent()
-                        .unwrap()
-                        .splice_children(index..index, vec![new]);
+                Change::Append { base, new } => {
+                    let index = base.index() + 1;
+                    if let Some(node) = base.parent().as_ref().or_else(|| base.as_node()) {
+                        node.splice_children(index..index, vec![new]);
+                    }
                 }
                 Change::Remove { target } => {
                     let index = target.index();
-                    let parent = target.parent().unwrap();
-                    parent.splice_children(index..index + 1, Vec::with_capacity(0));
+                    if let Some(node) = target.parent().as_ref().or_else(|| target.as_node()) {
+                        node.splice_children(index..index + 1, Vec::with_capacity(0));
+                    }
                 }
                 Change::ReplaceRange { old, new } => {
                     let start = old.start().index();
                     let end = old.end().index();
-                    let parent = old.start().parent().unwrap();
-                    parent.splice_children(start..end + 1, new);
+                    if let Some(node) = old
+                        .start()
+                        .parent()
+                        .as_ref()
+                        .or_else(|| old.start().as_node())
+                    {
+                        node.splice_children(start..end + 1, new);
+                    }
                 }
             }
         }

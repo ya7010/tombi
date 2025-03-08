@@ -1,13 +1,10 @@
-use ast::AstNode;
-use parser::parse_as;
 use std::borrow::Cow;
-use syntax::SyntaxElement;
 
 use futures::FutureExt;
 use itertools::Itertools;
 use schema_store::{CurrentSchema, ValueSchema};
 
-use crate::{change::Change, rule::array_values_order};
+use crate::rule::{array_comma_tailing_comment, array_values_order};
 
 impl crate::Edit for ast::Array {
     fn edit<'a: 'b, 'b>(
@@ -20,8 +17,6 @@ impl crate::Edit for ast::Array {
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             let mut changes = vec![];
-            tracing::error!("schema_url: {:?}", schema_url);
-            tracing::error!("value_schema: {:?}", value_schema);
 
             if let (Some(schema_url), Some(value_schema), Some(definitions)) =
                 (schema_url, value_schema, definitions)
@@ -68,32 +63,17 @@ impl crate::Edit for ast::Array {
                     }
                 }
             } else {
-                for value in self.values() {
+                for (value, comma) in self.values_with_comma() {
+                    changes.extend(array_comma_tailing_comment(
+                        &value,
+                        comma.as_ref(),
+                        schema_context,
+                    ));
                     changes.extend(
                         value
                             .edit(accessors, None, None, None, schema_context)
                             .await,
                     );
-                }
-            }
-
-            let values_with_comma = self.values_with_comma().into_iter().collect_vec();
-            if let Some((value, None)) = values_with_comma.last() {
-                if let Some(tailing_comment) = value.tailing_comment() {
-                    let tailing_comment_with_comma = parse_as::<ast::Comma>(
-                        &format!(",{}", tailing_comment.syntax().text()),
-                        schema_context.toml_version,
-                    )
-                    .into_syntax_node()
-                    .clone_for_update();
-
-                    changes.push(Change::Remove {
-                        target: SyntaxElement::Token(tailing_comment.syntax().clone()),
-                    });
-                    changes.push(Change::Append {
-                        parent: SyntaxElement::Node(value.syntax().clone()),
-                        new: SyntaxElement::Node(tailing_comment_with_comma),
-                    });
                 }
             }
 

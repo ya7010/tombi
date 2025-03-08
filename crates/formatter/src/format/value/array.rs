@@ -252,10 +252,6 @@ mod tests {
 
     test_format! {
         #[test]
-        // NOTE: Currently, This test is collect.
-        //       In the future, by inserting a layer that rewrites the ast before formatting,
-        //       when there is no value tailing comment and there is a comma tailing comment,
-        //       we will add logic to swap them.
         fn multiline_array3(
             r#"
             array = [
@@ -265,8 +261,7 @@ mod tests {
         ) -> Ok(
             r#"
             array = [
-              1  # comment
-              ,
+              1,  # comment
             ]
             "#
         );
@@ -341,8 +336,7 @@ mod tests {
               ,  # value2 comma tailing comment
               # value3 leading comment1
               # value3 leading comment2
-              3  # value3 trailing comment
-              ,
+              3,  # value3 trailing comment
               # array end dangling comment group 1-1
               # array end dangling comment group 1-2
 

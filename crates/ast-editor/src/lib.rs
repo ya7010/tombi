@@ -1,6 +1,7 @@
 mod change;
 mod edit;
 mod editor;
+mod node;
 mod rule;
 
 use change::Change;
