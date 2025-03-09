@@ -1,13 +1,14 @@
 use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
 use itertools::Itertools;
+use schema_store::SchemaAccessor;
 
 use super::get_schema;
 
 impl crate::Edit for ast::KeyValue {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::Accessor],
+        accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -25,7 +26,7 @@ impl crate::Edit for ast::KeyValue {
                 .filter_map(|key| {
                     key.try_to_raw_text(schema_context.toml_version)
                         .ok()
-                        .map(schema_store::Accessor::Key)
+                        .map(SchemaAccessor::Key)
                 })
                 .collect_vec();
 

@@ -1,14 +1,14 @@
 use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
 use itertools::Itertools;
-use schema_store::{GetHeaderAccessors, ValueSchema};
+use schema_store::{GetHeaderSchemarAccessors, ValueSchema};
 
 use crate::{edit::get_schema, rule::table_keys_order};
 
 impl crate::Edit for ast::Table {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [schema_store::Accessor],
+        _accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -19,7 +19,8 @@ impl crate::Edit for ast::Table {
 
         async move {
             let mut changes = vec![];
-            let Some(accessors) = self.get_header_accessor(schema_context.toml_version) else {
+            let Some(accessors) = self.get_header_schema_accessor(schema_context.toml_version)
+            else {
                 return changes;
             };
 
