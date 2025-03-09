@@ -4,11 +4,6 @@ set -e
 # Tombi installation script
 # Automatically installs tombi from GitHub releases based on detected architecture
 
-# Version
-VERSION="0.2.16"
-REPO="tombi-toml/tombi"
-GITHUB_RELEASE_URL="https://github.com/${REPO}/releases/download"
-
 # Color settings
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -27,6 +22,20 @@ print_error() {
 print_success() {
     echo "${GREEN}Success:${NC} $1"
 }
+
+# Parse command line options
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    --version)
+        SPECIFIED_VERSION="$2"
+        shift 2
+        ;;
+    *)
+        print_error "Unknown option: $1"
+        exit 1
+        ;;
+    esac
+done
 
 # Detect OS and architecture
 detect_os_arch() {
@@ -74,6 +83,19 @@ detect_os_arch() {
     print_step "Detected system: ${TARGET}"
 }
 
+artifact_extension() {
+    OS="$(uname -s)"
+
+    case "${OS}" in
+    MINGW* | MSYS* | CYGWIN* | Windows_NT)
+        echo ".zip"
+        ;;
+    *)
+        echo ".gz"
+        ;;
+    esac
+}
+
 # Create installation directories
 create_install_dir() {
     INSTALL_DIR="${HOME}/.tombi"
@@ -89,8 +111,8 @@ create_install_dir() {
 
 # Download and install tombi
 download_and_install() {
-    DOWNLOAD_URL="${GITHUB_RELEASE_URL}/v${VERSION}/tombi-vscode-${VERSION}-${TARGET}"
-    TEMP_FILE="${INSTALL_DIR}/tombi-${VERSION}"
+    DOWNLOAD_URL="${GITHUB_RELEASE_URL}/v${VERSION}/tombi-cli-${VERSION}-${TARGET}${ARTIFACT_EXTENSION}"
+    TEMP_FILE="${INSTALL_DIR}/tombi-${VERSION}${ARTIFACT_EXTENSION}"
 
     print_step "Download from ${DOWNLOAD_URL}"
     print_step "Downloading tombi v${VERSION} (${TARGET})..."
@@ -115,11 +137,29 @@ download_and_install() {
         exit 1
     fi
 
-    chmod +x "${TEMP_FILE}"
-    mv "${TEMP_FILE}" "${BIN_DIR}/tombi"
+    if [[ "${ARTIFACT_EXTENSION}" == ".zip" ]]; then
+        unzip -o "${TEMP_FILE}" -d "${INSTALL_DIR}"
+    elif [[ "${ARTIFACT_EXTENSION}" == ".gz" ]]; then
+        gzip -d "${TEMP_FILE}" -f
+    fi
+
+    chmod +x "${INSTALL_DIR}/tombi-${VERSION}"
+    mv "${INSTALL_DIR}/tombi-${VERSION}" "${BIN_DIR}/tombi"
 
     print_success "tombi v${VERSION} has been installed to ${BIN_DIR}/tombi"
 }
+
+# Version
+REPO="tombi-toml/tombi"
+GITHUB_RELEASE_URL="https://github.com/${REPO}/releases/download"
+if [ -n "${SPECIFIED_VERSION}" ]; then
+    VERSION="${SPECIFIED_VERSION}"
+    print_step "Using specified version: v${VERSION}"
+else
+    VERSION=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+    print_step "Using latest version: v${VERSION}"
+fi
+ARTIFACT_EXTENSION=$(artifact_extension)
 
 # Main process
 main() {
