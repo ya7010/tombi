@@ -201,6 +201,8 @@ async fn get_schema<'a: 'b, 'b>(
                 },
                 SchemaAccessor::Index => match (value, &*value_schema) {
                     (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
+                        // NOTE: This is fine. This function is only used for Table/ArrayOfTable or Keys of KeyValues,
+                        //       so there is only one element in the array.
                         if let Some(value) = array.first() {
                             if let Some(item_schema) = &array_schema.items {
                                 if let Ok(Some(CurrentSchema {
