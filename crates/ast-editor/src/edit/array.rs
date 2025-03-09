@@ -9,7 +9,7 @@ use crate::rule::{array_comma_tailing_comment, array_values_order};
 impl crate::Edit for ast::Array {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
+        _accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -50,7 +50,7 @@ impl crate::Edit for ast::Array {
                                 changes.extend(
                                     value
                                         .edit(
-                                            accessors,
+                                            &[],
                                             Some(value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
@@ -72,11 +72,7 @@ impl crate::Edit for ast::Array {
                     comma.as_ref(),
                     schema_context,
                 ));
-                changes.extend(
-                    value
-                        .edit(accessors, None, None, None, schema_context)
-                        .await,
-                );
+                changes.extend(value.edit(&[], None, None, None, schema_context).await);
             }
 
             changes

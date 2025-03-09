@@ -285,6 +285,22 @@ mod table_keys_order {
                 "#
             )
         }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_cargo_dependencies(
+                r#"
+                [dependencies]
+                serde = { features = ["derive"], version = "^1.0.0" }
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependencies]
+                serde = { version = "^1.0.0", features = ["derive"] }
+                "#
+            )
+        }
     }
 
     mod tombi {

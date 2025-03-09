@@ -8,7 +8,7 @@ use super::get_schema;
 impl crate::Edit for ast::KeyValue {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
+        _accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -51,11 +51,7 @@ impl crate::Edit for ast::KeyValue {
                         changes.extend(
                             value
                                 .edit(
-                                    &accessors
-                                        .to_vec()
-                                        .into_iter()
-                                        .chain(keys_accessors.into_iter())
-                                        .collect_vec(),
+                                    &[],
                                     Some(&value_schema),
                                     Some(&schema_url),
                                     Some(&definitions),
@@ -67,11 +63,7 @@ impl crate::Edit for ast::KeyValue {
                 }
             } else {
                 if let Some(value) = self.value() {
-                    changes.extend(
-                        value
-                            .edit(accessors, None, None, None, schema_context)
-                            .await,
-                    );
+                    changes.extend(value.edit(&[], None, None, None, schema_context).await);
                 }
             }
 
