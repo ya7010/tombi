@@ -196,6 +196,10 @@ async fn get_schema<'a: 'b, 'b>(
                             }
                         }
                     }
+
+                    _ => {}
+                },
+                SchemaAccessor::Index => match (value, &*value_schema) {
                     (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
                         if let Some(value) = array.first() {
                             if let Some(item_schema) = &array_schema.items {
@@ -225,35 +229,8 @@ async fn get_schema<'a: 'b, 'b>(
                             return None;
                         }
                     }
-                    _ => return None,
+                    _ => {}
                 },
-                SchemaAccessor::Index => {
-                    if let ValueSchema::Array(array_schema) = &*value_schema {
-                        if let Some(item_schema) = &array_schema.items {
-                            if let Ok(Some(CurrentSchema {
-                                value_schema,
-                                schema_url,
-                                definitions,
-                            })) = item_schema
-                                .write()
-                                .await
-                                .resolve(schema_url, definitions, schema_context.store)
-                                .await
-                            {
-                                return inner_get_schema(
-                                    value,
-                                    &accessors[1..],
-                                    validation_accessors,
-                                    value_schema,
-                                    schema_url,
-                                    definitions,
-                                    schema_context,
-                                )
-                                .await;
-                            }
-                        }
-                    }
-                }
             }
 
             None
