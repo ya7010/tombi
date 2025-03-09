@@ -1,13 +1,13 @@
 [package]
 name = "server"
 version = "0.0.0"
-edition = { workspace = true }
 authors = { workspace = true }
+edition = { workspace = true }
 license = { workspace = true }
 
 [features]
-default = ["clap"]
 clap = ["dep:clap"]
+default = ["clap"]
 
 [dependencies]
 ahash.workspace = true

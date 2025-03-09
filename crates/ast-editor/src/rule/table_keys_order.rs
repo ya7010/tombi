@@ -7,7 +7,7 @@ use x_tombi::TableKeysOrder;
 pub async fn table_keys_order<'a>(
     key_values: Vec<ast::KeyValue>,
     table_schema: &'a TableSchema,
-    _schema_context: &'a SchemaContext<'a>,
+    schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
     if key_values.is_empty() {
         return Vec::with_capacity(0);
@@ -24,14 +24,44 @@ pub async fn table_keys_order<'a>(
 
     match keys_order {
         TableKeysOrder::Ascending => {
-            let new = sorted(key_values)
+            let new = key_values
+                .iter()
+                .sorted_by(|a, b| {
+                    let a_keys = a.keys().unwrap();
+                    let b_keys = b.keys().unwrap();
+                    let a_first_key = a_keys.keys().next().unwrap();
+                    let b_first_key = b_keys.keys().next().unwrap();
+                    a_first_key
+                        .try_to_raw_text(schema_context.toml_version)
+                        .unwrap()
+                        .cmp(
+                            &b_first_key
+                                .try_to_raw_text(schema_context.toml_version)
+                                .unwrap(),
+                        )
+                })
                 .map(|kv| SyntaxElement::Node(kv.syntax().clone()))
                 .collect_vec();
 
             vec![crate::Change::ReplaceRange { old, new }]
         }
         TableKeysOrder::Descending => {
-            let new = sorted(key_values)
+            let new = key_values
+                .iter()
+                .sorted_by(|a, b| {
+                    let a_keys = a.keys().unwrap();
+                    let b_keys = b.keys().unwrap();
+                    let a_first_key = a_keys.keys().next().unwrap();
+                    let b_first_key = b_keys.keys().next().unwrap();
+                    a_first_key
+                        .try_to_raw_text(schema_context.toml_version)
+                        .unwrap()
+                        .cmp(
+                            &b_first_key
+                                .try_to_raw_text(schema_context.toml_version)
+                                .unwrap(),
+                        )
+                })
                 .rev()
                 .map(|kv| SyntaxElement::Node(kv.syntax().clone()))
                 .collect_vec();
@@ -45,8 +75,11 @@ pub async fn table_keys_order<'a>(
                 key_values = key_values
                     .into_iter()
                     .filter_map(|kv| {
-                        if kv.keys().iter().next().map(ToString::to_string)
-                            == Some(accessor.to_string())
+                        if kv.keys().and_then(|keys| {
+                            keys.keys().next().and_then(|key| {
+                                key.try_to_raw_text(schema_context.toml_version).ok()
+                            })
+                        }) == Some(accessor.to_string())
                         {
                             new.push(SyntaxElement::Node(kv.syntax().clone()));
                             None

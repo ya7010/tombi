@@ -1,9 +1,9 @@
 [package]
 name = "rg-tree"
-description = "A `Red/Green Tree` implementation."
 version = "0.0.0"
-edition.workspace = true
 authors.workspace = true
+edition.workspace = true
+description = "A `Red/Green Tree` implementation."
 license.workspace = true
 
 [features]
