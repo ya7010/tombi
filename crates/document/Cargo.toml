@@ -8,7 +8,7 @@ license = { workspace = true }
 [features]
 default = ["serde"]
 lsp = ["dep:tower-lsp", "text/lsp"]
-serde = ["dep:serde", "indexmap/serde", "chrono/serde"]
+serde = ["chrono/serde", "dep:serde", "indexmap/serde"]
 
 [dependencies]
 ast = { workspace = true }
