@@ -1,10 +1,9 @@
 use std::borrow::Cow;
 
 use futures::FutureExt;
-use itertools::Itertools;
 use linter::Validate;
 use schema_store::{
-    Accessor, AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, ValueSchema,
+    AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, ValueSchema,
 };
 
 mod array;
@@ -18,7 +17,7 @@ mod value;
 pub trait Edit {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::Accessor],
+        accessors: &'a [schema_store::SchemaAccessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -28,7 +27,7 @@ pub trait Edit {
 
 async fn get_schema<'a: 'b, 'b>(
     value: &'a document_tree::Value,
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [schema_store::SchemaAccessor],
     value_schema: &'a ValueSchema,
     schema_url: &'a schema_store::SchemaUrl,
     definitions: &'a schema_store::SchemaDefinitions,
@@ -36,7 +35,7 @@ async fn get_schema<'a: 'b, 'b>(
 ) -> Option<ValueSchema> {
     fn inner_get_schema<'a: 'b, 'b>(
         value: &'a document_tree::Value,
-        accessors: &'a [schema_store::Accessor],
+        accessors: &'a [schema_store::SchemaAccessor],
         validation_accessors: &'a [schema_store::SchemaAccessor],
         value_schema: &'a ValueSchema,
         schema_url: Cow<'a, schema_store::SchemaUrl>,
@@ -95,7 +94,7 @@ async fn get_schema<'a: 'b, 'b>(
             }
 
             match &accessors[0] {
-                Accessor::Key(key) => match (value, &*value_schema) {
+                SchemaAccessor::Key(key) => match (value, &*value_schema) {
                     (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) => {
                         if let Some(value) = table.get(&key.to_string()) {
                             if let Some(referable_property_schema) = table_schema
@@ -200,9 +199,9 @@ async fn get_schema<'a: 'b, 'b>(
 
                     _ => {}
                 },
-                Accessor::Index(index) => match (value, &*value_schema) {
+                SchemaAccessor::Index => match (value, &*value_schema) {
                     (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
-                        if let Some(value) = array.get(*index) {
+                        if let Some(value) = array.first() {
                             if let Some(item_schema) = &array_schema.items {
                                 if let Ok(Some(CurrentSchema {
                                     value_schema,
@@ -242,7 +241,7 @@ async fn get_schema<'a: 'b, 'b>(
     inner_get_schema(
         value,
         accessors,
-        &accessors.iter().map(SchemaAccessor::from).collect_vec(),
+        accessors,
         value_schema,
         Cow::Borrowed(schema_url),
         Cow::Borrowed(definitions),

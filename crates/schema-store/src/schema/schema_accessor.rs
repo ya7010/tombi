@@ -116,12 +116,12 @@ impl std::fmt::Display for SchemaAccessor {
     }
 }
 
-pub trait GetHeaderAccessors {
-    fn get_header_accessor(&self, toml_version: TomlVersion) -> Option<Vec<Accessor>>;
+pub trait GetHeaderSchemarAccessors {
+    fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>>;
 }
 
-impl GetHeaderAccessors for ast::Table {
-    fn get_header_accessor(&self, toml_version: TomlVersion) -> Option<Vec<Accessor>> {
+impl GetHeaderSchemarAccessors for ast::Table {
+    fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
         let array_of_tables_keys = self
             .array_of_tables_keys()
             .map(|keys| keys.into_iter().collect_vec())
@@ -133,11 +133,11 @@ impl GetHeaderAccessors for ast::Table {
             return None;
         };
         for key in header.keys() {
-            accessors.push(Accessor::Key(key.try_to_raw_text(toml_version).ok()?));
+            accessors.push(SchemaAccessor::Key(key.try_to_raw_text(toml_version).ok()?));
             header_keys.push(key);
 
             if array_of_tables_keys.contains(&header_keys) {
-                accessors.push(Accessor::Index(0));
+                accessors.push(SchemaAccessor::Index);
             }
         }
 
@@ -145,8 +145,8 @@ impl GetHeaderAccessors for ast::Table {
     }
 }
 
-impl GetHeaderAccessors for ast::ArrayOfTables {
-    fn get_header_accessor(&self, toml_version: TomlVersion) -> Option<Vec<Accessor>> {
+impl GetHeaderSchemarAccessors for ast::ArrayOfTables {
+    fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
         let array_of_tables_keys = self
             .array_of_tables_keys()
             .map(|keys| keys.into_iter().collect_vec())
@@ -159,15 +159,15 @@ impl GetHeaderAccessors for ast::ArrayOfTables {
         };
 
         for key in header.keys() {
-            accessors.push(Accessor::Key(key.try_to_raw_text(toml_version).ok()?));
+            accessors.push(SchemaAccessor::Key(key.try_to_raw_text(toml_version).ok()?));
             header_keys.push(key);
 
             if array_of_tables_keys.contains(&header_keys) {
-                accessors.push(Accessor::Index(0));
+                accessors.push(SchemaAccessor::Index);
             }
         }
 
-        accessors.push(Accessor::Index(0));
+        accessors.push(SchemaAccessor::Index);
 
         Some(accessors)
     }
