@@ -21,12 +21,18 @@ pub async fn serve(_args: impl Into<Args>, offline: bool) {
     let stdin = tokio::io::stdin();
     let stdout = tokio::io::stdout();
 
-    let (service, socket) =
-        tower_lsp::LspService::build(|client| crate::backend::Backend::new(client, offline))
-            .custom_method("tombi/getTomlVersion", Backend::get_toml_version)
-            .custom_method("tombi/updateSchema", Backend::update_schema)
-            .custom_method("tombi/updateConfig", Backend::update_config)
-            .finish();
+    let (service, socket) = tower_lsp::LspService::build(|client| {
+        crate::backend::Backend::new(
+            client,
+            schema_store::Options {
+                offline: offline.then_some(true),
+            },
+        )
+    })
+    .custom_method("tombi/getTomlVersion", Backend::get_toml_version)
+    .custom_method("tombi/updateSchema", Backend::update_schema)
+    .custom_method("tombi/updateConfig", Backend::update_config)
+    .finish();
 
     tower_lsp::Server::new(stdin, stdout, socket)
         .serve(service)

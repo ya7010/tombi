@@ -355,7 +355,7 @@ mod hover_keys_value {
                         .try_init();
                 }
 
-                let (service, _) = LspService::new(|client| Backend::new(client, false));
+                let (service, _) = LspService::new(|client| Backend::new(client, schema_store::Options::default()));
 
                 let backend = service.inner();
 

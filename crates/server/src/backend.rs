@@ -43,7 +43,7 @@ pub struct Backend {
 
 impl Backend {
     #[inline]
-    pub fn new(client: tower_lsp::Client, offline: bool) -> Self {
+    pub fn new(client: tower_lsp::Client, options: schema_store::Options) -> Self {
         let (config, config_dirpath) = match config::load_with_path() {
             Ok((config, config_dirpath)) => (config, config_dirpath),
             Err(err) => {
@@ -56,7 +56,7 @@ impl Backend {
             document_sources: Default::default(),
             config_dirpath,
             config: Arc::new(tokio::sync::RwLock::new(config)),
-            schema_store: schema_store::SchemaStore::new(offline),
+            schema_store: schema_store::SchemaStore::new(options),
         }
     }
 

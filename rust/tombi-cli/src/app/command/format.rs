@@ -84,7 +84,9 @@ where
         .map(|p| p.iter().map(|s| s.as_str()).collect());
     let format_options = config.format.unwrap_or_default();
     let schema_options = config.schema.unwrap_or_default();
-    let schema_store = schema_store::SchemaStore::new(offline);
+    let schema_store = schema_store::SchemaStore::new(schema_store::Options {
+        offline: offline.then_some(true),
+    });
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()

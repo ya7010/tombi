@@ -311,7 +311,7 @@ mod table_keys_order {
                 }
 
                 // Initialize schema store
-                let schema_store = SchemaStore::new(false);
+                let schema_store = SchemaStore::new(schema_store::Options::default());
 
                 // Load schemas
                 schema_store

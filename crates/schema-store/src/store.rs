@@ -14,17 +14,21 @@ pub struct SchemaStore {
     document_schemas:
         Arc<tokio::sync::RwLock<AHashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>>>,
     schemas: Arc<RwLock<Vec<crate::Schema>>>,
-    offline: bool,
+    options: crate::Options,
 }
 
 impl SchemaStore {
-    pub fn new(offline: bool) -> Self {
+    pub fn new(options: crate::Options) -> Self {
         Self {
             http_client: reqwest::Client::new(),
             document_schemas: Arc::new(RwLock::default()),
             schemas: Arc::new(RwLock::new(Vec::new())),
-            offline,
+            options,
         }
+    }
+
+    fn offline(&self) -> bool {
+        self.options.offline.unwrap_or(false)
     }
 
     pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
@@ -58,7 +62,7 @@ impl SchemaStore {
         &self,
         catalog_url: &CatalogUrl,
     ) -> Result<(), crate::Error> {
-        if matches!(catalog_url.scheme(), "http" | "https") && self.offline {
+        if matches!(catalog_url.scheme(), "http" | "https") && self.offline() {
             tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
             return Ok(());
         }
@@ -98,7 +102,7 @@ impl SchemaStore {
     }
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {
-        if matches!(schema_url.scheme(), "http" | "https") && self.offline {
+        if matches!(schema_url.scheme(), "http" | "https") && self.offline() {
             tracing::debug!("offline mode, skip fetch schema from url: {}", schema_url);
             return Ok(false);
         }
@@ -136,7 +140,7 @@ impl SchemaStore {
                 serde_json::from_reader(file)
             }
             "http" | "https" => {
-                if self.offline {
+                if self.offline() {
                     unreachable!(
                         "offline mode, store don't have online schema url: {}",
                         schema_url
@@ -184,7 +188,7 @@ impl SchemaStore {
         schema_url: &'a SchemaUrl,
     ) -> BoxFuture<'b, Result<Option<DocumentSchema>, crate::Error>> {
         async move {
-            if matches!(schema_url.scheme(), "http" | "https") && self.offline {
+            if matches!(schema_url.scheme(), "http" | "https") && self.offline() {
                 return Ok(None);
             }
 
@@ -220,7 +224,7 @@ impl SchemaStore {
                 self.try_get_source_schema_from_path(&source_path).await
             }
             "http" | "https" => {
-                if self.offline {
+                if self.offline() {
                     tracing::debug!("offline mode, skip fetch source from url: {}", source_url);
                     return Ok(None);
                 }

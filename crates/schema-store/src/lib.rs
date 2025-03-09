@@ -1,6 +1,7 @@
 mod accessor;
 mod error;
 pub mod json;
+mod options;
 mod schema;
 mod store;
 mod value_type;
@@ -8,6 +9,7 @@ mod x_taplo;
 
 pub use accessor::{Accessor, Accessors};
 pub use error::Error;
+pub use options::Options;
 pub use schema::*;
 pub use store::SchemaStore;
 pub use value_type::ValueType;
