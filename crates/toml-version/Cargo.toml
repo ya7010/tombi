@@ -1,16 +1,16 @@
 [package]
 name = "toml-version"
 version.workspace = true
-edition.workspace = true
 authors.workspace = true
-license.workspace = true
+edition.workspace = true
 repository.workspace = true
+license.workspace = true
 
 [features]
-default = ["serde", "clap"]
-serde = ["dep:serde"]
 clap = ["dep:clap"]
+default = ["clap", "serde"]
 jsonschema = ["dep:schemars"]
+serde = ["dep:serde"]
 
 [dependencies]
 clap = { workspace = true, optional = true }

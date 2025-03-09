@@ -229,6 +229,64 @@ mod table_keys_order {
         }
     }
 
+    mod cargo {
+        use test_lib::cargo_schema_path;
+
+        use super::*;
+
+        test_format! {
+            #[tokio::test]
+            async fn test_cargo_package(
+                r#"
+                [package]
+                name = "toml-version"
+                authors.workspace = true
+                edition.workspace = true
+                license.workspace = true
+                repository.workspace = true
+                version.workspace = true
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [package]
+                name = "toml-version"
+                version.workspace = true
+                authors.workspace = true
+                edition.workspace = true
+                repository.workspace = true
+                license.workspace = true
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_cargo_package2(
+                r#"
+                [package]
+                name = "toml-version"
+                authors = { workspace = true }
+                edition = { workspace = true }
+                license = { workspace = true }
+                repository = { workspace = true }
+                version = { workspace = true }
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [package]
+                name = "toml-version"
+                version = { workspace = true }
+                authors = { workspace = true }
+                edition = { workspace = true }
+                repository = { workspace = true }
+                license = { workspace = true }
+                "#
+            )
+        }
+    }
+
     #[macro_export]
     macro_rules! test_format {
         (
