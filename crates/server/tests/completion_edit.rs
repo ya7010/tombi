@@ -546,7 +546,7 @@ mod completion_edit {
                         .try_init();
                 }
 
-                let (service, _) = LspService::new(|client| Backend::new(client, false));
+                let (service, _) = LspService::new(|client| Backend::new(client, schema_store::Options::default()));
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = $schema_file_path.as_ref() {

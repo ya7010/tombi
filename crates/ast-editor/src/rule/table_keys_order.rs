@@ -1,5 +1,5 @@
 use ast::AstNode;
-use itertools::{sorted, Itertools};
+use itertools::Itertools;
 use schema_store::{SchemaContext, TableSchema};
 use syntax::SyntaxElement;
 use x_tombi::TableKeysOrder;
