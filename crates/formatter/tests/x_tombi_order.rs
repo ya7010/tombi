@@ -287,6 +287,29 @@ mod table_keys_order {
         }
     }
 
+    mod tombi {
+        use super::test_format;
+        use test_lib::tombi_schema_path;
+
+        test_format! {
+            #[tokio::test]
+            async fn test_tombi(
+                r#"
+                [[schemas]]
+                include = ["*.toml"]
+                path = "pyproject.toml"
+                "#,
+                tombi_schema_path(),
+            ) -> Ok(
+                r#"
+                [[schemas]]
+                path = "pyproject.toml"
+                include = ["*.toml"]
+                "#
+            )
+        }
+    }
+
     #[macro_export]
     macro_rules! test_format {
         (
