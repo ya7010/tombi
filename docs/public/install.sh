@@ -175,8 +175,11 @@ main() {
     # Verify installation
     if command -v tombi >/dev/null 2>&1; then
         if tombi --version >/dev/null 2>&1; then
-            INSTALLED_VERSION=$(tombi --version 2>&1 | head -n 1 || echo "unknown")
-            print_success "tombi ${INSTALLED_VERSION} has been successfully installed!"
+            INSTALLED_VERSION=$(tombi --version 2>&1 | head -n 1 | sed 's/tombi //g' || echo "unknown")
+            if [ "v${INSTALLED_VERSION}" != "v${VERSION}" ]; then
+                print_error "Installed version mismatch: expected v${VERSION}, but got v${INSTALLED_VERSION}"
+                exit 1
+            fi
             echo "Usage: ${GREEN}tombi --help${NC}"
         else
             print_error "Installation completed, but tombi command cannot be executed. "
