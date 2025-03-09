@@ -8,6 +8,9 @@ interface LinkCardProps {
 }
 
 export const LinkCard: Component<LinkCardProps> = (props) => {
+  if (props.image.startsWith("/")) {
+    props.image = `${import.meta.env.BASE_URL}${props.image}`;
+  }
   return (
     <div class="w-auto max-w-xl mx-0 my-6 border border-gray-200 rounded-lg p-4 bg-white shadow-sm transition-all hover:translate-y-[-2px] hover:shadow-md">
       <a
