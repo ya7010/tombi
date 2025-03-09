@@ -3,7 +3,7 @@ use futures::FutureExt;
 impl crate::Edit for ast::Value {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
+        accessors: &'a [schema_store::Accessor],
         value_schema: Option<&'a schema_store::ValueSchema>,
         schema_url: Option<&'a schema_store::SchemaUrl>,
         definitions: Option<&'a schema_store::SchemaDefinitions>,
