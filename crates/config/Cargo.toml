@@ -7,10 +7,10 @@ license.workspace = true
 repository.workspace = true
 
 [features]
-default = ["serde", "clap"]
 clap = ["dep:clap"]
+default = ["clap", "serde"]
+jsonschema = ["dep:schemars", "serde", "toml-version/jsonschema"]
 serde = ["dep:serde"]
-jsonschema = ["serde", "dep:schemars", "toml-version/jsonschema"]
 
 [dependencies]
 clap = { workspace = true, optional = true }

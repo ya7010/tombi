@@ -6,8 +6,8 @@ authors = { workspace = true }
 license = { workspace = true }
 
 [features]
-default = ["clap"]
 clap = ["dep:clap"]
+default = ["clap"]
 
 [dependencies]
 ahash.workspace = true
