@@ -10,6 +10,10 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Temporary directory for installation
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
 # Helper functions
 print_step() {
     echo "${BLUE}==>${NC} $1"
@@ -98,10 +102,7 @@ artifact_extension() {
 
 # Create installation directories
 create_install_dir() {
-    INSTALL_DIR="${HOME}/.tombi"
     BIN_DIR="${HOME}/.local/bin"
-
-    mkdir -p "${INSTALL_DIR}"
     mkdir -p "${BIN_DIR}"
 
     if [[ ! ":$PATH:" == *":${BIN_DIR}:"* ]]; then
@@ -112,7 +113,7 @@ create_install_dir() {
 # Download and install tombi
 download_and_install() {
     DOWNLOAD_URL="${GITHUB_RELEASE_URL}/v${VERSION}/tombi-cli-${VERSION}-${TARGET}${ARTIFACT_EXTENSION}"
-    TEMP_FILE="${INSTALL_DIR}/tombi-${VERSION}${ARTIFACT_EXTENSION}"
+    TEMP_FILE="${TEMP_DIR}/tombi-${VERSION}${ARTIFACT_EXTENSION}"
 
     print_step "Download from ${DOWNLOAD_URL}"
     print_step "Downloading tombi v${VERSION} (${TARGET})..."
@@ -138,13 +139,14 @@ download_and_install() {
     fi
 
     if [[ "${ARTIFACT_EXTENSION}" == ".zip" ]]; then
-        unzip -o "${TEMP_FILE}" -d "${INSTALL_DIR}"
+        unzip -o "${TEMP_FILE}" -d "${TEMP_DIR}"
     elif [[ "${ARTIFACT_EXTENSION}" == ".gz" ]]; then
         gzip -d "${TEMP_FILE}" -f
     fi
 
-    chmod +x "${INSTALL_DIR}/tombi-${VERSION}"
-    mv "${INSTALL_DIR}/tombi-${VERSION}" "${BIN_DIR}/tombi"
+    EXTRACTED_FILE="${TEMP_DIR}/tombi-${VERSION}"
+    chmod +x "${EXTRACTED_FILE}"
+    mv "${EXTRACTED_FILE}" "${BIN_DIR}/tombi"
 
     print_success "tombi v${VERSION} has been installed to ${BIN_DIR}/tombi"
 }
