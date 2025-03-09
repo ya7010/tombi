@@ -1,10 +1,10 @@
 [package]
 name = "toml-version"
 version.workspace = true
-edition.workspace = true
 authors.workspace = true
-license.workspace = true
+edition.workspace = true
 repository.workspace = true
+license.workspace = true
 
 [features]
 clap = ["dep:clap"]
