@@ -61,7 +61,7 @@ async fn get_schema<'a: 'b, 'b>(
                             )
                             .await
                         {
-                            return inner_get_schema(
+                            if let Some(value_schema) = inner_get_schema(
                                 value,
                                 accessors,
                                 validation_accessors,
@@ -70,7 +70,10 @@ async fn get_schema<'a: 'b, 'b>(
                                 definitions,
                                 schema_context,
                             )
-                            .await;
+                            .await
+                            {
+                                return Some(value_schema);
+                            }
                         }
                     }
 
