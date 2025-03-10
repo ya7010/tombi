@@ -43,7 +43,7 @@ pub fn validate<'a: 'b, 'b>(
                 .and_then(|s| s.value_schema.as_ref()),
             source_schema.root_schema.as_ref().map(|s| &s.schema_url),
             source_schema.root_schema.as_ref().map(|s| &s.definitions),
-            &schema_context,
+            schema_context,
         )
         .await?;
 

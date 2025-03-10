@@ -63,7 +63,7 @@ where
                             Some(value_schema),
                             Some(&schema_url),
                             Some(&definitions),
-                            &schema_context,
+                            schema_context,
                         )
                         .await
                     {
@@ -100,7 +100,7 @@ where
                         one_of_schema,
                         &schema_url,
                         &definitions,
-                        &schema_context,
+                        schema_context,
                     )
                     .await
                     {
@@ -118,7 +118,7 @@ where
                         any_of_schema,
                         &schema_url,
                         &definitions,
-                        &schema_context,
+                        schema_context,
                     )
                     .await
                     {
@@ -136,7 +136,7 @@ where
                         all_of_schema,
                         &schema_url,
                         &definitions,
-                        &schema_context,
+                        schema_context,
                     )
                     .await
                     {

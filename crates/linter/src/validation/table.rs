@@ -87,7 +87,7 @@ impl Validate for document_tree::Table {
                                 any_of_schema,
                                 schema_url,
                                 definitions,
-                                &schema_context,
+                                schema_context,
                             )
                             .await;
                         }
@@ -96,9 +96,9 @@ impl Validate for document_tree::Table {
                                 self,
                                 accessors,
                                 all_of_schema,
-                                &schema_url,
-                                &definitions,
-                                &schema_context,
+                                schema_url,
+                                definitions,
+                                schema_context,
                             )
                             .await;
                         }
@@ -149,7 +149,7 @@ impl Validate for document_tree::Table {
                                             Some(value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
-                                            &schema_context,
+                                            schema_context,
                                         )
                                         .await
                                     {

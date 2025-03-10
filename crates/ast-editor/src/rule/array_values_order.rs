@@ -79,7 +79,7 @@ pub async fn array_values_order<'a>(
 
     let new = sorted_values_with_comma
         .iter()
-        .map(|(value, comma)| {
+        .flat_map(|(value, comma)| {
             if let Some(comma) = comma {
                 vec![
                     SyntaxElement::Node(value.syntax().clone()),
@@ -89,12 +89,11 @@ pub async fn array_values_order<'a>(
                 vec![SyntaxElement::Node(value.syntax().clone())]
             }
         })
-        .flatten()
         .collect_vec();
 
     if !is_last_comma {
         if let Some(syntax::SyntaxElement::Node(node)) = new.last() {
-            if let Some(comma) = ast::Comma::cast(node.clone().into()) {
+            if let Some(comma) = ast::Comma::cast(node.clone()) {
                 if comma.tailing_comment().is_none()
                     && comma.leading_comments().collect_vec().is_empty()
                 {
@@ -344,7 +343,7 @@ impl SortableValues {
     pub fn sorted(self) -> Vec<(ast::Value, ast::Comma)> {
         match self {
             Self::Boolean(mut sortable_values) => {
-                sortable_values.sort_by_key(|(key, _, _)| key.clone());
+                sortable_values.sort_by_key(|(key, _, _)| *key);
 
                 sortable_values
                     .into_iter()
@@ -352,7 +351,7 @@ impl SortableValues {
                     .collect_vec()
             }
             Self::Integer(mut sortable_values) => {
-                sortable_values.sort_by_key(|(key, _, _)| key.clone());
+                sortable_values.sort_by_key(|(key, _, _)| *key);
 
                 sortable_values
                     .into_iter()

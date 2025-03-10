@@ -24,8 +24,8 @@ impl crate::Edit for ast::Array {
                 if let ValueSchema::Array(array_schema) = &value_schema {
                     changes.extend(
                         array_values_order(
-                            self.values_with_comma().into_iter().collect_vec(),
-                            &array_schema,
+                            self.values_with_comma().collect_vec(),
+                            array_schema,
                             schema_context,
                         )
                         .await,
