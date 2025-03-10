@@ -1,5 +1,5 @@
 [workspace]
-members = ["rust/*", "crates/*", "xtask", "toml-test"]
+members = ["crates/*", "rust/*", "toml-test", "xtask"]
 resolver = "2"
 
 [workspace.package]
@@ -38,8 +38,8 @@ proc-macro2 = "1.0.92"
 quote = "1.0.37"
 regex = "1.11.1"
 reqwest = { version = "0.12.9", default-features = false, features = [
-  "rustls-tls",
   "json",
+  "rustls-tls",
 ] }
 rg-tree = { path = "crates/rg-tree" }
 rstest = { version = "0.23.0" }
@@ -55,7 +55,11 @@ test-lib = { path = "crates/test-lib" }
 text = { path = "crates/text" }
 textwrap = { version = "0.16.1" }
 thiserror = { version = "2.0.3" }
-tokio = { version = "1.41.0", features = ["fs", "io-std", "rt-multi-thread"] }
+tokio = { version = "1.41.0", features = [
+  "fs",
+  "io-std",
+  "rt-multi-thread",
+] }
 toml = { version = "0.8.19" }
 toml-version = { path = "crates/toml-version" }
 tower-lsp = { version = "0.20.0" }
