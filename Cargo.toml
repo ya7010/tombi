@@ -4,10 +4,10 @@ resolver = "2"
 
 [workspace.package]
 version = "0.0.0"  # We use git tags for versioning. This is just a placeholder.
-edition = "2021"
 authors = ["yassun7010 <yassun7010@outlook.com>"]
-license = "MIT"
+edition = "2021"
 repository = "https://github.com/tombi-toml/tombi"
+license = "MIT"
 
 [workspace.dependencies]
 ahash = "0.8.11"
