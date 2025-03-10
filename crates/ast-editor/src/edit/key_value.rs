@@ -53,18 +53,16 @@ impl crate::Edit for ast::KeyValue {
                                 .edit(
                                     &[],
                                     Some(&value_schema),
-                                    Some(&schema_url),
-                                    Some(&definitions),
+                                    Some(schema_url),
+                                    Some(definitions),
                                     schema_context,
                                 )
                                 .await,
                         );
                     }
                 }
-            } else {
-                if let Some(value) = self.value() {
-                    changes.extend(value.edit(&[], None, None, None, schema_context).await);
-                }
+            } else if let Some(value) = self.value() {
+                changes.extend(value.edit(&[], None, None, None, schema_context).await);
             }
 
             changes

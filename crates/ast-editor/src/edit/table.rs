@@ -35,9 +35,9 @@ impl crate::Edit for ast::Table {
                     if let Some(value_schema) = get_schema(
                         &value,
                         &accessors,
-                        &value_schema,
-                        &schema_url,
-                        &definitions,
+                        value_schema,
+                        schema_url,
+                        definitions,
                         schema_context,
                     )
                     .await
@@ -60,7 +60,7 @@ impl crate::Edit for ast::Table {
                             changes.extend(
                                 table_keys_order(
                                     self.key_values().collect_vec(),
-                                    &table_schema,
+                                    table_schema,
                                     schema_context,
                                 )
                                 .await,
