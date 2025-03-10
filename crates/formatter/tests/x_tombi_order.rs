@@ -301,6 +301,25 @@ mod table_keys_order {
                 "#
             )
         }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_cargo_dependencies_trailing_comma(
+                r#"
+                [dependencies]
+                serde = { features = ["std", "derive",], version = "^1.0.0" }
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependencies]
+                serde = { version = "^1.0.0", features = [
+                  "derive",
+                  "std",
+                ] }
+                "#
+            )
+        }
     }
 
     mod tombi {

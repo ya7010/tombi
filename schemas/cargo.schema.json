@@ -141,6 +141,7 @@
               }
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "links": {
               "key": "https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#choosing-features"
@@ -353,7 +354,8 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "x-tombi-array-values-order": "ascending"
     },
     "Resolver": {
       "title": "Resolver",
@@ -985,7 +987,8 @@
           "description": "An array of registry names.",
           "items": {
             "type": "string"
-          }
+          },
+          "x-tombi-array-values-order": "ascending"
         }
       ],
       "x-taplo": {
@@ -1085,6 +1088,7 @@
               }
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "docs": {
               "enumValues": [
@@ -1110,6 +1114,7 @@
               "hidden": true
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "hidden": true
           }
@@ -1195,6 +1200,7 @@
               }
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "links": {
               "key": "https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-required-features-field"
@@ -1230,6 +1236,7 @@
               }
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "links": {
               "key": "https://doc.rust-lang.org/cargo/reference/workspaces.html#the-workspace-section"
@@ -1261,6 +1268,7 @@
               }
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "links": {
               "key": "https://doc.rust-lang.org/cargo/reference/workspaces.html#the-workspace-section"
@@ -1288,6 +1296,7 @@
               }
             }
           },
+          "x-tombi-array-values-order": "ascending",
           "x-taplo": {
             "links": {
               "key": "https://doc.rust-lang.org/cargo/reference/workspaces.html#the-workspace-section"
@@ -1387,6 +1396,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-authors-field"
@@ -1406,6 +1416,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-categories-field"
@@ -1445,6 +1456,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-exclude-and-include-fields"
@@ -1473,6 +1485,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-exclude-and-include-fields"
@@ -1492,6 +1505,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-keywords-field"
@@ -1704,6 +1718,7 @@
         "description": "Path to include.",
         "type": "string"
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://github.com/boozook/playdate/blob/main/support/build/README.md#assets-list"
@@ -1793,7 +1808,8 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "x-tombi-array-values-order": "ascending"
     },
     "package": {
       "$ref": "#/definitions/Package"
@@ -1832,6 +1848,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries"
@@ -1850,6 +1867,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples"
@@ -1868,6 +1886,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/cargo-targets.html#integration-tests"
@@ -1886,6 +1905,7 @@
           }
         }
       },
+      "x-tombi-array-values-order": "ascending",
       "x-taplo": {
         "links": {
           "key": "https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks"
