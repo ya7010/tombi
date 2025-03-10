@@ -22,7 +22,7 @@ impl crate::Edit for ast::InlineTable {
                 if let ValueSchema::Table(table_schema) = value_schema {
                     changes.extend(
                         inline_table_keys_order(
-                            self.key_values_with_comma().into_iter().collect_vec(),
+                            self.key_values_with_comma().collect_vec(),
                             table_schema,
                             schema_context,
                         )
@@ -33,8 +33,8 @@ impl crate::Edit for ast::InlineTable {
                         changes.extend(
                             key_value
                                 .edit(
-                                    &accessors,
-                                    Some(&value_schema),
+                                    accessors,
+                                    Some(value_schema),
                                     Some(schema_url),
                                     Some(definitions),
                                     schema_context,

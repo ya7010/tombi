@@ -129,10 +129,7 @@ impl GetHeaderSchemarAccessors for ast::Table {
 
         let mut accessors = vec![];
         let mut header_keys = vec![];
-        let Some(header) = self.header() else {
-            return None;
-        };
-        for key in header.keys() {
+        for key in self.header()?.keys() {
             accessors.push(SchemaAccessor::Key(key.try_to_raw_text(toml_version).ok()?));
             header_keys.push(key);
 
@@ -154,11 +151,7 @@ impl GetHeaderSchemarAccessors for ast::ArrayOfTables {
 
         let mut accessors = vec![];
         let mut header_keys = vec![];
-        let Some(header) = self.header() else {
-            return None;
-        };
-
-        for key in header.keys() {
+        for key in self.header()?.keys() {
             accessors.push(SchemaAccessor::Key(key.try_to_raw_text(toml_version).ok()?));
             header_keys.push(key);
 

@@ -18,50 +18,48 @@ impl crate::Edit for ast::Array {
         async move {
             let mut changes = vec![];
 
-            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
+            if let (Some(schema_url), Some(ValueSchema::Array(array_schema)), Some(definitions)) =
                 (schema_url, value_schema, definitions)
             {
-                if let ValueSchema::Array(array_schema) = &value_schema {
-                    changes.extend(
-                        array_values_order(
-                            self.values_with_comma().into_iter().collect_vec(),
-                            &array_schema,
-                            schema_context,
+                changes.extend(
+                    array_values_order(
+                        self.values_with_comma().collect_vec(),
+                        array_schema,
+                        schema_context,
+                    )
+                    .await,
+                );
+
+                if let Some(item_schema) = &array_schema.items {
+                    if let Ok(Some(CurrentSchema {
+                        schema_url,
+                        value_schema,
+                        definitions,
+                    })) = item_schema
+                        .write()
+                        .await
+                        .resolve(
+                            Cow::Borrowed(schema_url),
+                            Cow::Borrowed(definitions),
+                            schema_context.store,
                         )
-                        .await,
-                    );
-
-                    if let Some(item_schema) = &array_schema.items {
-                        if let Ok(Some(CurrentSchema {
-                            schema_url,
-                            value_schema,
-                            definitions,
-                        })) = item_schema
-                            .write()
-                            .await
-                            .resolve(
-                                Cow::Borrowed(schema_url),
-                                Cow::Borrowed(definitions),
-                                schema_context.store,
-                            )
-                            .await
-                        {
-                            for value in self.values() {
-                                changes.extend(
-                                    value
-                                        .edit(
-                                            &[],
-                                            Some(value_schema),
-                                            Some(&schema_url),
-                                            Some(&definitions),
-                                            schema_context,
-                                        )
-                                        .await,
-                                );
-                            }
-
-                            return changes;
+                        .await
+                    {
+                        for value in self.values() {
+                            changes.extend(
+                                value
+                                    .edit(
+                                        &[],
+                                        Some(value_schema),
+                                        Some(&schema_url),
+                                        Some(&definitions),
+                                        schema_context,
+                                    )
+                                    .await,
+                            );
                         }
+
+                        return changes;
                     }
                 }
             }

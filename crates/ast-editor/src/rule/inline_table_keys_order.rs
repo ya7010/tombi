@@ -103,7 +103,7 @@ pub async fn inline_table_keys_order<'a>(
 
     let new = sorted_key_values_with_comma
         .iter()
-        .map(|(key_value, comma)| {
+        .flat_map(|(key_value, comma)| {
             if let Some(comma) = comma {
                 vec![
                     SyntaxElement::Node(key_value.syntax().clone()),
@@ -113,12 +113,11 @@ pub async fn inline_table_keys_order<'a>(
                 vec![SyntaxElement::Node(key_value.syntax().clone())]
             }
         })
-        .flatten()
         .collect_vec();
 
     if !is_last_comma {
         if let Some(syntax::SyntaxElement::Node(node)) = new.last() {
-            if let Some(comma) = ast::Comma::cast(node.clone().into()) {
+            if let Some(comma) = ast::Comma::cast(node.clone()) {
                 if comma.tailing_comment().is_none()
                     && comma.leading_comments().collect_vec().is_empty()
                 {
