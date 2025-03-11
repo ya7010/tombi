@@ -214,7 +214,7 @@ impl Validate for document_tree::Table {
                                             diagnostics.extend(schema_diagnostics);
                                         }
                                     }
-                                } else if !table_schema.additional_properties {
+                                } else if !table_schema.has_additional_properties() {
                                     crate::Error {
                                         kind: crate::ErrorKind::PatternProperty {
                                             patterns: Patterns(
@@ -279,7 +279,7 @@ impl Validate for document_tree::Table {
                                 }
                                 continue;
                             }
-                            if !table_schema.additional_properties {
+                            if !table_schema.has_additional_properties() {
                                 if schema_context.store.strict() {
                                     crate::Error {
                                         kind: crate::ErrorKind::StrictAdditionalProperties,

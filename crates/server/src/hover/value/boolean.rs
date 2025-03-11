@@ -23,21 +23,29 @@ impl GetHoverContent for document_tree::Boolean {
                 (schema_url, value_schema, definitions)
             {
                 match value_schema {
-                    ValueSchema::Boolean(boolean_schema) => boolean_schema
-                        .get_hover_content(
-                            position,
-                            keys,
-                            accessors,
-                            Some(value_schema),
-                            Some(schema_url),
-                            Some(definitions),
-                            schema_context,
-                        )
-                        .await
-                        .map(|mut hover_content| {
-                            hover_content.range = Some(self.range());
-                            hover_content
-                        }),
+                    ValueSchema::Boolean(boolean_schema) => {
+                        if let Some(enumerate) = &boolean_schema.enumerate {
+                            if !enumerate.contains(&self.value()) {
+                                return None;
+                            }
+                        }
+
+                        boolean_schema
+                            .get_hover_content(
+                                position,
+                                keys,
+                                accessors,
+                                Some(value_schema),
+                                Some(schema_url),
+                                Some(definitions),
+                                schema_context,
+                            )
+                            .await
+                            .map(|mut hover_content| {
+                                hover_content.range = Some(self.range());
+                                hover_content
+                            })
+                    }
                     ValueSchema::OneOf(one_of_schema) => {
                         get_one_of_hover_content(
                             self,
