@@ -174,14 +174,14 @@
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
         }
       },
       "additionalProperties": false
     },
     "BoolDefaultTrue": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "ServerCompletion": {
       "type": "object",
@@ -196,8 +196,7 @@
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
         }
       },
       "additionalProperties": false
@@ -215,8 +214,7 @@
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
         }
       },
       "additionalProperties": false
@@ -234,8 +232,7 @@
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
         }
       },
       "additionalProperties": false
@@ -252,8 +249,7 @@
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
         },
         "strict": {
           "title": "Enable or disable strict schema validation.",
@@ -265,8 +261,7 @@
             {
               "type": "null"
             }
-          ],
-          "default": true
+          ]
         },
         "catalog": {
           "title": "Schema catalog options.",

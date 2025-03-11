@@ -41,7 +41,6 @@ pub struct ServerHover {
     /// # Enable hover feature.
     ///
     /// Whether to enable hover.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
     pub enabled: Option<BoolDefaultTrue>,
 }
 
@@ -56,7 +55,6 @@ pub struct ServerCompletion {
     /// Whether to enable completion.
     ///
     /// **WARNING**: 🚧 This feature is experimental 🚧
-    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
     pub enabled: Option<BoolDefaultTrue>,
 }
 
@@ -69,7 +67,6 @@ pub struct ServerFormatting {
     /// # Enable formatting feature.
     ///
     /// Whether to enable formatting.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
     pub enabled: Option<BoolDefaultTrue>,
 }
 
@@ -82,7 +79,6 @@ pub struct ServerDiagnostics {
     /// # Enable diagnostics feature.
     ///
     /// Whether to enable diagnostics.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
     pub enabled: Option<BoolDefaultTrue>,
 }
 
