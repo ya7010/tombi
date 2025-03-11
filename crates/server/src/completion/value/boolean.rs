@@ -28,6 +28,8 @@ impl FindCompletionContents for BooleanSchema {
                         CompletionContent::new_enumerate_value(
                             CompletionKind::Boolean,
                             value.to_string(),
+                            self.title.clone(),
+                            self.description.clone(),
                             edit,
                             schema_url,
                         )

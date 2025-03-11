@@ -28,6 +28,8 @@ impl FindCompletionContents for LocalDateTimeSchema {
                     completion_items.push(CompletionContent::new_enumerate_value(
                         CompletionKind::LocalDateTime,
                         label,
+                        self.title.clone(),
+                        self.description.clone(),
                         edit,
                         schema_url,
                     ));
