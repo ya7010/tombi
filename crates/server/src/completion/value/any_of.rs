@@ -71,33 +71,42 @@ where
             }
         }
 
+        let detail = any_of_schema
+            .detail(
+                schema_url,
+                definitions,
+                schema_context.store,
+                completion_hint,
+            )
+            .await;
+
+        let documentation = any_of_schema
+            .documentation(
+                schema_url,
+                definitions,
+                schema_context.store,
+                completion_hint,
+            )
+            .await;
+
         for completion_item in completion_items.iter_mut() {
             if completion_item.detail.is_none() {
-                completion_item.detail = any_of_schema
-                    .detail(
-                        schema_url,
-                        definitions,
-                        schema_context.store,
-                        completion_hint,
-                    )
-                    .await;
+                completion_item.detail = detail.clone();
             }
             if completion_item.documentation.is_none() {
-                completion_item.documentation = any_of_schema
-                    .documentation(
-                        schema_url,
-                        definitions,
-                        schema_context.store,
-                        completion_hint,
-                    )
-                    .await;
+                completion_item.documentation = documentation.clone();
             }
         }
 
         if let Some(default) = &any_of_schema.default {
-            if let Some(completion_item) =
-                serde_value_to_completion_item(default, position, Some(schema_url), completion_hint)
-            {
+            if let Some(completion_item) = serde_value_to_completion_item(
+                default,
+                position,
+                detail,
+                documentation,
+                Some(schema_url),
+                completion_hint,
+            ) {
                 completion_items.push(completion_item);
             }
         }
