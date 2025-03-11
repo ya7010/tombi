@@ -913,13 +913,13 @@
         {
           "type": "boolean",
           "enum": [true],
-          "title": "Equivalent to \"symbols\".",
+          "title": "Equivalent to \"symbols\"",
           "description": "The strip option controls the -C strip flag, which directs rustc to strip either symbols or debuginfo from a binary."
         },
         {
           "type": "boolean",
           "enum": [false],
-          "title": "Equivalent to \"none\".",
+          "title": "Equivalent to \"none\"",
           "description": "The strip option controls the -C strip flag, which directs rustc to strip either symbols or debuginfo from a binary."
         }
       ],
