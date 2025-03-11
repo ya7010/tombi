@@ -25,7 +25,10 @@ impl GetHoverContent for document_tree::String {
                 match value_schema {
                     ValueSchema::String(string_schema) => {
                         if let Some(enumerate) = &string_schema.enumerate {
-                            if !enumerate.contains(&self.value().to_string()) {
+                            if !enumerate
+                                .iter()
+                                .any(|x| x == &self.to_raw_string(schema_context.toml_version))
+                            {
                                 return None;
                             }
                         }
