@@ -384,6 +384,8 @@ fn serde_value_to_completion_item(
     Some(CompletionContent::new_default_value(
         kind,
         value.to_string(),
+        None,
+        None,
         CompletionEdit::new_literal(&value, position, completion_hint),
         schema_url,
     ))

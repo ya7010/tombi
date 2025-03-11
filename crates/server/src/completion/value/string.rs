@@ -27,6 +27,8 @@ impl FindCompletionContents for StringSchema {
                 completion_items.push(CompletionContent::new_default_value(
                     CompletionKind::String,
                     label,
+                    self.title.clone(),
+                    self.description.clone(),
                     edit,
                     schema_url,
                 ));
@@ -39,6 +41,8 @@ impl FindCompletionContents for StringSchema {
                     completion_items.push(CompletionContent::new_enumerate_value(
                         CompletionKind::String,
                         label,
+                        self.title.clone(),
+                        self.description.clone(),
                         edit,
                         schema_url,
                     ));
