@@ -57,6 +57,8 @@ impl CompletionContent {
     pub fn new_default_value(
         kind: CompletionKind,
         label: String,
+        detail: Option<String>,
+        documentation: Option<String>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&SchemaUrl>,
     ) -> Self {
@@ -65,8 +67,8 @@ impl CompletionContent {
             kind,
             emoji_icon: None,
             priority: CompletionContentPriority::Default,
-            detail: Some("default".to_string()),
-            documentation: None,
+            detail,
+            documentation,
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,

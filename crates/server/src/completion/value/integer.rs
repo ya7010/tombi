@@ -42,6 +42,8 @@ impl FindCompletionContents for IntegerSchema {
                 completion_items.push(CompletionContent::new_default_value(
                     CompletionKind::Integer,
                     label,
+                    self.title.clone(),
+                    self.description.clone(),
                     edit,
                     schema_url,
                 ));
