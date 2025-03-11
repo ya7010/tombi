@@ -1,3 +1,4 @@
+use ahash::AHashMap;
 use ast::AstNode;
 use itertools::Itertools;
 use schema_store::{SchemaContext, TableSchema};
@@ -98,4 +99,26 @@ pub async fn table_keys_order<'a>(
             vec![crate::Change::ReplaceRange { old, new }]
         }
     }
+}
+
+async fn sorted_keys<'a, T>(
+    targets: Vec<(Vec<schema_store::SchemaAccessor>, Vec<T>)>,
+    value_schema: &'a TableSchema,
+    schema_context: &'a SchemaContext<'a>,
+) -> Vec<T> {
+    let mut new_targets = AHashMap::new();
+    for (accessors, target) in targets {
+        if let Some(accessor) = accessors.first() {
+            new_targets
+                .entry(accessor.clone())
+                .or_insert_with(Vec::new)
+                .push((accessors[1..].to_vec(), target));
+        }
+    }
+
+    for (key, targets) in new_targets {
+        value_schema.properties.write().await.get(key)
+    }
+
+    result
 }
