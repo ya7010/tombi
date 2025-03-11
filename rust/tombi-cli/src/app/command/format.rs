@@ -86,6 +86,7 @@ where
     let schema_options = config.schema.unwrap_or_default();
     let schema_store = schema_store::SchemaStore::new(schema_store::Options {
         offline: offline.then_some(true),
+        strict: schema_options.strict(),
     });
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()

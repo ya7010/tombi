@@ -27,14 +27,17 @@ pub struct TableSchema {
 }
 
 impl TableSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(
+        object: &serde_json::Map<String, serde_json::Value>,
+        options: &crate::schema::SchemaOptions,
+    ) -> Self {
         let mut properties = IndexMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object, options) {
                     properties.insert(SchemaAccessor::Key(key.into()), value_schema);
                 }
             }
@@ -46,7 +49,7 @@ impl TableSchema {
                     let Some(object) = value.as_object() else {
                         continue;
                     };
-                    if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(object, options) {
                         pattern_properties.insert(pattern.clone(), value_schema);
                     }
                 }
@@ -54,17 +57,18 @@ impl TableSchema {
             }
             _ => None,
         };
+        let strict = options.strict.as_ref().map_or(true, |strict| *strict);
         let (additional_properties, additional_property_schema) =
             match object.get("additionalProperties") {
                 Some(serde_json::Value::Bool(allow)) => (*allow, None),
                 Some(serde_json::Value::Object(object)) => {
-                    let value_schema = Referable::<ValueSchema>::new(object);
+                    let value_schema = Referable::<ValueSchema>::new(object, options);
                     (
                         true,
                         value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),
                     )
                 }
-                _ => (true, None),
+                _ => (!strict, None),
             };
 
         let keys_order = match object

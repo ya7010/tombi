@@ -27,8 +27,14 @@ impl SchemaStore {
         }
     }
 
+    /// Offline mode
     fn offline(&self) -> bool {
         self.options.offline.unwrap_or(false)
+    }
+
+    /// Strict mode
+    pub fn strict(&self) -> bool {
+        self.options.strict.unwrap_or(true)
     }
 
     pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
@@ -180,7 +186,13 @@ impl SchemaStore {
             reason: err.to_string(),
         })?;
 
-        Ok(DocumentSchema::new(schema, schema_url.clone()))
+        Ok(DocumentSchema::new(
+            schema,
+            schema_url.clone(),
+            &crate::schema::SchemaOptions {
+                strict: self.options.strict,
+            },
+        ))
     }
 
     pub fn try_get_document_schema<'a: 'b, 'b>(

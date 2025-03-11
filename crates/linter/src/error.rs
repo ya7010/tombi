@@ -82,6 +82,9 @@ pub enum ErrorKind {
 
     #[error("Key must match the pattern \"{patterns}\"")]
     PatternProperty { patterns: Patterns },
+
+    #[error("In strict mode, the JSON schema must be explicitly set to `\"additionalProperties\": true`. ")]
+    StrictAdditionalProperties,
 }
 
 #[derive(Debug)]

@@ -1,4 +1,4 @@
-mod backend;
+pub mod backend;
 mod completion;
 mod document;
 pub mod handler;
@@ -22,9 +22,9 @@ pub async fn serve(_args: impl Into<Args>, offline: bool) {
     let stdout = tokio::io::stdout();
 
     let (service, socket) = tower_lsp::LspService::build(|client| {
-        crate::backend::Backend::new(
+        Backend::new(
             client,
-            schema_store::Options {
+            &crate::backend::Options {
                 offline: offline.then_some(true),
             },
         )
