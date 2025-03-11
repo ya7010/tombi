@@ -10,7 +10,6 @@ use crate::{BoolDefaultTrue, OneOrMany, SchemaCatalogPath};
 #[derive(Debug, Default, Clone)]
 pub struct SchemaOptions {
     /// # Enable or disable the schema.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
     pub enabled: Option<BoolDefaultTrue>,
 
     /// # Enable or disable strict schema validation.
@@ -18,7 +17,6 @@ pub struct SchemaOptions {
     /// If `additionalProperties` is not specified in the JSON Schema,
     /// the strict mode treats it as `additionalProperties: false`,
     /// which is different from the JSON Schema specification.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
     pub strict: Option<BoolDefaultTrue>,
 
     /// # Schema catalog options.
