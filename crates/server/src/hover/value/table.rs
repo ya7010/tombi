@@ -458,7 +458,7 @@ impl GetHoverContent for TableSchema {
                     min_keys: self.min_properties,
                     // NOTE: key_patterns are output for keys, not this tables.
                     key_patterns: None,
-                    additional_keys: Some(self.has_additional_properties()),
+                    additional_keys: Some(self.additional_properties),
                     keys_order: self.keys_order,
                     ..Default::default()
                 }),
