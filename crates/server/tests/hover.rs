@@ -252,6 +252,48 @@ mod hover_keys_value {
                 "Value": "String"
             });
         );
+
+        test_hover_keys_value!(
+            #[tokio::test]
+            async fn cargo_profile_release_strip_debuginfo(
+                r#"
+                [profile.release]
+                strip = "debuginfo█"
+                "#,
+                cargo_schema_path(),
+            ) -> Ok({
+                "Keys": "profile.release.strip",
+                "Value": "(String ^ Boolean)?"
+            });
+        );
+
+        test_hover_keys_value!(
+            #[tokio::test]
+            async fn cargo_profile_release_strip_true(
+                r#"
+                [profile.release]
+                strip = true█
+                "#,
+                cargo_schema_path(),
+            ) -> Ok({
+                "Keys": "profile.release.strip",
+                "Value": "(String ^ Boolean)?"
+            });
+        );
+
+        test_hover_keys_value!(
+            #[tokio::test]
+            async fn cargo_profile_release_strip_false(
+                r#"
+                [profile.release]
+                strip = false█
+                "#,
+                cargo_schema_path(),
+            ) -> Ok({
+                "Keys": "profile.release.strip",
+                "Value": "(String ^ Boolean)?"
+            });
+        );
     }
 
     mod pyproject_schema {
