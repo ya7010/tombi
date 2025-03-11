@@ -36,7 +36,10 @@ impl<T> Referable<T> {
 }
 
 impl Referable<ValueSchema> {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
+    pub fn new(
+        object: &serde_json::Map<String, serde_json::Value>,
+        options: &crate::schema::SchemaOptions,
+    ) -> Option<Self> {
         if let Some(x_taplo) = object.get("x-taplo") {
             if let Ok(x_taplo) = serde_json::from_value::<XTaplo>(x_taplo.to_owned()) {
                 if x_taplo.hidden == Some(true) {
@@ -59,7 +62,7 @@ impl Referable<ValueSchema> {
             });
         }
 
-        ValueSchema::new(object).map(|value_schema| Referable::Resolved {
+        ValueSchema::new(object, options).map(|value_schema| Referable::Resolved {
             schema_url: None,
             value: value_schema,
         })

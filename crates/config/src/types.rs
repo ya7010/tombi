@@ -1,5 +1,5 @@
+mod bool_default_true;
 mod date_time_delimiter;
-mod enabled;
 mod indent_style;
 mod indent_width;
 mod line_ending;
@@ -8,8 +8,8 @@ mod one_or_many;
 mod quote_style;
 mod schema_catalog_path;
 
+pub use bool_default_true::BoolDefaultTrue;
 pub use date_time_delimiter::DateTimeDelimiter;
-pub use enabled::Enabled;
 pub use indent_style::IndentStyle;
 pub use indent_width::IndentWidth;
 pub use line_ending::LineEnding;

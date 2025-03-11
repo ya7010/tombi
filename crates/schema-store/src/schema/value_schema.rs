@@ -31,9 +31,14 @@ pub enum ValueSchema {
 }
 
 impl ValueSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Option<Self> {
+    pub fn new(
+        object: &serde_json::Map<String, serde_json::Value>,
+        options: &crate::schema::SchemaOptions,
+    ) -> Option<Self> {
         match object.get("type") {
-            Some(serde_json::Value::String(type_str)) => return Self::new_single(type_str, object),
+            Some(serde_json::Value::String(type_str)) => {
+                return Self::new_single(type_str, object, options)
+            }
             Some(serde_json::Value::Array(types)) => {
                 return Some(Self::OneOf(OneOfSchema {
                     schemas: Arc::new(tokio::sync::RwLock::new(
@@ -41,7 +46,7 @@ impl ValueSchema {
                             .iter()
                             .filter_map(|type_value| {
                                 if let serde_json::Value::String(type_str) = type_value {
-                                    Self::new_single(type_str, object)
+                                    Self::new_single(type_str, object, options)
                                 } else {
                                     None
                                 }
@@ -59,13 +64,13 @@ impl ValueSchema {
         }
 
         if object.get("oneOf").is_some() {
-            return Some(ValueSchema::OneOf(OneOfSchema::new(object)));
+            return Some(ValueSchema::OneOf(OneOfSchema::new(object, options)));
         }
         if object.get("anyOf").is_some() {
-            return Some(ValueSchema::AnyOf(AnyOfSchema::new(object)));
+            return Some(ValueSchema::AnyOf(AnyOfSchema::new(object, options)));
         }
         if object.get("allOf").is_some() {
-            return Some(ValueSchema::AllOf(AllOfSchema::new(object)));
+            return Some(ValueSchema::AllOf(AllOfSchema::new(object, options)));
         }
 
         None
@@ -74,6 +79,7 @@ impl ValueSchema {
     fn new_single(
         type_str: &str,
         object: &serde_json::Map<String, serde_json::Value>,
+        options: &crate::schema::SchemaOptions,
     ) -> Option<Self> {
         match type_str {
             "null" => Some(ValueSchema::Null),
@@ -109,8 +115,8 @@ impl ValueSchema {
                 }
                 Some(ValueSchema::String(StringSchema::new(object)))
             }
-            "array" => Some(ValueSchema::Array(ArraySchema::new(object))),
-            "object" => Some(ValueSchema::Table(TableSchema::new(object))),
+            "array" => Some(ValueSchema::Array(ArraySchema::new(object, options))),
+            "object" => Some(ValueSchema::Table(TableSchema::new(object, options))),
             _ => None,
         }
     }

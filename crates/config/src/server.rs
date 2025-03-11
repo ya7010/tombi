@@ -1,4 +1,4 @@
-use crate::Enabled;
+use crate::BoolDefaultTrue;
 
 /// # Language Server options.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -41,8 +41,8 @@ pub struct ServerHover {
     /// # Enable hover feature.
     ///
     /// Whether to enable hover.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
-    pub enabled: Option<Enabled>,
+    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
+    pub enabled: Option<BoolDefaultTrue>,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -56,8 +56,8 @@ pub struct ServerCompletion {
     /// Whether to enable completion.
     ///
     /// **WARNING**: 🚧 This feature is experimental 🚧
-    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
-    pub enabled: Option<Enabled>,
+    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
+    pub enabled: Option<BoolDefaultTrue>,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -69,8 +69,8 @@ pub struct ServerFormatting {
     /// # Enable formatting feature.
     ///
     /// Whether to enable formatting.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
-    pub enabled: Option<Enabled>,
+    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
+    pub enabled: Option<BoolDefaultTrue>,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -82,8 +82,8 @@ pub struct ServerDiagnostics {
     /// # Enable diagnostics feature.
     ///
     /// Whether to enable diagnostics.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
-    pub enabled: Option<Enabled>,
+    #[cfg_attr(feature = "jsonschema", schemars(default = "BoolDefaultTrue::default"))]
+    pub enabled: Option<BoolDefaultTrue>,
 }
 
 impl ServerCompletion {

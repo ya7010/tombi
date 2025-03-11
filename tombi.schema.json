@@ -169,7 +169,7 @@
           "description": "Whether to enable hover.",
           "anyOf": [
             {
-              "$ref": "#/definitions/Enabled"
+              "$ref": "#/definitions/BoolDefaultTrue"
             },
             {
               "type": "null"
@@ -180,7 +180,7 @@
       },
       "additionalProperties": false
     },
-    "Enabled": {
+    "BoolDefaultTrue": {
       "type": "boolean"
     },
     "ServerCompletion": {
@@ -191,7 +191,7 @@
           "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
           "anyOf": [
             {
-              "$ref": "#/definitions/Enabled"
+              "$ref": "#/definitions/BoolDefaultTrue"
             },
             {
               "type": "null"
@@ -210,7 +210,7 @@
           "description": "Whether to enable formatting.",
           "anyOf": [
             {
-              "$ref": "#/definitions/Enabled"
+              "$ref": "#/definitions/BoolDefaultTrue"
             },
             {
               "type": "null"
@@ -229,7 +229,7 @@
           "description": "Whether to enable diagnostics.",
           "anyOf": [
             {
-              "$ref": "#/definitions/Enabled"
+              "$ref": "#/definitions/BoolDefaultTrue"
             },
             {
               "type": "null"
@@ -247,7 +247,20 @@
           "title": "Enable or disable the schema.",
           "anyOf": [
             {
-              "$ref": "#/definitions/Enabled"
+              "$ref": "#/definitions/BoolDefaultTrue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": true
+        },
+        "strict": {
+          "title": "Enable or disable strict schema validation.",
+          "description": "If `additionalProperties` is not specified in the JSON Schema,\n the strict mode treats it as `additionalProperties: false`,\n which is different from the JSON Schema specification.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BoolDefaultTrue"
             },
             {
               "type": "null"

@@ -15,7 +15,10 @@ pub struct AnyOfSchema {
 }
 
 impl AnyOfSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(
+        object: &serde_json::Map<String, serde_json::Value>,
+        options: &crate::schema::SchemaOptions,
+    ) -> Self {
         let title = object
             .get("title")
             .and_then(|v| v.as_str())
@@ -30,7 +33,7 @@ impl AnyOfSchema {
             .map(|a| {
                 a.iter()
                     .filter_map(|v| v.as_object())
-                    .filter_map(Referable::<ValueSchema>::new)
+                    .filter_map(|v| Referable::<ValueSchema>::new(v, options))
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();
