@@ -1,7 +1,7 @@
 use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
 use itertools::Itertools;
-use schema_store::{GetHeaderSchemarAccessors, ValueSchema};
+use schema_store::GetHeaderSchemarAccessors;
 
 use crate::{edit::get_schema, rule::table_keys_order};
 
@@ -42,32 +42,32 @@ impl crate::Edit for ast::ArrayOfTables {
                     )
                     .await
                     {
-                        if let ValueSchema::Table(table_schema) = &value_schema {
-                            for key_value in self.key_values() {
-                                changes.extend(
-                                    key_value
-                                        .edit(
-                                            &accessors,
-                                            Some(&value_schema),
-                                            Some(schema_url),
-                                            Some(definitions),
-                                            schema_context,
-                                        )
-                                        .await,
-                                );
-                            }
-
+                        for key_value in self.key_values() {
                             changes.extend(
-                                table_keys_order(
-                                    self.key_values().collect_vec(),
-                                    table_schema,
-                                    schema_context,
-                                )
-                                .await,
+                                key_value
+                                    .edit(
+                                        &accessors,
+                                        Some(&value_schema),
+                                        Some(schema_url),
+                                        Some(definitions),
+                                        schema_context,
+                                    )
+                                    .await,
                             );
-
-                            return changes;
                         }
+
+                        changes.extend(
+                            table_keys_order(
+                                self.key_values().collect_vec(),
+                                &value_schema,
+                                schema_url,
+                                definitions,
+                                schema_context,
+                            )
+                            .await,
+                        );
+
+                        return changes;
                     }
                 };
             }
