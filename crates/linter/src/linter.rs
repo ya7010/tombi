@@ -80,7 +80,7 @@ impl<'a> Linter<'a> {
                     store: self.schema_store,
                 };
                 if let Err(schema_diagnostics) =
-                    crate::validation::validate(document_tree, source_schema, &schema_context).await
+                    crate::validate::validate(document_tree, source_schema, &schema_context).await
                 {
                     diagnostics.extend(schema_diagnostics);
                 }
