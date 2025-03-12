@@ -11,11 +11,11 @@ impl Rule<ast::Key> for KeyEmptyRule {
             ast::Key::BasicString(node) => node.syntax().text() == "\"\"",
             ast::Key::LiteralString(node) => node.syntax().text() == "''",
         } {
-            l.add_diagnostic(diagnostic::Diagnostic::new_warning(
-                crate::ErrorKind::KeyEmpty.to_string(),
-                node.syntax().range(),
-            ));
-        };
+            l.extend_diagnostics(crate::Warning {
+                kind: crate::WarningKind::KeyEmpty,
+                range: node.syntax().range(),
+            });
+        }
     }
 }
 
@@ -23,9 +23,11 @@ impl Rule<ast::Key> for KeyEmptyRule {
 mod tests {
     use std::vec;
 
+    use diagnostic::SetDiagnostics;
+
     #[tokio::test]
     async fn test_key_empty() {
-        let err = crate::Linter::try_new(
+        let diagnostics = crate::Linter::try_new(
             config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
@@ -36,12 +38,14 @@ mod tests {
         .lint("'' = 1")
         .await
         .unwrap_err();
-        assert_eq!(
-            err,
-            vec![diagnostic::Diagnostic::new_warning(
-                crate::ErrorKind::KeyEmpty.to_string(),
-                text::Range::new((0, 0).into(), (0, 2).into()),
-            )]
-        );
+
+        let mut expected = vec![];
+        crate::Warning {
+            kind: crate::WarningKind::KeyEmpty,
+            range: text::Range::new((0, 0).into(), (0, 2).into()),
+        }
+        .set_diagnostics(&mut expected);
+
+        assert_eq!(diagnostics, expected);
     }
 }

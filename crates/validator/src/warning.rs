@@ -1,7 +1,7 @@
 #[derive(thiserror::Error, Debug)]
 pub enum WarningKind {
-    #[error("An empty quoted key is allowed, but it is not recommended")]
-    KeyEmpty,
+    #[error("This value is deprecated")]
+    Deprecated,
 }
 
 #[derive(Debug)]

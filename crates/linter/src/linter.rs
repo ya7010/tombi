@@ -80,7 +80,7 @@ impl<'a> Linter<'a> {
                     store: self.schema_store,
                 };
                 if let Err(schema_diagnostics) =
-                    crate::validation::validate(document_tree, source_schema, &schema_context).await
+                    validator::validate(document_tree, source_schema, &schema_context).await
                 {
                     diagnostics.extend(schema_diagnostics);
                 }
@@ -109,7 +109,7 @@ impl<'a> Linter<'a> {
     }
 
     #[inline]
-    pub(crate) fn add_diagnostic(&mut self, diagnostic: crate::Diagnostic) {
-        self.diagnostics.push(diagnostic);
+    pub(crate) fn extend_diagnostics(&mut self, diagnostics: impl SetDiagnostics) {
+        diagnostics.set_diagnostics(&mut self.diagnostics);
     }
 }
