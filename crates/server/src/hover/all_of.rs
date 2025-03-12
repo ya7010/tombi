@@ -21,7 +21,7 @@ where
     async move {
         let mut title_description_set = ahash::AHashSet::new();
         let mut value_type_set = indexmap::IndexSet::new();
-        let mut schema = None;
+        let mut constraints = None;
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
             let Ok(Some(CurrentSchema {
                 value_schema,
@@ -58,8 +58,8 @@ where
                     value_type_set.insert(hover_content.value_type);
                 }
 
-                if let Some(s) = hover_content.constraints {
-                    schema = Some(s);
+                if let Some(c) = hover_content.constraints {
+                    constraints = Some(c);
                 }
             }
         }
@@ -90,7 +90,7 @@ where
             description,
             accessors: schema_store::Accessors::new(accessors.to_vec()),
             value_type,
-            constraints: schema,
+            constraints,
             schema_url: Some(schema_url.to_owned()),
             range: None,
         })

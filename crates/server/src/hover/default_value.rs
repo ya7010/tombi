@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DefaultValue {
     Boolean(bool),
     Integer(i64),

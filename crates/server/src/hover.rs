@@ -53,7 +53,7 @@ trait GetHoverContent {
     ) -> BoxFuture<'b, Option<HoverContent>>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HoverContent {
     pub title: Option<String>,
     pub description: Option<String>,

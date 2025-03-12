@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
+use itertools::Itertools;
 use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
@@ -16,9 +17,11 @@ pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
     schema_context: &'a SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
-    T: GetHoverContent + document_tree::ValueImpl + Sync + Send,
+    T: GetHoverContent + document_tree::ValueImpl + validator::Validate + Sync + Send,
 {
     async move {
+        let mut any_hover_contents = vec![];
+        let mut valid_hover_contents = vec![];
         let mut value_type_set = indexmap::IndexSet::new();
 
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
@@ -68,22 +71,45 @@ where
                 }
 
                 if keys.is_empty() && accessors == hover_content.accessors.as_ref() {
-                    hover_content.value_type = value_type;
+                    hover_content.value_type = value_type.clone();
                 }
 
-                return Some(hover_content);
+                if value
+                    .validate(
+                        &accessors
+                            .iter()
+                            .map(|accessor| accessor.into())
+                            .collect_vec(),
+                        Some(value_schema),
+                        Some(schema_url),
+                        Some(definitions),
+                        schema_context,
+                    )
+                    .await
+                    .is_ok()
+                {
+                    valid_hover_contents.push(hover_content.clone());
+                }
+
+                any_hover_contents.push(hover_content);
             }
         }
 
-        Some(HoverContent {
-            title: None,
-            description: None,
-            accessors: schema_store::Accessors::new(accessors.to_vec()),
-            value_type: value.value_type().into(),
-            constraints: None,
-            schema_url: Some(schema_url.to_owned()),
-            range: None,
-        })
+        if let Some(hover_content) = valid_hover_contents.into_iter().next() {
+            Some(hover_content)
+        } else if let Some(hover_content) = any_hover_contents.into_iter().next() {
+            Some(hover_content)
+        } else {
+            Some(HoverContent {
+                title: None,
+                description: None,
+                accessors: schema_store::Accessors::new(accessors.to_vec()),
+                value_type: value.value_type().into(),
+                constraints: None,
+                schema_url: Some(schema_url.to_owned()),
+                range: None,
+            })
+        }
     }
     .boxed()
 }

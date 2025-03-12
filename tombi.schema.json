@@ -325,6 +325,7 @@
       ]
     },
     "RootSchema": {
+      "title": "The schema for the root table.",
       "type": "object",
       "properties": {
         "toml-version": {
@@ -357,15 +358,16 @@
       "x-tombi-table-keys-order": "schema"
     },
     "SubSchema": {
+      "title": "The schema for the sub value.",
       "type": "object",
       "properties": {
         "path": {
-          "title": "The schema path.",
+          "title": "The sub schema path.",
           "type": "string"
         },
         "include": {
-          "title": "The file match pattern of the schema.",
-          "description": "The file match pattern to include the target to apply the schema.\n Supports glob pattern.",
+          "title": "The file match pattern of the sub schema.",
+          "description": "The file match pattern to include the target to apply the sub schema.\n Supports glob pattern.",
           "type": "array",
           "items": {
             "type": "string"
@@ -373,7 +375,7 @@
           "minItems": 1
         },
         "root-keys": {
-          "title": "The keys to apply the schema.",
+          "title": "The keys to apply the sub schema.",
           "type": ["string", "null"],
           "minLength": 1
         }

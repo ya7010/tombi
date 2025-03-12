@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
+use itertools::Itertools;
 use schema_store::{Accessor, CurrentSchema, SchemaUrl, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
@@ -16,10 +17,11 @@ pub fn get_one_of_hover_content<'a: 'b, 'b, T>(
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
-    T: GetHoverContent + document_tree::ValueImpl + Sync + Send,
+    T: GetHoverContent + document_tree::ValueImpl + validator::Validate + Sync + Send,
 {
     async move {
         let mut one_hover_contents = ahash::AHashSet::new();
+        let mut valid_hover_contents = ahash::AHashSet::new();
         let mut value_type_set = indexmap::IndexSet::new();
 
         for referable_schema in one_of_schema.schemas.write().await.iter_mut() {
@@ -46,6 +48,7 @@ where
             let Some(value_schema) = referable_schema.resolved() else {
                 continue;
             };
+
             if let Some(mut hover_content) = value
                 .get_hover_content(
                     position,
@@ -77,12 +80,45 @@ where
                     return Some(hover_content);
                 }
 
+                if value
+                    .validate(
+                        &accessors
+                            .iter()
+                            .map(|accessor| accessor.into())
+                            .collect_vec(),
+                        Some(value_schema),
+                        Some(schema_url),
+                        Some(definitions),
+                        schema_context,
+                    )
+                    .await
+                    .is_ok()
+                {
+                    valid_hover_contents.insert(hover_content.clone());
+                }
+
                 one_hover_contents.insert(hover_content);
             }
         }
 
         if one_hover_contents.len() == 1 {
             one_hover_contents
+                .into_iter()
+                .next()
+                .map(|mut hover_content| {
+                    if hover_content.title.is_none() && hover_content.description.is_none() {
+                        if let Some(title) = &one_of_schema.title {
+                            hover_content.title = Some(title.clone());
+                        }
+                        if let Some(description) = &one_of_schema.description {
+                            hover_content.description = Some(description.clone());
+                        }
+                    }
+
+                    hover_content
+                })
+        } else if valid_hover_contents.len() == 1 {
+            valid_hover_contents
                 .into_iter()
                 .next()
                 .map(|mut hover_content| {
