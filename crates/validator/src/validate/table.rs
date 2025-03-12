@@ -18,6 +18,7 @@ impl Validate for document_tree::Table {
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         tracing::trace!("self = {:?}", self);
+        tracing::trace!("accessors = {:?}", accessors);
         tracing::trace!("value_schema = {:?}", value_schema);
 
         async move {

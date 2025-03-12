@@ -2,7 +2,7 @@ use x_tombi::{ArrayValuesOrder, TableKeysOrder};
 
 use super::default_value::DefaultValue;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct DataConstraints {
     // Common
     pub enumerate: Option<Vec<DefaultValue>>,

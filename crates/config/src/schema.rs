@@ -109,6 +109,7 @@ impl Schema {
     }
 }
 
+/// # The schema for the root table.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
@@ -130,6 +131,7 @@ pub struct RootSchema {
     pub include: Vec<String>,
 }
 
+/// # The schema for the sub value.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
@@ -137,17 +139,17 @@ pub struct RootSchema {
 #[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = x_tombi::TableKeysOrder::Schema)))]
 #[derive(Debug, Clone)]
 pub struct SubSchema {
-    /// # The schema path.
+    /// # The sub schema path.
     pub path: String,
 
-    /// # The file match pattern of the schema.
+    /// # The file match pattern of the sub schema.
     ///
-    /// The file match pattern to include the target to apply the schema.
+    /// The file match pattern to include the target to apply the sub schema.
     /// Supports glob pattern.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     pub include: Vec<String>,
 
-    /// # The keys to apply the schema.
+    /// # The keys to apply the sub schema.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     pub root_keys: Option<String>,
 }

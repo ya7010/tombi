@@ -28,7 +28,7 @@ impl std::fmt::Display for Accessor {
 }
 
 /// A collection of `Accessor`.
-#[derive(Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Accessors(Vec<Accessor>);
 
 impl Accessors {
