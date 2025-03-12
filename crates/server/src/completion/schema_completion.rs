@@ -225,7 +225,7 @@ impl FindCompletionContents for SchemaCompletion {
     }
 }
 
-impl linter::Validate for SchemaCompletion {
+impl validator::Validate for SchemaCompletion {
     fn validate<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],

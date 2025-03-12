@@ -149,7 +149,6 @@ dependencies = [
  "document-tree",
  "futures",
  "itertools",
- "linter",
  "parser",
  "regex",
  "schema-store",
@@ -158,6 +157,7 @@ dependencies = [
  "thiserror",
  "toml-version",
  "tracing",
+ "validator",
  "x-tombi",
 ]
 
@@ -1094,6 +1094,7 @@ dependencies = [
  "tokio",
  "tracing",
  "url",
+ "validator",
 ]
 
 [[package]]
@@ -1888,6 +1889,7 @@ dependencies = [
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
+ "validator",
  "x-tombi",
 ]
 
@@ -2458,6 +2460,17 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 [[package]]
 name = "validator"
 version = "0.0.0"
+dependencies = [
+ "diagnostic",
+ "document-tree",
+ "futures",
+ "itertools",
+ "regex",
+ "schema-store",
+ "text",
+ "thiserror",
+ "tracing",
+]
 
 [[package]]
 name = "valuable"
