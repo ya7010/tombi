@@ -149,6 +149,7 @@ dependencies = [
  "ast",
  "document-tree",
  "futures",
+ "indexmap",
  "itertools",
  "parser",
  "regex",

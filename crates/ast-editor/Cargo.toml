@@ -11,6 +11,7 @@ ahash.workspace = true
 ast.workspace = true
 document-tree.workspace = true
 futures.workspace = true
+indexmap.workspace = true
 itertools.workspace = true
 parser.workspace = true
 regex.workspace = true

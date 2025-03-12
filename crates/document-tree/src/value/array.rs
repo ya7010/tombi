@@ -164,6 +164,10 @@ impl Array {
     pub fn symbol_range(&self) -> text::Range {
         self.symbol_range
     }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, Value> {
+        self.values.iter()
+    }
 }
 
 impl ValueImpl for Array {

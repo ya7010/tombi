@@ -1,14 +1,19 @@
 use std::borrow::Cow;
 
-use ahash::AHashMap;
 use ast::AstNode;
 use futures::{future::BoxFuture, FutureExt};
+use indexmap::IndexMap;
 use itertools::Itertools;
-use schema_store::{CurrentSchema, SchemaAccessor, SchemaContext, ValueSchema};
+use schema_store::{
+    AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,
+    ValueSchema,
+};
 use syntax::SyntaxElement;
+use validator::Validate;
 use x_tombi::TableKeysOrder;
 
 pub async fn table_keys_order<'a>(
+    value: &'a document_tree::Value,
     key_values: Vec<ast::KeyValue>,
     value_schema: &'a ValueSchema,
     schema_url: &'a schema_store::SchemaUrl,
@@ -49,6 +54,8 @@ pub async fn table_keys_order<'a>(
     };
 
     let new = sorted_accessors(
+        value,
+        &[],
         targets,
         &ValueSchema::Table(table_schema.clone()),
         schema_url,
@@ -64,6 +71,8 @@ pub async fn table_keys_order<'a>(
 }
 
 fn sorted_accessors<'a: 'b, 'b, T>(
+    value: &'a document_tree::Value,
+    validation_accessors: &'a [schema_store::SchemaAccessor],
     targets: Vec<(Vec<schema_store::SchemaAccessor>, T)>,
     value_schema: &'a ValueSchema,
     schema_url: &'a schema_store::SchemaUrl,
@@ -71,11 +80,55 @@ fn sorted_accessors<'a: 'b, 'b, T>(
     schema_context: &'a SchemaContext<'a>,
 ) -> BoxFuture<'b, Vec<T>>
 where
-    T: Send + std::fmt::Debug + 'b,
+    T: Send + Clone + std::fmt::Debug + 'b,
 {
     async move {
+        if let ValueSchema::OneOf(OneOfSchema { schemas, .. })
+        | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+        | ValueSchema::AllOf(AllOfSchema { schemas, .. }) = value_schema
+        {
+            for schema in schemas.write().await.iter_mut() {
+                if let Ok(Some(CurrentSchema {
+                    schema_url,
+                    value_schema,
+                    definitions,
+                })) = schema
+                    .resolve(
+                        Cow::Borrowed(schema_url),
+                        Cow::Borrowed(definitions),
+                        schema_context.store,
+                    )
+                    .await
+                {
+                    if value
+                        .validate(
+                            validation_accessors,
+                            Some(value_schema),
+                            Some(&schema_url),
+                            Some(&definitions),
+                            schema_context,
+                        )
+                        .await
+                        .is_ok()
+                    {
+                        return sorted_accessors(
+                            value,
+                            validation_accessors,
+                            targets.clone(),
+                            value_schema,
+                            &schema_url,
+                            &definitions,
+                            schema_context,
+                        )
+                        .await;
+                    }
+                }
+            }
+            return targets.into_iter().map(|(_, target)| target).collect_vec();
+        }
+
         let mut results = Vec::with_capacity(targets.len());
-        let mut new_targets_map = AHashMap::new();
+        let mut new_targets_map = IndexMap::new();
         for (accessors, target) in targets {
             if let Some(accessor) = accessors.first() {
                 new_targets_map
@@ -87,8 +140,8 @@ where
             }
         }
 
-        match value_schema {
-            ValueSchema::Table(table_schema) => {
+        match (value, value_schema) {
+            (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) => {
                 if new_targets_map
                     .iter()
                     .all(|(accessor, _)| matches!(accessor, SchemaAccessor::Key(_)))
@@ -111,7 +164,7 @@ where
                             let mut sorted_targets = Vec::with_capacity(new_targets_map.len());
 
                             for accessor in table_schema.properties.read().await.keys() {
-                                if let Some(targets) = new_targets_map.remove(accessor) {
+                                if let Some(targets) = new_targets_map.shift_remove(accessor) {
                                     sorted_targets.push((accessor.to_owned(), targets));
                                 }
                             }
@@ -122,6 +175,7 @@ where
                     };
 
                     for (accessor, targets) in sorted_targets {
+                        let value = table.get(&accessor.to_string()).unwrap();
                         if let Some(referable_schema) =
                             table_schema.properties.write().await.get_mut(&accessor)
                         {
@@ -139,6 +193,46 @@ where
                             {
                                 results.extend(
                                     sorted_accessors(
+                                        value,
+                                        &validation_accessors
+                                            .iter()
+                                            .cloned()
+                                            .chain(std::iter::once(accessor))
+                                            .collect_vec(),
+                                        targets,
+                                        value_schema,
+                                        &schema_url,
+                                        &definitions,
+                                        schema_context,
+                                    )
+                                    .await,
+                                );
+                            }
+                        } else if let Some(referable_schema) =
+                            &table_schema.additional_property_schema
+                        {
+                            if let Ok(Some(CurrentSchema {
+                                schema_url,
+                                value_schema,
+                                definitions,
+                            })) = referable_schema
+                                .write()
+                                .await
+                                .resolve(
+                                    Cow::Borrowed(schema_url),
+                                    Cow::Borrowed(definitions),
+                                    schema_context.store,
+                                )
+                                .await
+                            {
+                                results.extend(
+                                    sorted_accessors(
+                                        value,
+                                        &validation_accessors
+                                            .iter()
+                                            .cloned()
+                                            .chain(std::iter::once(accessor))
+                                            .collect_vec(),
                                         targets,
                                         value_schema,
                                         &schema_url,
@@ -155,7 +249,7 @@ where
                     return results;
                 }
             }
-            ValueSchema::Array(array_schema) => {
+            (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
                 if new_targets_map
                     .iter()
                     .all(|(accessor, _)| matches!(accessor, SchemaAccessor::Index))
@@ -175,9 +269,11 @@ where
                             )
                             .await
                         {
-                            for (_, targets) in new_targets_map {
+                            for (value, (_, targets)) in array.iter().zip(new_targets_map) {
                                 results.extend(
                                     sorted_accessors(
+                                        value,
+                                        validation_accessors,
                                         targets,
                                         value_schema,
                                         &schema_url,
