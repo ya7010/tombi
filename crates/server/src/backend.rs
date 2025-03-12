@@ -41,9 +41,14 @@ pub struct Backend {
     pub schema_store: schema_store::SchemaStore,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct Options {
+    pub offline: Option<bool>,
+}
+
 impl Backend {
     #[inline]
-    pub fn new(client: tower_lsp::Client, options: schema_store::Options) -> Self {
+    pub fn new(client: tower_lsp::Client, options: &Options) -> Self {
         let (config, config_dirpath) = match config::load_with_path() {
             Ok((config, config_dirpath)) => (config, config_dirpath),
             Err(err) => {
@@ -51,6 +56,12 @@ impl Backend {
                 (Config::default(), None)
             }
         };
+
+        let options = schema_store::Options {
+            offline: options.offline,
+            strict: config.schema.as_ref().and_then(|schema| schema.strict()),
+        };
+
         Self {
             client,
             document_sources: Default::default(),

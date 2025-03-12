@@ -365,6 +365,8 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
 fn serde_value_to_completion_item(
     value: &serde_json::Value,
     position: text::Position,
+    detail: Option<String>,
+    documentation: Option<String>,
     schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Option<CompletionContent> {
@@ -384,6 +386,8 @@ fn serde_value_to_completion_item(
     Some(CompletionContent::new_default_value(
         kind,
         value.to_string(),
+        detail,
+        documentation,
         CompletionEdit::new_literal(&value, position, completion_hint),
         schema_url,
     ))

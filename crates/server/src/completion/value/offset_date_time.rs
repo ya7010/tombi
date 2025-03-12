@@ -28,6 +28,8 @@ impl FindCompletionContents for OffsetDateTimeSchema {
                     completion_items.push(CompletionContent::new_enumerate_value(
                         CompletionKind::OffsetDateTime,
                         label,
+                        self.title.clone(),
+                        self.description.clone(),
                         edit,
                         schema_url,
                     ));
@@ -40,6 +42,8 @@ impl FindCompletionContents for OffsetDateTimeSchema {
                 completion_items.push(CompletionContent::new_default_value(
                     CompletionKind::OffsetDateTime,
                     label,
+                    self.title.clone(),
+                    self.description.clone(),
                     edit,
                     schema_url,
                 ));

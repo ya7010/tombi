@@ -23,21 +23,32 @@ impl GetHoverContent for document_tree::String {
                 (schema_url, value_schema, definitions)
             {
                 match value_schema {
-                    ValueSchema::String(schema) => schema
-                        .get_hover_content(
-                            position,
-                            keys,
-                            accessors,
-                            Some(value_schema),
-                            Some(schema_url),
-                            Some(definitions),
-                            schema_context,
-                        )
-                        .await
-                        .map(|mut hover_content| {
-                            hover_content.range = Some(self.range());
-                            hover_content
-                        }),
+                    ValueSchema::String(string_schema) => {
+                        if let Some(enumerate) = &string_schema.enumerate {
+                            if !enumerate
+                                .iter()
+                                .any(|x| x == &self.to_raw_string(schema_context.toml_version))
+                            {
+                                return None;
+                            }
+                        }
+
+                        string_schema
+                            .get_hover_content(
+                                position,
+                                keys,
+                                accessors,
+                                Some(value_schema),
+                                Some(schema_url),
+                                Some(definitions),
+                                schema_context,
+                            )
+                            .await
+                            .map(|mut hover_content| {
+                                hover_content.range = Some(self.range());
+                                hover_content
+                            })
+                    }
                     ValueSchema::OneOf(one_of_schema) => {
                         get_one_of_hover_content(
                             self,

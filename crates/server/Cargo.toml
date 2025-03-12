@@ -40,6 +40,7 @@ tokio = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+validator.workspace = true
 x-tombi.workspace = true
 
 [dev-dependencies]

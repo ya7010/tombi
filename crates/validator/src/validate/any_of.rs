@@ -6,7 +6,7 @@ use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, ValueSchema};
 
 use super::Validate;
-use crate::validation::{all_of::validate_all_of, one_of::validate_one_of};
+use crate::validate::{all_of::validate_all_of, one_of::validate_one_of};
 
 pub fn validate_any_of<'a: 'b, 'b, T>(
     value: &'a T,

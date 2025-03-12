@@ -17,7 +17,11 @@ pub struct DocumentSchema {
 }
 
 impl DocumentSchema {
-    pub fn new(value: serde_json::Map<String, serde_json::Value>, schema_url: SchemaUrl) -> Self {
+    pub fn new(
+        value: serde_json::Map<String, serde_json::Value>,
+        schema_url: SchemaUrl,
+        options: &crate::schema::SchemaOptions,
+    ) -> Self {
         let toml_version = value.get("x-tombi-toml-version").and_then(|obj| match obj {
             serde_json::Value::String(version) => {
                 serde_json::from_str(&format!("\"{version}\"")).ok()
@@ -29,14 +33,14 @@ impl DocumentSchema {
             .and_then(|v| v.as_str())
             .and_then(|s| SchemaUrl::parse(s).ok());
 
-        let value_schema = ValueSchema::new(&value);
+        let value_schema = ValueSchema::new(&value, options);
         let mut definitions = AHashMap::default();
         if let Some(serde_json::Value::Object(object)) = value.get("definitions") {
             for (key, value) in object.into_iter() {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object, options) {
                     definitions.insert(format!("#/definitions/{key}"), value_schema);
                 }
             }
@@ -46,7 +50,7 @@ impl DocumentSchema {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object, options) {
                     definitions.insert(format!("#/$defs/{key}"), value_schema);
                 }
             }

@@ -280,13 +280,21 @@ impl Validate for document_tree::Table {
                                 continue;
                             }
                             if !table_schema.additional_properties {
-                                crate::Error {
-                                    kind: crate::ErrorKind::KeyNotAllowed {
-                                        key: key.to_string(),
-                                    },
-                                    range: key.range() + value.range(),
+                                if schema_context.store.strict() {
+                                    crate::Error {
+                                        kind: crate::ErrorKind::StrictAdditionalProperties,
+                                        range: key.range() + value.range(),
+                                    }
+                                    .set_diagnostics(&mut diagnostics);
+                                } else {
+                                    crate::Error {
+                                        kind: crate::ErrorKind::KeyNotAllowed {
+                                            key: key.to_string(),
+                                        },
+                                        range: key.range() + value.range(),
+                                    }
+                                    .set_diagnostics(&mut diagnostics);
                                 }
-                                .set_diagnostics(&mut diagnostics);
 
                                 continue;
                             }

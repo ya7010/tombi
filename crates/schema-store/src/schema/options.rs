@@ -1,5 +1,4 @@
 #[derive(Debug, Clone, Default)]
-pub struct Options {
+pub struct SchemaOptions {
     pub strict: Option<bool>,
-    pub offline: Option<bool>,
 }

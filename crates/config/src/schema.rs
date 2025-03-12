@@ -1,6 +1,6 @@
 use toml_version::TomlVersion;
 
-use crate::{Enabled, OneOrMany, SchemaCatalogPath};
+use crate::{BoolDefaultTrue, OneOrMany, SchemaCatalogPath};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -10,8 +10,14 @@ use crate::{Enabled, OneOrMany, SchemaCatalogPath};
 #[derive(Debug, Default, Clone)]
 pub struct SchemaOptions {
     /// # Enable or disable the schema.
-    #[cfg_attr(feature = "jsonschema", schemars(default = "Enabled::default"))]
-    pub enabled: Option<Enabled>,
+    pub enabled: Option<BoolDefaultTrue>,
+
+    /// # Enable or disable strict schema validation.
+    ///
+    /// If `additionalProperties` is not specified in the JSON Schema,
+    /// the strict mode treats it as `additionalProperties: false`,
+    /// which is different from the JSON Schema specification.
+    pub strict: Option<BoolDefaultTrue>,
 
     /// # Schema catalog options.
     pub catalog: Option<SchemaCatalog>,
@@ -21,6 +27,7 @@ impl SchemaOptions {
     pub const fn default() -> Self {
         Self {
             enabled: None,
+            strict: None,
             catalog: None,
         }
     }
@@ -36,6 +43,10 @@ impl SchemaOptions {
         } else {
             None
         }
+    }
+
+    pub fn strict(&self) -> Option<bool> {
+        self.strict.as_ref().map(|strict| strict.value())
     }
 }
 
