@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
+use itertools::Itertools;
 use schema_store::{
     Accessor, ArraySchema, CurrentSchema, SchemaAccessor, SchemaDefinitions, SchemaUrl, ValueSchema,
 };
@@ -99,7 +100,7 @@ impl FindCompletionContents for document_tree::Array {
                                                     .iter()
                                                     .cloned()
                                                     .chain(std::iter::once(accessor))
-                                                    .collect::<Vec<_>>(),
+                                                    .collect_vec(),
                                                 Some(value_schema),
                                                 Some(&schema_url),
                                                 Some(&definitions),
@@ -134,7 +135,7 @@ impl FindCompletionContents for document_tree::Array {
                                             .iter()
                                             .cloned()
                                             .chain(std::iter::once(Accessor::Index(new_item_index)))
-                                            .collect::<Vec<_>>(),
+                                            .collect_vec(),
                                         Some(value_schema),
                                         Some(&schema_url),
                                         Some(&definitions),

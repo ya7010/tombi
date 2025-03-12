@@ -89,6 +89,15 @@ impl PartialEq<Accessor> for SchemaAccessor {
     }
 }
 
+impl PartialOrd<SchemaAccessor> for SchemaAccessor {
+    fn partial_cmp(&self, other: &SchemaAccessor) -> Option<std::cmp::Ordering> {
+        match (self, other) {
+            (SchemaAccessor::Key(key1), SchemaAccessor::Key(key2)) => key1.partial_cmp(key2),
+            (SchemaAccessor::Index, _) | (_, SchemaAccessor::Index) => None,
+        }
+    }
+}
+
 impl From<Accessor> for SchemaAccessor {
     fn from(accessor: Accessor) -> Self {
         match accessor {

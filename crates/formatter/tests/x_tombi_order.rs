@@ -320,6 +320,56 @@ mod table_keys_order {
                 "#
             )
         }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_workspace_dependencies(
+                r#"
+                [workspace.dependencies]
+                serde.version = "^1.0.0"
+                serde.features = ["derive"]
+                serde.workspace = true
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [workspace.dependencies]
+                serde.workspace = true
+                serde.version = "^1.0.0"
+                serde.features = ["derive"]
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_workspace_dependencies_complex(
+                r#"
+                [workspace.dependencies]
+                serde.version = "^1.0.0"
+                serde.workspace = true
+                serde.features = ["derive"]
+                anyhow = "1.0.89"
+                chrono = { version = "0.4.38", features = ["serde"] }
+                reqwest.default-features = false
+                reqwest.version = "0.12.9"
+                reqwest.features = ["json", "rustls-tls"]
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [workspace.dependencies]
+                anyhow = "1.0.89"
+                chrono = { version = "0.4.38", features = ["serde"] }
+                reqwest.version = "0.12.9"
+                reqwest.default-features = false
+                reqwest.features = ["json", "rustls-tls"]
+                serde.workspace = true
+                serde.version = "^1.0.0"
+                serde.features = ["derive"]
+                "#
+            )
+        }
     }
 
     mod tombi {

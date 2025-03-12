@@ -145,9 +145,11 @@ dependencies = [
 name = "ast-editor"
 version = "0.0.0"
 dependencies = [
+ "ahash",
  "ast",
  "document-tree",
  "futures",
+ "indexmap",
  "itertools",
  "parser",
  "regex",
