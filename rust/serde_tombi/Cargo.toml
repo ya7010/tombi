@@ -1,0 +1,10 @@
+[package]
+name = "serde_tombi"
+version = "0.0.1"
+authors.workspace = true
+edition.workspace = true
+description = "A TOML serialization file format using Tombi."
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
