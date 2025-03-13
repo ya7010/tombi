@@ -1,10 +1,10 @@
 [package]
-name = "tombi-cli"
+name = "serde_tombi"
 version = "0.0.1"
-authors = ["yassun7010 <yassun7010@outlook.com>"]
-edition = "2021"
-description = "Tombi CLI"
-repository = "https://github.com/tombi-toml/tombi"
-license = "MIT"
+authors.workspace = true
+edition.workspace = true
+description = "A TOML serialization file format using Tombi."
+repository.workspace = true
+license.workspace = true
 
 [dependencies]
