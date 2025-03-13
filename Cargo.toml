@@ -61,8 +61,6 @@ tokio = { version = "1.41.0", features = [
   "io-std",
   "rt-multi-thread",
 ] }
-tombi = { path = "rust/tombi" }
-tombi-cli = { path = "rust/tombi-cli" }
 toml = { version = "0.8.19" }
 toml-version = { path = "crates/toml-version" }
 tower-lsp = { version = "0.20.0" }
