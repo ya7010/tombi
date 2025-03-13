@@ -1,10 +1,10 @@
 [package]
 name = "tombi-cli"
 version = "0.0.1"
-authors.workspace = true
-edition.workspace = true
+authors = ["yassun7010 <yassun7010@outlook.com>"]
+edition = "2021"
 description = "Tombi CLI"
-repository.workspace = true
-license.workspace = true
+repository = "https://github.com/tombi-toml/tombi"
+license = "MIT"
 
 [dependencies]
