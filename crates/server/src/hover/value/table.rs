@@ -444,7 +444,7 @@ impl GetHoverContent for TableSchema {
         _value_schema: Option<&'a ValueSchema>,
         schema_url: Option<&'a SchemaUrl>,
         _definitions: Option<&'a schema_store::SchemaDefinitions>,
-        _schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             Some(HoverContent {
@@ -458,7 +458,9 @@ impl GetHoverContent for TableSchema {
                     min_keys: self.min_properties,
                     // NOTE: key_patterns are output for keys, not this tables.
                     key_patterns: None,
-                    additional_keys: Some(self.additional_properties),
+                    additional_keys: Some(
+                        self.allows_any_additional_properties(schema_context.strict()),
+                    ),
                     keys_order: self.keys_order,
                     ..Default::default()
                 }),

@@ -17,7 +17,7 @@ pub struct TableSchema {
     pub description: Option<String>,
     pub properties: SchemaProperties,
     pub pattern_properties: Option<SchemaPatternProperties>,
-    pub additional_properties: bool,
+    additional_properties: Option<bool>,
     pub additional_property_schema: Option<SchemaItemTokio>,
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
@@ -57,18 +57,18 @@ impl TableSchema {
             }
             _ => None,
         };
-        let strict = options.strict.as_ref().map_or(true, |strict| *strict);
+
         let (additional_properties, additional_property_schema) =
             match object.get("additionalProperties") {
-                Some(serde_json::Value::Bool(allow)) => (*allow, None),
+                Some(serde_json::Value::Bool(allow)) => (Some(*allow), None),
                 Some(serde_json::Value::Object(object)) => {
                     let value_schema = Referable::<ValueSchema>::new(object, options);
                     (
-                        true,
+                        Some(true),
                         value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),
                     )
                 }
-                _ => (!strict, None),
+                _ => (None, None),
             };
 
         let keys_order = match object
@@ -125,6 +125,22 @@ impl TableSchema {
         crate::ValueType::Table
     }
 
+    #[inline]
+    pub fn allows_any_additional_properties(&self, strict: bool) -> bool {
+        self.allows_additional_properties(strict) || self.pattern_properties.is_some()
+    }
+
+    #[inline]
+    pub fn allows_additional_properties(&self, strict: bool) -> bool {
+        self.additional_properties.unwrap_or(!strict)
+    }
+
+    #[inline]
+    pub fn any_additional_properties(&self) -> bool {
+        (self.additional_properties == Some(true)) || self.pattern_properties.is_some()
+    }
+
+    #[inline]
     pub fn has_additional_property_schema(&self) -> bool {
         self.additional_property_schema.is_some()
     }

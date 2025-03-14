@@ -215,7 +215,9 @@ impl Validate for document_tree::Table {
                                             diagnostics.extend(schema_diagnostics);
                                         }
                                     }
-                                } else if !table_schema.additional_properties {
+                                } else if table_schema
+                                    .allows_additional_properties(schema_context.strict())
+                                {
                                     crate::Error {
                                         kind: crate::ErrorKind::PatternProperty {
                                             patterns: Patterns(
@@ -280,8 +282,8 @@ impl Validate for document_tree::Table {
                                 }
                                 continue;
                             }
-                            if !table_schema.additional_properties {
-                                if schema_context.store.strict() {
+                            if !table_schema.any_additional_properties() {
+                                if schema_context.strict() {
                                     crate::Warning {
                                         kind: crate::WarningKind::StrictAdditionalProperties,
                                         range: key.range() + value.range(),
