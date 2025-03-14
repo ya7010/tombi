@@ -13,9 +13,9 @@
 - [x] document site の立ち上げ
 
 ### Milestone 3
-- [ ] ast-editor の実装
-    - [ ] テーブルのキーの並び替えに対応
-    - [ ] 末尾カンマとコメントの関係の差し替え
+- [x] ast-editor の実装
+    - [x] テーブルのキーの並び替えに対応
+    - [x] 末尾カンマとコメントの関係の差し替え
 
 ### Milestone 4
 - [ ] serde-tombi を内部用に作成し、 TOML の Preview バージョンをパースできるように修正
