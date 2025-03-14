@@ -6,12 +6,6 @@ edition.workspace = true
 repository.workspace = true
 license.workspace = true
 
-[features]
-clap = ["dep:clap"]
-default = ["clap", "serde"]
-jsonschema = ["dep:schemars", "serde", "toml-version/jsonschema"]
-serde = ["dep:serde"]
-
 [dependencies]
 clap = { workspace = true, optional = true }
 schemars = { workspace = true, optional = true }
@@ -25,3 +19,9 @@ x-tombi.workspace = true
 
 [dev-dependencies]
 assert_matches.workspace = true
+
+[features]
+clap = ["dep:clap"]
+default = ["clap", "serde"]
+jsonschema = ["dep:schemars", "serde", "toml-version/jsonschema"]
+serde = ["dep:serde"]

@@ -5,10 +5,6 @@ authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 
-[features]
-default = ["lsp"]
-lsp = ["tower-lsp"]
-
 [dependencies]
 nu-ansi-term = { workspace = true }
 serde = { workspace = true }
@@ -21,3 +17,7 @@ tracing = { workspace = true }
 clap = { workspace = true }
 clap-verbosity-flag.workspace = true
 tracing-subscriber = { workspace = true }
+
+[features]
+default = ["lsp"]
+lsp = ["tower-lsp"]

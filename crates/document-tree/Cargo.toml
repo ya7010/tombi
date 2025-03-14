@@ -6,10 +6,6 @@ edition = { workspace = true }
 repository = { workspace = true }
 license = { workspace = true }
 
-[features]
-default = ["diagnostic"]
-diagnostic = ["dep:diagnostic"]
-
 [dependencies]
 ast = { workspace = true }
 chrono = { workspace = true }
@@ -20,3 +16,7 @@ text = { workspace = true }
 thiserror = { workspace = true }
 toml-version = { workspace = true }
 tracing.workspace = true
+
+[features]
+default = ["diagnostic"]
+diagnostic = ["dep:diagnostic"]
