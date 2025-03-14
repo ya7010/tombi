@@ -27,17 +27,14 @@ pub struct TableSchema {
 }
 
 impl TableSchema {
-    pub fn new(
-        object: &serde_json::Map<String, serde_json::Value>,
-        options: &crate::schema::SchemaOptions,
-    ) -> Self {
+    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
         let mut properties = IndexMap::new();
         if let Some(serde_json::Value::Object(props)) = object.get("properties") {
             for (key, value) in props {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(object, options) {
+                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
                     properties.insert(SchemaAccessor::Key(key.into()), value_schema);
                 }
             }
@@ -49,7 +46,7 @@ impl TableSchema {
                     let Some(object) = value.as_object() else {
                         continue;
                     };
-                    if let Some(value_schema) = Referable::<ValueSchema>::new(object, options) {
+                    if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
                         pattern_properties.insert(pattern.clone(), value_schema);
                     }
                 }
@@ -62,7 +59,7 @@ impl TableSchema {
             match object.get("additionalProperties") {
                 Some(serde_json::Value::Bool(allow)) => (Some(*allow), None),
                 Some(serde_json::Value::Object(object)) => {
-                    let value_schema = Referable::<ValueSchema>::new(object, options);
+                    let value_schema = Referable::<ValueSchema>::new(object);
                     (
                         Some(true),
                         value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),

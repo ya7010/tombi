@@ -22,10 +22,7 @@ pub struct ArraySchema {
 }
 
 impl ArraySchema {
-    pub fn new(
-        object: &serde_json::Map<String, serde_json::Value>,
-        options: &crate::schema::SchemaOptions,
-    ) -> Self {
+    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
         Self {
             title: object
                 .get("title")
@@ -36,7 +33,7 @@ impl ArraySchema {
             items: object.get("items").and_then(|value| {
                 value
                     .as_object()
-                    .and_then(|v| Referable::<ValueSchema>::new(v, options))
+                    .and_then(|v| Referable::<ValueSchema>::new(v))
                     .map(|schema| Arc::new(tokio::sync::RwLock::new(schema)))
             }),
             min_items: object

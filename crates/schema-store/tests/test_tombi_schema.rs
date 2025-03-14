@@ -35,7 +35,6 @@ fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
     let document_schema = DocumentSchema::new(
         serde_json::from_str(&contents)?,
         SchemaUrl::from_file_path(&document_path).unwrap(),
-        &schema_store::SchemaOptions::default(),
     );
 
     dbg!(document_schema);

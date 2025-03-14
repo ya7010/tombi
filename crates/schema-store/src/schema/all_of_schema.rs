@@ -15,10 +15,7 @@ pub struct AllOfSchema {
 }
 
 impl AllOfSchema {
-    pub fn new(
-        object: &serde_json::Map<String, serde_json::Value>,
-        options: &crate::schema::SchemaOptions,
-    ) -> Self {
+    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
         let title = object
             .get("title")
             .and_then(|v| v.as_str())
@@ -33,7 +30,7 @@ impl AllOfSchema {
             .map(|a| {
                 a.iter()
                     .filter_map(|v| v.as_object())
-                    .filter_map(|v| Referable::<ValueSchema>::new(v, options))
+                    .filter_map(|v| Referable::<ValueSchema>::new(v))
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();
