@@ -30,7 +30,7 @@ impl AnyOfSchema {
             .map(|a| {
                 a.iter()
                     .filter_map(|v| v.as_object())
-                    .filter_map(|v| Referable::<ValueSchema>::new(v))
+                    .filter_map(Referable::<ValueSchema>::new)
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();

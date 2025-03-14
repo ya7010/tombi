@@ -33,7 +33,7 @@ impl ArraySchema {
             items: object.get("items").and_then(|value| {
                 value
                     .as_object()
-                    .and_then(|v| Referable::<ValueSchema>::new(v))
+                    .and_then(Referable::<ValueSchema>::new)
                     .map(|schema| Arc::new(tokio::sync::RwLock::new(schema)))
             }),
             min_items: object
