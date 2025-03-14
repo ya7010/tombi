@@ -5,10 +5,6 @@ authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 
-[features]
-jsonschema = ["dep:schemars", "serde"]
-serde = ["dep:serde"]
-
 [dependencies]
 ast = { workspace = true }
 ast-editor = { workspace = true }
@@ -35,3 +31,7 @@ test-lib = { workspace = true }
 textwrap = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing-subscriber = { workspace = true }
+
+[features]
+jsonschema = ["dep:schemars", "serde"]
+serde = ["dep:serde"]

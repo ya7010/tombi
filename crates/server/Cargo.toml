@@ -5,10 +5,6 @@ authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 
-[features]
-clap = ["dep:clap"]
-default = ["clap"]
-
 [dependencies]
 ahash.workspace = true
 ast = { workspace = true }
@@ -50,3 +46,7 @@ tempfile = { version = "3.15.0" }
 test-lib = { workspace = true }
 textwrap = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
+
+[features]
+clap = ["dep:clap"]
+default = ["clap"]

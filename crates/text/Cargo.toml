@@ -5,11 +5,6 @@ authors.workspace = true
 edition.workspace = true
 license.workspace = true
 
-[features]
-default = ["lsp", "serde"]
-lsp = ["dep:tower-lsp"]
-serde = ["dep:serde"]
-
 [dependencies]
 serde = { workspace = true, optional = true }
 tower-lsp = { workspace = true, optional = true }
@@ -17,3 +12,8 @@ tracing.workspace = true
 
 [dev-dependencies]
 rstest.workspace = true
+
+[features]
+default = ["lsp", "serde"]
+lsp = ["dep:tower-lsp"]
+serde = ["dep:serde"]

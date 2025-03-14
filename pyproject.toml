@@ -9,15 +9,15 @@ dependencies = []
 [project.urls]
 GitHub = "https://github.com/tombi-toml/tombi"
 
-[build-system]
-requires = ["maturin>=1.5,<2.0"]
-build-backend = "maturin"
-
 [dependency-groups]
 dev = [
   "pytest>=8.3.3",
   "ruff>=0.7.4",
 ]
+
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
 
 [tool.maturin]
 bindings = "bin"

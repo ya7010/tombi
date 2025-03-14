@@ -288,6 +288,32 @@ mod table_keys_order {
 
         test_format! {
             #[tokio::test]
+            async fn test_dependencies_and_features(
+                r#"
+                [features]
+                default = ["clap"]
+                clap = ["clap/derive"]
+
+                [dependencies]
+                serde = { features = ["derive"], version = "^1.0.0" }
+                clap = { version = "4.5.0" }
+                "#,
+                cargo_schema_path(),
+            ) -> Ok(
+                r#"
+                [dependencies]
+                clap = { version = "4.5.0" }
+                serde = { version = "^1.0.0", features = ["derive"] }
+
+                [features]
+                clap = ["clap/derive"]
+                default = ["clap"]
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
             async fn test_cargo_dependencies(
                 r#"
                 [dependencies]
