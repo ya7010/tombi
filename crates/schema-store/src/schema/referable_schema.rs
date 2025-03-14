@@ -91,13 +91,17 @@ impl Referable<ValueSchema> {
                 } => {
                     if let Some(definition_schema) = definitions.read().await.get(reference) {
                         let mut referable_schema = definition_schema.to_owned();
-                        if let Referable::Resolved { ref mut value, .. } = &mut referable_schema {
+                        if let Referable::Resolved {
+                            value: ref mut value_schema,
+                            ..
+                        } = &mut referable_schema
+                        {
                             if title.is_some() || description.is_some() {
-                                value.set_title(title.to_owned());
-                                value.set_description(description.to_owned());
+                                value_schema.set_title(title.to_owned());
+                                value_schema.set_description(description.to_owned());
                             }
-                            if deprecated == &Some(true) {
-                                value.set_deprecated(true);
+                            if let Some(deprecated) = deprecated {
+                                value_schema.set_deprecated(*deprecated);
                             }
                         }
 
@@ -109,8 +113,12 @@ impl Referable<ValueSchema> {
                             schema_store.try_get_document_schema(&schema_url).await?
                         {
                             if let Some(value_schema) = &mut document_schema.value_schema {
-                                if deprecated == &Some(true) {
-                                    value_schema.set_deprecated(true);
+                                if title.is_some() || description.is_some() {
+                                    value_schema.set_title(title.to_owned());
+                                    value_schema.set_description(description.to_owned());
+                                }
+                                if let Some(deprecated) = deprecated {
+                                    value_schema.set_deprecated(*deprecated);
                                 }
 
                                 *self = Referable::Resolved {
