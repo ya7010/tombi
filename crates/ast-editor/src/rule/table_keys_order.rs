@@ -176,72 +176,75 @@ where
                     };
 
                     for (accessor, targets) in sorted_targets {
-                        let value = table.get(&accessor.to_string()).unwrap();
-                        if let Some(referable_schema) =
-                            table_schema.properties.write().await.get_mut(&accessor)
-                        {
-                            if let Ok(Some(CurrentSchema {
-                                schema_url,
-                                value_schema,
-                                definitions,
-                            })) = referable_schema
-                                .resolve(
-                                    Cow::Borrowed(schema_url),
-                                    Cow::Borrowed(definitions),
-                                    schema_context.store,
-                                )
-                                .await
+                        if let Some(value) = table.get(&accessor.to_string()) {
+                            if let Some(referable_schema) =
+                                table_schema.properties.write().await.get_mut(&accessor)
                             {
-                                results.extend(
-                                    sorted_accessors(
-                                        value,
-                                        &validation_accessors
-                                            .iter()
-                                            .cloned()
-                                            .chain(std::iter::once(accessor))
-                                            .collect_vec(),
-                                        targets,
-                                        value_schema,
-                                        &schema_url,
-                                        &definitions,
-                                        schema_context,
+                                if let Ok(Some(CurrentSchema {
+                                    schema_url,
+                                    value_schema,
+                                    definitions,
+                                })) = referable_schema
+                                    .resolve(
+                                        Cow::Borrowed(schema_url),
+                                        Cow::Borrowed(definitions),
+                                        schema_context.store,
                                     )
-                                    .await,
-                                );
-                            }
-                        } else if let Some(referable_schema) =
-                            &table_schema.additional_property_schema
-                        {
-                            if let Ok(Some(CurrentSchema {
-                                schema_url,
-                                value_schema,
-                                definitions,
-                            })) = referable_schema
-                                .write()
-                                .await
-                                .resolve(
-                                    Cow::Borrowed(schema_url),
-                                    Cow::Borrowed(definitions),
-                                    schema_context.store,
-                                )
-                                .await
+                                    .await
+                                {
+                                    results.extend(
+                                        sorted_accessors(
+                                            value,
+                                            &validation_accessors
+                                                .iter()
+                                                .cloned()
+                                                .chain(std::iter::once(accessor))
+                                                .collect_vec(),
+                                            targets,
+                                            value_schema,
+                                            &schema_url,
+                                            &definitions,
+                                            schema_context,
+                                        )
+                                        .await,
+                                    );
+                                }
+                            } else if let Some(referable_schema) =
+                                &table_schema.additional_property_schema
                             {
-                                results.extend(
-                                    sorted_accessors(
-                                        value,
-                                        &validation_accessors
-                                            .iter()
-                                            .cloned()
-                                            .chain(std::iter::once(accessor))
-                                            .collect_vec(),
-                                        targets,
-                                        value_schema,
-                                        &schema_url,
-                                        &definitions,
-                                        schema_context,
+                                if let Ok(Some(CurrentSchema {
+                                    schema_url,
+                                    value_schema,
+                                    definitions,
+                                })) = referable_schema
+                                    .write()
+                                    .await
+                                    .resolve(
+                                        Cow::Borrowed(schema_url),
+                                        Cow::Borrowed(definitions),
+                                        schema_context.store,
                                     )
-                                    .await,
-                                );
+                                    .await
+                                {
+                                    results.extend(
+                                        sorted_accessors(
+                                            value,
+                                            &validation_accessors
+                                                .iter()
+                                                .cloned()
+                                                .chain(std::iter::once(accessor))
+                                                .collect_vec(),
+                                            targets,
+                                            value_schema,
+                                            &schema_url,
+                                            &definitions,
+                                            schema_context,
+                                        )
+                                        .await,
+                                    );
+                                }
+                            } else {
+                                results.extend(targets.into_iter().map(|(_, target)| target));
                             }
                         } else {
                             results.extend(targets.into_iter().map(|(_, target)| target));
