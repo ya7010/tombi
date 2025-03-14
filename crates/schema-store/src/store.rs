@@ -186,13 +186,7 @@ impl SchemaStore {
             reason: err.to_string(),
         })?;
 
-        Ok(DocumentSchema::new(
-            schema,
-            schema_url.clone(),
-            &crate::schema::SchemaOptions {
-                strict: self.options.strict,
-            },
-        ))
+        Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
     pub fn try_get_document_schema<'a: 'b, 'b>(

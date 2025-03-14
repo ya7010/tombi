@@ -52,7 +52,6 @@ pub async fn root_table_keys_order<'a>(
                     .header()
                     .map(|key| {
                         key.keys()
-                            .into_iter()
                             .map(|key| {
                                 SchemaAccessor::Key(
                                     key.try_to_raw_text(schema_context.toml_version).unwrap(),

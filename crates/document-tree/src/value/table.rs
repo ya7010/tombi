@@ -696,7 +696,7 @@ where
         });
 
         DocumentTreeAndErrors {
-            tree: table.unwrap_or_else(|| Table::new_empty()),
+            tree: table.unwrap_or_else(Table::new_empty),
             errors,
         }
     }
