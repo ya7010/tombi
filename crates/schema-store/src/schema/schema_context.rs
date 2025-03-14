@@ -4,3 +4,10 @@ pub struct SchemaContext<'a> {
     pub sub_schema_url_map: Option<&'a crate::SubSchemaUrlMap>,
     pub store: &'a crate::SchemaStore,
 }
+
+impl SchemaContext<'_> {
+    #[inline]
+    pub fn strict(&self) -> bool {
+        self.store.strict()
+    }
+}

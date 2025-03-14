@@ -273,7 +273,9 @@ impl FindCompletionContents for document_tree::Table {
                                     }
                                 }
 
-                                if table_schema.has_additional_properties() {
+                                if table_schema
+                                    .allows_any_additional_properties(schema_context.strict())
+                                {
                                     return get_property_value_completion_contents(
                                         value,
                                         position,
@@ -863,7 +865,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                         return None;
                     }
                     if let ValueSchema::Table(table_schema) = value_schema {
-                        if !table_schema.has_additional_properties()
+                        if !table_schema.allows_any_additional_properties(schema_context.strict())
                             && table_schema.properties.read().await.keys().all(|key| {
                                 let property_name = &key.to_string();
                                 table.get(property_name).is_some()
