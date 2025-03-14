@@ -282,8 +282,8 @@ impl Validate for document_tree::Table {
                             }
                             if !table_schema.additional_properties {
                                 if schema_context.store.strict() {
-                                    crate::Error {
-                                        kind: crate::ErrorKind::StrictAdditionalProperties,
+                                    crate::Warning {
+                                        kind: crate::WarningKind::StrictAdditionalProperties,
                                         range: key.range() + value.range(),
                                     }
                                     .set_diagnostics(&mut diagnostics);
