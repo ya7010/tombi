@@ -2,6 +2,9 @@
 pub enum WarningKind {
     #[error("This value is deprecated")]
     Deprecated,
+
+    #[error("In strict mode, the JSON schema must be explicitly set to `\"additionalProperties\": true`. ")]
+    StrictAdditionalProperties,
 }
 
 #[derive(Debug)]
