@@ -1091,10 +1091,12 @@ dependencies = [
  "schemars",
  "serde",
  "syntax",
+ "test-lib",
  "text",
  "thiserror",
  "tokio",
  "tracing",
+ "tracing-subscriber",
  "url",
  "validator",
 ]

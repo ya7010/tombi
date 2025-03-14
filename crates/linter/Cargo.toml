@@ -25,4 +25,6 @@ url = { workspace = true }
 validator.workspace = true
 
 [dev-dependencies]
+test-lib.workspace = true
 tokio = { workspace = true, features = ["macros"] }
+tracing-subscriber.workspace = true
