@@ -17,7 +17,7 @@ pub struct TableSchema {
     pub description: Option<String>,
     pub properties: SchemaProperties,
     pub pattern_properties: Option<SchemaPatternProperties>,
-    pub additional_properties: bool,
+    additional_properties: bool,
     pub additional_property_schema: Option<SchemaItemTokio>,
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
@@ -123,6 +123,12 @@ impl TableSchema {
 
     pub fn value_type(&self) -> crate::ValueType {
         crate::ValueType::Table
+    }
+
+    pub fn has_additional_properties(&self) -> bool {
+        self.additional_properties == true
+            // || self.has_additional_property_schema() // self.additional_properties is enough
+            || self.pattern_properties.is_some()
     }
 
     pub fn has_additional_property_schema(&self) -> bool {
