@@ -15,6 +15,12 @@ impl From<DocumentTree> for Table {
     }
 }
 
+impl From<DocumentTree> for crate::Value {
+    fn from(tree: DocumentTree) -> Self {
+        crate::Value::Table(tree.0)
+    }
+}
+
 impl Deref for DocumentTree {
     type Target = Table;
 

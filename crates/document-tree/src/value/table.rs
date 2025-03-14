@@ -27,6 +27,15 @@ pub struct Table {
 }
 
 impl Table {
+    pub(crate) fn new_empty() -> Self {
+        Self {
+            kind: TableKind::Table,
+            key_values: Default::default(),
+            range: text::Range::default(),
+            symbol_range: text::Range::default(),
+        }
+    }
+
     pub(crate) fn new_root(node: &ast::Root) -> Self {
         Self {
             kind: TableKind::Root,
@@ -656,5 +665,39 @@ fn make_keys_table(
     DocumentTreeAndErrors {
         tree: table,
         errors,
+    }
+}
+
+impl<T> IntoDocumentTreeAndErrors<crate::Table> for Vec<T>
+where
+    T: IntoDocumentTreeAndErrors<crate::Table>,
+{
+    fn into_document_tree_and_errors(
+        self,
+        toml_version: TomlVersion,
+    ) -> DocumentTreeAndErrors<crate::Table> {
+        let mut errors = Vec::new();
+        let tables = self
+            .into_iter()
+            .map(|value| {
+                let (table, errs) = value.into_document_tree_and_errors(toml_version).into();
+                if !errs.is_empty() {
+                    errors.extend(errs);
+                }
+                table
+            })
+            .collect_vec();
+
+        let table = tables.into_iter().reduce(|mut acc, other| {
+            if let Err(errs) = acc.merge(other) {
+                errors.extend(errs);
+            }
+            acc
+        });
+
+        DocumentTreeAndErrors {
+            tree: table.unwrap_or_else(|| Table::new_empty()),
+            errors,
+        }
     }
 }

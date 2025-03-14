@@ -34,16 +34,17 @@ pub async fn table_keys_order<'a>(
         .map(|kv| {
             (
                 kv.keys()
-                    .into_iter()
                     .map(|key| {
-                        key.keys().into_iter().map(|key| {
-                            SchemaAccessor::Key(
-                                key.try_to_raw_text(schema_context.toml_version).unwrap(),
-                            )
-                        })
+                        key.keys()
+                            .into_iter()
+                            .map(|key| {
+                                SchemaAccessor::Key(
+                                    key.try_to_raw_text(schema_context.toml_version).unwrap(),
+                                )
+                            })
+                            .collect_vec()
                     })
-                    .flatten()
-                    .collect_vec(),
+                    .unwrap_or_default(),
                 kv,
             )
         })
@@ -70,7 +71,7 @@ pub async fn table_keys_order<'a>(
     vec![crate::Change::ReplaceRange { old, new }]
 }
 
-fn sorted_accessors<'a: 'b, 'b, T>(
+pub fn sorted_accessors<'a: 'b, 'b, T>(
     value: &'a document_tree::Value,
     validation_accessors: &'a [schema_store::SchemaAccessor],
     targets: Vec<(Vec<schema_store::SchemaAccessor>, T)>,
