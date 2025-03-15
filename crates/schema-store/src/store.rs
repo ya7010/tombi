@@ -325,14 +325,28 @@ impl SchemaStore {
             Either::Left(source_url) => self
                 .try_get_source_schema_from_url(source_url)
                 .await
-                .inspect(|_| {
-                    tracing::debug!("find schema from url: {}", source_url);
+                .inspect(|source_schema| {
+                    if let Some(source_schema) = source_schema {
+                        if let Some(root_schema) = &source_schema.root_schema {
+                            tracing::debug!(
+                                "find root schema from url: {}",
+                                root_schema.schema_url
+                            );
+                        }
+                    }
                 }),
             Either::Right(source_path) => self
                 .try_get_source_schema_from_path(source_path)
                 .await
-                .inspect(|_| {
-                    tracing::debug!("find schema from source: {}", source_path.display());
+                .inspect(|source_schema| {
+                    if let Some(source_schema) = source_schema {
+                        if let Some(root_schema) = &source_schema.root_schema {
+                            tracing::debug!(
+                                "find root schema from path: {}",
+                                root_schema.schema_url
+                            );
+                        }
+                    }
                 }),
         }
     }
