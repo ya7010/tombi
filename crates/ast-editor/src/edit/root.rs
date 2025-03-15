@@ -46,21 +46,17 @@ impl crate::Edit for ast::Root {
                 };
             }
 
-            if let (Some(value_schema), Some(schema_url), Some(definitions)) =
-                (value_schema, schema_url, definitions)
-            {
-                changes.extend(
-                    root_table_keys_order(
-                        key_values,
-                        table_or_array_of_tables,
-                        value_schema,
-                        schema_url,
-                        definitions,
-                        schema_context,
-                    )
-                    .await,
-                );
-            }
+            changes.extend(
+                root_table_keys_order(
+                    key_values,
+                    table_or_array_of_tables,
+                    value_schema,
+                    schema_url,
+                    definitions,
+                    schema_context,
+                )
+                .await,
+            );
 
             changes
         }

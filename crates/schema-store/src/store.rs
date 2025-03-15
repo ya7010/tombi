@@ -6,7 +6,9 @@ use futures::{future::BoxFuture, FutureExt};
 use itertools::Either;
 use tokio::sync::RwLock;
 
-use crate::{json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaUrl, SourceSchema};
+use crate::{
+    json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
+};
 
 #[derive(Debug, Clone)]
 pub struct SchemaStore {
@@ -59,7 +61,7 @@ impl SchemaStore {
                 url: schema_url,
                 include: schema.include().to_vec(),
                 toml_version: schema.toml_version(),
-                root_keys: schema.root_keys().and_then(SchemaAccessor::parse),
+                sub_root_keys: schema.root_keys().and_then(SchemaAccessor::parse),
             });
         }
     }
@@ -89,7 +91,7 @@ impl SchemaStore {
                                 url: schema.url,
                                 include: schema.file_match,
                                 toml_version: None,
-                                root_keys: None,
+                                sub_root_keys: None,
                             });
                         }
                     }
@@ -146,12 +148,11 @@ impl SchemaStore {
                 serde_json::from_reader(file)
             }
             "http" | "https" => {
-                if self.offline() {
-                    unreachable!(
-                        "offline mode, store don't have online schema url: {}",
-                        schema_url
-                    );
-                }
+                assert!(
+                    !self.offline(),
+                    "offline mode, store don't have online schema url: {schema_url}",
+                );
+
                 tracing::debug!("fetch schema from url: {}", schema_url);
 
                 let response = self
@@ -252,8 +253,6 @@ impl SchemaStore {
         &self,
         source_path: &std::path::Path,
     ) -> Result<Option<SourceSchema>, crate::Error> {
-        let mut source_schema: Option<SourceSchema> = None;
-
         let schemas = self.schemas.read().await;
         let matching_schemas = schemas
             .iter()
@@ -272,17 +271,19 @@ impl SchemaStore {
             })
             .collect::<Vec<_>>();
 
+        let mut source_schema: Option<SourceSchema> = None;
         for matching_schema in matching_schemas {
             if let Ok(Some(document_schema)) =
                 self.try_get_document_schema(&matching_schema.url).await
             {
-                match &matching_schema.root_keys {
-                    Some(root_keys) => match source_schema {
+                match &matching_schema.sub_root_keys {
+                    Some(sub_root_keys) => match source_schema {
                         Some(ref mut source_schema) => {
-                            if !source_schema.sub_schema_url_map.contains_key(root_keys) {
-                                source_schema
-                                    .sub_schema_url_map
-                                    .insert(root_keys.clone(), document_schema.schema_url.clone());
+                            if !source_schema.sub_schema_url_map.contains_key(sub_root_keys) {
+                                source_schema.sub_schema_url_map.insert(
+                                    sub_root_keys.clone(),
+                                    document_schema.schema_url.clone(),
+                                );
                             }
                         }
                         None => {
@@ -292,7 +293,7 @@ impl SchemaStore {
                             };
                             new_source_schema
                                 .sub_schema_url_map
-                                .insert(root_keys.clone(), document_schema.schema_url.clone());
+                                .insert(sub_root_keys.clone(), document_schema.schema_url.clone());
 
                             source_schema = Some(new_source_schema);
                         }
@@ -311,6 +312,8 @@ impl SchemaStore {
                         }
                     },
                 }
+            } else {
+                tracing::error!("Can't find matching schema for {}", matching_schema.url);
             }
         }
 
@@ -322,18 +325,22 @@ impl SchemaStore {
         source_url_or_path: Either<&url::Url, &std::path::Path>,
     ) -> Result<Option<SourceSchema>, crate::Error> {
         match source_url_or_path {
-            Either::Left(source_url) => self
-                .try_get_source_schema_from_url(source_url)
-                .await
-                .inspect(|_| {
-                    tracing::debug!("find schema from url: {}", source_url);
-                }),
-            Either::Right(source_path) => self
-                .try_get_source_schema_from_path(source_path)
-                .await
-                .inspect(|_| {
-                    tracing::debug!("find schema from source: {}", source_path.display());
-                }),
+            Either::Left(source_url) => self.try_get_source_schema_from_url(source_url).await,
+            Either::Right(source_path) => self.try_get_source_schema_from_path(source_path).await,
         }
+        .inspect(|source_schema| {
+            if let Some(source_schema) = source_schema {
+                if let Some(root_schema) = &source_schema.root_schema {
+                    tracing::debug!("find root schema from {}", root_schema.schema_url);
+                }
+                for (accessors, schema_url) in &source_schema.sub_schema_url_map {
+                    tracing::debug!(
+                        "find sub schema {:?} from {}",
+                        SchemaAccessors::new(accessors.clone()),
+                        schema_url
+                    );
+                }
+            }
+        })
     }
 }

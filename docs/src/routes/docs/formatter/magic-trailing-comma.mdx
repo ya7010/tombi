@@ -1,5 +1,3 @@
-import { CodeBlock } from "~/components/CodeBlock";
-
 # Magic Trailing Comma
 
 Magic Trailing Comma is a feature inspired by the [Black formatter](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#the-magic-trailing-comma), which automatically adds trailing commas to arrays and tables that span multiple lines.  
@@ -7,25 +5,46 @@ This feature makes version control more efficient by ensuring clean diffs when a
 
 ## Basic Usage
 
-When array elements fit on a single line, no trailing comma is added:
+When there is no trailing comma, Tombi automatically folds the array:
 
 ```toml
 # Before formatting
-dependencies = ["tombi", "biome", "prettier"]
+items = [
+  "aaaa",
+  "bbbb",
+  "cccc"
+]
 
 # After formatting
-dependencies = ["tombi", "biome", "prettier"]
+items = ["aaaa", "bbbb", "cccc"]
 ```
 
-When elements span multiple lines, a trailing comma is automatically added:
+If the line width is too wide, it will be expanded to multiple lines.
 
 ```toml
 # Before formatting
-dependencies = [
-  "tombi",
-  "biome",
-  "prettier"
+items = ["aaaa", "bbbb", "cccc", "dddd", "eeee", "ffff", "gggg", "hhhh", "iiii","jjjj"]
+
+# After formatting
+items = [
+  "aaaa",
+  "bbbb",
+  "cccc",
+  "dddd",
+  "eeee",
+  "ffff",
+  "gggg",
+  "hhhh",
+  "iiii",
+  "jjjj",
 ]
+```
+
+Alternatively, you can force it to expand to multiple lines by adding a comma to the last element of the array.
+
+```toml
+# Before formatting
+dependencies = ["tombi", "biome", "prettier",]
 
 # After formatting
 dependencies = [
@@ -35,41 +54,18 @@ dependencies = [
 ]
 ```
 
-## Table Examples
+## Magic Trailing Comma for Inline Tables
 
-The same behavior applies to TOML tables:
+In TOML v1.1.0, Magic Trailing Comma will also be enabled for Inline Tables.
 
 ```toml
 # Before formatting
-[package]
-name = "my-app"
-version = "1.0.0"
-authors = [
-  "John Doe",
-  "Jane Smith"
-]
-
-[dependencies]
-tombi = "1.0.0"
-biome = "1.0.0"
+items = { a = 1, b = 2, c = 3, }
 
 # After formatting
-[package]
-name = "my-app"
-version = "1.0.0"
-authors = [
-  "John Doe",
-  "Jane Smith",
-]
-
-[dependencies]
-tombi = "1.0.0",
-biome = "1.0.0",
+items = {
+  a = 1,
+  b = 2,
+  c = 3,
+}
 ```
-
-This feature provides several benefits:
-
-- Creates cleaner diffs when adding new elements
-- Makes reordering elements easier
-- Improves code consistency
-- Reduces version control conflicts in multi-developer environments

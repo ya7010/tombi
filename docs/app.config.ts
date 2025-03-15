@@ -5,6 +5,7 @@ import unocssPlugin from "unocss/vite";
 import remarkGfm from "remark-gfm";
 import { remarkBaseUrl } from "./src/remark/base-url";
 import { remarkCode } from "./src/remark/code";
+import { remarkHeadingAnchor } from "./src/remark/heading-anchor";
 
 const { default: mdx } = pkg;
 
@@ -31,6 +32,7 @@ export default defineConfig({
           [remarkGfm, { tablePipeAlign: false }],
           remarkBaseUrl,
           remarkCode,
+          remarkHeadingAnchor,
         ],
       }),
       unocssPlugin(),

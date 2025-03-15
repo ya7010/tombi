@@ -15,9 +15,9 @@ use x_tombi::TableKeysOrder;
 pub async fn table_keys_order<'a>(
     value: &'a document_tree::Value,
     key_values: Vec<ast::KeyValue>,
-    value_schema: &'a ValueSchema,
-    schema_url: &'a schema_store::SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    value_schema: Option<&'a ValueSchema>,
+    schema_url: Option<&'a schema_store::SchemaUrl>,
+    definitions: Option<&'a schema_store::SchemaDefinitions>,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
     if key_values.is_empty() {
@@ -49,15 +49,11 @@ pub async fn table_keys_order<'a>(
         })
         .collect_vec();
 
-    let ValueSchema::Table(table_schema) = value_schema else {
-        return Vec::with_capacity(0);
-    };
-
     let new = sorted_accessors(
         value,
         &[],
         targets,
-        &ValueSchema::Table(table_schema.clone()),
+        value_schema,
         schema_url,
         definitions,
         schema_context,
@@ -74,18 +70,24 @@ pub fn sorted_accessors<'a: 'b, 'b, T>(
     value: &'a document_tree::Value,
     validation_accessors: &'a [schema_store::SchemaAccessor],
     targets: Vec<(Vec<schema_store::SchemaAccessor>, T)>,
-    value_schema: &'a ValueSchema,
-    schema_url: &'a schema_store::SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    value_schema: Option<&'a ValueSchema>,
+    schema_url: Option<&'a schema_store::SchemaUrl>,
+    definitions: Option<&'a schema_store::SchemaDefinitions>,
     schema_context: &'a SchemaContext<'a>,
 ) -> BoxFuture<'b, Vec<T>>
 where
     T: Send + Clone + std::fmt::Debug + 'b,
 {
     async move {
-        if let ValueSchema::OneOf(OneOfSchema { schemas, .. })
-        | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
-        | ValueSchema::AllOf(AllOfSchema { schemas, .. }) = value_schema
+        if let (
+            Some(
+                ValueSchema::OneOf(OneOfSchema { schemas, .. })
+                | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
+                | ValueSchema::AllOf(AllOfSchema { schemas, .. }),
+            ),
+            Some(schema_url),
+            Some(definitions),
+        ) = (value_schema, schema_url, definitions)
         {
             for schema in schemas.write().await.iter_mut() {
                 if let Ok(Some(CurrentSchema {
@@ -115,9 +117,9 @@ where
                             value,
                             validation_accessors,
                             targets.clone(),
-                            value_schema,
-                            &schema_url,
-                            &definitions,
+                            Some(&value_schema),
+                            Some(&schema_url),
+                            Some(&definitions),
                             schema_context,
                         )
                         .await;
@@ -140,8 +142,13 @@ where
             }
         }
 
-        match (value, value_schema) {
-            (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) => {
+        match (value, value_schema, schema_url, definitions) {
+            (
+                document_tree::Value::Table(table),
+                Some(ValueSchema::Table(table_schema)),
+                Some(schema_url),
+                Some(definitions),
+            ) => {
                 if new_targets_map
                     .iter()
                     .all(|(accessor, _)| matches!(accessor, SchemaAccessor::Key(_)))
@@ -200,13 +207,15 @@ where
                                                 .chain(std::iter::once(accessor))
                                                 .collect_vec(),
                                             targets,
-                                            value_schema,
-                                            &schema_url,
-                                            &definitions,
+                                            Some(value_schema),
+                                            Some(&schema_url),
+                                            Some(&definitions),
                                             schema_context,
                                         )
                                         .await,
                                     );
+                                } else {
+                                    results.extend(targets.into_iter().map(|(_, target)| target));
                                 }
                             } else if let Some(referable_schema) =
                                 &table_schema.additional_property_schema
@@ -234,13 +243,15 @@ where
                                                 .chain(std::iter::once(accessor))
                                                 .collect_vec(),
                                             targets,
-                                            value_schema,
-                                            &schema_url,
-                                            &definitions,
+                                            Some(value_schema),
+                                            Some(&schema_url),
+                                            Some(&definitions),
                                             schema_context,
                                         )
                                         .await,
                                     );
+                                } else {
+                                    results.extend(targets.into_iter().map(|(_, target)| target));
                                 }
                             } else {
                                 results.extend(targets.into_iter().map(|(_, target)| target));
@@ -252,7 +263,12 @@ where
                     return results;
                 }
             }
-            (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
+            (
+                document_tree::Value::Array(array),
+                Some(ValueSchema::Array(array_schema)),
+                Some(schema_url),
+                Some(definitions),
+            ) => {
                 if new_targets_map
                     .iter()
                     .all(|(accessor, _)| matches!(accessor, SchemaAccessor::Index))
@@ -278,9 +294,9 @@ where
                                         value,
                                         validation_accessors,
                                         targets,
-                                        value_schema,
-                                        &schema_url,
-                                        &definitions,
+                                        Some(value_schema),
+                                        Some(&schema_url),
+                                        Some(&definitions),
                                         schema_context,
                                     )
                                     .await,

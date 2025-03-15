@@ -10,9 +10,9 @@ use crate::rule::table_keys_order::{sorted_accessors, table_keys_order};
 pub async fn root_table_keys_order<'a>(
     key_values: Vec<ast::KeyValue>,
     table_or_array_of_tables: Vec<TableOrArrayOfTables>,
-    value_schema: &'a ValueSchema,
-    schema_url: &'a schema_store::SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    value_schema: Option<&'a ValueSchema>,
+    schema_url: Option<&'a schema_store::SchemaUrl>,
+    definitions: Option<&'a schema_store::SchemaDefinitions>,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
     if key_values.is_empty() && table_or_array_of_tables.is_empty() {
@@ -65,10 +65,6 @@ pub async fn root_table_keys_order<'a>(
         })
         .collect_vec();
 
-    let ValueSchema::Table(table_schema) = value_schema else {
-        return Vec::with_capacity(0);
-    };
-
     let new = sorted_accessors(
         &document_tree::Value::Table(
             table_or_array_of_tables
@@ -77,7 +73,7 @@ pub async fn root_table_keys_order<'a>(
         ),
         &[],
         targets,
-        &ValueSchema::Table(table_schema.clone()),
+        value_schema,
         schema_url,
         definitions,
         schema_context,

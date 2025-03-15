@@ -125,6 +125,49 @@ impl std::fmt::Display for SchemaAccessor {
     }
 }
 
+/// A collection of `Accessor`.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+pub struct SchemaAccessors(Vec<SchemaAccessor>);
+
+impl SchemaAccessors {
+    #[inline]
+    pub fn new(accessors: Vec<SchemaAccessor>) -> Self {
+        Self(accessors)
+    }
+
+    #[inline]
+    pub fn first(&self) -> Option<&SchemaAccessor> {
+        self.0.first()
+    }
+
+    #[inline]
+    pub fn last(&self) -> Option<&SchemaAccessor> {
+        self.0.last()
+    }
+}
+
+impl AsRef<[SchemaAccessor]> for SchemaAccessors {
+    fn as_ref(&self) -> &[SchemaAccessor] {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for SchemaAccessors {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut iter = self.0.iter();
+        if let Some(accessor) = iter.next() {
+            write!(f, "{}", accessor)?;
+            for accessor in iter {
+                match accessor {
+                    SchemaAccessor::Key(_) => write!(f, ".{}", accessor)?,
+                    SchemaAccessor::Index => write!(f, "{}", accessor)?,
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
 pub trait GetHeaderSchemarAccessors {
     fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>>;
 }
