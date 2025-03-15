@@ -457,15 +457,74 @@ mod table_keys_order {
         }
     }
 
+    mod non_schema {
+        use super::test_format;
+
+        test_format! {
+            #[tokio::test]
+            async fn test_header_order(
+                r#"
+                [aaa]
+                key1 = "value1"
+                key2 = "value2"
+
+                [bbb]
+                key3 = "value3"
+                key4 = "value4"
+
+                [aaa.ccc]
+                key5 = "value5"
+                "#,
+            ) -> Ok(r#"
+                [aaa]
+                key1 = "value1"
+                key2 = "value2"
+
+                [aaa.ccc]
+                key5 = "value5"
+
+                [bbb]
+                key3 = "value3"
+                key4 = "value4"
+                "#
+            )
+        }
+    }
+
     #[macro_export]
     macro_rules! test_format {
         (
+            #[tokio::test]
+            async fn $name:ident(
+                $source:expr,
+                $schema_path:expr$(,)?
+            ) -> Ok($expected:expr$(,)?)
+        ) => {
+            test_format! {
                 #[tokio::test]
-                async fn $name:ident(
-                    $source:expr,
-                    $schema_path:expr$(,)?
-                ) -> Ok($expected:expr$(,)?)
-            ) => {
+                async fn _$name($source, Some($schema_path)) -> Ok($expected)
+            }
+        };
+
+        (
+            #[tokio::test]
+            async fn $name:ident(
+                $source:expr,
+            ) -> Ok($expected:expr$(,)?)
+        ) => {
+            test_format! {
+                #[tokio::test]
+                async fn _$name($source, Option::<&std::path::Path>::None) -> Ok($expected)
+            }
+        };
+
+        (
+            #[tokio::test]
+            async fn _$name:ident(
+                $source:expr,
+                $schema_path:expr$(,)?
+            ) -> Ok($expected:expr$(,)?)
+        ) => {
             #[tokio::test]
             async fn $name() {
                 use config::TomlVersion;
@@ -483,17 +542,19 @@ mod table_keys_order {
                 // Initialize schema store
                 let schema_store = SchemaStore::new(schema_store::Options::default());
 
-                // Load schemas
-                schema_store
-                    .load_schemas(
-                        &[config::Schema::Root(config::RootSchema {
-                            toml_version: None,
-                            path: $schema_path.to_string_lossy().to_string(),
-                            include: vec!["*.toml".to_string()],
-                        })],
-                        None,
-                    )
-                    .await;
+                if let Some(schema_path) = $schema_path {
+                    // Load schemas
+                    schema_store
+                        .load_schemas(
+                            &[config::Schema::Root(config::RootSchema {
+                                toml_version: None,
+                                path: schema_path.to_string_lossy().to_string(),
+                                include: vec!["*.toml".to_string()],
+                            })],
+                            None,
+                        )
+                        .await;
+                }
 
                 // Initialize formatter
                 let format_options = FormatOptions::default();

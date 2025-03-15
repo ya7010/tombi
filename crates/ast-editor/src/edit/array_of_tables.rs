@@ -1,4 +1,4 @@
-use document_tree::TryIntoDocumentTree;
+use document_tree::IntoDocumentTreeAndErrors;
 use futures::FutureExt;
 use itertools::Itertools;
 use schema_store::{GetHeaderSchemarAccessors, SchemaAccessor};
@@ -25,73 +25,71 @@ impl crate::Edit for ast::ArrayOfTables {
                 return changes;
             };
 
-            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
+            let mut value = &document_tree::Value::Table(
+                self.clone()
+                    .into_document_tree_and_errors(schema_context.toml_version)
+                    .tree,
+            );
+
+            let value_schema = if let (Some(schema_url), Some(value_schema), Some(definitions)) =
                 (schema_url, value_schema, definitions)
             {
-                if let Ok(table) = self
-                    .clone()
-                    .try_into_document_tree(schema_context.toml_version)
-                {
-                    let mut value = &document_tree::Value::Table(table);
-                    if let Some(value_schema) = get_schema(
-                        value,
-                        &header_accessors,
-                        value_schema,
-                        schema_url,
-                        definitions,
-                        schema_context,
-                    )
-                    .await
-                    {
-                        for header_accessor in &header_accessors {
-                            match (value, header_accessor) {
-                                (document_tree::Value::Table(table), SchemaAccessor::Key(key)) => {
-                                    value = table.get(key).unwrap()
-                                }
-                                (document_tree::Value::Array(array), SchemaAccessor::Index) => {
-                                    value = array.get(0).unwrap()
-                                }
-                                _ => {}
-                            }
-                        }
+                get_schema(
+                    value,
+                    &header_accessors,
+                    value_schema,
+                    schema_url,
+                    definitions,
+                    schema_context,
+                )
+                .await
+            } else {
+                None
+            };
 
-                        for key_value in self.key_values() {
-                            changes.extend(
-                                key_value
-                                    .edit(
-                                        &header_accessors,
-                                        Some(&value_schema),
-                                        Some(schema_url),
-                                        Some(definitions),
-                                        schema_context,
-                                    )
-                                    .await,
-                            );
-                        }
-
-                        changes.extend(
-                            table_keys_order(
-                                value,
-                                self.key_values().collect_vec(),
-                                &value_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await,
-                        );
-
-                        return changes;
+            for header_accessor in &header_accessors {
+                match (value, header_accessor) {
+                    (document_tree::Value::Table(table), SchemaAccessor::Key(key)) => {
+                        let Some(v) = table.get(key) else {
+                            return changes;
+                        };
+                        value = v;
                     }
-                };
+                    (document_tree::Value::Array(array), SchemaAccessor::Index) => {
+                        let Some(v) = array.get(0) else {
+                            return changes;
+                        };
+                        value = v;
+                    }
+                    _ => {}
+                }
             }
+
             for key_value in self.key_values() {
                 changes.extend(
                     key_value
-                        .edit(&header_accessors, None, None, None, schema_context)
+                        .edit(
+                            &header_accessors,
+                            value_schema.as_ref(),
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
                         .await,
                 );
             }
+
+            changes.extend(
+                table_keys_order(
+                    value,
+                    self.key_values().collect_vec(),
+                    value_schema.as_ref(),
+                    schema_url,
+                    definitions,
+                    schema_context,
+                )
+                .await,
+            );
 
             changes
         }
