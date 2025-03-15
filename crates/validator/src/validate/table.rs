@@ -3,7 +3,9 @@ use std::borrow::Cow;
 use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, SchemaAccessor, ValueSchema, ValueType};
+use schema_store::{
+    Accessor, CurrentSchema, SchemaAccessor, SchemaAccessors, ValueSchema, ValueType,
+};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 use crate::error::Patterns;
@@ -109,6 +111,13 @@ impl Validate for document_tree::Table {
                     for (key, value) in self.key_values() {
                         let accessor_raw_text = key.to_raw_text(schema_context.toml_version);
                         let accessor = Accessor::Key(accessor_raw_text.clone());
+                        let new_accessors = accessors
+                            .iter()
+                            .cloned()
+                            .chain(std::iter::once(SchemaAccessor::Key(
+                                accessor_raw_text.clone(),
+                            )))
+                            .collect::<Vec<_>>();
 
                         let mut matche_key = false;
                         if let Some(property_schema) = table_schema
@@ -133,20 +142,16 @@ impl Validate for document_tree::Table {
                                 })) => {
                                     if value_schema.deprecated() == Some(true) {
                                         crate::Warning {
-                                            kind: crate::WarningKind::Deprecated,
+                                            kind: crate::WarningKind::Deprecated(
+                                                SchemaAccessors::new(new_accessors.clone()),
+                                            ),
                                             range: key.range() + value.range(),
                                         }
                                         .set_diagnostics(&mut diagnostics);
                                     }
                                     if let Err(schema_diagnostics) = value
                                         .validate(
-                                            &accessors
-                                                .iter()
-                                                .cloned()
-                                                .chain(std::iter::once(SchemaAccessor::Key(
-                                                    accessor_raw_text.clone(),
-                                                )))
-                                                .collect::<Vec<_>>(),
+                                            &new_accessors,
                                             Some(value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
@@ -191,20 +196,16 @@ impl Validate for document_tree::Table {
                                     {
                                         if value_schema.deprecated() == Some(true) {
                                             crate::Warning {
-                                                kind: crate::WarningKind::Deprecated,
+                                                kind: crate::WarningKind::Deprecated(
+                                                    SchemaAccessors::new(new_accessors.clone()),
+                                                ),
                                                 range: key.range() + value.range(),
                                             }
                                             .set_diagnostics(&mut diagnostics);
                                         }
                                         if let Err(schema_diagnostics) = value
                                             .validate(
-                                                &accessors
-                                                    .iter()
-                                                    .cloned()
-                                                    .chain(std::iter::once(SchemaAccessor::Key(
-                                                        accessor_raw_text.clone(),
-                                                    )))
-                                                    .collect::<Vec<_>>(),
+                                                &new_accessors,
                                                 Some(value_schema),
                                                 Some(&schema_url),
                                                 Some(&definitions),
@@ -255,7 +256,9 @@ impl Validate for document_tree::Table {
                                 {
                                     if value_schema.deprecated() == Some(true) {
                                         crate::Warning {
-                                            kind: crate::WarningKind::Deprecated,
+                                            kind: crate::WarningKind::Deprecated(
+                                                SchemaAccessors::new(new_accessors.clone()),
+                                            ),
                                             range: key.range() + value.range(),
                                         }
                                         .set_diagnostics(&mut diagnostics);
@@ -263,13 +266,7 @@ impl Validate for document_tree::Table {
 
                                     if let Err(schema_diagnostics) = value
                                         .validate(
-                                            &accessors
-                                                .iter()
-                                                .cloned()
-                                                .chain(std::iter::once(SchemaAccessor::Key(
-                                                    accessor_raw_text,
-                                                )))
-                                                .collect::<Vec<_>>(),
+                                            &new_accessors,
                                             Some(value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
