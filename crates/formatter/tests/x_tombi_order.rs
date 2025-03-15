@@ -227,6 +227,42 @@ mod table_keys_order {
                 "#
             )
         }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_tool_mypy_overrides(
+                r#"
+                [[tool.mypy.overrides]]
+                module = [
+                    "pendulum.mixins.default",
+                    "tests.test_parsing",
+                    "tests.date.test_add",
+                    "tests.date.test_behavior",
+                    "tests.date.test_construct",
+                    "tests.date.test_comparison",
+                    "tests.date.test_day_of_week_modifiers",
+                    "tests.date.test_diff",
+                ]
+                ignore_errors = true
+                "#,
+                pyproject_schema_path(),
+            ) -> Ok(
+                r#"
+                [[tool.mypy.overrides]]
+                module = [
+                  "pendulum.mixins.default",
+                  "tests.test_parsing",
+                  "tests.date.test_add",
+                  "tests.date.test_behavior",
+                  "tests.date.test_construct",
+                  "tests.date.test_comparison",
+                  "tests.date.test_day_of_week_modifiers",
+                  "tests.date.test_diff",
+                ]
+                ignore_errors = true
+                "#
+            )
+        }
     }
 
     mod cargo {
