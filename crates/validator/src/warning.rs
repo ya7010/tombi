@@ -1,7 +1,7 @@
 #[derive(thiserror::Error, Debug)]
 pub enum WarningKind {
-    #[error("This value is deprecated")]
-    Deprecated,
+    #[error("`{0}` is deprecated")]
+    Deprecated(schema_store::SchemaAccessors),
 
     #[error("In strict mode, the JSON schema must be explicitly set to `\"additionalProperties\": true`. ")]
     StrictAdditionalProperties,

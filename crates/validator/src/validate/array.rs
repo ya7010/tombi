@@ -115,9 +115,16 @@ impl Validate for document_tree::Array {
                             )
                             .await
                         {
+                            let new_accessors = accessors
+                                .iter()
+                                .cloned()
+                                .chain(std::iter::once(schema_store::SchemaAccessor::Index))
+                                .collect::<Vec<_>>();
                             if value_schema.deprecated() == Some(true) {
                                 crate::Warning {
-                                    kind: crate::WarningKind::Deprecated,
+                                    kind: crate::WarningKind::Deprecated(
+                                        schema_store::SchemaAccessors::new(new_accessors.clone()),
+                                    ),
                                     range: self.range(),
                                 }
                                 .set_diagnostics(&mut diagnostics);
@@ -126,13 +133,7 @@ impl Validate for document_tree::Array {
                             for value in self.values().iter() {
                                 if let Err(schema_diagnostics) = value
                                     .validate(
-                                        &accessors
-                                            .iter()
-                                            .cloned()
-                                            .chain(std::iter::once(
-                                                schema_store::SchemaAccessor::Index,
-                                            ))
-                                            .collect::<Vec<_>>(),
+                                        &new_accessors,
                                         Some(value_schema),
                                         Some(&schema_url),
                                         Some(&definitions),
