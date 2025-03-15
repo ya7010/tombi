@@ -322,32 +322,15 @@ impl SchemaStore {
         source_url_or_path: Either<&url::Url, &std::path::Path>,
     ) -> Result<Option<SourceSchema>, crate::Error> {
         match source_url_or_path {
-            Either::Left(source_url) => self
-                .try_get_source_schema_from_url(source_url)
-                .await
-                .inspect(|source_schema| {
-                    if let Some(source_schema) = source_schema {
-                        if let Some(root_schema) = &source_schema.root_schema {
-                            tracing::debug!(
-                                "find root schema from url: {}",
-                                root_schema.schema_url
-                            );
-                        }
-                    }
-                }),
-            Either::Right(source_path) => self
-                .try_get_source_schema_from_path(source_path)
-                .await
-                .inspect(|source_schema| {
-                    if let Some(source_schema) = source_schema {
-                        if let Some(root_schema) = &source_schema.root_schema {
-                            tracing::debug!(
-                                "find root schema from path: {}",
-                                root_schema.schema_url
-                            );
-                        }
-                    }
-                }),
+            Either::Left(source_url) => self.try_get_source_schema_from_url(source_url).await,
+            Either::Right(source_path) => self.try_get_source_schema_from_path(source_path).await,
         }
+        .inspect(|source_schema| {
+            if let Some(source_schema) = source_schema {
+                if let Some(root_schema) = &source_schema.root_schema {
+                    tracing::debug!("find root schema from {}", root_schema.schema_url);
+                }
+            }
+        })
     }
 }
