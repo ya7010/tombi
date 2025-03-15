@@ -58,7 +58,7 @@ pub struct Schema {
     pub toml_version: Option<config::TomlVersion>,
     pub url: crate::SchemaUrl,
     pub include: Vec<String>,
-    pub root_keys: Option<Vec<SchemaAccessor>>,
+    pub sub_root_keys: Option<Vec<SchemaAccessor>>,
 }
 
 pub trait FindSchemaCandidates {
