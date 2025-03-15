@@ -35,6 +35,24 @@ main {
   margin-top: 0rem;
 }
 
+.heading-with-anchor {
+  position: relative;
+}
+
+.anchor-link {
+  margin-left: 0.5em;
+  color: #3B82F6;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-size: 0.8em;
+  text-decoration: none;
+}
+
+.heading-with-anchor:hover .anchor-link {
+  opacity: 1;
+}
+
 .mdx-content a {
   color: #3B82F6; /* text-blue-500 */
   text-decoration: none;
