@@ -207,6 +207,8 @@ where
                                         )
                                         .await,
                                     );
+                                } else {
+                                    results.extend(targets.into_iter().map(|(_, target)| target));
                                 }
                             } else if let Some(referable_schema) =
                                 &table_schema.additional_property_schema
@@ -241,6 +243,8 @@ where
                                         )
                                         .await,
                                     );
+                                } else {
+                                    results.extend(targets.into_iter().map(|(_, target)| target));
                                 }
                             } else {
                                 results.extend(targets.into_iter().map(|(_, target)| target));
