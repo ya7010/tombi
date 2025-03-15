@@ -460,12 +460,12 @@ mod table_keys_order {
     #[macro_export]
     macro_rules! test_format {
         (
-                #[tokio::test]
-                async fn $name:ident(
-                    $source:expr,
-                    $schema_path:expr$(,)?
-                ) -> Ok($expected:expr$(,)?)
-            ) => {
+            #[tokio::test]
+            async fn $name:ident(
+                $source:expr,
+                $schema_path:expr$(,)?
+            ) -> Ok($expected:expr$(,)?)
+        ) => {
             #[tokio::test]
             async fn $name() {
                 use config::TomlVersion;
