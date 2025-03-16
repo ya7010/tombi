@@ -10,10 +10,15 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_formatting(
     backend: &Backend,
-    DocumentFormattingParams { text_document, .. }: DocumentFormattingParams,
+    document_formatting_params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_formatting");
-    tracing::trace!("text_document: {:#?}", text_document);
+    tracing::trace!(
+        "document_formatting_params: {:#?}",
+        document_formatting_params
+    );
+
+    let DocumentFormattingParams { text_document, .. } = document_formatting_params;
 
     let config = backend.config().await;
 

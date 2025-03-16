@@ -5,10 +5,19 @@
       "path": "."
     },
     {
-      "path": "rust/tombi-cli"
+      "path": "xtask"
     },
     {
-      "path": "rust/tombi-lsp"
+      "path": "crates/x-tombi"
+    },
+    {
+      "path": "crates/toml-version"
+    },
+    {
+      "path": "crates/config"
+    },
+    {
+      "path": "crates/diagnostic"
     },
     {
       "path": "crates/text"
@@ -17,10 +26,19 @@
       "path": "crates/lexer"
     },
     {
+      "path": "crates/rg-tree"
+    },
+    {
       "path": "crates/syntax"
     },
     {
       "path": "crates/ast"
+    },
+    {
+      "path": "crates/ast-editor"
+    },
+    {
+      "path": "crates/parser"
     },
     {
       "path": "crates/document-tree"
@@ -29,19 +47,22 @@
       "path": "crates/document"
     },
     {
-      "path": "crates/parser"
+      "path": "crates/schema-store"
     },
     {
       "path": "crates/formatter"
     },
     {
+      "path": "crates/validator"
+    },
+    {
       "path": "crates/linter"
     },
     {
-      "path": "crates/schema-store"
+      "path": "crates/server"
     },
     {
-      "path": "xtask"
+      "path": "rust/tombi-cli"
     }
   ],
   "settings": {
