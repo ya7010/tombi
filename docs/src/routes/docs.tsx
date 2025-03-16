@@ -13,11 +13,8 @@ export default function DocumentationLayout(props: RouteSectionProps) {
     location.pathname;
     requestAnimationFrame(() => {
       Prism.highlightAll();
+      setupAnchors();
     });
-  });
-
-  onMount(() => {
-    setupAnchors();
   });
 
   return (
