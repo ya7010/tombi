@@ -25,6 +25,8 @@ url = { workspace = true }
 validator.workspace = true
 
 [dev-dependencies]
+assert_matches.workspace = true
+pretty_assertions.workspace = true
 test-lib.workspace = true
 tokio = { workspace = true, features = ["macros"] }
 tracing-subscriber.workspace = true

@@ -3,8 +3,8 @@ pub enum WarningKind {
     #[error("`{0}` is deprecated")]
     Deprecated(schema_store::SchemaAccessors),
 
-    #[error("In strict mode, the JSON schema must be explicitly set to `\"additionalProperties\": true`. ")]
-    StrictAdditionalProperties,
+    #[error("\"{key}\" is not allowed; In strict mode, the JSON schema must be explicitly set to `\"additionalProperties\": true`. ")]
+    StrictAdditionalProperties { key: String },
 }
 
 #[derive(Debug)]
