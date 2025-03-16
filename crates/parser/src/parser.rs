@@ -310,15 +310,18 @@ impl<'t> Parser<'t> {
         self.do_bump(kind, n_raw_tokens);
     }
 
+    #[inline]
     pub(crate) fn push_event(&mut self, event: Event) {
         self.events.push(event);
     }
 
+    #[inline]
     pub(crate) fn invalid_token(&mut self) {
         self.start().complete(self, INVALID_TOKEN);
     }
 
     /// Emit error with the `message`
+    #[inline]
     pub(crate) fn error(&mut self, error: crate::Error) {
         self.push_event(Event::Error { error });
     }
