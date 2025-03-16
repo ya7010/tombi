@@ -149,12 +149,12 @@ macro_rules! test_lint {
                     panic!("Expected errors but got success");
                 }
                 Err(errors) => {
-                    assert_eq!(
+                    pretty_assertions::assert_eq!(
                         errors
                             .into_iter()
                             .map(|error| error.message().to_string())
                             .collect::<Vec<_>>(),
-                        [$($error.to_string()),*].into_iter().collect::<Vec<_>>()
+                        [$($error.to_string()),*].into_iter().collect::<Vec<String>>()
                     );
                 }
             }
@@ -181,6 +181,30 @@ mod tests {
                 "#,
                 cargo_schema_path(),
             ) -> Ok(_);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_workspace_unknown(
+                r#"
+                [workspace]
+                aaa = 1
+                "#,
+                cargo_schema_path(),
+            ) -> Err([validator::WarningKind::StrictAdditionalProperties {
+                key: "aaa".to_string(),
+            }]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_unonkwn_keys(
+                r#"
+                [aaa]
+                bbb = 1
+                "#,
+                cargo_schema_path(),
+            ) -> Err([validator::ErrorKind::KeyNotAllowed { key: "aaa".to_string() }]);
         }
     }
 

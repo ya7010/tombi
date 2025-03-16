@@ -279,23 +279,28 @@ impl Validate for document_tree::Table {
                                 }
                                 continue;
                             }
-                            if !table_schema.any_additional_properties() {
-                                if schema_context.strict() {
-                                    crate::Warning {
-                                        kind: crate::WarningKind::StrictAdditionalProperties,
-                                        range: key.range() + value.range(),
-                                    }
-                                    .set_diagnostics(&mut diagnostics);
-                                } else {
-                                    crate::Error {
-                                        kind: crate::ErrorKind::KeyNotAllowed {
-                                            key: key.to_string(),
-                                        },
-                                        range: key.range() + value.range(),
-                                    }
-                                    .set_diagnostics(&mut diagnostics);
+                            if table_schema.check_strict_additional_properties_violation(
+                                schema_context.strict(),
+                            ) {
+                                crate::Warning {
+                                    kind: crate::WarningKind::StrictAdditionalProperties {
+                                        key: key.to_string(),
+                                    },
+                                    range: key.range() + value.range(),
                                 }
-
+                                .set_diagnostics(&mut diagnostics);
+                                continue;
+                            }
+                            if !table_schema
+                                .allows_any_additional_properties(schema_context.strict())
+                            {
+                                crate::Error {
+                                    kind: crate::ErrorKind::KeyNotAllowed {
+                                        key: key.to_string(),
+                                    },
+                                    range: key.range() + value.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
                                 continue;
                             }
                         }
