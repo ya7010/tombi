@@ -5,23 +5,24 @@ changelog:
     authors:
       - octocat
   categories:
-    - title: 💫 New Features
+    - title: 🚨 Breaking Changes
       labels:
-        - Semver-Minor
-        - enhancement
-    - title: 🛠 Breaking Changes
-      labels:
-        - Semver-Major
         - breaking-change
-    - title: 🔧 Other Changes
+    - title: 🚀 New Features
+      labels:
+        - enhancement
+    - title: 🐛 Bug Fixes
+      labels:
+        - bug
+    - title: 👒 Dependencies
+      labels:
+        - dependencies
+    - title: 🛠️ Other Changes
       labels:
         - "*"
       exclude:
         labels:
-          - dependencies
+          - breaking-change
           - enhancement
-          - Semver-Major
-          - Semver-Minor
-    - title: 👒 Dependencies
-      labels:
-        - dependencies
+          - bug
+          - dependencies
