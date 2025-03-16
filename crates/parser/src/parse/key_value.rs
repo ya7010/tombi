@@ -16,8 +16,10 @@ impl Parse for ast::KeyValue {
         }
 
         if p.at_ts(TS_LINE_END) {
+            p.invalid_token();
             p.error(crate::Error::new(ExpectedValue, p.current_range()));
         } else if p.at(COMMENT) {
+            p.invalid_token();
             p.error(crate::Error::new(ExpectedValue, p.previous_range()));
         } else {
             ast::Value::parse(p);

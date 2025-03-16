@@ -119,6 +119,20 @@ mod hover_keys_value {
 
         test_hover_keys_value!(
             #[tokio::test]
+            async fn cargo_package_name_incomplete(
+                r#"
+                [package]
+                name = █
+                "#,
+                cargo_schema_path(),
+            ) -> Ok({
+                "Keys": "package.name",
+                "Value": "String"
+            });
+        );
+
+        test_hover_keys_value!(
+            #[tokio::test]
             async fn cargo_package_readme(
                 r#"
                 [package]

@@ -314,6 +314,10 @@ impl<'t> Parser<'t> {
         self.events.push(event);
     }
 
+    pub(crate) fn invalid_token(&mut self) {
+        self.start().complete(self, INVALID_TOKEN);
+    }
+
     /// Emit error with the `message`
     pub(crate) fn error(&mut self, error: crate::Error) {
         self.push_event(Event::Error { error });
