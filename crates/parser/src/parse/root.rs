@@ -28,6 +28,7 @@ impl Parse for ast::Root {
             } else {
                 unknwon_line(p);
             }
+            while p.eat(LINE_BREAK) {}
         }
 
         end_dangling_comments(p, true);

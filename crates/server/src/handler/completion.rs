@@ -83,13 +83,6 @@ pub async fn handle_completion(
         }
     }
 
-    // FIXME: Remove whitespaces, because the AST assigns the whitespace to the next section.
-    //        In the future, it would be better to move the whitespace in ast_editor.
-    let mut position: text::Position = position.into();
-    while position.column() != 0 && position.char_at_left(&document_source.source) == Some(' ') {
-        position = text::Position::new(position.line(), position.column() - 1);
-    }
-
     let toml_version = backend.toml_version().await.unwrap_or_default();
     let Some(root) = backend
         .get_incomplete_ast(&text_document.uri, toml_version)
@@ -101,7 +94,7 @@ pub async fn handle_completion(
     Ok(Some(
         get_completion_contents(
             root,
-            position,
+            position.into(),
             &schema_store::SchemaContext {
                 toml_version,
                 root_schema,

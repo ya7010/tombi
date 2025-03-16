@@ -48,6 +48,28 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn tombi_used_toml_version_and_other_table(
+                r#"
+                toml-version = "v1.0.0"
+                █
+
+                [server]
+                "#,
+                tombi_schema_path(),
+            ) -> Ok([
+                "exclude",
+                "format",
+                "include",
+                "lint",
+                "schema",
+                "schemas",
+                "server",
+                // "toml-version",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn tombi_empty_bracket(
                 "[█]",
                 tombi_schema_path(),
