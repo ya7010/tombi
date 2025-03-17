@@ -103,6 +103,14 @@ fn format_comment(
     strip_leading_spaces: bool,
 ) -> Result<(), std::fmt::Error> {
     let comment = comment.to_string();
+    {
+        // For the purpose of reading the JSON Schema path defined in the file by taplo,
+        // we format in a different style from the tombi comment style.
+        if comment.starts_with("#:schema ") {
+            return write!(f, "#:schema {}", comment[9..].trim());
+        }
+    }
+
     let mut iter = comment.trim_ascii_end().chars();
 
     // write '#' character
@@ -163,5 +171,15 @@ mod tests {
             #       This allows for multi-line indentation to be preserved.
             "#
         ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn schema_comment(r"#:schema https://example.com/schema.json") -> Ok("#:schema https://example.com/schema.json");
+    }
+
+    test_format! {
+        #[test]
+        fn schema_comment_with_space(r"#:schema  https://example.com/schema.json  ") -> Ok("#:schema https://example.com/schema.json");
     }
 }

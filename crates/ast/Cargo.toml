@@ -11,3 +11,5 @@ syntax = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 toml-version = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }

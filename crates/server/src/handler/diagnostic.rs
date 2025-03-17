@@ -1,9 +1,8 @@
 use config::LintOptions;
 use itertools::Either;
 use tower_lsp::lsp_types::{
-    notification::ShowMessage, DocumentDiagnosticParams, DocumentDiagnosticReport,
-    DocumentDiagnosticReportResult, FullDocumentDiagnosticReport, MessageType,
-    RelatedFullDocumentDiagnosticReport, ShowMessageParams,
+    DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
+    FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
 };
 
 use crate::backend::Backend;
@@ -38,38 +37,23 @@ pub async fn handle_diagnostic(
 
     let document_sources = backend.document_sources.read().await;
     let diagnostics = match document_sources.get(&text_document.uri) {
-        Some(document) => {
-            match linter::Linter::try_new(
-                backend.toml_version().await.unwrap_or_default(),
-                backend
-                    .config()
-                    .await
-                    .lint
-                    .as_ref()
-                    .unwrap_or(&LintOptions::default()),
-                Some(Either::Left(&text_document.uri)),
-                &backend.schema_store,
-            )
-            .await
-            {
-                Ok(linter) => linter.lint(&document.source).await.map_or_else(
-                    |diagnostics| diagnostics.into_iter().map(Into::into).collect(),
-                    |_| vec![],
-                ),
-                Err(err) => {
-                    tracing::error!("{err}");
-
-                    backend
-                        .client
-                        .send_notification::<ShowMessage>(ShowMessageParams {
-                            typ: MessageType::ERROR,
-                            message: err.to_string(),
-                        })
-                        .await;
-                    vec![]
-                }
-            }
-        }
+        Some(document) => linter::Linter::new(
+            backend.toml_version().await.unwrap_or_default(),
+            backend
+                .config()
+                .await
+                .lint
+                .as_ref()
+                .unwrap_or(&LintOptions::default()),
+            Some(Either::Left(&text_document.uri)),
+            &backend.schema_store,
+        )
+        .lint(&document.source)
+        .await
+        .map_or_else(
+            |diagnostics| diagnostics.into_iter().map(Into::into).collect(),
+            |_| vec![],
+        ),
         None => vec![],
     };
 

@@ -230,51 +230,47 @@ where
 {
     let mut source = String::new();
     if file.read_to_string(&mut source).await.is_ok() {
-        match formatter::Formatter::try_new(
+        match formatter::Formatter::new(
             toml_version,
             FormatDefinitions::default(),
             format_options,
             source_path.map(itertools::Either::Right),
             schema_store,
         )
+        .format(&source)
         .await
         {
-            Ok(formatter) => match formatter.format(&source).await {
-                Ok(formatted) => {
-                    if source != formatted {
-                        if check {
-                            crate::error::NotFormattedError::from(file.source())
-                                .into_error()
-                                .print(printer);
-                        } else {
-                            if let Err(err) = file.reset().await {
+            Ok(formatted) => {
+                if source != formatted {
+                    if check {
+                        crate::error::NotFormattedError::from(file.source())
+                            .into_error()
+                            .print(printer);
+                    } else {
+                        if let Err(err) = file.reset().await {
+                            crate::Error::Io(err).print(printer);
+                            return Err(());
+                        }
+                        match file.write_all(formatted.as_bytes()).await {
+                            Ok(_) => return Ok(true),
+                            Err(err) => {
                                 crate::Error::Io(err).print(printer);
-                                return Err(());
-                            }
-                            match file.write_all(formatted.as_bytes()).await {
-                                Ok(_) => return Ok(true),
-                                Err(err) => {
-                                    crate::Error::Io(err).print(printer);
-                                }
                             }
                         }
-                    } else {
-                        return Ok(false);
                     }
-                }
-                Err(diagnostics) => if let Some(source_path) = source_path {
-                    diagnostics
-                        .into_iter()
-                        .map(|diagnostic| diagnostic.with_source_file(source_path))
-                        .collect()
                 } else {
-                    diagnostics
+                    return Ok(false);
                 }
-                .print(printer),
-            },
-            Err(err) => {
-                tracing::error!("failed to create formatter: {}", err);
             }
+            Err(diagnostics) => if let Some(source_path) = source_path {
+                diagnostics
+                    .into_iter()
+                    .map(|diagnostic| diagnostic.with_source_file(source_path))
+                    .collect()
+            } else {
+                diagnostics
+            }
+            .print(printer),
         }
     }
     Err(())

@@ -27,14 +27,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_key_empty() {
-        let diagnostics = crate::Linter::try_new(
+        let diagnostics = crate::Linter::new(
             config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
             &schema_store::SchemaStore::new(schema_store::Options::default()),
         )
-        .await
-        .unwrap()
         .lint("'' = 1")
         .await
         .unwrap_err();

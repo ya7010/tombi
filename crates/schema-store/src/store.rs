@@ -3,7 +3,7 @@ use std::{ops::Deref, sync::Arc};
 use ahash::AHashMap;
 use config::Schema;
 use futures::{future::BoxFuture, FutureExt};
-use itertools::Either;
+use itertools::{Either, Itertools};
 use tokio::sync::RwLock;
 
 use crate::{
@@ -195,7 +195,7 @@ impl SchemaStore {
         schema_url: &'a SchemaUrl,
     ) -> BoxFuture<'b, Result<Option<DocumentSchema>, crate::Error>> {
         async move {
-            if matches!(schema_url.scheme(), "http" | "https") && self.offline() {
+            if self.offline() && matches!(schema_url.scheme(), "http" | "https") {
                 return Ok(None);
             }
 
@@ -214,6 +214,70 @@ impl SchemaStore {
             self.try_get_document_schema(schema_url).await
         }
         .boxed()
+    }
+
+    pub async fn try_get_source_schema_from_ast(
+        &self,
+        root: &ast::Root,
+        source_url_or_path: Option<Either<&url::Url, &std::path::Path>>,
+    ) -> Result<Option<SourceSchema>, crate::Error> {
+        let source_path = match source_url_or_path {
+            Some(Either::Left(url)) => match url.scheme() {
+                "file" => url.to_file_path().ok(),
+                _ => None,
+            },
+            Some(Either::Right(path)) => Some(path.to_path_buf()),
+            None => None,
+        };
+
+        if let Some(comments) = itertools::chain!(
+            root.begin_dangling_comments()
+                .into_iter()
+                .next()
+                .map(|comment| {
+                    comment
+                        .into_iter()
+                        .map(|comment| ast::Comment::from(comment))
+                        .collect_vec()
+                }),
+            root.dangling_comments().into_iter().next().map(|comment| {
+                comment
+                    .into_iter()
+                    .map(|comment| ast::Comment::from(comment))
+                    .collect_vec()
+            })
+        )
+        .find(|comments| !comments.is_empty())
+        {
+            for comment in comments {
+                if let Some(schema_url) = comment.schema_url(source_path.as_deref()) {
+                    if let Ok(source_schema) = self
+                        .try_get_source_schema_from_schema_url(&SchemaUrl::new(schema_url))
+                        .await
+                    {
+                        return Ok(source_schema);
+                    }
+                }
+            }
+        }
+
+        Ok(None)
+    }
+
+    #[inline]
+    pub async fn try_get_source_schema_from_schema_url(
+        &self,
+        schema_url: &SchemaUrl,
+    ) -> Result<Option<SourceSchema>, crate::Error> {
+        if self.offline() && matches!(schema_url.scheme(), "http" | "https") {
+            tracing::debug!("offline mode, skip fetch schema: {}", schema_url);
+            return Ok(None);
+        }
+
+        Ok(Some(SourceSchema {
+            root_schema: self.try_get_document_schema(&schema_url).await?,
+            sub_schema_url_map: Default::default(),
+        }))
     }
 
     pub async fn try_get_source_schema_from_url(
@@ -235,12 +299,8 @@ impl SchemaStore {
                     tracing::debug!("offline mode, skip fetch source from url: {}", source_url);
                     return Ok(None);
                 }
-                let schema_url = SchemaUrl::new(source_url.clone());
-
-                Ok(Some(SourceSchema {
-                    root_schema: self.try_get_document_schema(&schema_url).await?,
-                    sub_schema_url_map: Default::default(),
-                }))
+                self.try_get_source_schema_from_schema_url(&SchemaUrl::new(source_url.clone()))
+                    .await
             }
             "untitled" => Ok(None),
             _ => Err(crate::Error::SourceUrlUnsupported {

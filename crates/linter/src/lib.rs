@@ -51,14 +51,12 @@ macro_rules! test_lint {
             // Initialize linter with schema if provided
             let source_path = std::path::PathBuf::from("test.toml");
             let options = crate::LintOptions::default();
-            let linter = $crate::Linter::try_new(
+            let linter = $crate::Linter::new(
                 TomlVersion::default(),
                 &options,
                 Some(itertools::Either::Right(source_path.as_path())),
                 &schema_store,
-            )
-            .await
-            .unwrap();
+            );
 
             let result = linter.lint($source).await;
 
@@ -134,14 +132,12 @@ macro_rules! test_lint {
             // Initialize linter with schema if provided
             let source_path = std::path::PathBuf::from("test.toml");
             let options = crate::LintOptions::default();
-            let linter = $crate::Linter::try_new(
+            let linter = $crate::Linter::new(
                 TomlVersion::default(),
                 &options,
                 Some(itertools::Either::Right(source_path.as_path())),
                 &schema_store,
-            )
-            .await
-            .unwrap();
+            );
 
             let result = linter.lint($source).await;
             match result {

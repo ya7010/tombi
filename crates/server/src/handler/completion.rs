@@ -1,3 +1,4 @@
+use itertools::Either;
 use tower_lsp::lsp_types::{
     CompletionContext, CompletionParams, CompletionTriggerKind, TextDocumentPositionParams,
 };
@@ -46,14 +47,27 @@ pub async fn handle_completion(
         return Ok(None);
     }
 
-    let Ok(source_schema) = &backend
-        .schema_store
-        .try_get_source_schema_from_url(&text_document.uri)
+    let toml_version = backend.toml_version().await.unwrap_or_default();
+    let Some(root) = backend
+        .get_incomplete_ast(&text_document.uri, toml_version)
         .await
     else {
-        tracing::debug!("schema not found: {}", text_document.uri);
         return Ok(None);
     };
+
+    let source_schema = backend
+        .schema_store
+        .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document.uri)))
+        .await
+        .ok()
+        .flatten()
+        .or(backend
+            .schema_store
+            .try_get_source_schema_from_url(&text_document.uri)
+            .await
+            .ok()
+            .flatten());
+
     let document_sources = backend.document_sources.read().await;
     let Some(document_source) = document_sources.get(&text_document.uri) else {
         return Ok(None);
@@ -61,7 +75,7 @@ pub async fn handle_completion(
 
     let root_schema = source_schema
         .as_ref()
-        .and_then(|source_schema| source_schema.root_schema.as_ref());
+        .and_then(|schema| schema.root_schema.as_ref());
 
     // Skip completion if the trigger character is a whitespace or if there is no schema.
     if let Some(CompletionContext {
@@ -83,14 +97,6 @@ pub async fn handle_completion(
         }
     }
 
-    let toml_version = backend.toml_version().await.unwrap_or_default();
-    let Some(root) = backend
-        .get_incomplete_ast(&text_document.uri, toml_version)
-        .await
-    else {
-        return Ok(None);
-    };
-
     Ok(Some(
         get_completion_contents(
             root,
@@ -100,7 +106,7 @@ pub async fn handle_completion(
                 root_schema,
                 sub_schema_url_map: source_schema
                     .as_ref()
-                    .map(|source_schema| &source_schema.sub_schema_url_map),
+                    .map(|schema| &schema.sub_schema_url_map),
                 store: &backend.schema_store,
             },
         )
