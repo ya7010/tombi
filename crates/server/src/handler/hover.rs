@@ -1,6 +1,6 @@
 use ast::{algo::ancestors_at_position, AstNode};
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use schema_store::SchemaContext;
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
@@ -55,6 +55,14 @@ pub async fn handle_hover(
     else {
         return Ok(None);
     };
+
+    let source_schema = backend
+        .schema_store
+        .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document.uri)))
+        .await
+        .ok()
+        .flatten()
+        .or(source_schema);
 
     let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
         return Ok(None);

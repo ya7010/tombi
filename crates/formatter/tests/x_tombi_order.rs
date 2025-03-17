@@ -559,15 +559,13 @@ mod table_keys_order {
                 // Initialize formatter
                 let format_options = FormatOptions::default();
                 let source_path = std::path::PathBuf::from("pyproject.toml");
-                let formatter = Formatter::try_new(
+                let formatter = Formatter::new(
                     TomlVersion::default(),
                     formatter::formatter::definitions::FormatDefinitions::default(),
                     &format_options,
                     Some(itertools::Either::Right(source_path.as_path())),
                     &schema_store,
-                )
-                .await
-                .unwrap();
+                );
 
                 // Test that keys are reordered according to schema order
                 let source = dedent($source).trim().to_string();

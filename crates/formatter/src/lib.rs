@@ -43,13 +43,13 @@ macro_rules! test_format {
                     .try_init();
             }
 
-            match $crate::Formatter::try_new(
+            match $crate::Formatter::new(
                 $toml_version,
                 $definitions,
                 $options,
                 None,
                 &schema_store::SchemaStore::new(schema_store::Options::default())
-            ).await.unwrap().format($source).await {
+            ).format($source).await {
                 Ok(formatted_text) => {
                     pretty_assertions::assert_eq!(formatted_text, textwrap::dedent($expected).trim().to_string() + "\n");
                 }
@@ -82,13 +82,13 @@ macro_rules! test_format {
                     .try_init();
             }
 
-            match $crate::Formatter::try_new(
+            match $crate::Formatter::new(
                 $toml_version,
                 $definitions,
                 $options,
                 None,
                 &schema_store::SchemaStore::new(schema_store::Options::default())
-            ).await.unwrap().format($source).await {
+            ).format($source).await {
                 Ok(_) => panic!("expected an error"),
                 Err(errors) => {
                     pretty_assertions::assert_ne!(errors, vec![]);
