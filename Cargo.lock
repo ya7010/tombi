@@ -1847,6 +1847,18 @@ dependencies = [
 [[package]]
 name = "serde_tombi"
 version = "0.0.1"
+dependencies = [
+ "ast",
+ "document",
+ "document-tree",
+ "indexmap",
+ "itertools",
+ "parser",
+ "serde",
+ "text",
+ "thiserror",
+ "toml-version",
+]
 
 [[package]]
 name = "serde_urlencoded"
