@@ -27,7 +27,7 @@ pub struct Table {
 }
 
 impl Table {
-    pub(crate) fn new(kind: TableKind) -> Self {
+    pub fn new(kind: TableKind) -> Self {
         Self {
             kind,
             key_values: IndexMap::new(),

@@ -36,7 +36,7 @@ pub struct Array {
 }
 
 impl Array {
-    pub(crate) fn new(kind: ArrayKind) -> Self {
+    pub fn new(kind: ArrayKind) -> Self {
         Self {
             kind,
             values: Vec::new(),

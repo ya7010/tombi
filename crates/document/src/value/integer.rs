@@ -36,7 +36,7 @@ pub struct Integer {
 
 impl Integer {
     #[inline]
-    pub(crate) fn new(value: i64) -> Self {
+    pub fn new(value: i64) -> Self {
         Self {
             kind: IntegerKind::Decimal,
             value,

@@ -27,6 +27,10 @@ pub struct Key {
 }
 
 impl Key {
+    pub fn new(kind: KeyKind, value: String) -> Self {
+        Self { kind, value }
+    }
+
     #[inline]
     pub fn value(&self) -> &str {
         &self.value

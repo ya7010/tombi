@@ -8,3 +8,13 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
+ast = { workspace = true }
+document = { workspace = true }
+document-tree = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
+parser = { workspace = true }
+serde = { workspace = true }
+text = { workspace = true }
+thiserror = { workspace = true }
+toml-version = { workspace = true }
