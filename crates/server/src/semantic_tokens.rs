@@ -11,7 +11,7 @@ pub trait AppendSemanticTokens {
 
 impl AppendSemanticTokens for ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for comments in self.begin_dangling_comments() {
+        for comments in self.key_values_begin_dangling_comments() {
             for comment in comments {
                 builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }
@@ -21,7 +21,7 @@ impl AppendSemanticTokens for ast::Root {
             item.append_semantic_tokens(builder);
         }
 
-        for comments in self.end_dangling_comments() {
+        for comments in self.key_values_end_dangling_comments() {
             for comment in comments {
                 builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
             }

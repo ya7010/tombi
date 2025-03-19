@@ -231,7 +231,7 @@ impl SchemaStore {
         };
 
         if let Some(comments) = itertools::chain!(
-            root.begin_dangling_comments()
+            root.key_values_begin_dangling_comments()
                 .into_iter()
                 .next()
                 .map(|comment| {

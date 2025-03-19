@@ -135,11 +135,20 @@ mod test {
     #[test]
     fn test_sample_toml(
 r#"
-# root begin dangling comment1
-# root begin dangling comment2
+# key values begin dangling comment1
+# key values begin dangling comment2
 
-# root begin dangling comment3
-# root begin dangling comment4
+# key values begin dangling comment3
+# key values begin dangling comment4
+
+key1 = 1
+key2 = "2"
+
+# key values end dangling comment1
+# key values end dangling comment2
+
+# key values end dangling comment3
+# key values end dangling comment4
 
 # table leading comment1
 # table leading comment2
@@ -219,11 +228,11 @@ lt1 = 07:32:00  # lt1 tailing comment
 # lt2 leading tailing comment
 lt2 = 00:32:00.999999  # lt2 tailing comment
 
-# table end dangling comment1
-# table end dangling comment2
+# table key values end dangling comment1
+# table key values end dangling comment2
 
-# table end dangling comment3
-# table end dangling comment4
+# table key values end dangling comment3
+# table key values end dangling comment4
 
 # table leading comment1
 # table leading comment2
@@ -244,12 +253,18 @@ key6 = 1
 key6 = 2
 
 [[ffff.ggg]]  # header tailing comment
+# table key values begin dangling comment1
+# table key values begin dangling comment2
+
+# table key values begin dangling comment3
+# table key values begin dangling comment4
+
 # key value leading comment1
 # key value leading comment2
 key6 = 3  # key value tailing comment
 
-# end dangling comment1
-# end dangling comment2
+# table key values end dangling comment1
+# table key values end dangling comment2
 "#,
     TomlVersion::V1_1_0_Preview,
     FormatDefinitions{

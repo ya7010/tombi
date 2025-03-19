@@ -43,7 +43,7 @@ impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
         let mut tree = crate::DocumentTree(crate::Table::new_root(&self));
         let mut errors = Vec::new();
 
-        for comments in self.begin_dangling_comments() {
+        for comments in self.key_values_begin_dangling_comments() {
             for comment in comments {
                 if let Err(error) = try_new_comment(comment.as_ref()) {
                     errors.push(error);
@@ -69,7 +69,7 @@ impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
             }
         }
 
-        for comments in self.end_dangling_comments() {
+        for comments in self.key_values_end_dangling_comments() {
             for comment in comments {
                 if let Err(error) = try_new_comment(comment.as_ref()) {
                     errors.push(error);
