@@ -3,14 +3,14 @@ use tower_lsp::lsp_types::DidChangeTextDocumentParams;
 use crate::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
-pub async fn handle_did_change(
-    backend: &Backend,
-    DidChangeTextDocumentParams {
+pub async fn handle_did_change(backend: &Backend, params: DidChangeTextDocumentParams) {
+    tracing::info!("handle_did_change");
+    tracing::trace!(?params);
+
+    let DidChangeTextDocumentParams {
         text_document,
         content_changes,
-    }: DidChangeTextDocumentParams,
-) {
-    tracing::info!("handle_did_change");
+    } = params;
 
     let mut document_sources = backend.document_sources.write().await;
     let Some(document) = document_sources.get_mut(&text_document.uri) else {

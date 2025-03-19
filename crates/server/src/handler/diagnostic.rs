@@ -10,15 +10,12 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_diagnostic(
     backend: &Backend,
-    document_diagnostic_params: DocumentDiagnosticParams,
+    params: DocumentDiagnosticParams,
 ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_diagnostic");
-    tracing::trace!(
-        "document_diagnostic_params: {:#?}",
-        document_diagnostic_params
-    );
+    tracing::trace!(?params);
 
-    let DocumentDiagnosticParams { text_document, .. } = document_diagnostic_params;
+    let DocumentDiagnosticParams { text_document, .. } = params;
 
     let config = backend.config().await;
 
