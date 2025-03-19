@@ -1,15 +1,14 @@
 use ast::AstNode;
-use document_tree::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors};
+use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Itertools;
 use schema_store::{SchemaAccessor, SchemaContext, ValueSchema};
-use syntax::{SyntaxElement, SyntaxNode};
-use toml_version::TomlVersion;
+use syntax::SyntaxElement;
 
 use crate::rule::table_keys_order::{sorted_accessors, table_keys_order};
 
 pub async fn root_table_keys_order<'a>(
     key_values: Vec<ast::KeyValue>,
-    table_or_array_of_tables: Vec<TableOrArrayOfTables>,
+    table_or_array_of_tables: Vec<ast::TableOrArrayOfTable>,
     value_schema: Option<&'a ValueSchema>,
     schema_url: Option<&'a schema_store::SchemaUrl>,
     definitions: Option<&'a schema_store::SchemaDefinitions>,
@@ -86,40 +85,4 @@ pub async fn root_table_keys_order<'a>(
     changes.push(crate::Change::ReplaceRange { old, new });
 
     changes
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum TableOrArrayOfTables {
-    Table(ast::Table),
-    ArrayOfTables(ast::ArrayOfTables),
-}
-
-impl TableOrArrayOfTables {
-    fn header(&self) -> Option<ast::Keys> {
-        match self {
-            Self::Table(table) => table.header(),
-            Self::ArrayOfTables(array_of_tables) => array_of_tables.header(),
-        }
-    }
-
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::Table(table) => table.syntax(),
-            Self::ArrayOfTables(array_of_tables) => array_of_tables.syntax(),
-        }
-    }
-}
-
-impl IntoDocumentTreeAndErrors<document_tree::Table> for TableOrArrayOfTables {
-    fn into_document_tree_and_errors(
-        self,
-        toml_version: TomlVersion,
-    ) -> DocumentTreeAndErrors<document_tree::Table> {
-        match self {
-            Self::Table(table) => table.into_document_tree_and_errors(toml_version),
-            Self::ArrayOfTables(array_of_tables) => {
-                array_of_tables.into_document_tree_and_errors(toml_version)
-            }
-        }
-    }
 }

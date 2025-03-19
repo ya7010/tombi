@@ -9,15 +9,15 @@ pub enum TableOrArrayOfTable {
 impl TableOrArrayOfTable {
     pub fn header(&self) -> Option<Keys> {
         match self {
-            TableOrArrayOfTable::Table(table) => table.header(),
-            TableOrArrayOfTable::ArrayOfTables(array_of_tables) => array_of_tables.header(),
+            Self::Table(table) => table.header(),
+            Self::ArrayOfTables(array_of_tables) => array_of_tables.header(),
         }
     }
 
     pub fn range(&self) -> text::Range {
         match self {
-            TableOrArrayOfTable::Table(table) => table.range(),
-            TableOrArrayOfTable::ArrayOfTables(array_of_tables) => array_of_tables.range(),
+            Self::Table(table) => table.range(),
+            Self::ArrayOfTables(array_of_tables) => array_of_tables.range(),
         }
     }
 }

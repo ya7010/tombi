@@ -1,6 +1,7 @@
 use std::{ops::Deref, sync::Arc};
 
 use ahash::AHashMap;
+use ast::AstNode;
 use config::Schema;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::{Either, Itertools};
@@ -240,12 +241,21 @@ impl SchemaStore {
                         .map(|comment| ast::Comment::from(comment))
                         .collect_vec()
                 }),
-            root.dangling_comments().into_iter().next().map(|comment| {
-                comment
+            root.key_values_dangling_comments()
+                .into_iter()
+                .next()
+                .map(|comment| {
+                    comment
+                        .into_iter()
+                        .map(|comment| ast::Comment::from(comment))
+                        .collect_vec()
+                }),
+            root.items().into_iter().next().map(|item| {
+                item.leading_comments()
                     .into_iter()
                     .map(|comment| ast::Comment::from(comment))
                     .collect_vec()
-            })
+            }),
         )
         .find(|comments| !comments.is_empty())
         {

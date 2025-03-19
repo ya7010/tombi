@@ -1,6 +1,6 @@
 use futures::FutureExt;
 
-use crate::rule::{root_table_keys_order, TableOrArrayOfTables};
+use crate::rule::root_table_keys_order;
 
 impl crate::Edit for ast::Root {
     fn edit<'a: 'b, 'b>(
@@ -16,34 +16,33 @@ impl crate::Edit for ast::Root {
             let mut key_values = vec![];
             let mut table_or_array_of_tables = vec![];
 
-            for item in self.items() {
-                match item {
-                    ast::RootItem::Table(table) => {
+            for key_value in self.key_values() {
+                changes.extend(
+                    key_value
+                        .edit(&[], value_schema, schema_url, definitions, schema_context)
+                        .await,
+                );
+                key_values.push(key_value);
+            }
+
+            for table_or_array_of_table in self.table_or_array_of_tables() {
+                match &table_or_array_of_table {
+                    ast::TableOrArrayOfTable::Table(table) => {
                         changes.extend(
                             table
                                 .edit(&[], value_schema, schema_url, definitions, schema_context)
                                 .await,
                         );
-                        table_or_array_of_tables.push(TableOrArrayOfTables::Table(table));
                     }
-                    ast::RootItem::ArrayOfTables(array_of_tables) => {
+                    ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => {
                         changes.extend(
                             array_of_tables
                                 .edit(&[], value_schema, schema_url, definitions, schema_context)
                                 .await,
                         );
-                        table_or_array_of_tables
-                            .push(TableOrArrayOfTables::ArrayOfTables(array_of_tables));
-                    }
-                    ast::RootItem::KeyValue(key_value) => {
-                        changes.extend(
-                            key_value
-                                .edit(&[], value_schema, schema_url, definitions, schema_context)
-                                .await,
-                        );
-                        key_values.push(key_value);
                     }
                 };
+                table_or_array_of_tables.push(table_or_array_of_table);
             }
 
             changes.extend(
