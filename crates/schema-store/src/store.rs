@@ -143,6 +143,11 @@ impl SchemaStore {
                         .map_err(|_| crate::Error::InvalidSchemaUrl {
                             schema_url: schema_url.to_string(),
                         })?;
+                if !schema_path.exists() {
+                    return Err(crate::Error::SchemaFileNotFound {
+                        schema_path: schema_path.clone(),
+                    });
+                }
                 let file = std::fs::File::open(&schema_path)
                     .map_err(|_| crate::Error::SchemaFileReadFailed { schema_path })?;
 
@@ -261,12 +266,9 @@ impl SchemaStore {
         {
             for comment in comments {
                 if let Some(schema_url) = comment.schema_url(source_path.as_deref()) {
-                    if let Ok(source_schema) = self
+                    return self
                         .try_get_source_schema_from_schema_url(&SchemaUrl::new(schema_url))
-                        .await
-                    {
-                        return Ok(source_schema);
-                    }
+                        .await;
                 }
             }
         }

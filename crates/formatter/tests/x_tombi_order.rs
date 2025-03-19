@@ -493,13 +493,12 @@ mod table_keys_order {
 
     mod file_schema {
         use super::test_format;
-        use test_lib::x_tombi_table_keys_order_schema_path;
 
         test_format! {
             #[tokio::test]
             async fn test_comment_sort1(
                 r#"
-                #:schema ../../../schemas/x-tombi-table-keys-order.schema.json
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
 
                 # root key values begin dangling comment1
                 # root key values begin dangling comment2
@@ -541,10 +540,9 @@ mod table_keys_order {
                 # table a key values end dangling comment3
                 # table a key values end dangling comment4
                 "#,
-                x_tombi_table_keys_order_schema_path(),
             ) -> Ok(
                 r#"
-                #:schema ../../../schemas/x-tombi-table-keys-order.schema.json
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
 
                 # root key values begin dangling comment1
                 # root key values begin dangling comment2
@@ -593,7 +591,7 @@ mod table_keys_order {
             #[tokio::test]
             async fn test_comment_sort2(
                 r#"
-                #:schema ../../../schemas/x-tombi-table-keys-order.schema.json
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
 
                 # root key values begin dangling comment1
                 # root key values begin dangling comment2
@@ -638,10 +636,9 @@ mod table_keys_order {
                 # table a key values end dangling comment3
                 # table a key values end dangling comment4
                 "#,
-                x_tombi_table_keys_order_schema_path(),
             ) -> Ok(
                 r#"
-                #:schema ../../../schemas/x-tombi-table-keys-order.schema.json
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
 
                 # root key values begin dangling comment1
                 # root key values begin dangling comment2
@@ -693,7 +690,7 @@ mod table_keys_order {
             #[tokio::test]
             async fn test_comment_sort3(
                 r#"
-                #:schema ../../../schemas/x-tombi-table-keys-order.schema.json
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
 
                 # root key values begin dangling comment1
                 # root key values begin dangling comment2
@@ -744,10 +741,9 @@ mod table_keys_order {
                 # table a key values end dangling comment3
                 # table a key values end dangling comment4
                 "#,
-                x_tombi_table_keys_order_schema_path(),
             ) -> Ok(
                 r#"
-                #:schema ../../../schemas/x-tombi-table-keys-order.schema.json
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
 
                 # root key values begin dangling comment1
                 # root key values begin dangling comment2
@@ -869,7 +865,7 @@ mod table_keys_order {
 
                 // Initialize formatter
                 let format_options = FormatOptions::default();
-                let source_path = std::path::PathBuf::from("pyproject.toml");
+                let source_path = test_lib::project_root().join("test.toml");
                 let formatter = Formatter::new(
                     TomlVersion::default(),
                     formatter::formatter::definitions::FormatDefinitions::default(),
