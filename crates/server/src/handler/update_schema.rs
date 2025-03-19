@@ -8,11 +8,14 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_update_schema(
     backend: &Backend,
-    TextDocumentIdentifier {
-        uri: schema_url, ..
-    }: TextDocumentIdentifier,
+    params: TextDocumentIdentifier,
 ) -> Result<bool, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_update_schema");
+    tracing::trace!(?params);
+
+    let TextDocumentIdentifier {
+        uri: schema_url, ..
+    } = params;
 
     match backend
         .schema_store

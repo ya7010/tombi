@@ -12,10 +12,10 @@ use crate::{
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_hover(
     backend: &backend::Backend,
-    hover_params: HoverParams,
+    params: HoverParams,
 ) -> Result<Option<HoverContent>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_hover");
-    tracing::trace!("hover_params: {:#?}", hover_params);
+    tracing::trace!(?params);
 
     let HoverParams {
         text_document_position_params:
@@ -24,7 +24,7 @@ pub async fn handle_hover(
                 position,
             },
         ..
-    } = hover_params;
+    } = params;
 
     let config = backend.config().await;
 
