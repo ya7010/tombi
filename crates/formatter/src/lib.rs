@@ -107,6 +107,31 @@ mod test {
 
     test_format! {
         #[test]
+        fn test_only_comment1(
+            r#"
+            # comment1
+            # comment2
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn test_only_comment2(
+            r#"
+            # comment1
+            # comment2
+
+            # comment3
+            # comment4
+            "#,
+            TomlVersion::V1_0_0
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
         fn test_key_values(r#"
             array5 = [
               1,
