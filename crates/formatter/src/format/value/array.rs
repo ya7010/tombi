@@ -337,6 +337,7 @@ mod tests {
               # value3 leading comment1
               # value3 leading comment2
               3,  # value3 trailing comment
+
               # array end dangling comment group 1-1
               # array end dangling comment group 1-2
 

@@ -9,6 +9,7 @@ use crate::{parser::Parser, token_set::TS_KEY_FIRST, ErrorKind::*};
 impl Parse for ast::Root {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
+        let mut only_key_values = true;
 
         begin_dangling_comments(p);
 
@@ -22,8 +23,16 @@ impl Parse for ast::Root {
                     invalid_line(p, ExpectedLineBreak);
                 }
             } else if p.nth_at(n, T!("[[")) {
+                if only_key_values {
+                    end_dangling_comments(p, false);
+                    only_key_values = false;
+                }
                 ast::ArrayOfTables::parse(p);
             } else if p.nth_at(n, T!['[']) {
+                if only_key_values {
+                    end_dangling_comments(p, false);
+                    only_key_values = false;
+                }
                 ast::Table::parse(p);
             } else {
                 unknwon_line(p);
@@ -31,7 +40,9 @@ impl Parse for ast::Root {
             while p.eat(LINE_BREAK) {}
         }
 
-        end_dangling_comments(p, true);
+        if only_key_values {
+            end_dangling_comments(p, true);
+        }
 
         m.complete(p, ROOT);
     }

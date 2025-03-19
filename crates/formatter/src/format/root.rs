@@ -1,5 +1,6 @@
 use std::fmt::Write;
 
+use ast::RootItem;
 use itertools::Itertools;
 
 use super::Format;
@@ -10,9 +11,11 @@ impl Format for ast::Root {
 
         let items = self.items().collect_vec();
         if !items.is_empty() {
-            self.begin_dangling_comments().format(f)?;
+            let mut only_key_values = true;
 
-            items
+            self.key_values_begin_dangling_comments().format(f)?;
+
+            for (i, item) in items
                 .into_iter()
                 .fold(
                     (Header::Root { key_value_size: 0 }, vec![]),
@@ -122,14 +125,23 @@ impl Format for ast::Root {
                 .1
                 .into_iter()
                 .enumerate()
-                .try_for_each(|(i, item)| {
-                    if i > 0 && matches!(item, ItemOrNewLine::Item(_)) {
-                        ItemOrNewLine::NewLine.format(f)?;
+            {
+                if i > 0 && matches!(item, ItemOrNewLine::Item(_)) {
+                    ItemOrNewLine::NewLine.format(f)?;
+                }
+                match item {
+                    ItemOrNewLine::NewLine
+                    | ItemOrNewLine::Item(RootItem::Table(_) | RootItem::ArrayOfTables(_)) => {
+                        if only_key_values {
+                            tracing::error!("{:?}", self.key_values_end_dangling_comments());
+                            self.key_values_end_dangling_comments().format(f)?;
+                            only_key_values = false;
+                        }
                     }
-                    item.format(f)
-                })?;
-
-            self.end_dangling_comments().format(f)?;
+                    _ => {}
+                }
+                item.format(f)?;
+            }
         } else {
             self.dangling_comments().format(f)?;
         }
