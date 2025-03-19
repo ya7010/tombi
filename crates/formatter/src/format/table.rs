@@ -19,7 +19,7 @@ impl Format for ast::Table {
         let key_values = self.key_values().collect_vec();
 
         if key_values.is_empty() {
-            let dangling_comments = self.dangling_comments();
+            let dangling_comments = self.key_values_dangling_comments();
 
             if !dangling_comments.is_empty() {
                 write!(f, "{}", f.line_ending())?;

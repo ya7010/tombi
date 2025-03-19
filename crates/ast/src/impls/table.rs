@@ -17,7 +17,7 @@ impl crate::Table {
             && position <= self.bracket_end().unwrap().range().start()
     }
 
-    pub fn dangling_comments(&self) -> Vec<Vec<crate::DanglingComment>> {
+    pub fn key_values_dangling_comments(&self) -> Vec<Vec<crate::DanglingComment>> {
         support::node::dangling_comments(
             self.syntax()
                 .children_with_tokens()
