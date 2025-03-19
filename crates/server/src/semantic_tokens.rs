@@ -17,14 +17,25 @@ impl AppendSemanticTokens for ast::Root {
             }
         }
 
+        let mut only_key_values = true;
         for item in self.items() {
-            item.append_semantic_tokens(builder);
-        }
-
-        for comments in self.key_values_end_dangling_comments() {
-            for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
+            match item {
+                ast::RootItem::Table(_) | ast::RootItem::ArrayOfTables(_) => {
+                    if only_key_values {
+                        for comments in self.key_values_end_dangling_comments() {
+                            for comment in comments {
+                                builder.add_token(
+                                    TokenType::COMMENT,
+                                    comment.as_ref().syntax().clone().into(),
+                                );
+                            }
+                        }
+                        only_key_values = false;
+                    }
+                }
+                ast::RootItem::KeyValue(_) => {}
             }
+            item.append_semantic_tokens(builder);
         }
     }
 }
