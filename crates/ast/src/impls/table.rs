@@ -27,7 +27,7 @@ impl crate::Table {
         )
     }
 
-    pub fn begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {
+    pub fn key_values_begin_dangling_comments(&self) -> Vec<Vec<crate::BeginDanglingComment>> {
         support::node::begin_dangling_comments(
             self.syntax()
                 .children_with_tokens()
@@ -37,7 +37,7 @@ impl crate::Table {
         )
     }
 
-    pub fn end_dangling_comments(&self) -> Vec<Vec<crate::EndDanglingComment>> {
+    pub fn key_values_end_dangling_comments(&self) -> Vec<Vec<crate::EndDanglingComment>> {
         support::node::end_dangling_comments(self.syntax().children_with_tokens())
     }
 

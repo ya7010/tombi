@@ -8,9 +8,7 @@ impl Format for ast::Table {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 
-        self.header_leading_comments()
-            .collect::<Vec<_>>()
-            .format(f)?;
+        self.header_leading_comments().collect_vec().format(f)?;
 
         write!(f, "[{header}]")?;
 
@@ -32,7 +30,7 @@ impl Format for ast::Table {
         } else {
             write!(f, "{}", f.line_ending())?;
 
-            self.begin_dangling_comments().format(f)?;
+            self.key_values_begin_dangling_comments().format(f)?;
 
             for (i, key_value) in key_values.into_iter().enumerate() {
                 if i != 0 {
@@ -41,7 +39,7 @@ impl Format for ast::Table {
                 key_value.format(f)?;
             }
 
-            self.end_dangling_comments().format(f)?;
+            self.key_values_end_dangling_comments().format(f)?;
         }
 
         Ok(())
@@ -112,17 +110,17 @@ mod tests {
         fn table_begin_dangling_comment1(
             r#"
             [header]
-            # table begin dangling comment group 1-1
-            # table begin dangling comment group 1-2
+            # key values begin dangling comment group 1-1
+            # key values begin dangling comment group 1-2
 
-            # table begin dangling comment group 2-1
-            # table begin dangling comment group 2-2
-            # table begin dangling comment group 2-3
+            # key values begin dangling comment group 2-1
+            # key values begin dangling comment group 2-2
+            # key values begin dangling comment group 2-3
 
-            # table begin dangling comment group 3-1
+            # key values begin dangling comment group 3-1
 
-            # key value leading comment1
-            # key value leading comment2
+            # key values leading comment1
+            # key values leading comment2
             key = "value"  # key tailing comment
             "#
         ) -> Ok(source);
@@ -134,8 +132,9 @@ mod tests {
             r#"
             [header]
             key = "value"  # key tailing comment
-            # key value end dangling comment 1-1
-            # key value end dangling comment 1-2
+
+            # key values end dangling comment 1-1
+            # key values end dangling comment 1-2
             "#
         ) -> Ok(source);
     }
@@ -146,14 +145,15 @@ mod tests {
             r#"
             [header]
             key = "value"  # key tailing comment
-            # key value end dangling comment 1-1
-            # key value end dangling comment 1-2
 
-            # key value end dangling comment 2-1
-            # key value end dangling comment 2-2
-            # key value end dangling comment 2-3
+            # key values end dangling comment 1-1
+            # key values end dangling comment 1-2
 
-            # key value end dangling comment 3-1
+            # key values end dangling comment 2-1
+            # key values end dangling comment 2-2
+            # key values end dangling comment 2-3
+
+            # key values end dangling comment 3-1
             "#
         ) -> Ok(source);
     }
@@ -165,8 +165,8 @@ mod tests {
             [header]
             key = "value"  # key tailing comment
 
-            # key value end dangling comment1
-            # key value end dangling comment2
+            # key values end dangling comment1
+            # key values end dangling comment2
             "#
         ) -> Ok(source);
     }

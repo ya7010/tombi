@@ -135,8 +135,11 @@ mod test {
     #[test]
     fn test_sample_toml(
 r#"
-# begin dangling comment1
-# begin dangling comment2
+# root begin dangling comment1
+# root begin dangling comment2
+
+# root begin dangling comment3
+# root begin dangling comment4
 
 # table leading comment1
 # table leading comment2
@@ -216,6 +219,14 @@ lt1 = 07:32:00  # lt1 tailing comment
 # lt2 leading tailing comment
 lt2 = 00:32:00.999999  # lt2 tailing comment
 
+# table end dangling comment1
+# table end dangling comment2
+
+# table end dangling comment3
+# table end dangling comment4
+
+# table leading comment1
+# table leading comment2
 [aaaa.ccc]
 key1 = 11
 key2 = "22"

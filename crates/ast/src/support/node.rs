@@ -75,48 +75,15 @@ pub fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
     iter: I,
 ) -> Vec<Vec<crate::EndDanglingComment>> {
-    let comment_iter = iter
-        .collect_vec()
-        .into_iter()
-        .rev()
-        .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
-        .collect_vec()
-        .into_iter()
-        .rev();
-
-    // NOTE: If there is a whitespace comment at the beginning, it is treated as a empty comment group.
-    //       This allows us to insert a line break at the beginning when formatting.
-    let comment_groups = group_comments(comment_iter.clone());
-    if comment_groups.is_empty()
-        || comment_iter
-            .skip(1) // skip LineBreak
-            .find(|node| node.kind() != WHITESPACE)
-            .is_some_and(|node| node.kind() == COMMENT)
-    {
-        // No new line break at the beginning
-        //
-        // ```toml
-        // [foo]
-        // bar = 1
-        // # end dangling comment1
-        // # end dangling comment2
-        // ```
-        comment_groups
-    } else {
-        // New line break at the beginning
-        //
-        // ```toml
-        // [foo]
-        // bar = 1
-        //
-        // # end dangling comment1
-        // # end dangling comment2
-        // ```
-        let mut result = Vec::with_capacity(comment_groups.len() + 1);
-        result.push(Vec::with_capacity(0));
-        result.extend(comment_groups);
-        result
-    }
+    group_comments(
+        iter.collect_vec()
+            .into_iter()
+            .rev()
+            .take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK))
+            .collect_vec()
+            .into_iter()
+            .rev(),
+    )
 }
 
 /// Group comments with empty line breaks.
