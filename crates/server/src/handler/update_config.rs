@@ -8,11 +8,15 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_update_config(
     backend: &Backend,
-    TextDocumentIdentifier {
-        uri: config_url, ..
-    }: TextDocumentIdentifier,
+    params: TextDocumentIdentifier,
 ) -> Result<bool, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_update_config");
+    tracing::trace!(?params);
+
+    let TextDocumentIdentifier {
+        uri: config_url, ..
+    } = params;
+
     let Some(workspace_folders) = backend.client.workspace_folders().await? else {
         return Ok(false);
     };

@@ -11,7 +11,12 @@ use crate::{
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_completion(
     backend: &backend::Backend,
-    CompletionParams {
+    params: CompletionParams,
+) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
+    tracing::info!("handle_completion");
+    tracing::trace!(?params);
+
+    let CompletionParams {
         text_document_position:
             TextDocumentPositionParams {
                 text_document,
@@ -19,10 +24,7 @@ pub async fn handle_completion(
             },
         context,
         ..
-    }: CompletionParams,
-) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
-    tracing::info!("handle_completion");
-    tracing::trace!("text_document: {:#?}", text_document);
+    } = params;
 
     let config = backend.config().await;
 

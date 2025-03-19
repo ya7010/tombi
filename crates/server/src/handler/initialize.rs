@@ -11,13 +11,16 @@ use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_initialize(
-    InitializeParams {
+    params: InitializeParams,
+) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
+    tracing::debug!("handle_initialize");
+    tracing::trace!(?params);
+
+    let InitializeParams {
         capabilities: client_capabilities,
         client_info,
         ..
-    }: InitializeParams,
-) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
-    let _p = tracing::debug_span!("handle_initialize").entered();
+    } = params;
 
     if let Some(ClientInfo { name, version }) = client_info {
         let version = version.unwrap_or_default();

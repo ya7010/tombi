@@ -6,9 +6,12 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_folding_range(
     backend: &Backend,
-    FoldingRangeParams { text_document, .. }: FoldingRangeParams,
+    params: FoldingRangeParams,
 ) -> Result<Option<Vec<FoldingRange>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_folding_range");
+    tracing::trace!(?params);
+
+    let FoldingRangeParams { text_document, .. } = params;
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
 

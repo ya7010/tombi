@@ -7,9 +7,12 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_document_symbol(
     backend: &Backend,
-    DocumentSymbolParams { text_document, .. }: DocumentSymbolParams,
+    params: DocumentSymbolParams,
 ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_document_symbol");
+    tracing::trace!(?params);
+
+    let DocumentSymbolParams { text_document, .. } = params;
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
