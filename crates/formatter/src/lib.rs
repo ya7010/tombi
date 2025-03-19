@@ -288,8 +288,14 @@ key6 = 2
 # key value leading comment2
 key6 = 3  # key value tailing comment
 
+[ffff.ggg.kkk]
+b = 3
+
 # table key values end dangling comment1
 # table key values end dangling comment2
+
+# table key values end dangling comment3
+# table key values end dangling comment4
 "#,
     TomlVersion::V1_1_0_Preview,
     FormatDefinitions{
