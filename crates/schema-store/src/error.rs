@@ -25,6 +25,9 @@ pub enum Error {
     #[error("invalid schema url: {schema_url}")]
     InvalidSchemaUrl { schema_url: String },
 
+    #[error("schema file not found: {schema_path}")]
+    SchemaFileNotFound { schema_path: PathBuf },
+
     #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: PathBuf },
 
