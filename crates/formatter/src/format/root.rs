@@ -1,6 +1,5 @@
 use std::fmt::Write;
 
-use ast::RootItem;
 use itertools::Itertools;
 
 use super::Format;
@@ -9,141 +8,114 @@ impl Format for ast::Root {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset();
 
-        let items = self.items().collect_vec();
-        if !items.is_empty() {
-            let mut only_key_values = true;
+        let key_values = self.key_values().collect_vec();
+        let table_or_array_of_tables = self.table_or_array_of_tables().collect_vec();
+        let key_values_dangling_comments = self.key_values_dangling_comments();
 
+        if !key_values.is_empty() {
             self.key_values_begin_dangling_comments().format(f)?;
 
-            for (i, item) in items
-                .into_iter()
-                .fold(
-                    (Header::Root { key_value_size: 0 }, vec![]),
-                    |(mut header, mut acc), item| match &item {
-                        ast::RootItem::Table(table) => {
-                            let header_keys = table.header().unwrap().keys();
-                            let key_value_size = table.key_values().count();
-                            let has_dangling_comments = !table.dangling_comments().is_empty();
-
-                            match header {
-                                Header::Root { key_value_size } => {
-                                    if key_value_size > 0 {
-                                        acc.push(ItemOrNewLine::NewLine);
-                                    }
-                                }
-                                Header::Table {
-                                    header_keys: pre_header_keys,
-                                    key_value_size,
-                                    has_dangling_comments,
-                                }
-                                | Header::ArrayOfTables {
-                                    header_keys: pre_header_keys,
-                                    key_value_size,
-                                    has_dangling_comments,
-                                } => {
-                                    if key_value_size > 0
-                                        || !header_keys.starts_with(&pre_header_keys)
-                                        || has_dangling_comments
-                                    {
-                                        acc.push(ItemOrNewLine::NewLine);
-                                    }
-                                }
-                            };
-                            acc.push(ItemOrNewLine::Item(item));
-
-                            (
-                                Header::Table {
-                                    header_keys,
-                                    key_value_size,
-                                    has_dangling_comments,
-                                },
-                                acc,
-                            )
-                        }
-                        ast::RootItem::ArrayOfTables(array_of_tables) => {
-                            let header_keys = array_of_tables.header().unwrap().keys();
-                            let key_value_size = array_of_tables.key_values().count();
-                            let has_dangling_comments =
-                                !array_of_tables.dangling_comments().is_empty();
-
-                            match header {
-                                Header::Root { key_value_size } => {
-                                    if key_value_size > 0 {
-                                        acc.push(ItemOrNewLine::NewLine);
-                                    }
-                                }
-                                Header::Table {
-                                    header_keys: pre_header_keys,
-                                    key_value_size,
-                                    has_dangling_comments,
-                                } => {
-                                    if key_value_size > 0
-                                        || !header_keys.starts_with(&pre_header_keys)
-                                        || has_dangling_comments
-                                    {
-                                        acc.push(ItemOrNewLine::NewLine);
-                                    }
-                                }
-                                Header::ArrayOfTables {
-                                    header_keys: pre_header_keys,
-                                    key_value_size,
-                                    has_dangling_comments,
-                                } => {
-                                    if key_value_size > 0
-                                        || !header_keys.starts_with(&pre_header_keys)
-                                        || pre_header_keys.same_as(&header_keys)
-                                        || has_dangling_comments
-                                    {
-                                        acc.push(ItemOrNewLine::NewLine);
-                                    }
-                                }
-                            };
-                            acc.push(ItemOrNewLine::Item(item));
-
-                            (
-                                Header::ArrayOfTables {
-                                    header_keys,
-                                    key_value_size,
-                                    has_dangling_comments,
-                                },
-                                acc,
-                            )
-                        }
-                        ast::RootItem::KeyValue(_) => {
-                            header = if let Header::Root { key_value_size } = header {
-                                Header::Root {
-                                    key_value_size: key_value_size + 1,
-                                }
-                            } else {
-                                header
-                            };
-                            acc.push(ItemOrNewLine::Item(item));
-                            (header, acc)
-                        }
-                    },
-                )
-                .1
-                .into_iter()
-                .enumerate()
-            {
-                if i > 0 && matches!(item, ItemOrNewLine::Item(_)) {
-                    ItemOrNewLine::NewLine.format(f)?;
+            for (i, key_value) in key_values.iter().enumerate() {
+                if i != 0 {
+                    write!(f, "{}", f.line_ending())?;
                 }
-                match item {
-                    ItemOrNewLine::NewLine
-                    | ItemOrNewLine::Item(RootItem::Table(_) | RootItem::ArrayOfTables(_)) => {
-                        if only_key_values {
-                            tracing::error!("{:?}", self.key_values_end_dangling_comments());
-                            self.key_values_end_dangling_comments().format(f)?;
-                            only_key_values = false;
-                        }
-                    }
-                    _ => {}
-                }
-                item.format(f)?;
+                key_value.format(f)?;
             }
+
+            self.key_values_end_dangling_comments().format(f)?;
         } else {
-            self.dangling_comments().format(f)?;
+            key_values_dangling_comments.format(f)?;
+        }
+
+        if !(key_values.is_empty() && key_values_dangling_comments.is_empty())
+            && !table_or_array_of_tables.is_empty()
+        {
+            write!(f, "{}", f.line_ending())?;
+            write!(f, "{}", f.line_ending())?;
+        }
+
+        let mut header = Header::Root;
+        for (i, table_or_array_of_tables) in table_or_array_of_tables.iter().enumerate() {
+            if i != 0 {
+                write!(f, "{}", f.line_ending())?;
+            }
+            match table_or_array_of_tables {
+                ast::TableOrArrayOfTable::Table(table) => {
+                    let header_keys = table.header().unwrap().keys();
+                    let key_value_size = table.key_values().count();
+                    let has_dangling_comments = !table.key_values_dangling_comments().is_empty();
+
+                    match header {
+                        Header::Root => {}
+                        Header::Table {
+                            header_keys: pre_header_keys,
+                            key_value_size,
+                            has_dangling_comments,
+                        }
+                        | Header::ArrayOfTables {
+                            header_keys: pre_header_keys,
+                            key_value_size,
+                            has_dangling_comments,
+                        } => {
+                            if key_value_size > 0
+                                || !header_keys.starts_with(&pre_header_keys)
+                                || has_dangling_comments
+                            {
+                                write!(f, "{}", f.line_ending())?;
+                            }
+                        }
+                    };
+                    table.format(f)?;
+
+                    header = Header::Table {
+                        header_keys,
+                        key_value_size,
+                        has_dangling_comments,
+                    };
+                }
+                ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => {
+                    let header_keys = array_of_tables.header().unwrap().keys();
+                    let key_value_size = array_of_tables.key_values().count();
+                    let has_dangling_comments =
+                        !array_of_tables.key_values_dangling_comments().is_empty();
+
+                    match header {
+                        Header::Root => {}
+                        Header::Table {
+                            header_keys: pre_header_keys,
+                            key_value_size,
+                            has_dangling_comments,
+                        } => {
+                            if key_value_size > 0
+                                || !header_keys.starts_with(&pre_header_keys)
+                                || has_dangling_comments
+                            {
+                                write!(f, "{}", f.line_ending())?;
+                            }
+                        }
+                        Header::ArrayOfTables {
+                            header_keys: pre_header_keys,
+                            key_value_size,
+                            has_dangling_comments,
+                        } => {
+                            if key_value_size > 0
+                                || !header_keys.starts_with(&pre_header_keys)
+                                || pre_header_keys.same_as(&header_keys)
+                                || has_dangling_comments
+                            {
+                                write!(f, "{}", f.line_ending())?;
+                            }
+                        }
+                    };
+                    array_of_tables.format(f)?;
+
+                    header = Header::ArrayOfTables {
+                        header_keys,
+                        key_value_size,
+                        has_dangling_comments,
+                    };
+                }
+            }
         }
 
         Ok(())
@@ -160,25 +132,9 @@ impl Format for ast::RootItem {
     }
 }
 
-enum ItemOrNewLine {
-    Item(ast::RootItem),
-    NewLine,
-}
-
-impl Format for ItemOrNewLine {
-    fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
-        match self {
-            Self::Item(it) => it.format(f),
-            Self::NewLine => write!(f, "{}", f.line_ending()),
-        }
-    }
-}
-
 #[derive(Debug)]
 enum Header {
-    Root {
-        key_value_size: usize,
-    },
+    Root,
 
     Table {
         header_keys: ast::AstChildren<ast::Key>,

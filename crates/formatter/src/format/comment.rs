@@ -182,11 +182,15 @@ mod tests {
 
     test_format! {
         #[test]
-        fn schema_comment(r"#:schema https://example.com/schema.json") -> Ok("#:schema https://example.com/schema.json");
+        fn schema_comment(r"#:schema ../../schemas/x-tombi-toml-v1.0.0.schema.json") -> Ok(
+            "#:schema ../../schemas/x-tombi-toml-v1.0.0.schema.json"
+        );
     }
 
     test_format! {
         #[test]
-        fn schema_comment_with_space(r"#:schema  https://example.com/schema.json  ") -> Ok("#:schema https://example.com/schema.json");
+        fn schema_comment_with_space(r"#:schema  ../../schemas/x-tombi-toml-v1.0.0.schema.json  ") -> Ok(
+            "#:schema ../../schemas/x-tombi-toml-v1.0.0.schema.json"
+        );
     }
 }

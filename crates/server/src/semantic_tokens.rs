@@ -3,6 +3,7 @@ mod token_type;
 
 use ast::{AstNode, AstToken};
 pub use builder::SemanticTokensBuilder;
+use itertools::Itertools;
 pub use token_type::{TokenType, SUPPORTED_TOKEN_TYPES};
 
 pub trait AppendSemanticTokens {
@@ -11,41 +12,43 @@ pub trait AppendSemanticTokens {
 
 impl AppendSemanticTokens for ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        for comments in self.key_values_begin_dangling_comments() {
-            for comment in comments {
-                builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
+        let key_values = self.key_values().collect_vec();
+
+        if key_values.is_empty() {
+            for comments in self.key_values_dangling_comments() {
+                for comment in comments {
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
+                }
+            }
+        } else {
+            for comments in self.key_values_begin_dangling_comments() {
+                for comment in comments {
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
+                }
+            }
+
+            for key_value in self.key_values() {
+                key_value.append_semantic_tokens(builder);
+            }
+
+            for comments in self.key_values_end_dangling_comments() {
+                for comment in comments {
+                    builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
+                }
             }
         }
 
-        let mut only_key_values = true;
-        for item in self.items() {
-            match item {
-                ast::RootItem::Table(_) | ast::RootItem::ArrayOfTables(_) => {
-                    if only_key_values {
-                        for comments in self.key_values_end_dangling_comments() {
-                            for comment in comments {
-                                builder.add_token(
-                                    TokenType::COMMENT,
-                                    comment.as_ref().syntax().clone().into(),
-                                );
-                            }
-                        }
-                        only_key_values = false;
-                    }
-                }
-                ast::RootItem::KeyValue(_) => {}
-            }
-            item.append_semantic_tokens(builder);
+        for table_or_array_of_table in self.table_or_array_of_tables() {
+            table_or_array_of_table.append_semantic_tokens(builder)
         }
     }
 }
 
-impl AppendSemanticTokens for ast::RootItem {
+impl AppendSemanticTokens for ast::TableOrArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         match self {
             Self::Table(table) => table.append_semantic_tokens(builder),
             Self::ArrayOfTables(array) => array.append_semantic_tokens(builder),
-            Self::KeyValue(key_value) => key_value.append_semantic_tokens(builder),
         }
     }
 }

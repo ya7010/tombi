@@ -61,7 +61,7 @@ impl<'a> Formatter<'a> {
         };
 
         let root = parsed.tree();
-        tracing::trace!("TOML AST: {:#?}", root);
+        tracing::trace!("TOML AST before editing: {:#?}", root);
 
         if diagnostics.is_empty() {
             let root = {
@@ -109,6 +109,8 @@ impl<'a> Formatter<'a> {
                 .edit()
                 .await
             };
+
+            tracing::trace!("TOML AST after editing: {:#?}", root);
 
             let line_ending = {
                 root.format(&mut self).unwrap();

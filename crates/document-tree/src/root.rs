@@ -29,12 +29,6 @@ impl Deref for DocumentTree {
     }
 }
 
-pub(crate) enum RootItem {
-    Table(Table),
-    ArrayOfTables(Table),
-    KeyValue(Table),
-}
-
 impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
     fn into_document_tree_and_errors(
         self,
@@ -51,21 +45,14 @@ impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
             }
         }
 
-        for item in self.items() {
-            let (item, errs) = item.into_document_tree_and_errors(toml_version).into();
+        for key_value in self.key_values() {
+            let (table, errs) = key_value.into_document_tree_and_errors(toml_version).into();
 
             if !errs.is_empty() {
                 errors.extend(errs);
             }
-
-            match item {
-                RootItem::Table(table)
-                | RootItem::ArrayOfTables(table)
-                | RootItem::KeyValue(table) => {
-                    if let Err(errs) = tree.0.merge(table) {
-                        errors.extend(errs);
-                    }
-                }
+            if let Err(errs) = tree.0.merge(table) {
+                errors.extend(errs);
             }
         }
 
@@ -77,25 +64,26 @@ impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
             }
         }
 
-        DocumentTreeAndErrors { tree, errors }
-    }
-}
+        for table_or_array_of_table in self.table_or_array_of_tables() {
+            let (table, errs) = match table_or_array_of_table {
+                ast::TableOrArrayOfTable::Table(table) => {
+                    table.into_document_tree_and_errors(toml_version)
+                }
+                ast::TableOrArrayOfTable::ArrayOfTables(array) => {
+                    array.into_document_tree_and_errors(toml_version)
+                }
+            }
+            .into();
 
-impl IntoDocumentTreeAndErrors<crate::RootItem> for ast::RootItem {
-    fn into_document_tree_and_errors(
-        self,
-        toml_version: TomlVersion,
-    ) -> crate::DocumentTreeAndErrors<crate::RootItem> {
-        match self {
-            ast::RootItem::Table(table) => table
-                .into_document_tree_and_errors(toml_version)
-                .map(crate::RootItem::Table),
-            ast::RootItem::ArrayOfTables(array) => array
-                .into_document_tree_and_errors(toml_version)
-                .map(crate::RootItem::ArrayOfTables),
-            ast::RootItem::KeyValue(key_value) => key_value
-                .into_document_tree_and_errors(toml_version)
-                .map(crate::RootItem::KeyValue),
+            if !errs.is_empty() {
+                errors.extend(errs);
+            }
+
+            if let Err(errs) = tree.0.merge(table) {
+                errors.extend(errs);
+            }
         }
+
+        DocumentTreeAndErrors { tree, errors }
     }
 }

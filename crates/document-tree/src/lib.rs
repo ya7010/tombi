@@ -8,7 +8,6 @@ mod value_type;
 pub use error::Error;
 pub use key::{Key, KeyKind};
 pub use root::DocumentTree;
-use root::RootItem;
 use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
@@ -26,13 +25,6 @@ pub struct DocumentTreeAndErrors<T> {
 }
 
 impl<T> DocumentTreeAndErrors<T> {
-    pub(crate) fn map<F>(self, f: impl FnOnce(T) -> F) -> DocumentTreeAndErrors<F> {
-        DocumentTreeAndErrors {
-            tree: f(self.tree),
-            errors: self.errors,
-        }
-    }
-
     pub fn ok(self) -> Result<T, Vec<crate::Error>> {
         if self.errors.is_empty() {
             Ok(self.tree)
