@@ -48,13 +48,20 @@ impl<'a> Linter<'a> {
 
             root.lint(&mut self);
 
-            let source_schema = if let Some(schema) = self
+            let source_schema = match self
                 .schema_store
                 .try_get_source_schema_from_ast(&root, self.source_url_or_path)
                 .await
-                .ok()
-                .flatten()
             {
+                Ok(Some(schema)) => Some(schema),
+                Ok(None) => None,
+                Err((err, range)) => {
+                    diagnostics.push(Diagnostic::new_error(err.to_string(), range));
+                    None
+                }
+            };
+
+            let source_schema = if let Some(schema) = source_schema {
                 Some(schema)
             } else if let Some(source_url_or_path) = self.source_url_or_path {
                 self.schema_store
