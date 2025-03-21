@@ -59,7 +59,7 @@ mod hover_keys_value {
 
         test_hover_keys_value!(
             #[tokio::test]
-            // NOTE: This test is correct. When you hover over the last key of the header of ArrayOfTables,
+            // NOTE: This test is correct. When you hover over the last key of the header of ArrayOfTable,
             //       the Keys in the hover content is `schema[$index]`, not `schemas`.
             //       Therefore, the Value is `Table`.
             async fn tombi_schemas(

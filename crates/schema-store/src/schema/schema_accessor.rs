@@ -194,7 +194,7 @@ impl GetHeaderSchemarAccessors for ast::Table {
     }
 }
 
-impl GetHeaderSchemarAccessors for ast::ArrayOfTables {
+impl GetHeaderSchemarAccessors for ast::ArrayOfTable {
     fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
         let array_of_tables_keys = self
             .array_of_tables_keys()

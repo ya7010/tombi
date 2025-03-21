@@ -11,9 +11,9 @@ impl Lint for ast::Root {
 impl Lint for ast::RootItem {
     fn lint(&self, l: &mut crate::Linter) {
         match self {
-            Self::Table(t) => t.lint(l),
-            Self::ArrayOfTables(t) => t.lint(l),
-            Self::KeyValue(k) => k.lint(l),
+            Self::Table(table) => table.lint(l),
+            Self::ArrayOfTable(array_of_table) => array_of_table.lint(l),
+            Self::KeyValue(key_value) => key_value.lint(l),
         }
     }
 }

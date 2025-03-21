@@ -27,7 +27,7 @@ impl Parse for ast::Root {
                     end_dangling_comments(p, false);
                     only_key_values = false;
                 }
-                ast::ArrayOfTables::parse(p);
+                ast::ArrayOfTable::parse(p);
             } else if p.nth_at(n, T!['[']) {
                 if only_key_values {
                     end_dangling_comments(p, false);

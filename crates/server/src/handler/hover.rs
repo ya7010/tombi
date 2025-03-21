@@ -137,8 +137,8 @@ async fn get_hover_range(
             kv.keys().unwrap()
         } else if let Some(table) = ast::Table::cast(node.to_owned()) {
             table.header().unwrap()
-        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            array_of_tables.header().unwrap()
+        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
+            array_of_table.header().unwrap()
         } else {
             continue;
         };

@@ -1,9 +1,9 @@
 use syntax::{SyntaxKind::*, T};
 use toml_version::TomlVersion;
 
-use crate::{support, ArrayOfTables, AstChildren, AstNode};
+use crate::{support, ArrayOfTable, AstChildren, AstNode};
 
-impl crate::ArrayOfTables {
+impl crate::ArrayOfTable {
     pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment> {
         support::node::leading_comments(self.syntax().children_with_tokens())
     }
@@ -43,7 +43,7 @@ impl crate::ArrayOfTables {
 
     pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {
         support::node::prev_siblings_nodes(self)
-            .filter_map(|node: ArrayOfTables| node.header().map(|header| header.keys()))
+            .filter_map(|node: ArrayOfTable| node.header().map(|header| header.keys()))
             .take_while(move |keys| {
                 match (
                     self.header().and_then(|header| header.keys().next()),

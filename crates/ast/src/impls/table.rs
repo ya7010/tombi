@@ -1,7 +1,7 @@
 use syntax::{SyntaxKind::*, T};
 use toml_version::TomlVersion;
 
-use crate::{support, ArrayOfTables, AstChildren, AstNode, TableOrArrayOfTable};
+use crate::{support, ArrayOfTable, AstChildren, AstNode, TableOrArrayOfTable};
 
 impl crate::Table {
     pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment> {
@@ -62,7 +62,7 @@ impl crate::Table {
 
     pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {
         support::node::prev_siblings_nodes(self)
-            .filter_map(|node: ArrayOfTables| node.header().map(|header| header.keys()))
+            .filter_map(|node: ArrayOfTable| node.header().map(|header| header.keys()))
             .take_while(|keys| {
                 match (
                     self.header().and_then(|header| header.keys().next()),
