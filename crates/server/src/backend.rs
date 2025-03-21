@@ -10,9 +10,10 @@ use tower_lsp::{
         CompletionParams, CompletionResponse, DidChangeConfigurationParams,
         DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidCloseTextDocumentParams,
         DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
-        DocumentDiagnosticReportResult, DocumentSymbolParams, DocumentSymbolResponse, FoldingRange,
-        FoldingRangeParams, Hover, HoverParams, InitializeParams, InitializeResult,
-        InitializedParams, SemanticTokensParams, SemanticTokensResult, TextDocumentIdentifier, Url,
+        DocumentDiagnosticReportResult, DocumentLink, DocumentLinkParams, DocumentSymbolParams,
+        DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover, HoverParams,
+        InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
+        SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
 };
@@ -25,9 +26,9 @@ use super::handler::{
 use crate::{
     document::DocumentSource,
     handler::{
-        handle_completion, handle_did_change_watched_files, handle_did_close, handle_folding_range,
-        handle_get_toml_version, handle_initialized, handle_update_config, handle_update_schema,
-        GetTomlVersionResponse,
+        handle_completion, handle_did_change_watched_files, handle_did_close, handle_document_link,
+        handle_folding_range, handle_get_toml_version, handle_initialized, handle_update_config,
+        handle_update_schema, GetTomlVersionResponse,
     },
 };
 
@@ -221,6 +222,13 @@ impl LanguageServer for Backend {
         params: DocumentSymbolParams,
     ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
         handle_document_symbol(self, params).await
+    }
+
+    async fn document_link(
+        &self,
+        params: DocumentLinkParams,
+    ) -> Result<Option<Vec<DocumentLink>>, tower_lsp::jsonrpc::Error> {
+        handle_document_link(self, params).await
     }
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {

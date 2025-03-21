@@ -29,6 +29,9 @@ impl Comment {
                 let mut schema_file_path = std::path::PathBuf::from(url_str);
                 if let Some(parent) = source_dir_path.parent() {
                     schema_file_path = parent.join(schema_file_path);
+                    if let Ok(canonicalized_file_path) = schema_file_path.canonicalize() {
+                        schema_file_path = canonicalized_file_path
+                    }
                 }
 
                 Some((
