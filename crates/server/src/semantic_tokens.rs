@@ -17,12 +17,24 @@ impl AppendSemanticTokens for ast::Root {
         if key_values.is_empty() {
             for comments in self.key_values_dangling_comments() {
                 for comment in comments {
+                    if let Some(file_schema_range) = builder.file_schema_range {
+                        if comment.syntax().range().contains(file_schema_range.start()) {
+                            builder.add_schema_url_comment(comment, &file_schema_range);
+                            continue;
+                        }
+                    }
                     builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
                 }
             }
         } else {
             for comments in self.key_values_begin_dangling_comments() {
                 for comment in comments {
+                    if let Some(file_schema_range) = builder.file_schema_range {
+                        if comment.syntax().range().contains(file_schema_range.start()) {
+                            builder.add_schema_url_comment(comment, &file_schema_range);
+                            continue;
+                        }
+                    }
                     builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());
                 }
             }

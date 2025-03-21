@@ -1,3 +1,4 @@
+use ast::AstToken;
 use tower_lsp::lsp_types::{Position, Range, SemanticToken};
 
 use super::token_type::TokenType;
@@ -5,13 +6,15 @@ use super::token_type::TokenType;
 pub struct SemanticTokensBuilder {
     tokens: Vec<SemanticToken>,
     last_range: text::Range,
+    pub file_schema_range: Option<text::Range>,
 }
 
 impl SemanticTokensBuilder {
-    pub fn new() -> Self {
+    pub fn new(file_schema_range: Option<text::Range>) -> Self {
         Self {
             tokens: Vec::new(),
             last_range: text::Range::default(),
+            file_schema_range,
         }
     }
 
@@ -30,6 +33,43 @@ impl SemanticTokensBuilder {
         });
 
         self.last_range = range;
+    }
+
+    pub fn add_schema_url_comment(
+        &mut self,
+        comment: impl AsRef<ast::Comment>,
+        file_schema_range: &text::Range,
+    ) {
+        let comment_range = comment.as_ref().syntax().range();
+
+        let relative = relative_range(comment_range, self.last_range);
+        let schema_keyword_len = ":schema".len() as u32;
+
+        self.tokens.push(SemanticToken {
+            delta_line: relative.start.line as u32,
+            delta_start: relative.start.character as u32,
+            length: 1 as u32,
+            token_type: TokenType::COMMENT as u32,
+            token_modifiers_bitset: 0,
+        });
+
+        self.tokens.push(SemanticToken {
+            delta_line: 0,
+            delta_start: 1 as u32,
+            length: schema_keyword_len,
+            token_type: TokenType::KEYWORD as u32,
+            token_modifiers_bitset: 0,
+        });
+
+        self.tokens.push(SemanticToken {
+            delta_line: 0,
+            delta_start: (file_schema_range.start().column() - comment_range.start().column() - 1)
+                as u32,
+            length: (file_schema_range.end().column() - file_schema_range.start().column()) as u32,
+            token_type: TokenType::STRING as u32,
+            token_modifiers_bitset: 0,
+        });
+        self.last_range = comment_range;
     }
 
     pub fn build(self) -> Vec<SemanticToken> {
