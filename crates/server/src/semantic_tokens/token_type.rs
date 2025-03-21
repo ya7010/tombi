@@ -36,6 +36,7 @@ token_types! {
         VARIABLE,
         OPERATOR,
         COMMENT,
+        KEYWORD,
     }
     custom {
         (BOOLEAN, "boolean"),
