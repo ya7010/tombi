@@ -19,6 +19,31 @@ macro_rules! test_lint {
         #[test]
         fn $name:ident(
             $source:expr,
+        ) -> Ok(_);
+    ) => {
+        test_lint! {
+            #[test]
+            fn _$name($source, Option::<std::path::PathBuf>::None) -> Ok(_);
+        }
+    };
+
+    (
+        #[test]
+        fn $name:ident(
+            $source:expr,
+            $schema_path:expr$(,)?
+        ) -> Ok(_);
+    ) => {
+        test_lint! {
+            #[test]
+            fn _$name($source, Some($schema_path)) -> Ok(_);
+        }
+    };
+
+    (
+        #[test]
+        fn _$name:ident(
+            $source:expr,
             $schema_path:expr$(,)?
         ) -> Ok(_);
     ) => {
@@ -36,17 +61,19 @@ macro_rules! test_lint {
             // Initialize schema store
             let schema_store = schema_store::SchemaStore::new(schema_store::Options::default());
 
-            // Load schemas
-            schema_store
-                .load_schemas(
-                    &[config::Schema::Root(config::RootSchema {
-                        toml_version: None,
-                        path: $schema_path.to_string_lossy().to_string(),
-                        include: vec!["*.toml".to_string()],
-                    })],
-                    None,
-                )
-                .await;
+            if let Some(schema_path) = $schema_path {
+                // Load schemas
+                schema_store
+                    .load_schemas(
+                        &[config::Schema::Root(config::RootSchema {
+                            toml_version: None,
+                            path: schema_path.to_string_lossy().to_string(),
+                            include: vec!["*.toml".to_string()],
+                        })],
+                        None,
+                    )
+                    .await;
+            }
 
             // Initialize linter with schema if provided
             let source_path = test_lib::project_root().join("test.toml");
@@ -218,6 +245,24 @@ mod tests {
             ) -> Err([
                 crate::WarningKind::KeyEmpty
             ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_schema_url(
+                r#"
+                #:schema https://json.schemastore.org/tombi.json
+                "#,
+            ) -> Ok(_);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_schema_file(
+                r#"
+                #:schema ./tombi.schema.json
+                "#,
+            ) -> Ok(_);
         }
 
         test_lint! {
