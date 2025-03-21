@@ -49,7 +49,7 @@ macro_rules! test_lint {
                 .await;
 
             // Initialize linter with schema if provided
-            let source_path = std::path::PathBuf::from("test.toml");
+            let source_path = test_lib::project_root().join("test.toml");
             let options = crate::LintOptions::default();
             let linter = $crate::Linter::new(
                 TomlVersion::default(),
@@ -130,7 +130,7 @@ macro_rules! test_lint {
             }
 
             // Initialize linter with schema if provided
-            let source_path = std::path::PathBuf::from("test.toml");
+            let source_path = test_lib::project_root().join("test.toml");
             let options = crate::LintOptions::default();
             let linter = $crate::Linter::new(
                 TomlVersion::default(),
@@ -205,6 +205,8 @@ mod tests {
     }
 
     mod non_schema {
+        use schema_store::SchemaUrl;
+
         use super::*;
 
         test_lint! {
@@ -215,6 +217,59 @@ mod tests {
                 "#,
             ) -> Err([
                 crate::WarningKind::KeyEmpty
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_does_not_exist_url(
+                r#"
+                #:schema https://does-not-exist.co.jp
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFetchFailed{
+                    schema_url: SchemaUrl::parse("https://does-not-exist.co.jp").unwrap(),
+                    reason: "error sending request for url (https://does-not-exist.co.jp/)".to_string(),
+                }
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_does_not_exist_file(
+                r#"
+                #:schema does-not-exist.schema.json
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFileNotFound{
+                    schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
+                }
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_relative_does_not_exist_file(
+                r#"
+                #:schema ./does-not-exist.schema.json
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFileNotFound{
+                    schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
+                }
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_parent_does_not_exist_file(
+                r#"
+                #:schema ../does-not-exist.schema.json
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFileNotFound{
+                    schema_path: test_lib::project_root().join("../does-not-exist.schema.json"),
+                }
             ]);
         }
     }

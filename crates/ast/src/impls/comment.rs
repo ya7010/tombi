@@ -4,7 +4,7 @@ impl Comment {
     pub fn schema_url(
         &self,
         source_path: Option<&std::path::Path>,
-    ) -> Option<(url::Url, text::Range)> {
+    ) -> Option<(Result<url::Url, String>, text::Range)> {
         let comment_string = self.to_string();
         if comment_string.starts_with("#:schema ") {
             let url_str = comment_string[9..].trim();
@@ -16,16 +16,19 @@ impl Comment {
                     9 + url_str.len() as text::Column,
                 ),
             );
+
             if let Ok(url) = url_str.parse::<url::Url>() {
-                Some((url, comment_range))
+                Some((Ok(url), comment_range))
             } else if let Some(source_dir_path) = source_path {
-                url::Url::from_file_path(source_dir_path)
-                    .ok()
-                    .and_then(|url| {
-                        url.join(url_str)
-                            .map(|joined_url| (joined_url, comment_range))
-                            .ok()
-                    })
+                let mut schema_file_path = std::path::PathBuf::from(url_str);
+                if let Some(parent) = source_dir_path.parent() {
+                    schema_file_path = parent.join(schema_file_path);
+                }
+
+                Some((
+                    url::Url::from_file_path(&schema_file_path).map_err(|_| url_str.to_string()),
+                    comment_range,
+                ))
             } else {
                 None
             }

@@ -266,6 +266,17 @@ impl SchemaStore {
         {
             for comment in comments {
                 if let Some((schema_url, url_range)) = comment.schema_url(source_path.as_deref()) {
+                    let schema_url = match schema_url {
+                        Ok(schema_url) => schema_url,
+                        Err(schema_url_or_file_path) => {
+                            return Err((
+                                crate::Error::InvalidSchemaUrlOrFilePath {
+                                    schema_url_or_file_path,
+                                },
+                                url_range,
+                            ));
+                        }
+                    };
                     return self
                         .try_get_source_schema_from_schema_url(&SchemaUrl::new(schema_url))
                         .await
