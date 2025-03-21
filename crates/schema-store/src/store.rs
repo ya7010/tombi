@@ -226,7 +226,7 @@ impl SchemaStore {
         &self,
         root: &ast::Root,
         source_url_or_path: Option<Either<&url::Url, &std::path::Path>>,
-    ) -> Result<Option<SourceSchema>, crate::Error> {
+    ) -> Result<Option<SourceSchema>, (crate::Error, text::Range)> {
         let source_path = match source_url_or_path {
             Some(Either::Left(url)) => match url.scheme() {
                 "file" => url.to_file_path().ok(),
@@ -265,10 +265,22 @@ impl SchemaStore {
         .find(|comments| !comments.is_empty())
         {
             for comment in comments {
-                if let Some(schema_url) = comment.schema_url(source_path.as_deref()) {
+                if let Some((schema_url, url_range)) = comment.schema_url(source_path.as_deref()) {
+                    let schema_url = match schema_url {
+                        Ok(schema_url) => schema_url,
+                        Err(schema_url_or_file_path) => {
+                            return Err((
+                                crate::Error::InvalidSchemaUrlOrFilePath {
+                                    schema_url_or_file_path,
+                                },
+                                url_range,
+                            ));
+                        }
+                    };
                     return self
                         .try_get_source_schema_from_schema_url(&SchemaUrl::new(schema_url))
-                        .await;
+                        .await
+                        .map_err(|err| (err, url_range));
                 }
             }
         }
