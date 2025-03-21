@@ -796,6 +796,88 @@ mod table_keys_order {
                 "#
             )
         }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_comment_sort4(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+                [b] # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b" # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+
+                # table a header leading comment
+                [a] # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a" # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+                "#,
+            ) -> Ok(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # table a header leading comment
+                [a]  # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a"  # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+
+                [b]  # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b"  # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+                "#
+            )
+        }
     }
 
     #[macro_export]

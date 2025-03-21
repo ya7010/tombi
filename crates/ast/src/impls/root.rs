@@ -14,7 +14,19 @@ impl crate::Root {
         &self,
         source_path: Option<&std::path::Path>,
     ) -> Option<(Result<url::Url, String>, text::Range)> {
-        if let Some(comments) = itertools::chain!(
+        if let Some(comments) = self.get_first_document_comment_group() {
+            for comment in comments {
+                if let Some((schema_url, url_range)) = comment.schema_url(source_path.as_deref()) {
+                    return Some((schema_url, url_range));
+                }
+            }
+        }
+        None
+    }
+
+    #[inline]
+    pub fn get_first_document_comment_group(&self) -> Option<Vec<crate::Comment>> {
+        itertools::chain!(
             self.key_values_begin_dangling_comments()
                 .into_iter()
                 .next()
@@ -41,14 +53,6 @@ impl crate::Root {
             }),
         )
         .find(|comments| !comments.is_empty())
-        {
-            for comment in comments {
-                if let Some((schema_url, url_range)) = comment.schema_url(source_path.as_deref()) {
-                    return Some((schema_url, url_range));
-                }
-            }
-        }
-        None
     }
 
     #[inline]

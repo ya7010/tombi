@@ -1,6 +1,9 @@
 use futures::FutureExt;
+use itertools::Itertools;
+use syntax::SyntaxElement;
 
 use crate::rule::root_table_keys_order;
+use ast::AstToken;
 
 impl crate::Edit for ast::Root {
     fn edit<'a: 'b, 'b>(
@@ -15,6 +18,17 @@ impl crate::Edit for ast::Root {
             let mut changes = vec![];
             let mut key_values = vec![];
             let mut table_or_array_of_tables = vec![];
+
+            if self.file_schema_url(None).is_some() {
+                changes.push(crate::Change::AppendTop {
+                    new: self
+                        .get_first_document_comment_group()
+                        .unwrap()
+                        .into_iter()
+                        .map(|comment| SyntaxElement::Token(comment.syntax().clone()))
+                        .collect_vec(),
+                });
+            }
 
             for key_value in self.key_values() {
                 changes.extend(

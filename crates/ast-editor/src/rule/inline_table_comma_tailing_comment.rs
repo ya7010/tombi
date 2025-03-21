@@ -27,7 +27,7 @@ pub fn inline_table_comma_tailing_comment(
                 },
                 Change::Append {
                     base: SyntaxElement::Node(key_value.syntax().clone()),
-                    new: SyntaxElement::Node(comma_with_tailing_comment),
+                    new: vec![SyntaxElement::Node(comma_with_tailing_comment)],
                 },
             ];
         }
