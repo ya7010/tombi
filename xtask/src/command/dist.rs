@@ -49,15 +49,16 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     .run()?;
 
     let dist = project_root().join("dist");
-    gzip(
-        &target.server_path,
-        &dist.join(target.cli_artifact_name.clone() + ".gz"),
-    )?;
     if target_name.contains("-windows-") {
         zip(
             &target.server_path,
             target.symbols_path.as_ref(),
             &dist.join(target.cli_artifact_name.clone() + ".zip"),
+        )?;
+    } else {
+        gzip(
+            &target.server_path,
+            &dist.join(target.cli_artifact_name.clone() + ".gz"),
         )?;
     }
 
@@ -86,7 +87,7 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
         ));
     }
 
-    sh.copy_file(&target.server_path, bundle_path.join("tombi"))?;
+    sh.copy_file(&target.server_path, bundle_path.join(&target.exe_name))?;
     if let Some(symbols_path) = &target.symbols_path {
         sh.copy_file(symbols_path, &bundle_path)?;
     }
@@ -113,6 +114,7 @@ fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> 
 struct Target {
     target_name: String,
     vscode_target_name: String,
+    exe_name: String,
     server_path: PathBuf,
     symbols_path: Option<PathBuf>,
     cli_artifact_name: String,
@@ -160,13 +162,15 @@ impl Target {
         } else {
             (String::new(), None)
         };
-        let server_path = out_path.join(format!("tombi{exe_suffix}"));
+        let exe_name = format!("tombi{exe_suffix}");
+        let server_path = out_path.join(&exe_name);
         let cli_artifact_name = format!("tombi-cli-{version}-{target_name}{exe_suffix}");
         let vscode_artifact_name = format!("tombi-vscode-{version}-{vscode_target_name}.vsix");
 
         Self {
             target_name,
             vscode_target_name,
+            exe_name,
             server_path,
             symbols_path,
             cli_artifact_name,
