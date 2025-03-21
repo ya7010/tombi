@@ -53,13 +53,10 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
         zip(
             &target.server_path,
             target.symbols_path.as_ref(),
-            &dist.join(target.cli_artifact_name.clone() + ".zip"),
+            &dist.join(&target.cli_artifact_name),
         )?;
     } else {
-        gzip(
-            &target.server_path,
-            &dist.join(target.cli_artifact_name.clone() + ".gz"),
-        )?;
+        gzip(&target.server_path, &dist.join(&target.cli_artifact_name))?;
     }
 
     Ok(())
@@ -157,14 +154,18 @@ impl Target {
             .join("target")
             .join(&target_name)
             .join("release");
-        let (exe_suffix, symbols_path) = if target_name.contains("-windows-") {
-            (".exe".into(), Some(out_path.join("tombi.pdb")))
+        let (exe_suffix, cli_artifact_suffix, symbols_path) = if target_name.contains("-windows-") {
+            (
+                ".exe".into(),
+                ".zip".to_string(),
+                Some(out_path.join("tombi.pdb")),
+            )
         } else {
-            (String::new(), None)
+            (String::new(), ".gz".to_string(), None)
         };
         let exe_name = format!("tombi{exe_suffix}");
         let server_path = out_path.join(&exe_name);
-        let cli_artifact_name = format!("tombi-cli-{version}-{target_name}{exe_suffix}");
+        let cli_artifact_name = format!("tombi-cli-{version}-{target_name}{cli_artifact_suffix}");
         let vscode_artifact_name = format!("tombi-vscode-{version}-{vscode_target_name}.vsix");
 
         Self {
