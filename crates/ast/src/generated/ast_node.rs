@@ -28,10 +28,10 @@ impl Array {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ArrayOfTables {
+pub struct ArrayOfTable {
     pub(crate) syntax: SyntaxNode,
 }
-impl ArrayOfTables {
+impl ArrayOfTable {
     #[inline]
     pub fn header(&self) -> Option<Keys> {
         support::node::child(&self.syntax)
@@ -406,7 +406,7 @@ pub enum Key {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum RootItem {
-    ArrayOfTables(ArrayOfTables),
+    ArrayOfTable(ArrayOfTable),
     KeyValue(KeyValue),
     Table(Table),
 }
@@ -448,7 +448,7 @@ impl AstNode for Array {
         &self.syntax
     }
 }
-impl AstNode for ArrayOfTables {
+impl AstNode for ArrayOfTable {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == SyntaxKind::ARRAY_OF_TABLES
@@ -889,10 +889,10 @@ impl AstNode for Key {
         }
     }
 }
-impl From<ArrayOfTables> for RootItem {
+impl From<ArrayOfTable> for RootItem {
     #[inline]
-    fn from(node: ArrayOfTables) -> RootItem {
-        RootItem::ArrayOfTables(node)
+    fn from(node: ArrayOfTable) -> RootItem {
+        RootItem::ArrayOfTable(node)
     }
 }
 impl From<KeyValue> for RootItem {
@@ -918,7 +918,7 @@ impl AstNode for RootItem {
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            SyntaxKind::ARRAY_OF_TABLES => RootItem::ArrayOfTables(ArrayOfTables { syntax }),
+            SyntaxKind::ARRAY_OF_TABLES => RootItem::ArrayOfTable(ArrayOfTable { syntax }),
             SyntaxKind::KEY_VALUE => RootItem::KeyValue(KeyValue { syntax }),
             SyntaxKind::TABLE => RootItem::Table(Table { syntax }),
             _ => return None,
@@ -928,7 +928,7 @@ impl AstNode for RootItem {
     #[inline]
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            RootItem::ArrayOfTables(it) => &it.syntax,
+            RootItem::ArrayOfTable(it) => &it.syntax,
             RootItem::KeyValue(it) => &it.syntax,
             RootItem::Table(it) => &it.syntax,
         }
@@ -1122,7 +1122,7 @@ impl std::fmt::Display for Array {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for ArrayOfTables {
+impl std::fmt::Display for ArrayOfTable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

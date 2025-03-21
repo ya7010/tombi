@@ -126,7 +126,7 @@ impl<'de> serde::Deserialize<'de> for Value {
             where
                 A: serde::de::SeqAccess<'de>,
             {
-                let mut vec = Array::new(ArrayKind::ArrayOfTables);
+                let mut vec = Array::new(ArrayKind::ArrayOfTable);
                 while let Some(elem) = seq.next_element()? {
                     vec.push(elem);
                 }

@@ -69,8 +69,8 @@ impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
                 ast::TableOrArrayOfTable::Table(table) => {
                     table.into_document_tree_and_errors(toml_version)
                 }
-                ast::TableOrArrayOfTable::ArrayOfTables(array) => {
-                    array.into_document_tree_and_errors(toml_version)
+                ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+                    array_of_table.into_document_tree_and_errors(toml_version)
                 }
             }
             .into();

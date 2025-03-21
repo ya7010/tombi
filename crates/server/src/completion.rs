@@ -97,11 +97,11 @@ pub async fn get_completion_contents(
                 }
                 table.header()
             }
-        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
+        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
             let (double_bracket_start_range, double_bracket_end_range) = {
                 match (
-                    array_of_tables.double_bracket_start(),
-                    array_of_tables.double_bracket_end(),
+                    array_of_table.double_bracket_start(),
+                    array_of_table.double_bracket_end(),
                 ) {
                     (Some(double_bracket_start), Some(double_bracket_end)) => {
                         (double_bracket_start.range(), double_bracket_end.range())
@@ -116,10 +116,10 @@ pub async fn get_completion_contents(
             {
                 return Vec::with_capacity(0);
             } else {
-                if array_of_tables.contains_header(position) {
+                if array_of_table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
                 }
-                array_of_tables.header()
+                array_of_table.header()
             }
         } else {
             continue;

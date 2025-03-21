@@ -8,7 +8,7 @@ pub enum ArrayKind {
     /// ```toml
     /// [[array]]
     /// ```
-    ArrayOfTables,
+    ArrayOfTable,
 
     /// An array.
     ///
@@ -23,7 +23,7 @@ impl From<document_tree::ArrayKind> for ArrayKind {
         use document_tree::ArrayKind::*;
 
         match kind {
-            ArrayOfTables | ParentArrayOfTables => Self::ArrayOfTables,
+            ArrayOfTable | ParentArrayOfTable => Self::ArrayOfTable,
             Array => Self::Array,
         }
     }
@@ -95,7 +95,7 @@ impl<'de> serde::Deserialize<'de> for Array {
     {
         let values = Vec::<Value>::deserialize(deserializer)?;
         Ok(Self {
-            kind: ArrayKind::ArrayOfTables,
+            kind: ArrayKind::ArrayOfTable,
             values,
         })
     }

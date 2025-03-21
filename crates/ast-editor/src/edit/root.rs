@@ -34,9 +34,9 @@ impl crate::Edit for ast::Root {
                                 .await,
                         );
                     }
-                    ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => {
+                    ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
                         changes.extend(
-                            array_of_tables
+                            array_of_table
                                 .edit(&[], value_schema, schema_url, definitions, schema_context)
                                 .await,
                         );

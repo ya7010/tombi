@@ -52,7 +52,7 @@ impl Format for ast::Root {
                             key_value_size,
                             has_dangling_comments,
                         }
-                        | Header::ArrayOfTables {
+                        | Header::ArrayOfTable {
                             header_keys: pre_header_keys,
                             key_value_size,
                             has_dangling_comments,
@@ -73,11 +73,11 @@ impl Format for ast::Root {
                         has_dangling_comments,
                     };
                 }
-                ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => {
-                    let header_keys = array_of_tables.header().unwrap().keys();
-                    let key_value_size = array_of_tables.key_values().count();
+                ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+                    let header_keys = array_of_table.header().unwrap().keys();
+                    let key_value_size = array_of_table.key_values().count();
                     let has_dangling_comments =
-                        !array_of_tables.key_values_dangling_comments().is_empty();
+                        !array_of_table.key_values_dangling_comments().is_empty();
 
                     match header {
                         Header::Root => {}
@@ -93,7 +93,7 @@ impl Format for ast::Root {
                                 write!(f, "{}", f.line_ending())?;
                             }
                         }
-                        Header::ArrayOfTables {
+                        Header::ArrayOfTable {
                             header_keys: pre_header_keys,
                             key_value_size,
                             has_dangling_comments,
@@ -107,9 +107,9 @@ impl Format for ast::Root {
                             }
                         }
                     };
-                    array_of_tables.format(f)?;
+                    array_of_table.format(f)?;
 
-                    header = Header::ArrayOfTables {
+                    header = Header::ArrayOfTable {
                         header_keys,
                         key_value_size,
                         has_dangling_comments,
@@ -126,7 +126,7 @@ impl Format for ast::RootItem {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             ast::RootItem::Table(it) => it.format(f),
-            ast::RootItem::ArrayOfTables(it) => it.format(f),
+            ast::RootItem::ArrayOfTable(it) => it.format(f),
             ast::RootItem::KeyValue(it) => it.format(f),
         }
     }
@@ -142,7 +142,7 @@ enum Header {
         has_dangling_comments: bool,
     },
 
-    ArrayOfTables {
+    ArrayOfTable {
         header_keys: ast::AstChildren<ast::Key>,
         key_value_size: usize,
         has_dangling_comments: bool,

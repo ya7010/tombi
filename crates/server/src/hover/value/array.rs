@@ -97,8 +97,7 @@ impl GetHoverContent for document_tree::Array {
                                             .await?;
 
                                         if keys.is_empty()
-                                            && self.kind()
-                                                == document_tree::ArrayKind::ArrayOfTables
+                                            && self.kind() == document_tree::ArrayKind::ArrayOfTable
                                         {
                                             if let Some(constraints) =
                                                 &mut hover_content.constraints

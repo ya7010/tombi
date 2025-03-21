@@ -11,7 +11,7 @@ use crate::{
     ErrorKind::*,
 };
 
-impl Parse for ast::ArrayOfTables {
+impl Parse for ast::ArrayOfTable {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
