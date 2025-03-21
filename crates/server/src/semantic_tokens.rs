@@ -48,7 +48,7 @@ impl AppendSemanticTokens for ast::TableOrArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         match self {
             Self::Table(table) => table.append_semantic_tokens(builder),
-            Self::ArrayOfTables(array) => array.append_semantic_tokens(builder),
+            Self::ArrayOfTable(array_of_table) => array_of_table.append_semantic_tokens(builder),
         }
     }
 }
@@ -83,7 +83,7 @@ impl AppendSemanticTokens for ast::Table {
     }
 }
 
-impl AppendSemanticTokens for ast::ArrayOfTables {
+impl AppendSemanticTokens for ast::ArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
             builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());

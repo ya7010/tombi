@@ -59,7 +59,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_array_of_tables(node: &ast::ArrayOfTables) -> Self {
+    pub(crate) fn new_array_of_table(node: &ast::ArrayOfTable) -> Self {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
@@ -373,12 +373,12 @@ impl IntoDocumentTreeAndErrors<crate::Table> for ast::Table {
     }
 }
 
-impl IntoDocumentTreeAndErrors<Table> for ast::ArrayOfTables {
+impl IntoDocumentTreeAndErrors<Table> for ast::ArrayOfTable {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
     ) -> DocumentTreeAndErrors<Table> {
-        let mut table = Table::new_array_of_tables(&self);
+        let mut table = Table::new_array_of_table(&self);
         let mut errors = Vec::new();
 
         for comment in self.header_leading_comments() {
@@ -466,8 +466,8 @@ impl IntoDocumentTreeAndErrors<Table> for ast::TableOrArrayOfTable {
             ast::TableOrArrayOfTable::Table(table) => {
                 table.into_document_tree_and_errors(toml_version)
             }
-            ast::TableOrArrayOfTable::ArrayOfTables(array_of_tables) => {
-                array_of_tables.into_document_tree_and_errors(toml_version)
+            ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+                array_of_table.into_document_tree_and_errors(toml_version)
             }
         }
     }

@@ -5,7 +5,7 @@ use schema_store::{GetHeaderSchemarAccessors, SchemaAccessor};
 
 use crate::{edit::get_schema, rule::table_keys_order};
 
-impl crate::Edit for ast::ArrayOfTables {
+impl crate::Edit for ast::ArrayOfTable {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],

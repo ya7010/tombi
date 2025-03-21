@@ -7,7 +7,7 @@ use schema_store::{
 use validator::Validate;
 
 mod array;
-mod array_of_tables;
+mod array_of_table;
 mod inline_table;
 mod key_value;
 mod root;

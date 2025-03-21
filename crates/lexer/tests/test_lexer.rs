@@ -251,7 +251,7 @@ test_tokens! {
 
 test_tokens! {
     #[test]
-    fn array_of_tables(
+    fn array_of_table(
         textwrap::dedent(
             r#"
             [[package]]

@@ -15,8 +15,8 @@ impl crate::Root {
     pub fn table_or_array_of_tables(&self) -> impl Iterator<Item = crate::TableOrArrayOfTable> {
         self.items().into_iter().filter_map(|item| match item {
             crate::RootItem::Table(table) => Some(crate::TableOrArrayOfTable::Table(table)),
-            crate::RootItem::ArrayOfTables(array_of_tables) => {
-                Some(crate::TableOrArrayOfTable::ArrayOfTables(array_of_tables))
+            crate::RootItem::ArrayOfTable(array_of_table) => {
+                Some(crate::TableOrArrayOfTable::ArrayOfTable(array_of_table))
             }
             _ => None,
         })
