@@ -1,8 +1,9 @@
 //! Generated file, do not edit by hand, see `xtask/src/codegen`
 
+use crate::support;
+use crate::AstChildren;
+use crate::AstNode;
 use syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
-
-use crate::{support, AstChildren, AstNode};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Array {
@@ -451,7 +452,7 @@ impl AstNode for Array {
 impl AstNode for ArrayOfTable {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SyntaxKind::ARRAY_OF_TABLES
+        kind == SyntaxKind::ARRAY_OF_TABLE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -912,13 +913,13 @@ impl AstNode for RootItem {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            SyntaxKind::ARRAY_OF_TABLES | SyntaxKind::KEY_VALUE | SyntaxKind::TABLE
+            SyntaxKind::ARRAY_OF_TABLE | SyntaxKind::KEY_VALUE | SyntaxKind::TABLE
         )
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            SyntaxKind::ARRAY_OF_TABLES => RootItem::ArrayOfTable(ArrayOfTable { syntax }),
+            SyntaxKind::ARRAY_OF_TABLE => RootItem::ArrayOfTable(ArrayOfTable { syntax }),
             SyntaxKind::KEY_VALUE => RootItem::KeyValue(KeyValue { syntax }),
             SyntaxKind::TABLE => RootItem::Table(Table { syntax }),
             _ => return None,

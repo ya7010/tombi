@@ -56,7 +56,7 @@ impl Parse for ast::ArrayOfTable {
         //       consume whitespace until the next section.
         while p.eat(LINE_BREAK) {}
 
-        m.complete(p, ARRAY_OF_TABLES);
+        m.complete(p, ARRAY_OF_TABLE);
     }
 }
 

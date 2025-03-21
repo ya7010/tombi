@@ -45,7 +45,7 @@ pub enum SyntaxKind {
     ARRAY,
     TABLE,
     INLINE_TABLE,
-    ARRAY_OF_TABLES,
+    ARRAY_OF_TABLE,
     #[doc(hidden)]
     INVALID_TOKEN,
     #[doc(hidden)]
