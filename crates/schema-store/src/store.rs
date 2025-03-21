@@ -1,10 +1,9 @@
 use std::{ops::Deref, sync::Arc};
 
 use ahash::AHashMap;
-use ast::AstNode;
 use config::Schema;
 use futures::{future::BoxFuture, FutureExt};
-use itertools::{Either, Itertools};
+use itertools::Either;
 use tokio::sync::RwLock;
 
 use crate::{
@@ -236,53 +235,22 @@ impl SchemaStore {
             None => None,
         };
 
-        if let Some(comments) = itertools::chain!(
-            root.key_values_begin_dangling_comments()
-                .into_iter()
-                .next()
-                .map(|comment| {
-                    comment
-                        .into_iter()
-                        .map(|comment| ast::Comment::from(comment))
-                        .collect_vec()
-                }),
-            root.key_values_dangling_comments()
-                .into_iter()
-                .next()
-                .map(|comment| {
-                    comment
-                        .into_iter()
-                        .map(|comment| ast::Comment::from(comment))
-                        .collect_vec()
-                }),
-            root.items().into_iter().next().map(|item| {
-                item.leading_comments()
-                    .into_iter()
-                    .map(|comment| ast::Comment::from(comment))
-                    .collect_vec()
-            }),
-        )
-        .find(|comments| !comments.is_empty())
-        {
-            for comment in comments {
-                if let Some((schema_url, url_range)) = comment.schema_url(source_path.as_deref()) {
-                    let schema_url = match schema_url {
-                        Ok(schema_url) => schema_url,
-                        Err(schema_url_or_file_path) => {
-                            return Err((
-                                crate::Error::InvalidSchemaUrlOrFilePath {
-                                    schema_url_or_file_path,
-                                },
-                                url_range,
-                            ));
-                        }
-                    };
-                    return self
-                        .try_get_source_schema_from_schema_url(&SchemaUrl::new(schema_url))
-                        .await
-                        .map_err(|err| (err, url_range));
+        if let Some((schema_url, url_range)) = root.file_schema_url(source_path.as_deref()) {
+            let schema_url = match schema_url {
+                Ok(schema_url) => schema_url,
+                Err(schema_url_or_file_path) => {
+                    return Err((
+                        crate::Error::InvalidSchemaUrlOrFilePath {
+                            schema_url_or_file_path,
+                        },
+                        url_range,
+                    ));
                 }
-            }
+            };
+            return self
+                .try_get_source_schema_from_schema_url(&SchemaUrl::new(schema_url))
+                .await
+                .map_err(|err| (err, url_range));
         }
 
         Ok(None)
