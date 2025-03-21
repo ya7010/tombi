@@ -66,7 +66,7 @@ impl SemanticTokensBuilder {
             delta_start: (file_schema_range.start().column() - comment_range.start().column() - 1)
                 as u32,
             length: (file_schema_range.end().column() - file_schema_range.start().column()) as u32,
-            token_type: TokenType::STRING as u32,
+            token_type: TokenType::COMMENT as u32,
             token_modifiers_bitset: 0,
         });
         self.last_range = comment_range;
