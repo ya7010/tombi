@@ -3,6 +3,7 @@ use std::path::PathBuf;
 pub fn project_root() -> PathBuf {
     let dir = std::env::var("CARGO_MANIFEST_DIR")
         .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_owned());
+
     PathBuf::from(dir)
         .parent()
         .unwrap()
