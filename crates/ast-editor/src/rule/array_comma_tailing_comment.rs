@@ -27,7 +27,7 @@ pub fn array_comma_tailing_comment(
                 },
                 Change::Append {
                     base: SyntaxElement::Node(value.syntax().clone()),
-                    new: SyntaxElement::Node(comma_with_tailing_comment),
+                    new: vec![SyntaxElement::Node(comma_with_tailing_comment)],
                 },
             ];
         }

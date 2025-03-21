@@ -1,8 +1,11 @@
 #[derive(Debug)]
 pub enum Change {
+    AppendTop {
+        new: Vec<syntax::SyntaxElement>,
+    },
     Append {
         base: syntax::SyntaxElement,
-        new: syntax::SyntaxElement,
+        new: Vec<syntax::SyntaxElement>,
     },
     Remove {
         target: syntax::SyntaxElement,
