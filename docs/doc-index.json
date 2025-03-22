@@ -20,6 +20,10 @@
         "path": "/docs/formatter/magic-trailing-comma"
       },
       {
+        "title": "Treatment of Comments",
+        "path": "/docs/formatter/treatment-of-comments"
+      },
+      {
         "title": "Json Schema",
         "path": "/docs/formatter/json-schema"
       }

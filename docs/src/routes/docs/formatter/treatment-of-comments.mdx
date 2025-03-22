@@ -1,0 +1,377 @@
+# Treatment of Comments
+
+Tombi has an automatic sorting feature, which requires sophisticated comment interpretation.
+
+Most users will learn how comments are handled by observing the formatter's behavior,
+but this page is provided for users who want a more systematic understanding of how comments are treated.
+
+## Terminology
+
+Generally, there are three types of comments:
+
+1. Leading comments
+2. Tailing comment
+3. Dangling comments
+
+Type 1 and 2 exist surrounding an element.
+Leading comments are on the lines before an element and can exist across multiple consecutive lines.
+Tailing comments exist at the end of the line after an element and can only exist once.
+
+```toml
+# leading comment1
+# leading comment2
+key = "value" # tailing comment
+```
+
+Type 3, Dangling comments, are comments not associated with any element.
+
+```toml
+# dangling comment1
+# dangling comment2
+
+key = "value"
+
+# dangling comment3
+
+# dangling comment4
+```
+
+When dangling comments exist, automatic sorting becomes challenging.
+
+For example, consider the following TOML file:
+
+```toml
+# dangling comment1
+
+key2 = "value2"
+
+# dangling comment2
+
+# leading comment1
+# leading comment2
+key1 = "value1" # tailing comment
+# dangling comment3
+
+# dangling comment4
+```
+
+When sorting keys in ascending order, key1 should come before key2.
+But where should dangling comment2 go? Before key1 or after key2?
+Tombi cannot determine which element the comment is directed at.
+
+Should we use AI to interpret the comment content?
+
+No, Tombi solves this problem by establishing special rules.
+
+## Limiting the Use of Dangling Comments
+
+Tombi limits where dangling comments can be used.
+They are allowed before and after key values, and before and after the brackets of arrays and inline tables.
+
+```toml
+# dangling comment
+# dangling comment
+
+key = "value"
+
+# dangling comment
+# dangling comment
+
+[table]
+# dangling comment
+# dangling comment
+
+key = [
+  # dangling comment
+  # dangling comment
+  
+  "value",
+  
+  # dangling comment
+  # dangling comment
+]
+
+# dangling comment
+# dangling comment
+
+[[array_of_table]]
+# dangling comment
+# dangling comment
+
+key = {
+  # dangling comment
+  # dangling comment
+  
+  key = "value"
+  
+  # dangling comment
+  # dangling comment
+}
+
+# dangling comment
+# dangling comment
+```
+
+<Note>
+Dangling comments can be separated by blank lines, allowing multiple groups to be placed.
+
+```toml
+# dangling comment
+# dangling comment
+
+# dangling comment
+# dangling comment
+
+# dangling comment
+# dangling comment
+```
+</Note>
+
+<Tip>
+In the proposed TOML v1.1.0, it allows multi-line and trailing commas of Inline Table.
+</Tip>
+
+Now, what happens to dangling comments in other locations?
+
+## Merging Leading Comments
+
+Consider a case where comments exist between key values, where dangling comments are not allowed:
+
+```toml
+key1 = 1
+
+# dangling comment?
+# dangling comment?
+
+# dangling comment?
+# dangling comment?
+
+key2 = 2
+```
+
+In such cases, Tombi treats dangling comments as leading comments and removes blank lines between comments:
+
+```toml
+key1 = 1
+# dangling comment?
+# dangling comment?
+# dangling comment?
+# dangling comment?
+key2 = 2
+```
+
+With this special pre-processing, Tombi maintains the meaning of comments while enabling automatic sorting.
+
+## Summary of Comment Handling
+
+Let's look at a more specific example to understand how Tombi handles comments:
+
+```toml
+# dangling comment
+# dangling comment
+
+# leading comment
+# leading comment
+key1 = 1 # tailing comment
+
+# leading comment
+# leading comment
+
+# leading comment
+# leading comment
+key2 = 2 # tailing comment
+
+# dangling comment
+# dangling comment
+
+# leading comment
+# leading comment
+[table]
+# dangling comment
+
+# dangling comment
+# dangling comment
+
+# leading comment
+# leading comment
+key1 = 1 # tailing comment
+
+# leading comment
+# leading comment
+
+# leading comment
+key2 = [
+  # dangling comment
+  # dangling comment
+  
+  # leading comment
+  # leading comment
+  "value1", # tailing comment
+
+  # leading comment
+  # leading comment
+
+  # leading comment
+  # leading comment
+  "value2", # tailing comment
+
+  # dangling comment
+  # dangling comment
+  
+  # dangling comment
+  # dangling comment
+] # tailing comment
+
+# dangling comment
+# dangling comment
+
+# leading comment
+[[array_of_table]]
+# dangling comment
+# dangling comment
+
+key1 = {
+  # dangling comment
+  # dangling comment
+
+  # dangling comment
+  # dangling comment
+  
+  # leading comment
+  # leading comment
+  key1 = "value1", # tailing comment
+
+  # leading comment
+  # leading comment
+
+  # leading comment
+  # leading comment
+  key2 = "value2" # tailing comment
+  # leading comment
+
+  # leading comment
+  # leading comment
+  , # tailing comment
+  # dangling comment
+  # dangling comment
+
+  # dangling comment
+  # dangling comment
+} # tailing comment
+
+# dangling comment
+# dangling comment
+
+# dangling comment
+```
+
+After formatting, the comments are rearranged as follows:
+
+```toml
+# dangling comment
+# dangling comment
+
+# leading comment
+# leading comment
+key1 = 1  # tailing comment
+# leading comment
+# leading comment
+# leading comment
+# leading comment
+key2 = 2  # tailing comment
+
+# dangling comment
+# dangling comment
+
+# leading comment
+# leading comment
+[table]
+# dangling comment
+
+# dangling comment
+# dangling comment
+
+# leading comment
+# leading comment
+key1 = 1  # tailing comment
+# leading comment
+# leading comment
+# leading comment
+key2 = [
+  # dangling comment
+  # dangling comment
+
+  # leading comment
+  # leading comment
+  "value1",  # tailing comment
+  # leading comment
+  # leading comment
+  # leading comment
+  # leading comment
+  "value2",  # tailing comment
+
+  # dangling comment
+  # dangling comment
+
+  # dangling comment
+  # dangling comment
+]  # tailing comment
+
+# dangling comment
+# dangling comment
+
+# leading comment
+[[array_of_table]]
+# dangling comment
+# dangling comment
+
+key1 = {
+  # dangling comment
+  # dangling comment
+
+  # dangling comment
+  # dangling comment
+
+  # leading comment
+  # leading comment
+  key1 = "value1",  # tailing comment
+  # leading comment
+  # leading comment
+  # leading comment
+  # leading comment
+  key2 = "value2"  # tailing comment
+  # leading comment
+  # leading comment
+  # leading comment
+  ,  # tailing comment
+
+  # dangling comment
+  # dangling comment
+
+  # dangling comment
+  # dangling comment
+}  # tailing comment
+
+# dangling comment
+# dangling comment
+
+# dangling comment
+```
+
+## `:schema` Directive
+
+Tombi can embed JSON Schema information in TOML files in the same way as Taplo.
+
+```toml
+#:schema your-schema.json
+key = "value"
+```
+
+However, when auto-sorting, to prevent the `#:schema` directive from being accidentally placed anywhere other than the beginning of the document,
+Tombi first moves the comment group containing the `#:schema` directive to the beginning of the document before performing auto-sorting.
+
+```toml
+#:schema your-schema.json
+
+key = "value"
+```
