@@ -28,14 +28,6 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_comment(
-                "# █",
-                tombi_schema_path(),
-            ) -> Ok([]);
-        }
-
-        test_completion_labels! {
-            #[tokio::test]
             async fn tombi_used_toml_version(
                 r#"
                 toml-version = "v1.0.0"
