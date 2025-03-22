@@ -110,9 +110,9 @@ impl Error {
         self.range
     }
 
-    pub fn requires_higher_toml_version(&self, toml_version: TomlVersion) -> bool {
+    pub fn is_match(&self, toml_version: TomlVersion) -> bool {
         self.required_toml_version
-            .map_or(false, |required| required > toml_version)
+            .map_or(true, |required| required >= toml_version)
     }
 }
 
