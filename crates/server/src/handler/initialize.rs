@@ -84,7 +84,10 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
             SemanticTokensOptions {
                 legend: SemanticTokensLegend {
                     token_types: SUPPORTED_TOKEN_TYPES.to_vec(),
-                    token_modifiers: vec![SemanticTokenModifier::READONLY],
+                    token_modifiers: vec![
+                        SemanticTokenModifier::DECLARATION,
+                        SemanticTokenModifier::READONLY,
+                    ],
                 },
                 full: Some(SemanticTokensFullOptions::Bool(true)),
                 ..Default::default()
