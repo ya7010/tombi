@@ -112,7 +112,7 @@ impl Error {
 
     pub fn is_match(&self, toml_version: TomlVersion) -> bool {
         self.required_toml_version
-            .map_or(true, |required| required >= toml_version)
+            .map_or(true, |required| required > toml_version)
     }
 }
 
