@@ -7,6 +7,13 @@ but like Taplo, Tombi is also trying to add validation functions to the linter t
 
 Currently, we are considering adding special information called `x-tombi-*` to JSON Schema.
 
+## Schema Priority
+This section will discuss how to prioritize the application of `x-tombi-*` keys in your JSON Schema.
+
+1. `#:schema` directive in the top comment of the TOML file (Same as [Taplo](https://taplo.tamasfe.dev/configuration/directives.html#the-schema-directive))
+2. JSON Schema specified in [the tombi configuration file](/docs/configuration#search-priority)
+3. JSON Schema specified in the JSON Schema Store
+
 ## Formatting
 ### x-tombi-toml-version
 This key is for automatically determining the TOML version.
