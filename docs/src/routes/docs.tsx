@@ -1,7 +1,7 @@
 import type { RouteSectionProps } from "@solidjs/router";
 import { useLocation } from "@solidjs/router";
 import { Sidebar } from "~/components/Sidebar";
-import { createEffect, onMount } from "solid-js";
+import { createEffect } from "solid-js";
 import Prism from "prismjs";
 import { DocNavigation } from "~/components/DocNavigation";
 import { setupAnchors } from "~/utils/anchor";
