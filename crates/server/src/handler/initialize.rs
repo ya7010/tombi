@@ -2,10 +2,10 @@ use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, CompletionOptions, CompletionOptionsCompletionItem,
     DiagnosticOptions, DiagnosticServerCapabilities, DocumentLinkOptions,
     FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, PositionEncodingKind, SemanticTokenModifier, SemanticTokensFullOptions,
-    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TextDocumentSyncSaveOptions, WorkDoneProgressOptions,
+    OneOf, PositionEncodingKind, SemanticTokensFullOptions, SemanticTokensLegend,
+    SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
+    WorkDoneProgressOptions,
 };
 
 use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;

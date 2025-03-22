@@ -2249,6 +2249,7 @@ dependencies = [
  "clap",
  "document-tree",
  "indexmap",
+ "itertools",
  "parser",
  "pretty_assertions",
  "serde",

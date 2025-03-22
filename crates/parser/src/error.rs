@@ -1,3 +1,5 @@
+use config::TomlVersion;
+
 #[derive(thiserror::Error, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
 pub enum ErrorKind {
@@ -76,15 +78,24 @@ pub enum ErrorKind {
     ForbiddenInlineTableLastComma,
 }
 
-#[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub struct Error {
     kind: ErrorKind,
     range: text::Range,
+    required_toml_version: Option<TomlVersion>,
 }
 
 impl Error {
-    pub fn new(kind: ErrorKind, range: text::Range) -> Self {
-        Self { kind, range }
+    pub fn new(
+        kind: ErrorKind,
+        range: text::Range,
+        required_toml_version: Option<TomlVersion>,
+    ) -> Self {
+        Self {
+            kind,
+            range,
+            required_toml_version,
+        }
     }
 
     pub fn kind(&self) -> ErrorKind {
@@ -97,6 +108,11 @@ impl Error {
 
     pub fn range(&self) -> text::Range {
         self.range
+    }
+
+    pub fn requires_higher_toml_version(&self, toml_version: TomlVersion) -> bool {
+        self.required_toml_version
+            .map_or(false, |required| required > toml_version)
     }
 }
 
@@ -111,6 +127,14 @@ impl std::fmt::Display for Error {
         )
     }
 }
+
+impl PartialEq for Error {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind && self.range == other.range
+    }
+}
+
+impl Eq for Error {}
 
 impl From<lexer::Error> for Error {
     fn from(error: lexer::Error) -> Self {
@@ -131,7 +155,7 @@ impl From<lexer::Error> for Error {
             lexer::ErrorKind::InvalidToken => ErrorKind::InvalidToken,
         };
 
-        Self::new(kind, error.range())
+        Self::new(kind, error.range(), None)
     }
 }
 

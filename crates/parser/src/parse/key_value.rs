@@ -12,15 +12,15 @@ impl Parse for ast::KeyValue {
         ast::Keys::parse(p);
 
         if !p.eat(T![=]) {
-            p.error(crate::Error::new(ExpectedEqual, p.current_range()));
+            p.error(crate::Error::new(ExpectedEqual, p.current_range(), None));
         }
 
         if p.at_ts(TS_LINE_END) {
             p.invalid_token();
-            p.error(crate::Error::new(ExpectedValue, p.current_range()));
+            p.error(crate::Error::new(ExpectedValue, p.current_range(), None));
         } else if p.at(COMMENT) {
             p.invalid_token();
-            p.error(crate::Error::new(ExpectedValue, p.previous_range()));
+            p.error(crate::Error::new(ExpectedValue, p.previous_range(), None));
         } else {
             ast::Value::parse(p);
         }

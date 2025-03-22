@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use ast::AstNode;
+use config::TomlVersion;
 use syntax::SyntaxNode;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -31,8 +32,10 @@ impl<T> Parsed<T> {
         SyntaxNode::new_root_mut(self.green_tree)
     }
 
-    pub fn errors(&self) -> &[crate::Error] {
-        &self.errors
+    pub fn errors(&self, toml_version: TomlVersion) -> impl Iterator<Item = &crate::Error> {
+        self.errors
+            .iter()
+            .filter(move |e| e.requires_higher_toml_version(toml_version))
     }
 }
 

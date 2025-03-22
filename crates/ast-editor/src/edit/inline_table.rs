@@ -50,7 +50,6 @@ impl crate::Edit for ast::InlineTable {
                 changes.extend(inline_table_comma_tailing_comment(
                     &key_value,
                     comma.as_ref(),
-                    schema_context,
                 ));
                 changes.extend(
                     key_value
