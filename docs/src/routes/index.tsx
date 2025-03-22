@@ -61,7 +61,7 @@ export default function Home() {
 
   return (
     <div>
-      <Title>Tombi - Modern TOML Formatter</Title>
+      <Title>Tombi - TOML Toolkit</Title>
 
       <section class="text-center mb-24">
         <h1 class="sr-only">Tombi</h1>
