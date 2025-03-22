@@ -4,7 +4,7 @@ use std::fmt::Write;
 
 use config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
-use itertools::Either;
+use itertools::{Either, Itertools};
 use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
 
@@ -44,17 +44,7 @@ impl<'a> Formatter<'a> {
     }
 
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let parsed = parser::parse(source, self.toml_version);
-
-        let diagnostics = if !parsed.errors().is_empty() {
-            let mut diagnostics = Vec::new();
-            for error in parsed.errors() {
-                error.set_diagnostics(&mut diagnostics);
-            }
-            diagnostics
-        } else {
-            Vec::with_capacity(0)
-        };
+        let parsed = parser::parse(source);
 
         let Some(parsed) = parsed.cast::<ast::Root>() else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
@@ -63,52 +53,61 @@ impl<'a> Formatter<'a> {
         let root = parsed.tree();
         tracing::trace!("TOML AST before editing: {:#?}", root);
 
-        if diagnostics.is_empty() {
-            let root = {
-                let source_schema = if let Some(schema) = self
-                    .schema_store
-                    .try_get_source_schema_from_ast(&root, self.source_url_or_path)
-                    .await
-                    .ok()
-                    .flatten()
-                {
-                    Some(schema)
-                } else if let Some(source_url_or_path) = self.source_url_or_path {
-                    self.schema_store
-                        .try_get_source_schema(source_url_or_path)
-                        .await
-                        .ok()
-                        .flatten()
-                } else {
-                    None
-                };
-
-                let toml_version = source_schema
-                    .as_ref()
-                    .and_then(|schema| {
-                        schema
-                            .root_schema
-                            .as_ref()
-                            .and_then(|root| root.toml_version())
-                    })
-                    .unwrap_or(self.toml_version);
-
-                ast_editor::Editor::new(
-                    root,
-                    &schema_store::SchemaContext {
-                        toml_version,
-                        root_schema: source_schema
-                            .as_ref()
-                            .and_then(|schema| schema.root_schema.as_ref()),
-                        sub_schema_url_map: source_schema
-                            .as_ref()
-                            .map(|schema| &schema.sub_schema_url_map),
-                        store: self.schema_store,
-                    },
-                )
-                .edit()
+        let source_schema = if let Some(schema) = self
+            .schema_store
+            .try_get_source_schema_from_ast(&root, self.source_url_or_path)
+            .await
+            .ok()
+            .flatten()
+        {
+            Some(schema)
+        } else if let Some(source_url_or_path) = self.source_url_or_path {
+            self.schema_store
+                .try_get_source_schema(source_url_or_path)
                 .await
-            };
+                .ok()
+                .flatten()
+        } else {
+            None
+        };
+
+        self.toml_version = source_schema
+            .as_ref()
+            .and_then(|schema| {
+                schema
+                    .root_schema
+                    .as_ref()
+                    .and_then(|root| root.toml_version())
+            })
+            .unwrap_or(self.toml_version);
+
+        let errors = parsed.errors(self.toml_version).collect_vec();
+        let diagnostics = if !errors.is_empty() {
+            let mut diagnostics = Vec::new();
+            for error in errors {
+                error.set_diagnostics(&mut diagnostics);
+            }
+            diagnostics
+        } else {
+            Vec::with_capacity(0)
+        };
+
+        if diagnostics.is_empty() {
+            let root = ast_editor::Editor::new(
+                root,
+                &schema_store::SchemaContext {
+                    toml_version: self.toml_version,
+                    root_schema: source_schema
+                        .as_ref()
+                        .and_then(|schema| schema.root_schema.as_ref()),
+                    sub_schema_url_map: source_schema
+                        .as_ref()
+                        .map(|schema| &schema.sub_schema_url_map),
+                    store: self.schema_store,
+                },
+            )
+            .edit()
+            .await;
 
             tracing::trace!("TOML AST after editing: {:#?}", root);
 

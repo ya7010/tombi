@@ -28,6 +28,7 @@ fn eat_keys(p: &mut Parser<'_>) -> bool {
                 p.error(crate::Error::new(
                     ForbiddenKeysLastPeriod,
                     p.current_range(),
+                    None,
                 ));
                 break;
             }
@@ -59,7 +60,7 @@ pub fn eat_key(p: &mut Parser<'_>) -> bool {
         }
         _ => {
             let m = p.start();
-            p.error(crate::Error::new(ExpectedKey, p.current_range()));
+            p.error(crate::Error::new(ExpectedKey, p.current_range(), None));
             // p.bump_remap(INVALID_TOKEN);
             m.complete(p, INVALID_TOKEN);
             false

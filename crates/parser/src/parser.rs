@@ -1,4 +1,3 @@
-use config::TomlVersion;
 use syntax::{
     SyntaxKind::{self, *},
     T,
@@ -13,15 +12,10 @@ pub(crate) struct Parser<'t> {
     pos: usize,
     pub tokens: Vec<lexer::Token>,
     pub(crate) events: Vec<crate::Event>,
-    toml_version: TomlVersion,
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(
-        source: &'t str,
-        input_tokens: &'t [lexer::Token],
-        toml_version: TomlVersion,
-    ) -> Self {
+    pub(crate) fn new(source: &'t str, input_tokens: &'t [lexer::Token]) -> Self {
         Self {
             source,
             input_tokens,
@@ -33,12 +27,7 @@ impl<'t> Parser<'t> {
                 .unwrap_or_default(),
             tokens: Vec::new(),
             events: Vec::new(),
-            toml_version,
         }
-    }
-
-    pub fn toml_version(&self) -> TomlVersion {
-        self.toml_version
     }
 
     pub(crate) fn finish(mut self) -> (Vec<lexer::Token>, Vec<crate::Event>) {

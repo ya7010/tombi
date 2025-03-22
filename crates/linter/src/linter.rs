@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 
-use ast::AstNode;
 use config::TomlVersion;
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::IntoDocumentTreeAndErrors;
@@ -34,58 +33,60 @@ impl<'a> Linter<'a> {
     }
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let p = parser::parse(source, self.toml_version);
-        let mut diagnostics = vec![];
+        let parsed = parser::parse(source);
 
-        for errors in p.errors() {
-            errors.set_diagnostics(&mut diagnostics);
+        let Some(parsed) = parsed.cast::<ast::Root>() else {
+            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
+        };
+
+        let root = parsed.tree();
+
+        let source_schema = match self
+            .schema_store
+            .try_get_source_schema_from_ast(&root, self.source_url_or_path)
+            .await
+        {
+            Ok(Some(schema)) => Some(schema),
+            Ok(None) => None,
+            Err((err, range)) => {
+                self.diagnostics
+                    .push(Diagnostic::new_error(err.to_string(), range));
+                None
+            }
+        };
+
+        let source_schema = if let Some(schema) = source_schema {
+            Some(schema)
+        } else if let Some(source_url_or_path) = self.source_url_or_path {
+            self.schema_store
+                .try_get_source_schema(source_url_or_path)
+                .await
+                .ok()
+                .flatten()
+        } else {
+            None
+        };
+
+        let toml_version = source_schema
+            .as_ref()
+            .and_then(|schema| {
+                schema
+                    .root_schema
+                    .as_ref()
+                    .and_then(|root| root.toml_version())
+            })
+            .unwrap_or(self.toml_version);
+
+        for errors in parsed.errors(toml_version) {
+            errors.set_diagnostics(&mut self.diagnostics);
         }
 
-        if diagnostics.is_empty() {
-            let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
-                unreachable!("Root node is always present");
-            };
+        root.lint(&mut self);
 
-            root.lint(&mut self);
-
-            let source_schema = match self
-                .schema_store
-                .try_get_source_schema_from_ast(&root, self.source_url_or_path)
-                .await
-            {
-                Ok(Some(schema)) => Some(schema),
-                Ok(None) => None,
-                Err((err, range)) => {
-                    diagnostics.push(Diagnostic::new_error(err.to_string(), range));
-                    None
-                }
-            };
-
-            let source_schema = if let Some(schema) = source_schema {
-                Some(schema)
-            } else if let Some(source_url_or_path) = self.source_url_or_path {
-                self.schema_store
-                    .try_get_source_schema(source_url_or_path)
-                    .await
-                    .ok()
-                    .flatten()
-            } else {
-                None
-            };
-
-            let toml_version = source_schema
-                .as_ref()
-                .and_then(|schema| {
-                    schema
-                        .root_schema
-                        .as_ref()
-                        .and_then(|root| root.toml_version())
-                })
-                .unwrap_or(self.toml_version);
-
+        if self.diagnostics.is_empty() {
             let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
 
-            errors.set_diagnostics(&mut diagnostics);
+            errors.set_diagnostics(&mut self.diagnostics);
 
             if let Some(source_schema) = source_schema {
                 let schema_context = schema_store::SchemaContext {
@@ -97,17 +98,15 @@ impl<'a> Linter<'a> {
                 if let Err(schema_diagnostics) =
                     validator::validate(document_tree, &source_schema, &schema_context).await
                 {
-                    diagnostics.extend(schema_diagnostics);
+                    self.diagnostics.extend(schema_diagnostics);
                 }
             }
-
-            diagnostics.extend(self.diagnostics);
         }
 
-        if diagnostics.is_empty() {
+        if self.diagnostics.is_empty() {
             Ok(())
         } else {
-            Err(diagnostics)
+            Err(self.diagnostics)
         }
     }
 

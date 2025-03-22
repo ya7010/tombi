@@ -8,7 +8,6 @@ mod parsed;
 mod parser;
 mod token_set;
 
-use config::TomlVersion;
 pub use error::{Error, ErrorKind};
 pub use event::Event;
 use output::Output;
@@ -16,14 +15,14 @@ use parse::Parse;
 pub use parsed::Parsed;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
-pub fn parse(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
-    parse_as::<ast::Root>(source, toml_version)
+pub fn parse(source: &str) -> Parsed<SyntaxNode> {
+    parse_as::<ast::Root>(source)
 }
 
 #[allow(private_bounds)]
-pub fn parse_as<P: Parse>(source: &str, toml_version: TomlVersion) -> Parsed<SyntaxNode> {
+pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
     let lexed = lexer::lex(source);
-    let mut p = crate::parser::Parser::new(source, &lexed.tokens, toml_version);
+    let mut p = crate::parser::Parser::new(source, &lexed.tokens);
 
     P::parse(&mut p);
 
@@ -69,20 +68,22 @@ pub fn build_green_tree(
 #[macro_export]
 macro_rules! test_parser {
     {#[test] fn $name:ident($source:expr) -> Ok(_)} => {
-        #[test]
-        fn $name() {
-            let p = $crate::parse(textwrap::dedent($source).trim(), Default::default());
-
-            pretty_assertions::assert_eq!(p.errors(), vec![])
+        test_parser! {
+            #[test]
+            fn $name($source, Default::default()) -> Ok(_)
         }
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(_)} => {
         #[test]
         fn $name() {
-            let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
+            use itertools::Itertools;
 
-            pretty_assertions::assert_eq!(p.errors(), vec![])
+            let p = $crate::parse(textwrap::dedent($source).trim());
+            pretty_assertions::assert_eq!(
+                p.errors($toml_version).collect_vec(),
+                Vec::<&$crate::Error>::new()
+            )
         }
     };
 
@@ -111,9 +112,14 @@ macro_rules! test_parser {
     )} => {
         #[test]
         fn $name() {
-            let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
+            use itertools::Itertools;
 
-            pretty_assertions::assert_eq!(p.errors(), vec![$($crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*])
+            let p = $crate::parse(textwrap::dedent($source).trim());
+
+            pretty_assertions::assert_eq!(
+                p.errors($toml_version).collect_vec(),
+                vec![$(&$crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into(), Some($toml_version))),*]
+            );
         }
     };
 }

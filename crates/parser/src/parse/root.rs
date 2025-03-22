@@ -56,7 +56,7 @@ fn unknwon_line(p: &mut Parser<'_>) {
     while !p.at_ts(TS_LINE_END) {
         p.bump_any();
     }
-    p.error(crate::Error::new(UnknownLine, p.current_range()));
+    p.error(crate::Error::new(UnknownLine, p.current_range(), None));
 
     tailing_comment(p);
 
@@ -65,6 +65,8 @@ fn unknwon_line(p: &mut Parser<'_>) {
 
 #[cfg(test)]
 mod test {
+    use itertools::Itertools;
+
     #[test]
     fn test_begin_dangling_comments() {
         let input = r#"
@@ -76,8 +78,11 @@ mod test {
 [table]
         "#
         .trim();
-        let p = crate::parse(input, crate::TomlVersion::default());
+        let p = crate::parse(input);
 
-        assert_eq!(p.errors(), vec![]);
+        assert_eq!(
+            p.errors(config::TomlVersion::default()).collect_vec(),
+            Vec::<&crate::Error>::new()
+        );
     }
 }
