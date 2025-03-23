@@ -75,7 +75,7 @@ impl FindCompletionContents for document_tree::Array {
                             if value.range().end() < position {
                                 new_item_index = index + 1;
                             }
-                            if value.range().contains(position) || value.range().end() == position {
+                            if value.range().contains(position) {
                                 let accessor = Accessor::Index(index);
                                 if let Some(items) = &array_schema.items {
                                     if let Ok(Some(CurrentSchema {
@@ -198,7 +198,7 @@ impl FindCompletionContents for document_tree::Array {
                 }
             } else {
                 for (index, value) in self.values().iter().enumerate() {
-                    if value.range().contains(position) || value.range().end() == position {
+                    if value.range().contains(position) {
                         if let document_tree::Value::Table(table) = value {
                             if keys.len() == 1 && table.kind() == document_tree::TableKind::KeyValue
                             {

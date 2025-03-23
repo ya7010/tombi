@@ -14,7 +14,7 @@ pub fn get_comment_completion_contents(
         for comment in comments {
             let comment_range = comment.syntax().range();
 
-            if comment_range.contains(position) || comment_range.end() == position {
+            if comment_range.contains(position) {
                 let comment_text = comment.syntax().text();
 
                 if (position.column() - comment_range.start().column() == 2)
