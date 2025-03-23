@@ -28,6 +28,38 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
+            async fn tombi_comment(
+                "# █",
+                tombi_schema_path(),
+            ) -> Ok([]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_comment_schema_directive(
+                "#:█",
+                tombi_schema_path(),
+            ) -> Ok(["schema"]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_toml_version_comment(
+                r#"toml-version = "v1.0.0"  # █"#,
+                tombi_schema_path(),
+            ) -> Ok([]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn tombi_toml_version_directive_comment(
+                r#"toml-version = "v1.0.0"  #:█"#,
+                tombi_schema_path(),
+            ) -> Ok([]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
             async fn tombi_used_toml_version(
                 r#"
                 toml-version = "v1.0.0"
