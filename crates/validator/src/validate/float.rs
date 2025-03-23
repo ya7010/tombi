@@ -155,7 +155,7 @@ impl Validate for document_tree::Float {
                         }
                     }
                 }
-                _ => unreachable!("Expected a Float schema"),
+                _ => {}
             }
 
             if diagnostics.is_empty() {

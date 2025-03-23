@@ -93,7 +93,7 @@ impl Validate for OffsetDateTime {
                         }
                     }
                 }
-                _ => unreachable!("Expected an OffsetDateTime schema"),
+                _ => {}
             }
 
             if diagnostics.is_empty() {

@@ -93,7 +93,7 @@ impl Validate for LocalTime {
                         }
                     }
                 }
-                _ => unreachable!("Expected a LocalTime schema"),
+                _ => {}
             }
 
             if diagnostics.is_empty() {

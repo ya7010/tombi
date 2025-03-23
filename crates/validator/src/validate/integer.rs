@@ -156,9 +156,7 @@ impl Validate for document_tree::Integer {
                         }
                     }
                 }
-                _ => {
-                    unreachable!("Expected an Integer schema")
-                }
+                _ => {}
             }
 
             if diagnostics.is_empty() {

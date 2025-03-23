@@ -93,7 +93,7 @@ impl Validate for LocalDateTime {
                         }
                     }
                 }
-                _ => unreachable!("Expected a LocalDateTime schema"),
+                _ => {}
             }
 
             if diagnostics.is_empty() {
