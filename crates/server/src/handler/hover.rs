@@ -41,25 +41,25 @@ pub async fn handle_hover(
 
     let position = position.into();
     let toml_version = backend.toml_version().await.unwrap_or_default();
-
-    let source_schema = backend
-        .schema_store
-        .try_get_source_schema_from_url(&text_document.uri)
-        .await
-        .ok()
-        .flatten();
-
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
 
-    let source_schema = backend
+    let source_schema = match backend
         .schema_store
         .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document.uri)))
         .await
         .ok()
         .flatten()
-        .or(source_schema);
+    {
+        Some(source_schema) => Some(source_schema),
+        None => backend
+            .schema_store
+            .try_get_source_schema_from_url(&text_document.uri)
+            .await
+            .ok()
+            .flatten(),
+    };
 
     let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
         return Ok(None);
