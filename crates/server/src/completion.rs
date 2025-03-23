@@ -46,7 +46,7 @@ pub async fn get_completion_contents(
         tracing::trace!("last_child_or_token(): {:?}", node.last_child_or_token());
 
         if let Some(SyntaxElement::Token(token)) = node.first_child_or_token() {
-            if token.kind() == SyntaxKind::COMMENT {
+            if token.kind() == SyntaxKind::COMMENT && token.range().contains(position) {
                 return get_comment_completion_contents(&root, position);
             }
         }

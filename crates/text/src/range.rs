@@ -55,7 +55,7 @@ impl Range {
 
     #[inline]
     pub fn contains(&self, position: Position) -> bool {
-        self.start <= position && position < self.end
+        self.start <= position && position <= self.end
     }
 }
 
