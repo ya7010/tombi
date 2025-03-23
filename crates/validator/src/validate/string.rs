@@ -138,7 +138,7 @@ impl Validate for document_tree::String {
                         }
                     }
                 }
-                _ => unreachable!("Expected a String schema"),
+                _ => {}
             }
 
             if diagnostics.is_empty() {

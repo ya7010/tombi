@@ -90,7 +90,7 @@ impl Validate for document_tree::Boolean {
                         }
                     }
                 }
-                _ => unreachable!("Expected a Boolean schema"),
+                _ => {}
             }
 
             if diagnostics.is_empty() {
