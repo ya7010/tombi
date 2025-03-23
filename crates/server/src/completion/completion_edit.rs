@@ -246,4 +246,17 @@ impl CompletionEdit {
             additional_text_edits: None,
         })
     }
+
+    pub fn new_comment_schema_directive(position: text::Position) -> Option<Self> {
+        let tombi_schema_url = "https://json.schemastore.org/tombi.json";
+
+        Some(Self {
+            insert_text_format: Some(InsertTextFormat::SNIPPET),
+            text_edit: CompletionTextEdit::Edit(TextEdit {
+                new_text: format!("schema ${{0:{tombi_schema_url}}}"),
+                range: text::Range::at(position).into(),
+            }),
+            additional_text_edits: None,
+        })
+    }
 }

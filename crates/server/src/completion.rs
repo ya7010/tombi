@@ -1,3 +1,4 @@
+mod comment;
 mod completion_content;
 mod completion_edit;
 mod completion_kind;
@@ -9,6 +10,7 @@ use std::{borrow::Cow, ops::Deref};
 
 use ahash::AHashMap;
 use ast::{algo::ancestors_at_position, AstNode};
+use comment::get_comment_completion_contents;
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
 use completion_kind::CompletionKind;
@@ -42,6 +44,12 @@ pub async fn get_completion_contents(
         );
         tracing::trace!("first_child_or_token(): {:?}", node.first_child_or_token());
         tracing::trace!("last_child_or_token(): {:?}", node.last_child_or_token());
+
+        if let Some(SyntaxElement::Token(token)) = node.first_child_or_token() {
+            if token.kind() == SyntaxKind::COMMENT {
+                return get_comment_completion_contents(&root, position);
+            }
+        }
 
         let ast_keys = if ast::Keys::cast(node.to_owned()).is_some() {
             if let Some(SyntaxElement::Token(last_token)) = node.last_child_or_token() {
