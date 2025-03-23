@@ -27,7 +27,7 @@ impl Parse for ast::Value {
                 // NOTE: This is a hack to make code completion more comfortable.
 
                 let key_range = p.nth_range(n);
-                p.error(crate::Error::new(ExpectedValue, key_range, None));
+                p.error(crate::Error::new(ExpectedValue, key_range));
                 let m = p.start();
                 leading_comments(p);
                 {
@@ -71,11 +71,7 @@ fn parse_invalid_value(p: &mut Parser<'_>, n: usize) {
         end_range = p.current_range();
         p.bump_any();
     }
-    p.error(crate::Error::new(
-        ExpectedValue,
-        start_range + end_range,
-        None,
-    ));
+    p.error(crate::Error::new(ExpectedValue, start_range + end_range));
 
     tailing_comment(p);
 

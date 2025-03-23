@@ -1,3 +1,4 @@
+use config::TomlVersion;
 use syntax::{
     SyntaxKind::{self, *},
     T,
@@ -312,6 +313,19 @@ impl<'t> Parser<'t> {
     /// Emit error with the `message`
     #[inline]
     pub(crate) fn error(&mut self, error: crate::Error) {
-        self.push_event(Event::Error { error });
+        self.push_event(Event::Error {
+            error: crate::TomlVersionedError::Common(error),
+        });
+    }
+
+    /// Emit new syntax error with the `message`
+    #[inline]
+    pub(crate) fn new_syntax_error(&mut self, error: crate::Error, minimum_version: TomlVersion) {
+        self.push_event(Event::Error {
+            error: crate::TomlVersionedError::NewSyntax {
+                error,
+                minimum_version,
+            },
+        });
     }
 }
