@@ -13,15 +13,10 @@ pub(crate) struct Parser<'t> {
     pos: usize,
     pub tokens: Vec<lexer::Token>,
     pub(crate) events: Vec<crate::Event>,
-    toml_version: TomlVersion,
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(
-        source: &'t str,
-        input_tokens: &'t [lexer::Token],
-        toml_version: TomlVersion,
-    ) -> Self {
+    pub(crate) fn new(source: &'t str, input_tokens: &'t [lexer::Token]) -> Self {
         Self {
             source,
             input_tokens,
@@ -33,12 +28,7 @@ impl<'t> Parser<'t> {
                 .unwrap_or_default(),
             tokens: Vec::new(),
             events: Vec::new(),
-            toml_version,
         }
-    }
-
-    pub fn toml_version(&self) -> TomlVersion {
-        self.toml_version
     }
 
     pub(crate) fn finish(mut self) -> (Vec<lexer::Token>, Vec<crate::Event>) {
@@ -323,6 +313,19 @@ impl<'t> Parser<'t> {
     /// Emit error with the `message`
     #[inline]
     pub(crate) fn error(&mut self, error: crate::Error) {
-        self.push_event(Event::Error { error });
+        self.push_event(Event::Error {
+            error: crate::TomlVersionedError::Common(error),
+        });
+    }
+
+    /// Emit new syntax error with the `message`
+    #[inline]
+    pub(crate) fn new_syntax_error(&mut self, error: crate::Error, minimum_version: TomlVersion) {
+        self.push_event(Event::Error {
+            error: crate::TomlVersionedError::NewSyntax {
+                error,
+                minimum_version,
+            },
+        });
     }
 }

@@ -21,7 +21,7 @@ pub enum Event {
     },
 
     Error {
-        error: crate::Error,
+        error: crate::TomlVersionedError,
     },
 }
 

@@ -4,6 +4,7 @@ use ahash::AHashMap;
 use config::{Config, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
+use itertools::Itertools;
 use syntax::SyntaxNode;
 use tower_lsp::{
     lsp_types::{
@@ -73,11 +74,7 @@ impl Backend {
     }
 
     #[inline]
-    async fn get_parsed(
-        &self,
-        uri: &Url,
-        toml_version: TomlVersion,
-    ) -> Option<parser::Parsed<SyntaxNode>> {
+    async fn get_parsed(&self, uri: &Url) -> Option<parser::Parsed<SyntaxNode>> {
         let document_source = self.document_sources.read().await;
         let document_info = match document_source.get(uri) {
             Some(document_info) => document_info,
@@ -87,16 +84,12 @@ impl Backend {
             }
         };
 
-        Some(parser::parse(&document_info.source, toml_version))
+        Some(parser::parse(&document_info.source))
     }
 
     #[inline]
-    pub async fn get_incomplete_ast(
-        &self,
-        uri: &Url,
-        toml_version: TomlVersion,
-    ) -> Option<ast::Root> {
-        self.get_parsed(uri, toml_version)
+    pub async fn get_incomplete_ast(&self, uri: &Url) -> Option<ast::Root> {
+        self.get_parsed(uri)
             .await?
             .cast::<ast::Root>()
             .map(|root| root.tree())
@@ -108,19 +101,16 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
-        let Some(p) = self
-            .get_parsed(uri, toml_version)
-            .await?
-            .cast::<ast::Root>()
-        else {
+        let Some(p) = self.get_parsed(uri).await?.cast::<ast::Root>() else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };
 
-        if p.errors().is_empty() {
+        let errors = p.errors(toml_version).collect_vec();
+        if errors.is_empty() {
             Some(Ok(p.tree()))
         } else {
-            let mut diagnostics = Vec::with_capacity(p.errors().len());
-            p.errors().iter().for_each(|error| {
+            let mut diagnostics = Vec::with_capacity(errors.len());
+            errors.iter().for_each(|error| {
                 error.set_diagnostics(&mut diagnostics);
             });
 
@@ -134,7 +124,7 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<document_tree::DocumentTree> {
-        self.get_incomplete_ast(uri, toml_version)
+        self.get_incomplete_ast(uri)
             .await?
             .try_into_document_tree(toml_version)
             .ok()

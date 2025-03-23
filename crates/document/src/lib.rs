@@ -70,12 +70,13 @@ macro_rules! test_serialize {
         #[test]
         fn $name() {
             use ast::AstNode;
+            use itertools::Itertools;
             use document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
 
             let source = textwrap::dedent($source);
-            let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
-            pretty_assertions::assert_eq!(p.errors(), &[]);
+            let p = parser::parse(&source.trim());
+            pretty_assertions::assert_eq!(p.errors($toml_version).collect_vec(), Vec::<&parser::Error>::new());
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
             let (document_tree, errors) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(errors, vec![]);
@@ -98,30 +99,31 @@ macro_rules! test_serialize {
             use document_tree::IntoDocumentTreeAndErrors;
 
             let source = textwrap::dedent($source);
-            let p = parser::parse(&source.trim(), toml_version::TomlVersion::default());
-            let errors = $errors
+            let p = parser::parse(&source.trim());
+            let expected_errors = $errors
                 .into_iter()
                 .map(|(m, r)| (m.to_string(), text::Range::from(r)))
                 .collect_vec();
 
-            if !p.errors().is_empty() {
+            let errors = p.errors($toml_version).collect_vec();
+            if !errors.is_empty() {
                 pretty_assertions::assert_eq!(
-                    p.errors()
+                    errors
                         .iter()
                         .map(|e| (e.to_message(), e.range()))
                         .collect_vec(),
-                    errors,
+                    expected_errors,
                 );
             }
             let root = ast::Root::cast(p.into_syntax_node()).unwrap();
             let (_, errs) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(
-                        errs
-                            .iter()
-                            .map(|e| (e.to_message(), e.range()))
-                            .collect_vec(),
-                        errors
-                    );
+                errs
+                    .iter()
+                    .map(|e| (e.to_message(), e.range()))
+                    .collect_vec(),
+                expected_errors
+            );
         }
     };
 }

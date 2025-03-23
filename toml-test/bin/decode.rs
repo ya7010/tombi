@@ -3,6 +3,7 @@ use std::io::Read;
 use ast::AstNode;
 use clap::Parser;
 use document_tree::TryIntoDocumentTree;
+use itertools::Itertools;
 use toml_test::{IntoValue, Value, INVALID_MESSAGE};
 use toml_version::TomlVersion;
 
@@ -25,10 +26,11 @@ fn main() -> Result<(), anyhow::Error> {
 }
 
 fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Error> {
-    let p = parser::parse(source, toml_version);
+    let p = parser::parse(source);
 
-    if !p.errors().is_empty() {
-        for error in p.errors() {
+    let errors = p.errors(toml_version).collect_vec();
+    if !errors.is_empty() {
+        for error in errors {
             eprintln!("{}", error);
         }
         return Err(anyhow::anyhow!(INVALID_MESSAGE));

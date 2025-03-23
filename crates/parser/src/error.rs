@@ -1,3 +1,5 @@
+use config::TomlVersion;
+
 #[derive(thiserror::Error, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
 pub enum ErrorKind {
@@ -76,7 +78,7 @@ pub enum ErrorKind {
     ForbiddenInlineTableLastComma,
 }
 
-#[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub struct Error {
     kind: ErrorKind,
     range: text::Range,
@@ -112,6 +114,14 @@ impl std::fmt::Display for Error {
     }
 }
 
+impl PartialEq for Error {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind && self.range == other.range
+    }
+}
+
+impl Eq for Error {}
+
 impl From<lexer::Error> for Error {
     fn from(error: lexer::Error) -> Self {
         let kind = match error.kind() {
@@ -142,5 +152,47 @@ impl diagnostic::SetDiagnostics for Error {
             self.to_message(),
             self.range(),
         ));
+    }
+}
+
+/// A wrapper type for errors that includes information about whether the error depends on the version of TOML.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TomlVersionedError {
+    /// Errors that do not depend on the version of TOML
+    Common(Error),
+    /// Error when not compatible with new syntax
+    NewSyntax {
+        error: Error,
+        minimum_version: TomlVersion,
+    },
+}
+
+impl TomlVersionedError {
+    pub fn error(&self) -> &Error {
+        match self {
+            Self::Common(error) => error,
+            Self::NewSyntax { error, .. } => error,
+        }
+    }
+
+    pub fn is_compatible_with(&self, toml_version: TomlVersion) -> bool {
+        match self {
+            Self::Common(_) => true,
+            Self::NewSyntax {
+                minimum_version, ..
+            } => toml_version < *minimum_version,
+        }
+    }
+}
+
+impl From<Error> for TomlVersionedError {
+    fn from(error: Error) -> Self {
+        Self::Common(error)
+    }
+}
+
+impl From<lexer::Error> for TomlVersionedError {
+    fn from(error: lexer::Error) -> Self {
+        Self::Common(error.into())
     }
 }
