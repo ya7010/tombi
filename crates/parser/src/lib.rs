@@ -8,6 +8,7 @@ mod parsed;
 mod parser;
 mod token_set;
 
+use error::TomlVersionedError;
 pub use error::{Error, ErrorKind};
 pub use event::Event;
 use output::Output;
@@ -35,7 +36,7 @@ pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
     let mut errors = lexed
         .errors
         .into_iter()
-        .map(crate::Error::from)
+        .map(crate::TomlVersionedError::from)
         .collect::<Vec<_>>();
 
     errors.extend(errs);
@@ -47,8 +48,8 @@ pub fn build_green_tree(
     source: &str,
     tokens: &[lexer::Token],
     parser_output: crate::Output,
-) -> (rg_tree::GreenNode, Vec<crate::Error>) {
-    let mut builder = syntax::SyntaxTreeBuilder::<crate::Error>::default();
+) -> (rg_tree::GreenNode, Vec<crate::TomlVersionedError>) {
+    let mut builder = syntax::SyntaxTreeBuilder::<crate::TomlVersionedError>::default();
 
     builder::intersperse_trivia(source, tokens, &parser_output, &mut |step| match step {
         builder::Step::AddToken { kind, text } => {
@@ -118,7 +119,7 @@ macro_rules! test_parser {
 
             pretty_assertions::assert_eq!(
                 p.errors($toml_version).collect_vec(),
-                vec![$(&$crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into(), Some($toml_version))),*]
+                vec![$(&$crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*]
             );
         }
     };

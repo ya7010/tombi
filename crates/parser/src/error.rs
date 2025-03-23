@@ -82,20 +82,11 @@ pub enum ErrorKind {
 pub struct Error {
     kind: ErrorKind,
     range: text::Range,
-    earliest_non_error_version: Option<TomlVersion>,
 }
 
 impl Error {
-    pub fn new(
-        kind: ErrorKind,
-        range: text::Range,
-        earliest_non_error_version: Option<TomlVersion>,
-    ) -> Self {
-        Self {
-            kind,
-            range,
-            earliest_non_error_version,
-        }
+    pub fn new(kind: ErrorKind, range: text::Range) -> Self {
+        Self { kind, range }
     }
 
     pub fn kind(&self) -> ErrorKind {
@@ -108,13 +99,6 @@ impl Error {
 
     pub fn range(&self) -> text::Range {
         self.range
-    }
-
-    pub fn is_compatible_with(&self, toml_version: TomlVersion) -> bool {
-        self.earliest_non_error_version
-            .map_or(true, |earliest_non_error_version| {
-                toml_version < earliest_non_error_version
-            })
     }
 }
 
@@ -157,7 +141,7 @@ impl From<lexer::Error> for Error {
             lexer::ErrorKind::InvalidToken => ErrorKind::InvalidToken,
         };
 
-        Self::new(kind, error.range(), None)
+        Self::new(kind, error.range())
     }
 }
 
@@ -168,5 +152,47 @@ impl diagnostic::SetDiagnostics for Error {
             self.to_message(),
             self.range(),
         ));
+    }
+}
+
+/// A wrapper type for errors that includes information about whether the error depends on the version of TOML.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TomlVersionedError {
+    /// Errors that do not depend on the version of TOML
+    Common(Error),
+    /// Error when not compatible with new syntax
+    NewSyntax {
+        error: Error,
+        minimum_version: TomlVersion,
+    },
+}
+
+impl TomlVersionedError {
+    pub fn error(&self) -> &Error {
+        match self {
+            Self::Common(error) => error,
+            Self::NewSyntax { error, .. } => error,
+        }
+    }
+
+    pub fn is_compatible_with(&self, toml_version: TomlVersion) -> bool {
+        match self {
+            Self::Common(_) => true,
+            Self::NewSyntax {
+                minimum_version, ..
+            } => toml_version < *minimum_version,
+        }
+    }
+}
+
+impl From<Error> for TomlVersionedError {
+    fn from(error: Error) -> Self {
+        Self::Common(error)
+    }
+}
+
+impl From<lexer::Error> for TomlVersionedError {
+    fn from(error: lexer::Error) -> Self {
+        Self::Common(error.into())
     }
 }

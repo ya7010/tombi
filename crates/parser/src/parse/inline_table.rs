@@ -45,7 +45,7 @@ impl Parse for ast::InlineTable {
             } else {
                 last_comma_range = None;
                 if !p.nth_at(n, T!['}']) {
-                    p.error(crate::Error::new(ExpectedComma, p.current_range(), None));
+                    p.error(crate::Error::new(ExpectedComma, p.current_range()));
                     p.bump_any();
                 }
             }
@@ -56,22 +56,20 @@ impl Parse for ast::InlineTable {
         let end_range = p.current_range();
 
         if !p.eat(T!['}']) {
-            p.error(crate::Error::new(ExpectedBraceEnd, p.current_range(), None));
+            p.error(crate::Error::new(ExpectedBraceEnd, p.current_range()));
         }
 
         if (end_range.start().line() - begin_range.start().line()) != key_value_lines {
-            p.error(crate::Error::new(
-                InlineTableMustSingleLine,
-                begin_range + end_range,
-                Some(TomlVersion::V1_1_0_Preview),
-            ));
+            p.new_syntax_error(
+                crate::Error::new(InlineTableMustSingleLine, begin_range + end_range),
+                TomlVersion::V1_1_0_Preview,
+            );
         }
         if let Some(comma_range) = last_comma_range {
-            p.error(crate::Error::new(
-                ForbiddenInlineTableLastComma,
-                comma_range,
-                Some(TomlVersion::V1_1_0_Preview),
-            ));
+            p.new_syntax_error(
+                crate::Error::new(ForbiddenInlineTableLastComma, comma_range),
+                TomlVersion::V1_1_0_Preview,
+            );
         }
 
         tailing_comment(p);
