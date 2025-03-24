@@ -66,6 +66,6 @@
     }
   ],
   "settings": {
-    "tombi.args": ["-v"]
+    "tombi.args": ["-vv"]
   }
 }
