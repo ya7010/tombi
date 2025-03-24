@@ -17,83 +17,80 @@ impl Validate for LocalDateTime {
         async move {
             let mut diagnostics = vec![];
 
-            match (value_schema, schema_url, definitions) {
-                (Some(value_schema), Some(schema_url), Some(definitions)) => {
-                    match value_schema.value_type().await {
-                        ValueType::LocalDateTime
-                        | ValueType::OneOf(_)
-                        | ValueType::AnyOf(_)
-                        | ValueType::AllOf(_) => {}
-                        ValueType::Null => return Ok(()),
-                        value_schema => {
-                            crate::Error {
-                                kind: crate::ErrorKind::TypeMismatch {
-                                    expected: value_schema,
-                                    actual: self.value_type(),
-                                },
-                                range: self.range(),
-                            }
-                            .set_diagnostics(&mut diagnostics);
+            if let (Some(value_schema), Some(schema_url), Some(definitions)) = (value_schema, schema_url, definitions) {
+                match value_schema.value_type().await {
+                    ValueType::LocalDateTime
+                    | ValueType::OneOf(_)
+                    | ValueType::AnyOf(_)
+                    | ValueType::AllOf(_) => {}
+                    ValueType::Null => return Ok(()),
+                    value_schema => {
+                        crate::Error {
+                            kind: crate::ErrorKind::TypeMismatch {
+                                expected: value_schema,
+                                actual: self.value_type(),
+                            },
+                            range: self.range(),
+                        }
+                        .set_diagnostics(&mut diagnostics);
 
-                            return Err(diagnostics);
-                        }
-                    }
-
-                    let local_date_time_schema = match value_schema {
-                        schema_store::ValueSchema::LocalDateTime(local_date_time_schema) => {
-                            local_date_time_schema
-                        }
-                        schema_store::ValueSchema::OneOf(one_of_schema) => {
-                            return validate_one_of(
-                                self,
-                                accessors,
-                                one_of_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await
-                        }
-                        schema_store::ValueSchema::AnyOf(any_of_schema) => {
-                            return validate_any_of(
-                                self,
-                                accessors,
-                                any_of_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await
-                        }
-                        schema_store::ValueSchema::AllOf(all_of_schema) => {
-                            return validate_all_of(
-                                self,
-                                accessors,
-                                all_of_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await
-                        }
-                        _ => unreachable!("Expected a LocalDateTime schema"),
-                    };
-
-                    let value_string = self.node().to_string();
-                    if let Some(enumerate) = &local_date_time_schema.enumerate {
-                        if !enumerate.contains(&value_string) {
-                            crate::Error {
-                                kind: crate::ErrorKind::Eunmerate {
-                                    expected: enumerate.iter().map(ToString::to_string).collect(),
-                                    actual: value_string,
-                                },
-                                range: self.range(),
-                            }
-                            .set_diagnostics(&mut diagnostics);
-                        }
+                        return Err(diagnostics);
                     }
                 }
-                _ => {}
+
+                let local_date_time_schema = match value_schema {
+                    schema_store::ValueSchema::LocalDateTime(local_date_time_schema) => {
+                        local_date_time_schema
+                    }
+                    schema_store::ValueSchema::OneOf(one_of_schema) => {
+                        return validate_one_of(
+                            self,
+                            accessors,
+                            one_of_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    schema_store::ValueSchema::AnyOf(any_of_schema) => {
+                        return validate_any_of(
+                            self,
+                            accessors,
+                            any_of_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    schema_store::ValueSchema::AllOf(all_of_schema) => {
+                        return validate_all_of(
+                            self,
+                            accessors,
+                            all_of_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    _ => unreachable!("Expected a LocalDateTime schema"),
+                };
+
+                let value_string = self.node().to_string();
+                if let Some(enumerate) = &local_date_time_schema.enumerate {
+                    if !enumerate.contains(&value_string) {
+                        crate::Error {
+                            kind: crate::ErrorKind::Eunmerate {
+                                expected: enumerate.iter().map(ToString::to_string).collect(),
+                                actual: value_string,
+                            },
+                            range: self.range(),
+                        }
+                        .set_diagnostics(&mut diagnostics);
+                    }
+                }
             }
 
             if diagnostics.is_empty() {

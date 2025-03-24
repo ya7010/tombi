@@ -16,7 +16,7 @@ impl crate::Root {
     ) -> Option<(Result<url::Url, String>, text::Range)> {
         if let Some(comments) = self.get_first_document_comment_group() {
             for comment in comments {
-                if let Some((schema_url, url_range)) = comment.schema_url(source_path.as_deref()) {
+                if let Some((schema_url, url_range)) = comment.schema_url(source_path) {
                     return Some((schema_url, url_range));
                 }
             }
@@ -33,7 +33,7 @@ impl crate::Root {
                 .map(|comment| {
                     comment
                         .into_iter()
-                        .map(|comment| crate::Comment::from(comment))
+                        .map(crate::Comment::from)
                         .collect_vec()
                 }),
             self.key_values_dangling_comments()
@@ -42,13 +42,12 @@ impl crate::Root {
                 .map(|comment| {
                     comment
                         .into_iter()
-                        .map(|comment| crate::Comment::from(comment))
+                        .map(crate::Comment::from)
                         .collect_vec()
                 }),
-            self.items().into_iter().next().map(|item| {
+            self.items().next().map(|item| {
                 item.leading_comments()
-                    .into_iter()
-                    .map(|comment| crate::Comment::from(comment))
+                    .map(crate::Comment::from)
                     .collect_vec()
             }),
         )
@@ -57,7 +56,7 @@ impl crate::Root {
 
     #[inline]
     pub fn key_values(&self) -> impl Iterator<Item = crate::KeyValue> {
-        self.items().into_iter().filter_map(|item| match item {
+        self.items().filter_map(|item| match item {
             crate::RootItem::KeyValue(key_value) => Some(key_value),
             _ => None,
         })
@@ -65,7 +64,7 @@ impl crate::Root {
 
     #[inline]
     pub fn table_or_array_of_tables(&self) -> impl Iterator<Item = crate::TableOrArrayOfTable> {
-        self.items().into_iter().filter_map(|item| match item {
+        self.items().filter_map(|item| match item {
             crate::RootItem::Table(table) => Some(crate::TableOrArrayOfTable::Table(table)),
             crate::RootItem::ArrayOfTable(array_of_table) => {
                 Some(crate::TableOrArrayOfTable::ArrayOfTable(array_of_table))
