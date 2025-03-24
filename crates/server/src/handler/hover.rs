@@ -172,15 +172,7 @@ async fn get_hover_range(
                                         .into_iter()
                                         .any(|comment| comment.syntax().range().contains(position))
                                 },
-                            )
-                            || table
-                                .key_values_dangling_comments()
-                                .into_iter()
-                                .any(|comments| {
-                                    comments
-                                        .into_iter()
-                                        .any(|comment| comment.syntax().range().contains(position))
-                                }))
+                            ))
                     {
                         hover_range = Some(table.syntax().range());
                     }
@@ -216,14 +208,6 @@ async fn get_hover_range(
                                     comments
                                         .into_iter()
                                         .any(|comment| comment.syntax().range().contains(position))
-                                })
-                            || array_of_table
-                                .key_values_dangling_comments()
-                                .into_iter()
-                                .any(|comments| {
-                                    comments
-                                        .into_iter()
-                                        .any(|comment| comment.syntax().range().contains(position))
                                 }))
                     {
                         hover_range = Some(array_of_table.syntax().range());
@@ -242,14 +226,6 @@ async fn get_hover_range(
                         })
                         || root
                             .key_values_end_dangling_comments()
-                            .into_iter()
-                            .any(|comments| {
-                                comments
-                                    .into_iter()
-                                    .any(|comment| comment.syntax().range().contains(position))
-                            })
-                        || root
-                            .key_values_dangling_comments()
                             .into_iter()
                             .any(|comments| {
                                 comments
