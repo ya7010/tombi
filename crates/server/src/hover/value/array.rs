@@ -133,7 +133,7 @@ impl GetHoverContent for document_tree::Array {
                                             .cloned()
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
-                                        Some(value_schema),
+                                        None,
                                         Some(schema_url),
                                         Some(definitions),
                                         schema_context,
@@ -211,7 +211,7 @@ impl GetHoverContent for document_tree::Array {
                                     .cloned()
                                     .chain(std::iter::once(accessor))
                                     .collect::<Vec<_>>(),
-                                value_schema,
+                                None,
                                 schema_url,
                                 definitions,
                                 schema_context,

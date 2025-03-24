@@ -357,6 +357,21 @@ mod hover_keys_value {
                 "Value": "String"
             });
         );
+
+        test_hover_keys_value!(
+            #[tokio::test]
+            async fn pyproject_tool_poetry_exclude_tests(
+                r#"
+                [tool.poetry]
+                exclude = [
+                    "█tests",
+                ]
+                "#,
+            ) -> Ok({
+                "Keys": "tool.poetry.exclude[0]",
+                "Value": "String"
+            });
+        );
     }
 
     #[macro_export]
