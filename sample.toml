@@ -4,7 +4,10 @@
 # key values begin dangling comment3
 # key values begin dangling comment4
 
-key1 = 1
+# key value1 leading comment1
+# key value1 leading comment2
+key1 = 1  # key value1 tailing comment
+# key value2 leading comment1
 key2 = "2"
 
 # key values end dangling comment1
