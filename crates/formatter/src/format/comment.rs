@@ -113,8 +113,8 @@ fn format_comment(
     {
         // For the purpose of reading the JSON Schema path defined in the file by taplo,
         // we format in a different style from the tombi comment style.
-        if comment.starts_with("#:schema ") {
-            return write!(f, "#:schema {}", comment[9..].trim());
+        if let Some(schema_url) = comment.strip_prefix("#:schema ") {
+            return write!(f, "#:schema {}", schema_url.trim());
         }
     }
 
