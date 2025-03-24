@@ -109,7 +109,9 @@ impl std::fmt::Display for HoverContent {
             writeln!(f, "{}\n", SECTION_SEPARATOR)?;
         }
 
-        writeln!(f, "Keys: `{}`\n", self.accessors)?;
+        if !self.accessors.is_empty() {
+            writeln!(f, "Keys: `{}`\n", self.accessors)?;
+        }
         writeln!(f, "Value: `{}`\n", self.value_type)?;
 
         if let Some(constraints) = &self.constraints {
