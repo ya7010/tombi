@@ -9,8 +9,10 @@ key2 = "2"
 
 # key values end dangling comment1
 # key values end dangling comment2
+
 # key values end dangling comment3
 # key values end dangling comment4
+
 # table leading comment1
 # table leading comment2
 [aaaa]
