@@ -134,14 +134,14 @@ impl GetHoverContent for document_tree::Array {
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
                                         None,
-                                        Some(schema_url),
-                                        Some(definitions),
+                                        None,
+                                        None,
                                         schema_context,
                                     )
                                     .await;
                             }
                         }
-                        array_schema
+                        return array_schema
                             .get_hover_content(
                                 position,
                                 keys,
@@ -155,10 +155,10 @@ impl GetHoverContent for document_tree::Array {
                             .map(|mut hover_content| {
                                 hover_content.range = Some(self.range());
                                 hover_content
-                            })
+                            });
                     }
                     ValueSchema::OneOf(one_of_schema) => {
-                        get_one_of_hover_content(
+                        return get_one_of_hover_content(
                             self,
                             position,
                             keys,
@@ -171,7 +171,7 @@ impl GetHoverContent for document_tree::Array {
                         .await
                     }
                     ValueSchema::AnyOf(any_of_schema) => {
-                        get_any_of_hover_content(
+                        return get_any_of_hover_content(
                             self,
                             position,
                             keys,
@@ -184,7 +184,7 @@ impl GetHoverContent for document_tree::Array {
                         .await
                     }
                     ValueSchema::AllOf(all_of_schema) => {
-                        get_all_of_hover_content(
+                        return get_all_of_hover_content(
                             self,
                             position,
                             keys,
@@ -196,39 +196,39 @@ impl GetHoverContent for document_tree::Array {
                         )
                         .await
                     }
-                    _ => None,
+                    _ => {}
                 }
-            } else {
-                for (index, value) in self.values().iter().enumerate() {
-                    if value.range().contains(position) {
-                        let accessor = Accessor::Index(index);
-                        return value
-                            .get_hover_content(
-                                position,
-                                keys,
-                                &accessors
-                                    .iter()
-                                    .cloned()
-                                    .chain(std::iter::once(accessor))
-                                    .collect::<Vec<_>>(),
-                                None,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await;
-                    }
-                }
-                Some(HoverContent {
-                    title: None,
-                    description: None,
-                    accessors: Accessors::new(accessors.to_vec()),
-                    value_type: ValueType::Array,
-                    constraints: None,
-                    schema_url: None,
-                    range: Some(self.range()),
-                })
             }
+
+            for (index, value) in self.values().iter().enumerate() {
+                if value.range().contains(position) {
+                    let accessor = Accessor::Index(index);
+                    return value
+                        .get_hover_content(
+                            position,
+                            keys,
+                            &accessors
+                                .iter()
+                                .cloned()
+                                .chain(std::iter::once(accessor))
+                                .collect::<Vec<_>>(),
+                            None,
+                            None,
+                            None,
+                            schema_context,
+                        )
+                        .await;
+                }
+            }
+            Some(HoverContent {
+                title: None,
+                description: None,
+                accessors: Accessors::new(accessors.to_vec()),
+                value_type: ValueType::Array,
+                constraints: None,
+                schema_url: None,
+                range: Some(self.range()),
+            })
         }
         .boxed()
     }
