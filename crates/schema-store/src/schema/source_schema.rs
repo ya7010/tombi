@@ -21,7 +21,7 @@ impl std::fmt::Debug for SourceSchema {
                 format!(
                     "[{:?}]: {}",
                     SchemaAccessors::new(accessors.clone()),
-                    url.to_string()
+                    url
                 )
             })
             .collect::<Vec<_>>()

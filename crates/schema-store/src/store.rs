@@ -267,7 +267,7 @@ impl SchemaStore {
         }
 
         Ok(Some(SourceSchema {
-            root_schema: self.try_get_document_schema(&schema_url).await?,
+            root_schema: self.try_get_document_schema(schema_url).await?,
             sub_schema_url_map: Default::default(),
         }))
     }

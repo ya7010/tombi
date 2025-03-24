@@ -27,8 +27,8 @@ impl Format for ast::Root {
             key_values_dangling_comments.format(f)?;
         }
 
-        if !(key_values.is_empty() && key_values_dangling_comments.is_empty())
-            && !table_or_array_of_tables.is_empty()
+        if !(table_or_array_of_tables.is_empty()
+            || key_values.is_empty() && key_values_dangling_comments.is_empty())
         {
             write!(f, "{}", f.line_ending())?;
             write!(f, "{}", f.line_ending())?;

@@ -6,9 +6,7 @@ impl Comment {
         source_path: Option<&std::path::Path>,
     ) -> Option<(Result<url::Url, String>, text::Range)> {
         let comment_string = self.to_string();
-        if comment_string.starts_with("#:schema ") {
-            let mut url_str = &comment_string[9..];
-
+        if let Some(mut url_str) = comment_string.strip_prefix("#:schema ") {
             let original_len = url_str.len();
             url_str = url_str.trim_start_matches(' ');
             let space_count = (original_len - url_str.len()) as u32;

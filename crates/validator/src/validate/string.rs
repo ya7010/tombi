@@ -18,127 +18,124 @@ impl Validate for document_tree::String {
         async move {
             let mut diagnostics = vec![];
 
-            match (value_schema, schema_url, definitions) {
-                (Some(value_schema), Some(schema_url), Some(definitions)) => {
-                    match value_schema.value_type().await {
-                        ValueType::String
-                        | ValueType::OneOf(_)
-                        | ValueType::AnyOf(_)
-                        | ValueType::AllOf(_) => {}
-                        ValueType::Null => return Ok(()),
-                        value_schema => {
-                            crate::Error {
-                                kind: crate::ErrorKind::TypeMismatch {
-                                    expected: value_schema,
-                                    actual: self.value_type(),
-                                },
-                                range: self.range(),
-                            }
-                            .set_diagnostics(&mut diagnostics);
+            if let (Some(value_schema), Some(schema_url), Some(definitions)) = (value_schema, schema_url, definitions) {
+                match value_schema.value_type().await {
+                    ValueType::String
+                    | ValueType::OneOf(_)
+                    | ValueType::AnyOf(_)
+                    | ValueType::AllOf(_) => {}
+                    ValueType::Null => return Ok(()),
+                    value_schema => {
+                        crate::Error {
+                            kind: crate::ErrorKind::TypeMismatch {
+                                expected: value_schema,
+                                actual: self.value_type(),
+                            },
+                            range: self.range(),
+                        }
+                        .set_diagnostics(&mut diagnostics);
 
-                            return Err(diagnostics);
-                        }
-                    }
-
-                    let string_schema = match value_schema {
-                        schema_store::ValueSchema::String(string_schema) => string_schema,
-                        schema_store::ValueSchema::OneOf(one_of_schema) => {
-                            return validate_one_of(
-                                self,
-                                accessors,
-                                one_of_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await
-                        }
-                        schema_store::ValueSchema::AnyOf(any_of_schema) => {
-                            return validate_any_of(
-                                self,
-                                accessors,
-                                any_of_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await
-                        }
-                        schema_store::ValueSchema::AllOf(all_of_schema) => {
-                            return validate_all_of(
-                                self,
-                                accessors,
-                                all_of_schema,
-                                schema_url,
-                                definitions,
-                                schema_context,
-                            )
-                            .await
-                        }
-                        _ => unreachable!("Expected a String schema"),
-                    };
-
-                    let value = self.to_raw_string(schema_context.toml_version);
-                    if let Some(enumerate) = &string_schema.enumerate {
-                        if !enumerate.contains(&value) {
-                            crate::Error {
-                                kind: crate::ErrorKind::Eunmerate {
-                                    expected: enumerate
-                                        .iter()
-                                        .map(|s| format!("\"{s}\""))
-                                        .collect(),
-                                    actual: self.value().to_string(),
-                                },
-                                range: self.range(),
-                            }
-                            .set_diagnostics(&mut diagnostics);
-                        }
-                    }
-
-                    if let Some(max_length) = &string_schema.max_length {
-                        if value.len() > *max_length {
-                            crate::Error {
-                                kind: crate::ErrorKind::MaximumLength {
-                                    maximum: *max_length,
-                                    actual: value.len(),
-                                },
-                                range: self.range(),
-                            }
-                            .set_diagnostics(&mut diagnostics);
-                        }
-                    }
-
-                    if let Some(min_length) = &string_schema.min_length {
-                        if value.len() < *min_length {
-                            crate::Error {
-                                kind: crate::ErrorKind::MinimumLength {
-                                    minimum: *min_length,
-                                    actual: value.len(),
-                                },
-                                range: self.range(),
-                            }
-                            .set_diagnostics(&mut diagnostics);
-                        }
-                    }
-
-                    if let Some(pattern) = &string_schema.pattern {
-                        if let Ok(regex) = Regex::new(pattern) {
-                            if !regex.is_match(&value) {
-                                crate::Error {
-                                    kind: crate::ErrorKind::Pattern {
-                                        pattern: pattern.clone(),
-                                        actual: value,
-                                    },
-                                    range: self.range(),
-                                }
-                                .set_diagnostics(&mut diagnostics);
-                            }
-                        } else {
-                            tracing::error!("Invalid regex pattern: {:?}", pattern);
-                        }
+                        return Err(diagnostics);
                     }
                 }
-                _ => {}
+
+                let string_schema = match value_schema {
+                    schema_store::ValueSchema::String(string_schema) => string_schema,
+                    schema_store::ValueSchema::OneOf(one_of_schema) => {
+                        return validate_one_of(
+                            self,
+                            accessors,
+                            one_of_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    schema_store::ValueSchema::AnyOf(any_of_schema) => {
+                        return validate_any_of(
+                            self,
+                            accessors,
+                            any_of_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    schema_store::ValueSchema::AllOf(all_of_schema) => {
+                        return validate_all_of(
+                            self,
+                            accessors,
+                            all_of_schema,
+                            schema_url,
+                            definitions,
+                            schema_context,
+                        )
+                        .await
+                    }
+                    _ => unreachable!("Expected a String schema"),
+                };
+
+                let value = self.to_raw_string(schema_context.toml_version);
+                if let Some(enumerate) = &string_schema.enumerate {
+                    if !enumerate.contains(&value) {
+                        crate::Error {
+                            kind: crate::ErrorKind::Eunmerate {
+                                expected: enumerate
+                                    .iter()
+                                    .map(|s| format!("\"{s}\""))
+                                    .collect(),
+                                actual: self.value().to_string(),
+                            },
+                            range: self.range(),
+                        }
+                        .set_diagnostics(&mut diagnostics);
+                    }
+                }
+
+                if let Some(max_length) = &string_schema.max_length {
+                    if value.len() > *max_length {
+                        crate::Error {
+                            kind: crate::ErrorKind::MaximumLength {
+                                maximum: *max_length,
+                                actual: value.len(),
+                            },
+                            range: self.range(),
+                        }
+                        .set_diagnostics(&mut diagnostics);
+                    }
+                }
+
+                if let Some(min_length) = &string_schema.min_length {
+                    if value.len() < *min_length {
+                        crate::Error {
+                            kind: crate::ErrorKind::MinimumLength {
+                                minimum: *min_length,
+                                actual: value.len(),
+                            },
+                            range: self.range(),
+                        }
+                        .set_diagnostics(&mut diagnostics);
+                    }
+                }
+
+                if let Some(pattern) = &string_schema.pattern {
+                    if let Ok(regex) = Regex::new(pattern) {
+                        if !regex.is_match(&value) {
+                            crate::Error {
+                                kind: crate::ErrorKind::Pattern {
+                                    pattern: pattern.clone(),
+                                    actual: value,
+                                },
+                                range: self.range(),
+                            }
+                            .set_diagnostics(&mut diagnostics);
+                        }
+                    } else {
+                        tracing::error!("Invalid regex pattern: {:?}", pattern);
+                    }
+                }
             }
 
             if diagnostics.is_empty() {

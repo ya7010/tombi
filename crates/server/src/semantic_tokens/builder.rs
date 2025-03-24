@@ -48,14 +48,14 @@ impl SemanticTokensBuilder {
         self.tokens.push(SemanticToken {
             delta_line: relative.start.line as u32,
             delta_start: relative.start.character as u32,
-            length: 1 as u32,
+            length: 1_u32,
             token_type: TokenType::COMMENT as u32,
             token_modifiers_bitset: 0,
         });
 
         self.tokens.push(SemanticToken {
             delta_line: 0,
-            delta_start: 1 as u32,
+            delta_start: 1_u32,
             length: schema_keyword_len,
             token_type: TokenType::KEYWORD as u32,
             token_modifiers_bitset: 0,
@@ -63,9 +63,8 @@ impl SemanticTokensBuilder {
 
         self.tokens.push(SemanticToken {
             delta_line: 0,
-            delta_start: (file_schema_range.start().column() - comment_range.start().column() - 1)
-                as u32,
-            length: (file_schema_range.end().column() - file_schema_range.start().column()) as u32,
+            delta_start: (file_schema_range.start().column() - comment_range.start().column() - 1),
+            length: (file_schema_range.end().column() - file_schema_range.start().column()),
             token_type: TokenType::COMMENT as u32,
             token_modifiers_bitset: 0,
         });
