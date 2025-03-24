@@ -434,7 +434,7 @@ mod hover_keys_value {
                     let schema_file_url = schema_store::SchemaUrl::from_file_path(schema_file_path).expect(
                         format!(
                             "failed to convert schema path to URL: {}",
-                            tombi_schema_path().display()
+                            schema_file_path.display()
                         )
                         .as_str(),
                     );
