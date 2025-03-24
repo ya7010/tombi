@@ -65,7 +65,7 @@ pub async fn handle_hover(
         return Ok(None);
     };
 
-    if keys.is_empty() {
+    if keys.is_empty() && range.is_none() {
         return Ok(None);
     }
 
@@ -110,35 +110,137 @@ async fn get_hover_range(
                     }
                 }
             }
-        };
-
-        let keys = if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
-            if hover_range.is_none() {
-                if let Some(inline_table) = ast::InlineTable::cast(node.parent().unwrap()) {
-                    for (key_value, comma) in inline_table.key_values_with_comma() {
-                        if hover_range.is_none() {
-                            let mut range = key_value.range();
-                            if let Some(comma) = comma {
-                                range += comma.range()
-                            };
-                            if range.contains(position) {
-                                hover_range = Some(range);
-                                break;
-                            }
-                        }
+        } else if let Some(inline_table) = ast::InlineTable::cast(node.to_owned()) {
+            for (key_value, comma) in inline_table.key_values_with_comma() {
+                if hover_range.is_none() {
+                    let mut range = key_value.range();
+                    if let Some(comma) = comma {
+                        range += comma.range()
+                    };
+                    if range.contains(position) {
+                        hover_range = Some(range);
                     }
-                } else {
-                    hover_range = Some(kv.range());
                 }
             }
-            kv.keys().unwrap()
-        } else if let Some(table) = ast::Table::cast(node.to_owned()) {
-            table.header().unwrap()
-        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
-            array_of_table.header().unwrap()
-        } else {
-            continue;
         };
+
+        let keys =
+            if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+                if hover_range.is_none() {
+                    if let Some(inline_table) = ast::InlineTable::cast(node.parent().unwrap()) {
+                        for (key_value, comma) in inline_table.key_values_with_comma() {
+                            if hover_range.is_none() {
+                                let mut range = key_value.range();
+                                if let Some(comma) = comma {
+                                    range += comma.range()
+                                };
+                                if range.contains(position) {
+                                    hover_range = Some(range);
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        hover_range = Some(kv.range());
+                    }
+                }
+                kv.keys()
+            } else if let Some(table) = ast::Table::cast(node.to_owned()) {
+                let header = table.header();
+                if let Some(header) = &header {
+                    if hover_range.is_none()
+                        && (header
+                            .keys()
+                            .last()
+                            .map_or(true, |key| key.syntax().range().contains(position))
+                            || table
+                                .leading_comments()
+                                .any(|comment| comment.syntax().range().contains(position))
+                            || table.tailing_comment().map_or(false, |comment| {
+                                comment.syntax().range().contains(position)
+                            })
+                            || table.key_values_begin_dangling_comments().into_iter().any(
+                                |comments| {
+                                    comments
+                                        .into_iter()
+                                        .any(|comment| comment.syntax().range().contains(position))
+                                },
+                            )
+                            || table.key_values_end_dangling_comments().into_iter().any(
+                                |comments| {
+                                    comments
+                                        .into_iter()
+                                        .any(|comment| comment.syntax().range().contains(position))
+                                },
+                            ))
+                    {
+                        hover_range = Some(table.syntax().range());
+                    }
+                }
+
+                header
+            } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
+                let header = array_of_table.header();
+                if let Some(header) = &header {
+                    if hover_range.is_none()
+                        && (header
+                            .keys()
+                            .last()
+                            .map_or(true, |key| key.syntax().range().contains(position))
+                            || array_of_table
+                                .leading_comments()
+                                .any(|comment| comment.syntax().range().contains(position))
+                            || array_of_table.tailing_comment().map_or(false, |comment| {
+                                comment.syntax().range().contains(position)
+                            })
+                            || array_of_table
+                                .key_values_begin_dangling_comments()
+                                .into_iter()
+                                .any(|comments| {
+                                    comments
+                                        .into_iter()
+                                        .any(|comment| comment.syntax().range().contains(position))
+                                })
+                            || array_of_table
+                                .key_values_end_dangling_comments()
+                                .into_iter()
+                                .any(|comments| {
+                                    comments
+                                        .into_iter()
+                                        .any(|comment| comment.syntax().range().contains(position))
+                                }))
+                    {
+                        hover_range = Some(array_of_table.syntax().range());
+                    }
+                }
+                header
+            } else if let Some(root) = ast::Root::cast(node.to_owned()) {
+                if hover_range.is_none()
+                    && (root
+                        .key_values_begin_dangling_comments()
+                        .into_iter()
+                        .any(|comments| {
+                            comments
+                                .into_iter()
+                                .any(|comment| comment.syntax().range().contains(position))
+                        })
+                        || root
+                            .key_values_end_dangling_comments()
+                            .into_iter()
+                            .any(|comments| {
+                                comments
+                                    .into_iter()
+                                    .any(|comment| comment.syntax().range().contains(position))
+                            }))
+                {
+                    hover_range = Some(root.syntax().range());
+                }
+                continue;
+            } else {
+                continue;
+            };
+
+        let Some(keys) = keys else { continue };
 
         let keys = if keys.range().contains(position) {
             let mut new_keys = Vec::with_capacity(keys.keys().count());
