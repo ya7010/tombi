@@ -148,8 +148,8 @@ impl GetHoverContent for document_tree::Table {
                                                 .chain(std::iter::once(accessor))
                                                 .collect::<Vec<_>>(),
                                             None,
-                                            Some(schema_url),
-                                            Some(definitions),
+                                            None,
+                                            None,
                                             schema_context,
                                         )
                                         .await
@@ -239,8 +239,8 @@ impl GetHoverContent for document_tree::Table {
                                                             .chain(std::iter::once(accessor))
                                                             .collect::<Vec<_>>(),
                                                         None,
-                                                        Some(schema_url),
-                                                        Some(definitions),
+                                                        None,
+                                                        None,
                                                         schema_context,
                                                     )
                                                     .await
@@ -331,8 +331,8 @@ impl GetHoverContent for document_tree::Table {
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
                                         None,
-                                        Some(schema_url),
-                                        Some(definitions),
+                                        None,
+                                        None,
                                         schema_context,
                                     )
                                     .await
@@ -413,8 +413,8 @@ impl GetHoverContent for document_tree::Table {
                                     .chain(std::iter::once(accessor))
                                     .collect::<Vec<_>>(),
                                 None,
-                                schema_url,
-                                definitions,
+                                None,
+                                None,
                                 schema_context,
                             )
                             .await;

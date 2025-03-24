@@ -35,7 +35,7 @@ where
                 )
                 .await
             else {
-                return None;
+                continue;
             };
 
             if let Some(hover_content) = value
@@ -55,8 +55,8 @@ where
                         hover_content.title.clone(),
                         hover_content.description.clone(),
                     ));
-                    value_type_set.insert(hover_content.value_type);
                 }
+                value_type_set.insert(hover_content.value_type);
 
                 if let Some(c) = hover_content.constraints {
                     constraints = Some(c);
