@@ -44,7 +44,7 @@ where
                 continue;
             };
 
-            match (value.value_type(), value_schema) {
+            match (value.value_type(), value_schema.as_ref()) {
                 (document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
                 | (document_tree::ValueType::Integer, ValueSchema::Integer(_))
                 | (document_tree::ValueType::Float, ValueSchema::Float(_))
@@ -59,7 +59,7 @@ where
                     match value
                         .validate(
                             accessors,
-                            Some(value_schema),
+                            Some(&value_schema),
                             Some(&schema_url),
                             Some(&definitions),
                             schema_context,

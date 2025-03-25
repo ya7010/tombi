@@ -101,7 +101,7 @@ impl FindCompletionContents for document_tree::Array {
                                                     .cloned()
                                                     .chain(std::iter::once(accessor))
                                                     .collect_vec(),
-                                                Some(value_schema),
+                                                Some(&value_schema),
                                                 Some(&schema_url),
                                                 Some(&definitions),
                                                 schema_context,
@@ -136,7 +136,7 @@ impl FindCompletionContents for document_tree::Array {
                                             .cloned()
                                             .chain(std::iter::once(Accessor::Index(new_item_index)))
                                             .collect_vec(),
-                                        Some(value_schema),
+                                        Some(&value_schema),
                                         Some(&schema_url),
                                         Some(&definitions),
                                         schema_context,

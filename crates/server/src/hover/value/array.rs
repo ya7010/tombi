@@ -2,8 +2,7 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
-    Accessor, Accessors, ArraySchema, CurrentSchema, SchemaAccessor, SchemaUrl, ValueSchema,
-    ValueType,
+    Accessor, Accessors, ArraySchema, CurrentSchema, SchemaAccessor, ValueSchema, ValueType,
 };
 
 use crate::hover::{
@@ -17,15 +16,16 @@ impl GetHoverContent for document_tree::Array {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         tracing::trace!("self: {:?}", self);
         tracing::trace!("keys: {:?}", keys);
         tracing::trace!("accessors: {:?}", accessors);
-        tracing::trace!("value_schema: {:?}", value_schema);
+        tracing::trace!(
+            "value_schema: {:?}",
+            current_schema.map(|s| &s.value_schema)
+        );
 
         async move {
             if let Some(sub_schema_url_map) = schema_context.sub_schema_url_map {
@@ -35,20 +35,29 @@ impl GetHoverContent for document_tree::Array {
                         .map(SchemaAccessor::from)
                         .collect::<Vec<_>>(),
                 ) {
-                    if schema_url != Some(sub_schema_url) {
+                    if current_schema.map(|schema| schema.schema_url.as_ref())
+                        != Some(sub_schema_url)
+                    {
                         if let Ok(Some(document_schema)) = schema_context
                             .store
                             .try_get_document_schema(sub_schema_url)
                             .await
                         {
+                            let current_schema =
+                                document_schema
+                                    .value_schema
+                                    .map(|value_schema| CurrentSchema {
+                                        value_schema: Cow::Owned(value_schema),
+                                        schema_url: Cow::Borrowed(sub_schema_url),
+                                        definitions: Cow::Borrowed(&document_schema.definitions),
+                                    });
+
                             return self
                                 .get_hover_content(
                                     position,
                                     keys,
                                     accessors,
-                                    document_schema.value_schema.as_ref(),
-                                    Some(&document_schema.schema_url),
-                                    Some(&document_schema.definitions),
+                                    current_schema.as_ref(),
                                     schema_context,
                                 )
                                 .await;
@@ -57,10 +66,8 @@ impl GetHoverContent for document_tree::Array {
                 }
             }
 
-            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
-                (schema_url, value_schema, definitions)
-            {
-                match value_schema {
+            if let Some(current_schema) = current_schema {
+                match current_schema.value_schema.as_ref() {
                     ValueSchema::Array(array_schema) => {
                         for (index, value) in self.values().iter().enumerate() {
                             if value.range().contains(position) {
@@ -68,14 +75,10 @@ impl GetHoverContent for document_tree::Array {
 
                                 if let Some(items) = &array_schema.items {
                                     let mut referable_schema = items.write().await;
-                                    if let Ok(Some(CurrentSchema {
-                                        schema_url,
-                                        value_schema: item_schema,
-                                        definitions,
-                                    })) = referable_schema
+                                    if let Ok(Some(current_schema)) = referable_schema
                                         .resolve(
-                                            Cow::Borrowed(schema_url),
-                                            Cow::Borrowed(definitions),
+                                            current_schema.schema_url.clone(),
+                                            current_schema.definitions.clone(),
                                             schema_context.store,
                                         )
                                         .await
@@ -89,9 +92,7 @@ impl GetHoverContent for document_tree::Array {
                                                     .cloned()
                                                     .chain(std::iter::once(accessor.clone()))
                                                     .collect::<Vec<_>>(),
-                                                Some(item_schema),
-                                                Some(&schema_url),
-                                                Some(&definitions),
+                                                Some(&current_schema),
                                                 schema_context,
                                             )
                                             .await?;
@@ -134,8 +135,6 @@ impl GetHoverContent for document_tree::Array {
                                             .chain(std::iter::once(accessor))
                                             .collect::<Vec<_>>(),
                                         None,
-                                        None,
-                                        None,
                                         schema_context,
                                     )
                                     .await;
@@ -146,9 +145,7 @@ impl GetHoverContent for document_tree::Array {
                                 position,
                                 keys,
                                 accessors,
-                                Some(value_schema),
-                                Some(schema_url),
-                                Some(definitions),
+                                Some(current_schema),
                                 schema_context,
                             )
                             .await
@@ -163,9 +160,9 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            one_of_schema,
-                            schema_url,
-                            definitions,
+                            &one_of_schema,
+                            &current_schema.schema_url,
+                            &current_schema.definitions,
                             schema_context,
                         )
                         .await
@@ -176,9 +173,9 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            any_of_schema,
-                            schema_url,
-                            definitions,
+                            &any_of_schema,
+                            &current_schema.schema_url,
+                            &current_schema.definitions,
                             schema_context,
                         )
                         .await
@@ -189,9 +186,9 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            all_of_schema,
-                            schema_url,
-                            definitions,
+                            &all_of_schema,
+                            &current_schema.schema_url,
+                            &current_schema.definitions,
                             schema_context,
                         )
                         .await
@@ -212,8 +209,6 @@ impl GetHoverContent for document_tree::Array {
                                 .cloned()
                                 .chain(std::iter::once(accessor))
                                 .collect::<Vec<_>>(),
-                            None,
-                            None,
                             None,
                             schema_context,
                         )
@@ -240,9 +235,7 @@ impl GetHoverContent for ArraySchema {
         _position: text::Position,
         _keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        _definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -258,7 +251,7 @@ impl GetHoverContent for ArraySchema {
                     values_order: self.values_order.clone(),
                     ..Default::default()
                 }),
-                schema_url: schema_url.cloned(),
+                schema_url: current_schema.map(|cs| cs.schema_url.as_ref().clone()),
                 range: None,
             })
         }

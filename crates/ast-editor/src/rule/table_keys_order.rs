@@ -105,7 +105,7 @@ where
                     if value
                         .validate(
                             validation_accessors,
-                            Some(value_schema),
+                            Some(&value_schema),
                             Some(&schema_url),
                             Some(&definitions),
                             schema_context,
@@ -117,7 +117,7 @@ where
                             value,
                             validation_accessors,
                             targets.clone(),
-                            Some(value_schema),
+                            Some(&value_schema),
                             Some(&schema_url),
                             Some(&definitions),
                             schema_context,
@@ -207,7 +207,7 @@ where
                                                 .chain(std::iter::once(accessor))
                                                 .collect_vec(),
                                             targets,
-                                            Some(value_schema),
+                                            Some(&value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
                                             schema_context,
@@ -243,7 +243,7 @@ where
                                                 .chain(std::iter::once(accessor))
                                                 .collect_vec(),
                                             targets,
-                                            Some(value_schema),
+                                            Some(&value_schema),
                                             Some(&schema_url),
                                             Some(&definitions),
                                             schema_context,
@@ -294,7 +294,7 @@ where
                                         value,
                                         validation_accessors,
                                         targets,
-                                        Some(value_schema),
+                                        Some(&value_schema),
                                         Some(&schema_url),
                                         Some(&definitions),
                                         schema_context,

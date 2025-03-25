@@ -289,12 +289,12 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
                         )
                         .await
                     {
-                        if matches!(value_schema, ValueSchema::Null) {
+                        if matches!(value_schema.as_ref(), ValueSchema::Null) {
                             continue;
                         }
 
                         if let Some(candidate) = CompletionCandidate::title(
-                            value_schema,
+                            value_schema.as_ref(),
                             &schema_url,
                             &definitions,
                             schema_store,
@@ -339,12 +339,12 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
                         )
                         .await
                     {
-                        if matches!(value_schema, ValueSchema::Null) {
+                        if matches!(value_schema.as_ref(), ValueSchema::Null) {
                             continue;
                         }
 
                         if let Some(candidate) = CompletionCandidate::description(
-                            value_schema,
+                            value_schema.as_ref(),
                             &schema_url,
                             &definitions,
                             schema_store,
