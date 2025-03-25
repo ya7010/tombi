@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, FloatSchema, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, CurrentSchema, FloatSchema, ValueSchema};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
@@ -13,16 +13,12 @@ impl GetHoverContent for document_tree::Float {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
-            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
-                (schema_url, value_schema, definitions)
-            {
-                match value_schema {
+            if let Some(current_schema) = current_schema {
+                match current_schema.value_schema.as_ref() {
                     ValueSchema::Float(float_schema) => {
                         if let Some(enumerate) = &float_schema.enumerate {
                             if !enumerate.contains(&self.value()) {
@@ -35,9 +31,7 @@ impl GetHoverContent for document_tree::Float {
                                 position,
                                 keys,
                                 accessors,
-                                Some(value_schema),
-                                Some(schema_url),
-                                Some(definitions),
+                                Some(current_schema),
                                 schema_context,
                             )
                             .await
@@ -53,8 +47,8 @@ impl GetHoverContent for document_tree::Float {
                             keys,
                             accessors,
                             one_of_schema,
-                            schema_url,
-                            definitions,
+                            current_schema.schema_url.as_ref(),
+                            current_schema.definitions.as_ref(),
                             schema_context,
                         )
                         .await
@@ -66,8 +60,8 @@ impl GetHoverContent for document_tree::Float {
                             keys,
                             accessors,
                             any_of_schema,
-                            schema_url,
-                            definitions,
+                            current_schema.schema_url.as_ref(),
+                            current_schema.definitions.as_ref(),
                             schema_context,
                         )
                         .await
@@ -79,8 +73,8 @@ impl GetHoverContent for document_tree::Float {
                             keys,
                             accessors,
                             all_of_schema,
-                            schema_url,
-                            definitions,
+                            current_schema.schema_url.as_ref(),
+                            current_schema.definitions.as_ref(),
                             schema_context,
                         )
                         .await
@@ -109,9 +103,7 @@ impl GetHoverContent for FloatSchema {
         _position: text::Position,
         _keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        _definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -135,7 +127,7 @@ impl GetHoverContent for FloatSchema {
                     multiple_of: self.multiple_of.map(DefaultValue::Float),
                     ..Default::default()
                 }),
-                schema_url: schema_url.cloned(),
+                schema_url: current_schema.map(|schema| schema.schema_url.as_ref().clone()),
                 range: None,
             })
         }

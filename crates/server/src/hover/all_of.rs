@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -23,11 +23,7 @@ where
         let mut value_type_set = indexmap::IndexSet::new();
         let mut constraints = None;
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
-            let Ok(Some(CurrentSchema {
-                value_schema,
-                schema_url,
-                definitions,
-            })) = referable_schema
+            let Ok(Some(current_schema)) = referable_schema
                 .resolve(
                     Cow::Borrowed(schema_url),
                     Cow::Borrowed(definitions),
@@ -43,9 +39,7 @@ where
                     position,
                     keys,
                     accessors,
-                    Some(value_schema),
-                    Some(&schema_url),
-                    Some(&definitions),
+                    Some(&current_schema),
                     schema_context,
                 )
                 .await
@@ -104,13 +98,11 @@ impl GetHoverContent for schema_store::AllOfSchema {
         _position: text::Position,
         _keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
-            let (Some(schema_url), Some(definitions)) = (schema_url, definitions) else {
+            let Some(current_schema) = current_schema else {
                 unreachable!("schema must be provided");
             };
 
@@ -121,8 +113,8 @@ impl GetHoverContent for schema_store::AllOfSchema {
             for referable_schema in schemas.iter_mut() {
                 let Ok(Some(CurrentSchema { value_schema, .. })) = referable_schema
                     .resolve(
-                        Cow::Borrowed(schema_url),
-                        Cow::Borrowed(definitions),
+                        current_schema.schema_url.clone(),
+                        current_schema.definitions.clone(),
                         schema_context.store,
                     )
                     .await
@@ -165,7 +157,7 @@ impl GetHoverContent for schema_store::AllOfSchema {
                 accessors: schema_store::Accessors::new(accessors.to_vec()),
                 value_type,
                 constraints: None,
-                schema_url: Some(schema_url.to_owned()),
+                schema_url: Some(current_schema.schema_url.as_ref().to_owned()),
                 range: None,
             })
         }

@@ -134,7 +134,7 @@ impl Validate for document_tree::Array {
                                 if let Err(schema_diagnostics) = value
                                     .validate(
                                         &new_accessors,
-                                        Some(value_schema),
+                                        Some(&value_schema),
                                         Some(&schema_url),
                                         Some(&definitions),
                                         schema_context,
