@@ -1,9 +1,5 @@
-use std::borrow::Cow;
-
 use futures::FutureExt;
-use schema_store::{
-    AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, ValueSchema,
-};
+use schema_store::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaAccessor, ValueSchema};
 use validator::Validate;
 
 mod array;
@@ -18,9 +14,7 @@ pub trait Edit {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>>;
 }
@@ -28,35 +22,27 @@ pub trait Edit {
 async fn get_schema<'a: 'b, 'b>(
     value: &'a document_tree::Value,
     accessors: &'a [schema_store::SchemaAccessor],
-    value_schema: &'a ValueSchema,
-    schema_url: &'a schema_store::SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    current_schema: &'a schema_store::CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
 ) -> Option<ValueSchema> {
     fn inner_get_schema<'a: 'b, 'b>(
         value: &'a document_tree::Value,
         accessors: &'a [schema_store::SchemaAccessor],
         validation_accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: &'a ValueSchema,
-        schema_url: Cow<'a, schema_store::SchemaUrl>,
-        definitions: Cow<'a, schema_store::SchemaDefinitions>,
+        current_schema: &'a schema_store::CurrentSchema<'a>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Option<ValueSchema>> {
         async move {
-            match value_schema {
+            match current_schema.value_schema.as_ref() {
                 ValueSchema::Table(_) | ValueSchema::Array(_) => {}
                 ValueSchema::OneOf(OneOfSchema { schemas, .. })
                 | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                     for referable_schema in schemas.write().await.iter_mut() {
-                        if let Ok(Some(CurrentSchema {
-                            value_schema,
-                            schema_url,
-                            definitions,
-                        })) = referable_schema
+                        if let Ok(Some(current_schema)) = referable_schema
                             .resolve(
-                                schema_url.clone(),
-                                definitions.clone(),
+                                current_schema.schema_url.clone(),
+                                current_schema.definitions.clone(),
                                 schema_context.store,
                             )
                             .await
@@ -65,9 +51,7 @@ async fn get_schema<'a: 'b, 'b>(
                                 value,
                                 accessors,
                                 validation_accessors,
-                                &value_schema,
-                                schema_url,
-                                definitions,
+                                &current_schema,
                                 schema_context,
                             )
                             .await
@@ -84,22 +68,16 @@ async fn get_schema<'a: 'b, 'b>(
 
             if accessors.is_empty() {
                 return value
-                    .validate(
-                        validation_accessors,
-                        Some(value_schema),
-                        Some(&schema_url),
-                        Some(&definitions),
-                        schema_context,
-                    )
+                    .validate(validation_accessors, Some(&current_schema), schema_context)
                     .await
                     .ok()
-                    .map(|_| value_schema.clone());
+                    .map(|_| current_schema.value_schema.as_ref().clone());
             }
 
             match &accessors[0] {
                 SchemaAccessor::Key(key) => {
                     if let (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) =
-                        (value, value_schema)
+                        (value, current_schema.value_schema.as_ref())
                     {
                         if let Some(value) = table.get(&key.to_string()) {
                             if let Some(referable_property_schema) = table_schema
@@ -108,14 +86,10 @@ async fn get_schema<'a: 'b, 'b>(
                                 .await
                                 .get_mut(&SchemaAccessor::Key(key.to_string()))
                             {
-                                if let Ok(Some(CurrentSchema {
-                                    value_schema,
-                                    schema_url,
-                                    definitions,
-                                })) = referable_property_schema
+                                if let Ok(Some(current_schema)) = referable_property_schema
                                     .resolve(
-                                        schema_url.clone(),
-                                        definitions.clone(),
+                                        current_schema.schema_url.clone(),
+                                        current_schema.definitions.clone(),
                                         schema_context.store,
                                     )
                                     .await
@@ -124,9 +98,7 @@ async fn get_schema<'a: 'b, 'b>(
                                         value,
                                         &accessors[1..],
                                         validation_accessors,
-                                        &value_schema,
-                                        schema_url,
-                                        definitions,
+                                        &current_schema,
                                         schema_context,
                                     )
                                     .await;
@@ -138,14 +110,10 @@ async fn get_schema<'a: 'b, 'b>(
                                 {
                                     if let Ok(pattern) = regex::Regex::new(property_key) {
                                         if pattern.is_match(&key.to_string()) {
-                                            if let Ok(Some(CurrentSchema {
-                                                schema_url,
-                                                value_schema,
-                                                definitions,
-                                            })) = pattern_property
+                                            if let Ok(Some(current_schema)) = pattern_property
                                                 .resolve(
-                                                    schema_url.clone(),
-                                                    definitions.clone(),
+                                                    current_schema.schema_url.clone(),
+                                                    current_schema.definitions.clone(),
                                                     schema_context.store,
                                                 )
                                                 .await
@@ -154,9 +122,7 @@ async fn get_schema<'a: 'b, 'b>(
                                                     value,
                                                     &accessors[1..],
                                                     validation_accessors,
-                                                    &value_schema,
-                                                    schema_url,
-                                                    definitions,
+                                                    &current_schema,
                                                     schema_context,
                                                 )
                                                 .await;
@@ -173,16 +139,12 @@ async fn get_schema<'a: 'b, 'b>(
                             if let Some(additional_properties_schema) =
                                 &table_schema.additional_property_schema
                             {
-                                if let Ok(Some(CurrentSchema {
-                                    value_schema,
-                                    schema_url,
-                                    definitions,
-                                })) = additional_properties_schema
+                                if let Ok(Some(current_schema)) = additional_properties_schema
                                     .write()
                                     .await
                                     .resolve(
-                                        schema_url.clone(),
-                                        definitions.clone(),
+                                        current_schema.schema_url.clone(),
+                                        current_schema.definitions.clone(),
                                         schema_context.store,
                                     )
                                     .await
@@ -191,9 +153,7 @@ async fn get_schema<'a: 'b, 'b>(
                                         value,
                                         &accessors[1..],
                                         validation_accessors,
-                                        &value_schema,
-                                        schema_url,
-                                        definitions,
+                                        &current_schema,
                                         schema_context,
                                     )
                                     .await;
@@ -204,29 +164,27 @@ async fn get_schema<'a: 'b, 'b>(
                 }
                 SchemaAccessor::Index => {
                     if let (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) =
-                        (value, value_schema)
+                        (value, current_schema.value_schema.as_ref())
                     {
                         // NOTE: This is fine. This function is only used for Table/ArrayOfTable or Keys of KeyValues,
                         //       so there is only one element in the array.
                         if let Some(value) = array.first() {
                             if let Some(item_schema) = &array_schema.items {
-                                if let Ok(Some(CurrentSchema {
-                                    value_schema,
-                                    schema_url,
-                                    definitions,
-                                })) = item_schema
+                                if let Ok(Some(current_schema)) = item_schema
                                     .write()
                                     .await
-                                    .resolve(schema_url, definitions, schema_context.store)
+                                    .resolve(
+                                        current_schema.schema_url.clone(),
+                                        current_schema.definitions.clone(),
+                                        schema_context.store,
+                                    )
                                     .await
                                 {
                                     return inner_get_schema(
                                         value,
                                         &accessors[1..],
                                         validation_accessors,
-                                        &value_schema,
-                                        schema_url,
-                                        definitions,
+                                        &current_schema,
                                         schema_context,
                                     )
                                     .await;
@@ -244,14 +202,5 @@ async fn get_schema<'a: 'b, 'b>(
         .boxed()
     }
 
-    inner_get_schema(
-        value,
-        accessors,
-        accessors,
-        value_schema,
-        Cow::Borrowed(schema_url),
-        Cow::Borrowed(definitions),
-        schema_context,
-    )
-    .await
+    inner_get_schema(value, accessors, accessors, current_schema, schema_context).await
 }

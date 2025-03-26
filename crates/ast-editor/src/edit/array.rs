@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use futures::FutureExt;
 use itertools::Itertools;
-use schema_store::{CurrentSchema, ValueSchema};
+use schema_store::ValueSchema;
 
 use crate::rule::{array_comma_tailing_comment, array_values_order};
 
@@ -10,56 +10,42 @@ impl crate::Edit for ast::Array {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             let mut changes = vec![];
 
-            if let (Some(schema_url), Some(ValueSchema::Array(array_schema)), Some(definitions)) =
-                (schema_url, value_schema, definitions)
-            {
-                changes.extend(
-                    array_values_order(
-                        self.values_with_comma().collect_vec(),
-                        array_schema,
-                        schema_context,
-                    )
-                    .await,
-                );
-
-                if let Some(item_schema) = &array_schema.items {
-                    if let Ok(Some(CurrentSchema {
-                        schema_url,
-                        value_schema,
-                        definitions,
-                    })) = item_schema
-                        .write()
-                        .await
-                        .resolve(
-                            Cow::Borrowed(schema_url),
-                            Cow::Borrowed(definitions),
-                            schema_context.store,
+            if let Some(current_schema) = current_schema {
+                if let ValueSchema::Array(array_schema) = current_schema.value_schema.as_ref() {
+                    changes.extend(
+                        array_values_order(
+                            self.values_with_comma().collect_vec(),
+                            array_schema,
+                            schema_context,
                         )
-                        .await
-                    {
-                        for value in self.values() {
-                            changes.extend(
-                                value
-                                    .edit(
-                                        &[],
-                                        Some(&value_schema),
-                                        Some(&schema_url),
-                                        Some(&definitions),
-                                        schema_context,
-                                    )
-                                    .await,
-                            );
-                        }
+                        .await,
+                    );
 
-                        return changes;
+                    if let Some(item_schema) = &array_schema.items {
+                        if let Ok(Some(current_schema)) = item_schema
+                            .write()
+                            .await
+                            .resolve(
+                                Cow::Borrowed(&current_schema.schema_url),
+                                Cow::Borrowed(&current_schema.definitions),
+                                schema_context.store,
+                            )
+                            .await
+                        {
+                            for value in self.values() {
+                                changes.extend(
+                                    value.edit(&[], Some(&current_schema), schema_context).await,
+                                );
+                            }
+
+                            return changes;
+                        }
                     }
                 }
             }
@@ -70,7 +56,7 @@ impl crate::Edit for ast::Array {
                     comma.as_ref(),
                     schema_context,
                 ));
-                changes.extend(value.edit(&[], None, None, None, schema_context).await);
+                changes.extend(value.edit(&[], None, schema_context).await);
             }
 
             changes

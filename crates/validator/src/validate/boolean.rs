@@ -9,16 +9,14 @@ impl Validate for document_tree::Boolean {
     fn validate<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         async move {
             let mut diagnostics = vec![];
 
-            if let (Some(value_schema), Some(schema_url), Some(definitions)) = (value_schema, schema_url, definitions) {
-                match value_schema.value_type().await {
+            if let Some(current_schema) = current_schema {
+                match current_schema.value_schema.value_type().await {
                     ValueType::Boolean
                     | ValueType::OneOf(_)
                     | ValueType::AnyOf(_)
@@ -37,15 +35,14 @@ impl Validate for document_tree::Boolean {
                         return Err(diagnostics);
                     }
                 }
-                let boolean_schema = match value_schema {
+                let boolean_schema = match current_schema.value_schema.as_ref() {
                     ValueSchema::Boolean(boolean_schema) => boolean_schema,
                     ValueSchema::OneOf(one_of_schema) => {
                         return validate_one_of(
                             self,
                             accessors,
                             one_of_schema,
-                            schema_url,
-                            definitions,
+                            &current_schema,
                             schema_context,
                         )
                         .await
@@ -55,8 +52,7 @@ impl Validate for document_tree::Boolean {
                             self,
                             accessors,
                             any_of_schema,
-                            schema_url,
-                            definitions,
+                            &current_schema,
                             schema_context,
                         )
                         .await
@@ -66,8 +62,7 @@ impl Validate for document_tree::Boolean {
                             self,
                             accessors,
                             all_of_schema,
-                            schema_url,
-                            definitions,
+                            &current_schema,
                             schema_context,
                         )
                         .await

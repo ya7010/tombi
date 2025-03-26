@@ -44,21 +44,23 @@ where
             schema_store::ValueType::AnyOf(value_type_set.into_iter().collect())
         };
 
-        for referable_schema in any_of_schema.schemas.read().await.iter() {
-            let Some(value_schema) = referable_schema.resolved() else {
+        for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
+            let Ok(Some(current_schema)) = referable_schema
+                .resolve(
+                    Cow::Borrowed(schema_url),
+                    Cow::Borrowed(definitions),
+                    schema_context.store,
+                )
+                .await
+            else {
                 continue;
             };
-
             if let Some(mut hover_content) = value
                 .get_hover_content(
                     position,
                     keys,
                     accessors,
-                    Some(&CurrentSchema {
-                        value_schema: Cow::Borrowed(value_schema),
-                        schema_url: Cow::Borrowed(schema_url),
-                        definitions: Cow::Borrowed(definitions),
-                    }),
+                    Some(&current_schema),
                     schema_context,
                 )
                 .await
@@ -82,9 +84,7 @@ where
                             .iter()
                             .map(|accessor| accessor.into())
                             .collect_vec(),
-                        Some(value_schema),
-                        Some(schema_url),
-                        Some(definitions),
+                        Some(&current_schema),
                         schema_context,
                     )
                     .await
