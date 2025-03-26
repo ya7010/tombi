@@ -20,10 +20,7 @@ impl Validate for document_tree::Table {
     ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
         tracing::trace!("self = {:?}", self);
         tracing::trace!("accessors = {:?}", accessors);
-        tracing::trace!(
-            "value_schema = {:?}",
-            current_schema.map(|schema| schema.value_schema.as_ref())
-        );
+        tracing::trace!("current_schema = {:?}", current_schema);
 
         async move {
             if let Some(sub_schema_url) = schema_context
