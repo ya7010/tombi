@@ -4,8 +4,7 @@ use std::fmt::Write;
 
 use config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
-use itertools::Either;
-use schema_store::SourceSchema;
+use itertools::{Either, Itertools};
 use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
 
@@ -18,30 +17,61 @@ pub struct Formatter<'a> {
     definitions: crate::FormatDefinitions,
     #[allow(dead_code)]
     options: &'a crate::FormatOptions,
-    source_schema: Option<SourceSchema>,
+    source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
     schema_store: &'a schema_store::SchemaStore,
     buf: String,
 }
 
 impl<'a> Formatter<'a> {
     #[inline]
-    pub async fn try_new(
+    pub fn new(
         toml_version: TomlVersion,
         definitions: crate::FormatDefinitions,
         options: &'a crate::FormatOptions,
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
-    ) -> Result<Self, schema_store::Error> {
-        let source_schema = match source_url_or_path {
-            Some(source_url_or_path) => {
-                schema_store
-                    .try_get_source_schema(source_url_or_path)
-                    .await?
-            }
-            None => None,
+    ) -> Self {
+        Self {
+            toml_version,
+            indent_depth: 0,
+            skip_indent: false,
+            definitions,
+            options,
+            source_url_or_path,
+            schema_store,
+            buf: String::new(),
+        }
+    }
+
+    pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
+        let parsed = parser::parse(source);
+
+        let Some(parsed) = parsed.cast::<ast::Root>() else {
+            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };
 
-        let toml_version = source_schema
+        let root = parsed.tree();
+        tracing::trace!("TOML AST before editing: {:#?}", root);
+
+        let source_schema = if let Some(schema) = self
+            .schema_store
+            .try_get_source_schema_from_ast(&root, self.source_url_or_path)
+            .await
+            .ok()
+            .flatten()
+        {
+            Some(schema)
+        } else if let Some(source_url_or_path) = self.source_url_or_path {
+            self.schema_store
+                .try_get_source_schema(source_url_or_path)
+                .await
+                .ok()
+                .flatten()
+        } else {
+            None
+        };
+
+        self.toml_version = source_schema
             .as_ref()
             .and_then(|schema| {
                 schema
@@ -49,39 +79,12 @@ impl<'a> Formatter<'a> {
                     .as_ref()
                     .and_then(|root| root.toml_version())
             })
-            .unwrap_or(toml_version);
+            .unwrap_or(self.toml_version);
 
-        Ok(Self {
-            toml_version,
-            indent_depth: 0,
-            skip_indent: false,
-            definitions,
-            options,
-            source_schema,
-            schema_store,
-            buf: String::new(),
-        })
-    }
-
-    pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let schema_context = schema_store::SchemaContext {
-            toml_version: self.toml_version,
-            root_schema: self
-                .source_schema
-                .as_ref()
-                .and_then(|schema| schema.root_schema.as_ref()),
-            sub_schema_url_map: self
-                .source_schema
-                .as_ref()
-                .map(|schema| &schema.sub_schema_url_map),
-            store: self.schema_store,
-        };
-
-        let parsed = parser::parse(source, self.toml_version);
-
-        let diagnostics = if !parsed.errors().is_empty() {
+        let errors = parsed.errors(self.toml_version).collect_vec();
+        let diagnostics = if !errors.is_empty() {
             let mut diagnostics = Vec::new();
-            for error in parsed.errors() {
+            for error in errors {
                 error.set_diagnostics(&mut diagnostics);
             }
             diagnostics
@@ -89,16 +92,24 @@ impl<'a> Formatter<'a> {
             Vec::with_capacity(0)
         };
 
-        let Some(parsed) = parsed.cast::<ast::Root>() else {
-            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
-        };
-
-        let root = parsed.tree();
-        tracing::trace!("TOML AST: {:#?}", root);
-        // let document_tree = root.into_document_tree_and_errors(self.toml_version);
-
         if diagnostics.is_empty() {
-            let root = ast_editor::Editor::new(root, &schema_context).edit().await;
+            let root = ast_editor::Editor::new(
+                root,
+                &schema_store::SchemaContext {
+                    toml_version: self.toml_version,
+                    root_schema: source_schema
+                        .as_ref()
+                        .and_then(|schema| schema.root_schema.as_ref()),
+                    sub_schema_url_map: source_schema
+                        .as_ref()
+                        .map(|schema| &schema.sub_schema_url_map),
+                    store: self.schema_store,
+                },
+            )
+            .edit()
+            .await;
+
+            tracing::trace!("TOML AST after editing: {:#?}", root);
 
             let line_ending = {
                 root.format(&mut self).unwrap();

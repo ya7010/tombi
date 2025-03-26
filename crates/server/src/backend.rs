@@ -4,29 +4,29 @@ use ahash::AHashMap;
 use config::{Config, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
+use itertools::Itertools;
 use syntax::SyntaxNode;
 use tower_lsp::{
     lsp_types::{
         CompletionParams, CompletionResponse, DidChangeConfigurationParams,
         DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidCloseTextDocumentParams,
         DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
-        DocumentDiagnosticReportResult, DocumentSymbolParams, DocumentSymbolResponse, FoldingRange,
-        FoldingRangeParams, Hover, HoverParams, InitializeParams, InitializeResult,
-        InitializedParams, SemanticTokensParams, SemanticTokensResult, TextDocumentIdentifier, Url,
+        DocumentDiagnosticReportResult, DocumentLink, DocumentLinkParams, DocumentSymbolParams,
+        DocumentSymbolResponse, FoldingRange, FoldingRangeParams, Hover, HoverParams,
+        InitializeParams, InitializeResult, InitializedParams, SemanticTokensParams,
+        SemanticTokensResult, TextDocumentIdentifier, Url,
     },
     LanguageServer,
 };
 
-use super::handler::{
-    handle_diagnostic, handle_did_change, handle_did_change_configuration, handle_did_open,
-    handle_did_save, handle_document_symbol, handle_formatting, handle_hover, handle_initialize,
-    handle_semantic_tokens_full, handle_shutdown,
-};
 use crate::{
     document::DocumentSource,
     handler::{
-        handle_completion, handle_did_change_watched_files, handle_did_close, handle_folding_range,
-        handle_get_toml_version, handle_initialized, handle_update_config, handle_update_schema,
+        handle_completion, handle_diagnostic, handle_did_change, handle_did_change_configuration,
+        handle_did_change_watched_files, handle_did_close, handle_did_open, handle_did_save,
+        handle_document_link, handle_document_symbol, handle_folding_range, handle_formatting,
+        handle_get_toml_version, handle_hover, handle_initialize, handle_initialized,
+        handle_semantic_tokens_full, handle_shutdown, handle_update_config, handle_update_schema,
         GetTomlVersionResponse,
     },
 };
@@ -72,11 +72,7 @@ impl Backend {
     }
 
     #[inline]
-    async fn get_parsed(
-        &self,
-        uri: &Url,
-        toml_version: TomlVersion,
-    ) -> Option<parser::Parsed<SyntaxNode>> {
+    async fn get_parsed(&self, uri: &Url) -> Option<parser::Parsed<SyntaxNode>> {
         let document_source = self.document_sources.read().await;
         let document_info = match document_source.get(uri) {
             Some(document_info) => document_info,
@@ -86,16 +82,12 @@ impl Backend {
             }
         };
 
-        Some(parser::parse(&document_info.source, toml_version))
+        Some(parser::parse(&document_info.source))
     }
 
     #[inline]
-    pub async fn get_incomplete_ast(
-        &self,
-        uri: &Url,
-        toml_version: TomlVersion,
-    ) -> Option<ast::Root> {
-        self.get_parsed(uri, toml_version)
+    pub async fn get_incomplete_ast(&self, uri: &Url) -> Option<ast::Root> {
+        self.get_parsed(uri)
             .await?
             .cast::<ast::Root>()
             .map(|root| root.tree())
@@ -107,19 +99,16 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
-        let Some(p) = self
-            .get_parsed(uri, toml_version)
-            .await?
-            .cast::<ast::Root>()
-        else {
+        let Some(p) = self.get_parsed(uri).await?.cast::<ast::Root>() else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };
 
-        if p.errors().is_empty() {
+        let errors = p.errors(toml_version).collect_vec();
+        if errors.is_empty() {
             Some(Ok(p.tree()))
         } else {
-            let mut diagnostics = Vec::with_capacity(p.errors().len());
-            p.errors().iter().for_each(|error| {
+            let mut diagnostics = Vec::with_capacity(errors.len());
+            errors.iter().for_each(|error| {
                 error.set_diagnostics(&mut diagnostics);
             });
 
@@ -133,7 +122,7 @@ impl Backend {
         uri: &Url,
         toml_version: TomlVersion,
     ) -> Option<document_tree::DocumentTree> {
-        self.get_incomplete_ast(uri, toml_version)
+        self.get_incomplete_ast(uri)
             .await?
             .try_into_document_tree(toml_version)
             .ok()
@@ -221,6 +210,13 @@ impl LanguageServer for Backend {
         params: DocumentSymbolParams,
     ) -> Result<Option<DocumentSymbolResponse>, tower_lsp::jsonrpc::Error> {
         handle_document_symbol(self, params).await
+    }
+
+    async fn document_link(
+        &self,
+        params: DocumentLinkParams,
+    ) -> Result<Option<Vec<DocumentLink>>, tower_lsp::jsonrpc::Error> {
+        handle_document_link(self, params).await
     }
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>, tower_lsp::jsonrpc::Error> {

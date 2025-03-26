@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 use ast::AstNode;
-use schema_store::SchemaContext;
+use schema_store::{CurrentSchema, SchemaContext};
 
 use crate::{change::Change, Edit};
 
@@ -21,28 +23,30 @@ impl<'a> Editor<'a> {
 
     pub async fn edit(self) -> ast::Root {
         let new_root = self.root.clone_for_update();
+        let current_schema = self.schema_context.root_schema.and_then(|document_schema| {
+            document_schema
+                .value_schema
+                .as_ref()
+                .map(|value_schema| CurrentSchema {
+                    value_schema: Cow::Borrowed(value_schema),
+                    schema_url: Cow::Borrowed(&document_schema.schema_url),
+                    definitions: Cow::Borrowed(&document_schema.definitions),
+                })
+        });
+
         let changes = new_root
-            .edit(
-                &[],
-                self.schema_context
-                    .root_schema
-                    .and_then(|document_schema| document_schema.value_schema.as_ref()),
-                self.schema_context
-                    .root_schema
-                    .map(|document_schema| &document_schema.schema_url),
-                self.schema_context
-                    .root_schema
-                    .map(|document_schema| &document_schema.definitions),
-                self.schema_context,
-            )
+            .edit(&[], current_schema.as_ref(), self.schema_context)
             .await;
 
         for change in changes {
             match change {
+                Change::AppendTop { new } => {
+                    new_root.syntax().splice_children(0..0, new);
+                }
                 Change::Append { base, new } => {
                     let index = base.index() + 1;
                     if let Some(node) = base.parent().as_ref().or_else(|| base.as_node()) {
-                        node.splice_children(index..index, vec![new]);
+                        node.splice_children(index..index, new);
                     }
                 }
                 Change::Remove { target } => {

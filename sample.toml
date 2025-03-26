@@ -1,28 +1,27 @@
-# root begin dangling comment1
-# root begin dangling comment2
+# key values begin dangling comment1
+# key values begin dangling comment2
 
-value1 = 1
+# key values begin dangling comment3
+# key values begin dangling comment4
 
-# table header leading comment1
-# table header leading comment2
+# key value1 leading comment1
+# key value1 leading comment2
+key1 = 1  # key value1 tailing comment
+# key value2 leading comment1
+key2 = "2"
+
+# key values end dangling comment1
+# key values end dangling comment2
+
+# key values end dangling comment3
+# key values end dangling comment4
+
+# table leading comment1
+# table leading comment2
 [aaaa]
-# table header tailing comment1
-# table header tailing comment1
-# table header leading comment1
-# table header leading comment2
-[aaaa.bbb]  # table header tailing comment
-# table begin dangling comment group 1-1
-# table begin dangling comment group 1-2
-
-# table begin dangling comment group 2-1
-# table begin dangling comment group 2-2
-# table begin dangling comment group 2-3
-
-# table begin dangling comment group 3-1
-
-# key value header comment1
-# key value header comment2
-# key value header comment3
+# table leading comment1
+# table leading comment2
+[aaaa.bbb]
 bool1 = true
 bool2 = false
 dec = 1  # dec tailing comment
@@ -34,14 +33,8 @@ infa = inf
 bs = "2"  # bs tailing comment
 ls = "3"  # ls tailing comment
 array1 = [
-  # array begin dangling comment 1-1
-  # array begin dangling comment 1-2
-
-  # array begin dangling comment 2-1
-  # array begin dangling comment 2-2
-  # array begin dangling comment 2-3
-
-  # array begin dangling comment 3-1
+  # array begin dangling comment1
+  # array begin dangling comment2
 
   # value1 leading comment1
   # value1 leading comment2
@@ -51,19 +44,10 @@ array1 = [
   # value1 comma leading comment2
   # value1 comma leading comment3
   ,  # value1 comma tailing comment
-  # value2 leading comment1
-  # value2 leading comment2
-  # value2 leading comment3
-  { key3 = 11, key4 = 2024-01-01T10:10:00 },  # value2 tailing comment
+  { key3 = 11, key4 = 2024-01-01T10:10:00 },
 
-  # array end dangling comment 1-1
-  # array end dangling comment 1-2
-
-  # array end dangling comment 2-1
-  # array end dangling comment 2-2
-  # array end dangling comment 2-3
-
-  # array end dangling comment 3-1
+  # array end dangling comment1
+  # array end dangling comment2
 ]  # array tailing comment
 array2 = [1, 2, 3]
 array3 = [
@@ -71,18 +55,19 @@ array3 = [
   2,
   3,
 ]
-array4 = [[1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1]]
+array4 = [
+  [
+    1,
+    2,
+    3,
+  ],
+  [1, 2, 3],
+]
 array5 = [
   1,
   {
-    # inline begin dangling comment 1-1
-    # inline begin dangling comment 1-2
-
-    # inline begin dangling comment 2-1
-    # inline begin dangling comment 2-2
-    # inline begin dangling comment 2-3
-
-    # inline begin dangling comment 3-1
+    # inline begin dangling comment1
+    # inline begin dangling comment2
 
     # key1 leading comment1
     # key1 leading comment2
@@ -96,13 +81,6 @@ array5 = [
 
   # comment
 ]
-array6 = {
-  key1 = [
-    1,
-    2,
-    3,
-  ],
-}
 date = 2024-01-01  # date tailing comment
 time = 10:11:00  # time tailing comment
 odt1 = 1979-05-27T07:32:00Z  # odt1 tailing comment
@@ -115,10 +93,15 @@ ld1 = 1979-05-27  # ld1 tailing comment
 lt1 = 07:32:00  # lt1 tailing comment
 # lt2 leading tailing comment
 lt2 = 00:32:00.999999  # lt2 tailing comment
-inline_table = { aaa = 1 }
-3.14.5.ab = true
-nan = true
 
+# table key values end dangling comment1
+# table key values end dangling comment2
+
+# table key values end dangling comment3
+# table key values end dangling comment4
+
+# table leading comment1
+# table leading comment2
 [aaaa.ccc]
 key1 = 11
 key2 = "22"
@@ -132,9 +115,6 @@ key5 = true
 [[ffff.ggg]]
 key6 = 1
 
-[ffff.ggg.kkk]
-b = 2
-
 [[ffff.ggg]]
 key6 = 2
 
@@ -142,9 +122,18 @@ key6 = 2
 b = 3
 
 [[ffff.ggg]]  # header tailing comment
+# table key values begin dangling comment1
+# table key values begin dangling comment2
+
+# table key values begin dangling comment3
+# table key values begin dangling comment4
+
 # key value leading comment1
 # key value leading comment2
 key6 = 3  # key value tailing comment
 
-# root end dangling comment1
-# root end dangling comment2
+# table key values end dangling comment1
+# table key values end dangling comment2
+
+# table key values end dangling comment3
+# table key values end dangling comment4

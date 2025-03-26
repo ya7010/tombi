@@ -6,9 +6,12 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_folding_range(
     backend: &Backend,
-    FoldingRangeParams { text_document, .. }: FoldingRangeParams,
+    params: FoldingRangeParams,
 ) -> Result<Option<Vec<FoldingRange>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_folding_range");
+    tracing::trace!(?params);
+
+    let FoldingRangeParams { text_document, .. } = params;
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
 
@@ -44,9 +47,9 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
                 kind: Some(FoldingRangeKind::Region),
                 collapsed_text: None,
             });
-        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
-            let start_position = array_of_tables.header().unwrap().range().start();
-            let end_position = array_of_tables.range().end();
+        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
+            let start_position = array_of_table.header().unwrap().range().start();
+            let end_position = array_of_table.range().end();
 
             ranges.push(FoldingRange {
                 start_line: start_position.line(),

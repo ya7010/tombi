@@ -13,7 +13,7 @@ pub enum ArrayKind {
     /// ```toml
     /// [[array]]
     /// ```
-    ArrayOfTables,
+    ArrayOfTable,
 
     /// An array of tables of parent keys.
     ///
@@ -29,7 +29,7 @@ pub enum ArrayKind {
     /// [fruit.variables.info]
     /// #^^^^^ ^^^^^^^^^       <- Here
     /// ```
-    ParentArrayOfTables,
+    ParentArrayOfTable,
 
     /// An array.
     ///
@@ -64,7 +64,7 @@ impl Array {
 
     pub(crate) fn new_array_of_tables(table: &crate::Table) -> Self {
         Self {
-            kind: ArrayKind::ArrayOfTables,
+            kind: ArrayKind::ArrayOfTable,
             values: vec![],
             range: table.range(),
             symbol_range: table.symbol_range(),
@@ -73,7 +73,7 @@ impl Array {
 
     pub(crate) fn new_parent_array_of_tables(table: &crate::Table) -> Self {
         Self {
-            kind: ArrayKind::ParentArrayOfTables,
+            kind: ArrayKind::ParentArrayOfTable,
             values: vec![],
             range: table.range(),
             symbol_range: table.symbol_range(),
@@ -115,7 +115,7 @@ impl Array {
         let mut errors = Vec::new();
 
         match (self.kind(), other.kind()) {
-            (ArrayOfTables | ParentArrayOfTables, ParentArrayOfTables) => {
+            (ArrayOfTable | ParentArrayOfTable, ParentArrayOfTable) => {
                 let Some(Value::Table(table2)) = other.values.pop() else {
                     unreachable!("Parent of array of tables must have one table.")
                 };
@@ -127,7 +127,7 @@ impl Array {
                     self.push(Value::Table(table2));
                 }
             }
-            (ArrayOfTables | ParentArrayOfTables, ArrayOfTables) | (Array, Array) => {
+            (ArrayOfTable | ParentArrayOfTable, ArrayOfTable) | (Array, Array) => {
                 self.extend(other.values);
             }
             (Array, _) | (_, Array) => {

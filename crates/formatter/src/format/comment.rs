@@ -55,7 +55,14 @@ impl Format for Vec<Vec<BeginDanglingComment>> {
 impl Format for Vec<Vec<EndDanglingComment>> {
     #[inline]
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
+        if self.is_empty() {
+            return Ok(());
+        }
+
+        write!(f, "{}", f.line_ending())?;
         for (i, comments) in self.iter().enumerate() {
+            assert!(!comments.is_empty());
+
             if i != 0 {
                 write!(f, "{}", f.line_ending())?;
             }
@@ -103,6 +110,14 @@ fn format_comment(
     strip_leading_spaces: bool,
 ) -> Result<(), std::fmt::Error> {
     let comment = comment.to_string();
+    {
+        // For the purpose of reading the JSON Schema path defined in the file by taplo,
+        // we format in a different style from the tombi comment style.
+        if let Some(schema_url) = comment.strip_prefix("#:schema ") {
+            return write!(f, "#:schema {}", schema_url.trim());
+        }
+    }
+
     let mut iter = comment.trim_ascii_end().chars();
 
     // write '#' character
@@ -163,5 +178,19 @@ mod tests {
             #       This allows for multi-line indentation to be preserved.
             "#
         ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn schema_comment(r"#:schema ../../schemas/x-tombi-toml-v1.0.0.schema.json") -> Ok(
+            "#:schema ../../schemas/x-tombi-toml-v1.0.0.schema.json"
+        );
+    }
+
+    test_format! {
+        #[test]
+        fn schema_comment_with_space(r"#:schema  ../../schemas/x-tombi-toml-v1.0.0.schema.json  ") -> Ok(
+            "#:schema ../../schemas/x-tombi-toml-v1.0.0.schema.json"
+        );
     }
 }

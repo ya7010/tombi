@@ -5,7 +5,10 @@ use tower_lsp::lsp_types::{InitializedParams, MessageType};
 use crate::backend::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
-pub async fn handle_initialized(backend: &Backend, InitializedParams { .. }: InitializedParams) {
+pub async fn handle_initialized(backend: &Backend, params: InitializedParams) {
+    tracing::info!("handle_initialized");
+    tracing::trace!(?params);
+
     load_schemas(backend).await;
 }
 

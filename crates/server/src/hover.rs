@@ -5,11 +5,11 @@ mod default_value;
 mod one_of;
 mod value;
 
-use std::{fmt::Debug, ops::Deref};
+use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use constraints::DataConstraints;
 use futures::future::BoxFuture;
-use schema_store::{get_schema_name, Accessor, Accessors, SchemaUrl, ValueSchema, ValueType};
+use schema_store::{get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType};
 
 pub async fn get_hover_content(
     tree: &document_tree::DocumentTree,
@@ -20,21 +20,22 @@ pub async fn get_hover_content(
     let table = tree.deref();
     match schema_context.root_schema {
         Some(document_schema) => {
+            let current_schema =
+                document_schema
+                    .value_schema
+                    .as_ref()
+                    .map(|value_schema| CurrentSchema {
+                        value_schema: Cow::Borrowed(value_schema),
+                        schema_url: Cow::Borrowed(&document_schema.schema_url),
+                        definitions: Cow::Borrowed(&document_schema.definitions),
+                    });
             table
-                .get_hover_content(
-                    position,
-                    keys,
-                    &[],
-                    document_schema.value_schema.as_ref(),
-                    Some(&document_schema.schema_url),
-                    Some(&document_schema.definitions),
-                    schema_context,
-                )
+                .get_hover_content(position, keys, &[], current_schema.as_ref(), schema_context)
                 .await
         }
         None => {
             table
-                .get_hover_content(position, keys, &[], None, None, None, schema_context)
+                .get_hover_content(position, keys, &[], None, schema_context)
                 .await
         }
     }
@@ -46,9 +47,7 @@ trait GetHoverContent {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>>;
 }
@@ -109,7 +108,9 @@ impl std::fmt::Display for HoverContent {
             writeln!(f, "{}\n", SECTION_SEPARATOR)?;
         }
 
-        writeln!(f, "Keys: `{}`\n", self.accessors)?;
+        if !self.accessors.is_empty() {
+            writeln!(f, "Keys: `{}`\n", self.accessors)?;
+        }
         writeln!(f, "Value: `{}`\n", self.value_type)?;
 
         if let Some(constraints) = &self.constraints {

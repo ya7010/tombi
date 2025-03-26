@@ -1,4 +1,4 @@
-mod array_of_tables;
+mod array_of_table;
 mod key;
 mod key_value;
 mod root;

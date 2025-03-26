@@ -1,8 +1,7 @@
 use config::FormatOptions;
 use itertools::Either;
 use tower_lsp::lsp_types::{
-    notification::{PublishDiagnostics, ShowMessage},
-    DocumentFormattingParams, MessageType, PublishDiagnosticsParams, ShowMessageParams, TextEdit,
+    notification::PublishDiagnostics, DocumentFormattingParams, PublishDiagnosticsParams, TextEdit,
 };
 
 use crate::backend::Backend;
@@ -10,15 +9,12 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_formatting(
     backend: &Backend,
-    document_formatting_params: DocumentFormattingParams,
+    params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_formatting");
-    tracing::trace!(
-        "document_formatting_params: {:#?}",
-        document_formatting_params
-    );
+    tracing::trace!(?params);
 
-    let DocumentFormattingParams { text_document, .. } = document_formatting_params;
+    let DocumentFormattingParams { text_document, .. } = params;
 
     let config = backend.config().await;
 
@@ -39,7 +35,7 @@ pub async fn handle_formatting(
         return Ok(None);
     };
 
-    match formatter::Formatter::try_new(
+    match formatter::Formatter::new(
         toml_version,
         Default::default(),
         backend
@@ -51,49 +47,37 @@ pub async fn handle_formatting(
         Some(Either::Left(&text_document.uri)),
         &backend.schema_store,
     )
+    .format(&document_source.source)
     .await
     {
-        Ok(formatter) => match formatter.format(&document_source.source).await {
-            Ok(new_text) => {
-                if new_text != document_source.source {
-                    document_source.source = new_text.clone();
+        Ok(new_text) => {
+            if new_text != document_source.source {
+                document_source.source = new_text.clone();
 
-                    return Ok(Some(vec![TextEdit {
-                        range: text::Range::new(text::Position::MIN, text::Position::MAX).into(),
-                        new_text,
-                    }]));
-                } else {
-                    tracing::debug!("no change");
-                    backend
-                        .client
-                        .send_notification::<PublishDiagnostics>(PublishDiagnosticsParams {
-                            uri: text_document.uri,
-                            diagnostics: Vec::with_capacity(0),
-                            version: Some(document_source.version),
-                        })
-                        .await;
-                }
-            }
-            Err(diagnostics) => {
-                tracing::error!("failed to format");
+                return Ok(Some(vec![TextEdit {
+                    range: text::Range::new(text::Position::MIN, text::Position::MAX).into(),
+                    new_text,
+                }]));
+            } else {
+                tracing::debug!("no change");
                 backend
                     .client
                     .send_notification::<PublishDiagnostics>(PublishDiagnosticsParams {
                         uri: text_document.uri,
-                        diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                        diagnostics: Vec::with_capacity(0),
                         version: Some(document_source.version),
                     })
                     .await;
             }
-        },
-        Err(err) => {
-            tracing::error!("{err}");
-
+        }
+        Err(diagnostics) => {
+            tracing::error!("failed to format");
             backend
                 .client
-                .send_notification::<ShowMessage>(ShowMessageParams {
-                    typ: MessageType::ERROR,
-                    message: err.to_string(),
+                .send_notification::<PublishDiagnostics>(PublishDiagnosticsParams {
+                    uri: text_document.uri,
+                    diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+                    version: Some(document_source.version),
                 })
                 .await;
         }

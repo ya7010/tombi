@@ -491,6 +491,395 @@ mod table_keys_order {
         }
     }
 
+    mod file_schema {
+        use super::test_format;
+
+        test_format! {
+            #[tokio::test]
+            async fn test_comment_sort1(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # root key values begin dangling comment3
+                # root key values begin dangling comment4
+
+                # table b header leading comment
+                [b] # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b" # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+
+                # table a header leading comment
+                [a] # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a" # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+                "#,
+            ) -> Ok(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # root key values begin dangling comment3
+                # root key values begin dangling comment4
+
+                # table a header leading comment
+                [a]  # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a"  # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+
+                # table b header leading comment
+                [b]  # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b"  # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_comment_sort2(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # root key values begin dangling comment3
+                # root key values begin dangling comment4
+
+                key1 = "value1"
+                key2 = "value2"
+
+                # table b header leading comment
+                [b] # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b" # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+
+                # table a header leading comment
+                [a] # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a" # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+                "#,
+            ) -> Ok(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # root key values begin dangling comment3
+                # root key values begin dangling comment4
+
+                key1 = "value1"
+                key2 = "value2"
+
+                # table a header leading comment
+                [a]  # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a"  # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+
+                # table b header leading comment
+                [b]  # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b"  # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_comment_sort3(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # root key values begin dangling comment3
+                # root key values begin dangling comment4
+
+                key1 = "value1"
+                key2 = "value2"
+
+                # root key values end dangling comment1
+                # root key values end dangling comment2
+
+                # root key values end dangling comment3
+                # root key values end dangling comment4
+
+                # table b header leading comment
+                [b] # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b" # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+
+                # table a header leading comment
+                [a] # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a" # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+                "#,
+            ) -> Ok(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # root key values begin dangling comment3
+                # root key values begin dangling comment4
+
+                key1 = "value1"
+                key2 = "value2"
+
+                # root key values end dangling comment1
+                # root key values end dangling comment2
+
+                # root key values end dangling comment3
+                # root key values end dangling comment4
+
+                # table a header leading comment
+                [a]  # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a"  # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+
+                # table b header leading comment
+                [b]  # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b"  # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
+            async fn test_comment_sort4(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+                [b] # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b" # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+
+                # table a header leading comment
+                [a] # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a" # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+                "#,
+            ) -> Ok(
+                r#"
+                #:schema ./schemas/x-tombi-table-keys-order.schema.json
+                # root key values begin dangling comment1
+                # root key values begin dangling comment2
+
+                # table a header leading comment
+                [a]  # table a header trailing comment
+                # table a key values begin dangling comment1
+                # table a key values begin dangling comment2
+
+                # table a key values begin dangling comment3
+                # table a key values begin dangling comment4
+
+                # key_a leading comment1
+                key_a = "a"  # key_a trailing comment1
+
+                # table a key values end dangling comment1
+                # table a key values end dangling comment2
+
+                # table a key values end dangling comment3
+                # table a key values end dangling comment4
+
+                [b]  # table b header trailing comment
+                # table b key values begin dangling comment1
+                # table b key values begin dangling comment2
+
+                # table b key values begin dangling comment3
+                # table b key values begin dangling comment4
+
+                # key_b leading comment1
+                key_b = "b"  # key_b trailing comment1
+
+                # table b key values end dangling comment1
+                # table b key values end dangling comment2
+
+                # table b key values end dangling comment3
+                # table b key values end dangling comment4
+                "#
+            )
+        }
+    }
+
     #[macro_export]
     macro_rules! test_format {
         (
@@ -558,16 +947,14 @@ mod table_keys_order {
 
                 // Initialize formatter
                 let format_options = FormatOptions::default();
-                let source_path = std::path::PathBuf::from("pyproject.toml");
-                let formatter = Formatter::try_new(
+                let source_path = test_lib::project_root().join("test.toml");
+                let formatter = Formatter::new(
                     TomlVersion::default(),
                     formatter::formatter::definitions::FormatDefinitions::default(),
                     &format_options,
                     Some(itertools::Either::Right(source_path.as_path())),
                     &schema_store,
-                )
-                .await
-                .unwrap();
+                );
 
                 // Test that keys are reordered according to schema order
                 let source = dedent($source).trim().to_string();

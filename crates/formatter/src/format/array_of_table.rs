@@ -4,13 +4,11 @@ use itertools::Itertools;
 
 use crate::Format;
 
-impl Format for ast::ArrayOfTables {
+impl Format for ast::ArrayOfTable {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 
-        self.header_leading_comments()
-            .collect::<Vec<_>>()
-            .format(f)?;
+        self.header_leading_comments().collect_vec().format(f)?;
 
         write!(f, "[[{header}]]")?;
 
@@ -21,7 +19,7 @@ impl Format for ast::ArrayOfTables {
         let key_values = self.key_values().collect_vec();
 
         if key_values.is_empty() {
-            let dangling_comments = self.dangling_comments();
+            let dangling_comments = self.key_values_dangling_comments();
 
             if !dangling_comments.is_empty() {
                 write!(f, "{}", f.line_ending())?;
@@ -32,7 +30,7 @@ impl Format for ast::ArrayOfTables {
         } else {
             write!(f, "{}", f.line_ending())?;
 
-            self.begin_dangling_comments().format(f)?;
+            self.key_values_begin_dangling_comments().format(f)?;
 
             for (i, key_value) in key_values.into_iter().enumerate() {
                 if i != 0 {
@@ -41,7 +39,7 @@ impl Format for ast::ArrayOfTables {
                 key_value.format(f)?;
             }
 
-            self.end_dangling_comments().format(f)?;
+            self.key_values_end_dangling_comments().format(f)?;
         }
 
         Ok(())

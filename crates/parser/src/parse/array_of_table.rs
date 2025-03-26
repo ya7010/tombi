@@ -11,7 +11,7 @@ use crate::{
     ErrorKind::*,
 };
 
-impl Parse for ast::ArrayOfTables {
+impl Parse for ast::ArrayOfTable {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
@@ -56,7 +56,7 @@ impl Parse for ast::ArrayOfTables {
         //       consume whitespace until the next section.
         while p.eat(LINE_BREAK) {}
 
-        m.complete(p, ARRAY_OF_TABLES);
+        m.complete(p, ARRAY_OF_TABLE);
     }
 }
 

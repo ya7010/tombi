@@ -59,7 +59,7 @@ mod hover_keys_value {
 
         test_hover_keys_value!(
             #[tokio::test]
-            // NOTE: This test is correct. When you hover over the last key of the header of ArrayOfTables,
+            // NOTE: This test is correct. When you hover over the last key of the header of ArrayOfTable,
             //       the Keys in the hover content is `schema[$index]`, not `schemas`.
             //       Therefore, the Value is `Table`.
             async fn tombi_schemas(
@@ -357,6 +357,21 @@ mod hover_keys_value {
                 "Value": "String"
             });
         );
+
+        test_hover_keys_value!(
+            #[tokio::test]
+            async fn pyproject_tool_poetry_exclude_tests(
+                r#"
+                [tool.poetry]
+                exclude = [
+                    "█tests",
+                ]
+                "#,
+            ) -> Ok({
+                "Keys": "tool.poetry.exclude[0]",
+                "Value": "String"
+            });
+        );
     }
 
     #[macro_export]
@@ -419,7 +434,7 @@ mod hover_keys_value {
                     let schema_file_url = schema_store::SchemaUrl::from_file_path(schema_file_path).expect(
                         format!(
                             "failed to convert schema path to URL: {}",
-                            tombi_schema_path().display()
+                            schema_file_path.display()
                         )
                         .as_str(),
                     );
@@ -495,6 +510,8 @@ mod hover_keys_value {
                 .await else {
                     return Err("failed to handle hover".into());
                 };
+
+                tracing::debug!("hover_content: {:#?}", hover_content);
 
                 if $schema_file_path.is_some() {
                     assert!(hover_content.schema_url.is_some(), "The hover target is not defined in the schema.");

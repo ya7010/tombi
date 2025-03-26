@@ -321,6 +321,26 @@ impl CompletionContent {
             })
             .collect()
     }
+
+    pub fn new_comment_directive(
+        directive: &str,
+        detail: impl Into<String>,
+        documentation: impl Into<String>,
+        edit: Option<CompletionEdit>,
+    ) -> Self {
+        Self {
+            label: directive.to_string(),
+            kind: CompletionKind::CommentDirective,
+            emoji_icon: Some('🦅'),
+            priority: CompletionContentPriority::Key,
+            detail: Some(detail.into()),
+            documentation: Some(documentation.into()),
+            filter_text: None,
+            edit,
+            schema_url: None,
+            preselect: None,
+        }
+    }
 }
 
 impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {

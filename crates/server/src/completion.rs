@@ -1,3 +1,4 @@
+mod comment;
 mod completion_content;
 mod completion_edit;
 mod completion_kind;
@@ -9,6 +10,7 @@ use std::{borrow::Cow, ops::Deref};
 
 use ahash::AHashMap;
 use ast::{algo::ancestors_at_position, AstNode};
+use comment::get_comment_completion_contents;
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
 use completion_kind::CompletionKind;
@@ -31,17 +33,23 @@ pub async fn get_completion_contents(
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        tracing::trace!("node: {:?}", node);
+        tracing::trace!("node = {:?}", node);
         tracing::trace!(
-            "prev_sibling_or_token(): {:?}",
+            "prev_sibling_or_token() = {:?}",
             node.prev_sibling_or_token()
         );
         tracing::trace!(
-            "next_sibling_or_token(): {:?}",
+            "next_sibling_or_token() = {:?}",
             node.next_sibling_or_token()
         );
-        tracing::trace!("first_child_or_token(): {:?}", node.first_child_or_token());
-        tracing::trace!("last_child_or_token(): {:?}", node.last_child_or_token());
+        tracing::trace!("first_child_or_token() = {:?}", node.first_child_or_token());
+        tracing::trace!("last_child_or_token() = {:?}", node.last_child_or_token());
+
+        if let Some(SyntaxElement::Token(token)) = node.first_child_or_token() {
+            if token.kind() == SyntaxKind::COMMENT && token.range().contains(position) {
+                return get_comment_completion_contents(&root, position);
+            }
+        }
 
         let ast_keys = if ast::Keys::cast(node.to_owned()).is_some() {
             if let Some(SyntaxElement::Token(last_token)) = node.last_child_or_token() {
@@ -97,11 +105,11 @@ pub async fn get_completion_contents(
                 }
                 table.header()
             }
-        } else if let Some(array_of_tables) = ast::ArrayOfTables::cast(node.to_owned()) {
+        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
             let (double_bracket_start_range, double_bracket_end_range) = {
                 match (
-                    array_of_tables.double_bracket_start(),
-                    array_of_tables.double_bracket_end(),
+                    array_of_table.double_bracket_start(),
+                    array_of_table.double_bracket_end(),
                 ) {
                     (Some(double_bracket_start), Some(double_bracket_end)) => {
                         (double_bracket_start.range(), double_bracket_end.range())
@@ -116,10 +124,10 @@ pub async fn get_completion_contents(
             {
                 return Vec::with_capacity(0);
             } else {
-                if array_of_tables.contains_header(position) {
+                if array_of_table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
                 }
-                array_of_tables.header()
+                array_of_table.header()
             }
         } else {
             continue;
@@ -157,23 +165,24 @@ pub async fn get_completion_contents(
         .into_document_tree_and_errors(schema_context.toml_version)
         .tree;
 
+    let current_schema = schema_context.root_schema.and_then(|document_schema| {
+        document_schema
+            .value_schema
+            .as_ref()
+            .map(|value_schema| CurrentSchema {
+                value_schema: Cow::Borrowed(value_schema),
+                schema_url: Cow::Borrowed(&document_schema.schema_url),
+                definitions: Cow::Borrowed(&document_schema.definitions),
+            })
+    });
+
     let completion_contents = document_tree
         .deref()
         .find_completion_contents(
             position,
             &keys,
             &[],
-            schema_context
-                .root_schema
-                .and_then(|schema| schema.value_schema.as_ref()),
-            schema_context
-                .root_schema
-                .as_ref()
-                .map(|schema| &schema.schema_url),
-            schema_context
-                .root_schema
-                .as_ref()
-                .map(|schema| &schema.definitions),
+            current_schema.as_ref(),
             schema_context,
             completion_hint,
         )
@@ -203,9 +212,7 @@ pub trait FindCompletionContents {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>>;
@@ -281,12 +288,12 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
                         )
                         .await
                     {
-                        if matches!(value_schema, ValueSchema::Null) {
+                        if matches!(value_schema.as_ref(), ValueSchema::Null) {
                             continue;
                         }
 
                         if let Some(candidate) = CompletionCandidate::title(
-                            value_schema,
+                            value_schema.as_ref(),
                             &schema_url,
                             &definitions,
                             schema_store,
@@ -331,12 +338,12 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
                         )
                         .await
                     {
-                        if matches!(value_schema, ValueSchema::Null) {
+                        if matches!(value_schema.as_ref(), ValueSchema::Null) {
                             continue;
                         }
 
                         if let Some(candidate) = CompletionCandidate::description(
-                            value_schema,
+                            value_schema.as_ref(),
                             &schema_url,
                             &definitions,
                             schema_store,

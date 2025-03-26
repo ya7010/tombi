@@ -19,6 +19,31 @@ macro_rules! test_lint {
         #[test]
         fn $name:ident(
             $source:expr,
+        ) -> Ok(_);
+    ) => {
+        test_lint! {
+            #[test]
+            fn _$name($source, Option::<std::path::PathBuf>::None) -> Ok(_);
+        }
+    };
+
+    (
+        #[test]
+        fn $name:ident(
+            $source:expr,
+            $schema_path:expr$(,)?
+        ) -> Ok(_);
+    ) => {
+        test_lint! {
+            #[test]
+            fn _$name($source, Some($schema_path)) -> Ok(_);
+        }
+    };
+
+    (
+        #[test]
+        fn _$name:ident(
+            $source:expr,
             $schema_path:expr$(,)?
         ) -> Ok(_);
     ) => {
@@ -36,29 +61,29 @@ macro_rules! test_lint {
             // Initialize schema store
             let schema_store = schema_store::SchemaStore::new(schema_store::Options::default());
 
-            // Load schemas
-            schema_store
-                .load_schemas(
-                    &[config::Schema::Root(config::RootSchema {
-                        toml_version: None,
-                        path: $schema_path.to_string_lossy().to_string(),
-                        include: vec!["*.toml".to_string()],
-                    })],
-                    None,
-                )
-                .await;
+            if let Some(schema_path) = $schema_path {
+                // Load schemas
+                schema_store
+                    .load_schemas(
+                        &[config::Schema::Root(config::RootSchema {
+                            toml_version: None,
+                            path: schema_path.to_string_lossy().to_string(),
+                            include: vec!["*.toml".to_string()],
+                        })],
+                        None,
+                    )
+                    .await;
+            }
 
             // Initialize linter with schema if provided
-            let source_path = std::path::PathBuf::from("test.toml");
-            let options = crate::LintOptions::default();
-            let linter = $crate::Linter::try_new(
+            let source_path = test_lib::project_root().join("test.toml");
+            let options = $crate::LintOptions::default();
+            let linter = $crate::Linter::new(
                 TomlVersion::default(),
                 &options,
                 Some(itertools::Either::Right(source_path.as_path())),
                 &schema_store,
-            )
-            .await
-            .unwrap();
+            );
 
             let result = linter.lint($source).await;
 
@@ -132,16 +157,14 @@ macro_rules! test_lint {
             }
 
             // Initialize linter with schema if provided
-            let source_path = std::path::PathBuf::from("test.toml");
-            let options = crate::LintOptions::default();
-            let linter = $crate::Linter::try_new(
+            let source_path = test_lib::project_root().join("test.toml");
+            let options = $crate::LintOptions::default();
+            let linter = $crate::Linter::new(
                 TomlVersion::default(),
                 &options,
                 Some(itertools::Either::Right(source_path.as_path())),
                 &schema_store,
-            )
-            .await
-            .unwrap();
+            );
 
             let result = linter.lint($source).await;
             match result {
@@ -209,6 +232,8 @@ mod tests {
     }
 
     mod non_schema {
+        use schema_store::SchemaUrl;
+
         use super::*;
 
         test_lint! {
@@ -219,6 +244,77 @@ mod tests {
                 "#,
             ) -> Err([
                 crate::WarningKind::KeyEmpty
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_schema_url(
+                r#"
+                #:schema https://json.schemastore.org/tombi.json
+                "#,
+            ) -> Ok(_);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_schema_file(
+                r#"
+                #:schema ./tombi.schema.json
+                "#,
+            ) -> Ok(_);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_does_not_exist_url(
+                r#"
+                #:schema https://does-not-exist.co.jp
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFetchFailed{
+                    schema_url: SchemaUrl::parse("https://does-not-exist.co.jp").unwrap(),
+                    reason: "error sending request for url (https://does-not-exist.co.jp/)".to_string(),
+                }
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_does_not_exist_file(
+                r#"
+                #:schema does-not-exist.schema.json
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFileNotFound{
+                    schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
+                }
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_relative_does_not_exist_file(
+                r#"
+                #:schema ./does-not-exist.schema.json
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFileNotFound{
+                    schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
+                }
+            ]);
+        }
+
+        test_lint! {
+            #[test]
+            fn test_file_schema_parent_does_not_exist_file(
+                r#"
+                #:schema ../does-not-exist.schema.json
+                "#,
+            ) -> Err([
+                schema_store::Error::SchemaFileNotFound{
+                    schema_path: test_lib::project_root().join("../does-not-exist.schema.json"),
+                }
             ]);
         }
     }

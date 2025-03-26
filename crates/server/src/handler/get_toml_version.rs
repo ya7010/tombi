@@ -6,9 +6,12 @@ use crate::backend::Backend;
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_get_toml_version(
     backend: &Backend,
-    TextDocumentIdentifier { uri }: TextDocumentIdentifier,
+    params: TextDocumentIdentifier,
 ) -> Result<GetTomlVersionResponse, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_get_toml_version");
+    tracing::trace!(?params);
+
+    let TextDocumentIdentifier { uri } = params;
 
     let source_schema = backend
         .schema_store

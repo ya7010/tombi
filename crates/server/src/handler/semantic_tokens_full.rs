@@ -8,16 +8,23 @@ use crate::{
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_semantic_tokens_full(
     backend: &Backend,
-    SemanticTokensParams { text_document, .. }: SemanticTokensParams,
+    params: SemanticTokensParams,
 ) -> Result<Option<SemanticTokensResult>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_semantic_tokens_full");
+    tracing::trace!(?params);
+
+    let SemanticTokensParams { text_document, .. } = params;
 
     let toml_version = backend.toml_version().await.unwrap_or_default();
     let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version).await else {
         return Ok(None);
     };
 
-    let mut tokens_builder = SemanticTokensBuilder::new();
+    let file_schema_range = root
+        .file_schema_url(text_document.uri.to_file_path().ok().as_deref())
+        .map(|(_, range)| range);
+
+    let mut tokens_builder = SemanticTokensBuilder::new(file_schema_range);
     root.append_semantic_tokens(&mut tokens_builder);
     let tokens = tokens_builder.build();
 

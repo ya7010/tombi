@@ -1,0 +1,57 @@
+{
+  "x-tombi-toml-version": "v1.0.0",
+  "type": "object",
+  "additionalProperties": {
+    "$ref": "#/definitions/Item"
+  },
+  "definitions": {
+    "Item": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "type": "string",
+            "format": "partial-date-time"
+          },
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "string",
+            "format": "partial-time"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Item"
+            },
+            "x-tombi-array-values-order": "ascending"
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/Item"
+            },
+            "x-tombi-table-keys-order": "ascending"
+          }
+        ]
+      },
+      "x-tombi-table-keys-order": "ascending"
+    }
+  },
+  "x-tombi-table-keys-order": "ascending"
+}

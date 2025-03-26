@@ -1,23 +1,23 @@
-use crate::{ArrayOfTables, AstNode, Keys, Table};
+use crate::{ArrayOfTable, AstNode, Keys, Table};
 
 #[derive(Debug, Clone)]
 pub enum TableOrArrayOfTable {
     Table(Table),
-    ArrayOfTables(ArrayOfTables),
+    ArrayOfTable(ArrayOfTable),
 }
 
 impl TableOrArrayOfTable {
     pub fn header(&self) -> Option<Keys> {
         match self {
-            TableOrArrayOfTable::Table(table) => table.header(),
-            TableOrArrayOfTable::ArrayOfTables(array_of_tables) => array_of_tables.header(),
+            Self::Table(table) => table.header(),
+            Self::ArrayOfTable(array_of_table) => array_of_table.header(),
         }
     }
 
     pub fn range(&self) -> text::Range {
         match self {
-            TableOrArrayOfTable::Table(table) => table.range(),
-            TableOrArrayOfTable::ArrayOfTables(array_of_tables) => array_of_tables.range(),
+            Self::Table(table) => table.range(),
+            Self::ArrayOfTable(array_of_table) => array_of_table.range(),
         }
     }
 }
@@ -25,15 +25,15 @@ impl TableOrArrayOfTable {
 impl AstNode for TableOrArrayOfTable {
     #[inline]
     fn can_cast(kind: syntax::SyntaxKind) -> bool {
-        Table::can_cast(kind) || ArrayOfTables::can_cast(kind)
+        Table::can_cast(kind) || ArrayOfTable::can_cast(kind)
     }
 
     #[inline]
     fn cast(syntax: syntax::SyntaxNode) -> Option<Self> {
         if Table::can_cast(syntax.kind()) {
             Table::cast(syntax).map(TableOrArrayOfTable::Table)
-        } else if ArrayOfTables::can_cast(syntax.kind()) {
-            ArrayOfTables::cast(syntax).map(TableOrArrayOfTable::ArrayOfTables)
+        } else if ArrayOfTable::can_cast(syntax.kind()) {
+            ArrayOfTable::cast(syntax).map(TableOrArrayOfTable::ArrayOfTable)
         } else {
             None
         }
@@ -43,7 +43,7 @@ impl AstNode for TableOrArrayOfTable {
     fn syntax(&self) -> &syntax::SyntaxNode {
         match self {
             TableOrArrayOfTable::Table(table) => table.syntax(),
-            TableOrArrayOfTable::ArrayOfTables(array_of_tables) => array_of_tables.syntax(),
+            TableOrArrayOfTable::ArrayOfTable(array_of_table) => array_of_table.syntax(),
         }
     }
 }

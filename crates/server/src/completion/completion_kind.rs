@@ -13,6 +13,7 @@ pub enum CompletionKind {
     Table,
     Key,
     MagicTrigger,
+    CommentDirective,
 }
 
 impl From<CompletionKind> for tower_lsp::lsp_types::CompletionItemKind {
@@ -34,6 +35,7 @@ impl From<CompletionKind> for tower_lsp::lsp_types::CompletionItemKind {
             CompletionKind::Key => tower_lsp::lsp_types::CompletionItemKind::FIELD,
             // NOTE: To give a writing taste close to method chaining
             CompletionKind::MagicTrigger => tower_lsp::lsp_types::CompletionItemKind::METHOD,
+            CompletionKind::CommentDirective => tower_lsp::lsp_types::CompletionItemKind::KEYWORD,
         }
     }
 }

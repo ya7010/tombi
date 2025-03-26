@@ -139,6 +139,8 @@ dependencies = [
  "text",
  "thiserror",
  "toml-version",
+ "tracing",
+ "url",
 ]
 
 [[package]]
@@ -2051,6 +2053,7 @@ name = "test-lib"
 version = "0.0.0"
 dependencies = [
  "chrono",
+ "tracing",
 ]
 
 [[package]]
@@ -2246,6 +2249,7 @@ dependencies = [
  "clap",
  "document-tree",
  "indexmap",
+ "itertools",
  "parser",
  "pretty_assertions",
  "serde",

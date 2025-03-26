@@ -46,6 +46,11 @@ impl Accessors {
     pub fn last(&self) -> Option<&Accessor> {
         self.0.last()
     }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl AsRef<[Accessor]> for Accessors {

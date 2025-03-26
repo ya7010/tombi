@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fmt::Debug};
+use std::fmt::Debug;
 
 use diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
@@ -12,8 +12,7 @@ pub fn validate_any_of<'a: 'b, 'b, T>(
     value: &'a T,
     accessors: &'a [schema_store::SchemaAccessor],
     any_of_schema: &'a schema_store::AnyOfSchema,
-    schema_url: &'a schema_store::SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    current_schema: &'a CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
 ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>
 where
@@ -29,14 +28,10 @@ where
 
         let mut schemas = any_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(Some(CurrentSchema {
-                value_schema,
-                schema_url,
-                definitions,
-            })) = referable_schema
+            let Ok(Some(current_schema)) = referable_schema
                 .resolve(
-                    Cow::Borrowed(schema_url),
-                    Cow::Borrowed(definitions),
+                    current_schema.schema_url.clone(),
+                    current_schema.definitions.clone(),
                     schema_context.store,
                 )
                 .await
@@ -44,7 +39,7 @@ where
                 continue;
             };
 
-            match (value.value_type(), value_schema) {
+            match (value.value_type(), current_schema.value_schema.as_ref()) {
                 (document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
                 | (document_tree::ValueType::Integer, ValueSchema::Integer(_))
                 | (document_tree::ValueType::Float, ValueSchema::Float(_))
@@ -57,13 +52,7 @@ where
                 | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
                     is_type_match = true;
                     match value
-                        .validate(
-                            accessors,
-                            Some(value_schema),
-                            Some(&schema_url),
-                            Some(&definitions),
-                            schema_context,
-                        )
+                        .validate(accessors, Some(&current_schema), schema_context)
                         .await
                     {
                         Ok(()) => {
@@ -85,7 +74,7 @@ where
                 | (_, ValueSchema::Null) => {
                     type_mismatch_errors.push(crate::Error {
                         kind: crate::ErrorKind::TypeMismatch {
-                            expected: value_schema.value_type().await,
+                            expected: current_schema.value_schema.value_type().await,
                             actual: value.value_type(),
                         },
                         range: value.range(),
@@ -96,8 +85,7 @@ where
                         value,
                         accessors,
                         one_of_schema,
-                        &schema_url,
-                        &definitions,
+                        &current_schema,
                         schema_context,
                     )
                     .await
@@ -113,8 +101,7 @@ where
                         value,
                         accessors,
                         any_of_schema,
-                        &schema_url,
-                        &definitions,
+                        &current_schema,
                         schema_context,
                     )
                     .await
@@ -130,8 +117,7 @@ where
                         value,
                         accessors,
                         all_of_schema,
-                        &schema_url,
-                        &definitions,
+                        &current_schema,
                         schema_context,
                     )
                     .await

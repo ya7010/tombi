@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use document_tree::IntoDocumentTreeAndErrors;
 use futures::FutureExt;
 use itertools::Itertools;
@@ -9,13 +11,10 @@ impl crate::Edit for ast::Table {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
-        tracing::trace!("schema_url: {:?}", schema_url.map(|url| url.to_string()));
-        tracing::trace!("value_schema: {:?}", value_schema);
+        tracing::trace!("current_schema = {:?}", current_schema);
 
         async move {
             let mut changes = vec![];
@@ -31,18 +30,18 @@ impl crate::Edit for ast::Table {
                     .tree,
             );
 
-            let value_schema = if let (Some(schema_url), Some(value_schema), Some(definitions)) =
-                (schema_url, value_schema, definitions)
-            {
-                get_schema(
-                    value,
-                    &header_accessors,
-                    value_schema,
-                    schema_url,
-                    definitions,
-                    schema_context,
-                )
-                .await
+            let current_schema = if let Some(current_schema) = current_schema {
+                if let Some(value_schema) =
+                    get_schema(value, &header_accessors, current_schema, schema_context).await
+                {
+                    Some(schema_store::CurrentSchema {
+                        value_schema: Cow::Owned(value_schema),
+                        schema_url: current_schema.schema_url.clone(),
+                        definitions: current_schema.definitions.clone(),
+                    })
+                } else {
+                    None
+                }
             } else {
                 None
             };
@@ -68,13 +67,7 @@ impl crate::Edit for ast::Table {
             for key_value in self.key_values() {
                 changes.extend(
                     key_value
-                        .edit(
-                            &header_accessors,
-                            value_schema.as_ref(),
-                            schema_url,
-                            definitions,
-                            schema_context,
-                        )
+                        .edit(&header_accessors, current_schema.as_ref(), schema_context)
                         .await,
                 );
             }
@@ -83,9 +76,7 @@ impl crate::Edit for ast::Table {
                 table_keys_order(
                     value,
                     self.key_values().collect_vec(),
-                    value_schema.as_ref(),
-                    schema_url,
-                    definitions,
+                    current_schema.as_ref(),
                     schema_context,
                 )
                 .await,

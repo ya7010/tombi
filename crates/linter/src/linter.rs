@@ -1,11 +1,9 @@
 use std::borrow::Cow;
 
-use ast::AstNode;
 use config::TomlVersion;
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
-use schema_store::SourceSchema;
 use url::Url;
 
 use crate::lint::Lint;
@@ -13,86 +11,102 @@ use crate::lint::Lint;
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
-    source_schema: Option<SourceSchema>,
+    source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
     schema_store: &'a schema_store::SchemaStore,
     pub(crate) diagnostics: Vec<crate::Diagnostic>,
 }
 
 impl<'a> Linter<'a> {
-    pub async fn try_new(
+    pub fn new(
         toml_version: TomlVersion,
         options: &'a crate::LintOptions,
-        schema_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
+        source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
         schema_store: &'a schema_store::SchemaStore,
-    ) -> Result<Self, schema_store::Error> {
-        let source_schema = if let Some(schema_url_or_path) = schema_url_or_path {
-            schema_store
-                .try_get_source_schema(schema_url_or_path)
-                .await?
+    ) -> Self {
+        Self {
+            toml_version,
+            options: Cow::Borrowed(options),
+            source_url_or_path,
+            schema_store,
+            diagnostics: Vec::new(),
+        }
+    }
+
+    pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
+        let parsed = parser::parse(source);
+
+        let Some(parsed) = parsed.cast::<ast::Root>() else {
+            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
+        };
+
+        let root = parsed.tree();
+
+        let source_schema = match self
+            .schema_store
+            .try_get_source_schema_from_ast(&root, self.source_url_or_path)
+            .await
+        {
+            Ok(Some(schema)) => Some(schema),
+            Ok(None) => None,
+            Err((err, range)) => {
+                self.diagnostics
+                    .push(Diagnostic::new_error(err.to_string(), range));
+                None
+            }
+        };
+
+        let source_schema = if let Some(schema) = source_schema {
+            Some(schema)
+        } else if let Some(source_url_or_path) = self.source_url_or_path {
+            self.schema_store
+                .try_get_source_schema(source_url_or_path)
+                .await
+                .ok()
+                .flatten()
         } else {
             None
         };
 
         let toml_version = source_schema
             .as_ref()
-            .and_then(|source_schema| {
-                source_schema
+            .and_then(|schema| {
+                schema
                     .root_schema
                     .as_ref()
-                    .and_then(|document_schema| document_schema.toml_version())
+                    .and_then(|root| root.toml_version())
             })
-            .unwrap_or(toml_version);
+            .unwrap_or(self.toml_version);
 
-        Ok(Self {
-            toml_version,
-            options: Cow::Borrowed(options),
-            source_schema,
-            schema_store,
-            diagnostics: Vec::new(),
-        })
-    }
-
-    pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let p = parser::parse(source, self.toml_version);
-        let mut diagnostics = vec![];
-
-        for errors in p.errors() {
-            errors.set_diagnostics(&mut diagnostics);
+        for errors in parsed.errors(toml_version) {
+            errors.set_diagnostics(&mut self.diagnostics);
         }
 
-        if diagnostics.is_empty() {
-            let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
-                unreachable!("Root node is always present");
-            };
+        root.lint(&mut self);
 
-            root.lint(&mut self);
+        if self.diagnostics.is_empty() {
+            let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
 
-            let (document_tree, errors) =
-                root.into_document_tree_and_errors(self.toml_version).into();
+            errors.set_diagnostics(&mut self.diagnostics);
 
-            errors.set_diagnostics(&mut diagnostics);
-
-            if let Some(source_schema) = &self.source_schema {
+            if let Some(source_schema) = source_schema {
                 let schema_context = schema_store::SchemaContext {
-                    toml_version: self.toml_version,
+                    toml_version,
                     root_schema: source_schema.root_schema.as_ref(),
                     sub_schema_url_map: Some(&source_schema.sub_schema_url_map),
                     store: self.schema_store,
                 };
                 if let Err(schema_diagnostics) =
-                    validator::validate(document_tree, source_schema, &schema_context).await
+                    validator::validate(document_tree, &source_schema, &schema_context).await
                 {
-                    diagnostics.extend(schema_diagnostics);
+                    self.diagnostics.extend(schema_diagnostics);
                 }
             }
-
-            diagnostics.extend(self.diagnostics);
         }
 
-        if diagnostics.is_empty() {
+        if self.diagnostics.is_empty() {
             Ok(())
         } else {
-            Err(diagnostics)
+            Err(self.diagnostics)
         }
     }
 

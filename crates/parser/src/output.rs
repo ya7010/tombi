@@ -19,7 +19,7 @@ pub struct Output {
     /// |16 bit kind|8 bit n_input_tokens|4 bit tag|4 bit leftover|
     ///
     events: Vec<u32>,
-    errors: Vec<crate::Error>,
+    errors: Vec<crate::TomlVersionedError>,
 }
 
 #[derive(Debug)]
@@ -33,7 +33,7 @@ pub enum Step {
     },
     Exit,
     Error {
-        error: crate::Error,
+        error: crate::TomlVersionedError,
     },
 }
 
@@ -101,7 +101,7 @@ impl Output {
         self.events.push(e)
     }
 
-    pub(crate) fn error(&mut self, error: crate::Error) {
+    pub(crate) fn error(&mut self, error: crate::TomlVersionedError) {
         let idx: usize = self.errors.len();
         self.errors.push(error);
         let e = (idx as u32) << Self::ERROR_SHIFT;

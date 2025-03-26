@@ -20,10 +20,20 @@ pub enum Referable<T> {
     },
 }
 
+#[derive(Clone)]
 pub struct CurrentSchema<'a> {
-    pub value_schema: &'a ValueSchema,
+    pub value_schema: Cow<'a, ValueSchema>,
     pub schema_url: Cow<'a, SchemaUrl>,
     pub definitions: Cow<'a, SchemaDefinitions>,
+}
+
+impl<'a> std::fmt::Debug for CurrentSchema<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CurrentSchema")
+            .field("value_schema", &self.value_schema)
+            .field("schema_url", &self.schema_url.to_string())
+            .finish()
+    }
 }
 
 impl<T> Referable<T> {
@@ -183,7 +193,7 @@ impl Referable<ValueSchema> {
                     }
 
                     Ok(Some(CurrentSchema {
-                        value_schema,
+                        value_schema: Cow::Borrowed(value_schema),
                         schema_url,
                         definitions,
                     }))

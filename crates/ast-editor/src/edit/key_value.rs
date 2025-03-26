@@ -1,7 +1,9 @@
+use std::borrow::Cow;
+
 use document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
 use itertools::Itertools;
-use schema_store::SchemaAccessor;
+use schema_store::{CurrentSchema, SchemaAccessor};
 
 use super::get_schema;
 
@@ -9,9 +11,7 @@ impl crate::Edit for ast::KeyValue {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
@@ -30,9 +30,7 @@ impl crate::Edit for ast::KeyValue {
                 })
                 .collect_vec();
 
-            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
-                (schema_url, value_schema, definitions)
-            {
+            if let Some(current_schema) = current_schema {
                 if let Some(value_schema) = get_schema(
                     &document_tree::Value::Table(
                         self.clone()
@@ -40,9 +38,7 @@ impl crate::Edit for ast::KeyValue {
                             .unwrap(),
                     ),
                     &keys_accessors.clone(),
-                    value_schema,
-                    schema_url,
-                    definitions,
+                    current_schema,
                     schema_context,
                 )
                 .await
@@ -52,17 +48,22 @@ impl crate::Edit for ast::KeyValue {
                             value
                                 .edit(
                                     &[],
-                                    Some(&value_schema),
-                                    Some(schema_url),
-                                    Some(definitions),
+                                    Some(&CurrentSchema {
+                                        value_schema: Cow::Owned(value_schema),
+                                        schema_url: current_schema.schema_url.clone(),
+                                        definitions: current_schema.definitions.clone(),
+                                    }),
                                     schema_context,
                                 )
                                 .await,
                         );
+                        return changes;
                     }
                 }
-            } else if let Some(value) = self.value() {
-                changes.extend(value.edit(&[], None, None, None, schema_context).await);
+            }
+
+            if let Some(value) = self.value() {
+                changes.extend(value.edit(&[], None, schema_context).await);
             }
 
             changes

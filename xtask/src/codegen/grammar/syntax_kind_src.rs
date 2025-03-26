@@ -39,7 +39,7 @@ pub const NODES: &[&str] = &[
     "ARRAY",
     "TABLE",
     "INLINE_TABLE",
-    "ARRAY_OF_TABLES",
+    "ARRAY_OF_TABLE",
 ];
 
 #[derive(Debug)]
