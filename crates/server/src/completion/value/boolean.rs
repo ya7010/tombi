@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, BooleanSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, BooleanSchema, CurrentSchema, SchemaUrl};
 
 use crate::completion::{
     completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
@@ -12,13 +12,13 @@ impl FindCompletionContents for BooleanSchema {
         position: text::Position,
         _keys: &'a [document_tree::Key],
         _accessors: &'a [Accessor],
-        _value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        _definitions: Option<&'a SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {
+            let schema_url = current_schema.map(|schema| schema.schema_url.as_ref());
+
             if let Some(enumerate) = &self.enumerate {
                 enumerate
                     .iter()

@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
-    Accessor, Accessors, ArraySchema, CurrentSchema, SchemaAccessor, ValueSchema, ValueType,
+    Accessor, Accessors, ArraySchema, CurrentSchema, DocumentSchema, ValueSchema, ValueType,
 };
 
 use crate::hover::{
@@ -28,42 +28,30 @@ impl GetHoverContent for document_tree::Array {
         );
 
         async move {
-            if let Some(sub_schema_url_map) = schema_context.sub_schema_url_map {
-                if let Some(sub_schema_url) = sub_schema_url_map.get(
-                    &accessors
-                        .iter()
-                        .map(SchemaAccessor::from)
-                        .collect::<Vec<_>>(),
-                ) {
-                    if current_schema.map(|schema| schema.schema_url.as_ref())
-                        != Some(sub_schema_url)
-                    {
-                        if let Ok(Some(document_schema)) = schema_context
-                            .store
-                            .try_get_document_schema(sub_schema_url)
-                            .await
-                        {
-                            let current_schema =
-                                document_schema
-                                    .value_schema
-                                    .map(|value_schema| CurrentSchema {
-                                        value_schema: Cow::Owned(value_schema),
-                                        schema_url: Cow::Borrowed(sub_schema_url),
-                                        definitions: Cow::Borrowed(&document_schema.definitions),
-                                    });
+            if let Some(Ok(DocumentSchema {
+                value_schema,
+                schema_url,
+                definitions,
+                ..
+            })) = schema_context
+                .get_subschema(&accessors, current_schema)
+                .await
+            {
+                let current_schema = value_schema.map(|value_schema| CurrentSchema {
+                    value_schema: Cow::Owned(value_schema),
+                    schema_url: Cow::Owned(schema_url),
+                    definitions: Cow::Owned(definitions),
+                });
 
-                            return self
-                                .get_hover_content(
-                                    position,
-                                    keys,
-                                    accessors,
-                                    current_schema.as_ref(),
-                                    schema_context,
-                                )
-                                .await;
-                        }
-                    }
-                }
+                return self
+                    .get_hover_content(
+                        position,
+                        keys,
+                        accessors,
+                        current_schema.as_ref(),
+                        schema_context,
+                    )
+                    .await;
             }
 
             if let Some(current_schema) = current_schema {

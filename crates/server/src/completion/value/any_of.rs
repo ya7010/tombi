@@ -1,9 +1,5 @@
-use std::borrow::Cow;
-
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{
-    Accessor, AnyOfSchema, CurrentSchema, ReferableValueSchemas, SchemaDefinitions, SchemaUrl,
-};
+use schema_store::{Accessor, AnyOfSchema, CurrentSchema, ReferableValueSchemas};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
@@ -30,8 +26,7 @@ pub fn find_any_of_completion_items<'a: 'b, 'b, T>(
     keys: &'a [document_tree::Key],
     accessors: &'a [Accessor],
     any_of_schema: &'a schema_store::AnyOfSchema,
-    schema_url: &'a SchemaUrl,
-    definitions: &'a SchemaDefinitions,
+    current_schema: &'a CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
@@ -42,14 +37,10 @@ where
         let mut completion_items = Vec::new();
 
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
-            if let Ok(Some(CurrentSchema {
-                schema_url,
-                value_schema,
-                definitions,
-            })) = referable_schema
+            if let Ok(Some(current_schema)) = referable_schema
                 .resolve(
-                    Cow::Borrowed(schema_url),
-                    Cow::Borrowed(definitions),
+                    current_schema.schema_url.clone(),
+                    current_schema.definitions.clone(),
                     schema_context.store,
                 )
                 .await
@@ -59,9 +50,7 @@ where
                         position,
                         keys,
                         accessors,
-                        Some(&value_schema),
-                        Some(&schema_url),
-                        Some(&definitions),
+                        Some(&current_schema),
                         schema_context,
                         completion_hint,
                     )
@@ -73,8 +62,8 @@ where
 
         let detail = any_of_schema
             .detail(
-                schema_url,
-                definitions,
+                &current_schema.schema_url,
+                &current_schema.definitions,
                 schema_context.store,
                 completion_hint,
             )
@@ -82,8 +71,8 @@ where
 
         let documentation = any_of_schema
             .documentation(
-                schema_url,
-                definitions,
+                &current_schema.schema_url,
+                &current_schema.definitions,
                 schema_context.store,
                 completion_hint,
             )
@@ -104,7 +93,7 @@ where
                 position,
                 detail,
                 documentation,
-                Some(schema_url),
+                Some(&current_schema.schema_url),
                 completion_hint,
             ) {
                 completion_items.push(completion_item);
