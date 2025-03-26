@@ -20,8 +20,9 @@ pub enum Referable<T> {
     },
 }
 
+#[derive(Debug, Clone)]
 pub struct CurrentSchema<'a> {
-    pub value_schema: &'a ValueSchema,
+    pub value_schema: Cow<'a, ValueSchema>,
     pub schema_url: Cow<'a, SchemaUrl>,
     pub definitions: Cow<'a, SchemaDefinitions>,
 }
@@ -183,7 +184,7 @@ impl Referable<ValueSchema> {
                     }
 
                     Ok(Some(CurrentSchema {
-                        value_schema,
+                        value_schema: Cow::Borrowed(value_schema),
                         schema_url,
                         definitions,
                     }))

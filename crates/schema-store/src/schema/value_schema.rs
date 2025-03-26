@@ -264,11 +264,7 @@ impl ValueSchema {
                 | ValueSchema::AnyOf(AnyOfSchema { schemas, .. })
                 | ValueSchema::AllOf(AllOfSchema { schemas, .. }) => {
                     for referable_schema in schemas.write().await.iter_mut() {
-                        if let Ok(Some(CurrentSchema {
-                            value_schema,
-                            schema_url,
-                            definitions,
-                        })) = referable_schema
+                        if let Ok(Some(current_schema)) = referable_schema
                             .resolve(
                                 Cow::Borrowed(schema_url),
                                 Cow::Borrowed(definitions),
@@ -277,11 +273,12 @@ impl ValueSchema {
                             .await
                         {
                             matched_schemas.extend(
-                                value_schema
+                                current_schema
+                                    .value_schema
                                     .match_flattened_schemas(
                                         condition,
-                                        &schema_url,
-                                        &definitions,
+                                        &current_schema.schema_url,
+                                        &current_schema.definitions,
                                         schema_store,
                                     )
                                     .await,
@@ -411,11 +408,7 @@ impl FindSchemaCandidates for ValueSchema {
                     let mut errors = Vec::new();
 
                     for referable_schema in schemas.write().await.iter_mut() {
-                        let Ok(Some(CurrentSchema {
-                            value_schema,
-                            schema_url,
-                            definitions,
-                        })) = referable_schema
+                        let Ok(Some(current_schema)) = referable_schema
                             .resolve(
                                 Cow::Borrowed(schema_url),
                                 Cow::Borrowed(definitions),
@@ -426,11 +419,12 @@ impl FindSchemaCandidates for ValueSchema {
                             continue;
                         };
 
-                        let (mut schema_candidates, schema_errors) = value_schema
+                        let (mut schema_candidates, schema_errors) = current_schema
+                            .value_schema
                             .find_schema_candidates(
                                 accessors,
-                                &schema_url,
-                                &definitions,
+                                &current_schema.schema_url,
+                                &current_schema.definitions,
                                 schema_store,
                             )
                             .await;

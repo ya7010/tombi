@@ -10,7 +10,7 @@ mod string;
 mod table;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, SchemaUrl, ValueSchema};
+use schema_store::{Accessor, CurrentSchema, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -20,9 +20,7 @@ impl GetHoverContent for document_tree::Value {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -33,9 +31,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -46,9 +42,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -59,9 +53,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -72,9 +64,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -85,9 +75,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -98,9 +86,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -111,9 +97,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -124,9 +108,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -137,9 +119,7 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -150,22 +130,19 @@ impl GetHoverContent for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
                 }
-                Self::Incomplete { range } => match value_schema {
-                    Some(value_schema) => value_schema
+                Self::Incomplete { range } => match current_schema {
+                    Some(current_schema) => current_schema
+                        .value_schema
                         .get_hover_content(
                             position,
                             keys,
                             accessors,
-                            Some(value_schema),
-                            schema_url,
-                            definitions,
+                            Some(current_schema),
                             schema_context,
                         )
                         .await
@@ -187,9 +164,7 @@ impl GetHoverContent for ValueSchema {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
@@ -200,9 +175,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -213,9 +186,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -226,9 +197,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -239,9 +208,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -252,9 +219,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -265,9 +230,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -278,9 +241,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -291,9 +252,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -304,9 +263,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -317,9 +274,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -330,9 +285,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -343,9 +296,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -356,9 +307,7 @@ impl GetHoverContent for ValueSchema {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                         )
                         .await

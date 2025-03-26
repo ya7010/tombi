@@ -59,7 +59,7 @@ where
                         position,
                         keys,
                         accessors,
-                        Some(value_schema),
+                        Some(&value_schema),
                         Some(&schema_url),
                         Some(&definitions),
                         schema_context,
