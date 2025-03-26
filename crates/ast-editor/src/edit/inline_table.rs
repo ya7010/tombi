@@ -8,18 +8,14 @@ impl crate::Edit for ast::InlineTable {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             let mut changes = vec![];
 
-            if let (Some(schema_url), Some(value_schema), Some(definitions)) =
-                (schema_url, value_schema, definitions)
-            {
-                if let ValueSchema::Table(table_schema) = value_schema {
+            if let Some(current_schema) = current_schema {
+                if let ValueSchema::Table(table_schema) = current_schema.value_schema.as_ref() {
                     changes.extend(
                         inline_table_keys_order(
                             self.key_values_with_comma().collect_vec(),
@@ -32,13 +28,7 @@ impl crate::Edit for ast::InlineTable {
                     for key_value in self.key_values() {
                         changes.extend(
                             key_value
-                                .edit(
-                                    accessors,
-                                    Some(value_schema),
-                                    Some(schema_url),
-                                    Some(definitions),
-                                    schema_context,
-                                )
+                                .edit(accessors, Some(current_schema), schema_context)
                                 .await,
                         );
                     }
@@ -46,16 +36,13 @@ impl crate::Edit for ast::InlineTable {
                     return changes;
                 }
             }
+
             for (key_value, comma) in self.key_values_with_comma() {
                 changes.extend(inline_table_comma_tailing_comment(
                     &key_value,
                     comma.as_ref(),
                 ));
-                changes.extend(
-                    key_value
-                        .edit(accessors, None, None, None, schema_context)
-                        .await,
-                );
+                changes.extend(key_value.edit(accessors, None, schema_context).await);
             }
 
             changes

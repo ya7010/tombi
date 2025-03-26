@@ -44,8 +44,15 @@ where
             schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
         };
 
-        for referable_schema in one_of_schema.schemas.read().await.iter() {
-            let Some(value_schema) = referable_schema.resolved() else {
+        for referable_schema in one_of_schema.schemas.write().await.iter_mut() {
+            let Ok(Some(current_schema)) = referable_schema
+                .resolve(
+                    Cow::Borrowed(schema_url),
+                    Cow::Borrowed(definitions),
+                    schema_context.store,
+                )
+                .await
+            else {
                 continue;
             };
 
@@ -54,11 +61,7 @@ where
                     position,
                     keys,
                     accessors,
-                    Some(&CurrentSchema {
-                        value_schema: Cow::Borrowed(value_schema),
-                        schema_url: Cow::Borrowed(schema_url),
-                        definitions: Cow::Borrowed(definitions),
-                    }),
+                    Some(&current_schema),
                     schema_context,
                 )
                 .await
@@ -76,7 +79,7 @@ where
                     hover_content.value_type = value_type.clone();
                 }
 
-                if value_schema.value_type().await == schema_store::ValueType::Array
+                if current_schema.value_schema.value_type().await == schema_store::ValueType::Array
                     && hover_content.value_type != schema_store::ValueType::Array
                 {
                     return Some(hover_content);
@@ -88,9 +91,7 @@ where
                             .iter()
                             .map(|accessor| accessor.into())
                             .collect_vec(),
-                        Some(value_schema),
-                        Some(schema_url),
-                        Some(definitions),
+                        Some(&current_schema),
                         schema_context,
                     )
                     .await

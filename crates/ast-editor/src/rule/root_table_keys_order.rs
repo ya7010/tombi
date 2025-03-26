@@ -1,7 +1,7 @@
 use ast::AstNode;
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Itertools;
-use schema_store::{SchemaAccessor, SchemaContext, ValueSchema};
+use schema_store::{CurrentSchema, SchemaAccessor, SchemaContext};
 use syntax::SyntaxElement;
 
 use crate::rule::table_keys_order::{sorted_accessors, table_keys_order};
@@ -9,9 +9,7 @@ use crate::rule::table_keys_order::{sorted_accessors, table_keys_order};
 pub async fn root_table_keys_order<'a>(
     key_values: Vec<ast::KeyValue>,
     table_or_array_of_tables: Vec<ast::TableOrArrayOfTable>,
-    value_schema: Option<&'a ValueSchema>,
-    schema_url: Option<&'a schema_store::SchemaUrl>,
-    definitions: Option<&'a schema_store::SchemaDefinitions>,
+    current_schema: Option<&'a CurrentSchema<'a>>,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
     if key_values.is_empty() && table_or_array_of_tables.is_empty() {
@@ -26,9 +24,7 @@ pub async fn root_table_keys_order<'a>(
                 .tree,
         ),
         key_values,
-        value_schema,
-        schema_url,
-        definitions,
+        current_schema,
         schema_context,
     )
     .await;
@@ -72,9 +68,7 @@ pub async fn root_table_keys_order<'a>(
         ),
         &[],
         targets,
-        value_schema,
-        schema_url,
-        definitions,
+        current_schema,
         schema_context,
     )
     .await

@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fmt::Debug};
+use std::fmt::Debug;
 
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::CurrentSchema;
@@ -9,8 +9,7 @@ pub fn validate_all_of<'a: 'b, 'b, T>(
     value: &'a T,
     accessors: &'a [schema_store::SchemaAccessor],
     all_of_schema: &'a schema_store::AllOfSchema,
-    schema_url: &'a schema_store::SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    current_schema: &'a CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
 ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>
 where
@@ -24,14 +23,10 @@ where
 
         let mut schemas = all_of_schema.schemas.write().await;
         for referable_schema in schemas.iter_mut() {
-            let Ok(Some(CurrentSchema {
-                value_schema,
-                schema_url,
-                definitions,
-            })) = referable_schema
+            let Ok(Some(current_schema)) = referable_schema
                 .resolve(
-                    Cow::Borrowed(schema_url),
-                    Cow::Borrowed(definitions),
+                    current_schema.schema_url.clone(),
+                    current_schema.definitions.clone(),
                     schema_context.store,
                 )
                 .await
@@ -40,13 +35,7 @@ where
             };
 
             match value
-                .validate(
-                    accessors,
-                    Some(&value_schema),
-                    Some(&schema_url),
-                    Some(&definitions),
-                    schema_context,
-                )
+                .validate(accessors, Some(&current_schema), schema_context)
                 .await
             {
                 Ok(()) => {}
