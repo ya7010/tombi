@@ -511,6 +511,8 @@ mod hover_keys_value {
                     return Err("failed to handle hover".into());
                 };
 
+                tracing::debug!("hover_content: {:#?}", hover_content);
+
                 if $schema_file_path.is_some() {
                     assert!(hover_content.schema_url.is_some(), "The hover target is not defined in the schema.");
                 } else {

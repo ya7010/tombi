@@ -71,19 +71,20 @@ impl GetHoverContent for document_tree::Table {
                                     None => None,
                                 };
 
-                                if let Some(property) = table_schema
+                                if let Some(property_schema) = table_schema
                                     .properties
                                     .write()
                                     .await
                                     .get_mut(&SchemaAccessor::from(&accessor))
                                 {
+                                    tracing::trace!("property_schema = {:?}", property_schema);
                                     let required = table_schema
                                         .required
                                         .as_ref()
                                         .map(|r| r.contains(&key_str))
                                         .unwrap_or(false);
 
-                                    if let Ok(Some(current_schema)) = property
+                                    if let Ok(Some(current_schema)) = property_schema
                                         .resolve(
                                             current_schema.schema_url.clone(),
                                             current_schema.definitions.clone(),
