@@ -20,6 +20,7 @@ pub enum Referable<T> {
     },
 }
 
+#[derive(Debug, Clone)]
 pub struct CurrentSchema<'a> {
     pub value_schema: Cow<'a, ValueSchema>,
     pub schema_url: Cow<'a, SchemaUrl>,

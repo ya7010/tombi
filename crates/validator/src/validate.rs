@@ -13,18 +13,19 @@ mod string;
 mod table;
 mod value;
 
+use std::borrow::Cow;
+
 use all_of::validate_all_of;
 use any_of::validate_any_of;
 use futures::{future::BoxFuture, FutureExt};
 use one_of::validate_one_of;
+use schema_store::CurrentSchema;
 
 pub trait Validate {
     fn validate<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],
-        value_schema: Option<&'a schema_store::ValueSchema>,
-        schema_url: Option<&'a schema_store::SchemaUrl>,
-        definitions: Option<&'a schema_store::SchemaDefinitions>,
+        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>;
 }
@@ -35,17 +36,19 @@ pub fn validate<'a: 'b, 'b>(
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
     async move {
-        tree.validate(
-            &[],
-            source_schema
-                .root_schema
+        let current_schema = source_schema.root_schema.as_ref().and_then(|root_schema| {
+            root_schema
+                .value_schema
                 .as_ref()
-                .and_then(|s| s.value_schema.as_ref()),
-            source_schema.root_schema.as_ref().map(|s| &s.schema_url),
-            source_schema.root_schema.as_ref().map(|s| &s.definitions),
-            schema_context,
-        )
-        .await?;
+                .map(|value_schema| CurrentSchema {
+                    value_schema: Cow::Borrowed(&value_schema),
+                    schema_url: Cow::Borrowed(&root_schema.schema_url),
+                    definitions: Cow::Borrowed(&root_schema.definitions),
+                })
+        });
+
+        tree.validate(&[], current_schema.as_ref(), schema_context)
+            .await?;
 
         Ok(())
     }
