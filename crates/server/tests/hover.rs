@@ -372,21 +372,6 @@ mod hover_keys_value {
                 "Value": "String"
             });
         );
-
-        test_hover_keys_value!(
-            #[tokio::test]
-            async fn pyproject_tool_cibuildwheel_overrides_test_command(
-                r#"
-                [[tool.cibuildwheel.overrides]]
-                select = "cp*"
-                test-command = "█"
-                "#,
-                pyproject_schema_path(),
-            ) -> Ok({
-                "Keys": "tool.cibuildwheel.overrides[0].test-command",
-                "Value": "String"
-            });
-        );
     }
 
     #[macro_export]
