@@ -1,0 +1,14 @@
+Write the title and the description of the commit;
+
+- The title should be less than 60 characters
+- If the title is longer than 60 characters, write the description
+- The title should include a type character
+  - feat: new feature
+  - fix: bug fix
+  - refactor: refactoring
+  - perf: performance improvement
+  - test: test
+  - docs: documentation
+  - style: style
+  - ci: ci
+  - chore: other
