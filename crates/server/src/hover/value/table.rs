@@ -20,13 +20,10 @@ impl GetHoverContent for document_tree::Table {
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
-        tracing::trace!("self: {:?}", self);
-        tracing::trace!("keys: {:?}", keys);
-        tracing::trace!("accessors: {:?}", accessors);
-        tracing::trace!(
-            "value_schema: {:?}",
-            current_schema.map(|schema| &schema.value_schema)
-        );
+        tracing::trace!("self = {:?}", self);
+        tracing::trace!("keys = {:?}", keys);
+        tracing::trace!("accessors = {:?}", accessors);
+        tracing::trace!("current_schema = {:?}", current_schema);
 
         async move {
             if let Some(Ok(DocumentSchema {

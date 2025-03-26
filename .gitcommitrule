@@ -1,5 +1,6 @@
-Write the title and the description of the commit;
+Write the title and the description of the commit in the following format:
 
+- Write in English
 - The title should be less than 60 characters
 - If the title is longer than 60 characters, write the description
 - The title should include a type character

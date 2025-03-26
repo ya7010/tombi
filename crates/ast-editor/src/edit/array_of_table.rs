@@ -14,14 +14,7 @@ impl crate::Edit for ast::ArrayOfTable {
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
-        tracing::trace!(
-            "schema_url: {:?}",
-            current_schema.map(|schema| schema.schema_url.as_ref())
-        );
-        tracing::trace!(
-            "value_schema: {:?}",
-            current_schema.map(|schema| schema.value_schema.as_ref())
-        );
+        tracing::trace!("current_schema = {:?}", current_schema);
 
         async move {
             let mut changes = vec![];

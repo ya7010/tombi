@@ -27,11 +27,11 @@ impl FindCompletionContents for document_tree::Table {
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
-        tracing::trace!("self: {:?}", self);
-        tracing::trace!("keys: {:?}", keys);
-        tracing::trace!("accessors: {:?}", accessors);
-        tracing::trace!("current schema: {:?}", current_schema);
-        tracing::trace!("completion hint: {:?}", completion_hint);
+        tracing::trace!("self = {:?}", self);
+        tracing::trace!("keys = {:?}", keys);
+        tracing::trace!("accessors = {:?}", accessors);
+        tracing::trace!("current_schema = {:?}", current_schema);
+        tracing::trace!("completion_hint = {:?}", completion_hint);
 
         async move {
             if let Some(Ok(DocumentSchema {
@@ -102,7 +102,7 @@ impl FindCompletionContents for document_tree::Table {
                                         .await
                                     {
                                         tracing::trace!(
-                                            "property schema: {:?}",
+                                            "property_schema = {:?}",
                                             current_schema.value_schema
                                         );
 
@@ -143,7 +143,7 @@ impl FindCompletionContents for document_tree::Table {
                                             .await
                                         {
                                             tracing::trace!(
-                                                "property schema: {:?}",
+                                                "property_schema = {:?}",
                                                 &current_schema.value_schema
                                             );
 
@@ -184,7 +184,7 @@ impl FindCompletionContents for document_tree::Table {
                                         };
                                         if pattern.is_match(accessor_str) {
                                             tracing::trace!(
-                                                "pattern property schema: {:?}",
+                                                "pattern_property_schema = {:?}",
                                                 &pattern_property_schema
                                             );
                                             if let Ok(Some(current_schema)) =
@@ -216,7 +216,7 @@ impl FindCompletionContents for document_tree::Table {
                                     &table_schema.additional_property_schema
                                 {
                                     tracing::trace!(
-                                        "additional property schema: {:?}",
+                                        "additional_property_schema = {:?}",
                                         referable_additional_property_schema
                                     );
 
@@ -626,12 +626,12 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
     schema_context: &'a schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>> {
-    tracing::trace!("key: {:?}", key);
-    tracing::trace!("value: {:?}", value);
-    tracing::trace!("keys: {:?}", keys);
-    tracing::trace!("accessors: {:?}", accessors);
-    tracing::trace!("current schema: {:?}", current_schema);
-    tracing::trace!("completion hint: {:?}", completion_hint);
+    tracing::trace!("key = {:?}", key);
+    tracing::trace!("value = {:?}", value);
+    tracing::trace!("keys = {:?}", keys);
+    tracing::trace!("accessors = {:?}", accessors);
+    tracing::trace!("current_schema = {:?}", current_schema);
+    tracing::trace!("completion_hint = {:?}", completion_hint);
 
     async move {
         if keys.len() == 1 {

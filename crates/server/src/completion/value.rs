@@ -47,11 +47,11 @@ impl FindCompletionContents for document_tree::Value {
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
-        tracing::trace!("self: {:?}", self);
-        tracing::trace!("accessors: {:?}", accessors);
-        tracing::trace!("keys: {:?}", keys);
-        tracing::trace!("current_schema: {:?}", current_schema);
-        tracing::trace!("completion_hint: {:?}", completion_hint);
+        tracing::trace!("self = {:?}", self);
+        tracing::trace!("accessors = {:?}", accessors);
+        tracing::trace!("keys = {:?}", keys);
+        tracing::trace!("current_schema = {:?}", current_schema);
+        tracing::trace!("completion_hint = {:?}", completion_hint);
 
         async move {
             match self {
