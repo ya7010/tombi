@@ -1,12 +1,11 @@
-use ast::AstNode;
-use document::IntoDocument;
-use document_tree::IntoDocumentTreeAndErrors;
+mod de;
+
+pub use de::{from_document, from_str, parse_str};
 use serde::ser::SerializeSeq as SerdeSerializeSeq;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::Serialize;
 use std::fmt;
 use std::marker::PhantomData;
 use thiserror::Error;
-use toml_version::TomlVersion;
 
 /// Error that can occur when processing TOML.
 #[derive(Debug, Error)]
@@ -81,98 +80,13 @@ fn document_to_string(document: &document::Document) -> String {
 }
 
 /// Serialize the given data structure as a TOML Document.
-pub fn to_document<T>(value: &T) -> Result<document::Document>
+fn to_document<T>(value: &T) -> Result<document::Document>
 where
     T: Serialize,
 {
     let mut serializer = Serializer::default();
     value.serialize(&mut serializer)?;
     Ok(serializer.output())
-}
-
-/// Deserialize a TOML string into a Rust data structure.
-///
-/// # Note
-///
-/// This function is not yet implemented and will return an error.
-/// The example below shows the expected usage once implemented.
-///
-/// # Examples
-///
-/// ```no_run
-/// use serde::Deserialize;
-///
-/// #[derive(Deserialize)]
-/// struct Config {
-///     ip: String,
-///     port: u16,
-///     keys: Vec<String>,
-/// }
-///
-/// let toml = r#"
-/// ip = "127.0.0.1"
-/// port = 8080
-/// keys = ["key1", "key2"]
-/// "#;
-///
-/// let config: Config = serde_tombi::from_str(toml).unwrap();
-/// ```
-pub fn from_str<T>(s: &str) -> Result<T>
-where
-    T: DeserializeOwned,
-{
-    let document = parse_str(s)?;
-    from_document(document)
-}
-
-/// Parse a TOML string into a Document.
-pub fn parse_str(s: &str) -> Result<document::Document> {
-    // Parse the source string using the parser
-    let parsed = parser::parse(s, TomlVersion::default());
-
-    // Check if there are any parsing errors
-    if !parsed.errors().is_empty() {
-        return Err(Error::Parser(
-            parsed
-                .errors()
-                .iter()
-                .map(|e| format!("{}", e))
-                .collect::<Vec<_>>()
-                .join(", "),
-        ));
-    }
-
-    // Cast the parsed result to an AST Root node
-    let root = ast::Root::cast(parsed.into_syntax_node())
-        .ok_or_else(|| Error::Parser("Failed to cast to AST Root".to_string()))?;
-
-    // Convert the AST to a document tree
-    let (document_tree, errors) = root
-        .into_document_tree_and_errors(TomlVersion::default())
-        .into();
-
-    // Check for errors during document tree construction
-    if !errors.is_empty() {
-        return Err(Error::DocumentTree(
-            errors
-                .iter()
-                .map(|e| format!("{}", e))
-                .collect::<Vec<_>>()
-                .join(", "),
-        ));
-    }
-
-    // Convert to a Document
-    Ok(document_tree.into_document(TomlVersion::default()))
-}
-
-/// Deserialize a Document into a Rust data structure.
-pub fn from_document<T>(_document: document::Document) -> Result<T>
-where
-    T: DeserializeOwned,
-{
-    // Implementation not yet available
-    Err(Error::Deserialization("Not implemented yet".to_string()))
 }
 
 // Actual serializer implementation
