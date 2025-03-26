@@ -165,23 +165,24 @@ pub async fn get_completion_contents(
         .into_document_tree_and_errors(schema_context.toml_version)
         .tree;
 
+    let current_schema = schema_context.root_schema.and_then(|document_schema| {
+        document_schema
+            .value_schema
+            .as_ref()
+            .map(|value_schema| CurrentSchema {
+                value_schema: Cow::Borrowed(value_schema),
+                schema_url: Cow::Borrowed(&document_schema.schema_url),
+                definitions: Cow::Borrowed(&document_schema.definitions),
+            })
+    });
+
     let completion_contents = document_tree
         .deref()
         .find_completion_contents(
             position,
             &keys,
             &[],
-            schema_context
-                .root_schema
-                .and_then(|schema| schema.value_schema.as_ref()),
-            schema_context
-                .root_schema
-                .as_ref()
-                .map(|schema| &schema.schema_url),
-            schema_context
-                .root_schema
-                .as_ref()
-                .map(|schema| &schema.definitions),
+            current_schema.as_ref(),
             schema_context,
             completion_hint,
         )
@@ -211,9 +212,7 @@ pub trait FindCompletionContents {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>>;

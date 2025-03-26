@@ -26,9 +26,9 @@ use local_time::type_hint_local_time;
 use offset_date_time::type_hint_offset_date_time;
 pub use one_of::find_one_of_completion_items;
 use schema_store::{
-    Accessor, ArraySchema, BooleanSchema, FloatSchema, IntegerSchema, LocalDateSchema,
-    LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions, SchemaStore,
-    SchemaUrl, StringSchema, TableSchema, ValueSchema,
+    Accessor, ArraySchema, BooleanSchema, CurrentSchema, FloatSchema, IntegerSchema,
+    LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions,
+    SchemaStore, SchemaUrl, StringSchema, TableSchema, ValueSchema,
 };
 use string::type_hint_string;
 
@@ -43,16 +43,14 @@ impl FindCompletionContents for document_tree::Value {
         position: text::Position,
         keys: &'a [document_tree::Key],
         accessors: &'a [Accessor],
-        value_schema: Option<&'a ValueSchema>,
-        schema_url: Option<&'a SchemaUrl>,
-        definitions: Option<&'a SchemaDefinitions>,
+        current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self: {:?}", self);
         tracing::trace!("accessors: {:?}", accessors);
         tracing::trace!("keys: {:?}", keys);
-        tracing::trace!("value_schema: {:?}", value_schema);
+        tracing::trace!("current_schema: {:?}", current_schema);
         tracing::trace!("completion_hint: {:?}", completion_hint);
 
         async move {
@@ -71,9 +69,7 @@ impl FindCompletionContents for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                             completion_hint,
                         )
@@ -85,24 +81,20 @@ impl FindCompletionContents for document_tree::Value {
                             position,
                             keys,
                             accessors,
-                            value_schema,
-                            schema_url,
-                            definitions,
+                            current_schema,
                             schema_context,
                             completion_hint,
                         )
                         .await
                 }
-                Self::Incomplete { .. } => match value_schema {
-                    Some(value_schema) => {
+                Self::Incomplete { .. } => match current_schema {
+                    Some(current_schema) => {
                         SchemaCompletion
                             .find_completion_contents(
                                 position,
                                 keys,
                                 accessors,
-                                Some(value_schema),
-                                schema_url,
-                                definitions,
+                                Some(current_schema),
                                 schema_context,
                                 completion_hint,
                             )
@@ -118,7 +110,7 @@ impl FindCompletionContents for document_tree::Value {
                                 vec![CompletionContent::new_type_hint_key(
                                     last_key,
                                     schema_context.toml_version,
-                                    schema_url,
+                                    None,
                                     completion_hint,
                                 )]
                             }
@@ -126,7 +118,7 @@ impl FindCompletionContents for document_tree::Value {
                                 last_key,
                                 position,
                                 schema_context.toml_version,
-                                schema_url,
+                                None,
                                 completion_hint,
                             ),
                         }
