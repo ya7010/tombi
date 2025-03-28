@@ -2,6 +2,8 @@ name: "Pull Request Labeler"
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   labeler:
