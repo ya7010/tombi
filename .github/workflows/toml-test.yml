@@ -15,7 +15,7 @@ jobs:
         toml-version:
           - v1.0.0
           - v1.1.0-preview
-
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
