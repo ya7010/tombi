@@ -57,6 +57,7 @@ jobs:
             vscode_target: darwin-arm64
     name: dist (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     env:
       TOMBI_TARGET: ${{ matrix.target }}
       VSCODE_TARGET: ${{ matrix.vscode_target }}
