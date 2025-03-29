@@ -1076,7 +1076,7 @@ impl<T, E: serde::ser::Error> serde::ser::SerializeStructVariant for Impossible<
 mod tests {
     use super::*;
     use chrono::{DateTime, TimeZone, Utc};
-    use indexmap::IndexMap;
+    use indexmap::{indexmap, IndexMap};
     use serde::Serialize;
 
     #[test]
@@ -1164,18 +1164,16 @@ simple_value = 42
             int_map: IndexMap<String, i32>,
         }
 
-        let mut string_map = IndexMap::new();
-        string_map.insert("key1".to_string(), "value1".to_string());
-        string_map.insert("key2".to_string(), "value2".to_string());
-
-        let mut int_map = IndexMap::new();
-        int_map.insert("one".to_string(), 1);
-        int_map.insert("two".to_string(), 2);
-        int_map.insert("three".to_string(), 3);
-
         let test = MapTest {
-            string_map,
-            int_map,
+            string_map: indexmap! {
+                "key1".to_string() => "value1".to_string(),
+                "key2".to_string() => "value2".to_string(),
+            },
+            int_map: indexmap! {
+                "one".to_string() => 1,
+                "two".to_string() => 2,
+                "three".to_string() => 3,
+            },
         };
 
         let toml = to_string(&test).expect("TOML serialization failed");
