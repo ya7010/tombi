@@ -34,9 +34,74 @@ where
 
 /// Helper function to convert a Document to a String.
 fn document_to_string(document: &document::Document) -> String {
-    // This is a simplistic implementation
-    // In a real implementation, this would likely involve a more complex formatting process
-    format!("{:?}", document)
+    let mut output = String::new();
+
+    fn write_table(table: &document::Table, output: &mut String, is_root: bool) {
+        let mut first_table = true;
+        for (key, value) in table.key_values() {
+            match value {
+                document::Value::Table(nested_table) => {
+                    if !first_table && is_root {
+                        output.push('\n');
+                    }
+                    first_table = false;
+                    output.push_str(&format!("[{}]\n", key.value()));
+                    for (nested_key, nested_value) in nested_table.key_values() {
+                        output.push_str(&format!(
+                            "{} = {}\n",
+                            nested_key.value(),
+                            value_to_string(nested_value)
+                        ));
+                    }
+                }
+                document::Value::Array(array) => {
+                    output.push_str(&format!("{} = [", key.value()));
+                    let mut array_items = Vec::new();
+                    for item in array.values() {
+                        array_items.push(value_to_string(item));
+                    }
+                    output.push_str(&array_items.join(", "));
+                    output.push_str("]\n");
+                }
+                _ => {
+                    output.push_str(&format!("{} = {}\n", key.value(), value_to_string(value)));
+                }
+            }
+        }
+    }
+
+    fn value_to_string(value: &document::Value) -> String {
+        match value {
+            document::Value::String(s) => format!("\"{}\"", s.value()),
+            document::Value::Integer(i) => i.value().to_string(),
+            document::Value::Float(f) => f.value().to_string(),
+            document::Value::Boolean(b) => b.value().to_string(),
+            document::Value::Array(a) => {
+                let mut items = Vec::new();
+                for item in a.values() {
+                    items.push(value_to_string(item));
+                }
+                format!("[{}]", items.join(", "))
+            }
+            document::Value::Table(t) => {
+                let mut output = String::new();
+                write_table(t, &mut output, false);
+                output
+            }
+            document::Value::OffsetDateTime(dt) => dt.value().to_string(),
+            document::Value::LocalDateTime(dt) => dt.value().to_string(),
+            document::Value::LocalDate(d) => d.value().to_string(),
+            document::Value::LocalTime(t) => t.value().to_string(),
+        }
+    }
+
+    // Create a temporary table to hold the document's key-values
+    let mut root_table = document::Table::new(document::TableKind::Table);
+    for (key, value) in document.key_values() {
+        root_table.insert(key.clone(), value.clone());
+    }
+    write_table(&root_table, &mut output, true);
+    output
 }
 
 /// Serialize the given data structure as a TOML Document.
@@ -992,23 +1057,8 @@ impl<T, E: serde::ser::Error> serde::ser::SerializeStructVariant for Impossible<
 mod tests {
     use super::*;
     use chrono::{DateTime, TimeZone, Utc};
-    use document::Value;
-    use maplit::hashmap;
+    use indexmap::IndexMap;
     use serde::Serialize;
-    use std::collections::HashMap;
-
-    // Helper function to validate document
-    fn validate_document<T: Serialize>(value: &T) -> crate::Result<document::Document> {
-        to_document(value)
-    }
-
-    // Helper function to convert document to HashMap for comparison
-    fn document_to_hashmap(doc: &document::Document) -> HashMap<String, Value> {
-        doc.key_values()
-            .iter()
-            .map(|(k, v)| (k.value().to_string(), v.clone()))
-            .collect()
-    }
 
     #[test]
     fn test_serialize_struct() {
@@ -1029,18 +1079,15 @@ mod tests {
             opt: Some("optional".to_string()),
         };
 
-        let document = validate_document(&test).expect("Document creation failed");
-        let doc_map = document_to_hashmap(&document);
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"int = 42
+float = 3.14159
+string = "hello"
+bool = true
+opt = "optional"
+"#;
 
-        let expected = hashmap! {
-            "int".to_string() => Value::Integer(document::Integer::new(42)),
-            "float".to_string() => Value::Float(document::Float::new(3.14159)),
-            "string".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "hello".to_string())),
-            "bool".to_string() => Value::Boolean(document::Boolean::new(true)),
-            "opt".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "optional".to_string())),
-        };
-
-        assert_eq!(doc_map, expected);
+        pretty_assertions::assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1063,24 +1110,13 @@ mod tests {
             simple_value: 42,
         };
 
-        let document = validate_document(&test).expect("Document creation failed");
-        let doc_map = document_to_hashmap(&document);
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"[nested]
+value = "nested value"
+simple_value = 42
+"#;
 
-        let mut nested_table = document::Table::new(document::TableKind::Table);
-        nested_table.insert(
-            document::Key::new(document::KeyKind::BareKey, "value".to_string()),
-            Value::String(document::String::new(
-                document::StringKind::BasicString,
-                "nested value".to_string(),
-            )),
-        );
-
-        let expected = hashmap! {
-            "nested".to_string() => Value::Table(nested_table),
-            "simple_value".to_string() => Value::Integer(document::Integer::new(42)),
-        };
-
-        assert_eq!(doc_map, expected);
+        pretty_assertions::assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1094,34 +1130,26 @@ mod tests {
             values: vec![1, 2, 3],
         };
 
-        let document = validate_document(&test).expect("Document creation failed");
-        let doc_map = document_to_hashmap(&document);
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"values = [1, 2, 3]
+"#;
 
-        let mut array = document::Array::new(document::ArrayKind::Array);
-        array.push(Value::Integer(document::Integer::new(1)));
-        array.push(Value::Integer(document::Integer::new(2)));
-        array.push(Value::Integer(document::Integer::new(3)));
-
-        let expected = hashmap! {
-            "values".to_string() => Value::Array(array),
-        };
-
-        assert_eq!(doc_map, expected);
+        pretty_assertions::assert_eq!(toml, expected);
     }
 
     #[test]
     fn test_serialize_map() {
         #[derive(Serialize)]
         struct MapTest {
-            string_map: HashMap<String, String>,
-            int_map: HashMap<String, i32>,
+            string_map: IndexMap<String, String>,
+            int_map: IndexMap<String, i32>,
         }
 
-        let mut string_map = HashMap::new();
+        let mut string_map = IndexMap::new();
         string_map.insert("key1".to_string(), "value1".to_string());
         string_map.insert("key2".to_string(), "value2".to_string());
 
-        let mut int_map = HashMap::new();
+        let mut int_map = IndexMap::new();
         int_map.insert("one".to_string(), 1);
         int_map.insert("two".to_string(), 2);
         int_map.insert("three".to_string(), 3);
@@ -1131,45 +1159,21 @@ mod tests {
             int_map,
         };
 
-        let document = validate_document(&test).expect("Document creation failed");
-        let doc_map = document_to_hashmap(&document);
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"
+[string_map]
+key1 = "value1"
+key2 = "value2"
 
-        let mut string_table = document::Table::new(document::TableKind::Table);
-        string_table.insert(
-            document::Key::new(document::KeyKind::BareKey, "key1".to_string()),
-            Value::String(document::String::new(
-                document::StringKind::BasicString,
-                "value1".to_string(),
-            )),
-        );
-        string_table.insert(
-            document::Key::new(document::KeyKind::BareKey, "key2".to_string()),
-            Value::String(document::String::new(
-                document::StringKind::BasicString,
-                "value2".to_string(),
-            )),
-        );
+[int_map]
+one = 1
+two = 2
+three = 3
+"#
+        .strip_prefix("\n")
+        .unwrap();
 
-        let mut int_table = document::Table::new(document::TableKind::Table);
-        int_table.insert(
-            document::Key::new(document::KeyKind::BareKey, "one".to_string()),
-            Value::Integer(document::Integer::new(1)),
-        );
-        int_table.insert(
-            document::Key::new(document::KeyKind::BareKey, "two".to_string()),
-            Value::Integer(document::Integer::new(2)),
-        );
-        int_table.insert(
-            document::Key::new(document::KeyKind::BareKey, "three".to_string()),
-            Value::Integer(document::Integer::new(3)),
-        );
-
-        let expected = hashmap! {
-            "string_map".to_string() => Value::Table(string_table),
-            "int_map".to_string() => Value::Table(int_table),
-        };
-
-        assert_eq!(doc_map, expected);
+        pretty_assertions::assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1188,14 +1192,11 @@ mod tests {
             enum_value: SimpleEnum::Variant1,
         };
 
-        let document = validate_document(&test).expect("Document creation failed");
-        let doc_map = document_to_hashmap(&document);
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"enum_value = "Variant1"
+"#;
 
-        let expected = hashmap! {
-            "enum_value".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "Variant1".to_string())),
-        };
-
-        assert_eq!(doc_map, expected);
+        pretty_assertions::assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1211,14 +1212,14 @@ mod tests {
             updated_at: Utc.with_ymd_and_hms(2023, 7, 20, 14, 45, 30).unwrap(),
         };
 
-        let document = validate_document(&test).expect("Document creation failed");
-        let doc_map = document_to_hashmap(&document);
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"
+created_at = "2023-05-15T10:30:00Z"
+updated_at = "2023-07-20T14:45:30Z"
+"#
+        .strip_prefix("\n")
+        .unwrap();
 
-        let expected = hashmap! {
-            "created_at".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "2023-05-15T10:30:00Z".to_string())),
-            "updated_at".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "2023-07-20T14:45:30Z".to_string())),
-        };
-
-        assert_eq!(doc_map, expected);
+        pretty_assertions::assert_eq!(toml, expected);
     }
 }

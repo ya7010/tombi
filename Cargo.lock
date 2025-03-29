@@ -1864,6 +1864,7 @@ dependencies = [
  "itertools",
  "maplit",
  "parser",
+ "pretty_assertions",
  "serde",
  "text",
  "thiserror",

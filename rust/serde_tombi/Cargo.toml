@@ -22,3 +22,4 @@ toml-version = { workspace = true }
 
 [dev-dependencies]
 maplit = { workspace = true }
+pretty_assertions.workspace = true
