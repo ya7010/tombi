@@ -279,3 +279,41 @@ pub fn parse_literal_string(input: &str, is_multi_line: bool) -> Result<String, 
     }
     Ok(output)
 }
+
+pub fn to_basic_string(value: &str) -> String {
+    let mut result = String::with_capacity(value.len() + 2);
+    result.push('"');
+    for c in value.chars() {
+        match c {
+            '"' => result.push_str("\\\""),
+            '\\' => result.push_str("\\\\"),
+            '\x00' => result.push_str("\\0"),
+            '\x07' => result.push_str("\\a"),
+            '\x08' => result.push_str("\\b"),
+            '\x09' => result.push_str("\\t"),
+            '\x0a' => result.push_str("\\n"),
+            '\x0b' => result.push_str("\\v"),
+            '\x0c' => result.push_str("\\f"),
+            '\x0d' => result.push_str("\\r"),
+            '\x1b' => result.push_str("\\e"),
+            c if c.is_control() => {
+                result.push_str(&format!("\\u{:04x}", c as u32));
+            }
+            c => result.push(c),
+        }
+    }
+    result.push('"');
+    result
+}
+
+pub fn to_literal_string(value: &str) -> String {
+    format!("'{}'", value)
+}
+
+pub fn to_multi_line_basic_string(value: &str) -> String {
+    format!("\"\"\"\n{}\"\"\"", value)
+}
+
+pub fn to_multi_line_literal_string(value: &str) -> String {
+    format!("'''\n{}'''", value)
+}
