@@ -1079,6 +1079,13 @@ mod tests {
     use indexmap::{indexmap, IndexMap};
     use serde::Serialize;
 
+    macro_rules! toml_text_assert_eq {
+        ($actual:expr, $expected:expr) => {
+            let expected = format!("{}\n", $expected.trim());
+            pretty_assertions::assert_eq!($actual, expected);
+        };
+    }
+
     #[test]
     fn test_serialize_struct() {
         #[derive(Serialize)]
@@ -1099,14 +1106,15 @@ mod tests {
         };
 
         let toml = to_string(&test).expect("TOML serialization failed");
-        let expected = r#"int = 42
+        let expected = r#"
+int = 42
 float = 3.14159
 string = "hello"
 bool = true
 opt = "optional"
 "#;
 
-        pretty_assertions::assert_eq!(toml, expected);
+        toml_text_assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1130,12 +1138,13 @@ opt = "optional"
         };
 
         let toml = to_string(&test).expect("TOML serialization failed");
-        let expected = r#"[nested]
+        let expected = r#"
+[nested]
 value = "nested value"
 simple_value = 42
 "#;
 
-        pretty_assertions::assert_eq!(toml, expected);
+        toml_text_assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1150,10 +1159,9 @@ simple_value = 42
         };
 
         let toml = to_string(&test).expect("TOML serialization failed");
-        let expected = r#"values = [1, 2, 3]
-"#;
+        let expected = r#"values = [1, 2, 3]"#;
 
-        pretty_assertions::assert_eq!(toml, expected);
+        toml_text_assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1190,7 +1198,7 @@ three = 3
         .strip_prefix("\n")
         .unwrap();
 
-        pretty_assertions::assert_eq!(toml, expected);
+        toml_text_assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1210,10 +1218,9 @@ three = 3
         };
 
         let toml = to_string(&test).expect("TOML serialization failed");
-        let expected = r#"enum_value = "Variant1"
-"#;
+        let expected = r#"enum_value = "Variant1""#;
 
-        pretty_assertions::assert_eq!(toml, expected);
+        toml_text_assert_eq!(toml, expected);
     }
 
     #[test]
@@ -1237,6 +1244,6 @@ updated_at = "2023-07-20T14:45:30Z"
         .strip_prefix("\n")
         .unwrap();
 
-        pretty_assertions::assert_eq!(toml, expected);
+        toml_text_assert_eq!(toml, expected);
     }
 }
