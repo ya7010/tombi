@@ -1,6 +1,10 @@
+use formatter::formatter::definitions::FormatDefinitions;
+use formatter::FormatOptions;
+use schema_store::SchemaStore;
 use serde::ser::SerializeSeq as SerdeSerializeSeq;
 use serde::Serialize;
 use std::marker::PhantomData;
+use toml_version::TomlVersion;
 
 /// Serialize the given data structure as a TOML string.
 ///
@@ -29,7 +33,22 @@ where
     T: Serialize,
 {
     let document = to_document(value)?;
-    Ok(document_to_string(&document))
+    let text = document_to_string(&document);
+    let format_options = FormatOptions::default();
+    let format_definitions = FormatDefinitions::default();
+    let schema_store = SchemaStore::new(schema_store::Options::default());
+
+    let formatter = formatter::Formatter::new(
+        TomlVersion::default(),
+        format_definitions,
+        &format_options,
+        None,
+        &schema_store,
+    );
+    match formatter.format_without_schema(&text) {
+        Ok(formatted) => Ok(formatted),
+        Err(_) => unreachable!("Document is valid TOML"),
+    }
 }
 
 /// Helper function to convert a Document to a String.
@@ -118,7 +137,7 @@ where
 #[derive(Default)]
 struct Serializer {
     // Root TOML table
-    root: Option<document::Table>,
+    table: Option<document::Table>,
     // Current key path
     current_path: Vec<std::string::String>,
 }
@@ -127,7 +146,7 @@ impl Serializer {
     // Output the Document
     fn output(self) -> document::Document {
         // Create document from root table or create a new empty one
-        let root_table = self.root.unwrap_or_else(|| create_empty_table());
+        let root_table = self.table.unwrap_or_else(|| create_empty_table());
         // Create document from root table (avoid tuple struct initialization)
         unsafe {
             // This is safe: Document type has the same layout as Table type and is just a wrapper
@@ -170,12 +189,12 @@ impl Serializer {
         let keys: Vec<&str> = path.split('.').collect();
 
         // Ensure root table exists
-        if self.root.is_none() {
-            self.root = Some(create_empty_table());
+        if self.table.is_none() {
+            self.table = Some(create_empty_table());
         }
 
         // We'll use a simplified approach with owned tables
-        let mut current = self.root.take().unwrap_or_else(|| create_empty_table());
+        let mut current = self.table.take().unwrap_or_else(|| create_empty_table());
 
         // Navigate through tables, creating as necessary
         let last_idx = keys.len() - 1;
@@ -187,7 +206,7 @@ impl Serializer {
             if i == last_idx {
                 // This is the last key, insert the value
                 if current.key_values().contains_key(&key) {
-                    self.root = Some(current); // Restore root
+                    self.table = Some(current); // Restore root
                     return Err(crate::Error::Serialization(format!(
                         "Key {} already exists",
                         key_str
@@ -204,7 +223,7 @@ impl Serializer {
                 match current.key_values().get(&key) {
                     Some(document::Value::Table(existing)) => existing.clone(),
                     _ => {
-                        self.root = Some(current); // Restore root
+                        self.table = Some(current); // Restore root
                         return Err(crate::Error::Serialization(format!(
                             "Key {} already exists but is not a table",
                             key_str
@@ -220,7 +239,7 @@ impl Serializer {
             current = next_table;
         }
 
-        self.root = Some(current);
+        self.table = Some(current);
         Ok(())
     }
 }
@@ -468,7 +487,7 @@ impl<'a> serde::ser::SerializeSeq for SerializeSeq<'a> {
         value.serialize(&mut temp_serializer)?;
 
         // Extract the serialized value
-        if let Some(root) = temp_serializer.root {
+        if let Some(root) = temp_serializer.table {
             if let Some(value) = root.key_values().values().next() {
                 self.items.push(value.clone());
                 Ok(())
@@ -625,7 +644,7 @@ impl<'a> serde::ser::SerializeStruct for SerializeStruct<'a> {
         // For nested structs, create a new table and add it
         let mut temp_serializer = Serializer::default();
         if value.serialize(&mut temp_serializer).is_ok() {
-            if let Some(root) = temp_serializer.root {
+            if let Some(root) = temp_serializer.table {
                 // If root table exists, add it as a nested table
                 self.serializer.push_key(key);
 
@@ -680,7 +699,7 @@ impl<'a> serde::ser::SerializeStructVariant for SerializeStructVariant<'a> {
         // For nested structs, create a new table and add it
         let mut temp_serializer = Serializer::default();
         if value.serialize(&mut temp_serializer).is_ok() {
-            if let Some(root) = temp_serializer.root {
+            if let Some(root) = temp_serializer.table {
                 // If root table exists, add it as a nested table
                 self.serializer.push_key(key);
 
