@@ -138,6 +138,7 @@ dependencies = [
  "syntax",
  "text",
  "thiserror",
+ "toml-text",
  "toml-version",
  "tracing",
  "url",
@@ -486,6 +487,7 @@ dependencies = [
  "textwrap",
  "thiserror",
  "toml",
+ "toml-text",
  "toml-version",
  "tower-lsp",
 ]
@@ -501,6 +503,7 @@ dependencies = [
  "itertools",
  "text",
  "thiserror",
+ "toml-text",
  "toml-version",
  "tracing",
 ]
@@ -2271,6 +2274,14 @@ dependencies = [
  "serde_json",
  "text",
  "textwrap",
+ "toml-version",
+]
+
+[[package]]
+name = "toml-text"
+version = "0.0.0"
+dependencies = [
+ "thiserror",
  "toml-version",
 ]
 

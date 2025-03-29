@@ -1,4 +1,3 @@
-use document_tree::support;
 use toml_version::TomlVersion;
 
 use crate::IntoDocument;
@@ -38,11 +37,9 @@ impl Key {
 
     pub fn to_raw_text(&self, toml_version: TomlVersion) -> String {
         match self.kind {
-            KeyKind::BareKey => support::string::try_from_bare_key(self.value(), toml_version),
-            KeyKind::BasicString => {
-                support::string::try_from_basic_string(self.value(), toml_version)
-            }
-            KeyKind::LiteralString => support::string::try_from_literal_string(self.value()),
+            KeyKind::BareKey => toml_text::try_from_bare_key(self.value(), toml_version),
+            KeyKind::BasicString => toml_text::try_from_basic_string(self.value(), toml_version),
+            KeyKind::LiteralString => toml_text::try_from_literal_string(self.value()),
         }
         .unwrap()
     }
