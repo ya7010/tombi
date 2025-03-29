@@ -207,6 +207,8 @@ mod test {
 
 #[cfg(test)]
 mod tests {
+    use test_lib::toml_text_assert_eq;
+
     use super::*;
 
     #[test]
@@ -253,7 +255,8 @@ mod tests {
 
         // Test to_string method
         let toml_string = document.to_string();
-        let expected = r#"string = "hello"
+        let expected = r#"
+string = "hello"
 integer = 42
 float = 3.14
 boolean = true
@@ -263,6 +266,6 @@ array = [
     3,
 ]
 "#;
-        assert_eq!(toml_string, expected);
+        toml_text_assert_eq!(toml_string, expected);
     }
 }

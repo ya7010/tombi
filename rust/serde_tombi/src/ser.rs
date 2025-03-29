@@ -1078,13 +1078,7 @@ mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
     use serde::Serialize;
-
-    macro_rules! toml_text_assert_eq {
-        ($actual:expr, $expected:expr) => {
-            let expected = format!("{}\n", $expected.trim());
-            pretty_assertions::assert_eq!($actual, expected);
-        };
-    }
+    use test_lib::toml_text_assert_eq;
 
     #[test]
     fn test_serialize_struct() {
