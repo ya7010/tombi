@@ -197,3 +197,67 @@ mod test {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_document_serialization() {
+        // Create a test document with various value types
+        let mut table = Table::new(TableKind::Table);
+
+        // Add string value
+        table.insert(
+            Key::new(KeyKind::BareKey, "string".to_string()),
+            Value::String(String::new(StringKind::BasicString, "hello".to_string())),
+        );
+
+        // Add integer value
+        table.insert(
+            Key::new(KeyKind::BareKey, "integer".to_string()),
+            Value::Integer(Integer::new(42)),
+        );
+
+        // Add float value
+        table.insert(
+            Key::new(KeyKind::BareKey, "float".to_string()),
+            Value::Float(Float::new(3.14)),
+        );
+
+        // Add boolean value
+        table.insert(
+            Key::new(KeyKind::BareKey, "boolean".to_string()),
+            Value::Boolean(Boolean::new(true)),
+        );
+
+        // Add array value
+        let mut array = Array::new(ArrayKind::Array);
+        array.push(Value::Integer(Integer::new(1)));
+        array.push(Value::Integer(Integer::new(2)));
+        array.push(Value::Integer(Integer::new(3)));
+        table.insert(
+            Key::new(KeyKind::BareKey, "array".to_string()),
+            Value::Array(array),
+        );
+
+        // Create document
+        let document = Document(table);
+
+        // Serialize to JSON
+        let serialized = serde_json::to_string(&document).unwrap();
+
+        // Expected JSON structure
+        let expected = json!({
+            "string": "hello",
+            "integer": 42,
+            "float": 3.14,
+            "boolean": true,
+            "array": [1, 2, 3]
+        });
+
+        // Compare serialized JSON with expected
+        assert_eq!(serialized, expected.to_string());
+    }
+}

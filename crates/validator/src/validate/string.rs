@@ -72,13 +72,13 @@ impl Validate for document_tree::String {
                     _ => unreachable!("Expected a String schema"),
                 };
 
-                let value = self.to_raw_string(schema_context.toml_version);
+                let value = self.value().to_string();
                 if let Some(enumerate) = &string_schema.enumerate {
                     if !enumerate.contains(&value) {
                         crate::Error {
                             kind: crate::ErrorKind::Eunmerate {
                                 expected: enumerate.iter().map(|s| format!("\"{s}\"")).collect(),
-                                actual: self.value().to_string(),
+                                actual: value.clone(),
                             },
                             range: self.range(),
                         }

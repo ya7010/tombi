@@ -1,6 +1,3 @@
-use document_tree::support;
-use toml_version::TomlVersion;
-
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
@@ -55,36 +52,22 @@ impl String {
     }
 }
 
-impl From<document_tree::String> for String {
+impl From<document_tree::String> for crate::String {
     fn from(node: document_tree::String) -> Self {
         Self {
             kind: node.kind().into(),
-            value: node.value().to_string(),
+            value: node.into_value(),
         }
     }
 }
 
 #[cfg(feature = "serde")]
-impl serde::Serialize for String {
+impl serde::Serialize for crate::String {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        match self.kind {
-            StringKind::BasicString => {
-                support::string::try_from_basic_string(&self.value, TomlVersion::latest())
-            }
-            StringKind::LiteralString => support::string::try_from_literal_string(&self.value),
-            StringKind::MultiLineBasicString => support::string::try_from_multi_line_basic_string(
-                &self.value,
-                TomlVersion::latest(),
-            ),
-            StringKind::MultiLineLiteralString => {
-                support::string::try_from_multi_line_literal_string(&self.value)
-            }
-        }
-        .map_err(serde::ser::Error::custom)?
-        .serialize(serializer)
+        self.value.serialize(serializer)
     }
 }
 
