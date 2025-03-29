@@ -1,5 +1,3 @@
-use crate::Error;
-use crate::Result;
 use ast::AstNode;
 use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
@@ -34,7 +32,7 @@ use toml_version::TomlVersion;
 ///
 /// let config: Config = serde_tombi::from_str(toml).unwrap();
 /// ```
-pub fn from_str<T>(s: &str) -> Result<T>
+pub fn from_str<T>(s: &str) -> crate::Result<T>
 where
     T: DeserializeOwned,
 {
@@ -43,14 +41,14 @@ where
 }
 
 /// Parse a TOML string into a Document.
-pub fn parse_str(s: &str) -> Result<document::Document> {
+pub fn parse_str(s: &str) -> crate::Result<document::Document> {
     // Parse the source string using the parser
     let parsed = parser::parse(s);
 
     let errors = parsed.errors(TomlVersion::default()).collect_vec();
     // Check if there are any parsing errors
     if !errors.is_empty() {
-        return Err(Error::Parser(
+        return Err(crate::Error::Parser(
             errors
                 .iter()
                 .map(|e| format!("{}", e))
@@ -61,7 +59,7 @@ pub fn parse_str(s: &str) -> Result<document::Document> {
 
     // Cast the parsed result to an AST Root node
     let root = ast::Root::cast(parsed.into_syntax_node())
-        .ok_or_else(|| Error::Parser("Failed to cast to AST Root".to_string()))?;
+        .ok_or_else(|| crate::Error::Parser("Failed to cast to AST Root".to_string()))?;
 
     // Convert the AST to a document tree
     let (document_tree, errors) = root
@@ -70,7 +68,7 @@ pub fn parse_str(s: &str) -> Result<document::Document> {
 
     // Check for errors during document tree construction
     if !errors.is_empty() {
-        return Err(Error::DocumentTree(
+        return Err(crate::Error::DocumentTree(
             errors
                 .iter()
                 .map(|e| format!("{}", e))
@@ -84,10 +82,12 @@ pub fn parse_str(s: &str) -> Result<document::Document> {
 }
 
 /// Deserialize a Document into a Rust data structure.
-pub fn from_document<T>(_document: document::Document) -> Result<T>
+pub fn from_document<T>(_document: document::Document) -> crate::Result<T>
 where
     T: DeserializeOwned,
 {
     // Implementation not yet available
-    Err(Error::Deserialization("Not implemented yet".to_string()))
+    Err(crate::Error::Deserialization(
+        "Not implemented yet".to_string(),
+    ))
 }

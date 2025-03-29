@@ -19,3 +19,6 @@ serde = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 toml-version = { workspace = true }
+
+[dev-dependencies]
+maplit = { workspace = true }

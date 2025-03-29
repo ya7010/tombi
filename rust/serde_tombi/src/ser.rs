@@ -2,8 +2,6 @@ use serde::ser::SerializeSeq as SerdeSerializeSeq;
 use serde::Serialize;
 use std::marker::PhantomData;
 
-use crate::{Error, Result};
-
 /// Serialize the given data structure as a TOML string.
 ///
 /// # Examples
@@ -26,7 +24,7 @@ use crate::{Error, Result};
 ///
 /// let toml = serde_tombi::to_string(&config);
 /// ```
-pub fn to_string<T>(value: &T) -> Result<String>
+pub fn to_string<T>(value: &T) -> crate::Result<String>
 where
     T: Serialize,
 {
@@ -42,7 +40,7 @@ fn document_to_string(document: &document::Document) -> String {
 }
 
 /// Serialize the given data structure as a TOML Document.
-pub fn to_document<T>(value: &T) -> Result<document::Document>
+pub fn to_document<T>(value: &T) -> crate::Result<document::Document>
 where
     T: Serialize,
 {
@@ -92,18 +90,18 @@ impl Serializer {
     }
 
     // Add a value at the specified path
-    fn add_value(&mut self, value: document::Value) -> Result<()> {
+    fn add_value(&mut self, value: document::Value) -> crate::Result<()> {
         if let Some(key_path) = self.current_key() {
             self.add_to_table_by_path(&key_path, value)
         } else {
-            Err(Error::Serialization(
+            Err(crate::Error::Serialization(
                 "Cannot add value without a key path".to_string(),
             ))
         }
     }
 
     // Add a value to the table based on path
-    fn add_to_table_by_path(&mut self, path: &str, value: document::Value) -> Result<()> {
+    fn add_to_table_by_path(&mut self, path: &str, value: document::Value) -> crate::Result<()> {
         let keys: Vec<&str> = path.split('.').collect();
 
         // Ensure root table exists
@@ -125,7 +123,7 @@ impl Serializer {
                 // This is the last key, insert the value
                 if current.key_values().contains_key(&key) {
                     self.root = Some(current); // Restore root
-                    return Err(Error::Serialization(format!(
+                    return Err(crate::Error::Serialization(format!(
                         "Key {} already exists",
                         key_str
                     )));
@@ -142,7 +140,7 @@ impl Serializer {
                     Some(document::Value::Table(existing)) => existing.clone(),
                     _ => {
                         self.root = Some(current); // Restore root
-                        return Err(Error::Serialization(format!(
+                        return Err(crate::Error::Serialization(format!(
                             "Key {} already exists but is not a table",
                             key_str
                         )));
@@ -192,7 +190,7 @@ fn create_key(key: &str) -> document::Key {
 
 impl<'a> serde::Serializer for &'a mut Serializer {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
     type SerializeSeq = SerializeSeq<'a>;
     type SerializeTuple = SerializeTuple<'a>;
     type SerializeTupleStruct = SerializeTupleStruct<'a>;
@@ -202,60 +200,60 @@ impl<'a> serde::Serializer for &'a mut Serializer {
     type SerializeStructVariant = SerializeStructVariant<'a>;
 
     // Basic type serialization
-    fn serialize_bool(self, v: bool) -> Result<()> {
+    fn serialize_bool(self, v: bool) -> crate::Result<()> {
         self.add_value(document::Value::Boolean(document::Boolean::new(v)))
     }
 
-    fn serialize_i8(self, v: i8) -> Result<()> {
+    fn serialize_i8(self, v: i8) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_i16(self, v: i16) -> Result<()> {
+    fn serialize_i16(self, v: i16) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_i32(self, v: i32) -> Result<()> {
+    fn serialize_i32(self, v: i32) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_i64(self, v: i64) -> Result<()> {
+    fn serialize_i64(self, v: i64) -> crate::Result<()> {
         self.add_value(document::Value::Integer(document::Integer::new(v)))
     }
 
-    fn serialize_u8(self, v: u8) -> Result<()> {
+    fn serialize_u8(self, v: u8) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_u16(self, v: u16) -> Result<()> {
+    fn serialize_u16(self, v: u16) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_u32(self, v: u32) -> Result<()> {
+    fn serialize_u32(self, v: u32) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_u64(self, v: u64) -> Result<()> {
+    fn serialize_u64(self, v: u64) -> crate::Result<()> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_f32(self, v: f32) -> Result<()> {
+    fn serialize_f32(self, v: f32) -> crate::Result<()> {
         self.serialize_f64(v as f64)
     }
 
-    fn serialize_f64(self, v: f64) -> Result<()> {
+    fn serialize_f64(self, v: f64) -> crate::Result<()> {
         self.add_value(document::Value::Float(document::Float::new(v)))
     }
 
-    fn serialize_char(self, v: char) -> Result<()> {
+    fn serialize_char(self, v: char) -> crate::Result<()> {
         self.serialize_str(&v.to_string())
     }
 
-    fn serialize_str(self, v: &str) -> Result<()> {
+    fn serialize_str(self, v: &str) -> crate::Result<()> {
         // Use our helper function to create string value
         self.add_value(create_string_value(v))
     }
 
-    fn serialize_bytes(self, v: &[u8]) -> Result<()> {
+    fn serialize_bytes(self, v: &[u8]) -> crate::Result<()> {
         use serde::ser::SerializeSeq;
         let mut seq = self.serialize_seq(Some(v.len()))?;
         for byte in v {
@@ -264,27 +262,27 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         seq.end()
     }
 
-    fn serialize_none(self) -> Result<()> {
-        Err(Error::Serialization(
+    fn serialize_none(self) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "TOML does not support None/null values".to_string(),
         ))
     }
 
-    fn serialize_some<T>(self, value: &T) -> Result<()>
+    fn serialize_some<T>(self, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
         value.serialize(self)
     }
 
-    fn serialize_unit(self) -> Result<()> {
-        Err(Error::Serialization(
+    fn serialize_unit(self) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "TOML does not support unit values".to_string(),
         ))
     }
 
-    fn serialize_unit_struct(self, _name: &'static str) -> Result<()> {
-        Err(Error::Serialization(
+    fn serialize_unit_struct(self, _name: &'static str) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "TOML does not support unit structs".to_string(),
         ))
     }
@@ -294,11 +292,11 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         _name: &'static str,
         _variant_index: u32,
         variant: &'static str,
-    ) -> Result<()> {
+    ) -> crate::Result<()> {
         self.serialize_str(variant)
     }
 
-    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<()>
+    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -311,7 +309,7 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         _variant_index: u32,
         variant: &'static str,
         value: &T,
-    ) -> Result<()>
+    ) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -321,14 +319,14 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         result
     }
 
-    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
+    fn serialize_seq(self, len: Option<usize>) -> crate::Result<Self::SerializeSeq> {
         Ok(SerializeSeq {
             serializer: self,
             items: Vec::with_capacity(len.unwrap_or(0)),
         })
     }
 
-    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple> {
+    fn serialize_tuple(self, len: usize) -> crate::Result<Self::SerializeTuple> {
         self.serialize_seq(Some(len))
             .map(|seq| SerializeTuple { seq })
     }
@@ -337,7 +335,7 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         self,
         _name: &'static str,
         len: usize,
-    ) -> Result<Self::SerializeTupleStruct> {
+    ) -> crate::Result<Self::SerializeTupleStruct> {
         self.serialize_seq(Some(len))
             .map(|seq| SerializeTupleStruct { seq })
     }
@@ -348,7 +346,7 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         _variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<Self::SerializeTupleVariant> {
+    ) -> crate::Result<Self::SerializeTupleVariant> {
         self.push_key(variant);
         Ok(SerializeTupleVariant {
             seq: SerializeSeq {
@@ -358,14 +356,18 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         })
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
+    fn serialize_map(self, _len: Option<usize>) -> crate::Result<Self::SerializeMap> {
         Ok(SerializeMap {
             serializer: self,
             key: None,
         })
     }
 
-    fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {
+    fn serialize_struct(
+        self,
+        _name: &'static str,
+        _len: usize,
+    ) -> crate::Result<Self::SerializeStruct> {
         Ok(SerializeStruct { serializer: self })
     }
 
@@ -375,7 +377,7 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         _variant_index: u32,
         variant: &'static str,
         _len: usize,
-    ) -> Result<Self::SerializeStructVariant> {
+    ) -> crate::Result<Self::SerializeStructVariant> {
         self.push_key(variant);
         Ok(SerializeStructVariant { serializer: self })
     }
@@ -389,9 +391,9 @@ pub struct SerializeSeq<'a> {
 
 impl<'a> serde::ser::SerializeSeq for SerializeSeq<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_element<T>(&mut self, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -406,18 +408,18 @@ impl<'a> serde::ser::SerializeSeq for SerializeSeq<'a> {
                 self.items.push(value.clone());
                 Ok(())
             } else {
-                Err(Error::Serialization(
+                Err(crate::Error::Serialization(
                     "Failed to serialize sequence element".to_string(),
                 ))
             }
         } else {
-            Err(Error::Serialization(
+            Err(crate::Error::Serialization(
                 "Failed to serialize sequence element".to_string(),
             ))
         }
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         // Create array using our helper
         let array_value = create_array_value(self.items);
         self.serializer.add_value(array_value)
@@ -431,16 +433,16 @@ pub struct SerializeTuple<'a> {
 
 impl<'a> serde::ser::SerializeTuple for SerializeTuple<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_element<T>(&mut self, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
         self.seq.serialize_element(value)
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         self.seq.end()
     }
 }
@@ -452,16 +454,16 @@ pub struct SerializeTupleStruct<'a> {
 
 impl<'a> serde::ser::SerializeTupleStruct for SerializeTupleStruct<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_field<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
         self.seq.serialize_element(value)
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         self.seq.end()
     }
 }
@@ -473,16 +475,16 @@ pub struct SerializeTupleVariant<'a> {
 
 impl<'a> serde::ser::SerializeTupleVariant for SerializeTupleVariant<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_field<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
         self.seq.serialize_element(value)
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         // Store a reference to the serializer before moving self.seq
         let serializer = unsafe {
             // This is safe: self.seq is only used in this function and
@@ -510,9 +512,9 @@ pub struct SerializeMap<'a> {
 
 impl<'a> serde::ser::SerializeMap for SerializeMap<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_key<T>(&mut self, key: &T) -> Result<()>
+    fn serialize_key<T>(&mut self, key: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -523,7 +525,7 @@ impl<'a> serde::ser::SerializeMap for SerializeMap<'a> {
         Ok(())
     }
 
-    fn serialize_value<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_value<T>(&mut self, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -533,11 +535,11 @@ impl<'a> serde::ser::SerializeMap for SerializeMap<'a> {
             self.serializer.pop_key();
             result
         } else {
-            Err(Error::Serialization("Map key missing".to_string()))
+            Err(crate::Error::Serialization("Map key missing".to_string()))
         }
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         Ok(())
     }
 }
@@ -549,9 +551,9 @@ pub struct SerializeStruct<'a> {
 
 impl<'a> serde::ser::SerializeStruct for SerializeStruct<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -592,7 +594,7 @@ impl<'a> serde::ser::SerializeStruct for SerializeStruct<'a> {
         result
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         Ok(())
     }
 }
@@ -604,9 +606,9 @@ pub struct SerializeStructVariant<'a> {
 
 impl<'a> serde::ser::SerializeStructVariant for SerializeStructVariant<'a> {
     type Ok = ();
-    type Error = Error;
+    type Error = crate::Error;
 
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -647,7 +649,7 @@ impl<'a> serde::ser::SerializeStructVariant for SerializeStructVariant<'a> {
         result
     }
 
-    fn end(self) -> Result<()> {
+    fn end(self) -> crate::Result<()> {
         self.serializer.pop_key();
         Ok(())
     }
@@ -661,110 +663,110 @@ struct KeySerializer {
 
 impl serde::Serializer for &mut KeySerializer {
     type Ok = ();
-    type Error = Error;
-    type SerializeSeq = Impossible<(), Error>;
-    type SerializeTuple = Impossible<(), Error>;
-    type SerializeTupleStruct = Impossible<(), Error>;
-    type SerializeTupleVariant = Impossible<(), Error>;
-    type SerializeMap = Impossible<(), Error>;
-    type SerializeStruct = Impossible<(), Error>;
-    type SerializeStructVariant = Impossible<(), Error>;
+    type Error = crate::Error;
+    type SerializeSeq = Impossible<(), crate::Error>;
+    type SerializeTuple = Impossible<(), crate::Error>;
+    type SerializeTupleStruct = Impossible<(), crate::Error>;
+    type SerializeTupleVariant = Impossible<(), crate::Error>;
+    type SerializeMap = Impossible<(), crate::Error>;
+    type SerializeStruct = Impossible<(), crate::Error>;
+    type SerializeStructVariant = Impossible<(), crate::Error>;
 
-    fn serialize_bool(self, v: bool) -> Result<()> {
+    fn serialize_bool(self, v: bool) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_i8(self, v: i8) -> Result<()> {
+    fn serialize_i8(self, v: i8) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_i16(self, v: i16) -> Result<()> {
+    fn serialize_i16(self, v: i16) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_i32(self, v: i32) -> Result<()> {
+    fn serialize_i32(self, v: i32) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_i64(self, v: i64) -> Result<()> {
+    fn serialize_i64(self, v: i64) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_u8(self, v: u8) -> Result<()> {
+    fn serialize_u8(self, v: u8) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_u16(self, v: u16) -> Result<()> {
+    fn serialize_u16(self, v: u16) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_u32(self, v: u32) -> Result<()> {
+    fn serialize_u32(self, v: u32) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_u64(self, v: u64) -> Result<()> {
+    fn serialize_u64(self, v: u64) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_f32(self, v: f32) -> Result<()> {
+    fn serialize_f32(self, v: f32) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_f64(self, v: f64) -> Result<()> {
+    fn serialize_f64(self, v: f64) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_char(self, v: char) -> Result<()> {
+    fn serialize_char(self, v: char) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    fn serialize_str(self, v: &str) -> Result<()> {
+    fn serialize_str(self, v: &str) -> crate::Result<()> {
         self.key = v.to_string();
         Ok(())
     }
 
-    // Other methods return error as they're invalid for TOML keys
-    fn serialize_bytes(self, _v: &[u8]) -> Result<()> {
-        Err(Error::Serialization(
+    // Other methods return crate::Error as they're invalid for TOML keys
+    fn serialize_bytes(self, _v: &[u8]) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "Cannot use bytes as TOML key".to_string(),
         ))
     }
 
-    fn serialize_none(self) -> Result<()> {
-        Err(Error::Serialization(
+    fn serialize_none(self) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "Cannot use None as TOML key".to_string(),
         ))
     }
 
-    fn serialize_some<T>(self, _value: &T) -> Result<()>
+    fn serialize_some<T>(self, _value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
-        Err(Error::Serialization(
+        Err(crate::Error::Serialization(
             "Cannot use Some as TOML key".to_string(),
         ))
     }
 
-    fn serialize_unit(self) -> Result<()> {
-        Err(Error::Serialization(
+    fn serialize_unit(self) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "Cannot use unit as TOML key".to_string(),
         ))
     }
 
-    fn serialize_unit_struct(self, _name: &'static str) -> Result<()> {
-        Err(Error::Serialization(
+    fn serialize_unit_struct(self, _name: &'static str) -> crate::Result<()> {
+        Err(crate::Error::Serialization(
             "Cannot use unit struct as TOML key".to_string(),
         ))
     }
@@ -774,12 +776,12 @@ impl serde::Serializer for &mut KeySerializer {
         _name: &'static str,
         _variant_index: u32,
         variant: &'static str,
-    ) -> Result<()> {
+    ) -> crate::Result<()> {
         self.key = variant.to_string();
         Ok(())
     }
 
-    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<()>
+    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
@@ -792,23 +794,23 @@ impl serde::Serializer for &mut KeySerializer {
         _variant_index: u32,
         _variant: &'static str,
         _value: &T,
-    ) -> Result<()>
+    ) -> crate::Result<()>
     where
         T: ?Sized + Serialize,
     {
-        Err(Error::Serialization(
+        Err(crate::Error::Serialization(
             "Cannot use newtype variant as TOML key".to_string(),
         ))
     }
 
-    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq> {
-        Err(Error::Serialization(
+    fn serialize_seq(self, _len: Option<usize>) -> crate::Result<Self::SerializeSeq> {
+        Err(crate::Error::Serialization(
             "Cannot use sequence as TOML key".to_string(),
         ))
     }
 
-    fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
-        Err(Error::Serialization(
+    fn serialize_tuple(self, _len: usize) -> crate::Result<Self::SerializeTuple> {
+        Err(crate::Error::Serialization(
             "Cannot use tuple as TOML key".to_string(),
         ))
     }
@@ -817,8 +819,8 @@ impl serde::Serializer for &mut KeySerializer {
         self,
         _name: &'static str,
         _len: usize,
-    ) -> Result<Self::SerializeTupleStruct> {
-        Err(Error::Serialization(
+    ) -> crate::Result<Self::SerializeTupleStruct> {
+        Err(crate::Error::Serialization(
             "Cannot use tuple struct as TOML key".to_string(),
         ))
     }
@@ -829,20 +831,24 @@ impl serde::Serializer for &mut KeySerializer {
         _variant_index: u32,
         _variant: &'static str,
         _len: usize,
-    ) -> Result<Self::SerializeTupleVariant> {
-        Err(Error::Serialization(
+    ) -> crate::Result<Self::SerializeTupleVariant> {
+        Err(crate::Error::Serialization(
             "Cannot use tuple variant as TOML key".to_string(),
         ))
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
-        Err(Error::Serialization(
+    fn serialize_map(self, _len: Option<usize>) -> crate::Result<Self::SerializeMap> {
+        Err(crate::Error::Serialization(
             "Cannot use map as TOML key".to_string(),
         ))
     }
 
-    fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {
-        Err(Error::Serialization(
+    fn serialize_struct(
+        self,
+        _name: &'static str,
+        _len: usize,
+    ) -> crate::Result<Self::SerializeStruct> {
+        Err(crate::Error::Serialization(
             "Cannot use struct as TOML key".to_string(),
         ))
     }
@@ -853,8 +859,8 @@ impl serde::Serializer for &mut KeySerializer {
         _variant_index: u32,
         _variant: &'static str,
         _len: usize,
-    ) -> Result<Self::SerializeStructVariant> {
-        Err(Error::Serialization(
+    ) -> crate::Result<Self::SerializeStructVariant> {
+        Err(crate::Error::Serialization(
             "Cannot use struct variant as TOML key".to_string(),
         ))
     }
@@ -987,8 +993,22 @@ mod tests {
     use super::*;
     use chrono::{DateTime, TimeZone, Utc};
     use document::Value;
+    use maplit::hashmap;
     use serde::Serialize;
     use std::collections::HashMap;
+
+    // Helper function to validate document
+    fn validate_document<T: Serialize>(value: &T) -> crate::Result<document::Document> {
+        to_document(value)
+    }
+
+    // Helper function to convert document to HashMap for comparison
+    fn document_to_hashmap(doc: &document::Document) -> HashMap<String, Value> {
+        doc.key_values()
+            .iter()
+            .map(|(k, v)| (k.value().to_string(), v.clone()))
+            .collect()
+    }
 
     #[test]
     fn test_serialize_struct() {
@@ -1009,52 +1029,18 @@ mod tests {
             opt: Some("optional".to_string()),
         };
 
-        let result = to_string(&test);
-        assert!(result.is_ok());
+        let document = validate_document(&test).expect("Document creation failed");
+        let doc_map = document_to_hashmap(&document);
 
-        let document = to_document(&test);
-        assert!(document.is_ok());
+        let expected = hashmap! {
+            "int".to_string() => Value::Integer(document::Integer::new(42)),
+            "float".to_string() => Value::Float(document::Float::new(3.14159)),
+            "string".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "hello".to_string())),
+            "bool".to_string() => Value::Boolean(document::Boolean::new(true)),
+            "opt".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "optional".to_string())),
+        };
 
-        if let Ok(doc) = document {
-            // Document is a wrapper for table, so we can access key_values directly
-            let root_table = doc.key_values();
-            assert_eq!(root_table.len(), 5);
-
-            // Check integer value
-            if let Some(Value::Integer(int_val)) = root_table.get(&create_key("int")) {
-                assert_eq!(int_val.value(), 42);
-            } else {
-                panic!("Expected integer value for 'int'");
-            }
-
-            // Check float value
-            if let Some(Value::Float(float_val)) = root_table.get(&create_key("float")) {
-                assert!((float_val.value() - 3.14159).abs() < f64::EPSILON);
-            } else {
-                panic!("Expected float value for 'float'");
-            }
-
-            // Check string value
-            if let Some(Value::String(str_val)) = root_table.get(&create_key("string")) {
-                assert_eq!(str_val.value(), "hello");
-            } else {
-                panic!("Expected string value for 'string'");
-            }
-
-            // Check boolean value
-            if let Some(Value::Boolean(bool_val)) = root_table.get(&create_key("bool")) {
-                assert_eq!(bool_val.value(), true);
-            } else {
-                panic!("Expected boolean value for 'bool'");
-            }
-
-            // Check option value
-            if let Some(Value::String(opt_val)) = root_table.get(&create_key("opt")) {
-                assert_eq!(opt_val.value(), "optional");
-            } else {
-                panic!("Expected string value for 'opt'");
-            }
-        }
+        assert_eq!(doc_map, expected);
     }
 
     #[test]
@@ -1067,7 +1053,6 @@ mod tests {
         #[derive(Serialize)]
         struct Test {
             nested: Nested,
-            // Remove array to make test case simpler
             simple_value: i32,
         }
 
@@ -1078,40 +1063,28 @@ mod tests {
             simple_value: 42,
         };
 
-        let document = to_document(&test);
-        if let Err(ref e) = document {
-            println!("Error: {:?}", e);
-        }
-        assert!(document.is_ok());
+        let document = validate_document(&test).expect("Document creation failed");
+        let doc_map = document_to_hashmap(&document);
 
-        if let Ok(doc) = document {
-            let root_table = doc.key_values();
+        let mut nested_table = document::Table::new(document::TableKind::Table);
+        nested_table.insert(
+            document::Key::new(document::KeyKind::BareKey, "value".to_string()),
+            Value::String(document::String::new(
+                document::StringKind::BasicString,
+                "nested value".to_string(),
+            )),
+        );
 
-            // Check nested structure
-            if let Some(Value::Table(nested_table)) = root_table.get(&create_key("nested")) {
-                if let Some(Value::String(value)) =
-                    nested_table.key_values().get(&create_key("value"))
-                {
-                    assert_eq!(value.value(), "nested value");
-                } else {
-                    panic!("Expected string value in nested table");
-                }
-            } else {
-                panic!("Expected nested table");
-            }
+        let expected = hashmap! {
+            "nested".to_string() => Value::Table(nested_table),
+            "simple_value".to_string() => Value::Integer(document::Integer::new(42)),
+        };
 
-            // Check simple value
-            if let Some(Value::Integer(int_val)) = root_table.get(&create_key("simple_value")) {
-                assert_eq!(int_val.value(), 42);
-            } else {
-                panic!("Expected integer value for 'simple_value'");
-            }
-        }
+        assert_eq!(doc_map, expected);
     }
 
     #[test]
     fn test_serialize_array() {
-        // Simple struct with only an array
         #[derive(Serialize)]
         struct SimpleArrayTest {
             values: Vec<i32>,
@@ -1121,37 +1094,19 @@ mod tests {
             values: vec![1, 2, 3],
         };
 
-        let document = to_document(&test);
-        if let Err(ref e) = document {
-            println!("Error: {:?}", e);
-        }
-        assert!(document.is_ok());
+        let document = validate_document(&test).expect("Document creation failed");
+        let doc_map = document_to_hashmap(&document);
 
-        if let Ok(doc) = document {
-            let root_table = doc.key_values();
+        let mut array = document::Array::new(document::ArrayKind::Array);
+        array.push(Value::Integer(document::Integer::new(1)));
+        array.push(Value::Integer(document::Integer::new(2)));
+        array.push(Value::Integer(document::Integer::new(3)));
 
-            // Verify the array
-            if let Some(Value::Array(array)) = root_table.get(&create_key("values")) {
-                assert_eq!(array.values().len(), 3);
+        let expected = hashmap! {
+            "values".to_string() => Value::Array(array),
+        };
 
-                // Verify the values
-                let values: Vec<i64> = array
-                    .values()
-                    .iter()
-                    .filter_map(|v| {
-                        if let Value::Integer(i) = v {
-                            Some(i.value())
-                        } else {
-                            None
-                        }
-                    })
-                    .collect();
-
-                assert_eq!(values, vec![1, 2, 3]);
-            } else {
-                panic!("Expected array value for 'values'");
-            }
-        }
+        assert_eq!(doc_map, expected);
     }
 
     #[test]
@@ -1176,73 +1131,52 @@ mod tests {
             int_map,
         };
 
-        let document = to_document(&test);
-        if let Err(ref e) = document {
-            println!("Error: {:?}", e);
-        }
-        assert!(document.is_ok());
+        let document = validate_document(&test).expect("Document creation failed");
+        let doc_map = document_to_hashmap(&document);
 
-        if let Ok(doc) = document {
-            let root_table = doc.key_values();
+        let mut string_table = document::Table::new(document::TableKind::Table);
+        string_table.insert(
+            document::Key::new(document::KeyKind::BareKey, "key1".to_string()),
+            Value::String(document::String::new(
+                document::StringKind::BasicString,
+                "value1".to_string(),
+            )),
+        );
+        string_table.insert(
+            document::Key::new(document::KeyKind::BareKey, "key2".to_string()),
+            Value::String(document::String::new(
+                document::StringKind::BasicString,
+                "value2".to_string(),
+            )),
+        );
 
-            // Verify the string map
-            if let Some(Value::Table(table)) = root_table.get(&create_key("string_map")) {
-                assert_eq!(table.key_values().len(), 2);
+        let mut int_table = document::Table::new(document::TableKind::Table);
+        int_table.insert(
+            document::Key::new(document::KeyKind::BareKey, "one".to_string()),
+            Value::Integer(document::Integer::new(1)),
+        );
+        int_table.insert(
+            document::Key::new(document::KeyKind::BareKey, "two".to_string()),
+            Value::Integer(document::Integer::new(2)),
+        );
+        int_table.insert(
+            document::Key::new(document::KeyKind::BareKey, "three".to_string()),
+            Value::Integer(document::Integer::new(3)),
+        );
 
-                // Verify the value of key1
-                if let Some(Value::String(value)) = table.key_values().get(&create_key("key1")) {
-                    assert_eq!(value.value(), "value1");
-                } else {
-                    panic!("Expected string value for 'key1'");
-                }
+        let expected = hashmap! {
+            "string_map".to_string() => Value::Table(string_table),
+            "int_map".to_string() => Value::Table(int_table),
+        };
 
-                // Verify the value of key2
-                if let Some(Value::String(value)) = table.key_values().get(&create_key("key2")) {
-                    assert_eq!(value.value(), "value2");
-                } else {
-                    panic!("Expected string value for 'key2'");
-                }
-            } else {
-                panic!("Expected table value for 'string_map'");
-            }
-
-            // Verify the integer map
-            if let Some(Value::Table(table)) = root_table.get(&create_key("int_map")) {
-                assert_eq!(table.key_values().len(), 3);
-
-                // Verify the value of one
-                if let Some(Value::Integer(value)) = table.key_values().get(&create_key("one")) {
-                    assert_eq!(value.value(), 1);
-                } else {
-                    panic!("Expected integer value for 'one'");
-                }
-
-                // Verify the value of two
-                if let Some(Value::Integer(value)) = table.key_values().get(&create_key("two")) {
-                    assert_eq!(value.value(), 2);
-                } else {
-                    panic!("Expected integer value for 'two'");
-                }
-
-                // Verify the value of three
-                if let Some(Value::Integer(value)) = table.key_values().get(&create_key("three")) {
-                    assert_eq!(value.value(), 3);
-                } else {
-                    panic!("Expected integer value for 'three'");
-                }
-            } else {
-                panic!("Expected table value for 'int_map'");
-            }
-        }
+        assert_eq!(doc_map, expected);
     }
 
     #[test]
     fn test_serialize_enum() {
-        // Simple struct with only an enum
         #[derive(Serialize)]
         enum SimpleEnum {
             Variant1,
-            // Variant2,
         }
 
         #[derive(Serialize)]
@@ -1254,22 +1188,14 @@ mod tests {
             enum_value: SimpleEnum::Variant1,
         };
 
-        let document = to_document(&test);
-        if let Err(ref e) = document {
-            println!("Error: {:?}", e);
-        }
-        assert!(document.is_ok());
+        let document = validate_document(&test).expect("Document creation failed");
+        let doc_map = document_to_hashmap(&document);
 
-        if let Ok(doc) = document {
-            let root_table = doc.key_values();
+        let expected = hashmap! {
+            "enum_value".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "Variant1".to_string())),
+        };
 
-            // Verify the enum
-            if let Some(Value::String(value)) = root_table.get(&create_key("enum_value")) {
-                assert_eq!(value.value(), "Variant1");
-            } else {
-                panic!("Expected string value for 'enum_value'");
-            }
-        }
+        assert_eq!(doc_map, expected);
     }
 
     #[test]
@@ -1285,28 +1211,14 @@ mod tests {
             updated_at: Utc.with_ymd_and_hms(2023, 7, 20, 14, 45, 30).unwrap(),
         };
 
-        let document = to_document(&test);
-        if let Err(ref e) = document {
-            println!("Error: {:?}", e);
-        }
-        assert!(document.is_ok());
+        let document = validate_document(&test).expect("Document creation failed");
+        let doc_map = document_to_hashmap(&document);
 
-        if let Ok(doc) = document {
-            let root_table = doc.key_values();
+        let expected = hashmap! {
+            "created_at".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "2023-05-15T10:30:00Z".to_string())),
+            "updated_at".to_string() => Value::String(document::String::new(document::StringKind::BasicString, "2023-07-20T14:45:30Z".to_string())),
+        };
 
-            // Verify created_at
-            if let Some(Value::String(created_at)) = root_table.get(&create_key("created_at")) {
-                assert_eq!(created_at.value(), "2023-05-15T10:30:00Z");
-            } else {
-                panic!("Expected string value for 'created_at'");
-            }
-
-            // Verify updated_at
-            if let Some(Value::String(updated_at)) = root_table.get(&create_key("updated_at")) {
-                assert_eq!(updated_at.value(), "2023-07-20T14:45:30Z");
-            } else {
-                panic!("Expected string value for 'updated_at'");
-            }
-        }
+        assert_eq!(doc_map, expected);
     }
 }
