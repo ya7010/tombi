@@ -7,7 +7,7 @@ pub use key::{Key, KeyKind};
 use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
-    OffsetDateTime, String, StringKind, Table, TableKind, Value,
+    OffsetDateTime, String, StringKind, Table, TableKind, ToTomlString, Value,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -40,7 +40,9 @@ impl Deref for Document {
 impl Document {
     /// Convert the document to a TOML string representation
     pub fn to_string(&self) -> std::string::String {
-        toml::to_string_pretty(self).unwrap()
+        let mut result = std::string::String::new();
+        self.0.to_toml_string(&mut result, 0);
+        result
     }
 }
 
@@ -260,11 +262,97 @@ string = "hello"
 integer = 42
 float = 3.14
 boolean = true
-array = [
-    1,
-    2,
-    3,
-]
+array = [1, 2, 3]
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+
+    #[test]
+    fn test_array_of_tables_serialization() {
+        // Create a test document with array of tables
+        let mut root_table = Table::new(TableKind::Table);
+
+        // Create array of tables
+        let mut array_of_tables = Array::new(ArrayKind::ArrayOfTable);
+
+        // First table in array
+        let mut table1 = Table::new(TableKind::Table);
+        table1.insert(
+            Key::new(KeyKind::BareKey, "name".to_string()),
+            Value::String(String::new(StringKind::BasicString, "apple".to_string())),
+        );
+        table1.insert(
+            Key::new(KeyKind::BareKey, "color".to_string()),
+            Value::String(String::new(StringKind::BasicString, "red".to_string())),
+        );
+        array_of_tables.push(Value::Table(table1));
+
+        // Second table in array
+        let mut table2 = Table::new(TableKind::Table);
+        table2.insert(
+            Key::new(KeyKind::BareKey, "name".to_string()),
+            Value::String(String::new(StringKind::BasicString, "banana".to_string())),
+        );
+        table2.insert(
+            Key::new(KeyKind::BareKey, "color".to_string()),
+            Value::String(String::new(StringKind::BasicString, "yellow".to_string())),
+        );
+        array_of_tables.push(Value::Table(table2));
+
+        // Add array of tables to root table
+        root_table.insert(
+            Key::new(KeyKind::BareKey, "fruits".to_string()),
+            Value::Array(array_of_tables),
+        );
+
+        // Create document
+        let document = Document(root_table);
+
+        // Test to_string method
+        let toml_string = document.to_string();
+        let expected = r#"
+[[fruits]]
+name = "apple"
+color = "red"
+
+[[fruits]]
+name = "banana"
+color = "yellow"
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+
+    #[test]
+    fn test_nested_tables_serialization() {
+        // Create a test document with nested tables
+        let mut root_table = Table::new(TableKind::Table);
+
+        // Create nested table
+        let mut nested_table = Table::new(TableKind::Table);
+        nested_table.insert(
+            Key::new(KeyKind::BareKey, "name".to_string()),
+            Value::String(String::new(StringKind::BasicString, "John".to_string())),
+        );
+        nested_table.insert(
+            Key::new(KeyKind::BareKey, "age".to_string()),
+            Value::Integer(Integer::new(30)),
+        );
+
+        // Add nested table to root table
+        root_table.insert(
+            Key::new(KeyKind::BareKey, "person".to_string()),
+            Value::Table(nested_table),
+        );
+
+        // Create document
+        let document = Document(root_table);
+
+        // Test to_string method
+        let toml_string = document.to_string();
+        let expected = r#"
+[person]
+name = "John"
+age = 30
 "#;
         toml_text_assert_eq!(toml_string, expected);
     }

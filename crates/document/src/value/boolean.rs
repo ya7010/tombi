@@ -1,3 +1,5 @@
+use super::ToTomlString;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
     value: bool,
@@ -40,5 +42,11 @@ impl<'de> serde::Deserialize<'de> for Boolean {
         D: serde::Deserializer<'de>,
     {
         bool::deserialize(deserializer).map(|value| Self { value })
+    }
+}
+
+impl ToTomlString for Boolean {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        result.push_str(if self.value { "true" } else { "false" });
     }
 }

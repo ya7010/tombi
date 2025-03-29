@@ -1,3 +1,5 @@
+use super::ToTomlString;
+
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
@@ -68,6 +70,51 @@ impl serde::Serialize for crate::String {
         S: serde::Serializer,
     {
         self.value.serialize(serializer)
+    }
+}
+
+impl ToTomlString for String {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        match self.kind {
+            StringKind::BasicString => {
+                result.push('"');
+                for c in self.value.chars() {
+                    match c {
+                        '"' => result.push_str("\\\""),
+                        '\\' => result.push_str("\\\\"),
+                        '\x00' => result.push_str("\\0"),
+                        '\x07' => result.push_str("\\a"),
+                        '\x08' => result.push_str("\\b"),
+                        '\x09' => result.push_str("\\t"),
+                        '\x0a' => result.push_str("\\n"),
+                        '\x0b' => result.push_str("\\v"),
+                        '\x0c' => result.push_str("\\f"),
+                        '\x0d' => result.push_str("\\r"),
+                        '\x1b' => result.push_str("\\e"),
+                        c if c.is_control() => {
+                            result.push_str(&format!("\\u{:04x}", c as u32));
+                        }
+                        c => result.push(c),
+                    }
+                }
+                result.push('"');
+            }
+            StringKind::LiteralString => {
+                result.push('\'');
+                result.push_str(&self.value);
+                result.push('\'');
+            }
+            StringKind::MultiLineBasicString => {
+                result.push_str("\"\"\"\n");
+                result.push_str(&self.value);
+                result.push_str("\"\"\"");
+            }
+            StringKind::MultiLineLiteralString => {
+                result.push_str("'''\n");
+                result.push_str(&self.value);
+                result.push_str("'''");
+            }
+        }
     }
 }
 

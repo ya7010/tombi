@@ -1,6 +1,7 @@
 use indexmap::{map::Entry, IndexMap};
 
-use crate::{IntoDocument, Key, Value};
+use super::ToTomlString;
+use crate::{ArrayKind, IntoDocument, Key, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TableKind {
@@ -91,6 +92,58 @@ impl<'de> serde::Deserialize<'de> for Table {
             kind: TableKind::Table,
             key_values,
         })
+    }
+}
+
+impl ToTomlString for Table {
+    fn to_toml_string(&self, result: &mut std::string::String, indent: usize) {
+        match self.kind {
+            TableKind::Table => {
+                for (key, value) in &self.key_values {
+                    match value {
+                        Value::Table(table) => {
+                            result.push('[');
+                            result.push_str(&key.to_string());
+                            result.push_str("]\n");
+                            table.to_toml_string(result, indent);
+                        }
+                        Value::Array(array) if array.kind() == ArrayKind::ArrayOfTable => {
+                            array.to_toml_string(result, indent);
+                        }
+                        _ => {
+                            result.push_str(&"  ".repeat(indent));
+                            result.push_str(&key.to_string());
+                            result.push_str(" = ");
+                            value.to_toml_string(result, indent);
+                            result.push('\n');
+                        }
+                    }
+                }
+            }
+            TableKind::InlineTable => {
+                result.push('{');
+                let mut first = true;
+                for (key, value) in &self.key_values {
+                    if !first {
+                        result.push_str(", ");
+                    }
+                    first = false;
+                    result.push_str(&key.to_string());
+                    result.push_str(" = ");
+                    value.to_toml_string(result, indent);
+                }
+                result.push('}');
+            }
+            TableKind::KeyValue => {
+                for (key, value) in &self.key_values {
+                    result.push_str(&"  ".repeat(indent));
+                    result.push_str(&key.to_string());
+                    result.push_str(" = ");
+                    value.to_toml_string(result, indent);
+                    result.push('\n');
+                }
+            }
+        }
     }
 }
 

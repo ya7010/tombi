@@ -1,3 +1,4 @@
+use super::ToTomlString;
 use crate::{IntoDocument, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -98,5 +99,44 @@ impl<'de> serde::Deserialize<'de> for Array {
             kind: ArrayKind::ArrayOfTable,
             values,
         })
+    }
+}
+
+impl ToTomlString for Array {
+    fn to_toml_string(&self, result: &mut std::string::String, indent: usize) {
+        match self.kind {
+            ArrayKind::Array => {
+                result.push('[');
+                if !self.values.is_empty() {
+                    let mut first = true;
+                    for value in &self.values {
+                        if !first {
+                            result.push_str(", ");
+                        }
+                        first = false;
+                        value.to_toml_string(result, indent + 1);
+                    }
+                }
+                result.push(']');
+            }
+            ArrayKind::ArrayOfTable => {
+                let mut first = true;
+                for value in &self.values {
+                    if let Value::Table(table) = value {
+                        if !first {
+                            result.push('\n');
+                        }
+                        first = false;
+                        result.push_str("[[fruits]]\n");
+                        for (key, value) in table.key_values() {
+                            result.push_str(&key.to_string());
+                            result.push_str(" = ");
+                            value.to_toml_string(result, indent);
+                            result.push('\n');
+                        }
+                    }
+                }
+            }
+        }
     }
 }

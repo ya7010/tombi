@@ -298,3 +298,29 @@ mod test {
         }))
     }
 }
+
+use super::ToTomlString;
+
+impl ToTomlString for OffsetDateTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        result.push_str(&self.value.to_rfc3339());
+    }
+}
+
+impl ToTomlString for LocalDateTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        result.push_str(&self.value.format("%Y-%m-%d %H:%M:%S").to_string());
+    }
+}
+
+impl ToTomlString for LocalDate {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        result.push_str(&self.value.format("%Y-%m-%d").to_string());
+    }
+}
+
+impl ToTomlString for LocalTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        result.push_str(&self.value.format("%H:%M:%S").to_string());
+    }
+}

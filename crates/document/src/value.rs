@@ -148,3 +148,24 @@ impl<'de> serde::Deserialize<'de> for Value {
         deserializer.deserialize_any(ValueVisitor)
     }
 }
+
+pub trait ToTomlString {
+    fn to_toml_string(&self, result: &mut std::string::String, indent: usize);
+}
+
+impl ToTomlString for Value {
+    fn to_toml_string(&self, result: &mut std::string::String, indent: usize) {
+        match self {
+            Value::Boolean(value) => value.to_toml_string(result, indent),
+            Value::Integer(value) => value.to_toml_string(result, indent),
+            Value::Float(value) => value.to_toml_string(result, indent),
+            Value::String(value) => value.to_toml_string(result, indent),
+            Value::OffsetDateTime(value) => value.to_toml_string(result, indent),
+            Value::LocalDateTime(value) => value.to_toml_string(result, indent),
+            Value::LocalDate(value) => value.to_toml_string(result, indent),
+            Value::LocalTime(value) => value.to_toml_string(result, indent),
+            Value::Array(value) => value.to_toml_string(result, indent),
+            Value::Table(value) => value.to_toml_string(result, indent),
+        }
+    }
+}

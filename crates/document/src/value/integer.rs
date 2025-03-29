@@ -1,3 +1,5 @@
+use super::ToTomlString;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IntegerKind {
     Binary,
@@ -84,5 +86,27 @@ impl<'de> serde::Deserialize<'de> for Integer {
             kind: IntegerKind::Decimal,
             value,
         })
+    }
+}
+
+impl ToTomlString for Integer {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        match self.kind {
+            IntegerKind::Binary => {
+                result.push_str("0b");
+                result.push_str(&format!("{:b}", self.value));
+            }
+            IntegerKind::Decimal => {
+                result.push_str(&self.value.to_string());
+            }
+            IntegerKind::Octal => {
+                result.push_str("0o");
+                result.push_str(&format!("{:o}", self.value));
+            }
+            IntegerKind::Hexadecimal => {
+                result.push_str("0x");
+                result.push_str(&format!("{:x}", self.value));
+            }
+        }
     }
 }

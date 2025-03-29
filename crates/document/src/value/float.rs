@@ -1,3 +1,5 @@
+use super::ToTomlString;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Float {
     value: f64,
@@ -40,6 +42,22 @@ impl<'de> serde::Deserialize<'de> for Float {
         D: serde::Deserializer<'de>,
     {
         f64::deserialize(deserializer).map(|value| Self { value })
+    }
+}
+
+impl ToTomlString for Float {
+    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+        if self.value.is_infinite() {
+            if self.value.is_sign_positive() {
+                result.push_str("inf");
+            } else {
+                result.push_str("-inf");
+            }
+        } else if self.value.is_nan() {
+            result.push_str("nan");
+        } else {
+            result.push_str(&self.value.to_string());
+        }
     }
 }
 
