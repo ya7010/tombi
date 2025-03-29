@@ -484,6 +484,7 @@ dependencies = [
  "text",
  "textwrap",
  "thiserror",
+ "toml",
  "toml-version",
  "tower-lsp",
 ]

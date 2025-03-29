@@ -37,6 +37,13 @@ impl Deref for Document {
     }
 }
 
+impl Document {
+    /// Convert the document to a TOML string representation
+    pub fn to_string(&self) -> std::string::String {
+        toml::to_string_pretty(self).unwrap()
+    }
+}
+
 #[cfg(feature = "serde")]
 impl serde::Serialize for Document {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -201,7 +208,6 @@ mod test {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::json;
 
     #[test]
     fn test_document_serialization() {
@@ -245,19 +251,18 @@ mod tests {
         // Create document
         let document = Document(table);
 
-        // Serialize to JSON
-        let serialized = serde_json::to_string(&document).unwrap();
-
-        // Expected JSON structure
-        let expected = json!({
-            "string": "hello",
-            "integer": 42,
-            "float": 3.14,
-            "boolean": true,
-            "array": [1, 2, 3]
-        });
-
-        // Compare serialized JSON with expected
-        assert_eq!(serialized, expected.to_string());
+        // Test to_string method
+        let toml_string = document.to_string();
+        let expected = r#"string = "hello"
+integer = 42
+float = 3.14
+boolean = true
+array = [
+    1,
+    2,
+    3,
+]
+"#;
+        assert_eq!(toml_string, expected);
     }
 }
