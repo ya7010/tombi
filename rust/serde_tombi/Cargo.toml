@@ -9,6 +9,7 @@ license.workspace = true
 
 [dependencies]
 ast = { workspace = true }
+chrono = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }

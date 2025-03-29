@@ -160,21 +160,6 @@ impl Serializer {
         self.root = Some(current);
         Ok(())
     }
-
-    // Extract a single value from the serializer
-    fn extract_single_value(&self) -> Option<document::Value> {
-        if let Some(ref root) = self.root {
-            if root.key_values().len() == 1 {
-                // If there's only one key-value pair, return its value
-                root.key_values().values().next().cloned()
-            } else {
-                // If there are multiple values, return the entire table
-                Some(document::Value::Table(root.clone()))
-            }
-        } else {
-            None
-        }
-    }
 }
 
 // Helper functions for creating document values
@@ -412,12 +397,19 @@ impl<'a> serde::ser::SerializeSeq for SerializeSeq<'a> {
     {
         // Create a temporary serializer to serialize the value
         let mut temp_serializer = Serializer::default();
+        temp_serializer.push_key("temp");
         value.serialize(&mut temp_serializer)?;
 
         // Extract the serialized value
-        if let Some(value) = temp_serializer.extract_single_value() {
-            self.items.push(value);
-            Ok(())
+        if let Some(root) = temp_serializer.root {
+            if let Some(value) = root.key_values().values().next() {
+                self.items.push(value.clone());
+                Ok(())
+            } else {
+                Err(Error::Serialization(
+                    "Failed to serialize sequence element".to_string(),
+                ))
+            }
         } else {
             Err(Error::Serialization(
                 "Failed to serialize sequence element".to_string(),
@@ -428,25 +420,7 @@ impl<'a> serde::ser::SerializeSeq for SerializeSeq<'a> {
     fn end(self) -> Result<()> {
         // Create array using our helper
         let array_value = create_array_value(self.items);
-
-        // If there's no key path, set the array directly to the root table
-        if self.serializer.current_key().is_none() {
-            // Set the array as root
-            // Note: This is a special case only done for testing
-            // In actual TOML, arrays are not allowed at the root level
-            if self.serializer.root.is_none() {
-                self.serializer.root = Some(create_empty_table());
-            }
-
-            // Add array to root table
-            // Using special key "array" for testing
-            self.serializer.push_key("array");
-            let result = self.serializer.add_value(array_value);
-            self.serializer.pop_key();
-            result
-        } else {
-            self.serializer.add_value(array_value)
-        }
+        self.serializer.add_value(array_value)
     }
 }
 
@@ -581,28 +555,6 @@ impl<'a> serde::ser::SerializeStruct for SerializeStruct<'a> {
     where
         T: ?Sized + Serialize,
     {
-        // Special handling is needed for array types
-        if std::any::type_name::<T>().contains("Vec<") {
-            self.serializer.push_key(key);
-
-            // Use a temporary serializer to serialize the array
-            let mut temp_serializer = Serializer::default();
-            temp_serializer.push_key("temp");
-            value.serialize(&mut temp_serializer)?;
-
-            // Get the array value
-            if let Some(root) = temp_serializer.root {
-                if let Some(array_value) = root.key_values().get(&create_key("temp")) {
-                    // Copy the array value
-                    let result = self.serializer.add_value(array_value.clone());
-                    self.serializer.pop_key();
-                    return result;
-                }
-            }
-
-            self.serializer.pop_key();
-        }
-
         // For nested structs, create a new table and add it
         let mut temp_serializer = Serializer::default();
         if value.serialize(&mut temp_serializer).is_ok() {
@@ -612,7 +564,18 @@ impl<'a> serde::ser::SerializeStruct for SerializeStruct<'a> {
 
                 // Add root table as nested table
                 if root.key_values().len() > 0 {
-                    let nested_value = document::Value::Table(root);
+                    let nested_value = if std::any::type_name::<T>().contains("Vec<") {
+                        // If it's a Vec, extract the array value
+                        if let Some(document::Value::Array(array)) =
+                            root.key_values().values().next()
+                        {
+                            document::Value::Array(array.clone())
+                        } else {
+                            document::Value::Table(root)
+                        }
+                    } else {
+                        document::Value::Table(root)
+                    };
                     let result = self.serializer.add_value(nested_value);
                     self.serializer.pop_key();
                     return result;
@@ -656,7 +619,18 @@ impl<'a> serde::ser::SerializeStructVariant for SerializeStructVariant<'a> {
 
                 // Add root table as nested table
                 if root.key_values().len() > 0 {
-                    let nested_value = document::Value::Table(root);
+                    let nested_value = if std::any::type_name::<T>().contains("Vec<") {
+                        // If it's a Vec, extract the array value
+                        if let Some(document::Value::Array(array)) =
+                            root.key_values().values().next()
+                        {
+                            document::Value::Array(array.clone())
+                        } else {
+                            document::Value::Table(root)
+                        }
+                    } else {
+                        document::Value::Table(root)
+                    };
                     let result = self.serializer.add_value(nested_value);
                     self.serializer.pop_key();
                     return result;
@@ -1011,6 +985,7 @@ impl<T, E: serde::ser::Error> serde::ser::SerializeStructVariant for Impossible<
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::{DateTime, TimeZone, Utc};
     use document::Value;
     use serde::Serialize;
     use std::collections::HashMap;
@@ -1299,42 +1274,15 @@ mod tests {
 
     #[test]
     fn test_serialize_datetime() {
-        // Simple struct for DateTime testing
-        // In real applications, a date library like chrono would be used,
-        // but here we use a simple integer representation
-        #[derive(Serialize)]
-        struct DateTime {
-            year: i32,
-            month: u8,
-            day: u8,
-            hour: u8,
-            minute: u8,
-            second: u8,
-        }
-
         #[derive(Serialize)]
         struct DateTimeTest {
-            created_at: DateTime,
-            updated_at: DateTime,
+            created_at: DateTime<Utc>,
+            updated_at: DateTime<Utc>,
         }
 
         let test = DateTimeTest {
-            created_at: DateTime {
-                year: 2023,
-                month: 5,
-                day: 15,
-                hour: 10,
-                minute: 30,
-                second: 0,
-            },
-            updated_at: DateTime {
-                year: 2023,
-                month: 7,
-                day: 20,
-                hour: 14,
-                minute: 45,
-                second: 30,
-            },
+            created_at: Utc.with_ymd_and_hms(2023, 5, 15, 10, 30, 0).unwrap(),
+            updated_at: Utc.with_ymd_and_hms(2023, 7, 20, 14, 45, 30).unwrap(),
         };
 
         let document = to_document(&test);
@@ -1347,113 +1295,17 @@ mod tests {
             let root_table = doc.key_values();
 
             // Verify created_at
-            if let Some(Value::Table(created_at)) = root_table.get(&create_key("created_at")) {
-                // Verify year
-                if let Some(Value::Integer(year)) = created_at.key_values().get(&create_key("year"))
-                {
-                    assert_eq!(year.value(), 2023);
-                } else {
-                    panic!("Expected integer value for created_at.year");
-                }
-
-                // Verify month
-                if let Some(Value::Integer(month)) =
-                    created_at.key_values().get(&create_key("month"))
-                {
-                    assert_eq!(month.value(), 5);
-                } else {
-                    panic!("Expected integer value for created_at.month");
-                }
-
-                // Verify day
-                if let Some(Value::Integer(day)) = created_at.key_values().get(&create_key("day")) {
-                    assert_eq!(day.value(), 15);
-                } else {
-                    panic!("Expected integer value for created_at.day");
-                }
-
-                // Verify hour
-                if let Some(Value::Integer(hour)) = created_at.key_values().get(&create_key("hour"))
-                {
-                    assert_eq!(hour.value(), 10);
-                } else {
-                    panic!("Expected integer value for created_at.hour");
-                }
-
-                // Verify minute
-                if let Some(Value::Integer(minute)) =
-                    created_at.key_values().get(&create_key("minute"))
-                {
-                    assert_eq!(minute.value(), 30);
-                } else {
-                    panic!("Expected integer value for created_at.minute");
-                }
-
-                // Verify second
-                if let Some(Value::Integer(second)) =
-                    created_at.key_values().get(&create_key("second"))
-                {
-                    assert_eq!(second.value(), 0);
-                } else {
-                    panic!("Expected integer value for created_at.second");
-                }
+            if let Some(Value::String(created_at)) = root_table.get(&create_key("created_at")) {
+                assert_eq!(created_at.value(), "2023-05-15T10:30:00Z");
             } else {
-                panic!("Expected table value for 'created_at'");
+                panic!("Expected string value for 'created_at'");
             }
 
             // Verify updated_at
-            if let Some(Value::Table(updated_at)) = root_table.get(&create_key("updated_at")) {
-                // Verify year
-                if let Some(Value::Integer(year)) = updated_at.key_values().get(&create_key("year"))
-                {
-                    assert_eq!(year.value(), 2023);
-                } else {
-                    panic!("Expected integer value for updated_at.year");
-                }
-
-                // Verify month
-                if let Some(Value::Integer(month)) =
-                    updated_at.key_values().get(&create_key("month"))
-                {
-                    assert_eq!(month.value(), 7);
-                } else {
-                    panic!("Expected integer value for updated_at.month");
-                }
-
-                // Verify day
-                if let Some(Value::Integer(day)) = updated_at.key_values().get(&create_key("day")) {
-                    assert_eq!(day.value(), 20);
-                } else {
-                    panic!("Expected integer value for updated_at.day");
-                }
-
-                // Verify hour
-                if let Some(Value::Integer(hour)) = updated_at.key_values().get(&create_key("hour"))
-                {
-                    assert_eq!(hour.value(), 14);
-                } else {
-                    panic!("Expected integer value for updated_at.hour");
-                }
-
-                // Verify minute
-                if let Some(Value::Integer(minute)) =
-                    updated_at.key_values().get(&create_key("minute"))
-                {
-                    assert_eq!(minute.value(), 45);
-                } else {
-                    panic!("Expected integer value for updated_at.minute");
-                }
-
-                // Verify second
-                if let Some(Value::Integer(second)) =
-                    updated_at.key_values().get(&create_key("second"))
-                {
-                    assert_eq!(second.value(), 30);
-                } else {
-                    panic!("Expected integer value for updated_at.second");
-                }
+            if let Some(Value::String(updated_at)) = root_table.get(&create_key("updated_at")) {
+                assert_eq!(updated_at.value(), "2023-07-20T14:45:30Z");
             } else {
-                panic!("Expected table value for 'updated_at'");
+                panic!("Expected string value for 'updated_at'");
             }
         }
     }
