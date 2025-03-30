@@ -8,7 +8,8 @@ pub use document::{
     LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
 
-pub struct Document(pub(crate) document::Document);
+#[derive(Debug, Clone, PartialEq)]
+pub struct Document(document::Document);
 
 impl Document {
     pub fn new() -> Self {
@@ -87,38 +88,14 @@ impl ToTomlString for (&document::Key, &document::Value) {
 }
 
 impl ToTomlString for document::Value {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
         match self {
             document::Value::String(s) => result.push_str(&format!("\"{}\"", s.value())),
             document::Value::Integer(i) => result.push_str(&i.value().to_string()),
             document::Value::Float(f) => result.push_str(&f.value().to_string()),
             document::Value::Boolean(b) => result.push_str(&b.value().to_string()),
-            document::Value::Array(a) => {
-                result.push('[');
-                let mut first = true;
-                for item in a.values() {
-                    if !first {
-                        result.push_str(", ");
-                    }
-                    first = false;
-                    item.to_toml_string(result, &[]);
-                }
-                result.push(']');
-            }
-            document::Value::Table(t) => {
-                result.push('{');
-                let mut first = true;
-                for (key, value) in t.key_values() {
-                    if !first {
-                        result.push_str(", ");
-                    }
-                    first = false;
-                    result.push_str(&key.value());
-                    result.push_str(" = ");
-                    value.to_toml_string(result, &[]);
-                }
-                result.push('}');
-            }
+            document::Value::Array(a) => a.to_toml_string(result, parent_keys),
+            document::Value::Table(t) => t.to_toml_string(result, parent_keys),
             document::Value::OffsetDateTime(dt) => result.push_str(&dt.value().to_string()),
             document::Value::LocalDateTime(dt) => result.push_str(&dt.value().to_string()),
             document::Value::LocalDate(d) => result.push_str(&d.value().to_string()),
@@ -589,12 +566,14 @@ age = 30
             Value::Table(aaa_table),
         );
 
+        tracing::trace!("document: {document:?}");
+
         // Test to_string method
         let toml_string = document.to_string().unwrap();
         let expected = r#"
 [aaa.bbb]
 ddd = "value1"
-inline = {x = 1, y = 2}
+inline = { x = 1, y = 2 }
 
 [aaa.bbb.ccc]
 value = "deep nested"

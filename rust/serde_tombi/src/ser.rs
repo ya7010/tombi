@@ -1024,6 +1024,8 @@ opt = "optional"
 
     #[test]
     fn test_serialize_nested_struct() {
+        test_lib::init_tracing();
+
         #[derive(Serialize)]
         struct Nested {
             value: String,
@@ -1044,9 +1046,10 @@ opt = "optional"
 
         let toml = to_string(&test).expect("TOML serialization failed");
         let expected = r#"
+simple_value = 42
+
 [nested]
 value = "nested value"
-simple_value = 42
 "#;
 
         toml_text_assert_eq!(toml, expected);
