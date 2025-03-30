@@ -14,19 +14,18 @@ pub use value::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct Document(pub(crate) Table);
 
-impl From<Document> for Table {
-    fn from(document: Document) -> Self {
-        document.0
+impl Document {
+    /// Convert the document to a TOML string representation
+    pub fn to_string(&self) -> std::string::String {
+        let mut result = std::string::String::new();
+        self.0.to_toml_string(&mut result, &[]);
+        result.trim().to_string() + "\n"
     }
 }
 
-pub trait IntoDocument<T> {
-    fn into_document(self, toml_version: TomlVersion) -> T;
-}
-
-impl IntoDocument<Document> for document_tree::DocumentTree {
-    fn into_document(self, toml_version: TomlVersion) -> Document {
-        Document(document_tree::Table::from(self).into_document(toml_version))
+impl From<Document> for Table {
+    fn from(document: Document) -> Self {
+        document.0
     }
 }
 
@@ -38,12 +37,13 @@ impl Deref for Document {
     }
 }
 
-impl Document {
-    /// Convert the document to a TOML string representation
-    pub fn to_string(&self) -> std::string::String {
-        let mut result = std::string::String::new();
-        self.0.to_toml_string(&mut result, &[]);
-        result.trim().to_string() + "\n"
+pub trait IntoDocument<T> {
+    fn into_document(self, toml_version: TomlVersion) -> T;
+}
+
+impl IntoDocument<Document> for document_tree::DocumentTree {
+    fn into_document(self, toml_version: TomlVersion) -> Document {
+        Document(document_tree::Table::from(self).into_document(toml_version))
     }
 }
 
