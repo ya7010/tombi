@@ -1,4 +1,4 @@
-use super::ToTomlString;
+use crate::ToTomlString;
 use toml_text::{
     to_basic_string, to_literal_string, to_multi_line_basic_string, to_multi_line_literal_string,
 };
@@ -66,18 +66,8 @@ impl From<document_tree::String> for crate::String {
     }
 }
 
-#[cfg(feature = "serde")]
-impl serde::Serialize for crate::String {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        self.value.serialize(serializer)
-    }
-}
-
 impl ToTomlString for String {
-    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
         match self.kind {
             StringKind::BasicString => {
                 result.push_str(&to_basic_string(&self.value));
@@ -92,6 +82,16 @@ impl ToTomlString for String {
                 result.push_str(&to_multi_line_literal_string(&self.value));
             }
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for crate::String {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.value.serialize(serializer)
     }
 }
 

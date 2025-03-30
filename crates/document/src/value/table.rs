@@ -1,6 +1,7 @@
 use indexmap::{map::Entry, IndexMap};
+use itertools::Itertools;
 
-use super::ToTomlString;
+use crate::ToTomlString;
 use crate::{ArrayKind, IntoDocument, Key, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -96,51 +97,100 @@ impl<'de> serde::Deserialize<'de> for Table {
 }
 
 impl ToTomlString for Table {
-    fn to_toml_string(&self, result: &mut std::string::String, indent: usize) {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&crate::Key]) {
         match self.kind {
             TableKind::Table => {
-                for (key, value) in &self.key_values {
-                    match value {
-                        Value::Table(table) => {
-                            result.push('[');
-                            result.push_str(&key.to_string());
-                            result.push_str("]\n");
-                            table.to_toml_string(result, indent);
-                        }
-                        Value::Array(array) if array.kind() == ArrayKind::ArrayOfTable => {
-                            array.to_toml_string(result, indent);
-                        }
-                        _ => {
-                            result.push_str(&"  ".repeat(indent));
-                            result.push_str(&key.to_string());
-                            result.push_str(" = ");
-                            value.to_toml_string(result, indent);
-                            result.push('\n');
+                if self.key_values.len() == 1 {
+                    if let Some((key, value)) = self.key_values.iter().next() {
+                        match value {
+                            crate::Value::Table(table) if table.kind() == TableKind::Table => {
+                                return table.to_toml_string(
+                                    result,
+                                    &parent_keys
+                                        .into_iter()
+                                        .chain(&[key])
+                                        .map(|key| *key)
+                                        .collect_vec(),
+                                );
+                            }
+                            crate::Value::Array(array)
+                                if array.kind() == ArrayKind::ArrayOfTable =>
+                            {
+                                return array.to_toml_string(
+                                    result,
+                                    &parent_keys
+                                        .into_iter()
+                                        .chain(&[key])
+                                        .map(|key| *key)
+                                        .collect_vec(),
+                                );
+                            }
+                            _ => {}
                         }
                     }
+                }
+
+                if !parent_keys.is_empty() {
+                    result.push_str(&format!(
+                        "[{}]\n",
+                        parent_keys
+                            .iter()
+                            .map(ToString::to_string)
+                            .collect_vec()
+                            .join(".")
+                    ));
+                }
+
+                let mut table_key_values = Vec::new();
+                for (key, value) in &self.key_values {
+                    match value {
+                        crate::Value::Table(table) if table.kind() == TableKind::Table => {
+                            table_key_values.push((key, value));
+                            continue;
+                        }
+                        crate::Value::Array(array) if array.kind() == ArrayKind::ArrayOfTable => {
+                            table_key_values.push((key, value));
+                            continue;
+                        }
+                        _ => (key, value).to_toml_string(result, &[]),
+                    }
+                }
+
+                for (key, value) in table_key_values {
+                    value.to_toml_string(
+                        result,
+                        &parent_keys
+                            .iter()
+                            .chain(&[key])
+                            .map(|key| *key)
+                            .collect_vec(),
+                    );
                 }
             }
             TableKind::InlineTable => {
                 result.push('{');
-                let mut first = true;
-                for (key, value) in &self.key_values {
-                    if !first {
+                for (i, (key, value)) in self.key_values.iter().enumerate() {
+                    if i != 0 {
                         result.push_str(", ");
                     }
-                    first = false;
-                    result.push_str(&key.to_string());
-                    result.push_str(" = ");
-                    value.to_toml_string(result, indent);
+                    result.push_str(&format!(
+                        "{} = ",
+                        parent_keys.iter().chain(&[key]).map(|key| *key).join(".")
+                    ));
+                    value.to_toml_string(
+                        result,
+                        &parent_keys
+                            .iter()
+                            .chain(&[key])
+                            .map(|key| *key)
+                            .collect_vec(),
+                    );
                 }
                 result.push('}');
             }
             TableKind::KeyValue => {
-                for (key, value) in &self.key_values {
-                    result.push_str(&"  ".repeat(indent));
-                    result.push_str(&key.to_string());
-                    result.push_str(" = ");
-                    value.to_toml_string(result, indent);
-                    result.push('\n');
+                for key_value in &self.key_values {
+                    key_value.to_toml_string(result, parent_keys);
                 }
             }
         }

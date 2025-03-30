@@ -1,4 +1,4 @@
-use super::ToTomlString;
+use crate::ToTomlString;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
@@ -46,7 +46,7 @@ impl<'de> serde::Deserialize<'de> for Boolean {
 }
 
 impl ToTomlString for Boolean {
-    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
         result.push_str(if self.value { "true" } else { "false" });
     }
 }

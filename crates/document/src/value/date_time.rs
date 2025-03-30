@@ -1,3 +1,5 @@
+use crate::ToTomlString;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OffsetDateTime {
     value: chrono::DateTime<chrono::FixedOffset>,
@@ -75,6 +77,30 @@ impl From<document_tree::LocalTime> for LocalTime {
         Self {
             value: *node.value(),
         }
+    }
+}
+
+impl ToTomlString for OffsetDateTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
+        result.push_str(&self.value.to_rfc3339());
+    }
+}
+
+impl ToTomlString for LocalDateTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
+        result.push_str(&self.value.format("%Y-%m-%d %H:%M:%S").to_string());
+    }
+}
+
+impl ToTomlString for LocalDate {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
+        result.push_str(&self.value.format("%Y-%m-%d").to_string());
+    }
+}
+
+impl ToTomlString for LocalTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
+        result.push_str(&self.value.format("%H:%M:%S").to_string());
     }
 }
 
@@ -296,31 +322,5 @@ mod test {
         fn local_time_optional_seconds_in_toml_v1_1_0(r#"lt = 07:32"#, TomlVersion::V1_1_0_Preview) -> Ok(json!({
             "lt": "07:32:00"
         }))
-    }
-}
-
-use super::ToTomlString;
-
-impl ToTomlString for OffsetDateTime {
-    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
-        result.push_str(&self.value.to_rfc3339());
-    }
-}
-
-impl ToTomlString for LocalDateTime {
-    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
-        result.push_str(&self.value.format("%Y-%m-%d %H:%M:%S").to_string());
-    }
-}
-
-impl ToTomlString for LocalDate {
-    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
-        result.push_str(&self.value.format("%Y-%m-%d").to_string());
-    }
-}
-
-impl ToTomlString for LocalTime {
-    fn to_toml_string(&self, result: &mut std::string::String, _indent: usize) {
-        result.push_str(&self.value.format("%H:%M:%S").to_string());
     }
 }

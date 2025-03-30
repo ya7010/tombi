@@ -1,5 +1,6 @@
-use super::ToTomlString;
-use crate::{IntoDocument, Value};
+use itertools::Itertools;
+
+use crate::{IntoDocument, TableKind, ToTomlString, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -103,35 +104,55 @@ impl<'de> serde::Deserialize<'de> for Array {
 }
 
 impl ToTomlString for Array {
-    fn to_toml_string(&self, result: &mut std::string::String, indent: usize) {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&crate::Key]) {
         match self.kind {
             ArrayKind::Array => {
                 result.push('[');
                 if !self.values.is_empty() {
-                    let mut first = true;
-                    for value in &self.values {
-                        if !first {
+                    for (i, value) in self.values.iter().enumerate() {
+                        if i != 0 {
                             result.push_str(", ");
                         }
-                        first = false;
-                        value.to_toml_string(result, indent + 1);
+                        value.to_toml_string(result, parent_keys);
                     }
                 }
                 result.push(']');
             }
             ArrayKind::ArrayOfTable => {
-                let mut first = true;
-                for value in &self.values {
+                for value in self.values.iter() {
+                    result.push_str(&format!(
+                        "[[{}]]\n",
+                        parent_keys
+                            .iter()
+                            .map(ToString::to_string)
+                            .collect_vec()
+                            .join(".")
+                    ));
                     if let Value::Table(table) = value {
-                        if !first {
-                            result.push('\n');
-                        }
-                        first = false;
-                        result.push_str("[[fruits]]\n");
                         for (key, value) in table.key_values() {
-                            result.push_str(&key.to_string());
-                            result.push_str(" = ");
-                            value.to_toml_string(result, indent);
+                            match value {
+                                Value::Table(table) if table.kind() == TableKind::KeyValue => {
+                                    table.to_toml_string(
+                                        result,
+                                        &parent_keys
+                                            .iter()
+                                            .chain(&[key])
+                                            .map(|key| *key)
+                                            .collect_vec(),
+                                    );
+                                }
+                                _ => {
+                                    result.push_str(&format!("{} = ", key));
+                                    value.to_toml_string(
+                                        result,
+                                        &parent_keys
+                                            .iter()
+                                            .chain(&[key])
+                                            .map(|key| *key)
+                                            .collect_vec(),
+                                    );
+                                }
+                            }
                             result.push('\n');
                         }
                     }
