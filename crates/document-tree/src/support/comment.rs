@@ -1,13 +1,13 @@
-use ast::{support::string::parse_literal_string, AstToken};
+use ast::AstToken;
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {
     #[error(transparent)]
-    String(#[from] crate::support::string::ParseError),
+    String(#[from] toml_text::ParseError),
 }
 
 pub fn try_from_comment(value: &str) -> Result<String, ParseError> {
-    let comment = parse_literal_string(&value[1..], false)?;
+    let comment = toml_text::parse_literal_string(&value[1..], false)?;
 
     Ok(comment)
 }

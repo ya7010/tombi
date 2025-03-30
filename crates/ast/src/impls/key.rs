@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use toml_version::TomlVersion;
 
-use crate::{support, AstChildren};
+use crate::AstChildren;
 
 impl crate::Key {
     pub fn token(&self) -> Option<syntax::SyntaxToken> {
@@ -16,14 +16,14 @@ impl crate::Key {
     pub fn try_to_raw_text(
         &self,
         toml_version: TomlVersion,
-    ) -> Result<String, support::string::ParseError> {
+    ) -> Result<String, toml_text::ParseError> {
         match self {
             Self::BareKey(key) => Ok(key.token().unwrap().text().to_string()),
             Self::BasicString(key) => {
-                support::string::try_from_basic_string(key.token().unwrap().text(), toml_version)
+                toml_text::try_from_basic_string(key.token().unwrap().text(), toml_version)
             }
             Self::LiteralString(key) => {
-                support::string::try_from_literal_string(key.token().unwrap().text())
+                toml_text::try_from_literal_string(key.token().unwrap().text())
             }
         }
     }

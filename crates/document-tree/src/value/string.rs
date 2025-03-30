@@ -19,13 +19,25 @@ pub struct String {
 impl crate::String {
     pub fn try_new(
         kind: StringKind,
-        value: std::string::String,
+        quoted_string: impl Into<std::string::String>,
         toml_version: TomlVersion,
-    ) -> Result<Self, crate::support::string::ParseError> {
-        let string = Self { kind, value };
-        string.try_to_raw_string(toml_version)?;
+    ) -> Result<Self, toml_text::ParseError> {
+        let quoted_string = quoted_string.into();
 
-        Ok(string)
+        let value = match &kind {
+            StringKind::BasicString(_) => {
+                toml_text::try_from_basic_string(&quoted_string, toml_version)
+            }
+            StringKind::LiteralString(_) => toml_text::try_from_literal_string(&quoted_string),
+            StringKind::MultiLineBasicString(_) => {
+                toml_text::try_from_multi_line_basic_string(&quoted_string, toml_version)
+            }
+            StringKind::MultiLineLiteralString(_) => {
+                toml_text::try_from_multi_line_literal_string(&quoted_string)
+            }
+        }?;
+
+        Ok(Self { kind, value })
     }
 
     #[inline]
@@ -39,31 +51,8 @@ impl crate::String {
     }
 
     #[inline]
-    pub fn to_raw_string(&self, toml_version: TomlVersion) -> std::string::String {
-        // NOTE: String has already been validated by `impl TryIntoDocumentTree<String>`,
-        //       so it's safe to unwrap.
-        self.try_to_raw_string(toml_version).unwrap()
-    }
-
-    #[inline]
-    fn try_to_raw_string(
-        &self,
-        toml_version: TomlVersion,
-    ) -> Result<std::string::String, crate::support::string::ParseError> {
-        match self.kind {
-            StringKind::BasicString(_) => {
-                crate::support::string::try_from_basic_string(&self.value, toml_version)
-            }
-            StringKind::LiteralString(_) => {
-                crate::support::string::try_from_literal_string(&self.value)
-            }
-            StringKind::MultiLineBasicString(_) => {
-                crate::support::string::try_from_multi_line_basic_string(&self.value, toml_version)
-            }
-            StringKind::MultiLineLiteralString(_) => {
-                crate::support::string::try_from_multi_line_literal_string(&self.value)
-            }
-        }
+    pub fn into_value(self) -> std::string::String {
+        self.value
     }
 
     #[inline]

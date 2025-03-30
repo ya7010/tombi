@@ -51,12 +51,7 @@ macro_rules! test_lint {
         async fn $name() {
             use config::TomlVersion;
 
-            if let Ok(level) = std::env::var("RUST_LOG") {
-                let _ = tracing_subscriber::fmt()
-                    .with_env_filter(level)
-                    .pretty()
-                    .try_init();
-            }
+            test_lib::init_tracing();
 
             // Initialize schema store
             let schema_store = schema_store::SchemaStore::new(schema_store::Options::default());
@@ -132,12 +127,7 @@ macro_rules! test_lint {
         async fn $name() {
             use config::TomlVersion;
 
-            if let Ok(level) = std::env::var("RUST_LOG") {
-                let _ = tracing_subscriber::fmt()
-                    .with_env_filter(level)
-                    .pretty()
-                    .try_init();
-            }
+            test_lib::init_tracing();
 
             // Initialize schema store
             let schema_store = schema_store::SchemaStore::new(schema_store::Options::default());

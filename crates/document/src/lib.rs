@@ -1,7 +1,7 @@
 mod key;
 mod value;
 
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 pub use key::{Key, KeyKind};
 use toml_version::TomlVersion;
@@ -13,9 +13,29 @@ pub use value::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct Document(pub(crate) Table);
 
+impl Document {
+    pub fn new() -> Self {
+        Self(Table::new(TableKind::Table))
+    }
+}
+
 impl From<Document> for Table {
     fn from(document: Document) -> Self {
         document.0
+    }
+}
+
+impl Deref for Document {
+    type Target = Table;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Document {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -26,14 +46,6 @@ pub trait IntoDocument<T> {
 impl IntoDocument<Document> for document_tree::DocumentTree {
     fn into_document(self, toml_version: TomlVersion) -> Document {
         Document(document_tree::Table::from(self).into_document(toml_version))
-    }
-}
-
-impl Deref for Document {
-    type Target = Table;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 
@@ -60,9 +72,9 @@ impl<'de> serde::Deserialize<'de> for Document {
 
 #[cfg(test)]
 #[macro_export]
-macro_rules! test_serialize {
+macro_rules! test_deserialize {
     {#[test] fn $name:ident($source:expr) -> Ok($json:expr)} => {
-        test_serialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Ok($json)}
+        test_deserialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Ok($json)}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($json:expr)} => {
@@ -87,7 +99,7 @@ macro_rules! test_serialize {
     };
 
     {#[test] fn $name:ident($source:expr) -> Err($errors:expr)} => {
-        test_serialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Err($errors)}
+        test_deserialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Err($errors)}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err($errors:expr)} => {
@@ -132,12 +144,12 @@ macro_rules! test_serialize {
 mod test {
     use serde_json::json;
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn empty("") -> Ok(json!({}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn key_values(
             r#"
@@ -147,7 +159,7 @@ mod test {
         ) -> Ok(json!({"key": "value", "flag": true}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn array_of_tables_sample(
             r#"

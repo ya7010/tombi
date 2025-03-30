@@ -1,0 +1,589 @@
+use formatter::{formatter::definitions::FormatDefinitions, FormatOptions};
+use itertools::Itertools;
+use schema_store::SchemaStore;
+use toml_version::TomlVersion;
+
+pub use document::{
+    Array, ArrayKind, Boolean, Float, Integer, IntegerKind, Key, LocalDate, LocalDateTime,
+    LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
+};
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Document(document::Document);
+
+impl Document {
+    pub fn new() -> Self {
+        Self(document::Document::new())
+    }
+
+    pub fn to_string(&self) -> crate::Result<std::string::String> {
+        let mut toml_text = std::string::String::new();
+        self.to_toml_string(&mut toml_text, &[]);
+
+        let format_options = FormatOptions::default();
+        let format_definitions = FormatDefinitions::default();
+        let schema_store = SchemaStore::new(schema_store::Options::default());
+
+        let formatter = formatter::Formatter::new(
+            TomlVersion::default(),
+            format_definitions,
+            &format_options,
+            None,
+            &schema_store,
+        );
+        match formatter.format_without_schema(&toml_text) {
+            Ok(formatted) => Ok(formatted),
+            Err(errors) => {
+                tracing::trace!("toml_text: {}", toml_text);
+                tracing::trace!(?errors);
+                unreachable!("Document is valid TOML. Errors: {errors:?}")
+            }
+        }
+    }
+}
+
+impl std::ops::Deref for Document {
+    type Target = document::Document;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for Document {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+/// A trait for converting TOML values to their string representation.
+pub(crate) trait ToTomlString {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]);
+}
+
+impl ToTomlString for (&document::Key, &document::Value) {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+        let (key, value) = *self;
+        match value {
+            document::Value::Table(table) if table.kind() == document::TableKind::KeyValue => {
+                table.to_toml_string(
+                    result,
+                    &parent_keys
+                        .iter()
+                        .chain(&[key])
+                        .map(|key| *key)
+                        .collect_vec(),
+                );
+            }
+            _ => {
+                result.push_str(&format!(
+                    "{} = ",
+                    parent_keys.iter().chain(&[key]).map(|key| *key).join(".")
+                ));
+                value.to_toml_string(result, &[]);
+            }
+        }
+        result.push('\n');
+    }
+}
+
+impl ToTomlString for document::Value {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+        match self {
+            document::Value::String(s) => result.push_str(&format!("\"{}\"", s.value())),
+            document::Value::Integer(i) => result.push_str(&i.value().to_string()),
+            document::Value::Float(f) => result.push_str(&f.value().to_string()),
+            document::Value::Boolean(b) => result.push_str(&b.value().to_string()),
+            document::Value::Array(a) => a.to_toml_string(result, parent_keys),
+            document::Value::Table(t) => t.to_toml_string(result, parent_keys),
+            document::Value::OffsetDateTime(dt) => result.push_str(&dt.value().to_string()),
+            document::Value::LocalDateTime(dt) => result.push_str(&dt.value().to_string()),
+            document::Value::LocalDate(d) => result.push_str(&d.value().to_string()),
+            document::Value::LocalTime(t) => result.push_str(&t.value().to_string()),
+        }
+    }
+}
+
+impl ToTomlString for document::Table {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+        match self.kind() {
+            document::TableKind::Table => {
+                if self.key_values().len() == 1 {
+                    if let Some((key, value)) = self.key_values().iter().next() {
+                        match value {
+                            document::Value::Table(table)
+                                if table.kind() == document::TableKind::Table =>
+                            {
+                                return table.to_toml_string(
+                                    result,
+                                    &parent_keys
+                                        .into_iter()
+                                        .chain(&[key])
+                                        .map(|key| *key)
+                                        .collect_vec(),
+                                );
+                            }
+                            document::Value::Array(array)
+                                if array.kind() == document::ArrayKind::ArrayOfTable =>
+                            {
+                                return array.to_toml_string(
+                                    result,
+                                    &parent_keys
+                                        .into_iter()
+                                        .chain(&[key])
+                                        .map(|key| *key)
+                                        .collect_vec(),
+                                );
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                if !parent_keys.is_empty() {
+                    result.push_str(&format!(
+                        "[{}]\n",
+                        parent_keys
+                            .iter()
+                            .map(ToString::to_string)
+                            .collect_vec()
+                            .join(".")
+                    ));
+                }
+
+                let mut table_key_values = Vec::new();
+                for (key, value) in self.key_values() {
+                    match value {
+                        document::Value::Table(table)
+                            if table.kind() == document::TableKind::Table =>
+                        {
+                            table_key_values.push((key, value));
+                            continue;
+                        }
+                        document::Value::Array(array)
+                            if array.kind() == document::ArrayKind::ArrayOfTable =>
+                        {
+                            table_key_values.push((key, value));
+                            continue;
+                        }
+                        _ => (key, value).to_toml_string(result, &[]),
+                    }
+                }
+
+                for (key, value) in table_key_values {
+                    value.to_toml_string(
+                        result,
+                        &parent_keys
+                            .iter()
+                            .chain(&[key])
+                            .map(|key| *key)
+                            .collect_vec(),
+                    );
+                }
+            }
+            document::TableKind::InlineTable => {
+                result.push('{');
+                for (i, (key, value)) in self.key_values().iter().enumerate() {
+                    if i != 0 {
+                        result.push_str(", ");
+                    }
+                    result.push_str(&format!(
+                        "{} = ",
+                        parent_keys.iter().chain(&[key]).map(|key| *key).join(".")
+                    ));
+                    value.to_toml_string(
+                        result,
+                        &parent_keys
+                            .iter()
+                            .chain(&[key])
+                            .map(|key| *key)
+                            .collect_vec(),
+                    );
+                }
+                result.push('}');
+            }
+            document::TableKind::KeyValue => {
+                for key_value in self.key_values() {
+                    key_value.to_toml_string(result, parent_keys);
+                }
+            }
+        }
+    }
+}
+
+impl ToTomlString for document::Array {
+    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+        match self.kind() {
+            document::ArrayKind::Array => {
+                result.push('[');
+                if !self.values().is_empty() {
+                    for (i, value) in self.values().iter().enumerate() {
+                        if i != 0 {
+                            result.push_str(", ");
+                        }
+                        value.to_toml_string(result, parent_keys);
+                    }
+                }
+                result.push(']');
+            }
+            document::ArrayKind::ArrayOfTable => {
+                for value in self.values().iter() {
+                    result.push_str(&format!(
+                        "[[{}]]\n",
+                        parent_keys
+                            .iter()
+                            .map(ToString::to_string)
+                            .collect_vec()
+                            .join(".")
+                    ));
+                    if let document::Value::Table(table) = value {
+                        for (key, value) in table.key_values() {
+                            match value {
+                                document::Value::Table(table)
+                                    if table.kind() == document::TableKind::KeyValue =>
+                                {
+                                    table.to_toml_string(
+                                        result,
+                                        &parent_keys
+                                            .iter()
+                                            .chain(&[key])
+                                            .map(|key| *key)
+                                            .collect_vec(),
+                                    );
+                                }
+                                _ => {
+                                    result.push_str(&format!("{} = ", key));
+                                    value.to_toml_string(
+                                        result,
+                                        &parent_keys
+                                            .iter()
+                                            .chain(&[key])
+                                            .map(|key| *key)
+                                            .collect_vec(),
+                                    );
+                                }
+                            }
+                            result.push('\n');
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl ToTomlString for document::Boolean {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        result.push_str(if self.value() { "true" } else { "false" });
+    }
+}
+
+impl ToTomlString for document::Float {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        if self.value().is_infinite() {
+            if self.value().is_sign_positive() {
+                result.push_str("inf");
+            } else {
+                result.push_str("-inf");
+            }
+        } else if self.value().is_nan() {
+            result.push_str("nan");
+        } else {
+            result.push_str(&self.value().to_string());
+        }
+    }
+}
+
+impl ToTomlString for document::String {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        match self.kind() {
+            document::StringKind::BasicString => {
+                result.push_str(&toml_text::to_basic_string(&self.value()));
+            }
+            document::StringKind::LiteralString => {
+                result.push_str(&toml_text::to_literal_string(&self.value()));
+            }
+            document::StringKind::MultiLineBasicString => {
+                result.push_str(&toml_text::to_multi_line_basic_string(&self.value()));
+            }
+            document::StringKind::MultiLineLiteralString => {
+                result.push_str(&toml_text::to_multi_line_literal_string(&self.value()));
+            }
+        }
+    }
+}
+
+impl ToTomlString for document::OffsetDateTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        result.push_str(&self.value().to_rfc3339());
+    }
+}
+
+impl ToTomlString for document::LocalDateTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        result.push_str(&self.value().format("%Y-%m-%d %H:%M:%S").to_string());
+    }
+}
+
+impl ToTomlString for document::LocalDate {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        result.push_str(&self.value().format("%Y-%m-%d").to_string());
+    }
+}
+
+impl ToTomlString for document::LocalTime {
+    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+        result.push_str(&self.value().format("%H:%M:%S").to_string());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use document::KeyKind;
+    use test_lib::toml_text_assert_eq;
+
+    use crate::document::*;
+
+    #[test]
+    fn test_document_serialization() {
+        test_lib::init_tracing();
+
+        // Create a test document with various value types
+        let mut document = Document::new();
+
+        // Add string value
+        document.insert(
+            Key::new(KeyKind::BareKey, "string".to_string()),
+            Value::String(String::new(StringKind::BasicString, "hello".to_string())),
+        );
+
+        // Add integer value
+        document.insert(
+            Key::new(KeyKind::BareKey, "integer".to_string()),
+            Value::Integer(Integer::new(42)),
+        );
+
+        // Add float value
+        document.insert(
+            Key::new(KeyKind::BareKey, "float".to_string()),
+            Value::Float(Float::new(3.14)),
+        );
+
+        // Add boolean value
+        document.insert(
+            Key::new(KeyKind::BareKey, "boolean".to_string()),
+            Value::Boolean(Boolean::new(true)),
+        );
+
+        // Add array value
+        let mut array = Array::new(ArrayKind::Array);
+        array.push(Value::Integer(Integer::new(1)));
+        array.push(Value::Integer(Integer::new(2)));
+        array.push(Value::Integer(Integer::new(3)));
+        document.insert(
+            Key::new(KeyKind::BareKey, "array".to_string()),
+            Value::Array(array),
+        );
+
+        // Test to_string method
+        let toml_string = document.to_string().unwrap();
+        let expected = r#"
+string = "hello"
+integer = 42
+float = 3.14
+boolean = true
+array = [1, 2, 3]
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+
+    #[test]
+    fn test_array_of_tables_serialization() {
+        test_lib::init_tracing();
+
+        // Create a test document with array of tables
+        let mut document = Document::new();
+
+        // Create array of tables
+        let mut array_of_tables = Array::new(ArrayKind::ArrayOfTable);
+
+        // First table in array
+        let mut table1 = Table::new(TableKind::Table);
+        table1.insert(
+            Key::new(KeyKind::BareKey, "name".to_string()),
+            Value::String(String::new(StringKind::BasicString, "apple".to_string())),
+        );
+        table1.insert(
+            Key::new(KeyKind::BareKey, "color".to_string()),
+            Value::String(String::new(StringKind::BasicString, "red".to_string())),
+        );
+        array_of_tables.push(Value::Table(table1));
+
+        // Second table in array
+        let mut table2 = Table::new(TableKind::Table);
+        table2.insert(
+            Key::new(KeyKind::BareKey, "name".to_string()),
+            Value::String(String::new(StringKind::BasicString, "banana".to_string())),
+        );
+        table2.insert(
+            Key::new(KeyKind::BareKey, "color".to_string()),
+            Value::String(String::new(StringKind::BasicString, "yellow".to_string())),
+        );
+        array_of_tables.push(Value::Table(table2));
+
+        // Add array of tables to root table
+        document.insert(
+            Key::new(KeyKind::BareKey, "fruits".to_string()),
+            Value::Array(array_of_tables),
+        );
+
+        // Test to_string method
+        let toml_string = document.to_string().unwrap();
+        let expected = r#"
+[[fruits]]
+name = "apple"
+color = "red"
+
+[[fruits]]
+name = "banana"
+color = "yellow"
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+
+    #[test]
+    fn test_nested_tables_serialization() {
+        test_lib::init_tracing();
+
+        // Create a test document with nested tables
+        let mut document = Document::new();
+
+        // Create nested table
+        let mut nested_table = Table::new(TableKind::Table);
+        nested_table.insert(
+            Key::new(KeyKind::BareKey, "name".to_string()),
+            Value::String(String::new(StringKind::BasicString, "John".to_string())),
+        );
+        nested_table.insert(
+            Key::new(KeyKind::BareKey, "age".to_string()),
+            Value::Integer(Integer::new(30)),
+        );
+
+        // Add nested table to root table
+        document.insert(
+            Key::new(KeyKind::BareKey, "person".to_string()),
+            Value::Table(nested_table),
+        );
+
+        // Test to_string method
+        let toml_string = document.to_string().unwrap();
+        let expected = r#"
+[person]
+name = "John"
+age = 30
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+
+    #[test]
+    fn test_complex_nested_structures_serialization() {
+        test_lib::init_tracing();
+
+        let mut document = Document::new();
+
+        // Create nested table structure [aaa.bbb]
+        let mut aaa_table = Table::new(TableKind::Table);
+        let mut bbb_table = Table::new(TableKind::Table);
+
+        // Add values to [aaa.bbb]
+        bbb_table.insert(
+            Key::new(KeyKind::BareKey, "ddd".to_string()),
+            Value::String(String::new(StringKind::BasicString, "value1".to_string())),
+        );
+
+        // Create and add inline table
+        let mut inline_table = Table::new(TableKind::InlineTable);
+        inline_table.insert(
+            Key::new(KeyKind::BareKey, "x".to_string()),
+            Value::Integer(Integer::new(1)),
+        );
+        inline_table.insert(
+            Key::new(KeyKind::BareKey, "y".to_string()),
+            Value::Integer(Integer::new(2)),
+        );
+        bbb_table.insert(
+            Key::new(KeyKind::BareKey, "inline".to_string()),
+            Value::Table(inline_table),
+        );
+
+        // Create nested table [aaa.bbb.ccc]
+        let mut ccc_table = Table::new(TableKind::Table);
+        ccc_table.insert(
+            Key::new(KeyKind::BareKey, "value".to_string()),
+            Value::String(String::new(
+                StringKind::BasicString,
+                "deep nested".to_string(),
+            )),
+        );
+
+        // Create array of tables
+        let mut array_of_tables = Array::new(ArrayKind::ArrayOfTable);
+        let mut array_table1 = Table::new(TableKind::Table);
+        array_table1.insert(
+            Key::new(KeyKind::BareKey, "id".to_string()),
+            Value::Integer(Integer::new(1)),
+        );
+        array_of_tables.push(Value::Table(array_table1));
+
+        let mut array_table2 = Table::new(TableKind::Table);
+        array_table2.insert(
+            Key::new(KeyKind::BareKey, "id".to_string()),
+            Value::Integer(Integer::new(2)),
+        );
+        array_of_tables.push(Value::Table(array_table2));
+
+        // Add array of tables to ccc_table
+        ccc_table.insert(
+            Key::new(KeyKind::BareKey, "items".to_string()),
+            Value::Array(array_of_tables),
+        );
+
+        // Add ccc_table to bbb_table
+        bbb_table.insert(
+            Key::new(KeyKind::BareKey, "ccc".to_string()),
+            Value::Table(ccc_table),
+        );
+
+        // Add bbb_table to aaa_table
+        aaa_table.insert(
+            Key::new(KeyKind::BareKey, "bbb".to_string()),
+            Value::Table(bbb_table),
+        );
+
+        // Add aaa_table to root table
+        document.insert(
+            Key::new(KeyKind::BareKey, "aaa".to_string()),
+            Value::Table(aaa_table),
+        );
+
+        tracing::trace!("document: {document:?}");
+
+        // Test to_string method
+        let toml_string = document.to_string().unwrap();
+        let expected = r#"
+[aaa.bbb]
+ddd = "value1"
+inline = { x = 1, y = 2 }
+
+[aaa.bbb.ccc]
+value = "deep nested"
+
+[[aaa.bbb.ccc.items]]
+id = 1
+
+[[aaa.bbb.ccc.items]]
+id = 2
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+}

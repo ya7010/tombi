@@ -1,4 +1,3 @@
-use document_tree::support;
 use toml_version::TomlVersion;
 
 use crate::IntoDocument;
@@ -38,11 +37,9 @@ impl Key {
 
     pub fn to_raw_text(&self, toml_version: TomlVersion) -> String {
         match self.kind {
-            KeyKind::BareKey => support::string::try_from_bare_key(self.value(), toml_version),
-            KeyKind::BasicString => {
-                support::string::try_from_basic_string(self.value(), toml_version)
-            }
-            KeyKind::LiteralString => support::string::try_from_literal_string(self.value()),
+            KeyKind::BareKey => toml_text::try_from_bare_key(self.value(), toml_version),
+            KeyKind::BasicString => toml_text::try_from_basic_string(self.value(), toml_version),
+            KeyKind::LiteralString => toml_text::try_from_literal_string(self.value()),
         }
         .unwrap()
     }
@@ -117,56 +114,56 @@ impl<'de> serde::Deserialize<'de> for Key {
 mod test {
     use serde_json::json;
 
-    use crate::test_serialize;
+    use crate::test_deserialize;
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn bare_key(r#"key = 1"#) -> Ok(json!({"key": 1}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn basic_string_key(r#""key" = 1"#) -> Ok(json!({"key": 1}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn literal_string_key(r#"'key' = 'value'"#) -> Ok(json!({"key": "value"}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn boolean_key(r#"true = 'value'"#) -> Ok(json!({"true": "value"}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn integer_key(r#"123 = 'value'"#) -> Ok(json!({"123":  "value"}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn float_key1(r#"3.14 = 'value'"#) -> Ok(json!({"3": {"14": "value"}}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn nan_float_key(r#"nan = 'value'"#) -> Ok(json!({"nan": "value"}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn p_nan_float_key(r#"+nan = 'value'"#) -> Err([
             ("invalid string: bare key contains '+' character", ((0, 0), (0, 4)))
         ])
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn m_nan_float_key(r#"-nan = 'value'"#) -> Ok(json!({"-nan": "value"}))
     }
 
-    test_serialize! {
+    test_deserialize! {
         #[test]
         fn float_and_bare_key(r#"3.14.abc = 'value'"#) -> Ok(json!({"3": {"14": {"abc": "value"}}}))
     }

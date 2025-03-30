@@ -138,6 +138,7 @@ dependencies = [
  "syntax",
  "text",
  "thiserror",
+ "toml-text",
  "toml-version",
  "tracing",
  "url",
@@ -481,9 +482,12 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_json",
+ "test-lib",
  "text",
  "textwrap",
  "thiserror",
+ "toml",
+ "toml-text",
  "toml-version",
  "tower-lsp",
 ]
@@ -499,6 +503,7 @@ dependencies = [
  "itertools",
  "text",
  "thiserror",
+ "toml-text",
  "toml-version",
  "tracing",
 ]
@@ -1151,6 +1156,12 @@ dependencies = [
  "serde_repr",
  "url",
 ]
+
+[[package]]
+name = "maplit"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "matchers"
@@ -1851,15 +1862,24 @@ name = "serde_tombi"
 version = "0.0.1"
 dependencies = [
  "ast",
+ "chrono",
+ "diagnostic",
  "document",
  "document-tree",
+ "formatter",
  "indexmap",
  "itertools",
+ "maplit",
  "parser",
+ "pretty_assertions",
+ "schema-store",
  "serde",
+ "test-lib",
  "text",
  "thiserror",
+ "toml-text",
  "toml-version",
+ "tracing",
 ]
 
 [[package]]
@@ -2054,6 +2074,7 @@ version = "0.0.0"
 dependencies = [
  "chrono",
  "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -2256,6 +2277,14 @@ dependencies = [
  "serde_json",
  "text",
  "textwrap",
+ "toml-version",
+]
+
+[[package]]
+name = "toml-text"
+version = "0.0.0"
+dependencies = [
+ "thiserror",
  "toml-version",
 ]
 

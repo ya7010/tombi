@@ -60,7 +60,7 @@ impl IntoValue for document_tree::Value {
             },
             document_tree::Value::String(value) => Value::Literal {
                 r#type: Type::String,
-                value: value.to_raw_string(toml_version),
+                value: value.into_value(),
             },
             document_tree::Value::OffsetDateTime(value) => Value::Literal {
                 r#type: Type::Datetime,

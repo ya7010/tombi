@@ -29,7 +29,7 @@ pub enum Error {
 
     #[error("invalid string: {error}")]
     ParseStringError {
-        error: crate::support::string::ParseError,
+        error: toml_text::ParseError,
         range: text::Range,
     },
 
