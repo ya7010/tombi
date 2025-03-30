@@ -33,7 +33,7 @@ impl Document {
         match formatter.format_without_schema(&toml_text) {
             Ok(formatted) => Ok(formatted),
             Err(errors) => {
-                tracing::trace!(?toml_text);
+                tracing::trace!("toml_text: {}", toml_text);
                 tracing::trace!(?errors);
                 unreachable!("Document is valid TOML. Errors: {errors:?}")
             }
@@ -369,6 +369,8 @@ mod tests {
 
     #[test]
     fn test_document_serialization() {
+        test_lib::init_tracing();
+
         // Create a test document with various value types
         let mut document = Document::new();
 
@@ -420,6 +422,8 @@ array = [1, 2, 3]
 
     #[test]
     fn test_array_of_tables_serialization() {
+        test_lib::init_tracing();
+
         // Create a test document with array of tables
         let mut document = Document::new();
 
@@ -472,6 +476,8 @@ color = "yellow"
 
     #[test]
     fn test_nested_tables_serialization() {
+        test_lib::init_tracing();
+
         // Create a test document with nested tables
         let mut document = Document::new();
 
@@ -504,6 +510,8 @@ age = 30
 
     #[test]
     fn test_complex_nested_structures_serialization() {
+        test_lib::init_tracing();
+
         let mut document = Document::new();
 
         // Create nested table structure [aaa.bbb]

@@ -539,12 +539,7 @@ mod completion_edit {
                     LspService,
                 };
 
-                if let Ok(level) = std::env::var("RUST_LOG") {
-                    let _ = tracing_subscriber::fmt()
-                        .with_env_filter(level)
-                        .pretty()
-                        .try_init();
-                }
+                test_lib::init_tracing();
 
                 let (service, _) = LspService::new(|client| Backend::new(client, &server::backend::Options::default()));
                 let backend = service.inner();

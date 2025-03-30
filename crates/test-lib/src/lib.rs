@@ -11,3 +11,12 @@ macro_rules! toml_text_assert_eq {
         pretty_assertions::assert_eq!($actual, expected);
     };
 }
+
+pub fn init_tracing() {
+    if let Ok(level) = std::env::var("RUST_LOG") {
+        let _ = tracing_subscriber::fmt()
+            .with_env_filter(level)
+            .pretty()
+            .try_init();
+    }
+}

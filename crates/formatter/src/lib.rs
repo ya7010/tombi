@@ -36,12 +36,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Ok($expected:expr);) => {
         #[tokio::test]
         async fn $name() {
-            if let Ok(level) = std::env::var("RUST_LOG") {
-                let _ = tracing_subscriber::fmt()
-                    .with_env_filter(level)
-                    .pretty()
-                    .try_init();
-            }
+            test_lib::init_tracing();
 
             match $crate::Formatter::new(
                 $toml_version,
@@ -75,12 +70,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Err(_);) => {
         #[tokio::test]
         async fn $name() {
-            if let Ok(level) = std::env::var("RUST_LOG") {
-                let _ = tracing_subscriber::fmt()
-                    .with_env_filter(level)
-                    .pretty()
-                    .try_init();
-            }
+            test_lib::init_tracing();
 
             match $crate::Formatter::new(
                 $toml_version,
