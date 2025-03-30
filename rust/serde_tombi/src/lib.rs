@@ -1,4 +1,5 @@
 mod de;
+mod document;
 mod ser;
 
 pub use de::{from_document, from_str, parse_str};
@@ -6,24 +7,29 @@ pub use ser::{to_document, to_string};
 use std::fmt;
 use thiserror::Error;
 
+pub use document::{
+    Array, ArrayKind, Boolean, Document, Float, Integer, IntegerKind, Key, LocalDate,
+    LocalDateTime, LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
+};
+
 /// Error that can occur when processing TOML.
 #[derive(Debug, Error)]
 pub enum Error {
     /// Error occurred while parsing the TOML document.
     #[error("Parser error: {0}")]
-    Parser(String),
+    Parser(std::string::String),
 
     /// Error occurred during document tree construction.
     #[error("Document tree error: {0}")]
-    DocumentTree(String),
+    DocumentTree(std::string::String),
 
     /// Error occurred during serialization.
     #[error("Serialization error: {0}")]
-    Serialization(String),
+    Serialization(std::string::String),
 
     /// Error occurred during deserialization.
     #[error("Deserialization error: {0}")]
-    Deserialization(String),
+    Deserialization(std::string::String),
 }
 
 impl serde::ser::Error for Error {

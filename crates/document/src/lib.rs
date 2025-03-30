@@ -1,9 +1,8 @@
 mod key;
 mod value;
 
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
-use itertools::Itertools;
 pub use key::{Key, KeyKind};
 use toml_version::TomlVersion;
 pub use value::{
@@ -15,11 +14,8 @@ pub use value::{
 pub struct Document(pub(crate) Table);
 
 impl Document {
-    /// Convert the document to a TOML string representation
-    pub fn to_string(&self) -> std::string::String {
-        let mut result = std::string::String::new();
-        self.0.to_toml_string(&mut result, &[]);
-        result.trim().to_string() + "\n"
+    pub fn new() -> Self {
+        Self(Table::new(TableKind::Table))
     }
 }
 
@@ -37,6 +33,12 @@ impl Deref for Document {
     }
 }
 
+impl DerefMut for Document {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 pub trait IntoDocument<T> {
     fn into_document(self, toml_version: TomlVersion) -> T;
 }
@@ -44,36 +46,6 @@ pub trait IntoDocument<T> {
 impl IntoDocument<Document> for document_tree::DocumentTree {
     fn into_document(self, toml_version: TomlVersion) -> Document {
         Document(document_tree::Table::from(self).into_document(toml_version))
-    }
-}
-
-trait ToTomlString {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&crate::Key]);
-}
-
-impl ToTomlString for (&Key, &Value) {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&crate::Key]) {
-        let (key, value) = *self;
-        match value {
-            Value::Table(table) if table.kind() == TableKind::KeyValue => {
-                table.to_toml_string(
-                    result,
-                    &parent_keys
-                        .iter()
-                        .chain(&[key])
-                        .map(|key| *key)
-                        .collect_vec(),
-                );
-            }
-            _ => {
-                result.push_str(&format!(
-                    "{} = ",
-                    parent_keys.iter().chain(&[key]).map(|key| *key).join(".")
-                ));
-                value.to_toml_string(result, &[]);
-            }
-        }
-        result.push('\n');
     }
 }
 
@@ -235,254 +207,5 @@ mod test {
                 }
             )
         )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use test_lib::toml_text_assert_eq;
-
-    use super::*;
-
-    #[test]
-    fn test_document_serialization() {
-        // Create a test document with various value types
-        let mut table = Table::new(TableKind::Table);
-
-        // Add string value
-        table.insert(
-            Key::new(KeyKind::BareKey, "string".to_string()),
-            Value::String(String::new(StringKind::BasicString, "hello".to_string())),
-        );
-
-        // Add integer value
-        table.insert(
-            Key::new(KeyKind::BareKey, "integer".to_string()),
-            Value::Integer(Integer::new(42)),
-        );
-
-        // Add float value
-        table.insert(
-            Key::new(KeyKind::BareKey, "float".to_string()),
-            Value::Float(Float::new(3.14)),
-        );
-
-        // Add boolean value
-        table.insert(
-            Key::new(KeyKind::BareKey, "boolean".to_string()),
-            Value::Boolean(Boolean::new(true)),
-        );
-
-        // Add array value
-        let mut array = Array::new(ArrayKind::Array);
-        array.push(Value::Integer(Integer::new(1)));
-        array.push(Value::Integer(Integer::new(2)));
-        array.push(Value::Integer(Integer::new(3)));
-        table.insert(
-            Key::new(KeyKind::BareKey, "array".to_string()),
-            Value::Array(array),
-        );
-
-        // Create document
-        let document = Document(table);
-
-        // Test to_string method
-        let toml_string = document.to_string();
-        let expected = r#"
-string = "hello"
-integer = 42
-float = 3.14
-boolean = true
-array = [1, 2, 3]
-"#;
-        toml_text_assert_eq!(toml_string, expected);
-    }
-
-    #[test]
-    fn test_array_of_tables_serialization() {
-        // Create a test document with array of tables
-        let mut root_table = Table::new(TableKind::Table);
-
-        // Create array of tables
-        let mut array_of_tables = Array::new(ArrayKind::ArrayOfTable);
-
-        // First table in array
-        let mut table1 = Table::new(TableKind::Table);
-        table1.insert(
-            Key::new(KeyKind::BareKey, "name".to_string()),
-            Value::String(String::new(StringKind::BasicString, "apple".to_string())),
-        );
-        table1.insert(
-            Key::new(KeyKind::BareKey, "color".to_string()),
-            Value::String(String::new(StringKind::BasicString, "red".to_string())),
-        );
-        array_of_tables.push(Value::Table(table1));
-
-        // Second table in array
-        let mut table2 = Table::new(TableKind::Table);
-        table2.insert(
-            Key::new(KeyKind::BareKey, "name".to_string()),
-            Value::String(String::new(StringKind::BasicString, "banana".to_string())),
-        );
-        table2.insert(
-            Key::new(KeyKind::BareKey, "color".to_string()),
-            Value::String(String::new(StringKind::BasicString, "yellow".to_string())),
-        );
-        array_of_tables.push(Value::Table(table2));
-
-        // Add array of tables to root table
-        root_table.insert(
-            Key::new(KeyKind::BareKey, "fruits".to_string()),
-            Value::Array(array_of_tables),
-        );
-
-        // Create document
-        let document = Document(root_table);
-
-        // Test to_string method
-        let toml_string = document.to_string();
-        let expected = r#"
-[[fruits]]
-name = "apple"
-color = "red"
-[[fruits]]
-name = "banana"
-color = "yellow"
-"#;
-        toml_text_assert_eq!(toml_string, expected);
-    }
-
-    #[test]
-    fn test_nested_tables_serialization() {
-        // Create a test document with nested tables
-        let mut root_table = Table::new(TableKind::Table);
-
-        // Create nested table
-        let mut nested_table = Table::new(TableKind::Table);
-        nested_table.insert(
-            Key::new(KeyKind::BareKey, "name".to_string()),
-            Value::String(String::new(StringKind::BasicString, "John".to_string())),
-        );
-        nested_table.insert(
-            Key::new(KeyKind::BareKey, "age".to_string()),
-            Value::Integer(Integer::new(30)),
-        );
-
-        // Add nested table to root table
-        root_table.insert(
-            Key::new(KeyKind::BareKey, "person".to_string()),
-            Value::Table(nested_table),
-        );
-
-        // Create document
-        let document = Document(root_table);
-
-        // Test to_string method
-        let toml_string = document.to_string();
-        let expected = r#"
-[person]
-name = "John"
-age = 30
-"#;
-        toml_text_assert_eq!(toml_string, expected);
-    }
-
-    #[test]
-    fn test_complex_nested_structures_serialization() {
-        // Create root table
-        let mut root_table = Table::new(TableKind::Table);
-
-        // Create nested table structure [aaa.bbb]
-        let mut aaa_table = Table::new(TableKind::Table);
-        let mut bbb_table = Table::new(TableKind::Table);
-
-        // Add values to [aaa.bbb]
-        bbb_table.insert(
-            Key::new(KeyKind::BareKey, "ddd".to_string()),
-            Value::String(String::new(StringKind::BasicString, "value1".to_string())),
-        );
-
-        // Create and add inline table
-        let mut inline_table = Table::new(TableKind::InlineTable);
-        inline_table.insert(
-            Key::new(KeyKind::BareKey, "x".to_string()),
-            Value::Integer(Integer::new(1)),
-        );
-        inline_table.insert(
-            Key::new(KeyKind::BareKey, "y".to_string()),
-            Value::Integer(Integer::new(2)),
-        );
-        bbb_table.insert(
-            Key::new(KeyKind::BareKey, "inline".to_string()),
-            Value::Table(inline_table),
-        );
-
-        // Create nested table [aaa.bbb.ccc]
-        let mut ccc_table = Table::new(TableKind::Table);
-        ccc_table.insert(
-            Key::new(KeyKind::BareKey, "value".to_string()),
-            Value::String(String::new(
-                StringKind::BasicString,
-                "deep nested".to_string(),
-            )),
-        );
-
-        // Create array of tables
-        let mut array_of_tables = Array::new(ArrayKind::ArrayOfTable);
-        let mut array_table1 = Table::new(TableKind::Table);
-        array_table1.insert(
-            Key::new(KeyKind::BareKey, "id".to_string()),
-            Value::Integer(Integer::new(1)),
-        );
-        array_of_tables.push(Value::Table(array_table1));
-
-        let mut array_table2 = Table::new(TableKind::Table);
-        array_table2.insert(
-            Key::new(KeyKind::BareKey, "id".to_string()),
-            Value::Integer(Integer::new(2)),
-        );
-        array_of_tables.push(Value::Table(array_table2));
-
-        // Add array of tables to ccc_table
-        ccc_table.insert(
-            Key::new(KeyKind::BareKey, "items".to_string()),
-            Value::Array(array_of_tables),
-        );
-
-        // Add ccc_table to bbb_table
-        bbb_table.insert(
-            Key::new(KeyKind::BareKey, "ccc".to_string()),
-            Value::Table(ccc_table),
-        );
-
-        // Add bbb_table to aaa_table
-        aaa_table.insert(
-            Key::new(KeyKind::BareKey, "bbb".to_string()),
-            Value::Table(bbb_table),
-        );
-
-        // Add aaa_table to root table
-        root_table.insert(
-            Key::new(KeyKind::BareKey, "aaa".to_string()),
-            Value::Table(aaa_table),
-        );
-
-        // Create document
-        let document = Document(root_table);
-
-        // Test to_string method
-        let toml_string = document.to_string();
-        let expected = r#"
-[aaa.bbb]
-ddd = "value1"
-inline = {x = 1, y = 2}
-[aaa.bbb.ccc]
-value = "deep nested"
-[[aaa.bbb.ccc.items]]
-id = 1
-[[aaa.bbb.ccc.items]]
-id = 2
-"#;
-        toml_text_assert_eq!(toml_string, expected);
     }
 }

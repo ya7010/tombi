@@ -1,8 +1,3 @@
-use crate::ToTomlString;
-use toml_text::{
-    to_basic_string, to_literal_string, to_multi_line_basic_string, to_multi_line_literal_string,
-};
-
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringKind {
@@ -62,25 +57,6 @@ impl From<document_tree::String> for crate::String {
         Self {
             kind: node.kind().into(),
             value: node.into_value(),
-        }
-    }
-}
-
-impl ToTomlString for String {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&crate::Key]) {
-        match self.kind {
-            StringKind::BasicString => {
-                result.push_str(&to_basic_string(&self.value));
-            }
-            StringKind::LiteralString => {
-                result.push_str(&to_literal_string(&self.value));
-            }
-            StringKind::MultiLineBasicString => {
-                result.push_str(&to_multi_line_basic_string(&self.value));
-            }
-            StringKind::MultiLineLiteralString => {
-                result.push_str(&to_multi_line_literal_string(&self.value));
-            }
         }
     }
 }

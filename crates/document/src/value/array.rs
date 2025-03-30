@@ -1,6 +1,4 @@
-use itertools::Itertools;
-
-use crate::{IntoDocument, TableKind, ToTomlString, Value};
+use crate::{IntoDocument, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ArrayKind {
@@ -100,64 +98,5 @@ impl<'de> serde::Deserialize<'de> for Array {
             kind: ArrayKind::ArrayOfTable,
             values,
         })
-    }
-}
-
-impl ToTomlString for Array {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&crate::Key]) {
-        match self.kind {
-            ArrayKind::Array => {
-                result.push('[');
-                if !self.values.is_empty() {
-                    for (i, value) in self.values.iter().enumerate() {
-                        if i != 0 {
-                            result.push_str(", ");
-                        }
-                        value.to_toml_string(result, parent_keys);
-                    }
-                }
-                result.push(']');
-            }
-            ArrayKind::ArrayOfTable => {
-                for value in self.values.iter() {
-                    result.push_str(&format!(
-                        "[[{}]]\n",
-                        parent_keys
-                            .iter()
-                            .map(ToString::to_string)
-                            .collect_vec()
-                            .join(".")
-                    ));
-                    if let Value::Table(table) = value {
-                        for (key, value) in table.key_values() {
-                            match value {
-                                Value::Table(table) if table.kind() == TableKind::KeyValue => {
-                                    table.to_toml_string(
-                                        result,
-                                        &parent_keys
-                                            .iter()
-                                            .chain(&[key])
-                                            .map(|key| *key)
-                                            .collect_vec(),
-                                    );
-                                }
-                                _ => {
-                                    result.push_str(&format!("{} = ", key));
-                                    value.to_toml_string(
-                                        result,
-                                        &parent_keys
-                                            .iter()
-                                            .chain(&[key])
-                                            .map(|key| *key)
-                                            .collect_vec(),
-                                    );
-                                }
-                            }
-                            result.push('\n');
-                        }
-                    }
-                }
-            }
-        }
     }
 }

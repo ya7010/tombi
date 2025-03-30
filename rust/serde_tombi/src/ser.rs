@@ -1,10 +1,6 @@
-use formatter::formatter::definitions::FormatDefinitions;
-use formatter::FormatOptions;
-use schema_store::SchemaStore;
 use serde::ser::SerializeSeq as SerdeSerializeSeq;
 use serde::Serialize;
 use std::marker::PhantomData;
-use toml_version::TomlVersion;
 
 /// Serialize the given data structure as a TOML string.
 ///
@@ -33,98 +29,11 @@ where
     T: Serialize,
 {
     let document = to_document(value)?;
-    let text = document_to_string(&document);
-    let format_options = FormatOptions::default();
-    let format_definitions = FormatDefinitions::default();
-    let schema_store = SchemaStore::new(schema_store::Options::default());
-
-    let formatter = formatter::Formatter::new(
-        TomlVersion::default(),
-        format_definitions,
-        &format_options,
-        None,
-        &schema_store,
-    );
-    match formatter.format_without_schema(&text) {
-        Ok(formatted) => Ok(formatted),
-        Err(_) => unreachable!("Document is valid TOML"),
-    }
-}
-
-/// Helper function to convert a Document to a String.
-fn document_to_string(document: &document::Document) -> String {
-    let mut output = String::new();
-
-    fn write_table(table: &document::Table, output: &mut String, is_root: bool) {
-        let mut first_table = true;
-        for (key, value) in table.key_values() {
-            match value {
-                document::Value::Table(nested_table) => {
-                    if !first_table && is_root {
-                        output.push('\n');
-                    }
-                    first_table = false;
-                    output.push_str(&format!("[{}]\n", key.value()));
-                    for (nested_key, nested_value) in nested_table.key_values() {
-                        output.push_str(&format!(
-                            "{} = {}\n",
-                            nested_key.value(),
-                            value_to_string(nested_value)
-                        ));
-                    }
-                }
-                document::Value::Array(array) => {
-                    output.push_str(&format!("{} = [", key.value()));
-                    let mut array_items = Vec::new();
-                    for item in array.values() {
-                        array_items.push(value_to_string(item));
-                    }
-                    output.push_str(&array_items.join(", "));
-                    output.push_str("]\n");
-                }
-                _ => {
-                    output.push_str(&format!("{} = {}\n", key.value(), value_to_string(value)));
-                }
-            }
-        }
-    }
-
-    fn value_to_string(value: &document::Value) -> String {
-        match value {
-            document::Value::String(s) => format!("\"{}\"", s.value()),
-            document::Value::Integer(i) => i.value().to_string(),
-            document::Value::Float(f) => f.value().to_string(),
-            document::Value::Boolean(b) => b.value().to_string(),
-            document::Value::Array(a) => {
-                let mut items = Vec::new();
-                for item in a.values() {
-                    items.push(value_to_string(item));
-                }
-                format!("[{}]", items.join(", "))
-            }
-            document::Value::Table(t) => {
-                let mut output = String::new();
-                write_table(t, &mut output, false);
-                output
-            }
-            document::Value::OffsetDateTime(dt) => dt.value().to_string(),
-            document::Value::LocalDateTime(dt) => dt.value().to_string(),
-            document::Value::LocalDate(d) => d.value().to_string(),
-            document::Value::LocalTime(t) => t.value().to_string(),
-        }
-    }
-
-    // Create a temporary table to hold the document's key-values
-    let mut root_table = document::Table::new(document::TableKind::Table);
-    for (key, value) in document.key_values() {
-        root_table.insert(key.clone(), value.clone());
-    }
-    write_table(&root_table, &mut output, true);
-    output
+    document.to_string()
 }
 
 /// Serialize the given data structure as a TOML Document.
-pub fn to_document<T>(value: &T) -> crate::Result<document::Document>
+pub fn to_document<T>(value: &T) -> crate::Result<crate::Document>
 where
     T: Serialize,
 {
@@ -144,7 +53,7 @@ struct Serializer {
 
 impl Serializer {
     // Output the Document
-    fn output(self) -> document::Document {
+    fn output(self) -> crate::Document {
         // Create document from root table or create a new empty one
         let root_table = self.table.unwrap_or_else(|| create_empty_table());
         // Create document from root table (avoid tuple struct initialization)
@@ -413,6 +322,7 @@ impl<'a> serde::Serializer for &'a mut Serializer {
     fn serialize_tuple(self, len: usize) -> crate::Result<Self::SerializeTuple> {
         self.serialize_seq(Some(len))
             .map(|seq| SerializeTuple { seq })
+            .map_err(|e| e.into())
     }
 
     fn serialize_tuple_struct(
@@ -422,6 +332,7 @@ impl<'a> serde::Serializer for &'a mut Serializer {
     ) -> crate::Result<Self::SerializeTupleStruct> {
         self.serialize_seq(Some(len))
             .map(|seq| SerializeTupleStruct { seq })
+            .map_err(|e| e.into())
     }
 
     fn serialize_tuple_variant(

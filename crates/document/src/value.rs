@@ -148,20 +148,3 @@ impl<'de> serde::Deserialize<'de> for Value {
         deserializer.deserialize_any(ValueVisitor)
     }
 }
-
-impl crate::ToTomlString for Value {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&crate::Key]) {
-        match self {
-            Value::Boolean(value) => value.to_toml_string(result, parent_keys),
-            Value::Integer(value) => value.to_toml_string(result, parent_keys),
-            Value::Float(value) => value.to_toml_string(result, parent_keys),
-            Value::String(value) => value.to_toml_string(result, parent_keys),
-            Value::OffsetDateTime(value) => value.to_toml_string(result, parent_keys),
-            Value::LocalDateTime(value) => value.to_toml_string(result, parent_keys),
-            Value::LocalDate(value) => value.to_toml_string(result, parent_keys),
-            Value::LocalTime(value) => value.to_toml_string(result, parent_keys),
-            Value::Array(value) => value.to_toml_string(result, parent_keys),
-            Value::Table(value) => value.to_toml_string(result, parent_keys),
-        }
-    }
-}

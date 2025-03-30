@@ -1877,7 +1877,9 @@ dependencies = [
  "test-lib",
  "text",
  "thiserror",
+ "toml-text",
  "toml-version",
+ "tracing",
 ]
 
 [[package]]
