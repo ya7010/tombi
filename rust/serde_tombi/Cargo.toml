@@ -13,7 +13,9 @@ chrono = { workspace = true }
 diagnostic = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
+features = "0.10.0"
 formatter = { workspace = true }
+futures.workspace = true
 indexmap = { workspace = true }
 itertools = { workspace = true }
 parser = { workspace = true }

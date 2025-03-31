@@ -33,13 +33,7 @@ impl<'a> Linter<'a> {
     }
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let parsed = parser::parse(source);
-
-        let Some(parsed) = parsed.cast::<ast::Root>() else {
-            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
-        };
-
-        let root = parsed.tree();
+        let (parsed, root) = parser::parsed_and_ast(source);
 
         let source_schema = match self
             .schema_store

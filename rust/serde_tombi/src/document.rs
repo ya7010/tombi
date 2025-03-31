@@ -31,12 +31,13 @@ impl Document {
             None,
             &schema_store,
         );
-        match formatter.format_without_schema(&toml_text) {
+
+        match futures::executor::block_on(formatter.format(&toml_text)) {
             Ok(formatted) => Ok(formatted),
             Err(errors) => {
                 tracing::trace!("toml_text: {}", toml_text);
                 tracing::trace!(?errors);
-                unreachable!("Document is valid TOML. Errors: {errors:?}")
+                unreachable!("Document must be valid TOML.")
             }
         }
     }
