@@ -44,6 +44,19 @@ pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
     Parsed::new(green_tree, errors)
 }
 
+pub fn parsed_and_ast(source: &str) -> (crate::Parsed<ast::Root>, ast::Root) {
+    let parsed = crate::parse(source);
+
+    let Some(parsed) = parsed.cast::<ast::Root>() else {
+        unreachable!("TOML Root node is always a valid AST node even if source is empty.")
+    };
+
+    let root = parsed.tree();
+    tracing::trace!("TOML AST before editing: {:#?}", root);
+
+    (parsed, root)
+}
+
 pub fn build_green_tree(
     source: &str,
     tokens: &[lexer::Token],
