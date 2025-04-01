@@ -35,7 +35,7 @@ impl Document {
         match futures::executor::block_on(formatter.format(&toml_text)) {
             Ok(formatted) => Ok(formatted),
             Err(errors) => {
-                tracing::trace!("toml_text: {}", toml_text);
+                tracing::trace!(?toml_text);
                 tracing::trace!(?errors);
                 unreachable!("Document must be valid TOML.")
             }

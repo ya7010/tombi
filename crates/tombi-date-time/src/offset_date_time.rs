@@ -1,0 +1,94 @@
+#[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
+pub struct OffsetDateTime {
+    date: crate::private::Date,
+    time: crate::private::Time,
+    offset: crate::Offset,
+}
+
+impl OffsetDateTime {
+    #[cfg(feature = "serde")]
+    pub(crate) fn type_name() -> &'static str {
+        "offset date time"
+    }
+
+    pub fn from_ymd_hms(
+        year: u16,
+        month: u8,
+        day: u8,
+        hour: u8,
+        minute: u8,
+        second: u8,
+        offset: crate::Offset,
+    ) -> Self {
+        Self::from_ymd_hms_milli(year, month, day, hour, minute, second, 0, offset)
+    }
+
+    pub fn from_ymd_hms_milli(
+        year: u16,
+        month: u8,
+        day: u8,
+        hour: u8,
+        minute: u8,
+        second: u8,
+        milli: u32,
+        offset: crate::Offset,
+    ) -> Self {
+        Self {
+            date: crate::private::Date { year, month, day },
+            time: crate::private::Time {
+                hour,
+                minute,
+                second,
+                nanosecond: milli * 1_000_000,
+            },
+            offset,
+        }
+    }
+
+    pub fn year(&self) -> u16 {
+        self.date.year
+    }
+
+    pub fn month(&self) -> u8 {
+        self.date.month
+    }
+
+    pub fn day(&self) -> u8 {
+        self.date.day
+    }
+
+    pub fn hour(&self) -> u8 {
+        self.time.hour
+    }
+
+    pub fn minute(&self) -> u8 {
+        self.time.minute
+    }
+
+    pub fn second(&self) -> u8 {
+        self.time.second
+    }
+
+    pub fn nanosecond(&self) -> u32 {
+        self.time.nanosecond
+    }
+
+    pub fn offset(&self) -> crate::Offset {
+        self.offset
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::ser::Serialize for OffsetDateTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        crate::private::DateTime {
+            date: Some(self.date),
+            time: Some(self.time),
+            offset: Some(self.offset),
+        }
+        .serialize(serializer)
+    }
+}
