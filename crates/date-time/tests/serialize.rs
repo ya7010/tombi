@@ -40,7 +40,7 @@ fn test_local_time_serialization_with_milliseconds(
 #[rstest]
 #[case(1234, "12:00:00.000001234")]
 #[case(123456789, "12:00:00.123456789")]
-#[case(1234567890, "12:00:00.123456789")]
+#[case(999999999, "12:00:00.999999999")]
 fn test_local_time_serialization_with_nanoseconds(
     #[case] nanoseconds: u32,
     #[case] expected: &str,
@@ -81,7 +81,7 @@ fn test_local_date_time_serialization_with_milliseconds(
 #[rstest]
 #[case(1234, "2021-01-01T12:00:00.000001234")]
 #[case(123456789, "2021-01-01T12:00:00.123456789")]
-#[case(1234567890, "2021-01-01T12:00:00.123456789")]
+#[case(999999999, "2021-01-01T12:00:00.999999999")]
 fn test_local_date_time_serialization_with_nanoseconds(
     #[case] nanoseconds: u32,
     #[case] expected: &str,

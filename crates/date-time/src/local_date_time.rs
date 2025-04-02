@@ -108,3 +108,23 @@ impl serde::ser::Serialize for LocalDateTime {
         .serialize(serializer)
     }
 }
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Deserialize<'de> for LocalDateTime {
+    fn deserialize<D>(deserializer: D) -> Result<LocalDateTime, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        match crate::private::DateTime::deserialize(deserializer)? {
+            crate::private::DateTime {
+                date: Some(date),
+                time: Some(time),
+                offset: None,
+            } => Ok(LocalDateTime { date, time }),
+            datetime => Err(serde::de::Error::invalid_type(
+                serde::de::Unexpected::Other(datetime.type_name()),
+                &Self::type_name(),
+            )),
+        }
+    }
+}

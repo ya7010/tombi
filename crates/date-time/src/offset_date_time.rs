@@ -92,3 +92,23 @@ impl serde::ser::Serialize for OffsetDateTime {
         .serialize(serializer)
     }
 }
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Deserialize<'de> for OffsetDateTime {
+    fn deserialize<D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        match crate::private::DateTime::deserialize(deserializer)? {
+            crate::private::DateTime {
+                date: Some(date),
+                time: Some(time),
+                offset: Some(offset),
+            } => Ok(OffsetDateTime { date, time, offset }),
+            datetime => Err(serde::de::Error::invalid_type(
+                serde::de::Unexpected::Other(datetime.type_name()),
+                &Self::type_name(),
+            )),
+        }
+    }
+}
