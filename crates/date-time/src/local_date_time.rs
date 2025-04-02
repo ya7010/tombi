@@ -29,15 +29,38 @@ impl LocalDateTime {
         hour: u8,
         minute: u8,
         second: u8,
-        milli: u32,
+        millisecond: u32,
     ) -> Self {
+        assert!(millisecond < 1_000);
+
         Self {
             date: crate::private::Date { year, month, day },
             time: crate::private::Time {
                 hour,
                 minute,
                 second,
-                nanosecond: milli * 1_000_000,
+                nanosecond: millisecond * 1_000_000,
+            },
+        }
+    }
+
+    pub fn from_ymd_hms_nano(
+        year: u16,
+        month: u8,
+        day: u8,
+        hour: u8,
+        minute: u8,
+        second: u8,
+        nanosecond: u32,
+    ) -> Self {
+        assert!(nanosecond < 1_000_000_000);
+        Self {
+            date: crate::private::Date { year, month, day },
+            time: crate::private::Time {
+                hour,
+                minute,
+                second,
+                nanosecond,
             },
         }
     }

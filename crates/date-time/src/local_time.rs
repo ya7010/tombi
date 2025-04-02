@@ -17,11 +17,24 @@ impl LocalTime {
     }
 
     pub fn from_hms_milli(hour: u8, minute: u8, second: u8, millisecond: u32) -> Self {
+        assert!(millisecond < 1_000);
+
         Self(crate::private::Time {
             hour,
             minute,
             second,
             nanosecond: millisecond * 1_000_000,
+        })
+    }
+
+    pub fn from_hms_nano(hour: u8, minute: u8, second: u8, nanosecond: u32) -> Self {
+        assert!(nanosecond < 1_000_000_000);
+
+        Self(crate::private::Time {
+            hour,
+            minute,
+            second,
+            nanosecond,
         })
     }
 
