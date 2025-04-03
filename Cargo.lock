@@ -426,6 +426,7 @@ dependencies = [
  "rstest",
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]
@@ -486,6 +487,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "chrono",
+ "date-time",
  "document-tree",
  "indexmap",
  "itertools",
@@ -509,6 +511,7 @@ version = "0.0.0"
 dependencies = [
  "ast",
  "chrono",
+ "date-time",
  "diagnostic",
  "indexmap",
  "itertools",

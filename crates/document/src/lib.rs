@@ -7,7 +7,7 @@ pub use key::{Key, KeyKind};
 use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
-    OffsetDateTime, String, StringKind, Table, TableKind, Value,
+    OffsetDateTime, String, StringKind, Table, TableKind, TimeZoneOffset, Value,
 };
 
 #[derive(Debug, Clone, PartialEq)]
