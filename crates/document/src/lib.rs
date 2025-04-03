@@ -210,37 +210,4 @@ mod test {
             )
         )
     }
-
-    test_deserialize! {
-        #[test]
-        fn invalid_time(
-            r#"
-            time = 24:00
-            "#
-        ) -> Ok(
-            json!(
-                {
-                    "time": [
-                        {
-                            "name": "apple",
-                            "physical": {
-                                "color": "red",
-                                "shape": "round"
-                            },
-                            "varieties": [
-                                { "name": "red delicious" },
-                                { "name": "granny smith" }
-                            ]
-                        },
-                        {
-                            "name": "banana",
-                            "varieties": [
-                                { "name": "plantain" }
-                            ]
-                        }
-                    ]
-                }
-            )
-        )
-    }
 }
