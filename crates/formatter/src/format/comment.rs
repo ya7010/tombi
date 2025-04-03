@@ -59,10 +59,7 @@ impl Format for Vec<Vec<EndDanglingComment>> {
             return Ok(());
         }
 
-        write!(f, "{}", f.line_ending())?;
         for (i, comments) in self.iter().enumerate() {
-            assert!(!comments.is_empty());
-
             if i != 0 {
                 write!(f, "{}", f.line_ending())?;
             }
@@ -178,6 +175,61 @@ mod tests {
             #       This allows for multi-line indentation to be preserved.
             "#
         ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn end_dangling_comment(
+            r#"
+            key = "value"
+            # end dangling comment1
+            # end dangling comment2
+
+            # end dangling comment3
+            # end dangling comment4
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn end_dangling_comment_starts_with_line_break(
+            r#"
+            key = "value"
+
+            # end dangling comment1
+            # end dangling comment2
+
+            # end dangling comment3
+            # end dangling comment4
+            "#
+        ) -> Ok(source);
+    }
+
+    test_format! {
+        #[test]
+        fn end_dangling_comment_starts_with_multi_line_break(
+            r#"
+            key = "value"
+
+
+            # end dangling comment1
+            # end dangling comment2
+
+            # end dangling comment3
+            # end dangling comment4
+            "#
+        ) -> Ok(
+            r#"
+            key = "value"
+
+            # end dangling comment1
+            # end dangling comment2
+
+            # end dangling comment3
+            # end dangling comment4
+            "#
+        );
     }
 
     test_format! {
