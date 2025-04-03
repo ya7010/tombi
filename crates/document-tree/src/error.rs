@@ -1,4 +1,5 @@
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Error {
     #[error("duplicate key: {key}")]
     DuplicateKey { key: String, range: text::Range },
@@ -57,6 +58,12 @@ pub enum Error {
         range: text::Range,
     },
 
+    #[error("invalid date-time: {error}")]
+    ParseDateTimeError {
+        error: date_time::parse::Error,
+        range: text::Range,
+    },
+
     #[error("invalid comment: {error}")]
     ParseCommentError {
         error: crate::support::comment::ParseError,
@@ -87,6 +94,7 @@ impl Error {
             Self::ParseLocalTimeError { range, .. } => *range,
             Self::ParseCommentError { range, .. } => *range,
             Self::IncompleteNode { range } => *range,
+            Self::ParseDateTimeError { range, .. } => *range,
         }
     }
 }

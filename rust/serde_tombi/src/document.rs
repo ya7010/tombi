@@ -97,10 +97,10 @@ impl ToTomlString for document::Value {
             document::Value::Boolean(b) => result.push_str(&b.value().to_string()),
             document::Value::Array(a) => a.to_toml_string(result, parent_keys),
             document::Value::Table(t) => t.to_toml_string(result, parent_keys),
-            document::Value::OffsetDateTime(dt) => result.push_str(&dt.value().to_string()),
-            document::Value::LocalDateTime(dt) => result.push_str(&dt.value().to_string()),
-            document::Value::LocalDate(d) => result.push_str(&d.value().to_string()),
-            document::Value::LocalTime(t) => result.push_str(&t.value().to_string()),
+            document::Value::OffsetDateTime(dt) => result.push_str(&dt.to_string()),
+            document::Value::LocalDateTime(dt) => result.push_str(&dt.to_string()),
+            document::Value::LocalDate(d) => result.push_str(&d.to_string()),
+            document::Value::LocalTime(t) => result.push_str(&t.to_string()),
         }
     }
 }
@@ -316,25 +316,25 @@ impl ToTomlString for document::String {
 
 impl ToTomlString for document::OffsetDateTime {
     fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
-        result.push_str(&self.value().to_rfc3339());
+        result.push_str(&self.to_string());
     }
 }
 
 impl ToTomlString for document::LocalDateTime {
     fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
-        result.push_str(&self.value().format("%Y-%m-%d %H:%M:%S").to_string());
+        result.push_str(&self.to_string());
     }
 }
 
 impl ToTomlString for document::LocalDate {
     fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
-        result.push_str(&self.value().format("%Y-%m-%d").to_string());
+        result.push_str(&self.to_string());
     }
 }
 
 impl ToTomlString for document::LocalTime {
     fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
-        result.push_str(&self.value().format("%H:%M:%S").to_string());
+        result.push_str(&self.to_string());
     }
 }
 
@@ -584,6 +584,25 @@ id = 1
 
 [[aaa.bbb.ccc.items]]
 id = 2
+"#;
+        toml_text_assert_eq!(toml_string, expected);
+    }
+
+    #[test]
+    fn test_date_time_serialization() {
+        test_lib::init_tracing();
+
+        let mut document = Document::new();
+
+        let now = OffsetDateTime::from_ymd_hms(2024, 1, 1, 0, 0, 0, document::TimeZoneOffset::Z);
+        document.insert(
+            Key::new(KeyKind::BareKey, "now".to_string()),
+            Value::OffsetDateTime(now),
+        );
+
+        let toml_string = document.to_string().unwrap();
+        let expected = r#"
+now = 2024-01-01T00:00:00Z
 "#;
         toml_text_assert_eq!(toml_string, expected);
     }

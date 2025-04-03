@@ -8,7 +8,7 @@ mod table;
 
 pub use array::{Array, ArrayKind};
 pub use boolean::Boolean;
-pub use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime};
+pub use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
 pub use float::Float;
 pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};

@@ -7,13 +7,13 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OffsetDateTime {
-    value: chrono::DateTime<chrono::FixedOffset>,
+    value: date_time::OffsetDateTime,
     node: ast::OffsetDateTime,
 }
 
 impl OffsetDateTime {
     #[inline]
-    pub fn value(&self) -> &chrono::DateTime<chrono::FixedOffset> {
+    pub fn value(&self) -> &date_time::OffsetDateTime {
         &self.value
     }
 
@@ -35,15 +35,13 @@ impl OffsetDateTime {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDateTime {
-    // NOTE: `chrono::DateTime<chrono::Local>` is not enough to represent local date time.
-    //       `chrono::Local.from_local_datetime(native_date_time)` cannot uniquely determine the time zone in some cases, so we handle NativeDateTime.
-    value: chrono::NaiveDateTime,
+    value: date_time::LocalDateTime,
     node: ast::LocalDateTime,
 }
 
 impl LocalDateTime {
     #[inline]
-    pub fn value(&self) -> &chrono::NaiveDateTime {
+    pub fn value(&self) -> &date_time::LocalDateTime {
         &self.value
     }
 
@@ -65,13 +63,13 @@ impl LocalDateTime {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDate {
-    value: chrono::NaiveDate,
+    value: date_time::LocalDate,
     node: ast::LocalDate,
 }
 
 impl LocalDate {
     #[inline]
-    pub fn value(&self) -> &chrono::NaiveDate {
+    pub fn value(&self) -> &date_time::LocalDate {
         &self.value
     }
 
@@ -93,13 +91,13 @@ impl LocalDate {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalTime {
-    value: chrono::NaiveTime,
+    value: date_time::LocalTime,
     node: ast::LocalTime,
 }
 
 impl LocalTime {
     #[inline]
-    pub fn value(&self) -> &chrono::NaiveTime {
+    pub fn value(&self) -> &date_time::LocalTime {
         &self.value
     }
 
@@ -156,6 +154,30 @@ impl ValueImpl for LocalTime {
 
     fn range(&self) -> text::Range {
         self.range()
+    }
+}
+
+impl From<crate::OffsetDateTime> for date_time::OffsetDateTime {
+    fn from(node: crate::OffsetDateTime) -> Self {
+        node.value
+    }
+}
+
+impl From<crate::LocalDateTime> for date_time::LocalDateTime {
+    fn from(node: crate::LocalDateTime) -> Self {
+        node.value
+    }
+}
+
+impl From<crate::LocalDate> for date_time::LocalDate {
+    fn from(node: crate::LocalDate) -> Self {
+        node.value
+    }
+}
+
+impl From<crate::LocalTime> for date_time::LocalTime {
+    fn from(node: crate::LocalTime) -> Self {
+        node.value
     }
 }
 

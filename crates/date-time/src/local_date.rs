@@ -24,6 +24,28 @@ impl LocalDate {
     }
 }
 
+impl std::str::FromStr for LocalDate {
+    type Err = crate::parse::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match crate::private::DateTime::from_str(s) {
+            Ok(crate::private::DateTime {
+                date: Some(date),
+                time: None,
+                offset: None,
+            }) => Ok(Self(date)),
+            Ok(_) => Err(crate::parse::Error::ExpectedLocalDate),
+            Err(error) => Err(error.into()),
+        }
+    }
+}
+
+impl std::fmt::Display for LocalDate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 #[cfg(feature = "serde")]
 impl serde::ser::Serialize for LocalDate {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -51,5 +73,25 @@ impl<'de> serde::de::Deserialize<'de> for LocalDate {
                 &Self::type_name(),
             )),
         }
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl From<chrono::NaiveDate> for LocalDate {
+    fn from(value: chrono::NaiveDate) -> Self {
+        use chrono::Datelike;
+
+        Self(crate::private::Date {
+            year: value.year() as u16,
+            month: value.month() as u8,
+            day: value.day() as u8,
+        })
+    }
+}
+
+#[cfg(feature = "chrono")]
+impl From<chrono::DateTime<chrono::Local>> for LocalDate {
+    fn from(value: chrono::DateTime<chrono::Local>) -> Self {
+        value.naive_local().date().into()
     }
 }

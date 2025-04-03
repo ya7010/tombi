@@ -8,6 +8,7 @@ license = { workspace = true }
 [dependencies]
 ast = { workspace = true }
 chrono = { workspace = true }
+date-time = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
