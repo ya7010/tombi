@@ -181,12 +181,10 @@ mod tests {
         #[test]
         fn end_dangling_comment(
             r#"
-            key = "value"
-            # end dangling comment1
-            # end dangling comment2
-
-            # end dangling comment3
-            # end dangling comment4
+            [dependencies]
+            serde = "^1.0"
+            # serde_json = "^1.0"
+            # serde-yaml = "^0.10"
             "#
         ) -> Ok(source);
     }
