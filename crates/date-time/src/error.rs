@@ -59,6 +59,12 @@ pub mod parse {
         #[error("nanosecond must be between 0 and 999_999_999")]
         InvalidNanoseconds,
 
+        #[error("time zone offset hour must be between 0 and 24")]
+        InvalidTimeZoneOffsetHour,
+
+        #[error("time zone offset minute must be between 0 and 59")]
+        InvalidTimeZoneOffsetMinute,
+
         #[error("offset must be between -24:00 and 24:00")]
         InvalidOffset,
     }

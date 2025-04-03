@@ -199,14 +199,16 @@ impl std::str::FromStr for DateTime {
                 nanosecond,
             };
 
-            if time.hour > 24 {
+            tracing::error!("time: {:?}", time);
+
+            if time.hour >= 24 {
                 return Err(crate::parse::Error::InvalidHour);
             }
-            if time.minute > 59 {
+            if time.minute >= 60 {
                 return Err(crate::parse::Error::InvalidMinute);
             }
             // 00-58, 00-59, 00-60 based on leap second rules
-            if time.second > 60 {
+            if time.second >= 60 {
                 return Err(crate::parse::Error::InvalidSecond);
             }
             if time.nanosecond > 999_999_999 {
@@ -245,6 +247,13 @@ impl std::str::FromStr for DateTime {
 
                 let hours = h1 * 10 + h2;
                 let minutes = m1 * 10 + m2;
+
+                if hours >= 24 {
+                    return Err(crate::parse::Error::InvalidTimeZoneOffsetHour);
+                }
+                if minutes >= 60 {
+                    return Err(crate::parse::Error::InvalidTimeZoneOffsetMinute);
+                }
 
                 let total_minutes = sign * (hours * 60 + minutes);
 
