@@ -158,39 +158,43 @@ impl std::str::FromStr for DateTime {
             }
             let m1 = digit(&mut chars)?;
             let m2 = digit(&mut chars)?;
-            match chars.next() {
-                Some(':') => {}
-                _ => return Err(crate::parse::Error::ExpectedTimeFormat),
-            }
-            let s1 = digit(&mut chars)?;
-            let s2 = digit(&mut chars)?;
+            let (s1, s2, nanosecond) = match chars.clone().next() {
+                Some(':') => {
+                    chars.next();
+                    let s1 = digit(&mut chars)?;
+                    let s2 = digit(&mut chars)?;
 
-            let mut nanosecond = 0;
-            if chars.clone().next() == Some('.') {
-                chars.next();
-                let whole = chars.as_str();
+                    let mut nanosecond = 0;
+                    if chars.clone().next() == Some('.') {
+                        chars.next();
+                        let whole = chars.as_str();
 
-                let mut end = whole.len();
-                for (i, byte) in whole.bytes().enumerate() {
-                    #[allow(clippy::single_match_else)]
-                    match byte {
-                        b'0'..=b'9' => {
-                            if i < 9 {
-                                let p = 10_u32.pow(8 - i as u32);
-                                nanosecond += p * u32::from(byte - b'0');
+                        let mut end = whole.len();
+                        for (i, byte) in whole.bytes().enumerate() {
+                            #[allow(clippy::single_match_else)]
+                            match byte {
+                                b'0'..=b'9' => {
+                                    if i < 9 {
+                                        let p = 10_u32.pow(8 - i as u32);
+                                        nanosecond += p * u32::from(byte - b'0');
+                                    }
+                                }
+                                _ => {
+                                    end = i;
+                                    break;
+                                }
                             }
                         }
-                        _ => {
-                            end = i;
-                            break;
+                        if end == 0 {
+                            return Err(crate::parse::Error::ExpectedNanoseconds);
                         }
+                        chars = whole[end..].chars();
                     }
+
+                    (s1, s2, nanosecond)
                 }
-                if end == 0 {
-                    return Err(crate::parse::Error::ExpectedNanoseconds);
-                }
-                chars = whole[end..].chars();
-            }
+                _ => (0, 0, 0),
+            };
 
             let time = crate::private::Time {
                 hour: h1 * 10 + h2,
