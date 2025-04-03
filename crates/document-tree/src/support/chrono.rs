@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use toml_version::TomlVersion;
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -45,7 +47,7 @@ impl From<chrono::format::ParseErrorKind> for ParseError {
 pub fn try_new_offset_date_time(
     node: &ast::OffsetDateTime,
     toml_version: TomlVersion,
-) -> Result<chrono::DateTime<chrono::FixedOffset>, crate::Error> {
+) -> Result<date_time::OffsetDateTime, crate::Error> {
     let Some(token) = node.token() else {
         return Err(crate::Error::IncompleteNode {
             range: node.range(),
@@ -59,10 +61,10 @@ pub fn try_new_offset_date_time(
         });
     };
 
-    match chrono::DateTime::parse_from_rfc3339(&datetime_str) {
+    match date_time::OffsetDateTime::from_str(&datetime_str) {
         Ok(value) => Ok(value),
-        Err(error) => Err(crate::Error::ParseOffsetDateTimeError {
-            error: error.kind().into(),
+        Err(error) => Err(crate::Error::ParseDateTimeError {
+            error: error.into(),
             range: token.range(),
         }),
     }
@@ -71,7 +73,7 @@ pub fn try_new_offset_date_time(
 pub fn try_new_local_date_time(
     node: &ast::LocalDateTime,
     toml_version: TomlVersion,
-) -> Result<chrono::NaiveDateTime, crate::Error> {
+) -> Result<date_time::LocalDateTime, crate::Error> {
     let Some(token) = node.token() else {
         return Err(crate::Error::IncompleteNode {
             range: node.range(),
@@ -85,10 +87,10 @@ pub fn try_new_local_date_time(
         });
     };
 
-    match chrono::NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S%.f") {
+    match date_time::LocalDateTime::from_str(&datetime_str) {
         Ok(value) => Ok(value),
-        Err(error) => Err(crate::Error::ParseLocalDateTimeError {
-            error: error.kind().into(),
+        Err(error) => Err(crate::Error::ParseDateTimeError {
+            error: error.into(),
             range: token.range(),
         }),
     }
@@ -97,17 +99,17 @@ pub fn try_new_local_date_time(
 pub fn try_new_local_date(
     node: &ast::LocalDate,
     _toml_version: TomlVersion,
-) -> Result<chrono::NaiveDate, crate::Error> {
+) -> Result<date_time::LocalDate, crate::Error> {
     let Some(token) = node.token() else {
         return Err(crate::Error::IncompleteNode {
             range: node.range(),
         });
     };
 
-    match chrono::NaiveDate::parse_from_str(token.text(), "%Y-%m-%d") {
+    match date_time::LocalDate::from_str(token.text()) {
         Ok(value) => Ok(value),
-        Err(error) => Err(crate::Error::ParseLocalDateError {
-            error: error.kind().into(),
+        Err(error) => Err(crate::Error::ParseDateTimeError {
+            error: error.into(),
             range: token.range(),
         }),
     }
@@ -116,7 +118,7 @@ pub fn try_new_local_date(
 pub fn try_new_local_time(
     node: &ast::LocalTime,
     toml_version: TomlVersion,
-) -> Result<chrono::NaiveTime, crate::Error> {
+) -> Result<date_time::LocalTime, crate::Error> {
     const HOUR_MINUTE_SIZE: usize = "00:00".len();
 
     let Some(token) = node.token() else {
@@ -129,7 +131,7 @@ pub fn try_new_local_time(
     // NOTE: Support optional seconds.
     //       See more infomation: https://github.com/toml-lang/toml/issues/671
     if text.chars().nth(HOUR_MINUTE_SIZE) == Some(':') {
-        chrono::NaiveTime::parse_from_str(text, "%H:%M:%S%.f")
+        date_time::LocalTime::from_str(text)
     } else {
         if toml_version < TomlVersion::V1_1_0_Preview {
             return Err(crate::Error::ParseLocalTimeError {
@@ -137,10 +139,10 @@ pub fn try_new_local_time(
                 range: token.range(),
             });
         }
-        chrono::NaiveTime::parse_from_str(text, "%H:%M%.f")
+        date_time::LocalTime::from_str(text)
     }
-    .map_err(|error| crate::Error::ParseLocalTimeError {
-        error: error.kind().into(),
+    .map_err(|error| crate::Error::ParseDateTimeError {
+        error,
         range: token.range(),
     })
 }

@@ -12,7 +12,7 @@ pub(crate) struct DateTime {
 
     /// Optional offset.
     /// Required for: *Offset Date-Time*.
-    pub offset: Option<crate::Offset>,
+    pub offset: Option<crate::TimeZoneOffset>,
 }
 
 impl DateTime {
@@ -71,9 +71,9 @@ impl std::fmt::Display for DateTime {
 }
 
 impl std::str::FromStr for DateTime {
-    type Err = crate::DatetimeParseError;
+    type Err = crate::parse::Error;
 
-    fn from_str(date: &str) -> Result<DateTime, crate::DatetimeParseError> {
+    fn from_str(date: &str) -> Result<DateTime, crate::parse::Error> {
         // Accepted formats:
         //
         // 0000-00-00T00:00:00.00Z
@@ -81,7 +81,7 @@ impl std::str::FromStr for DateTime {
         // 0000-00-00
         // 00:00:00.00
         if date.len() < 3 {
-            return Err(crate::DatetimeParseError {});
+            return Err(crate::parse::Error::TooShort);
         }
         let mut offset_allowed = true;
         let mut chars = date.chars();
@@ -98,7 +98,7 @@ impl std::str::FromStr for DateTime {
 
             match chars.next() {
                 Some('-') => {}
-                _ => return Err(crate::DatetimeParseError {}),
+                _ => return Err(crate::parse::Error::ExpectedDateOrTimeFormat),
             }
 
             let m1 = digit(&mut chars)?;
@@ -106,7 +106,7 @@ impl std::str::FromStr for DateTime {
 
             match chars.next() {
                 Some('-') => {}
-                _ => return Err(crate::DatetimeParseError {}),
+                _ => return Err(crate::parse::Error::ExpectedYearFormat),
             }
 
             let d1 = digit(&mut chars)?;
@@ -119,7 +119,7 @@ impl std::str::FromStr for DateTime {
             };
 
             if date.month < 1 || date.month > 12 {
-                return Err(crate::DatetimeParseError {});
+                return Err(crate::parse::Error::InvalidMonth);
             }
             let is_leap_year =
                 (date.year % 4 == 0) && ((date.year % 100 != 0) || (date.year % 400 == 0));
@@ -130,7 +130,9 @@ impl std::str::FromStr for DateTime {
                 _ => 31,
             };
             if date.day < 1 || date.day > max_days_in_month {
-                return Err(crate::DatetimeParseError {});
+                return Err(crate::parse::Error::InvalidDay {
+                    max_days: max_days_in_month,
+                });
             }
 
             Some(date)
@@ -152,13 +154,13 @@ impl std::str::FromStr for DateTime {
             let h2 = digit(&mut chars)?;
             match chars.next() {
                 Some(':') => {}
-                _ => return Err(crate::DatetimeParseError {}),
+                _ => return Err(crate::parse::Error::ExpectedTimeFormat),
             }
             let m1 = digit(&mut chars)?;
             let m2 = digit(&mut chars)?;
             match chars.next() {
                 Some(':') => {}
-                _ => return Err(crate::DatetimeParseError {}),
+                _ => return Err(crate::parse::Error::ExpectedTimeFormat),
             }
             let s1 = digit(&mut chars)?;
             let s2 = digit(&mut chars)?;
@@ -185,7 +187,7 @@ impl std::str::FromStr for DateTime {
                     }
                 }
                 if end == 0 {
-                    return Err(crate::DatetimeParseError {});
+                    return Err(crate::parse::Error::ExpectedNanoseconds);
                 }
                 chars = whole[end..].chars();
             }
@@ -198,17 +200,17 @@ impl std::str::FromStr for DateTime {
             };
 
             if time.hour > 24 {
-                return Err(crate::DatetimeParseError {});
+                return Err(crate::parse::Error::InvalidHour);
             }
             if time.minute > 59 {
-                return Err(crate::DatetimeParseError {});
+                return Err(crate::parse::Error::InvalidMinute);
             }
             // 00-58, 00-59, 00-60 based on leap second rules
             if time.second > 60 {
-                return Err(crate::DatetimeParseError {});
+                return Err(crate::parse::Error::InvalidSecond);
             }
             if time.nanosecond > 999_999_999 {
-                return Err(crate::DatetimeParseError {});
+                return Err(crate::parse::Error::InvalidNanoseconds);
             }
 
             Some(time)
@@ -222,21 +224,21 @@ impl std::str::FromStr for DateTime {
             let next = chars.clone().next();
             if next == Some('Z') || next == Some('z') {
                 chars.next();
-                Some(crate::Offset::Z)
+                Some(crate::TimeZoneOffset::Z)
             } else if next.is_none() {
                 None
             } else {
                 let sign = match next {
                     Some('+') => 1,
                     Some('-') => -1,
-                    _ => return Err(crate::DatetimeParseError {}),
+                    _ => return Err(crate::parse::Error::ExpectedTimeZoneOffsetSign),
                 };
                 chars.next();
                 let h1 = digit(&mut chars)? as i16;
                 let h2 = digit(&mut chars)? as i16;
                 match chars.next() {
                     Some(':') => {}
-                    _ => return Err(crate::DatetimeParseError {}),
+                    _ => return Err(crate::parse::Error::ExpectedTimeZoneOffsetColon),
                 }
                 let m1 = digit(&mut chars)? as i16;
                 let m2 = digit(&mut chars)? as i16;
@@ -247,10 +249,10 @@ impl std::str::FromStr for DateTime {
                 let total_minutes = sign * (hours * 60 + minutes);
 
                 if !((-24 * 60)..=(24 * 60)).contains(&total_minutes) {
-                    return Err(crate::DatetimeParseError {});
+                    return Err(crate::parse::Error::InvalidOffset);
                 }
 
-                Some(crate::Offset::Custom {
+                Some(crate::TimeZoneOffset::Custom {
                     minutes: total_minutes,
                 })
             }
@@ -261,7 +263,7 @@ impl std::str::FromStr for DateTime {
         // Return an error if we didn't hit eof, otherwise return our parsed
         // date
         if chars.next().is_some() {
-            return Err(crate::DatetimeParseError {});
+            return Err(crate::parse::Error::TooLong);
         }
 
         Ok(DateTime {
@@ -319,9 +321,9 @@ impl<'de> serde::de::Deserialize<'de> for DateTime {
     }
 }
 
-fn digit(chars: &mut std::str::Chars<'_>) -> Result<u8, crate::DatetimeParseError> {
+fn digit(chars: &mut std::str::Chars<'_>) -> Result<u8, crate::parse::Error> {
     match chars.next() {
         Some(c) if c.is_ascii_digit() => Ok(c as u8 - b'0'),
-        _ => Err(crate::DatetimeParseError {}),
+        _ => Err(crate::parse::Error::ExpectedNumber),
     }
 }
