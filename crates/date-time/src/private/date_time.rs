@@ -158,39 +158,43 @@ impl std::str::FromStr for DateTime {
             }
             let m1 = digit(&mut chars)?;
             let m2 = digit(&mut chars)?;
-            match chars.next() {
-                Some(':') => {}
-                _ => return Err(crate::parse::Error::ExpectedTimeFormat),
-            }
-            let s1 = digit(&mut chars)?;
-            let s2 = digit(&mut chars)?;
+            let (s1, s2, nanosecond) = match chars.clone().next() {
+                Some(':') => {
+                    chars.next();
+                    let s1 = digit(&mut chars)?;
+                    let s2 = digit(&mut chars)?;
 
-            let mut nanosecond = 0;
-            if chars.clone().next() == Some('.') {
-                chars.next();
-                let whole = chars.as_str();
+                    let mut nanosecond = 0;
+                    if chars.clone().next() == Some('.') {
+                        chars.next();
+                        let whole = chars.as_str();
 
-                let mut end = whole.len();
-                for (i, byte) in whole.bytes().enumerate() {
-                    #[allow(clippy::single_match_else)]
-                    match byte {
-                        b'0'..=b'9' => {
-                            if i < 9 {
-                                let p = 10_u32.pow(8 - i as u32);
-                                nanosecond += p * u32::from(byte - b'0');
+                        let mut end = whole.len();
+                        for (i, byte) in whole.bytes().enumerate() {
+                            #[allow(clippy::single_match_else)]
+                            match byte {
+                                b'0'..=b'9' => {
+                                    if i < 9 {
+                                        let p = 10_u32.pow(8 - i as u32);
+                                        nanosecond += p * u32::from(byte - b'0');
+                                    }
+                                }
+                                _ => {
+                                    end = i;
+                                    break;
+                                }
                             }
                         }
-                        _ => {
-                            end = i;
-                            break;
+                        if end == 0 {
+                            return Err(crate::parse::Error::ExpectedNanoseconds);
                         }
+                        chars = whole[end..].chars();
                     }
+
+                    (s1, s2, nanosecond)
                 }
-                if end == 0 {
-                    return Err(crate::parse::Error::ExpectedNanoseconds);
-                }
-                chars = whole[end..].chars();
-            }
+                _ => (0, 0, 0),
+            };
 
             let time = crate::private::Time {
                 hour: h1 * 10 + h2,
@@ -199,14 +203,16 @@ impl std::str::FromStr for DateTime {
                 nanosecond,
             };
 
-            if time.hour > 24 {
+            tracing::error!("time: {:?}", time);
+
+            if time.hour >= 24 {
                 return Err(crate::parse::Error::InvalidHour);
             }
-            if time.minute > 59 {
+            if time.minute >= 60 {
                 return Err(crate::parse::Error::InvalidMinute);
             }
             // 00-58, 00-59, 00-60 based on leap second rules
-            if time.second > 60 {
+            if time.second >= 60 {
                 return Err(crate::parse::Error::InvalidSecond);
             }
             if time.nanosecond > 999_999_999 {
@@ -245,6 +251,13 @@ impl std::str::FromStr for DateTime {
 
                 let hours = h1 * 10 + h2;
                 let minutes = m1 * 10 + m2;
+
+                if hours >= 24 {
+                    return Err(crate::parse::Error::InvalidTimeZoneOffsetHour);
+                }
+                if minutes >= 60 {
+                    return Err(crate::parse::Error::InvalidTimeZoneOffsetMinute);
+                }
 
                 let total_minutes = sign * (hours * 60 + minutes);
 

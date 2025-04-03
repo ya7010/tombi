@@ -86,6 +86,8 @@ macro_rules! test_deserialize {
             use document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
 
+            test_lib::init_tracing();
+
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim());
             pretty_assertions::assert_eq!(p.errors($toml_version).collect_vec(), Vec::<&parser::Error>::new());
