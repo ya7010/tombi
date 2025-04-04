@@ -67,6 +67,9 @@ pub mod parse {
 
         #[error("offset must be between -24:00 and 24:00")]
         InvalidOffset,
+
+        #[error("invalid TOML DateTime format")]
+        InvalidFormat,
     }
 }
 

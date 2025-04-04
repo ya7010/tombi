@@ -1,5 +1,3 @@
-use crate::{DatetimeFromString, FIELD, NAME};
-
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub(crate) struct DateTime {
     /// Optional date.
@@ -293,11 +291,7 @@ impl serde::ser::Serialize for DateTime {
     where
         S: serde::ser::Serializer,
     {
-        use serde::ser::SerializeStruct;
-
-        let mut s = serializer.serialize_struct(NAME, 1)?;
-        s.serialize_field(FIELD, &self.to_string())?;
-        s.end()
+        serializer.serialize_str(&self.to_string())
     }
 }
 
@@ -307,36 +301,30 @@ impl<'de> serde::de::Deserialize<'de> for DateTime {
     where
         D: serde::de::Deserializer<'de>,
     {
-        struct DatetimeVisitor;
+        struct Visitor;
 
-        impl<'de> serde::de::Visitor<'de> for DatetimeVisitor {
+        impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = DateTime;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("a TOML datetime")
             }
 
-            fn visit_map<V>(self, mut visitor: V) -> Result<DateTime, V::Error>
+            fn visit_str<E>(self, s: &str) -> Result<DateTime, E>
             where
-                V: serde::de::MapAccess<'de>,
+                E: serde::de::Error,
             {
-                let value = visitor.next_key::<crate::private::DateTimeKey>()?;
-                if value.is_none() {
-                    return Err(serde::de::Error::custom("datetime key not found"));
-                }
-                let v: DatetimeFromString = visitor.next_value()?;
-                Ok(v.value)
+                s.parse().map_err(serde::de::Error::custom)
             }
         }
 
-        static FIELDS: [&str; 1] = [FIELD];
-        deserializer.deserialize_struct(NAME, &FIELDS, DatetimeVisitor)
+        deserializer.deserialize_str(Visitor)
     }
 }
 
 fn digit(chars: &mut std::str::Chars<'_>) -> Result<u8, crate::parse::Error> {
     match chars.next() {
         Some(c) if c.is_ascii_digit() => Ok(c as u8 - b'0'),
-        _ => Err(crate::parse::Error::ExpectedNumber),
+        _ => Err(crate::parse::Error::InvalidFormat),
     }
 }
