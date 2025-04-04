@@ -65,8 +65,11 @@ pub mod parse {
         #[error("time zone offset minute must be between 0 and 59")]
         InvalidTimeZoneOffsetMinute,
 
-        #[error("offset must be between -24:00 and 24:00")]
-        InvalidOffset,
+        #[error("time zone offset must be between -24:00 and 24:00")]
+        InvalidTimeZoneOffset,
+
+        #[error("invalid TOML DateTime format")]
+        InvalidFormat,
     }
 }
 

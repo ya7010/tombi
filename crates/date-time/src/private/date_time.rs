@@ -1,4 +1,4 @@
-use crate::{DatetimeFromString, FIELD, NAME};
+const DATE_TIME_SERDE_NAME: &str = "$__tombi_private_DateTime";
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub(crate) struct DateTime {
@@ -262,7 +262,7 @@ impl std::str::FromStr for DateTime {
                 let total_minutes = sign * (hours * 60 + minutes);
 
                 if !((-24 * 60)..=(24 * 60)).contains(&total_minutes) {
-                    return Err(crate::parse::Error::InvalidOffset);
+                    return Err(crate::parse::Error::InvalidTimeZoneOffset);
                 }
 
                 Some(crate::TimeZoneOffset::Custom {
@@ -293,11 +293,18 @@ impl serde::ser::Serialize for DateTime {
     where
         S: serde::ser::Serializer,
     {
-        use serde::ser::SerializeStruct;
+        struct DateTimeStr<'a>(&'a str);
 
-        let mut s = serializer.serialize_struct(NAME, 1)?;
-        s.serialize_field(FIELD, &self.to_string())?;
-        s.end()
+        impl<'a> serde::ser::Serialize for DateTimeStr<'a> {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::ser::Serializer,
+            {
+                serializer.serialize_str(self.0)
+            }
+        }
+
+        serializer.serialize_newtype_struct(DATE_TIME_SERDE_NAME, &DateTimeStr(&self.to_string()))
     }
 }
 
@@ -307,36 +314,37 @@ impl<'de> serde::de::Deserialize<'de> for DateTime {
     where
         D: serde::de::Deserializer<'de>,
     {
-        struct DatetimeVisitor;
+        struct DateTimeVisitor;
 
-        impl<'de> serde::de::Visitor<'de> for DatetimeVisitor {
+        impl<'de> serde::de::Visitor<'de> for DateTimeVisitor {
             type Value = DateTime;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                formatter.write_str("a TOML datetime")
+                formatter.write_str("a TOML DateTime")
             }
 
-            fn visit_map<V>(self, mut visitor: V) -> Result<DateTime, V::Error>
+            fn visit_str<E>(self, s: &str) -> Result<DateTime, E>
             where
-                V: serde::de::MapAccess<'de>,
+                E: serde::de::Error,
             {
-                let value = visitor.next_key::<crate::private::DateTimeKey>()?;
-                if value.is_none() {
-                    return Err(serde::de::Error::custom("datetime key not found"));
-                }
-                let v: DatetimeFromString = visitor.next_value()?;
-                Ok(v.value)
+                s.parse().map_err(serde::de::Error::custom)
+            }
+
+            fn visit_newtype_struct<D>(self, deserializer: D) -> Result<DateTime, D::Error>
+            where
+                D: serde::de::Deserializer<'de>,
+            {
+                deserializer.deserialize_str(self)
             }
         }
 
-        static FIELDS: [&str; 1] = [FIELD];
-        deserializer.deserialize_struct(NAME, &FIELDS, DatetimeVisitor)
+        deserializer.deserialize_newtype_struct(DATE_TIME_SERDE_NAME, DateTimeVisitor)
     }
 }
 
 fn digit(chars: &mut std::str::Chars<'_>) -> Result<u8, crate::parse::Error> {
     match chars.next() {
         Some(c) if c.is_ascii_digit() => Ok(c as u8 - b'0'),
-        _ => Err(crate::parse::Error::ExpectedNumber),
+        _ => Err(crate::parse::Error::InvalidFormat),
     }
 }
