@@ -16,7 +16,12 @@ impl Document {
         Self(document::Document::new())
     }
 
+    #[inline]
     pub fn to_string(&self) -> crate::Result<std::string::String> {
+        futures::executor::block_on(self.to_string_async())
+    }
+
+    pub async fn to_string_async(&self) -> crate::Result<std::string::String> {
         let mut toml_text = std::string::String::new();
         self.to_toml_string(&mut toml_text, &[]);
 
@@ -32,7 +37,7 @@ impl Document {
             &schema_store,
         );
 
-        match futures::executor::block_on(formatter.format(&toml_text)) {
+        match formatter.format(&toml_text).await {
             Ok(formatted) => Ok(formatted),
             Err(errors) => {
                 tracing::trace!(?toml_text);
