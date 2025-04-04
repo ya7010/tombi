@@ -103,6 +103,26 @@ impl std::fmt::Display for OffsetDateTime {
     }
 }
 
+#[cfg(feature = "chrono")]
+impl From<chrono::DateTime<chrono::FixedOffset>> for OffsetDateTime {
+    fn from(value: chrono::DateTime<chrono::FixedOffset>) -> Self {
+        use chrono::Datelike;
+        use chrono::Timelike;
+
+        Self::from_ymd_hms(
+            value.year() as u16,
+            value.month() as u8,
+            value.day() as u8,
+            value.hour() as u8,
+            value.minute() as u8,
+            value.second() as u8,
+            crate::TimeZoneOffset::Custom {
+                minutes: value.offset().local_minus_utc() as i16,
+            },
+        )
+    }
+}
+
 #[cfg(feature = "serde")]
 impl serde::ser::Serialize for OffsetDateTime {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

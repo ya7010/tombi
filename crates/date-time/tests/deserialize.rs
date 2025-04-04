@@ -1,4 +1,4 @@
-use date_time::{LocalDate, LocalDateTime, LocalTime, Offset, OffsetDateTime};
+use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
 use rstest::rstest;
 use serde_json::json;
 
@@ -86,11 +86,14 @@ fn test_local_date_time_deserialization_with_nanoseconds(
 }
 
 #[rstest]
-#[case("2021-01-01T12:00:00Z", Offset::Z)]
-#[case("2021-01-01T12:00:00+00:00", Offset::Custom { minutes: 0 })]
-#[case("2021-01-01T12:00:00+00:30", Offset::Custom { minutes: 30 })]
-#[case("2021-01-01T12:00:00-00:30", Offset::Custom { minutes: -30 })]
-fn test_offset_date_time_deserialization(#[case] input: &str, #[case] expected_offset: Offset) {
+#[case("2021-01-01T12:00:00Z", TimeZoneOffset::Z)]
+#[case("2021-01-01T12:00:00+00:00", TimeZoneOffset::Custom { minutes: 0 })]
+#[case("2021-01-01T12:00:00+00:30", TimeZoneOffset::Custom { minutes: 30 })]
+#[case("2021-01-01T12:00:00-00:30", TimeZoneOffset::Custom { minutes: -30 })]
+fn test_offset_date_time_deserialization(
+    #[case] input: &str,
+    #[case] expected_offset: TimeZoneOffset,
+) {
     let json = json!({"$__tombi_private_datetime": input});
     let date_time: OffsetDateTime = serde_json::from_value(json).unwrap();
     assert_eq!(
