@@ -28,8 +28,14 @@ pub fn to_string<T>(value: &T) -> crate::Result<String>
 where
     T: Serialize,
 {
-    let document = to_document(value)?;
-    document.to_string()
+    to_document(value)?.to_string()
+}
+
+pub async fn to_string_async<T>(value: &T) -> crate::Result<String>
+where
+    T: Serialize,
+{
+    to_document(value)?.to_string_async().await
 }
 
 /// Serialize the given data structure as a TOML Document.
