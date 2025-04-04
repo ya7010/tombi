@@ -103,21 +103,6 @@ impl std::fmt::Display for OffsetDateTime {
     }
 }
 
-#[cfg(feature = "serde")]
-impl serde::ser::Serialize for OffsetDateTime {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        crate::private::DateTime {
-            date: Some(self.date),
-            time: Some(self.time),
-            offset: Some(self.offset),
-        }
-        .serialize(serializer)
-    }
-}
-
 #[cfg(feature = "chrono")]
 impl From<chrono::DateTime<chrono::FixedOffset>> for OffsetDateTime {
     fn from(value: chrono::DateTime<chrono::FixedOffset>) -> Self {
@@ -135,5 +120,40 @@ impl From<chrono::DateTime<chrono::FixedOffset>> for OffsetDateTime {
                 minutes: value.offset().local_minus_utc() as i16,
             },
         )
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::ser::Serialize for OffsetDateTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        crate::private::DateTime {
+            date: Some(self.date),
+            time: Some(self.time),
+            offset: Some(self.offset),
+        }
+        .serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Deserialize<'de> for OffsetDateTime {
+    fn deserialize<D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        match crate::private::DateTime::deserialize(deserializer)? {
+            crate::private::DateTime {
+                date: Some(date),
+                time: Some(time),
+                offset: Some(offset),
+            } => Ok(OffsetDateTime { date, time, offset }),
+            datetime => Err(serde::de::Error::invalid_type(
+                serde::de::Unexpected::Other(datetime.type_name()),
+                &Self::type_name(),
+            )),
+        }
     }
 }

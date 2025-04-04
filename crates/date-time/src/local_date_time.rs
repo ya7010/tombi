@@ -29,15 +29,17 @@ impl LocalDateTime {
         hour: u8,
         minute: u8,
         second: u8,
-        milli: u32,
+        millisecond: u32,
     ) -> Self {
+        assert!(millisecond < 1_000);
+
         Self {
             date: crate::private::Date { year, month, day },
             time: crate::private::Time {
                 hour,
                 minute,
                 second,
-                nanosecond: milli * 1_000_000,
+                nanosecond: millisecond * 1_000_000,
             },
         }
     }
@@ -118,21 +120,6 @@ impl std::fmt::Display for LocalDateTime {
     }
 }
 
-#[cfg(feature = "serde")]
-impl serde::ser::Serialize for LocalDateTime {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        crate::private::DateTime {
-            date: Some(self.date),
-            time: Some(self.time),
-            offset: None,
-        }
-        .serialize(serializer)
-    }
-}
-
 // NOTE: `chrono::DateTime<chrono::Local>` is not enough to represent local date time.
 //       `chrono::Local.from_local_datetime(native_date_time)` cannot uniquely determine the time zone in some cases, so we handle NativeDateTime.
 #[cfg(feature = "chrono")]
@@ -157,5 +144,40 @@ impl From<chrono::NaiveDateTime> for LocalDateTime {
 impl From<chrono::DateTime<chrono::Local>> for LocalDateTime {
     fn from(value: chrono::DateTime<chrono::Local>) -> Self {
         value.naive_local().into()
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::ser::Serialize for LocalDateTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        crate::private::DateTime {
+            date: Some(self.date),
+            time: Some(self.time),
+            offset: None,
+        }
+        .serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Deserialize<'de> for LocalDateTime {
+    fn deserialize<D>(deserializer: D) -> Result<LocalDateTime, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        match crate::private::DateTime::deserialize(deserializer)? {
+            crate::private::DateTime {
+                date: Some(date),
+                time: Some(time),
+                offset: None,
+            } => Ok(LocalDateTime { date, time }),
+            datetime => Err(serde::de::Error::invalid_type(
+                serde::de::Unexpected::Other(datetime.type_name()),
+                &Self::type_name(),
+            )),
+        }
     }
 }
