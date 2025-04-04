@@ -1,3 +1,4 @@
+mod error;
 mod local_date;
 mod local_date_time;
 mod local_time;
@@ -5,19 +6,14 @@ mod offset;
 mod offset_date_time;
 mod private;
 
-use std::error;
+pub use error::*;
 use std::fmt;
 
 pub use local_date::LocalDate;
 pub use local_date_time::LocalDateTime;
 pub use local_time::LocalTime;
-pub use offset::Offset;
+pub use offset::TimeZoneOffset;
 pub use offset_date_time::OffsetDateTime;
-
-/// Error returned from parsing a `Datetime` in the `FromStr` implementation.
-#[derive(Debug, Clone)]
-#[non_exhaustive]
-pub struct DatetimeParseError {}
 
 #[doc(hidden)]
 #[cfg(feature = "serde")]
@@ -61,11 +57,3 @@ impl<'de> serde::de::Deserialize<'de> for DatetimeFromString {
         deserializer.deserialize_str(Visitor)
     }
 }
-
-impl fmt::Display for DatetimeParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        "failed to parse datetime".fmt(f)
-    }
-}
-
-impl error::Error for DatetimeParseError {}

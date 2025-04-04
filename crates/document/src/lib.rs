@@ -7,7 +7,7 @@ pub use key::{Key, KeyKind};
 use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
-    OffsetDateTime, String, StringKind, Table, TableKind, Value,
+    OffsetDateTime, String, StringKind, Table, TableKind, TimeZoneOffset, Value,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -85,6 +85,8 @@ macro_rules! test_deserialize {
             use itertools::Itertools;
             use document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
+
+            test_lib::init_tracing();
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim());

@@ -2,7 +2,7 @@
 pub struct OffsetDateTime {
     date: crate::private::Date,
     time: crate::private::Time,
-    offset: crate::Offset,
+    offset: crate::TimeZoneOffset,
 }
 
 impl OffsetDateTime {
@@ -18,7 +18,7 @@ impl OffsetDateTime {
         hour: u8,
         minute: u8,
         second: u8,
-        offset: crate::Offset,
+        offset: crate::TimeZoneOffset,
     ) -> Self {
         Self::from_ymd_hms_milli(year, month, day, hour, minute, second, 0, offset)
     }
@@ -31,7 +31,7 @@ impl OffsetDateTime {
         minute: u8,
         second: u8,
         milli: u32,
-        offset: crate::Offset,
+        offset: crate::TimeZoneOffset,
     ) -> Self {
         Self {
             date: crate::private::Date { year, month, day },
@@ -73,8 +73,33 @@ impl OffsetDateTime {
         self.time.nanosecond
     }
 
-    pub fn offset(&self) -> crate::Offset {
+    pub fn offset(&self) -> crate::TimeZoneOffset {
         self.offset
+    }
+}
+
+impl std::str::FromStr for OffsetDateTime {
+    type Err = crate::parse::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match crate::private::DateTime::from_str(s) {
+            Ok(crate::private::DateTime {
+                date: Some(date),
+                time: Some(time),
+                offset: Some(offset),
+            }) => Ok(Self { date, time, offset }),
+            Ok(_) => Err(crate::parse::Error::ExpectedOffsetDateTime),
+            Err(error) => Err(error.into()),
+        }
+    }
+}
+
+impl std::fmt::Display for OffsetDateTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.date.fmt(f)?;
+        write!(f, "T")?;
+        self.time.fmt(f)?;
+        self.offset.fmt(f)
     }
 }
 

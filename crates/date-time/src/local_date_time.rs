@@ -94,6 +94,32 @@ impl LocalDateTime {
     }
 }
 
+impl std::str::FromStr for LocalDateTime {
+    type Err = crate::parse::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match crate::private::DateTime::from_str(s) {
+            Ok(crate::private::DateTime {
+                date: Some(date),
+                time: Some(time),
+                offset: None,
+            }) => Ok(Self { date, time }),
+            Ok(_) => Err(crate::parse::Error::ExpectedLocalDateTime),
+            Err(error) => Err(error.into()),
+        }
+    }
+}
+
+impl std::fmt::Display for LocalDateTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.date.fmt(f)?;
+        write!(f, "T")?;
+        self.time.fmt(f)?;
+
+        Ok(())
+    }
+}
+
 #[cfg(feature = "serde")]
 impl serde::ser::Serialize for LocalDateTime {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
