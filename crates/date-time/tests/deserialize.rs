@@ -102,13 +102,15 @@ fn test_offset_date_time_deserialization(
     );
 }
 
-#[test]
-fn test_invalid_date_time_deserialization() {
-    let json = json!("invalid-date-time");
-    let result: Result<LocalDateTime, _> = serde_json::from_value(json);
+#[rstest]
+#[case(json!("invalid-date-time"), date_time::parse::Error::InvalidFormat)]
+#[case(json!("2021-01-01T12:00:00+25:00"), date_time::parse::Error::InvalidTimeZoneOffsetHour)]
+#[case(json!(true), "invalid type: boolean `true`, expected a TOML DateTime")]
+fn test_invalid_date_time_deserialization(
+    #[case] input: serde_json::Value,
+    #[case] expected_error: impl ToString,
+) {
+    let result: Result<LocalDateTime, _> = serde_json::from_value(input);
     assert!(result.is_err());
-    assert_eq!(
-        result.unwrap_err().to_string(),
-        date_time::parse::Error::InvalidFormat.to_string()
-    );
+    pretty_assertions::assert_eq!(result.unwrap_err().to_string(), expected_error.to_string());
 }
