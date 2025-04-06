@@ -7,7 +7,7 @@ pub use key::{Key, KeyKind};
 use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
-    OffsetDateTime, String, StringKind, Table, TableKind, TimeZoneOffset, Value,
+    OffsetDateTime, String, StringKind, Table, TableKind, TimeZoneOffset, Value, ValueKind,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -22,6 +22,12 @@ impl Document {
 impl From<Document> for Table {
     fn from(document: Document) -> Self {
         document.0
+    }
+}
+
+impl From<Table> for Document {
+    fn from(table: Table) -> Self {
+        Self(table)
     }
 }
 

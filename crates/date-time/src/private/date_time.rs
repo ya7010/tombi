@@ -1,5 +1,3 @@
-const DATE_TIME_SERDE_NAME: &str = "$__tombi_private_DateTime";
-
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub(crate) struct DateTime {
     /// Optional date.
@@ -304,41 +302,44 @@ impl serde::ser::Serialize for DateTime {
             }
         }
 
-        serializer.serialize_newtype_struct(DATE_TIME_SERDE_NAME, &DateTimeStr(&self.to_string()))
+        serializer.serialize_newtype_struct(
+            match self.type_name() {
+                t if t == crate::OffsetDateTime::type_name() => {
+                    crate::OFFSET_DATE_TIME_NEWTYPE_NAME
+                }
+                t if t == crate::LocalDateTime::type_name() => crate::LOCAL_DATE_TIME_NEWTYPE_NAME,
+                t if t == crate::LocalDate::type_name() => crate::LOCAL_DATE_NEWTYPE_NAME,
+                t if t == crate::LocalTime::type_name() => crate::LOCAL_TIME_NEWTYPE_NAME,
+                _ => unreachable!("unsupported datetime combination"),
+            },
+            &DateTimeStr(&self.to_string()),
+        )
     }
 }
 
 #[cfg(feature = "serde")]
-impl<'de> serde::de::Deserialize<'de> for DateTime {
-    fn deserialize<D>(deserializer: D) -> Result<DateTime, D::Error>
+pub(crate) struct DateTimeVisitor;
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Visitor<'de> for DateTimeVisitor {
+    type Value = DateTime;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("a TOML DateTime")
+    }
+
+    fn visit_str<E>(self, s: &str) -> Result<DateTime, E>
+    where
+        E: serde::de::Error,
+    {
+        s.parse().map_err(serde::de::Error::custom)
+    }
+
+    fn visit_newtype_struct<D>(self, deserializer: D) -> Result<DateTime, D::Error>
     where
         D: serde::de::Deserializer<'de>,
     {
-        struct DateTimeVisitor;
-
-        impl<'de> serde::de::Visitor<'de> for DateTimeVisitor {
-            type Value = DateTime;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                formatter.write_str("a TOML DateTime")
-            }
-
-            fn visit_str<E>(self, s: &str) -> Result<DateTime, E>
-            where
-                E: serde::de::Error,
-            {
-                s.parse().map_err(serde::de::Error::custom)
-            }
-
-            fn visit_newtype_struct<D>(self, deserializer: D) -> Result<DateTime, D::Error>
-            where
-                D: serde::de::Deserializer<'de>,
-            {
-                deserializer.deserialize_str(self)
-            }
-        }
-
-        deserializer.deserialize_newtype_struct(DATE_TIME_SERDE_NAME, DateTimeVisitor)
+        deserializer.deserialize_str(self)
     }
 }
 

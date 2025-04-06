@@ -16,6 +16,37 @@ pub use table::{Table, TableKind};
 
 use crate::IntoDocument;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ValueKind {
+    Boolean,
+    Integer,
+    Float,
+    String,
+    OffsetDateTime,
+    LocalDateTime,
+    LocalDate,
+    LocalTime,
+    Array,
+    Table,
+}
+
+impl std::fmt::Display for ValueKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ValueKind::Boolean => write!(f, "Boolean"),
+            ValueKind::Integer => write!(f, "Integer"),
+            ValueKind::Float => write!(f, "Float"),
+            ValueKind::String => write!(f, "String"),
+            ValueKind::OffsetDateTime => write!(f, "OffsetDateTime"),
+            ValueKind::LocalDateTime => write!(f, "LocalDateTime"),
+            ValueKind::LocalDate => write!(f, "LocalDate"),
+            ValueKind::LocalTime => write!(f, "LocalTime"),
+            ValueKind::Array => write!(f, "Array"),
+            ValueKind::Table => write!(f, "Table"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Boolean(Boolean),
@@ -28,6 +59,23 @@ pub enum Value {
     LocalTime(LocalTime),
     Array(Array),
     Table(Table),
+}
+
+impl Value {
+    pub fn kind(&self) -> ValueKind {
+        match self {
+            Value::Boolean(_) => ValueKind::Boolean,
+            Value::Integer(_) => ValueKind::Integer,
+            Value::Float(_) => ValueKind::Float,
+            Value::String(_) => ValueKind::String,
+            Value::OffsetDateTime(_) => ValueKind::OffsetDateTime,
+            Value::LocalDateTime(_) => ValueKind::LocalDateTime,
+            Value::LocalDate(_) => ValueKind::LocalDate,
+            Value::LocalTime(_) => ValueKind::LocalTime,
+            Value::Array(_) => ValueKind::Array,
+            Value::Table(_) => ValueKind::Table,
+        }
+    }
 }
 
 impl IntoDocument<Value> for document_tree::Value {

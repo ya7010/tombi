@@ -396,3 +396,9 @@ impl SchemaStore {
         })
     }
 }
+
+impl Default for SchemaStore {
+    fn default() -> Self {
+        Self::new(crate::Options::default())
+    }
+}

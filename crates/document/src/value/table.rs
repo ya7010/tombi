@@ -40,6 +40,11 @@ impl Table {
     }
 
     #[inline]
+    pub fn kind_mut(&mut self) -> &mut TableKind {
+        &mut self.kind
+    }
+
+    #[inline]
     pub fn key_values(&self) -> &IndexMap<Key, Value> {
         &self.key_values
     }

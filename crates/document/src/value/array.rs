@@ -42,12 +42,17 @@ impl Array {
             values: Vec::new(),
         }
     }
+
     pub fn push(&mut self, value: Value) {
         self.values.push(value);
     }
 
     pub fn kind(&self) -> ArrayKind {
         self.kind
+    }
+
+    pub fn kind_mut(&mut self) -> &mut ArrayKind {
+        &mut self.kind
     }
 
     pub fn values(&self) -> &[Value] {

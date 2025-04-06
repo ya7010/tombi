@@ -34,34 +34,44 @@ impl Key {
     pub fn value(&self) -> &str {
         &self.value
     }
-
-    pub fn to_raw_text(&self, toml_version: TomlVersion) -> String {
-        match self.kind {
-            KeyKind::BareKey => toml_text::try_from_bare_key(self.value(), toml_version),
-            KeyKind::BasicString => toml_text::try_from_basic_string(self.value(), toml_version),
-            KeyKind::LiteralString => toml_text::try_from_literal_string(self.value()),
-        }
-        .unwrap()
-    }
 }
 
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
-        self.to_raw_text(TomlVersion::latest()) == other.to_raw_text(TomlVersion::latest())
+        self.value == other.value
     }
 }
 
 impl Eq for Key {}
 
+impl From<crate::String> for Key {
+    fn from(value: crate::String) -> Self {
+        Self {
+            kind: match value.kind() {
+                _ if !value.value.contains("'") && !value.value.contains("\"") => KeyKind::BareKey,
+                crate::StringKind::BasicString => KeyKind::BasicString,
+                crate::StringKind::LiteralString => KeyKind::LiteralString,
+                crate::StringKind::MultiLineBasicString => KeyKind::BasicString,
+                crate::StringKind::MultiLineLiteralString => KeyKind::LiteralString,
+            },
+            value: value.value,
+        }
+    }
+}
+
 impl std::hash::Hash for Key {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.to_raw_text(TomlVersion::latest()).hash(state)
+        self.value.hash(state)
     }
 }
 
 impl std::fmt::Display for Key {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value)
+        match self.kind {
+            KeyKind::BareKey => write!(f, "{}", self.value),
+            KeyKind::BasicString => write!(f, r#""{}""#, self.value),
+            KeyKind::LiteralString => write!(f, r#"'{}'"#, self.value),
+        }
     }
 }
 

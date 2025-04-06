@@ -168,7 +168,10 @@ impl<'de> serde::de::Deserialize<'de> for LocalDateTime {
     where
         D: serde::de::Deserializer<'de>,
     {
-        match crate::private::DateTime::deserialize(deserializer)? {
+        match deserializer.deserialize_newtype_struct(
+            crate::LOCAL_DATE_TIME_NEWTYPE_NAME,
+            crate::private::DateTimeVisitor,
+        )? {
             crate::private::DateTime {
                 date: Some(date),
                 time: Some(time),

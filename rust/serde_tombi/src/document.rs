@@ -1,66 +1,9 @@
-use formatter::{formatter::definitions::FormatDefinitions, FormatOptions};
 use itertools::Itertools;
-use schema_store::SchemaStore;
-use toml_version::TomlVersion;
 
 pub use document::{
-    Array, ArrayKind, Boolean, Float, Integer, IntegerKind, Key, LocalDate, LocalDateTime,
-    LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
+    Array, ArrayKind, Boolean, Document, Float, Integer, IntegerKind, Key, LocalDate,
+    LocalDateTime, LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Document(document::Document);
-
-impl Document {
-    pub fn new() -> Self {
-        Self(document::Document::new())
-    }
-
-    #[inline]
-    pub fn to_string(&self) -> crate::Result<std::string::String> {
-        futures::executor::block_on(self.to_string_async())
-    }
-
-    pub async fn to_string_async(&self) -> crate::Result<std::string::String> {
-        let mut toml_text = std::string::String::new();
-        self.to_toml_string(&mut toml_text, &[]);
-
-        let format_options = FormatOptions::default();
-        let format_definitions = FormatDefinitions::default();
-        let schema_store = SchemaStore::new(schema_store::Options::default());
-
-        let formatter = formatter::Formatter::new(
-            TomlVersion::default(),
-            format_definitions,
-            &format_options,
-            None,
-            &schema_store,
-        );
-
-        match formatter.format(&toml_text).await {
-            Ok(formatted) => Ok(formatted),
-            Err(errors) => {
-                tracing::trace!(?toml_text);
-                tracing::trace!(?errors);
-                unreachable!("Document must be valid TOML.")
-            }
-        }
-    }
-}
-
-impl std::ops::Deref for Document {
-    type Target = document::Document;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl std::ops::DerefMut for Document {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 /// A trait for converting TOML values to their string representation.
 pub(crate) trait ToTomlString {
@@ -392,7 +335,7 @@ mod tests {
         );
 
         // Test to_string method
-        let toml_string = document.to_string().unwrap();
+        let toml_string = crate::to_string(&document).unwrap();
         let expected = r#"
 string = "hello"
 integer = 42
@@ -444,7 +387,7 @@ array = [1, 2, 3]
         );
 
         // Test to_string method
-        let toml_string = document.to_string().unwrap();
+        let toml_string = crate::to_string(&document).unwrap();
         let expected = r#"
 [[fruits]]
 name = "apple"
@@ -482,7 +425,7 @@ color = "yellow"
         );
 
         // Test to_string method
-        let toml_string = document.to_string().unwrap();
+        let toml_string = crate::to_string(&document).unwrap();
         let expected = r#"
 [person]
 name = "John"
@@ -575,11 +518,14 @@ age = 30
         tracing::trace!("document: {document:?}");
 
         // Test to_string method
-        let toml_string = document.to_string().unwrap();
+        let toml_string = crate::to_string(&document).unwrap();
         let expected = r#"
 [aaa.bbb]
 ddd = "value1"
-inline = { x = 1, y = 2 }
+
+[aaa.bbb.inline]
+x = 1
+y = 2
 
 [aaa.bbb.ccc]
 value = "deep nested"
@@ -605,7 +551,7 @@ id = 2
             Value::OffsetDateTime(now),
         );
 
-        let toml_string = document.to_string().unwrap();
+        let toml_string = crate::to_string(&document).unwrap();
         let expected = r#"
 now = 2024-01-01T00:00:00Z
 "#;
