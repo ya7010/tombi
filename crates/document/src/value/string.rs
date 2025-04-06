@@ -32,7 +32,7 @@ impl From<&document_tree::StringKind> for StringKind {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct String {
     kind: StringKind,
-    value: std::string::String,
+    pub(crate) value: std::string::String,
 }
 
 impl String {

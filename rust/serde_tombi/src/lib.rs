@@ -3,7 +3,7 @@ mod document;
 mod ser;
 
 pub use de::{from_document, from_str, parse_str};
-pub use ser::{to_document, to_string, to_string_async};
+pub use ser::{to_document, to_string, to_string_async, Serializer};
 use std::fmt;
 use thiserror::Error;
 

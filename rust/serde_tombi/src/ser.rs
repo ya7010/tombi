@@ -1,6 +1,13 @@
-use serde::ser::SerializeSeq as SerdeSerializeSeq;
+mod error;
+
+use formatter::formatter::definitions::FormatDefinitions;
+use formatter::FormatOptions;
+use schema_store::SchemaStore;
 use serde::Serialize;
-use std::marker::PhantomData;
+use toml_version::TomlVersion;
+
+use crate::document::ToTomlString;
+pub use error::Error;
 
 /// Serialize the given data structure as a TOML string.
 ///
@@ -24,266 +31,200 @@ use std::marker::PhantomData;
 ///
 /// let toml = serde_tombi::to_string(&config);
 /// ```
-pub fn to_string<T>(value: &T) -> crate::Result<String>
+pub fn to_string<T>(value: &T) -> Result<String, crate::ser::Error>
 where
     T: Serialize,
 {
-    to_document(value)?.to_string()
+    Serializer::default().to_string(value)
 }
 
-pub async fn to_string_async<T>(value: &T) -> crate::Result<String>
+pub async fn to_string_async<T>(value: &T) -> Result<String, crate::ser::Error>
 where
     T: Serialize,
 {
-    to_document(value)?.to_string_async().await
+    Serializer::default().to_string_async(value).await
 }
 
 /// Serialize the given data structure as a TOML Document.
-pub fn to_document<T>(value: &T) -> crate::Result<crate::Document>
+pub fn to_document<T>(value: &T) -> Result<crate::Document, crate::ser::Error>
 where
     T: Serialize,
 {
-    let mut serializer = Serializer::default();
-    value.serialize(&mut serializer)?;
-    Ok(serializer.output())
+    Serializer::default().to_document(value)
 }
 
 // Actual serializer implementation
 #[derive(Default)]
-struct Serializer {
-    // Root TOML table
-    table: Option<document::Table>,
-    // Current key path
-    current_path: Vec<std::string::String>,
+pub struct Serializer<'a> {
+    config: Option<&'a config::Config>,
+    schema_store: Option<&'a schema_store::SchemaStore>,
 }
 
-impl Serializer {
-    // Output the Document
-    fn output(self) -> crate::Document {
-        // Create document from root table or create a new empty one
-        let root_table = self.table.unwrap_or_else(|| create_empty_table());
-        // Create document from root table (avoid tuple struct initialization)
-        unsafe {
-            // This is safe: Document type has the same layout as Table type and is just a wrapper
-            std::mem::transmute(root_table)
+impl<'a> Serializer<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_config(mut self, config: &'a config::Config) -> Self {
+        self.config = Some(config);
+        self
+    }
+
+    pub fn with_schema_store(mut self, schema_store: &'a schema_store::SchemaStore) -> Self {
+        self.schema_store = Some(schema_store);
+        self
+    }
+
+    pub fn to_document<T>(&self, value: &T) -> Result<document::Document, crate::ser::Error>
+    where
+        T: Serialize,
+    {
+        match value.serialize(&mut ValueSerializer { accessors: &[] }) {
+            Ok(Some(document::Value::Table(table))) => Ok(document::Document::from(table)),
+            Ok(Some(value)) => Err(crate::ser::Error::RootMustBeTable(value.kind())),
+            Ok(None) => Ok(document::Document::new()),
+            Err(error) => Err(crate::ser::Error::Serde(error.to_string())),
         }
     }
 
-    // Get the current path as a string
-    fn current_key(&self) -> Option<std::string::String> {
-        if self.current_path.is_empty() {
-            None
-        } else {
-            Some(self.current_path.join("."))
-        }
+    pub fn to_string<T>(&self, value: &T) -> Result<String, crate::ser::Error>
+    where
+        T: Serialize,
+    {
+        futures::executor::block_on(self.to_string_async(value))
     }
 
-    // Add a key to the path
-    fn push_key(&mut self, key: &str) {
-        self.current_path.push(key.to_string());
-    }
+    pub async fn to_string_async<T>(&self, value: &T) -> Result<String, crate::ser::Error>
+    where
+        T: Serialize,
+    {
+        let document = to_document(value)?;
+        let mut toml_text = std::string::String::new();
+        document.to_toml_string(&mut toml_text, &[]);
 
-    // Remove the last key from the path
-    fn pop_key(&mut self) {
-        self.current_path.pop();
-    }
+        let format_definitions = FormatDefinitions::default();
+        let default_format_options = FormatOptions::default();
+        let format_options = self
+            .config
+            .as_ref()
+            .and_then(|config| config.format.as_ref())
+            .unwrap_or(&default_format_options);
+        let schema_store = match self.schema_store.as_ref() {
+            Some(schema_store) => schema_store,
+            None => &SchemaStore::default(),
+        };
 
-    // Add a value at the specified path
-    fn add_value(&mut self, value: document::Value) -> crate::Result<()> {
-        if let Some(key_path) = self.current_key() {
-            self.add_to_table_by_path(&key_path, value)
-        } else {
-            Err(crate::Error::Serialization(
-                "Cannot add value without a key path".to_string(),
-            ))
-        }
-    }
+        let formatter = formatter::Formatter::new(
+            TomlVersion::default(),
+            format_definitions,
+            format_options,
+            None,
+            schema_store,
+        );
 
-    // Add a value to the table based on path
-    fn add_to_table_by_path(&mut self, path: &str, value: document::Value) -> crate::Result<()> {
-        let keys: Vec<&str> = path.split('.').collect();
-
-        // Ensure root table exists
-        if self.table.is_none() {
-            self.table = Some(create_empty_table());
-        }
-
-        // We'll use a simplified approach with owned tables
-        let mut current = self.table.take().unwrap_or_else(|| create_empty_table());
-
-        // Navigate through tables, creating as necessary
-        let last_idx = keys.len() - 1;
-
-        for i in 0..keys.len() {
-            let key_str = keys[i];
-            let key = create_key(key_str);
-
-            if i == last_idx {
-                // This is the last key, insert the value
-                if current.key_values().contains_key(&key) {
-                    self.table = Some(current); // Restore root
-                    return Err(crate::Error::Serialization(format!(
-                        "Key {} already exists",
-                        key_str
-                    )));
-                }
-
-                // Add the value to the table
-                current.insert(key, value);
-                break;
+        match formatter.format(&toml_text).await {
+            Ok(formatted) => Ok(formatted),
+            Err(errors) => {
+                tracing::trace!("toml_text:\n{}", toml_text);
+                tracing::trace!(?errors);
+                unreachable!("Document must be valid TOML.")
             }
-
-            // Not the last key, ensure this path exists as a table
-            let next_table = if current.key_values().contains_key(&key) {
-                match current.key_values().get(&key) {
-                    Some(document::Value::Table(existing)) => existing.clone(),
-                    _ => {
-                        self.table = Some(current); // Restore root
-                        return Err(crate::Error::Serialization(format!(
-                            "Key {} already exists but is not a table",
-                            key_str
-                        )));
-                    }
-                }
-            } else {
-                let new_table = create_empty_table();
-                current.insert(key.clone(), document::Value::Table(new_table.clone()));
-                new_table
-            };
-
-            current = next_table;
         }
-
-        self.table = Some(current);
-        Ok(())
     }
 }
 
-// Helper functions for creating document values
-fn create_string_value(value: &str) -> document::Value {
-    // Create TomlString with BasicString kind
-    let toml_string = document::String::new(document::StringKind::BasicString, value.to_string());
-    document::Value::String(toml_string)
+pub struct ValueSerializer<'a> {
+    accessors: &'a [schema_store::Accessor],
 }
 
-fn create_array_value(values: Vec<document::Value>) -> document::Value {
-    // Create Array using the public new method
-    let mut array = document::Array::new(document::ArrayKind::Array);
-    for value in values {
-        array.push(value);
-    }
-    document::Value::Array(array)
-}
-
-// Create empty table
-fn create_empty_table() -> document::Table {
-    // Create table using the public new method
-    document::Table::new(document::TableKind::Table)
-}
-
-// Create key
-fn create_key(key: &str) -> document::Key {
-    // Create Key using the public new method
-    document::Key::new(document::KeyKind::BareKey, key.to_string())
-}
-
-impl<'a> serde::Serializer for &'a mut Serializer {
-    type Ok = ();
-    type Error = crate::Error;
-    type SerializeSeq = SerializeSeq<'a>;
-    type SerializeTuple = SerializeTuple<'a>;
-    type SerializeTupleStruct = SerializeTupleStruct<'a>;
-    type SerializeTupleVariant = SerializeTupleVariant<'a>;
-    type SerializeMap = SerializeMap<'a>;
-    type SerializeStruct = SerializeStruct<'a>;
-    type SerializeStructVariant = SerializeStructVariant<'a>;
+impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
+    type SerializeSeq = SerializeArray<'a>;
+    type SerializeTuple = SerializeArray<'a>;
+    type SerializeTupleStruct = SerializeArray<'a>;
+    type SerializeTupleVariant = SerializeArray<'a>;
+    type SerializeMap = SerializeTable<'a>;
+    type SerializeStruct = SerializeTable<'a>;
+    type SerializeStructVariant = SerializeTable<'a>;
 
     // Basic type serialization
-    fn serialize_bool(self, v: bool) -> crate::Result<()> {
-        self.add_value(document::Value::Boolean(document::Boolean::new(v)))
+    fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
+        Ok(Some(document::Value::Boolean(document::Boolean::new(v))))
     }
 
-    fn serialize_i8(self, v: i8) -> crate::Result<()> {
+    fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_i16(self, v: i16) -> crate::Result<()> {
+    fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_i32(self, v: i32) -> crate::Result<()> {
+    fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_i64(self, v: i64) -> crate::Result<()> {
-        self.add_value(document::Value::Integer(document::Integer::new(v)))
+    fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
+        Ok(Some(document::Value::Integer(document::Integer::new(v))))
     }
 
-    fn serialize_u8(self, v: u8) -> crate::Result<()> {
+    fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_u16(self, v: u16) -> crate::Result<()> {
+    fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_u32(self, v: u32) -> crate::Result<()> {
+    fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_u64(self, v: u64) -> crate::Result<()> {
+    fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
         self.serialize_i64(v as i64)
     }
 
-    fn serialize_f32(self, v: f32) -> crate::Result<()> {
+    fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
         self.serialize_f64(v as f64)
     }
 
-    fn serialize_f64(self, v: f64) -> crate::Result<()> {
-        self.add_value(document::Value::Float(document::Float::new(v)))
+    fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
+        Ok(Some(document::Value::Float(document::Float::new(v))))
     }
 
-    fn serialize_char(self, v: char) -> crate::Result<()> {
+    fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
         self.serialize_str(&v.to_string())
     }
 
-    fn serialize_str(self, v: &str) -> crate::Result<()> {
-        // Use our helper function to create string value
-        self.add_value(create_string_value(v))
+    fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
+        Ok(Some(document::Value::String(document::String::new(
+            document::StringKind::BasicString,
+            v.to_string(),
+        ))))
     }
 
-    fn serialize_bytes(self, v: &[u8]) -> crate::Result<()> {
-        use serde::ser::SerializeSeq;
-        let mut seq = self.serialize_seq(Some(v.len()))?;
-        for byte in v {
-            seq.serialize_element(byte)?;
-        }
-        seq.end()
+    fn serialize_bytes(self, _: &[u8]) -> Result<Self::Ok, Self::Error> {
+        Err(crate::ser::Error::TomlMustBeUtf8)
     }
 
-    fn serialize_none(self) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "TOML does not support None/null values".to_string(),
-        ))
+    fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
+        Ok(None)
     }
 
-    fn serialize_some<T>(self, value: &T) -> crate::Result<()>
+    fn serialize_some<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + Serialize,
     {
         value.serialize(self)
     }
 
-    fn serialize_unit(self) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "TOML does not support unit values".to_string(),
-        ))
+    fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
+        Err(crate::ser::Error::SerializeUnit)
     }
 
-    fn serialize_unit_struct(self, _name: &'static str) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "TOML does not support unit structs".to_string(),
-        ))
+    fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
+        Err(crate::ser::Error::SerializeUnitStruct)
     }
 
     fn serialize_unit_variant(
@@ -291,539 +232,511 @@ impl<'a> serde::Serializer for &'a mut Serializer {
         _name: &'static str,
         _variant_index: u32,
         variant: &'static str,
-    ) -> crate::Result<()> {
+    ) -> Result<Self::Ok, Self::Error> {
         self.serialize_str(variant)
     }
 
-    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> crate::Result<()>
+    fn serialize_newtype_struct<T>(
+        self,
+        name: &'static str,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + Serialize,
     {
-        value.serialize(self)
+        match name {
+            date_time::OFFSET_DATE_TIME_NEWTYPE_NAME => value
+                .serialize(DateTimeSerializer::new(self.accessors))
+                .map(|dt| Some(document::Value::OffsetDateTime(dt))),
+            date_time::LOCAL_DATE_TIME_NEWTYPE_NAME => value
+                .serialize(DateTimeSerializer::new(self.accessors))
+                .map(|dt| Some(document::Value::LocalDateTime(dt))),
+            date_time::LOCAL_DATE_NEWTYPE_NAME => value
+                .serialize(DateTimeSerializer::new(self.accessors))
+                .map(|dt| Some(document::Value::LocalDate(dt))),
+            date_time::LOCAL_TIME_NEWTYPE_NAME => value
+                .serialize(DateTimeSerializer::new(self.accessors))
+                .map(|dt| Some(document::Value::LocalTime(dt))),
+            _ => value.serialize(self),
+        }
     }
 
     fn serialize_newtype_variant<T>(
         self,
         _name: &'static str,
         _variant_index: u32,
-        variant: &'static str,
+        _variant: &'static str,
         value: &T,
-    ) -> crate::Result<()>
+    ) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + Serialize,
     {
-        self.push_key(variant);
-        let result = value.serialize(&mut *self);
-        self.pop_key();
-        result
+        value.serialize(&mut *self)
     }
 
-    fn serialize_seq(self, len: Option<usize>) -> crate::Result<Self::SerializeSeq> {
-        Ok(SerializeSeq {
-            serializer: self,
-            items: Vec::with_capacity(len.unwrap_or(0)),
-        })
-    }
-
-    fn serialize_tuple(self, len: usize) -> crate::Result<Self::SerializeTuple> {
-        self.serialize_seq(Some(len))
-            .map(|seq| SerializeTuple { seq })
-            .map_err(|e| e.into())
-    }
-
-    fn serialize_tuple_struct(
-        self,
-        _name: &'static str,
-        len: usize,
-    ) -> crate::Result<Self::SerializeTupleStruct> {
-        self.serialize_seq(Some(len))
-            .map(|seq| SerializeTupleStruct { seq })
-            .map_err(|e| e.into())
-    }
-
-    fn serialize_tuple_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        variant: &'static str,
-        len: usize,
-    ) -> crate::Result<Self::SerializeTupleVariant> {
-        self.push_key(variant);
-        Ok(SerializeTupleVariant {
-            seq: SerializeSeq {
-                serializer: self,
-                items: Vec::with_capacity(len),
+    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
+        Ok(SerializeArray {
+            kind: document::ArrayKind::ArrayOfTable,
+            accessors: self.accessors,
+            values: match len {
+                Some(len) => Vec::with_capacity(len),
+                None => Vec::new(),
             },
         })
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> crate::Result<Self::SerializeMap> {
-        Ok(SerializeMap {
-            serializer: self,
+    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
+        Ok(SerializeArray {
+            kind: document::ArrayKind::ArrayOfTable,
+            accessors: self.accessors,
+            values: Vec::with_capacity(len),
+        })
+    }
+
+    fn serialize_tuple_struct(
+        self,
+        _name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleStruct, Self::Error> {
+        Ok(SerializeArray {
+            kind: document::ArrayKind::ArrayOfTable,
+            accessors: self.accessors,
+            values: Vec::with_capacity(len),
+        })
+    }
+
+    fn serialize_tuple_variant(
+        self,
+        _name: &'static str,
+        _variant_index: u32,
+        _variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleVariant, Self::Error> {
+        Ok(SerializeArray {
+            kind: document::ArrayKind::ArrayOfTable,
+            accessors: self.accessors,
+            values: Vec::with_capacity(len),
+        })
+    }
+
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
+        Ok(SerializeTable {
+            accessors: self.accessors,
             key: None,
+            key_values: match len {
+                Some(len) => Vec::with_capacity(len),
+                None => Vec::new(),
+            },
         })
     }
 
     fn serialize_struct(
         self,
         _name: &'static str,
-        _len: usize,
-    ) -> crate::Result<Self::SerializeStruct> {
-        Ok(SerializeStruct { serializer: self })
+        len: usize,
+    ) -> Result<Self::SerializeStruct, Self::Error> {
+        Ok(SerializeTable {
+            accessors: self.accessors,
+            key: None,
+            key_values: Vec::with_capacity(len),
+        })
     }
 
     fn serialize_struct_variant(
         self,
         _name: &'static str,
         _variant_index: u32,
-        variant: &'static str,
-        _len: usize,
-    ) -> crate::Result<Self::SerializeStructVariant> {
-        self.push_key(variant);
-        Ok(SerializeStructVariant { serializer: self })
+        _variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStructVariant, Self::Error> {
+        Ok(SerializeTable {
+            accessors: self.accessors,
+            key: None,
+            key_values: Vec::with_capacity(len),
+        })
     }
 }
 
 // Sequence serialization
-pub struct SerializeSeq<'a> {
-    serializer: &'a mut Serializer,
-    items: Vec<document::Value>,
+pub struct SerializeArray<'a> {
+    kind: document::ArrayKind,
+    accessors: &'a [schema_store::Accessor],
+    values: Vec<document::Value>,
 }
 
-impl<'a> serde::ser::SerializeSeq for SerializeSeq<'a> {
-    type Ok = ();
-    type Error = crate::Error;
+impl<'a> serde::ser::SerializeSeq for SerializeArray<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> crate::Result<()>
+    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + Serialize,
     {
-        // Create a temporary serializer to serialize the value
-        let mut temp_serializer = Serializer::default();
-        temp_serializer.push_key("temp");
-        value.serialize(&mut temp_serializer)?;
+        let Some(mut value) = value.serialize(&mut ValueSerializer {
+            accessors: self.accessors,
+        })?
+        else {
+            let mut accessors = self.accessors.to_vec();
+            accessors.push(schema_store::Accessor::Index(self.values.len()));
 
-        // Extract the serialized value
-        if let Some(root) = temp_serializer.table {
-            if let Some(value) = root.key_values().values().next() {
-                self.items.push(value.clone());
-                Ok(())
-            } else {
-                Err(crate::Error::Serialization(
-                    "Failed to serialize sequence element".to_string(),
-                ))
-            }
-        } else {
-            Err(crate::Error::Serialization(
-                "Failed to serialize sequence element".to_string(),
-            ))
-        }
-    }
-
-    fn end(self) -> crate::Result<()> {
-        // Create array using our helper
-        let array_value = create_array_value(self.items);
-        self.serializer.add_value(array_value)
-    }
-}
-
-// Tuple serialization
-pub struct SerializeTuple<'a> {
-    seq: SerializeSeq<'a>,
-}
-
-impl<'a> serde::ser::SerializeTuple for SerializeTuple<'a> {
-    type Ok = ();
-    type Error = crate::Error;
-
-    fn serialize_element<T>(&mut self, value: &T) -> crate::Result<()>
-    where
-        T: ?Sized + Serialize,
-    {
-        self.seq.serialize_element(value)
-    }
-
-    fn end(self) -> crate::Result<()> {
-        self.seq.end()
-    }
-}
-
-// Tuple struct serialization
-pub struct SerializeTupleStruct<'a> {
-    seq: SerializeSeq<'a>,
-}
-
-impl<'a> serde::ser::SerializeTupleStruct for SerializeTupleStruct<'a> {
-    type Ok = ();
-    type Error = crate::Error;
-
-    fn serialize_field<T>(&mut self, value: &T) -> crate::Result<()>
-    where
-        T: ?Sized + Serialize,
-    {
-        self.seq.serialize_element(value)
-    }
-
-    fn end(self) -> crate::Result<()> {
-        self.seq.end()
-    }
-}
-
-// Tuple variant serialization
-pub struct SerializeTupleVariant<'a> {
-    seq: SerializeSeq<'a>,
-}
-
-impl<'a> serde::ser::SerializeTupleVariant for SerializeTupleVariant<'a> {
-    type Ok = ();
-    type Error = crate::Error;
-
-    fn serialize_field<T>(&mut self, value: &T) -> crate::Result<()>
-    where
-        T: ?Sized + Serialize,
-    {
-        self.seq.serialize_element(value)
-    }
-
-    fn end(self) -> crate::Result<()> {
-        // Store a reference to the serializer before moving self.seq
-        let serializer = unsafe {
-            // This is safe: self.seq is only used in this function and
-            // self.seq.serializer is used after self.seq.end() is called
-            std::ptr::read(&self.seq.serializer)
+            return Err(crate::ser::Error::ArrayValueRequired(
+                schema_store::Accessors::new(accessors),
+            ));
         };
-
-        // Call self.seq.end() which consumes self.seq
-        let result = self.seq.end();
-
-        // Only call pop_key() if the result was successful
-        if result.is_ok() {
-            serializer.pop_key();
+        match &mut value {
+            document::Value::Boolean(_)
+            | document::Value::Integer(_)
+            | document::Value::Float(_)
+            | document::Value::String(_)
+            | document::Value::LocalDate(_)
+            | document::Value::LocalDateTime(_)
+            | document::Value::LocalTime(_)
+            | document::Value::OffsetDateTime(_) => {
+                self.kind = document::ArrayKind::Array;
+            }
+            document::Value::Array(array) => {
+                if self.kind == document::ArrayKind::Array {
+                    let array_kind = array.kind_mut();
+                    *array_kind = document::ArrayKind::Array;
+                }
+            }
+            document::Value::Table(table) => {
+                if self.kind == document::ArrayKind::Array {
+                    let table_kind = table.kind_mut();
+                    *table_kind = document::TableKind::InlineTable;
+                }
+            }
         }
+        self.values.push(value);
 
-        result
+        Ok(())
+    }
+
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        let mut array = document::Array::new(self.kind);
+        for value in self.values {
+            array.push(value);
+        }
+        Ok(Some(document::Value::Array(array)))
+    }
+}
+
+impl<'a> serde::ser::SerializeTuple for SerializeArray<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
+
+    #[inline]
+    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: ?Sized + Serialize,
+    {
+        serde::ser::SerializeSeq::serialize_element(self, value)
+    }
+
+    #[inline]
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        serde::ser::SerializeSeq::end(self)
+    }
+}
+
+impl<'a> serde::ser::SerializeTupleStruct for SerializeArray<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
+
+    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: ?Sized + Serialize,
+    {
+        serde::ser::SerializeSeq::serialize_element(self, value)
+    }
+
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        serde::ser::SerializeSeq::end(self)
+    }
+}
+
+impl<'a> serde::ser::SerializeTupleVariant for SerializeArray<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
+
+    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: ?Sized + Serialize,
+    {
+        serde::ser::SerializeSeq::serialize_element(self, value)
+    }
+
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        serde::ser::SerializeSeq::end(self)
     }
 }
 
 // Map serialization
-pub struct SerializeMap<'a> {
-    serializer: &'a mut Serializer,
-    key: Option<String>,
+pub struct SerializeTable<'a> {
+    accessors: &'a [schema_store::Accessor],
+    key: Option<document::Key>,
+    key_values: Vec<(document::Key, document::Value)>,
 }
 
-impl<'a> serde::ser::SerializeMap for SerializeMap<'a> {
-    type Ok = ();
-    type Error = crate::Error;
+impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
 
-    fn serialize_key<T>(&mut self, key: &T) -> crate::Result<()>
+    fn serialize_key<T>(&mut self, key: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + Serialize,
     {
         // Keys must be converted to strings
-        let mut key_serializer = KeySerializer::default();
-        key.serialize(&mut key_serializer)?;
-        self.key = Some(key_serializer.key);
-        Ok(())
-    }
-
-    fn serialize_value<T>(&mut self, value: &T) -> crate::Result<()>
-    where
-        T: ?Sized + Serialize,
-    {
-        if let Some(key) = self.key.take() {
-            self.serializer.push_key(&key);
-            let result = value.serialize(&mut *self.serializer);
-            self.serializer.pop_key();
-            result
-        } else {
-            Err(crate::Error::Serialization("Map key missing".to_string()))
-        }
-    }
-
-    fn end(self) -> crate::Result<()> {
-        Ok(())
-    }
-}
-
-// Struct serialization
-pub struct SerializeStruct<'a> {
-    serializer: &'a mut Serializer,
-}
-
-impl<'a> serde::ser::SerializeStruct for SerializeStruct<'a> {
-    type Ok = ();
-    type Error = crate::Error;
-
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> crate::Result<()>
-    where
-        T: ?Sized + Serialize,
-    {
-        // For nested structs, create a new table and add it
-        let mut temp_serializer = Serializer::default();
-        if value.serialize(&mut temp_serializer).is_ok() {
-            if let Some(root) = temp_serializer.table {
-                // If root table exists, add it as a nested table
-                self.serializer.push_key(key);
-
-                // Add root table as nested table
-                if root.key_values().len() > 0 {
-                    let nested_value = if std::any::type_name::<T>().contains("Vec<") {
-                        // If it's a Vec, extract the array value
-                        if let Some(document::Value::Array(array)) =
-                            root.key_values().values().next()
-                        {
-                            document::Value::Array(array.clone())
-                        } else {
-                            document::Value::Table(root)
-                        }
-                    } else {
-                        document::Value::Table(root)
-                    };
-                    let result = self.serializer.add_value(nested_value);
-                    self.serializer.pop_key();
-                    return result;
-                }
-
-                self.serializer.pop_key();
+        match key.serialize(&mut ValueSerializer {
+            accessors: self.accessors,
+        }) {
+            Ok(Some(document::Value::String(string))) => {
+                self.key = Some(document::Key::from(string));
+                Ok(())
+            }
+            Ok(Some(value)) => {
+                self.key = None;
+                return Err(crate::ser::Error::KeyMustBeString(
+                    schema_store::Accessors::new(self.accessors.to_vec()),
+                    value.kind(),
+                ));
+            }
+            Ok(None) => {
+                self.key = None;
+                Err(crate::ser::Error::KeyRequired(
+                    schema_store::Accessors::new(self.accessors.to_vec()),
+                ))
+            }
+            Err(error) => {
+                self.key = None;
+                Err(error.into())
             }
         }
-
-        // Normal field serialization
-        self.serializer.push_key(key);
-        let result = value.serialize(&mut *self.serializer);
-        self.serializer.pop_key();
-        result
     }
 
-    fn end(self) -> crate::Result<()> {
-        Ok(())
-    }
-}
-
-// Struct variant serialization
-pub struct SerializeStructVariant<'a> {
-    serializer: &'a mut Serializer,
-}
-
-impl<'a> serde::ser::SerializeStructVariant for SerializeStructVariant<'a> {
-    type Ok = ();
-    type Error = crate::Error;
-
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> crate::Result<()>
+    fn serialize_value<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + Serialize,
     {
-        // For nested structs, create a new table and add it
-        let mut temp_serializer = Serializer::default();
-        if value.serialize(&mut temp_serializer).is_ok() {
-            if let Some(root) = temp_serializer.table {
-                // If root table exists, add it as a nested table
-                self.serializer.push_key(key);
+        let Some(key) = self.key.take() else {
+            return Err(crate::ser::Error::KeyRequired(
+                schema_store::Accessors::new(self.accessors.to_vec()),
+            ));
+        };
+        let Some(value) = value.serialize(&mut ValueSerializer {
+            accessors: self.accessors,
+        })?
+        else {
+            self.key = None;
+            return Ok(());
+        };
 
-                // Add root table as nested table
-                if root.key_values().len() > 0 {
-                    let nested_value = if std::any::type_name::<T>().contains("Vec<") {
-                        // If it's a Vec, extract the array value
-                        if let Some(document::Value::Array(array)) =
-                            root.key_values().values().next()
-                        {
-                            document::Value::Array(array.clone())
-                        } else {
-                            document::Value::Table(root)
-                        }
-                    } else {
-                        document::Value::Table(root)
-                    };
-                    let result = self.serializer.add_value(nested_value);
-                    self.serializer.pop_key();
-                    return result;
-                }
+        self.key_values.push((key, value));
+        Ok(())
+    }
 
-                self.serializer.pop_key();
-            }
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        let mut table = document::Table::new(document::TableKind::Table);
+        for (key, value) in self.key_values {
+            table.insert(key, value);
         }
-
-        // Normal field serialization
-        self.serializer.push_key(key);
-        let result = value.serialize(&mut *self.serializer);
-        self.serializer.pop_key();
-        result
-    }
-
-    fn end(self) -> crate::Result<()> {
-        self.serializer.pop_key();
-        Ok(())
+        Ok(Some(document::Value::Table(table)))
     }
 }
 
-// Special serializer for keys
-#[derive(Default)]
-struct KeySerializer {
-    key: String,
-}
+impl<'a> serde::ser::SerializeStruct for SerializeTable<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
 
-impl serde::Serializer for &mut KeySerializer {
-    type Ok = ();
-    type Error = crate::Error;
-    type SerializeSeq = Impossible<(), crate::Error>;
-    type SerializeTuple = Impossible<(), crate::Error>;
-    type SerializeTupleStruct = Impossible<(), crate::Error>;
-    type SerializeTupleVariant = Impossible<(), crate::Error>;
-    type SerializeMap = Impossible<(), crate::Error>;
-    type SerializeStruct = Impossible<(), crate::Error>;
-    type SerializeStructVariant = Impossible<(), crate::Error>;
-
-    fn serialize_bool(self, v: bool) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_i8(self, v: i8) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_i16(self, v: i16) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_i32(self, v: i32) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_i64(self, v: i64) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_u8(self, v: u8) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_u16(self, v: u16) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_u32(self, v: u32) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_u64(self, v: u64) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_f32(self, v: f32) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_f64(self, v: f64) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_char(self, v: char) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    fn serialize_str(self, v: &str) -> crate::Result<()> {
-        self.key = v.to_string();
-        Ok(())
-    }
-
-    // Other methods return crate::Error as they're invalid for TOML keys
-    fn serialize_bytes(self, _v: &[u8]) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "Cannot use bytes as TOML key".to_string(),
-        ))
-    }
-
-    fn serialize_none(self) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "Cannot use None as TOML key".to_string(),
-        ))
-    }
-
-    fn serialize_some<T>(self, _value: &T) -> crate::Result<()>
+    #[inline]
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + Serialize,
     {
-        Err(crate::Error::Serialization(
-            "Cannot use Some as TOML key".to_string(),
-        ))
+        serde::ser::SerializeMap::serialize_entry(self, key, value)
     }
 
-    fn serialize_unit(self) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "Cannot use unit as TOML key".to_string(),
-        ))
+    #[inline]
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        serde::ser::SerializeMap::end(self)
+    }
+}
+
+impl<'a> serde::ser::SerializeStructVariant for SerializeTable<'a> {
+    type Ok = Option<document::Value>;
+    type Error = crate::ser::Error;
+
+    #[inline]
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
+    where
+        T: ?Sized + Serialize,
+    {
+        serde::ser::SerializeStruct::serialize_field(self, key, value)
     }
 
-    fn serialize_unit_struct(self, _name: &'static str) -> crate::Result<()> {
-        Err(crate::Error::Serialization(
-            "Cannot use unit struct as TOML key".to_string(),
-        ))
+    #[inline]
+    fn end(self) -> Result<Self::Ok, Self::Error> {
+        serde::ser::SerializeStruct::end(self)
+    }
+}
+
+struct DateTimeSerializer<'a, T> {
+    accessors: &'a [schema_store::Accessor],
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<'a, T> DateTimeSerializer<'a, T> {
+    fn new(accessors: &'a [schema_store::Accessor]) -> Self {
+        Self {
+            accessors,
+            _marker: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'a, T> serde::ser::Serializer for DateTimeSerializer<'a, T>
+where
+    T: std::str::FromStr,
+    T::Err: Into<date_time::parse::Error>,
+{
+    type Ok = T;
+    type Error = crate::ser::Error;
+    type SerializeSeq = serde::ser::Impossible<Self::Ok, Self::Error>;
+    type SerializeTuple = serde::ser::Impossible<Self::Ok, Self::Error>;
+    type SerializeTupleStruct = serde::ser::Impossible<Self::Ok, Self::Error>;
+    type SerializeTupleVariant = serde::ser::Impossible<Self::Ok, Self::Error>;
+    type SerializeMap = serde::ser::Impossible<Self::Ok, Self::Error>;
+    type SerializeStruct = serde::ser::Impossible<Self::Ok, Self::Error>;
+    type SerializeStructVariant = serde::ser::Impossible<Self::Ok, Self::Error>;
+
+    fn serialize_str(self, s: &str) -> Result<Self::Ok, Self::Error> {
+        match s.parse::<T>() {
+            Ok(value) => Ok(value),
+            Err(err) => Err(crate::ser::Error::DateTimeParseError(
+                schema_store::Accessors::new(self.accessors.to_vec()),
+                err.into(),
+            )),
+        }
+    }
+
+    fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_i8(self, _v: i8) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_i16(self, _v: i16) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_i32(self, _v: i32) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_i64(self, _v: i64) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_u8(self, _v: u8) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_u16(self, _v: u16) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_u32(self, _v: u32) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_u64(self, _v: u64) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_f32(self, _v: f32) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_f64(self, _v: f64) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_char(self, _v: char) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_bytes(self, _v: &[u8]) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_some<V>(self, _v: &V) -> Result<Self::Ok, Self::Error>
+    where
+        V: ?Sized + Serialize,
+    {
+        unreachable!()
+    }
+
+    fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
+    }
+
+    fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
     }
 
     fn serialize_unit_variant(
         self,
         _name: &'static str,
         _variant_index: u32,
-        variant: &'static str,
-    ) -> crate::Result<()> {
-        self.key = variant.to_string();
-        Ok(())
+        _variant: &'static str,
+    ) -> Result<Self::Ok, Self::Error> {
+        unreachable!()
     }
 
-    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> crate::Result<()>
+    fn serialize_newtype_struct<V>(
+        self,
+        _name: &'static str,
+        _value: &V,
+    ) -> Result<Self::Ok, Self::Error>
     where
-        T: ?Sized + Serialize,
+        V: ?Sized + Serialize,
     {
-        value.serialize(self)
+        unreachable!()
     }
 
-    fn serialize_newtype_variant<T>(
+    fn serialize_newtype_variant<V>(
         self,
         _name: &'static str,
         _variant_index: u32,
         _variant: &'static str,
-        _value: &T,
-    ) -> crate::Result<()>
+        _value: &V,
+    ) -> Result<Self::Ok, Self::Error>
     where
-        T: ?Sized + Serialize,
+        V: ?Sized + Serialize,
     {
-        Err(crate::Error::Serialization(
-            "Cannot use newtype variant as TOML key".to_string(),
-        ))
+        unreachable!()
     }
 
-    fn serialize_seq(self, _len: Option<usize>) -> crate::Result<Self::SerializeSeq> {
-        Err(crate::Error::Serialization(
-            "Cannot use sequence as TOML key".to_string(),
-        ))
+    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
+        unreachable!()
     }
 
-    fn serialize_tuple(self, _len: usize) -> crate::Result<Self::SerializeTuple> {
-        Err(crate::Error::Serialization(
-            "Cannot use tuple as TOML key".to_string(),
-        ))
+    fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple, Self::Error> {
+        unreachable!()
     }
 
     fn serialize_tuple_struct(
         self,
         _name: &'static str,
         _len: usize,
-    ) -> crate::Result<Self::SerializeTupleStruct> {
-        Err(crate::Error::Serialization(
-            "Cannot use tuple struct as TOML key".to_string(),
-        ))
+    ) -> Result<Self::SerializeTupleStruct, Self::Error> {
+        unreachable!()
     }
 
     fn serialize_tuple_variant(
@@ -832,26 +745,20 @@ impl serde::Serializer for &mut KeySerializer {
         _variant_index: u32,
         _variant: &'static str,
         _len: usize,
-    ) -> crate::Result<Self::SerializeTupleVariant> {
-        Err(crate::Error::Serialization(
-            "Cannot use tuple variant as TOML key".to_string(),
-        ))
+    ) -> Result<Self::SerializeTupleVariant, Self::Error> {
+        unreachable!()
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> crate::Result<Self::SerializeMap> {
-        Err(crate::Error::Serialization(
-            "Cannot use map as TOML key".to_string(),
-        ))
+    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
+        unreachable!()
     }
 
     fn serialize_struct(
         self,
         _name: &'static str,
         _len: usize,
-    ) -> crate::Result<Self::SerializeStruct> {
-        Err(crate::Error::Serialization(
-            "Cannot use struct as TOML key".to_string(),
-        ))
+    ) -> Result<Self::SerializeStruct, Self::Error> {
+        unreachable!()
     }
 
     fn serialize_struct_variant(
@@ -860,135 +767,10 @@ impl serde::Serializer for &mut KeySerializer {
         _variant_index: u32,
         _variant: &'static str,
         _len: usize,
-    ) -> crate::Result<Self::SerializeStructVariant> {
-        Err(crate::Error::Serialization(
-            "Cannot use struct variant as TOML key".to_string(),
-        ))
-    }
-}
-
-// Dummy struct for unimplementable serialization types
-struct Impossible<T, E>(PhantomData<T>, PhantomData<E>);
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeSeq for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_element<U>(&mut self, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
+    ) -> Result<Self::SerializeStructVariant, Self::Error> {
         unreachable!()
     }
 }
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeTuple for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_element<U>(&mut self, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
-        unreachable!()
-    }
-}
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeTupleStruct for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_field<U>(&mut self, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
-        unreachable!()
-    }
-}
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeTupleVariant for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_field<U>(&mut self, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
-        unreachable!()
-    }
-}
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeMap for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_key<U>(&mut self, _key: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn serialize_value<U>(&mut self, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
-        unreachable!()
-    }
-}
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeStruct for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_field<U>(&mut self, _key: &'static str, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
-        unreachable!()
-    }
-}
-
-impl<T, E: serde::ser::Error> serde::ser::SerializeStructVariant for Impossible<T, E> {
-    type Ok = T;
-    type Error = E;
-
-    fn serialize_field<U>(&mut self, _key: &'static str, _value: &U) -> std::result::Result<(), E>
-    where
-        U: ?Sized + Serialize,
-    {
-        unreachable!()
-    }
-
-    fn end(self) -> std::result::Result<T, E> {
-        unreachable!()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
