@@ -39,6 +39,37 @@ impl SchemaStore {
         self.options.strict.unwrap_or(true)
     }
 
+    pub async fn load_config(
+        &self,
+        config: &config::Config,
+        config_path: Option<&std::path::Path>,
+    ) -> Result<(), crate::Error> {
+        let base_dirpath = config_path.and_then(|p| p.parent());
+        self.load_schemas(
+            match &config.schemas {
+                Some(schemas) => schemas,
+                None => &[],
+            },
+            base_dirpath,
+        )
+        .await;
+
+        if let Some(schema_options) = &config.schema {
+            for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
+                self.load_schemas_from_catalog_url(&CatalogUrl::new(
+                    catalog_path.try_into().map_err(|_| {
+                        crate::Error::CatalogPathConvertUrlFailed {
+                            catalog_path: catalog_path.to_string(),
+                        }
+                    })?,
+                ))
+                .await?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
         let mut store_schemas = self.schemas.write().await;
 
@@ -207,7 +238,7 @@ impl SchemaStore {
             if let Some(document_schema) = self.document_schemas.read().await.get(schema_url) {
                 return match document_schema {
                     Ok(document_schema) => Ok(Some(document_schema.clone())),
-                    Err(err) => Err(err.clone()),
+                    Err(err) => Err(err.to_owned()),
                 };
             }
 

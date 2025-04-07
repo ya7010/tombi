@@ -13,6 +13,12 @@ impl SchemaCatalogPath {
     }
 }
 
+impl std::fmt::Display for SchemaCatalogPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl Default for SchemaCatalogPath {
     fn default() -> Self {
         SchemaCatalogPath("https://www.schemastore.org/api/json/catalog.json".to_string())

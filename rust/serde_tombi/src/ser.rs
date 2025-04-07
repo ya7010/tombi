@@ -57,6 +57,7 @@ where
 #[derive(Default)]
 pub struct Serializer<'a> {
     config: Option<&'a config::Config>,
+    config_path: Option<&'a std::path::Path>,
     schema_store: Option<&'a schema_store::SchemaStore>,
 }
 
@@ -65,8 +66,13 @@ impl<'a> Serializer<'a> {
         Self::default()
     }
 
-    pub fn with_config(mut self, config: &'a config::Config) -> Self {
+    pub fn with_config(
+        mut self,
+        config: &'a config::Config,
+        config_path: Option<&'a std::path::Path>,
+    ) -> Self {
         self.config = Some(config);
+        self.config_path = config_path;
         self
     }
 
@@ -91,7 +97,7 @@ impl<'a> Serializer<'a> {
     where
         T: Serialize,
     {
-        futures::executor::block_on(self.to_string_async(value))
+        tokio::runtime::Runtime::new()?.block_on(self.to_string_async(value))
     }
 
     pub async fn to_string_async<T>(&self, value: &T) -> Result<String, crate::ser::Error>
@@ -103,21 +109,30 @@ impl<'a> Serializer<'a> {
         document.to_toml_string(&mut toml_text, &[]);
 
         let format_definitions = FormatDefinitions::default();
-        let default_format_options = FormatOptions::default();
-        let format_options = self
-            .config
-            .as_ref()
-            .and_then(|config| config.format.as_ref())
-            .unwrap_or(&default_format_options);
-        let schema_store = match self.schema_store.as_ref() {
+        let format_options = FormatOptions::default();
+
+        let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::default(),
         };
+        if self.schema_store.is_none() {
+            match self.config {
+                Some(config) => {
+                    schema_store.load_config(&config, self.config_path).await?;
+                }
+                None => {
+                    let (config, config_path) = config::load_with_path()?;
+                    schema_store
+                        .load_config(&config, config_path.as_deref())
+                        .await?;
+                }
+            };
+        }
 
         let formatter = formatter::Formatter::new(
             TomlVersion::default(),
             format_definitions,
-            format_options,
+            &format_options,
             None,
             schema_store,
         );
@@ -936,9 +951,26 @@ three = 3
         let expected = r#"
 created_at = "2023-05-15T10:30:00Z"
 updated_at = "2023-07-20T14:45:30Z"
-"#
-        .strip_prefix("\n")
-        .unwrap();
+"#;
+
+        toml_text_assert_eq!(toml, expected);
+    }
+
+    #[test]
+    fn test_serialize_option() {
+        #[derive(Serialize)]
+        struct OptionTest {
+            some: Option<String>,
+            none: Option<String>,
+        }
+
+        let test = OptionTest {
+            some: Some("optional".to_string()),
+            none: None,
+        };
+
+        let toml = to_string(&test).expect("TOML serialization failed");
+        let expected = r#"some = "optional""#;
 
         toml_text_assert_eq!(toml, expected);
     }

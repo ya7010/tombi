@@ -49,8 +49,8 @@ pub struct Options {
 impl Backend {
     #[inline]
     pub fn new(client: tower_lsp::Client, options: &Options) -> Self {
-        let (config, config_dirpath) = match config::load_with_path() {
-            Ok((config, config_dirpath)) => (config, config_dirpath),
+        let (config, config_path) = match config::load_with_path() {
+            Ok((config, config_path)) => (config, config_path),
             Err(err) => {
                 tracing::error!("{err}");
                 (Config::default(), None)
@@ -65,7 +65,7 @@ impl Backend {
         Self {
             client,
             document_sources: Default::default(),
-            config_dirpath,
+            config_dirpath: config_path.and_then(|path| path.parent().map(ToOwned::to_owned)),
             config: Arc::new(tokio::sync::RwLock::new(config)),
             schema_store: schema_store::SchemaStore::new(options),
         }

@@ -154,12 +154,7 @@ pub fn load_with_path() -> Result<(Config, Option<PathBuf>), crate::Error> {
                 unreachable!("tombi.toml should always be parsed successfully.");
             };
 
-            let config_dirpath = match config_path.parent() {
-                Some(dir) => dir.to_owned(),
-                None => current_dir,
-            };
-
-            return Ok((config, Some(config_dirpath)));
+            return Ok((config, Some(config_path)));
         }
 
         let pyproject_toml_path = current_dir.join(PYPROJECT_FILENAME);
