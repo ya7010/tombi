@@ -103,4 +103,9 @@ mod tests {
         #[test]
         fn valid_local_time_key_value2("lt2 = 00:32:00.999999") -> Ok(source);
     }
+
+    test_format! {
+        #[test]
+        fn retain_pico_seconds("lt2 = 00:00:00.999999999999") -> Ok(source);
+    }
 }
