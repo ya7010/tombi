@@ -16,6 +16,9 @@ pub enum Error {
     #[error("definition ref not found: {definition_ref}")]
     DefinitionNotFound { definition_ref: String },
 
+    #[error("failed to convert to catalog url: {catalog_path}")]
+    CatalogPathConvertUrlFailed { catalog_path: String },
+
     #[error("failed to fetch catalog: {catalog_url}")]
     CatalogUrlFetchFailed { catalog_url: CatalogUrl },
 

@@ -1,6 +1,15 @@
-#[derive(thiserror::Error, Debug, Clone)]
+#[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum Error {
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Config(#[from] config::Error),
+
+    #[error(transparent)]
+    SchemaStore(#[from] schema_store::Error),
+
     #[error("Document root must be a Table, got {0}")]
     RootMustBeTable(document::ValueKind),
 

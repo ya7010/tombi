@@ -16,14 +16,15 @@ diagnostic = { workspace = true }
 document = { workspace = true }
 document-tree = { workspace = true }
 formatter = { workspace = true }
-futures = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
 parser = { workspace = true }
 schema-store = { workspace = true }
 serde = { workspace = true }
 text = { workspace = true }
+textwrap = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

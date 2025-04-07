@@ -1,6 +1,5 @@
 use config::{LintOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
-use schema_store::json::CatalogUrl;
 use tokio::io::AsyncReadExt;
 
 use crate::app::arg;
@@ -57,22 +56,13 @@ where
     crate::Error: Print<P>,
     P: Copy + Clone + Send + 'static,
 {
-    let (config, config_dirpath) = config::load_with_path()?;
+    let (config, config_path) = config::load_with_path()?;
 
     let toml_version = config.toml_version.unwrap_or_default();
-    let include_patterns: Option<Vec<&str>> = config
-        .include
-        .as_deref()
-        .map(|p| p.iter().map(|s| s.as_str()).collect());
-    let exclude_patterns: Option<Vec<&str>> = config
-        .exclude
-        .as_deref()
-        .map(|p| p.iter().map(|s| s.as_str()).collect());
-    let lint_options = config.lint.unwrap_or_default();
-    let schema_options = config.schema.unwrap_or_default();
+    let schema_options = config.schema.as_ref();
     let schema_store = schema_store::SchemaStore::new(schema_store::Options {
         offline: offline.then_some(true),
-        strict: schema_options.strict(),
+        strict: schema_options.and_then(|schema_options| schema_options.strict()),
     });
 
     let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
@@ -84,23 +74,19 @@ where
     };
 
     runtime.block_on(async {
-        if schema_options.enabled.unwrap_or_default().value() {
-            schema_store
-                .load_schemas(
-                    match &config.schemas {
-                        Some(schemas) => schemas,
-                        None => &[],
-                    },
-                    config_dirpath.as_deref(),
-                )
-                .await;
+        schema_store
+            .load_config(&config, config_path.as_deref())
+            .await?;
 
-            for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
-                schema_store
-                    .load_schemas_from_catalog_url(&CatalogUrl::new(catalog_path.try_into()?))
-                    .await?;
-            }
-        }
+        let include_patterns: Option<Vec<&str>> = config
+            .include
+            .as_ref()
+            .map(|p| p.iter().map(|s| s.as_str()).collect());
+        let exclude_patterns: Option<Vec<&str>> = config
+            .exclude
+            .as_ref()
+            .map(|p| p.iter().map(|s| s.as_str()).collect());
+        let lint_options = config.lint.unwrap_or_default();
 
         let input = arg::FileInput::new(
             &args.files,
