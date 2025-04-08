@@ -627,7 +627,7 @@ where
     fn serialize_str(self, s: &str) -> Result<Self::Ok, Self::Error> {
         match s.parse::<T>() {
             Ok(value) => Ok(value),
-            Err(err) => Err(crate::ser::Error::DateTimeParseError {
+            Err(err) => Err(crate::ser::Error::DateTimeParseFailed {
                 accessors: schema_store::Accessors::new(self.accessors.to_vec()),
                 error: err.into(),
             }),
