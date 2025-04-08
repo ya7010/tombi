@@ -118,7 +118,7 @@ impl<'a> Serializer<'a> {
         if self.schema_store.is_none() {
             match self.config {
                 Some(config) => {
-                    schema_store.load_config(&config, self.config_path).await?;
+                    schema_store.load_config(config, self.config_path).await?;
                 }
                 None => {
                     let (config, config_path) = config::load_with_path()?;
@@ -126,7 +126,7 @@ impl<'a> Serializer<'a> {
                         .load_config(&config, config_path.as_deref())
                         .await?;
                 }
-            };
+            }
         }
 
         let formatter = formatter::Formatter::new(
@@ -379,7 +379,7 @@ pub struct SerializeArray<'a> {
     values: Vec<document::Value>,
 }
 
-impl<'a> serde::ser::SerializeSeq for SerializeArray<'a> {
+impl serde::ser::SerializeSeq for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -436,7 +436,7 @@ impl<'a> serde::ser::SerializeSeq for SerializeArray<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeTuple for SerializeArray<'a> {
+impl serde::ser::SerializeTuple for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -454,7 +454,7 @@ impl<'a> serde::ser::SerializeTuple for SerializeArray<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeTupleStruct for SerializeArray<'a> {
+impl serde::ser::SerializeTupleStruct for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -470,7 +470,7 @@ impl<'a> serde::ser::SerializeTupleStruct for SerializeArray<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeTupleVariant for SerializeArray<'a> {
+impl serde::ser::SerializeTupleVariant for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -493,7 +493,7 @@ pub struct SerializeTable<'a> {
     key_values: Vec<(document::Key, document::Value)>,
 }
 
-impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
+impl serde::ser::SerializeMap for SerializeTable<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -511,10 +511,10 @@ impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
             }
             Ok(Some(value)) => {
                 self.key = None;
-                return Err(crate::ser::Error::KeyMustBeString(
+                Err(crate::ser::Error::KeyMustBeString(
                     schema_store::Accessors::new(self.accessors.to_vec()),
                     value.kind(),
-                ));
+                ))
             }
             Ok(None) => {
                 self.key = None;
@@ -524,7 +524,7 @@ impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
             }
             Err(error) => {
                 self.key = None;
-                Err(error.into())
+                Err(error)
             }
         }
     }
@@ -559,7 +559,7 @@ impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeStruct for SerializeTable<'a> {
+impl serde::ser::SerializeStruct for SerializeTable<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -577,7 +577,7 @@ impl<'a> serde::ser::SerializeStruct for SerializeTable<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeStructVariant for SerializeTable<'a> {
+impl serde::ser::SerializeStructVariant for SerializeTable<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -609,7 +609,7 @@ impl<'a, T> DateTimeSerializer<'a, T> {
     }
 }
 
-impl<'a, T> serde::ser::Serializer for DateTimeSerializer<'a, T>
+impl<T> serde::ser::Serializer for DateTimeSerializer<'_, T>
 where
     T: std::str::FromStr,
     T::Err: Into<date_time::parse::Error>,
@@ -627,10 +627,10 @@ where
     fn serialize_str(self, s: &str) -> Result<Self::Ok, Self::Error> {
         match s.parse::<T>() {
             Ok(value) => Ok(value),
-            Err(err) => Err(crate::ser::Error::DateTimeParseError(
-                schema_store::Accessors::new(self.accessors.to_vec()),
-                err.into(),
-            )),
+            Err(err) => Err(crate::ser::Error::DateTimeParseFailed {
+                accessors: schema_store::Accessors::new(self.accessors.to_vec()),
+                error: err.into(),
+            }),
         }
     }
 
@@ -788,6 +788,7 @@ where
 }
 #[cfg(test)]
 mod tests {
+
     use super::*;
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
@@ -807,7 +808,7 @@ mod tests {
 
         let test = Test {
             int: 42,
-            float: 3.14159,
+            float: std::f64::consts::PI,
             string: "hello".to_string(),
             bool: true,
             opt: Some("optional".to_string()),
@@ -816,7 +817,7 @@ mod tests {
         let toml = to_string(&test).expect("TOML serialization failed");
         let expected = r#"
 int = 42
-float = 3.14159
+float = 3.141592653589793
 string = "hello"
 bool = true
 opt = "optional"

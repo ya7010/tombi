@@ -31,7 +31,7 @@ impl GetHoverContent for document_tree::Boolean {
                                 position,
                                 keys,
                                 accessors,
-                                Some(&current_schema),
+                                Some(current_schema),
                                 schema_context,
                             )
                             .await
@@ -45,7 +45,7 @@ impl GetHoverContent for document_tree::Boolean {
                             self,
                             position,
                             keys,
-                            &accessors,
+                            accessors,
                             one_of_schema,
                             current_schema.schema_url.as_ref(),
                             current_schema.definitions.as_ref(),

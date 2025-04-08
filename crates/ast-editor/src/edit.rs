@@ -68,7 +68,7 @@ async fn get_schema<'a: 'b, 'b>(
 
             if accessors.is_empty() {
                 return value
-                    .validate(validation_accessors, Some(&current_schema), schema_context)
+                    .validate(validation_accessors, Some(current_schema), schema_context)
                     .await
                     .ok()
                     .map(|_| current_schema.value_schema.as_ref().clone());

@@ -35,7 +35,7 @@ impl std::str::FromStr for LocalDate {
                 offset: None,
             }) => Ok(Self(date)),
             Ok(_) => Err(crate::parse::Error::ExpectedLocalDate),
-            Err(error) => Err(error.into()),
+            Err(error) => Err(error),
         }
     }
 }

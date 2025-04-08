@@ -22,8 +22,11 @@ pub enum Error {
     #[error("Value is required for {0}")]
     ValueRequired(schema_store::Accessors),
 
-    #[error("{1} for {0}")]
-    DateTimeParseError(schema_store::Accessors, date_time::parse::Error),
+    #[error("{error} for {accessors}")]
+    DateTimeParseFailed {
+        accessors: schema_store::Accessors,
+        error: date_time::parse::Error,
+    },
 
     #[error("TOML must be UTF-8 encoded")]
     TomlMustBeUtf8,

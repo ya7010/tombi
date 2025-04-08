@@ -13,6 +13,12 @@ pub use value::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct Document(pub(crate) Table);
 
+impl Default for Document {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Document {
     pub fn new() -> Self {
         Self(Table::new(TableKind::Table))

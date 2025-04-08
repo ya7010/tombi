@@ -43,7 +43,7 @@ impl Validate for document_tree::Integer {
                             self,
                             accessors,
                             one_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -53,7 +53,7 @@ impl Validate for document_tree::Integer {
                             self,
                             accessors,
                             any_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -63,7 +63,7 @@ impl Validate for document_tree::Integer {
                             self,
                             accessors,
                             all_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                         )
                         .await

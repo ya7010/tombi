@@ -66,7 +66,7 @@ impl std::str::FromStr for LocalTime {
                 offset: None,
             }) => Ok(Self(time)),
             Ok(_) => Err(crate::parse::Error::ExpectedLocalTime),
-            Err(error) => Err(error.into()),
+            Err(error) => Err(error),
         }
     }
 }
@@ -119,7 +119,7 @@ impl From<chrono::NaiveTime> for LocalTime {
             hour: value.hour() as u8,
             minute: value.minute() as u8,
             second: value.second() as u8,
-            nanosecond: value.nanosecond() as u32,
+            nanosecond: value.nanosecond(),
         })
     }
 }

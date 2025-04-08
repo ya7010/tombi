@@ -31,17 +31,11 @@ impl crate::Edit for ast::ArrayOfTable {
             );
 
             let current_schema = if let Some(current_schema) = current_schema {
-                if let Some(value_schema) =
-                    get_schema(value, &header_accessors, current_schema, schema_context).await
-                {
-                    Some(CurrentSchema {
+                get_schema(value, &header_accessors, current_schema, schema_context).await.map(|value_schema| CurrentSchema {
                         value_schema: Cow::Owned(value_schema),
                         schema_url: current_schema.schema_url.clone(),
                         definitions: current_schema.definitions.clone(),
                     })
-                } else {
-                    None
-                }
             } else {
                 None
             };

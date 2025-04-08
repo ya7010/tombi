@@ -293,7 +293,7 @@ impl serde::ser::Serialize for DateTime {
     {
         struct DateTimeStr<'a>(&'a str);
 
-        impl<'a> serde::ser::Serialize for DateTimeStr<'a> {
+        impl serde::ser::Serialize for DateTimeStr<'_> {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::ser::Serializer,

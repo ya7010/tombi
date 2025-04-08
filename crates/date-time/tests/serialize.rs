@@ -6,14 +6,14 @@ use serde_json::json;
 fn test_local_date_serialization() {
     let date = LocalDate::from_ymd(2021, 1, 1);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&date).unwrap(), json!("2021-01-01"));
+    pretty_assertions::assert_eq!(serde_json::to_value(date).unwrap(), json!("2021-01-01"));
 }
 
 #[test]
 fn test_local_time_serialization() {
     let time = LocalTime::from_hms(12, 0, 0);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&time).unwrap(), json!("12:00:00"));
+    pretty_assertions::assert_eq!(serde_json::to_value(time).unwrap(), json!("12:00:00"));
 }
 
 #[rstest]
@@ -25,7 +25,7 @@ fn test_local_time_serialization_with_milliseconds(
 ) {
     let time = LocalTime::from_hms_milli(12, 0, 0, milliseconds);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&time).unwrap(), json!(expected));
+    pretty_assertions::assert_eq!(serde_json::to_value(time).unwrap(), json!(expected));
 }
 
 #[rstest]
@@ -38,7 +38,7 @@ fn test_local_time_serialization_with_nanoseconds(
 ) {
     let time = LocalTime::from_hms_nano(12, 0, 0, nanoseconds);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&time).unwrap(), json!(expected));
+    pretty_assertions::assert_eq!(serde_json::to_value(time).unwrap(), json!(expected));
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn test_local_date_time_serialization() {
     let date_time = LocalDateTime::from_ymd_hms(2021, 1, 1, 12, 0, 0);
 
     pretty_assertions::assert_eq!(
-        serde_json::to_value(&date_time).unwrap(),
+        serde_json::to_value(date_time).unwrap(),
         json!("2021-01-01T12:00:00")
     );
 }
@@ -60,7 +60,7 @@ fn test_local_date_time_serialization_with_milliseconds(
 ) {
     let date_time = LocalDateTime::from_ymd_hms_milli(2021, 1, 1, 12, 0, 0, milliseconds);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&date_time).unwrap(), json!(expected));
+    pretty_assertions::assert_eq!(serde_json::to_value(date_time).unwrap(), json!(expected));
 }
 
 #[rstest]
@@ -73,7 +73,7 @@ fn test_local_date_time_serialization_with_nanoseconds(
 ) {
     let date_time = LocalDateTime::from_ymd_hms_nano(2021, 1, 1, 12, 0, 0, nanoseconds);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&date_time).unwrap(), json!(expected));
+    pretty_assertions::assert_eq!(serde_json::to_value(date_time).unwrap(), json!(expected));
 }
 
 #[rstest]
@@ -84,5 +84,5 @@ fn test_local_date_time_serialization_with_nanoseconds(
 fn test_offset_date_time_serialization(#[case] offset: TimeZoneOffset, #[case] expected: &str) {
     let date_time = OffsetDateTime::from_ymd_hms(2021, 1, 1, 12, 0, 0, offset);
 
-    pretty_assertions::assert_eq!(serde_json::to_value(&date_time).unwrap(), json!(expected));
+    pretty_assertions::assert_eq!(serde_json::to_value(date_time).unwrap(), json!(expected));
 }

@@ -64,7 +64,7 @@ pub fn try_new_offset_date_time(
     match date_time::OffsetDateTime::from_str(&datetime_str) {
         Ok(value) => Ok(value),
         Err(error) => Err(crate::Error::ParseDateTimeError {
-            error: error.into(),
+            error,
             range: token.range(),
         }),
     }
@@ -90,7 +90,7 @@ pub fn try_new_local_date_time(
     match date_time::LocalDateTime::from_str(&datetime_str) {
         Ok(value) => Ok(value),
         Err(error) => Err(crate::Error::ParseDateTimeError {
-            error: error.into(),
+            error,
             range: token.range(),
         }),
     }
@@ -109,7 +109,7 @@ pub fn try_new_local_date(
     match date_time::LocalDate::from_str(token.text()) {
         Ok(value) => Ok(value),
         Err(error) => Err(crate::Error::ParseDateTimeError {
-            error: error.into(),
+            error,
             range: token.range(),
         }),
     }
