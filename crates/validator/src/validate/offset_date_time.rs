@@ -45,7 +45,7 @@ impl Validate for OffsetDateTime {
                             self,
                             accessors,
                             one_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -55,7 +55,7 @@ impl Validate for OffsetDateTime {
                             self,
                             accessors,
                             any_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -65,7 +65,7 @@ impl Validate for OffsetDateTime {
                             self,
                             accessors,
                             all_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                         )
                         .await

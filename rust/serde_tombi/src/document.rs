@@ -19,15 +19,14 @@ impl ToTomlString for (&document::Key, &document::Value) {
                     result,
                     &parent_keys
                         .iter()
-                        .chain(&[key])
-                        .map(|key| *key)
+                        .chain(&[key]).copied()
                         .collect_vec(),
                 );
             }
             _ => {
                 result.push_str(&format!(
                     "{} = ",
-                    parent_keys.iter().chain(&[key]).map(|key| *key).join(".")
+                    parent_keys.iter().chain(&[key]).copied().join(".")
                 ));
                 value.to_toml_string(result, &[]);
             }
@@ -66,9 +65,8 @@ impl ToTomlString for document::Table {
                                 return table.to_toml_string(
                                     result,
                                     &parent_keys
-                                        .into_iter()
-                                        .chain(&[key])
-                                        .map(|key| *key)
+                                        .iter()
+                                        .chain(&[key]).copied()
                                         .collect_vec(),
                                 );
                             }
@@ -78,9 +76,8 @@ impl ToTomlString for document::Table {
                                 return array.to_toml_string(
                                     result,
                                     &parent_keys
-                                        .into_iter()
-                                        .chain(&[key])
-                                        .map(|key| *key)
+                                        .iter()
+                                        .chain(&[key]).copied()
                                         .collect_vec(),
                                 );
                             }
@@ -124,8 +121,7 @@ impl ToTomlString for document::Table {
                         result,
                         &parent_keys
                             .iter()
-                            .chain(&[key])
-                            .map(|key| *key)
+                            .chain(&[key]).copied()
                             .collect_vec(),
                     );
                 }
@@ -138,14 +134,13 @@ impl ToTomlString for document::Table {
                     }
                     result.push_str(&format!(
                         "{} = ",
-                        parent_keys.iter().chain(&[key]).map(|key| *key).join(".")
+                        parent_keys.iter().chain(&[key]).copied().join(".")
                     ));
                     value.to_toml_string(
                         result,
                         &parent_keys
                             .iter()
-                            .chain(&[key])
-                            .map(|key| *key)
+                            .chain(&[key]).copied()
                             .collect_vec(),
                     );
                 }
@@ -195,8 +190,7 @@ impl ToTomlString for document::Array {
                                         result,
                                         &parent_keys
                                             .iter()
-                                            .chain(&[key])
-                                            .map(|key| *key)
+                                            .chain(&[key]).copied()
                                             .collect_vec(),
                                     );
                                 }
@@ -206,8 +200,7 @@ impl ToTomlString for document::Array {
                                         result,
                                         &parent_keys
                                             .iter()
-                                            .chain(&[key])
-                                            .map(|key| *key)
+                                            .chain(&[key]).copied()
                                             .collect_vec(),
                                     );
                                 }
@@ -247,16 +240,16 @@ impl ToTomlString for document::String {
     fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
         match self.kind() {
             document::StringKind::BasicString => {
-                result.push_str(&toml_text::to_basic_string(&self.value()));
+                result.push_str(&toml_text::to_basic_string(self.value()));
             }
             document::StringKind::LiteralString => {
-                result.push_str(&toml_text::to_literal_string(&self.value()));
+                result.push_str(&toml_text::to_literal_string(self.value()));
             }
             document::StringKind::MultiLineBasicString => {
-                result.push_str(&toml_text::to_multi_line_basic_string(&self.value()));
+                result.push_str(&toml_text::to_multi_line_basic_string(self.value()));
             }
             document::StringKind::MultiLineLiteralString => {
-                result.push_str(&toml_text::to_multi_line_literal_string(&self.value()));
+                result.push_str(&toml_text::to_multi_line_literal_string(self.value()));
             }
         }
     }

@@ -31,7 +31,7 @@ impl GetHoverContent for document_tree::Array {
                 definitions,
                 ..
             })) = schema_context
-                .get_subschema(&accessors, current_schema)
+                .get_subschema(accessors, current_schema)
                 .await
             {
                 let current_schema = value_schema.map(|value_schema| CurrentSchema {
@@ -145,7 +145,7 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            &one_of_schema,
+                            one_of_schema,
                             &current_schema.schema_url,
                             &current_schema.definitions,
                             schema_context,
@@ -158,7 +158,7 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            &any_of_schema,
+                            any_of_schema,
                             &current_schema.schema_url,
                             &current_schema.definitions,
                             schema_context,
@@ -171,7 +171,7 @@ impl GetHoverContent for document_tree::Array {
                             position,
                             keys,
                             accessors,
-                            &all_of_schema,
+                            all_of_schema,
                             &current_schema.schema_url,
                             &current_schema.definitions,
                             schema_context,

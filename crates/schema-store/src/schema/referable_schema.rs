@@ -27,7 +27,7 @@ pub struct CurrentSchema<'a> {
     pub definitions: Cow<'a, SchemaDefinitions>,
 }
 
-impl<'a> std::fmt::Debug for CurrentSchema<'a> {
+impl std::fmt::Debug for CurrentSchema<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CurrentSchema")
             .field("value_schema", &self.value_schema)

@@ -37,7 +37,7 @@ impl FindCompletionContents for document_tree::Array {
                 definitions,
                 ..
             })) = schema_context
-                .get_subschema(&accessors, current_schema)
+                .get_subschema(accessors, current_schema)
                 .await
             {
                 return self

@@ -379,7 +379,7 @@ pub struct SerializeArray<'a> {
     values: Vec<document::Value>,
 }
 
-impl<'a> serde::ser::SerializeSeq for SerializeArray<'a> {
+impl serde::ser::SerializeSeq for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -436,7 +436,7 @@ impl<'a> serde::ser::SerializeSeq for SerializeArray<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeTuple for SerializeArray<'a> {
+impl serde::ser::SerializeTuple for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -454,7 +454,7 @@ impl<'a> serde::ser::SerializeTuple for SerializeArray<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeTupleStruct for SerializeArray<'a> {
+impl serde::ser::SerializeTupleStruct for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -470,7 +470,7 @@ impl<'a> serde::ser::SerializeTupleStruct for SerializeArray<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeTupleVariant for SerializeArray<'a> {
+impl serde::ser::SerializeTupleVariant for SerializeArray<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -493,7 +493,7 @@ pub struct SerializeTable<'a> {
     key_values: Vec<(document::Key, document::Value)>,
 }
 
-impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
+impl serde::ser::SerializeMap for SerializeTable<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -511,10 +511,10 @@ impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
             }
             Ok(Some(value)) => {
                 self.key = None;
-                return Err(crate::ser::Error::KeyMustBeString(
+                Err(crate::ser::Error::KeyMustBeString(
                     schema_store::Accessors::new(self.accessors.to_vec()),
                     value.kind(),
-                ));
+                ))
             }
             Ok(None) => {
                 self.key = None;
@@ -524,7 +524,7 @@ impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
             }
             Err(error) => {
                 self.key = None;
-                Err(error.into())
+                Err(error)
             }
         }
     }
@@ -559,7 +559,7 @@ impl<'a> serde::ser::SerializeMap for SerializeTable<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeStruct for SerializeTable<'a> {
+impl serde::ser::SerializeStruct for SerializeTable<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -577,7 +577,7 @@ impl<'a> serde::ser::SerializeStruct for SerializeTable<'a> {
     }
 }
 
-impl<'a> serde::ser::SerializeStructVariant for SerializeTable<'a> {
+impl serde::ser::SerializeStructVariant for SerializeTable<'_> {
     type Ok = Option<document::Value>;
     type Error = crate::ser::Error;
 
@@ -609,7 +609,7 @@ impl<'a, T> DateTimeSerializer<'a, T> {
     }
 }
 
-impl<'a, T> serde::ser::Serializer for DateTimeSerializer<'a, T>
+impl<T> serde::ser::Serializer for DateTimeSerializer<'_, T>
 where
     T: std::str::FromStr,
     T::Err: Into<date_time::parse::Error>,

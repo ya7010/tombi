@@ -32,7 +32,7 @@ impl GetHoverContent for document_tree::Table {
                 definitions,
                 ..
             })) = schema_context
-                .get_subschema(&accessors, current_schema)
+                .get_subschema(accessors, current_schema)
                 .await
             {
                 let current_schema = value_schema.map(|value_schema| CurrentSchema {

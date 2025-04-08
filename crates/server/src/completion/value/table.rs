@@ -40,7 +40,7 @@ impl FindCompletionContents for document_tree::Table {
                 definitions,
                 ..
             })) = schema_context
-                .get_subschema(&accessors, current_schema)
+                .get_subschema(accessors, current_schema)
                 .await
             {
                 return self
@@ -407,7 +407,7 @@ impl FindCompletionContents for document_tree::Table {
                             keys,
                             accessors,
                             one_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                             completion_hint,
                         )
@@ -420,7 +420,7 @@ impl FindCompletionContents for document_tree::Table {
                             keys,
                             accessors,
                             any_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                             completion_hint,
                         )
@@ -433,7 +433,7 @@ impl FindCompletionContents for document_tree::Table {
                             keys,
                             accessors,
                             all_of_schema,
-                            &current_schema,
+                            current_schema,
                             schema_context,
                             completion_hint,
                         )

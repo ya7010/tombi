@@ -41,7 +41,7 @@ pub fn validate<'a: 'b, 'b>(
                 .value_schema
                 .as_ref()
                 .map(|value_schema| CurrentSchema {
-                    value_schema: Cow::Borrowed(&value_schema),
+                    value_schema: Cow::Borrowed(value_schema),
                     schema_url: Cow::Borrowed(&root_schema.schema_url),
                     definitions: Cow::Borrowed(&root_schema.definitions),
                 })

@@ -89,7 +89,7 @@ impl std::str::FromStr for OffsetDateTime {
                 offset: Some(offset),
             }) => Ok(Self { date, time, offset }),
             Ok(_) => Err(crate::parse::Error::ExpectedOffsetDateTime),
-            Err(error) => Err(error.into()),
+            Err(error) => Err(error),
         }
     }
 }
