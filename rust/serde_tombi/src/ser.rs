@@ -788,6 +788,7 @@ where
 }
 #[cfg(test)]
 mod tests {
+
     use super::*;
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
@@ -807,7 +808,7 @@ mod tests {
 
         let test = Test {
             int: 42,
-            float: 3.14159,
+            float: std::f64::consts::PI,
             string: "hello".to_string(),
             bool: true,
             opt: Some("optional".to_string()),
@@ -816,7 +817,7 @@ mod tests {
         let toml = to_string(&test).expect("TOML serialization failed");
         let expected = r#"
 int = 42
-float = 3.14159
+float = 3.141592653589793
 string = "hello"
 bool = true
 opt = "optional"
