@@ -118,7 +118,9 @@ impl<'a> Serializer<'a> {
         if self.schema_store.is_none() {
             match self.config {
                 Some(config) => {
-                    schema_store.load_config(config, self.config_path).await?;
+                    if self.schema_store.is_none() {
+                        schema_store.load_config(config, self.config_path).await?;
+                    }
                 }
                 None => {
                     let (config, config_path) = config::load_with_path()?;
