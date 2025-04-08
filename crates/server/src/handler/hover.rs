@@ -190,9 +190,9 @@ async fn get_hover_range(
                             || array_of_table
                                 .leading_comments()
                                 .any(|comment| comment.syntax().range().contains(position))
-                            || array_of_table.tailing_comment().map_or(false, |comment| {
-                                comment.syntax().range().contains(position)
-                            })
+                            || array_of_table
+                                .tailing_comment()
+                                .is_some_and(|comment| comment.syntax().range().contains(position))
                             || array_of_table
                                 .key_values_begin_dangling_comments()
                                 .into_iter()
