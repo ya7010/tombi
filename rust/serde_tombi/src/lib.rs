@@ -6,20 +6,35 @@
 //!
 //! ```rust
 //! use serde::Serialize;
+//! use std::collections::HashMap;
 //!
 //! #[derive(Serialize)]
-//! struct Config {
-//!     ip: String,
-//!     port: u16,
+//! struct Package {
+//!     name: String,
+//!     version: String,
+//!     authors: Vec<String>,
 //! }
 //!
-//! let config = Config {
-//!     ip: "127.0.0.1".to_string(),
-//!     port: 8080,
+//! #[derive(Serialize)]
+//! struct CargoToml {
+//!     package: Package,
+//!     dependencies: HashMap<String, String>,
+//! }
+//!
+//! let cargo_toml = CargoToml {
+//!     package: Package {
+//!         name: "serde_tombi".to_string(),
+//!         version: "0.1.0".to_string(),
+//!         authors: vec!["The Tombi Team".to_string()],
+//!     },
+//!     dependencies: [
+//!         ("serde".to_string(), "1.0".to_string()),
+//!         ("thiserror".to_string(), "1.0".to_string()),
+//!     ].into_iter().collect(),
 //! };
 //!
 //! // Simple serialization
-//! let toml = serde_tombi::to_string(&config).unwrap();
+//! let toml = serde_tombi::to_string(&cargo_toml).unwrap();
 //! ```
 //!
 //! ## Using TypedBuilder pattern
@@ -27,28 +42,40 @@
 //! ```rust
 //! use serde::Serialize;
 //! use serde_tombi::Serializer;
+//! use std::collections::HashMap;
 //!
 //! #[derive(Serialize)]
-//! struct Config {
-//!     ip: String,
-//!     port: u16,
+//! struct Package {
+//!     name: String,
+//!     version: String,
+//!     authors: Vec<String>,
 //! }
 //!
-//! let config = Config {
-//!     ip: "127.0.0.1".to_string(),
-//!     port: 8080,
+//! #[derive(Serialize)]
+//! struct CargoToml {
+//!     package: Package,
+//!     dependencies: HashMap<String, String>,
+//! }
+//!
+//! let cargo_toml = CargoToml {
+//!     package: Package {
+//!         name: "serde_tombi".to_string(),
+//!         version: "0.1.0".to_string(),
+//!         authors: vec!["The Tombi Team".to_string()],
+//!     },
+//!     dependencies: [
+//!         ("serde".to_string(), "1.0".to_string()),
+//!         ("thiserror".to_string(), "1.0".to_string()),
+//!     ].into_iter().collect(),
 //! };
 //!
-//! // Using either the builder pattern or direct construction
+//! // Using either new() or the builder pattern
 //! // Builder pattern:
 //! let serializer = Serializer::builder()
-//!     .schema_store(&schema_store::SchemaStore::default())
+//!     .source_path(std::path::Path::new("Cargo.toml"))
 //!     .build();
 //!
-//! // Or direct construction:
-//! let serializer = Serializer::new();
-//!
-//! let toml = serializer.to_string(&config).unwrap();
+//! let toml = serializer.to_string(&cargo_toml).unwrap();
 //! ```
 //!
 mod de;
