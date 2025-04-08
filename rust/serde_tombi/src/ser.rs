@@ -118,7 +118,7 @@ impl<'a> Serializer<'a> {
         if self.schema_store.is_none() {
             match self.config {
                 Some(config) => {
-                    schema_store.load_config(&config, self.config_path).await?;
+                    schema_store.load_config(config, self.config_path).await?;
                 }
                 None => {
                     let (config, config_path) = config::load_with_path()?;
@@ -126,7 +126,7 @@ impl<'a> Serializer<'a> {
                         .load_config(&config, config_path.as_deref())
                         .await?;
                 }
-            };
+            }
         }
 
         let formatter = formatter::Formatter::new(
