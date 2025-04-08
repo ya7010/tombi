@@ -31,7 +31,7 @@ mod tests {
             config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
-            &schema_store::SchemaStore::new(schema_store::Options::default()),
+            &schema_store::SchemaStore::new(),
         )
         .lint("'' = 1")
         .await

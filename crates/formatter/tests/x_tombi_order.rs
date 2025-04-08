@@ -924,7 +924,7 @@ mod table_keys_order {
                 test_lib::init_tracing();
 
                 // Initialize schema store
-                let schema_store = SchemaStore::new(schema_store::Options::default());
+                let schema_store = SchemaStore::new();
 
                 if let Some(schema_path) = $schema_path {
                     // Load schemas

@@ -113,7 +113,7 @@ impl<'a> Serializer<'a> {
 
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
-            None => &SchemaStore::default(),
+            None => &SchemaStore::new(),
         };
         if self.schema_store.is_none() {
             match self.config {
