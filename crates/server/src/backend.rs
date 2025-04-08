@@ -67,7 +67,7 @@ impl Backend {
             document_sources: Default::default(),
             config_dirpath: config_path.and_then(|path| path.parent().map(ToOwned::to_owned)),
             config: Arc::new(tokio::sync::RwLock::new(config)),
-            schema_store: schema_store::SchemaStore::new(options),
+            schema_store: schema_store::SchemaStore::new_with_options(options),
         }
     }
 

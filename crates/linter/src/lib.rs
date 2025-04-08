@@ -54,7 +54,7 @@ macro_rules! test_lint {
             test_lib::init_tracing();
 
             // Initialize schema store
-            let schema_store = schema_store::SchemaStore::new(schema_store::Options::default());
+            let schema_store = schema_store::SchemaStore::new();
 
             if let Some(schema_path) = $schema_path {
                 // Load schemas
@@ -130,7 +130,7 @@ macro_rules! test_lint {
             test_lib::init_tracing();
 
             // Initialize schema store
-            let schema_store = schema_store::SchemaStore::new(schema_store::Options::default());
+            let schema_store = schema_store::SchemaStore::new();
 
             if let Some(schema_path) = $schema_path {
                 // Load schemas

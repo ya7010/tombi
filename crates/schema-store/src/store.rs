@@ -20,7 +20,19 @@ pub struct SchemaStore {
 }
 
 impl SchemaStore {
-    pub fn new(options: crate::Options) -> Self {
+    /// New with default options
+    ///
+    /// Create an empty store.
+    /// Note that the new() does not automatically load schemas from Config etc.
+    pub fn new() -> Self {
+        Self::new_with_options(crate::Options::default())
+    }
+
+    /// New with options
+    ///
+    /// Create a store with the given options.
+    /// Note that the new_with_options() does not automatically load schemas from Config etc.
+    pub fn new_with_options(options: crate::Options) -> Self {
         Self {
             http_client: reqwest::Client::new(),
             document_schemas: Arc::new(RwLock::default()),
@@ -425,11 +437,5 @@ impl SchemaStore {
                 }
             }
         })
-    }
-}
-
-impl Default for SchemaStore {
-    fn default() -> Self {
-        Self::new(crate::Options::default())
     }
 }
