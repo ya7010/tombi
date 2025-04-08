@@ -1,16 +1,69 @@
+//! Provides serialization functionality for converting Rust types to TOML.
+//!
+//! # Examples
+//!
+//! ## Basic usage
+//!
+//! ```rust
+//! use serde::Serialize;
+//!
+//! #[derive(Serialize)]
+//! struct Config {
+//!     ip: String,
+//!     port: u16,
+//! }
+//!
+//! let config = Config {
+//!     ip: "127.0.0.1".to_string(),
+//!     port: 8080,
+//! };
+//!
+//! // Simple serialization
+//! let toml = serde_tombi::to_string(&config).unwrap();
+//! ```
+//!
+//! ## Using TypedBuilder pattern
+//!
+//! ```rust
+//! use serde::Serialize;
+//! use serde_tombi::Serializer;
+//!
+//! #[derive(Serialize)]
+//! struct Config {
+//!     ip: String,
+//!     port: u16,
+//! }
+//!
+//! let config = Config {
+//!     ip: "127.0.0.1".to_string(),
+//!     port: 8080,
+//! };
+//!
+//! // Using either the builder pattern or direct construction
+//! // Builder pattern:
+//! let serializer = Serializer::builder()
+//!     .schema_store(&schema_store::SchemaStore::default())
+//!     .build();
+//!
+//! // Or direct construction:
+//! let serializer = Serializer::new();
+//!
+//! let toml = serializer.to_string(&config).unwrap();
+//! ```
+//!
 mod de;
 mod document;
 mod ser;
 
 pub use de::{from_document, from_str, parse_str};
-pub use ser::{to_document, to_string, to_string_async, Serializer};
-use std::fmt;
-use thiserror::Error;
-
 pub use document::{
     Array, ArrayKind, Boolean, Document, Float, Integer, IntegerKind, Key, LocalDate,
     LocalDateTime, LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
+
+pub use ser::{to_document, to_string, to_string_async, Serializer};
+use std::fmt;
+use thiserror::Error;
 
 /// Error that can occur when processing TOML.
 #[derive(Debug, Error)]

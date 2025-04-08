@@ -2,9 +2,11 @@ mod error;
 
 use formatter::formatter::definitions::FormatDefinitions;
 use formatter::FormatOptions;
+use itertools::Either;
 use schema_store::SchemaStore;
 use serde::Serialize;
 use toml_version::TomlVersion;
+use typed_builder::TypedBuilder;
 
 use crate::document::ToTomlString;
 pub use error::Error;
@@ -35,14 +37,14 @@ pub fn to_string<T>(value: &T) -> Result<String, crate::ser::Error>
 where
     T: Serialize,
 {
-    Serializer::default().to_string(value)
+    Serializer::new().to_string(value)
 }
 
 pub async fn to_string_async<T>(value: &T) -> Result<String, crate::ser::Error>
 where
     T: Serialize,
 {
-    Serializer::default().to_string_async(value).await
+    Serializer::new().to_string_async(value).await
 }
 
 /// Serialize the given data structure as a TOML Document.
@@ -50,35 +52,33 @@ pub fn to_document<T>(value: &T) -> Result<crate::Document, crate::ser::Error>
 where
     T: Serialize,
 {
-    Serializer::default().to_document(value)
+    Serializer::new().to_document(value)
 }
 
 // Actual serializer implementation
-#[derive(Default)]
+#[derive(TypedBuilder)]
 pub struct Serializer<'a> {
+    #[builder(default, setter(into, strip_option))]
     config: Option<&'a config::Config>,
+
+    #[builder(default, setter(into, strip_option))]
     config_path: Option<&'a std::path::Path>,
+
+    #[builder(default, setter(into, strip_option))]
+    source_path: Option<&'a std::path::Path>,
+
+    #[builder(default, setter(into, strip_option))]
     schema_store: Option<&'a schema_store::SchemaStore>,
 }
 
 impl<'a> Serializer<'a> {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_config(
-        mut self,
-        config: &'a config::Config,
-        config_path: Option<&'a std::path::Path>,
-    ) -> Self {
-        self.config = Some(config);
-        self.config_path = config_path;
-        self
-    }
-
-    pub fn with_schema_store(mut self, schema_store: &'a schema_store::SchemaStore) -> Self {
-        self.schema_store = Some(schema_store);
-        self
+    pub const fn new() -> Self {
+        Self {
+            config: None,
+            config_path: None,
+            source_path: None,
+            schema_store: None,
+        }
     }
 
     pub fn to_document<T>(&self, value: &T) -> Result<document::Document, crate::ser::Error>
@@ -135,7 +135,8 @@ impl<'a> Serializer<'a> {
             TomlVersion::default(),
             format_definitions,
             &format_options,
-            None,
+            self.source_path
+                .map(|source_path| Either::Right(source_path)),
             schema_store,
         );
 
@@ -974,6 +975,55 @@ updated_at = "2023-07-20T14:45:30Z"
 
         let toml = to_string(&test).expect("TOML serialization failed");
         let expected = r#"some = "optional""#;
+
+        toml_text_assert_eq!(toml, expected);
+    }
+
+    #[test]
+    fn test_builder_with_schema_store_cargo_dependencies() {
+        // This test verifies that dependencies in a Cargo.toml file
+        // are sorted alphabetically when the appropriate schema is used
+
+        #[derive(Serialize)]
+        struct CargoToml {
+            package: Package,
+            dependencies: IndexMap<String, String>,
+        }
+
+        #[derive(Serialize)]
+        struct Package {
+            name: String,
+            version: String,
+        }
+
+        // Create a Cargo.toml with unordered dependencies
+        let cargo_toml = CargoToml {
+            package: Package {
+                name: "test-package".to_string(),
+                version: "0.1.0".to_string(),
+            },
+            dependencies: indexmap! {
+                "zzz".to_string() => "1.0".to_string(),
+                "aaa".to_string() => "1.0".to_string(),
+                "mmm".to_string() => "1.0".to_string(),
+            },
+        };
+
+        let toml = Serializer::builder()
+            .source_path(std::path::Path::new("Cargo.toml"))
+            .build()
+            .to_string(&cargo_toml)
+            .expect("TOML serialization failed");
+
+        let expected = r#"[package]
+name = "test-package"
+version = "0.1.0"
+
+[dependencies]
+aaa = "1.0"
+mmm = "1.0"
+zzz = "1.0"
+"#;
 
         toml_text_assert_eq!(toml, expected);
     }
