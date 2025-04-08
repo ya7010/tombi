@@ -19,9 +19,9 @@ impl Validate for document_tree::Array {
                 .sub_schema_url_map
                 .and_then(|map| map.get(accessors))
             {
-                if current_schema.map_or(false, |current_schema| {
-                    &*current_schema.schema_url != sub_schema_url
-                }) {
+                if current_schema
+                    .is_some_and(|current_schema| &*current_schema.schema_url != sub_schema_url)
+                {
                     if let Ok(Some(DocumentSchema {
                         value_schema: Some(value_schema),
                         schema_url,

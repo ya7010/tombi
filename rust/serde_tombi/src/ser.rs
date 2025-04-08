@@ -627,10 +627,10 @@ where
     fn serialize_str(self, s: &str) -> Result<Self::Ok, Self::Error> {
         match s.parse::<T>() {
             Ok(value) => Ok(value),
-            Err(err) => Err(crate::ser::Error::DateTimeParseError(
-                schema_store::Accessors::new(self.accessors.to_vec()),
-                err.into(),
-            )),
+            Err(err) => Err(crate::ser::Error::DateTimeParseError {
+                accessors: schema_store::Accessors::new(self.accessors.to_vec()),
+                error: err.into(),
+            }),
         }
     }
 
