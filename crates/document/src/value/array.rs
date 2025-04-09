@@ -53,6 +53,10 @@ impl Array {
         self.kind
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
+
     pub fn kind_mut(&mut self) -> &mut ArrayKind {
         &mut self.kind
     }

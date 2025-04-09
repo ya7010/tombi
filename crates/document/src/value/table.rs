@@ -169,10 +169,43 @@ impl<'de> serde::Deserializer<'de> for &'de Table {
         visitor.visit_map(TableDeserializer::new(self))
     }
 
+    fn deserialize_enum<V>(
+        self,
+        _name: &'static str,
+        _variants: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        let mut iter = self.key_values().iter();
+        let (key, value) = match iter.next() {
+            Some(v) => v,
+            None => {
+                return Err(serde::de::Error::invalid_value(
+                    serde::de::Unexpected::Map,
+                    &"map with a single key",
+                ));
+            }
+        };
+        // enums are encoded in json as maps with a single key:value pair
+        if iter.next().is_some() {
+            return Err(serde::de::Error::invalid_value(
+                serde::de::Unexpected::Map,
+                &"map with a single key",
+            ));
+        }
+
+        visitor.visit_enum(super::EnumRefDeserializer {
+            variant: key.value(),
+            value: Some(value),
+        })
+    }
+
     forward_to_deserialize_any! {
         bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
         bytes byte_buf option unit unit_struct newtype_struct seq tuple
-        tuple_struct struct identifier enum ignored_any
+        tuple_struct struct identifier ignored_any
     }
 }
 
