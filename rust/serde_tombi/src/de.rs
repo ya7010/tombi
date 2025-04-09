@@ -1,6 +1,9 @@
+mod error;
+
 use ast::AstNode;
 use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
+pub use error::Error;
 use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use toml_version::TomlVersion;
@@ -32,7 +35,7 @@ use toml_version::TomlVersion;
 ///
 /// let config: Config = serde_tombi::from_str(toml).unwrap();
 /// ```
-pub fn from_str<T>(s: &str) -> crate::Result<T>
+pub fn from_str<T>(s: &str) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
@@ -40,26 +43,28 @@ where
     from_document(document)
 }
 
+pub fn from_document<T>(document: document::Document) -> Result<T, crate::de::Error>
+where
+    T: DeserializeOwned,
+{
+    Ok(T::deserialize(&document)?)
+}
+
 /// Parse a TOML string into a Document.
-pub fn parse_str(s: &str) -> crate::Result<document::Document> {
+pub fn parse_str(s: &str) -> Result<document::Document, crate::de::Error> {
     // Parse the source string using the parser
     let parsed = parser::parse(s);
 
     let errors = parsed.errors(TomlVersion::default()).collect_vec();
     // Check if there are any parsing errors
     if !errors.is_empty() {
-        return Err(crate::Error::Parser(
-            errors
-                .iter()
-                .map(|e| format!("{}", e))
-                .collect::<Vec<_>>()
-                .join(", "),
+        return Err(crate::de::Error::Parser(
+            parsed.into_errors(TomlVersion::default()).collect_vec(),
         ));
     }
 
     // Cast the parsed result to an AST Root node
-    let root = ast::Root::cast(parsed.into_syntax_node())
-        .ok_or_else(|| crate::Error::Parser("Failed to cast to AST Root".to_string()))?;
+    let root = ast::Root::cast(parsed.into_syntax_node()).expect("AST Root must be present");
 
     // Convert the AST to a document tree
     let (document_tree, errors) = root
@@ -68,26 +73,9 @@ pub fn parse_str(s: &str) -> crate::Result<document::Document> {
 
     // Check for errors during document tree construction
     if !errors.is_empty() {
-        return Err(crate::Error::DocumentTree(
-            errors
-                .iter()
-                .map(|e| format!("{}", e))
-                .collect::<Vec<_>>()
-                .join(", "),
-        ));
+        return Err(crate::de::Error::DocumentTree(errors));
     }
 
     // Convert to a Document
     Ok(document_tree.into_document(TomlVersion::default()))
-}
-
-/// Deserialize a Document into a Rust data structure.
-pub fn from_document<T>(_document: document::Document) -> crate::Result<T>
-where
-    T: DeserializeOwned,
-{
-    // Implementation not yet available
-    Err(crate::Error::Deserialization(
-        "Not implemented yet".to_string(),
-    ))
 }

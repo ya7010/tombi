@@ -41,6 +41,13 @@ impl<T> Parsed<T> {
             .filter(move |e| e.is_compatible_with(toml_version))
             .map(|e| e.error())
     }
+
+    pub fn into_errors(self, toml_version: TomlVersion) -> impl Iterator<Item = crate::Error> {
+        self.errors
+            .into_iter()
+            .filter(move |e| e.is_compatible_with(toml_version))
+            .map(|e| e.into_error())
+    }
 }
 
 impl<T> Clone for Parsed<T> {

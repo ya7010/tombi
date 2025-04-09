@@ -1,4 +1,5 @@
 use indexmap::{map::Entry, IndexMap};
+use serde::forward_to_deserialize_any;
 
 use crate::{IntoDocument, Key, Value};
 
@@ -96,6 +97,82 @@ impl<'de> serde::Deserialize<'de> for Table {
             kind: TableKind::Table,
             key_values,
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+struct TableDeserializer<'de> {
+    iter: <&'de IndexMap<Key, Value> as IntoIterator>::IntoIter,
+    value: Option<&'de Value>,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> TableDeserializer<'de> {
+    fn new(table: &'de Table) -> Self {
+        Self {
+            iter: table.key_values().iter(),
+            value: None,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::MapAccess<'de> for TableDeserializer<'de> {
+    type Error = crate::de::Error;
+
+    fn next_key_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+    where
+        T: serde::de::DeserializeSeed<'de>,
+    {
+        match self.iter.next() {
+            Some((key, value)) => {
+                self.value = Some(value);
+                seed.deserialize(key).map(Some)
+            }
+            None => Ok(None),
+        }
+    }
+
+    fn next_value_seed<T>(&mut self, seed: T) -> Result<T::Value, Self::Error>
+    where
+        T: serde::de::DeserializeSeed<'de>,
+    {
+        match self.value.take() {
+            Some(value) => seed.deserialize(value),
+            None => Err(serde::de::Error::custom("value is missing")),
+        }
+    }
+
+    fn size_hint(&self) -> Option<usize> {
+        match self.iter.size_hint() {
+            (lower, Some(upper)) if lower == upper => Some(upper),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserializer<'de> for &'de Table {
+    type Error = crate::de::Error;
+
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.deserialize_map(visitor)
+    }
+
+    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_map(TableDeserializer::new(self))
+    }
+
+    forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf option unit unit_struct newtype_struct seq tuple
+        tuple_struct struct identifier enum ignored_any
     }
 }
 

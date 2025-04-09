@@ -3,7 +3,7 @@ pub struct LocalTime(crate::private::Time);
 
 impl LocalTime {
     #[cfg(feature = "serde")]
-    pub(crate) fn type_name() -> &'static str {
+    pub fn type_name() -> &'static str {
         "local time"
     }
 

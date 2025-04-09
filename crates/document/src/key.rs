@@ -1,3 +1,4 @@
+use serde::forward_to_deserialize_any;
 use toml_version::TomlVersion;
 
 use crate::IntoDocument;
@@ -117,6 +118,24 @@ impl<'de> serde::Deserialize<'de> for Key {
                 value: format!(r#""{}""#, value.replace("\"", r#"\""#)),
             })
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Deserializer<'de> for &'de Key {
+    type Error = crate::de::Error;
+
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_str(self.value())
+    }
+
+    forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf option unit unit_struct newtype_struct seq tuple
+        tuple_struct map struct identifier enum ignored_any
     }
 }
 

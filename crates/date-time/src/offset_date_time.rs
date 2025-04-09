@@ -7,7 +7,7 @@ pub struct OffsetDateTime {
 
 impl OffsetDateTime {
     #[cfg(feature = "serde")]
-    pub(crate) fn type_name() -> &'static str {
+    pub fn type_name() -> &'static str {
         "offset date time"
     }
 

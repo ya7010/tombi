@@ -12,17 +12,17 @@ date-time = { workspace = true }
 document-tree = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
+parser = { workspace = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true }
 text = { workspace = true }
-thiserror = { workspace = true }
+thiserror.workspace = true
 toml = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tower-lsp = { workspace = true, optional = true }
 
 [dev-dependencies]
-parser = { workspace = true }
 pretty_assertions = { workspace = true }
 serde_json = { workspace = true }
 test-lib = { workspace = true }

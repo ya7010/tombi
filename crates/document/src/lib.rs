@@ -1,9 +1,11 @@
+pub mod de;
 mod key;
 mod value;
 
 use std::ops::{Deref, DerefMut};
 
 pub use key::{Key, KeyKind};
+use serde::forward_to_deserialize_any;
 use toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
@@ -79,6 +81,24 @@ impl<'de> serde::Deserialize<'de> for Document {
     {
         let table = Table::deserialize(deserializer)?;
         Ok(Document(table))
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserializer<'de> for &'de Document {
+    type Error = crate::de::Error;
+
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_any(visitor)
+    }
+
+    forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf option unit unit_struct newtype_struct seq tuple
+        tuple_struct struct map identifier enum ignored_any
     }
 }
 

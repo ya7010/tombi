@@ -11,6 +11,7 @@ pub use boolean::Boolean;
 pub use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
 pub use float::Float;
 pub use integer::{Integer, IntegerKind};
+use serde::forward_to_deserialize_any;
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
 
@@ -47,6 +48,41 @@ impl std::fmt::Display for ValueKind {
     }
 }
 
+#[cfg(feature = "serde")]
+impl serde::de::Expected for ValueKind {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> TryFrom<serde::de::Unexpected<'a>> for ValueKind {
+    type Error = serde::de::Unexpected<'a>;
+
+    fn try_from(unexp: serde::de::Unexpected<'a>) -> Result<Self, Self::Error> {
+        match unexp {
+            serde::de::Unexpected::Bool(_) => Ok(ValueKind::Boolean),
+            serde::de::Unexpected::Unsigned(_) => Ok(ValueKind::Integer),
+            serde::de::Unexpected::Signed(_) => Ok(ValueKind::Integer),
+            serde::de::Unexpected::Float(_) => Ok(ValueKind::Float),
+            serde::de::Unexpected::Char(_) => Ok(ValueKind::String),
+            serde::de::Unexpected::Str(_) => Ok(ValueKind::String),
+            serde::de::Unexpected::Bytes(_) => Ok(ValueKind::String),
+            serde::de::Unexpected::Seq => Ok(ValueKind::Array),
+            serde::de::Unexpected::Map => Ok(ValueKind::Table),
+            serde::de::Unexpected::StructVariant => Ok(ValueKind::String),
+            serde::de::Unexpected::Unit
+            | serde::de::Unexpected::Option
+            | serde::de::Unexpected::NewtypeStruct
+            | serde::de::Unexpected::Enum
+            | serde::de::Unexpected::UnitVariant
+            | serde::de::Unexpected::NewtypeVariant
+            | serde::de::Unexpected::TupleVariant
+            | serde::de::Unexpected::Other(_) => Err(unexp),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Boolean(Boolean),
@@ -62,6 +98,7 @@ pub enum Value {
 }
 
 impl Value {
+    #[inline]
     pub fn kind(&self) -> ValueKind {
         match self {
             Value::Boolean(_) => ValueKind::Boolean,
@@ -74,6 +111,26 @@ impl Value {
             Value::LocalTime(_) => ValueKind::LocalTime,
             Value::Array(_) => ValueKind::Array,
             Value::Table(_) => ValueKind::Table,
+        }
+    }
+
+    #[cfg(feature = "serde")]
+    pub(crate) fn unexpected(&self) -> serde::de::Unexpected {
+        match self {
+            Value::Boolean(bool) => serde::de::Unexpected::Bool(bool.value()),
+            Value::Integer(integer) => serde::de::Unexpected::Signed(integer.value()),
+            Value::Float(float) => serde::de::Unexpected::Float(float.value()),
+            Value::String(string) => serde::de::Unexpected::Str(string.value()),
+            Value::OffsetDateTime(_) => {
+                serde::de::Unexpected::Other(date_time::OffsetDateTime::type_name())
+            }
+            Value::LocalDateTime(_) => {
+                serde::de::Unexpected::Other(date_time::LocalDateTime::type_name())
+            }
+            Value::LocalDate(_) => serde::de::Unexpected::Other(date_time::LocalDate::type_name()),
+            Value::LocalTime(_) => serde::de::Unexpected::Other(date_time::LocalTime::type_name()),
+            Value::Array(_) => serde::de::Unexpected::Seq,
+            Value::Table(_) => serde::de::Unexpected::Map,
         }
     }
 }
@@ -194,5 +251,107 @@ impl<'de> serde::Deserialize<'de> for Value {
         }
 
         deserializer.deserialize_any(ValueVisitor)
+    }
+}
+
+macro_rules! deserialize_value {
+    ($func_name:ident, $value_type:ident, $visit_method:ident) => {
+        fn $func_name<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+        where
+            V: serde::de::Visitor<'de>,
+        {
+            match self {
+                Value::$value_type(value) => visitor.$visit_method(value.value()),
+                _ => Err(serde::de::Error::invalid_type(
+                    self.unexpected(),
+                    &ValueKind::$value_type,
+                )),
+            }
+        }
+    };
+}
+
+impl<'de> serde::de::Deserializer<'de> for &'de Value {
+    type Error = crate::de::Error;
+
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        match self.kind() {
+            ValueKind::Boolean => self.deserialize_bool(visitor),
+            ValueKind::Integer => self.deserialize_i64(visitor),
+            ValueKind::Float => self.deserialize_f64(visitor),
+            ValueKind::String => self.deserialize_str(visitor),
+            ValueKind::OffsetDateTime => {
+                self.deserialize_newtype_struct(OffsetDateTime::type_name(), visitor)
+            }
+            ValueKind::LocalDateTime => {
+                self.deserialize_newtype_struct(LocalDateTime::type_name(), visitor)
+            }
+            ValueKind::LocalDate => {
+                self.deserialize_newtype_struct(LocalDate::type_name(), visitor)
+            }
+            ValueKind::LocalTime => {
+                self.deserialize_newtype_struct(LocalTime::type_name(), visitor)
+            }
+            ValueKind::Array => self.deserialize_seq(visitor),
+            ValueKind::Table => self.deserialize_map(visitor),
+        }
+    }
+
+    deserialize_value!(deserialize_bool, Boolean, visit_bool);
+    deserialize_value!(deserialize_i64, Integer, visit_i64);
+    deserialize_value!(deserialize_f64, Float, visit_f64);
+    deserialize_value!(deserialize_str, String, visit_str);
+
+    fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        match self {
+            Value::Array(array) => array.deserialize_seq(visitor),
+            _ => Err(serde::de::Error::invalid_type(
+                self.unexpected(),
+                &ValueKind::Array,
+            )),
+        }
+    }
+
+    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        match self {
+            Value::Table(table) => table.deserialize_map(visitor),
+            _ => Err(serde::de::Error::invalid_type(
+                self.unexpected(),
+                &ValueKind::Table,
+            )),
+        }
+    }
+
+    fn deserialize_newtype_struct<V>(
+        self,
+        _name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_newtype_struct(self)
+    }
+
+    fn deserialize_ignored_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_unit()
+    }
+
+    forward_to_deserialize_any! {
+         i8 i16 i32 i128 u8 u16 u32 u64 u128 f32 char string
+        bytes byte_buf option unit unit_struct tuple
+        tuple_struct struct identifier enum
     }
 }
