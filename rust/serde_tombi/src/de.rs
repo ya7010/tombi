@@ -86,6 +86,7 @@ mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
     use serde::Deserialize;
+    use test_lib::project_root;
 
     #[test]
     fn test_deserialize_struct() {
@@ -262,5 +263,277 @@ updated_at = "2023-07-20T14:45:30Z"
 
         let result: OptionTest = from_str(toml).expect("TOML deserialization failed");
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_deserialize_empty_containers() {
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct EmptyContainers {
+            empty_array: Vec<i32>,
+            empty_map: IndexMap<String, String>,
+        }
+
+        let toml = r#"
+empty_array = []
+empty_map = {}
+"#;
+
+        let expected = EmptyContainers {
+            empty_array: vec![],
+            empty_map: IndexMap::new(),
+        };
+
+        let result: EmptyContainers = from_str(toml).expect("TOML deserialization failed");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_deserialize_special_characters() {
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct SpecialChars {
+            newlines: String,
+            quotes: String,
+            unicode: String,
+            escape_chars: String,
+        }
+
+        let toml = r#"
+newlines = "line1\nline2\nline3"
+quotes = "\"quoted\""
+unicode = "日本語の文字列"
+escape_chars = "\\t\\n\\r\\\""
+"#;
+
+        let expected = SpecialChars {
+            newlines: "line1\nline2\nline3".to_string(),
+            quotes: "\"quoted\"".to_string(),
+            unicode: "日本語の文字列".to_string(),
+            escape_chars: "\\t\\n\\r\\\"".to_string(),
+        };
+
+        let result: SpecialChars = from_str(toml).expect("TOML deserialization failed");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_deserialize_numeric_boundaries() {
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct NumericBoundaries {
+            min_i32: i32,
+            max_i32: i32,
+            min_f64: f64,
+            max_f64: f64,
+            zero: f64,
+            negative_zero: f64,
+        }
+
+        let toml = r#"
+min_i32 = -2147483648
+max_i32 = 2147483647
+min_f64 = -1.7976931348623157e308
+max_f64 = 1.7976931348623157e308
+zero = 0.0
+negative_zero = -0.0
+"#;
+
+        let expected = NumericBoundaries {
+            min_i32: i32::MIN,
+            max_i32: i32::MAX,
+            min_f64: f64::MIN,
+            max_f64: f64::MAX,
+            zero: 0.0,
+            negative_zero: -0.0,
+        };
+
+        let result: NumericBoundaries = from_str(toml).expect("TOML deserialization failed");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_deserialize_complex_nested() {
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct Inner {
+            value: String,
+            numbers: Vec<i32>,
+        }
+
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct Middle {
+            inner: Inner,
+            map: IndexMap<String, Inner>,
+        }
+
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct ComplexNested {
+            middle: Middle,
+            array_of_maps: Vec<IndexMap<String, String>>,
+        }
+
+        let toml = r#"
+[middle.inner]
+value = "nested value"
+numbers = [1, 2, 3]
+
+[middle.map.key1]
+value = "value1"
+numbers = [4, 5, 6]
+
+[middle.map.key2]
+value = "value2"
+numbers = [7, 8, 9]
+
+[[array_of_maps]]
+key1 = "value1"
+key2 = "value2"
+
+[[array_of_maps]]
+key3 = "value3"
+key4 = "value4"
+"#;
+
+        let expected = ComplexNested {
+            middle: Middle {
+                inner: Inner {
+                    value: "nested value".to_string(),
+                    numbers: vec![1, 2, 3],
+                },
+                map: indexmap! {
+                    "key1".to_string() => Inner {
+                        value: "value1".to_string(),
+                        numbers: vec![4, 5, 6],
+                    },
+                    "key2".to_string() => Inner {
+                        value: "value2".to_string(),
+                        numbers: vec![7, 8, 9],
+                    },
+                },
+            },
+            array_of_maps: vec![
+                indexmap! {
+                    "key1".to_string() => "value1".to_string(),
+                    "key2".to_string() => "value2".to_string(),
+                },
+                indexmap! {
+                    "key3".to_string() => "value3".to_string(),
+                    "key4".to_string() => "value4".to_string(),
+                },
+            ],
+        };
+
+        let result: ComplexNested = from_str(toml).expect("TOML deserialization failed");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_deserialize_mixed_type_array() {
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct MixedTypeArray {
+            mixed: Vec<MixedType>,
+        }
+
+        #[derive(Debug, Deserialize, PartialEq)]
+        #[serde(untagged)]
+        enum MixedType {
+            Integer(i32),
+            Float(f64),
+            String(String),
+            Boolean(bool),
+        }
+
+        let toml = r#"
+mixed = [42, 3.14, "hello", true]
+"#;
+
+        let expected = MixedTypeArray {
+            mixed: vec![
+                MixedType::Integer(42),
+                MixedType::Float(3.14),
+                MixedType::String("hello".to_string()),
+                MixedType::Boolean(true),
+            ],
+        };
+
+        let result: MixedTypeArray = from_str(toml).expect("TOML deserialization failed");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_deserialize_default_values() {
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct DefaultValues {
+            #[serde(default)]
+            optional_string: String,
+            #[serde(default = "default_i32")]
+            optional_i32: i32,
+            #[serde(default = "default_vec")]
+            optional_vec: Vec<String>,
+        }
+
+        fn default_i32() -> i32 {
+            42
+        }
+
+        fn default_vec() -> Vec<String> {
+            vec!["default".to_string()]
+        }
+
+        let toml = r#"
+optional_string = "provided"
+"#;
+
+        let expected = DefaultValues {
+            optional_string: "provided".to_string(),
+            optional_i32: 42,
+            optional_vec: vec!["default".to_string()],
+        };
+
+        let result: DefaultValues = from_str(toml).expect("TOML deserialization failed");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_empty_tombi_config() {
+        let toml = r#""#;
+
+        let config: config::Config = from_str(toml).expect("TOML deserialization failed");
+
+        pretty_assertions::assert_eq!(config, config::Config::default());
+    }
+
+    #[test]
+    fn test_deserialize_actual_tombi_config() {
+        let config_path = project_root().join("tombi.toml");
+        let config_str = std::fs::read_to_string(&config_path).expect("Failed to read tombi.toml");
+
+        let result: config::Config = from_str(&config_str).expect("Failed to parse tombi.toml");
+
+        // Verify the parsed values
+        assert_eq!(
+            result.toml_version,
+            Some(toml_version::TomlVersion::V1_1_0_Preview)
+        );
+        assert_eq!(result.exclude, Some(vec!["node_modules/**/*".to_string()]));
+        assert!(result.format.is_some());
+        assert!(result.lint.is_some());
+        assert!(result.server.is_some());
+        assert!(result.schema.is_some());
+        assert!(result.schemas.is_some());
+
+        let schema = result.schema.unwrap();
+        assert_eq!(schema.enabled, Some(config::BoolDefaultTrue::default()));
+
+        let schemas = result.schemas.unwrap();
+        assert_eq!(schemas.len(), 5);
+
+        // Verify the first schema
+        let first_schema = &schemas[0];
+        assert_eq!(first_schema.path(), "tombi.schema.json");
+        assert_eq!(first_schema.include(), &["tombi.toml"]);
+
+        // Verify the last schema
+        let last_schema = &schemas[4];
+        assert_eq!(last_schema.path(), "schemas/partial-taskipy.schema.json");
+        assert_eq!(last_schema.include(), &["pyproject.toml"]);
+        assert_eq!(last_schema.root_keys(), Some("tool.taskipy"));
     }
 }

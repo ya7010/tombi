@@ -24,7 +24,7 @@ pub const SUPPORTED_CONFIG_FILENAMES: [&str; 2] = [CONFIG_FILENAME, PYPROJECT_FI
 ///
 /// **Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.
 /// See the [GitHub repository](https://github.com/tombi-toml/tombi) for more information.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
