@@ -34,7 +34,7 @@ pub async fn handle_update_config(
             };
 
             if config_url == workspace_config_url {
-                match config::Config::try_from_url(workspace_config_url) {
+                match serde_tombi::config::try_from_url(workspace_config_url) {
                     Ok(Some(config)) => {
                         backend
                             .update_workspace_config(config_url.clone(), config)

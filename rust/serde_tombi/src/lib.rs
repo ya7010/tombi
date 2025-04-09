@@ -78,11 +78,12 @@
 //! let toml = serializer.to_string(&cargo_toml).unwrap();
 //! ```
 //!
+pub mod config;
 mod de;
 mod document;
 mod ser;
 
-pub use de::{from_document, from_str};
+pub use de::{from_document, from_str, from_str_async};
 pub use document::{
     Array, ArrayKind, Boolean, Document, Float, Integer, IntegerKind, Key, LocalDate,
     LocalDateTime, LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,

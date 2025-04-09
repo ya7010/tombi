@@ -1900,6 +1900,7 @@ dependencies = [
  "toml-version",
  "tracing",
  "typed-builder",
+ "url",
 ]
 
 [[package]]
@@ -1943,6 +1944,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "serde_tombi",
  "syntax",
  "tempfile",
  "test-lib",
@@ -2260,6 +2262,7 @@ dependencies = [
  "linter",
  "nu-ansi-term 0.50.1",
  "schema-store",
+ "serde_tombi",
  "server",
  "thiserror",
  "tokio",

@@ -5,8 +5,10 @@ use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
 use itertools::Itertools;
+use schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use toml_version::TomlVersion;
+use typed_builder::TypedBuilder;
 
 /// Deserialize a TOML string into a Rust data structure.
 ///
@@ -39,45 +41,140 @@ pub fn from_str<T>(s: &str) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
-    let document = parse_str(s)?;
-    from_document(document)
+    Deserializer::new().from_str(s)
+}
+
+pub async fn from_str_async<T>(s: &str) -> Result<T, crate::de::Error>
+where
+    T: DeserializeOwned,
+{
+    Deserializer::new().from_str_async(s).await
 }
 
 pub fn from_document<T>(document: document::Document) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
-    Ok(T::deserialize(&document)?)
+    Deserializer::new().from_document(document)
 }
 
-/// Parse a TOML string into a Document.
-pub fn parse_str(s: &str) -> Result<document::Document, crate::de::Error> {
-    // Parse the source string using the parser
-    let parsed = parser::parse(s);
+// Actual deserializer implementation
+#[derive(TypedBuilder)]
+pub struct Deserializer<'de> {
+    #[builder(default, setter(into, strip_option))]
+    config: Option<&'de ::config::Config>,
 
-    let errors = parsed.errors(TomlVersion::default()).collect_vec();
-    // Check if there are any parsing errors
-    if !errors.is_empty() {
-        return Err(crate::de::Error::Parser(
-            parsed.into_errors(TomlVersion::default()).collect_vec(),
-        ));
+    #[builder(default, setter(into, strip_option))]
+    config_path: Option<&'de std::path::Path>,
+
+    #[builder(default, setter(into, strip_option))]
+    source_path: Option<&'de std::path::Path>,
+
+    #[builder(default, setter(into, strip_option))]
+    schema_store: Option<&'de schema_store::SchemaStore>,
+}
+
+impl<'de> Deserializer<'de> {
+    pub fn new() -> Self {
+        Self {
+            config: None,
+            config_path: None,
+            source_path: None,
+            schema_store: None,
+        }
     }
 
-    // Cast the parsed result to an AST Root node
-    let root = ast::Root::cast(parsed.into_syntax_node()).expect("AST Root must be present");
-
-    // Convert the AST to a document tree
-    let (document_tree, errors) = root
-        .into_document_tree_and_errors(TomlVersion::default())
-        .into();
-
-    // Check for errors during document tree construction
-    if !errors.is_empty() {
-        return Err(crate::de::Error::DocumentTree(errors));
+    pub fn from_str<T>(&self, s: &str) -> Result<T, crate::de::Error>
+    where
+        T: DeserializeOwned,
+    {
+        tokio::runtime::Runtime::new()?.block_on(self.from_str_async(s))
     }
 
-    // Convert to a Document
-    Ok(document_tree.into_document(TomlVersion::default()))
+    pub async fn from_str_async<T>(&self, s: &str) -> Result<T, crate::de::Error>
+    where
+        T: DeserializeOwned,
+    {
+        from_document(self.try_to_document(s).await?)
+    }
+
+    pub fn from_document<T>(&self, document: document::Document) -> Result<T, crate::de::Error>
+    where
+        T: DeserializeOwned,
+    {
+        Ok(T::deserialize(&document)?)
+    }
+
+    async fn try_to_document(&self, s: &str) -> Result<document::Document, crate::de::Error> {
+        let schema_store = match self.schema_store {
+            Some(schema_store) => schema_store,
+            None => &SchemaStore::new(),
+        };
+
+        let mut toml_version = TomlVersion::default();
+        if self.schema_store.is_none() {
+            match self.config {
+                Some(config) => {
+                    if let Some(new_toml_version) = config.toml_version {
+                        toml_version = new_toml_version;
+                    }
+                    if self.schema_store.is_none() {
+                        schema_store.load_config(config, self.config_path).await?;
+                    }
+                }
+                None => {
+                    let (config, config_path) = crate::config::load_with_path()?;
+
+                    if let Some(new_toml_version) = config.toml_version {
+                        toml_version = new_toml_version;
+                    }
+
+                    schema_store
+                        .load_config(&config, config_path.as_deref())
+                        .await?;
+                }
+            }
+        }
+
+        if let Some(source_path) = self.source_path {
+            if let Some(SourceSchema {
+                root_schema: Some(root_schema),
+                ..
+            }) = schema_store
+                .try_get_source_schema_from_path(source_path)
+                .await?
+            {
+                if let Some(new_toml_version) = root_schema.toml_version() {
+                    toml_version = new_toml_version;
+                }
+            }
+        }
+
+        // Parse the source string using the parser
+        let parsed = parser::parse(s);
+
+        let errors = parsed.errors(toml_version).collect_vec();
+        // Check if there are any parsing errors
+        if !errors.is_empty() {
+            return Err(crate::de::Error::Parser(
+                parsed.into_errors(toml_version).collect_vec(),
+            ));
+        }
+
+        // Cast the parsed result to an AST Root node
+        let root = ast::Root::cast(parsed.into_syntax_node()).expect("AST Root must be present");
+
+        // Convert the AST to a document tree
+        let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
+
+        // Check for errors during document tree construction
+        if !errors.is_empty() {
+            return Err(crate::de::Error::DocumentTree(errors));
+        }
+
+        // Convert to a Document
+        Ok(document_tree.into_document(toml_version))
+    }
 }
 
 #[cfg(test)]

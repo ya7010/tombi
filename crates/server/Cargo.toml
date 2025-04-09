@@ -29,6 +29,7 @@ schema-store = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_tombi = { workspace = true }
 syntax.workspace = true
 text = { workspace = true }
 thiserror = { workspace = true }
