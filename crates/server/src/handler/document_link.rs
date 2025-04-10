@@ -10,7 +10,7 @@ pub async fn handle_document_link(
     tracing::trace!(?params);
 
     let DocumentLinkParams { text_document, .. } = params;
-    let toml_version = backend.toml_version().await.unwrap_or_default();
+    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
 
     let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version).await else {
         return Ok(None);

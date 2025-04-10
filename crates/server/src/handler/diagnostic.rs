@@ -32,10 +32,11 @@ pub async fn handle_diagnostic(
         ));
     }
 
+    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
     let document_sources = backend.document_sources.read().await;
     let diagnostics = match document_sources.get(&text_document.uri) {
         Some(document) => linter::Linter::new(
-            backend.toml_version().await.unwrap_or_default(),
+            toml_version,
             backend
                 .config()
                 .await

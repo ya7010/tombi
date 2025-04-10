@@ -40,7 +40,7 @@ pub async fn handle_hover(
     }
 
     let position = position.into();
-    let toml_version = backend.toml_version().await.unwrap_or_default();
+    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
