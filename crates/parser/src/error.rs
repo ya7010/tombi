@@ -175,6 +175,13 @@ impl TomlVersionedError {
         }
     }
 
+    pub fn into_error(self) -> Error {
+        match self {
+            Self::Common(error) => error,
+            Self::NewSyntax { error, .. } => error,
+        }
+    }
+
     pub fn is_compatible_with(&self, toml_version: TomlVersion) -> bool {
         match self {
             Self::Common(_) => true,

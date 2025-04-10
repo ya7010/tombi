@@ -3,7 +3,7 @@ pub struct LocalDate(crate::private::Date);
 
 impl LocalDate {
     #[cfg(feature = "serde")]
-    pub(crate) fn type_name() -> &'static str {
+    pub fn type_name() -> &'static str {
         "local date"
     }
 

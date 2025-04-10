@@ -6,7 +6,7 @@ pub struct LocalDateTime {
 
 impl LocalDateTime {
     #[cfg(feature = "serde")]
-    pub(crate) fn type_name() -> &'static str {
+    pub fn type_name() -> &'static str {
         "local date time"
     }
 
