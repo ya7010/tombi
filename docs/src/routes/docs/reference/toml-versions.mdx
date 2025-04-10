@@ -1,11 +1,16 @@
+import { Note } from "~/components/highlight";
+
 # TOML Versions
 
 ## TOML v1.1.0
 [TOML v1.1.0](https://github.com/toml-lang/toml/issues/928) has not been released.
 
-The formatter of Tombi will show its true power in `v1.1.0-preview`, but be careful.
+The formatter of Tombi will show its true power in `v1.1.0-preview`.
+But, Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/manifest.html), [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)) are `v1.0.0`, and the default TOML version of Tombi is also `v1.0.0`.
 
-Many existing systems ([Cargo.toml](https://doc.rust-lang.org/cargo/reference/manifest.html), [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)) are `v1.0.0`, and the default TOML version of Tombi is also `v1.0.0`.
+<Note>
+If you want to try `v1.1.0`, please touch `tombi.toml`. `tombi.toml` supports `v1.1.0-preview`.
+</Note>
 
 ## TOML Version Control
 

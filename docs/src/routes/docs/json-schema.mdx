@@ -1,53 +1,57 @@
 import { Note } from "~/components/highlight";
 
-# Json Schema
+# JSON Schema
 
-TOML itself may add [schema specifications](https://github.com/toml-lang/toml/issues/792),
-but like Taplo, Tombi is also trying to add validation functions to the linter that support [JSON Schema](https://json-schema.org/).
+While TOML itself may introduce [schema specifications](https://github.com/toml-lang/toml/issues/792) in the future,
+Tombi, like Taplo, is implementing validation features in its linter that support [JSON Schema](https://json-schema.org/).
 
-Currently, we are considering adding special information called `x-tombi-*` to JSON Schema.
+Currently, we are extending JSON Schema with special annotations using the `x-tombi-*` prefix.
 
 ## Schema Priority
-This section will discuss how to prioritize the application of `x-tombi-*` keys in your JSON Schema.
+This section explains how Tombi prioritizes the application of `x-tombi-*` keys in your JSON Schema:
 
-1. `#:schema` directive in the top comment of the TOML file (Same as [Taplo](https://taplo.tamasfe.dev/configuration/directives.html#the-schema-directive))
-2. JSON Schema specified in [the tombi configuration file](/docs/configuration#search-priority)
-3. JSON Schema specified in the JSON Schema Store
+1. `#:schema` directive in the TOML file's top comment (compatible with [Taplo](https://taplo.tamasfe.dev/configuration/directives.html#the-schema-directive))
+2. JSON Schema specified in [the Tombi configuration file](/docs/configuration#search-priority)
+3. JSON Schema from the JSON Schema Store
 
 ## Formatting
 ### x-tombi-toml-version
-This key is for automatically determining the TOML version.
-Currently, only `v1.0.0` is supported.
-`v1.1.0-preview` is also available to experience, which proposes awesome features such as allowing the trailing comma in Inline Table.
+This key automatically determines the TOML version to use.
+Currently, we support:
+- `v1.0.0` (stable)
+- `v1.1.0-preview` (experimental)
 
-Until `v1.1.0` is released officially, please specify `v1.0.0`.
+The preview version includes exciting features like trailing comma support in Inline Tables.
 
+<Note>
+Until `v1.1.0` is officially released, we recommend using `v1.0.0`.
+
+For experimental purposes, the JSON Schema in `tombi.toml` is specified as `v1.1.0-preview`.
+</Note>
 
 ### x-tombi-table-keys-order
 
-For automatically sorting table keys like `[dependencies]`
+This key controls the automatic sorting of table keys (e.g., `[dependencies]`).
 
-There are three strategies.
+Available sorting strategies:
 - `ascending`
 - `descending`
 - `schema`
 
 <Note>
-If you use `schema`, it is not recommended to use `additionalProperties` or `patternProperties`.
-  They are not sorted after `properties` and placed at the end.
+When using the `schema` strategy, we recommend avoiding `additionalProperties` or `patternProperties` as they are not sorted with `properties` and will appear at the end.
 </Note>
 
 ## Linting
 ### Strict Mode
-Tombi enables `strict` mode by default, and objects without `additionalProperties` are treated as `additionalProperties: false`, which is different from the JSON Schema specification.
-This choice resolves the ambiguity of JSON Schema and performs more strict validation.
+By default, Tombi operates in `strict` mode. In this mode, objects without `additionalProperties` are treated as if `additionalProperties: false` was specified.
+This differs from the standard JSON Schema specification but provides more precise validation by eliminating ambiguity.
 
-If you want to disable strict mode, add `schema.strict = false` to `tombi.toml`.
+To disable strict mode, add `schema.strict = false` to your `tombi.toml` configuration.
 
 ## Language Gap
-TOML is a different language from JSON, so applying JSON Schema to TOML is not a one-to-one relationship.  
-However, JSON Schema is useful as a tool for representing the structure of TOML. And there are already many schema assets.  
+While TOML and JSON are different languages, JSON Schema remains a valuable tool for representing TOML structures, especially given the abundance of existing schema assets.
 
-Tombi overcomes the language gap by using an abbreviation to represent JSON Schema that does not exist in TOML.
+Tombi bridges this language gap by using abbreviations to represent JSON Schema concepts that don't have direct equivalents in TOML.
 
-If you are interested, check out the Hover section to see how it represents concepts in JSON Schema.
+For more details on how Tombi represents these concepts, check out the Hover section.
