@@ -628,28 +628,25 @@ optional_string = "provided"
     #[tokio::test]
     async fn test_deserialize_actual_tombi_config() {
         let config_path = project_root().join("tombi.toml");
-        let config_str = std::fs::read_to_string(&config_path).expect("Failed to read tombi.toml");
-
-        let result: config::Config = from_str_async(&config_str)
-            .await
-            .expect("Failed to parse tombi.toml");
+        let config = crate::config::from_str(
+            &std::fs::read_to_string(&config_path).unwrap(),
+            &config_path,
+        )
+        .expect("Failed to parse tombi.toml");
 
         // Verify the parsed values
-        assert_eq!(
-            result.toml_version,
-            Some(toml_version::TomlVersion::V1_1_0_Preview)
-        );
-        assert_eq!(result.exclude, Some(vec!["node_modules/**/*".to_string()]));
-        assert!(result.format.is_some());
-        assert!(result.lint.is_some());
-        assert!(result.server.is_some());
-        assert!(result.schema.is_some());
-        assert!(result.schemas.is_some());
+        assert_eq!(config.toml_version, Some(toml_version::TomlVersion::V1_0_0));
+        assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
+        assert!(config.format.is_some());
+        assert!(config.lint.is_some());
+        assert!(config.server.is_some());
+        assert!(config.schema.is_some());
+        assert!(config.schemas.is_some());
 
-        let schema = result.schema.unwrap();
+        let schema = config.schema.unwrap();
         assert_eq!(schema.enabled, Some(config::BoolDefaultTrue::default()));
 
-        let schemas = result.schemas.unwrap();
+        let schemas = config.schemas.unwrap();
         assert_eq!(schemas.len(), 5);
 
         // Verify the first schema

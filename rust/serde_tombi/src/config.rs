@@ -1,6 +1,9 @@
 use config::{Config, TomlVersion, CONFIG_FILENAME, PYPROJECT_FILENAME, TOMBI_CONFIG_TOML_VERSION};
 
-fn from_str(toml_text: &str, config_path: &std::path::Path) -> Result<Config, crate::de::Error> {
+pub(crate) fn from_str(
+    toml_text: &str,
+    config_path: &std::path::Path,
+) -> Result<Config, crate::de::Error> {
     let deserializer = crate::Deserializer::builder()
         .config_path(config_path)
         .build();
