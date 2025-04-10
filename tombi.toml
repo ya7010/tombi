@@ -3,7 +3,7 @@
 # This file is for checking if the JsonSchema is correct.
 #
 
-toml-version = "v1.1.0-preview"
+toml-version = "v1.0.0"
 exclude = ["node_modules/**/*"]
 
 [format]
@@ -14,9 +14,9 @@ exclude = ["node_modules/**/*"]
 
 [schema]
 enabled = true
-catalog = { path = [
-  "https://www.schemastore.org/api/json/catalog.json",
-] }
+catalog = {
+  path = "https://www.schemastore.org/api/json/catalog.json",
+}
 
 [[schemas]]
 path = "tombi.schema.json"
