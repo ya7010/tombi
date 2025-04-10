@@ -63,7 +63,6 @@ tokio = { version = "1.41.0", features = [
   "io-std",
   "rt-multi-thread",
 ] }
-toml = { version = "0.8.19" }
 toml-text = { path = "crates/toml-text" }
 toml-version = { path = "crates/toml-version" }
 tower-lsp = { version = "0.20.0" }
