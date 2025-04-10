@@ -69,7 +69,7 @@ impl SchemaStore {
         if let Some(schema_options) = &config.schema {
             for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
                 self.load_schemas_from_catalog_url(&CatalogUrl::new(
-                    catalog_path.try_into().map_err(|_| {
+                    catalog_path.try_to_catalog_url(base_dirpath).map_err(|_| {
                         crate::Error::CatalogPathConvertUrlFailed {
                             catalog_path: catalog_path.to_string(),
                         }
@@ -113,43 +113,68 @@ impl SchemaStore {
         &self,
         catalog_url: &CatalogUrl,
     ) -> Result<(), crate::Error> {
-        if matches!(catalog_url.scheme(), "http" | "https") && self.offline() {
-            tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
-            return Ok(());
-        }
-
-        tracing::debug!("loading schema catalog: {}", catalog_url);
-
-        if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
-            match response.json::<crate::json::JsonCatalog>().await {
-                Ok(catalog) => {
-                    let mut schemas = self.schemas.write().await;
-                    for schema in catalog.schemas {
-                        if schema
-                            .file_match
-                            .iter()
-                            .any(|pattern| pattern.ends_with(".toml"))
-                        {
-                            schemas.push(crate::Schema {
-                                url: schema.url,
-                                include: schema.file_match,
-                                toml_version: None,
-                                sub_root_keys: None,
-                            });
-                        }
-                    }
-                    Ok(())
-                }
-                Err(err) => Err(crate::Error::InvalidJsonFormat {
-                    url: catalog_url.deref().clone(),
-                    reason: err.to_string(),
-                }),
+        let catalog = if matches!(catalog_url.scheme(), "http" | "https") {
+            if self.offline() {
+                tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
+                return Ok(());
             }
+            tracing::debug!("loading schema catalog: {}", catalog_url);
+
+            if let Ok(response) = self.http_client.get(catalog_url.as_str()).send().await {
+                match response.json::<crate::json::JsonCatalog>().await {
+                    Ok(catalog) => catalog,
+                    Err(err) => {
+                        return Err(crate::Error::InvalidJsonFormat {
+                            url: catalog_url.deref().clone(),
+                            reason: err.to_string(),
+                        })
+                    }
+                }
+            } else {
+                return Err(crate::Error::CatalogUrlFetchFailed {
+                    catalog_url: catalog_url.clone(),
+                });
+            }
+        } else if catalog_url.scheme() == "file" {
+            let catalog_path =
+                catalog_url
+                    .to_file_path()
+                    .map_err(|_| crate::Error::InvalidCatalogFileUrl {
+                        catalog_url: catalog_url.clone(),
+                    })?;
+
+            let content = std::fs::read_to_string(&catalog_path).map_err(|_| {
+                crate::Error::CatalogFileReadFailed {
+                    catalog_path: catalog_path.to_path_buf(),
+                }
+            })?;
+
+            serde_json::from_str(&content).map_err(|err| crate::Error::InvalidJsonFormat {
+                url: catalog_url.deref().clone(),
+                reason: err.to_string(),
+            })?
         } else {
-            Err(crate::Error::CatalogUrlFetchFailed {
-                catalog_url: catalog_url.clone(),
-            })
+            return Err(crate::Error::UnsupportedUrlSchema {
+                schema: catalog_url.to_string(),
+            });
+        };
+
+        let mut schemas = self.schemas.write().await;
+        for schema in catalog.schemas {
+            if schema
+                .file_match
+                .iter()
+                .any(|pattern| pattern.ends_with(".toml"))
+            {
+                schemas.push(crate::Schema {
+                    url: schema.url,
+                    include: schema.file_match,
+                    toml_version: None,
+                    sub_root_keys: None,
+                });
+            }
         }
+        Ok(())
     }
 
     pub async fn update_schema(&self, schema_url: &SchemaUrl) -> Result<bool, crate::Error> {

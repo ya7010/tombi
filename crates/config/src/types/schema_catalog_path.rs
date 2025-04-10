@@ -11,6 +11,20 @@ impl SchemaCatalogPath {
     pub fn value(&self) -> &str {
         self.0.as_str()
     }
+
+    pub fn try_to_catalog_url(
+        &self,
+        base_dirpath: Option<&std::path::Path>,
+    ) -> Result<url::Url, url::ParseError> {
+        match self.0.parse() {
+            Ok(url) => Ok(url),
+            Err(err) => match base_dirpath {
+                Some(base_dirpath) => url::Url::from_file_path(&base_dirpath.join(&self.0)),
+                None => url::Url::from_file_path(&self.0),
+            }
+            .map_err(|_| err),
+        }
+    }
 }
 
 impl std::fmt::Display for SchemaCatalogPath {
@@ -28,16 +42,5 @@ impl Default for SchemaCatalogPath {
 impl Default for OneOrMany<SchemaCatalogPath> {
     fn default() -> Self {
         Self::One(SchemaCatalogPath::default())
-    }
-}
-
-impl TryInto<url::Url> for &SchemaCatalogPath {
-    type Error = url::ParseError;
-
-    fn try_into(self) -> Result<url::Url, Self::Error> {
-        match self.0.parse() {
-            Ok(url) => Ok(url),
-            Err(_) => format!("file://{}", self.0).parse(),
-        }
     }
 }

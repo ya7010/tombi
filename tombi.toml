@@ -14,9 +14,9 @@ exclude = ["node_modules/**/*"]
 
 [schema]
 enabled = true
-catalog = {
-  path = "schemas/catalog.json",
-}
+catalog = { path = [
+  "https://www.schemastore.org/api/json/catalog.json",
+] }
 
 [[schemas]]
 path = "tombi.schema.json"

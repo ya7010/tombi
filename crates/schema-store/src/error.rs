@@ -22,6 +22,12 @@ pub enum Error {
     #[error("failed to fetch catalog: {catalog_url}")]
     CatalogUrlFetchFailed { catalog_url: CatalogUrl },
 
+    #[error("invalid catalog file url: {catalog_url}")]
+    InvalidCatalogFileUrl { catalog_url: CatalogUrl },
+
+    #[error("failed to read catalog: {catalog_path}")]
+    CatalogFileReadFailed { catalog_path: PathBuf },
+
     #[error("unsupported schema url: {schema_url}")]
     UnsupportedSchemaUrl { schema_url: SchemaUrl },
 
@@ -66,4 +72,7 @@ pub enum Error {
 
     #[error("unsupported reference: {reference}")]
     UnsupportedReference { reference: String },
+
+    #[error("unsupported url schema: {schema}")]
+    UnsupportedUrlSchema { schema: String },
 }

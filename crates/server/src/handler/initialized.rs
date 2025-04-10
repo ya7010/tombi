@@ -32,7 +32,9 @@ async fn load_schemas(backend: &Backend) {
             .await;
 
         for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
-            if let Ok(catalog_url) = catalog_path.try_into() {
+            if let Ok(catalog_url) =
+                catalog_path.try_to_catalog_url(backend.config_dirpath.as_deref())
+            {
                 if let Err(err) = backend
                     .schema_store
                     .load_schemas_from_catalog_url(&CatalogUrl::new(catalog_url))

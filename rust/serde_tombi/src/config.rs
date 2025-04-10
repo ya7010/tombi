@@ -1,9 +1,27 @@
-use config::{Config, CONFIG_FILENAME, PYPROJECT_FILENAME};
+use config::{Config, TomlVersion, CONFIG_FILENAME, PYPROJECT_FILENAME, TOMBI_CONFIG_TOML_VERSION};
+
+fn from_str(toml_text: &str, config_path: &std::path::Path) -> Result<Config, crate::de::Error> {
+    let deserializer = crate::Deserializer::builder()
+        .config_path(config_path)
+        .build();
+
+    deserializer.from_document(deserializer.try_to_document(toml_text, TOMBI_CONFIG_TOML_VERSION)?)
+}
 
 #[doc(hidden)]
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Default)]
 struct PyProjectToml {
     tool: Option<Tool>,
+}
+
+impl PyProjectToml {
+    fn from_str(toml_text: &str, config_path: &std::path::Path) -> Result<Self, crate::de::Error> {
+        let deserializer = crate::Deserializer::builder()
+            .config_path(config_path)
+            .build();
+
+        deserializer.from_document(deserializer.try_to_document(toml_text, TomlVersion::V1_0_0)?)
+    }
 }
 
 #[doc(hidden)]
@@ -23,26 +41,33 @@ pub fn try_from_path<P: AsRef<std::path::Path>>(
         });
     }
 
-    let Ok(config_str) = std::fs::read_to_string(config_path) else {
+    let Ok(config_text) = std::fs::read_to_string(config_path) else {
         return Err(config::Error::ConfigFileReadFailed {
             config_path: config_path.to_owned(),
         });
     };
 
     match config_path.file_name().and_then(|name| name.to_str()) {
-        Some(CONFIG_FILENAME) => crate::from_str::<Config>(&config_str)
-            .map_err(|_| config::Error::ConfigFileParseFailed {
-                config_path: config_path.to_owned(),
-            })
-            .map(Some),
+        Some(CONFIG_FILENAME) => match crate::config::from_str(&config_text, config_path) {
+            Ok(tombi_config) => Ok(Some(tombi_config)),
+            Err(error) => {
+                tracing::error!(?error);
+                Err(config::Error::ConfigFileParseFailed {
+                    config_path: config_path.to_owned(),
+                })
+            }
+        },
         Some(PYPROJECT_FILENAME) => {
-            let Ok(pyproject_toml) = crate::from_str::<PyProjectToml>(&config_str) else {
+            let Ok(pyproject_toml) = PyProjectToml::from_str(&config_text, config_path) else {
                 return Err(config::Error::ConfigFileParseFailed {
                     config_path: config_path.to_owned(),
                 });
             };
-            if let Some(Tool { tombi: Some(tombi) }) = pyproject_toml.tool {
-                Ok(Some(tombi))
+            if let Some(Tool {
+                tombi: Some(tombi_config),
+            }) = pyproject_toml.tool
+            {
+                Ok(Some(tombi_config))
             } else {
                 Ok(None)
             }

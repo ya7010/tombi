@@ -19,8 +19,9 @@ use typed_builder::TypedBuilder;
 ///
 /// # Examples
 ///
-/// ```no_run
+/// ```
 /// use serde::Deserialize;
+/// use tokio;
 ///
 /// #[derive(Deserialize)]
 /// struct Config {
@@ -29,26 +30,22 @@ use typed_builder::TypedBuilder;
 ///     keys: Vec<String>,
 /// }
 ///
-/// let toml = r#"
-/// ip = "127.0.0.1"
-/// port = 8080
-/// keys = ["key1", "key2"]
-/// "#;
+/// #[tokio::main]
+/// async fn main() {
+///     let toml = r#"
+///     ip = "127.0.0.1"
+///     port = 8080
+///     keys = ["key1", "key2"]
+///     "#;
 ///
-/// let config: Config = serde_tombi::from_str(toml).unwrap();
+///     let config: Config = serde_tombi::from_str_async(toml).await.unwrap();
+/// }
 /// ```
-pub fn from_str<T>(s: &str) -> Result<T, crate::de::Error>
+pub async fn from_str_async<T>(toml_text: &str) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
-    Deserializer::new().from_str(s)
-}
-
-pub async fn from_str_async<T>(s: &str) -> Result<T, crate::de::Error>
-where
-    T: DeserializeOwned,
-{
-    Deserializer::new().from_str_async(s).await
+    Deserializer::new().from_str_async(toml_text).await
 }
 
 pub fn from_document<T>(document: document::Document) -> Result<T, crate::de::Error>
@@ -84,18 +81,11 @@ impl<'de> Deserializer<'de> {
         }
     }
 
-    pub fn from_str<T>(&self, s: &str) -> Result<T, crate::de::Error>
+    pub async fn from_str_async<T>(&self, toml_text: &str) -> Result<T, crate::de::Error>
     where
         T: DeserializeOwned,
     {
-        tokio::runtime::Runtime::new()?.block_on(self.from_str_async(s))
-    }
-
-    pub async fn from_str_async<T>(&self, s: &str) -> Result<T, crate::de::Error>
-    where
-        T: DeserializeOwned,
-    {
-        from_document(self.try_to_document(s).await?)
+        from_document(self.try_to_document(toml_text, self.get_toml_version().await?)?)
     }
 
     pub fn from_document<T>(&self, document: document::Document) -> Result<T, crate::de::Error>
@@ -105,13 +95,14 @@ impl<'de> Deserializer<'de> {
         Ok(T::deserialize(&document)?)
     }
 
-    async fn try_to_document(&self, s: &str) -> Result<document::Document, crate::de::Error> {
+    async fn get_toml_version(&self) -> Result<TomlVersion, crate::de::Error> {
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::new(),
         };
 
         let mut toml_version = TomlVersion::default();
+
         if self.schema_store.is_none() {
             match self.config {
                 Some(config) => {
@@ -150,8 +141,16 @@ impl<'de> Deserializer<'de> {
             }
         }
 
+        Ok(toml_version)
+    }
+
+    pub(crate) fn try_to_document(
+        &self,
+        toml_text: &str,
+        toml_version: TomlVersion,
+    ) -> Result<document::Document, crate::de::Error> {
         // Parse the source string using the parser
-        let parsed = parser::parse(s);
+        let parsed = parser::parse(toml_text);
 
         let errors = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
@@ -185,8 +184,8 @@ mod tests {
     use serde::Deserialize;
     use test_lib::project_root;
 
-    #[test]
-    fn test_deserialize_struct() {
+    #[tokio::test]
+    async fn test_deserialize_struct() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct Test {
             int: i32,
@@ -212,12 +211,14 @@ opt = "optional"
             opt: Some("optional".to_string()),
         };
 
-        let result: Test = from_str(toml).expect("TOML deserialization failed");
+        let result: Test = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_nested_struct() {
+    #[tokio::test]
+    async fn test_deserialize_nested_struct() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct Nested {
             value: String,
@@ -243,12 +244,14 @@ value = "nested value"
             simple_value: 42,
         };
 
-        let result: Test = from_str(toml).expect("TOML deserialization failed");
+        let result: Test = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_array() {
+    #[tokio::test]
+    async fn test_deserialize_array() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct SimpleArrayTest {
             values: Vec<i32>,
@@ -260,12 +263,14 @@ value = "nested value"
             values: vec![1, 2, 3],
         };
 
-        let result: SimpleArrayTest = from_str(toml).expect("TOML deserialization failed");
+        let result: SimpleArrayTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_map() {
+    #[tokio::test]
+    async fn test_deserialize_map() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct MapTest {
             string_map: IndexMap<String, String>,
@@ -295,12 +300,14 @@ three = 3
             },
         };
 
-        let result: MapTest = from_str(toml).expect("TOML deserialization failed");
+        let result: MapTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_enum() {
+    #[tokio::test]
+    async fn test_deserialize_enum() {
         #[derive(Debug, Deserialize, PartialEq)]
         enum SimpleEnum {
             Variant1,
@@ -317,12 +324,14 @@ three = 3
             enum_value: SimpleEnum::Variant1,
         };
 
-        let result: EnumTest = from_str(toml).expect("TOML deserialization failed");
+        let result: EnumTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_datetime() {
+    #[tokio::test]
+    async fn test_deserialize_datetime() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct DateTimeTest {
             created_at: DateTime<Utc>,
@@ -339,12 +348,14 @@ updated_at = "2023-07-20T14:45:30Z"
             updated_at: Utc.with_ymd_and_hms(2023, 7, 20, 14, 45, 30).unwrap(),
         };
 
-        let result: DateTimeTest = from_str(toml).expect("TOML deserialization failed");
+        let result: DateTimeTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_option() {
+    #[tokio::test]
+    async fn test_deserialize_option() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct OptionTest {
             some: Option<String>,
@@ -358,12 +369,14 @@ updated_at = "2023-07-20T14:45:30Z"
             none: None,
         };
 
-        let result: OptionTest = from_str(toml).expect("TOML deserialization failed");
+        let result: OptionTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_empty_containers() {
+    #[tokio::test]
+    async fn test_deserialize_empty_containers() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct EmptyContainers {
             empty_array: Vec<i32>,
@@ -380,12 +393,14 @@ empty_map = {}
             empty_map: IndexMap::new(),
         };
 
-        let result: EmptyContainers = from_str(toml).expect("TOML deserialization failed");
+        let result: EmptyContainers = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_special_characters() {
+    #[tokio::test]
+    async fn test_deserialize_special_characters() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct SpecialChars {
             newlines: String,
@@ -408,12 +423,14 @@ escape_chars = "\\t\\n\\r\\\""
             escape_chars: "\\t\\n\\r\\\"".to_string(),
         };
 
-        let result: SpecialChars = from_str(toml).expect("TOML deserialization failed");
+        let result: SpecialChars = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_numeric_boundaries() {
+    #[tokio::test]
+    async fn test_deserialize_numeric_boundaries() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct NumericBoundaries {
             min_i32: i32,
@@ -442,12 +459,14 @@ negative_zero = -0.0
             negative_zero: -0.0,
         };
 
-        let result: NumericBoundaries = from_str(toml).expect("TOML deserialization failed");
+        let result: NumericBoundaries = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_complex_nested() {
+    #[tokio::test]
+    async fn test_deserialize_complex_nested() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct Inner {
             value: String,
@@ -517,12 +536,14 @@ key4 = "value4"
             ],
         };
 
-        let result: ComplexNested = from_str(toml).expect("TOML deserialization failed");
+        let result: ComplexNested = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_mixed_type_array() {
+    #[tokio::test]
+    async fn test_deserialize_mixed_type_array() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct MixedTypeArray {
             mixed: Vec<MixedType>,
@@ -550,12 +571,14 @@ mixed = [42, 3.14, "hello", true]
             ],
         };
 
-        let result: MixedTypeArray = from_str(toml).expect("TOML deserialization failed");
+        let result: MixedTypeArray = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_default_values() {
+    #[tokio::test]
+    async fn test_deserialize_default_values() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct DefaultValues {
             #[serde(default)]
@@ -584,25 +607,32 @@ optional_string = "provided"
             optional_vec: vec!["default".to_string()],
         };
 
-        let result: DefaultValues = from_str(toml).expect("TOML deserialization failed");
+        let result: DefaultValues = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_empty_tombi_config() {
+    #[tokio::test]
+    async fn test_empty_tombi_config() {
+        test_lib::init_tracing();
         let toml = r#""#;
 
-        let config: config::Config = from_str(toml).expect("TOML deserialization failed");
+        let config: config::Config = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
 
         pretty_assertions::assert_eq!(config, config::Config::default());
     }
 
-    #[test]
-    fn test_deserialize_actual_tombi_config() {
+    #[tokio::test]
+    async fn test_deserialize_actual_tombi_config() {
         let config_path = project_root().join("tombi.toml");
         let config_str = std::fs::read_to_string(&config_path).expect("Failed to read tombi.toml");
 
-        let result: config::Config = from_str(&config_str).expect("Failed to parse tombi.toml");
+        let result: config::Config = from_str_async(&config_str)
+            .await
+            .expect("Failed to parse tombi.toml");
 
         // Verify the parsed values
         assert_eq!(

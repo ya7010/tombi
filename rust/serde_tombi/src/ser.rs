@@ -17,6 +17,7 @@ pub use error::Error;
 ///
 /// ```
 /// use serde::Serialize;
+/// use tokio;
 ///
 /// #[derive(Serialize)]
 /// struct Config {
@@ -25,21 +26,17 @@ pub use error::Error;
 ///     keys: Vec<String>,
 /// }
 ///
-/// let config = Config {
-///     ip: "127.0.0.1".to_string(),
-///     port: 8080,
-///     keys: vec!["key1".to_string(), "key2".to_string()],
-/// };
+/// #[tokio::main]
+/// async fn main() {
+///     let config = Config {
+///         ip: "127.0.0.1".to_string(),
+///         port: 8080,
+///         keys: vec!["key1".to_string(), "key2".to_string()],
+///     };
 ///
-/// let toml = serde_tombi::to_string(&config);
+///     let toml = serde_tombi::to_string_async(&config).await.unwrap();
+/// }
 /// ```
-pub fn to_string<T>(value: &T) -> Result<String, crate::ser::Error>
-where
-    T: Serialize,
-{
-    Serializer::new().to_string(value)
-}
-
 pub async fn to_string_async<T>(value: &T) -> Result<String, crate::ser::Error>
 where
     T: Serialize,
@@ -798,8 +795,8 @@ mod tests {
     use serde::Serialize;
     use test_lib::toml_text_assert_eq;
 
-    #[test]
-    fn test_serialize_struct() {
+    #[tokio::test]
+    async fn test_serialize_struct() {
         #[derive(Serialize)]
         struct Test {
             int: i32,
@@ -817,7 +814,9 @@ mod tests {
             opt: Some("optional".to_string()),
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"
 int = 42
 float = 3.141592653589793
@@ -829,8 +828,8 @@ opt = "optional"
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_serialize_nested_struct() {
+    #[tokio::test]
+    async fn test_serialize_nested_struct() {
         test_lib::init_tracing();
 
         #[derive(Serialize)]
@@ -851,7 +850,9 @@ opt = "optional"
             simple_value: 42,
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"
 simple_value = 42
 
@@ -862,8 +863,8 @@ value = "nested value"
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_serialize_array() {
+    #[tokio::test]
+    async fn test_serialize_array() {
         #[derive(Serialize)]
         struct SimpleArrayTest {
             values: Vec<i32>,
@@ -873,14 +874,16 @@ value = "nested value"
             values: vec![1, 2, 3],
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"values = [1, 2, 3]"#;
 
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_serialize_map() {
+    #[tokio::test]
+    async fn test_serialize_map() {
         #[derive(Serialize)]
         struct MapTest {
             string_map: IndexMap<String, String>,
@@ -899,7 +902,9 @@ value = "nested value"
             },
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"
 [string_map]
 key1 = "value1"
@@ -916,8 +921,8 @@ three = 3
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_serialize_enum() {
+    #[tokio::test]
+    async fn test_serialize_enum() {
         #[derive(Serialize)]
         enum SimpleEnum {
             Variant1,
@@ -932,14 +937,16 @@ three = 3
             enum_value: SimpleEnum::Variant1,
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"enum_value = "Variant1""#;
 
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_serialize_datetime() {
+    #[tokio::test]
+    async fn test_serialize_datetime() {
         #[derive(Serialize)]
         struct DateTimeTest {
             created_at: DateTime<Utc>,
@@ -951,7 +958,9 @@ three = 3
             updated_at: Utc.with_ymd_and_hms(2023, 7, 20, 14, 45, 30).unwrap(),
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"
 created_at = "2023-05-15T10:30:00Z"
 updated_at = "2023-07-20T14:45:30Z"
@@ -960,8 +969,8 @@ updated_at = "2023-07-20T14:45:30Z"
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_serialize_option() {
+    #[tokio::test]
+    async fn test_serialize_option() {
         #[derive(Serialize)]
         struct OptionTest {
             some: Option<String>,
@@ -973,14 +982,16 @@ updated_at = "2023-07-20T14:45:30Z"
             none: None,
         };
 
-        let toml = to_string(&test).expect("TOML serialization failed");
+        let toml = to_string_async(&test)
+            .await
+            .expect("TOML serialization failed");
         let expected = r#"some = "optional""#;
 
         toml_text_assert_eq!(toml, expected);
     }
 
-    #[test]
-    fn test_builder_with_schema_store_cargo_dependencies() {
+    #[tokio::test]
+    async fn test_builder_with_schema_store_cargo_dependencies() {
         // This test verifies that dependencies in a Cargo.toml file
         // are sorted alphabetically when the appropriate schema is used
 
@@ -1012,7 +1023,8 @@ updated_at = "2023-07-20T14:45:30Z"
         let toml = Serializer::builder()
             .source_path(std::path::Path::new("Cargo.toml"))
             .build()
-            .to_string(&cargo_toml)
+            .to_string_async(&cargo_toml)
+            .await
             .expect("TOML serialization failed");
 
         let expected = r#"[package]

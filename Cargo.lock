@@ -504,6 +504,7 @@ dependencies = [
  "toml-text",
  "toml-version",
  "tower-lsp",
+ "tracing",
 ]
 
 [[package]]
@@ -1884,6 +1885,7 @@ dependencies = [
  "document",
  "document-tree",
  "formatter",
+ "futures",
  "indexmap",
  "itertools",
  "maplit",

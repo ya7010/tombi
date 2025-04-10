@@ -5,8 +5,10 @@
 //! ## Basic usage
 //!
 //! ```rust
-//! use serde::Serialize;
 //! use std::collections::HashMap;
+//!
+//! use serde::Serialize;
+//! use tokio;
 //!
 //! #[derive(Serialize)]
 //! struct Package {
@@ -21,28 +23,33 @@
 //!     dependencies: HashMap<String, String>,
 //! }
 //!
-//! let cargo_toml = CargoToml {
-//!     package: Package {
-//!         name: "serde_tombi".to_string(),
-//!         version: "0.1.0".to_string(),
-//!         authors: vec!["The Tombi Team".to_string()],
-//!     },
-//!     dependencies: [
-//!         ("serde".to_string(), "1.0".to_string()),
-//!         ("thiserror".to_string(), "1.0".to_string()),
-//!     ].into_iter().collect(),
-//! };
+//! #[tokio::main]
+//! async fn main() {
+//!     let cargo_toml = CargoToml {
+//!         package: Package {
+//!             name: "serde_tombi".to_string(),
+//!             version: "0.1.0".to_string(),
+//!             authors: vec!["The Tombi Team".to_string()],
+//!         },
+//!         dependencies: [
+//!             ("serde".to_string(), "1.0".to_string()),
+//!             ("thiserror".to_string(), "1.0".to_string()),
+//!         ].into_iter().collect(),
+//!     };
 //!
-//! // Simple serialization
-//! let toml = serde_tombi::to_string(&cargo_toml).unwrap();
+//!     // Simple serialization
+//!     let toml = serde_tombi::to_string_async(&cargo_toml).await.unwrap();
+//! }
 //! ```
 //!
 //! ## Using TypedBuilder pattern
 //!
 //! ```rust
+//! use std::collections::HashMap;
+//!
 //! use serde::Serialize;
 //! use serde_tombi::Serializer;
-//! use std::collections::HashMap;
+//! use tokio;
 //!
 //! #[derive(Serialize)]
 //! struct Package {
@@ -57,25 +64,28 @@
 //!     dependencies: HashMap<String, String>,
 //! }
 //!
-//! let cargo_toml = CargoToml {
-//!     package: Package {
-//!         name: "serde_tombi".to_string(),
-//!         version: "0.1.0".to_string(),
-//!         authors: vec!["The Tombi Team".to_string()],
-//!     },
-//!     dependencies: [
-//!         ("serde".to_string(), "1.0".to_string()),
-//!         ("thiserror".to_string(), "1.0".to_string()),
-//!     ].into_iter().collect(),
-//! };
+//! #[tokio::main]
+//! async fn main() {
+//!     let cargo_toml = CargoToml {
+//!         package: Package {
+//!             name: "serde_tombi".to_string(),
+//!             version: "0.1.0".to_string(),
+//!             authors: vec!["The Tombi Team".to_string()],
+//!         },
+//!         dependencies: [
+//!             ("serde".to_string(), "1.0".to_string()),
+//!             ("thiserror".to_string(), "1.0".to_string()),
+//!         ].into_iter().collect(),
+//!     };
 //!
-//! // Using either new() or the builder pattern
-//! // Builder pattern:
-//! let serializer = Serializer::builder()
-//!     .source_path(std::path::Path::new("Cargo.toml"))
-//!     .build();
+//!     // Using either new() or the builder pattern
+//!     // Builder pattern:
+//!     let serializer = Serializer::builder()
+//!         .source_path(std::path::Path::new("Cargo.toml"))
+//!         .build();
 //!
-//! let toml = serializer.to_string(&cargo_toml).unwrap();
+//!     let toml = serializer.to_string_async(&cargo_toml).await.unwrap();
+//! }
 //! ```
 //!
 pub mod config;
@@ -83,13 +93,13 @@ mod de;
 mod document;
 mod ser;
 
-pub use de::{from_document, from_str, from_str_async};
+pub use de::{from_document, from_str_async, Deserializer};
 pub use document::{
     Array, ArrayKind, Boolean, Document, Float, Integer, IntegerKind, Key, LocalDate,
     LocalDateTime, LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
 
-pub use ser::{to_document, to_string, to_string_async, Serializer};
+pub use ser::{to_document, to_string_async, Serializer};
 use std::fmt;
 use thiserror::Error;
 
