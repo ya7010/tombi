@@ -32,7 +32,10 @@
     "include": {
       "title": "File patterns to include.",
       "description": "The file match pattern to include in formatting and linting.\n Supports glob pattern.",
-      "type": ["array", "null"],
+      "type": [
+        "array",
+        "null"
+      ],
       "items": {
         "type": "string"
       },
@@ -41,7 +44,10 @@
     "exclude": {
       "title": "File patterns to exclude.",
       "description": "The file match pattern to exclude from formatting and linting.\n Supports glob pattern.",
-      "type": ["array", "null"],
+      "type": [
+        "array",
+        "null"
+      ],
       "items": {
         "type": "string"
       },
@@ -82,20 +88,26 @@
     },
     "schemas": {
       "title": "Schema catalog items.",
-      "type": ["array", "null"],
+      "type": [
+        "array",
+        "null"
+      ],
       "items": {
         "$ref": "#/definitions/Schema"
       }
     }
   },
   "additionalProperties": false,
-  "x-tombi-toml-version": "v1.0.0",
+  "x-tombi-toml-version": "v1.1.0-preview",
   "x-tombi-table-keys-order": "schema",
   "definitions": {
     "TomlVersion": {
       "title": "TOML version.",
       "type": "string",
-      "enum": ["v1.0.0", "v1.1.0-preview"]
+      "enum": [
+        "v1.0.0",
+        "v1.1.0-preview"
+      ]
     },
     "FormatOptions": {
       "title": "Formatter options.",
@@ -354,7 +366,10 @@
         }
       },
       "additionalProperties": false,
-      "required": ["path", "include"],
+      "required": [
+        "path",
+        "include"
+      ],
       "x-tombi-table-keys-order": "schema"
     },
     "SubSchema": {
@@ -376,12 +391,18 @@
         },
         "root-keys": {
           "title": "The keys to apply the sub schema.",
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         }
       },
       "additionalProperties": false,
-      "required": ["path", "include"],
+      "required": [
+        "path",
+        "include"
+      ],
       "x-tombi-table-keys-order": "schema"
     }
   }

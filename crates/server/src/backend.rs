@@ -49,7 +49,7 @@ pub struct Options {
 impl Backend {
     #[inline]
     pub fn new(client: tower_lsp::Client, options: &Options) -> Self {
-        let (config, config_path) = match config::load_with_path() {
+        let (config, config_path) = match serde_tombi::config::load_with_path() {
             Ok((config, config_path)) => (config, config_path),
             Err(err) => {
                 tracing::error!("{err}");

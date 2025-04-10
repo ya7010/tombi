@@ -56,7 +56,7 @@ where
     crate::Error: Print<P>,
     P: Copy + Clone + Send + 'static,
 {
-    let (config, config_path) = config::load_with_path()?;
+    let (config, config_path) = serde_tombi::config::load_with_path()?;
 
     let toml_version = config.toml_version.unwrap_or_default();
     let schema_options = config.schema.as_ref();

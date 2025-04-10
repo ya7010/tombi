@@ -5,8 +5,10 @@ use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
 use itertools::Itertools;
+use schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use toml_version::TomlVersion;
+use typed_builder::TypedBuilder;
 
 /// Deserialize a TOML string into a Rust data structure.
 ///
@@ -17,8 +19,9 @@ use toml_version::TomlVersion;
 ///
 /// # Examples
 ///
-/// ```no_run
+/// ```
 /// use serde::Deserialize;
+/// use tokio;
 ///
 /// #[derive(Deserialize)]
 /// struct Config {
@@ -27,57 +30,150 @@ use toml_version::TomlVersion;
 ///     keys: Vec<String>,
 /// }
 ///
-/// let toml = r#"
-/// ip = "127.0.0.1"
-/// port = 8080
-/// keys = ["key1", "key2"]
-/// "#;
+/// #[tokio::main]
+/// async fn main() {
+///     let toml = r#"
+///     ip = "127.0.0.1"
+///     port = 8080
+///     keys = ["key1", "key2"]
+///     "#;
 ///
-/// let config: Config = serde_tombi::from_str(toml).unwrap();
+///     let config: Config = serde_tombi::from_str_async(toml).await.unwrap();
+/// }
 /// ```
-pub fn from_str<T>(s: &str) -> Result<T, crate::de::Error>
+pub async fn from_str_async<T>(toml_text: &str) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
-    let document = parse_str(s)?;
-    from_document(document)
+    Deserializer::new().from_str_async(toml_text).await
 }
 
 pub fn from_document<T>(document: document::Document) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
-    Ok(T::deserialize(&document)?)
+    Deserializer::new().from_document(document)
 }
 
-/// Parse a TOML string into a Document.
-pub fn parse_str(s: &str) -> Result<document::Document, crate::de::Error> {
-    // Parse the source string using the parser
-    let parsed = parser::parse(s);
+// Actual deserializer implementation
+#[derive(TypedBuilder)]
+pub struct Deserializer<'de> {
+    #[builder(default, setter(into, strip_option))]
+    config: Option<&'de ::config::Config>,
 
-    let errors = parsed.errors(TomlVersion::default()).collect_vec();
-    // Check if there are any parsing errors
-    if !errors.is_empty() {
-        return Err(crate::de::Error::Parser(
-            parsed.into_errors(TomlVersion::default()).collect_vec(),
-        ));
+    #[builder(default, setter(into, strip_option))]
+    config_path: Option<&'de std::path::Path>,
+
+    #[builder(default, setter(into, strip_option))]
+    source_path: Option<&'de std::path::Path>,
+
+    #[builder(default, setter(into, strip_option))]
+    schema_store: Option<&'de schema_store::SchemaStore>,
+}
+
+impl<'de> Deserializer<'de> {
+    pub fn new() -> Self {
+        Self {
+            config: None,
+            config_path: None,
+            source_path: None,
+            schema_store: None,
+        }
     }
 
-    // Cast the parsed result to an AST Root node
-    let root = ast::Root::cast(parsed.into_syntax_node()).expect("AST Root must be present");
-
-    // Convert the AST to a document tree
-    let (document_tree, errors) = root
-        .into_document_tree_and_errors(TomlVersion::default())
-        .into();
-
-    // Check for errors during document tree construction
-    if !errors.is_empty() {
-        return Err(crate::de::Error::DocumentTree(errors));
+    pub async fn from_str_async<T>(&self, toml_text: &str) -> Result<T, crate::de::Error>
+    where
+        T: DeserializeOwned,
+    {
+        from_document(self.try_to_document(toml_text, self.get_toml_version().await?)?)
     }
 
-    // Convert to a Document
-    Ok(document_tree.into_document(TomlVersion::default()))
+    pub fn from_document<T>(&self, document: document::Document) -> Result<T, crate::de::Error>
+    where
+        T: DeserializeOwned,
+    {
+        Ok(T::deserialize(&document)?)
+    }
+
+    async fn get_toml_version(&self) -> Result<TomlVersion, crate::de::Error> {
+        let schema_store = match self.schema_store {
+            Some(schema_store) => schema_store,
+            None => &SchemaStore::new(),
+        };
+
+        let mut toml_version = TomlVersion::default();
+
+        if self.schema_store.is_none() {
+            match self.config {
+                Some(config) => {
+                    if let Some(new_toml_version) = config.toml_version {
+                        toml_version = new_toml_version;
+                    }
+                    if self.schema_store.is_none() {
+                        schema_store.load_config(config, self.config_path).await?;
+                    }
+                }
+                None => {
+                    let (config, config_path) = crate::config::load_with_path()?;
+
+                    if let Some(new_toml_version) = config.toml_version {
+                        toml_version = new_toml_version;
+                    }
+
+                    schema_store
+                        .load_config(&config, config_path.as_deref())
+                        .await?;
+                }
+            }
+        }
+
+        if let Some(source_path) = self.source_path {
+            if let Some(SourceSchema {
+                root_schema: Some(root_schema),
+                ..
+            }) = schema_store
+                .try_get_source_schema_from_path(source_path)
+                .await?
+            {
+                if let Some(new_toml_version) = root_schema.toml_version() {
+                    toml_version = new_toml_version;
+                }
+            }
+        }
+
+        Ok(toml_version)
+    }
+
+    pub(crate) fn try_to_document(
+        &self,
+        toml_text: &str,
+        toml_version: TomlVersion,
+    ) -> Result<document::Document, crate::de::Error> {
+        // Parse the source string using the parser
+        let parsed = parser::parse(toml_text);
+
+        let errors = parsed.errors(toml_version).collect_vec();
+        // Check if there are any parsing errors
+        if !errors.is_empty() {
+            return Err(crate::de::Error::Parser(
+                parsed.into_errors(toml_version).collect_vec(),
+            ));
+        }
+
+        // Cast the parsed result to an AST Root node
+        let root = ast::Root::cast(parsed.into_syntax_node()).expect("AST Root must be present");
+
+        // Convert the AST to a document tree
+        let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
+
+        // Check for errors during document tree construction
+        if !errors.is_empty() {
+            return Err(crate::de::Error::DocumentTree(errors));
+        }
+
+        // Convert to a Document
+        Ok(document_tree.into_document(toml_version))
+    }
 }
 
 #[cfg(test)]
@@ -88,8 +184,8 @@ mod tests {
     use serde::Deserialize;
     use test_lib::project_root;
 
-    #[test]
-    fn test_deserialize_struct() {
+    #[tokio::test]
+    async fn test_deserialize_struct() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct Test {
             int: i32,
@@ -115,12 +211,14 @@ opt = "optional"
             opt: Some("optional".to_string()),
         };
 
-        let result: Test = from_str(toml).expect("TOML deserialization failed");
+        let result: Test = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_nested_struct() {
+    #[tokio::test]
+    async fn test_deserialize_nested_struct() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct Nested {
             value: String,
@@ -146,12 +244,14 @@ value = "nested value"
             simple_value: 42,
         };
 
-        let result: Test = from_str(toml).expect("TOML deserialization failed");
+        let result: Test = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_array() {
+    #[tokio::test]
+    async fn test_deserialize_array() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct SimpleArrayTest {
             values: Vec<i32>,
@@ -163,12 +263,14 @@ value = "nested value"
             values: vec![1, 2, 3],
         };
 
-        let result: SimpleArrayTest = from_str(toml).expect("TOML deserialization failed");
+        let result: SimpleArrayTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_map() {
+    #[tokio::test]
+    async fn test_deserialize_map() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct MapTest {
             string_map: IndexMap<String, String>,
@@ -198,12 +300,14 @@ three = 3
             },
         };
 
-        let result: MapTest = from_str(toml).expect("TOML deserialization failed");
+        let result: MapTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_enum() {
+    #[tokio::test]
+    async fn test_deserialize_enum() {
         #[derive(Debug, Deserialize, PartialEq)]
         enum SimpleEnum {
             Variant1,
@@ -220,12 +324,14 @@ three = 3
             enum_value: SimpleEnum::Variant1,
         };
 
-        let result: EnumTest = from_str(toml).expect("TOML deserialization failed");
+        let result: EnumTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_datetime() {
+    #[tokio::test]
+    async fn test_deserialize_datetime() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct DateTimeTest {
             created_at: DateTime<Utc>,
@@ -242,12 +348,14 @@ updated_at = "2023-07-20T14:45:30Z"
             updated_at: Utc.with_ymd_and_hms(2023, 7, 20, 14, 45, 30).unwrap(),
         };
 
-        let result: DateTimeTest = from_str(toml).expect("TOML deserialization failed");
+        let result: DateTimeTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_option() {
+    #[tokio::test]
+    async fn test_deserialize_option() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct OptionTest {
             some: Option<String>,
@@ -261,12 +369,14 @@ updated_at = "2023-07-20T14:45:30Z"
             none: None,
         };
 
-        let result: OptionTest = from_str(toml).expect("TOML deserialization failed");
+        let result: OptionTest = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_empty_containers() {
+    #[tokio::test]
+    async fn test_deserialize_empty_containers() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct EmptyContainers {
             empty_array: Vec<i32>,
@@ -283,12 +393,14 @@ empty_map = {}
             empty_map: IndexMap::new(),
         };
 
-        let result: EmptyContainers = from_str(toml).expect("TOML deserialization failed");
+        let result: EmptyContainers = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_special_characters() {
+    #[tokio::test]
+    async fn test_deserialize_special_characters() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct SpecialChars {
             newlines: String,
@@ -311,12 +423,14 @@ escape_chars = "\\t\\n\\r\\\""
             escape_chars: "\\t\\n\\r\\\"".to_string(),
         };
 
-        let result: SpecialChars = from_str(toml).expect("TOML deserialization failed");
+        let result: SpecialChars = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_numeric_boundaries() {
+    #[tokio::test]
+    async fn test_deserialize_numeric_boundaries() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct NumericBoundaries {
             min_i32: i32,
@@ -345,12 +459,14 @@ negative_zero = -0.0
             negative_zero: -0.0,
         };
 
-        let result: NumericBoundaries = from_str(toml).expect("TOML deserialization failed");
+        let result: NumericBoundaries = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_complex_nested() {
+    #[tokio::test]
+    async fn test_deserialize_complex_nested() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct Inner {
             value: String,
@@ -420,12 +536,14 @@ key4 = "value4"
             ],
         };
 
-        let result: ComplexNested = from_str(toml).expect("TOML deserialization failed");
+        let result: ComplexNested = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_mixed_type_array() {
+    #[tokio::test]
+    async fn test_deserialize_mixed_type_array() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct MixedTypeArray {
             mixed: Vec<MixedType>,
@@ -453,12 +571,14 @@ mixed = [42, 3.14, "hello", true]
             ],
         };
 
-        let result: MixedTypeArray = from_str(toml).expect("TOML deserialization failed");
+        let result: MixedTypeArray = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_deserialize_default_values() {
+    #[tokio::test]
+    async fn test_deserialize_default_values() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct DefaultValues {
             #[serde(default)]
@@ -487,42 +607,46 @@ optional_string = "provided"
             optional_vec: vec!["default".to_string()],
         };
 
-        let result: DefaultValues = from_str(toml).expect("TOML deserialization failed");
+        let result: DefaultValues = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
         assert_eq!(result, expected);
     }
 
-    #[test]
-    fn test_empty_tombi_config() {
+    #[tokio::test]
+    async fn test_empty_tombi_config() {
+        test_lib::init_tracing();
         let toml = r#""#;
 
-        let config: config::Config = from_str(toml).expect("TOML deserialization failed");
+        let config: config::Config = from_str_async(toml)
+            .await
+            .expect("TOML deserialization failed");
 
         pretty_assertions::assert_eq!(config, config::Config::default());
     }
 
-    #[test]
-    fn test_deserialize_actual_tombi_config() {
+    #[tokio::test]
+    async fn test_deserialize_actual_tombi_config() {
         let config_path = project_root().join("tombi.toml");
-        let config_str = std::fs::read_to_string(&config_path).expect("Failed to read tombi.toml");
-
-        let result: config::Config = from_str(&config_str).expect("Failed to parse tombi.toml");
+        let config = crate::config::from_str(
+            &std::fs::read_to_string(&config_path).unwrap(),
+            &config_path,
+        )
+        .expect("Failed to parse tombi.toml");
 
         // Verify the parsed values
-        assert_eq!(
-            result.toml_version,
-            Some(toml_version::TomlVersion::V1_1_0_Preview)
-        );
-        assert_eq!(result.exclude, Some(vec!["node_modules/**/*".to_string()]));
-        assert!(result.format.is_some());
-        assert!(result.lint.is_some());
-        assert!(result.server.is_some());
-        assert!(result.schema.is_some());
-        assert!(result.schemas.is_some());
+        assert_eq!(config.toml_version, Some(toml_version::TomlVersion::V1_0_0));
+        assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
+        assert!(config.format.is_some());
+        assert!(config.lint.is_some());
+        assert!(config.server.is_some());
+        assert!(config.schema.is_some());
+        assert!(config.schemas.is_some());
 
-        let schema = result.schema.unwrap();
+        let schema = config.schema.unwrap();
         assert_eq!(schema.enabled, Some(config::BoolDefaultTrue::default()));
 
-        let schemas = result.schemas.unwrap();
+        let schemas = config.schemas.unwrap();
         assert_eq!(schemas.len(), 5);
 
         // Verify the first schema

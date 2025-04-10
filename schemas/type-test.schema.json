@@ -4,18 +4,30 @@
   "type": "object",
   "properties": {
     "boolean": {
-      "type": ["boolean", "null"]
+      "type": [
+        "boolean",
+        "null"
+      ]
     },
     "integer": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "format": "int64"
     },
     "float": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "format": "double"
     },
     "array": {
-      "type": ["array", "null"],
+      "type": [
+        "array",
+        "null"
+      ],
       "items": {
         "type": "integer",
         "format": "uint64",
@@ -23,19 +35,31 @@
       }
     },
     "offset-date-time": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "date-time"
     },
     "local-date-time": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "partial-date-time"
     },
     "local-date": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "date"
     },
     "local-time": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "partial-time"
     },
     "literal": {

@@ -265,8 +265,8 @@ mod tests {
 
     use crate::document::*;
 
-    #[test]
-    fn test_document_serialization() {
+    #[tokio::test]
+    async fn test_document_serialization() {
         test_lib::init_tracing();
 
         // Create a test document with various value types
@@ -307,7 +307,7 @@ mod tests {
         );
 
         // Test to_string method
-        let toml_string = crate::to_string(&document).unwrap();
+        let toml_string = crate::to_string_async(&document).await.unwrap();
         let expected = r#"
 string = "hello"
 integer = 42
@@ -318,8 +318,8 @@ array = [1, 2, 3]
         toml_text_assert_eq!(toml_string, expected);
     }
 
-    #[test]
-    fn test_array_of_tables_serialization() {
+    #[tokio::test]
+    async fn test_array_of_tables_serialization() {
         test_lib::init_tracing();
 
         // Create a test document with array of tables
@@ -359,7 +359,7 @@ array = [1, 2, 3]
         );
 
         // Test to_string method
-        let toml_string = crate::to_string(&document).unwrap();
+        let toml_string = crate::to_string_async(&document).await.unwrap();
         let expected = r#"
 [[fruits]]
 name = "apple"
@@ -372,8 +372,8 @@ color = "yellow"
         toml_text_assert_eq!(toml_string, expected);
     }
 
-    #[test]
-    fn test_nested_tables_serialization() {
+    #[tokio::test]
+    async fn test_nested_tables_serialization() {
         test_lib::init_tracing();
 
         // Create a test document with nested tables
@@ -397,7 +397,7 @@ color = "yellow"
         );
 
         // Test to_string method
-        let toml_string = crate::to_string(&document).unwrap();
+        let toml_string = crate::to_string_async(&document).await.unwrap();
         let expected = r#"
 [person]
 name = "John"
@@ -406,8 +406,8 @@ age = 30
         toml_text_assert_eq!(toml_string, expected);
     }
 
-    #[test]
-    fn test_complex_nested_structures_serialization() {
+    #[tokio::test]
+    async fn test_complex_nested_structures_serialization() {
         test_lib::init_tracing();
 
         let mut document = Document::new();
@@ -490,7 +490,7 @@ age = 30
         tracing::trace!("document: {document:?}");
 
         // Test to_string method
-        let toml_string = crate::to_string(&document).unwrap();
+        let toml_string = crate::to_string_async(&document).await.unwrap();
         let expected = r#"
 [aaa.bbb]
 ddd = "value1"
@@ -511,8 +511,8 @@ id = 2
         toml_text_assert_eq!(toml_string, expected);
     }
 
-    #[test]
-    fn test_date_time_serialization() {
+    #[tokio::test]
+    async fn test_date_time_serialization() {
         test_lib::init_tracing();
 
         let mut document = Document::new();
@@ -523,7 +523,7 @@ id = 2
             Value::OffsetDateTime(now),
         );
 
-        let toml_string = crate::to_string(&document).unwrap();
+        let toml_string = crate::to_string_async(&document).await.unwrap();
         let expected = r#"
 now = 2024-01-01T00:00:00Z
 "#;

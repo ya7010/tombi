@@ -352,7 +352,6 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
- "toml",
  "toml-version",
  "tracing",
  "url",
@@ -500,10 +499,10 @@ dependencies = [
  "text",
  "textwrap",
  "thiserror",
- "toml",
  "toml-text",
  "toml-version",
  "tower-lsp",
+ "tracing",
 ]
 
 [[package]]
@@ -1864,15 +1863,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_spanned"
-version = "0.6.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87607cb1398ed59d48732e575a4c28a7a8ebf2454b964fe3f224f2afc07909e1"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "serde_tombi"
 version = "0.0.1"
 dependencies = [
@@ -1884,6 +1874,7 @@ dependencies = [
  "document",
  "document-tree",
  "formatter",
+ "futures",
  "indexmap",
  "itertools",
  "maplit",
@@ -1900,6 +1891,7 @@ dependencies = [
  "toml-version",
  "tracing",
  "typed-builder",
+ "url",
 ]
 
 [[package]]
@@ -1943,6 +1935,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "serde_tombi",
  "syntax",
  "tempfile",
  "test-lib",
@@ -2260,24 +2253,13 @@ dependencies = [
  "linter",
  "nu-ansi-term 0.50.1",
  "schema-store",
+ "serde_tombi",
  "server",
  "thiserror",
  "tokio",
  "tracing",
  "tracing-subscriber",
  "url",
-]
-
-[[package]]
-name = "toml"
-version = "0.8.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1ed1f98e3fdc28d6d910e6737ae6ab1a93bf1985935a1193e68f93eeb68d24e"
-dependencies = [
- "serde",
- "serde_spanned",
- "toml_datetime",
- "toml_edit",
 ]
 
 [[package]]
@@ -2322,9 +2304,6 @@ name = "toml_datetime"
 version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0dd7358ecb8fc2f8d014bf86f6f638ce72ba252a2c3a2572f2a795f1d23efb41"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "toml_edit"
@@ -2333,8 +2312,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ae48d6208a266e853d946088ed816055e556cc6028c5e8e2b84d9fa5dd7c7f5"
 dependencies = [
  "indexmap",
- "serde",
- "serde_spanned",
  "toml_datetime",
  "winnow",
 ]
