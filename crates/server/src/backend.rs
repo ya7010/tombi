@@ -5,6 +5,7 @@ use config::{Config, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
+use schema_store::SourceSchema;
 use syntax::SyntaxNode;
 use tower_lsp::{
     lsp_types::{
@@ -140,9 +141,30 @@ impl Backend {
         *self.config.write().await = config;
     }
 
-    #[inline]
-    pub async fn toml_version(&self) -> Option<TomlVersion> {
-        self.config.read().await.toml_version
+    pub async fn text_document_toml_version(
+        &self,
+        text_document_uri: &Url,
+    ) -> (TomlVersion, &'static str) {
+        if let Some(SourceSchema {
+            root_schema: Some(document_schema),
+            ..
+        }) = self
+            .schema_store
+            .try_get_source_schema_from_url(&text_document_uri)
+            .await
+            .ok()
+            .flatten()
+        {
+            if let Some(toml_version) = document_schema.toml_version() {
+                return (toml_version, "schema");
+            }
+        }
+
+        if let Some(toml_version) = self.config.read().await.toml_version {
+            return (toml_version, "config");
+        }
+
+        (TomlVersion::default(), "default")
     }
 }
 

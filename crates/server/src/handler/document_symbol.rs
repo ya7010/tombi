@@ -14,7 +14,7 @@ pub async fn handle_document_symbol(
 
     let DocumentSymbolParams { text_document, .. } = params;
 
-    let toml_version = backend.toml_version().await.unwrap_or_default();
+    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
 
     let Some(tree) = backend
         .get_incomplete_document_tree(&text_document.uri, toml_version)
