@@ -1817,38 +1817,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde-tombi"
-version = "0.0.1"
-dependencies = [
- "ast",
- "chrono",
- "config",
- "date-time",
- "diagnostic",
- "document",
- "document-tree",
- "formatter",
- "futures",
- "indexmap",
- "itertools",
- "maplit",
- "parser",
- "pretty_assertions",
- "schema-store",
- "serde",
- "test-lib",
- "text",
- "textwrap",
- "thiserror",
- "tokio",
- "toml-text",
- "toml-version",
- "tracing",
- "typed-builder",
- "url",
-]
-
-[[package]]
 name = "serde_derive"
 version = "1.0.215"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1895,6 +1863,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_tombi"
+version = "0.0.1"
+dependencies = [
+ "ast",
+ "chrono",
+ "config",
+ "date-time",
+ "diagnostic",
+ "document",
+ "document-tree",
+ "formatter",
+ "futures",
+ "indexmap",
+ "itertools",
+ "maplit",
+ "parser",
+ "pretty_assertions",
+ "schema-store",
+ "serde",
+ "test-lib",
+ "text",
+ "textwrap",
+ "thiserror",
+ "tokio",
+ "toml-text",
+ "toml-version",
+ "tracing",
+ "typed-builder",
+ "url",
+]
+
+[[package]]
 name = "serde_urlencoded"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1934,8 +1934,8 @@ dependencies = [
  "schema-store",
  "semver",
  "serde",
- "serde-tombi",
  "serde_json",
+ "serde_tombi",
  "syntax",
  "tempfile",
  "test-lib",
@@ -2253,7 +2253,7 @@ dependencies = [
  "linter",
  "nu-ansi-term 0.50.1",
  "schema-store",
- "serde-tombi",
+ "serde_tombi",
  "server",
  "thiserror",
  "tokio",
