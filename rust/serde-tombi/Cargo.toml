@@ -1,5 +1,5 @@
 [package]
-name = "serde_tombi"
+name = "serde-tombi"
 version = "0.0.1"
 authors.workspace = true
 edition.workspace = true
