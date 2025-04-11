@@ -50,8 +50,8 @@ schema-store = { path = "crates/schema-store" }
 schemars = { version = "1.0.0-alpha.17", features = ["preserve_order", "url2"] }
 semver = { version = "1.0.23" }
 serde = { version = "^1.0.0", features = ["derive"] }
+serde-tombi = { path = "rust/serde-tombi" }
 serde_json = { version = "1.0.130", features = ["preserve_order"] }
-serde_tombi = { path = "rust/serde_tombi" }
 server = { path = "crates/server" }
 syntax = { path = "crates/syntax" }
 test-lib = { path = "crates/test-lib" }

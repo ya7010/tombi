@@ -22,7 +22,7 @@ itertools.workspace = true
 linter = { workspace = true }
 nu-ansi-term = { workspace = true }
 schema-store.workspace = true
-serde_tombi.workspace = true
+serde-tombi = { workspace = true }
 server = { workspace = true }
 thiserror = { workspace = true }
 tokio.workspace = true
