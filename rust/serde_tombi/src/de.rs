@@ -635,7 +635,10 @@ optional_string = "provided"
         .expect("Failed to parse tombi.toml");
 
         // Verify the parsed values
-        assert_eq!(config.toml_version, Some(toml_version::TomlVersion::V1_0_0));
+        assert_eq!(
+            config.toml_version,
+            Some(toml_version::TomlVersion::V1_1_0_Preview)
+        );
         assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
         assert!(config.format.is_some());
         assert!(config.lint.is_some());
