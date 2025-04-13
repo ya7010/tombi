@@ -2,20 +2,29 @@
 
 Welcome to the Tombi documentation!
 
-Tombi(鳶) is a powerful [TOML](https://toml.io/) `Formatter`, `Linter`, and `Language Server`
-designed to help you maintain clean and consistent TOML files.
+Tombi (鳶) is a powerful toolkit that provides a [TOML](https://toml.io/) `Formatter`, `Linter`,
+and `Language Server` to help you maintain clean and consistent TOML files.
 
 ## Getting Started
 
 Visit our [Quick Start Guide](/docs/installation) to begin using Tombi in your projects.
 
 ## Why Tombi?
-TOML is used in many projects such as [pyproject](https://peps.python.org/pep-0621/) and [cargo](https://doc.rust-lang.org/cargo/reference/manifest.html).  
 
-TOML is a good configuration language better than JSON and YAML.  
-JSON is a data description language and cannot include comments.  
-YAML has a complex specification and may interpret data that the user did not intend implicitly.
+TOML has become a popular configuration format used in many modern development tools, including [pyproject](https://peps.python.org/pep-0621/) for Python and [cargo](https://doc.rust-lang.org/cargo/reference/manifest.html) for Rust.
 
-YAML has an excellent [Language Server](https://github.com/redhat-developer/yaml-language-server) created by RedHat.  
+While TOML offers several advantages over other configuration formats:
+- Unlike JSON, it supports comments and has a more human-readable syntax
+- Unlike YAML, it has a simpler specification with fewer implicit behaviors
 
-So, I needed a Language Server for TOML.
+However, unlike YAML and JSON, TOML has lacked a reliable and comprehensive tooling solution. While YAML has an excellent [Language Server](https://github.com/redhat-developer/yaml-language-server) created by RedHat, and JSON has widespread IDE support, TOML developers have been missing similar robust tooling.
+
+We created Tombi to support teams that use TOML as their configuration format. Our goal is to provide a reliable and efficient development experience for TOML files.
+
+### Key Features
+- Integrated approach combining Linter, Formatter, and Language Server
+- High-performance implementation inspired by Rust Analyzer
+- Automatic validation using JSON Schema Store
+- More stable parser implementation
+- Enhanced JSON Schema with automatic sorting capabilities
+- Configuration-free formatter inspired by Python's black (featuring Magic Trailing Comma)
