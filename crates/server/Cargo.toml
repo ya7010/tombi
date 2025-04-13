@@ -24,6 +24,7 @@ itertools = { workspace = true }
 linter = { workspace = true }
 parser = { workspace = true }
 regex.workspace = true
+reqwest = { workspace = true }
 rustc-hash = { workspace = true }
 schema-store = { workspace = true }
 semver = { workspace = true }
