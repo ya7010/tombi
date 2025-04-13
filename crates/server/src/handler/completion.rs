@@ -54,21 +54,12 @@ pub async fn handle_completion(
         return Ok(None);
     };
 
-    let source_schema = match backend
+    let source_schema = backend
         .schema_store
         .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document.uri)))
         .await
         .ok()
-        .flatten()
-    {
-        Some(source_schema) => Some(source_schema),
-        None => backend
-            .schema_store
-            .try_get_source_schema_from_url(&text_document.uri)
-            .await
-            .ok()
-            .flatten(),
-    };
+        .flatten();
 
     let document_sources = backend.document_sources.read().await;
     let Some(document_source) = document_sources.get(&text_document.uri) else {
