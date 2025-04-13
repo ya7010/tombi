@@ -5,7 +5,7 @@ use tower_lsp::lsp_types::{
     OneOf, PositionEncodingKind, SemanticTokensFullOptions, SemanticTokensLegend,
     SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
     TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
-    WorkDoneProgressOptions,
+    TypeDefinitionProviderCapability, WorkDoneProgressOptions,
 };
 
 use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
@@ -77,6 +77,7 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
             resolve_provider: Some(true),
             work_done_progress_options: WorkDoneProgressOptions::default(),
         }),
+        type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
         document_symbol_provider: Some(OneOf::Left(true)),
         document_formatting_provider: Some(OneOf::Left(true)),
         folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),

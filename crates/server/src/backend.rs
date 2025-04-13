@@ -9,6 +9,7 @@ use schema_store::SourceSchema;
 use syntax::SyntaxNode;
 use tower_lsp::{
     lsp_types::{
+        request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},
         CompletionParams, CompletionResponse, DidChangeConfigurationParams,
         DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidCloseTextDocumentParams,
         DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
@@ -26,9 +27,9 @@ use crate::{
         handle_completion, handle_diagnostic, handle_did_change, handle_did_change_configuration,
         handle_did_change_watched_files, handle_did_close, handle_did_open, handle_did_save,
         handle_document_link, handle_document_symbol, handle_folding_range, handle_formatting,
-        handle_get_toml_version, handle_hover, handle_initialize, handle_initialized,
-        handle_semantic_tokens_full, handle_shutdown, handle_update_config, handle_update_schema,
-        GetTomlVersionResponse,
+        handle_get_toml_version, handle_goto_type_definition, handle_hover, handle_initialize,
+        handle_initialized, handle_semantic_tokens_full, handle_shutdown, handle_update_config,
+        handle_update_schema, GetTomlVersionResponse,
     },
 };
 
@@ -266,6 +267,13 @@ impl LanguageServer for Backend {
         params: DocumentDiagnosticParams,
     ) -> Result<DocumentDiagnosticReportResult, tower_lsp::jsonrpc::Error> {
         handle_diagnostic(self, params).await
+    }
+
+    async fn goto_type_definition(
+        &self,
+        params: GotoTypeDefinitionParams,
+    ) -> Result<Option<GotoTypeDefinitionResponse>, tower_lsp::jsonrpc::Error> {
+        handle_goto_type_definition(self, params).await
     }
 }
 
