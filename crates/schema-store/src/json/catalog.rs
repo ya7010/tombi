@@ -30,3 +30,9 @@ impl std::fmt::Display for CatalogUrl {
         write!(f, "{}", self.0)
     }
 }
+
+impl From<CatalogUrl> for url::Url {
+    fn from(catalog_url: CatalogUrl) -> Self {
+        catalog_url.0
+    }
+}

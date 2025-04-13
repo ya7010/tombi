@@ -36,6 +36,12 @@ impl std::ops::Deref for SchemaUrl {
     }
 }
 
+impl From<SchemaUrl> for url::Url {
+    fn from(schema_url: SchemaUrl) -> Self {
+        schema_url.0
+    }
+}
+
 impl std::fmt::Display for SchemaUrl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)

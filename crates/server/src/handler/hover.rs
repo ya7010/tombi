@@ -51,9 +51,7 @@ pub async fn handle_hover(
         .ok()
         .flatten();
 
-    let (toml_version, _) = backend
-        .source_toml_version(source_schema.as_ref())
-        .await;
+    let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
     let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
         return Ok(None);
@@ -83,7 +81,7 @@ pub async fn handle_hover(
     }));
 }
 
-async fn get_hover_range(
+pub(crate) async fn get_hover_range(
     root: &ast::Root,
     position: text::Position,
     toml_version: config::TomlVersion,
