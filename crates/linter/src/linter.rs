@@ -49,18 +49,6 @@ impl<'a> Linter<'a> {
             }
         };
 
-        let source_schema = if let Some(schema) = source_schema {
-            Some(schema)
-        } else if let Some(source_url_or_path) = self.source_url_or_path {
-            self.schema_store
-                .try_get_source_schema(source_url_or_path)
-                .await
-                .ok()
-                .flatten()
-        } else {
-            None
-        };
-
         let toml_version = source_schema
             .as_ref()
             .and_then(|schema| {

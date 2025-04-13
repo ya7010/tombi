@@ -321,11 +321,19 @@ impl SchemaStore {
                 .map_err(|err| (err, url_range));
         }
 
-        Ok(None)
+        if let Some(source_url_or_path) = source_url_or_path {
+            Ok(self
+                .try_get_source_schema(source_url_or_path)
+                .await
+                .ok()
+                .flatten())
+        } else {
+            Ok(None)
+        }
     }
 
     #[inline]
-    pub async fn try_get_source_schema_from_schema_url(
+    async fn try_get_source_schema_from_schema_url(
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<Option<SourceSchema>, crate::Error> {
@@ -340,7 +348,7 @@ impl SchemaStore {
         }))
     }
 
-    pub async fn try_get_source_schema_from_url(
+    async fn try_get_source_schema_from_url(
         &self,
         source_url: &url::Url,
     ) -> Result<Option<SourceSchema>, crate::Error> {
@@ -369,7 +377,7 @@ impl SchemaStore {
         }
     }
 
-    pub async fn try_get_source_schema_from_path(
+    async fn try_get_source_schema_from_path(
         &self,
         source_path: &std::path::Path,
     ) -> Result<Option<SourceSchema>, crate::Error> {
@@ -440,7 +448,7 @@ impl SchemaStore {
         Ok(source_schema)
     }
 
-    pub async fn try_get_source_schema(
+    async fn try_get_source_schema(
         &self,
         source_url_or_path: Either<&url::Url, &std::path::Path>,
     ) -> Result<Option<SourceSchema>, crate::Error> {

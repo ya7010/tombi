@@ -4,7 +4,7 @@ use ahash::AHashMap;
 use config::{Config, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use schema_store::SourceSchema;
 use syntax::SyntaxNode;
 use tower_lsp::{
@@ -74,12 +74,12 @@ impl Backend {
     }
 
     #[inline]
-    async fn get_parsed(&self, uri: &Url) -> Option<parser::Parsed<SyntaxNode>> {
+    async fn get_parsed(&self, text_document_uri: &Url) -> Option<parser::Parsed<SyntaxNode>> {
         let document_source = self.document_sources.read().await;
-        let document_info = match document_source.get(uri) {
+        let document_info = match document_source.get(text_document_uri) {
             Some(document_info) => document_info,
             None => {
-                tracing::warn!("document not found: {}", uri);
+                tracing::warn!("document not found: {}", text_document_uri);
                 return None;
             }
         };
@@ -88,8 +88,8 @@ impl Backend {
     }
 
     #[inline]
-    pub async fn get_incomplete_ast(&self, uri: &Url) -> Option<ast::Root> {
-        self.get_parsed(uri)
+    pub async fn get_incomplete_ast(&self, text_document_uri: &Url) -> Option<ast::Root> {
+        self.get_parsed(text_document_uri)
             .await?
             .cast::<ast::Root>()
             .map(|root| root.tree())
@@ -98,16 +98,39 @@ impl Backend {
     #[inline]
     pub async fn try_get_ast(
         &self,
-        uri: &Url,
-        toml_version: TomlVersion,
+        text_document_uri: &Url,
     ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
-        let Some(p) = self.get_parsed(uri).await?.cast::<ast::Root>() else {
+        self.try_get_ast_and_source_schema(text_document_uri)
+            .await
+            .map(|result| result.map(|(root, _)| root))
+    }
+
+    #[inline]
+    pub async fn try_get_ast_and_source_schema(
+        &self,
+        text_document_uri: &Url,
+    ) -> Option<Result<(ast::Root, Option<SourceSchema>), Vec<Diagnostic>>> {
+        let Some(parsed) = self
+            .get_parsed(text_document_uri)
+            .await?
+            .cast::<ast::Root>()
+        else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };
+        let root = parsed.tree();
 
-        let errors = p.errors(toml_version).collect_vec();
+        let source_schema = self
+            .schema_store
+            .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document_uri)))
+            .await
+            .ok()
+            .flatten();
+
+        let (toml_version, _) = self.source_toml_version(source_schema.as_ref()).await;
+
+        let errors = parsed.errors(toml_version).collect_vec();
         if errors.is_empty() {
-            Some(Ok(p.tree()))
+            Some(Ok((root, source_schema)))
         } else {
             let mut diagnostics = Vec::with_capacity(errors.len());
             errors.iter().for_each(|error| {
@@ -121,13 +144,20 @@ impl Backend {
     #[inline]
     pub async fn get_incomplete_document_tree(
         &self,
-        uri: &Url,
-        toml_version: TomlVersion,
+        text_document_uri: &Url,
     ) -> Option<document_tree::DocumentTree> {
-        self.get_incomplete_ast(uri)
-            .await?
-            .try_into_document_tree(toml_version)
+        let root = self.get_incomplete_ast(&text_document_uri).await?;
+
+        let source_schema = self
+            .schema_store
+            .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document_uri)))
+            .await
             .ok()
+            .flatten();
+
+        let (toml_version, _) = self.source_toml_version(source_schema.as_ref()).await;
+
+        root.try_into_document_tree(toml_version).ok()
     }
 
     #[inline]
@@ -142,19 +172,14 @@ impl Backend {
         *self.config.write().await = config;
     }
 
-    pub async fn text_document_toml_version(
+    pub async fn source_toml_version(
         &self,
-        text_document_uri: &Url,
+        source_schema: Option<&SourceSchema>,
     ) -> (TomlVersion, &'static str) {
         if let Some(SourceSchema {
             root_schema: Some(document_schema),
             ..
-        }) = self
-            .schema_store
-            .try_get_source_schema_from_url(&text_document_uri)
-            .await
-            .ok()
-            .flatten()
+        }) = source_schema
         {
             if let Some(toml_version) = document_schema.toml_version() {
                 return (toml_version, "schema");

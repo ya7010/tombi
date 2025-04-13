@@ -15,8 +15,7 @@ pub async fn handle_semantic_tokens_full(
 
     let SemanticTokensParams { text_document, .. } = params;
 
-    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
-    let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version).await else {
+    let Some(Ok(root)) = backend.try_get_ast(&text_document.uri).await else {
         return Ok(None);
     };
 

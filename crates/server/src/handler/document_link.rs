@@ -10,13 +10,19 @@ pub async fn handle_document_link(
     tracing::trace!(?params);
 
     let DocumentLinkParams { text_document, .. } = params;
-    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
 
-    let Some(Ok(root)) = backend.try_get_ast(&text_document.uri, toml_version).await else {
+    let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
 
     let mut document_links = vec![];
+
+    // Document Inline Comment Schema URL
+    //
+    // ```toml
+    // #:schema https://example.com/schema.json
+    // key = "value"
+    // ```
     if let Some((Ok(schema_url), range)) =
         root.file_schema_url(text_document.uri.to_file_path().ok().as_deref())
     {
