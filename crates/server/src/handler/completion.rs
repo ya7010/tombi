@@ -49,7 +49,6 @@ pub async fn handle_completion(
         return Ok(None);
     }
 
-    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
@@ -60,6 +59,8 @@ pub async fn handle_completion(
         .await
         .ok()
         .flatten();
+
+    let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
     let document_sources = backend.document_sources.read().await;
     let Some(document_source) = document_sources.get(&text_document.uri) else {

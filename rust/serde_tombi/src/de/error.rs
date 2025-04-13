@@ -9,6 +9,12 @@ pub enum Error {
     #[error(transparent)]
     SchemaStore(#[from] schema_store::Error),
 
+    #[error("cannot get schema url from document comment: {error} at {url_range}")]
+    DocumentCommentSchemaUrl {
+        error: schema_store::Error,
+        url_range: text::Range,
+    },
+
     #[error(transparent)]
     DocumentDeserialize(#[from] document::de::Error),
 

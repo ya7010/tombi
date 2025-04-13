@@ -1,3 +1,4 @@
+use itertools::Either;
 use tower_lsp::lsp_types::request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse};
 
 use crate::backend::Backend;
@@ -12,10 +13,7 @@ pub async fn handle_goto_type_definition(
 
     let GotoTypeDefinitionParams {
         text_document_position_params:
-            tower_lsp::lsp_types::TextDocumentPositionParams {
-                text_document,
-                position,
-            },
+            tower_lsp::lsp_types::TextDocumentPositionParams { text_document, .. },
         ..
     } = params;
 
@@ -32,12 +30,11 @@ pub async fn handle_goto_type_definition(
         return Ok(None);
     }
 
-    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
 
-    let source_schema = backend
+    let _source_schema = backend
         .schema_store
         .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document.uri)))
         .await

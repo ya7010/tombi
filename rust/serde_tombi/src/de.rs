@@ -4,7 +4,7 @@ use ast::AstNode;
 use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
-use itertools::Itertools;
+use itertools::{Either, Itertools};
 use schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use toml_version::TomlVersion;
@@ -85,7 +85,17 @@ impl<'de> Deserializer<'de> {
     where
         T: DeserializeOwned,
     {
-        from_document(self.try_to_document(toml_text, self.get_toml_version().await?)?)
+        let parsed = parser::parse(toml_text);
+        let root = ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
+        let toml_version = self.get_toml_version(&root).await?;
+        let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+        // Check if there are any parsing errors
+        if !errors.is_empty() {
+            return Err(crate::de::Error::Parser(
+                parsed.into_errors(toml_version).collect_vec(),
+            ));
+        }
+        from_document(self.try_to_document(root, toml_version)?)
     }
 
     pub fn from_document<T>(&self, document: document::Document) -> Result<T, crate::de::Error>
@@ -95,7 +105,7 @@ impl<'de> Deserializer<'de> {
         Ok(T::deserialize(&document)?)
     }
 
-    async fn get_toml_version(&self) -> Result<TomlVersion, crate::de::Error> {
+    async fn get_toml_version(&self, root: &ast::Root) -> Result<TomlVersion, crate::de::Error> {
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::new(),
@@ -128,16 +138,22 @@ impl<'de> Deserializer<'de> {
         }
 
         if let Some(source_path) = self.source_path {
-            if let Some(SourceSchema {
-                root_schema: Some(root_schema),
-                ..
-            }) = schema_store
-                .try_get_source_schema_from_path(source_path)
-                .await?
+            match schema_store
+                .try_get_source_schema_from_ast(root, Some(Either::Right(source_path)))
+                .await
             {
-                if let Some(new_toml_version) = root_schema.toml_version() {
-                    toml_version = new_toml_version;
+                Ok(Some(SourceSchema {
+                    root_schema: Some(root_schema),
+                    ..
+                })) => {
+                    if let Some(new_toml_version) = root_schema.toml_version() {
+                        toml_version = new_toml_version;
+                    }
                 }
+                Err((error, url_range)) => {
+                    return Err(crate::de::Error::DocumentCommentSchemaUrl { error, url_range });
+                }
+                _ => {}
             }
         }
 
@@ -146,23 +162,9 @@ impl<'de> Deserializer<'de> {
 
     pub(crate) fn try_to_document(
         &self,
-        toml_text: &str,
+        root: ast::Root,
         toml_version: TomlVersion,
     ) -> Result<document::Document, crate::de::Error> {
-        // Parse the source string using the parser
-        let parsed = parser::parse(toml_text);
-
-        let errors = parsed.errors(toml_version).collect_vec();
-        // Check if there are any parsing errors
-        if !errors.is_empty() {
-            return Err(crate::de::Error::Parser(
-                parsed.into_errors(toml_version).collect_vec(),
-            ));
-        }
-
-        // Cast the parsed result to an AST Root node
-        let root = ast::Root::cast(parsed.into_syntax_node()).expect("AST Root must be present");
-
         // Convert the AST to a document tree
         let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
 

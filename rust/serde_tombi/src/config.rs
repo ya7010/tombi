@@ -1,4 +1,6 @@
+use ast::AstNode;
 use config::{Config, TomlVersion, CONFIG_FILENAME, PYPROJECT_FILENAME, TOMBI_CONFIG_TOML_VERSION};
+use itertools::Itertools;
 
 /// Parse the TOML text into a `Config` struct.
 ///
@@ -15,7 +17,18 @@ pub(crate) fn from_str(
         .config_path(config_path)
         .build();
 
-    deserializer.from_document(deserializer.try_to_document(toml_text, TOMBI_CONFIG_TOML_VERSION)?)
+    let toml_version = TOMBI_CONFIG_TOML_VERSION;
+    let parsed = parser::parse(toml_text);
+    let root = ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
+    let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+    // Check if there are any parsing errors
+    if !errors.is_empty() {
+        return Err(crate::de::Error::Parser(
+            parsed.into_errors(toml_version).collect_vec(),
+        ));
+    }
+
+    deserializer.from_document(deserializer.try_to_document(root, TOMBI_CONFIG_TOML_VERSION)?)
 }
 
 #[doc(hidden)]
@@ -30,7 +43,18 @@ impl PyProjectToml {
             .config_path(config_path)
             .build();
 
-        deserializer.from_document(deserializer.try_to_document(toml_text, TomlVersion::V1_0_0)?)
+        let toml_version = TOMBI_CONFIG_TOML_VERSION;
+        let parsed = parser::parse(toml_text);
+        let root = ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
+        let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+        // Check if there are any parsing errors
+        if !errors.is_empty() {
+            return Err(crate::de::Error::Parser(
+                parsed.into_errors(toml_version).collect_vec(),
+            ));
+        }
+
+        deserializer.from_document(deserializer.try_to_document(root, TomlVersion::V1_0_0)?)
     }
 }
 

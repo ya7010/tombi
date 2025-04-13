@@ -263,7 +263,7 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    fn try_get_document_schema<'a: 'b, 'b>(
+    pub fn try_get_document_schema<'a: 'b, 'b>(
         &'a self,
         schema_url: &'a SchemaUrl,
     ) -> BoxFuture<'b, Result<Option<DocumentSchema>, crate::Error>> {
@@ -321,7 +321,15 @@ impl SchemaStore {
                 .map_err(|err| (err, url_range));
         }
 
-        self.try_get_source_schema(&source_url_or_path).await
+        if let Some(source_url_or_path) = source_url_or_path {
+            Ok(self
+                .try_get_source_schema(source_url_or_path)
+                .await
+                .ok()
+                .flatten())
+        } else {
+            Ok(None)
+        }
     }
 
     #[inline]
@@ -340,7 +348,7 @@ impl SchemaStore {
         }))
     }
 
-    pub async fn try_get_source_schema_from_url(
+    async fn try_get_source_schema_from_url(
         &self,
         source_url: &url::Url,
     ) -> Result<Option<SourceSchema>, crate::Error> {
@@ -440,7 +448,7 @@ impl SchemaStore {
         Ok(source_schema)
     }
 
-    pub async fn try_get_source_schema(
+    async fn try_get_source_schema(
         &self,
         source_url_or_path: Either<&url::Url, &std::path::Path>,
     ) -> Result<Option<SourceSchema>, crate::Error> {

@@ -40,7 +40,6 @@ pub async fn handle_hover(
     }
 
     let position = position.into();
-    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
@@ -51,6 +50,10 @@ pub async fn handle_hover(
         .await
         .ok()
         .flatten();
+
+    let (toml_version, _) = backend
+        .source_toml_version(source_schema.as_ref())
+        .await;
 
     let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
         return Ok(None);
