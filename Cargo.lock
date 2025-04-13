@@ -1929,6 +1929,7 @@ dependencies = [
  "parser",
  "pretty_assertions",
  "regex",
+ "reqwest",
  "rstest",
  "rustc-hash",
  "schema-store",
