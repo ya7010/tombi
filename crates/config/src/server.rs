@@ -19,6 +19,9 @@ pub struct ServerOptions {
 
     /// # Diagnostics Feature options.
     pub diagnostics: Option<ServerDiagnostics>,
+
+    /// # Document Symbol Feature options.
+    pub goto_type_definition: Option<ServerGotoTypeDefinition>,
 }
 
 impl ServerOptions {
@@ -28,6 +31,7 @@ impl ServerOptions {
             completion: None,
             formatting: None,
             diagnostics: None,
+            goto_type_definition: None,
         }
     }
 }
@@ -86,4 +90,16 @@ impl ServerCompletion {
     pub const fn default() -> Self {
         Self { enabled: None }
     }
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct ServerGotoTypeDefinition {
+    /// # Enable goto type definition feature.
+    ///
+    /// Whether to enable goto type definition.
+    pub enabled: Option<BoolDefaultTrue>,
 }

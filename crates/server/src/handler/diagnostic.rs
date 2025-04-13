@@ -32,8 +32,25 @@ pub async fn handle_diagnostic(
         ));
     }
 
-    let (toml_version, _) = backend.text_document_toml_version(&text_document.uri).await;
+    let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
+        return Ok(DocumentDiagnosticReportResult::Report(
+            DocumentDiagnosticReport::Full(Default::default()),
+        ));
+    };
+
+    let source_schema = backend
+        .schema_store
+        .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document.uri)))
+        .await
+        .ok()
+        .flatten();
+
+    let (toml_version, _) = backend
+        .source_toml_version(source_schema.as_ref())
+        .await;
+
     let document_sources = backend.document_sources.read().await;
+
     let diagnostics = match document_sources.get(&text_document.uri) {
         Some(document) => linter::Linter::new(
             toml_version,
