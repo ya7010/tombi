@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "rust/*", "toml-test", "xtask"]
+members = ["crates/*", "plugins/*", "rust/*", "toml-test", "xtask"]
 
 [workspace.package]
 version = "0.0.0"  # We use git tags for versioning. This is just a placeholder.
@@ -16,6 +16,7 @@ assert_matches = "1.5.0"
 ast = { path = "crates/ast" }
 ast-editor = { path = "crates/ast-editor" }
 camino = "1.1.9"
+cargo_metadata = "0.19.2"
 chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.20", features = ["derive", "string"] }
 clap-verbosity-flag = "3.0.1"
