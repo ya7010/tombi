@@ -3,7 +3,9 @@ name = "tombi-cargo-plugin"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+description = "Tombi plugin for Cargo.toml"
 repository.workspace = true
 license.workspace = true
 
 [dependencies]
+cargo_metadata = { workspace = true }
