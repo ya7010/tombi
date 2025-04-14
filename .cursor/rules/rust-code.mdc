@@ -7,3 +7,4 @@ alwaysApply: true
 # Your rule content
 
 - write all comment as English.
+- don't use mod.rs. Use Rust 2018 stype
