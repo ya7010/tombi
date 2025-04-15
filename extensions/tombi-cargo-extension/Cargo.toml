@@ -1,11 +1,12 @@
 [package]
-name = "tombi-cargo-plugin"
+name = "tombi-cargo-extension"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
-description = "Tombi plugin for Cargo.toml"
+description = "Tombi extension for Cargo.toml"
 repository.workspace = true
 license.workspace = true
 
 [dependencies]
 cargo_metadata = { workspace = true }
+tombi-extension = { workspace = true }
