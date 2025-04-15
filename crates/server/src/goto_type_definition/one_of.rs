@@ -59,7 +59,10 @@ where
             }
         }
 
-        None
+        Some(TypeDefinition {
+            schema_url: schema_url.clone(),
+            range: text::Range::default(),
+        })
     }
     .boxed()
 }

@@ -199,7 +199,10 @@ impl GetTypeDefinition for document_tree::Table {
                                     )
                                     .await
                             } else {
-                                None
+                                Some(TypeDefinition {
+                                    schema_url: current_schema.schema_url.as_ref().clone(),
+                                    range: text::Range::default(),
+                                })
                             }
                         } else {
                             table_schema
@@ -252,7 +255,10 @@ impl GetTypeDefinition for document_tree::Table {
                         )
                         .await
                     }
-                    _ => None,
+                    _ => Some(TypeDefinition {
+                        schema_url: current_schema.schema_url.as_ref().clone(),
+                        range: text::Range::default(),
+                    }),
                 }
             } else {
                 if let Some(key) = keys.first() {

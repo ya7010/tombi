@@ -56,7 +56,10 @@ where
                     .await
                     .is_err()
                 {
-                    return None;
+                    return Some(TypeDefinition {
+                        schema_url: schema_url.clone(),
+                        range: text::Range::default(),
+                    });
                 }
                 all_of_type_definition = Some(type_definition);
             }
