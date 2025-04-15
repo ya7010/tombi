@@ -11,8 +11,8 @@ use tower_lsp::lsp_types::{
 
 use crate::{
     backend::Backend,
+    goto_type_definition::{get_type_definition, TypeDefinition},
     handler::hover::get_hover_range,
-    hover::{get_hover_content, HoverContent},
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -71,7 +71,7 @@ pub async fn handle_goto_type_definition(
     let document_tree = root.into_document_tree_and_errors(toml_version).tree;
 
     Ok(
-        match get_hover_content(
+        match get_type_definition(
             &document_tree,
             position,
             &keys,
@@ -84,101 +84,16 @@ pub async fn handle_goto_type_definition(
         )
         .await
         {
-            Some(HoverContent {
-                schema_url: Some(schema_url),
-                ..
-            }) => {
+            Some(TypeDefinition { schema_url, .. }) => {
                 let url: Url = schema_url.into();
                 if matches!(url.scheme(), "http" | "https") {
-                    // Fetch the remote content
-                    let client = Client::new();
-                    let content = match client.get(url.to_string()).send().await {
-                        Ok(response) => match response.text().await {
-                            Ok(content) => content,
-                            Err(e) => {
-                                tracing::error!("Error fetching content: {}", e);
-                                return Err(tower_lsp::jsonrpc::Error::new(
-                                    tower_lsp::jsonrpc::ErrorCode::InternalError,
-                                ));
-                            }
-                        },
-                        Err(e) => {
-                            tracing::error!("Error fetching content: {}", e);
-                            return Err(tower_lsp::jsonrpc::Error::new(
-                                tower_lsp::jsonrpc::ErrorCode::InternalError,
-                            ));
-                        }
-                    };
-
-                    // Create a new file with the content
-                    let virtual_file_uri =
-                        Url::parse(&format!("untitled://{}", url.path())).unwrap();
-
-                    // First, create the file
-                    let create_file = CreateFile {
-                        uri: virtual_file_uri.clone(),
-                        options: Some(CreateFileOptions {
-                            overwrite: Some(true),
-                            ignore_if_exists: Some(false),
-                        }),
-                        annotation_id: None,
-                    };
-
-                    // Create a workspace edit with both changes
-                    let edit = WorkspaceEdit {
-                        changes: None,
-                        document_changes: Some(DocumentChanges::Operations(vec![
-                            DocumentChangeOperation::Op(ResourceOp::Create(create_file)),
-                        ])),
-                        change_annotations: None,
-                    };
-
-                    // Apply the workspace edit
-                    let _ = backend
-                        .client
-                        .send_request::<tower_lsp::lsp_types::request::ApplyWorkspaceEdit>(
-                            tower_lsp::lsp_types::ApplyWorkspaceEditParams {
-                                label: Some("Create remote file".to_string()),
-                                edit,
-                            },
-                        )
-                        .await;
-
-                    // Then, create the text document edit
-                    let text_document_edit = TextDocumentEdit {
-                        text_document: OptionalVersionedTextDocumentIdentifier {
-                            uri: virtual_file_uri.clone(),
-                            version: Some(0),
-                        },
-                        edits: vec![OneOf::Left(TextEdit {
-                            range: Range {
-                                start: Position::new(0, 0),
-                                end: Position::new(0, 0),
-                            },
-                            new_text: content,
-                        })],
-                    };
-
-                    // Create a workspace edit with both changes
-                    let edit = WorkspaceEdit {
-                        changes: None,
-                        document_changes: Some(DocumentChanges::Edits(vec![text_document_edit])),
-                        change_annotations: None,
-                    };
-
-                    // Apply the workspace edit
-                    let _ = backend
-                        .client
-                        .send_request::<tower_lsp::lsp_types::request::ApplyWorkspaceEdit>(
-                            tower_lsp::lsp_types::ApplyWorkspaceEditParams {
-                                label: Some("Create remote file".to_string()),
-                                edit,
-                            },
-                        )
-                        .await;
+                    let remote_url_path = format!("untitled://{}", url.path());
+                    let remote_url = Url::parse(&remote_url_path).unwrap();
+                    open_remote_file(backend, &remote_url, fetch_remote_content(&url).await?)
+                        .await?;
 
                     Some(GotoTypeDefinitionResponse::Scalar(Location {
-                        uri: virtual_file_uri,
+                        uri: remote_url,
                         range: text::Range::default().into(),
                     }))
                 } else {
@@ -191,4 +106,124 @@ pub async fn handle_goto_type_definition(
             _ => None,
         },
     )
+}
+
+async fn fetch_remote_content(url: &Url) -> Result<String, tower_lsp::jsonrpc::Error> {
+    let client = Client::new();
+    let content = match client.get(url.to_string()).send().await {
+        Ok(response) => match response.text().await {
+            Ok(content) => content,
+            Err(e) => {
+                tracing::error!("Error fetching content: {}", e);
+                return Err(tower_lsp::jsonrpc::Error::new(
+                    tower_lsp::jsonrpc::ErrorCode::InternalError,
+                ));
+            }
+        },
+        Err(e) => {
+            tracing::error!("Error fetching content: {}", e);
+            return Err(tower_lsp::jsonrpc::Error::new(
+                tower_lsp::jsonrpc::ErrorCode::InternalError,
+            ));
+        }
+    };
+
+    // Check if the content is valid JSON
+    serde_json::from_str::<serde_json::Value>(&content).map_err(|e| {
+        tracing::error!("Error parsing {url} content: {}", e);
+        tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InternalError)
+    })?;
+
+    Ok(content)
+}
+
+async fn open_remote_file(
+    backend: &Backend,
+    remote_url: &Url,
+    content: impl Into<String>,
+) -> Result<(), tower_lsp::jsonrpc::Error> {
+    let remote_url_path = Url::parse(&format!("untitled://{}", remote_url.path())).unwrap();
+
+    create_empty_file(backend, &remote_url_path).await?;
+    insert_content(backend, &remote_url_path, content).await?;
+
+    Ok(())
+}
+
+async fn create_empty_file(
+    backend: &Backend,
+    remote_url_path: &Url,
+) -> Result<(), tower_lsp::jsonrpc::Error> {
+    // First, create the file
+    let create_file = CreateFile {
+        uri: remote_url_path.clone(),
+        options: Some(CreateFileOptions {
+            overwrite: Some(true),
+            ignore_if_exists: Some(false),
+        }),
+        annotation_id: None,
+    };
+
+    // Create a workspace edit with both changes
+    let edit = WorkspaceEdit {
+        changes: None,
+        document_changes: Some(DocumentChanges::Operations(vec![
+            DocumentChangeOperation::Op(ResourceOp::Create(create_file)),
+        ])),
+        change_annotations: None,
+    };
+
+    // Apply the workspace edit
+    let _ = backend
+        .client
+        .send_request::<tower_lsp::lsp_types::request::ApplyWorkspaceEdit>(
+            tower_lsp::lsp_types::ApplyWorkspaceEditParams {
+                label: Some("Create remote file".to_string()),
+                edit,
+            },
+        )
+        .await;
+
+    Ok(())
+}
+
+async fn insert_content(
+    backend: &Backend,
+    remote_url_path: &Url,
+    content: impl Into<String>,
+) -> Result<(), tower_lsp::jsonrpc::Error> {
+    // Then, create the text document edit
+    let text_document_edit = TextDocumentEdit {
+        text_document: OptionalVersionedTextDocumentIdentifier {
+            uri: remote_url_path.clone(),
+            version: Some(0),
+        },
+        edits: vec![OneOf::Left(TextEdit {
+            range: Range {
+                start: Position::new(0, 0),
+                end: Position::new(0, 0),
+            },
+            new_text: content.into(),
+        })],
+    };
+
+    // Create a workspace edit with both changes
+    let edit = WorkspaceEdit {
+        changes: None,
+        document_changes: Some(DocumentChanges::Edits(vec![text_document_edit])),
+        change_annotations: None,
+    };
+
+    // Apply the workspace edit
+    let _ = backend
+        .client
+        .send_request::<tower_lsp::lsp_types::request::ApplyWorkspaceEdit>(
+            tower_lsp::lsp_types::ApplyWorkspaceEditParams {
+                label: Some("Create remote file".to_string()),
+                edit,
+            },
+        )
+        .await;
+
+    Ok(())
 }
