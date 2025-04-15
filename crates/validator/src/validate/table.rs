@@ -128,6 +128,8 @@ impl Validate for document_tree::Table {
                         .await
                         .get_mut(&SchemaAccessor::from(&accessor))
                     {
+                        tracing::trace!("property_schema = {:?}", property_schema);
+
                         matche_key = true;
                         match property_schema
                             .resolve(
