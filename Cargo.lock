@@ -2270,10 +2270,11 @@ name = "tombi"
 version = "0.0.0"
 
 [[package]]
-name = "tombi-cargo-plugin"
+name = "tombi-cargo-extension"
 version = "0.0.0"
 dependencies = [
  "cargo_metadata",
+ "tombi-extension",
 ]
 
 [[package]]
@@ -2300,7 +2301,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tombi-plugin"
+name = "tombi-extension"
 version = "0.0.0"
 
 [[package]]

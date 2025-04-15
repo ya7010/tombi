@@ -1,5 +1,5 @@
 [package]
-name = "tombi-plugin"
+name = "tombi-extension"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
