@@ -486,7 +486,7 @@ impl Cursor<'_> {
         self.eat_while(|c| {
             matches!(
                 c,
-                // ASCII characters
+                // ASCII characters - a-z A-Z 0-9 - _
                 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' |
 
                 // ==============================================
@@ -497,9 +497,32 @@ impl Cursor<'_> {
                 //       When the use of v1.1.0 is officially confirmed, it will be implemented.
                 //
                 // See discussion: https://github.com/toml-lang/toml/discussions/941
+                // See specification: https://github.com/toml-lang/toml/blob/78fcf9dd7eab7acfbaf147c684b649477e7bdd9c/toml.abnf#L55-L64
+                //
 
-                // Unicode characters from non-breaking space onwards
-                '\u{A0}'..='\u{10FFFF}'
+                // Superscript digits, fractions
+                '\u{B2}' | '\u{B3}' | '\u{B9}' | '\u{BC}'..='\u{BE}' |
+
+                // Non-symbol chars in Latin block
+                '\u{C0}'..='\u{D6}' | '\u{D8}'..='\u{F6}' | '\u{F8}'..='\u{37D}' |
+
+                // Exclude GREEK QUESTION MARK (which is basically a semicolon)
+                '\u{37F}'..='\u{1FFF}' |
+
+                // From General Punctuation Block, include the two tie symbols and ZWNJ, ZWJ
+                '\u{200C}'..='\u{200D}' | '\u{203F}'..='\u{2040}' |
+
+                // Include super-/subscripts, letterlike/numberlike forms, enclosed alphanumerics
+                '\u{2070}'..='\u{218F}' | '\u{2460}'..='\u{24FF}' |
+
+                // Skip arrows, math, box drawing etc
+                '\u{2C00}'..='\u{2FEF}' | '\u{3001}'..='\u{D7FF}' |
+
+                // Skip surrogate block, Private Use area, intended for process-internal use
+                '\u{F900}'..='\u{FDCF}' | '\u{FDF0}'..='\u{FFFD}' |
+
+                // All chars outside BMP range, excluding Private Use planes
+                '\u{10000}'..='\u{EFFFF}'
             )
         });
         if is_token_separator_with_dot(self.peek(1)) {
