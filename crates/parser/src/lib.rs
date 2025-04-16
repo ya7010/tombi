@@ -22,7 +22,7 @@ pub fn parse(source: &str) -> Parsed<SyntaxNode> {
 
 #[allow(private_bounds)]
 pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
-    let lexed = lexer::lex(source);
+    let lexed = tombi_lexer::lex(source);
     let mut p = crate::parser::Parser::new(source, &lexed.tokens);
 
     P::parse(&mut p);
@@ -59,7 +59,7 @@ pub fn parsed_and_ast(source: &str) -> (crate::Parsed<tombi_ast::Root>, tombi_as
 
 pub fn build_green_tree(
     source: &str,
-    tokens: &[lexer::Token],
+    tokens: &[tombi_lexer::Token],
     parser_output: crate::Output,
 ) -> (rg_tree::GreenNode, Vec<crate::TomlVersionedError>) {
     let mut builder = syntax::SyntaxTreeBuilder::<crate::TomlVersionedError>::default();

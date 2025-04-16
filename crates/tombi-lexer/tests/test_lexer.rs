@@ -1,6 +1,6 @@
 use itertools::Itertools;
-use lexer::{tokenize, ErrorKind::*, Token};
 use syntax::SyntaxKind::*;
+use tombi_lexer::{tokenize, ErrorKind::*, Token};
 
 macro_rules! test_tokens {
     {#[test]fn $name:ident($source:expr) -> [
@@ -77,7 +77,7 @@ macro_rules! test_token {
                 tokens,
                 [
                     Err(
-                        lexer::Error::new(
+                        tombi_lexer::Error::new(
                             $kind,
                             (
                                 ($start_offset, $end_offset).into(),

@@ -9,14 +9,14 @@ use crate::{marker::Marker, token_set::TokenSet, Event};
 #[derive(Debug)]
 pub(crate) struct Parser<'t> {
     source: &'t str,
-    input_tokens: &'t [lexer::Token],
+    input_tokens: &'t [tombi_lexer::Token],
     pos: usize,
-    pub tokens: Vec<lexer::Token>,
+    pub tokens: Vec<tombi_lexer::Token>,
     pub(crate) events: Vec<crate::Event>,
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(source: &'t str, input_tokens: &'t [lexer::Token]) -> Self {
+    pub(crate) fn new(source: &'t str, input_tokens: &'t [tombi_lexer::Token]) -> Self {
         Self {
             source,
             input_tokens,
@@ -31,7 +31,7 @@ impl<'t> Parser<'t> {
         }
     }
 
-    pub(crate) fn finish(mut self) -> (Vec<lexer::Token>, Vec<crate::Event>) {
+    pub(crate) fn finish(mut self) -> (Vec<tombi_lexer::Token>, Vec<crate::Event>) {
         for i in self.pos..self.input_tokens.len() {
             self.tokens.push(self.input_tokens[i]);
         }
@@ -74,10 +74,10 @@ impl<'t> Parser<'t> {
         self.input_tokens.len()
     }
 
-    fn nth_token(&self, n: usize) -> lexer::Token {
+    fn nth_token(&self, n: usize) -> tombi_lexer::Token {
         let pos = self.nth_index(n);
         if pos == self.input_tokens.len() {
-            return lexer::Token::eof();
+            return tombi_lexer::Token::eof();
         }
 
         self.input_tokens[pos]
@@ -206,7 +206,7 @@ impl<'t> Parser<'t> {
         let key1 = {
             let m = self.start();
 
-            let token = lexer::Token::new(
+            let token = tombi_lexer::Token::new(
                 BARE_KEY,
                 (
                     text::Span::new(
@@ -232,7 +232,7 @@ impl<'t> Parser<'t> {
         let dot = {
             let m = self.start();
 
-            let token = lexer::Token::new(
+            let token = tombi_lexer::Token::new(
                 T![.],
                 (
                     text::Span::new(key1.span().end(), key1.span().end() + text::Offset::of(".")),
@@ -257,7 +257,7 @@ impl<'t> Parser<'t> {
         {
             let m = self.start();
 
-            let token = lexer::Token::new(
+            let token = tombi_lexer::Token::new(
                 BARE_KEY,
                 (
                     text::Span::new(

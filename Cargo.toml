@@ -23,7 +23,6 @@ futures-util = "0.3.31"
 glob = "0.3.1"
 indexmap = { version = "2.6.0", features = ["serde"] }
 itertools = "0.13.0"
-lexer = { path = "crates/lexer" }
 linter = { path = "crates/linter" }
 maplit = { version = "1.0" }
 nu-ansi-term = "0.50.1"
@@ -65,6 +64,7 @@ tombi-document = { path = "crates/tombi-document" }
 tombi-document-tree = { path = "crates/tombi-document-tree" }
 tombi-extension = { path = "crates/tombi-extension" }
 tombi-formatter = { path = "crates/tombi-formatter" }
+tombi-lexer = { path = "crates/tombi-lexer" }
 toml-text = { path = "crates/toml-text" }
 toml-version = { path = "crates/toml-version" }
 tower-lsp = { version = "0.20.0" }

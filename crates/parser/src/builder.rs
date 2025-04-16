@@ -5,7 +5,7 @@ use crate::output;
 pub struct Builder<'a, 'b, 'c> {
     source: &'a str,
     token_index: usize,
-    tokens: &'b [lexer::Token],
+    tokens: &'b [tombi_lexer::Token],
     state: State,
     sink: &'c mut dyn FnMut(Step<'_>),
 }
@@ -29,7 +29,7 @@ pub enum State {
 impl<'a, 'b, 'c> Builder<'a, 'b, 'c> {
     pub fn new(
         source: &'a str,
-        tokens: &'b [lexer::Token],
+        tokens: &'b [tombi_lexer::Token],
         sink: &'c mut dyn FnMut(Step<'_>),
     ) -> Self {
         Self {
@@ -107,7 +107,7 @@ pub enum Step<'a> {
 
 pub fn intersperse_trivia(
     source: &str,
-    tokens: &[lexer::Token],
+    tokens: &[tombi_lexer::Token],
     output: &crate::Output,
     sink: &mut dyn FnMut(Step<'_>),
 ) {

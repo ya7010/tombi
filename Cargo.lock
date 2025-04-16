@@ -954,21 +954,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
-name = "lexer"
-version = "0.0.0"
-dependencies = [
- "itertools",
- "pretty_assertions",
- "regex",
- "rstest",
- "syntax",
- "text",
- "textwrap",
- "thiserror",
- "tracing",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.164"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1170,7 +1155,6 @@ version = "0.0.0"
 dependencies = [
  "drop_bomb",
  "itertools",
- "lexer",
  "pretty_assertions",
  "rg-tree",
  "rstest",
@@ -1182,6 +1166,7 @@ dependencies = [
  "tombi-config",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-lexer",
  "tracing",
  "tracing-subscriber",
 ]
@@ -2302,6 +2287,21 @@ dependencies = [
  "tracing-subscriber",
  "unicode-segmentation",
  "url",
+]
+
+[[package]]
+name = "tombi-lexer"
+version = "0.0.0"
+dependencies = [
+ "itertools",
+ "pretty_assertions",
+ "regex",
+ "rstest",
+ "syntax",
+ "text",
+ "textwrap",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]

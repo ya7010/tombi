@@ -3,7 +3,7 @@ use tombi_config::TomlVersion;
 #[derive(thiserror::Error, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
 pub enum ErrorKind {
-    // lexer::ErrorKind translation
+    // tombi_lexer::ErrorKind translation
     #[error("invalid key")]
     InvalidKey,
 
@@ -122,23 +122,25 @@ impl PartialEq for Error {
 
 impl Eq for Error {}
 
-impl From<lexer::Error> for Error {
-    fn from(error: lexer::Error) -> Self {
+impl From<tombi_lexer::Error> for Error {
+    fn from(error: tombi_lexer::Error) -> Self {
         let kind = match error.kind() {
-            lexer::ErrorKind::InvalidKey => ErrorKind::InvalidKey,
-            lexer::ErrorKind::InvalidBasicString => ErrorKind::InvalidBasicString,
-            lexer::ErrorKind::InvalidLiteralString => ErrorKind::InvalidLiteralString,
-            lexer::ErrorKind::InvalidMultilineBasicString => ErrorKind::InvalidMultilineBasicString,
-            lexer::ErrorKind::InvalidMultilineLiteralString => {
+            tombi_lexer::ErrorKind::InvalidKey => ErrorKind::InvalidKey,
+            tombi_lexer::ErrorKind::InvalidBasicString => ErrorKind::InvalidBasicString,
+            tombi_lexer::ErrorKind::InvalidLiteralString => ErrorKind::InvalidLiteralString,
+            tombi_lexer::ErrorKind::InvalidMultilineBasicString => {
+                ErrorKind::InvalidMultilineBasicString
+            }
+            tombi_lexer::ErrorKind::InvalidMultilineLiteralString => {
                 ErrorKind::InvalidMultilineLiteralString
             }
-            lexer::ErrorKind::InvalidNumber => ErrorKind::InvalidNumber,
-            lexer::ErrorKind::InvalidOffsetDateTime => ErrorKind::InvalidOffsetDateTime,
-            lexer::ErrorKind::InvalidLocalDateTime => ErrorKind::InvalidLocalDateTime,
-            lexer::ErrorKind::InvalidLocalDate => ErrorKind::InvalidLocalDate,
-            lexer::ErrorKind::InvalidLocalTime => ErrorKind::InvalidLocalTime,
-            lexer::ErrorKind::InvalidLineBreak => ErrorKind::InvalidLineBreak,
-            lexer::ErrorKind::InvalidToken => ErrorKind::InvalidToken,
+            tombi_lexer::ErrorKind::InvalidNumber => ErrorKind::InvalidNumber,
+            tombi_lexer::ErrorKind::InvalidOffsetDateTime => ErrorKind::InvalidOffsetDateTime,
+            tombi_lexer::ErrorKind::InvalidLocalDateTime => ErrorKind::InvalidLocalDateTime,
+            tombi_lexer::ErrorKind::InvalidLocalDate => ErrorKind::InvalidLocalDate,
+            tombi_lexer::ErrorKind::InvalidLocalTime => ErrorKind::InvalidLocalTime,
+            tombi_lexer::ErrorKind::InvalidLineBreak => ErrorKind::InvalidLineBreak,
+            tombi_lexer::ErrorKind::InvalidToken => ErrorKind::InvalidToken,
         };
 
         Self::new(kind, error.range())
@@ -198,8 +200,8 @@ impl From<Error> for TomlVersionedError {
     }
 }
 
-impl From<lexer::Error> for TomlVersionedError {
-    fn from(error: lexer::Error) -> Self {
+impl From<tombi_lexer::Error> for TomlVersionedError {
+    fn from(error: tombi_lexer::Error) -> Self {
         Self::Common(error.into())
     }
 }

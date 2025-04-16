@@ -1,5 +1,5 @@
 [package]
-name = "lexer"
+name = "tombi-lexer"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
