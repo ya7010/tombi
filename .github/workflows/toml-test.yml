@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Check all TOML version jobs succeeded
         run: |
-          if [[ ${{ needs.toml-test.result }} == *"failure"* ]]; then
+          if [[ ${{ needs.toml-test.result }} != success ]]; then
             echo "At least one job failed"
             exit 1
           else
