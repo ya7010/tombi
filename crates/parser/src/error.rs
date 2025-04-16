@@ -81,11 +81,11 @@ pub enum ErrorKind {
 #[derive(thiserror::Error, Debug, Clone)]
 pub struct Error {
     kind: ErrorKind,
-    range: text::Range,
+    range: tombi_text::Range,
 }
 
 impl Error {
-    pub fn new(kind: ErrorKind, range: text::Range) -> Self {
+    pub fn new(kind: ErrorKind, range: tombi_text::Range) -> Self {
         Self { kind, range }
     }
 
@@ -97,7 +97,7 @@ impl Error {
         self.kind.to_string()
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.range
     }
 }

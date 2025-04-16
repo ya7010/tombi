@@ -56,7 +56,7 @@ impl crate::String {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self.kind() {
             StringKind::BasicString(node) => node.token(),
             StringKind::LiteralString(node) => node.token(),
@@ -68,7 +68,7 @@ impl crate::String {
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -78,7 +78,7 @@ impl ValueImpl for crate::String {
         ValueType::String
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }

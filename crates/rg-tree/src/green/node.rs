@@ -18,21 +18,21 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(super) struct GreenNodeHead {
     kind: SyntaxKind,
-    text_len: text::RelativeOffset,
-    text_relative_position: text::RelativePosition,
+    text_len: tombi_text::RelativeOffset,
+    text_relative_position: tombi_text::RelativePosition,
     _c: Count<GreenNode>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum GreenChild {
     Node {
-        relative_offset: text::RelativeOffset,
-        relative_position: text::RelativePosition,
+        relative_offset: tombi_text::RelativeOffset,
+        relative_position: tombi_text::RelativePosition,
         node: GreenNode,
     },
     Token {
-        relative_offset: text::RelativeOffset,
-        relative_position: text::RelativePosition,
+        relative_offset: tombi_text::RelativeOffset,
+        relative_position: tombi_text::RelativePosition,
         token: GreenToken,
     },
 }
@@ -138,12 +138,12 @@ impl GreenNodeData {
 
     /// Returns the length of the text covered by this node.
     #[inline]
-    pub fn text_len(&self) -> text::RawOffset {
+    pub fn text_len(&self) -> tombi_text::RawOffset {
         self.header().text_len
     }
 
     #[inline]
-    pub fn text_relative_position(&self) -> text::RelativePosition {
+    pub fn text_relative_position(&self) -> tombi_text::RelativePosition {
         self.header().text_relative_position
     }
 
@@ -157,18 +157,18 @@ impl GreenNodeData {
 
     pub(crate) fn child_at_span(
         &self,
-        rel_span: text::Span,
+        rel_span: tombi_text::Span,
     ) -> Option<(
         usize,
-        text::RelativeOffset,
-        text::RelativePosition,
+        tombi_text::RelativeOffset,
+        tombi_text::RelativePosition,
         GreenElementRef<'_>,
     )> {
         let idx = self
             .slice()
             .binary_search_by(|it| {
                 let child_range = it.rel_span();
-                text::Span::ordering(child_range, rel_span)
+                tombi_text::Span::ordering(child_range, rel_span)
             })
             // XXX: this handles empty ranges
             .unwrap_or_else(|it| it.saturating_sub(1));
@@ -238,7 +238,7 @@ impl GreenNode {
         I: IntoIterator<Item = GreenElement>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: text::RawOffset = 0;
+        let mut text_len: tombi_text::RawOffset = 0;
         let mut text_relative_position = Default::default();
         let children = children.into_iter().map(|el| {
             let relative_offset = text_len;
@@ -309,7 +309,7 @@ impl GreenChild {
         }
     }
     #[inline]
-    pub(crate) fn relative_offset(&self) -> text::RelativeOffset {
+    pub(crate) fn relative_offset(&self) -> tombi_text::RelativeOffset {
         match self {
             GreenChild::Node {
                 relative_offset, ..
@@ -321,7 +321,7 @@ impl GreenChild {
     }
 
     #[inline]
-    pub(crate) fn relative_position(&self) -> text::RelativePosition {
+    pub(crate) fn relative_position(&self) -> tombi_text::RelativePosition {
         match self {
             GreenChild::Node {
                 relative_position, ..
@@ -333,9 +333,9 @@ impl GreenChild {
     }
 
     #[inline]
-    fn rel_span(&self) -> text::Span {
+    fn rel_span(&self) -> tombi_text::Span {
         let len = self.as_ref().text_len();
-        text::Span::at(text::Offset::new(self.relative_offset()), len)
+        tombi_text::Span::at(tombi_text::Offset::new(self.relative_offset()), len)
     }
 }
 

@@ -9,7 +9,7 @@ use crate::goto_type_definition::{
 impl GetTypeDefinition for tombi_document_tree::Float {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
@@ -81,7 +81,7 @@ impl GetTypeDefinition for tombi_document_tree::Float {
 impl GetTypeDefinition for schema_store::FloatSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        _position: text::Position,
+        _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
@@ -90,7 +90,7 @@ impl GetTypeDefinition for schema_store::FloatSchema {
         async move {
             current_schema.map(|schema| TypeDefinition {
                 schema_url: schema.schema_url.as_ref().clone(),
-                range: text::Range::default(),
+                range: tombi_text::Range::default(),
             })
         }
         .boxed()

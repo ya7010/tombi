@@ -11,7 +11,7 @@ use crate::goto_type_definition::{
 impl GetTypeDefinition for tombi_document_tree::Array {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -178,7 +178,7 @@ impl GetTypeDefinition for tombi_document_tree::Array {
 impl GetTypeDefinition for ArraySchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        _position: text::Position,
+        _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -187,7 +187,7 @@ impl GetTypeDefinition for ArraySchema {
         async move {
             current_schema.map(|schema| TypeDefinition {
                 schema_url: schema.schema_url.as_ref().clone(),
-                range: text::Range::default(),
+                range: tombi_text::Range::default(),
             })
         }
         .boxed()

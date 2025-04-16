@@ -6,7 +6,7 @@ pub enum ErrorKind {}
 #[derive(Debug)]
 pub struct Error {
     pub kind: ErrorKind,
-    pub range: text::Range,
+    pub range: tombi_text::Range,
 }
 
 impl tombi_diagnostic::SetDiagnostics for Error {

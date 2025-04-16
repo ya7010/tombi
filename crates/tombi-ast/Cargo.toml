@@ -8,8 +8,8 @@ license = { workspace = true }
 [dependencies]
 itertools = { workspace = true }
 syntax = { workspace = true }
-text = { workspace = true }
 thiserror = { workspace = true }
+tombi-text = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

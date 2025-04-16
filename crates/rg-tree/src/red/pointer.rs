@@ -7,7 +7,7 @@ use crate::Language;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct RedNodePtr<L: Language> {
     kind: L::Kind,
-    span: text::Span,
+    span: tombi_text::Span,
 }
 
 impl<L: Language> RedNodePtr<L> {
@@ -54,7 +54,7 @@ impl<L: Language> RedNodePtr<L> {
     }
 
     /// Returns the range of the syntax node this points to.
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         self.span
     }
 }

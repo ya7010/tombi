@@ -40,7 +40,7 @@ fn create_symbols(tree: &tombi_document_tree::DocumentTree) -> Vec<DocumentSymbo
 fn symbols_for_value(
     name: String,
     value: &tombi_document_tree::Value,
-    parent_key_range: Option<text::Range>,
+    parent_key_range: Option<tombi_text::Range>,
     symbols: &mut Vec<DocumentSymbol>,
 ) {
     use tombi_document_tree::Value::*;

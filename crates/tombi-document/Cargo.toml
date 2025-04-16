@@ -12,11 +12,11 @@ itertools = { workspace = true }
 parser = { workspace = true }
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true }
-text = { workspace = true }
-thiserror.workspace = true
+thiserror = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-date-time = { workspace = true }
 tombi-document-tree = { workspace = true }
+tombi-text = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tower-lsp = { workspace = true, optional = true }
@@ -30,5 +30,5 @@ textwrap = { workspace = true }
 
 [features]
 default = ["serde"]
-lsp = ["dep:tower-lsp", "text/lsp"]
+lsp = ["dep:tower-lsp", "tombi-text/lsp"]
 serde = ["chrono/serde", "dep:serde", "indexmap/serde"]

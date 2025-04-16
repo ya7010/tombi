@@ -22,7 +22,7 @@ impl CompositeSchemaImpl for AnyOfSchema {
 
 pub fn find_any_of_completion_items<'a: 'b, 'b, T>(
     value: &'a T,
-    position: text::Position,
+    position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
     accessors: &'a [Accessor],
     any_of_schema: &'a schema_store::AnyOfSchema,

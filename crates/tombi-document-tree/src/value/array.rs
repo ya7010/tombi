@@ -42,8 +42,8 @@ pub enum ArrayKind {
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Array {
     kind: ArrayKind,
-    range: text::Range,
-    symbol_range: text::Range,
+    range: tombi_text::Range,
+    symbol_range: tombi_text::Range,
     values: Vec<Value>,
 }
 
@@ -55,7 +55,7 @@ impl Array {
             range: node.range(),
             symbol_range: match (node.bracket_start(), node.bracket_end()) {
                 (Some(start), Some(end)) => {
-                    text::Range::new(start.range().start(), end.range().end())
+                    tombi_text::Range::new(start.range().start(), end.range().end())
                 }
                 _ => node.range(),
             },
@@ -157,11 +157,11 @@ impl Array {
         &mut self.values
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.range
     }
 
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.symbol_range
     }
 
@@ -175,7 +175,7 @@ impl ValueImpl for Array {
         ValueType::Array
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }

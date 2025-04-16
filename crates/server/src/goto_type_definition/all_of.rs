@@ -8,7 +8,7 @@ use super::{GetTypeDefinition, TypeDefinition};
 
 pub fn get_all_of_type_definition<'a: 'b, 'b, T>(
     value: &'a T,
-    position: text::Position,
+    position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
     accessors: &'a [schema_store::Accessor],
     all_of_schema: &'a schema_store::AllOfSchema,
@@ -58,7 +58,7 @@ where
                 {
                     return Some(TypeDefinition {
                         schema_url: schema_url.clone(),
-                        range: text::Range::default(),
+                        range: tombi_text::Range::default(),
                     });
                 }
                 all_of_type_definition = Some(type_definition);
@@ -73,7 +73,7 @@ where
 impl GetTypeDefinition for schema_store::AllOfSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        _position: text::Position,
+        _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -86,7 +86,7 @@ impl GetTypeDefinition for schema_store::AllOfSchema {
 
             Some(TypeDefinition {
                 schema_url: current_schema.schema_url.as_ref().to_owned(),
-                range: text::Range::default(),
+                range: tombi_text::Range::default(),
             })
         }
         .boxed()

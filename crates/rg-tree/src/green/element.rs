@@ -62,12 +62,12 @@ impl GreenElement {
 
     /// Returns the length of the text covered by this element.
     #[inline]
-    pub fn text_len(&self) -> text::RelativeOffset {
+    pub fn text_len(&self) -> tombi_text::RelativeOffset {
         self.as_deref().text_len()
     }
 
     #[inline]
-    pub fn text_relative_position(&self) -> text::RelativePosition {
+    pub fn text_relative_position(&self) -> tombi_text::RelativePosition {
         self.as_deref().text_relative_position()
     }
 }
@@ -84,7 +84,7 @@ impl GreenElementRef<'_> {
 
     /// Returns the length of the text covered by this element.
     #[inline]
-    pub fn text_len(self) -> text::RawOffset {
+    pub fn text_len(self) -> tombi_text::RawOffset {
         match self {
             NodeOrToken::Node(it) => it.text_len(),
             NodeOrToken::Token(it) => it.text_len(),
@@ -92,7 +92,7 @@ impl GreenElementRef<'_> {
     }
 
     #[inline]
-    pub fn text_relative_position(self) -> text::RelativePosition {
+    pub fn text_relative_position(self) -> tombi_text::RelativePosition {
         match self {
             NodeOrToken::Node(it) => it.text_relative_position(),
             NodeOrToken::Token(it) => it.text_relative_position(),

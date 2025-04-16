@@ -17,7 +17,7 @@ use super::{GetHoverContent, HoverContent};
 impl GetHoverContent for tombi_document_tree::Value {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -161,7 +161,7 @@ impl GetHoverContent for tombi_document_tree::Value {
 impl GetHoverContent for ValueSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,

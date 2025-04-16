@@ -11,8 +11,8 @@ futures = { workspace = true }
 itertools = { workspace = true }
 regex = { workspace = true }
 schema-store = { workspace = true }
-text = { workspace = true }
 thiserror = { workspace = true }
 tombi-diagnostic = { workspace = true }
 tombi-document-tree = { workspace = true }
+tombi-text = { workspace = true }
 tracing = { workspace = true }

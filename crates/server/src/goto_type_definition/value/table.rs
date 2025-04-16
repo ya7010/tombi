@@ -13,7 +13,7 @@ use crate::goto_type_definition::{
 impl GetTypeDefinition for tombi_document_tree::Table {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -201,7 +201,7 @@ impl GetTypeDefinition for tombi_document_tree::Table {
                             } else {
                                 Some(TypeDefinition {
                                     schema_url: current_schema.schema_url.as_ref().clone(),
-                                    range: text::Range::default(),
+                                    range: tombi_text::Range::default(),
                                 })
                             }
                         } else {
@@ -257,7 +257,7 @@ impl GetTypeDefinition for tombi_document_tree::Table {
                     }
                     _ => Some(TypeDefinition {
                         schema_url: current_schema.schema_url.as_ref().clone(),
-                        range: text::Range::default(),
+                        range: tombi_text::Range::default(),
                     }),
                 }
             } else {
@@ -290,7 +290,7 @@ impl GetTypeDefinition for tombi_document_tree::Table {
 impl GetTypeDefinition for TableSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        _position: text::Position,
+        _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -299,7 +299,7 @@ impl GetTypeDefinition for TableSchema {
         async move {
             current_schema.map(|schema| TypeDefinition {
                 schema_url: schema.schema_url.as_ref().clone(),
-                range: text::Range::default(),
+                range: tombi_text::Range::default(),
             })
         }
         .boxed()

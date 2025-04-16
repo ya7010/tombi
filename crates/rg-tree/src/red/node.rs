@@ -74,11 +74,11 @@ impl<L: Language> RedNode<L> {
         L::kind_from_raw(self.raw.kind())
     }
 
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         self.raw.span()
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.raw.range()
     }
 
@@ -182,11 +182,11 @@ impl<L: Language> RedNode<L> {
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
     /// Precondition: offset must be within node's span.
-    pub fn token_at_offset(&self, offset: text::Offset) -> TokenAtOffset<RedToken<L>> {
+    pub fn token_at_offset(&self, offset: tombi_text::Offset) -> TokenAtOffset<RedToken<L>> {
         self.raw.token_at_offset(offset).map(RedToken::from)
     }
 
-    pub fn token_at_position(&self, position: text::Position) -> TokenAtOffset<RedToken<L>> {
+    pub fn token_at_position(&self, position: tombi_text::Position) -> TokenAtOffset<RedToken<L>> {
         self.raw.token_at_position(position).map(RedToken::from)
     }
 
@@ -194,7 +194,7 @@ impl<L: Language> RedNode<L> {
     /// contains the span. If the span is empty and is contained in two leaf
     /// nodes, either one can be returned. Precondition: span must be contained
     /// within the current node
-    pub fn covering_element(&self, span: text::Span) -> RedElement<L> {
+    pub fn covering_element(&self, span: tombi_text::Span) -> RedElement<L> {
         NodeOrToken::from(self.raw.covering_element(span))
     }
 
@@ -203,7 +203,7 @@ impl<L: Language> RedNode<L> {
     ///
     /// The method uses binary search internally, so it's complexity is
     /// `O(log(N))` where `N = self.children_with_tokens().count()`.
-    pub fn child_or_token_at_span(&self, span: text::Span) -> Option<RedElement<L>> {
+    pub fn child_or_token_at_span(&self, span: tombi_text::Span) -> Option<RedElement<L>> {
         self.raw.child_or_token_at_span(span).map(RedElement::from)
     }
 

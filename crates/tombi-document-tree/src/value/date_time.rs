@@ -23,12 +23,12 @@ impl OffsetDateTime {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.node.token().unwrap().range()
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -51,12 +51,12 @@ impl LocalDateTime {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.node.token().unwrap().range()
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -79,12 +79,12 @@ impl LocalDate {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.node.token().unwrap().range()
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -107,12 +107,12 @@ impl LocalTime {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.node.token().unwrap().range()
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -122,7 +122,7 @@ impl ValueImpl for OffsetDateTime {
         ValueType::OffsetDateTime
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -132,7 +132,7 @@ impl ValueImpl for LocalDateTime {
         ValueType::LocalDateTime
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -142,7 +142,7 @@ impl ValueImpl for LocalDate {
         ValueType::LocalDate
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -152,7 +152,7 @@ impl ValueImpl for LocalTime {
         ValueType::LocalTime
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }

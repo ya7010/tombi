@@ -1,7 +1,7 @@
-use tombi_document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
 use reqwest::Client;
 use schema_store::SchemaContext;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tower_lsp::lsp_types::{
     request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},
     CreateFile, CreateFileOptions, DocumentChangeOperation, DocumentChanges, Location, OneOf,
@@ -94,12 +94,12 @@ pub async fn handle_goto_type_definition(
 
                     Some(GotoTypeDefinitionResponse::Scalar(Location {
                         uri: remote_url,
-                        range: text::Range::default().into(),
+                        range: tombi_text::Range::default().into(),
                     }))
                 } else {
                     Some(GotoTypeDefinitionResponse::Scalar(Location {
                         uri: url,
-                        range: text::Range::default().into(),
+                        range: tombi_text::Range::default().into(),
                     }))
                 }
             }

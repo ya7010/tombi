@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
-use tombi_document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
 use schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, SchemaUrl, ValueSchema};
+use tombi_document_tree::ArrayKind;
 
 use super::{
     all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
@@ -17,7 +17,7 @@ use crate::completion::{
 impl FindCompletionContents for tombi_document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -174,7 +174,8 @@ impl FindCompletionContents for tombi_document_tree::Array {
                 for (index, value) in self.values().iter().enumerate() {
                     if value.range().contains(position) {
                         if let tombi_document_tree::Value::Table(table) = value {
-                            if keys.len() == 1 && table.kind() == tombi_document_tree::TableKind::KeyValue
+                            if keys.len() == 1
+                                && table.kind() == tombi_document_tree::TableKind::KeyValue
                             {
                                 let key = &keys.first().unwrap();
                                 return vec![CompletionContent::new_type_hint_key(
@@ -219,7 +220,7 @@ impl FindCompletionContents for tombi_document_tree::Array {
 impl FindCompletionContents for ArraySchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -241,7 +242,7 @@ impl FindCompletionContents for ArraySchema {
 }
 
 pub fn type_hint_array(
-    position: text::Position,
+    position: tombi_text::Position,
     schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {

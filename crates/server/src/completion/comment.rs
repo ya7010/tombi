@@ -4,7 +4,7 @@ use super::{CompletionContent, CompletionEdit};
 
 pub fn get_comment_completion_contents(
     root: &tombi_ast::Root,
-    position: text::Position,
+    position: tombi_text::Position,
 ) -> Vec<CompletionContent> {
     if root.file_schema_url(None).is_some() {
         return Vec::with_capacity(0);

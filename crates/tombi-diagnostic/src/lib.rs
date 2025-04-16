@@ -8,13 +8,13 @@ pub use printer::Print;
 pub struct Diagnostic {
     level: level::Level,
     message: String,
-    range: text::Range,
+    range: tombi_text::Range,
     source_file: Option<std::path::PathBuf>,
 }
 
 impl Diagnostic {
     #[inline]
-    pub fn new_warning(message: impl Into<String>, range: impl Into<text::Range>) -> Self {
+    pub fn new_warning(message: impl Into<String>, range: impl Into<tombi_text::Range>) -> Self {
         Self {
             level: level::Level::WARNING,
             message: message.into(),
@@ -24,7 +24,7 @@ impl Diagnostic {
     }
 
     #[inline]
-    pub fn new_error(message: impl Into<String>, range: impl Into<text::Range>) -> Self {
+    pub fn new_error(message: impl Into<String>, range: impl Into<tombi_text::Range>) -> Self {
         Self {
             level: level::Level::ERROR,
             message: message.into(),
@@ -49,12 +49,12 @@ impl Diagnostic {
     }
 
     #[inline]
-    pub fn position(&self) -> text::Position {
+    pub fn position(&self) -> tombi_text::Position {
         self.range.start()
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.range
     }
 

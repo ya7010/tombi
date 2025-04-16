@@ -2,77 +2,80 @@
 #[non_exhaustive]
 pub enum Error {
     #[error("duplicate key: {key}")]
-    DuplicateKey { key: String, range: text::Range },
+    DuplicateKey {
+        key: String,
+        range: tombi_text::Range,
+    },
 
     #[error("conflicting table")]
     ConflictTable {
-        range1: text::Range,
-        range2: text::Range,
+        range1: tombi_text::Range,
+        range2: tombi_text::Range,
     },
 
     #[error("conflicting array")]
     ConflictArray {
-        range1: text::Range,
-        range2: text::Range,
+        range1: tombi_text::Range,
+        range2: tombi_text::Range,
     },
 
     #[error("invalid integer: {error}")]
     ParseIntError {
         error: std::num::ParseIntError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid float: {error}")]
     ParseFloatError {
         error: crate::support::float::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid string: {error}")]
     ParseStringError {
         error: toml_text::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid offset date time: {error}")]
     ParseOffsetDateTimeError {
         error: crate::support::chrono::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid local date time: {error}")]
     ParseLocalDateTimeError {
         error: crate::support::chrono::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid local date: {error}")]
     ParseLocalDateError {
         error: crate::support::chrono::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid local time: {error}")]
     ParseLocalTimeError {
         error: crate::support::chrono::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid date-time: {error}")]
     ParseDateTimeError {
         error: tombi_date_time::parse::Error,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     #[error("invalid comment: {error}")]
     ParseCommentError {
         error: crate::support::comment::ParseError,
-        range: text::Range,
+        range: tombi_text::Range,
     },
 
     /// Error when `ast::Node` is None
     #[error("incomplete node")]
-    IncompleteNode { range: text::Range },
+    IncompleteNode { range: tombi_text::Range },
 }
 
 impl Error {
@@ -80,7 +83,7 @@ impl Error {
         self.to_string()
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             Self::DuplicateKey { range, .. } => *range,
             Self::ConflictTable { range2, .. } => *range2,

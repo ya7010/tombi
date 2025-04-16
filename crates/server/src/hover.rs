@@ -13,7 +13,7 @@ use schema_store::{get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUr
 
 pub async fn get_hover_content(
     tree: &tombi_document_tree::DocumentTree,
-    position: text::Position,
+    position: tombi_text::Position,
     keys: &[tombi_document_tree::Key],
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Option<HoverContent> {
@@ -44,7 +44,7 @@ pub async fn get_hover_content(
 trait GetHoverContent {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -60,7 +60,7 @@ pub struct HoverContent {
     pub value_type: ValueType,
     pub constraints: Option<DataConstraints>,
     pub schema_url: Option<SchemaUrl>,
-    pub range: Option<text::Range>,
+    pub range: Option<tombi_text::Range>,
 }
 
 impl HoverContent {

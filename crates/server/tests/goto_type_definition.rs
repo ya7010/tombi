@@ -201,8 +201,8 @@ mod goto_type_definition_tests {
                 let params = tower_lsp::lsp_types::request::GotoTypeDefinitionParams {
                     text_document_position_params: TextDocumentPositionParams {
                         text_document: TextDocumentIdentifier { uri: toml_file_url },
-                        position: (text::Position::default()
-                            + text::RelativePosition::of(&toml_text[..index]))
+                        position: (tombi_text::Position::default()
+                            + tombi_text::RelativePosition::of(&toml_text[..index]))
                         .into(),
                     },
                     work_done_progress_params: WorkDoneProgressParams::default(),

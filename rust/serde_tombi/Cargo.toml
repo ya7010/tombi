@@ -15,7 +15,6 @@ itertools = { workspace = true }
 parser = { workspace = true }
 schema-store = { workspace = true }
 serde = { workspace = true }
-text = { workspace = true }
 textwrap = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
@@ -26,6 +25,7 @@ tombi-diagnostic = { workspace = true }
 tombi-document = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
+tombi-text = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

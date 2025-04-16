@@ -10,11 +10,11 @@ license = { workspace = true }
 chrono = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-text = { workspace = true }
 thiserror = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-date-time = { workspace = true }
 tombi-diagnostic = { workspace = true, optional = true }
+tombi-text = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

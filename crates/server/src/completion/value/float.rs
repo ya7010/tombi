@@ -9,7 +9,7 @@ use crate::completion::{
 impl FindCompletionContents for FloatSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -59,7 +59,7 @@ impl FindCompletionContents for FloatSchema {
 }
 
 pub fn type_hint_float(
-    position: text::Position,
+    position: tombi_text::Position,
     schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,
 ) -> Vec<CompletionContent> {

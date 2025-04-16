@@ -43,7 +43,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// let text = "0123456789";
     ///
     /// let offset = Offset::from(2);
@@ -63,7 +63,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// let point: Offset;
     /// # point = Offset::from(3);
     /// let span = Span::empty(point);
@@ -117,7 +117,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// let (start, end): (Offset, Offset);
     /// # start = 10.into(); end = 20.into();
     /// let span = Span::new(start, end);
@@ -136,7 +136,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// let (start, end): (Offset, Offset);
     /// # start = 10.into(); end = 20.into();
     /// let span = Span::new(start, end);
@@ -153,7 +153,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// let larger = Span::new(0.into(), 20.into());
     /// let smaller = Span::new(5.into(), 15.into());
     /// assert!(larger.contains_span(smaller));
@@ -174,7 +174,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// assert_eq!(
     ///     Span::intersect(
     ///         Span::new(0.into(), 10.into()),
@@ -198,7 +198,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// assert_eq!(
     ///     Span::cover(
     ///         Span::new(0.into(), 5.into()),
@@ -219,7 +219,7 @@ impl Span {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// assert_eq!(
     ///     Span::empty(0.into()).cover_offset(20.into()),
     ///     Span::new(0.into(), 20.into()),
@@ -272,7 +272,7 @@ impl Span {
     /// # Examples
     ///
     /// ```
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// # use std::cmp::Ordering;
     ///
     /// let a = Span::new(0.into(), 3.into());

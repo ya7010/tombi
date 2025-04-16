@@ -2,10 +2,10 @@ pub struct Cursor<'a> {
     /// Iterator over chars. Slightly faster than a &str.
     chars: std::str::Chars<'a>,
     current_char: char,
-    current_offset: text::Offset,
-    current_position: text::Position,
-    token_start_offset: text::Offset,
-    token_start_position: text::Position,
+    current_offset: tombi_text::Offset,
+    current_position: tombi_text::Position,
+    token_start_offset: tombi_text::Offset,
+    token_start_position: tombi_text::Position,
 }
 
 pub(crate) const EOF_CHAR: char = '\0';
@@ -118,8 +118,8 @@ impl<'a> Cursor<'a> {
     /// Moves to the next character.
     pub(crate) fn bump(&mut self) -> Option<char> {
         if let Some(c) = self.chars.next() {
-            self.current_offset += text::Offset::new(c.len_utf8() as u32);
-            self.current_position += text::RelativePosition::from(c);
+            self.current_offset += tombi_text::Offset::new(c.len_utf8() as u32);
+            self.current_position += tombi_text::RelativePosition::from(c);
             self.current_char = c;
             Some(c)
         } else {
@@ -147,7 +147,7 @@ impl<'a> Cursor<'a> {
     }
 
     #[inline]
-    pub(crate) fn pop_span_range(&mut self) -> (text::Span, text::Range) {
+    pub(crate) fn pop_span_range(&mut self) -> (tombi_text::Span, tombi_text::Range) {
         let start_offset = self.token_start_offset;
         let end_offset = self.current_offset;
         let start_position = self.token_start_position;
@@ -157,8 +157,8 @@ impl<'a> Cursor<'a> {
         self.token_start_position = self.current_position;
 
         (
-            text::Span::new(start_offset, end_offset),
-            text::Range::new(start_position, end_position),
+            tombi_text::Span::new(start_offset, end_offset),
+            tombi_text::Range::new(start_position, end_position),
         )
     }
 }

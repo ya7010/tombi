@@ -12,7 +12,7 @@ pub enum Error {
     #[error("cannot get schema url from document comment: {error} at {url_range}")]
     DocumentCommentSchemaUrl {
         error: schema_store::Error,
-        url_range: text::Range,
+        url_range: tombi_text::Range,
     },
 
     #[error(transparent)]

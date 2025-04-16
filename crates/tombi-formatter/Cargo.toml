@@ -12,13 +12,13 @@ schema-store = { workspace = true }
 schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 syntax = { workspace = true }
-text = { workspace = true }
 tokio.workspace = true
 tombi-ast = { workspace = true }
 tombi-ast-editor = { workspace = true }
 tombi-config = { workspace = true }
 tombi-diagnostic = { workspace = true }
 tombi-document-tree = { workspace = true }
+tombi-text = { workspace = true }
 tracing = { workspace = true }
 unicode-segmentation = { workspace = true }
 url = { workspace = true }

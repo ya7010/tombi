@@ -50,7 +50,7 @@ impl Offset {
     /// # Examples
     ///
     /// ```rust
-    /// # use text::*;
+    /// # use tombi_text::*;
     /// let char_size = Offset::of("🦀");
     /// assert_eq!(char_size, Offset::from(4));
     ///

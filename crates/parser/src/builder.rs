@@ -86,7 +86,7 @@ impl<'a, 'b, 'c> Builder<'a, 'b, 'c> {
     }
 
     fn do_token(&mut self, kind: SyntaxKind, n_tokens: usize) {
-        let span = text::Span::new(
+        let span = tombi_text::Span::new(
             self.tokens[self.token_index].span().start(),
             self.tokens[self.token_index + n_tokens].span().start(),
         );

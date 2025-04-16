@@ -27,7 +27,7 @@ impl Range {
             end: if start <= end {
                 end
             } else {
-                tracing::error!("Invalid text::Range: start: {:?} > end: {:?}", start, end);
+                tracing::error!("Invalid tombi_text::Range: start: {:?} > end: {:?}", start, end);
                 start
             },
         }

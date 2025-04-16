@@ -54,11 +54,11 @@ impl<L: Language> RedToken<L> {
         L::kind_from_raw(self.raw.kind())
     }
 
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         self.raw.span()
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.raw.range()
     }
 

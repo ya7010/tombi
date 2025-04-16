@@ -20,7 +20,7 @@ use crate::completion::{
 impl FindCompletionContents for tombi_document_tree::Table {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -83,8 +83,10 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                         ) => false,
                                         None => true,
                                     };
-                                    if matches!(value, tombi_document_tree::Value::Incomplete { .. })
-                                        && need_magic_trigger
+                                    if matches!(
+                                        value,
+                                        tombi_document_tree::Value::Incomplete { .. }
+                                    ) && need_magic_trigger
                                     {
                                         return CompletionContent::new_magic_triggers(
                                             accessor_str,
@@ -472,7 +474,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
 impl FindCompletionContents for TableSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -618,7 +620,7 @@ async fn count_table_or_array_schema(
 
 fn get_property_value_completion_contents<'a: 'b, 'b>(
     value: &'a tombi_document_tree::Value,
-    position: text::Position,
+    position: tombi_text::Position,
     key: &'a tombi_document_tree::Key,
     keys: &'a [tombi_document_tree::Key],
     accessors: &'a [Accessor],
@@ -752,7 +754,7 @@ fn check_used_table_value(value: &tombi_document_tree::Value) -> bool {
 
 fn collect_table_key_completion_contents<'a: 'b, 'b>(
     table: &'a tombi_document_tree::Table,
-    position: text::Position,
+    position: tombi_text::Position,
     key_name: &'a String,
     accessors: &'a [Accessor],
     table_schema: &'a TableSchema,

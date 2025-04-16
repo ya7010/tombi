@@ -67,7 +67,11 @@ pub async fn handle_formatting(
                 document_source.source = new_text.clone();
 
                 return Ok(Some(vec![TextEdit {
-                    range: text::Range::new(text::Position::MIN, text::Position::MAX).into(),
+                    range: tombi_text::Range::new(
+                        tombi_text::Position::MIN,
+                        tombi_text::Position::MAX,
+                    )
+                    .into(),
                     new_text,
                 }]));
             } else {

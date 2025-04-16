@@ -15,7 +15,7 @@ impl Lexed {
     pub(crate) fn push_result_token(
         &mut self,
         result_token: Result<crate::Token, crate::Error>,
-    ) -> (text::Span, text::Range) {
+    ) -> (tombi_text::Span, tombi_text::Range) {
         let idx = self.len();
         if idx % (bits::BITS as usize) == 0 {
             self.joints.push(0);

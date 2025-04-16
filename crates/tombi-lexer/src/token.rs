@@ -3,20 +3,20 @@ use syntax::SyntaxKind;
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Token {
     kind: SyntaxKind,
-    span: text::Span,
-    range: text::Range,
+    span: tombi_text::Span,
+    range: tombi_text::Range,
 }
 
 impl Token {
-    pub fn new(kind: SyntaxKind, (span, range): (text::Span, text::Range)) -> Self {
+    pub fn new(kind: SyntaxKind, (span, range): (tombi_text::Span, tombi_text::Range)) -> Self {
         Self { kind, span, range }
     }
 
     pub const fn eof() -> Self {
         Self {
             kind: SyntaxKind::EOF,
-            span: text::Span::MAX,
-            range: text::Range::MAX,
+            span: tombi_text::Span::MAX,
+            range: tombi_text::Range::MAX,
         }
     }
 
@@ -31,12 +31,12 @@ impl Token {
     }
 
     #[inline]
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         self.span
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.range
     }
 }

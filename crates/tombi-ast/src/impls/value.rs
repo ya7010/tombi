@@ -1,5 +1,5 @@
 impl crate::Value {
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             Self::Boolean(boolean) => boolean.range(),
             Self::IntegerBin(integer) => integer.range(),
@@ -20,7 +20,7 @@ impl crate::Value {
         }
     }
 
-    pub fn token_range(&self) -> text::Range {
+    pub fn token_range(&self) -> tombi_text::Range {
         match self {
             Self::Boolean(boolean) => boolean.token().unwrap().range(),
             Self::IntegerBin(integer) => integer.token().unwrap().range(),

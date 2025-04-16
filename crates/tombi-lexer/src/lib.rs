@@ -38,8 +38,8 @@ regex!(
 pub fn lex(source: &str) -> Lexed {
     let mut lexed = Lexed::default();
     let mut was_joint = false;
-    let mut last_offset = text::Offset::default();
-    let mut last_position = text::Position::default();
+    let mut last_offset = tombi_text::Offset::default();
+    let mut last_position = tombi_text::Position::default();
 
     for result in tokenize(source) {
         match result {
@@ -59,10 +59,10 @@ pub fn lex(source: &str) -> Lexed {
     lexed.tokens.push(crate::Token::new(
         SyntaxKind::EOF,
         (
-            text::Span::new(last_offset, text::Offset::new(source.len() as u32)),
-            text::Range::new(
+            tombi_text::Span::new(last_offset, tombi_text::Offset::new(source.len() as u32)),
+            tombi_text::Range::new(
                 last_position,
-                last_position + text::RelativePosition::of(&source[last_offset.into()..]),
+                last_position + tombi_text::RelativePosition::of(&source[last_offset.into()..]),
             ),
         ),
     ));

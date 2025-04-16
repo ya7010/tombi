@@ -8,7 +8,7 @@ use super::{GetHoverContent, HoverContent};
 
 pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
-    position: text::Position,
+    position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
     accessors: &'a [schema_store::Accessor],
     any_of_schema: &'a schema_store::AnyOfSchema,
@@ -119,7 +119,7 @@ where
 impl GetHoverContent for schema_store::AnyOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        _position: text::Position,
+        _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,

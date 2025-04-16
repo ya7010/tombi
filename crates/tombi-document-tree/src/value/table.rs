@@ -21,8 +21,8 @@ pub enum TableKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Table {
     kind: TableKind,
-    range: text::Range,
-    symbol_range: text::Range,
+    range: tombi_text::Range,
+    symbol_range: tombi_text::Range,
     key_values: IndexMap<Key, Value>,
 }
 
@@ -31,8 +31,8 @@ impl Table {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
-            range: text::Range::default(),
-            symbol_range: text::Range::default(),
+            range: tombi_text::Range::default(),
+            symbol_range: tombi_text::Range::default(),
         }
     }
 
@@ -50,7 +50,7 @@ impl Table {
             kind: TableKind::Table,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: text::Range::new(
+            symbol_range: tombi_text::Range::new(
                 node.bracket_start()
                     .map(|bracket| bracket.range().start())
                     .unwrap_or_else(|| node.range().start()),
@@ -64,7 +64,7 @@ impl Table {
             kind: TableKind::Table,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: text::Range::new(
+            symbol_range: tombi_text::Range::new(
                 node.double_bracket_start()
                     .map(|bracket| bracket.range().start())
                     .unwrap_or_else(|| node.range().start()),
@@ -78,7 +78,7 @@ impl Table {
             kind: TableKind::InlineTable,
             key_values: Default::default(),
             range: node.syntax().range(),
-            symbol_range: text::Range::new(
+            symbol_range: tombi_text::Range::new(
                 node.brace_start()
                     .map(|brace| brace.range().start())
                     .unwrap_or_else(|| node.range().start()),
@@ -270,12 +270,12 @@ impl Table {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.range
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.symbol_range
     }
 }
@@ -291,7 +291,7 @@ impl ValueImpl for Table {
         ValueType::Table
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -516,7 +516,7 @@ impl IntoDocumentTreeAndErrors<Table> for tombi_ast::KeyValue {
                     range: table.range(),
                 });
                 Value::Incomplete {
-                    range: text::Range::at(self.range().end()),
+                    range: tombi_text::Range::at(self.range().end()),
                 }
             }
         };

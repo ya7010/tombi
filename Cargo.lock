@@ -974,13 +974,13 @@ dependencies = [
  "serde",
  "syntax",
  "test-lib",
- "text",
  "thiserror",
  "tokio",
  "tombi-ast",
  "tombi-config",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-text",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -1159,7 +1159,6 @@ dependencies = [
  "rg-tree",
  "rstest",
  "syntax",
- "text",
  "textwrap",
  "thiserror",
  "tombi-ast",
@@ -1167,6 +1166,7 @@ dependencies = [
  "tombi-diagnostic",
  "tombi-document-tree",
  "tombi-lexer",
+ "tombi-text",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1472,7 +1472,7 @@ dependencies = [
  "hashbrown 0.15.1",
  "itertools",
  "rustc-hash",
- "text",
+ "tombi-text",
 ]
 
 [[package]]
@@ -1619,13 +1619,13 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
- "text",
  "thiserror",
  "tokio",
  "tombi-ast",
  "tombi-config",
  "tombi-document",
  "tombi-document-tree",
+ "tombi-text",
  "tracing",
  "url",
  "x-tombi",
@@ -1742,7 +1742,6 @@ dependencies = [
  "schema-store",
  "serde",
  "test-lib",
- "text",
  "textwrap",
  "thiserror",
  "tokio",
@@ -1753,6 +1752,7 @@ dependencies = [
  "tombi-document",
  "tombi-document-tree",
  "tombi-formatter",
+ "tombi-text",
  "toml-text",
  "toml-version",
  "tracing",
@@ -1800,7 +1800,6 @@ dependencies = [
  "syntax",
  "tempfile",
  "test-lib",
- "text",
  "textwrap",
  "thiserror",
  "tokio",
@@ -1810,6 +1809,7 @@ dependencies = [
  "tombi-document",
  "tombi-document-tree",
  "tombi-formatter",
+ "tombi-text",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
@@ -1930,8 +1930,8 @@ version = "0.0.0"
 dependencies = [
  "rg-tree",
  "rstest",
- "text",
  "thiserror",
+ "tombi-text",
 ]
 
 [[package]]
@@ -1955,16 +1955,6 @@ dependencies = [
  "chrono",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "text"
-version = "0.0.0"
-dependencies = [
- "rstest",
- "serde",
- "tower-lsp",
- "tracing",
 ]
 
 [[package]]
@@ -2112,8 +2102,8 @@ version = "0.0.0"
 dependencies = [
  "itertools",
  "syntax",
- "text",
  "thiserror",
+ "tombi-text",
  "toml-text",
  "toml-version",
  "tracing",
@@ -2132,10 +2122,10 @@ dependencies = [
  "regex",
  "schema-store",
  "syntax",
- "text",
  "thiserror",
  "tombi-ast",
  "tombi-document-tree",
+ "tombi-text",
  "toml-version",
  "tracing",
  "validator",
@@ -2209,8 +2199,8 @@ dependencies = [
  "clap-verbosity-flag",
  "nu-ansi-term 0.50.1",
  "serde",
- "text",
  "thiserror",
+ "tombi-text",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
@@ -2228,12 +2218,12 @@ dependencies = [
  "serde",
  "serde_json",
  "test-lib",
- "text",
  "textwrap",
  "thiserror",
  "tombi-ast",
  "tombi-date-time",
  "tombi-document-tree",
+ "tombi-text",
  "toml-text",
  "toml-version",
  "tower-lsp",
@@ -2247,11 +2237,11 @@ dependencies = [
  "chrono",
  "indexmap",
  "itertools",
- "text",
  "thiserror",
  "tombi-ast",
  "tombi-date-time",
  "tombi-diagnostic",
+ "tombi-text",
  "toml-text",
  "toml-version",
  "tracing",
@@ -2275,7 +2265,6 @@ dependencies = [
  "serde",
  "syntax",
  "test-lib",
- "text",
  "textwrap",
  "tokio",
  "tombi-ast",
@@ -2283,6 +2272,7 @@ dependencies = [
  "tombi-config",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-text",
  "tracing",
  "tracing-subscriber",
  "unicode-segmentation",
@@ -2298,9 +2288,19 @@ dependencies = [
  "regex",
  "rstest",
  "syntax",
- "text",
  "textwrap",
  "thiserror",
+ "tombi-text",
+ "tracing",
+]
+
+[[package]]
+name = "tombi-text"
+version = "0.0.0"
+dependencies = [
+ "rstest",
+ "serde",
+ "tower-lsp",
  "tracing",
 ]
 
@@ -2317,10 +2317,10 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_json",
- "text",
  "textwrap",
  "tombi-ast",
  "tombi-document-tree",
+ "tombi-text",
  "toml-version",
 ]
 
@@ -2579,10 +2579,10 @@ dependencies = [
  "itertools",
  "regex",
  "schema-store",
- "text",
  "thiserror",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-text",
  "tracing",
 ]
 

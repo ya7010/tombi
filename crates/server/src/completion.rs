@@ -26,7 +26,7 @@ use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 
 pub async fn get_completion_contents(
     root: tombi_ast::Root,
-    position: text::Position,
+    position: tombi_text::Position,
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Vec<CompletionContent> {
     let mut keys: Vec<tombi_document_tree::Key> = vec![];
@@ -209,7 +209,7 @@ pub async fn get_completion_contents(
 pub trait FindCompletionContents {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -371,7 +371,7 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
 
 fn serde_value_to_completion_item(
     value: &serde_json::Value,
-    position: text::Position,
+    position: tombi_text::Position,
     detail: Option<String>,
     documentation: Option<String>,
     schema_url: Option<&SchemaUrl>,

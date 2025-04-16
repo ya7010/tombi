@@ -100,13 +100,13 @@ impl GreenTokenData {
 
     /// Returns the length of the text covered by this token.
     #[inline]
-    pub fn text_len(&self) -> text::RawOffset {
-        self.text().len() as text::RawOffset
+    pub fn text_len(&self) -> tombi_text::RawOffset {
+        self.text().len() as tombi_text::RawOffset
     }
 
     #[inline]
-    pub fn text_relative_position(&self) -> text::RelativePosition {
-        text::RelativePosition::of(self.text())
+    pub fn text_relative_position(&self) -> tombi_text::RelativePosition {
+        tombi_text::RelativePosition::of(self.text())
     }
 }
 

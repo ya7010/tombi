@@ -23,12 +23,12 @@ impl Float {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.node.token().unwrap().range()
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -38,7 +38,7 @@ impl ValueImpl for Float {
         ValueType::Float
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }

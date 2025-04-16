@@ -31,7 +31,7 @@ impl Integer {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self.kind() {
             IntegerKind::Binary(node) => node.token(),
             IntegerKind::Decimal(node) => node.token(),
@@ -43,7 +43,7 @@ impl Integer {
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
 }
@@ -53,7 +53,7 @@ impl ValueImpl for Integer {
         ValueType::Integer
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }

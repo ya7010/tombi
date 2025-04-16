@@ -16,7 +16,7 @@ use super::GetTypeDefinition;
 impl GetTypeDefinition for tombi_document_tree::Value {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
@@ -158,7 +158,7 @@ impl GetTypeDefinition for tombi_document_tree::Value {
 impl GetTypeDefinition for schema_store::ValueSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,

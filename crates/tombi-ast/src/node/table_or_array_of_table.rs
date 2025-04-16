@@ -14,7 +14,7 @@ impl TableOrArrayOfTable {
         }
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             Self::Table(table) => table.range(),
             Self::ArrayOfTable(array_of_table) => array_of_table.range(),

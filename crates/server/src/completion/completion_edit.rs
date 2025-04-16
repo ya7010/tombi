@@ -12,7 +12,7 @@ pub struct CompletionEdit {
 impl CompletionEdit {
     pub fn new_literal(
         label: &str,
-        position: text::Position,
+        position: tombi_text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -23,7 +23,7 @@ impl CompletionEdit {
                 insert_text_format: None,
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = {}", label),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -36,7 +36,7 @@ impl CompletionEdit {
 
     pub fn new_selectable_literal(
         label: &str,
-        position: text::Position,
+        position: tombi_text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -47,7 +47,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = ${{0:{label}}}"),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -60,7 +60,7 @@ impl CompletionEdit {
 
     pub fn new_string_literal(
         quote: char,
-        position: text::Position,
+        position: tombi_text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -71,7 +71,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!(" = {quote}$1{quote}$0"),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -82,7 +82,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: format!("{quote}$1{quote}$0"),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: None,
             }),
@@ -90,7 +90,7 @@ impl CompletionEdit {
     }
 
     pub fn new_array_literal(
-        position: text::Position,
+        position: tombi_text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -101,7 +101,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: " = [$1]$0".to_string(),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -112,7 +112,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: "[$1]$0".to_string(),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: None,
             }),
@@ -120,7 +120,7 @@ impl CompletionEdit {
     }
 
     pub fn new_inline_table(
-        position: text::Position,
+        position: tombi_text::Position,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -128,7 +128,7 @@ impl CompletionEdit {
                 insert_text_format: Some(InsertTextFormat::SNIPPET),
                 text_edit: CompletionTextEdit::Edit(TextEdit {
                     new_text: " = { $1 }$0".to_string(),
-                    range: text::Range::at(position).into(),
+                    range: tombi_text::Range::at(position).into(),
                 }),
                 additional_text_edits: Some(vec![TextEdit {
                     range: range.into(),
@@ -141,7 +141,7 @@ impl CompletionEdit {
                     insert_text_format: Some(InsertTextFormat::SNIPPET),
                     text_edit: CompletionTextEdit::Edit(TextEdit {
                         new_text: "{ $1 }$0".to_string(),
-                        range: text::Range::at(position).into(),
+                        range: tombi_text::Range::at(position).into(),
                     }),
                     additional_text_edits: None,
                 })
@@ -151,7 +151,7 @@ impl CompletionEdit {
 
     pub fn new_key(
         key_name: &str,
-        key_range: text::Range,
+        key_range: tombi_text::Range,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -191,7 +191,7 @@ impl CompletionEdit {
 
     pub fn new_additional_key(
         key_name: &str,
-        key_range: text::Range,
+        key_range: tombi_text::Range,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
         match completion_hint {
@@ -236,25 +236,25 @@ impl CompletionEdit {
         }
     }
 
-    pub fn new_magic_trigger(trigger: &str, position: text::Position) -> Option<Self> {
+    pub fn new_magic_trigger(trigger: &str, position: tombi_text::Position) -> Option<Self> {
         Some(Self {
             insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
             text_edit: CompletionTextEdit::Edit(TextEdit {
                 new_text: trigger.to_string(),
-                range: text::Range::at(position).into(),
+                range: tombi_text::Range::at(position).into(),
             }),
             additional_text_edits: None,
         })
     }
 
-    pub fn new_comment_schema_directive(position: text::Position) -> Option<Self> {
+    pub fn new_comment_schema_directive(position: tombi_text::Position) -> Option<Self> {
         let tombi_schema_url = "https://json.schemastore.org/tombi.json";
 
         Some(Self {
             insert_text_format: Some(InsertTextFormat::SNIPPET),
             text_edit: CompletionTextEdit::Edit(TextEdit {
                 new_text: format!("schema ${{0:{tombi_schema_url}}}"),
-                range: text::Range::at(position).into(),
+                range: tombi_text::Range::at(position).into(),
             }),
             additional_text_edits: None,
         })

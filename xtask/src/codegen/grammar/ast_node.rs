@@ -57,7 +57,7 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
                         #(#methods)*
 
                         #[inline]
-                        pub fn range(&self) -> text::Range {
+                        pub fn range(&self) -> tombi_text::Range {
                             self.syntax.range()
                         }
                     }

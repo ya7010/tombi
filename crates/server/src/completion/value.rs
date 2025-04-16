@@ -40,7 +40,7 @@ use super::{
 impl FindCompletionContents for tombi_document_tree::Value {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -132,7 +132,7 @@ impl FindCompletionContents for tombi_document_tree::Value {
 
 pub fn type_hint_value(
     key: Option<&tombi_document_tree::Key>,
-    position: text::Position,
+    position: tombi_text::Position,
     toml_version: TomlVersion,
     schema_url: Option<&SchemaUrl>,
     completion_hint: Option<CompletionHint>,

@@ -293,7 +293,7 @@ impl SchemaStore {
         &self,
         root: &tombi_ast::Root,
         source_url_or_path: Option<Either<&url::Url, &std::path::Path>>,
-    ) -> Result<Option<SourceSchema>, (crate::Error, text::Range)> {
+    ) -> Result<Option<SourceSchema>, (crate::Error, tombi_text::Range)> {
         let source_path = match source_url_or_path {
             Some(Either::Left(url)) => match url.scheme() {
                 "file" => url.to_file_path().ok(),

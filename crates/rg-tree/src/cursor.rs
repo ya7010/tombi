@@ -123,9 +123,9 @@ struct NodeData {
     /// Invariant: never changes after NodeData is created.
     mutable: bool,
     /// Absolute offset for immutable nodes, unused for mutable nodes.
-    offset: text::Offset,
+    offset: tombi_text::Offset,
     /// Absolute position for immutable nodes, unused for mutable nodes.
-    position: text::Position,
+    position: tombi_text::Position,
     // The following links only have meaning when `mutable` is true.
     first: Cell<*const NodeData>,
     /// Invariant: never null if mutable.
@@ -235,8 +235,8 @@ impl NodeData {
     fn new(
         parent: Option<SyntaxNode>,
         index: u32,
-        offset: text::Offset,
-        position: text::Position,
+        offset: tombi_text::Offset,
+        position: tombi_text::Position,
         green: Green,
         mutable: bool,
     ) -> ptr::NonNull<NodeData> {
@@ -311,7 +311,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn key(&self) -> (ptr::NonNull<()>, text::Offset) {
+    fn key(&self) -> (ptr::NonNull<()>, tombi_text::Offset) {
         let ptr = match &self.green {
             Green::Node { ptr } => ptr.get().cast(),
             Green::Token { ptr } => ptr.cast(),
@@ -358,7 +358,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn offset(&self) -> text::Offset {
+    fn offset(&self) -> tombi_text::Offset {
         if self.mutable {
             self.offset_mut()
         } else {
@@ -367,8 +367,8 @@ impl NodeData {
     }
 
     #[cold]
-    fn offset_mut(&self) -> text::Offset {
-        let mut res = text::Offset::from(0);
+    fn offset_mut(&self) -> tombi_text::Offset {
+        let mut res = tombi_text::Offset::from(0);
 
         let mut node = self;
         while let Some(parent) = node.parent() {
@@ -386,7 +386,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn position(&self) -> text::Position {
+    fn position(&self) -> tombi_text::Position {
         if self.mutable {
             self.position_mut()
         } else {
@@ -395,7 +395,7 @@ impl NodeData {
     }
 
     #[cold]
-    fn position_mut(&self) -> text::Position {
+    fn position_mut(&self) -> tombi_text::Position {
         let mut res = Default::default();
 
         let mut node = self;
@@ -414,16 +414,16 @@ impl NodeData {
     }
 
     #[inline]
-    fn span(&self) -> text::Span {
+    fn span(&self) -> tombi_text::Span {
         let offset = self.offset();
         let len = self.green().text_len();
-        text::Span::at(offset, len)
+        tombi_text::Span::at(offset, len)
     }
 
     #[inline]
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         let start = self.position();
-        text::Range::new(start, start + self.green().text_relative_position())
+        tombi_text::Range::new(start, start + self.green().text_relative_position())
     }
 
     #[inline]
@@ -610,8 +610,8 @@ impl SyntaxNode {
             ptr: NodeData::new(
                 None,
                 0,
-                text::Offset::new(0),
-                text::Position::new(0, 0),
+                tombi_text::Offset::new(0),
+                tombi_text::Position::new(0, 0),
                 green,
                 false,
             ),
@@ -627,8 +627,8 @@ impl SyntaxNode {
             ptr: NodeData::new(
                 None,
                 0,
-                text::Offset::new(0),
-                text::Position::new(0, 0),
+                tombi_text::Offset::new(0),
+                tombi_text::Position::new(0, 0),
                 green,
                 true,
             ),
@@ -639,8 +639,8 @@ impl SyntaxNode {
         green: &GreenNodeData,
         parent: SyntaxNode,
         index: u32,
-        offset: text::Offset,
-        position: text::Position,
+        offset: tombi_text::Offset,
+        position: tombi_text::Position,
     ) -> SyntaxNode {
         let mutable = parent.data().mutable;
         let green = Green::Node {
@@ -700,22 +700,22 @@ impl SyntaxNode {
     }
 
     #[inline]
-    fn offset(&self) -> text::Offset {
+    fn offset(&self) -> tombi_text::Offset {
         self.data().offset()
     }
 
     #[inline]
-    fn position(&self) -> text::Position {
+    fn position(&self) -> tombi_text::Position {
         self.data().position()
     }
 
     #[inline]
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         self.data().span()
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.data().range()
     }
 
@@ -898,7 +898,7 @@ impl SyntaxNode {
         PreorderWithTokens::new(self.clone())
     }
 
-    pub fn token_at_offset(&self, offset: text::Offset) -> TokenAtOffset<SyntaxToken> {
+    pub fn token_at_offset(&self, offset: tombi_text::Offset) -> TokenAtOffset<SyntaxToken> {
         // TODO: this could be faster if we first drill-down to node, and only
         // then switch to token search. We should also replace explicit
         // recursion with a loop.
@@ -934,7 +934,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn token_at_position(&self, position: text::Position) -> TokenAtOffset<SyntaxToken> {
+    pub fn token_at_position(&self, position: tombi_text::Position) -> TokenAtOffset<SyntaxToken> {
         let range = self.range();
         assert!(
             range.start() <= position && position <= range.end(),
@@ -971,7 +971,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn covering_element(&self, span: text::Span) -> SyntaxElement {
+    pub fn covering_element(&self, span: tombi_text::Span) -> SyntaxElement {
         let mut res: SyntaxElement = self.clone().into();
         loop {
             assert!(
@@ -990,7 +990,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn child_or_token_at_span(&self, span: text::Span) -> Option<SyntaxElement> {
+    pub fn child_or_token_at_span(&self, span: tombi_text::Span) -> Option<SyntaxElement> {
         self.green_ref().child_at_span(span - self.offset()).map(
             |(index, relative_offset, relative_position, green)| {
                 SyntaxElement::new(
@@ -1039,8 +1039,8 @@ impl SyntaxToken {
         green: &GreenTokenData,
         parent: SyntaxNode,
         index: u32,
-        offset: text::Offset,
-        position: text::Position,
+        offset: tombi_text::Offset,
+        position: tombi_text::Position,
     ) -> SyntaxToken {
         let mutable = parent.data().mutable;
         let green = Green::Token { ptr: green.into() };
@@ -1071,12 +1071,12 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         self.data().span()
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.data().range()
     }
 
@@ -1164,8 +1164,8 @@ impl SyntaxElement {
         element: GreenElementRef<'_>,
         parent: SyntaxNode,
         index: u32,
-        offset: text::Offset,
-        position: text::Position,
+        offset: tombi_text::Offset,
+        position: tombi_text::Position,
     ) -> SyntaxElement {
         match element {
             NodeOrToken::Node(node) => {
@@ -1178,7 +1178,7 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         match self {
             NodeOrToken::Node(it) => it.span(),
             NodeOrToken::Token(it) => it.span(),
@@ -1186,7 +1186,7 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             NodeOrToken::Node(it) => it.range(),
             NodeOrToken::Token(it) => it.range(),
@@ -1252,7 +1252,7 @@ impl SyntaxElement {
         }
     }
 
-    fn token_at_offset(&self, offset: text::Offset) -> TokenAtOffset<SyntaxToken> {
+    fn token_at_offset(&self, offset: tombi_text::Offset) -> TokenAtOffset<SyntaxToken> {
         assert!(self.span().start() <= offset && offset <= self.span().end());
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
@@ -1260,7 +1260,7 @@ impl SyntaxElement {
         }
     }
 
-    fn token_at_position(&self, position: text::Position) -> TokenAtOffset<SyntaxToken> {
+    fn token_at_position(&self, position: tombi_text::Position) -> TokenAtOffset<SyntaxToken> {
         assert!(self.range().start() <= position && position <= self.range().end());
         match self {
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),

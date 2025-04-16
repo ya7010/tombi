@@ -1008,8 +1008,8 @@ mod completion_labels {
                             text_document: TextDocumentIdentifier {
                                 uri: toml_file_url,
                             },
-                            position: (text::Position::default()
-                                + text::RelativePosition::of(&toml_text[..index]))
+                            position: (tombi_text::Position::default()
+                                + tombi_text::RelativePosition::of(&toml_text[..index]))
                             .into(),
                         },
                         work_done_progress_params: WorkDoneProgressParams::default(),
@@ -1277,8 +1277,8 @@ mod completion_labels {
                             text_document: TextDocumentIdentifier {
                                 uri: toml_file_url,
                             },
-                            position: (text::Position::default()
-                                + text::RelativePosition::of(&toml_text[..index]))
+                            position: (tombi_text::Position::default()
+                                + tombi_text::RelativePosition::of(&toml_text[..index]))
                             .into(),
                         },
                         work_done_progress_params: WorkDoneProgressParams::default(),

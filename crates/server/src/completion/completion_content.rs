@@ -142,7 +142,7 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_inline_table(
-        position: text::Position,
+        position: tombi_text::Position,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -184,7 +184,7 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_empty_key(
-        position: text::Position,
+        position: tombi_text::Position,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -198,7 +198,7 @@ impl CompletionContent {
             filter_text: None,
             edit: CompletionEdit::new_additional_key(
                 "key",
-                text::Range::at(position),
+                tombi_text::Range::at(position),
                 completion_hint,
             ),
             schema_url: schema_url.cloned(),
@@ -208,7 +208,7 @@ impl CompletionContent {
 
     pub fn new_key(
         key_name: &str,
-        position: text::Position,
+        position: tombi_text::Position,
         detail: Option<String>,
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
@@ -223,8 +223,8 @@ impl CompletionContent {
         let key_range = match completion_hint {
             Some(
                 CompletionHint::DotTrigger { range } | CompletionHint::EqualTrigger { range, .. },
-            ) => text::Range::new(range.end(), position),
-            _ => text::Range::at(position),
+            ) => tombi_text::Range::new(range.end(), position),
+            _ => tombi_text::Range::at(position),
         };
 
         Self {
@@ -247,7 +247,7 @@ impl CompletionContent {
 
     pub fn new_pattern_key(
         patterns: &[String],
-        position: text::Position,
+        position: tombi_text::Position,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -269,7 +269,7 @@ impl CompletionContent {
             filter_text: None,
             edit: CompletionEdit::new_additional_key(
                 "key",
-                text::Range::at(position),
+                tombi_text::Range::at(position),
                 completion_hint,
             ),
             schema_url: schema_url.cloned(),
@@ -278,7 +278,7 @@ impl CompletionContent {
     }
 
     pub fn new_additional_key(
-        position: text::Position,
+        position: tombi_text::Position,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
@@ -292,7 +292,7 @@ impl CompletionContent {
             filter_text: None,
             edit: CompletionEdit::new_additional_key(
                 "key",
-                text::Range::at(position),
+                tombi_text::Range::at(position),
                 completion_hint,
             ),
             schema_url: schema_url.cloned(),
@@ -302,7 +302,7 @@ impl CompletionContent {
 
     pub fn new_magic_triggers(
         key: &str,
-        position: text::Position,
+        position: tombi_text::Position,
         schema_url: Option<&SchemaUrl>,
     ) -> Vec<Self> {
         [(".", "Dot Trigger"), ("=", "Equal Trigger")]

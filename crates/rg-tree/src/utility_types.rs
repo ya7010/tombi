@@ -3,7 +3,7 @@ use std::{
     ops::{AddAssign, Deref},
 };
 
-use text::Offset;
+use tombi_text::Offset;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum NodeOrToken<N, T> {

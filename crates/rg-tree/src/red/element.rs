@@ -18,14 +18,14 @@ impl<L: Language> From<RedToken<L>> for RedElement<L> {
 }
 
 impl<L: Language> RedElement<L> {
-    pub fn span(&self) -> text::Span {
+    pub fn span(&self) -> tombi_text::Span {
         match self {
             NodeOrToken::Node(it) => it.span(),
             NodeOrToken::Token(it) => it.span(),
         }
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             NodeOrToken::Node(it) => it.range(),
             NodeOrToken::Token(it) => it.range(),

@@ -5,7 +5,7 @@ use crate::cursor::{SyntaxNode, SyntaxToken};
 #[derive(Clone)]
 pub struct SyntaxText {
     node: SyntaxNode,
-    span: text::Span,
+    span: tombi_text::Span,
 }
 
 impl SyntaxText {
@@ -15,7 +15,7 @@ impl SyntaxText {
         SyntaxText { node, span }
     }
 
-    pub fn len(&self) -> text::RawOffset {
+    pub fn len(&self) -> tombi_text::RawOffset {
         self.span.len()
     }
 
@@ -28,22 +28,22 @@ impl SyntaxText {
             .is_err()
     }
 
-    pub fn find_char(&self, c: char) -> Option<text::Offset> {
-        let mut acc: text::Offset = 0.into();
+    pub fn find_char(&self, c: char) -> Option<tombi_text::Offset> {
+        let mut acc: tombi_text::Offset = 0.into();
         let res = self.try_for_each_chunk(|chunk| {
             if let Some(pos) = chunk.find(c) {
-                return Err(acc + pos as text::RelativeOffset);
+                return Err(acc + pos as tombi_text::RelativeOffset);
             }
-            acc += text::Offset::of(chunk);
+            acc += tombi_text::Offset::of(chunk);
             Ok(())
         });
         found(res)
     }
 
-    pub fn char_at(&self, offset: text::Offset) -> Option<char> {
-        let mut start: text::Offset = 0.into();
+    pub fn char_at(&self, offset: tombi_text::Offset) -> Option<char> {
+        let mut start: tombi_text::Offset = 0.into();
         let res = self.try_for_each_chunk(|chunk| {
-            let end = start + text::Offset::of(chunk);
+            let end = start + tombi_text::Offset::of(chunk);
             if start <= offset && offset < end {
                 let off: usize = u32::from(offset - start) as usize;
                 return Err(chunk[off..].chars().next().unwrap());
@@ -56,12 +56,12 @@ impl SyntaxText {
 
     pub fn slice<S: private::SyntaxTextSpan>(&self, span: S) -> SyntaxText {
         let start = span.start().unwrap_or_default();
-        let end = span.end().unwrap_or(text::Offset::new(self.len()));
+        let end = span.end().unwrap_or(tombi_text::Offset::new(self.len()));
         assert!(start <= end);
         let len = end - start;
         let start = self.span.start() + start;
         let end = start + len;
-        let span = text::Span::new(start, end);
+        let span = tombi_text::Span::new(start, end);
 
         SyntaxText {
             node: self.node.clone(),
@@ -95,7 +95,7 @@ impl SyntaxText {
         }
     }
 
-    fn tokens_with_spans(&self) -> impl Iterator<Item = (SyntaxToken, text::Span)> {
+    fn tokens_with_spans(&self) -> impl Iterator<Item = (SyntaxToken, tombi_text::Span)> {
         let span = self.span;
         self.node
             .descendants_with_tokens()
@@ -178,7 +178,10 @@ impl PartialEq for SyntaxText {
     }
 }
 
-fn zip_texts<I: Iterator<Item = (SyntaxToken, text::Span)>>(xs: &mut I, ys: &mut I) -> Option<()> {
+fn zip_texts<I: Iterator<Item = (SyntaxToken, tombi_text::Span)>>(
+    xs: &mut I,
+    ys: &mut I,
+) -> Option<()> {
     let mut x = xs.next()?;
     let mut y = ys.next()?;
     loop {
@@ -193,9 +196,9 @@ fn zip_texts<I: Iterator<Item = (SyntaxToken, text::Span)>>(xs: &mut I, ys: &mut
         if !(x_text.starts_with(y_text) || y_text.starts_with(x_text)) {
             return Some(());
         }
-        let advance = text::Offset::new(std::cmp::min(x.1.len(), y.1.len()));
-        x.1 = text::Span::new(x.1.start() + advance, x.1.end());
-        y.1 = text::Span::new(y.1.start() + advance, y.1.end());
+        let advance = tombi_text::Offset::new(std::cmp::min(x.1.len(), y.1.len()));
+        x.1 = tombi_text::Span::new(x.1.start() + advance, x.1.end());
+        y.1 = tombi_text::Span::new(y.1.start() + advance, y.1.end());
     }
 }
 
@@ -205,51 +208,51 @@ mod private {
     use std::ops;
 
     pub trait SyntaxTextSpan {
-        fn start(&self) -> Option<text::Offset>;
-        fn end(&self) -> Option<text::Offset>;
+        fn start(&self) -> Option<tombi_text::Offset>;
+        fn end(&self) -> Option<tombi_text::Offset>;
     }
 
-    impl SyntaxTextSpan for text::Span {
-        fn start(&self) -> Option<text::Offset> {
-            Some(text::Span::start(*self))
+    impl SyntaxTextSpan for tombi_text::Span {
+        fn start(&self) -> Option<tombi_text::Offset> {
+            Some(tombi_text::Span::start(*self))
         }
-        fn end(&self) -> Option<text::Offset> {
-            Some(text::Span::end(*self))
+        fn end(&self) -> Option<tombi_text::Offset> {
+            Some(tombi_text::Span::end(*self))
         }
     }
 
-    impl SyntaxTextSpan for ops::Range<text::Offset> {
-        fn start(&self) -> Option<text::Offset> {
+    impl SyntaxTextSpan for ops::Range<tombi_text::Offset> {
+        fn start(&self) -> Option<tombi_text::Offset> {
             Some(self.start)
         }
-        fn end(&self) -> Option<text::Offset> {
+        fn end(&self) -> Option<tombi_text::Offset> {
             Some(self.end)
         }
     }
 
-    impl SyntaxTextSpan for ops::RangeFrom<text::Offset> {
-        fn start(&self) -> Option<text::Offset> {
+    impl SyntaxTextSpan for ops::RangeFrom<tombi_text::Offset> {
+        fn start(&self) -> Option<tombi_text::Offset> {
             Some(self.start)
         }
-        fn end(&self) -> Option<text::Offset> {
+        fn end(&self) -> Option<tombi_text::Offset> {
             None
         }
     }
 
-    impl SyntaxTextSpan for ops::RangeTo<text::Offset> {
-        fn start(&self) -> Option<text::Offset> {
+    impl SyntaxTextSpan for ops::RangeTo<tombi_text::Offset> {
+        fn start(&self) -> Option<tombi_text::Offset> {
             None
         }
-        fn end(&self) -> Option<text::Offset> {
+        fn end(&self) -> Option<tombi_text::Offset> {
             Some(self.end)
         }
     }
 
     impl SyntaxTextSpan for ops::RangeFull {
-        fn start(&self) -> Option<text::Offset> {
+        fn start(&self) -> Option<tombi_text::Offset> {
             None
         }
-        fn end(&self) -> Option<text::Offset> {
+        fn end(&self) -> Option<tombi_text::Offset> {
             None
         }
     }

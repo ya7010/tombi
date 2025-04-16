@@ -29,12 +29,12 @@ pub enum Value {
     LocalTime(LocalTime),
     Array(Array),
     Table(Table),
-    Incomplete { range: text::Range },
+    Incomplete { range: tombi_text::Range },
 }
 
 impl Value {
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             Value::Boolean(value) => value.range(),
             Value::Integer(value) => value.range(),
@@ -51,7 +51,7 @@ impl Value {
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> text::Range {
+    pub fn symbol_range(&self) -> tombi_text::Range {
         match self {
             Value::Boolean(value) => value.symbol_range(),
             Value::Integer(value) => value.symbol_range(),
@@ -85,7 +85,7 @@ impl crate::ValueImpl for Value {
         }
     }
 
-    fn range(&self) -> text::Range {
+    fn range(&self) -> tombi_text::Range {
         self.range()
     }
 }

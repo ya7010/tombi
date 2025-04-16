@@ -15,10 +15,10 @@ macro_rules! test_tokens {
                 )*
             ]
             .into_iter()
-            .fold((vec![], (0, text::Position::MIN)), |(mut acc, (start_offset, start_position)), (kind, text)| {
+            .fold((vec![], (0, tombi_text::Position::MIN)), |(mut acc, (start_offset, start_position)), (kind, text)| {
                 let text: &str = text;
                 let end_offset = start_offset + (text.len() as u32);
-                let end_position = start_position + text::RelativePosition::of(text);
+                let end_position = start_position + tombi_text::RelativePosition::of(text);
                 acc.push(
                     Ok(
                         Token::new(
@@ -44,8 +44,8 @@ macro_rules! test_token {
             let source = textwrap::dedent($source);
             let source = source.trim();
             let tokens = tokenize(&source).collect_vec();
-            let start_position = text::Position::MIN;
-            let end_position = start_position + text::RelativePosition::of(source);
+            let start_position = tombi_text::Position::MIN;
+            let end_position = start_position + tombi_text::RelativePosition::of(source);
 
             pretty_assertions::assert_eq!(
                 tokens,
@@ -70,8 +70,8 @@ macro_rules! test_token {
             let source = textwrap::dedent($source);
             let source = source.trim();
             let tokens = tokenize(&source).collect_vec();
-            let start_position = text::Position::MIN;
-            let end_position = start_position + text::RelativePosition::of(source);
+            let start_position = tombi_text::Position::MIN;
+            let end_position = start_position + tombi_text::RelativePosition::of(source);
 
             pretty_assertions::assert_eq!(
                 tokens,

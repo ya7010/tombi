@@ -14,7 +14,7 @@ pub enum KeyKind {
 pub struct Key {
     kind: KeyKind,
     value: String,
-    range: text::Range,
+    range: tombi_text::Range,
 }
 
 impl std::borrow::Borrow<String> for Key {
@@ -27,7 +27,7 @@ impl Key {
     pub fn try_new(
         kind: KeyKind,
         value: String,
-        range: text::Range,
+        range: tombi_text::Range,
         toml_version: TomlVersion,
     ) -> Result<Self, crate::Error> {
         let key = Self { kind, value, range };
@@ -64,7 +64,7 @@ impl Key {
         })
     }
 
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.range
     }
 }

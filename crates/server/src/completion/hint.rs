@@ -2,6 +2,6 @@
 pub enum CompletionHint {
     InTableHeader,
     InArray,
-    DotTrigger { range: text::Range },
-    EqualTrigger { range: text::Range },
+    DotTrigger { range: tombi_text::Range },
+    EqualTrigger { range: tombi_text::Range },
 }

@@ -14,7 +14,7 @@ pub struct SchemaCompletion;
 impl FindCompletionContents for SchemaCompletion {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,

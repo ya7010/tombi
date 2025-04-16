@@ -9,7 +9,7 @@ use schema_store::{CurrentSchema, SchemaUrl};
 
 pub async fn get_type_definition(
     tree: &tombi_document_tree::DocumentTree,
-    position: text::Position,
+    position: tombi_text::Position,
     keys: &[tombi_document_tree::Key],
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Option<TypeDefinition> {
@@ -40,13 +40,13 @@ pub async fn get_type_definition(
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TypeDefinition {
     pub schema_url: SchemaUrl,
-    pub range: text::Range,
+    pub range: tombi_text::Range,
 }
 
 trait GetTypeDefinition {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,

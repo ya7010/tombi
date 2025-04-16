@@ -43,7 +43,7 @@ impl<T> From<DocumentTreeAndErrors<T>> for (T, Vec<crate::Error>) {
 pub trait ValueImpl {
     fn value_type(&self) -> ValueType;
 
-    fn range(&self) -> text::Range;
+    fn range(&self) -> tombi_text::Range;
 }
 
 /// A structure that holds an incomplete tree and errors that are the reason for the incompleteness.

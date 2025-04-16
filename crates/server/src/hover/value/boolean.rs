@@ -10,7 +10,7 @@ use crate::hover::{
 impl GetHoverContent for tombi_document_tree::Boolean {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        position: text::Position,
+        position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -100,7 +100,7 @@ impl GetHoverContent for tombi_document_tree::Boolean {
 impl GetHoverContent for BooleanSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        _position: text::Position,
+        _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,

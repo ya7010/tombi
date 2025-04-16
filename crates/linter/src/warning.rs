@@ -7,7 +7,7 @@ pub enum WarningKind {
 #[derive(Debug)]
 pub struct Warning {
     pub kind: WarningKind,
-    pub range: text::Range,
+    pub range: tombi_text::Range,
 }
 
 impl tombi_diagnostic::SetDiagnostics for Warning {

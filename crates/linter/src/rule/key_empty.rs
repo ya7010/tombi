@@ -40,7 +40,7 @@ mod tests {
         let mut expected = vec![];
         crate::Warning {
             kind: crate::WarningKind::KeyEmpty,
-            range: text::Range::new((0, 0).into(), (0, 2).into()),
+            range: tombi_text::Range::new((0, 0).into(), (0, 2).into()),
         }
         .set_diagnostics(&mut expected);
 

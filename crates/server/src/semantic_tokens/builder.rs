@@ -5,15 +5,15 @@ use super::token_type::TokenType;
 
 pub struct SemanticTokensBuilder {
     tokens: Vec<SemanticToken>,
-    last_range: text::Range,
-    pub file_schema_range: Option<text::Range>,
+    last_range: tombi_text::Range,
+    pub file_schema_range: Option<tombi_text::Range>,
 }
 
 impl SemanticTokensBuilder {
-    pub fn new(file_schema_range: Option<text::Range>) -> Self {
+    pub fn new(file_schema_range: Option<tombi_text::Range>) -> Self {
         Self {
             tokens: Vec::new(),
-            last_range: text::Range::default(),
+            last_range: tombi_text::Range::default(),
             file_schema_range,
         }
     }
@@ -38,7 +38,7 @@ impl SemanticTokensBuilder {
     pub fn add_schema_url_comment(
         &mut self,
         comment: impl AsRef<tombi_ast::Comment>,
-        file_schema_range: &text::Range,
+        file_schema_range: &tombi_text::Range,
     ) {
         let comment_range = comment.as_ref().syntax().range();
 
@@ -76,7 +76,7 @@ impl SemanticTokensBuilder {
     }
 }
 
-fn relative_range(from: text::Range, to: text::Range) -> Range {
+fn relative_range(from: tombi_text::Range, to: tombi_text::Range) -> Range {
     let line_diff = from.end().line() - from.start().line();
     let start = from.start() - to.start();
     let start = Position {

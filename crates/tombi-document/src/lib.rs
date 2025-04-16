@@ -148,7 +148,7 @@ macro_rules! test_deserialize {
             let p = parser::parse(&source.trim());
             let expected_errors = $errors
                 .into_iter()
-                .map(|(m, r)| (m.to_string(), text::Range::from(r)))
+                .map(|(m, r)| (m.to_string(), tombi_text::Range::from(r)))
                 .collect_vec();
 
             let errors = p.errors($toml_version).collect_vec();
