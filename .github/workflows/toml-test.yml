@@ -15,7 +15,7 @@ jobs:
         toml-version:
           - v1.0.0
           - v1.1.0-preview
-    continue-on-error: true
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
 
@@ -40,11 +40,4 @@ jobs:
     runs-on: ubuntu-latest
     needs: toml-test
     steps:
-      - name: Check all TOML version jobs succeeded
-        run: |
-          if [[ ${{ needs.toml-test.result }} != success ]]; then
-            echo "At least one job failed"
-            exit 1
-          else
-            echo "All matrix jobs succeeded!"
-          fi
+      - run: echo "All matrix jobs succeeded!"
