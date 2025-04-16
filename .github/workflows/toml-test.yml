@@ -39,6 +39,12 @@ jobs:
   success-check:
     runs-on: ubuntu-latest
     needs: toml-test
-    if: ${{ !contains(needs.toml-test.result, 'failure') }}
     steps:
-      - run: echo "All matrix jobs succeeded!"
+      - name: Check all TOML version jobs succeeded
+        run: |
+          if [[ ${{ needs.toml-test.result }} == *"failure"* ]]; then
+            echo "At least one job failed"
+            exit 1
+          else
+            echo "All matrix jobs succeeded!"
+          fi
