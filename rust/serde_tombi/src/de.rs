@@ -1,12 +1,12 @@
 mod error;
 
-use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
 use itertools::{Either, Itertools};
 use schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use tombi_ast::AstNode;
+use tombi_document::IntoDocument;
 use toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
@@ -48,7 +48,7 @@ where
     Deserializer::new().from_str_async(toml_text).await
 }
 
-pub fn from_document<T>(document: document::Document) -> Result<T, crate::de::Error>
+pub fn from_document<T>(document: tombi_document::Document) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
@@ -98,7 +98,10 @@ impl<'de> Deserializer<'de> {
         from_document(self.try_to_document(root, toml_version)?)
     }
 
-    pub fn from_document<T>(&self, document: document::Document) -> Result<T, crate::de::Error>
+    pub fn from_document<T>(
+        &self,
+        document: tombi_document::Document,
+    ) -> Result<T, crate::de::Error>
     where
         T: DeserializeOwned,
     {
@@ -167,7 +170,7 @@ impl<'de> Deserializer<'de> {
         &self,
         root: tombi_ast::Root,
         toml_version: TomlVersion,
-    ) -> Result<document::Document, crate::de::Error> {
+    ) -> Result<tombi_document::Document, crate::de::Error> {
         // Convert the AST to a document tree
         let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
 

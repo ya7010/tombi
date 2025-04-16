@@ -429,30 +429,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "document"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "document-tree",
- "indexmap",
- "itertools",
- "parser",
- "pretty_assertions",
- "serde",
- "serde_json",
- "test-lib",
- "text",
- "textwrap",
- "thiserror",
- "tombi-ast",
- "tombi-date-time",
- "toml-text",
- "toml-version",
- "tower-lsp",
- "tracing",
-]
-
-[[package]]
 name = "document-tree"
 version = "0.0.0"
 dependencies = [
@@ -1692,7 +1668,6 @@ name = "schema-store"
 version = "0.0.0"
 dependencies = [
  "ahash",
- "document",
  "document-tree",
  "futures",
  "glob",
@@ -1710,6 +1685,7 @@ dependencies = [
  "tokio",
  "tombi-ast",
  "tombi-config",
+ "tombi-document",
  "tracing",
  "url",
  "x-tombi",
@@ -1817,7 +1793,6 @@ name = "serde_tombi"
 version = "0.0.1"
 dependencies = [
  "chrono",
- "document",
  "document-tree",
  "formatter",
  "futures",
@@ -1837,6 +1812,7 @@ dependencies = [
  "tombi-config",
  "tombi-date-time",
  "tombi-diagnostic",
+ "tombi-document",
  "toml-text",
  "toml-version",
  "tracing",
@@ -1865,7 +1841,6 @@ dependencies = [
  "chrono",
  "clap",
  "crossbeam-channel",
- "document",
  "document-tree",
  "formatter",
  "futures",
@@ -1894,6 +1869,7 @@ dependencies = [
  "tombi-ast",
  "tombi-config",
  "tombi-diagnostic",
+ "tombi-document",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
@@ -2298,6 +2274,30 @@ dependencies = [
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "tombi-document"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "document-tree",
+ "indexmap",
+ "itertools",
+ "parser",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "test-lib",
+ "text",
+ "textwrap",
+ "thiserror",
+ "tombi-ast",
+ "tombi-date-time",
+ "toml-text",
+ "toml-version",
+ "tower-lsp",
+ "tracing",
 ]
 
 [[package]]

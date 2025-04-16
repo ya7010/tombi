@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use ahash::AHashMap;
-use tombi_config::{Config, TomlVersion};
-use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
 use itertools::{Either, Itertools};
 use schema_store::SourceSchema;
 use syntax::SyntaxNode;
+use tombi_config::{Config, TomlVersion};
+use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use tower_lsp::{
     lsp_types::{
         request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},

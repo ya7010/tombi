@@ -18,7 +18,7 @@ pub use value_type::ValueType;
 /// A structure that holds an incomplete tree and errors that are the reason for the incompleteness.
 ///
 /// [DocumentTree](crate::Root) needs to hold an incomplete tree and errors at the same time because it allows incomplete values.
-/// If there are no errors, the tree is considered complete and can be converted to a [Document](document::Document).
+/// If there are no errors, the tree is considered complete and can be converted to a [Document](tombi_document::Document).
 pub struct DocumentTreeAndErrors<T> {
     pub tree: T,
     pub errors: Vec<crate::Error>,

@@ -16,7 +16,7 @@ pub enum Error {
     },
 
     #[error(transparent)]
-    DocumentDeserialize(#[from] document::de::Error),
+    DocumentDeserialize(#[from] tombi_document::de::Error),
 
     #[error("{}", .0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "))]
     Parser(Vec<parser::Error>),

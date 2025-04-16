@@ -78,14 +78,14 @@ impl<'a> Serializer<'a> {
         }
     }
 
-    pub fn to_document<T>(&self, value: &T) -> Result<document::Document, crate::ser::Error>
+    pub fn to_document<T>(&self, value: &T) -> Result<tombi_document::Document, crate::ser::Error>
     where
         T: Serialize,
     {
         match value.serialize(&mut ValueSerializer { accessors: &[] }) {
-            Ok(Some(document::Value::Table(table))) => Ok(document::Document::from(table)),
+            Ok(Some(tombi_document::Value::Table(table))) => Ok(tombi_document::Document::from(table)),
             Ok(Some(value)) => Err(crate::ser::Error::RootMustBeTable(value.kind())),
-            Ok(None) => Ok(document::Document::new()),
+            Ok(None) => Ok(tombi_document::Document::new()),
             Err(error) => Err(crate::ser::Error::Serde(error.to_string())),
         }
     }
@@ -153,7 +153,7 @@ pub struct ValueSerializer<'a> {
 }
 
 impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
     type SerializeSeq = SerializeArray<'a>;
     type SerializeTuple = SerializeArray<'a>;
@@ -165,7 +165,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
 
     // Basic type serialization
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(document::Value::Boolean(document::Boolean::new(v))))
+        Ok(Some(tombi_document::Value::Boolean(tombi_document::Boolean::new(v))))
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
@@ -181,7 +181,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(document::Value::Integer(document::Integer::new(v))))
+        Ok(Some(tombi_document::Value::Integer(tombi_document::Integer::new(v))))
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
@@ -205,7 +205,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(document::Value::Float(document::Float::new(v))))
+        Ok(Some(tombi_document::Value::Float(tombi_document::Float::new(v))))
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
@@ -213,8 +213,8 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(document::Value::String(document::String::new(
-            document::StringKind::BasicString,
+        Ok(Some(tombi_document::Value::String(tombi_document::String::new(
+            tombi_document::StringKind::BasicString,
             v.to_string(),
         ))))
     }
@@ -262,16 +262,16 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
         match name {
             tombi_date_time::OFFSET_DATE_TIME_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
-                .map(|dt| Some(document::Value::OffsetDateTime(dt))),
+                .map(|dt| Some(tombi_document::Value::OffsetDateTime(dt))),
             tombi_date_time::LOCAL_DATE_TIME_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
-                .map(|dt| Some(document::Value::LocalDateTime(dt))),
+                .map(|dt| Some(tombi_document::Value::LocalDateTime(dt))),
             tombi_date_time::LOCAL_DATE_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
-                .map(|dt| Some(document::Value::LocalDate(dt))),
+                .map(|dt| Some(tombi_document::Value::LocalDate(dt))),
             tombi_date_time::LOCAL_TIME_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
-                .map(|dt| Some(document::Value::LocalTime(dt))),
+                .map(|dt| Some(tombi_document::Value::LocalTime(dt))),
             _ => value.serialize(self),
         }
     }
@@ -291,7 +291,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
         Ok(SerializeArray {
-            kind: document::ArrayKind::ArrayOfTable,
+            kind: tombi_document::ArrayKind::ArrayOfTable,
             accessors: self.accessors,
             values: match len {
                 Some(len) => Vec::with_capacity(len),
@@ -302,7 +302,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
         Ok(SerializeArray {
-            kind: document::ArrayKind::ArrayOfTable,
+            kind: tombi_document::ArrayKind::ArrayOfTable,
             accessors: self.accessors,
             values: Vec::with_capacity(len),
         })
@@ -314,7 +314,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
         len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
         Ok(SerializeArray {
-            kind: document::ArrayKind::ArrayOfTable,
+            kind: tombi_document::ArrayKind::ArrayOfTable,
             accessors: self.accessors,
             values: Vec::with_capacity(len),
         })
@@ -328,7 +328,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
         Ok(SerializeArray {
-            kind: document::ArrayKind::ArrayOfTable,
+            kind: tombi_document::ArrayKind::ArrayOfTable,
             accessors: self.accessors,
             values: Vec::with_capacity(len),
         })
@@ -374,13 +374,13 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
 
 // Sequence serialization
 pub struct SerializeArray<'a> {
-    kind: document::ArrayKind,
+    kind: tombi_document::ArrayKind,
     accessors: &'a [schema_store::Accessor],
-    values: Vec<document::Value>,
+    values: Vec<tombi_document::Value>,
 }
 
 impl serde::ser::SerializeSeq for SerializeArray<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
@@ -399,26 +399,26 @@ impl serde::ser::SerializeSeq for SerializeArray<'_> {
             ));
         };
         match &mut value {
-            document::Value::Boolean(_)
-            | document::Value::Integer(_)
-            | document::Value::Float(_)
-            | document::Value::String(_)
-            | document::Value::LocalDate(_)
-            | document::Value::LocalDateTime(_)
-            | document::Value::LocalTime(_)
-            | document::Value::OffsetDateTime(_) => {
-                self.kind = document::ArrayKind::Array;
+            tombi_document::Value::Boolean(_)
+            | tombi_document::Value::Integer(_)
+            | tombi_document::Value::Float(_)
+            | tombi_document::Value::String(_)
+            | tombi_document::Value::LocalDate(_)
+            | tombi_document::Value::LocalDateTime(_)
+            | tombi_document::Value::LocalTime(_)
+            | tombi_document::Value::OffsetDateTime(_) => {
+                self.kind = tombi_document::ArrayKind::Array;
             }
-            document::Value::Array(array) => {
-                if self.kind == document::ArrayKind::Array {
+            tombi_document::Value::Array(array) => {
+                if self.kind == tombi_document::ArrayKind::Array {
                     let array_kind = array.kind_mut();
-                    *array_kind = document::ArrayKind::Array;
+                    *array_kind = tombi_document::ArrayKind::Array;
                 }
             }
-            document::Value::Table(table) => {
-                if self.kind == document::ArrayKind::Array {
+            tombi_document::Value::Table(table) => {
+                if self.kind == tombi_document::ArrayKind::Array {
                     let table_kind = table.kind_mut();
-                    *table_kind = document::TableKind::InlineTable;
+                    *table_kind = tombi_document::TableKind::InlineTable;
                 }
             }
         }
@@ -428,16 +428,16 @@ impl serde::ser::SerializeSeq for SerializeArray<'_> {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        let mut array = document::Array::new(self.kind);
+        let mut array = tombi_document::Array::new(self.kind);
         for value in self.values {
             array.push(value);
         }
-        Ok(Some(document::Value::Array(array)))
+        Ok(Some(tombi_document::Value::Array(array)))
     }
 }
 
 impl serde::ser::SerializeTuple for SerializeArray<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     #[inline]
@@ -455,7 +455,7 @@ impl serde::ser::SerializeTuple for SerializeArray<'_> {
 }
 
 impl serde::ser::SerializeTupleStruct for SerializeArray<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
@@ -471,7 +471,7 @@ impl serde::ser::SerializeTupleStruct for SerializeArray<'_> {
 }
 
 impl serde::ser::SerializeTupleVariant for SerializeArray<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
@@ -489,12 +489,12 @@ impl serde::ser::SerializeTupleVariant for SerializeArray<'_> {
 // Map serialization
 pub struct SerializeTable<'a> {
     accessors: &'a [schema_store::Accessor],
-    key: Option<document::Key>,
-    key_values: Vec<(document::Key, document::Value)>,
+    key: Option<tombi_document::Key>,
+    key_values: Vec<(tombi_document::Key, tombi_document::Value)>,
 }
 
 impl serde::ser::SerializeMap for SerializeTable<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     fn serialize_key<T>(&mut self, key: &T) -> Result<(), Self::Error>
@@ -505,8 +505,8 @@ impl serde::ser::SerializeMap for SerializeTable<'_> {
         match key.serialize(&mut ValueSerializer {
             accessors: self.accessors,
         }) {
-            Ok(Some(document::Value::String(string))) => {
-                self.key = Some(document::Key::from(string));
+            Ok(Some(tombi_document::Value::String(string))) => {
+                self.key = Some(tombi_document::Key::from(string));
                 Ok(())
             }
             Ok(Some(value)) => {
@@ -551,16 +551,16 @@ impl serde::ser::SerializeMap for SerializeTable<'_> {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        let mut table = document::Table::new(document::TableKind::Table);
+        let mut table = tombi_document::Table::new(tombi_document::TableKind::Table);
         for (key, value) in self.key_values {
             table.insert(key, value);
         }
-        Ok(Some(document::Value::Table(table)))
+        Ok(Some(tombi_document::Value::Table(table)))
     }
 }
 
 impl serde::ser::SerializeStruct for SerializeTable<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     #[inline]
@@ -578,7 +578,7 @@ impl serde::ser::SerializeStruct for SerializeTable<'_> {
 }
 
 impl serde::ser::SerializeStructVariant for SerializeTable<'_> {
-    type Ok = Option<document::Value>;
+    type Ok = Option<tombi_document::Value>;
     type Error = crate::ser::Error;
 
     #[inline]

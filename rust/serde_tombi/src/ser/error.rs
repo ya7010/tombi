@@ -11,10 +11,10 @@ pub enum Error {
     SchemaStore(#[from] schema_store::Error),
 
     #[error("Document root must be a Table, got {0}")]
-    RootMustBeTable(document::ValueKind),
+    RootMustBeTable(tombi_document::ValueKind),
 
     #[error("Key must be a String, got {1} for {0}")]
-    KeyMustBeString(schema_store::Accessors, document::ValueKind),
+    KeyMustBeString(schema_store::Accessors, tombi_document::ValueKind),
 
     #[error("Key is required for {0}")]
     KeyRequired(schema_store::Accessors),

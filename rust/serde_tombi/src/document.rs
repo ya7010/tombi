@@ -1,20 +1,30 @@
 use itertools::Itertools;
 
-pub use document::{
+pub use tombi_document::{
     Array, ArrayKind, Boolean, Document, Float, Integer, IntegerKind, Key, LocalDate,
     LocalDateTime, LocalTime, OffsetDateTime, String, StringKind, Table, TableKind, Value,
 };
 
 /// A trait for converting TOML values to their string representation.
 pub(crate) trait ToTomlString {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]);
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        parent_keys: &[&tombi_document::Key],
+    );
 }
 
-impl ToTomlString for (&document::Key, &document::Value) {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+impl ToTomlString for (&tombi_document::Key, &tombi_document::Value) {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        parent_keys: &[&tombi_document::Key],
+    ) {
         let (key, value) = *self;
         match value {
-            document::Value::Table(table) if table.kind() == document::TableKind::KeyValue => {
+            tombi_document::Value::Table(table)
+                if table.kind() == tombi_document::TableKind::KeyValue =>
+            {
                 table.to_toml_string(
                     result,
                     &parent_keys.iter().chain(&[key]).copied().collect_vec(),
@@ -32,40 +42,48 @@ impl ToTomlString for (&document::Key, &document::Value) {
     }
 }
 
-impl ToTomlString for document::Value {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::Value {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        parent_keys: &[&tombi_document::Key],
+    ) {
         match self {
-            document::Value::String(s) => result.push_str(&format!("\"{}\"", s.value())),
-            document::Value::Integer(i) => result.push_str(&i.value().to_string()),
-            document::Value::Float(f) => result.push_str(&f.value().to_string()),
-            document::Value::Boolean(b) => result.push_str(&b.value().to_string()),
-            document::Value::Array(a) => a.to_toml_string(result, parent_keys),
-            document::Value::Table(t) => t.to_toml_string(result, parent_keys),
-            document::Value::OffsetDateTime(dt) => result.push_str(&dt.to_string()),
-            document::Value::LocalDateTime(dt) => result.push_str(&dt.to_string()),
-            document::Value::LocalDate(d) => result.push_str(&d.to_string()),
-            document::Value::LocalTime(t) => result.push_str(&t.to_string()),
+            tombi_document::Value::String(s) => result.push_str(&format!("\"{}\"", s.value())),
+            tombi_document::Value::Integer(i) => result.push_str(&i.value().to_string()),
+            tombi_document::Value::Float(f) => result.push_str(&f.value().to_string()),
+            tombi_document::Value::Boolean(b) => result.push_str(&b.value().to_string()),
+            tombi_document::Value::Array(a) => a.to_toml_string(result, parent_keys),
+            tombi_document::Value::Table(t) => t.to_toml_string(result, parent_keys),
+            tombi_document::Value::OffsetDateTime(dt) => result.push_str(&dt.to_string()),
+            tombi_document::Value::LocalDateTime(dt) => result.push_str(&dt.to_string()),
+            tombi_document::Value::LocalDate(d) => result.push_str(&d.to_string()),
+            tombi_document::Value::LocalTime(t) => result.push_str(&t.to_string()),
         }
     }
 }
 
-impl ToTomlString for document::Table {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::Table {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        parent_keys: &[&tombi_document::Key],
+    ) {
         match self.kind() {
-            document::TableKind::Table => {
+            tombi_document::TableKind::Table => {
                 if self.key_values().len() == 1 {
                     if let Some((key, value)) = self.key_values().iter().next() {
                         match value {
-                            document::Value::Table(table)
-                                if table.kind() == document::TableKind::Table =>
+                            tombi_document::Value::Table(table)
+                                if table.kind() == tombi_document::TableKind::Table =>
                             {
                                 return table.to_toml_string(
                                     result,
                                     &parent_keys.iter().chain(&[key]).copied().collect_vec(),
                                 );
                             }
-                            document::Value::Array(array)
-                                if array.kind() == document::ArrayKind::ArrayOfTable =>
+                            tombi_document::Value::Array(array)
+                                if array.kind() == tombi_document::ArrayKind::ArrayOfTable =>
                             {
                                 return array.to_toml_string(
                                     result,
@@ -91,14 +109,14 @@ impl ToTomlString for document::Table {
                 let mut table_key_values = Vec::new();
                 for (key, value) in self.key_values() {
                     match value {
-                        document::Value::Table(table)
-                            if table.kind() == document::TableKind::Table =>
+                        tombi_document::Value::Table(table)
+                            if table.kind() == tombi_document::TableKind::Table =>
                         {
                             table_key_values.push((key, value));
                             continue;
                         }
-                        document::Value::Array(array)
-                            if array.kind() == document::ArrayKind::ArrayOfTable =>
+                        tombi_document::Value::Array(array)
+                            if array.kind() == tombi_document::ArrayKind::ArrayOfTable =>
                         {
                             table_key_values.push((key, value));
                             continue;
@@ -114,7 +132,7 @@ impl ToTomlString for document::Table {
                     );
                 }
             }
-            document::TableKind::InlineTable => {
+            tombi_document::TableKind::InlineTable => {
                 result.push('{');
                 for (i, (key, value)) in self.key_values().iter().enumerate() {
                     if i != 0 {
@@ -131,7 +149,7 @@ impl ToTomlString for document::Table {
                 }
                 result.push('}');
             }
-            document::TableKind::KeyValue => {
+            tombi_document::TableKind::KeyValue => {
                 for key_value in self.key_values() {
                     key_value.to_toml_string(result, parent_keys);
                 }
@@ -140,10 +158,14 @@ impl ToTomlString for document::Table {
     }
 }
 
-impl ToTomlString for document::Array {
-    fn to_toml_string(&self, result: &mut std::string::String, parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::Array {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        parent_keys: &[&tombi_document::Key],
+    ) {
         match self.kind() {
-            document::ArrayKind::Array => {
+            tombi_document::ArrayKind::Array => {
                 result.push('[');
                 if !self.values().is_empty() {
                     for (i, value) in self.values().iter().enumerate() {
@@ -155,7 +177,7 @@ impl ToTomlString for document::Array {
                 }
                 result.push(']');
             }
-            document::ArrayKind::ArrayOfTable => {
+            tombi_document::ArrayKind::ArrayOfTable => {
                 for value in self.values().iter() {
                     result.push_str(&format!(
                         "[[{}]]\n",
@@ -165,11 +187,11 @@ impl ToTomlString for document::Array {
                             .collect_vec()
                             .join(".")
                     ));
-                    if let document::Value::Table(table) = value {
+                    if let tombi_document::Value::Table(table) = value {
                         for (key, value) in table.key_values() {
                             match value {
-                                document::Value::Table(table)
-                                    if table.kind() == document::TableKind::KeyValue =>
+                                tombi_document::Value::Table(table)
+                                    if table.kind() == tombi_document::TableKind::KeyValue =>
                                 {
                                     table.to_toml_string(
                                         result,
@@ -193,14 +215,22 @@ impl ToTomlString for document::Array {
     }
 }
 
-impl ToTomlString for document::Boolean {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::Boolean {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         result.push_str(if self.value() { "true" } else { "false" });
     }
 }
 
-impl ToTomlString for document::Float {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::Float {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         if self.value().is_infinite() {
             if self.value().is_sign_positive() {
                 result.push_str("inf");
@@ -215,53 +245,73 @@ impl ToTomlString for document::Float {
     }
 }
 
-impl ToTomlString for document::String {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::String {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         match self.kind() {
-            document::StringKind::BasicString => {
+            tombi_document::StringKind::BasicString => {
                 result.push_str(&toml_text::to_basic_string(self.value()));
             }
-            document::StringKind::LiteralString => {
+            tombi_document::StringKind::LiteralString => {
                 result.push_str(&toml_text::to_literal_string(self.value()));
             }
-            document::StringKind::MultiLineBasicString => {
+            tombi_document::StringKind::MultiLineBasicString => {
                 result.push_str(&toml_text::to_multi_line_basic_string(self.value()));
             }
-            document::StringKind::MultiLineLiteralString => {
+            tombi_document::StringKind::MultiLineLiteralString => {
                 result.push_str(&toml_text::to_multi_line_literal_string(self.value()));
             }
         }
     }
 }
 
-impl ToTomlString for document::OffsetDateTime {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::OffsetDateTime {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         result.push_str(&self.to_string());
     }
 }
 
-impl ToTomlString for document::LocalDateTime {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::LocalDateTime {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         result.push_str(&self.to_string());
     }
 }
 
-impl ToTomlString for document::LocalDate {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::LocalDate {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         result.push_str(&self.to_string());
     }
 }
 
-impl ToTomlString for document::LocalTime {
-    fn to_toml_string(&self, result: &mut std::string::String, _parent_keys: &[&document::Key]) {
+impl ToTomlString for tombi_document::LocalTime {
+    fn to_toml_string(
+        &self,
+        result: &mut std::string::String,
+        _parent_keys: &[&tombi_document::Key],
+    ) {
         result.push_str(&self.to_string());
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use document::KeyKind;
     use test_lib::toml_text_assert_eq;
+    use tombi_document::KeyKind;
 
     use crate::document::*;
 
@@ -517,7 +567,8 @@ id = 2
 
         let mut document = Document::new();
 
-        let now = OffsetDateTime::from_ymd_hms(2024, 1, 1, 0, 0, 0, document::TimeZoneOffset::Z);
+        let now =
+            OffsetDateTime::from_ymd_hms(2024, 1, 1, 0, 0, 0, tombi_document::TimeZoneOffset::Z);
         document.insert(
             Key::new(KeyKind::BareKey, "now".to_string()),
             Value::OffsetDateTime(now),
