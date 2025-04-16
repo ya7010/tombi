@@ -36,7 +36,7 @@ jobs:
       - name: Run toml-test
         run: cargo xtask toml-test --toml-version ${{ matrix.toml-version }}
 
-  success-check:
+  success-tombi-test:
     runs-on: ubuntu-latest
     needs: toml-test
     steps:
