@@ -916,10 +916,10 @@ mod table_keys_order {
         ) => {
             #[tokio::test]
             async fn $name() {
-                use formatter::{FormatOptions, Formatter};
                 use schema_store::SchemaStore;
                 use textwrap::dedent;
                 use tombi_config::TomlVersion;
+                use tombi_formatter::{FormatOptions, Formatter};
 
                 test_lib::init_tracing();
 
@@ -945,7 +945,7 @@ mod table_keys_order {
                 let source_path = test_lib::project_root().join("test.toml");
                 let formatter = Formatter::new(
                     TomlVersion::default(),
-                    formatter::formatter::definitions::FormatDefinitions::default(),
+                    tombi_formatter::formatter::definitions::FormatDefinitions::default(),
                     &format_options,
                     Some(itertools::Either::Right(source_path.as_path())),
                     &schema_store,

@@ -1,7 +1,7 @@
+use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tombi_config::{FormatOptions, TomlVersion};
 use tombi_diagnostic::{printer::Pretty, Diagnostic, Print};
-use formatter::formatter::definitions::FormatDefinitions;
-use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
+use tombi_formatter::formatter::definitions::FormatDefinitions;
 
 use crate::app::arg;
 
@@ -216,7 +216,7 @@ where
 {
     let mut source = String::new();
     if file.read_to_string(&mut source).await.is_ok() {
-        match formatter::Formatter::new(
+        match tombi_formatter::Formatter::new(
             toml_version,
             FormatDefinitions::default(),
             format_options,

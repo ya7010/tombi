@@ -1,10 +1,10 @@
 mod error;
 
-use formatter::formatter::definitions::FormatDefinitions;
-use formatter::FormatOptions;
 use itertools::Either;
 use schema_store::SchemaStore;
 use serde::Serialize;
+use tombi_formatter::formatter::definitions::FormatDefinitions;
+use tombi_formatter::FormatOptions;
 use toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
@@ -83,7 +83,9 @@ impl<'a> Serializer<'a> {
         T: Serialize,
     {
         match value.serialize(&mut ValueSerializer { accessors: &[] }) {
-            Ok(Some(tombi_document::Value::Table(table))) => Ok(tombi_document::Document::from(table)),
+            Ok(Some(tombi_document::Value::Table(table))) => {
+                Ok(tombi_document::Document::from(table))
+            }
             Ok(Some(value)) => Err(crate::ser::Error::RootMustBeTable(value.kind())),
             Ok(None) => Ok(tombi_document::Document::new()),
             Err(error) => Err(crate::ser::Error::Serde(error.to_string())),
@@ -128,7 +130,7 @@ impl<'a> Serializer<'a> {
             }
         }
 
-        let formatter = formatter::Formatter::new(
+        let formatter = tombi_formatter::Formatter::new(
             TomlVersion::default(),
             format_definitions,
             &format_options,
@@ -165,7 +167,9 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
 
     // Basic type serialization
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(tombi_document::Value::Boolean(tombi_document::Boolean::new(v))))
+        Ok(Some(tombi_document::Value::Boolean(
+            tombi_document::Boolean::new(v),
+        )))
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
@@ -181,7 +185,9 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(tombi_document::Value::Integer(tombi_document::Integer::new(v))))
+        Ok(Some(tombi_document::Value::Integer(
+            tombi_document::Integer::new(v),
+        )))
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
@@ -205,7 +211,9 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(tombi_document::Value::Float(tombi_document::Float::new(v))))
+        Ok(Some(tombi_document::Value::Float(
+            tombi_document::Float::new(v),
+        )))
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
@@ -213,10 +221,9 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        Ok(Some(tombi_document::Value::String(tombi_document::String::new(
-            tombi_document::StringKind::BasicString,
-            v.to_string(),
-        ))))
+        Ok(Some(tombi_document::Value::String(
+            tombi_document::String::new(tombi_document::StringKind::BasicString, v.to_string()),
+        )))
     }
 
     fn serialize_bytes(self, _: &[u8]) -> Result<Self::Ok, Self::Error> {

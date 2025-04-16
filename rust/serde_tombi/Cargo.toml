@@ -9,7 +9,6 @@ license.workspace = true
 
 [dependencies]
 chrono = { workspace = true }
-formatter = { workspace = true }
 futures = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
@@ -26,6 +25,7 @@ tombi-date-time = { workspace = true }
 tombi-diagnostic = { workspace = true }
 tombi-document = { workspace = true }
 tombi-document-tree = { workspace = true }
+tombi-formatter = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

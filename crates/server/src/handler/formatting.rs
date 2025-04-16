@@ -1,5 +1,5 @@
-use tombi_config::FormatOptions;
 use itertools::Either;
+use tombi_config::FormatOptions;
 use tower_lsp::lsp_types::{
     notification::PublishDiagnostics, DocumentFormattingParams, PublishDiagnosticsParams, TextEdit,
 };
@@ -47,7 +47,7 @@ pub async fn handle_formatting(
         return Ok(None);
     };
 
-    match formatter::Formatter::new(
+    match tombi_formatter::Formatter::new(
         toml_version,
         Default::default(),
         backend
