@@ -17,7 +17,7 @@ tombi-ast = { workspace = true }
 tombi-date-time = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-text = { workspace = true }
-toml-text = { workspace = true }
+tombi-toml-text = { workspace = true }
 toml-version = { workspace = true }
 tower-lsp = { workspace = true, optional = true }
 tracing = { workspace = true }

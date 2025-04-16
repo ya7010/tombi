@@ -1753,7 +1753,7 @@ dependencies = [
  "tombi-document-tree",
  "tombi-formatter",
  "tombi-text",
- "toml-text",
+ "tombi-toml-text",
  "toml-version",
  "tracing",
  "typed-builder",
@@ -2104,7 +2104,7 @@ dependencies = [
  "syntax",
  "thiserror",
  "tombi-text",
- "toml-text",
+ "tombi-toml-text",
  "toml-version",
  "tracing",
  "url",
@@ -2224,7 +2224,7 @@ dependencies = [
  "tombi-date-time",
  "tombi-document-tree",
  "tombi-text",
- "toml-text",
+ "tombi-toml-text",
  "toml-version",
  "tower-lsp",
  "tracing",
@@ -2242,7 +2242,7 @@ dependencies = [
  "tombi-date-time",
  "tombi-diagnostic",
  "tombi-text",
- "toml-text",
+ "tombi-toml-text",
  "toml-version",
  "tracing",
 ]
@@ -2305,6 +2305,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-toml-text"
+version = "0.0.0"
+dependencies = [
+ "thiserror",
+ "toml-version",
+]
+
+[[package]]
 name = "toml-test"
 version = "0.0.0"
 dependencies = [
@@ -2321,14 +2329,6 @@ dependencies = [
  "tombi-ast",
  "tombi-document-tree",
  "tombi-text",
- "toml-version",
-]
-
-[[package]]
-name = "toml-text"
-version = "0.0.0"
-dependencies = [
- "thiserror",
  "toml-version",
 ]
 

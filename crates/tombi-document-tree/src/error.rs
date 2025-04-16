@@ -33,7 +33,7 @@ pub enum Error {
 
     #[error("invalid string: {error}")]
     ParseStringError {
-        error: toml_text::ParseError,
+        error: tombi_toml_text::ParseError,
         range: tombi_text::Range,
     },
 

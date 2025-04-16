@@ -16,14 +16,14 @@ impl crate::Key {
     pub fn try_to_raw_text(
         &self,
         toml_version: TomlVersion,
-    ) -> Result<String, toml_text::ParseError> {
+    ) -> Result<String, tombi_toml_text::ParseError> {
         match self {
             Self::BareKey(key) => Ok(key.token().unwrap().text().to_string()),
             Self::BasicString(key) => {
-                toml_text::try_from_basic_string(key.token().unwrap().text(), toml_version)
+                tombi_toml_text::try_from_basic_string(key.token().unwrap().text(), toml_version)
             }
             Self::LiteralString(key) => {
-                toml_text::try_from_literal_string(key.token().unwrap().text())
+                tombi_toml_text::try_from_literal_string(key.token().unwrap().text())
             }
         }
     }

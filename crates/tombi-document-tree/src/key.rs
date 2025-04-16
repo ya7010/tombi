@@ -54,9 +54,11 @@ impl Key {
         toml_version: TomlVersion,
     ) -> Result<std::string::String, crate::Error> {
         match self.kind {
-            KeyKind::BareKey => toml_text::try_from_bare_key(&self.value, toml_version),
-            KeyKind::BasicString => toml_text::try_from_basic_string(&self.value, toml_version),
-            KeyKind::LiteralString => toml_text::try_from_literal_string(&self.value),
+            KeyKind::BareKey => tombi_toml_text::try_from_bare_key(&self.value, toml_version),
+            KeyKind::BasicString => {
+                tombi_toml_text::try_from_basic_string(&self.value, toml_version)
+            }
+            KeyKind::LiteralString => tombi_toml_text::try_from_literal_string(&self.value),
         }
         .map_err(|error| crate::Error::ParseStringError {
             error,

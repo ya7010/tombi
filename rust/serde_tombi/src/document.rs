@@ -253,16 +253,16 @@ impl ToTomlString for tombi_document::String {
     ) {
         match self.kind() {
             tombi_document::StringKind::BasicString => {
-                result.push_str(&toml_text::to_basic_string(self.value()));
+                result.push_str(&tombi_toml_text::to_basic_string(self.value()));
             }
             tombi_document::StringKind::LiteralString => {
-                result.push_str(&toml_text::to_literal_string(self.value()));
+                result.push_str(&tombi_toml_text::to_literal_string(self.value()));
             }
             tombi_document::StringKind::MultiLineBasicString => {
-                result.push_str(&toml_text::to_multi_line_basic_string(self.value()));
+                result.push_str(&tombi_toml_text::to_multi_line_basic_string(self.value()));
             }
             tombi_document::StringKind::MultiLineLiteralString => {
-                result.push_str(&toml_text::to_multi_line_literal_string(self.value()));
+                result.push_str(&tombi_toml_text::to_multi_line_literal_string(self.value()));
             }
         }
     }

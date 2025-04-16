@@ -21,19 +21,19 @@ impl crate::String {
         kind: StringKind,
         quoted_string: impl Into<std::string::String>,
         toml_version: TomlVersion,
-    ) -> Result<Self, toml_text::ParseError> {
+    ) -> Result<Self, tombi_toml_text::ParseError> {
         let quoted_string = quoted_string.into();
 
         let value = match &kind {
             StringKind::BasicString(_) => {
-                toml_text::try_from_basic_string(&quoted_string, toml_version)
+                tombi_toml_text::try_from_basic_string(&quoted_string, toml_version)
             }
-            StringKind::LiteralString(_) => toml_text::try_from_literal_string(&quoted_string),
+            StringKind::LiteralString(_) => tombi_toml_text::try_from_literal_string(&quoted_string),
             StringKind::MultiLineBasicString(_) => {
-                toml_text::try_from_multi_line_basic_string(&quoted_string, toml_version)
+                tombi_toml_text::try_from_multi_line_basic_string(&quoted_string, toml_version)
             }
             StringKind::MultiLineLiteralString(_) => {
-                toml_text::try_from_multi_line_literal_string(&quoted_string)
+                tombi_toml_text::try_from_multi_line_literal_string(&quoted_string)
             }
         }?;
 

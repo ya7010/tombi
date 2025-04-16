@@ -10,7 +10,7 @@ itertools = { workspace = true }
 syntax = { workspace = true }
 thiserror = { workspace = true }
 tombi-text = { workspace = true }
-toml-text = { workspace = true }
+tombi-toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }
 url = { workspace = true }

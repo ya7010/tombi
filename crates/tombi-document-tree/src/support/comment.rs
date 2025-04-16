@@ -3,11 +3,11 @@ use tombi_ast::AstToken;
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {
     #[error(transparent)]
-    String(#[from] toml_text::ParseError),
+    String(#[from] tombi_toml_text::ParseError),
 }
 
 pub fn try_from_comment(value: &str) -> Result<String, ParseError> {
-    let comment = toml_text::parse_literal_string(&value[1..], false)?;
+    let comment = tombi_toml_text::parse_literal_string(&value[1..], false)?;
 
     Ok(comment)
 }

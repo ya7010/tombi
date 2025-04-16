@@ -26,7 +26,7 @@ tombi-document = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
 tombi-text = { workspace = true }
-toml-text = { workspace = true }
+tombi-toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }
 typed-builder = { workspace = true }
