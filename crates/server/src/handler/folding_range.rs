@@ -1,4 +1,4 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 use tower_lsp::lsp_types::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 
 use crate::backend::Backend;
@@ -26,11 +26,11 @@ pub async fn handle_folding_range(
     }
 }
 
-fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
+fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
     let mut ranges: Vec<FoldingRange> = vec![];
 
     for node in root.syntax().descendants() {
-        if let Some(table) = ast::Table::cast(node.to_owned()) {
+        if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
             let start_position = table.header().unwrap().range().start();
             let end_position = table
                 .subtables()
@@ -45,7 +45,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
                 kind: Some(FoldingRangeKind::Region),
                 collapsed_text: None,
             });
-        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
+        } else if let Some(array_of_table) = tombi_ast::ArrayOfTable::cast(node.to_owned()) {
             let start_position = array_of_table.header().unwrap().range().start();
             let end_position = array_of_table.range().end();
 
@@ -57,7 +57,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
                 kind: Some(FoldingRangeKind::Region),
                 collapsed_text: None,
             });
-        } else if let Some(array) = ast::Array::cast(node.to_owned()) {
+        } else if let Some(array) = tombi_ast::Array::cast(node.to_owned()) {
             let start_position = array.bracket_start().unwrap().range().start();
             let end_position = array.bracket_end().unwrap().range().end();
 
@@ -69,7 +69,7 @@ fn create_folding_ranges(root: ast::Root) -> Vec<FoldingRange> {
                 kind: Some(FoldingRangeKind::Region),
                 collapsed_text: None,
             });
-        } else if let Some(inline_table) = ast::InlineTable::cast(node.to_owned()) {
+        } else if let Some(inline_table) = tombi_ast::InlineTable::cast(node.to_owned()) {
             let start_position = inline_table.brace_start().unwrap().range().start();
             let end_position = inline_table.brace_end().unwrap().range().end();
 

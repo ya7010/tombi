@@ -8,7 +8,6 @@ license = { workspace = true }
 
 [dependencies]
 ahash = { workspace = true }
-ast = { workspace = true }
 config.workspace = true
 document = { workspace = true }
 document-tree = { workspace = true }
@@ -24,6 +23,7 @@ serde_json = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 tokio.workspace = true
+tombi-ast = { workspace = true }
 tracing = { workspace = true }
 url = { workspace = true }
 x-tombi.workspace = true

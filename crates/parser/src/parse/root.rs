@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{parser::Parser, token_set::TS_KEY_FIRST, ErrorKind::*};
 
-impl Parse for ast::Root {
+impl Parse for tombi_ast::Root {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
         let mut only_key_values = true;
@@ -18,7 +18,7 @@ impl Parse for ast::Root {
             if p.nth_at(n, EOF) {
                 break;
             } else if p.nth_at_ts(n, TS_KEY_FIRST) {
-                ast::KeyValue::parse(p);
+                tombi_ast::KeyValue::parse(p);
                 if !p.at_ts(TS_LINE_END) {
                     invalid_line(p, ExpectedLineBreak);
                 }
@@ -27,13 +27,13 @@ impl Parse for ast::Root {
                     end_dangling_comments(p, false);
                     only_key_values = false;
                 }
-                ast::ArrayOfTable::parse(p);
+                tombi_ast::ArrayOfTable::parse(p);
             } else if p.nth_at(n, T!['[']) {
                 if only_key_values {
                     end_dangling_comments(p, false);
                     only_key_values = false;
                 }
-                ast::Table::parse(p);
+                tombi_ast::Table::parse(p);
             } else {
                 unknwon_line(p);
             }

@@ -1,6 +1,6 @@
 use std::io::Read;
 
-use ast::AstNode;
+use tombi_ast::AstNode;
 use clap::Parser;
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
@@ -36,7 +36,7 @@ fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Erro
         return Err(anyhow::anyhow!(INVALID_MESSAGE));
     }
 
-    let Some(root) = ast::Root::cast(p.into_syntax_node()) else {
+    let Some(root) = tombi_ast::Root::cast(p.into_syntax_node()) else {
         eprintln!("ast root cast failed");
         return Err(anyhow::anyhow!(INVALID_MESSAGE));
     };

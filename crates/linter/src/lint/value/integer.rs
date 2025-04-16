@@ -1,17 +1,17 @@
 use crate::Lint;
 
-impl Lint for ast::IntegerBin {
+impl Lint for tombi_ast::IntegerBin {
     fn lint(&self, _l: &mut crate::Linter) {}
 }
 
-impl Lint for ast::IntegerOct {
+impl Lint for tombi_ast::IntegerOct {
     fn lint(&self, _l: &mut crate::Linter) {}
 }
 
-impl Lint for ast::IntegerDec {
+impl Lint for tombi_ast::IntegerDec {
     fn lint(&self, _l: &mut crate::Linter) {}
 }
 
-impl Lint for ast::IntegerHex {
+impl Lint for tombi_ast::IntegerHex {
     fn lint(&self, _l: &mut crate::Linter) {}
 }

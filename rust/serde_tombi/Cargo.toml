@@ -8,7 +8,6 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-ast = { workspace = true }
 chrono = { workspace = true }
 config = { workspace = true }
 date-time = { workspace = true }
@@ -26,6 +25,7 @@ text = { workspace = true }
 textwrap = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+tombi-ast = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

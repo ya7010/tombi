@@ -9,7 +9,7 @@ use crate::{
     ErrorKind::*,
 };
 
-impl Parse for ast::Array {
+impl Parse for tombi_ast::Array {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
@@ -27,11 +27,11 @@ impl Parse for ast::Array {
                 break;
             }
 
-            ast::Value::parse(p);
+            tombi_ast::Value::parse(p);
 
             let n = peek_leading_comments(p);
             if p.nth_at(n, T![,]) {
-                ast::Comma::parse(p);
+                tombi_ast::Comma::parse(p);
             } else if !p.nth_at(n, T![']']) {
                 p.error(crate::Error::new(ExpectedComma, p.current_range()));
                 p.bump_any();

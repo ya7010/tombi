@@ -172,7 +172,7 @@ pub trait GetHeaderSchemarAccessors {
     fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>>;
 }
 
-impl GetHeaderSchemarAccessors for ast::Table {
+impl GetHeaderSchemarAccessors for tombi_ast::Table {
     fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
         let array_of_tables_keys = self
             .array_of_tables_keys()
@@ -194,7 +194,7 @@ impl GetHeaderSchemarAccessors for ast::Table {
     }
 }
 
-impl GetHeaderSchemarAccessors for ast::ArrayOfTable {
+impl GetHeaderSchemarAccessors for tombi_ast::ArrayOfTable {
     fn get_header_schema_accessor(&self, toml_version: TomlVersion) -> Option<Vec<SchemaAccessor>> {
         let array_of_tables_keys = self
             .array_of_tables_keys()

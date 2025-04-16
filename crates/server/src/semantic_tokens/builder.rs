@@ -1,4 +1,4 @@
-use ast::AstToken;
+use tombi_ast::AstToken;
 use tower_lsp::lsp_types::{Position, Range, SemanticToken};
 
 use super::token_type::TokenType;
@@ -37,7 +37,7 @@ impl SemanticTokensBuilder {
 
     pub fn add_schema_url_comment(
         &mut self,
-        comment: impl AsRef<ast::Comment>,
+        comment: impl AsRef<tombi_ast::Comment>,
         file_schema_range: &text::Range,
     ) {
         let comment_range = comment.as_ref().syntax().range();

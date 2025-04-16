@@ -8,7 +8,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct Float {
     value: f64,
-    node: ast::Float,
+    node: tombi_ast::Float,
 }
 
 impl Float {
@@ -18,7 +18,7 @@ impl Float {
     }
 
     #[inline]
-    pub fn node(&self) -> &ast::Float {
+    pub fn node(&self) -> &tombi_ast::Float {
         &self.node
     }
 
@@ -43,7 +43,7 @@ impl ValueImpl for Float {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::Float {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::Float {
     fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,

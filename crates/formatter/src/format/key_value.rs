@@ -1,10 +1,10 @@
 use std::fmt::Write;
 
-use ast::AstNode;
+use tombi_ast::AstNode;
 
 use crate::Format;
 
-impl Format for ast::KeyValue {
+impl Format for tombi_ast::KeyValue {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         self.leading_comments().collect::<Vec<_>>().format(f)?;
 

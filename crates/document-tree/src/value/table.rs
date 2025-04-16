@@ -1,6 +1,6 @@
-use ast::{AstChildren, AstNode};
 use indexmap::{map::Entry, IndexMap};
 use itertools::Itertools;
+use tombi_ast::{AstChildren, AstNode};
 use toml_version::TomlVersion;
 
 use crate::{
@@ -36,7 +36,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_root(node: &ast::Root) -> Self {
+    pub(crate) fn new_root(node: &tombi_ast::Root) -> Self {
         Self {
             kind: TableKind::Root,
             key_values: Default::default(),
@@ -45,7 +45,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_table(node: &ast::Table) -> Self {
+    pub(crate) fn new_table(node: &tombi_ast::Table) -> Self {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
@@ -59,7 +59,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_array_of_table(node: &ast::ArrayOfTable) -> Self {
+    pub(crate) fn new_array_of_table(node: &tombi_ast::ArrayOfTable) -> Self {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
@@ -73,7 +73,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_inline_table(node: &ast::InlineTable) -> Self {
+    pub(crate) fn new_inline_table(node: &tombi_ast::InlineTable) -> Self {
         Self {
             kind: TableKind::InlineTable,
             key_values: Default::default(),
@@ -87,7 +87,7 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_key_value(node: &ast::KeyValue) -> Self {
+    pub(crate) fn new_key_value(node: &tombi_ast::KeyValue) -> Self {
         Self {
             kind: TableKind::KeyValue,
             key_values: Default::default(),
@@ -296,7 +296,7 @@ impl ValueImpl for Table {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Table> for ast::Table {
+impl IntoDocumentTreeAndErrors<crate::Table> for tombi_ast::Table {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -373,7 +373,7 @@ impl IntoDocumentTreeAndErrors<crate::Table> for ast::Table {
     }
 }
 
-impl IntoDocumentTreeAndErrors<Table> for ast::ArrayOfTable {
+impl IntoDocumentTreeAndErrors<Table> for tombi_ast::ArrayOfTable {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -457,23 +457,23 @@ impl IntoDocumentTreeAndErrors<Table> for ast::ArrayOfTable {
     }
 }
 
-impl IntoDocumentTreeAndErrors<Table> for ast::TableOrArrayOfTable {
+impl IntoDocumentTreeAndErrors<Table> for tombi_ast::TableOrArrayOfTable {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
     ) -> DocumentTreeAndErrors<Table> {
         match self {
-            ast::TableOrArrayOfTable::Table(table) => {
+            tombi_ast::TableOrArrayOfTable::Table(table) => {
                 table.into_document_tree_and_errors(toml_version)
             }
-            ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+            tombi_ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
                 array_of_table.into_document_tree_and_errors(toml_version)
             }
         }
     }
 }
 
-impl IntoDocumentTreeAndErrors<Table> for ast::KeyValue {
+impl IntoDocumentTreeAndErrors<Table> for tombi_ast::KeyValue {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
@@ -537,7 +537,7 @@ impl IntoDocumentTreeAndErrors<Table> for ast::KeyValue {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::InlineTable {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::InlineTable {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -606,7 +606,7 @@ impl IntoIterator for Table {
 }
 
 fn get_array_of_tables_keys(
-    keys_iter: impl Iterator<Item = AstChildren<ast::Key>>,
+    keys_iter: impl Iterator<Item = AstChildren<tombi_ast::Key>>,
     toml_version: TomlVersion,
     errors: &mut Vec<crate::Error>,
 ) -> Vec<Vec<Key>> {

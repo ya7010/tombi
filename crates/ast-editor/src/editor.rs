@@ -1,19 +1,19 @@
 use std::borrow::Cow;
 
-use ast::AstNode;
+use tombi_ast::AstNode;
 use schema_store::{CurrentSchema, SchemaContext};
 
 use crate::{change::Change, Edit};
 
 pub struct Editor<'a> {
-    root: ast::Root,
+    root: tombi_ast::Root,
     #[allow(dead_code)]
     changes: Vec<Change>,
     schema_context: &'a SchemaContext<'a>,
 }
 
 impl<'a> Editor<'a> {
-    pub fn new(root: ast::Root, schema_context: &'a SchemaContext<'a>) -> Self {
+    pub fn new(root: tombi_ast::Root, schema_context: &'a SchemaContext<'a>) -> Self {
         Self {
             root,
             changes: vec![],
@@ -21,7 +21,7 @@ impl<'a> Editor<'a> {
         }
     }
 
-    pub async fn edit(self) -> ast::Root {
+    pub async fn edit(self) -> tombi_ast::Root {
         let new_root = self.root.clone_for_update();
         let current_schema = self.schema_context.root_schema.and_then(|document_schema| {
             document_schema

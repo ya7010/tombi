@@ -291,7 +291,7 @@ impl SchemaStore {
 
     pub async fn try_get_source_schema_from_ast(
         &self,
-        root: &ast::Root,
+        root: &tombi_ast::Root,
         source_url_or_path: Option<Either<&url::Url, &std::path::Path>>,
     ) -> Result<Option<SourceSchema>, (crate::Error, text::Range)> {
         let source_path = match source_url_or_path {

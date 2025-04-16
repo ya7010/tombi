@@ -1,4 +1,4 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 
 use crate::{
     support::comment::try_new_comment, DocumentTreeAndErrors, IntoDocumentTreeAndErrors, Value,
@@ -48,7 +48,7 @@ pub struct Array {
 }
 
 impl Array {
-    pub(crate) fn new_array(node: &ast::Array) -> Self {
+    pub(crate) fn new_array(node: &tombi_ast::Array) -> Self {
         Self {
             kind: ArrayKind::Array,
             values: vec![],
@@ -180,7 +180,7 @@ impl ValueImpl for Array {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::Array {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::Array {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
@@ -199,14 +199,14 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::Array {
 
         for (value_or_key, comma) in self.value_or_key_values_with_commata() {
             match value_or_key {
-                ast::ValueOrKeyValue::Value(value) => {
+                tombi_ast::ValueOrKeyValue::Value(value) => {
                     let (value, errs) = value.into_document_tree_and_errors(toml_version).into();
                     if !errs.is_empty() {
                         errors.extend(errs);
                     }
                     array.push(value);
                 }
-                ast::ValueOrKeyValue::KeyValue(key_value) => {
+                tombi_ast::ValueOrKeyValue::KeyValue(key_value) => {
                     let (table, errs) =
                         key_value.into_document_tree_and_errors(toml_version).into();
                     if !errs.is_empty() {

@@ -1,4 +1,4 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 use itertools::Itertools;
 use schema_store::SchemaContext;
 use syntax::SyntaxElement;
@@ -6,8 +6,8 @@ use syntax::SyntaxElement;
 use crate::{change::Change, node::make_comma_with_tailing_comment};
 
 pub fn array_comma_tailing_comment(
-    value: &ast::Value,
-    comma: Option<&ast::Comma>,
+    value: &tombi_ast::Value,
+    comma: Option<&tombi_ast::Comma>,
     _schema_context: &SchemaContext,
 ) -> Vec<Change> {
     if let Some(tailing_comment) = value.tailing_comment() {

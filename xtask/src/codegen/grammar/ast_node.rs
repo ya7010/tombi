@@ -14,7 +14,7 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
             let kind = format_ident!("{}", node.name.to_case(Case::UpperSnake));
             let traits = node.traits.iter().map(|trait_name| {
                 let trait_name = format_ident!("{}", trait_name);
-                quote!(impl ast::#trait_name for #name {})
+                quote!(impl tombi_ast::#trait_name for #name {})
             });
 
             let methods = node.fields.iter().map(|field| {
@@ -97,7 +97,7 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
                 .collect();
             let traits = en.traits.iter().sorted().map(|trait_name| {
                 let trait_name = format_ident!("{}", trait_name);
-                quote!(impl ast::#trait_name for #name {})
+                quote!(impl tombi_ast::#trait_name for #name {})
             });
 
             let ast_node = quote! {
@@ -173,12 +173,12 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
                     pub struct #name {
                         pub(crate) syntax: SyntaxNode,
                     }
-                    impl ast::#trait_name for #name {}
+                    impl tombi_ast::#trait_name for #name {}
                 },
                 quote! {
                     impl #name {
                         #[inline]
-                        pub fn new<T: ast::#trait_name>(node: T) -> #name {
+                        pub fn new<T: tombi_ast::#trait_name>(node: T) -> #name {
                             #name {
                                 syntax: node.syntax().clone()
                             }

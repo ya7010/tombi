@@ -1,6 +1,6 @@
 mod error;
 
-use ast::AstNode;
+use tombi_ast::AstNode;
 use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
@@ -86,7 +86,7 @@ impl<'de> Deserializer<'de> {
         T: DeserializeOwned,
     {
         let parsed = parser::parse(toml_text);
-        let root = ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
+        let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
         let toml_version = self.get_toml_version(&root).await?;
         let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
@@ -105,7 +105,7 @@ impl<'de> Deserializer<'de> {
         Ok(T::deserialize(&document)?)
     }
 
-    async fn get_toml_version(&self, root: &ast::Root) -> Result<TomlVersion, crate::de::Error> {
+    async fn get_toml_version(&self, root: &tombi_ast::Root) -> Result<TomlVersion, crate::de::Error> {
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::new(),
@@ -162,7 +162,7 @@ impl<'de> Deserializer<'de> {
 
     pub(crate) fn try_to_document(
         &self,
-        root: ast::Root,
+        root: tombi_ast::Root,
         toml_version: TomlVersion,
     ) -> Result<document::Document, crate::de::Error> {
         // Convert the AST to a document tree

@@ -1,12 +1,12 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 use itertools::Itertools;
 use syntax::SyntaxElement;
 
 use crate::{change::Change, node::make_comma_with_tailing_comment};
 
 pub fn inline_table_comma_tailing_comment(
-    key_value: &ast::KeyValue,
-    comma: Option<&ast::Comma>,
+    key_value: &tombi_ast::KeyValue,
+    comma: Option<&tombi_ast::Comma>,
 ) -> Vec<Change> {
     if let Some(tailing_comment) = key_value.tailing_comment() {
         if match comma {

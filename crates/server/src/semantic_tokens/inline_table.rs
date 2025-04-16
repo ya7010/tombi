@@ -1,8 +1,8 @@
-use ast::{AstNode, AstToken};
+use tombi_ast::{AstNode, AstToken};
 
 use super::{AppendSemanticTokens, SemanticTokensBuilder, TokenType};
 
-impl AppendSemanticTokens for ast::InlineTable {
+impl AppendSemanticTokens for tombi_ast::InlineTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comments in self.inner_begin_dangling_comments() {
             for comment in comments {

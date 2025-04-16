@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::Format;
 
-impl Format for ast::Table {
+impl Format for tombi_ast::Table {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 

@@ -11,7 +11,7 @@ use crate::{
     ErrorKind::*,
 };
 
-impl Parse for ast::ArrayOfTable {
+impl Parse for tombi_ast::ArrayOfTable {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
@@ -21,7 +21,7 @@ impl Parse for ast::ArrayOfTable {
 
         p.eat(T!("[["));
 
-        ast::Keys::parse(p);
+        tombi_ast::Keys::parse(p);
 
         if !p.eat(T!("]]")) {
             invalid_line(p, ExpectedDoubleBracketEnd);
@@ -42,7 +42,7 @@ impl Parse for ast::ArrayOfTable {
             if p.nth_at_ts(n, TS_NEXT_SECTION) {
                 break;
             }
-            ast::KeyValue::parse(p);
+            tombi_ast::KeyValue::parse(p);
 
             if !p.at_ts(TS_LINE_END) {
                 invalid_line(p, ExpectedLineBreak);

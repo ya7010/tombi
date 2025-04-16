@@ -9,7 +9,7 @@ mod value;
 use std::{borrow::Cow, ops::Deref};
 
 use ahash::AHashMap;
-use ast::{algo::ancestors_at_position, AstNode};
+use tombi_ast::{algo::ancestors_at_position, AstNode};
 use comment::get_comment_completion_contents;
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
@@ -25,7 +25,7 @@ use schema_store::{
 use syntax::{SyntaxElement, SyntaxKind};
 
 pub async fn get_completion_contents(
-    root: ast::Root,
+    root: tombi_ast::Root,
     position: text::Position,
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Vec<CompletionContent> {
@@ -51,7 +51,7 @@ pub async fn get_completion_contents(
             }
         }
 
-        let ast_keys = if ast::Keys::cast(node.to_owned()).is_some() {
+        let ast_keys = if tombi_ast::Keys::cast(node.to_owned()).is_some() {
             if let Some(SyntaxElement::Token(last_token)) = node.last_child_or_token() {
                 if last_token.kind() == SyntaxKind::DOT {
                     completion_hint = Some(CompletionHint::DotTrigger {
@@ -60,7 +60,7 @@ pub async fn get_completion_contents(
                 }
             }
             continue;
-        } else if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+        } else if let Some(kv) = tombi_ast::KeyValue::cast(node.to_owned()) {
             match (kv.keys(), kv.eq(), kv.value()) {
                 (Some(_), Some(_), Some(_)) => {}
                 (Some(_), Some(eq), None) => {
@@ -85,7 +85,7 @@ pub async fn get_completion_contents(
             }
 
             kv.keys()
-        } else if let Some(table) = ast::Table::cast(node.to_owned()) {
+        } else if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
             let (bracket_start_range, bracket_end_range) =
                 match (table.bracket_start(), table.bracket_end()) {
                     (Some(bracket_start), Some(blacket_end)) => {
@@ -105,7 +105,7 @@ pub async fn get_completion_contents(
                 }
                 table.header()
             }
-        } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
+        } else if let Some(array_of_table) = tombi_ast::ArrayOfTable::cast(node.to_owned()) {
             let (double_bracket_start_range, double_bracket_end_range) = {
                 match (
                     array_of_table.double_bracket_start(),

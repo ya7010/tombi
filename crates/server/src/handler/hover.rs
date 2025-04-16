@@ -1,4 +1,4 @@
-use ast::{algo::ancestors_at_position, AstNode};
+use tombi_ast::{algo::ancestors_at_position, AstNode};
 use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use itertools::{Either, Itertools};
 use schema_store::SchemaContext;
@@ -82,7 +82,7 @@ pub async fn handle_hover(
 }
 
 pub(crate) async fn get_hover_range(
-    root: &ast::Root,
+    root: &tombi_ast::Root,
     position: text::Position,
     toml_version: config::TomlVersion,
 ) -> Option<(Vec<document_tree::Key>, Option<text::Range>)> {
@@ -90,7 +90,7 @@ pub(crate) async fn get_hover_range(
     let mut hover_range = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        if let Some(array) = ast::Array::cast(node.to_owned()) {
+        if let Some(array) = tombi_ast::Array::cast(node.to_owned()) {
             for (value, comma) in array.values_with_comma() {
                 if hover_range.is_none() {
                     let mut range = value.range();
@@ -102,7 +102,7 @@ pub(crate) async fn get_hover_range(
                     }
                 }
             }
-        } else if let Some(inline_table) = ast::InlineTable::cast(node.to_owned()) {
+        } else if let Some(inline_table) = tombi_ast::InlineTable::cast(node.to_owned()) {
             for (key_value, comma) in inline_table.key_values_with_comma() {
                 if hover_range.is_none() {
                     let mut range = key_value.range();
@@ -117,9 +117,9 @@ pub(crate) async fn get_hover_range(
         };
 
         let keys =
-            if let Some(kv) = ast::KeyValue::cast(node.to_owned()) {
+            if let Some(kv) = tombi_ast::KeyValue::cast(node.to_owned()) {
                 if hover_range.is_none() {
-                    if let Some(inline_table) = ast::InlineTable::cast(node.parent().unwrap()) {
+                    if let Some(inline_table) = tombi_ast::InlineTable::cast(node.parent().unwrap()) {
                         for (key_value, comma) in inline_table.key_values_with_comma() {
                             if hover_range.is_none() {
                                 let mut range = key_value.range();
@@ -137,7 +137,7 @@ pub(crate) async fn get_hover_range(
                     }
                 }
                 kv.keys()
-            } else if let Some(table) = ast::Table::cast(node.to_owned()) {
+            } else if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
                 let header = table.header();
                 if let Some(header) = &header {
                     if hover_range.is_none()
@@ -171,7 +171,7 @@ pub(crate) async fn get_hover_range(
                 }
 
                 header
-            } else if let Some(array_of_table) = ast::ArrayOfTable::cast(node.to_owned()) {
+            } else if let Some(array_of_table) = tombi_ast::ArrayOfTable::cast(node.to_owned()) {
                 let header = array_of_table.header();
                 if let Some(header) = &header {
                     if hover_range.is_none()
@@ -206,7 +206,7 @@ pub(crate) async fn get_hover_range(
                     }
                 }
                 header
-            } else if let Some(root) = ast::Root::cast(node.to_owned()) {
+            } else if let Some(root) = tombi_ast::Root::cast(node.to_owned()) {
                 if hover_range.is_none()
                     && (root
                         .key_values_begin_dangling_comments()

@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use ast::AstNode;
+use tombi_ast::AstNode;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -14,7 +14,7 @@ use x_tombi::TableKeysOrder;
 
 pub async fn table_keys_order<'a>(
     value: &'a document_tree::Value,
-    key_values: Vec<ast::KeyValue>,
+    key_values: Vec<tombi_ast::KeyValue>,
     current_schema: Option<&'a CurrentSchema<'a>>,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {

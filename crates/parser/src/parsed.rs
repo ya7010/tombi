@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use ast::AstNode;
+use tombi_ast::AstNode;
 use config::TomlVersion;
 use syntax::SyntaxNode;
 

@@ -4,7 +4,7 @@ use schema_store::ValueSchema;
 
 use crate::rule::{inline_table_comma_tailing_comment, inline_table_keys_order};
 
-impl crate::Edit for ast::InlineTable {
+impl crate::Edit for tombi_ast::InlineTable {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],

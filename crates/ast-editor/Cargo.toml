@@ -7,19 +7,19 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-ahash.workspace = true
-ast.workspace = true
-document-tree.workspace = true
-futures.workspace = true
-indexmap.workspace = true
-itertools.workspace = true
-parser.workspace = true
-regex.workspace = true
-schema-store.workspace = true
-syntax.workspace = true
-text.workspace = true
-thiserror.workspace = true
-toml-version.workspace = true
-tracing.workspace = true
-validator.workspace = true
-x-tombi.workspace = true
+ahash = { workspace = true }
+document-tree = { workspace = true }
+futures = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
+parser = { workspace = true }
+regex = { workspace = true }
+schema-store = { workspace = true }
+syntax = { workspace = true }
+text = { workspace = true }
+thiserror = { workspace = true }
+tombi-ast = { workspace = true }
+toml-version = { workspace = true }
+tracing = { workspace = true }
+validator = { workspace = true }
+x-tombi = { workspace = true }

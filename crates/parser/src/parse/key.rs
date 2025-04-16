@@ -3,7 +3,7 @@ use syntax::{SyntaxKind::*, T};
 use super::Parse;
 use crate::{parser::Parser, token_set::TS_KEY_FIRST, ErrorKind::*};
 
-impl Parse for ast::Keys {
+impl Parse for tombi_ast::Keys {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
         if eat_keys(p) {

@@ -88,10 +88,10 @@ impl Backend {
     }
 
     #[inline]
-    pub async fn get_incomplete_ast(&self, text_document_uri: &Url) -> Option<ast::Root> {
+    pub async fn get_incomplete_ast(&self, text_document_uri: &Url) -> Option<tombi_ast::Root> {
         self.get_parsed(text_document_uri)
             .await?
-            .cast::<ast::Root>()
+            .cast::<tombi_ast::Root>()
             .map(|root| root.tree())
     }
 
@@ -99,7 +99,7 @@ impl Backend {
     pub async fn try_get_ast(
         &self,
         text_document_uri: &Url,
-    ) -> Option<Result<ast::Root, Vec<Diagnostic>>> {
+    ) -> Option<Result<tombi_ast::Root, Vec<Diagnostic>>> {
         self.try_get_ast_and_source_schema(text_document_uri)
             .await
             .map(|result| result.map(|(root, _)| root))
@@ -109,11 +109,11 @@ impl Backend {
     pub async fn try_get_ast_and_source_schema(
         &self,
         text_document_uri: &Url,
-    ) -> Option<Result<(ast::Root, Option<SourceSchema>), Vec<Diagnostic>>> {
+    ) -> Option<Result<(tombi_ast::Root, Option<SourceSchema>), Vec<Diagnostic>>> {
         let Some(parsed) = self
             .get_parsed(text_document_uri)
             .await?
-            .cast::<ast::Root>()
+            .cast::<tombi_ast::Root>()
         else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };

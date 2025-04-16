@@ -1,12 +1,12 @@
 use std::fmt::Write;
 
-use ast::AstNode;
 use config::QuoteStyle;
+use tombi_ast::AstNode;
 
 use super::LiteralNode;
 use crate::format::Format;
 
-impl Format for ast::BasicString {
+impl Format for tombi_ast::BasicString {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         self.leading_comments().collect::<Vec<_>>().format(f)?;
 
@@ -33,7 +33,7 @@ impl Format for ast::BasicString {
     }
 }
 
-impl Format for ast::LiteralString {
+impl Format for tombi_ast::LiteralString {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         self.leading_comments().collect::<Vec<_>>().format(f)?;
 
@@ -59,13 +59,13 @@ impl Format for ast::LiteralString {
         Ok(())
     }
 }
-impl LiteralNode for ast::MultiLineBasicString {
+impl LiteralNode for tombi_ast::MultiLineBasicString {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }
 }
 
-impl LiteralNode for ast::MultiLineLiteralString {
+impl LiteralNode for tombi_ast::MultiLineLiteralString {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }

@@ -10,7 +10,7 @@ use crate::{
     ErrorKind::*,
 };
 
-impl Parse for ast::Table {
+impl Parse for tombi_ast::Table {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
@@ -20,7 +20,7 @@ impl Parse for ast::Table {
 
         p.eat(T!['[']);
 
-        ast::Keys::parse(p);
+        tombi_ast::Keys::parse(p);
 
         if !p.eat(T![']']) {
             invalid_line(p, ExpectedBracketEnd);
@@ -43,7 +43,7 @@ impl Parse for ast::Table {
                 break;
             }
 
-            ast::KeyValue::parse(p);
+            tombi_ast::KeyValue::parse(p);
 
             if !p.at_ts(TS_LINE_END) {
                 invalid_line(p, ExpectedLineBreak);

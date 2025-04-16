@@ -1,6 +1,6 @@
 use super::LiteralNode;
 
-impl LiteralNode for ast::Float {
+impl LiteralNode for tombi_ast::Float {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }

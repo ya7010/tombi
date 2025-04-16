@@ -1,6 +1,6 @@
 use crate::Lint;
 
-impl Lint for ast::KeyValue {
+impl Lint for tombi_ast::KeyValue {
     fn lint(&self, l: &mut crate::Linter) {
         if let Some(keys) = self.keys() {
             for key in keys.keys() {

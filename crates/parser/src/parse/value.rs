@@ -3,7 +3,7 @@ use syntax::{SyntaxKind::*, T};
 use super::{key::eat_key, leading_comments, peek_leading_comments, tailing_comment, Parse};
 use crate::{parser::Parser, token_set::TS_COMMEMT_OR_LINE_END, ErrorKind::*};
 
-impl Parse for ast::Value {
+impl Parse for tombi_ast::Value {
     fn parse(p: &mut Parser<'_>) {
         let n = peek_leading_comments(p);
         match p.nth(n) {
@@ -21,8 +21,8 @@ impl Parse for ast::Value {
             | LOCAL_DATE_TIME
             | LOCAL_DATE
             | LOCAL_TIME => parse_literal_value(p),
-            T!('[') => ast::Array::parse(p),
-            T!('{') => ast::InlineTable::parse(p),
+            T!('[') => tombi_ast::Array::parse(p),
+            T!('{') => tombi_ast::InlineTable::parse(p),
             BARE_KEY => {
                 // NOTE: This is a hack to make code completion more comfortable.
 

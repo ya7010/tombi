@@ -1,11 +1,11 @@
 use std::fmt::Write;
 
-use ast::AstNode;
 use itertools::Itertools;
+use tombi_ast::AstNode;
 
 use crate::Format;
 
-impl Format for ast::Keys {
+impl Format for tombi_ast::Keys {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let keys = self
             .keys()
@@ -17,13 +17,13 @@ impl Format for ast::Keys {
     }
 }
 
-impl Format for ast::BareKey {
+impl Format for tombi_ast::BareKey {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", self.syntax().text())
     }
 }
 
-impl Format for ast::Key {
+impl Format for tombi_ast::Key {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             Self::BareKey(it) => it.format(f),

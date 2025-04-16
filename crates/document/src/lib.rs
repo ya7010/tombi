@@ -113,7 +113,7 @@ macro_rules! test_deserialize {
         #[cfg(feature = "serde")]
         #[test]
         fn $name() {
-            use ast::AstNode;
+            use tombi_ast::AstNode;
             use itertools::Itertools;
             use document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
@@ -123,7 +123,7 @@ macro_rules! test_deserialize {
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim());
             pretty_assertions::assert_eq!(p.errors($toml_version).collect_vec(), Vec::<&parser::Error>::new());
-            let root = ast::Root::cast(p.into_syntax_node()).unwrap();
+            let root = tombi_ast::Root::cast(p.into_syntax_node()).unwrap();
             let (document_tree, errors) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(errors, vec![]);
             let document: $crate::Document = document_tree.into_document($toml_version);
@@ -140,7 +140,7 @@ macro_rules! test_deserialize {
         #[cfg(feature = "serde")]
         #[test]
         fn $name() {
-            use ast::AstNode;
+            use tombi_ast::AstNode;
             use itertools::Itertools;
             use document_tree::IntoDocumentTreeAndErrors;
 
@@ -161,7 +161,7 @@ macro_rules! test_deserialize {
                     expected_errors,
                 );
             }
-            let root = ast::Root::cast(p.into_syntax_node()).unwrap();
+            let root = tombi_ast::Root::cast(p.into_syntax_node()).unwrap();
             let (_, errs) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(
                 errs

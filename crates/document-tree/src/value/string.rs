@@ -4,10 +4,10 @@ use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors, ValueImpl, ValueTy
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StringKind {
-    BasicString(ast::BasicString),
-    LiteralString(ast::LiteralString),
-    MultiLineBasicString(ast::MultiLineBasicString),
-    MultiLineLiteralString(ast::MultiLineLiteralString),
+    BasicString(tombi_ast::BasicString),
+    LiteralString(tombi_ast::LiteralString),
+    MultiLineBasicString(tombi_ast::MultiLineBasicString),
+    MultiLineLiteralString(tombi_ast::MultiLineLiteralString),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -83,7 +83,7 @@ impl ValueImpl for crate::String {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::BasicString {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::BasicString {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -113,7 +113,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::BasicString {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::LiteralString {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LiteralString {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -143,7 +143,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::LiteralString {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::MultiLineBasicString {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::MultiLineBasicString {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -173,7 +173,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::MultiLineBasicString {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::MultiLineLiteralString {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::MultiLineLiteralString {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
