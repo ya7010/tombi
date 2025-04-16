@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use config::QuoteStyle;
+use tombi_config::QuoteStyle;
 use tombi_ast::AstNode;
 
 use super::LiteralNode;
@@ -73,7 +73,7 @@ impl LiteralNode for tombi_ast::MultiLineLiteralString {
 
 #[cfg(test)]
 mod tests {
-    use config::{QuoteStyle, TomlVersion};
+    use tombi_config::{QuoteStyle, TomlVersion};
 
     use crate::{test_format, FormatDefinitions};
 

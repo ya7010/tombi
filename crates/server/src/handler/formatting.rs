@@ -1,4 +1,4 @@
-use config::FormatOptions;
+use tombi_config::FormatOptions;
 use itertools::Either;
 use tower_lsp::lsp_types::{
     notification::PublishDiagnostics, DocumentFormattingParams, PublishDiagnosticsParams, TextEdit,

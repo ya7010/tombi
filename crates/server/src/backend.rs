@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use ahash::AHashMap;
-use config::{Config, TomlVersion};
+use tombi_config::{Config, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
 use itertools::{Either, Itertools};

@@ -1,10 +1,10 @@
 use std::{ops::Deref, sync::Arc};
 
 use ahash::AHashMap;
-use config::Schema;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Either;
 use tokio::sync::RwLock;
+use tombi_config::Schema;
 
 use crate::{
     json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
@@ -53,7 +53,7 @@ impl SchemaStore {
 
     pub async fn load_config(
         &self,
-        config: &config::Config,
+        config: &tombi_config::Config,
         config_path: Option<&std::path::Path>,
     ) -> Result<(), crate::Error> {
         let base_dirpath = config_path.and_then(|p| p.parent());

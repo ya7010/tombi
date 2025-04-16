@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
-use tombi_ast::AstNode;
-use config::TomlVersion;
 use syntax::SyntaxNode;
+use tombi_ast::AstNode;
+use tombi_config::TomlVersion;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Parsed<T> {

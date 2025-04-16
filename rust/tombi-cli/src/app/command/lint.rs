@@ -1,4 +1,4 @@
-use config::{LintOptions, TomlVersion};
+use tombi_config::{LintOptions, TomlVersion};
 use diagnostic::{printer::Pretty, Diagnostic, Print};
 use tokio::io::AsyncReadExt;
 

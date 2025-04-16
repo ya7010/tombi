@@ -28,7 +28,7 @@ mod tests {
     #[tokio::test]
     async fn test_key_empty() {
         let diagnostics = crate::Linter::new(
-            config::TomlVersion::default(),
+            tombi_config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
             &schema_store::SchemaStore::new(),

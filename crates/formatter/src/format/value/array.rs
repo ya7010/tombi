@@ -162,7 +162,7 @@ fn format_singleline_array(
 
 #[cfg(test)]
 mod tests {
-    use config::{QuoteStyle, TomlVersion};
+    use tombi_config::{QuoteStyle, TomlVersion};
     use rstest::rstest;
 
     use super::*;

@@ -84,7 +84,7 @@ pub async fn handle_hover(
 pub(crate) async fn get_hover_range(
     root: &tombi_ast::Root,
     position: text::Position,
-    toml_version: config::TomlVersion,
+    toml_version: tombi_config::TomlVersion,
 ) -> Option<(Vec<document_tree::Key>, Option<text::Range>)> {
     let mut keys_vec = vec![];
     let mut hover_range = None;

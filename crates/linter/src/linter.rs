@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;

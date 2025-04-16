@@ -1,8 +1,8 @@
-use config::TomlVersion;
 use syntax::{
     SyntaxKind::{self, *},
     T,
 };
+use tombi_config::TomlVersion;
 
 use crate::{marker::Marker, token_set::TokenSet, Event};
 

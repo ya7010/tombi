@@ -1,4 +1,4 @@
-use config::LintOptions;
+use tombi_config::LintOptions;
 use itertools::Either;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,

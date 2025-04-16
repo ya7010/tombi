@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use itertools::Itertools;
 
 use crate::Accessor;

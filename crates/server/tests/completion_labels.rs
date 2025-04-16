@@ -948,8 +948,8 @@ mod completion_labels {
                         .schema_store
                         .load_schemas(
                             &[
-                                config::Schema::Root(
-                                    config::RootSchema {
+                                tombi_config::Schema::Root(
+                                    tombi_config::RootSchema {
                                         toml_version: None,
                                         path: schema_url.to_string(),
                                         include: vec!["*.toml".to_string()],
@@ -1192,8 +1192,8 @@ mod completion_labels {
                         .schema_store
                         .load_schemas(
                             &[
-                                config::Schema::Root(
-                                    config::RootSchema {
+                                tombi_config::Schema::Root(
+                                    tombi_config::RootSchema {
                                         toml_version: None,
                                         path: schema_url.to_string(),
                                         include: vec!["*.toml".to_string()],
@@ -1218,8 +1218,8 @@ mod completion_labels {
                     .schema_store
                     .load_schemas(
                         &[
-                            config::Schema::Sub(
-                                config::SubSchema {
+                            tombi_config::Schema::Sub(
+                                tombi_config::SubSchema {
                                     path: subschema_url.to_string(),
                                     include: vec!["*.toml".to_string()],
                                     root_keys: Some($root_keys.to_string()),

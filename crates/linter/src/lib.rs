@@ -4,12 +4,12 @@ mod linter;
 mod rule;
 mod warning;
 
-pub use config::LintOptions;
 use diagnostic::Diagnostic;
 pub use error::{Error, ErrorKind};
 use lint::Lint;
 pub use linter::Linter;
 use rule::Rule;
+pub use tombi_config::LintOptions;
 pub use warning::{Warning, WarningKind};
 
 #[cfg(test)]
@@ -49,7 +49,7 @@ macro_rules! test_lint {
     ) => {
         #[tokio::test]
         async fn $name() {
-            use config::TomlVersion;
+            use tombi_config::TomlVersion;
 
             test_lib::init_tracing();
 
@@ -60,7 +60,7 @@ macro_rules! test_lint {
                 // Load schemas
                 schema_store
                     .load_schemas(
-                        &[config::Schema::Root(config::RootSchema {
+                        &[tombi_config::Schema::Root(tombi_config::RootSchema {
                             toml_version: None,
                             path: schema_path.to_string_lossy().to_string(),
                             include: vec!["*.toml".to_string()],
@@ -125,7 +125,7 @@ macro_rules! test_lint {
     ) => {
         #[tokio::test]
         async fn $name() {
-            use config::TomlVersion;
+            use tombi_config::TomlVersion;
 
             test_lib::init_tracing();
 
@@ -136,7 +136,7 @@ macro_rules! test_lint {
                 // Load schemas
                 schema_store
                     .load_schemas(
-                        &[config::Schema::Root(config::RootSchema {
+                        &[tombi_config::Schema::Root(tombi_config::RootSchema {
                             toml_version: None,
                             path: schema_path.to_string_lossy().to_string(),
                             include: vec!["*.toml".to_string()],

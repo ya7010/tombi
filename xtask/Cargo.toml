@@ -9,7 +9,6 @@ license = { workspace = true }
 anyhow = { workspace = true }
 chrono.workspace = true
 clap = { workspace = true }
-config = { workspace = true, features = ["jsonschema"] }
 convert_case = "0.6.0"
 flate2 = "1.0.35"
 itertools = { workspace = true }
@@ -20,6 +19,7 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror = { workspace = true }
 time = { version = "0.3.36", default-features = false }
+tombi-config = { workspace = true, features = ["jsonschema"] }
 ungrammar = "1.16.1"
 xshell = "0.2.7"
 zip = { version = "2.2.1", default-features = false, features = [

@@ -1,4 +1,4 @@
-use config::{DateTimeDelimiter, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use tombi_config::{DateTimeDelimiter, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 
 /// FormatDefinitions provides the definition of the format that does not have the freedom set by [`FormatOptions`][crate::FormatOptions].
 ///

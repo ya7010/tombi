@@ -16,7 +16,7 @@ pub use all_of::find_all_of_completion_items;
 pub use any_of::find_any_of_completion_items;
 use array::type_hint_array;
 use boolean::type_hint_boolean;
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use float::type_hint_float;
 use futures::{future::BoxFuture, FutureExt};
 use integer::type_hint_integer;

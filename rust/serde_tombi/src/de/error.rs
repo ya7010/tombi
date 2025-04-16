@@ -4,7 +4,7 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    Config(#[from] config::Error),
+    Config(#[from] tombi_config::Error),
 
     #[error(transparent)]
     SchemaStore(#[from] schema_store::Error),

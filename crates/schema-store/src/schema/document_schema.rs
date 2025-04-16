@@ -1,5 +1,5 @@
 use ahash::AHashMap;
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use futures::{future::BoxFuture, FutureExt};
 
 use super::{

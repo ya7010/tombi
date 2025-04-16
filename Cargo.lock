@@ -356,21 +356,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b63caa9aa9397e2d9480a9b13673856c78d8ac123288526c37d7839f2a86990"
 
 [[package]]
-name = "config"
-version = "0.0.0"
-dependencies = [
- "assert_matches",
- "clap",
- "schemars",
- "serde",
- "thiserror",
- "toml-version",
- "tracing",
- "url",
- "x-tombi",
-]
-
-[[package]]
 name = "convert_case"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -611,7 +596,6 @@ version = "0.0.0"
 dependencies = [
  "assert_matches",
  "ast-editor",
- "config",
  "diagnostic",
  "document-tree",
  "itertools",
@@ -627,6 +611,7 @@ dependencies = [
  "textwrap",
  "tokio",
  "tombi-ast",
+ "tombi-config",
  "tracing",
  "tracing-subscriber",
  "unicode-segmentation",
@@ -1113,7 +1098,6 @@ name = "linter"
 version = "0.0.0"
 dependencies = [
  "assert_matches",
- "config",
  "diagnostic",
  "document-tree",
  "futures",
@@ -1130,6 +1114,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tombi-ast",
+ "tombi-config",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -1302,7 +1287,6 @@ dependencies = [
 name = "parser"
 version = "0.0.0"
 dependencies = [
- "config",
  "diagnostic",
  "document-tree",
  "drop_bomb",
@@ -1316,6 +1300,7 @@ dependencies = [
  "textwrap",
  "thiserror",
  "tombi-ast",
+ "tombi-config",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1757,7 +1742,6 @@ name = "schema-store"
 version = "0.0.0"
 dependencies = [
  "ahash",
- "config",
  "document",
  "document-tree",
  "futures",
@@ -1775,6 +1759,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tombi-ast",
+ "tombi-config",
  "tracing",
  "url",
  "x-tombi",
@@ -1882,7 +1867,6 @@ name = "serde_tombi"
 version = "0.0.1"
 dependencies = [
  "chrono",
- "config",
  "date-time",
  "diagnostic",
  "document",
@@ -1902,6 +1886,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tombi-ast",
+ "tombi-config",
  "toml-text",
  "toml-version",
  "tracing",
@@ -1929,7 +1914,6 @@ dependencies = [
  "camino",
  "chrono",
  "clap",
- "config",
  "crossbeam-channel",
  "diagnostic",
  "document",
@@ -1959,6 +1943,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tombi-ast",
+ "tombi-config",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
@@ -2283,7 +2268,6 @@ version = "0.0.0"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
- "config",
  "diagnostic",
  "formatter",
  "glob",
@@ -2295,9 +2279,25 @@ dependencies = [
  "server",
  "thiserror",
  "tokio",
+ "tombi-config",
  "tracing",
  "tracing-subscriber",
  "url",
+]
+
+[[package]]
+name = "tombi-config"
+version = "0.0.0"
+dependencies = [
+ "assert_matches",
+ "clap",
+ "schemars",
+ "serde",
+ "thiserror",
+ "toml-version",
+ "tracing",
+ "url",
+ "x-tombi",
 ]
 
 [[package]]
@@ -2904,7 +2904,6 @@ dependencies = [
  "anyhow",
  "chrono",
  "clap",
- "config",
  "convert_case",
  "flate2",
  "itertools",
@@ -2915,6 +2914,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "time",
+ "tombi-config",
  "ungrammar",
  "xshell",
  "zip",

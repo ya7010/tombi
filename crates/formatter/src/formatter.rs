@@ -2,7 +2,7 @@ pub mod definitions;
 
 use std::fmt::Write;
 
-use config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
+use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use itertools::{Either, Itertools};
 use unicode_segmentation::UnicodeSegmentation;
@@ -146,7 +146,7 @@ impl<'a> Formatter<'a> {
     }
 
     #[inline]
-    pub(crate) fn quote_style(&self) -> config::QuoteStyle {
+    pub(crate) fn quote_style(&self) -> tombi_config::QuoteStyle {
         self.definitions.quote_style.unwrap_or_default()
     }
 

@@ -81,7 +81,7 @@ mod test {
         let p = crate::parse(input);
 
         assert_eq!(
-            p.errors(config::TomlVersion::default()).collect_vec(),
+            p.errors(tombi_config::TomlVersion::default()).collect_vec(),
             Vec::<&crate::Error>::new()
         );
     }

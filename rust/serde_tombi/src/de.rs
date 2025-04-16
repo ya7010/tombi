@@ -1,12 +1,12 @@
 mod error;
 
-use tombi_ast::AstNode;
 use document::IntoDocument;
 use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
 use itertools::{Either, Itertools};
 use schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
+use tombi_ast::AstNode;
 use toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
@@ -59,7 +59,7 @@ where
 #[derive(TypedBuilder)]
 pub struct Deserializer<'de> {
     #[builder(default, setter(into, strip_option))]
-    config: Option<&'de ::config::Config>,
+    config: Option<&'de ::tombi_config::Config>,
 
     #[builder(default, setter(into, strip_option))]
     config_path: Option<&'de std::path::Path>,
@@ -105,7 +105,10 @@ impl<'de> Deserializer<'de> {
         Ok(T::deserialize(&document)?)
     }
 
-    async fn get_toml_version(&self, root: &tombi_ast::Root) -> Result<TomlVersion, crate::de::Error> {
+    async fn get_toml_version(
+        &self,
+        root: &tombi_ast::Root,
+    ) -> Result<TomlVersion, crate::de::Error> {
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::new(),
@@ -620,11 +623,11 @@ optional_string = "provided"
         test_lib::init_tracing();
         let toml = r#""#;
 
-        let config: config::Config = from_str_async(toml)
+        let config: tombi_config::Config = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
 
-        pretty_assertions::assert_eq!(config, config::Config::default());
+        pretty_assertions::assert_eq!(config, tombi_config::Config::default());
     }
 
     #[tokio::test]
@@ -649,7 +652,10 @@ optional_string = "provided"
         assert!(config.schemas.is_some());
 
         let schema = config.schema.unwrap();
-        assert_eq!(schema.enabled, Some(config::BoolDefaultTrue::default()));
+        assert_eq!(
+            schema.enabled,
+            Some(tombi_config::BoolDefaultTrue::default())
+        );
 
         let schemas = config.schemas.unwrap();
         assert_eq!(schemas.len(), 5);

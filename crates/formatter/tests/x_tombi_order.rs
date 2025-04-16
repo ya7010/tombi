@@ -916,10 +916,10 @@ mod table_keys_order {
         ) => {
             #[tokio::test]
             async fn $name() {
-                use config::TomlVersion;
                 use formatter::{FormatOptions, Formatter};
                 use schema_store::SchemaStore;
                 use textwrap::dedent;
+                use tombi_config::TomlVersion;
 
                 test_lib::init_tracing();
 
@@ -930,7 +930,7 @@ mod table_keys_order {
                     // Load schemas
                     schema_store
                         .load_schemas(
-                            &[config::Schema::Root(config::RootSchema {
+                            &[tombi_config::Schema::Root(tombi_config::RootSchema {
                                 toml_version: None,
                                 path: schema_path.to_string_lossy().to_string(),
                                 include: vec!["*.toml".to_string()],

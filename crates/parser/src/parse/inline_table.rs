@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use syntax::{SyntaxKind::*, T};
 
 use crate::{
@@ -80,7 +80,7 @@ impl Parse for tombi_ast::InlineTable {
 
 #[cfg(test)]
 mod test {
-    use config::TomlVersion;
+    use tombi_config::TomlVersion;
 
     use crate::{test_parser, ErrorKind::*};
 

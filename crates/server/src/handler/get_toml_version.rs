@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use itertools::Either;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 

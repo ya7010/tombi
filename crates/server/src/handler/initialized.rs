@@ -1,4 +1,4 @@
-use config::SchemaOptions;
+use tombi_config::SchemaOptions;
 use schema_store::json::CatalogUrl;
 use tower_lsp::lsp_types::{InitializedParams, MessageType};
 

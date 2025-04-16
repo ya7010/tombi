@@ -55,7 +55,7 @@ pub type ReferableValueSchemas = Arc<tokio::sync::RwLock<Vec<Referable<ValueSche
 
 #[derive(Debug, Clone)]
 pub struct Schema {
-    pub toml_version: Option<config::TomlVersion>,
+    pub toml_version: Option<tombi_config::TomlVersion>,
     pub url: crate::SchemaUrl,
     pub include: Vec<String>,
     pub sub_root_keys: Option<Vec<SchemaAccessor>>,

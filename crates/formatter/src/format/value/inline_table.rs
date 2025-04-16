@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use itertools::Itertools;
 use tombi_ast::AstNode;
 use unicode_segmentation::UnicodeSegmentation;
@@ -168,7 +168,7 @@ fn format_singleline_inline_table(
 
 #[cfg(test)]
 mod tests {
-    use config::TomlVersion;
+    use tombi_config::TomlVersion;
 
     use crate::{formatter::definitions::FormatDefinitions, test_format};
 

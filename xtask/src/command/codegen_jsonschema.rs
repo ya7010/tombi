@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use schemars::{generate::SchemaSettings, SchemaGenerator};
 
 use crate::utils::project_root;
@@ -13,7 +13,7 @@ pub fn run() -> Result<(), anyhow::Error> {
     )?;
     std::fs::write(
         project_root().join("tombi.schema.json"),
-        serde_json::to_string_pretty(&generator.into_root_schema_for::<config::Config>())? + "\n",
+        serde_json::to_string_pretty(&generator.into_root_schema_for::<tombi_config::Config>())? + "\n",
     )?;
     Ok(())
 }

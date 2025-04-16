@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 use xshell::Shell;
 
 use crate::utils::project_root;

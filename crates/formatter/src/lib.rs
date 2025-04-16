@@ -1,7 +1,7 @@
 mod format;
 pub mod formatter;
 
-pub use config::FormatOptions;
+pub use tombi_config::FormatOptions;
 use format::Format;
 use formatter::definitions::FormatDefinitions;
 pub use formatter::Formatter;
@@ -22,7 +22,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr) -> Ok($expected:expr);) => {
-        $crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Ok($expected););
+        $crate::test_format!(#[test] fn $name($source, tombi_config::TomlVersion::default()) -> Ok($expected););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($expected:expr);) => {
@@ -56,7 +56,7 @@ macro_rules! test_format {
     };
 
     (#[test] fn $name:ident($source:expr) -> Err(_);) => {
-        $crate::test_format!(#[test] fn $name($source, config::TomlVersion::default()) -> Err(_););
+        $crate::test_format!(#[test] fn $name($source, tombi_config::TomlVersion::default()) -> Err(_););
     };
 
     (#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err(_);) => {
@@ -90,7 +90,7 @@ macro_rules! test_format {
 
 #[cfg(test)]
 mod test {
-    use config::{QuoteStyle, TomlVersion};
+    use tombi_config::{QuoteStyle, TomlVersion};
 
     use super::*;
     use crate::FormatDefinitions;

@@ -1,4 +1,4 @@
-use config::SUPPORTED_CONFIG_FILENAMES;
+use tombi_config::SUPPORTED_CONFIG_FILENAMES;
 use tower_lsp::lsp_types::{
     notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier, Url,
 };

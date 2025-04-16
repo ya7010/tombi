@@ -10,7 +10,6 @@ ahash.workspace = true
 camino = { workspace = true }
 chrono.workspace = true
 clap = { workspace = true, optional = true }
-config = { workspace = true }
 crossbeam-channel = "0.5.13"
 diagnostic = { workspace = true }
 document = { workspace = true }
@@ -35,6 +34,7 @@ text = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tombi-ast = { workspace = true }
+tombi-config = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

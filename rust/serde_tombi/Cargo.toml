@@ -9,7 +9,6 @@ license.workspace = true
 
 [dependencies]
 chrono = { workspace = true }
-config = { workspace = true }
 date-time = { workspace = true }
 diagnostic = { workspace = true }
 document = { workspace = true }
@@ -26,6 +25,7 @@ textwrap = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tombi-ast = { workspace = true }
+tombi-config = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

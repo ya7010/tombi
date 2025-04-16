@@ -56,7 +56,7 @@ where
 #[derive(TypedBuilder)]
 pub struct Serializer<'a> {
     #[builder(default, setter(into, strip_option))]
-    config: Option<&'a config::Config>,
+    config: Option<&'a tombi_config::Config>,
 
     #[builder(default, setter(into, strip_option))]
     config_path: Option<&'a std::path::Path>,

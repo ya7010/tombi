@@ -1,4 +1,4 @@
-use config::TomlVersion;
+use tombi_config::TomlVersion;
 
 #[derive(thiserror::Error, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]

@@ -153,7 +153,7 @@ mod goto_type_definition_tests {
                     backend
                         .schema_store
                         .load_schemas(
-                            &[config::Schema::Root(config::RootSchema {
+                            &[tombi_config::Schema::Root(tombi_config::RootSchema {
                                 toml_version: None,
                                 path: schema_file_url.to_string(),
                                 include: vec!["*.toml".to_string()],
