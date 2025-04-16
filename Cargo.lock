@@ -392,19 +392,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "date-time"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "pretty_assertions",
- "rstest",
- "serde",
- "serde_json",
- "thiserror",
- "tracing",
-]
-
-[[package]]
 name = "deranged"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -461,7 +448,6 @@ name = "document"
 version = "0.0.0"
 dependencies = [
  "chrono",
- "date-time",
  "document-tree",
  "indexmap",
  "itertools",
@@ -474,6 +460,7 @@ dependencies = [
  "textwrap",
  "thiserror",
  "tombi-ast",
+ "tombi-date-time",
  "toml-text",
  "toml-version",
  "tower-lsp",
@@ -485,13 +472,13 @@ name = "document-tree"
 version = "0.0.0"
 dependencies = [
  "chrono",
- "date-time",
  "diagnostic",
  "indexmap",
  "itertools",
  "text",
  "thiserror",
  "tombi-ast",
+ "tombi-date-time",
  "toml-text",
  "toml-version",
  "tracing",
@@ -1845,7 +1832,6 @@ name = "serde_tombi"
 version = "0.0.1"
 dependencies = [
  "chrono",
- "date-time",
  "diagnostic",
  "document",
  "document-tree",
@@ -1865,6 +1851,7 @@ dependencies = [
  "tokio",
  "tombi-ast",
  "tombi-config",
+ "tombi-date-time",
  "toml-text",
  "toml-version",
  "tracing",
@@ -2298,6 +2285,19 @@ dependencies = [
  "tracing",
  "url",
  "x-tombi",
+]
+
+[[package]]
+name = "tombi-date-time"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "pretty_assertions",
+ "rstest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]

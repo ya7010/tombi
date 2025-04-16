@@ -124,13 +124,17 @@ impl Value {
             Value::Float(float) => serde::de::Unexpected::Float(float.value()),
             Value::String(string) => serde::de::Unexpected::Str(string.value()),
             Value::OffsetDateTime(_) => {
-                serde::de::Unexpected::Other(date_time::OffsetDateTime::type_name())
+                serde::de::Unexpected::Other(tombi_date_time::OffsetDateTime::type_name())
             }
             Value::LocalDateTime(_) => {
-                serde::de::Unexpected::Other(date_time::LocalDateTime::type_name())
+                serde::de::Unexpected::Other(tombi_date_time::LocalDateTime::type_name())
             }
-            Value::LocalDate(_) => serde::de::Unexpected::Other(date_time::LocalDate::type_name()),
-            Value::LocalTime(_) => serde::de::Unexpected::Other(date_time::LocalTime::type_name()),
+            Value::LocalDate(_) => {
+                serde::de::Unexpected::Other(tombi_date_time::LocalDate::type_name())
+            }
+            Value::LocalTime(_) => {
+                serde::de::Unexpected::Other(tombi_date_time::LocalTime::type_name())
+            }
             Value::Array(_) => serde::de::Unexpected::Seq,
             Value::Table(_) => serde::de::Unexpected::Map,
         }

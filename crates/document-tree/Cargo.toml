@@ -8,13 +8,13 @@ license = { workspace = true }
 
 [dependencies]
 chrono = { workspace = true }
-date-time = { workspace = true }
 diagnostic = { workspace = true, optional = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 tombi-ast = { workspace = true }
+tombi-date-time = { workspace = true }
 toml-text = { workspace = true }
 toml-version = { workspace = true }
 tracing = { workspace = true }

@@ -7,13 +7,13 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OffsetDateTime {
-    value: date_time::OffsetDateTime,
+    value: tombi_date_time::OffsetDateTime,
     node: tombi_ast::OffsetDateTime,
 }
 
 impl OffsetDateTime {
     #[inline]
-    pub fn value(&self) -> &date_time::OffsetDateTime {
+    pub fn value(&self) -> &tombi_date_time::OffsetDateTime {
         &self.value
     }
 
@@ -35,13 +35,13 @@ impl OffsetDateTime {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDateTime {
-    value: date_time::LocalDateTime,
+    value: tombi_date_time::LocalDateTime,
     node: tombi_ast::LocalDateTime,
 }
 
 impl LocalDateTime {
     #[inline]
-    pub fn value(&self) -> &date_time::LocalDateTime {
+    pub fn value(&self) -> &tombi_date_time::LocalDateTime {
         &self.value
     }
 
@@ -63,13 +63,13 @@ impl LocalDateTime {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDate {
-    value: date_time::LocalDate,
+    value: tombi_date_time::LocalDate,
     node: tombi_ast::LocalDate,
 }
 
 impl LocalDate {
     #[inline]
-    pub fn value(&self) -> &date_time::LocalDate {
+    pub fn value(&self) -> &tombi_date_time::LocalDate {
         &self.value
     }
 
@@ -91,13 +91,13 @@ impl LocalDate {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalTime {
-    value: date_time::LocalTime,
+    value: tombi_date_time::LocalTime,
     node: tombi_ast::LocalTime,
 }
 
 impl LocalTime {
     #[inline]
-    pub fn value(&self) -> &date_time::LocalTime {
+    pub fn value(&self) -> &tombi_date_time::LocalTime {
         &self.value
     }
 
@@ -157,25 +157,25 @@ impl ValueImpl for LocalTime {
     }
 }
 
-impl From<crate::OffsetDateTime> for date_time::OffsetDateTime {
+impl From<crate::OffsetDateTime> for tombi_date_time::OffsetDateTime {
     fn from(node: crate::OffsetDateTime) -> Self {
         node.value
     }
 }
 
-impl From<crate::LocalDateTime> for date_time::LocalDateTime {
+impl From<crate::LocalDateTime> for tombi_date_time::LocalDateTime {
     fn from(node: crate::LocalDateTime) -> Self {
         node.value
     }
 }
 
-impl From<crate::LocalDate> for date_time::LocalDate {
+impl From<crate::LocalDate> for tombi_date_time::LocalDate {
     fn from(node: crate::LocalDate) -> Self {
         node.value
     }
 }
 
-impl From<crate::LocalTime> for date_time::LocalTime {
+impl From<crate::LocalTime> for tombi_date_time::LocalTime {
     fn from(node: crate::LocalTime) -> Self {
         node.value
     }

@@ -260,16 +260,16 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
         T: ?Sized + Serialize,
     {
         match name {
-            date_time::OFFSET_DATE_TIME_NEWTYPE_NAME => value
+            tombi_date_time::OFFSET_DATE_TIME_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
                 .map(|dt| Some(document::Value::OffsetDateTime(dt))),
-            date_time::LOCAL_DATE_TIME_NEWTYPE_NAME => value
+            tombi_date_time::LOCAL_DATE_TIME_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
                 .map(|dt| Some(document::Value::LocalDateTime(dt))),
-            date_time::LOCAL_DATE_NEWTYPE_NAME => value
+            tombi_date_time::LOCAL_DATE_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
                 .map(|dt| Some(document::Value::LocalDate(dt))),
-            date_time::LOCAL_TIME_NEWTYPE_NAME => value
+            tombi_date_time::LOCAL_TIME_NEWTYPE_NAME => value
                 .serialize(DateTimeSerializer::new(self.accessors))
                 .map(|dt| Some(document::Value::LocalTime(dt))),
             _ => value.serialize(self),
@@ -612,7 +612,7 @@ impl<'a, T> DateTimeSerializer<'a, T> {
 impl<T> serde::ser::Serializer for DateTimeSerializer<'_, T>
 where
     T: std::str::FromStr,
-    T::Err: Into<date_time::parse::Error>,
+    T::Err: Into<tombi_date_time::parse::Error>,
 {
     type Ok = T;
     type Error = crate::ser::Error;

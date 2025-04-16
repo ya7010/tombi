@@ -1,4 +1,4 @@
-use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
+use tombi_date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
 use rstest::rstest;
 use serde_json::json;
 

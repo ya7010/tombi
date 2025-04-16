@@ -60,7 +60,7 @@ pub enum Error {
 
     #[error("invalid date-time: {error}")]
     ParseDateTimeError {
-        error: date_time::parse::Error,
+        error: tombi_date_time::parse::Error,
         range: text::Range,
     },
 

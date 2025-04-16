@@ -25,7 +25,7 @@ pub enum Error {
     #[error("{error} for {accessors}")]
     DateTimeParseFailed {
         accessors: schema_store::Accessors,
-        error: date_time::parse::Error,
+        error: tombi_date_time::parse::Error,
     },
 
     #[error("TOML must be UTF-8 encoded")]

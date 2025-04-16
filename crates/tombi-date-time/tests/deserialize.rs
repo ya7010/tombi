@@ -1,4 +1,4 @@
-use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
+use tombi_date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, TimeZoneOffset};
 use rstest::rstest;
 use serde_json::json;
 
@@ -103,8 +103,8 @@ fn test_offset_date_time_deserialization(
 }
 
 #[rstest]
-#[case(json!("invalid-date-time"), date_time::parse::Error::InvalidFormat)]
-#[case(json!("2021-01-01T12:00:00+25:00"), date_time::parse::Error::InvalidTimeZoneOffsetHour)]
+#[case(json!("invalid-date-time"), tombi_date_time::parse::Error::InvalidFormat)]
+#[case(json!("2021-01-01T12:00:00+25:00"), tombi_date_time::parse::Error::InvalidTimeZoneOffsetHour)]
 #[case(json!(true), "invalid type: boolean `true`, expected a TOML DateTime")]
 fn test_invalid_date_time_deserialization(
     #[case] input: serde_json::Value,
