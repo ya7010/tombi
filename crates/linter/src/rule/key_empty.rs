@@ -1,15 +1,15 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 
 use crate::Rule;
 
 pub struct KeyEmptyRule;
 
-impl Rule<ast::Key> for KeyEmptyRule {
-    fn check(node: &ast::Key, l: &mut crate::Linter) {
+impl Rule<tombi_ast::Key> for KeyEmptyRule {
+    fn check(node: &tombi_ast::Key, l: &mut crate::Linter) {
         if match node {
-            ast::Key::BareKey(_) => false,
-            ast::Key::BasicString(node) => node.syntax().text() == "\"\"",
-            ast::Key::LiteralString(node) => node.syntax().text() == "''",
+            tombi_ast::Key::BareKey(_) => false,
+            tombi_ast::Key::BasicString(node) => node.syntax().text() == "\"\"",
+            tombi_ast::Key::LiteralString(node) => node.syntax().text() == "''",
         } {
             l.extend_diagnostics(crate::Warning {
                 kind: crate::WarningKind::KeyEmpty,

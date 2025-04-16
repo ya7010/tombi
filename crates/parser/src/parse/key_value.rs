@@ -3,13 +3,13 @@ use syntax::{SyntaxKind::*, T};
 use super::{leading_comments, tailing_comment, Parse, TS_LINE_END};
 use crate::{parser::Parser, ErrorKind::*};
 
-impl Parse for ast::KeyValue {
+impl Parse for tombi_ast::KeyValue {
     fn parse(p: &mut Parser) {
         let m = p.start();
 
         leading_comments(p);
 
-        ast::Keys::parse(p);
+        tombi_ast::Keys::parse(p);
 
         if !p.eat(T![=]) {
             p.error(crate::Error::new(ExpectedEqual, p.current_range()));
@@ -22,7 +22,7 @@ impl Parse for ast::KeyValue {
             p.invalid_token();
             p.error(crate::Error::new(ExpectedValue, p.previous_range()));
         } else {
-            ast::Value::parse(p);
+            tombi_ast::Value::parse(p);
         }
 
         tailing_comment(p);

@@ -29,7 +29,7 @@ impl Deref for DocumentTree {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
+impl IntoDocumentTreeAndErrors<crate::DocumentTree> for tombi_ast::Root {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -66,10 +66,10 @@ impl IntoDocumentTreeAndErrors<crate::DocumentTree> for ast::Root {
 
         for table_or_array_of_table in self.table_or_array_of_tables() {
             let (table, errs) = match table_or_array_of_table {
-                ast::TableOrArrayOfTable::Table(table) => {
+                tombi_ast::TableOrArrayOfTable::Table(table) => {
                     table.into_document_tree_and_errors(toml_version)
                 }
-                ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+                tombi_ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
                     array_of_table.into_document_tree_and_errors(toml_version)
                 }
             }

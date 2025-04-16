@@ -6,7 +6,6 @@ edition = { workspace = true }
 license = { workspace = true }
 
 [dependencies]
-ast = { workspace = true }
 config = { workspace = true }
 diagnostic = { workspace = true }
 document-tree = { workspace = true }
@@ -20,6 +19,7 @@ serde = { workspace = true }
 syntax = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
+tombi-ast = { workspace = true }
 tracing = { workspace = true }
 url = { workspace = true }
 validator.workspace = true

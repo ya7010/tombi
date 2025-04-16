@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use super::Format;
 
-impl Format for ast::Root {
+impl Format for tombi_ast::Root {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         f.reset();
 
@@ -40,7 +40,7 @@ impl Format for ast::Root {
                 write!(f, "{}", f.line_ending())?;
             }
             match table_or_array_of_tables {
-                ast::TableOrArrayOfTable::Table(table) => {
+                tombi_ast::TableOrArrayOfTable::Table(table) => {
                     let header_keys = table.header().unwrap().keys();
                     let key_value_size = table.key_values().count();
                     let has_dangling_comments = !table.key_values_dangling_comments().is_empty();
@@ -73,7 +73,7 @@ impl Format for ast::Root {
                         has_dangling_comments,
                     };
                 }
-                ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+                tombi_ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
                     let header_keys = array_of_table.header().unwrap().keys();
                     let key_value_size = array_of_table.key_values().count();
                     let has_dangling_comments =
@@ -122,12 +122,12 @@ impl Format for ast::Root {
     }
 }
 
-impl Format for ast::RootItem {
+impl Format for tombi_ast::RootItem {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            ast::RootItem::Table(it) => it.format(f),
-            ast::RootItem::ArrayOfTable(it) => it.format(f),
-            ast::RootItem::KeyValue(it) => it.format(f),
+            tombi_ast::RootItem::Table(it) => it.format(f),
+            tombi_ast::RootItem::ArrayOfTable(it) => it.format(f),
+            tombi_ast::RootItem::KeyValue(it) => it.format(f),
         }
     }
 }
@@ -137,13 +137,13 @@ enum Header {
     Root,
 
     Table {
-        header_keys: ast::AstChildren<ast::Key>,
+        header_keys: tombi_ast::AstChildren<tombi_ast::Key>,
         key_value_size: usize,
         has_dangling_comments: bool,
     },
 
     ArrayOfTable {
-        header_keys: ast::AstChildren<ast::Key>,
+        header_keys: tombi_ast::AstChildren<tombi_ast::Key>,
         key_value_size: usize,
         has_dangling_comments: bool,
     },

@@ -10,7 +10,7 @@ use crate::{
     ErrorKind::*,
 };
 
-impl Parse for ast::InlineTable {
+impl Parse for tombi_ast::InlineTable {
     fn parse(p: &mut Parser<'_>) {
         let m = p.start();
 
@@ -34,14 +34,14 @@ impl Parse for ast::InlineTable {
 
             let start_line = p.nth_range(n).start().line();
 
-            ast::KeyValue::parse(p);
+            tombi_ast::KeyValue::parse(p);
 
             key_value_lines += p.previous_range().end().line() - start_line;
 
             let n = peek_leading_comments(p);
             if p.nth_at(n, T![,]) {
                 last_comma_range = Some(p.nth_range(n));
-                ast::Comma::parse(p);
+                tombi_ast::Comma::parse(p);
             } else {
                 last_comma_range = None;
                 if !p.nth_at(n, T!['}']) {

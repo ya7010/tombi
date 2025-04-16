@@ -1,12 +1,12 @@
 use std::fmt::Write;
 
-use ast::AstNode;
 use itertools::Itertools;
+use tombi_ast::AstNode;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::Format;
 
-impl Format for ast::Array {
+impl Format for tombi_ast::Array {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         if self.should_be_multiline(f.toml_version()) || exceeds_line_width(self, f)? {
             format_multiline_array(self, f)
@@ -17,7 +17,7 @@ impl Format for ast::Array {
 }
 
 pub(crate) fn exceeds_line_width(
-    node: &ast::Array,
+    node: &tombi_ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<bool, std::fmt::Error> {
     let mut length = f.current_line_width();
@@ -28,10 +28,10 @@ pub(crate) fn exceeds_line_width(
     for value in node.values() {
         // Check if nested value should be multiline
         let should_be_multiline = match &value {
-            ast::Value::Array(array) => {
+            tombi_ast::Value::Array(array) => {
                 array.should_be_multiline(f.toml_version()) || exceeds_line_width(array, f)?
             }
-            ast::Value::InlineTable(table) => {
+            tombi_ast::Value::InlineTable(table) => {
                 table.should_be_multiline(f.toml_version())
                     || crate::format::value::inline_table::exceeds_line_width(table, f)?
             }
@@ -63,7 +63,7 @@ pub(crate) fn exceeds_line_width(
 }
 
 fn format_multiline_array(
-    array: &ast::Array,
+    array: &tombi_ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     array.leading_comments().collect::<Vec<_>>().format(f)?;
@@ -135,7 +135,7 @@ fn format_multiline_array(
 }
 
 fn format_singleline_array(
-    array: &ast::Array,
+    array: &tombi_ast::Array,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     array.leading_comments().collect::<Vec<_>>().format(f)?;
@@ -400,13 +400,13 @@ mod tests {
     #[case("[1, 2, 3,]", true)]
     #[case("[1, 2, 3]", false)]
     fn has_tailing_comma_after_last_value(#[case] source: &str, #[case] expected: bool) {
-        let p = parser::parse_as::<ast::Array>(source);
+        let p = parser::parse_as::<tombi_ast::Array>(source);
         assert_eq!(
             p.errors(TomlVersion::default()).collect_vec(),
             Vec::<&parser::Error>::new()
         );
 
-        let ast = ast::Array::cast(p.syntax_node()).unwrap();
+        let ast = tombi_ast::Array::cast(p.syntax_node()).unwrap();
         assert_eq!(ast.has_tailing_comma_after_last_value(), expected);
     }
 

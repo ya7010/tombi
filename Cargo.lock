@@ -131,25 +131,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
 
 [[package]]
-name = "ast"
-version = "0.0.0"
-dependencies = [
- "itertools",
- "syntax",
- "text",
- "thiserror",
- "toml-text",
- "toml-version",
- "tracing",
- "url",
-]
-
-[[package]]
 name = "ast-editor"
 version = "0.0.0"
 dependencies = [
  "ahash",
- "ast",
  "document-tree",
  "futures",
  "indexmap",
@@ -160,6 +145,7 @@ dependencies = [
  "syntax",
  "text",
  "thiserror",
+ "tombi-ast",
  "toml-version",
  "tracing",
  "validator",
@@ -511,7 +497,6 @@ dependencies = [
 name = "document"
 version = "0.0.0"
 dependencies = [
- "ast",
  "chrono",
  "date-time",
  "document-tree",
@@ -525,6 +510,7 @@ dependencies = [
  "text",
  "textwrap",
  "thiserror",
+ "tombi-ast",
  "toml-text",
  "toml-version",
  "tower-lsp",
@@ -535,7 +521,6 @@ dependencies = [
 name = "document-tree"
 version = "0.0.0"
 dependencies = [
- "ast",
  "chrono",
  "date-time",
  "diagnostic",
@@ -543,6 +528,7 @@ dependencies = [
  "itertools",
  "text",
  "thiserror",
+ "tombi-ast",
  "toml-text",
  "toml-version",
  "tracing",
@@ -624,7 +610,6 @@ name = "formatter"
 version = "0.0.0"
 dependencies = [
  "assert_matches",
- "ast",
  "ast-editor",
  "config",
  "diagnostic",
@@ -641,6 +626,7 @@ dependencies = [
  "text",
  "textwrap",
  "tokio",
+ "tombi-ast",
  "tracing",
  "tracing-subscriber",
  "unicode-segmentation",
@@ -1127,7 +1113,6 @@ name = "linter"
 version = "0.0.0"
 dependencies = [
  "assert_matches",
- "ast",
  "config",
  "diagnostic",
  "document-tree",
@@ -1144,6 +1129,7 @@ dependencies = [
  "text",
  "thiserror",
  "tokio",
+ "tombi-ast",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -1316,7 +1302,6 @@ dependencies = [
 name = "parser"
 version = "0.0.0"
 dependencies = [
- "ast",
  "config",
  "diagnostic",
  "document-tree",
@@ -1330,6 +1315,7 @@ dependencies = [
  "text",
  "textwrap",
  "thiserror",
+ "tombi-ast",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1771,7 +1757,6 @@ name = "schema-store"
 version = "0.0.0"
 dependencies = [
  "ahash",
- "ast",
  "config",
  "document",
  "document-tree",
@@ -1789,6 +1774,7 @@ dependencies = [
  "text",
  "thiserror",
  "tokio",
+ "tombi-ast",
  "tracing",
  "url",
  "x-tombi",
@@ -1895,7 +1881,6 @@ dependencies = [
 name = "serde_tombi"
 version = "0.0.1"
 dependencies = [
- "ast",
  "chrono",
  "config",
  "date-time",
@@ -1916,6 +1901,7 @@ dependencies = [
  "textwrap",
  "thiserror",
  "tokio",
+ "tombi-ast",
  "toml-text",
  "toml-version",
  "tracing",
@@ -1940,7 +1926,6 @@ name = "server"
 version = "0.0.0"
 dependencies = [
  "ahash",
- "ast",
  "camino",
  "chrono",
  "clap",
@@ -1973,6 +1958,7 @@ dependencies = [
  "textwrap",
  "thiserror",
  "tokio",
+ "tombi-ast",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
@@ -2270,6 +2256,20 @@ name = "tombi"
 version = "0.0.0"
 
 [[package]]
+name = "tombi-ast"
+version = "0.0.0"
+dependencies = [
+ "itertools",
+ "syntax",
+ "text",
+ "thiserror",
+ "toml-text",
+ "toml-version",
+ "tracing",
+ "url",
+]
+
+[[package]]
 name = "tombi-cargo-extension"
 version = "0.0.0"
 dependencies = [
@@ -2309,7 +2309,6 @@ name = "toml-test"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "ast",
  "chrono",
  "clap",
  "document-tree",
@@ -2321,6 +2320,7 @@ dependencies = [
  "serde_json",
  "text",
  "textwrap",
+ "tombi-ast",
  "toml-version",
 ]
 

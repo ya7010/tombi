@@ -1,8 +1,8 @@
-use ast::AstNode;
 use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
 use schema_store::{ArraySchema, SchemaContext};
 use syntax::SyntaxElement;
+use tombi_ast::AstNode;
 use x_tombi::ArrayValuesOrder;
 
 use crate::node::make_comma;
@@ -10,7 +10,7 @@ use crate::node::make_comma;
 use super::array_comma_tailing_comment;
 
 pub async fn array_values_order<'a>(
-    values_with_comma: Vec<(ast::Value, Option<ast::Comma>)>,
+    values_with_comma: Vec<(tombi_ast::Value, Option<tombi_ast::Comma>)>,
     array_schema: &'a ArraySchema,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
@@ -93,7 +93,7 @@ pub async fn array_values_order<'a>(
 
     if !is_last_comma {
         if let Some(syntax::SyntaxElement::Node(node)) = new.last() {
-            if let Some(comma) = ast::Comma::cast(node.clone()) {
+            if let Some(comma) = tombi_ast::Comma::cast(node.clone()) {
                 if comma.tailing_comment().is_none()
                     && comma.leading_comments().collect_vec().is_empty()
                 {
@@ -121,13 +121,13 @@ enum SortableType {
 }
 
 enum SortableValues {
-    Boolean(Vec<(bool, ast::Value, ast::Comma)>),
-    Integer(Vec<(i64, ast::Value, ast::Comma)>),
-    String(Vec<(String, ast::Value, ast::Comma)>),
-    OffsetDateTime(Vec<(String, ast::Value, ast::Comma)>),
-    LocalDateTime(Vec<(String, ast::Value, ast::Comma)>),
-    LocalDate(Vec<(String, ast::Value, ast::Comma)>),
-    LocalTime(Vec<(String, ast::Value, ast::Comma)>),
+    Boolean(Vec<(bool, tombi_ast::Value, tombi_ast::Comma)>),
+    Integer(Vec<(i64, tombi_ast::Value, tombi_ast::Comma)>),
+    String(Vec<(String, tombi_ast::Value, tombi_ast::Comma)>),
+    OffsetDateTime(Vec<(String, tombi_ast::Value, tombi_ast::Comma)>),
+    LocalDateTime(Vec<(String, tombi_ast::Value, tombi_ast::Comma)>),
+    LocalDate(Vec<(String, tombi_ast::Value, tombi_ast::Comma)>),
+    LocalTime(Vec<(String, tombi_ast::Value, tombi_ast::Comma)>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thiserror::Error)]
@@ -147,7 +147,7 @@ enum Warning {
 
 impl SortableValues {
     pub fn new(
-        values_with_comma: Vec<(ast::Value, Option<ast::Comma>)>,
+        values_with_comma: Vec<(tombi_ast::Value, Option<tombi_ast::Comma>)>,
         toml_version: toml_version::TomlVersion,
     ) -> Result<Self, Warning> {
         if values_with_comma.is_empty() {
@@ -155,19 +155,19 @@ impl SortableValues {
         }
 
         let sortable_type = match values_with_comma.first().unwrap().0 {
-            ast::Value::Boolean(_) => SortableType::Boolean,
-            ast::Value::IntegerBin(_)
-            | ast::Value::IntegerOct(_)
-            | ast::Value::IntegerDec(_)
-            | ast::Value::IntegerHex(_) => SortableType::Integer,
-            ast::Value::BasicString(_)
-            | ast::Value::LiteralString(_)
-            | ast::Value::MultiLineBasicString(_)
-            | ast::Value::MultiLineLiteralString(_) => SortableType::String,
-            ast::Value::OffsetDateTime(_) => SortableType::OffsetDateTime,
-            ast::Value::LocalDateTime(_) => SortableType::LocalDateTime,
-            ast::Value::LocalDate(_) => SortableType::LocalDate,
-            ast::Value::LocalTime(_) => SortableType::LocalTime,
+            tombi_ast::Value::Boolean(_) => SortableType::Boolean,
+            tombi_ast::Value::IntegerBin(_)
+            | tombi_ast::Value::IntegerOct(_)
+            | tombi_ast::Value::IntegerDec(_)
+            | tombi_ast::Value::IntegerHex(_) => SortableType::Integer,
+            tombi_ast::Value::BasicString(_)
+            | tombi_ast::Value::LiteralString(_)
+            | tombi_ast::Value::MultiLineBasicString(_)
+            | tombi_ast::Value::MultiLineLiteralString(_) => SortableType::String,
+            tombi_ast::Value::OffsetDateTime(_) => SortableType::OffsetDateTime,
+            tombi_ast::Value::LocalDateTime(_) => SortableType::LocalDateTime,
+            tombi_ast::Value::LocalDate(_) => SortableType::LocalDate,
+            tombi_ast::Value::LocalTime(_) => SortableType::LocalTime,
             _ => return Err(Warning::Empty),
         };
 
@@ -175,8 +175,8 @@ impl SortableValues {
             SortableType::Boolean => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
-                    if let ast::Value::Boolean(_) = value {
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    if let tombi_ast::Value::Boolean(_) = value {
                         match value.syntax().to_string().as_ref() {
                             "true" => sortable_values.push((true, value, comma)),
                             "false" => sortable_values.push((false, value, comma)),
@@ -191,9 +191,9 @@ impl SortableValues {
             SortableType::Integer => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
                     match value.clone() {
-                        ast::Value::IntegerBin(integer_bin) => {
+                        tombi_ast::Value::IntegerBin(integer_bin) => {
                             if let Ok(document_tree::Value::Integer(integer)) =
                                 integer_bin.try_into_document_tree(toml_version)
                             {
@@ -202,7 +202,7 @@ impl SortableValues {
                                 return Err(Warning::Incomplete);
                             }
                         }
-                        ast::Value::IntegerOct(integer_oct) => {
+                        tombi_ast::Value::IntegerOct(integer_oct) => {
                             if let Ok(document_tree::Value::Integer(integer)) =
                                 integer_oct.try_into_document_tree(toml_version)
                             {
@@ -211,7 +211,7 @@ impl SortableValues {
                                 return Err(Warning::Incomplete);
                             }
                         }
-                        ast::Value::IntegerDec(integer_dec) => {
+                        tombi_ast::Value::IntegerDec(integer_dec) => {
                             if let Ok(document_tree::Value::Integer(integer)) =
                                 integer_dec.try_into_document_tree(toml_version)
                             {
@@ -220,7 +220,7 @@ impl SortableValues {
                                 return Err(Warning::Incomplete);
                             }
                         }
-                        ast::Value::IntegerHex(integer_hex) => {
+                        tombi_ast::Value::IntegerHex(integer_hex) => {
                             if let Ok(document_tree::Value::Integer(integer)) =
                                 integer_hex.try_into_document_tree(toml_version)
                             {
@@ -237,9 +237,9 @@ impl SortableValues {
             SortableType::String => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
                     match value.clone() {
-                        ast::Value::BasicString(basic_string) => {
+                        tombi_ast::Value::BasicString(basic_string) => {
                             if let Ok(document_tree::Value::String(string)) =
                                 basic_string.try_into_document_tree(toml_version)
                             {
@@ -248,7 +248,7 @@ impl SortableValues {
                                 return Err(Warning::Incomplete);
                             }
                         }
-                        ast::Value::LiteralString(literal_string) => {
+                        tombi_ast::Value::LiteralString(literal_string) => {
                             if let Ok(document_tree::Value::String(string)) =
                                 literal_string.try_into_document_tree(toml_version)
                             {
@@ -257,7 +257,7 @@ impl SortableValues {
                                 return Err(Warning::Incomplete);
                             }
                         }
-                        ast::Value::MultiLineBasicString(multi_line_basic_string) => {
+                        tombi_ast::Value::MultiLineBasicString(multi_line_basic_string) => {
                             if let Ok(document_tree::Value::String(string)) =
                                 multi_line_basic_string.try_into_document_tree(toml_version)
                             {
@@ -266,7 +266,7 @@ impl SortableValues {
                                 return Err(Warning::Incomplete);
                             }
                         }
-                        ast::Value::MultiLineLiteralString(multi_line_literal_string) => {
+                        tombi_ast::Value::MultiLineLiteralString(multi_line_literal_string) => {
                             if let Ok(document_tree::Value::String(string)) =
                                 multi_line_literal_string.try_into_document_tree(toml_version)
                             {
@@ -283,8 +283,8 @@ impl SortableValues {
             SortableType::OffsetDateTime => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
-                    if let ast::Value::OffsetDateTime(_) = value {
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    if let tombi_ast::Value::OffsetDateTime(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
                         return Err(Warning::DifferentTypes);
@@ -295,8 +295,8 @@ impl SortableValues {
             SortableType::LocalDateTime => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
-                    if let ast::Value::LocalDateTime(_) = value {
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    if let tombi_ast::Value::LocalDateTime(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
                         return Err(Warning::DifferentTypes);
@@ -307,8 +307,8 @@ impl SortableValues {
             SortableType::LocalDate => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
-                    if let ast::Value::LocalDate(_) = value {
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    if let tombi_ast::Value::LocalDate(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
                         return Err(Warning::DifferentTypes);
@@ -319,8 +319,8 @@ impl SortableValues {
             SortableType::LocalTime => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(ast::Comma::cast(make_comma()).unwrap());
-                    if let ast::Value::LocalTime(_) = value {
+                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    if let tombi_ast::Value::LocalTime(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
                         return Err(Warning::DifferentTypes);
@@ -333,7 +333,7 @@ impl SortableValues {
         Ok(sortable_values)
     }
 
-    pub fn sorted(self) -> Vec<(ast::Value, ast::Comma)> {
+    pub fn sorted(self) -> Vec<(tombi_ast::Value, tombi_ast::Comma)> {
         match self {
             Self::Boolean(mut sortable_values) => {
                 sortable_values.sort_by_key(|(key, _, _)| *key);

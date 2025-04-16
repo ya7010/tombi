@@ -1,14 +1,14 @@
-use ast::AstNode;
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Itertools;
 use schema_store::{CurrentSchema, SchemaAccessor, SchemaContext};
 use syntax::SyntaxElement;
+use tombi_ast::AstNode;
 
 use crate::rule::table_keys_order::{sorted_accessors, table_keys_order};
 
 pub async fn root_table_keys_order<'a>(
-    key_values: Vec<ast::KeyValue>,
-    table_or_array_of_tables: Vec<ast::TableOrArrayOfTable>,
+    key_values: Vec<tombi_ast::KeyValue>,
+    table_or_array_of_tables: Vec<tombi_ast::TableOrArrayOfTable>,
     current_schema: Option<&'a CurrentSchema<'a>>,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {

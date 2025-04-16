@@ -7,7 +7,7 @@ use schema_store::{CurrentSchema, SchemaAccessor};
 
 use super::get_schema;
 
-impl crate::Edit for ast::KeyValue {
+impl crate::Edit for tombi_ast::KeyValue {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],

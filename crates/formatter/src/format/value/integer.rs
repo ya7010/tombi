@@ -1,24 +1,24 @@
 use super::LiteralNode;
 
-impl LiteralNode for ast::IntegerBin {
+impl LiteralNode for tombi_ast::IntegerBin {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }
 }
 
-impl LiteralNode for ast::IntegerHex {
+impl LiteralNode for tombi_ast::IntegerHex {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }
 }
 
-impl LiteralNode for ast::IntegerDec {
+impl LiteralNode for tombi_ast::IntegerDec {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }
 }
 
-impl LiteralNode for ast::IntegerOct {
+impl LiteralNode for tombi_ast::IntegerOct {
     fn token(&self) -> Option<syntax::SyntaxToken> {
         self.token()
     }

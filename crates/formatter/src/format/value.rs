@@ -12,7 +12,7 @@ use syntax::SyntaxToken;
 
 use crate::Format;
 
-impl Format for ast::Value {
+impl Format for tombi_ast::Value {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             Self::Array(it) => it.format(f),
@@ -41,7 +41,7 @@ trait LiteralNode {
 
 impl<T> Format for T
 where
-    T: LiteralNode + ast::AstNode,
+    T: LiteralNode + tombi_ast::AstNode,
 {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         self.leading_comments().collect::<Vec<_>>().format(f)?;

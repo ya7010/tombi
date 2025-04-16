@@ -1,8 +1,8 @@
-use ast::{AstNode, AstToken};
+use tombi_ast::{AstNode, AstToken};
 
 use super::{AppendSemanticTokens, SemanticTokensBuilder, TokenType};
 
-impl AppendSemanticTokens for ast::ArrayOfTable {
+impl AppendSemanticTokens for tombi_ast::ArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         for comment in self.header_leading_comments() {
             builder.add_token(TokenType::COMMENT, comment.as_ref().syntax().clone().into());

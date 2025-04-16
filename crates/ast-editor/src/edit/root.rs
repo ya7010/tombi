@@ -3,9 +3,9 @@ use itertools::Itertools;
 use syntax::SyntaxElement;
 
 use crate::rule::root_table_keys_order;
-use ast::AstToken;
+use tombi_ast::AstToken;
 
-impl crate::Edit for ast::Root {
+impl crate::Edit for tombi_ast::Root {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],
@@ -35,10 +35,10 @@ impl crate::Edit for ast::Root {
 
             for table_or_array_of_table in self.table_or_array_of_tables() {
                 match &table_or_array_of_table {
-                    ast::TableOrArrayOfTable::Table(table) => {
+                    tombi_ast::TableOrArrayOfTable::Table(table) => {
                         changes.extend(table.edit(&[], current_schema, schema_context).await);
                     }
-                    ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
+                    tombi_ast::TableOrArrayOfTable::ArrayOfTable(array_of_table) => {
                         changes.extend(
                             array_of_table
                                 .edit(&[], current_schema, schema_context)

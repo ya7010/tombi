@@ -8,7 +8,7 @@ mod string;
 
 use crate::Lint;
 
-impl Lint for ast::Value {
+impl Lint for tombi_ast::Value {
     fn lint(&self, l: &mut crate::Linter) {
         match self {
             Self::Boolean(value) => value.lint(l),

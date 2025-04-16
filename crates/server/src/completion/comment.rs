@@ -1,9 +1,9 @@
-use ast::AstToken;
+use tombi_ast::AstToken;
 
 use super::{CompletionContent, CompletionEdit};
 
 pub fn get_comment_completion_contents(
-    root: &ast::Root,
+    root: &tombi_ast::Root,
     position: text::Position,
 ) -> Vec<CompletionContent> {
     if root.file_schema_url(None).is_some() {

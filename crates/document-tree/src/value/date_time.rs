@@ -8,7 +8,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OffsetDateTime {
     value: date_time::OffsetDateTime,
-    node: ast::OffsetDateTime,
+    node: tombi_ast::OffsetDateTime,
 }
 
 impl OffsetDateTime {
@@ -18,7 +18,7 @@ impl OffsetDateTime {
     }
 
     #[inline]
-    pub fn node(&self) -> &ast::OffsetDateTime {
+    pub fn node(&self) -> &tombi_ast::OffsetDateTime {
         &self.node
     }
 
@@ -36,7 +36,7 @@ impl OffsetDateTime {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDateTime {
     value: date_time::LocalDateTime,
-    node: ast::LocalDateTime,
+    node: tombi_ast::LocalDateTime,
 }
 
 impl LocalDateTime {
@@ -46,7 +46,7 @@ impl LocalDateTime {
     }
 
     #[inline]
-    pub fn node(&self) -> &ast::LocalDateTime {
+    pub fn node(&self) -> &tombi_ast::LocalDateTime {
         &self.node
     }
 
@@ -64,7 +64,7 @@ impl LocalDateTime {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalDate {
     value: date_time::LocalDate,
-    node: ast::LocalDate,
+    node: tombi_ast::LocalDate,
 }
 
 impl LocalDate {
@@ -74,7 +74,7 @@ impl LocalDate {
     }
 
     #[inline]
-    pub fn node(&self) -> &ast::LocalDate {
+    pub fn node(&self) -> &tombi_ast::LocalDate {
         &self.node
     }
 
@@ -92,7 +92,7 @@ impl LocalDate {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalTime {
     value: date_time::LocalTime,
-    node: ast::LocalTime,
+    node: tombi_ast::LocalTime,
 }
 
 impl LocalTime {
@@ -102,7 +102,7 @@ impl LocalTime {
     }
 
     #[inline]
-    pub fn node(&self) -> &ast::LocalTime {
+    pub fn node(&self) -> &tombi_ast::LocalTime {
         &self.node
     }
 
@@ -181,7 +181,7 @@ impl From<crate::LocalTime> for date_time::LocalTime {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::OffsetDateTime {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::OffsetDateTime {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
@@ -207,7 +207,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::OffsetDateTime {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::LocalDateTime {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalDateTime {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
@@ -233,7 +233,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::LocalDateTime {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::LocalDate {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalDate {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
@@ -259,7 +259,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::LocalDate {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::LocalTime {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalTime {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,

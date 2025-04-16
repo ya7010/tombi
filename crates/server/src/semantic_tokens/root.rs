@@ -1,9 +1,9 @@
-use ast::AstToken;
+use tombi_ast::AstToken;
 use itertools::Itertools;
 
 use super::{AppendSemanticTokens, SemanticTokensBuilder, TokenType};
 
-impl AppendSemanticTokens for ast::Root {
+impl AppendSemanticTokens for tombi_ast::Root {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         let key_values = self.key_values().collect_vec();
 
@@ -49,7 +49,7 @@ impl AppendSemanticTokens for ast::Root {
     }
 }
 
-impl AppendSemanticTokens for ast::TableOrArrayOfTable {
+impl AppendSemanticTokens for tombi_ast::TableOrArrayOfTable {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
         match self {
             Self::Table(table) => table.append_semantic_tokens(builder),

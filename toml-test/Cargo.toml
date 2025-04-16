@@ -12,7 +12,6 @@ path = "bin/decode.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-ast = { workspace = true }
 chrono = { workspace = true }
 clap = { workspace = true }
 document-tree = { workspace = true }
@@ -22,6 +21,7 @@ parser = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 text = { workspace = true }
+tombi-ast = { workspace = true }
 toml-version = { workspace = true }
 
 [dev-dependencies]

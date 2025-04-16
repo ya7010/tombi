@@ -1,6 +1,6 @@
 use futures::FutureExt;
 
-impl crate::Edit for ast::Value {
+impl crate::Edit for tombi_ast::Value {
     fn edit<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],
@@ -9,10 +9,10 @@ impl crate::Edit for ast::Value {
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             match self {
-                ast::Value::Array(array) => {
+                tombi_ast::Value::Array(array) => {
                     array.edit(accessors, current_schema, schema_context).await
                 }
-                ast::Value::InlineTable(inline_table) => {
+                tombi_ast::Value::InlineTable(inline_table) => {
                     inline_table
                         .edit(accessors, current_schema, schema_context)
                         .await

@@ -1,13 +1,13 @@
 use std::fmt::Write;
 
-use ast::AstNode;
 use config::TomlVersion;
 use itertools::Itertools;
+use tombi_ast::AstNode;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::Format;
 
-impl Format for ast::InlineTable {
+impl Format for tombi_ast::InlineTable {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         if self.should_be_multiline(f.toml_version()) || exceeds_line_width(self, f)? {
             format_multiline_inline_table(self, f)
@@ -18,7 +18,7 @@ impl Format for ast::InlineTable {
 }
 
 pub(crate) fn exceeds_line_width(
-    node: &ast::InlineTable,
+    node: &tombi_ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<bool, std::fmt::Error> {
     if f.toml_version() < TomlVersion::V1_1_0_Preview {
@@ -34,11 +34,11 @@ pub(crate) fn exceeds_line_width(
         // Check if nested value should be multiline
         if let Some(value) = key_value.value() {
             let should_be_multiline = match value {
-                ast::Value::Array(array) => {
+                tombi_ast::Value::Array(array) => {
                     array.should_be_multiline(f.toml_version())
                         || crate::format::value::array::exceeds_line_width(&array, f)?
                 }
-                ast::Value::InlineTable(table) => {
+                tombi_ast::Value::InlineTable(table) => {
                     table.should_be_multiline(f.toml_version()) || exceeds_line_width(&table, f)?
                 }
                 _ => false,
@@ -69,7 +69,7 @@ pub(crate) fn exceeds_line_width(
 }
 
 fn format_multiline_inline_table(
-    table: &ast::InlineTable,
+    table: &tombi_ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     table.leading_comments().collect::<Vec<_>>().format(f)?;
@@ -141,7 +141,7 @@ fn format_multiline_inline_table(
 }
 
 fn format_singleline_inline_table(
-    table: &ast::InlineTable,
+    table: &tombi_ast::InlineTable,
     f: &mut crate::Formatter,
 ) -> Result<(), std::fmt::Error> {
     table.leading_comments().collect::<Vec<_>>().format(f)?;

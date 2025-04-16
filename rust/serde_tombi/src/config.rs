@@ -1,4 +1,4 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 use config::{Config, TomlVersion, CONFIG_FILENAME, PYPROJECT_FILENAME, TOMBI_CONFIG_TOML_VERSION};
 use itertools::Itertools;
 
@@ -19,7 +19,7 @@ pub(crate) fn from_str(
 
     let toml_version = TOMBI_CONFIG_TOML_VERSION;
     let parsed = parser::parse(toml_text);
-    let root = ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
+    let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
     let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
     // Check if there are any parsing errors
     if !errors.is_empty() {
@@ -45,7 +45,7 @@ impl PyProjectToml {
 
         let toml_version = TOMBI_CONFIG_TOML_VERSION;
         let parsed = parser::parse(toml_text);
-        let root = ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
+        let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
         let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
         if !errors.is_empty() {

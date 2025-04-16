@@ -17,7 +17,7 @@ pub use parsed::Parsed;
 pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub fn parse(source: &str) -> Parsed<SyntaxNode> {
-    parse_as::<ast::Root>(source)
+    parse_as::<tombi_ast::Root>(source)
 }
 
 #[allow(private_bounds)]
@@ -44,10 +44,10 @@ pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
     Parsed::new(green_tree, errors)
 }
 
-pub fn parsed_and_ast(source: &str) -> (crate::Parsed<ast::Root>, ast::Root) {
+pub fn parsed_and_ast(source: &str) -> (crate::Parsed<tombi_ast::Root>, tombi_ast::Root) {
     let parsed = crate::parse(source);
 
-    let Some(parsed) = parsed.cast::<ast::Root>() else {
+    let Some(parsed) = parsed.cast::<tombi_ast::Root>() else {
         unreachable!("TOML Root node is always a valid AST node even if source is empty.")
     };
 

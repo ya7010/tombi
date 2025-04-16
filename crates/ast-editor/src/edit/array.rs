@@ -6,7 +6,7 @@ use schema_store::ValueSchema;
 
 use crate::rule::{array_comma_tailing_comment, array_values_order};
 
-impl crate::Edit for ast::Array {
+impl crate::Edit for tombi_ast::Array {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],

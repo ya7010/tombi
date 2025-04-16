@@ -7,13 +7,13 @@ mod string;
 mod table;
 
 pub use array::{Array, ArrayKind};
-use ast::AstNode;
 pub use boolean::Boolean;
 pub use date_time::{LocalDate, LocalDateTime, LocalTime, OffsetDateTime};
 pub use float::Float;
 pub use integer::{Integer, IntegerKind};
 pub use string::{String, StringKind};
 pub use table::{Table, TableKind};
+use tombi_ast::AstNode;
 
 use crate::{support::comment::try_new_comment, DocumentTreeAndErrors, IntoDocumentTreeAndErrors};
 
@@ -90,7 +90,7 @@ impl crate::ValueImpl for Value {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::Value {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::Value {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,
@@ -109,26 +109,40 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::Value {
         }
 
         let mut document_tree_result = match self {
-            ast::Value::BasicString(string) => string.into_document_tree_and_errors(toml_version),
-            ast::Value::LiteralString(string) => string.into_document_tree_and_errors(toml_version),
-            ast::Value::MultiLineBasicString(string) => {
+            tombi_ast::Value::BasicString(string) => {
                 string.into_document_tree_and_errors(toml_version)
             }
-            ast::Value::MultiLineLiteralString(string) => {
+            tombi_ast::Value::LiteralString(string) => {
                 string.into_document_tree_and_errors(toml_version)
             }
-            ast::Value::IntegerBin(integer) => integer.into_document_tree_and_errors(toml_version),
-            ast::Value::IntegerOct(integer) => integer.into_document_tree_and_errors(toml_version),
-            ast::Value::IntegerDec(integer) => integer.into_document_tree_and_errors(toml_version),
-            ast::Value::IntegerHex(integer) => integer.into_document_tree_and_errors(toml_version),
-            ast::Value::Float(float) => float.into_document_tree_and_errors(toml_version),
-            ast::Value::Boolean(boolean) => boolean.into_document_tree_and_errors(toml_version),
-            ast::Value::OffsetDateTime(dt) => dt.into_document_tree_and_errors(toml_version),
-            ast::Value::LocalDateTime(dt) => dt.into_document_tree_and_errors(toml_version),
-            ast::Value::LocalDate(date) => date.into_document_tree_and_errors(toml_version),
-            ast::Value::LocalTime(time) => time.into_document_tree_and_errors(toml_version),
-            ast::Value::Array(array) => array.into_document_tree_and_errors(toml_version),
-            ast::Value::InlineTable(inline_table) => {
+            tombi_ast::Value::MultiLineBasicString(string) => {
+                string.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::MultiLineLiteralString(string) => {
+                string.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::IntegerBin(integer) => {
+                integer.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::IntegerOct(integer) => {
+                integer.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::IntegerDec(integer) => {
+                integer.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::IntegerHex(integer) => {
+                integer.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::Float(float) => float.into_document_tree_and_errors(toml_version),
+            tombi_ast::Value::Boolean(boolean) => {
+                boolean.into_document_tree_and_errors(toml_version)
+            }
+            tombi_ast::Value::OffsetDateTime(dt) => dt.into_document_tree_and_errors(toml_version),
+            tombi_ast::Value::LocalDateTime(dt) => dt.into_document_tree_and_errors(toml_version),
+            tombi_ast::Value::LocalDate(date) => date.into_document_tree_and_errors(toml_version),
+            tombi_ast::Value::LocalTime(time) => time.into_document_tree_and_errors(toml_version),
+            tombi_ast::Value::Array(array) => array.into_document_tree_and_errors(toml_version),
+            tombi_ast::Value::InlineTable(inline_table) => {
                 inline_table.into_document_tree_and_errors(toml_version)
             }
         };

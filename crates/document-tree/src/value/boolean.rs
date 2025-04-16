@@ -5,7 +5,7 @@ use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors, ValueImpl, ValueTy
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Boolean {
     value: bool,
-    node: ast::Boolean,
+    node: tombi_ast::Boolean,
 }
 
 impl Boolean {
@@ -15,7 +15,7 @@ impl Boolean {
     }
 
     #[inline]
-    pub fn node(&self) -> &ast::Boolean {
+    pub fn node(&self) -> &tombi_ast::Boolean {
         &self.node
     }
 
@@ -40,7 +40,7 @@ impl ValueImpl for Boolean {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::Boolean {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::Boolean {
     fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,

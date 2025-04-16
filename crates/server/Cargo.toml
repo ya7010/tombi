@@ -7,7 +7,6 @@ license = { workspace = true }
 
 [dependencies]
 ahash.workspace = true
-ast = { workspace = true }
 camino = { workspace = true }
 chrono.workspace = true
 clap = { workspace = true, optional = true }
@@ -35,6 +34,7 @@ syntax.workspace = true
 text = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+tombi-ast = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

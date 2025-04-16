@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use ast::{
+use tombi_ast::{
     BeginDanglingComment, DanglingComment, EndDanglingComment, LeadingComment, TailingComment,
 };
 
@@ -103,7 +103,7 @@ impl Format for TailingComment {
 
 fn format_comment(
     f: &mut crate::Formatter,
-    comment: &ast::Comment,
+    comment: &tombi_ast::Comment,
     strip_leading_spaces: bool,
 ) -> Result<(), std::fmt::Error> {
     let comment = comment.to_string();

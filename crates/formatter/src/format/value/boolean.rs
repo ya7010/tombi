@@ -1,4 +1,4 @@
-use ast::Boolean;
+use tombi_ast::Boolean;
 
 use super::LiteralNode;
 

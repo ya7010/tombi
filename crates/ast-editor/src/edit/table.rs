@@ -7,7 +7,7 @@ use schema_store::{GetHeaderSchemarAccessors, SchemaAccessor};
 
 use crate::{edit::get_schema, rule::table_keys_order};
 
-impl crate::Edit for ast::Table {
+impl crate::Edit for tombi_ast::Table {
     fn edit<'a: 'b, 'b>(
         &'a self,
         _accessors: &'a [schema_store::SchemaAccessor],

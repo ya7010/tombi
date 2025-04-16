@@ -1,4 +1,4 @@
-use ast::AstNode;
+use tombi_ast::AstNode;
 use toml_version::TomlVersion;
 
 use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors};
@@ -92,7 +92,7 @@ impl std::fmt::Display for Key {
     }
 }
 
-impl IntoDocumentTreeAndErrors<Option<Key>> for ast::Key {
+impl IntoDocumentTreeAndErrors<Option<Key>> for tombi_ast::Key {
     fn into_document_tree_and_errors(
         self,
         toml_version: TomlVersion,
@@ -107,9 +107,9 @@ impl IntoDocumentTreeAndErrors<Option<Key>> for ast::Key {
 
         match Key::try_new(
             match self {
-                ast::Key::BareKey(_) => KeyKind::BareKey,
-                ast::Key::BasicString(_) => KeyKind::BasicString,
-                ast::Key::LiteralString(_) => KeyKind::LiteralString,
+                tombi_ast::Key::BareKey(_) => KeyKind::BareKey,
+                tombi_ast::Key::BasicString(_) => KeyKind::BasicString,
+                tombi_ast::Key::LiteralString(_) => KeyKind::LiteralString,
             },
             token.text().to_string(),
             token.range(),
@@ -127,7 +127,7 @@ impl IntoDocumentTreeAndErrors<Option<Key>> for ast::Key {
     }
 }
 
-impl IntoDocumentTreeAndErrors<Vec<crate::Key>> for ast::Keys {
+impl IntoDocumentTreeAndErrors<Vec<crate::Key>> for tombi_ast::Keys {
     fn into_document_tree_and_errors(
         self,
         toml_version: toml_version::TomlVersion,

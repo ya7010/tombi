@@ -1,13 +1,13 @@
-use ast::AstNode;
 use itertools::Itertools;
 use schema_store::{SchemaContext, TableSchema};
 use syntax::SyntaxElement;
+use tombi_ast::AstNode;
 use x_tombi::TableKeysOrder;
 
 use crate::rule::inline_table_comma_tailing_comment;
 
 pub async fn inline_table_keys_order<'a>(
-    key_values_with_comma: Vec<(ast::KeyValue, Option<ast::Comma>)>,
+    key_values_with_comma: Vec<(tombi_ast::KeyValue, Option<tombi_ast::Comma>)>,
     table_schema: &'a TableSchema,
     schema_context: &'a SchemaContext<'a>,
 ) -> Vec<crate::Change> {
@@ -116,7 +116,7 @@ pub async fn inline_table_keys_order<'a>(
 
     if !is_last_comma {
         if let Some(syntax::SyntaxElement::Node(node)) = new.last() {
-            if let Some(comma) = ast::Comma::cast(node.clone()) {
+            if let Some(comma) = tombi_ast::Comma::cast(node.clone()) {
                 if comma.tailing_comment().is_none()
                     && comma.leading_comments().collect_vec().is_empty()
                 {

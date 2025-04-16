@@ -7,10 +7,10 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IntegerKind {
-    Binary(ast::IntegerBin),
-    Decimal(ast::IntegerDec),
-    Octal(ast::IntegerOct),
-    Hexadecimal(ast::IntegerHex),
+    Binary(tombi_ast::IntegerBin),
+    Decimal(tombi_ast::IntegerDec),
+    Octal(tombi_ast::IntegerOct),
+    Hexadecimal(tombi_ast::IntegerHex),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -58,7 +58,7 @@ impl ValueImpl for Integer {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerBin {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::IntegerBin {
     fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
@@ -87,7 +87,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerBin {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerOct {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::IntegerOct {
     fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
@@ -116,7 +116,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerOct {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerDec {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::IntegerDec {
     fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
@@ -145,7 +145,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerDec {
     }
 }
 
-impl IntoDocumentTreeAndErrors<crate::Value> for ast::IntegerHex {
+impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::IntegerHex {
     fn into_document_tree_and_errors(
         self,
         _toml_version: TomlVersion,
