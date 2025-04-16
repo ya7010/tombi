@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use diagnostic::SetDiagnostics;
+use tombi_diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
@@ -17,7 +17,7 @@ impl Validate for document_tree::Table {
         accessors: &'a [schema_store::SchemaAccessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         tracing::trace!("self = {:?}", self);
         tracing::trace!("accessors = {:?}", accessors);
         tracing::trace!("current_schema = {:?}", current_schema);

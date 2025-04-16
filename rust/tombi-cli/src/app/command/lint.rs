@@ -1,5 +1,5 @@
 use tombi_config::{LintOptions, TomlVersion};
-use diagnostic::{printer::Pretty, Diagnostic, Print};
+use tombi_diagnostic::{printer::Pretty, Diagnostic, Print};
 use tokio::io::AsyncReadExt;
 
 use crate::app::arg;

@@ -1,5 +1,5 @@
 use tombi_config::{FormatOptions, TomlVersion};
-use diagnostic::{printer::Pretty, Diagnostic, Print};
+use tombi_diagnostic::{printer::Pretty, Diagnostic, Print};
 use formatter::formatter::definitions::FormatDefinitions;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 

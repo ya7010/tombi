@@ -13,9 +13,9 @@ pub struct Warning {
     pub range: text::Range,
 }
 
-impl diagnostic::SetDiagnostics for Warning {
-    fn set_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
-        diagnostics.push(diagnostic::Diagnostic::new_warning(
+impl tombi_diagnostic::SetDiagnostics for Warning {
+    fn set_diagnostics(&self, diagnostics: &mut Vec<tombi_diagnostic::Diagnostic>) {
+        diagnostics.push(tombi_diagnostic::Diagnostic::new_warning(
             self.kind.to_string(),
             self.range,
         ))

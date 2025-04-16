@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use diagnostic::SetDiagnostics;
+use tombi_diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, DocumentSchema, ValueSchema, ValueType};
@@ -13,7 +13,7 @@ impl Validate for document_tree::Array {
         accessors: &'a [schema_store::SchemaAccessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move {
             if let Some(sub_schema_url) = schema_context
                 .sub_schema_url_map

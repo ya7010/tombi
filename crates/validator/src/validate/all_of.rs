@@ -11,7 +11,7 @@ pub fn validate_all_of<'a: 'b, 'b, T>(
     all_of_schema: &'a schema_store::AllOfSchema,
     current_schema: &'a CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
-) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>
+) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>>
 where
     T: Validate + Sync + Send + Debug,
 {

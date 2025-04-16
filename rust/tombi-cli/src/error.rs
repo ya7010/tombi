@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use diagnostic::{
+use tombi_diagnostic::{
     printer::{Pretty, Simple},
     Level, Print,
 };

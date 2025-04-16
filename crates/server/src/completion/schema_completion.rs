@@ -204,7 +204,7 @@ impl validator::Validate for SchemaCompletion {
         _accessors: &'a [schema_store::SchemaAccessor],
         _current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move { Ok(()) }.boxed()
     }
 }

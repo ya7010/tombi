@@ -2,7 +2,7 @@ pub mod definitions;
 
 use std::fmt::Write;
 
-use diagnostic::{Diagnostic, SetDiagnostics};
+use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use itertools::{Either, Itertools};
 use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use unicode_segmentation::UnicodeSegmentation;

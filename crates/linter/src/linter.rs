@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use tombi_config::TomlVersion;
-use diagnostic::{Diagnostic, SetDiagnostics};
+use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
 use url::Url;

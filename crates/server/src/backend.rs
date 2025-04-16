@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ahash::AHashMap;
 use tombi_config::{Config, TomlVersion};
-use diagnostic::{Diagnostic, SetDiagnostics};
+use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use document_tree::TryIntoDocumentTree;
 use itertools::{Either, Itertools};
 use schema_store::SourceSchema;

@@ -1,4 +1,4 @@
-use diagnostic::SetDiagnostics;
+use tombi_diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
@@ -12,7 +12,7 @@ impl Validate for document_tree::String {
         accessors: &'a [schema_store::SchemaAccessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
+    ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move {
             let mut diagnostics = vec![];
 

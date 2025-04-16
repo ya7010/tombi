@@ -4,7 +4,7 @@ mod linter;
 mod rule;
 mod warning;
 
-use diagnostic::Diagnostic;
+use tombi_diagnostic::Diagnostic;
 pub use error::{Error, ErrorKind};
 use lint::Lint;
 pub use linter::Linter;

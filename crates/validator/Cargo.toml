@@ -7,12 +7,12 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-diagnostic.workspace = true
-document-tree.workspace = true
-futures.workspace = true
-itertools.workspace = true
-regex.workspace = true
-schema-store.workspace = true
-text.workspace = true
-thiserror.workspace = true
-tracing.workspace = true
+document-tree = { workspace = true }
+futures = { workspace = true }
+itertools = { workspace = true }
+regex = { workspace = true }
+schema-store = { workspace = true }
+text = { workspace = true }
+thiserror = { workspace = true }
+tombi-diagnostic = { workspace = true }
+tracing = { workspace = true }

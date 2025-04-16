@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use diagnostic::SetDiagnostics;
+use tombi_diagnostic::SetDiagnostics;
 use document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, OneOfSchema, ValueSchema};
@@ -14,7 +14,7 @@ pub fn validate_one_of<'a: 'b, 'b, T>(
     one_of_schema: &'a OneOfSchema,
     current_schema: &'a CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
-) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>
+) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>>
 where
     T: Validate + ValueImpl + Sync + Send + Debug,
 {

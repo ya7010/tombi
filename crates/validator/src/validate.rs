@@ -27,14 +27,14 @@ pub trait Validate {
         accessors: &'a [schema_store::SchemaAccessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
-    ) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>>;
+    ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>>;
 }
 
 pub fn validate<'a: 'b, 'b>(
     tree: document_tree::DocumentTree,
     source_schema: &'a schema_store::SourceSchema,
     schema_context: &'a schema_store::SchemaContext,
-) -> BoxFuture<'b, Result<(), Vec<diagnostic::Diagnostic>>> {
+) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
     async move {
         let current_schema = source_schema.root_schema.as_ref().and_then(|root_schema| {
             root_schema

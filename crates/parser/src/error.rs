@@ -146,9 +146,9 @@ impl From<lexer::Error> for Error {
 }
 
 #[cfg(feature = "diagnostic")]
-impl diagnostic::SetDiagnostics for Error {
-    fn set_diagnostics(&self, diagnostics: &mut Vec<diagnostic::Diagnostic>) {
-        diagnostics.push(diagnostic::Diagnostic::new_error(
+impl tombi_diagnostic::SetDiagnostics for Error {
+    fn set_diagnostics(&self, diagnostics: &mut Vec<tombi_diagnostic::Diagnostic>) {
+        diagnostics.push(tombi_diagnostic::Diagnostic::new_error(
             self.to_message(),
             self.range(),
         ));

@@ -23,7 +23,7 @@ impl Rule<tombi_ast::Key> for KeyEmptyRule {
 mod tests {
     use std::vec;
 
-    use diagnostic::SetDiagnostics;
+    use tombi_diagnostic::SetDiagnostics;
 
     #[tokio::test]
     async fn test_key_empty() {
