@@ -26,7 +26,7 @@ pub async fn handle_document_symbol(
     Ok(Some(DocumentSymbolResponse::Nested(symbols)))
 }
 
-fn create_symbols(tree: &document_tree::DocumentTree) -> Vec<DocumentSymbol> {
+fn create_symbols(tree: &tombi_document_tree::DocumentTree) -> Vec<DocumentSymbol> {
     let mut symbols: Vec<DocumentSymbol> = vec![];
 
     for (key, value) in tree.key_values() {
@@ -39,11 +39,11 @@ fn create_symbols(tree: &document_tree::DocumentTree) -> Vec<DocumentSymbol> {
 #[allow(deprecated)]
 fn symbols_for_value(
     name: String,
-    value: &document_tree::Value,
+    value: &tombi_document_tree::Value,
     parent_key_range: Option<text::Range>,
     symbols: &mut Vec<DocumentSymbol>,
 ) {
-    use document_tree::Value::*;
+    use tombi_document_tree::Value::*;
 
     let value_range = value.symbol_range();
     let range = if let Some(parent_key_range) = parent_key_range {

@@ -303,20 +303,20 @@ impl std::fmt::Display for ValueType {
     }
 }
 
-impl From<document_tree::ValueType> for ValueType {
-    fn from(value_type: document_tree::ValueType) -> Self {
+impl From<tombi_document_tree::ValueType> for ValueType {
+    fn from(value_type: tombi_document_tree::ValueType) -> Self {
         match value_type {
-            document_tree::ValueType::Boolean => ValueType::Boolean,
-            document_tree::ValueType::Integer => ValueType::Integer,
-            document_tree::ValueType::Float => ValueType::Float,
-            document_tree::ValueType::String => ValueType::String,
-            document_tree::ValueType::OffsetDateTime => ValueType::OffsetDateTime,
-            document_tree::ValueType::LocalDateTime => ValueType::LocalDateTime,
-            document_tree::ValueType::LocalDate => ValueType::LocalDate,
-            document_tree::ValueType::LocalTime => ValueType::LocalTime,
-            document_tree::ValueType::Array => ValueType::Array,
-            document_tree::ValueType::Table => ValueType::Table,
-            document_tree::ValueType::Incomplete => unreachable!("incomplete value"),
+            tombi_document_tree::ValueType::Boolean => ValueType::Boolean,
+            tombi_document_tree::ValueType::Integer => ValueType::Integer,
+            tombi_document_tree::ValueType::Float => ValueType::Float,
+            tombi_document_tree::ValueType::String => ValueType::String,
+            tombi_document_tree::ValueType::OffsetDateTime => ValueType::OffsetDateTime,
+            tombi_document_tree::ValueType::LocalDateTime => ValueType::LocalDateTime,
+            tombi_document_tree::ValueType::LocalDate => ValueType::LocalDate,
+            tombi_document_tree::ValueType::LocalTime => ValueType::LocalTime,
+            tombi_document_tree::ValueType::Array => ValueType::Array,
+            tombi_document_tree::ValueType::Table => ValueType::Table,
+            tombi_document_tree::ValueType::Incomplete => unreachable!("incomplete value"),
         }
     }
 }

@@ -10,7 +10,7 @@ impl FindCompletionContents for StringSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext<'a>,

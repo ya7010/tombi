@@ -2,7 +2,7 @@ use std::io::Read;
 
 use tombi_ast::AstNode;
 use clap::Parser;
-use document_tree::TryIntoDocumentTree;
+use tombi_document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
 use toml_test::{IntoValue, Value, INVALID_MESSAGE};
 use toml_version::TomlVersion;

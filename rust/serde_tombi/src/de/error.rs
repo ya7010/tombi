@@ -22,5 +22,5 @@ pub enum Error {
     Parser(Vec<parser::Error>),
 
     #[error("{}", .0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "))]
-    DocumentTree(Vec<document_tree::Error>),
+    DocumentTree(Vec<tombi_document_tree::Error>),
 }

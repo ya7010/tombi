@@ -17,11 +17,11 @@ use crate::completion::{
     CompletionCandidate, CompletionContent, CompletionHint, FindCompletionContents,
 };
 
-impl FindCompletionContents for document_tree::Table {
+impl FindCompletionContents for tombi_document_tree::Table {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
@@ -83,7 +83,7 @@ impl FindCompletionContents for document_tree::Table {
                                         ) => false,
                                         None => true,
                                     };
-                                    if matches!(value, document_tree::Value::Incomplete { .. })
+                                    if matches!(value, tombi_document_tree::Value::Incomplete { .. })
                                         && need_magic_trigger
                                     {
                                         return CompletionContent::new_magic_triggers(
@@ -473,7 +473,7 @@ impl FindCompletionContents for TableSchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
@@ -617,10 +617,10 @@ async fn count_table_or_array_schema(
 }
 
 fn get_property_value_completion_contents<'a: 'b, 'b>(
-    value: &'a document_tree::Value,
+    value: &'a tombi_document_tree::Value,
     position: text::Position,
-    key: &'a document_tree::Key,
-    keys: &'a [document_tree::Key],
+    key: &'a tombi_document_tree::Key,
+    keys: &'a [tombi_document_tree::Key],
     accessors: &'a [Accessor],
     current_schema: Option<&'a CurrentSchema<'a>>,
     schema_context: &'a schema_store::SchemaContext<'a>,
@@ -677,7 +677,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                     }
                 }
                 None => {
-                    if matches!(value, document_tree::Value::Incomplete { .. }) {
+                    if matches!(value, tombi_document_tree::Value::Incomplete { .. }) {
                         match completion_hint {
                             Some(
                                 CompletionHint::InTableHeader
@@ -725,33 +725,33 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
     .boxed()
 }
 
-fn check_used_table_value(value: &document_tree::Value) -> bool {
+fn check_used_table_value(value: &tombi_document_tree::Value) -> bool {
     match value {
-        document_tree::Value::Boolean(_)
-        | document_tree::Value::Integer(_)
-        | document_tree::Value::Float(_)
-        | document_tree::Value::String(_)
-        | document_tree::Value::OffsetDateTime(_)
-        | document_tree::Value::LocalDateTime(_)
-        | document_tree::Value::LocalDate(_)
-        | document_tree::Value::LocalTime(_) => return true,
-        document_tree::Value::Array(array) => {
-            if array.kind() == document_tree::ArrayKind::Array {
+        tombi_document_tree::Value::Boolean(_)
+        | tombi_document_tree::Value::Integer(_)
+        | tombi_document_tree::Value::Float(_)
+        | tombi_document_tree::Value::String(_)
+        | tombi_document_tree::Value::OffsetDateTime(_)
+        | tombi_document_tree::Value::LocalDateTime(_)
+        | tombi_document_tree::Value::LocalDate(_)
+        | tombi_document_tree::Value::LocalTime(_) => return true,
+        tombi_document_tree::Value::Array(array) => {
+            if array.kind() == tombi_document_tree::ArrayKind::Array {
                 return true;
             }
         }
-        document_tree::Value::Table(table) => {
-            if table.kind() == document_tree::TableKind::InlineTable {
+        tombi_document_tree::Value::Table(table) => {
+            if table.kind() == tombi_document_tree::TableKind::InlineTable {
                 return true;
             }
         }
-        document_tree::Value::Incomplete { .. } => {}
+        tombi_document_tree::Value::Incomplete { .. } => {}
     }
     false
 }
 
 fn collect_table_key_completion_contents<'a: 'b, 'b>(
-    table: &'a document_tree::Table,
+    table: &'a tombi_document_tree::Table,
     position: text::Position,
     key_name: &'a String,
     accessors: &'a [Accessor],

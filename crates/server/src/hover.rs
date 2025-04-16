@@ -12,9 +12,9 @@ use futures::future::BoxFuture;
 use schema_store::{get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType};
 
 pub async fn get_hover_content(
-    tree: &document_tree::DocumentTree,
+    tree: &tombi_document_tree::DocumentTree,
     position: text::Position,
-    keys: &[document_tree::Key],
+    keys: &[tombi_document_tree::Key],
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Option<HoverContent> {
     let table = tree.deref();
@@ -45,7 +45,7 @@ trait GetHoverContent {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,

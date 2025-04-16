@@ -8,9 +8,9 @@ use std::{borrow::Cow, ops::Deref};
 use schema_store::{CurrentSchema, SchemaUrl};
 
 pub async fn get_type_definition(
-    tree: &document_tree::DocumentTree,
+    tree: &tombi_document_tree::DocumentTree,
     position: text::Position,
-    keys: &[document_tree::Key],
+    keys: &[tombi_document_tree::Key],
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Option<TypeDefinition> {
     let table = tree.deref();
@@ -47,7 +47,7 @@ trait GetTypeDefinition {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,

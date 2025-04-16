@@ -14,11 +14,11 @@ use schema_store::{Accessor, CurrentSchema, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
-impl GetHoverContent for document_tree::Value {
+impl GetHoverContent for tombi_document_tree::Value {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
@@ -162,7 +162,7 @@ impl GetHoverContent for ValueSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,

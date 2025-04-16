@@ -7,11 +7,11 @@ use crate::hover::{
     GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::OffsetDateTime {
+impl GetHoverContent for tombi_document_tree::OffsetDateTime {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
@@ -93,7 +93,7 @@ impl GetHoverContent for OffsetDateTimeSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         _position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,

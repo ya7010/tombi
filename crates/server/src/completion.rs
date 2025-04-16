@@ -9,12 +9,10 @@ mod value;
 use std::{borrow::Cow, ops::Deref};
 
 use ahash::AHashMap;
-use tombi_ast::{algo::ancestors_at_position, AstNode};
 use comment::get_comment_completion_contents;
 pub use completion_content::CompletionContent;
 pub use completion_edit::CompletionEdit;
 use completion_kind::CompletionKind;
-use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
@@ -23,13 +21,15 @@ use schema_store::{
     ValueSchema,
 };
 use syntax::{SyntaxElement, SyntaxKind};
+use tombi_ast::{algo::ancestors_at_position, AstNode};
+use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 
 pub async fn get_completion_contents(
     root: tombi_ast::Root,
     position: text::Position,
     schema_context: &schema_store::SchemaContext<'_>,
 ) -> Vec<CompletionContent> {
-    let mut keys: Vec<document_tree::Key> = vec![];
+    let mut keys: Vec<tombi_document_tree::Key> = vec![];
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
@@ -210,7 +210,7 @@ pub trait FindCompletionContents {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,

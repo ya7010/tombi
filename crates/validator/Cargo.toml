@@ -7,7 +7,6 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-document-tree = { workspace = true }
 futures = { workspace = true }
 itertools = { workspace = true }
 regex = { workspace = true }
@@ -15,4 +14,5 @@ schema-store = { workspace = true }
 text = { workspace = true }
 thiserror = { workspace = true }
 tombi-diagnostic = { workspace = true }
+tombi-document-tree = { workspace = true }
 tracing = { workspace = true }

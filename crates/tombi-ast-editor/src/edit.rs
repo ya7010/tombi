@@ -20,13 +20,13 @@ pub trait Edit {
 }
 
 async fn get_schema<'a: 'b, 'b>(
-    value: &'a document_tree::Value,
+    value: &'a tombi_document_tree::Value,
     accessors: &'a [schema_store::SchemaAccessor],
     current_schema: &'a schema_store::CurrentSchema<'a>,
     schema_context: &'a schema_store::SchemaContext<'a>,
 ) -> Option<ValueSchema> {
     fn inner_get_schema<'a: 'b, 'b>(
-        value: &'a document_tree::Value,
+        value: &'a tombi_document_tree::Value,
         accessors: &'a [schema_store::SchemaAccessor],
         validation_accessors: &'a [schema_store::SchemaAccessor],
         current_schema: &'a schema_store::CurrentSchema<'a>,
@@ -76,7 +76,7 @@ async fn get_schema<'a: 'b, 'b>(
 
             match &accessors[0] {
                 SchemaAccessor::Key(key) => {
-                    if let (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) =
+                    if let (tombi_document_tree::Value::Table(table), ValueSchema::Table(table_schema)) =
                         (value, current_schema.value_schema.as_ref())
                     {
                         if let Some(value) = table.get(&key.to_string()) {
@@ -163,7 +163,7 @@ async fn get_schema<'a: 'b, 'b>(
                     }
                 }
                 SchemaAccessor::Index => {
-                    if let (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) =
+                    if let (tombi_document_tree::Value::Array(array), ValueSchema::Array(array_schema)) =
                         (value, current_schema.value_schema.as_ref())
                     {
                         // NOTE: This is fine. This function is only used for Table/ArrayOfTable or Keys of KeyValues,

@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use tombi_diagnostic::SetDiagnostics;
-use document_tree::ValueImpl;
+use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, ValueSchema};
 
@@ -40,16 +40,16 @@ where
             };
 
             match (value.value_type(), current_schema.value_schema.as_ref()) {
-                (document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
-                | (document_tree::ValueType::Integer, ValueSchema::Integer(_))
-                | (document_tree::ValueType::Float, ValueSchema::Float(_))
-                | (document_tree::ValueType::String, ValueSchema::String(_))
-                | (document_tree::ValueType::OffsetDateTime, ValueSchema::OffsetDateTime(_))
-                | (document_tree::ValueType::LocalDateTime, ValueSchema::LocalDateTime(_))
-                | (document_tree::ValueType::LocalDate, ValueSchema::LocalDate(_))
-                | (document_tree::ValueType::LocalTime, ValueSchema::LocalTime(_))
-                | (document_tree::ValueType::Table, ValueSchema::Table(_))
-                | (document_tree::ValueType::Array, ValueSchema::Array(_)) => {
+                (tombi_document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
+                | (tombi_document_tree::ValueType::Integer, ValueSchema::Integer(_))
+                | (tombi_document_tree::ValueType::Float, ValueSchema::Float(_))
+                | (tombi_document_tree::ValueType::String, ValueSchema::String(_))
+                | (tombi_document_tree::ValueType::OffsetDateTime, ValueSchema::OffsetDateTime(_))
+                | (tombi_document_tree::ValueType::LocalDateTime, ValueSchema::LocalDateTime(_))
+                | (tombi_document_tree::ValueType::LocalDate, ValueSchema::LocalDate(_))
+                | (tombi_document_tree::ValueType::LocalTime, ValueSchema::LocalTime(_))
+                | (tombi_document_tree::ValueType::Table, ValueSchema::Table(_))
+                | (tombi_document_tree::ValueType::Array, ValueSchema::Array(_)) => {
                     is_type_match = true;
                     match value
                         .validate(accessors, Some(&current_schema), schema_context)

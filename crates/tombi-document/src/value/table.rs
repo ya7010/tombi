@@ -10,9 +10,9 @@ pub enum TableKind {
     KeyValue,
 }
 
-impl From<document_tree::TableKind> for TableKind {
-    fn from(kind: document_tree::TableKind) -> Self {
-        use document_tree::TableKind::*;
+impl From<tombi_document_tree::TableKind> for TableKind {
+    fn from(kind: tombi_document_tree::TableKind) -> Self {
+        use tombi_document_tree::TableKind::*;
         match kind {
             Root | Table | ParentTable | ParentKey => Self::Table,
             InlineTable => Self::InlineTable,
@@ -59,10 +59,10 @@ impl Table {
     }
 }
 
-impl IntoDocument<Table> for document_tree::Table {
+impl IntoDocument<Table> for tombi_document_tree::Table {
     fn into_document(self, toml_version: crate::TomlVersion) -> Table {
         let kind = self.kind().into();
-        let key_values = IndexMap::<document_tree::Key, document_tree::Value>::from(self)
+        let key_values = IndexMap::<tombi_document_tree::Key, tombi_document_tree::Value>::from(self)
             .into_iter()
             .map(|(key, value)| {
                 (

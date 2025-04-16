@@ -141,20 +141,20 @@ impl Value {
     }
 }
 
-impl IntoDocument<Value> for document_tree::Value {
+impl IntoDocument<Value> for tombi_document_tree::Value {
     fn into_document(self, toml_version: crate::TomlVersion) -> Value {
         match self {
-            document_tree::Value::Boolean(value) => Value::Boolean(value.into()),
-            document_tree::Value::Integer(value) => Value::Integer(value.into()),
-            document_tree::Value::Float(value) => Value::Float(value.into()),
-            document_tree::Value::String(value) => Value::String(value.into()),
-            document_tree::Value::OffsetDateTime(value) => Value::OffsetDateTime(value.into()),
-            document_tree::Value::LocalDateTime(value) => Value::LocalDateTime(value.into()),
-            document_tree::Value::LocalDate(value) => Value::LocalDate(value.into()),
-            document_tree::Value::LocalTime(value) => Value::LocalTime(value.into()),
-            document_tree::Value::Array(value) => Value::Array(value.into_document(toml_version)),
-            document_tree::Value::Table(value) => Value::Table(value.into_document(toml_version)),
-            document_tree::Value::Incomplete { .. } => {
+            tombi_document_tree::Value::Boolean(value) => Value::Boolean(value.into()),
+            tombi_document_tree::Value::Integer(value) => Value::Integer(value.into()),
+            tombi_document_tree::Value::Float(value) => Value::Float(value.into()),
+            tombi_document_tree::Value::String(value) => Value::String(value.into()),
+            tombi_document_tree::Value::OffsetDateTime(value) => Value::OffsetDateTime(value.into()),
+            tombi_document_tree::Value::LocalDateTime(value) => Value::LocalDateTime(value.into()),
+            tombi_document_tree::Value::LocalDate(value) => Value::LocalDate(value.into()),
+            tombi_document_tree::Value::LocalTime(value) => Value::LocalTime(value.into()),
+            tombi_document_tree::Value::Array(value) => Value::Array(value.into_document(toml_version)),
+            tombi_document_tree::Value::Table(value) => Value::Table(value.into_document(toml_version)),
+            tombi_document_tree::Value::Incomplete { .. } => {
                 unreachable!("Incomplete value should not be converted to document")
             }
         }

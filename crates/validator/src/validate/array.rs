@@ -1,13 +1,13 @@
 use std::borrow::Cow;
 
 use tombi_diagnostic::SetDiagnostics;
-use document_tree::ValueImpl;
+use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{CurrentSchema, DocumentSchema, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
-impl Validate for document_tree::Array {
+impl Validate for tombi_document_tree::Array {
     fn validate<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],

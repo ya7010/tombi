@@ -23,7 +23,7 @@ impl CompositeSchemaImpl for AllOfSchema {
 pub fn find_all_of_completion_items<'a: 'b, 'b, T>(
     value: &'a T,
     position: text::Position,
-    keys: &'a [document_tree::Key],
+    keys: &'a [tombi_document_tree::Key],
     accessors: &'a [Accessor],
     all_of_schema: &'a schema_store::AllOfSchema,
     current_schema: &'a CurrentSchema<'a>,

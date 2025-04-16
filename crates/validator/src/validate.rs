@@ -31,7 +31,7 @@ pub trait Validate {
 }
 
 pub fn validate<'a: 'b, 'b>(
-    tree: document_tree::DocumentTree,
+    tree: tombi_document_tree::DocumentTree,
     source_schema: &'a schema_store::SourceSchema,
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {

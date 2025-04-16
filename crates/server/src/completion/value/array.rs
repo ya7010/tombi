@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use document_tree::ArrayKind;
+use tombi_document_tree::ArrayKind;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
 use schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, SchemaUrl, ValueSchema};
@@ -14,11 +14,11 @@ use crate::completion::{
     CompletionEdit,
 };
 
-impl FindCompletionContents for document_tree::Array {
+impl FindCompletionContents for tombi_document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
@@ -173,8 +173,8 @@ impl FindCompletionContents for document_tree::Array {
             } else {
                 for (index, value) in self.values().iter().enumerate() {
                     if value.range().contains(position) {
-                        if let document_tree::Value::Table(table) = value {
-                            if keys.len() == 1 && table.kind() == document_tree::TableKind::KeyValue
+                        if let tombi_document_tree::Value::Table(table) = value {
+                            if keys.len() == 1 && table.kind() == tombi_document_tree::TableKind::KeyValue
                             {
                                 let key = &keys.first().unwrap();
                                 return vec![CompletionContent::new_type_hint_key(
@@ -220,7 +220,7 @@ impl FindCompletionContents for ArraySchema {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext<'a>,

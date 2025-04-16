@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use tombi_diagnostic::SetDiagnostics;
-use document_tree::ValueImpl;
+use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::{
     Accessor, CurrentSchema, DocumentSchema, SchemaAccessor, SchemaAccessors, ValueSchema,
@@ -11,7 +11,7 @@ use schema_store::{
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 use crate::error::Patterns;
 
-impl Validate for document_tree::Table {
+impl Validate for tombi_document_tree::Table {
     fn validate<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],

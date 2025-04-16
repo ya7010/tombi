@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use ahash::AHashMap;
-use document_tree::TryIntoDocumentTree;
 use itertools::{Either, Itertools};
 use schema_store::SourceSchema;
 use syntax::SyntaxNode;
 use tombi_config::{Config, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
+use tombi_document_tree::TryIntoDocumentTree;
 use tower_lsp::{
     lsp_types::{
         request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},
@@ -145,7 +145,7 @@ impl Backend {
     pub async fn get_incomplete_document_tree(
         &self,
         text_document_uri: &Url,
-    ) -> Option<document_tree::DocumentTree> {
+    ) -> Option<tombi_document_tree::DocumentTree> {
         let root = self.get_incomplete_ast(&text_document_uri).await?;
 
         let source_schema = self

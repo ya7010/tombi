@@ -6,24 +6,24 @@ pub enum IntegerKind {
     Hexadecimal,
 }
 
-impl From<document_tree::IntegerKind> for IntegerKind {
-    fn from(kind: document_tree::IntegerKind) -> Self {
+impl From<tombi_document_tree::IntegerKind> for IntegerKind {
+    fn from(kind: tombi_document_tree::IntegerKind) -> Self {
         match kind {
-            document_tree::IntegerKind::Binary(_) => Self::Binary,
-            document_tree::IntegerKind::Decimal(_) => Self::Decimal,
-            document_tree::IntegerKind::Octal(_) => Self::Octal,
-            document_tree::IntegerKind::Hexadecimal(_) => Self::Hexadecimal,
+            tombi_document_tree::IntegerKind::Binary(_) => Self::Binary,
+            tombi_document_tree::IntegerKind::Decimal(_) => Self::Decimal,
+            tombi_document_tree::IntegerKind::Octal(_) => Self::Octal,
+            tombi_document_tree::IntegerKind::Hexadecimal(_) => Self::Hexadecimal,
         }
     }
 }
 
-impl From<&document_tree::IntegerKind> for IntegerKind {
-    fn from(kind: &document_tree::IntegerKind) -> Self {
+impl From<&tombi_document_tree::IntegerKind> for IntegerKind {
+    fn from(kind: &tombi_document_tree::IntegerKind) -> Self {
         match kind {
-            document_tree::IntegerKind::Binary(_) => Self::Binary,
-            document_tree::IntegerKind::Decimal(_) => Self::Decimal,
-            document_tree::IntegerKind::Octal(_) => Self::Octal,
-            document_tree::IntegerKind::Hexadecimal(_) => Self::Hexadecimal,
+            tombi_document_tree::IntegerKind::Binary(_) => Self::Binary,
+            tombi_document_tree::IntegerKind::Decimal(_) => Self::Decimal,
+            tombi_document_tree::IntegerKind::Octal(_) => Self::Octal,
+            tombi_document_tree::IntegerKind::Hexadecimal(_) => Self::Hexadecimal,
         }
     }
 }
@@ -54,8 +54,8 @@ impl Integer {
     }
 }
 
-impl From<document_tree::Integer> for Integer {
-    fn from(node: document_tree::Integer) -> Self {
+impl From<tombi_document_tree::Integer> for Integer {
+    fn from(node: tombi_document_tree::Integer) -> Self {
         Self {
             kind: node.kind().into(),
             value: node.value(),

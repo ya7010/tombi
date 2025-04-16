@@ -1,12 +1,12 @@
 use tombi_diagnostic::SetDiagnostics;
-use document_tree::ValueImpl;
+use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
 use schema_store::ValueType;
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
-impl Validate for document_tree::String {
+impl Validate for tombi_document_tree::String {
     fn validate<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],

@@ -1,5 +1,5 @@
 use tombi_diagnostic::SetDiagnostics;
-use document_tree::{LocalDateTime, ValueImpl};
+use tombi_document_tree::{LocalDateTime, ValueImpl};
 use futures::{future::BoxFuture, FutureExt};
 use schema_store::ValueType;
 

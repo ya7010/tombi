@@ -13,7 +13,7 @@ use validator::Validate;
 use x_tombi::TableKeysOrder;
 
 pub async fn table_keys_order<'a>(
-    value: &'a document_tree::Value,
+    value: &'a tombi_document_tree::Value,
     key_values: Vec<tombi_ast::KeyValue>,
     current_schema: Option<&'a CurrentSchema<'a>>,
     schema_context: &'a SchemaContext<'a>,
@@ -57,7 +57,7 @@ pub async fn table_keys_order<'a>(
 }
 
 pub fn sorted_accessors<'a: 'b, 'b, T>(
-    value: &'a document_tree::Value,
+    value: &'a tombi_document_tree::Value,
     validation_accessors: &'a [schema_store::SchemaAccessor],
     targets: Vec<(Vec<schema_store::SchemaAccessor>, T)>,
     current_schema: Option<&'a CurrentSchema<'a>>,
@@ -127,7 +127,7 @@ where
 
         if let Some(current_schema) = current_schema {
             match (value, current_schema.value_schema.as_ref()) {
-                (document_tree::Value::Table(table), ValueSchema::Table(table_schema)) => {
+                (tombi_document_tree::Value::Table(table), ValueSchema::Table(table_schema)) => {
                     if new_targets_map
                         .iter()
                         .all(|(accessor, _)| matches!(accessor, SchemaAccessor::Key(_)))
@@ -232,7 +232,7 @@ where
                         return results;
                     }
                 }
-                (document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
+                (tombi_document_tree::Value::Array(array), ValueSchema::Array(array_schema)) => {
                     if new_targets_map
                         .iter()
                         .all(|(accessor, _)| matches!(accessor, SchemaAccessor::Index))

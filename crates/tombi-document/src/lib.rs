@@ -57,9 +57,9 @@ pub trait IntoDocument<T> {
     fn into_document(self, toml_version: TomlVersion) -> T;
 }
 
-impl IntoDocument<Document> for document_tree::DocumentTree {
+impl IntoDocument<Document> for tombi_document_tree::DocumentTree {
     fn into_document(self, toml_version: TomlVersion) -> Document {
-        Document(document_tree::Table::from(self).into_document(toml_version))
+        Document(tombi_document_tree::Table::from(self).into_document(toml_version))
     }
 }
 
@@ -115,7 +115,7 @@ macro_rules! test_deserialize {
         fn $name() {
             use tombi_ast::AstNode;
             use itertools::Itertools;
-            use document_tree::IntoDocumentTreeAndErrors;
+            use tombi_document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
 
             test_lib::init_tracing();
@@ -142,7 +142,7 @@ macro_rules! test_deserialize {
         fn $name() {
             use tombi_ast::AstNode;
             use itertools::Itertools;
-            use document_tree::IntoDocumentTreeAndErrors;
+            use tombi_document_tree::IntoDocumentTreeAndErrors;
 
             let source = textwrap::dedent($source);
             let p = parser::parse(&source.trim());

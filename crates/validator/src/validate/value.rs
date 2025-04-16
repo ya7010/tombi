@@ -2,7 +2,7 @@ use futures::{future::BoxFuture, FutureExt};
 
 use super::Validate;
 
-impl Validate for document_tree::Value {
+impl Validate for tombi_document_tree::Value {
     fn validate<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [schema_store::SchemaAccessor],

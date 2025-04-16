@@ -13,11 +13,11 @@ use futures::{future::BoxFuture, FutureExt};
 
 use super::GetTypeDefinition;
 
-impl GetTypeDefinition for document_tree::Value {
+impl GetTypeDefinition for tombi_document_tree::Value {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
@@ -159,7 +159,7 @@ impl GetTypeDefinition for schema_store::ValueSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [schema_store::Accessor],
         current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,

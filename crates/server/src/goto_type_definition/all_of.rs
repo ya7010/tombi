@@ -9,7 +9,7 @@ use super::{GetTypeDefinition, TypeDefinition};
 pub fn get_all_of_type_definition<'a: 'b, 'b, T>(
     value: &'a T,
     position: text::Position,
-    keys: &'a [document_tree::Key],
+    keys: &'a [tombi_document_tree::Key],
     accessors: &'a [schema_store::Accessor],
     all_of_schema: &'a schema_store::AllOfSchema,
     schema_url: &'a SchemaUrl,
@@ -17,7 +17,7 @@ pub fn get_all_of_type_definition<'a: 'b, 'b, T>(
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<TypeDefinition>>
 where
-    T: GetTypeDefinition + document_tree::ValueImpl + validator::Validate + Sync + Send,
+    T: GetTypeDefinition + tombi_document_tree::ValueImpl + validator::Validate + Sync + Send,
 {
     async move {
         let mut all_of_type_definition = None;
@@ -74,7 +74,7 @@ impl GetTypeDefinition for schema_store::AllOfSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         _position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,

@@ -10,11 +10,11 @@ use crate::hover::{
     constraints::DataConstraints, one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
-impl GetHoverContent for document_tree::Array {
+impl GetHoverContent for tombi_document_tree::Array {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
@@ -83,7 +83,7 @@ impl GetHoverContent for document_tree::Array {
                                             .await?;
 
                                         if keys.is_empty()
-                                            && self.kind() == document_tree::ArrayKind::ArrayOfTable
+                                            && self.kind() == tombi_document_tree::ArrayKind::ArrayOfTable
                                         {
                                             if let Some(constraints) =
                                                 &mut hover_content.constraints
@@ -218,7 +218,7 @@ impl GetHoverContent for ArraySchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         _position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,

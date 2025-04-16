@@ -11,7 +11,7 @@ pub enum ErrorKind {
     #[error("Expected a value of type {expected}, but found {actual}")]
     TypeMismatch {
         expected: schema_store::ValueType,
-        actual: document_tree::ValueType,
+        actual: tombi_document_tree::ValueType,
     },
 
     #[error("The value must be one of [{}], but found {actual}", .expected.join(", "))]

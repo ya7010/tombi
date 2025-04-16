@@ -16,7 +16,6 @@ pub use all_of::find_all_of_completion_items;
 pub use any_of::find_any_of_completion_items;
 use array::type_hint_array;
 use boolean::type_hint_boolean;
-use tombi_config::TomlVersion;
 use float::type_hint_float;
 use futures::{future::BoxFuture, FutureExt};
 use integer::type_hint_integer;
@@ -31,17 +30,18 @@ use schema_store::{
     SchemaStore, SchemaUrl, StringSchema, TableSchema, ValueSchema,
 };
 use string::type_hint_string;
+use tombi_config::TomlVersion;
 
 use super::{
     schema_completion::SchemaCompletion, CompletionCandidate, CompletionContent, CompletionHint,
     FindCompletionContents,
 };
 
-impl FindCompletionContents for document_tree::Value {
+impl FindCompletionContents for tombi_document_tree::Value {
     fn find_completion_contents<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext<'a>,
@@ -131,7 +131,7 @@ impl FindCompletionContents for document_tree::Value {
 }
 
 pub fn type_hint_value(
-    key: Option<&document_tree::Key>,
+    key: Option<&tombi_document_tree::Key>,
     position: text::Position,
     toml_version: TomlVersion,
     schema_url: Option<&SchemaUrl>,

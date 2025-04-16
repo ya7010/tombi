@@ -7,24 +7,24 @@ pub enum StringKind {
     MultiLineLiteralString,
 }
 
-impl From<document_tree::StringKind> for StringKind {
-    fn from(kind: document_tree::StringKind) -> Self {
+impl From<tombi_document_tree::StringKind> for StringKind {
+    fn from(kind: tombi_document_tree::StringKind) -> Self {
         match kind {
-            document_tree::StringKind::BasicString(_) => Self::BasicString,
-            document_tree::StringKind::LiteralString(_) => Self::LiteralString,
-            document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
-            document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
+            tombi_document_tree::StringKind::BasicString(_) => Self::BasicString,
+            tombi_document_tree::StringKind::LiteralString(_) => Self::LiteralString,
+            tombi_document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
+            tombi_document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
         }
     }
 }
 
-impl From<&document_tree::StringKind> for StringKind {
-    fn from(kind: &document_tree::StringKind) -> Self {
+impl From<&tombi_document_tree::StringKind> for StringKind {
+    fn from(kind: &tombi_document_tree::StringKind) -> Self {
         match kind {
-            document_tree::StringKind::BasicString(_) => Self::BasicString,
-            document_tree::StringKind::LiteralString(_) => Self::LiteralString,
-            document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
-            document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
+            tombi_document_tree::StringKind::BasicString(_) => Self::BasicString,
+            tombi_document_tree::StringKind::LiteralString(_) => Self::LiteralString,
+            tombi_document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
+            tombi_document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
         }
     }
 }
@@ -52,8 +52,8 @@ impl String {
     }
 }
 
-impl From<document_tree::String> for crate::String {
-    fn from(node: document_tree::String) -> Self {
+impl From<tombi_document_tree::String> for crate::String {
+    fn from(node: tombi_document_tree::String) -> Self {
         Self {
             kind: node.kind().into(),
             value: node.into_value(),

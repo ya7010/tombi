@@ -1,5 +1,5 @@
 use tombi_ast::{algo::ancestors_at_position, AstNode};
-use document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
+use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use itertools::{Either, Itertools};
 use schema_store::SchemaContext;
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
@@ -85,7 +85,7 @@ pub(crate) async fn get_hover_range(
     root: &tombi_ast::Root,
     position: text::Position,
     toml_version: tombi_config::TomlVersion,
-) -> Option<(Vec<document_tree::Key>, Option<text::Range>)> {
+) -> Option<(Vec<tombi_document_tree::Key>, Option<text::Range>)> {
     let mut keys_vec = vec![];
     let mut hover_range = None;
 

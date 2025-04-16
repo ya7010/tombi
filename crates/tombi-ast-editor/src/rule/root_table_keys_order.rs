@@ -1,4 +1,4 @@
-use document_tree::IntoDocumentTreeAndErrors;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use itertools::Itertools;
 use schema_store::{CurrentSchema, SchemaAccessor, SchemaContext};
 use syntax::SyntaxElement;
@@ -17,7 +17,7 @@ pub async fn root_table_keys_order<'a>(
     }
 
     let mut changes = table_keys_order(
-        &document_tree::Value::Table(
+        &tombi_document_tree::Value::Table(
             key_values
                 .clone()
                 .into_document_tree_and_errors(schema_context.toml_version)
@@ -61,7 +61,7 @@ pub async fn root_table_keys_order<'a>(
         .collect_vec();
 
     let new = sorted_accessors(
-        &document_tree::Value::Table(
+        &tombi_document_tree::Value::Table(
             table_or_array_of_tables
                 .into_document_tree_and_errors(schema_context.toml_version)
                 .tree,

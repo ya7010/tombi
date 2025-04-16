@@ -10,11 +10,11 @@ use crate::goto_type_definition::{
     one_of::get_one_of_type_definition, GetTypeDefinition, TypeDefinition,
 };
 
-impl GetTypeDefinition for document_tree::Table {
+impl GetTypeDefinition for tombi_document_tree::Table {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         position: text::Position,
-        keys: &'a [document_tree::Key],
+        keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,
@@ -291,7 +291,7 @@ impl GetTypeDefinition for TableSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         _position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,

@@ -9,7 +9,7 @@ use super::{GetTypeDefinition, TypeDefinition};
 pub fn get_any_of_type_definition<'a: 'b, 'b, T>(
     value: &'a T,
     position: text::Position,
-    keys: &'a [document_tree::Key],
+    keys: &'a [tombi_document_tree::Key],
     accessors: &'a [schema_store::Accessor],
     any_of_schema: &'a schema_store::AnyOfSchema,
     schema_url: &'a SchemaUrl,
@@ -17,7 +17,7 @@ pub fn get_any_of_type_definition<'a: 'b, 'b, T>(
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<TypeDefinition>>
 where
-    T: GetTypeDefinition + document_tree::ValueImpl + validator::Validate + Sync + Send,
+    T: GetTypeDefinition + tombi_document_tree::ValueImpl + validator::Validate + Sync + Send,
 {
     async move {
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
@@ -71,7 +71,7 @@ impl GetTypeDefinition for schema_store::AnyOfSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         _position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a schema_store::SchemaContext,

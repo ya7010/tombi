@@ -1,4 +1,4 @@
-use document_tree::TryIntoDocumentTree;
+use tombi_document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
 use schema_store::{ArraySchema, SchemaContext};
 use syntax::SyntaxElement;
@@ -194,7 +194,7 @@ impl SortableValues {
                     let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
                     match value.clone() {
                         tombi_ast::Value::IntegerBin(integer_bin) => {
-                            if let Ok(document_tree::Value::Integer(integer)) =
+                            if let Ok(tombi_document_tree::Value::Integer(integer)) =
                                 integer_bin.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((integer.value(), value, comma));
@@ -203,7 +203,7 @@ impl SortableValues {
                             }
                         }
                         tombi_ast::Value::IntegerOct(integer_oct) => {
-                            if let Ok(document_tree::Value::Integer(integer)) =
+                            if let Ok(tombi_document_tree::Value::Integer(integer)) =
                                 integer_oct.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((integer.value(), value, comma));
@@ -212,7 +212,7 @@ impl SortableValues {
                             }
                         }
                         tombi_ast::Value::IntegerDec(integer_dec) => {
-                            if let Ok(document_tree::Value::Integer(integer)) =
+                            if let Ok(tombi_document_tree::Value::Integer(integer)) =
                                 integer_dec.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((integer.value(), value, comma));
@@ -221,7 +221,7 @@ impl SortableValues {
                             }
                         }
                         tombi_ast::Value::IntegerHex(integer_hex) => {
-                            if let Ok(document_tree::Value::Integer(integer)) =
+                            if let Ok(tombi_document_tree::Value::Integer(integer)) =
                                 integer_hex.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((integer.value(), value, comma));
@@ -240,7 +240,7 @@ impl SortableValues {
                     let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
                     match value.clone() {
                         tombi_ast::Value::BasicString(basic_string) => {
-                            if let Ok(document_tree::Value::String(string)) =
+                            if let Ok(tombi_document_tree::Value::String(string)) =
                                 basic_string.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((string.value().to_owned(), value, comma));
@@ -249,7 +249,7 @@ impl SortableValues {
                             }
                         }
                         tombi_ast::Value::LiteralString(literal_string) => {
-                            if let Ok(document_tree::Value::String(string)) =
+                            if let Ok(tombi_document_tree::Value::String(string)) =
                                 literal_string.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((string.value().to_owned(), value, comma));
@@ -258,7 +258,7 @@ impl SortableValues {
                             }
                         }
                         tombi_ast::Value::MultiLineBasicString(multi_line_basic_string) => {
-                            if let Ok(document_tree::Value::String(string)) =
+                            if let Ok(tombi_document_tree::Value::String(string)) =
                                 multi_line_basic_string.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((string.value().to_owned(), value, comma));
@@ -267,7 +267,7 @@ impl SortableValues {
                             }
                         }
                         tombi_ast::Value::MultiLineLiteralString(multi_line_literal_string) => {
-                            if let Ok(document_tree::Value::String(string)) =
+                            if let Ok(tombi_document_tree::Value::String(string)) =
                                 multi_line_literal_string.try_into_document_tree(toml_version)
                             {
                                 sortable_values.push((string.value().to_owned(), value, comma));

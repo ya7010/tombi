@@ -9,7 +9,7 @@ use super::{GetHoverContent, HoverContent};
 pub fn get_one_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
     position: text::Position,
-    keys: &'a [document_tree::Key],
+    keys: &'a [tombi_document_tree::Key],
     accessors: &'a [schema_store::Accessor],
     one_of_schema: &'a schema_store::OneOfSchema,
     schema_url: &'a SchemaUrl,
@@ -17,7 +17,7 @@ pub fn get_one_of_hover_content<'a: 'b, 'b, T>(
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
-    T: GetHoverContent + document_tree::ValueImpl + validator::Validate + Sync + Send,
+    T: GetHoverContent + tombi_document_tree::ValueImpl + validator::Validate + Sync + Send,
 {
     async move {
         let mut one_hover_contents = ahash::AHashSet::new();
@@ -155,7 +155,7 @@ impl GetHoverContent for schema_store::OneOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         _position: text::Position,
-        _keys: &'a [document_tree::Key],
+        _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a schema_store::SchemaContext,

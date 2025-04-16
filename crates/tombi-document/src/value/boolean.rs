@@ -15,8 +15,8 @@ impl Boolean {
     }
 }
 
-impl From<document_tree::Boolean> for Boolean {
-    fn from(node: document_tree::Boolean) -> Self {
+impl From<tombi_document_tree::Boolean> for Boolean {
+    fn from(node: tombi_document_tree::Boolean) -> Self {
         Self {
             value: node.value(),
         }

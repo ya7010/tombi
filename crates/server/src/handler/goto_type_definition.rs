@@ -1,4 +1,4 @@
-use document_tree::IntoDocumentTreeAndErrors;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use itertools::Either;
 use reqwest::Client;
 use schema_store::SchemaContext;

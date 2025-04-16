@@ -1,5 +1,5 @@
-use tombi_config::TomlVersion;
 use schema_store::{get_schema_name, SchemaUrl};
+use tombi_config::TomlVersion;
 
 use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
 
@@ -161,7 +161,7 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_key(
-        key: &document_tree::Key,
+        key: &tombi_document_tree::Key,
         toml_version: TomlVersion,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,

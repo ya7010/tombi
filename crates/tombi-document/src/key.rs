@@ -10,12 +10,12 @@ pub enum KeyKind {
     LiteralString,
 }
 
-impl From<document_tree::KeyKind> for KeyKind {
-    fn from(kind: document_tree::KeyKind) -> Self {
+impl From<tombi_document_tree::KeyKind> for KeyKind {
+    fn from(kind: tombi_document_tree::KeyKind) -> Self {
         match kind {
-            document_tree::KeyKind::BareKey => Self::BareKey,
-            document_tree::KeyKind::BasicString => Self::BasicString,
-            document_tree::KeyKind::LiteralString => Self::LiteralString,
+            tombi_document_tree::KeyKind::BareKey => Self::BareKey,
+            tombi_document_tree::KeyKind::BasicString => Self::BasicString,
+            tombi_document_tree::KeyKind::LiteralString => Self::LiteralString,
         }
     }
 }
@@ -76,7 +76,7 @@ impl std::fmt::Display for Key {
     }
 }
 
-impl IntoDocument<Key> for document_tree::Key {
+impl IntoDocument<Key> for tombi_document_tree::Key {
     fn into_document(self, toml_version: TomlVersion) -> Key {
         Key {
             kind: self.kind().into(),

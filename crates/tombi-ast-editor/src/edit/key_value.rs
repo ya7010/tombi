@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use document_tree::TryIntoDocumentTree;
+use tombi_document_tree::TryIntoDocumentTree;
 use futures::FutureExt;
 use itertools::Itertools;
 use schema_store::{CurrentSchema, SchemaAccessor};
@@ -32,7 +32,7 @@ impl crate::Edit for tombi_ast::KeyValue {
 
             if let Some(current_schema) = current_schema {
                 if let Some(value_schema) = get_schema(
-                    &document_tree::Value::Table(
+                    &tombi_document_tree::Value::Table(
                         self.clone()
                             .try_into_document_tree(schema_context.toml_version)
                             .unwrap(),

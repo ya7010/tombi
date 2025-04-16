@@ -1,12 +1,12 @@
 mod error;
 
-use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
 use itertools::{Either, Itertools};
 use schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use tombi_ast::AstNode;
 use tombi_document::IntoDocument;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 

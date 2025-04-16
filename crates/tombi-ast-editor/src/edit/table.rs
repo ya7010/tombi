@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use document_tree::IntoDocumentTreeAndErrors;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use futures::FutureExt;
 use itertools::Itertools;
 use schema_store::{GetHeaderSchemarAccessors, SchemaAccessor};
@@ -24,7 +24,7 @@ impl crate::Edit for tombi_ast::Table {
                 return changes;
             };
 
-            let mut value = &document_tree::Value::Table(
+            let mut value = &tombi_document_tree::Value::Table(
                 self.clone()
                     .into_document_tree_and_errors(schema_context.toml_version)
                     .tree,
@@ -42,13 +42,13 @@ impl crate::Edit for tombi_ast::Table {
 
             for header_accessor in &header_accessors {
                 match (value, header_accessor) {
-                    (document_tree::Value::Table(table), SchemaAccessor::Key(key)) => {
+                    (tombi_document_tree::Value::Table(table), SchemaAccessor::Key(key)) => {
                         let Some(v) = table.get(key) else {
                             return changes;
                         };
                         value = v;
                     }
-                    (document_tree::Value::Array(array), SchemaAccessor::Index) => {
+                    (tombi_document_tree::Value::Array(array), SchemaAccessor::Index) => {
                         let Some(v) = array.get(0) else {
                             return changes;
                         };

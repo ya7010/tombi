@@ -20,9 +20,9 @@ pub enum ArrayKind {
     Array,
 }
 
-impl From<document_tree::ArrayKind> for ArrayKind {
-    fn from(kind: document_tree::ArrayKind) -> Self {
-        use document_tree::ArrayKind::*;
+impl From<tombi_document_tree::ArrayKind> for ArrayKind {
+    fn from(kind: tombi_document_tree::ArrayKind) -> Self {
+        use tombi_document_tree::ArrayKind::*;
 
         match kind {
             ArrayOfTable | ParentArrayOfTable => Self::ArrayOfTable,
@@ -76,11 +76,11 @@ impl From<Array> for Vec<Value> {
     }
 }
 
-impl IntoDocument<Array> for document_tree::Array {
+impl IntoDocument<Array> for tombi_document_tree::Array {
     fn into_document(self, toml_version: toml_version::TomlVersion) -> Array {
         Array {
             kind: self.kind().into(),
-            values: Vec::<document_tree::Value>::from(self.values())
+            values: Vec::<tombi_document_tree::Value>::from(self.values())
                 .into_iter()
                 .map(|value| value.into_document(toml_version))
                 .collect(),
