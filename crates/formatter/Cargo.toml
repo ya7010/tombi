@@ -6,7 +6,6 @@ edition = { workspace = true }
 license = { workspace = true }
 
 [dependencies]
-ast-editor = { workspace = true }
 diagnostic = { workspace = true }
 document-tree = { workspace = true }
 itertools = { workspace = true }
@@ -18,6 +17,7 @@ syntax = { workspace = true }
 text = { workspace = true }
 tokio.workspace = true
 tombi-ast = { workspace = true }
+tombi-ast-editor = { workspace = true }
 tombi-config = { workspace = true }
 tracing = { workspace = true }
 unicode-segmentation = { workspace = true }

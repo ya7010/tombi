@@ -131,28 +131,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
 
 [[package]]
-name = "ast-editor"
-version = "0.0.0"
-dependencies = [
- "ahash",
- "document-tree",
- "futures",
- "indexmap",
- "itertools",
- "parser",
- "regex",
- "schema-store",
- "syntax",
- "text",
- "thiserror",
- "tombi-ast",
- "toml-version",
- "tracing",
- "validator",
- "x-tombi",
-]
-
-[[package]]
 name = "async-trait"
 version = "0.1.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -595,7 +573,6 @@ name = "formatter"
 version = "0.0.0"
 dependencies = [
  "assert_matches",
- "ast-editor",
  "diagnostic",
  "document-tree",
  "itertools",
@@ -611,6 +588,7 @@ dependencies = [
  "textwrap",
  "tokio",
  "tombi-ast",
+ "tombi-ast-editor",
  "tombi-config",
  "tracing",
  "tracing-subscriber",
@@ -2252,6 +2230,28 @@ dependencies = [
  "toml-version",
  "tracing",
  "url",
+]
+
+[[package]]
+name = "tombi-ast-editor"
+version = "0.0.0"
+dependencies = [
+ "ahash",
+ "document-tree",
+ "futures",
+ "indexmap",
+ "itertools",
+ "parser",
+ "regex",
+ "schema-store",
+ "syntax",
+ "text",
+ "thiserror",
+ "tombi-ast",
+ "toml-version",
+ "tracing",
+ "validator",
+ "x-tombi",
 ]
 
 [[package]]

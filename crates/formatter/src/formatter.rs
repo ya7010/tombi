@@ -2,9 +2,9 @@ pub mod definitions;
 
 use std::fmt::Write;
 
-use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use diagnostic::{Diagnostic, SetDiagnostics};
 use itertools::{Either, Itertools};
+use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
 
@@ -73,7 +73,7 @@ impl<'a> Formatter<'a> {
             return Err(diagnostics);
         }
 
-        let root = ast_editor::Editor::new(
+        let root = tombi_ast_editor::Editor::new(
             root,
             &schema_store::SchemaContext {
                 toml_version: self.toml_version,

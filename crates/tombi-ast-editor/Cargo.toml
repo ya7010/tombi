@@ -1,5 +1,5 @@
 [package]
-name = "ast-editor"
+name = "tombi-ast-editor"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
