@@ -15,7 +15,7 @@ jobs:
         toml-version:
           - v1.0.0
           - v1.1.0-preview
-    continue-on-error: true
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
 
@@ -36,9 +36,8 @@ jobs:
       - name: Run toml-test
         run: cargo xtask toml-test --toml-version ${{ matrix.toml-version }}
 
-  success-check:
+  success-tombi-test:
     runs-on: ubuntu-latest
     needs: toml-test
-    if: ${{ always() && !contains(needs.toml-test.result, 'failure') }}
     steps:
       - run: echo "All matrix jobs succeeded!"
