@@ -17,7 +17,7 @@ pub fn get_all_of_type_definition<'a: 'b, 'b, T>(
     schema_context: &'a schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<TypeDefinition>>
 where
-    T: GetTypeDefinition + tombi_document_tree::ValueImpl + validator::Validate + Sync + Send,
+    T: GetTypeDefinition + tombi_document_tree::ValueImpl + tombi_validator::Validate + Sync + Send,
 {
     async move {
         let mut all_of_type_definition = None;

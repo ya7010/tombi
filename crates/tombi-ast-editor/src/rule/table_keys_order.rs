@@ -9,8 +9,8 @@ use schema_store::{
 };
 use syntax::SyntaxElement;
 use tombi_ast::AstNode;
+use tombi_validator::Validate;
 use tombi_x_keyword::TableKeysOrder;
-use validator::Validate;
 
 pub async fn table_keys_order<'a>(
     value: &'a tombi_document_tree::Value,

@@ -1,6 +1,6 @@
 use futures::FutureExt;
 use schema_store::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaAccessor, ValueSchema};
-use validator::Validate;
+use tombi_validator::Validate;
 
 mod array;
 mod array_of_table;
@@ -76,8 +76,10 @@ async fn get_schema<'a: 'b, 'b>(
 
             match &accessors[0] {
                 SchemaAccessor::Key(key) => {
-                    if let (tombi_document_tree::Value::Table(table), ValueSchema::Table(table_schema)) =
-                        (value, current_schema.value_schema.as_ref())
+                    if let (
+                        tombi_document_tree::Value::Table(table),
+                        ValueSchema::Table(table_schema),
+                    ) = (value, current_schema.value_schema.as_ref())
                     {
                         if let Some(value) = table.get(&key.to_string()) {
                             if let Some(referable_property_schema) = table_schema
@@ -163,8 +165,10 @@ async fn get_schema<'a: 'b, 'b>(
                     }
                 }
                 SchemaAccessor::Index => {
-                    if let (tombi_document_tree::Value::Array(array), ValueSchema::Array(array_schema)) =
-                        (value, current_schema.value_schema.as_ref())
+                    if let (
+                        tombi_document_tree::Value::Array(array),
+                        ValueSchema::Array(array_schema),
+                    ) = (value, current_schema.value_schema.as_ref())
                     {
                         // NOTE: This is fine. This function is only used for Table/ArrayOfTable or Keys of KeyValues,
                         //       so there is only one element in the array.

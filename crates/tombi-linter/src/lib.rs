@@ -4,12 +4,12 @@ mod linter;
 mod rule;
 mod warning;
 
-use tombi_diagnostic::Diagnostic;
 pub use error::{Error, ErrorKind};
 use lint::Lint;
 pub use linter::Linter;
 use rule::Rule;
 pub use tombi_config::LintOptions;
+use tombi_diagnostic::Diagnostic;
 pub use warning::{Warning, WarningKind};
 
 #[cfg(test)]
@@ -204,7 +204,7 @@ mod tests {
                 aaa = 1
                 "#,
                 cargo_schema_path(),
-            ) -> Err([validator::WarningKind::StrictAdditionalProperties {
+            ) -> Err([tombi_validator::WarningKind::StrictAdditionalProperties {
                 key: "aaa".to_string(),
             }]);
         }
@@ -217,7 +217,7 @@ mod tests {
                 bbb = 1
                 "#,
                 cargo_schema_path(),
-            ) -> Err([validator::ErrorKind::KeyNotAllowed { key: "aaa".to_string() }]);
+            ) -> Err([tombi_validator::ErrorKind::KeyNotAllowed { key: "aaa".to_string() }]);
         }
     }
 

@@ -34,11 +34,11 @@ tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
 tombi-linter = { workspace = true }
 tombi-text = { workspace = true }
+tombi-validator = { workspace = true }
 tombi-x-keyword = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-validator = { workspace = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }

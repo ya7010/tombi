@@ -31,7 +31,7 @@ pub fn find_any_of_completion_items<'a: 'b, 'b, T>(
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
 where
-    T: FindCompletionContents + validator::Validate + Sync + Send,
+    T: FindCompletionContents + tombi_validator::Validate + Sync + Send,
 {
     async move {
         let mut completion_items = Vec::new();

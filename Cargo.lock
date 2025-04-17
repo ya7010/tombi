@@ -1771,11 +1771,11 @@ dependencies = [
  "tombi-formatter",
  "tombi-linter",
  "tombi-text",
+ "tombi-validator",
  "tombi-x-keyword",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
- "validator",
 ]
 
 [[package]]
@@ -2088,9 +2088,9 @@ dependencies = [
  "tombi-document-tree",
  "tombi-text",
  "tombi-toml-version",
+ "tombi-validator",
  "tombi-x-keyword",
  "tracing",
- "validator",
 ]
 
 [[package]]
@@ -2277,10 +2277,10 @@ dependencies = [
  "tombi-diagnostic",
  "tombi-document-tree",
  "tombi-text",
+ "tombi-validator",
  "tracing",
  "tracing-subscriber",
  "url",
- "validator",
 ]
 
 [[package]]
@@ -2308,6 +2308,21 @@ dependencies = [
  "clap",
  "schemars",
  "serde",
+]
+
+[[package]]
+name = "tombi-validator"
+version = "0.0.0"
+dependencies = [
+ "futures",
+ "itertools",
+ "regex",
+ "schema-store",
+ "thiserror",
+ "tombi-diagnostic",
+ "tombi-document-tree",
+ "tombi-text",
+ "tracing",
 ]
 
 [[package]]
@@ -2568,21 +2583,6 @@ name = "utf8parse"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
-
-[[package]]
-name = "validator"
-version = "0.0.0"
-dependencies = [
- "futures",
- "itertools",
- "regex",
- "schema-store",
- "thiserror",
- "tombi-diagnostic",
- "tombi-document-tree",
- "tombi-text",
- "tracing",
-]
 
 [[package]]
 name = "valuable"

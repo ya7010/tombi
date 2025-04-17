@@ -17,7 +17,7 @@ pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
     schema_context: &'a SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
-    T: GetHoverContent + tombi_document_tree::ValueImpl + validator::Validate + Sync + Send,
+    T: GetHoverContent + tombi_document_tree::ValueImpl + tombi_validator::Validate + Sync + Send,
 {
     async move {
         let mut any_hover_contents = vec![];

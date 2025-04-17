@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
+use itertools::Either;
 use tombi_config::TomlVersion;
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use tombi_document_tree::IntoDocumentTreeAndErrors;
-use itertools::Either;
 use url::Url;
 
 use crate::lint::Lint;
@@ -78,7 +78,7 @@ impl<'a> Linter<'a> {
                     store: self.schema_store,
                 };
                 if let Err(schema_diagnostics) =
-                    validator::validate(document_tree, &source_schema, &schema_context).await
+                    tombi_validator::validate(document_tree, &source_schema, &schema_context).await
                 {
                     self.diagnostics.extend(schema_diagnostics);
                 }
