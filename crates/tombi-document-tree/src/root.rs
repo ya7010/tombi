@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{
     support::comment::try_new_comment, DocumentTreeAndErrors, IntoDocumentTreeAndErrors, Table,

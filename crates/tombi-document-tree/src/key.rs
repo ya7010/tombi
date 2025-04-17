@@ -1,5 +1,5 @@
 use tombi_ast::AstNode;
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors};
 
@@ -132,7 +132,7 @@ impl IntoDocumentTreeAndErrors<Option<Key>> for tombi_ast::Key {
 impl IntoDocumentTreeAndErrors<Vec<crate::Key>> for tombi_ast::Keys {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<Vec<crate::Key>> {
         let mut keys = Vec::new();
         let mut errors = Vec::new();

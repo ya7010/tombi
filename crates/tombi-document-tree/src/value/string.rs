@@ -1,4 +1,4 @@
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{DocumentTreeAndErrors, IntoDocumentTreeAndErrors, ValueImpl, ValueType};
 
@@ -28,7 +28,9 @@ impl crate::String {
             StringKind::BasicString(_) => {
                 tombi_toml_text::try_from_basic_string(&quoted_string, toml_version)
             }
-            StringKind::LiteralString(_) => tombi_toml_text::try_from_literal_string(&quoted_string),
+            StringKind::LiteralString(_) => {
+                tombi_toml_text::try_from_literal_string(&quoted_string)
+            }
             StringKind::MultiLineBasicString(_) => {
                 tombi_toml_text::try_from_multi_line_basic_string(&quoted_string, toml_version)
             }

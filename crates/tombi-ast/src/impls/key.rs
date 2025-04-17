@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::AstChildren;
 

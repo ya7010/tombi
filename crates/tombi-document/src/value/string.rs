@@ -74,7 +74,7 @@ impl serde::Serialize for crate::String {
 #[cfg(test)]
 mod test {
     use serde_json::json;
-    use toml_version::TomlVersion;
+    use tombi_toml_version::TomlVersion;
 
     use crate::test_deserialize;
 

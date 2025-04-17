@@ -8,7 +8,7 @@ mod value_type;
 pub use error::Error;
 pub use key::{Key, KeyKind};
 pub use root::DocumentTree;
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, StringKind, Table, TableKind, Value,

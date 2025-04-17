@@ -184,7 +184,7 @@ impl From<crate::LocalTime> for tombi_date_time::LocalTime {
 impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::OffsetDateTime {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(_) = self.token() else {
@@ -210,7 +210,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::OffsetDateTime {
 impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalDateTime {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(_) = self.token() else {
@@ -236,7 +236,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalDateTime {
 impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalDate {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(_) = self.token() else {
@@ -262,7 +262,7 @@ impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalDate {
 impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::LocalTime {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let range = self.range();
         let Some(_) = self.token() else {

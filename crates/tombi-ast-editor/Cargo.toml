@@ -19,7 +19,7 @@ thiserror = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-text = { workspace = true }
-toml-version = { workspace = true }
+tombi-toml-version = { workspace = true }
 tracing = { workspace = true }
 validator = { workspace = true }
 x-tombi = { workspace = true }

@@ -1,5 +1,5 @@
 use serde::forward_to_deserialize_any;
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::IntoDocument;
 

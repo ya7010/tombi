@@ -1,4 +1,4 @@
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{
     support::integer::{try_from_binary, try_from_decimal, try_from_hexadecimal, try_from_octal},

@@ -1,4 +1,4 @@
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{BoolDefaultTrue, OneOrMany, SchemaCatalogPath};
 

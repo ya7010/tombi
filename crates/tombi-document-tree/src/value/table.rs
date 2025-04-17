@@ -1,7 +1,7 @@
 use indexmap::{map::Entry, IndexMap};
 use itertools::Itertools;
 use tombi_ast::{AstChildren, AstNode};
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{
     support::comment::try_new_comment, Array, DocumentTreeAndErrors, IntoDocumentTreeAndErrors,
@@ -476,7 +476,7 @@ impl IntoDocumentTreeAndErrors<Table> for tombi_ast::TableOrArrayOfTable {
 impl IntoDocumentTreeAndErrors<Table> for tombi_ast::KeyValue {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<Table> {
         let table = Table::new_key_value(&self);
         let mut errors = Vec::new();

@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 
 pub use key::{Key, KeyKind};
 use serde::forward_to_deserialize_any;
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 pub use value::{
     Array, ArrayKind, Boolean, Float, Integer, IntegerKind, LocalDate, LocalDateTime, LocalTime,
     OffsetDateTime, String, StringKind, Table, TableKind, TimeZoneOffset, Value, ValueKind,
@@ -106,7 +106,7 @@ impl<'de> serde::Deserializer<'de> for &'de Document {
 #[macro_export]
 macro_rules! test_deserialize {
     {#[test] fn $name:ident($source:expr) -> Ok($json:expr)} => {
-        test_deserialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Ok($json)}
+        test_deserialize! {#[test] fn $name($source, tombi_toml_version::TomlVersion::default()) -> Ok($json)}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok($json:expr)} => {
@@ -133,7 +133,7 @@ macro_rules! test_deserialize {
     };
 
     {#[test] fn $name:ident($source:expr) -> Err($errors:expr)} => {
-        test_deserialize! {#[test] fn $name($source, toml_version::TomlVersion::default()) -> Err($errors)}
+        test_deserialize! {#[test] fn $name($source, tombi_toml_version::TomlVersion::default()) -> Err($errors)}
     };
 
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Err($errors:expr)} => {

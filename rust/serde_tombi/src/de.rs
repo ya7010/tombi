@@ -7,7 +7,7 @@ use serde::de::DeserializeOwned;
 use tombi_ast::AstNode;
 use tombi_document::IntoDocument;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
 /// Deserialize a TOML string into a Rust data structure.
@@ -645,7 +645,7 @@ optional_string = "provided"
         // Verify the parsed values
         assert_eq!(
             config.toml_version,
-            Some(toml_version::TomlVersion::V1_1_0_Preview)
+            Some(tombi_toml_version::TomlVersion::V1_1_0_Preview)
         );
         assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
         assert!(config.format.is_some());

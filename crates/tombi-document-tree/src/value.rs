@@ -93,7 +93,7 @@ impl crate::ValueImpl for Value {
 impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::Value {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let mut errors = Vec::new();
         for comment in self.leading_comments() {

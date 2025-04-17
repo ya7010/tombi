@@ -5,7 +5,7 @@ use schema_store::SchemaStore;
 use serde::Serialize;
 use tombi_formatter::formatter::definitions::FormatDefinitions;
 use tombi_formatter::FormatOptions;
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
 use crate::document::ToTomlString;

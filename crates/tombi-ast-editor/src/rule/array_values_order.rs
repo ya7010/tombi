@@ -148,7 +148,7 @@ enum Warning {
 impl SortableValues {
     pub fn new(
         values_with_comma: Vec<(tombi_ast::Value, Option<tombi_ast::Comma>)>,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> Result<Self, Warning> {
         if values_with_comma.is_empty() {
             return Err(Warning::UnsupportedTypes);

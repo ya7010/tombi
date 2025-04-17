@@ -5,7 +5,7 @@ use clap::Parser;
 use tombi_document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
 use toml_test::{IntoValue, Value, INVALID_MESSAGE};
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 #[derive(Debug, clap::Parser, Default)]
 #[command(disable_help_subcommand(true))]
@@ -80,7 +80,7 @@ macro_rules! test_decode {
     } => {
         test_decode! {
             #[test]
-            fn $name($source, toml_version::TomlVersion::default()) -> Ok($expected)
+            fn $name($source, tombi_toml_version::TomlVersion::default()) -> Ok($expected)
         }
     };
 }

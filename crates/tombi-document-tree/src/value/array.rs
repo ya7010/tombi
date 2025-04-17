@@ -183,7 +183,7 @@ impl ValueImpl for Array {
 impl IntoDocumentTreeAndErrors<crate::Value> for tombi_ast::Array {
     fn into_document_tree_and_errors(
         self,
-        toml_version: toml_version::TomlVersion,
+        toml_version: tombi_toml_version::TomlVersion,
     ) -> crate::DocumentTreeAndErrors<crate::Value> {
         let mut array = Array::new_array(&self);
 

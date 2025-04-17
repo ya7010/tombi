@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {

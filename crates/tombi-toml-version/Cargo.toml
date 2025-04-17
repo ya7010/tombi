@@ -1,5 +1,5 @@
 [package]
-name = "toml-version"
+name = "tombi-toml-version"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

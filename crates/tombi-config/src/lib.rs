@@ -11,7 +11,7 @@ pub use lint::LintOptions;
 pub use schema::SchemaOptions;
 pub use schema::{RootSchema, Schema, SubSchema};
 pub use server::{ServerCompletion, ServerOptions};
-pub use toml_version::TomlVersion;
+pub use tombi_toml_version::TomlVersion;
 pub use types::*;
 
 pub const CONFIG_FILENAME: &str = "tombi.toml";

@@ -77,7 +77,7 @@ impl From<Array> for Vec<Value> {
 }
 
 impl IntoDocument<Array> for tombi_document_tree::Array {
-    fn into_document(self, toml_version: toml_version::TomlVersion) -> Array {
+    fn into_document(self, toml_version: tombi_toml_version::TomlVersion) -> Array {
         Array {
             kind: self.kind().into(),
             values: Vec::<tombi_document_tree::Value>::from(self.values())

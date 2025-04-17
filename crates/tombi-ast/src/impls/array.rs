@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use syntax::{SyntaxKind::*, T};
-use toml_version::TomlVersion;
+use tombi_toml_version::TomlVersion;
 
 use crate::{support, AstNode};
 

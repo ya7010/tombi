@@ -1754,7 +1754,7 @@ dependencies = [
  "tombi-formatter",
  "tombi-text",
  "tombi-toml-text",
- "toml-version",
+ "tombi-toml-version",
  "tracing",
  "typed-builder",
  "url",
@@ -2105,7 +2105,7 @@ dependencies = [
  "thiserror",
  "tombi-text",
  "tombi-toml-text",
- "toml-version",
+ "tombi-toml-version",
  "tracing",
  "url",
 ]
@@ -2126,7 +2126,7 @@ dependencies = [
  "tombi-ast",
  "tombi-document-tree",
  "tombi-text",
- "toml-version",
+ "tombi-toml-version",
  "tracing",
  "validator",
  "x-tombi",
@@ -2172,7 +2172,7 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
- "toml-version",
+ "tombi-toml-version",
  "tracing",
  "url",
  "x-tombi",
@@ -2225,7 +2225,7 @@ dependencies = [
  "tombi-document-tree",
  "tombi-text",
  "tombi-toml-text",
- "toml-version",
+ "tombi-toml-version",
  "tower-lsp",
  "tracing",
 ]
@@ -2243,7 +2243,7 @@ dependencies = [
  "tombi-diagnostic",
  "tombi-text",
  "tombi-toml-text",
- "toml-version",
+ "tombi-toml-version",
  "tracing",
 ]
 
@@ -2309,7 +2309,16 @@ name = "tombi-toml-text"
 version = "0.0.0"
 dependencies = [
  "thiserror",
- "toml-version",
+ "tombi-toml-version",
+]
+
+[[package]]
+name = "tombi-toml-version"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
@@ -2329,16 +2338,7 @@ dependencies = [
  "tombi-ast",
  "tombi-document-tree",
  "tombi-text",
- "toml-version",
-]
-
-[[package]]
-name = "toml-version"
-version = "0.0.0"
-dependencies = [
- "clap",
- "schemars",
- "serde",
+ "tombi-toml-version",
 ]
 
 [[package]]
