@@ -9,7 +9,7 @@ macro_rules! impl_comment {
         pub struct $name(crate::Comment);
 
         impl $name {
-            pub fn syntax(&self) -> &syntax::SyntaxToken {
+            pub fn syntax(&self) -> &tombi_syntax::SyntaxToken {
                 self.0.syntax()
             }
         }

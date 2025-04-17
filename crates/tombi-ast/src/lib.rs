@@ -24,15 +24,15 @@ where
             .map(Into::into)
     }
 
-    fn can_cast(kind: syntax::SyntaxKind) -> bool
+    fn can_cast(kind: tombi_syntax::SyntaxKind) -> bool
     where
         Self: Sized;
 
-    fn cast(syntax: syntax::SyntaxNode) -> Option<Self>
+    fn cast(syntax: tombi_syntax::SyntaxNode) -> Option<Self>
     where
         Self: Sized;
 
-    fn syntax(&self) -> &syntax::SyntaxNode;
+    fn syntax(&self) -> &tombi_syntax::SyntaxNode;
 
     fn clone_for_update(&self) -> Self
     where
@@ -44,15 +44,15 @@ where
 
 /// Like `AstNode`, but wraps tokens rather than interior nodes.
 pub trait AstToken {
-    fn can_cast(token: syntax::SyntaxKind) -> bool
+    fn can_cast(token: tombi_syntax::SyntaxKind) -> bool
     where
         Self: Sized;
 
-    fn cast(syntax: syntax::SyntaxToken) -> Option<Self>
+    fn cast(syntax: tombi_syntax::SyntaxToken) -> Option<Self>
     where
         Self: Sized;
 
-    fn syntax(&self) -> &syntax::SyntaxToken;
+    fn syntax(&self) -> &tombi_syntax::SyntaxToken;
 
     fn text(&self) -> &str {
         self.syntax().text()
@@ -62,12 +62,12 @@ pub trait AstToken {
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct AstChildren<N> {
-    inner: syntax::SyntaxNodeChildren,
+    inner: tombi_syntax::SyntaxNodeChildren,
     ph: PhantomData<N>,
 }
 
 impl<N> AstChildren<N> {
-    fn new(parent: &syntax::SyntaxNode) -> Self {
+    fn new(parent: &tombi_syntax::SyntaxNode) -> Self {
         AstChildren {
             inner: parent.children(),
             ph: PhantomData,

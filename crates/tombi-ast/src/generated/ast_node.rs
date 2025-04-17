@@ -3,7 +3,7 @@
 use crate::support;
 use crate::AstChildren;
 use crate::AstNode;
-use syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
+use tombi_syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Array {
@@ -23,7 +23,7 @@ impl Array {
         support::node::token(&self.syntax, T![']'])
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -50,7 +50,7 @@ impl ArrayOfTable {
         support::node::token(&self.syntax, T!["]]"])
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -65,7 +65,7 @@ impl BareKey {
         support::node::token(&self.syntax, BARE_KEY)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -80,7 +80,7 @@ impl BasicString {
         support::node::token(&self.syntax, BASIC_STRING)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -95,7 +95,7 @@ impl Boolean {
         support::node::token(&self.syntax, BOOLEAN)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -110,7 +110,7 @@ impl Comma {
         support::node::token(&self.syntax, T ! [,])
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -125,7 +125,7 @@ impl Float {
         support::node::token(&self.syntax, FLOAT)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -148,7 +148,7 @@ impl InlineTable {
         support::node::token(&self.syntax, T!['}'])
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -163,7 +163,7 @@ impl IntegerBin {
         support::node::token(&self.syntax, INTEGER_BIN)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -178,7 +178,7 @@ impl IntegerDec {
         support::node::token(&self.syntax, INTEGER_DEC)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -193,7 +193,7 @@ impl IntegerHex {
         support::node::token(&self.syntax, INTEGER_HEX)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -208,7 +208,7 @@ impl IntegerOct {
         support::node::token(&self.syntax, INTEGER_OCT)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -231,7 +231,7 @@ impl KeyValue {
         support::node::token(&self.syntax, T ! [=])
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -246,7 +246,7 @@ impl Keys {
         support::node::children(&self.syntax)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -261,7 +261,7 @@ impl LiteralString {
         support::node::token(&self.syntax, LITERAL_STRING)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -276,7 +276,7 @@ impl LocalDate {
         support::node::token(&self.syntax, LOCAL_DATE)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -291,7 +291,7 @@ impl LocalDateTime {
         support::node::token(&self.syntax, LOCAL_DATE_TIME)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -306,7 +306,7 @@ impl LocalTime {
         support::node::token(&self.syntax, LOCAL_TIME)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -321,7 +321,7 @@ impl MultiLineBasicString {
         support::node::token(&self.syntax, MULTI_LINE_BASIC_STRING)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -336,7 +336,7 @@ impl MultiLineLiteralString {
         support::node::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -351,7 +351,7 @@ impl OffsetDateTime {
         support::node::token(&self.syntax, OFFSET_DATE_TIME)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -366,7 +366,7 @@ impl Root {
         support::node::children(&self.syntax)
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }
@@ -393,7 +393,7 @@ impl Table {
         support::node::token(&self.syntax, T![']'])
     }
     #[inline]
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         self.syntax.range()
     }
 }

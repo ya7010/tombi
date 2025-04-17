@@ -1,5 +1,5 @@
-use document_tree::support;
-use toml_version::TomlVersion;
+use tombi_document_tree::support;
+use tombi_toml_version::TomlVersion;
 
 #[derive(Debug, serde::Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -26,81 +26,81 @@ pub trait IntoValue {
     fn into_value(self, toml_version: TomlVersion) -> Value;
 }
 
-impl IntoValue for document_tree::Value {
+impl IntoValue for tombi_document_tree::Value {
     fn into_value(self, toml_version: TomlVersion) -> Value {
         match self {
-            document_tree::Value::Boolean(value) => Value::Literal {
+            tombi_document_tree::Value::Boolean(value) => Value::Literal {
                 r#type: Type::Bool,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::Integer(value) => Value::Literal {
+            tombi_document_tree::Value::Integer(value) => Value::Literal {
                 r#type: Type::Integer,
                 value: match value.kind() {
-                    document_tree::IntegerKind::Binary(node) => {
+                    tombi_document_tree::IntegerKind::Binary(node) => {
                         support::integer::try_from_binary(node.token().unwrap().text())
                     }
-                    document_tree::IntegerKind::Octal(node) => {
+                    tombi_document_tree::IntegerKind::Octal(node) => {
                         support::integer::try_from_octal(node.token().unwrap().text())
                     }
-                    document_tree::IntegerKind::Decimal(node) => {
+                    tombi_document_tree::IntegerKind::Decimal(node) => {
                         support::integer::try_from_decimal(node.token().unwrap().text())
                     }
-                    document_tree::IntegerKind::Hexadecimal(node) => {
+                    tombi_document_tree::IntegerKind::Hexadecimal(node) => {
                         support::integer::try_from_hexadecimal(node.token().unwrap().text())
                     }
                 }
                 .unwrap()
                 .to_string(),
             },
-            document_tree::Value::Float(value) => Value::Literal {
+            tombi_document_tree::Value::Float(value) => Value::Literal {
                 r#type: Type::Float,
                 value: support::float::try_from_float(value.node().token().unwrap().text())
                     .unwrap()
                     .to_string(),
             },
-            document_tree::Value::String(value) => Value::Literal {
+            tombi_document_tree::Value::String(value) => Value::Literal {
                 r#type: Type::String,
                 value: value.into_value(),
             },
-            document_tree::Value::OffsetDateTime(value) => Value::Literal {
+            tombi_document_tree::Value::OffsetDateTime(value) => Value::Literal {
                 r#type: Type::Datetime,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalDateTime(value) => Value::Literal {
+            tombi_document_tree::Value::LocalDateTime(value) => Value::Literal {
                 r#type: Type::DatetimeLocal,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalDate(value) => Value::Literal {
+            tombi_document_tree::Value::LocalDate(value) => Value::Literal {
                 r#type: Type::DateLocal,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::LocalTime(value) => Value::Literal {
+            tombi_document_tree::Value::LocalTime(value) => Value::Literal {
                 r#type: Type::TimeLocal,
                 value: value.node().token().unwrap().text().to_string(),
             },
-            document_tree::Value::Array(array) => Value::Array(
+            tombi_document_tree::Value::Array(array) => Value::Array(
                 array
                     .into_iter()
                     .map(|value| value.into_value(toml_version))
                     .collect(),
             ),
-            document_tree::Value::Table(value) => Value::Table(
+            tombi_document_tree::Value::Table(value) => Value::Table(
                 value
                     .into_iter()
                     .map(|(k, v)| (k.to_raw_text(toml_version), v.into_value(toml_version)))
                     .collect(),
             ),
-            document_tree::Value::Incomplete { .. } => {
+            tombi_document_tree::Value::Incomplete { .. } => {
                 unreachable!("Incomplete value should not be converted to Value.")
             }
         }
     }
 }
 
-impl IntoValue for document_tree::DocumentTree {
+impl IntoValue for tombi_document_tree::DocumentTree {
     fn into_value(self, toml_version: TomlVersion) -> Value {
         Value::Table(
-            document_tree::Table::from(self)
+            tombi_document_tree::Table::from(self)
                 .into_iter()
                 .map(|(k, v)| (k.to_raw_text(toml_version), v.into_value(toml_version)))
                 .collect(),

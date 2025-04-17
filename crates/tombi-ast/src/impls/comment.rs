@@ -4,7 +4,7 @@ impl Comment {
     pub fn schema_url(
         &self,
         source_path: Option<&std::path::Path>,
-    ) -> Option<(Result<url::Url, String>, text::Range)> {
+    ) -> Option<(Result<url::Url, String>, tombi_text::Range)> {
         let comment_string = self.to_string();
         if let Some(mut url_str) = comment_string.strip_prefix("#:schema ") {
             let original_len = url_str.len();
@@ -13,11 +13,11 @@ impl Comment {
             url_str = url_str.trim();
 
             let mut schema_url_range = self.syntax().range();
-            schema_url_range = text::Range::new(
-                text::Position::new(schema_url_range.start().line(), 9 + space_count),
-                text::Position::new(
+            schema_url_range = tombi_text::Range::new(
+                tombi_text::Position::new(schema_url_range.start().line(), 9 + space_count),
+                tombi_text::Position::new(
                     schema_url_range.end().line(),
-                    9 + space_count + url_str.len() as text::Column,
+                    9 + space_count + url_str.len() as tombi_text::Column,
                 ),
             );
 

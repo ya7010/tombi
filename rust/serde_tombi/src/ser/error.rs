@@ -5,34 +5,34 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    Config(#[from] config::Error),
+    Config(#[from] tombi_config::Error),
 
     #[error(transparent)]
-    SchemaStore(#[from] schema_store::Error),
+    SchemaStore(#[from] tombi_schema_store::Error),
 
     #[error("Document root must be a Table, got {0}")]
-    RootMustBeTable(document::ValueKind),
+    RootMustBeTable(tombi_document::ValueKind),
 
     #[error("Key must be a String, got {1} for {0}")]
-    KeyMustBeString(schema_store::Accessors, document::ValueKind),
+    KeyMustBeString(tombi_schema_store::Accessors, tombi_document::ValueKind),
 
     #[error("Key is required for {0}")]
-    KeyRequired(schema_store::Accessors),
+    KeyRequired(tombi_schema_store::Accessors),
 
     #[error("Value is required for {0}")]
-    ValueRequired(schema_store::Accessors),
+    ValueRequired(tombi_schema_store::Accessors),
 
     #[error("{error} for {accessors}")]
     DateTimeParseFailed {
-        accessors: schema_store::Accessors,
-        error: date_time::parse::Error,
+        accessors: tombi_schema_store::Accessors,
+        error: tombi_date_time::parse::Error,
     },
 
     #[error("TOML must be UTF-8 encoded")]
     TomlMustBeUtf8,
 
     #[error("{0} required")]
-    ArrayValueRequired(schema_store::Accessors),
+    ArrayValueRequired(tombi_schema_store::Accessors),
 
     #[error("TOML does not support unit values")]
     SerializeUnit,

@@ -1,13 +1,13 @@
 mod error;
 
-use tombi_ast::AstNode;
-use document::IntoDocument;
-use document_tree::IntoDocumentTreeAndErrors;
 pub use error::Error;
 use itertools::{Either, Itertools};
-use schema_store::{SchemaStore, SourceSchema};
+use tombi_schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
-use toml_version::TomlVersion;
+use tombi_ast::AstNode;
+use tombi_document::IntoDocument;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
+use tombi_toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
 /// Deserialize a TOML string into a Rust data structure.
@@ -48,7 +48,7 @@ where
     Deserializer::new().from_str_async(toml_text).await
 }
 
-pub fn from_document<T>(document: document::Document) -> Result<T, crate::de::Error>
+pub fn from_document<T>(document: tombi_document::Document) -> Result<T, crate::de::Error>
 where
     T: DeserializeOwned,
 {
@@ -59,7 +59,7 @@ where
 #[derive(TypedBuilder)]
 pub struct Deserializer<'de> {
     #[builder(default, setter(into, strip_option))]
-    config: Option<&'de ::config::Config>,
+    config: Option<&'de ::tombi_config::Config>,
 
     #[builder(default, setter(into, strip_option))]
     config_path: Option<&'de std::path::Path>,
@@ -68,7 +68,7 @@ pub struct Deserializer<'de> {
     source_path: Option<&'de std::path::Path>,
 
     #[builder(default, setter(into, strip_option))]
-    schema_store: Option<&'de schema_store::SchemaStore>,
+    schema_store: Option<&'de tombi_schema_store::SchemaStore>,
 }
 
 impl<'de> Deserializer<'de> {
@@ -85,10 +85,10 @@ impl<'de> Deserializer<'de> {
     where
         T: DeserializeOwned,
     {
-        let parsed = parser::parse(toml_text);
+        let parsed = tombi_parser::parse(toml_text);
         let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
         let toml_version = self.get_toml_version(&root).await?;
-        let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+        let errors: Vec<&tombi_parser::Error> = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
         if !errors.is_empty() {
             return Err(crate::de::Error::Parser(
@@ -98,14 +98,20 @@ impl<'de> Deserializer<'de> {
         from_document(self.try_to_document(root, toml_version)?)
     }
 
-    pub fn from_document<T>(&self, document: document::Document) -> Result<T, crate::de::Error>
+    pub fn from_document<T>(
+        &self,
+        document: tombi_document::Document,
+    ) -> Result<T, crate::de::Error>
     where
         T: DeserializeOwned,
     {
         Ok(T::deserialize(&document)?)
     }
 
-    async fn get_toml_version(&self, root: &tombi_ast::Root) -> Result<TomlVersion, crate::de::Error> {
+    async fn get_toml_version(
+        &self,
+        root: &tombi_ast::Root,
+    ) -> Result<TomlVersion, crate::de::Error> {
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::new(),
@@ -164,7 +170,7 @@ impl<'de> Deserializer<'de> {
         &self,
         root: tombi_ast::Root,
         toml_version: TomlVersion,
-    ) -> Result<document::Document, crate::de::Error> {
+    ) -> Result<tombi_document::Document, crate::de::Error> {
         // Convert the AST to a document tree
         let (document_tree, errors) = root.into_document_tree_and_errors(toml_version).into();
 
@@ -184,7 +190,7 @@ mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
     use serde::Deserialize;
-    use test_lib::project_root;
+    use tombi_test_lib::project_root;
 
     #[tokio::test]
     async fn test_deserialize_struct() {
@@ -617,14 +623,14 @@ optional_string = "provided"
 
     #[tokio::test]
     async fn test_empty_tombi_config() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
         let toml = r#""#;
 
-        let config: config::Config = from_str_async(toml)
+        let config: tombi_config::Config = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
 
-        pretty_assertions::assert_eq!(config, config::Config::default());
+        pretty_assertions::assert_eq!(config, tombi_config::Config::default());
     }
 
     #[tokio::test]
@@ -639,7 +645,7 @@ optional_string = "provided"
         // Verify the parsed values
         assert_eq!(
             config.toml_version,
-            Some(toml_version::TomlVersion::V1_1_0_Preview)
+            Some(tombi_toml_version::TomlVersion::V1_1_0_Preview)
         );
         assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
         assert!(config.format.is_some());
@@ -649,7 +655,10 @@ optional_string = "provided"
         assert!(config.schemas.is_some());
 
         let schema = config.schema.unwrap();
-        assert_eq!(schema.enabled, Some(config::BoolDefaultTrue::default()));
+        assert_eq!(
+            schema.enabled,
+            Some(tombi_config::BoolDefaultTrue::default())
+        );
 
         let schemas = config.schemas.unwrap();
         assert_eq!(schemas.len(), 5);

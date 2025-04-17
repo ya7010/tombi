@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use syntax::SyntaxKind;
+use tombi_syntax::SyntaxKind;
 
 use crate::{support, AstNode};
 
@@ -13,7 +13,7 @@ impl crate::Root {
     pub fn file_schema_url(
         &self,
         source_path: Option<&std::path::Path>,
-    ) -> Option<(Result<url::Url, String>, text::Range)> {
+    ) -> Option<(Result<url::Url, String>, tombi_text::Range)> {
         if let Some(comments) = self.get_first_document_comment_group() {
             for comment in comments {
                 if let Some((schema_url, url_range)) = comment.schema_url(source_path) {

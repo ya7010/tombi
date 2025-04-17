@@ -1,6 +1,8 @@
-use tombi_ast::AstNode;
-use config::{Config, TomlVersion, CONFIG_FILENAME, PYPROJECT_FILENAME, TOMBI_CONFIG_TOML_VERSION};
 use itertools::Itertools;
+use tombi_ast::AstNode;
+use tombi_config::{
+    Config, TomlVersion, CONFIG_FILENAME, PYPROJECT_FILENAME, TOMBI_CONFIG_TOML_VERSION,
+};
 
 /// Parse the TOML text into a `Config` struct.
 ///
@@ -18,9 +20,9 @@ pub(crate) fn from_str(
         .build();
 
     let toml_version = TOMBI_CONFIG_TOML_VERSION;
-    let parsed = parser::parse(toml_text);
+    let parsed = tombi_parser::parse(toml_text);
     let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
-    let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+    let errors: Vec<&tombi_parser::Error> = parsed.errors(toml_version).collect_vec();
     // Check if there are any parsing errors
     if !errors.is_empty() {
         return Err(crate::de::Error::Parser(
@@ -44,9 +46,9 @@ impl PyProjectToml {
             .build();
 
         let toml_version = TOMBI_CONFIG_TOML_VERSION;
-        let parsed = parser::parse(toml_text);
+        let parsed = tombi_parser::parse(toml_text);
         let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
-        let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+        let errors: Vec<&tombi_parser::Error> = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
         if !errors.is_empty() {
             return Err(crate::de::Error::Parser(
@@ -66,17 +68,17 @@ struct Tool {
 
 pub fn try_from_path<P: AsRef<std::path::Path>>(
     config_path: P,
-) -> Result<Option<Config>, config::Error> {
+) -> Result<Option<Config>, tombi_config::Error> {
     let config_path = config_path.as_ref();
 
     if !config_path.exists() {
-        return Err(config::Error::ConfigFileNotFound {
+        return Err(tombi_config::Error::ConfigFileNotFound {
             config_path: config_path.to_owned(),
         });
     }
 
     let Ok(config_text) = std::fs::read_to_string(config_path) else {
-        return Err(config::Error::ConfigFileReadFailed {
+        return Err(tombi_config::Error::ConfigFileReadFailed {
             config_path: config_path.to_owned(),
         });
     };
@@ -86,14 +88,14 @@ pub fn try_from_path<P: AsRef<std::path::Path>>(
             Ok(tombi_config) => Ok(Some(tombi_config)),
             Err(error) => {
                 tracing::error!(?error);
-                Err(config::Error::ConfigFileParseFailed {
+                Err(tombi_config::Error::ConfigFileParseFailed {
                     config_path: config_path.to_owned(),
                 })
             }
         },
         Some(PYPROJECT_FILENAME) => {
             let Ok(pyproject_toml) = PyProjectToml::from_str(&config_text, config_path) else {
-                return Err(config::Error::ConfigFileParseFailed {
+                return Err(tombi_config::Error::ConfigFileParseFailed {
                     config_path: config_path.to_owned(),
                 });
             };
@@ -106,26 +108,26 @@ pub fn try_from_path<P: AsRef<std::path::Path>>(
                 Ok(None)
             }
         }
-        _ => Err(config::Error::ConfigFileUnsupported {
+        _ => Err(tombi_config::Error::ConfigFileUnsupported {
             config_path: config_path.to_owned(),
         }),
     }
 }
 
-pub fn try_from_url(config_url: url::Url) -> Result<Option<Config>, config::Error> {
+pub fn try_from_url(config_url: url::Url) -> Result<Option<Config>, tombi_config::Error> {
     match config_url.scheme() {
         "file" => {
             let config_path = config_url
                 .to_file_path()
-                .map_err(|_| config::Error::ConfigUrlParseFailed { config_url })?;
+                .map_err(|_| tombi_config::Error::ConfigUrlParseFailed { config_url })?;
             try_from_path(config_path)
         }
-        _ => Err(config::Error::ConfigUrlUnsupported { config_url }),
+        _ => Err(tombi_config::Error::ConfigUrlUnsupported { config_url }),
     }
 }
 
 /// Load the config from the current directory.
-pub fn load_with_path() -> Result<(Config, Option<std::path::PathBuf>), config::Error> {
+pub fn load_with_path() -> Result<(Config, Option<std::path::PathBuf>), tombi_config::Error> {
     let mut current_dir = std::env::current_dir().unwrap();
     loop {
         let config_path = current_dir.join(CONFIG_FILENAME);
@@ -165,7 +167,7 @@ pub fn load_with_path() -> Result<(Config, Option<std::path::PathBuf>), config::
     Ok((Config::default(), None))
 }
 
-pub fn load() -> Result<Config, config::Error> {
+pub fn load() -> Result<Config, tombi_config::Error> {
     let (config, _) = load_with_path()?;
     Ok(config)
 }

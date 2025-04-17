@@ -4,23 +4,23 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    Config(#[from] config::Error),
+    Config(#[from] tombi_config::Error),
 
     #[error(transparent)]
-    SchemaStore(#[from] schema_store::Error),
+    SchemaStore(#[from] tombi_schema_store::Error),
 
     #[error("cannot get schema url from document comment: {error} at {url_range}")]
     DocumentCommentSchemaUrl {
-        error: schema_store::Error,
-        url_range: text::Range,
+        error: tombi_schema_store::Error,
+        url_range: tombi_text::Range,
     },
 
     #[error(transparent)]
-    DocumentDeserialize(#[from] document::de::Error),
+    DocumentDeserialize(#[from] tombi_document::de::Error),
 
     #[error("{}", .0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "))]
-    Parser(Vec<parser::Error>),
+    Parser(Vec<tombi_parser::Error>),
 
     #[error("{}", .0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "))]
-    DocumentTree(Vec<document_tree::Error>),
+    DocumentTree(Vec<tombi_document_tree::Error>),
 }

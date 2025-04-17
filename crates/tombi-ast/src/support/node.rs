@@ -1,20 +1,20 @@
 use itertools::Itertools;
-use syntax::{SyntaxElement, SyntaxKind, SyntaxKind::*};
+use tombi_syntax::{SyntaxElement, SyntaxKind, SyntaxKind::*};
 
 use crate::{AstChildren, AstNode, AstToken};
 
 #[inline]
-pub fn child<N: AstNode>(parent: &syntax::SyntaxNode) -> Option<N> {
+pub fn child<N: AstNode>(parent: &tombi_syntax::SyntaxNode) -> Option<N> {
     parent.children().find_map(N::cast)
 }
 
 #[inline]
-pub fn children<N: AstNode>(parent: &syntax::SyntaxNode) -> AstChildren<N> {
+pub fn children<N: AstNode>(parent: &tombi_syntax::SyntaxNode) -> AstChildren<N> {
     AstChildren::new(parent)
 }
 
 #[inline]
-pub fn token(parent: &syntax::SyntaxNode, kind: syntax::SyntaxKind) -> Option<syntax::SyntaxToken> {
+pub fn token(parent: &tombi_syntax::SyntaxNode, kind: tombi_syntax::SyntaxKind) -> Option<tombi_syntax::SyntaxToken> {
     parent
         .children_with_tokens()
         .filter_map(|it| it.into_token())
@@ -22,7 +22,7 @@ pub fn token(parent: &syntax::SyntaxNode, kind: syntax::SyntaxKind) -> Option<sy
 }
 
 #[inline]
-pub fn leading_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn leading_comments<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
 ) -> impl Iterator<Item = crate::LeadingComment> {
     iter.take_while(|node| matches!(node.kind(), COMMENT | LINE_BREAK | WHITESPACE))
@@ -33,9 +33,9 @@ pub fn leading_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 }
 
 #[inline]
-pub fn tailing_comment<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn tailing_comment<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
-    end: syntax::SyntaxKind,
+    end: tombi_syntax::SyntaxKind,
 ) -> Option<crate::TailingComment> {
     let mut iter = iter
         .skip_while(|item| item.kind() != end && item.kind() != EOF)
@@ -58,21 +58,21 @@ pub fn tailing_comment<I: Iterator<Item = syntax::SyntaxElement>>(
 }
 
 #[inline]
-pub fn dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn dangling_comments<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
 ) -> Vec<Vec<crate::DanglingComment>> {
     group_comments(iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK)))
 }
 
 #[inline]
-pub fn begin_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn begin_dangling_comments<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
 ) -> Vec<Vec<crate::BeginDanglingComment>> {
     group_comments(iter.take_while(|node| matches!(node.kind(), COMMENT | WHITESPACE | LINE_BREAK)))
 }
 
 #[inline]
-pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn end_dangling_comments<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
 ) -> Vec<Vec<crate::EndDanglingComment>> {
     let comment_iter = iter
@@ -121,7 +121,7 @@ pub fn end_dangling_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 
 /// Group comments with empty line breaks.
 #[inline]
-fn group_comments<T, I: Iterator<Item = syntax::SyntaxElement>>(iter: I) -> Vec<Vec<T>>
+fn group_comments<T, I: Iterator<Item = tombi_syntax::SyntaxElement>>(iter: I) -> Vec<Vec<T>>
 where
     T: From<crate::Comment>,
 {
@@ -161,7 +161,7 @@ where
     })
 }
 
-pub fn has_only_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn has_only_comments<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
     start: SyntaxKind,
     end: SyntaxKind,
@@ -173,7 +173,7 @@ pub fn has_only_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 }
 
 #[inline]
-pub fn has_inner_comments<I: Iterator<Item = syntax::SyntaxElement>>(
+pub fn has_inner_comments<I: Iterator<Item = tombi_syntax::SyntaxElement>>(
     iter: I,
     start: SyntaxKind,
     end: SyntaxKind,
@@ -184,7 +184,7 @@ pub fn has_inner_comments<I: Iterator<Item = syntax::SyntaxElement>>(
         .any(|node| {
             node.kind() == COMMENT
                 || match node {
-                    syntax::SyntaxElement::Node(node) => node
+                    tombi_syntax::SyntaxElement::Node(node) => node
                         .children_with_tokens()
                         .any(|node| node.kind() == COMMENT),
                     _ => false,
@@ -194,13 +194,13 @@ pub fn has_inner_comments<I: Iterator<Item = syntax::SyntaxElement>>(
 
 pub fn prev_siblings_nodes<N: AstNode, T: AstNode>(node: &N) -> impl Iterator<Item = T> {
     node.syntax()
-        .siblings(syntax::Direction::Prev)
+        .siblings(tombi_syntax::Direction::Prev)
         .skip(1)
         .filter_map(T::cast)
 }
 
 pub fn next_siblings_nodes<N: AstNode, T: AstNode>(node: &N) -> impl Iterator<Item = T> {
     node.syntax()
-        .siblings(syntax::Direction::Next)
+        .siblings(tombi_syntax::Direction::Next)
         .filter_map(T::cast)
 }

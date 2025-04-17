@@ -1,6 +1,6 @@
-use config::{LintOptions, TomlVersion};
-use diagnostic::{printer::Pretty, Diagnostic, Print};
 use tokio::io::AsyncReadExt;
+use tombi_config::{LintOptions, TomlVersion};
+use tombi_diagnostic::{printer::Pretty, Diagnostic, Print};
 
 use crate::app::arg;
 
@@ -60,7 +60,7 @@ where
 
     let toml_version = config.toml_version.unwrap_or_default();
     let schema_options = config.schema.as_ref();
-    let schema_store = schema_store::SchemaStore::new_with_options(schema_store::Options {
+    let schema_store = tombi_schema_store::SchemaStore::new_with_options(tombi_schema_store::Options {
         offline: offline.then_some(true),
         strict: schema_options.and_then(|schema_options| schema_options.strict()),
     });
@@ -186,7 +186,7 @@ async fn lint_file<R, P>(
     source_path: Option<&std::path::Path>,
     toml_version: TomlVersion,
     lint_options: &LintOptions,
-    schema_store: &schema_store::SchemaStore,
+    schema_store: &tombi_schema_store::SchemaStore,
 ) -> bool
 where
     Diagnostic: Print<P>,
@@ -196,7 +196,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).await.is_ok() {
-        match linter::Linter::new(
+        match tombi_linter::Linter::new(
             toml_version,
             lint_options,
             source_path.map(itertools::Either::Right),

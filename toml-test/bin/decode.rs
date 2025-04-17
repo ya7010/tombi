@@ -1,11 +1,11 @@
 use std::io::Read;
 
-use tombi_ast::AstNode;
 use clap::Parser;
-use document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
+use tombi_ast::AstNode;
+use tombi_document_tree::TryIntoDocumentTree;
+use tombi_toml_version::TomlVersion;
 use toml_test::{IntoValue, Value, INVALID_MESSAGE};
-use toml_version::TomlVersion;
 
 #[derive(Debug, clap::Parser, Default)]
 #[command(disable_help_subcommand(true))]
@@ -26,7 +26,7 @@ fn main() -> Result<(), anyhow::Error> {
 }
 
 fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Error> {
-    let p = parser::parse(source);
+    let p = tombi_parser::parse(source);
 
     let errors = p.errors(toml_version).collect_vec();
     if !errors.is_empty() {
@@ -80,7 +80,7 @@ macro_rules! test_decode {
     } => {
         test_decode! {
             #[test]
-            fn $name($source, toml_version::TomlVersion::default()) -> Ok($expected)
+            fn $name($source, tombi_toml_version::TomlVersion::default()) -> Ok($expected)
         }
     };
 }

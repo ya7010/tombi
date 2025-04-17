@@ -31,7 +31,7 @@ pub fn generate_ast_token() -> Result<String, anyhow::Error> {
     reformat(
         quote! {
             use crate::AstToken;
-            use syntax::{SyntaxKind, SyntaxToken};
+            use tombi_syntax::{SyntaxKind, SyntaxToken};
             #(#tokens)*
         }
         .to_string(),

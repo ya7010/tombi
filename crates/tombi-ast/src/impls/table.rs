@@ -1,5 +1,5 @@
-use syntax::{SyntaxKind::*, T};
-use toml_version::TomlVersion;
+use tombi_syntax::{SyntaxKind::*, T};
+use tombi_toml_version::TomlVersion;
 
 use crate::{support, ArrayOfTable, AstChildren, AstNode, TableOrArrayOfTable};
 
@@ -12,7 +12,7 @@ impl crate::Table {
         support::node::tailing_comment(self.syntax().children_with_tokens(), T!(']'))
     }
 
-    pub fn contains_header(&self, position: text::Position) -> bool {
+    pub fn contains_header(&self, position: tombi_text::Position) -> bool {
         self.bracket_start().unwrap().range().end() <= position
             && position <= self.bracket_end().unwrap().range().start()
     }

@@ -7,7 +7,7 @@ pub enum ValueOrKeyValue {
 }
 
 impl ValueOrKeyValue {
-    pub fn range(&self) -> text::Range {
+    pub fn range(&self) -> tombi_text::Range {
         match self {
             ValueOrKeyValue::Value(value) => value.range(),
             ValueOrKeyValue::KeyValue(key) => key.syntax().range(),
@@ -17,12 +17,12 @@ impl ValueOrKeyValue {
 
 impl AstNode for ValueOrKeyValue {
     #[inline]
-    fn can_cast(kind: syntax::SyntaxKind) -> bool {
+    fn can_cast(kind: tombi_syntax::SyntaxKind) -> bool {
         Value::can_cast(kind) || KeyValue::can_cast(kind)
     }
 
     #[inline]
-    fn cast(syntax: syntax::SyntaxNode) -> Option<Self> {
+    fn cast(syntax: tombi_syntax::SyntaxNode) -> Option<Self> {
         if Value::can_cast(syntax.kind()) {
             Value::cast(syntax).map(ValueOrKeyValue::Value)
         } else if KeyValue::can_cast(syntax.kind()) {
@@ -33,7 +33,7 @@ impl AstNode for ValueOrKeyValue {
     }
 
     #[inline]
-    fn syntax(&self) -> &syntax::SyntaxNode {
+    fn syntax(&self) -> &tombi_syntax::SyntaxNode {
         match self {
             ValueOrKeyValue::Value(value) => value.syntax(),
             ValueOrKeyValue::KeyValue(key) => key.syntax(),
