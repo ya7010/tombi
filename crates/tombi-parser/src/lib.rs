@@ -61,7 +61,7 @@ pub fn build_green_tree(
     source: &str,
     tokens: &[tombi_lexer::Token],
     parser_output: crate::Output,
-) -> (rg_tree::GreenNode, Vec<crate::TomlVersionedError>) {
+) -> (tombi_rg_tree::GreenNode, Vec<crate::TomlVersionedError>) {
     let mut builder = syntax::SyntaxTreeBuilder::<crate::TomlVersionedError>::default();
 
     builder::intersperse_trivia(source, tokens, &parser_output, &mut |step| match step {

@@ -6,14 +6,14 @@ use tombi_config::TomlVersion;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Parsed<T> {
-    green_tree: rg_tree::GreenNode,
+    green_tree: tombi_rg_tree::GreenNode,
     errors: Vec<crate::TomlVersionedError>,
     _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> Parsed<T> {
     pub fn new(
-        green_tree: rg_tree::GreenNode,
+        green_tree: tombi_rg_tree::GreenNode,
         errors: Vec<crate::TomlVersionedError>,
     ) -> Parsed<T> {
         Parsed {

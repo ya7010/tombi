@@ -1406,17 +1406,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rg-tree"
-version = "0.0.0"
-dependencies = [
- "countme",
- "hashbrown 0.15.1",
- "itertools",
- "rustc-hash",
- "tombi-text",
-]
-
-[[package]]
 name = "ring"
 version = "0.17.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1867,9 +1856,9 @@ dependencies = [
 name = "syntax"
 version = "0.0.0"
 dependencies = [
- "rg-tree",
  "rstest",
  "thiserror",
+ "tombi-rg-tree",
  "tombi-text",
 ]
 
@@ -2268,7 +2257,6 @@ dependencies = [
  "drop_bomb",
  "itertools",
  "pretty_assertions",
- "rg-tree",
  "rstest",
  "syntax",
  "textwrap",
@@ -2278,9 +2266,21 @@ dependencies = [
  "tombi-diagnostic",
  "tombi-document-tree",
  "tombi-lexer",
+ "tombi-rg-tree",
  "tombi-text",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "tombi-rg-tree"
+version = "0.0.0"
+dependencies = [
+ "countme",
+ "hashbrown 0.15.1",
+ "itertools",
+ "rustc-hash",
+ "tombi-text",
 ]
 
 [[package]]

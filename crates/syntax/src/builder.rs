@@ -1,15 +1,15 @@
-use rg_tree::Language;
+use tombi_rg_tree::Language;
 
 use crate::TomlLanguage;
 
 #[derive(Debug)]
 pub struct SyntaxTreeBuilder<E> {
-    inner: rg_tree::GreenNodeBuilder<'static>,
+    inner: tombi_rg_tree::GreenNodeBuilder<'static>,
     errors: Vec<E>,
 }
 
 impl<E> SyntaxTreeBuilder<E> {
-    pub fn finish(self) -> (rg_tree::GreenNode, Vec<E>) {
+    pub fn finish(self) -> (tombi_rg_tree::GreenNode, Vec<E>) {
         let green = self.inner.finish();
         (green, self.errors)
     }
@@ -36,7 +36,7 @@ impl<E> SyntaxTreeBuilder<E> {
 impl<E> Default for SyntaxTreeBuilder<E> {
     fn default() -> SyntaxTreeBuilder<E> {
         SyntaxTreeBuilder {
-            inner: rg_tree::GreenNodeBuilder::new(),
+            inner: tombi_rg_tree::GreenNodeBuilder::new(),
             errors: Vec::new(),
         }
     }
