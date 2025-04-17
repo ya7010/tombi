@@ -9,7 +9,6 @@ license = { workspace = true }
 itertools = { workspace = true }
 schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-syntax = { workspace = true }
 tokio.workspace = true
 tombi-ast = { workspace = true }
 tombi-ast-editor = { workspace = true }
@@ -18,6 +17,7 @@ tombi-diagnostic = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-parser = { workspace = true }
 tombi-schema-store = { workspace = true }
+tombi-syntax = { workspace = true }
 tombi-text = { workspace = true }
 tracing = { workspace = true }
 unicode-segmentation = { workspace = true }

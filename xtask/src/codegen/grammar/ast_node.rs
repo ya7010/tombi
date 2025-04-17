@@ -231,7 +231,7 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
     reformat(
         quote! {
             use crate::AstNode;
-            use syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
+            use tombi_syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
             use crate::support;
             use crate::AstChildren;
 

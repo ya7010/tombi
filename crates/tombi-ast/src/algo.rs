@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use syntax::SyntaxNode;
+use tombi_syntax::SyntaxNode;
 
 use crate::AstNode;
 

@@ -1,6 +1,6 @@
 use tombi_ast::AstNode;
 use itertools::Itertools;
-use syntax::SyntaxElement;
+use tombi_syntax::SyntaxElement;
 
 use crate::{change::Change, node::make_comma_with_tailing_comment};
 

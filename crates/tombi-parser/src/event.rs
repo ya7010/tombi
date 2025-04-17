@@ -1,11 +1,11 @@
-use syntax::SyntaxKind::{self, *};
+use tombi_syntax::SyntaxKind::{self, *};
 
 use crate::output::Output;
 
 #[derive(Debug, Clone)]
 pub enum Event {
     Start {
-        kind: syntax::SyntaxKind,
+        kind: tombi_syntax::SyntaxKind,
         forward_parent: Option<u32>,
     },
 

@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use syntax::{SyntaxKind::*, T};
+use tombi_syntax::{SyntaxKind::*, T};
 use tombi_toml_version::TomlVersion;
 
 use crate::{support, AstNode};

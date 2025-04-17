@@ -1,4 +1,4 @@
-use syntax::{SyntaxKind::*, T};
+use tombi_syntax::{SyntaxKind::*, T};
 
 use super::{
     begin_dangling_comments, end_dangling_comments, invalid_line, leading_comments,

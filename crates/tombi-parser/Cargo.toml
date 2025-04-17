@@ -8,7 +8,6 @@ license.workspace = true
 [dependencies]
 drop_bomb = "0.1.5"
 itertools = { workspace = true }
-syntax = { workspace = true }
 thiserror = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-config.workspace = true
@@ -16,6 +15,7 @@ tombi-diagnostic = { workspace = true, optional = true }
 tombi-document-tree = { workspace = true }
 tombi-lexer = { workspace = true }
 tombi-rg-tree = { workspace = true }
+tombi-syntax = { workspace = true }
 tombi-text = { workspace = true }
 tracing = { workspace = true }
 

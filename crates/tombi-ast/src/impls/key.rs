@@ -5,7 +5,7 @@ use tombi_toml_version::TomlVersion;
 use crate::AstChildren;
 
 impl crate::Key {
-    pub fn token(&self) -> Option<syntax::SyntaxToken> {
+    pub fn token(&self) -> Option<tombi_syntax::SyntaxToken> {
         match self {
             Self::BareKey(key) => key.token(),
             Self::BasicString(key) => key.token(),

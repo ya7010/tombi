@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use syntax::SyntaxElement;
+use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_document_tree::TryIntoDocumentTree;
 use tombi_schema_store::{ArraySchema, SchemaContext};
@@ -92,7 +92,7 @@ pub async fn array_values_order<'a>(
         .collect_vec();
 
     if !is_last_comma {
-        if let Some(syntax::SyntaxElement::Node(node)) = new.last() {
+        if let Some(tombi_syntax::SyntaxElement::Node(node)) = new.last() {
             if let Some(comma) = tombi_ast::Comma::cast(node.clone()) {
                 if comma.tailing_comment().is_none()
                     && comma.leading_comments().collect_vec().is_empty()

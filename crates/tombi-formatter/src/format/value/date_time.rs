@@ -39,13 +39,13 @@ impl_date_time_format! {
 }
 
 impl LiteralNode for tombi_ast::LocalDate {
-    fn token(&self) -> Option<syntax::SyntaxToken> {
+    fn token(&self) -> Option<tombi_syntax::SyntaxToken> {
         self.token()
     }
 }
 
 impl LiteralNode for tombi_ast::LocalTime {
-    fn token(&self) -> Option<syntax::SyntaxToken> {
+    fn token(&self) -> Option<tombi_syntax::SyntaxToken> {
         self.token()
     }
 }

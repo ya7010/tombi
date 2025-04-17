@@ -7,7 +7,7 @@ use cursor::Cursor;
 use error::ErrorKind::*;
 pub use error::{Error, ErrorKind};
 pub use lexed::Lexed;
-use syntax::{SyntaxKind, T};
+use tombi_syntax::{SyntaxKind, T};
 pub use token::Token;
 
 macro_rules! regex {

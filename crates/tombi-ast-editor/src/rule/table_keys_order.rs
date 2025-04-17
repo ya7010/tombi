@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
 use itertools::Itertools;
-use syntax::SyntaxElement;
+use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::{
     AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,

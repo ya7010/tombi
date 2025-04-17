@@ -1,5 +1,5 @@
 use drop_bomb::DropBomb;
-use syntax::SyntaxKind;
+use tombi_syntax::SyntaxKind;
 
 use crate::{parser::Parser, Event};
 

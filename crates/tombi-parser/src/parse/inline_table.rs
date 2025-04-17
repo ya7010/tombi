@@ -1,4 +1,4 @@
-use syntax::{SyntaxKind::*, T};
+use tombi_syntax::{SyntaxKind::*, T};
 use tombi_config::TomlVersion;
 
 use crate::{

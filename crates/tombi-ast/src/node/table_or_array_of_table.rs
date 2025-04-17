@@ -24,12 +24,12 @@ impl TableOrArrayOfTable {
 
 impl AstNode for TableOrArrayOfTable {
     #[inline]
-    fn can_cast(kind: syntax::SyntaxKind) -> bool {
+    fn can_cast(kind: tombi_syntax::SyntaxKind) -> bool {
         Table::can_cast(kind) || ArrayOfTable::can_cast(kind)
     }
 
     #[inline]
-    fn cast(syntax: syntax::SyntaxNode) -> Option<Self> {
+    fn cast(syntax: tombi_syntax::SyntaxNode) -> Option<Self> {
         if Table::can_cast(syntax.kind()) {
             Table::cast(syntax).map(TableOrArrayOfTable::Table)
         } else if ArrayOfTable::can_cast(syntax.kind()) {
@@ -40,7 +40,7 @@ impl AstNode for TableOrArrayOfTable {
     }
 
     #[inline]
-    fn syntax(&self) -> &syntax::SyntaxNode {
+    fn syntax(&self) -> &tombi_syntax::SyntaxNode {
         match self {
             TableOrArrayOfTable::Table(table) => table.syntax(),
             TableOrArrayOfTable::ArrayOfTable(array_of_table) => array_of_table.syntax(),

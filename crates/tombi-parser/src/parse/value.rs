@@ -1,4 +1,4 @@
-use syntax::{SyntaxKind::*, T};
+use tombi_syntax::{SyntaxKind::*, T};
 
 use super::{key::eat_key, leading_comments, peek_leading_comments, tailing_comment, Parse};
 use crate::{parser::Parser, token_set::TS_COMMEMT_OR_LINE_END, ErrorKind::*};

@@ -20,7 +20,7 @@ use tombi_schema_store::{
     Accessor, CurrentSchema, ReferableValueSchemas, SchemaDefinitions, SchemaStore, SchemaUrl,
     ValueSchema,
 };
-use syntax::{SyntaxElement, SyntaxKind};
+use tombi_syntax::{SyntaxElement, SyntaxKind};
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 

@@ -3,7 +3,7 @@
 use crate::support;
 use crate::AstChildren;
 use crate::AstNode;
-use syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
+use tombi_syntax::{SyntaxKind, SyntaxKind::*, SyntaxNode, SyntaxToken, T};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Array {

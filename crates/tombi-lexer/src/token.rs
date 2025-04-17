@@ -1,4 +1,4 @@
-use syntax::SyntaxKind;
+use tombi_syntax::SyntaxKind;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Token {

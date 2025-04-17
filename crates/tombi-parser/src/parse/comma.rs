@@ -1,4 +1,4 @@
-use syntax::T;
+use tombi_syntax::T;
 
 use super::{Parse, Parser};
 use crate::parse::{leading_comments, tailing_comment};

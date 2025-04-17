@@ -14,7 +14,7 @@ pub use event::Event;
 use output::Output;
 use parse::Parse;
 pub use parsed::Parsed;
-pub use syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
+pub use tombi_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub fn parse(source: &str) -> Parsed<SyntaxNode> {
     parse_as::<tombi_ast::Root>(source)
@@ -62,7 +62,7 @@ pub fn build_green_tree(
     tokens: &[tombi_lexer::Token],
     parser_output: crate::Output,
 ) -> (tombi_rg_tree::GreenNode, Vec<crate::TomlVersionedError>) {
-    let mut builder = syntax::SyntaxTreeBuilder::<crate::TomlVersionedError>::default();
+    let mut builder = tombi_syntax::SyntaxTreeBuilder::<crate::TomlVersionedError>::default();
 
     builder::intersperse_trivia(source, tokens, &parser_output, &mut |step| match step {
         builder::Step::AddToken { kind, text } => {

@@ -18,7 +18,7 @@ impl SemanticTokensBuilder {
         }
     }
 
-    pub fn add_token(&mut self, token_type: TokenType, elem: syntax::SyntaxElement) {
+    pub fn add_token(&mut self, token_type: TokenType, elem: tombi_syntax::SyntaxElement) {
         let range = elem.range();
 
         let relative = relative_range(range, self.last_range);

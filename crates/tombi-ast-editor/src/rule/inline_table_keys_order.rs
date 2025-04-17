@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use syntax::SyntaxElement;
+use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::{SchemaContext, TableSchema};
 use tombi_x_keyword::TableKeysOrder;
@@ -115,7 +115,7 @@ pub async fn inline_table_keys_order<'a>(
         .collect_vec();
 
     if !is_last_comma {
-        if let Some(syntax::SyntaxElement::Node(node)) = new.last() {
+        if let Some(tombi_syntax::SyntaxElement::Node(node)) = new.last() {
             if let Some(comma) = tombi_ast::Comma::cast(node.clone()) {
                 if comma.tailing_comment().is_none()
                     && comma.leading_comments().collect_vec().is_empty()

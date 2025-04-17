@@ -1,6 +1,6 @@
 use futures::FutureExt;
 use itertools::Itertools;
-use syntax::SyntaxElement;
+use tombi_syntax::SyntaxElement;
 
 use crate::rule::root_table_keys_order;
 use tombi_ast::AstToken;

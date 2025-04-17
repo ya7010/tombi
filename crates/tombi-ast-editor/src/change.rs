@@ -1,17 +1,17 @@
 #[derive(Debug)]
 pub enum Change {
     AppendTop {
-        new: Vec<syntax::SyntaxElement>,
+        new: Vec<tombi_syntax::SyntaxElement>,
     },
     Append {
-        base: syntax::SyntaxElement,
-        new: Vec<syntax::SyntaxElement>,
+        base: tombi_syntax::SyntaxElement,
+        new: Vec<tombi_syntax::SyntaxElement>,
     },
     Remove {
-        target: syntax::SyntaxElement,
+        target: tombi_syntax::SyntaxElement,
     },
     ReplaceRange {
-        old: std::ops::RangeInclusive<syntax::SyntaxElement>,
-        new: Vec<syntax::SyntaxElement>,
+        old: std::ops::RangeInclusive<tombi_syntax::SyntaxElement>,
+        new: Vec<tombi_syntax::SyntaxElement>,
     },
 }

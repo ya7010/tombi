@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use syntax::SyntaxElement;
+use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::SchemaContext;
 

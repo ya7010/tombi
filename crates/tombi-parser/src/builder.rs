@@ -1,4 +1,4 @@
-use syntax::SyntaxKind;
+use tombi_syntax::SyntaxKind;
 
 use crate::output;
 

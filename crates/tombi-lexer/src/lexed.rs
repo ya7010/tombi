@@ -1,4 +1,4 @@
-use syntax::SyntaxKind::*;
+use tombi_syntax::SyntaxKind::*;
 
 #[allow(non_camel_case_types)]
 type bits = u64;

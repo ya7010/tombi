@@ -11,7 +11,6 @@ itertools = { workspace = true }
 regex = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
-syntax = { workspace = true }
 thiserror = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-config = { workspace = true }
@@ -19,6 +18,7 @@ tombi-diagnostic = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-parser = { workspace = true }
 tombi-schema-store = { workspace = true }
+tombi-syntax = { workspace = true }
 tombi-text = { workspace = true }
 tombi-validator = { workspace = true }
 tracing = { workspace = true }

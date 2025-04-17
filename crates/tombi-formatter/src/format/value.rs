@@ -8,7 +8,7 @@ mod string;
 
 use std::fmt::Write;
 
-use syntax::SyntaxToken;
+use tombi_syntax::SyntaxToken;
 
 use crate::Format;
 

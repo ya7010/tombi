@@ -3,7 +3,7 @@ use std::sync::Arc;
 use ahash::AHashMap;
 use itertools::{Either, Itertools};
 use tombi_schema_store::SourceSchema;
-use syntax::SyntaxNode;
+use tombi_syntax::SyntaxNode;
 use tombi_config::{Config, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use tombi_document_tree::TryIntoDocumentTree;
