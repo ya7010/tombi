@@ -40,7 +40,6 @@ semver = { version = "1.0.23" }
 serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = { version = "1.0.130", features = ["preserve_order"] }
 serde_tombi = { path = "rust/serde_tombi" }
-server = { path = "crates/server" }
 syntax = { path = "crates/syntax" }
 test-lib = { path = "crates/test-lib" }
 textwrap = { version = "0.16.1" }
@@ -64,6 +63,7 @@ tombi-linter = { path = "crates/tombi-linter" }
 tombi-parser = { path = "crates/tombi-parser" }
 tombi-rg-tree = { path = "crates/tombi-rg-tree" }
 tombi-schema-store = { path = "crates/tombi-schema-store" }
+tombi-server = { path = "crates/tombi-server" }
 tombi-text = { path = "crates/tombi-text" }
 tombi-toml-text = { path = "crates/tombi-toml-text" }
 tombi-toml-version = { path = "crates/tombi-toml-version" }

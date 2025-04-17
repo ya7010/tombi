@@ -527,8 +527,8 @@ mod completion_edit {
         ) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-                use server::handler::handle_did_open;
-                use server::Backend;
+                use tombi_server::handler::handle_did_open;
+                use tombi_server::Backend;
                 use std::io::Write;
                 use tower_lsp::{
                     lsp_types::{
@@ -541,7 +541,7 @@ mod completion_edit {
 
                 test_lib::init_tracing();
 
-                let (service, _) = LspService::new(|client| Backend::new(client, &server::backend::Options::default()));
+                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_server::backend::Options::default()));
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = $schema_file_path.as_ref() {
@@ -608,7 +608,7 @@ mod completion_edit {
                 )
                 .await;
 
-                let Ok(Some(completion_contents)) = server::handler::handle_completion(
+                let Ok(Some(completion_contents)) = tombi_server::handler::handle_completion(
                     &backend,
                     CompletionParams {
                         text_document_position: TextDocumentPositionParams {

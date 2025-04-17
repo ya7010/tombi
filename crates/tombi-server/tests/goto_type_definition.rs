@@ -121,9 +121,9 @@ mod goto_type_definition_tests {
         ) -> Ok($expected:expr);) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-                use server::handler::{handle_did_open, handle_goto_type_definition};
-                use server::Backend;
                 use std::io::Write;
+                use tombi_server::handler::{handle_did_open, handle_goto_type_definition};
+                use tombi_server::Backend;
                 use tower_lsp::{
                     lsp_types::{
                         DidOpenTextDocumentParams, PartialResultParams, TextDocumentIdentifier,
@@ -135,7 +135,7 @@ mod goto_type_definition_tests {
                 test_lib::init_tracing();
 
                 let (service, _) = LspService::new(|client| {
-                    Backend::new(client, &server::backend::Options::default())
+                    Backend::new(client, &tombi_server::backend::Options::default())
                 });
 
                 let backend = service.inner();

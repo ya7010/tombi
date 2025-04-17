@@ -1,5 +1,5 @@
 [package]
-name = "server"
+name = "tombi-server"
 version = "0.0.0"
 authors = { workspace = true }
 edition = { workspace = true }
