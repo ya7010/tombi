@@ -1,6 +1,6 @@
+use tokio::io::AsyncReadExt;
 use tombi_config::{LintOptions, TomlVersion};
 use tombi_diagnostic::{printer::Pretty, Diagnostic, Print};
-use tokio::io::AsyncReadExt;
 
 use crate::app::arg;
 
@@ -196,7 +196,7 @@ where
 {
     let mut source = String::new();
     if reader.read_to_string(&mut source).await.is_ok() {
-        match linter::Linter::new(
+        match tombi_linter::Linter::new(
             toml_version,
             lint_options,
             source_path.map(itertools::Either::Right),

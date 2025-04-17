@@ -1,5 +1,5 @@
-use tombi_config::LintOptions;
 use itertools::Either;
+use tombi_config::LintOptions;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport,
@@ -45,14 +45,12 @@ pub async fn handle_diagnostic(
         .ok()
         .flatten();
 
-    let (toml_version, _) = backend
-        .source_toml_version(source_schema.as_ref())
-        .await;
+    let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
     let document_sources = backend.document_sources.read().await;
 
     let diagnostics = match document_sources.get(&text_document.uri) {
-        Some(document) => linter::Linter::new(
+        Some(document) => tombi_linter::Linter::new(
             toml_version,
             backend
                 .config()

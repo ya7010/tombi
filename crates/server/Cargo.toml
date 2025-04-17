@@ -15,7 +15,6 @@ futures = { workspace = true }
 futures-util = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-linter = { workspace = true }
 parser = { workspace = true }
 regex.workspace = true
 reqwest = { workspace = true }
@@ -34,6 +33,7 @@ tombi-diagnostic = { workspace = true }
 tombi-document = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
+tombi-linter = { workspace = true }
 tombi-text = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }

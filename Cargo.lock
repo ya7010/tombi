@@ -960,34 +960,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "433bfe06b8c75da9b2e3fbea6e5329ff87748f0b144ef75306e674c3f6f7c13f"
 
 [[package]]
-name = "linter"
-version = "0.0.0"
-dependencies = [
- "assert_matches",
- "futures",
- "itertools",
- "parser",
- "pretty_assertions",
- "regex",
- "schema-store",
- "schemars",
- "serde",
- "syntax",
- "test-lib",
- "thiserror",
- "tokio",
- "tombi-ast",
- "tombi-config",
- "tombi-diagnostic",
- "tombi-document-tree",
- "tombi-text",
- "tracing",
- "tracing-subscriber",
- "url",
- "validator",
-]
-
-[[package]]
 name = "linux-raw-sys"
 version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1785,7 +1757,6 @@ dependencies = [
  "futures-util",
  "indexmap",
  "itertools",
- "linter",
  "parser",
  "pretty_assertions",
  "regex",
@@ -1809,6 +1780,7 @@ dependencies = [
  "tombi-document",
  "tombi-document-tree",
  "tombi-formatter",
+ "tombi-linter",
  "tombi-text",
  "tower-lsp",
  "tracing",
@@ -2148,7 +2120,6 @@ dependencies = [
  "clap-verbosity-flag",
  "glob",
  "itertools",
- "linter",
  "nu-ansi-term 0.50.1",
  "schema-store",
  "serde_tombi",
@@ -2158,6 +2129,7 @@ dependencies = [
  "tombi-config",
  "tombi-diagnostic",
  "tombi-formatter",
+ "tombi-linter",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -2292,6 +2264,34 @@ dependencies = [
  "thiserror",
  "tombi-text",
  "tracing",
+]
+
+[[package]]
+name = "tombi-linter"
+version = "0.0.0"
+dependencies = [
+ "assert_matches",
+ "futures",
+ "itertools",
+ "parser",
+ "pretty_assertions",
+ "regex",
+ "schema-store",
+ "schemars",
+ "serde",
+ "syntax",
+ "test-lib",
+ "thiserror",
+ "tokio",
+ "tombi-ast",
+ "tombi-config",
+ "tombi-diagnostic",
+ "tombi-document-tree",
+ "tombi-text",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "validator",
 ]
 
 [[package]]
