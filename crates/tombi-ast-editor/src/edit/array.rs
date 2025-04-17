@@ -2,16 +2,16 @@ use std::borrow::Cow;
 
 use futures::FutureExt;
 use itertools::Itertools;
-use schema_store::ValueSchema;
+use tombi_schema_store::ValueSchema;
 
 use crate::rule::{array_comma_tailing_comment, array_values_order};
 
 impl crate::Edit for tombi_ast::Array {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        _accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             let mut changes = vec![];

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ahash::AHashMap;
 use itertools::{Either, Itertools};
-use schema_store::SourceSchema;
+use tombi_schema_store::SourceSchema;
 use syntax::SyntaxNode;
 use tombi_config::{Config, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
@@ -40,7 +40,7 @@ pub struct Backend {
     pub document_sources: Arc<tokio::sync::RwLock<AHashMap<Url, DocumentSource>>>,
     pub config_dirpath: Option<std::path::PathBuf>,
     config: Arc<tokio::sync::RwLock<Config>>,
-    pub schema_store: schema_store::SchemaStore,
+    pub schema_store: tombi_schema_store::SchemaStore,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -59,7 +59,7 @@ impl Backend {
             }
         };
 
-        let options = schema_store::Options {
+        let options = tombi_schema_store::Options {
             offline: options.offline,
             strict: config.schema.as_ref().and_then(|schema| schema.strict()),
         };
@@ -69,7 +69,7 @@ impl Backend {
             document_sources: Default::default(),
             config_dirpath: config_path.and_then(|path| path.parent().map(ToOwned::to_owned)),
             config: Arc::new(tokio::sync::RwLock::new(config)),
-            schema_store: schema_store::SchemaStore::new_with_options(options),
+            schema_store: tombi_schema_store::SchemaStore::new_with_options(options),
         }
     }
 

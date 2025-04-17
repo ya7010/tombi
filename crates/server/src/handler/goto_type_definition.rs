@@ -1,6 +1,6 @@
 use itertools::Either;
 use reqwest::Client;
-use schema_store::SchemaContext;
+use tombi_schema_store::SchemaContext;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tower_lsp::lsp_types::{
     request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},

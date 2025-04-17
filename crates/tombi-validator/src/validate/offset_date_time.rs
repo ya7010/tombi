@@ -1,16 +1,16 @@
 use tombi_diagnostic::SetDiagnostics;
 use tombi_document_tree::{OffsetDateTime, ValueImpl};
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::ValueType;
+use tombi_schema_store::ValueType;
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for OffsetDateTime {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move {
             let mut diagnostics = vec![];
@@ -37,10 +37,10 @@ impl Validate for OffsetDateTime {
                 }
 
                 let offset_date_time_schema = match current_schema.value_schema.as_ref() {
-                    schema_store::ValueSchema::OffsetDateTime(offset_date_time_schema) => {
+                    tombi_schema_store::ValueSchema::OffsetDateTime(offset_date_time_schema) => {
                         offset_date_time_schema
                     }
-                    schema_store::ValueSchema::OneOf(one_of_schema) => {
+                    tombi_schema_store::ValueSchema::OneOf(one_of_schema) => {
                         return validate_one_of(
                             self,
                             accessors,
@@ -50,7 +50,7 @@ impl Validate for OffsetDateTime {
                         )
                         .await
                     }
-                    schema_store::ValueSchema::AnyOf(any_of_schema) => {
+                    tombi_schema_store::ValueSchema::AnyOf(any_of_schema) => {
                         return validate_any_of(
                             self,
                             accessors,
@@ -60,7 +60,7 @@ impl Validate for OffsetDateTime {
                         )
                         .await
                     }
-                    schema_store::ValueSchema::AllOf(all_of_schema) => {
+                    tombi_schema_store::ValueSchema::AllOf(all_of_schema) => {
                         return validate_all_of(
                             self,
                             accessors,

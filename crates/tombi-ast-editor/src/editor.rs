@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use tombi_ast::AstNode;
-use schema_store::{CurrentSchema, SchemaContext};
+use tombi_schema_store::{CurrentSchema, SchemaContext};
 
 use crate::{change::Change, Edit};
 

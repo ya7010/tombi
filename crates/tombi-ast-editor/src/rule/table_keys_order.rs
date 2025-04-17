@@ -3,12 +3,12 @@ use std::borrow::Cow;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
 use itertools::Itertools;
-use schema_store::{
+use syntax::SyntaxElement;
+use tombi_ast::AstNode;
+use tombi_schema_store::{
     AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,
     ValueSchema,
 };
-use syntax::SyntaxElement;
-use tombi_ast::AstNode;
 use tombi_validator::Validate;
 use tombi_x_keyword::TableKeysOrder;
 
@@ -58,8 +58,8 @@ pub async fn table_keys_order<'a>(
 
 pub fn sorted_accessors<'a: 'b, 'b, T>(
     value: &'a tombi_document_tree::Value,
-    validation_accessors: &'a [schema_store::SchemaAccessor],
-    targets: Vec<(Vec<schema_store::SchemaAccessor>, T)>,
+    validation_accessors: &'a [tombi_schema_store::SchemaAccessor],
+    targets: Vec<(Vec<tombi_schema_store::SchemaAccessor>, T)>,
     current_schema: Option<&'a CurrentSchema<'a>>,
     schema_context: &'a SchemaContext<'a>,
 ) -> BoxFuture<'b, Vec<T>>

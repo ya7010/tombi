@@ -10,7 +10,7 @@ mod string;
 mod table;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, ValueSchema};
+use tombi_schema_store::{Accessor, CurrentSchema, ValueSchema};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -21,7 +21,7 @@ impl GetHoverContent for tombi_document_tree::Value {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             match self {
@@ -165,7 +165,7 @@ impl GetHoverContent for ValueSchema {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             match self {

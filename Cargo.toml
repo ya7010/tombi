@@ -35,7 +35,6 @@ reqwest = { version = "0.12.9", default-features = false, features = [
 ] }
 rstest = { version = "0.23.0" }
 rustc-hash = { version = "2.0.0" }
-schema-store = { path = "crates/schema-store" }
 schemars = { version = "1.0.0-alpha.17", features = ["preserve_order", "url2"] }
 semver = { version = "1.0.23" }
 serde = { version = "^1.0.0", features = ["derive"] }
@@ -64,6 +63,7 @@ tombi-lexer = { path = "crates/tombi-lexer" }
 tombi-linter = { path = "crates/tombi-linter" }
 tombi-parser = { path = "crates/tombi-parser" }
 tombi-rg-tree = { path = "crates/tombi-rg-tree" }
+tombi-schema-store = { path = "crates/tombi-schema-store" }
 tombi-text = { path = "crates/tombi-text" }
 tombi-toml-text = { path = "crates/tombi-toml-text" }
 tombi-toml-version = { path = "crates/tombi-toml-version" }

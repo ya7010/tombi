@@ -1,16 +1,16 @@
 use tombi_diagnostic::SetDiagnostics;
 use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{ValueSchema, ValueType};
+use tombi_schema_store::{ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for tombi_document_tree::Boolean {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move {
             let mut diagnostics = vec![];

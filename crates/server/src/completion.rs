@@ -16,7 +16,7 @@ use completion_kind::CompletionKind;
 use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
-use schema_store::{
+use tombi_schema_store::{
     Accessor, CurrentSchema, ReferableValueSchemas, SchemaDefinitions, SchemaStore, SchemaUrl,
     ValueSchema,
 };
@@ -27,7 +27,7 @@ use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 pub async fn get_completion_contents(
     root: tombi_ast::Root,
     position: tombi_text::Position,
-    schema_context: &schema_store::SchemaContext<'_>,
+    schema_context: &tombi_schema_store::SchemaContext<'_>,
 ) -> Vec<CompletionContent> {
     let mut keys: Vec<tombi_document_tree::Key> = vec![];
     let mut completion_hint = None;
@@ -213,7 +213,7 @@ pub trait FindCompletionContents {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>>;
 }

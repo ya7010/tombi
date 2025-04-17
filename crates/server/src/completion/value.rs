@@ -24,7 +24,7 @@ use local_date_time::type_hint_local_date_time;
 use local_time::type_hint_local_time;
 use offset_date_time::type_hint_offset_date_time;
 pub use one_of::find_one_of_completion_items;
-use schema_store::{
+use tombi_schema_store::{
     Accessor, ArraySchema, BooleanSchema, CurrentSchema, FloatSchema, IntegerSchema,
     LocalDateSchema, LocalDateTimeSchema, LocalTimeSchema, OffsetDateTimeSchema, SchemaDefinitions,
     SchemaStore, SchemaUrl, StringSchema, TableSchema, ValueSchema,
@@ -44,7 +44,7 @@ impl FindCompletionContents for tombi_document_tree::Value {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self = {:?}", self);

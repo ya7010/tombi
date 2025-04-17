@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::ValueSchema;
+use tombi_schema_store::ValueSchema;
 
 use crate::goto_type_definition::{
     all_of::get_all_of_type_definition, any_of::get_any_of_type_definition,
@@ -11,9 +11,9 @@ impl GetTypeDefinition for tombi_document_tree::Integer {
         &'a self,
         position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
-        accessors: &'a [schema_store::Accessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::Accessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<crate::goto_type_definition::TypeDefinition>> {
         async move {
             if let Some(current_schema) = current_schema {
@@ -84,14 +84,14 @@ impl GetTypeDefinition for tombi_document_tree::Integer {
     }
 }
 
-impl GetTypeDefinition for schema_store::IntegerSchema {
+impl GetTypeDefinition for tombi_schema_store::IntegerSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
-        _accessors: &'a [schema_store::Accessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext,
+        _accessors: &'a [tombi_schema_store::Accessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
             current_schema

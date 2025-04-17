@@ -74,7 +74,7 @@ where
 
     let toml_version = config.toml_version.unwrap_or_default();
     let schema_options = config.schema.as_ref();
-    let schema_store = schema_store::SchemaStore::new_with_options(schema_store::Options {
+    let schema_store = tombi_schema_store::SchemaStore::new_with_options(tombi_schema_store::Options {
         offline: offline.then_some(true),
         strict: schema_options.and_then(|schema_options| schema_options.strict()),
     });
@@ -207,7 +207,7 @@ async fn format_file<P>(
     toml_version: TomlVersion,
     check: bool,
     format_options: &FormatOptions,
-    schema_store: &schema_store::SchemaStore,
+    schema_store: &tombi_schema_store::SchemaStore,
 ) -> Result<bool, ()>
 where
     Diagnostic: Print<P>,

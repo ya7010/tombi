@@ -54,7 +54,7 @@ macro_rules! test_lint {
             test_lib::init_tracing();
 
             // Initialize schema store
-            let schema_store = schema_store::SchemaStore::new();
+            let schema_store = tombi_schema_store::SchemaStore::new();
 
             if let Some(schema_path) = $schema_path {
                 // Load schemas
@@ -130,7 +130,7 @@ macro_rules! test_lint {
             test_lib::init_tracing();
 
             // Initialize schema store
-            let schema_store = schema_store::SchemaStore::new();
+            let schema_store = tombi_schema_store::SchemaStore::new();
 
             if let Some(schema_path) = $schema_path {
                 // Load schemas
@@ -222,7 +222,7 @@ mod tests {
     }
 
     mod non_schema {
-        use schema_store::SchemaUrl;
+        use tombi_schema_store::SchemaUrl;
 
         use super::*;
 
@@ -262,7 +262,7 @@ mod tests {
                 #:schema https://does-not-exist.co.jp
                 "#,
             ) -> Err([
-                schema_store::Error::SchemaFetchFailed{
+                tombi_schema_store::Error::SchemaFetchFailed{
                     schema_url: SchemaUrl::parse("https://does-not-exist.co.jp").unwrap(),
                     reason: "error sending request for url (https://does-not-exist.co.jp/)".to_string(),
                 }
@@ -276,7 +276,7 @@ mod tests {
                 #:schema does-not-exist.schema.json
                 "#,
             ) -> Err([
-                schema_store::Error::SchemaFileNotFound{
+                tombi_schema_store::Error::SchemaFileNotFound{
                     schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
                 }
             ]);
@@ -289,7 +289,7 @@ mod tests {
                 #:schema ./does-not-exist.schema.json
                 "#,
             ) -> Err([
-                schema_store::Error::SchemaFileNotFound{
+                tombi_schema_store::Error::SchemaFileNotFound{
                     schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
                 }
             ]);
@@ -302,7 +302,7 @@ mod tests {
                 #:schema ../does-not-exist.schema.json
                 "#,
             ) -> Err([
-                schema_store::Error::SchemaFileNotFound{
+                tombi_schema_store::Error::SchemaFileNotFound{
                     schema_path: test_lib::project_root().join("../does-not-exist.schema.json"),
                 }
             ]);

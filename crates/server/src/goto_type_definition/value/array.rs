@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, ValueSchema};
+use tombi_schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, ValueSchema};
 
 use crate::goto_type_definition::{
     all_of::get_all_of_type_definition, any_of::get_any_of_type_definition,
@@ -15,7 +15,7 @@ impl GetTypeDefinition for tombi_document_tree::Array {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         tracing::trace!("self = {:?}", self);
         tracing::trace!("keys = {:?}", keys);
@@ -182,7 +182,7 @@ impl GetTypeDefinition for ArraySchema {
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext,
+        _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
             current_schema.map(|schema| TypeDefinition {

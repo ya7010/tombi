@@ -17,7 +17,6 @@ itertools = { workspace = true }
 regex.workspace = true
 reqwest = { workspace = true }
 rustc-hash = { workspace = true }
-schema-store = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -33,6 +32,7 @@ tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
 tombi-linter = { workspace = true }
 tombi-parser = { workspace = true }
+tombi-schema-store = { workspace = true }
 tombi-text = { workspace = true }
 tombi-validator = { workspace = true }
 tombi-x-keyword = { workspace = true }

@@ -426,7 +426,7 @@ mod hover_keys_value {
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = &$schema_file_path {
-                    let schema_file_url = schema_store::SchemaUrl::from_file_path(schema_file_path).expect(
+                    let schema_file_url = tombi_schema_store::SchemaUrl::from_file_path(schema_file_path).expect(
                         format!(
                             "failed to convert schema path to URL: {}",
                             schema_file_path.display()

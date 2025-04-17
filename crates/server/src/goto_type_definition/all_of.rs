@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
-use schema_store::{Accessor, CurrentSchema, SchemaUrl};
+use tombi_schema_store::{Accessor, CurrentSchema, SchemaUrl};
 
 use super::{GetTypeDefinition, TypeDefinition};
 
@@ -10,11 +10,11 @@ pub fn get_all_of_type_definition<'a: 'b, 'b, T>(
     value: &'a T,
     position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
-    accessors: &'a [schema_store::Accessor],
-    all_of_schema: &'a schema_store::AllOfSchema,
+    accessors: &'a [tombi_schema_store::Accessor],
+    all_of_schema: &'a tombi_schema_store::AllOfSchema,
     schema_url: &'a SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
-    schema_context: &'a schema_store::SchemaContext,
+    definitions: &'a tombi_schema_store::SchemaDefinitions,
+    schema_context: &'a tombi_schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<TypeDefinition>>
 where
     T: GetTypeDefinition + tombi_document_tree::ValueImpl + tombi_validator::Validate + Sync + Send,
@@ -70,14 +70,14 @@ where
     .boxed()
 }
 
-impl GetTypeDefinition for schema_store::AllOfSchema {
+impl GetTypeDefinition for tombi_schema_store::AllOfSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext,
+        _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
             let Some(current_schema) = current_schema else {

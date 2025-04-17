@@ -18,7 +18,7 @@ pub struct Formatter<'a> {
     #[allow(dead_code)]
     options: &'a crate::FormatOptions,
     source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
-    schema_store: &'a schema_store::SchemaStore,
+    schema_store: &'a tombi_schema_store::SchemaStore,
     buf: String,
 }
 
@@ -29,7 +29,7 @@ impl<'a> Formatter<'a> {
         definitions: crate::FormatDefinitions,
         options: &'a crate::FormatOptions,
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
-        schema_store: &'a schema_store::SchemaStore,
+        schema_store: &'a tombi_schema_store::SchemaStore,
     ) -> Self {
         Self {
             toml_version,
@@ -75,7 +75,7 @@ impl<'a> Formatter<'a> {
 
         let root = tombi_ast_editor::Editor::new(
             root,
-            &schema_store::SchemaContext {
+            &tombi_schema_store::SchemaContext {
                 toml_version: self.toml_version,
                 root_schema: source_schema
                     .as_ref()

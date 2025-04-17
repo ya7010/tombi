@@ -3,16 +3,16 @@ use std::borrow::Cow;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
 use futures::FutureExt;
 use itertools::Itertools;
-use schema_store::{GetHeaderSchemarAccessors, SchemaAccessor};
+use tombi_schema_store::{GetHeaderSchemarAccessors, SchemaAccessor};
 
 use crate::{edit::get_schema, rule::table_keys_order};
 
 impl crate::Edit for tombi_ast::Table {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        _accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         tracing::trace!("current_schema = {:?}", current_schema);
 
@@ -31,7 +31,7 @@ impl crate::Edit for tombi_ast::Table {
             );
 
             let current_schema = if let Some(current_schema) = current_schema {
-                get_schema(value, &header_accessors, current_schema, schema_context).await.map(|value_schema| schema_store::CurrentSchema {
+                get_schema(value, &header_accessors, current_schema, schema_context).await.map(|value_schema| tombi_schema_store::CurrentSchema {
                         value_schema: Cow::Owned(value_schema),
                         schema_url: current_schema.schema_url.clone(),
                         definitions: current_schema.definitions.clone(),

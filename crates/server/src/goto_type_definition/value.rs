@@ -18,9 +18,9 @@ impl GetTypeDefinition for tombi_document_tree::Value {
         &'a self,
         position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
-        accessors: &'a [schema_store::Accessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::Accessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> futures::future::BoxFuture<'b, Option<crate::goto_type_definition::TypeDefinition>> {
         async move {
             match self {
@@ -155,14 +155,14 @@ impl GetTypeDefinition for tombi_document_tree::Value {
     }
 }
 
-impl GetTypeDefinition for schema_store::ValueSchema {
+impl GetTypeDefinition for tombi_schema_store::ValueSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
-        accessors: &'a [schema_store::Accessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::Accessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<crate::goto_type_definition::TypeDefinition>> {
         async move {
             match self {

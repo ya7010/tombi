@@ -1,7 +1,7 @@
 mod error;
 
 use itertools::Either;
-use schema_store::SchemaStore;
+use tombi_schema_store::SchemaStore;
 use serde::Serialize;
 use tombi_formatter::formatter::definitions::FormatDefinitions;
 use tombi_formatter::FormatOptions;
@@ -65,7 +65,7 @@ pub struct Serializer<'a> {
     source_path: Option<&'a std::path::Path>,
 
     #[builder(default, setter(into, strip_option))]
-    schema_store: Option<&'a schema_store::SchemaStore>,
+    schema_store: Option<&'a tombi_schema_store::SchemaStore>,
 }
 
 impl<'a> Serializer<'a> {
@@ -151,7 +151,7 @@ impl<'a> Serializer<'a> {
 }
 
 pub struct ValueSerializer<'a> {
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [tombi_schema_store::Accessor],
 }
 
 impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
@@ -382,7 +382,7 @@ impl<'a> serde::Serializer for &'a mut ValueSerializer<'a> {
 // Sequence serialization
 pub struct SerializeArray<'a> {
     kind: tombi_document::ArrayKind,
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [tombi_schema_store::Accessor],
     values: Vec<tombi_document::Value>,
 }
 
@@ -399,10 +399,10 @@ impl serde::ser::SerializeSeq for SerializeArray<'_> {
         })?
         else {
             let mut accessors = self.accessors.to_vec();
-            accessors.push(schema_store::Accessor::Index(self.values.len()));
+            accessors.push(tombi_schema_store::Accessor::Index(self.values.len()));
 
             return Err(crate::ser::Error::ArrayValueRequired(
-                schema_store::Accessors::new(accessors),
+                tombi_schema_store::Accessors::new(accessors),
             ));
         };
         match &mut value {
@@ -495,7 +495,7 @@ impl serde::ser::SerializeTupleVariant for SerializeArray<'_> {
 
 // Map serialization
 pub struct SerializeTable<'a> {
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [tombi_schema_store::Accessor],
     key: Option<tombi_document::Key>,
     key_values: Vec<(tombi_document::Key, tombi_document::Value)>,
 }
@@ -519,14 +519,14 @@ impl serde::ser::SerializeMap for SerializeTable<'_> {
             Ok(Some(value)) => {
                 self.key = None;
                 Err(crate::ser::Error::KeyMustBeString(
-                    schema_store::Accessors::new(self.accessors.to_vec()),
+                    tombi_schema_store::Accessors::new(self.accessors.to_vec()),
                     value.kind(),
                 ))
             }
             Ok(None) => {
                 self.key = None;
                 Err(crate::ser::Error::KeyRequired(
-                    schema_store::Accessors::new(self.accessors.to_vec()),
+                    tombi_schema_store::Accessors::new(self.accessors.to_vec()),
                 ))
             }
             Err(error) => {
@@ -542,7 +542,7 @@ impl serde::ser::SerializeMap for SerializeTable<'_> {
     {
         let Some(key) = self.key.take() else {
             return Err(crate::ser::Error::KeyRequired(
-                schema_store::Accessors::new(self.accessors.to_vec()),
+                tombi_schema_store::Accessors::new(self.accessors.to_vec()),
             ));
         };
         let Some(value) = value.serialize(&mut ValueSerializer {
@@ -603,12 +603,12 @@ impl serde::ser::SerializeStructVariant for SerializeTable<'_> {
 }
 
 struct DateTimeSerializer<'a, T> {
-    accessors: &'a [schema_store::Accessor],
+    accessors: &'a [tombi_schema_store::Accessor],
     _marker: std::marker::PhantomData<T>,
 }
 
 impl<'a, T> DateTimeSerializer<'a, T> {
-    fn new(accessors: &'a [schema_store::Accessor]) -> Self {
+    fn new(accessors: &'a [tombi_schema_store::Accessor]) -> Self {
         Self {
             accessors,
             _marker: std::marker::PhantomData,
@@ -635,7 +635,7 @@ where
         match s.parse::<T>() {
             Ok(value) => Ok(value),
             Err(err) => Err(crate::ser::Error::DateTimeParseFailed {
-                accessors: schema_store::Accessors::new(self.accessors.to_vec()),
+                accessors: tombi_schema_store::Accessors::new(self.accessors.to_vec()),
                 error: err.into(),
             }),
         }

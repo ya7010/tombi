@@ -17,7 +17,7 @@ impl SchemaAccessor {
     /// # Examples
     ///
     /// ```
-    /// use schema_store::{SchemaAccessor, Accessor};
+    /// use tombi_schema_store::{SchemaAccessor, Accessor};
     ///
     /// let accessors = SchemaAccessor::parse("key1[*].key2").unwrap();
     /// assert_eq!(accessors.len(), 3);

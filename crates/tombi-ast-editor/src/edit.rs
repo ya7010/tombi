@@ -1,5 +1,5 @@
 use futures::FutureExt;
-use schema_store::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaAccessor, ValueSchema};
+use tombi_schema_store::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaAccessor, ValueSchema};
 use tombi_validator::Validate;
 
 mod array;
@@ -13,24 +13,24 @@ mod value;
 pub trait Edit {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>>;
 }
 
 async fn get_schema<'a: 'b, 'b>(
     value: &'a tombi_document_tree::Value,
-    accessors: &'a [schema_store::SchemaAccessor],
-    current_schema: &'a schema_store::CurrentSchema<'a>,
-    schema_context: &'a schema_store::SchemaContext<'a>,
+    accessors: &'a [tombi_schema_store::SchemaAccessor],
+    current_schema: &'a tombi_schema_store::CurrentSchema<'a>,
+    schema_context: &'a tombi_schema_store::SchemaContext<'a>,
 ) -> Option<ValueSchema> {
     fn inner_get_schema<'a: 'b, 'b>(
         value: &'a tombi_document_tree::Value,
-        accessors: &'a [schema_store::SchemaAccessor],
-        validation_accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: &'a schema_store::CurrentSchema<'a>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
+        validation_accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: &'a tombi_schema_store::CurrentSchema<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Option<ValueSchema>> {
         async move {
             match current_schema.value_schema.as_ref() {

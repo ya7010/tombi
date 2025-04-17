@@ -1,5 +1,5 @@
 use tombi_config::SchemaOptions;
-use schema_store::json::CatalogUrl;
+use tombi_schema_store::json::CatalogUrl;
 use tower_lsp::lsp_types::{InitializedParams, MessageType};
 
 use crate::backend::Backend;

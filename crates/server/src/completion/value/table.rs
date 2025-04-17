@@ -4,7 +4,7 @@ use futures::{
     future::{join_all, BoxFuture},
     FutureExt,
 };
-use schema_store::{
+use tombi_schema_store::{
     is_online_url, Accessor, CurrentSchema, DocumentSchema, FindSchemaCandidates, Referable,
     SchemaAccessor, SchemaStore, TableSchema, ValueSchema,
 };
@@ -24,7 +24,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self = {:?}", self);
@@ -478,7 +478,7 @@ impl FindCompletionContents for TableSchema {
         _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {
@@ -625,7 +625,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
     keys: &'a [tombi_document_tree::Key],
     accessors: &'a [Accessor],
     current_schema: Option<&'a CurrentSchema<'a>>,
-    schema_context: &'a schema_store::SchemaContext<'a>,
+    schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>> {
     tracing::trace!("key = {:?}", key);
@@ -759,7 +759,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
     accessors: &'a [Accessor],
     table_schema: &'a TableSchema,
     current_schema: &'a CurrentSchema<'a>,
-    schema_context: &'a schema_store::SchemaContext<'a>,
+    schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Option<Vec<CompletionContent>>> {
     async move {

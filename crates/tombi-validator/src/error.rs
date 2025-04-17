@@ -10,7 +10,7 @@ pub enum ErrorKind {
 
     #[error("Expected a value of type {expected}, but found {actual}")]
     TypeMismatch {
-        expected: schema_store::ValueType,
+        expected: tombi_schema_store::ValueType,
         actual: tombi_document_tree::ValueType,
     },
 

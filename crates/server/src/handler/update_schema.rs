@@ -1,4 +1,4 @@
-use schema_store::SchemaUrl;
+use tombi_schema_store::SchemaUrl;
 use tower_lsp::lsp_types::{
     notification::ShowMessage, MessageType, ShowMessageParams, TextDocumentIdentifier,
 };

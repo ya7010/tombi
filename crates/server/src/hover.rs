@@ -9,13 +9,13 @@ use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use constraints::DataConstraints;
 use futures::future::BoxFuture;
-use schema_store::{get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType};
+use tombi_schema_store::{get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType};
 
 pub async fn get_hover_content(
     tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     keys: &[tombi_document_tree::Key],
-    schema_context: &schema_store::SchemaContext<'_>,
+    schema_context: &tombi_schema_store::SchemaContext<'_>,
 ) -> Option<HoverContent> {
     let table = tree.deref();
     match schema_context.root_schema {
@@ -48,7 +48,7 @@ trait GetHoverContent {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>>;
 }
 
@@ -144,7 +144,7 @@ impl From<HoverContent> for tower_lsp::lsp_types::Hover {
 #[cfg(test)]
 mod test {
     use rstest::rstest;
-    use schema_store::SchemaUrl;
+    use tombi_schema_store::SchemaUrl;
 
     use super::*;
 

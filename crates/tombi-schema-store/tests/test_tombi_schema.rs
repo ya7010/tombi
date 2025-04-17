@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use schema_store::{DocumentSchema, SchemaUrl};
+use tombi_schema_store::{DocumentSchema, SchemaUrl};
 
 fn project_root() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let cargo_manifest_dir = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);

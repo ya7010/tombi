@@ -95,7 +95,7 @@ pub async fn handle_completion(
         get_completion_contents(
             root,
             position.into(),
-            &schema_store::SchemaContext {
+            &tombi_schema_store::SchemaContext {
                 toml_version,
                 root_schema,
                 sub_schema_url_map: source_schema

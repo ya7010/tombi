@@ -1,5 +1,5 @@
 use itertools::{Either, Itertools};
-use schema_store::SchemaContext;
+use tombi_schema_store::SchemaContext;
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};

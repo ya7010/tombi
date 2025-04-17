@@ -1,8 +1,8 @@
-use tombi_document_tree::IntoDocumentTreeAndErrors;
 use itertools::Itertools;
-use schema_store::{CurrentSchema, SchemaAccessor, SchemaContext};
 use syntax::SyntaxElement;
 use tombi_ast::AstNode;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
+use tombi_schema_store::{CurrentSchema, SchemaAccessor, SchemaContext};
 
 use crate::rule::table_keys_order::{sorted_accessors, table_keys_order};
 

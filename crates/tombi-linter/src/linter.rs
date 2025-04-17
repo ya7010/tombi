@@ -12,7 +12,7 @@ pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
     source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
-    schema_store: &'a schema_store::SchemaStore,
+    schema_store: &'a tombi_schema_store::SchemaStore,
     pub(crate) diagnostics: Vec<crate::Diagnostic>,
 }
 
@@ -21,7 +21,7 @@ impl<'a> Linter<'a> {
         toml_version: TomlVersion,
         options: &'a crate::LintOptions,
         source_url_or_path: Option<Either<&'a Url, &'a std::path::Path>>,
-        schema_store: &'a schema_store::SchemaStore,
+        schema_store: &'a tombi_schema_store::SchemaStore,
     ) -> Self {
         Self {
             toml_version,
@@ -71,7 +71,7 @@ impl<'a> Linter<'a> {
             errors.set_diagnostics(&mut self.diagnostics);
 
             if let Some(source_schema) = source_schema {
-                let schema_context = schema_store::SchemaContext {
+                let schema_context = tombi_schema_store::SchemaContext {
                     toml_version,
                     root_schema: source_schema.root_schema.as_ref(),
                     sub_schema_url_map: Some(&source_schema.sub_schema_url_map),

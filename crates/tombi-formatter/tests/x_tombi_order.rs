@@ -916,7 +916,7 @@ mod table_keys_order {
         ) => {
             #[tokio::test]
             async fn $name() {
-                use schema_store::SchemaStore;
+                use tombi_schema_store::SchemaStore;
                 use textwrap::dedent;
                 use tombi_config::TomlVersion;
                 use tombi_formatter::{FormatOptions, Formatter};

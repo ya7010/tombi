@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
+use tombi_schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -9,10 +9,10 @@ pub fn get_all_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
     position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
-    accessors: &'a [schema_store::Accessor],
-    all_of_schema: &'a schema_store::AllOfSchema,
+    accessors: &'a [tombi_schema_store::Accessor],
+    all_of_schema: &'a tombi_schema_store::AllOfSchema,
     schema_url: &'a SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    definitions: &'a tombi_schema_store::SchemaDefinitions,
     schema_context: &'a SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
@@ -76,13 +76,13 @@ where
         let value_type = if value_type_set.len() == 1 {
             value_type_set.into_iter().next().unwrap()
         } else {
-            schema_store::ValueType::AllOf(value_type_set.into_iter().collect())
+            tombi_schema_store::ValueType::AllOf(value_type_set.into_iter().collect())
         };
 
         Some(HoverContent {
             title,
             description,
-            accessors: schema_store::Accessors::new(accessors.to_vec()),
+            accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
             value_type,
             constraints,
             schema_url: Some(schema_url.to_owned()),
@@ -92,7 +92,7 @@ where
     .boxed()
 }
 
-impl GetHoverContent for schema_store::AllOfSchema {
+impl GetHoverContent for tombi_schema_store::AllOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         _position: tombi_text::Position,
@@ -145,16 +145,16 @@ impl GetHoverContent for schema_store::AllOfSchema {
                 }
             }
 
-            let value_type: schema_store::ValueType = if value_type_set.len() == 1 {
+            let value_type: tombi_schema_store::ValueType = if value_type_set.len() == 1 {
                 value_type_set.into_iter().next().unwrap()
             } else {
-                schema_store::ValueType::AllOf(value_type_set.into_iter().collect())
+                tombi_schema_store::ValueType::AllOf(value_type_set.into_iter().collect())
             };
 
             Some(HoverContent {
                 title,
                 description,
-                accessors: schema_store::Accessors::new(accessors.to_vec()),
+                accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type,
                 constraints: None,
                 schema_url: Some(current_schema.schema_url.as_ref().to_owned()),

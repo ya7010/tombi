@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
-use schema_store::{Accessor, CurrentSchema, SchemaUrl};
+use tombi_schema_store::{Accessor, CurrentSchema, SchemaUrl};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -10,11 +10,11 @@ pub fn get_one_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
     position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
-    accessors: &'a [schema_store::Accessor],
-    one_of_schema: &'a schema_store::OneOfSchema,
+    accessors: &'a [tombi_schema_store::Accessor],
+    one_of_schema: &'a tombi_schema_store::OneOfSchema,
     schema_url: &'a SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
-    schema_context: &'a schema_store::SchemaContext,
+    definitions: &'a tombi_schema_store::SchemaDefinitions,
+    schema_context: &'a tombi_schema_store::SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
     T: GetHoverContent + tombi_document_tree::ValueImpl + tombi_validator::Validate + Sync + Send,
@@ -41,7 +41,7 @@ where
         let value_type = if value_type_set.len() == 1 {
             value_type_set.into_iter().next().unwrap()
         } else {
-            schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
+            tombi_schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
         };
 
         for referable_schema in one_of_schema.schemas.write().await.iter_mut() {
@@ -79,8 +79,8 @@ where
                     hover_content.value_type = value_type.clone();
                 }
 
-                if current_schema.value_schema.value_type().await == schema_store::ValueType::Array
-                    && hover_content.value_type != schema_store::ValueType::Array
+                if current_schema.value_schema.value_type().await == tombi_schema_store::ValueType::Array
+                    && hover_content.value_type != tombi_schema_store::ValueType::Array
                 {
                     return Some(hover_content);
                 }
@@ -140,7 +140,7 @@ where
             Some(HoverContent {
                 title: None,
                 description: None,
-                accessors: schema_store::Accessors::new(accessors.to_vec()),
+                accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type: value.value_type().into(),
                 constraints: None,
                 schema_url: Some(schema_url.to_owned()),
@@ -151,14 +151,14 @@ where
     .boxed()
 }
 
-impl GetHoverContent for schema_store::OneOfSchema {
+impl GetHoverContent for tombi_schema_store::OneOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             let Some(current_schema) = current_schema else {
@@ -203,16 +203,16 @@ impl GetHoverContent for schema_store::OneOfSchema {
                 }
             }
 
-            let value_type: schema_store::ValueType = if value_type_set.len() == 1 {
+            let value_type: tombi_schema_store::ValueType = if value_type_set.len() == 1 {
                 value_type_set.into_iter().next().unwrap()
             } else {
-                schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
+                tombi_schema_store::ValueType::OneOf(value_type_set.into_iter().collect())
             };
 
             Some(HoverContent {
                 title,
                 description,
-                accessors: schema_store::Accessors::new(accessors.to_vec()),
+                accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type,
                 constraints: None,
                 schema_url: Some(current_schema.schema_url.as_ref().to_owned()),

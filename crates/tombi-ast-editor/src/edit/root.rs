@@ -8,9 +8,9 @@ use tombi_ast::AstToken;
 impl crate::Edit for tombi_ast::Root {
     fn edit<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        _accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
         async move {
             let mut changes = vec![];

@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, IntegerSchema, SchemaUrl};
+use tombi_schema_store::{Accessor, CurrentSchema, IntegerSchema, SchemaUrl};
 
 use crate::completion::{
     completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
@@ -13,7 +13,7 @@ impl FindCompletionContents for IntegerSchema {
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext<'a>,
+        _schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {

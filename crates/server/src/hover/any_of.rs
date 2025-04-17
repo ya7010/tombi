@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
-use schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
+use tombi_schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{GetHoverContent, HoverContent};
 
@@ -10,10 +10,10 @@ pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
     value: &'a T,
     position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
-    accessors: &'a [schema_store::Accessor],
-    any_of_schema: &'a schema_store::AnyOfSchema,
+    accessors: &'a [tombi_schema_store::Accessor],
+    any_of_schema: &'a tombi_schema_store::AnyOfSchema,
     schema_url: &'a SchemaUrl,
-    definitions: &'a schema_store::SchemaDefinitions,
+    definitions: &'a tombi_schema_store::SchemaDefinitions,
     schema_context: &'a SchemaContext,
 ) -> BoxFuture<'b, Option<HoverContent>>
 where
@@ -41,7 +41,7 @@ where
         let value_type = if value_type_set.len() == 1 {
             value_type_set.into_iter().next().unwrap()
         } else {
-            schema_store::ValueType::AnyOf(value_type_set.into_iter().collect())
+            tombi_schema_store::ValueType::AnyOf(value_type_set.into_iter().collect())
         };
 
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
@@ -105,7 +105,7 @@ where
             Some(HoverContent {
                 title: None,
                 description: None,
-                accessors: schema_store::Accessors::new(accessors.to_vec()),
+                accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type: value.value_type().into(),
                 constraints: None,
                 schema_url: Some(schema_url.to_owned()),
@@ -116,7 +116,7 @@ where
     .boxed()
 }
 
-impl GetHoverContent for schema_store::AnyOfSchema {
+impl GetHoverContent for tombi_schema_store::AnyOfSchema {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
         _position: tombi_text::Position,
@@ -168,16 +168,16 @@ impl GetHoverContent for schema_store::AnyOfSchema {
                 }
             }
 
-            let value_type: schema_store::ValueType = if value_type_set.len() == 1 {
+            let value_type: tombi_schema_store::ValueType = if value_type_set.len() == 1 {
                 value_type_set.into_iter().next().unwrap()
             } else {
-                schema_store::ValueType::AnyOf(value_type_set.into_iter().collect())
+                tombi_schema_store::ValueType::AnyOf(value_type_set.into_iter().collect())
             };
 
             Some(HoverContent {
                 title,
                 description,
-                accessors: schema_store::Accessors::new(accessors.to_vec()),
+                accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type,
                 constraints: None,
                 schema_url: Some(current_schema.schema_url.as_ref().clone()),

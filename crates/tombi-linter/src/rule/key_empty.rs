@@ -31,7 +31,7 @@ mod tests {
             tombi_config::TomlVersion::default(),
             &crate::LintOptions::default(),
             None,
-            &schema_store::SchemaStore::new(),
+            &tombi_schema_store::SchemaStore::new(),
         )
         .lint("'' = 1")
         .await

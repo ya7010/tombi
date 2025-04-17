@@ -5,13 +5,13 @@ mod value;
 
 use std::{borrow::Cow, ops::Deref};
 
-use schema_store::{CurrentSchema, SchemaUrl};
+use tombi_schema_store::{CurrentSchema, SchemaUrl};
 
 pub async fn get_type_definition(
     tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     keys: &[tombi_document_tree::Key],
-    schema_context: &schema_store::SchemaContext<'_>,
+    schema_context: &tombi_schema_store::SchemaContext<'_>,
 ) -> Option<TypeDefinition> {
     let table = tree.deref();
     match schema_context.root_schema {
@@ -48,8 +48,8 @@ trait GetTypeDefinition {
         &'a self,
         position: tombi_text::Position,
         keys: &'a [tombi_document_tree::Key],
-        accessors: &'a [schema_store::Accessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::Accessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> futures::future::BoxFuture<'b, Option<crate::goto_type_definition::TypeDefinition>>;
 }

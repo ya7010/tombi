@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
-use schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, SchemaUrl, ValueSchema};
+use tombi_schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, SchemaUrl, ValueSchema};
 use tombi_document_tree::ArrayKind;
 
 use super::{
@@ -21,7 +21,7 @@ impl FindCompletionContents for tombi_document_tree::Array {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("self = {:?}", self);
@@ -224,7 +224,7 @@ impl FindCompletionContents for ArraySchema {
         _keys: &'a [tombi_document_tree::Key],
         _accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext<'a>,
+        _schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         async move {

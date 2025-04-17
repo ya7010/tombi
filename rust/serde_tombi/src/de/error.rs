@@ -7,11 +7,11 @@ pub enum Error {
     Config(#[from] tombi_config::Error),
 
     #[error(transparent)]
-    SchemaStore(#[from] schema_store::Error),
+    SchemaStore(#[from] tombi_schema_store::Error),
 
     #[error("cannot get schema url from document comment: {error} at {url_range}")]
     DocumentCommentSchemaUrl {
-        error: schema_store::Error,
+        error: tombi_schema_store::Error,
         url_range: tombi_text::Range,
     },
 

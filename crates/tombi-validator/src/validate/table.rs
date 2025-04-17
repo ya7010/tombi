@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use tombi_diagnostic::SetDiagnostics;
 use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{
+use tombi_schema_store::{
     Accessor, CurrentSchema, DocumentSchema, SchemaAccessor, SchemaAccessors, ValueSchema,
     ValueType,
 };
@@ -14,9 +14,9 @@ use crate::error::Patterns;
 impl Validate for tombi_document_tree::Table {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         tracing::trace!("self = {:?}", self);
         tracing::trace!("accessors = {:?}", accessors);

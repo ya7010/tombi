@@ -19,21 +19,21 @@ use all_of::validate_all_of;
 use any_of::validate_any_of;
 use futures::{future::BoxFuture, FutureExt};
 use one_of::validate_one_of;
-use schema_store::CurrentSchema;
+use tombi_schema_store::CurrentSchema;
 
 pub trait Validate {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
-        current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
+        current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>>;
 }
 
 pub fn validate<'a: 'b, 'b>(
     tree: tombi_document_tree::DocumentTree,
-    source_schema: &'a schema_store::SourceSchema,
-    schema_context: &'a schema_store::SchemaContext,
+    source_schema: &'a tombi_schema_store::SourceSchema,
+    schema_context: &'a tombi_schema_store::SchemaContext,
 ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
     async move {
         let current_schema = source_schema.root_schema.as_ref().and_then(|root_schema| {

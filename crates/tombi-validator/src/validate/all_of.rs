@@ -1,16 +1,16 @@
 use std::fmt::Debug;
 
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::CurrentSchema;
+use tombi_schema_store::CurrentSchema;
 
 use super::Validate;
 
 pub fn validate_all_of<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a [schema_store::SchemaAccessor],
-    all_of_schema: &'a schema_store::AllOfSchema,
+    accessors: &'a [tombi_schema_store::SchemaAccessor],
+    all_of_schema: &'a tombi_schema_store::AllOfSchema,
     current_schema: &'a CurrentSchema<'a>,
-    schema_context: &'a schema_store::SchemaContext<'a>,
+    schema_context: &'a tombi_schema_store::SchemaContext<'a>,
 ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>>
 where
     T: Validate + Sync + Send + Debug,

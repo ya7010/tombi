@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, OneOfSchema, ReferableValueSchemas};
+use tombi_schema_store::{Accessor, CurrentSchema, OneOfSchema, ReferableValueSchemas};
 
 use crate::completion::{
     serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
@@ -25,9 +25,9 @@ pub fn find_one_of_completion_items<'a: 'b, 'b, T>(
     position: tombi_text::Position,
     keys: &'a [tombi_document_tree::Key],
     accessors: &'a [Accessor],
-    one_of_schema: &'a schema_store::OneOfSchema,
+    one_of_schema: &'a tombi_schema_store::OneOfSchema,
     current_schema: &'a CurrentSchema<'a>,
-    schema_context: &'a schema_store::SchemaContext<'a>,
+    schema_context: &'a tombi_schema_store::SchemaContext<'a>,
     completion_hint: Option<CompletionHint>,
 ) -> BoxFuture<'b, Vec<CompletionContent>>
 where

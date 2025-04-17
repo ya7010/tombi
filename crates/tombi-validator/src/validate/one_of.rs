@@ -3,17 +3,17 @@ use std::fmt::Debug;
 use tombi_diagnostic::SetDiagnostics;
 use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{CurrentSchema, OneOfSchema, ValueSchema};
+use tombi_schema_store::{CurrentSchema, OneOfSchema, ValueSchema};
 
 use super::Validate;
 use crate::validate::{all_of::validate_all_of, any_of::validate_any_of};
 
 pub fn validate_one_of<'a: 'b, 'b, T>(
     value: &'a T,
-    accessors: &'a [schema_store::SchemaAccessor],
+    accessors: &'a [tombi_schema_store::SchemaAccessor],
     one_of_schema: &'a OneOfSchema,
     current_schema: &'a CurrentSchema<'a>,
-    schema_context: &'a schema_store::SchemaContext<'a>,
+    schema_context: &'a tombi_schema_store::SchemaContext<'a>,
 ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>>
 where
     T: Validate + ValueImpl + Sync + Send + Debug,

@@ -1,8 +1,8 @@
-use tombi_document_tree::TryIntoDocumentTree;
 use itertools::Itertools;
-use schema_store::{ArraySchema, SchemaContext};
 use syntax::SyntaxElement;
 use tombi_ast::AstNode;
+use tombi_document_tree::TryIntoDocumentTree;
+use tombi_schema_store::{ArraySchema, SchemaContext};
 use tombi_x_keyword::ArrayValuesOrder;
 
 use crate::node::make_comma;

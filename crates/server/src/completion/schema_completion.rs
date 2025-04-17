@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, ValueSchema};
+use tombi_schema_store::{Accessor, CurrentSchema, ValueSchema};
 
 use super::{
     value::{
@@ -18,7 +18,7 @@ impl FindCompletionContents for SchemaCompletion {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext<'a>,
+        schema_context: &'a tombi_schema_store::SchemaContext<'a>,
         completion_hint: Option<CompletionHint>,
     ) -> BoxFuture<'b, Vec<CompletionContent>> {
         tracing::trace!("accessors = {:?}", accessors);
@@ -201,9 +201,9 @@ impl FindCompletionContents for SchemaCompletion {
 impl tombi_validator::Validate for SchemaCompletion {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        _accessors: &'a [schema_store::SchemaAccessor],
-        _current_schema: Option<&'a schema_store::CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext,
+        _accessors: &'a [tombi_schema_store::SchemaAccessor],
+        _current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
+        _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move { Ok(()) }.boxed()
     }

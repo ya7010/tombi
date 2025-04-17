@@ -1,4 +1,4 @@
-use schema_store::{get_schema_name, SchemaUrl};
+use tombi_schema_store::{get_schema_name, SchemaUrl};
 use tombi_config::TomlVersion;
 
 use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};

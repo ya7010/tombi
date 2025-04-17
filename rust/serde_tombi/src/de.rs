@@ -2,7 +2,7 @@ mod error;
 
 pub use error::Error;
 use itertools::{Either, Itertools};
-use schema_store::{SchemaStore, SourceSchema};
+use tombi_schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use tombi_ast::AstNode;
 use tombi_document::IntoDocument;
@@ -68,7 +68,7 @@ pub struct Deserializer<'de> {
     source_path: Option<&'de std::path::Path>,
 
     #[builder(default, setter(into, strip_option))]
-    schema_store: Option<&'de schema_store::SchemaStore>,
+    schema_store: Option<&'de tombi_schema_store::SchemaStore>,
 }
 
 impl<'de> Deserializer<'de> {

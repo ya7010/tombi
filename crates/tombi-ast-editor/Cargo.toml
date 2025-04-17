@@ -12,12 +12,12 @@ futures = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
 regex = { workspace = true }
-schema-store = { workspace = true }
 syntax = { workspace = true }
 thiserror = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-parser = { workspace = true }
+tombi-schema-store = { workspace = true }
 tombi-text = { workspace = true }
 tombi-toml-version = { workspace = true }
 tombi-validator = { workspace = true }

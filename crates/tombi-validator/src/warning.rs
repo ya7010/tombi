@@ -1,7 +1,7 @@
 #[derive(thiserror::Error, Debug)]
 pub enum WarningKind {
     #[error("`{0}` is deprecated")]
-    Deprecated(schema_store::SchemaAccessors),
+    Deprecated(tombi_schema_store::SchemaAccessors),
 
     #[error("\"{key}\" is not allowed; In strict mode, the JSON schema must be explicitly set to `\"additionalProperties\": true`. ")]
     StrictAdditionalProperties { key: String },

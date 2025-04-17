@@ -3,16 +3,16 @@ use std::borrow::Cow;
 use tombi_diagnostic::SetDiagnostics;
 use tombi_document_tree::ValueImpl;
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{CurrentSchema, DocumentSchema, ValueSchema, ValueType};
+use tombi_schema_store::{CurrentSchema, DocumentSchema, ValueSchema, ValueType};
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
 
 impl Validate for tombi_document_tree::Array {
     fn validate<'a: 'b, 'b>(
         &'a self,
-        accessors: &'a [schema_store::SchemaAccessor],
+        accessors: &'a [tombi_schema_store::SchemaAccessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
         async move {
             if let Some(sub_schema_url) = schema_context
@@ -117,12 +117,12 @@ impl Validate for tombi_document_tree::Array {
                         let new_accessors = accessors
                             .iter()
                             .cloned()
-                            .chain(std::iter::once(schema_store::SchemaAccessor::Index))
+                            .chain(std::iter::once(tombi_schema_store::SchemaAccessor::Index))
                             .collect::<Vec<_>>();
                         if current_schema.value_schema.deprecated() == Some(true) {
                             crate::Warning {
                                 kind: crate::WarningKind::Deprecated(
-                                    schema_store::SchemaAccessors::new(new_accessors.clone()),
+                                    tombi_schema_store::SchemaAccessors::new(new_accessors.clone()),
                                 ),
                                 range: self.range(),
                             }
@@ -172,7 +172,7 @@ impl Validate for tombi_document_tree::Array {
                             &accessors
                                 .iter()
                                 .cloned()
-                                .chain(std::iter::once(schema_store::SchemaAccessor::Index))
+                                .chain(std::iter::once(tombi_schema_store::SchemaAccessor::Index))
                                 .collect::<Vec<_>>(),
                             None,
                             schema_context,

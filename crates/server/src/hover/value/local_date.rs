@@ -1,5 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
-use schema_store::{Accessor, CurrentSchema, LocalDateSchema, ValueSchema};
+use tombi_schema_store::{Accessor, CurrentSchema, LocalDateSchema, ValueSchema};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
@@ -14,7 +14,7 @@ impl GetHoverContent for tombi_document_tree::LocalDate {
         keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        schema_context: &'a schema_store::SchemaContext,
+        schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             if let Some(current_schema) = current_schema {
@@ -77,8 +77,8 @@ impl GetHoverContent for tombi_document_tree::LocalDate {
                 Some(HoverContent {
                     title: None,
                     description: None,
-                    accessors: schema_store::Accessors::new(accessors.to_vec()),
-                    value_type: schema_store::ValueType::LocalDate,
+                    accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
+                    value_type: tombi_schema_store::ValueType::LocalDate,
                     constraints: None,
                     schema_url: None,
                     range: Some(self.range()),
@@ -96,14 +96,14 @@ impl GetHoverContent for LocalDateSchema {
         _keys: &'a [tombi_document_tree::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
-        _schema_context: &'a schema_store::SchemaContext,
+        _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<HoverContent>> {
         async move {
             Some(HoverContent {
                 title: self.title.clone(),
                 description: self.description.clone(),
-                accessors: schema_store::Accessors::new(accessors.to_vec()),
-                value_type: schema_store::ValueType::LocalDate,
+                accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
+                value_type: tombi_schema_store::ValueType::LocalDate,
                 constraints: Some(DataConstraints {
                     default: self
                         .default
