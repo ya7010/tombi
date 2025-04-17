@@ -118,7 +118,7 @@ macro_rules! test_deserialize {
             use tombi_document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
 
-            test_lib::init_tracing();
+            tombi_test_lib::init_tracing();
 
             let source = textwrap::dedent($source);
             let p = tombi_parser::parse(&source.trim());

@@ -800,7 +800,7 @@ mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
     use serde::Serialize;
-    use test_lib::toml_text_assert_eq;
+    use tombi_test_lib::toml_text_assert_eq;
 
     #[tokio::test]
     async fn test_serialize_struct() {
@@ -837,7 +837,7 @@ opt = "optional"
 
     #[tokio::test]
     async fn test_serialize_nested_struct() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
 
         #[derive(Serialize)]
         struct Nested {

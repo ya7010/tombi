@@ -190,7 +190,7 @@ mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
     use serde::Deserialize;
-    use test_lib::project_root;
+    use tombi_test_lib::project_root;
 
     #[tokio::test]
     async fn test_deserialize_struct() {
@@ -623,7 +623,7 @@ optional_string = "provided"
 
     #[tokio::test]
     async fn test_empty_tombi_config() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
         let toml = r#""#;
 
         let config: tombi_config::Config = from_str_async(toml)

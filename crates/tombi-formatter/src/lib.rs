@@ -36,7 +36,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Ok($expected:expr);) => {
         #[tokio::test]
         async fn $name() {
-            test_lib::init_tracing();
+            tombi_test_lib::init_tracing();
 
             match $crate::Formatter::new(
                 $toml_version,
@@ -70,7 +70,7 @@ macro_rules! test_format {
     (#[test] fn $name:ident($source:expr, $toml_version:expr, $definitions:expr, $options:expr) -> Err(_);) => {
         #[tokio::test]
         async fn $name() {
-            test_lib::init_tracing();
+            tombi_test_lib::init_tracing();
 
             match $crate::Formatter::new(
                 $toml_version,

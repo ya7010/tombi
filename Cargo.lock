@@ -1641,7 +1641,6 @@ dependencies = [
  "maplit",
  "pretty_assertions",
  "serde",
- "test-lib",
  "textwrap",
  "thiserror",
  "tokio",
@@ -1654,6 +1653,7 @@ dependencies = [
  "tombi-formatter",
  "tombi-parser",
  "tombi-schema-store",
+ "tombi-test-lib",
  "tombi-text",
  "tombi-toml-text",
  "tombi-toml-version",
@@ -1793,15 +1793,6 @@ dependencies = [
  "once_cell",
  "rustix",
  "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "test-lib"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -2063,13 +2054,13 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_json",
- "test-lib",
  "textwrap",
  "thiserror",
  "tombi-ast",
  "tombi-date-time",
  "tombi-document-tree",
  "tombi-parser",
+ "tombi-test-lib",
  "tombi-text",
  "tombi-toml-text",
  "tombi-toml-version",
@@ -2108,7 +2099,6 @@ dependencies = [
  "rstest",
  "schemars",
  "serde",
- "test-lib",
  "textwrap",
  "tokio",
  "tombi-ast",
@@ -2119,6 +2109,7 @@ dependencies = [
  "tombi-parser",
  "tombi-schema-store",
  "tombi-syntax",
+ "tombi-test-lib",
  "tombi-text",
  "tracing",
  "tracing-subscriber",
@@ -2152,7 +2143,6 @@ dependencies = [
  "regex",
  "schemars",
  "serde",
- "test-lib",
  "thiserror",
  "tokio",
  "tombi-ast",
@@ -2162,6 +2152,7 @@ dependencies = [
  "tombi-parser",
  "tombi-schema-store",
  "tombi-syntax",
+ "tombi-test-lib",
  "tombi-text",
  "tombi-validator",
  "tracing",
@@ -2251,7 +2242,6 @@ dependencies = [
  "serde_json",
  "serde_tombi",
  "tempfile",
- "test-lib",
  "textwrap",
  "thiserror",
  "tokio",
@@ -2265,6 +2255,7 @@ dependencies = [
  "tombi-parser",
  "tombi-schema-store",
  "tombi-syntax",
+ "tombi-test-lib",
  "tombi-text",
  "tombi-validator",
  "tombi-x-keyword",
@@ -2281,6 +2272,15 @@ dependencies = [
  "thiserror",
  "tombi-rg-tree",
  "tombi-text",
+]
+
+[[package]]
+name = "tombi-test-lib"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

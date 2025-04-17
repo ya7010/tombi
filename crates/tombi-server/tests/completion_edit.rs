@@ -1,11 +1,11 @@
-use test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
+use tombi_test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
 
 struct Select<T>(T);
 mod completion_edit {
     use super::*;
 
     mod tombi_schema {
-        use test_lib::tombi_schema_path;
+        use tombi_test_lib::tombi_schema_path;
 
         use super::*;
 
@@ -45,7 +45,7 @@ mod completion_edit {
     }
 
     mod cargo_schema {
-        use test_lib::cargo_schema_path;
+        use tombi_test_lib::cargo_schema_path;
 
         use super::*;
 
@@ -119,7 +119,7 @@ mod completion_edit {
     }
 
     mod pyproject_schema {
-        use test_lib::pyproject_schema_path;
+        use tombi_test_lib::pyproject_schema_path;
 
         use super::*;
 
@@ -539,7 +539,7 @@ mod completion_edit {
                     LspService,
                 };
 
-                test_lib::init_tracing();
+                tombi_test_lib::init_tracing();
 
                 let (service, _) = LspService::new(|client| Backend::new(client, &tombi_server::backend::Options::default()));
                 let backend = service.inner();

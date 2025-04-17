@@ -51,7 +51,7 @@ macro_rules! test_lint {
         async fn $name() {
             use tombi_config::TomlVersion;
 
-            test_lib::init_tracing();
+            tombi_test_lib::init_tracing();
 
             // Initialize schema store
             let schema_store = tombi_schema_store::SchemaStore::new();
@@ -71,7 +71,7 @@ macro_rules! test_lint {
             }
 
             // Initialize linter with schema if provided
-            let source_path = test_lib::project_root().join("test.toml");
+            let source_path = tombi_test_lib::project_root().join("test.toml");
             let options = $crate::LintOptions::default();
             let linter = $crate::Linter::new(
                 TomlVersion::default(),
@@ -127,7 +127,7 @@ macro_rules! test_lint {
         async fn $name() {
             use tombi_config::TomlVersion;
 
-            test_lib::init_tracing();
+            tombi_test_lib::init_tracing();
 
             // Initialize schema store
             let schema_store = tombi_schema_store::SchemaStore::new();
@@ -147,7 +147,7 @@ macro_rules! test_lint {
             }
 
             // Initialize linter with schema if provided
-            let source_path = test_lib::project_root().join("test.toml");
+            let source_path = tombi_test_lib::project_root().join("test.toml");
             let options = $crate::LintOptions::default();
             let linter = $crate::Linter::new(
                 TomlVersion::default(),
@@ -181,7 +181,7 @@ mod tests {
 
     mod cargo {
         use super::*;
-        use test_lib::cargo_schema_path;
+        use tombi_test_lib::cargo_schema_path;
 
         test_lint! {
             #[test]
@@ -277,7 +277,7 @@ mod tests {
                 "#,
             ) -> Err([
                 tombi_schema_store::Error::SchemaFileNotFound{
-                    schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
+                    schema_path: tombi_test_lib::project_root().join("does-not-exist.schema.json"),
                 }
             ]);
         }
@@ -290,7 +290,7 @@ mod tests {
                 "#,
             ) -> Err([
                 tombi_schema_store::Error::SchemaFileNotFound{
-                    schema_path: test_lib::project_root().join("does-not-exist.schema.json"),
+                    schema_path: tombi_test_lib::project_root().join("does-not-exist.schema.json"),
                 }
             ]);
         }
@@ -303,7 +303,7 @@ mod tests {
                 "#,
             ) -> Err([
                 tombi_schema_store::Error::SchemaFileNotFound{
-                    schema_path: test_lib::project_root().join("../does-not-exist.schema.json"),
+                    schema_path: tombi_test_lib::project_root().join("../does-not-exist.schema.json"),
                 }
             ]);
         }

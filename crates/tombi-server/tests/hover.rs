@@ -1,4 +1,4 @@
-use test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
+use tombi_test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
 mod hover_keys_value {
     use super::*;
 
@@ -419,7 +419,7 @@ mod hover_keys_value {
                 };
                 use tombi_server::handler::handle_did_open;
 
-                test_lib::init_tracing();
+                tombi_test_lib::init_tracing();
 
                 let (service, _) = LspService::new(|client| Backend::new(client, &tombi_server::backend::Options::default()));
 

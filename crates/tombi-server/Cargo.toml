@@ -44,9 +44,9 @@ tracing-subscriber = { workspace = true }
 pretty_assertions = { workspace = true }
 rstest = { workspace = true }
 tempfile = { version = "3.15.0" }
-test-lib = { workspace = true }
 textwrap = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
+tombi-test-lib = { workspace = true }
 
 [features]
 clap = ["dep:clap"]

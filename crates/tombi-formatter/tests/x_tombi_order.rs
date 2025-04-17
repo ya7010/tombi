@@ -3,7 +3,7 @@ mod table_keys_order {
 
     mod pyproject {
         use super::test_format;
-        use test_lib::pyproject_schema_path;
+        use tombi_test_lib::pyproject_schema_path;
 
         test_format! {
             #[tokio::test]
@@ -266,7 +266,7 @@ mod table_keys_order {
     }
 
     mod cargo {
-        use test_lib::cargo_schema_path;
+        use tombi_test_lib::cargo_schema_path;
 
         use super::*;
 
@@ -436,7 +436,7 @@ mod table_keys_order {
 
     mod tombi {
         use super::test_format;
-        use test_lib::tombi_schema_path;
+        use tombi_test_lib::tombi_schema_path;
 
         test_format! {
             #[tokio::test]
@@ -921,7 +921,7 @@ mod table_keys_order {
                 use tombi_config::TomlVersion;
                 use tombi_formatter::{FormatOptions, Formatter};
 
-                test_lib::init_tracing();
+                tombi_test_lib::init_tracing();
 
                 // Initialize schema store
                 let schema_store = SchemaStore::new();
@@ -942,7 +942,7 @@ mod table_keys_order {
 
                 // Initialize formatter
                 let format_options = FormatOptions::default();
-                let source_path = test_lib::project_root().join("test.toml");
+                let source_path = tombi_test_lib::project_root().join("test.toml");
                 let formatter = Formatter::new(
                     TomlVersion::default(),
                     tombi_formatter::formatter::definitions::FormatDefinitions::default(),

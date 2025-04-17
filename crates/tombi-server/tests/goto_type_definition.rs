@@ -1,4 +1,4 @@
-use test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
+use tombi_test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
 mod goto_type_definition_tests {
     use super::*;
 
@@ -132,7 +132,7 @@ mod goto_type_definition_tests {
                     LspService,
                 };
 
-                test_lib::init_tracing();
+                tombi_test_lib::init_tracing();
 
                 let (service, _) = LspService::new(|client| {
                     Backend::new(client, &tombi_server::backend::Options::default())

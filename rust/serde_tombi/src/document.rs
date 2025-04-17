@@ -310,14 +310,14 @@ impl ToTomlString for tombi_document::LocalTime {
 
 #[cfg(test)]
 mod tests {
-    use test_lib::toml_text_assert_eq;
+    use tombi_test_lib::toml_text_assert_eq;
     use tombi_document::KeyKind;
 
     use crate::document::*;
 
     #[tokio::test]
     async fn test_document_serialization() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
 
         // Create a test document with various value types
         let mut document = Document::new();
@@ -370,7 +370,7 @@ array = [1, 2, 3]
 
     #[tokio::test]
     async fn test_array_of_tables_serialization() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
 
         // Create a test document with array of tables
         let mut document = Document::new();
@@ -424,7 +424,7 @@ color = "yellow"
 
     #[tokio::test]
     async fn test_nested_tables_serialization() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
 
         // Create a test document with nested tables
         let mut document = Document::new();
@@ -458,7 +458,7 @@ age = 30
 
     #[tokio::test]
     async fn test_complex_nested_structures_serialization() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
 
         let mut document = Document::new();
 
@@ -563,7 +563,7 @@ id = 2
 
     #[tokio::test]
     async fn test_date_time_serialization() {
-        test_lib::init_tracing();
+        tombi_test_lib::init_tracing();
 
         let mut document = Document::new();
 

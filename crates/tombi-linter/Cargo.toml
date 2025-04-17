@@ -25,8 +25,8 @@ tracing = { workspace = true }
 url = { workspace = true }
 
 [dev-dependencies]
-assert_matches.workspace = true
-pretty_assertions.workspace = true
-test-lib.workspace = true
+assert_matches = { workspace = true }
+pretty_assertions = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
-tracing-subscriber.workspace = true
+tombi-test-lib = { workspace = true }
+tracing-subscriber = { workspace = true }
