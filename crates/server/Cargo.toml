@@ -10,7 +10,6 @@ ahash.workspace = true
 camino = { workspace = true }
 chrono.workspace = true
 clap = { workspace = true, optional = true }
-crossbeam-channel = "0.5.13"
 futures = { workspace = true }
 futures-util = { workspace = true }
 indexmap = { workspace = true }
@@ -24,7 +23,7 @@ semver = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_tombi = { workspace = true }
-syntax.workspace = true
+syntax = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tombi-ast = { workspace = true }
@@ -35,11 +34,11 @@ tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
 tombi-linter = { workspace = true }
 tombi-text = { workspace = true }
+tombi-x-keyword = { workspace = true }
 tower-lsp = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-validator.workspace = true
-x-tombi.workspace = true
+validator = { workspace = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }

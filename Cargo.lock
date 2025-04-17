@@ -364,15 +364,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crossbeam-channel"
-version = "0.5.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33480d6946193aa8033910124896ca395333cae7e2d1113d1fef6c3272217df2"
-dependencies = [
- "crossbeam-utils",
-]
-
-[[package]]
 name = "crossbeam-utils"
 version = "0.8.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1588,7 +1579,6 @@ dependencies = [
  "regex",
  "reqwest",
  "rstest",
- "schemars",
  "serde",
  "serde_json",
  "thiserror",
@@ -1598,9 +1588,9 @@ dependencies = [
  "tombi-document",
  "tombi-document-tree",
  "tombi-text",
+ "tombi-x-keyword",
  "tracing",
  "url",
- "x-tombi",
 ]
 
 [[package]]
@@ -1752,7 +1742,6 @@ dependencies = [
  "camino",
  "chrono",
  "clap",
- "crossbeam-channel",
  "futures",
  "futures-util",
  "indexmap",
@@ -1782,11 +1771,11 @@ dependencies = [
  "tombi-formatter",
  "tombi-linter",
  "tombi-text",
+ "tombi-x-keyword",
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
  "validator",
- "x-tombi",
 ]
 
 [[package]]
@@ -2099,9 +2088,9 @@ dependencies = [
  "tombi-document-tree",
  "tombi-text",
  "tombi-toml-version",
+ "tombi-x-keyword",
  "tracing",
  "validator",
- "x-tombi",
 ]
 
 [[package]]
@@ -2145,9 +2134,9 @@ dependencies = [
  "serde",
  "thiserror",
  "tombi-toml-version",
+ "tombi-x-keyword",
  "tracing",
  "url",
- "x-tombi",
 ]
 
 [[package]]
@@ -2314,6 +2303,15 @@ dependencies = [
 
 [[package]]
 name = "tombi-toml-version"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "schemars",
+ "serde",
+]
+
+[[package]]
+name = "tombi-x-keyword"
 version = "0.0.0"
 dependencies = [
  "clap",
@@ -2872,15 +2870,6 @@ name = "writeable"
 version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
-
-[[package]]
-name = "x-tombi"
-version = "0.0.0"
-dependencies = [
- "clap",
- "schemars",
- "serde",
-]
 
 [[package]]
 name = "xshell"

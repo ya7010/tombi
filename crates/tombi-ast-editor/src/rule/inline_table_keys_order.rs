@@ -2,7 +2,7 @@ use itertools::Itertools;
 use schema_store::{SchemaContext, TableSchema};
 use syntax::SyntaxElement;
 use tombi_ast::AstNode;
-use x_tombi::TableKeysOrder;
+use tombi_x_keyword::TableKeysOrder;
 
 use crate::rule::inline_table_comma_tailing_comment;
 

@@ -3,7 +3,7 @@ use std::{borrow::Cow, sync::Arc};
 use ahash::AHashMap;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
-use x_tombi::{TableKeysOrder, X_TOMBI_TABLE_KEYS_ORDER};
+use tombi_x_keyword::{TableKeysOrder, X_TOMBI_TABLE_KEYS_ORDER};
 
 use super::{
     CurrentSchema, FindSchemaCandidates, SchemaAccessor, SchemaDefinitions, SchemaItemTokio,

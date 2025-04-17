@@ -1,5 +1,5 @@
 [package]
-name = "x-tombi"
+name = "tombi-x-keyword"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

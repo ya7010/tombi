@@ -1,4 +1,4 @@
-use x_tombi::{ArrayValuesOrder, TableKeysOrder};
+use tombi_x_keyword::{ArrayValuesOrder, TableKeysOrder};
 
 use super::default_value::DefaultValue;
 

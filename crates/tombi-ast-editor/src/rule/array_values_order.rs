@@ -3,7 +3,7 @@ use itertools::Itertools;
 use schema_store::{ArraySchema, SchemaContext};
 use syntax::SyntaxElement;
 use tombi_ast::AstNode;
-use x_tombi::ArrayValuesOrder;
+use tombi_x_keyword::ArrayValuesOrder;
 
 use crate::node::make_comma;
 

@@ -1,7 +1,7 @@
 use std::{borrow::Cow, sync::Arc};
 
 use futures::{future::BoxFuture, FutureExt};
-use x_tombi::{ArrayValuesOrder, X_TOMBI_ARRAY_VALUES_ORDER};
+use tombi_x_keyword::{ArrayValuesOrder, X_TOMBI_ARRAY_VALUES_ORDER};
 
 use super::{
     CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, SchemaUrl,
