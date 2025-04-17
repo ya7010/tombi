@@ -19,7 +19,7 @@ pub enum Error {
     DocumentDeserialize(#[from] tombi_document::de::Error),
 
     #[error("{}", .0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "))]
-    Parser(Vec<parser::Error>),
+    Parser(Vec<tombi_parser::Error>),
 
     #[error("{}", .0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "))]
     DocumentTree(Vec<tombi_document_tree::Error>),

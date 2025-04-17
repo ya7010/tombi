@@ -1,5 +1,5 @@
-use tombi_config::TomlVersion;
 use syntax::{SyntaxKind::*, T};
+use tombi_config::TomlVersion;
 
 use crate::{
     parse::{

@@ -25,7 +25,6 @@ indexmap = { version = "2.6.0", features = ["serde"] }
 itertools = "0.13.0"
 maplit = { version = "1.0" }
 nu-ansi-term = "0.50.1"
-parser = { path = "crates/parser" }
 pretty_assertions = "1.4.1"
 proc-macro2 = "1.0.92"
 quote = "1.0.37"
@@ -64,6 +63,7 @@ tombi-extension = { path = "crates/tombi-extension" }
 tombi-formatter = { path = "crates/tombi-formatter" }
 tombi-lexer = { path = "crates/tombi-lexer" }
 tombi-linter = { path = "crates/tombi-linter" }
+tombi-parser = { path = "crates/tombi-parser" }
 tombi-text = { path = "crates/tombi-text" }
 tombi-toml-text = { path = "crates/tombi-toml-text" }
 tombi-toml-version = { path = "crates/tombi-toml-version" }

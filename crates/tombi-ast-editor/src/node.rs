@@ -1,4 +1,4 @@
-use parser::parse_as;
+use tombi_parser::parse_as;
 
 pub fn make_comma() -> syntax::SyntaxNode {
     parse_as::<tombi_ast::Comma>(",").into_syntax_node_mut()

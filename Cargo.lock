@@ -1113,28 +1113,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "parser"
-version = "0.0.0"
-dependencies = [
- "drop_bomb",
- "itertools",
- "pretty_assertions",
- "rg-tree",
- "rstest",
- "syntax",
- "textwrap",
- "thiserror",
- "tombi-ast",
- "tombi-config",
- "tombi-diagnostic",
- "tombi-document-tree",
- "tombi-lexer",
- "tombi-text",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1699,7 +1677,6 @@ dependencies = [
  "indexmap",
  "itertools",
  "maplit",
- "parser",
  "pretty_assertions",
  "schema-store",
  "serde",
@@ -1714,6 +1691,7 @@ dependencies = [
  "tombi-document",
  "tombi-document-tree",
  "tombi-formatter",
+ "tombi-parser",
  "tombi-text",
  "tombi-toml-text",
  "tombi-toml-version",
@@ -1746,7 +1724,6 @@ dependencies = [
  "futures-util",
  "indexmap",
  "itertools",
- "parser",
  "pretty_assertions",
  "regex",
  "reqwest",
@@ -1770,6 +1747,7 @@ dependencies = [
  "tombi-document-tree",
  "tombi-formatter",
  "tombi-linter",
+ "tombi-parser",
  "tombi-text",
  "tombi-validator",
  "tombi-x-keyword",
@@ -2079,13 +2057,13 @@ dependencies = [
  "futures",
  "indexmap",
  "itertools",
- "parser",
  "regex",
  "schema-store",
  "syntax",
  "thiserror",
  "tombi-ast",
  "tombi-document-tree",
+ "tombi-parser",
  "tombi-text",
  "tombi-toml-version",
  "tombi-validator",
@@ -2174,7 +2152,6 @@ dependencies = [
  "chrono",
  "indexmap",
  "itertools",
- "parser",
  "pretty_assertions",
  "serde",
  "serde_json",
@@ -2184,6 +2161,7 @@ dependencies = [
  "tombi-ast",
  "tombi-date-time",
  "tombi-document-tree",
+ "tombi-parser",
  "tombi-text",
  "tombi-toml-text",
  "tombi-toml-version",
@@ -2218,7 +2196,6 @@ version = "0.0.0"
 dependencies = [
  "assert_matches",
  "itertools",
- "parser",
  "pretty_assertions",
  "rstest",
  "schema-store",
@@ -2233,6 +2210,7 @@ dependencies = [
  "tombi-config",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-parser",
  "tombi-text",
  "tracing",
  "tracing-subscriber",
@@ -2262,7 +2240,6 @@ dependencies = [
  "assert_matches",
  "futures",
  "itertools",
- "parser",
  "pretty_assertions",
  "regex",
  "schema-store",
@@ -2276,11 +2253,34 @@ dependencies = [
  "tombi-config",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-parser",
  "tombi-text",
  "tombi-validator",
  "tracing",
  "tracing-subscriber",
  "url",
+]
+
+[[package]]
+name = "tombi-parser"
+version = "0.0.0"
+dependencies = [
+ "drop_bomb",
+ "itertools",
+ "pretty_assertions",
+ "rg-tree",
+ "rstest",
+ "syntax",
+ "textwrap",
+ "thiserror",
+ "tombi-ast",
+ "tombi-config",
+ "tombi-diagnostic",
+ "tombi-document-tree",
+ "tombi-lexer",
+ "tombi-text",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -2343,13 +2343,13 @@ dependencies = [
  "clap",
  "indexmap",
  "itertools",
- "parser",
  "pretty_assertions",
  "serde",
  "serde_json",
  "textwrap",
  "tombi-ast",
  "tombi-document-tree",
+ "tombi-parser",
  "tombi-text",
  "tombi-toml-version",
 ]

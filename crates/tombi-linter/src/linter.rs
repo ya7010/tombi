@@ -33,7 +33,7 @@ impl<'a> Linter<'a> {
     }
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        let (parsed, root) = parser::parsed_and_ast(source);
+        let (parsed, root) = tombi_parser::parsed_and_ast(source);
 
         let source_schema = match self
             .schema_store

@@ -85,10 +85,10 @@ impl<'de> Deserializer<'de> {
     where
         T: DeserializeOwned,
     {
-        let parsed = parser::parse(toml_text);
+        let parsed = tombi_parser::parse(toml_text);
         let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
         let toml_version = self.get_toml_version(&root).await?;
-        let errors: Vec<&parser::Error> = parsed.errors(toml_version).collect_vec();
+        let errors: Vec<&tombi_parser::Error> = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
         if !errors.is_empty() {
             return Err(crate::de::Error::Parser(

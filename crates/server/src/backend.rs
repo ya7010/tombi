@@ -74,7 +74,7 @@ impl Backend {
     }
 
     #[inline]
-    async fn get_parsed(&self, text_document_uri: &Url) -> Option<parser::Parsed<SyntaxNode>> {
+    async fn get_parsed(&self, text_document_uri: &Url) -> Option<tombi_parser::Parsed<SyntaxNode>> {
         let document_source = self.document_sources.read().await;
         let document_info = match document_source.get(text_document_uri) {
             Some(document_info) => document_info,
@@ -84,7 +84,7 @@ impl Backend {
             }
         };
 
-        Some(parser::parse(&document_info.source))
+        Some(tombi_parser::parse(&document_info.source))
     }
 
     #[inline]

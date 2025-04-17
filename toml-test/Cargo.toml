@@ -16,11 +16,11 @@ chrono = { workspace = true }
 clap = { workspace = true }
 indexmap = { workspace = true }
 itertools = { workspace = true }
-parser = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-document-tree = { workspace = true }
+tombi-parser = { workspace = true }
 tombi-text = { workspace = true }
 tombi-toml-version = { workspace = true }
 

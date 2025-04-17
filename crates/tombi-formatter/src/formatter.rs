@@ -2,9 +2,9 @@ pub mod definitions;
 
 use std::fmt::Write;
 
-use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use itertools::{Either, Itertools};
 use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
+use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use unicode_segmentation::UnicodeSegmentation;
 use url::Url;
 
@@ -45,7 +45,7 @@ impl<'a> Formatter<'a> {
 
     /// Format a TOML document and return the result as a string
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let (parsed, root) = parser::parsed_and_ast(source);
+        let (parsed, root) = tombi_parser::parsed_and_ast(source);
 
         let source_schema = self
             .schema_store
