@@ -33,53 +33,13 @@ impl<'a> Cursor<'a> {
     pub fn peek(&self, i: usize) -> char {
         assert!(i != 0, "peek(0) is invalid");
 
-        // `.next()` optimizes better than `.nth(0)`
-        self.chars
+        let peeked_char = self
+            .chars
             .clone()
             .nth(i.saturating_sub(1))
-            .unwrap_or(EOF_CHAR)
-    }
+            .unwrap_or(EOF_CHAR);
 
-    pub fn peek_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
-        let iter = self.chars.clone();
-        let mut s = String::new();
-        for c in iter {
-            if predicate(c) {
-                s.push(c);
-            } else {
-                break;
-            }
-        }
-        s
-    }
-
-    pub fn peeks(&self, size: usize) -> String {
-        assert!(size > 0);
-        let mut iter = self.chars.clone();
-        let mut s = String::with_capacity(size);
-        for _ in 0..size {
-            if let Some(c) = iter.next() {
-                s.push(c);
-            } else {
-                break;
-            }
-        }
-        s
-    }
-
-    pub fn peeks_with_current(&self, size: usize) -> String {
-        assert!(size > 0);
-        let mut iter = self.chars.clone();
-        let mut s = String::with_capacity(size + 1);
-        s.push(self.current_char);
-        for _ in 0..size - 1 {
-            if let Some(c) = iter.next() {
-                s.push(c);
-            } else {
-                break;
-            }
-        }
-        s
+        peeked_char
     }
 
     pub fn peek_with_current_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {
@@ -96,7 +56,7 @@ impl<'a> Cursor<'a> {
         s
     }
 
-    /// Checks if the charactor at the current position is a expected.
+    /// Checks if the character at the current position is expected.
     pub fn matches(&self, expected: &str) -> bool {
         let mut iter = expected.chars();
         if iter.next() != Some(self.current_char) {
@@ -139,8 +99,6 @@ impl<'a> Cursor<'a> {
 
     /// Eats symbols while predicate returns true or until the end of file is reached.
     pub(crate) fn eat_while(&mut self, mut predicate: impl FnMut(char) -> bool) {
-        // It was tried making optimized version of this for eg. line comments, but
-        // LLVM can inline all of this and compile it down to fast iteration over bytes.
         while predicate(self.peek(1)) && !self.is_eof() {
             self.bump();
         }
