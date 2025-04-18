@@ -1,15 +1,16 @@
 [package]
-name = "tombi-lexer"
+name = "tombi-json-lexer"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+repository.workspace = true
 license.workspace = true
 
 [dependencies]
 itertools = { workspace = true }
 regex = { workspace = true }
 thiserror = { workspace = true }
-tombi-syntax = { workspace = true }
+tombi-json-syntax = { path = "../tombi-json-syntax" }
 tombi-text = { workspace = true }
 tracing = { workspace = true }
 
@@ -17,4 +18,4 @@ tracing = { workspace = true }
 pretty_assertions = { workspace = true }
 rstest = { workspace = true }
 textwrap = { workspace = true }
-tombi-test-lib = { workspace = true }
+tombi-test-lib.workspace = true

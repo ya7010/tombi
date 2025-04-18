@@ -2118,6 +2118,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-json-lexer"
+version = "0.0.0"
+dependencies = [
+ "itertools",
+ "pretty_assertions",
+ "regex",
+ "rstest",
+ "textwrap",
+ "thiserror",
+ "tombi-json-syntax",
+ "tombi-test-lib",
+ "tombi-text",
+ "tracing",
+]
+
+[[package]]
+name = "tombi-json-syntax"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "tombi-rg-tree",
+]
+
+[[package]]
 name = "tombi-lexer"
 version = "0.0.0"
 dependencies = [
@@ -2128,6 +2152,7 @@ dependencies = [
  "textwrap",
  "thiserror",
  "tombi-syntax",
+ "tombi-test-lib",
  "tombi-text",
  "tracing",
 ]

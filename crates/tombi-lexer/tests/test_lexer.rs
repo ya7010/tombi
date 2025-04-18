@@ -1,6 +1,6 @@
 use itertools::Itertools;
-use tombi_syntax::SyntaxKind::*;
 use tombi_lexer::{tokenize, ErrorKind::*, Token};
+use tombi_syntax::SyntaxKind::*;
 
 macro_rules! test_tokens {
     {#[test]fn $name:ident($source:expr) -> [
@@ -8,6 +8,8 @@ macro_rules! test_tokens {
     ];} => {
         #[test]
         fn $name() {
+            tombi_test_lib::init_tracing();
+
             let tokens = tokenize($source).collect_vec();
             let (expected, _) = [
                 $(
