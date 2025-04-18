@@ -3,6 +3,15 @@ use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
 
+// Include modules
+mod macros;
+mod map;
+mod number;
+
+// Re-export types
+pub use map::Map;
+pub use number::Number;
+
 /// Enum representing a JSON value
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -10,14 +19,14 @@ pub enum Value {
     Null,
     /// Boolean value
     Bool(bool),
-    /// Number value (represented as a floating point)
-    Number(f64),
+    /// Number value
+    Number(Number),
     /// String value
     String(String),
     /// Array of values
     Array(Vec<Value>),
-    /// Object (using IndexMap)
-    Object(IndexMap<String, Value>),
+    /// Object (using Map)
+    Object(Map<String, Value>),
 }
 
 impl Value {
@@ -51,6 +60,22 @@ impl Value {
         matches!(self, Value::Object(_))
     }
 
+    /// Check if the value is an integer number
+    pub fn is_i64(&self) -> bool {
+        match self {
+            Value::Number(n) => n.is_i64(),
+            _ => false,
+        }
+    }
+
+    /// Check if the value is a floating point number
+    pub fn is_f64(&self) -> bool {
+        match self {
+            Value::Number(n) => n.is_f64(),
+            _ => false,
+        }
+    }
+
     /// Get as boolean value
     pub fn as_bool(&self) -> Option<bool> {
         match self {
@@ -59,10 +84,18 @@ impl Value {
         }
     }
 
-    /// Get as number value
+    /// Get as floating point number value
     pub fn as_f64(&self) -> Option<f64> {
         match self {
-            Value::Number(n) => Some(*n),
+            Value::Number(n) => n.as_f64(),
+            _ => None,
+        }
+    }
+
+    /// Get as integer number value
+    pub fn as_i64(&self) -> Option<i64> {
+        match self {
+            Value::Number(n) => n.as_i64(),
             _ => None,
         }
     }
@@ -92,7 +125,7 @@ impl Value {
     }
 
     /// Get as object reference
-    pub fn as_object(&self) -> Option<&IndexMap<String, Value>> {
+    pub fn as_object(&self) -> Option<&Map<String, Value>> {
         match self {
             Value::Object(o) => Some(o),
             _ => None,
@@ -100,7 +133,7 @@ impl Value {
     }
 
     /// Get as mutable object reference
-    pub fn as_object_mut(&mut self) -> Option<&mut IndexMap<String, Value>> {
+    pub fn as_object_mut(&mut self) -> Option<&mut Map<String, Value>> {
         match self {
             Value::Object(o) => Some(o),
             _ => None,
@@ -120,15 +153,69 @@ impl From<bool> for Value {
     }
 }
 
-impl From<f64> for Value {
-    fn from(f: f64) -> Self {
-        Value::Number(f)
+impl From<i8> for Value {
+    fn from(i: i8) -> Self {
+        Value::Number(i.into())
+    }
+}
+
+impl From<i16> for Value {
+    fn from(i: i16) -> Self {
+        Value::Number(i.into())
     }
 }
 
 impl From<i32> for Value {
     fn from(i: i32) -> Self {
-        Value::Number(i as f64)
+        Value::Number(i.into())
+    }
+}
+
+impl From<i64> for Value {
+    fn from(i: i64) -> Self {
+        Value::Number(i.into())
+    }
+}
+
+impl From<u8> for Value {
+    fn from(u: u8) -> Self {
+        Value::Number(u.into())
+    }
+}
+
+impl From<u16> for Value {
+    fn from(u: u16) -> Self {
+        Value::Number(u.into())
+    }
+}
+
+impl From<u32> for Value {
+    fn from(u: u32) -> Self {
+        Value::Number(u.into())
+    }
+}
+
+impl From<u64> for Value {
+    fn from(u: u64) -> Self {
+        Value::Number(u.into())
+    }
+}
+
+impl From<f32> for Value {
+    fn from(f: f32) -> Self {
+        Value::Number(f.into())
+    }
+}
+
+impl From<f64> for Value {
+    fn from(f: f64) -> Self {
+        Value::Number(f.into())
+    }
+}
+
+impl From<Number> for Value {
+    fn from(n: Number) -> Self {
+        Value::Number(n)
     }
 }
 
@@ -153,13 +240,31 @@ where
     }
 }
 
+impl<K, V> From<Map<K, V>> for Value
+where
+    K: Into<String> + Hash + Eq,
+    V: Into<Value>,
+{
+    fn from(m: Map<K, V>) -> Self {
+        let mut map = Map::new();
+        for (k, v) in m {
+            map.insert(k.into(), v.into());
+        }
+        Value::Object(map)
+    }
+}
+
 impl<K, V> From<IndexMap<K, V>> for Value
 where
     K: Into<String> + Hash + Eq,
     V: Into<Value>,
 {
     fn from(m: IndexMap<K, V>) -> Self {
-        Value::Object(m.into_iter().map(|(k, v)| (k.into(), v.into())).collect())
+        let mut map = Map::new();
+        for (k, v) in m {
+            map.insert(k.into(), v.into());
+        }
+        Value::Object(map)
     }
 }
 
@@ -169,11 +274,11 @@ where
     V: Into<Value>,
 {
     fn from(m: HashMap<K, V>) -> Self {
-        let mut index_map = IndexMap::with_capacity(m.len());
+        let mut map = Map::new();
         for (k, v) in m {
-            index_map.insert(k.into(), v.into());
+            map.insert(k.into(), v.into());
         }
-        Value::Object(index_map)
+        Value::Object(map)
     }
 }
 
@@ -199,7 +304,7 @@ impl fmt::Display for Value {
             Value::Object(o) => {
                 write!(f, "{{")?;
                 let mut first = true;
-                for (key, value) in o {
+                for (key, value) in o.iter() {
                     if !first {
                         write!(f, ", ")?;
                     }
@@ -221,7 +326,7 @@ impl serde::Serialize for Value {
         match self {
             Value::Null => serializer.serialize_unit(),
             Value::Bool(b) => serializer.serialize_bool(*b),
-            Value::Number(n) => serializer.serialize_f64(*n),
+            Value::Number(n) => n.serialize(serializer),
             Value::String(s) => serializer.serialize_str(s),
             Value::Array(a) => a.serialize(serializer),
             Value::Object(o) => o.serialize(serializer),
@@ -249,15 +354,15 @@ impl<'de> serde::Deserialize<'de> for Value {
             }
 
             fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E> {
-                Ok(Value::Number(v as f64))
+                Ok(Value::Number(v.into()))
             }
 
             fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E> {
-                Ok(Value::Number(v as f64))
+                Ok(Value::Number(v.into()))
             }
 
             fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E> {
-                Ok(Value::Number(v))
+                Ok(Value::Number(v.into()))
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -294,7 +399,7 @@ impl<'de> serde::Deserialize<'de> for Value {
             where
                 A: serde::de::MapAccess<'de>,
             {
-                let mut obj = IndexMap::new();
+                let mut obj = Map::new();
                 while let Some((key, value)) = map.next_entry()? {
                     obj.insert(key, value);
                 }

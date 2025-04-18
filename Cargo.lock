@@ -2178,7 +2178,6 @@ dependencies = [
 name = "tombi-json-tree"
 version = "0.0.0"
 dependencies = [
- "indexmap",
  "tombi-json-value",
  "tombi-text",
 ]

@@ -7,6 +7,5 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-indexmap = { workspace = true }
 tombi-json-value = { workspace = true }
 tombi-text = { workspace = true }

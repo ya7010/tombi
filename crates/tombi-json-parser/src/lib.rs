@@ -1,11 +1,10 @@
 mod error;
 
 pub use error::Error;
-use indexmap::IndexMap;
 use tombi_json_lexer::{lex, Lexed, Token};
 use tombi_json_syntax::{SyntaxKind, T};
 use tombi_json_tree::{ArrayNode, ObjectNode, Tree, ValueNode};
-use tombi_json_value::Value;
+use tombi_json_value::{Map, Number, Value};
 use tombi_text::Range;
 
 /// Parser for JSON documents
@@ -105,7 +104,7 @@ impl<'a> Parser<'a> {
 
                         // Parse as f64
                         match num_str.parse::<f64>() {
-                            Ok(n) => Ok(ValueNode::new(Value::Number(n), range)),
+                            Ok(n) => Ok(ValueNode::new(Value::Number(Number::from_f64(n)), range)),
                             Err(_) => Err(Error::InvalidValue),
                         }
                     }
@@ -200,15 +199,14 @@ impl<'a> Parser<'a> {
         // Consume the opening brace
         let open_token = self.expect(T!['{'])?;
         let start_range = open_token.range();
-        let mut properties = IndexMap::new();
-        let mut key_ranges = IndexMap::new();
+        let mut properties = Map::new();
 
         // Check if the object is empty
         if let Some(token) = self.peek() {
             if token.kind() == T!['}'] {
                 let close_token = self.advance().unwrap();
                 let full_range = Range::new(start_range.start(), close_token.range().end());
-                return Ok(ValueNode::new(Value::Object(IndexMap::new()), full_range));
+                return Ok(ValueNode::new(Value::Object(Map::new()), full_range));
             }
         }
 
@@ -226,7 +224,6 @@ impl<'a> Parser<'a> {
                 return Err(Error::UnexpectedEof);
             }
 
-            let key_range = self.peek().unwrap().range();
             let key = self.parse_string()?;
 
             // Check for duplicate keys
@@ -241,7 +238,6 @@ impl<'a> Parser<'a> {
             let value = self.parse_value()?;
 
             // Store key and value
-            key_ranges.insert(key.clone(), key_range);
             properties.insert(key, value);
 
             // Check for comma or closing brace
@@ -255,7 +251,6 @@ impl<'a> Parser<'a> {
 
                     let object_node = ObjectNode {
                         properties,
-                        key_ranges,
                         range: full_range,
                     };
 
@@ -277,7 +272,6 @@ impl<'a> Parser<'a> {
 
                     let object_node = ObjectNode {
                         properties,
-                        key_ranges,
                         range: full_range,
                     };
 

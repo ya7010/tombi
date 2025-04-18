@@ -1,5 +1,4 @@
-use indexmap::IndexMap;
-use tombi_json_value::Value;
+use tombi_json_value::{Map, Value};
 use tombi_text::Range;
 
 /// A struct representing a JSON tree with source position information
@@ -31,9 +30,7 @@ pub struct ArrayNode {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ObjectNode {
     /// The object properties
-    pub properties: IndexMap<String, ValueNode>,
-    /// The position of each key in the source code
-    pub key_ranges: IndexMap<String, Range>,
+    pub properties: Map<String, ValueNode>,
     /// The position of the entire object in the source code
     pub range: Range,
 }
@@ -84,6 +81,11 @@ impl ValueNode {
         self.value.as_f64()
     }
 
+    /// Get as integer number value
+    pub fn as_i64(&self) -> Option<i64> {
+        self.value.as_i64()
+    }
+
     /// Get as string reference
     pub fn as_str(&self) -> Option<&str> {
         self.value.as_str()
@@ -119,7 +121,7 @@ impl From<&ArrayNode> for Value {
 impl From<ObjectNode> for Value {
     fn from(node: ObjectNode) -> Self {
         // Use IndexMap as an intermediate step
-        let mut map = IndexMap::new();
+        let mut map = Map::new();
         for (key, value_node) in node.properties {
             map.insert(key, Value::from(value_node));
         }
@@ -131,7 +133,7 @@ impl From<ObjectNode> for Value {
 impl From<&ObjectNode> for Value {
     fn from(node: &ObjectNode) -> Self {
         // Use IndexMap as an intermediate step
-        let mut map = IndexMap::new();
+        let mut map = Map::new();
         for (key, value_node) in &node.properties {
             map.insert(key.clone(), Value::from(value_node));
         }
@@ -162,6 +164,7 @@ impl From<&Tree> for Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tombi_json_value::Number;
     use tombi_text::Position;
 
     #[test]
@@ -176,9 +179,9 @@ mod tests {
         assert!(bool_node.is_bool());
         assert_eq!(bool_node.as_bool(), Some(true));
 
-        let number_node = ValueNode::new(Value::Number(42.0), range);
+        let number_node = ValueNode::new(Value::Number(Number::from_i64(42)), range);
         assert!(number_node.is_number());
-        assert_eq!(number_node.as_f64(), Some(42.0));
+        assert_eq!(number_node.as_i64(), Some(42));
 
         let string_node = ValueNode::new(Value::String("test".to_string()), range);
         assert!(string_node.is_string());
@@ -203,9 +206,9 @@ mod tests {
         let range = Range::at(pos);
 
         let items = vec![
-            ValueNode::new(Value::Number(1.0), range),
-            ValueNode::new(Value::Number(2.0), range),
-            ValueNode::new(Value::Number(3.0), range),
+            ValueNode::new(Value::Number(Number::from_f64(1.0)), range),
+            ValueNode::new(Value::Number(Number::from_f64(2.0)), range),
+            ValueNode::new(Value::Number(Number::from_f64(3.0)), range),
         ];
 
         let array_node = ArrayNode { items, range };
@@ -214,9 +217,9 @@ mod tests {
         assert!(value.is_array());
         let array = value.as_array().unwrap();
         assert_eq!(array.len(), 3);
-        assert_eq!(array[0], Value::Number(1.0));
-        assert_eq!(array[1], Value::Number(2.0));
-        assert_eq!(array[2], Value::Number(3.0));
+        assert_eq!(array[0], Value::Number(Number::from_f64(1.0)));
+        assert_eq!(array[1], Value::Number(Number::from_f64(2.0)));
+        assert_eq!(array[2], Value::Number(Number::from_f64(3.0)));
     }
 
     #[test]
@@ -224,23 +227,23 @@ mod tests {
         let pos = Position::new(1, 1);
         let range = Range::at(pos);
 
-        let mut properties = IndexMap::new();
-        properties.insert("a".to_string(), ValueNode::new(Value::Number(1.0), range));
-        properties.insert("b".to_string(), ValueNode::new(Value::Number(2.0), range));
+        let mut properties = Map::new();
+        properties.insert(
+            "a".to_string(),
+            ValueNode::new(Value::Number(Number::from_f64(1.0)), range),
+        );
+        properties.insert(
+            "b".to_string(),
+            ValueNode::new(Value::Number(Number::from_f64(2.0)), range),
+        );
 
-        let key_ranges = properties.keys().map(|k| (k.clone(), range)).collect();
-
-        let object_node = ObjectNode {
-            properties,
-            key_ranges,
-            range,
-        };
+        let object_node = ObjectNode { properties, range };
         let value: Value = object_node.into();
 
         assert!(value.is_object());
         let obj = value.as_object().unwrap();
         assert_eq!(obj.len(), 2);
-        assert_eq!(obj.get("a").unwrap(), &Value::Number(1.0));
-        assert_eq!(obj.get("b").unwrap(), &Value::Number(2.0));
+        assert_eq!(obj.get("a").unwrap(), &Value::Number(Number::from_f64(1.0)));
+        assert_eq!(obj.get("b").unwrap(), &Value::Number(Number::from_f64(2.0)));
     }
 }
