@@ -238,7 +238,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 2.0.3",
 ]
 
 [[package]]
@@ -1206,7 +1206,7 @@ dependencies = [
  "rustc-hash",
  "rustls",
  "socket2",
- "thiserror",
+ "thiserror 2.0.3",
  "tokio",
  "tracing",
 ]
@@ -1225,7 +1225,7 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "slab",
- "thiserror",
+ "thiserror 2.0.3",
  "tinyvec",
  "tracing",
  "web-time",
@@ -1642,7 +1642,7 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "textwrap",
- "thiserror",
+ "thiserror 2.0.3",
  "tokio",
  "tombi-ast",
  "tombi-config",
@@ -1808,11 +1808,31 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
+version = "1.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
+dependencies = [
+ "thiserror-impl 1.0.69",
+]
+
+[[package]]
+name = "thiserror"
 version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c006c85c7651b3cf2ada4584faa36773bd07bac24acfb39f3c431b36d7e667aa"
 dependencies = [
- "thiserror-impl",
+ "thiserror-impl 2.0.3",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -1939,7 +1959,7 @@ name = "tombi-ast"
 version = "0.0.0"
 dependencies = [
  "itertools",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-syntax",
  "tombi-text",
  "tombi-toml-text",
@@ -1957,7 +1977,7 @@ dependencies = [
  "indexmap",
  "itertools",
  "regex",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-ast",
  "tombi-document-tree",
  "tombi-parser",
@@ -1988,7 +2008,7 @@ dependencies = [
  "itertools",
  "nu-ansi-term 0.50.1",
  "serde_tombi",
- "thiserror",
+ "thiserror 2.0.3",
  "tokio",
  "tombi-config",
  "tombi-diagnostic",
@@ -2009,7 +2029,7 @@ dependencies = [
  "clap",
  "schemars",
  "serde",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-toml-version",
  "tombi-x-keyword",
  "tracing",
@@ -2025,7 +2045,7 @@ dependencies = [
  "rstest",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 2.0.3",
  "tracing",
 ]
 
@@ -2037,7 +2057,7 @@ dependencies = [
  "clap-verbosity-flag",
  "nu-ansi-term 0.50.1",
  "serde",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-text",
  "tower-lsp",
  "tracing",
@@ -2055,7 +2075,7 @@ dependencies = [
  "serde",
  "serde_json",
  "textwrap",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-ast",
  "tombi-date-time",
  "tombi-document-tree",
@@ -2075,7 +2095,7 @@ dependencies = [
  "chrono",
  "indexmap",
  "itertools",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-ast",
  "tombi-date-time",
  "tombi-diagnostic",
@@ -2126,11 +2146,24 @@ dependencies = [
  "regex",
  "rstest",
  "textwrap",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-json-syntax",
  "tombi-test-lib",
  "tombi-text",
  "tracing",
+]
+
+[[package]]
+name = "tombi-json-parser"
+version = "0.0.0"
+dependencies = [
+ "indexmap",
+ "thiserror 1.0.69",
+ "tombi-json-lexer",
+ "tombi-json-syntax",
+ "tombi-json-tree",
+ "tombi-json-value",
+ "tombi-text",
 ]
 
 [[package]]
@@ -2139,6 +2172,14 @@ version = "0.0.0"
 dependencies = [
  "pretty_assertions",
  "tombi-rg-tree",
+]
+
+[[package]]
+name = "tombi-json-tree"
+version = "0.0.0"
+dependencies = [
+ "tombi-json-value",
+ "tombi-text",
 ]
 
 [[package]]
@@ -2158,7 +2199,7 @@ dependencies = [
  "regex",
  "rstest",
  "textwrap",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-syntax",
  "tombi-test-lib",
  "tombi-text",
@@ -2176,7 +2217,7 @@ dependencies = [
  "regex",
  "schemars",
  "serde",
- "thiserror",
+ "thiserror 2.0.3",
  "tokio",
  "tombi-ast",
  "tombi-config",
@@ -2202,7 +2243,7 @@ dependencies = [
  "pretty_assertions",
  "rstest",
  "textwrap",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-ast",
  "tombi-config",
  "tombi-diagnostic",
@@ -2241,7 +2282,7 @@ dependencies = [
  "rstest",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 2.0.3",
  "tokio",
  "tombi-ast",
  "tombi-config",
@@ -2276,7 +2317,7 @@ dependencies = [
  "serde_tombi",
  "tempfile",
  "textwrap",
- "thiserror",
+ "thiserror 2.0.3",
  "tokio",
  "tombi-ast",
  "tombi-config",
@@ -2302,7 +2343,7 @@ name = "tombi-syntax"
 version = "0.0.0"
 dependencies = [
  "rstest",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-rg-tree",
  "tombi-text",
 ]
@@ -2330,7 +2371,7 @@ dependencies = [
 name = "tombi-toml-text"
 version = "0.0.0"
 dependencies = [
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-toml-version",
 ]
 
@@ -2350,7 +2391,7 @@ dependencies = [
  "futures",
  "itertools",
  "regex",
- "thiserror",
+ "thiserror 2.0.3",
  "tombi-diagnostic",
  "tombi-document-tree",
  "tombi-schema-store",
@@ -2934,7 +2975,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
- "thiserror",
+ "thiserror 2.0.3",
  "time",
  "tombi-config",
  "ungrammar",
@@ -3055,7 +3096,7 @@ dependencies = [
  "flate2",
  "indexmap",
  "memchr",
- "thiserror",
+ "thiserror 2.0.3",
  "time",
  "zopfli",
 ]

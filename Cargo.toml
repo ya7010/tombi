@@ -58,6 +58,8 @@ tombi-extension = { path = "crates/tombi-extension" }
 tombi-formatter = { path = "crates/tombi-formatter" }
 tombi-json-lexer = { path = "crates/tombi-json-lexer" }
 tombi-json-parser = { path = "crates/tombi-json-parser" }
+tombi-json-tree = { path = "crates/tombi-json-tree" }
+tombi-json-value = { path = "crates/tombi-json-value" }
 tombi-lexer = { path = "crates/tombi-lexer" }
 tombi-linter = { path = "crates/tombi-linter" }
 tombi-parser = { path = "crates/tombi-parser" }
