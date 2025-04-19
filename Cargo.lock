@@ -2138,6 +2138,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-json"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "tombi-json-parser",
+ "tombi-json-tree",
+ "tombi-json-value",
+]
+
+[[package]]
 name = "tombi-json-lexer"
 version = "0.0.0"
 dependencies = [

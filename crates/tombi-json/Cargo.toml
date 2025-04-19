@@ -1,0 +1,13 @@
+[package]
+name = "tombi-json"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+tombi-json-parser = { workspace = true }
+tombi-json-tree = { workspace = true }
+tombi-json-value = { workspace = true }
