@@ -2,6 +2,7 @@
 pub struct IntegerSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub minimum: Option<i64>,
     pub maximum: Option<i64>,
     pub exclusive_minimum: Option<i64>,
@@ -32,6 +33,7 @@ impl IntegerSchema {
                 .map(|v| v.items.iter().filter_map(|v| v.as_i64()).collect()),
             default: object.get("default").and_then(|v| v.as_i64()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            range: object.range,
         }
     }
 

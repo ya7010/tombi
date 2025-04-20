@@ -2,6 +2,7 @@
 pub struct LocalDateTimeSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub enumerate: Option<Vec<String>>,
     pub default: Option<String>,
     pub deprecated: Option<bool>,
@@ -27,6 +28,7 @@ impl LocalDateTimeSchema {
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            range: object.range,
         }
     }
 

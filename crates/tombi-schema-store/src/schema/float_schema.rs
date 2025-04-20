@@ -2,6 +2,7 @@
 pub struct FloatSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub minimum: Option<f64>,
     pub maximum: Option<f64>,
     pub exclusive_minimum: Option<f64>,
@@ -32,6 +33,7 @@ impl FloatSchema {
                 .map(|v| v.items.iter().filter_map(|v| v.as_f64()).collect()),
             default: object.get("default").and_then(|v| v.as_f64()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            range: object.range,
         }
     }
 

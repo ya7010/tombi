@@ -254,6 +254,25 @@ impl ValueSchema {
         }
     }
 
+    pub fn range(&self) -> tombi_text::Range {
+        match self {
+            ValueSchema::Null => tombi_text::Range::default(),
+            ValueSchema::Boolean(schema) => schema.range,
+            ValueSchema::Integer(schema) => schema.range,
+            ValueSchema::Float(schema) => schema.range,
+            ValueSchema::String(schema) => schema.range,
+            ValueSchema::LocalDate(schema) => schema.range,
+            ValueSchema::LocalDateTime(schema) => schema.range,
+            ValueSchema::LocalTime(schema) => schema.range,
+            ValueSchema::OffsetDateTime(schema) => schema.range,
+            ValueSchema::Array(schema) => schema.range,
+            ValueSchema::Table(schema) => schema.range,
+            ValueSchema::OneOf(schema) => schema.range,
+            ValueSchema::AnyOf(schema) => schema.range,
+            ValueSchema::AllOf(schema) => schema.range,
+        }
+    }
+
     pub fn match_flattened_schemas<'a: 'b, 'b, T: Fn(&ValueSchema) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,

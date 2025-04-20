@@ -44,14 +44,7 @@ pub struct TypeDefinition {
 }
 
 impl TypeDefinition {
-    pub fn new(schema_url: SchemaUrl) -> Self {
-        Self {
-            schema_url,
-            range: tombi_text::Range::default(),
-        }
-    }
-
-    pub fn with_range(schema_url: SchemaUrl, range: tombi_text::Range) -> Self {
+    pub fn new(schema_url: SchemaUrl, range: tombi_text::Range) -> Self {
         Self { schema_url, range }
     }
 }

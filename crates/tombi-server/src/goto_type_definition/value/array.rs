@@ -185,9 +185,11 @@ impl GetTypeDefinition for ArraySchema {
         _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
-            current_schema.map(|schema| TypeDefinition {
-                schema_url: schema.schema_url.as_ref().clone(),
-                range: tombi_text::Range::default(),
+            current_schema.map(|schema| {
+                TypeDefinition::new(
+                    schema.schema_url.as_ref().clone(),
+                    schema.value_schema.range(),
+                )
             })
         }
         .boxed()

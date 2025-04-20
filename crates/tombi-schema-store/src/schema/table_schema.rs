@@ -16,6 +16,7 @@ use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
 pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub properties: SchemaProperties,
     pub pattern_properties: Option<SchemaPatternProperties>,
     additional_properties: Option<bool>,
@@ -102,6 +103,7 @@ impl TableSchema {
             description: object_node
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
+            range: object_node.range,
             properties: Arc::new(properties.into()),
             pattern_properties: pattern_properties.map(|props| {
                 let converted_props = props

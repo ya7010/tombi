@@ -2,6 +2,7 @@
 pub struct StringSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub min_length: Option<usize>,
     pub max_length: Option<usize>,
     pub pattern: Option<String>,
@@ -19,6 +20,7 @@ impl StringSchema {
             description: object
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
+            range: object.range,
             min_length: object
                 .get("minLength")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),

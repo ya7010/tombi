@@ -94,9 +94,12 @@ impl GetTypeDefinition for tombi_schema_store::IntegerSchema {
         _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
-            current_schema
-                .map(|schema| schema.schema_url.as_ref().clone())
-                .map(TypeDefinition::new)
+            current_schema.map(|schema| {
+                TypeDefinition::new(
+                    schema.schema_url.as_ref().clone(),
+                    schema.value_schema.range(),
+                )
+            })
         }
         .boxed()
     }

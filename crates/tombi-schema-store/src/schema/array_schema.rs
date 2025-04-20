@@ -13,6 +13,7 @@ use crate::{Accessor, SchemaStore};
 pub struct ArraySchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub items: Option<SchemaItemTokio>,
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
@@ -43,29 +44,29 @@ impl ArraySchema {
                 .get("maxItems")
                 .and_then(|v| v.as_u64().map(|n| n as usize)),
             unique_items: object.get("uniqueItems").and_then(|v| v.as_bool()),
-            values_order: match object
+            values_order: object
                 .get(X_TOMBI_ARRAY_VALUES_ORDER)
                 // NOTE: support old name
                 .or_else(|| object.get("x-tombi-array-values-order-by"))
-            {
-                Some(tombi_json::ValueNode::String(order)) => match order.value.as_str() {
-                    "ascending" => Some(ArrayValuesOrder::Ascending),
-                    "descending" => Some(ArrayValuesOrder::Descending),
+                .and_then(|order| match order {
+                    tombi_json::ValueNode::String(str) => match str.value.as_str() {
+                        "ascending" => Some(ArrayValuesOrder::Ascending),
+                        "descending" => Some(ArrayValuesOrder::Descending),
+                        _ => {
+                            tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}", str.value);
+                            None
+                        }
+                    },
                     _ => {
-                        tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}", order.value);
+                        tracing::error!(
+                            "invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}",
+                            order.to_string()
+                        );
                         None
                     }
-                },
-                Some(order) => {
-                    tracing::error!(
-                        "invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}",
-                        order.to_string()
-                    );
-                    None
-                }
-                None => None,
-            },
+                }),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            range: object.range,
         }
     }
 
