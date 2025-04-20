@@ -2129,6 +2129,7 @@ dependencies = [
  "tombi-json-syntax",
  "tombi-json-value",
  "tombi-text",
+ "tracing",
 ]
 
 [[package]]
@@ -2161,6 +2162,7 @@ version = "0.0.0"
 dependencies = [
  "indexmap",
  "serde",
+ "tracing",
 ]
 
 [[package]]

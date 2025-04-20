@@ -9,6 +9,7 @@ license.workspace = true
 [dependencies]
 indexmap = { workspace = true }
 serde = { workspace = true, optional = true }
+tracing = { workspace = true }
 
 [features]
 default = ["serde"]
