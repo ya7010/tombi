@@ -1,9 +1,12 @@
 pub use tombi_json_parser::{parse, Error as ParserError};
+use tombi_json_tree::StringNode;
 pub use tombi_json_tree::{ArrayNode, ObjectNode, Tree, ValueNode};
 pub use tombi_json_value::{Map, Number, Value};
+pub use tombi_text::Range;
 
 use serde::de::{
-    self, DeserializeOwned, Deserializer as SerdeDeserializer, MapAccess, SeqAccess, Visitor,
+    self, DeserializeOwned, Deserializer as SerdeDeserializer, IntoDeserializer, MapAccess,
+    SeqAccess, Visitor,
 };
 use std::fmt;
 use std::marker::PhantomData;
@@ -40,69 +43,57 @@ impl From<ParserError> for Error {
     }
 }
 
-/// Deserializer for JSON data
-pub struct Deserializer {
-    // Private fields can be added if needed
-}
-
-impl Deserializer {
-    /// Creates a new JSON deserializer
-    pub fn new() -> Self {
-        Deserializer {}
-    }
-
-    /// Deserialize a JSON string into a Value
-    pub fn from_str(s: &str) -> Result<Value, ParserError> {
-        // Parse the JSON string into a Tree
-        let tree = parse(s)?;
-
-        // Convert the Tree to a Value
-        Ok(tree.into())
-    }
+/// Deserialize an instance of type Tree from a string of JSON text
+pub fn from_str(s: &str) -> Result<Tree, ParserError> {
+    parse(s)
 }
 
 /// Deserialize an instance of type Value from a string of JSON text
-pub fn from_str(s: &str) -> Result<Value, ParserError> {
-    Deserializer::from_str(s)
+pub fn from_str_value(s: &str) -> Result<Value, ParserError> {
+    // Parse the JSON string into a Tree
+    let tree = parse(s)?;
+
+    // Convert the Tree to a Value
+    Ok(tree.into())
 }
 
-// ValueDeserializer that implements serde::Deserializer
-pub struct ValueDeserializer<'de> {
-    value: Value,
+// TreeDeserializer that implements serde::Deserializer
+pub struct ValueNodeDeserializer<'de> {
+    node: ValueNode,
     _marker: PhantomData<&'de ()>,
 }
 
-impl<'de> ValueDeserializer<'de> {
-    pub fn new(value: Value) -> Self {
-        ValueDeserializer {
-            value,
+impl<'de> ValueNodeDeserializer<'de> {
+    pub fn new(node: ValueNode) -> Self {
+        ValueNodeDeserializer {
+            node,
             _marker: PhantomData,
         }
     }
 }
 
-impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
+impl<'de> SerdeDeserializer<'de> for ValueNodeDeserializer<'de> {
     type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Null => visitor.visit_unit(),
-            Value::Bool(b) => visitor.visit_bool(b),
-            Value::Number(n) => {
-                if let Some(i) = n.as_i64() {
+        match &self.node {
+            ValueNode::Null(_) => visitor.visit_unit(),
+            ValueNode::Bool(node) => visitor.visit_bool(node.value),
+            ValueNode::Number(node) => {
+                if let Some(i) = node.value.as_i64() {
                     visitor.visit_i64(i)
-                } else if let Some(f) = n.as_f64() {
+                } else if let Some(f) = node.value.as_f64() {
                     visitor.visit_f64(f)
                 } else {
                     Err(Error::Custom("invalid number value".to_string()))
                 }
             }
-            Value::String(s) => visitor.visit_string(s),
-            Value::Array(_) => self.deserialize_seq(visitor),
-            Value::Object(_) => self.deserialize_map(visitor),
+            ValueNode::String(node) => visitor.visit_string(node.value.clone()),
+            ValueNode::Array(_) => self.deserialize_seq(visitor),
+            ValueNode::Object(_) => self.deserialize_map(visitor),
         }
     }
 
@@ -110,11 +101,11 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Bool(b) => visitor.visit_bool(b),
+        match &self.node {
+            ValueNode::Bool(node) => visitor.visit_bool(node.value),
             _ => Err(Error::Custom(format!(
                 "invalid type: expected bool, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -144,22 +135,22 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Number(ref n) => {
-                if let Some(i) = n.as_i64() {
+        match &self.node {
+            ValueNode::Number(ref n) => {
+                if let Some(i) = n.value.as_i64() {
                     visitor.visit_i64(i)
-                } else if let Some(f) = n.as_f64() {
+                } else if let Some(f) = n.value.as_f64() {
                     visitor.visit_i64(f as i64)
                 } else {
                     Err(Error::Custom(format!(
                         "invalid type: expected i64, found {:?}",
-                        self.value
+                        self.node
                     )))
                 }
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected i64, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -189,9 +180,9 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Number(ref n) => {
-                if let Some(i) = n.as_i64() {
+        match &self.node {
+            ValueNode::Number(ref n) => {
+                if let Some(i) = n.value.as_i64() {
                     if i >= 0 {
                         visitor.visit_u64(i as u64)
                     } else {
@@ -200,7 +191,7 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
                             i
                         )))
                     }
-                } else if let Some(f) = n.as_f64() {
+                } else if let Some(f) = n.value.as_f64() {
                     if f >= 0.0 {
                         visitor.visit_u64(f as u64)
                     } else {
@@ -212,13 +203,13 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
                 } else {
                     Err(Error::Custom(format!(
                         "invalid type: expected u64, found {:?}",
-                        self.value
+                        self.node
                     )))
                 }
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected u64, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -234,22 +225,22 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Number(ref n) => {
-                if let Some(f) = n.as_f64() {
+        match &self.node {
+            ValueNode::Number(ref n) => {
+                if let Some(f) = n.value.as_f64() {
                     visitor.visit_f64(f)
-                } else if let Some(i) = n.as_i64() {
+                } else if let Some(i) = n.value.as_i64() {
                     visitor.visit_f64(i as f64)
                 } else {
                     Err(Error::Custom(format!(
                         "invalid type: expected f64, found {:?}",
-                        self.value
+                        self.node
                     )))
                 }
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected f64, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -258,20 +249,20 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::String(ref s) => {
-                let mut chars = s.chars();
+        match &self.node {
+            ValueNode::String(ref s) => {
+                let mut chars = s.value.chars();
                 match (chars.next(), chars.next()) {
                     (Some(c), None) => visitor.visit_char(c),
                     _ => Err(Error::Custom(format!(
                         "invalid value: expected single character string, found {:?}",
-                        self.value
+                        self.node
                     ))),
                 }
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected char, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -280,11 +271,11 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::String(s) => visitor.visit_string(s),
+        match &self.node {
+            ValueNode::String(s) => visitor.visit_string(s.value.clone()),
             _ => Err(Error::Custom(format!(
                 "invalid type: expected string, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -300,13 +291,13 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Array(arr) => {
+        match &self.node {
+            ValueNode::Array(arr) => {
                 let mut bytes = Vec::with_capacity(arr.len());
-                for item in arr {
+                for item in &arr.items {
                     match item {
-                        Value::Number(n) => {
-                            if let Some(i) = n.as_i64() {
+                        ValueNode::Number(n) => {
+                            if let Some(i) = n.value.as_i64() {
                                 if i >= 0 && i <= 255 {
                                     bytes.push(i as u8);
                                 } else {
@@ -332,10 +323,10 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
                 }
                 visitor.visit_bytes(&bytes)
             }
-            Value::String(s) => visitor.visit_bytes(s.as_bytes()),
+            ValueNode::String(s) => visitor.visit_bytes(s.value.as_bytes()),
             _ => Err(Error::Custom(format!(
                 "invalid type: expected array or string, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -351,8 +342,8 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Null => visitor.visit_none(),
+        match self.node {
+            ValueNode::Null(_) => visitor.visit_none(),
             _ => visitor.visit_some(self),
         }
     }
@@ -361,11 +352,11 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Null => visitor.visit_unit(),
+        match self.node {
+            ValueNode::Null(_) => visitor.visit_unit(),
             _ => Err(Error::Custom(format!(
                 "invalid type: expected null, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -396,14 +387,19 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Array(arr) => {
-                let seq_access = ValueSeqAccess::new(arr);
+        match self.node {
+            ValueNode::Array(array) => {
+                let mut items = Vec::new();
+                for value_node in array.items.iter() {
+                    items.push(value_node.clone());
+                }
+
+                let seq_access = ValueSeqAccess { items, index: 0 };
                 visitor.visit_seq(seq_access)
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected array, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -431,14 +427,18 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::Object(map) => {
-                let map_access = ValueMapAccess::new(map);
+        match self.node {
+            ValueNode::Object(object_node) => {
+                let map_access = TreeMapAccess {
+                    properties: object_node.properties.into_iter(),
+                    key: None,
+                    value: None,
+                };
                 visitor.visit_map(map_access)
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected object, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -464,18 +464,23 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Value::String(ref s) => visitor.visit_enum(ValueEnumAccess::new(s.clone(), None)),
-            Value::Object(mut obj) if obj.len() == 1 => {
-                let (variant, value) = obj
-                    .into_iter()
-                    .next()
-                    .expect("Object with length 1 has no entries");
-                visitor.visit_enum(ValueEnumAccess::new(variant, Some(value)))
+        match self.node {
+            ValueNode::String(s) => visitor.visit_enum(TreeEnumAccess::new(s.value, None)),
+            ValueNode::Object(obj) if obj.len() == 1 => {
+                let Some((variant, value_node)) = obj.properties.into_iter().next() else {
+                    return Err(Error::Custom(
+                        "invalid type: expected enum, found object with no properties".to_string(),
+                    ));
+                };
+
+                visitor.visit_enum(TreeEnumAccess {
+                    variant: variant.value,
+                    value: Some(value_node),
+                })
             }
             _ => Err(Error::Custom(format!(
                 "invalid type: expected string or map with single key, found {:?}",
-                self.value
+                self.node
             ))),
         }
     }
@@ -495,16 +500,9 @@ impl<'de> SerdeDeserializer<'de> for ValueDeserializer<'de> {
     }
 }
 
-// 配列アクセス用のヘルパー構造体
 struct ValueSeqAccess {
-    elements: Vec<Value>,
+    items: Vec<ValueNode>,
     index: usize,
-}
-
-impl ValueSeqAccess {
-    fn new(elements: Vec<Value>) -> Self {
-        ValueSeqAccess { elements, index: 0 }
-    }
 }
 
 impl<'de> SeqAccess<'de> for ValueSeqAccess {
@@ -514,104 +512,90 @@ impl<'de> SeqAccess<'de> for ValueSeqAccess {
     where
         T: de::DeserializeSeed<'de>,
     {
-        if self.index >= self.elements.len() {
+        if self.index >= self.items.len() {
             return Ok(None);
         }
 
-        let value = self.elements.remove(self.index);
-        seed.deserialize(ValueDeserializer::new(value)).map(Some)
+        let node = self.items[self.index].clone();
+        self.index += 1;
+
+        seed.deserialize(ValueNodeDeserializer::new(node)).map(Some)
     }
 }
 
 // マップアクセス用のヘルパー構造体
-struct ValueMapAccess {
-    map: Map<String, Value>,
-    keys: Vec<String>,
-    index: usize,
+struct TreeMapAccess {
+    properties: indexmap::map::IntoIter<StringNode, ValueNode>,
+    key: Option<String>,
+    value: Option<ValueNode>,
 }
 
-impl ValueMapAccess {
-    fn new(map: Map<String, Value>) -> Self {
-        let keys: Vec<String> = map.keys().cloned().collect();
-        ValueMapAccess {
-            map,
-            keys,
-            index: 0,
-        }
-    }
-}
-
-impl<'de> MapAccess<'de> for ValueMapAccess {
+impl<'de> MapAccess<'de> for TreeMapAccess {
     type Error = Error;
 
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
     where
         K: de::DeserializeSeed<'de>,
     {
-        if self.index >= self.keys.len() {
-            return Ok(None);
-        }
+        if let Some((key, value)) = self.properties.next() {
+            self.key = Some(key.value.clone());
+            let key = seed.deserialize(ValueNodeDeserializer::new(ValueNode::String(key)))?;
+            self.value = Some(value);
 
-        let key = self.keys[self.index].clone();
-        seed.deserialize(ValueDeserializer::new(Value::String(key)))
-            .map(Some)
+            Ok(Some(key))
+        } else {
+            Ok(None)
+        }
     }
 
     fn next_value_seed<V>(&mut self, seed: V) -> Result<V::Value, Self::Error>
     where
         V: de::DeserializeSeed<'de>,
     {
-        let key = &self.keys[self.index];
-        self.index += 1;
-
-        if let Some(value) = self.map.get(key) {
-            let value = value.clone();
-            seed.deserialize(ValueDeserializer::new(value))
+        if let Some(value_node) = std::mem::replace(&mut self.value, None) {
+            seed.deserialize(ValueNodeDeserializer::new(value_node))
         } else {
-            Err(Error::Custom(format!("no value for key: {}", key)))
+            Err(Error::Custom(format!("no value for key: {:?}", self.key)))
         }
     }
 }
 
 // 列挙型アクセス用のヘルパー構造体
-struct ValueEnumAccess {
+struct TreeEnumAccess {
     variant: String,
-    value: Option<Value>,
+    value: Option<ValueNode>,
 }
 
-impl ValueEnumAccess {
-    fn new(variant: String, value: Option<Value>) -> Self {
-        ValueEnumAccess { variant, value }
+impl TreeEnumAccess {
+    fn new(variant: String, value: Option<ValueNode>) -> Self {
+        TreeEnumAccess { variant, value }
     }
 }
 
-impl<'de> de::EnumAccess<'de> for ValueEnumAccess {
+impl<'de> de::EnumAccess<'de> for TreeEnumAccess {
     type Error = Error;
-    type Variant = ValueVariantAccess;
+    type Variant = TreeVariantAccess;
 
     fn variant_seed<V>(self, seed: V) -> Result<(V::Value, Self::Variant), Self::Error>
     where
         V: de::DeserializeSeed<'de>,
     {
-        let variant = self.variant.clone();
-        let variant_deserializer = ValueDeserializer::new(Value::String(variant));
-        let variant_value = seed.deserialize(variant_deserializer)?;
-        let variant_access = ValueVariantAccess { value: self.value };
-
-        Ok((variant_value, variant_access))
+        let variant = self.variant.into_deserializer();
+        let visitor = TreeVariantAccess { node: self.value };
+        seed.deserialize(variant).map(|v| (v, visitor))
     }
 }
 
 // 列挙型バリアントアクセス用のヘルパー構造体
-struct ValueVariantAccess {
-    value: Option<Value>,
+struct TreeVariantAccess {
+    node: Option<ValueNode>,
 }
 
-impl<'de> de::VariantAccess<'de> for ValueVariantAccess {
+impl<'de> de::VariantAccess<'de> for TreeVariantAccess {
     type Error = Error;
 
     fn unit_variant(self) -> Result<(), Self::Error> {
-        match self.value {
+        match self.node {
             Some(_) => Err(Error::Custom(
                 "invalid type: expected unit variant, found non-unit variant".to_string(),
             )),
@@ -623,8 +607,8 @@ impl<'de> de::VariantAccess<'de> for ValueVariantAccess {
     where
         T: de::DeserializeSeed<'de>,
     {
-        match self.value {
-            Some(value) => seed.deserialize(ValueDeserializer::new(value)),
+        match self.node {
+            Some(node) => seed.deserialize(ValueNodeDeserializer::new(node)),
             None => Err(Error::Custom(
                 "invalid type: expected newtype variant, found unit variant".to_string(),
             )),
@@ -635,14 +619,16 @@ impl<'de> de::VariantAccess<'de> for ValueVariantAccess {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Some(Value::Array(vec)) => {
-                let seq_access = ValueSeqAccess::new(vec);
-                visitor.visit_seq(seq_access)
-            }
-            Some(_) => Err(Error::Custom(
-                "invalid type: expected tuple variant, found non-array".to_string(),
-            )),
+        match self.node {
+            Some(node) => match node {
+                ValueNode::Array(_) => {
+                    let deserializer = ValueNodeDeserializer::new(node);
+                    deserializer.deserialize_seq(visitor)
+                }
+                _ => Err(Error::Custom(
+                    "invalid type: expected tuple variant, found non-array".to_string(),
+                )),
+            },
             None => Err(Error::Custom(
                 "invalid type: expected tuple variant, found unit variant".to_string(),
             )),
@@ -657,14 +643,16 @@ impl<'de> de::VariantAccess<'de> for ValueVariantAccess {
     where
         V: Visitor<'de>,
     {
-        match self.value {
-            Some(Value::Object(map)) => {
-                let map_access = ValueMapAccess::new(map);
-                visitor.visit_map(map_access)
-            }
-            Some(_) => Err(Error::Custom(
-                "invalid type: expected struct variant, found non-object".to_string(),
-            )),
+        match self.node {
+            Some(node) => match node {
+                ValueNode::Object(_) => {
+                    let deserializer = ValueNodeDeserializer::new(node);
+                    deserializer.deserialize_map(visitor)
+                }
+                _ => Err(Error::Custom(
+                    "invalid type: expected struct variant, found non-object".to_string(),
+                )),
+            },
             None => Err(Error::Custom(
                 "invalid type: expected struct variant, found unit variant".to_string(),
             )),
@@ -677,19 +665,28 @@ pub fn from_str_to<T>(s: &str) -> Result<T, Error>
 where
     T: DeserializeOwned,
 {
-    // Parse the JSON string into a Value
-    let value = Deserializer::from_str(s)?;
+    // Parse the JSON string into a Tree
+    let tree = parse(s)?;
 
-    // Deserialize the Value into type T directly
-    from_value(value)
+    // Deserialize the Tree into type T directly
+    from_tree(tree)
 }
 
-/// Deserialize an instance of type T from a Value
-pub fn from_value<T>(value: Value) -> Result<T, Error>
+/// Deserialize an instance of type T from a Tree
+pub fn from_tree<T>(tree: Tree) -> Result<T, Error>
 where
     T: DeserializeOwned,
 {
-    let deserializer = ValueDeserializer::new(value);
+    let deserializer = ValueNodeDeserializer::new(tree.root);
+    T::deserialize(deserializer)
+}
+
+/// Deserialize an instance of type T from a Value
+pub fn from_node<T>(node: ValueNode) -> Result<T, Error>
+where
+    T: DeserializeOwned,
+{
+    let deserializer = ValueNodeDeserializer::new(node);
     T::deserialize(deserializer)
 }
 
@@ -701,68 +698,64 @@ mod tests {
     #[test]
     fn test_deserialize_null() {
         let json = "null";
-        let value = from_str(json).unwrap();
-        assert!(value.is_null());
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_null());
     }
 
     #[test]
     fn test_deserialize_bool() {
         let json = "true";
-        let value = from_str(json).unwrap();
-        assert!(value.is_bool());
-        assert_eq!(value.as_bool(), Some(true));
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_bool());
+        assert_eq!(tree.root.as_bool(), Some(true));
 
         let json = "false";
-        let value = from_str(json).unwrap();
-        assert!(value.is_bool());
-        assert_eq!(value.as_bool(), Some(false));
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_bool());
+        assert_eq!(tree.root.as_bool(), Some(false));
     }
 
     #[test]
     fn test_deserialize_number() {
         let json = "42";
-        let value = from_str(json).unwrap();
-        assert!(value.is_number());
-        assert_eq!(value.as_i64(), Some(42));
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_number());
+        assert_eq!(tree.root.as_f64(), Some(42.0));
 
         let json = "-3.14";
-        let value = from_str(json).unwrap();
-        assert!(value.is_number());
-        assert_eq!(value.as_f64(), Some(-3.14));
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_number());
+        assert_eq!(tree.root.as_f64(), Some(-3.14));
     }
 
     #[test]
     fn test_deserialize_string() {
         let json = r#""hello""#;
-        let value = from_str(json).unwrap();
-        assert!(value.is_string());
-        assert_eq!(value.as_str(), Some("hello"));
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_string());
+        assert_eq!(tree.root.as_str(), Some("hello"));
     }
 
     #[test]
     fn test_deserialize_array() {
         let json = "[1, 2, 3]";
-        let value = from_str(json).unwrap();
-        assert!(value.is_array());
-        assert_eq!(value.as_array().unwrap().len(), 3);
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_array());
 
         let json = "[]";
-        let value = from_str(json).unwrap();
-        assert!(value.is_array());
-        assert_eq!(value.as_array().unwrap().len(), 0);
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_array());
     }
 
     #[test]
     fn test_deserialize_object() {
         let json = r#"{"a": 1, "b": 2}"#;
-        let value = from_str(json).unwrap();
-        assert!(value.is_object());
-        assert_eq!(value.as_object().unwrap().len(), 2);
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_object());
 
         let json = "{}";
-        let value = from_str(json).unwrap();
-        assert!(value.is_object());
-        assert_eq!(value.as_object().unwrap().len(), 0);
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_object());
     }
 
     #[test]
@@ -780,9 +773,11 @@ mod tests {
         }
         "#;
 
-        let value = from_str(json).unwrap();
-        assert!(value.is_object());
+        let tree = from_str(json).unwrap();
+        assert!(tree.root.is_object());
 
+        // Convert to Value for easier testing
+        let value: Value = tree.into();
         let obj = value.as_object().unwrap();
         assert_eq!(obj.get("name").unwrap().as_str(), Some("John"));
         assert_eq!(obj.get("age").unwrap().as_i64(), Some(30));
@@ -871,5 +866,33 @@ mod tests {
         let json = r###"{"HexCode": "#FF0000"}"###;
         let color: Color = from_str_to(json).unwrap();
         assert_eq!(color, Color::HexCode("#FF0000".to_string()));
+    }
+
+    #[test]
+    fn test_source_position() {
+        let json = r#"{"name": "John", "age": 30}"#;
+        let tree = from_str(json).unwrap();
+
+        // `tree.root.range`や子要素のrangeを調べることで位置情報が取得できる
+        assert!(tree.root.range().start() != tree.root.range().end());
+
+        if let Some(object_node) = tree.root.as_object() {
+            // オブジェクトのプロパティの位置情報を確認
+            if let Some(name_node) = object_node.properties.get("name") {
+                // "name"キーの値の位置情報
+                assert!(name_node.range().start() != name_node.range().end());
+
+                // 値が "John" であることを確認
+                assert_eq!(name_node.as_str(), Some("John"));
+            }
+
+            if let Some(age_node) = object_node.properties.get("age") {
+                // "age"キーの値の位置情報
+                assert!(age_node.range().start() != age_node.range().end());
+
+                // 値が 30 であることを確認
+                assert_eq!(age_node.as_i64(), Some(30));
+            }
+        }
     }
 }

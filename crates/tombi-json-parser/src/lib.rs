@@ -3,8 +3,10 @@ mod error;
 pub use error::Error;
 use tombi_json_lexer::{lex, Lexed, Token};
 use tombi_json_syntax::{SyntaxKind, T};
-use tombi_json_tree::{ArrayNode, ObjectNode, Tree, ValueNode};
-use tombi_json_value::{Map, Number, Value};
+use tombi_json_tree::{
+    ArrayNode, BoolNode, NullNode, NumberNode, ObjectNode, StringNode, Tree, ValueNode,
+};
+use tombi_json_value::{Map, Number};
 use tombi_text::Range;
 
 /// Parser for JSON documents
@@ -63,11 +65,12 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_string(&mut self) -> Result<String, crate::Error> {
+    fn parse_string_node(&mut self) -> Result<StringNode, crate::Error> {
         // Get the current token (without advancing the position)
         match self.peek() {
             Some(token) if token.kind() == SyntaxKind::STRING => {
                 let span = token.span();
+                let range = token.range();
                 // Get the string and advance the position
                 let raw_str = &self.source[span.start().into()..span.end().into()];
                 self.advance();
@@ -76,7 +79,10 @@ impl<'a> Parser<'a> {
                 let content = &raw_str[1..raw_str.len() - 1];
 
                 // In a real implementation, we would process escape sequences here
-                Ok(content.to_string())
+                Ok(StringNode {
+                    value: content.to_string(),
+                    range,
+                })
             }
             Some(token) => Err(Error::UnexpectedToken {
                 expected: SyntaxKind::STRING,
@@ -90,11 +96,7 @@ impl<'a> Parser<'a> {
         match self.peek() {
             Some(token) => {
                 match token.kind() {
-                    SyntaxKind::STRING => {
-                        let start_range = token.range();
-                        let content = self.parse_string()?;
-                        Ok(ValueNode::new(Value::String(content), start_range))
-                    }
+                    SyntaxKind::STRING => self.parse_string_node().map(ValueNode::String),
                     SyntaxKind::NUMBER => {
                         let token = self.peek().unwrap();
                         let span = token.span();
@@ -104,7 +106,10 @@ impl<'a> Parser<'a> {
 
                         // Parse as f64
                         match num_str.parse::<f64>() {
-                            Ok(n) => Ok(ValueNode::new(Value::Number(Number::from_f64(n)), range)),
+                            Ok(n) => Ok(ValueNode::Number(NumberNode {
+                                value: Number::from_f64(n),
+                                range,
+                            })),
                             Err(_) => Err(Error::InvalidValue),
                         }
                     }
@@ -112,7 +117,7 @@ impl<'a> Parser<'a> {
                         let token = self.peek().unwrap();
                         let range = token.range();
                         self.advance();
-                        Ok(ValueNode::new(Value::Null, range))
+                        Ok(ValueNode::Null(NullNode { range }))
                     }
                     SyntaxKind::BOOLEAN => {
                         let token = self.peek().unwrap();
@@ -122,7 +127,7 @@ impl<'a> Parser<'a> {
                         let value = bool_str == "true";
                         self.advance();
 
-                        Ok(ValueNode::new(Value::Bool(value), range))
+                        Ok(ValueNode::Bool(BoolNode { value, range }))
                     }
                     T!['['] => self.parse_array(),
                     T!['{'] => self.parse_object(),
@@ -144,7 +149,10 @@ impl<'a> Parser<'a> {
             if token.kind() == T![']'] {
                 let close_token = self.advance().unwrap();
                 let full_range = Range::new(start_range.start(), close_token.range().end());
-                return Ok(ValueNode::new(Value::Array(Vec::new()), full_range));
+                return Ok(ValueNode::Array(ArrayNode {
+                    items: Vec::new(),
+                    range: full_range,
+                }));
             }
         }
 
@@ -168,7 +176,7 @@ impl<'a> Parser<'a> {
                         range: full_range,
                     };
 
-                    return Ok(ValueNode::new(array_node.into(), full_range));
+                    return Ok(ValueNode::Array(array_node));
                 }
                 _ => {
                     return Err(Error::UnexpectedToken {
@@ -189,7 +197,7 @@ impl<'a> Parser<'a> {
                         range: full_range,
                     };
 
-                    return Ok(ValueNode::new(array_node.into(), full_range));
+                    return Ok(ValueNode::Array(array_node));
                 }
             }
         }
@@ -206,29 +214,32 @@ impl<'a> Parser<'a> {
             if token.kind() == T!['}'] {
                 let close_token = self.advance().unwrap();
                 let full_range = Range::new(start_range.start(), close_token.range().end());
-                return Ok(ValueNode::new(Value::Object(Map::new()), full_range));
+                return Ok(ValueNode::Object(ObjectNode {
+                    properties: Map::new(),
+                    range: full_range,
+                }));
             }
         }
 
         // Parse object members
         loop {
             // Parse key (must be a string)
-            if let Some(token) = self.peek() {
-                if token.kind() != SyntaxKind::STRING {
-                    return Err(Error::UnexpectedToken {
-                        expected: SyntaxKind::STRING,
-                        actual: token.kind(),
-                    });
-                }
-            } else {
+            let Some(token) = self.peek() else {
                 return Err(Error::UnexpectedEof);
+            };
+
+            if token.kind() != SyntaxKind::STRING {
+                return Err(Error::UnexpectedToken {
+                    expected: SyntaxKind::STRING,
+                    actual: token.kind(),
+                });
             }
 
-            let key = self.parse_string()?;
+            let key = self.parse_string_node()?;
 
             // Check for duplicate keys
             if properties.contains_key(&key) {
-                return Err(Error::DuplicateKey(key));
+                return Err(Error::DuplicateKey(key.value));
             }
 
             // Expect colon
@@ -254,7 +265,7 @@ impl<'a> Parser<'a> {
                         range: full_range,
                     };
 
-                    return Ok(ValueNode::new(object_node.into(), full_range));
+                    return Ok(ValueNode::Object(object_node));
                 }
                 _ => {
                     return Err(Error::UnexpectedToken {
@@ -275,7 +286,7 @@ impl<'a> Parser<'a> {
                         range: full_range,
                     };
 
-                    return Ok(ValueNode::new(object_node.into(), full_range));
+                    return Ok(ValueNode::Object(object_node));
                 }
             }
         }
