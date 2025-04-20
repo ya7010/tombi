@@ -96,10 +96,7 @@ impl GetTypeDefinition for tombi_schema_store::IntegerSchema {
         async move {
             current_schema
                 .map(|schema| schema.schema_url.as_ref().clone())
-                .map(|schema_url| TypeDefinition {
-                    schema_url,
-                    range: tombi_text::Range::default(),
-                })
+                .map(TypeDefinition::new)
         }
         .boxed()
     }
