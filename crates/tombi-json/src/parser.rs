@@ -71,9 +71,48 @@ impl<'a> Parser<'a> {
                 // Remove the quotation marks
                 let content = &raw_str[1..raw_str.len() - 1];
 
-                // In a real implementation, we would process escape sequences here
+                // Process the string including escape sequences
+                let mut processed = String::with_capacity(content.len());
+                let mut chars = content.chars().peekable();
+
+                while let Some(c) = chars.next() {
+                    if c == '\\' {
+                        // Handle escape sequences
+                        match chars.next() {
+                            Some('"') => processed.push('"'),
+                            Some('\\') => processed.push('\\'),
+                            Some('/') => processed.push('/'),
+                            Some('b') => processed.push('\u{0008}'),
+                            Some('f') => processed.push('\u{000C}'),
+                            Some('n') => processed.push('\n'),
+                            Some('r') => processed.push('\r'),
+                            Some('t') => processed.push('\t'),
+                            Some('u') => {
+                                // Unicode escape sequence: \uXXXX
+                                let mut code_point = 0u32;
+                                for _ in 0..4 {
+                                    match chars.next() {
+                                        Some(hex) if hex.is_ascii_hexdigit() => {
+                                            code_point =
+                                                code_point * 16 + hex.to_digit(16).unwrap();
+                                        }
+                                        _ => return Err(Error::InvalidUnicodeEscape),
+                                    }
+                                }
+                                match std::char::from_u32(code_point) {
+                                    Some(unicode_char) => processed.push(unicode_char),
+                                    None => return Err(Error::InvalidUnicodeCodePoint),
+                                }
+                            }
+                            _ => return Err(Error::InvalidEscapeSequence),
+                        }
+                    } else {
+                        processed.push(c);
+                    }
+                }
+
                 Ok(StringNode {
-                    value: content.to_string(),
+                    value: processed,
                     range,
                 })
             }
@@ -99,10 +138,20 @@ impl<'a> Parser<'a> {
 
                         // Parse as f64
                         match num_str.parse::<f64>() {
-                            Ok(n) => Ok(ValueNode::Number(NumberNode {
-                                value: Number::from_f64(n),
-                                range,
-                            })),
+                            Ok(n) => {
+                                let num = if n.is_nan() || n.is_infinite() {
+                                    // Fallback for NaN or infinity
+                                    if num_str.starts_with('-') {
+                                        Number::from(-0.0)
+                                    } else {
+                                        Number::from(0.0)
+                                    }
+                                } else {
+                                    Number::from_f64(n)
+                                };
+
+                                Ok(ValueNode::Number(NumberNode { value: num, range }))
+                            }
                             Err(_) => Err(Error::InvalidValue),
                         }
                     }

@@ -67,7 +67,7 @@ impl Number {
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             Number::Float(f) => Some(*f),
-            _ => None,
+            Number::Integer(i) => Some(*i as f64),
         }
     }
 }

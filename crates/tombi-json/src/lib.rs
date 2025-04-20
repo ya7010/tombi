@@ -902,4 +902,64 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_string_with_quotes() {
+        let json = r#""This string contains \"quotes\" inside it""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(
+            value_node.as_str(),
+            Some(r#"This string contains "quotes" inside it"#)
+        );
+    }
+
+    #[test]
+    fn test_string_with_escape_sequences() {
+        let json = r#""Line1\nLine2\tTabbed\rCarriage Return\\Backslash""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(
+            value_node.as_str(),
+            Some("Line1\nLine2\tTabbed\rCarriage Return\\Backslash")
+        );
+    }
+
+    #[test]
+    fn test_unicode_string() {
+        let json = r#""こんにちは世界! 🌍 🌎 🌏""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(value_node.as_str(), Some("こんにちは世界! 🌍 🌎 🌏"));
+    }
+
+    #[test]
+    fn test_unicode_escape_sequence() {
+        let json = r#""\u3053\u3093\u306B\u3061\u306F\u4E16\u754C""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(value_node.as_str(), Some("こんにちは世界"));
+    }
+
+    #[test]
+    fn test_complex_string_mixed() {
+        let json = r#""Mixed: \"quotes\", 日本語, and \u0065\u0073\u0063\u0061\u0070\u0065\u0064 text with 🚀""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(
+            value_node.as_str(),
+            Some(r#"Mixed: "quotes", 日本語, and escaped text with 🚀"#)
+        );
+    }
+
+    #[test]
+    fn test_string_with_control_characters() {
+        let json = r#""\u0000\u0001\u0002\b\f""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(
+            value_node.as_str(),
+            Some("\u{0000}\u{0001}\u{0002}\u{0008}\u{000C}")
+        );
+    }
 }

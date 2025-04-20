@@ -18,6 +18,12 @@ pub enum Error {
     ExpectedColon,
     #[error("Duplicate key: {0}")]
     DuplicateKey(String),
+    #[error("Invalid escape sequence")]
+    InvalidEscapeSequence,
+    #[error("Invalid Unicode escape sequence")]
+    InvalidUnicodeEscape,
+    #[error("Invalid Unicode code point")]
+    InvalidUnicodeCodePoint,
 }
 
 impl From<LexerError> for Error {
