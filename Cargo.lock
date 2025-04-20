@@ -2138,6 +2138,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-json"
+version = "0.0.0"
+dependencies = [
+ "indexmap",
+ "serde",
+ "tombi-json-parser",
+ "tombi-json-tree",
+ "tombi-json-value",
+ "tombi-text",
+]
+
+[[package]]
 name = "tombi-json-lexer"
 version = "0.0.0"
 dependencies = [
@@ -2178,6 +2190,7 @@ dependencies = [
 name = "tombi-json-tree"
 version = "0.0.0"
 dependencies = [
+ "indexmap",
  "tombi-json-value",
  "tombi-text",
 ]

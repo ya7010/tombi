@@ -1,5 +1,5 @@
 [package]
-name = "tombi-json-tree"
+name = "tombi-json"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -8,5 +8,8 @@ license.workspace = true
 
 [dependencies]
 indexmap = { workspace = true }
+serde = { workspace = true }
+tombi-json-parser = { workspace = true }
+tombi-json-tree = { workspace = true }
 tombi-json-value = { workspace = true }
 tombi-text = { workspace = true }

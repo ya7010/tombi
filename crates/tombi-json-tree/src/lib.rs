@@ -1,4 +1,4 @@
-use tombi_json_value::{Map, Value};
+use tombi_json_value::{Map, Number, Value};
 use tombi_text::Range;
 
 /// A struct representing a JSON tree with source position information
@@ -10,11 +10,92 @@ pub struct Tree {
 
 /// A JSON value with source code position information
 #[derive(Debug, Clone, PartialEq)]
-pub struct ValueNode {
-    /// The JSON value
-    pub value: Value,
-    /// The position in the source code
+pub enum ValueNode {
+    /// A JSON null value
+    Null(NullNode),
+    /// A JSON boolean value
+    Bool(BoolNode),
+    /// A JSON number value
+    Number(NumberNode),
+    /// A JSON string value
+    String(StringNode),
+    /// A JSON array value
+    Array(ArrayNode),
+    /// A JSON object value
+    Object(ObjectNode),
+}
+
+impl ValueNode {
+    pub fn range(&self) -> Range {
+        match self {
+            Self::Null(node) => node.range,
+            Self::Bool(node) => node.range,
+            Self::Number(node) => node.range,
+            Self::String(node) => node.range,
+            Self::Array(node) => node.range,
+            Self::Object(node) => node.range,
+        }
+    }
+}
+
+/// A JSON null value with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct NullNode {
+    /// The position of the null value in the source code
     pub range: Range,
+}
+
+/// A JSON boolean value with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct BoolNode {
+    /// The boolean value
+    pub value: bool,
+    /// The position of the boolean value in the source code
+    pub range: Range,
+}
+
+/// A JSON number value with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct NumberNode {
+    /// The number value
+    pub value: Number,
+    /// The position of the number value in the source code
+    pub range: Range,
+}
+
+/// A JSON string value with source code position information
+#[derive(Debug, Clone)]
+pub struct StringNode {
+    /// The string value
+    pub value: String,
+    /// The position of the string value in the source code
+    pub range: Range,
+}
+
+impl PartialEq for StringNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl Eq for StringNode {}
+
+impl indexmap::Equivalent<String> for StringNode {
+    fn equivalent(&self, other: &String) -> bool {
+        self.value == *other
+    }
+}
+
+impl std::borrow::Borrow<str> for StringNode {
+    fn borrow(&self) -> &str {
+        &self.value
+    }
+}
+
+impl std::hash::Hash for StringNode {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.value.hash(state);
+    }
 }
 
 /// A JSON array with source code position information
@@ -26,81 +107,157 @@ pub struct ArrayNode {
     pub range: Range,
 }
 
+impl ArrayNode {
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
+}
+
 /// A JSON object with source code position information
 #[derive(Debug, Clone, PartialEq)]
 pub struct ObjectNode {
     /// The object properties
-    pub properties: Map<String, ValueNode>,
+    pub properties: Map<StringNode, ValueNode>,
     /// The position of the entire object in the source code
     pub range: Range,
 }
 
-impl ValueNode {
-    /// Create a new JSON node
-    pub fn new(value: Value, range: Range) -> Self {
-        Self { value, range }
+impl ObjectNode {
+    pub fn len(&self) -> usize {
+        self.properties.len()
     }
+}
 
+impl ValueNode {
     /// Check if the node is null
     pub fn is_null(&self) -> bool {
-        self.value.is_null()
+        matches!(self, Self::Null(_))
     }
 
     /// Check if the node is a boolean
     pub fn is_bool(&self) -> bool {
-        self.value.is_bool()
+        matches!(self, Self::Bool(_))
     }
 
     /// Check if the node is a number
     pub fn is_number(&self) -> bool {
-        self.value.is_number()
+        matches!(self, Self::Number(_))
     }
 
     /// Check if the node is a string
     pub fn is_string(&self) -> bool {
-        self.value.is_string()
+        matches!(self, Self::String(_))
     }
 
     /// Check if the node is an array
     pub fn is_array(&self) -> bool {
-        self.value.is_array()
+        matches!(self, Self::Array(_))
     }
 
     /// Check if the node is an object
     pub fn is_object(&self) -> bool {
-        self.value.is_object()
+        matches!(self, Self::Object(_))
     }
 
     /// Get as boolean value
     pub fn as_bool(&self) -> Option<bool> {
-        self.value.as_bool()
+        match self {
+            Self::Bool(node) => Some(node.value),
+            _ => None,
+        }
     }
 
     /// Get as number value
     pub fn as_f64(&self) -> Option<f64> {
-        self.value.as_f64()
+        match self {
+            Self::Number(node) => node.value.as_f64(),
+            _ => None,
+        }
     }
 
     /// Get as integer number value
     pub fn as_i64(&self) -> Option<i64> {
-        self.value.as_i64()
+        match self {
+            Self::Number(node) => node.value.as_i64(),
+            _ => None,
+        }
     }
 
     /// Get as string reference
     pub fn as_str(&self) -> Option<&str> {
-        self.value.as_str()
+        match self {
+            Self::String(node) => Some(&node.value),
+            _ => None,
+        }
+    }
+
+    /// Get as array reference
+    pub fn as_array(&self) -> Option<&ArrayNode> {
+        match self {
+            Self::Array(node) => Some(node),
+            _ => None,
+        }
+    }
+
+    /// Get as mutable array reference
+    pub fn as_array_mut(&mut self) -> Option<&mut ArrayNode> {
+        match self {
+            Self::Array(node) => Some(node),
+            _ => None,
+        }
+    }
+
+    /// Get as ObjectNode if this node contains an object
+    pub fn as_object(&self) -> Option<&ObjectNode> {
+        match self {
+            Self::Object(node) => Some(node),
+            _ => None,
+        }
+    }
+
+    pub fn as_object_mut(&mut self) -> Option<&mut ObjectNode> {
+        match self {
+            ValueNode::Object(o) => Some(o),
+            _ => None,
+        }
     }
 }
 
 impl From<ValueNode> for Value {
     fn from(node: ValueNode) -> Self {
-        node.value
+        match node {
+            ValueNode::Null(_) => Value::Null,
+            ValueNode::Bool(node) => Value::Bool(node.value),
+            ValueNode::Number(node) => Value::Number(node.value),
+            ValueNode::String(node) => Value::String(node.value),
+            ValueNode::Array(node) => {
+                Value::Array(node.items.into_iter().map(Into::into).collect())
+            }
+            ValueNode::Object(node) => Value::Object(
+                node.properties
+                    .into_iter()
+                    .map(|(k, v)| (k.value, v.into()))
+                    .collect(),
+            ),
+        }
     }
 }
 
 impl From<&ValueNode> for Value {
     fn from(node: &ValueNode) -> Self {
-        node.value.clone()
+        match node {
+            ValueNode::Null(_) => Value::Null,
+            ValueNode::Bool(node) => Value::Bool(node.value),
+            ValueNode::Number(node) => Value::Number(node.value.clone()),
+            ValueNode::String(node) => Value::String(node.value.clone()),
+            ValueNode::Array(node) => Value::Array(node.items.iter().map(Into::into).collect()),
+            ValueNode::Object(node) => Value::Object(
+                node.properties
+                    .iter()
+                    .map(|(k, v)| (k.value.clone(), v.into()))
+                    .collect(),
+            ),
+        }
     }
 }
 
@@ -123,7 +280,7 @@ impl From<ObjectNode> for Value {
         // Use IndexMap as an intermediate step
         let mut map = Map::new();
         for (key, value_node) in node.properties {
-            map.insert(key, Value::from(value_node));
+            map.insert(key.value, Value::from(value_node));
         }
         // Convert IndexMap to Value
         Value::Object(map)
@@ -135,7 +292,7 @@ impl From<&ObjectNode> for Value {
         // Use IndexMap as an intermediate step
         let mut map = Map::new();
         for (key, value_node) in &node.properties {
-            map.insert(key.clone(), Value::from(value_node));
+            map.insert(key.value.clone(), Value::from(value_node));
         }
         // Convert IndexMap to Value
         Value::Object(map)
@@ -158,92 +315,5 @@ impl From<Tree> for Value {
 impl From<&Tree> for Value {
     fn from(tree: &Tree) -> Self {
         (&tree.root).into()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use tombi_json_value::Number;
-    use tombi_text::Position;
-
-    #[test]
-    fn test_json_node() {
-        let pos = Position::new(1, 1);
-        let range = Range::at(pos);
-
-        let node = ValueNode::new(Value::Null, range);
-        assert!(node.is_null());
-
-        let bool_node = ValueNode::new(Value::Bool(true), range);
-        assert!(bool_node.is_bool());
-        assert_eq!(bool_node.as_bool(), Some(true));
-
-        let number_node = ValueNode::new(Value::Number(Number::from_i64(42)), range);
-        assert!(number_node.is_number());
-        assert_eq!(number_node.as_i64(), Some(42));
-
-        let string_node = ValueNode::new(Value::String("test".to_string()), range);
-        assert!(string_node.is_string());
-        assert_eq!(string_node.as_str(), Some("test"));
-    }
-
-    #[test]
-    fn test_from_value_node() {
-        let pos = Position::new(1, 1);
-        let range = Range::at(pos);
-
-        let string_value = Value::String("test".to_string());
-        let node = ValueNode::new(string_value.clone(), range);
-
-        let value: Value = node.into();
-        assert_eq!(value, string_value);
-    }
-
-    #[test]
-    fn test_from_array_node() {
-        let pos = Position::new(1, 1);
-        let range = Range::at(pos);
-
-        let items = vec![
-            ValueNode::new(Value::Number(Number::from_f64(1.0)), range),
-            ValueNode::new(Value::Number(Number::from_f64(2.0)), range),
-            ValueNode::new(Value::Number(Number::from_f64(3.0)), range),
-        ];
-
-        let array_node = ArrayNode { items, range };
-        let value: Value = array_node.into();
-
-        assert!(value.is_array());
-        let array = value.as_array().unwrap();
-        assert_eq!(array.len(), 3);
-        assert_eq!(array[0], Value::Number(Number::from_f64(1.0)));
-        assert_eq!(array[1], Value::Number(Number::from_f64(2.0)));
-        assert_eq!(array[2], Value::Number(Number::from_f64(3.0)));
-    }
-
-    #[test]
-    fn test_from_object_node() {
-        let pos = Position::new(1, 1);
-        let range = Range::at(pos);
-
-        let mut properties = Map::new();
-        properties.insert(
-            "a".to_string(),
-            ValueNode::new(Value::Number(Number::from_f64(1.0)), range),
-        );
-        properties.insert(
-            "b".to_string(),
-            ValueNode::new(Value::Number(Number::from_f64(2.0)), range),
-        );
-
-        let object_node = ObjectNode { properties, range };
-        let value: Value = object_node.into();
-
-        assert!(value.is_object());
-        let obj = value.as_object().unwrap();
-        assert_eq!(obj.len(), 2);
-        assert_eq!(obj.get("a").unwrap(), &Value::Number(Number::from_f64(1.0)));
-        assert_eq!(obj.get("b").unwrap(), &Value::Number(Number::from_f64(2.0)));
     }
 }
