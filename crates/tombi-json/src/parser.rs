@@ -24,46 +24,41 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn peek(&self) -> Option<&Token> {
-        self.lexed.tokens.get(self.position)
-    }
-
-    fn peek_kind(&self) -> Option<SyntaxKind> {
-        self.peek().map(|t| t.kind())
-    }
-
-    fn advance(&mut self) -> Option<&Token> {
-        // Save the start position
-        let position = self.position;
-        let token = self.lexed.tokens.get(position);
-
-        // Advance the position
-        self.position += 1;
-
-        // Skip trivia tokens
-        while let Some(token) = self.lexed.tokens.get(self.position) {
+    pub fn parse(&mut self) -> Result<ValueNode, crate::parser::Error> {
+        // Skip leading trivia
+        while let Some(token) = self.peek() {
             if token.kind().is_trivia() {
-                self.position += 1;
+                self.advance();
             } else {
                 break;
             }
         }
 
-        token
-    }
+        let root = self.parse_value()?;
 
-    fn expect(&mut self, kind: SyntaxKind) -> Result<&Token, crate::parser::Error> {
-        match self.peek() {
-            Some(token) if token.kind() == kind => Ok(self.advance().unwrap()),
-            Some(token) => Err(Error::UnexpectedToken {
-                expected: kind,
-                actual: token.kind(),
-            }),
-            None => Err(Error::UnexpectedEof),
+        // Skip trailing trivia
+        while let Some(token) = self.peek() {
+            if token.kind().is_trivia() {
+                self.advance();
+            } else {
+                break;
+            }
         }
+
+        // Ensure all tokens have been consumed
+        if let Some(token) = self.peek() {
+            if token.kind() != SyntaxKind::EOF {
+                return Err(Error::UnexpectedToken {
+                    expected: SyntaxKind::EOF,
+                    actual: token.kind(),
+                });
+            }
+        }
+
+        Ok(root)
     }
 
-    fn parse_string_node(&mut self) -> Result<StringNode, crate::parser::Error> {
+    fn parse_string(&mut self) -> Result<StringNode, crate::parser::Error> {
         // Get the current token (without advancing the position)
         match self.peek() {
             Some(token) if token.kind() == SyntaxKind::STRING => {
@@ -94,7 +89,7 @@ impl<'a> Parser<'a> {
         match self.peek() {
             Some(token) => {
                 match token.kind() {
-                    SyntaxKind::STRING => self.parse_string_node().map(ValueNode::String),
+                    SyntaxKind::STRING => self.parse_string().map(ValueNode::String),
                     SyntaxKind::NUMBER => {
                         let token = self.peek().unwrap();
                         let span = token.span();
@@ -234,7 +229,7 @@ impl<'a> Parser<'a> {
                 });
             }
 
-            let key = self.parse_string_node()?;
+            let key = self.parse_string()?;
 
             // Check for duplicate keys
             if properties.contains_key(&key) {
@@ -291,45 +286,50 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_document(&mut self) -> Result<ValueNode, crate::parser::Error> {
-        // Skip leading trivia
-        while let Some(token) = self.peek() {
+    fn peek(&self) -> Option<&Token> {
+        self.lexed.tokens.get(self.position)
+    }
+
+    fn peek_kind(&self) -> Option<SyntaxKind> {
+        self.peek().map(|t| t.kind())
+    }
+
+    fn advance(&mut self) -> Option<&Token> {
+        // Save the start position
+        let position = self.position;
+        let token = self.lexed.tokens.get(position);
+
+        // Advance the position
+        self.position += 1;
+
+        // Skip trivia tokens
+        while let Some(token) = self.lexed.tokens.get(self.position) {
             if token.kind().is_trivia() {
-                self.advance();
+                self.position += 1;
             } else {
                 break;
             }
         }
 
-        let root = self.parse_value()?;
+        token
+    }
 
-        // Skip trailing trivia
-        while let Some(token) = self.peek() {
-            if token.kind().is_trivia() {
-                self.advance();
-            } else {
-                break;
-            }
+    fn expect(&mut self, kind: SyntaxKind) -> Result<&Token, crate::parser::Error> {
+        match self.peek() {
+            Some(token) if token.kind() == kind => Ok(self.advance().unwrap()),
+            Some(token) => Err(Error::UnexpectedToken {
+                expected: kind,
+                actual: token.kind(),
+            }),
+            None => Err(Error::UnexpectedEof),
         }
-
-        // Ensure all tokens have been consumed
-        if let Some(token) = self.peek() {
-            if token.kind() != SyntaxKind::EOF {
-                return Err(Error::UnexpectedToken {
-                    expected: SyntaxKind::EOF,
-                    actual: token.kind(),
-                });
-            }
-        }
-
-        Ok(root)
     }
 }
 
 /// Parse a JSON string into a Tree
 pub fn parse(source: &str) -> Result<ValueNode, crate::parser::Error> {
     let mut parser = Parser::new(source);
-    parser.parse_document()
+    parser.parse()
 }
 
 #[cfg(test)]

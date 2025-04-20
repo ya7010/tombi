@@ -7,8 +7,7 @@ pub use tombi_json_value::{Number, Object, Value};
 pub use tombi_text::Range;
 
 use serde::de::{
-    self, DeserializeOwned, Deserializer as SerdeDeserializer, IntoDeserializer, MapAccess,
-    SeqAccess, Visitor,
+    self, DeserializeOwned, Deserializer as SerdeDeserializer, IntoDeserializer, Visitor,
 };
 use std::fmt;
 use std::io::{self, Read};
@@ -390,12 +389,9 @@ impl<'de> SerdeDeserializer<'de> for ValueNodeDeserializer<'de> {
     {
         match self.node {
             ValueNode::Array(array) => {
-                let mut items = Vec::new();
-                for value_node in array.items.iter() {
-                    items.push(value_node.clone());
-                }
-
-                let seq_access = ValueSeqAccess { items, index: 0 };
+                let seq_access = SeqAccess {
+                    items: array.items.into_iter(),
+                };
                 visitor.visit_seq(seq_access)
             }
             _ => Err(Error::Custom(format!(
@@ -430,7 +426,7 @@ impl<'de> SerdeDeserializer<'de> for ValueNodeDeserializer<'de> {
     {
         match self.node {
             ValueNode::Object(object_node) => {
-                let map_access = TreeMapAccess {
+                let map_access = MapAccess {
                     properties: object_node.properties.into_iter(),
                     key: None,
                     value: None,
@@ -501,37 +497,32 @@ impl<'de> SerdeDeserializer<'de> for ValueNodeDeserializer<'de> {
     }
 }
 
-struct ValueSeqAccess {
-    items: Vec<ValueNode>,
-    index: usize,
+struct SeqAccess {
+    items: std::vec::IntoIter<ValueNode>,
 }
 
-impl<'de> SeqAccess<'de> for ValueSeqAccess {
+impl<'de> serde::de::SeqAccess<'de> for SeqAccess {
     type Error = Error;
 
     fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
     where
         T: de::DeserializeSeed<'de>,
     {
-        if self.index >= self.items.len() {
+        let Some(item) = self.items.next() else {
             return Ok(None);
-        }
+        };
 
-        let node = self.items[self.index].clone();
-        self.index += 1;
-
-        seed.deserialize(ValueNodeDeserializer::new(node)).map(Some)
+        seed.deserialize(ValueNodeDeserializer::new(item)).map(Some)
     }
 }
 
-// マップアクセス用のヘルパー構造体
-struct TreeMapAccess {
+struct MapAccess {
     properties: indexmap::map::IntoIter<StringNode, ValueNode>,
     key: Option<String>,
     value: Option<ValueNode>,
 }
 
-impl<'de> MapAccess<'de> for TreeMapAccess {
+impl<'de> serde::de::MapAccess<'de> for MapAccess {
     type Error = Error;
 
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
