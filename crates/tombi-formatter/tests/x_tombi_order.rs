@@ -916,10 +916,10 @@ mod table_keys_order {
         ) => {
             #[tokio::test]
             async fn $name() {
-                use tombi_schema_store::SchemaStore;
                 use textwrap::dedent;
                 use tombi_config::TomlVersion;
                 use tombi_formatter::{FormatOptions, Formatter};
+                use tombi_schema_store::SchemaStore;
 
                 tombi_test_lib::init_tracing();
 

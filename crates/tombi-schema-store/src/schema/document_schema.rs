@@ -39,7 +39,7 @@ impl DocumentSchema {
                     continue;
                 };
                 if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
-                    definitions.insert(format!("#/definitions/{key}"), value_schema);
+                    definitions.insert(format!("#/definitions/{}", key.value), value_schema);
                 }
             }
         }
@@ -49,7 +49,7 @@ impl DocumentSchema {
                     continue;
                 };
                 if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
-                    definitions.insert(format!("#/$defs/{key}"), value_schema);
+                    definitions.insert(format!("#/$defs/{}", key.value), value_schema);
                 }
             }
         }
