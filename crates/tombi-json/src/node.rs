@@ -1,12 +1,8 @@
-use tombi_json_value::{Map, Number, Value};
-use tombi_text::Range;
+use std::io::Read;
 
-/// A struct representing a JSON tree with source position information
-#[derive(Debug, Clone, PartialEq)]
-pub struct Tree {
-    /// The root node of the JSON tree
-    pub root: ValueNode,
-}
+use itertools::Itertools;
+use tombi_json_value::{Number, Object, Value};
+use tombi_text::Range;
 
 /// A JSON value with source code position information
 #[derive(Debug, Clone, PartialEq)]
@@ -36,99 +32,7 @@ impl ValueNode {
             Self::Object(node) => node.range,
         }
     }
-}
 
-/// A JSON null value with source code position information
-#[derive(Debug, Clone, PartialEq)]
-pub struct NullNode {
-    /// The position of the null value in the source code
-    pub range: Range,
-}
-
-/// A JSON boolean value with source code position information
-#[derive(Debug, Clone, PartialEq)]
-pub struct BoolNode {
-    /// The boolean value
-    pub value: bool,
-    /// The position of the boolean value in the source code
-    pub range: Range,
-}
-
-/// A JSON number value with source code position information
-#[derive(Debug, Clone, PartialEq)]
-pub struct NumberNode {
-    /// The number value
-    pub value: Number,
-    /// The position of the number value in the source code
-    pub range: Range,
-}
-
-/// A JSON string value with source code position information
-#[derive(Debug, Clone)]
-pub struct StringNode {
-    /// The string value
-    pub value: String,
-    /// The position of the string value in the source code
-    pub range: Range,
-}
-
-impl PartialEq for StringNode {
-    fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
-    }
-}
-
-impl Eq for StringNode {}
-
-impl indexmap::Equivalent<String> for StringNode {
-    fn equivalent(&self, other: &String) -> bool {
-        self.value == *other
-    }
-}
-
-impl std::borrow::Borrow<str> for StringNode {
-    fn borrow(&self) -> &str {
-        &self.value
-    }
-}
-
-impl std::hash::Hash for StringNode {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.value.hash(state);
-    }
-}
-
-/// A JSON array with source code position information
-#[derive(Debug, Clone, PartialEq)]
-pub struct ArrayNode {
-    /// The array elements
-    pub items: Vec<ValueNode>,
-    /// The position of the entire array in the source code
-    pub range: Range,
-}
-
-impl ArrayNode {
-    pub fn len(&self) -> usize {
-        self.items.len()
-    }
-}
-
-/// A JSON object with source code position information
-#[derive(Debug, Clone, PartialEq)]
-pub struct ObjectNode {
-    /// The object properties
-    pub properties: Map<StringNode, ValueNode>,
-    /// The position of the entire object in the source code
-    pub range: Range,
-}
-
-impl ObjectNode {
-    pub fn len(&self) -> usize {
-        self.properties.len()
-    }
-}
-
-impl ValueNode {
     /// Check if the node is null
     pub fn is_null(&self) -> bool {
         matches!(self, Self::Null(_))
@@ -167,10 +71,18 @@ impl ValueNode {
         }
     }
 
-    /// Get as number value
+    /// Get as float value
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             Self::Number(node) => node.value.as_f64(),
+            _ => None,
+        }
+    }
+
+    /// Get as unsigned integer value
+    pub fn as_u64(&self) -> Option<u64> {
+        match self {
+            Self::Number(node) => node.value.as_u64(),
             _ => None,
         }
     }
@@ -221,6 +133,161 @@ impl ValueNode {
             _ => None,
         }
     }
+
+    pub fn from_str(s: &str) -> Result<Self, crate::Error> {
+        Ok(crate::parser::parse(s)?)
+    }
+
+    pub fn from_reader<R>(reader: R) -> Result<Self, crate::Error>
+    where
+        R: std::io::Read,
+    {
+        let mut reader = std::io::BufReader::new(reader);
+        let mut s = String::new();
+        reader.read_to_string(&mut s)?;
+        Ok(crate::parser::parse(&s)?)
+    }
+}
+
+/// A JSON null value with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct NullNode {
+    /// The position of the null value in the source code
+    pub range: Range,
+}
+
+impl std::fmt::Display for NullNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "null")
+    }
+}
+
+/// A JSON boolean value with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct BoolNode {
+    /// The boolean value
+    pub value: bool,
+    /// The position of the boolean value in the source code
+    pub range: Range,
+}
+
+impl std::fmt::Display for BoolNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+/// A JSON number value with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct NumberNode {
+    /// The number value
+    pub value: Number,
+    /// The position of the number value in the source code
+    pub range: Range,
+}
+
+impl std::fmt::Display for NumberNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+/// A JSON string value with source code position information
+#[derive(Debug, Clone)]
+pub struct StringNode {
+    /// The string value
+    pub value: String,
+    /// The position of the string value in the source code
+    pub range: Range,
+}
+
+impl std::fmt::Display for StringNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "\"{}\"", self.value)
+    }
+}
+
+impl PartialEq for StringNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl Eq for StringNode {}
+
+impl indexmap::Equivalent<String> for StringNode {
+    fn equivalent(&self, other: &String) -> bool {
+        self.value == *other
+    }
+}
+
+impl std::borrow::Borrow<str> for StringNode {
+    fn borrow(&self) -> &str {
+        &self.value
+    }
+}
+
+impl std::hash::Hash for StringNode {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.value.hash(state);
+    }
+}
+
+/// A JSON array with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct ArrayNode {
+    /// The array elements
+    pub items: Vec<ValueNode>,
+    /// The position of the entire array in the source code
+    pub range: Range,
+}
+
+impl ArrayNode {
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
+}
+
+impl std::fmt::Display for ArrayNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[{}]",
+            self.items.iter().map(|item| item.to_string()).join(", ")
+        )
+    }
+}
+
+/// A JSON object with source code position information
+#[derive(Debug, Clone, PartialEq)]
+pub struct ObjectNode {
+    /// The object properties
+    pub properties: tombi_json_value::Map<StringNode, ValueNode>,
+    /// The position of the entire object in the source code
+    pub range: Range,
+}
+
+impl ObjectNode {
+    pub fn get(&self, key: &str) -> Option<&ValueNode> {
+        self.properties.get(key)
+    }
+
+    pub fn len(&self) -> usize {
+        self.properties.len()
+    }
+}
+
+impl std::fmt::Display for ObjectNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{{}}}",
+            self.properties
+                .iter()
+                .map(|(k, v)| format!("{}: {}", k.value, v))
+                .join(", ")
+        )
+    }
 }
 
 impl From<ValueNode> for Value {
@@ -238,6 +305,30 @@ impl From<ValueNode> for Value {
                     .into_iter()
                     .map(|(k, v)| (k.value, v.into()))
                     .collect(),
+            ),
+        }
+    }
+}
+
+impl std::fmt::Display for ValueNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Null(_) => write!(f, "null"),
+            Self::Bool(node) => write!(f, "{}", node.value),
+            Self::Number(node) => write!(f, "{}", node.value),
+            Self::String(node) => write!(f, "\"{}\"", node.value),
+            Self::Array(node) => write!(
+                f,
+                "[{}]",
+                node.items.iter().map(|item| item.to_string()).join(", ")
+            ),
+            Self::Object(node) => write!(
+                f,
+                "{{{}}}",
+                node.properties
+                    .iter()
+                    .map(|(k, v)| format!("{}: {}", k.value, v))
+                    .join(", ")
             ),
         }
     }
@@ -278,7 +369,7 @@ impl From<&ArrayNode> for Value {
 impl From<ObjectNode> for Value {
     fn from(node: ObjectNode) -> Self {
         // Use IndexMap as an intermediate step
-        let mut map = Map::new();
+        let mut map = Object::new();
         for (key, value_node) in node.properties {
             map.insert(key.value, Value::from(value_node));
         }
@@ -290,30 +381,11 @@ impl From<ObjectNode> for Value {
 impl From<&ObjectNode> for Value {
     fn from(node: &ObjectNode) -> Self {
         // Use IndexMap as an intermediate step
-        let mut map = Map::new();
+        let mut map = Object::new();
         for (key, value_node) in &node.properties {
             map.insert(key.value.clone(), Value::from(value_node));
         }
         // Convert IndexMap to Value
         Value::Object(map)
-    }
-}
-
-impl Tree {
-    /// Create a new JSON tree
-    pub fn new(root: ValueNode) -> Self {
-        Self { root }
-    }
-}
-
-impl From<Tree> for Value {
-    fn from(tree: Tree) -> Self {
-        tree.root.into()
-    }
-}
-
-impl From<&Tree> for Value {
-    fn from(tree: &Tree) -> Self {
-        (&tree.root).into()
     }
 }

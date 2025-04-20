@@ -3,6 +3,7 @@ use std::{borrow::Cow, sync::Arc};
 use ahash::AHashMap;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
+use tombi_json::StringNode;
 use tombi_x_keyword::{TableKeysOrder, X_TOMBI_TABLE_KEYS_ORDER};
 
 use super::{
@@ -27,22 +28,25 @@ pub struct TableSchema {
 }
 
 impl TableSchema {
-    pub fn new(object: &tombi_json_value::Map<String, tombi_json_value::Value>) -> Self {
+    pub fn new(object_node: &tombi_json::ObjectNode) -> Self {
         let mut properties = IndexMap::new();
-        if let Some(tombi_json_value::Value::Object(props)) = object.get("properties") {
-            for (key, value) in props {
-                let Some(object) = value.as_object() else {
+        if let Some(tombi_json::ValueNode::Object(object_node)) = object_node.get("properties") {
+            for (key_node, value_node) in object_node.properties.iter() {
+                let Some(object) = value_node.as_object() else {
                     continue;
                 };
                 if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
-                    properties.insert(SchemaAccessor::Key(key.into()), value_schema);
+                    properties.insert(
+                        SchemaAccessor::Key(key_node.value.to_string()),
+                        value_schema,
+                    );
                 }
             }
         }
-        let pattern_properties = match object.get("patternProperties") {
-            Some(tombi_json_value::Value::Object(props)) => {
+        let pattern_properties = match object_node.get("patternProperties") {
+            Some(tombi_json::ValueNode::Object(object_node)) => {
                 let mut pattern_properties = AHashMap::new();
-                for (pattern, value) in props {
+                for (pattern, value) in object_node.properties.iter() {
                     let Some(object) = value.as_object() else {
                         continue;
                     };
@@ -56,10 +60,10 @@ impl TableSchema {
         };
 
         let (additional_properties, additional_property_schema) =
-            match object.get("additionalProperties") {
-                Some(tombi_json_value::Value::Bool(allow)) => (Some(*allow), None),
-                Some(tombi_json_value::Value::Object(object)) => {
-                    let value_schema = Referable::<ValueSchema>::new(object);
+            match object_node.get("additionalProperties") {
+                Some(tombi_json::ValueNode::Bool(allow)) => (Some(allow.value), None),
+                Some(tombi_json::ValueNode::Object(object_node)) => {
+                    let value_schema = Referable::<ValueSchema>::new(object_node);
                     (
                         Some(true),
                         value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),
@@ -68,20 +72,22 @@ impl TableSchema {
                 _ => (None, None),
             };
 
-        let keys_order = match object
+        let keys_order = match object_node
             .get(X_TOMBI_TABLE_KEYS_ORDER)
             // NOTE: support old name
-            .or_else(|| object.get("x-tombi-table-keys-order-by"))
+            .or_else(|| object_node.get("x-tombi-table-keys-order-by"))
         {
-            Some(tombi_json_value::Value::String(order)) => match order.as_str() {
-                "ascending" => Some(TableKeysOrder::Ascending),
-                "descending" => Some(TableKeysOrder::Descending),
-                "schema" => Some(TableKeysOrder::Schema),
-                _ => {
-                    tracing::error!("invalid {X_TOMBI_TABLE_KEYS_ORDER}: {order}");
-                    None
+            Some(tombi_json::ValueNode::String(StringNode { value: order, .. })) => {
+                match order.as_str() {
+                    "ascending" => Some(TableKeysOrder::Ascending),
+                    "descending" => Some(TableKeysOrder::Descending),
+                    "schema" => Some(TableKeysOrder::Schema),
+                    _ => {
+                        tracing::error!("invalid {X_TOMBI_TABLE_KEYS_ORDER}: {order}");
+                        None
+                    }
                 }
-            },
+            }
             Some(order) => {
                 tracing::error!("invalid {X_TOMBI_TABLE_KEYS_ORDER}: {}", order.to_string());
                 None
@@ -90,31 +96,39 @@ impl TableSchema {
         };
 
         Self {
-            title: object
+            title: object_node
                 .get("title")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
-            description: object
+            description: object_node
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             properties: Arc::new(properties.into()),
-            pattern_properties: pattern_properties.map(|props| Arc::new(props.into())),
+            pattern_properties: pattern_properties.map(|props| {
+                let converted_props = props
+                    .into_iter()
+                    .map(|(key, value)| (key.value, value))
+                    .collect::<AHashMap<_, _>>();
+                Arc::new(converted_props.into())
+            }),
             additional_properties,
             additional_property_schema,
-            required: object.get("required").and_then(|v| {
+            required: object_node.get("required").and_then(|v| {
                 v.as_array().map(|arr| {
-                    arr.iter()
-                        .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                    arr.items
+                        .iter()
+                        .filter_map(|v| v.as_str())
+                        .map(ToString::to_string)
                         .collect()
                 })
             }),
-            min_properties: object
+            min_properties: object_node
                 .get("minProperties")
                 .and_then(|v| v.as_u64().map(|u| u as usize)),
-            max_properties: object
+            max_properties: object_node
                 .get("maxProperties")
                 .and_then(|v| v.as_u64().map(|u| u as usize)),
             keys_order,
-            deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            deprecated: object_node.get("deprecated").and_then(|v| v.as_bool()),
         }
     }
 

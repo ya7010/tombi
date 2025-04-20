@@ -31,10 +31,18 @@ fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
     let mut contents = String::new();
     reader.read_to_string(&mut contents)?;
 
-    let document_schema = DocumentSchema::new(
-        tombi_json_value::from_str(&contents)?,
-        SchemaUrl::from_file_path(&document_path).unwrap(),
-    );
+    let value_node = tombi_json::ValueNode::from_str(&contents)?;
+    let object = match value_node {
+        tombi_json::ValueNode::Object(object) => object,
+        _ => {
+            return Err(Box::new(tombi_schema_store::Error::SchemaMustBeObject {
+                schema_url: SchemaUrl::from_file_path(&document_path).unwrap(),
+            }));
+        }
+    };
+
+    let document_schema =
+        DocumentSchema::new(object, SchemaUrl::from_file_path(&document_path).unwrap());
 
     dbg!(document_schema);
     Ok(())

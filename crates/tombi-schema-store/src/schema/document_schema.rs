@@ -17,25 +17,24 @@ pub struct DocumentSchema {
 }
 
 impl DocumentSchema {
-    pub fn new(
-        value: tombi_json_value::Map<String, tombi_json_value::Value>,
-        schema_url: SchemaUrl,
-    ) -> Self {
-        let toml_version = value.get("x-tombi-toml-version").and_then(|obj| match obj {
-            tombi_json_value::Value::String(version) => {
-                serde_json::from_str(&format!("\"{version}\"")).ok()
-            }
-            _ => None,
-        });
-        let schema_id = value
+    pub fn new(object: tombi_json::ObjectNode, schema_url: SchemaUrl) -> Self {
+        let toml_version = object
+            .get("x-tombi-toml-version")
+            .and_then(|obj| match obj {
+                tombi_json::ValueNode::String(version) => {
+                    serde_json::from_str(&format!("\"{}\"", version.value)).ok()
+                }
+                _ => None,
+            });
+        let schema_id = object
             .get("$id")
             .and_then(|v| v.as_str())
             .and_then(|s| SchemaUrl::parse(s).ok());
 
-        let value_schema = ValueSchema::new(&value);
+        let value_schema = ValueSchema::new(&object);
         let mut definitions = AHashMap::default();
-        if let Some(tombi_json_value::Value::Object(object)) = value.get("definitions") {
-            for (key, value) in object.into_iter() {
+        if let Some(tombi_json::ValueNode::Object(object)) = object.get("definitions") {
+            for (key, value) in object.properties.iter() {
                 let Some(object) = value.as_object() else {
                     continue;
                 };
@@ -44,8 +43,8 @@ impl DocumentSchema {
                 }
             }
         }
-        if let Some(tombi_json_value::Value::Object(object)) = value.get("$defs") {
-            for (key, value) in object.into_iter() {
+        if let Some(tombi_json::ValueNode::Object(object)) = object.get("$defs") {
+            for (key, value) in object.properties.iter() {
                 let Some(object) = value.as_object() else {
                     continue;
                 };

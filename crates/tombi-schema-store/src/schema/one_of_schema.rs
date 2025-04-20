@@ -10,12 +10,12 @@ pub struct OneOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub schemas: ReferableValueSchemas,
-    pub default: Option<tombi_json_value::Value>,
+    pub default: Option<tombi_json::Value>,
     pub deprecated: Option<bool>,
 }
 
 impl OneOfSchema {
-    pub fn new(object: &tombi_json_value::Map<String, tombi_json_value::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         let title = object
             .get("title")
             .and_then(|v| v.as_str())
@@ -27,19 +27,21 @@ impl OneOfSchema {
         let schemas = object
             .get("oneOf")
             .and_then(|v| v.as_array())
-            .map(|a| {
-                a.iter()
+            .map(|array| {
+                array
+                    .items
+                    .iter()
                     .filter_map(|v| v.as_object())
                     .filter_map(Referable::<ValueSchema>::new)
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();
-        let default = object.get("default").cloned();
+
         Self {
             title,
             description,
             schemas: Arc::new(tokio::sync::RwLock::new(schemas)),
-            default,
+            default: object.get("default").cloned().map(|v| v.into()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }

@@ -13,7 +13,7 @@ pub struct IntegerSchema {
 }
 
 impl IntegerSchema {
-    pub fn new(object: &tombi_json_value::Map<String, tombi_json_value::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         Self {
             title: object
                 .get("title")
@@ -27,9 +27,9 @@ impl IntegerSchema {
             exclusive_maximum: object.get("exclusiveMaximum").and_then(|v| v.as_i64()),
             multiple_of: object.get("multipleOf").and_then(|v| v.as_i64()),
             enumerate: object
-                .get("enumerate")
+                .get("enum")
                 .and_then(|v| v.as_array())
-                .map(|v| v.iter().filter_map(|v| v.as_i64()).collect()),
+                .map(|v| v.items.iter().filter_map(|v| v.as_i64()).collect()),
             default: object.get("default").and_then(|v| v.as_i64()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }

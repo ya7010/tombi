@@ -46,17 +46,17 @@ impl<T> Referable<T> {
 }
 
 impl Referable<ValueSchema> {
-    pub fn new(object: &tombi_json_value::Map<String, tombi_json_value::Value>) -> Option<Self> {
+    pub fn new(object: &tombi_json::ObjectNode) -> Option<Self> {
         if let Some(x_taplo) = object.get("x-taplo") {
-            if let Ok(x_taplo) = serde_json::from_value::<XTaplo>(x_taplo.to_owned()) {
+            if let Ok(x_taplo) = tombi_json::from_value_node::<XTaplo>(x_taplo.to_owned()) {
                 if x_taplo.hidden == Some(true) {
                     return None;
                 }
             }
         }
-        if let Some(tombi_json_value::Value::String(ref_string)) = object.get("$ref") {
+        if let Some(tombi_json::ValueNode::String(ref_string)) = object.get("$ref") {
             return Some(Referable::Ref {
-                reference: ref_string.clone(),
+                reference: ref_string.value.clone(),
                 title: object
                     .get("title")
                     .and_then(|title| title.as_str().map(|s| s.to_string())),

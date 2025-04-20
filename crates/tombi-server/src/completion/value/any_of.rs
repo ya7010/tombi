@@ -2,7 +2,7 @@ use futures::{future::BoxFuture, FutureExt};
 use tombi_schema_store::{Accessor, AnyOfSchema, CurrentSchema, ReferableValueSchemas};
 
 use crate::completion::{
-    serde_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
+    tombi_json_value_to_completion_item, CompletionCandidate, CompletionContent, CompletionHint,
     CompositeSchemaImpl, FindCompletionContents,
 };
 
@@ -88,7 +88,7 @@ where
         }
 
         if let Some(default) = &any_of_schema.default {
-            if let Some(completion_item) = serde_value_to_completion_item(
+            if let Some(completion_item) = tombi_json_value_to_completion_item(
                 default,
                 position,
                 detail,

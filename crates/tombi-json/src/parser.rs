@@ -1,12 +1,10 @@
 mod error;
 
+use crate::{ArrayNode, BoolNode, NullNode, NumberNode, ObjectNode, StringNode, ValueNode};
 pub use error::Error;
 use tombi_json_lexer::{lex, Lexed, Token};
 use tombi_json_syntax::{SyntaxKind, T};
-use tombi_json_tree::{
-    ArrayNode, BoolNode, NullNode, NumberNode, ObjectNode, StringNode, Tree, ValueNode,
-};
-use tombi_json_value::{Map, Number};
+use tombi_json_value::Number;
 use tombi_text::Range;
 
 /// Parser for JSON documents
@@ -54,7 +52,7 @@ impl<'a> Parser<'a> {
         token
     }
 
-    fn expect(&mut self, kind: SyntaxKind) -> Result<&Token, crate::Error> {
+    fn expect(&mut self, kind: SyntaxKind) -> Result<&Token, crate::parser::Error> {
         match self.peek() {
             Some(token) if token.kind() == kind => Ok(self.advance().unwrap()),
             Some(token) => Err(Error::UnexpectedToken {
@@ -65,7 +63,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_string_node(&mut self) -> Result<StringNode, crate::Error> {
+    fn parse_string_node(&mut self) -> Result<StringNode, crate::parser::Error> {
         // Get the current token (without advancing the position)
         match self.peek() {
             Some(token) if token.kind() == SyntaxKind::STRING => {
@@ -92,7 +90,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_value(&mut self) -> Result<ValueNode, crate::Error> {
+    fn parse_value(&mut self) -> Result<ValueNode, crate::parser::Error> {
         match self.peek() {
             Some(token) => {
                 match token.kind() {
@@ -138,7 +136,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_array(&mut self) -> Result<ValueNode, crate::Error> {
+    fn parse_array(&mut self) -> Result<ValueNode, crate::parser::Error> {
         // Consume the opening bracket
         let open_token = self.expect(T!['['])?;
         let start_range = open_token.range();
@@ -203,11 +201,12 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_object(&mut self) -> Result<ValueNode, crate::Error> {
+    fn parse_object(&mut self) -> Result<ValueNode, crate::parser::Error> {
         // Consume the opening brace
         let open_token = self.expect(T!['{'])?;
         let start_range = open_token.range();
-        let mut properties = Map::new();
+        let mut properties: tombi_json_value::Map<StringNode, ValueNode> =
+            tombi_json_value::Map::new();
 
         // Check if the object is empty
         if let Some(token) = self.peek() {
@@ -215,7 +214,7 @@ impl<'a> Parser<'a> {
                 let close_token = self.advance().unwrap();
                 let full_range = Range::new(start_range.start(), close_token.range().end());
                 return Ok(ValueNode::Object(ObjectNode {
-                    properties: Map::new(),
+                    properties: tombi_json_value::Map::new(),
                     range: full_range,
                 }));
             }
@@ -292,7 +291,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_document(&mut self) -> Result<Tree, crate::Error> {
+    fn parse_document(&mut self) -> Result<ValueNode, crate::parser::Error> {
         // Skip leading trivia
         while let Some(token) = self.peek() {
             if token.kind().is_trivia() {
@@ -323,12 +322,12 @@ impl<'a> Parser<'a> {
             }
         }
 
-        Ok(Tree::new(root))
+        Ok(root)
     }
 }
 
 /// Parse a JSON string into a Tree
-pub fn parse(source: &str) -> Result<Tree, crate::Error> {
+pub fn parse(source: &str) -> Result<ValueNode, crate::parser::Error> {
     let mut parser = Parser::new(source);
     parser.parse_document()
 }
@@ -340,64 +339,64 @@ mod tests {
     #[test]
     fn test_parse_null() {
         let source = "null";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_null());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_null());
     }
 
     #[test]
     fn test_parse_boolean() {
         let source = "true";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_bool());
-        assert_eq!(tree.root.as_bool(), Some(true));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_bool());
+        assert_eq!(value_node.as_bool(), Some(true));
 
         let source = "false";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_bool());
-        assert_eq!(tree.root.as_bool(), Some(false));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_bool());
+        assert_eq!(value_node.as_bool(), Some(false));
     }
 
     #[test]
     fn test_parse_number() {
         let source = "42";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_number());
-        assert_eq!(tree.root.as_f64(), Some(42.0));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_number());
+        assert_eq!(value_node.as_f64(), Some(42.0));
 
         let source = "-3.14";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_number());
-        assert_eq!(tree.root.as_f64(), Some(-3.14));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_number());
+        assert_eq!(value_node.as_f64(), Some(-3.14));
     }
 
     #[test]
     fn test_parse_string() {
         let source = r#""hello""#;
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_string());
-        assert_eq!(tree.root.as_str(), Some("hello"));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(value_node.as_str(), Some("hello"));
     }
 
     #[test]
     fn test_parse_array() {
         let source = "[1, 2, 3]";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_array());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_array());
 
         let source = "[]";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_array());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_array());
     }
 
     #[test]
     fn test_parse_object() {
         let source = r#"{"a": 1, "b": 2}"#;
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_object());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_object());
 
         let source = "{}";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_object());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_object());
     }
 
     #[test]
@@ -415,7 +414,7 @@ mod tests {
         }
         "#;
 
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_object());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_object());
     }
 }

@@ -8,8 +8,10 @@ license.workspace = true
 
 [dependencies]
 indexmap = { workspace = true }
+itertools = { workspace = true }
 serde = { workspace = true }
-tombi-json-parser = { workspace = true }
-tombi-json-tree = { workspace = true }
+thiserror = { workspace = true }
+tombi-json-lexer = { workspace = true }
+tombi-json-syntax = { workspace = true }
 tombi-json-value = { workspace = true }
 tombi-text = { workspace = true }
