@@ -16,13 +16,13 @@ use completion_kind::CompletionKind;
 use futures::{future::BoxFuture, FutureExt};
 pub use hint::CompletionHint;
 use itertools::Itertools;
+use tombi_ast::{algo::ancestors_at_position, AstNode};
+use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 use tombi_schema_store::{
     Accessor, CurrentSchema, ReferableValueSchemas, SchemaDefinitions, SchemaStore, SchemaUrl,
     ValueSchema,
 };
 use tombi_syntax::{SyntaxElement, SyntaxKind};
-use tombi_ast::{algo::ancestors_at_position, AstNode};
-use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
 
 pub async fn get_completion_contents(
     root: tombi_ast::Root,
@@ -369,8 +369,8 @@ impl<T: CompositeSchemaImpl + Sync + Send> CompletionCandidate for T {
     }
 }
 
-fn serde_value_to_completion_item(
-    value: &serde_json::Value,
+fn tombi_json_value_to_completion_item(
+    value: &tombi_json::Value,
     position: tombi_text::Position,
     detail: Option<String>,
     documentation: Option<String>,
@@ -378,15 +378,15 @@ fn serde_value_to_completion_item(
     completion_hint: Option<CompletionHint>,
 ) -> Option<CompletionContent> {
     let (kind, value) = match value {
-        serde_json::Value::String(value) => (CompletionKind::String, format!("\"{value}\"")),
-        serde_json::Value::Number(value) => {
+        tombi_json::Value::String(value) => (CompletionKind::String, format!("\"{value}\"")),
+        tombi_json::Value::Number(value) => {
             if value.is_i64() {
                 (CompletionKind::Integer, value.to_string())
             } else {
                 (CompletionKind::Float, value.to_string())
             }
         }
-        serde_json::Value::Bool(value) => (CompletionKind::Boolean, value.to_string()),
+        tombi_json::Value::Bool(value) => (CompletionKind::Boolean, value.to_string()),
         _ => return None,
     };
 

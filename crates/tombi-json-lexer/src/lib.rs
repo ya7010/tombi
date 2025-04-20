@@ -169,8 +169,6 @@ impl Cursor<'_> {
     }
 
     fn number(&mut self) -> Result<Token, crate::Error> {
-        tracing::debug!("Processing number starting with '{}'", self.current());
-
         let line = self.peek_with_current_while(|c| !is_token_separator(c));
 
         if let Some(m) = REGEX_FLOAT.find(&line) {

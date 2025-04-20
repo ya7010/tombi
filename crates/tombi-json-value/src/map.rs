@@ -125,7 +125,10 @@ where
     }
 
     /// Returns true if the map contains a key
-    pub fn contains_key(&self, key: &K) -> bool {
+    pub fn contains_key<Q>(&self, key: &Q) -> bool
+    where
+        Q: ?Sized + Hash + Equivalent<K>,
+    {
         self.inner.contains_key(key)
     }
 }

@@ -44,11 +44,11 @@ macro_rules! json {
     // Object
     ({$($key:tt : $value:tt),* $(,)?}) => {
         {
-            let mut map = $crate::Map::new();
+            let mut object = $crate::Object::new();
             $(
-                map.insert($crate::json_key!($key), $crate::json!($value));
+                object.insert($crate::json_key!($key), $crate::json!($value));
             )*
-            $crate::Value::Object(map)
+            $crate::Value::Object(object)
         }
     };
 

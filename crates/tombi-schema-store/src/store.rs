@@ -202,7 +202,7 @@ impl SchemaStore {
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<DocumentSchema, crate::Error> {
-        let schema: serde_json::Map<String, serde_json::Value> = match schema_url.scheme() {
+        let tombi_json::ValueNode::Object(schema) = match schema_url.scheme() {
             "file" => {
                 let schema_path =
                     schema_url
@@ -218,7 +218,7 @@ impl SchemaStore {
                 let file = std::fs::File::open(&schema_path)
                     .map_err(|_| crate::Error::SchemaFileReadFailed { schema_path })?;
 
-                serde_json::from_reader(file)
+                tombi_json::ValueNode::from_reader(file)
             }
             "http" | "https" => {
                 assert!(
@@ -247,7 +247,7 @@ impl SchemaStore {
                             reason: err.to_string(),
                         })?;
 
-                serde_json::from_reader(std::io::Cursor::new(bytes))
+                tombi_json::ValueNode::from_reader(std::io::Cursor::new(bytes))
             }
             _ => {
                 return Err(crate::Error::UnsupportedSchemaUrl {
@@ -258,7 +258,12 @@ impl SchemaStore {
         .map_err(|err| crate::Error::SchemaFileParseFailed {
             schema_url: schema_url.to_owned(),
             reason: err.to_string(),
-        })?;
+        })?
+        else {
+            return Err(crate::Error::SchemaMustBeObject {
+                schema_url: schema_url.to_owned(),
+            });
+        };
 
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }

@@ -19,7 +19,6 @@ reqwest = { workspace = true }
 rustc-hash = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 serde_tombi = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
@@ -29,6 +28,7 @@ tombi-diagnostic = { workspace = true }
 tombi-document = { workspace = true }
 tombi-document-tree = { workspace = true }
 tombi-formatter = { workspace = true }
+tombi-json = { workspace = true }
 tombi-linter = { workspace = true }
 tombi-parser = { workspace = true }
 tombi-schema-store = { workspace = true }

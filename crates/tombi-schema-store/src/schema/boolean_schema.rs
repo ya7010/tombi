@@ -8,19 +8,19 @@ pub struct BooleanSchema {
 }
 
 impl BooleanSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         Self {
             title: object
                 .get("title")
-                .and_then(|v| v.as_str().map(|s| s.to_string())),
+                .and_then(|value| value.as_str().map(|s| s.to_string())),
             description: object
                 .get("description")
-                .and_then(|v| v.as_str().map(|s| s.to_string())),
+                .and_then(|value| value.as_str().map(|s| s.to_string())),
             default: object.get("default").and_then(|v| v.as_bool()),
             enumerate: object
                 .get("enum")
-                .and_then(|v| v.as_array())
-                .map(|a| a.iter().filter_map(|v| v.as_bool()).collect()),
+                .and_then(|value| value.as_array())
+                .map(|array| array.items.iter().filter_map(|v| v.as_bool()).collect()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }
     }

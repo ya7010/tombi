@@ -13,7 +13,7 @@ pub struct FloatSchema {
 }
 
 impl FloatSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         Self {
             title: object
                 .get("title")
@@ -29,7 +29,7 @@ impl FloatSchema {
             enumerate: object
                 .get("enum")
                 .and_then(|v| v.as_array())
-                .map(|v| v.iter().filter_map(|v| v.as_f64()).collect()),
+                .map(|v| v.items.iter().filter_map(|v| v.as_f64()).collect()),
             default: object.get("default").and_then(|v| v.as_f64()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
         }

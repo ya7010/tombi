@@ -22,7 +22,7 @@ pub struct ArraySchema {
 }
 
 impl ArraySchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         Self {
             title: object
                 .get("title")
@@ -48,16 +48,19 @@ impl ArraySchema {
                 // NOTE: support old name
                 .or_else(|| object.get("x-tombi-array-values-order-by"))
             {
-                Some(serde_json::Value::String(order)) => match order.as_str() {
+                Some(tombi_json::ValueNode::String(order)) => match order.value.as_str() {
                     "ascending" => Some(ArrayValuesOrder::Ascending),
                     "descending" => Some(ArrayValuesOrder::Descending),
                     _ => {
-                        tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {order}");
+                        tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}", order.value);
                         None
                     }
                 },
                 Some(order) => {
-                    tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {order}");
+                    tracing::error!(
+                        "invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}",
+                        order.to_string()
+                    );
                     None
                 }
                 None => None,

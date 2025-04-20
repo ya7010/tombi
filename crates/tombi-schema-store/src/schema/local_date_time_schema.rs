@@ -8,7 +8,7 @@ pub struct LocalDateTimeSchema {
 }
 
 impl LocalDateTimeSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         Self {
             title: object
                 .get("title")
@@ -16,10 +16,13 @@ impl LocalDateTimeSchema {
             description: object
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
-            enumerate: object
-                .get("enum")
-                .and_then(|v| v.as_array())
-                .map(|a| a.iter().map(|v| v.to_string()).collect()),
+            enumerate: object.get("enum").and_then(|v| v.as_array()).map(|a| {
+                a.items
+                    .iter()
+                    .filter_map(|v| v.as_str())
+                    .map(ToString::to_string)
+                    .collect()
+            }),
             default: object
                 .get("default")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),

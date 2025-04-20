@@ -75,4 +75,7 @@ pub enum Error {
 
     #[error("unsupported url schema: {schema}")]
     UnsupportedUrlSchema { schema: String },
+
+    #[error("schema must be an object: {schema_url}")]
+    SchemaMustBeObject { schema_url: SchemaUrl },
 }

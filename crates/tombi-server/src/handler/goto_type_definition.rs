@@ -1,7 +1,7 @@
 use itertools::Either;
 use reqwest::Client;
-use tombi_schema_store::SchemaContext;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
+use tombi_schema_store::SchemaContext;
 use tower_lsp::lsp_types::{
     request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},
     CreateFile, CreateFileOptions, DocumentChangeOperation, DocumentChanges, Location, OneOf,
@@ -89,8 +89,8 @@ pub async fn handle_goto_type_definition(
                 if matches!(url.scheme(), "http" | "https") {
                     let remote_url_path = format!("untitled://{}", url.path());
                     let remote_url = Url::parse(&remote_url_path).unwrap();
-                    open_remote_file(backend, &remote_url, fetch_remote_content(&url).await?)
-                        .await?;
+                    let (content, _) = fetch_remote_content(&url).await?;
+                    open_remote_file(backend, &remote_url, content).await?;
 
                     Some(GotoTypeDefinitionResponse::Scalar(Location {
                         uri: remote_url,
@@ -108,7 +108,9 @@ pub async fn handle_goto_type_definition(
     )
 }
 
-async fn fetch_remote_content(url: &Url) -> Result<String, tower_lsp::jsonrpc::Error> {
+async fn fetch_remote_content(
+    url: &Url,
+) -> Result<(String, tombi_json::ValueNode), tower_lsp::jsonrpc::Error> {
     let client = Client::new();
     let content = match client.get(url.to_string()).send().await {
         Ok(response) => match response.text().await {
@@ -129,12 +131,12 @@ async fn fetch_remote_content(url: &Url) -> Result<String, tower_lsp::jsonrpc::E
     };
 
     // Check if the content is valid JSON
-    serde_json::from_str::<serde_json::Value>(&content).map_err(|e| {
+    let value_node = tombi_json::ValueNode::from_str(&content.clone()).map_err(|e| {
         tracing::error!("Error parsing {url} content: {}", e);
         tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InternalError)
     })?;
 
-    Ok(content)
+    Ok((content, value_node))
 }
 
 async fn open_remote_file(

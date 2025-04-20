@@ -11,7 +11,7 @@ pub struct StringSchema {
 }
 
 impl StringSchema {
-    pub fn new(object: &serde_json::Map<String, serde_json::Value>) -> Self {
+    pub fn new(object: &tombi_json::ObjectNode) -> Self {
         Self {
             title: object
                 .get("title")
@@ -29,8 +29,10 @@ impl StringSchema {
                 .get("pattern")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
             enumerate: object.get("enum").and_then(|v| v.as_array()).map(|a| {
-                a.iter()
-                    .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                a.items
+                    .iter()
+                    .filter_map(|v| v.as_str())
+                    .map(ToString::to_string)
                     .collect()
             }),
             default: object

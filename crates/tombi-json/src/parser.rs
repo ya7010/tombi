@@ -1,12 +1,10 @@
 mod error;
 
+use crate::{ArrayNode, BoolNode, NullNode, NumberNode, ObjectNode, StringNode, ValueNode};
 pub use error::Error;
 use tombi_json_lexer::{lex, Lexed, Token};
 use tombi_json_syntax::{SyntaxKind, T};
-use tombi_json_tree::{
-    ArrayNode, BoolNode, NullNode, NumberNode, ObjectNode, StringNode, Tree, ValueNode,
-};
-use tombi_json_value::{Map, Number};
+use tombi_json_value::Number;
 use tombi_text::Range;
 
 /// Parser for JSON documents
@@ -26,46 +24,41 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn peek(&self) -> Option<&Token> {
-        self.lexed.tokens.get(self.position)
-    }
-
-    fn peek_kind(&self) -> Option<SyntaxKind> {
-        self.peek().map(|t| t.kind())
-    }
-
-    fn advance(&mut self) -> Option<&Token> {
-        // Save the start position
-        let position = self.position;
-        let token = self.lexed.tokens.get(position);
-
-        // Advance the position
-        self.position += 1;
-
-        // Skip trivia tokens
-        while let Some(token) = self.lexed.tokens.get(self.position) {
+    pub fn parse(&mut self) -> Result<ValueNode, crate::parser::Error> {
+        // Skip leading trivia
+        while let Some(token) = self.peek() {
             if token.kind().is_trivia() {
-                self.position += 1;
+                self.advance();
             } else {
                 break;
             }
         }
 
-        token
-    }
+        let root = self.parse_value()?;
 
-    fn expect(&mut self, kind: SyntaxKind) -> Result<&Token, crate::Error> {
-        match self.peek() {
-            Some(token) if token.kind() == kind => Ok(self.advance().unwrap()),
-            Some(token) => Err(Error::UnexpectedToken {
-                expected: kind,
-                actual: token.kind(),
-            }),
-            None => Err(Error::UnexpectedEof),
+        // Skip trailing trivia
+        while let Some(token) = self.peek() {
+            if token.kind().is_trivia() {
+                self.advance();
+            } else {
+                break;
+            }
         }
+
+        // Ensure all tokens have been consumed
+        if let Some(token) = self.peek() {
+            if token.kind() != SyntaxKind::EOF {
+                return Err(Error::UnexpectedToken {
+                    expected: SyntaxKind::EOF,
+                    actual: token.kind(),
+                });
+            }
+        }
+
+        Ok(root)
     }
 
-    fn parse_string_node(&mut self) -> Result<StringNode, crate::Error> {
+    fn parse_string(&mut self) -> Result<StringNode, crate::parser::Error> {
         // Get the current token (without advancing the position)
         match self.peek() {
             Some(token) if token.kind() == SyntaxKind::STRING => {
@@ -78,9 +71,48 @@ impl<'a> Parser<'a> {
                 // Remove the quotation marks
                 let content = &raw_str[1..raw_str.len() - 1];
 
-                // In a real implementation, we would process escape sequences here
+                // Process the string including escape sequences
+                let mut processed = String::with_capacity(content.len());
+                let mut chars = content.chars().peekable();
+
+                while let Some(c) = chars.next() {
+                    if c == '\\' {
+                        // Handle escape sequences
+                        match chars.next() {
+                            Some('"') => processed.push('"'),
+                            Some('\\') => processed.push('\\'),
+                            Some('/') => processed.push('/'),
+                            Some('b') => processed.push('\u{0008}'),
+                            Some('f') => processed.push('\u{000C}'),
+                            Some('n') => processed.push('\n'),
+                            Some('r') => processed.push('\r'),
+                            Some('t') => processed.push('\t'),
+                            Some('u') => {
+                                // Unicode escape sequence: \uXXXX
+                                let mut code_point = 0u32;
+                                for _ in 0..4 {
+                                    match chars.next() {
+                                        Some(hex) if hex.is_ascii_hexdigit() => {
+                                            code_point =
+                                                code_point * 16 + hex.to_digit(16).unwrap();
+                                        }
+                                        _ => return Err(Error::InvalidUnicodeEscape),
+                                    }
+                                }
+                                match std::char::from_u32(code_point) {
+                                    Some(unicode_char) => processed.push(unicode_char),
+                                    None => return Err(Error::InvalidUnicodeCodePoint),
+                                }
+                            }
+                            _ => return Err(Error::InvalidEscapeSequence),
+                        }
+                    } else {
+                        processed.push(c);
+                    }
+                }
+
                 Ok(StringNode {
-                    value: content.to_string(),
+                    value: processed,
                     range,
                 })
             }
@@ -92,11 +124,11 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_value(&mut self) -> Result<ValueNode, crate::Error> {
+    fn parse_value(&mut self) -> Result<ValueNode, crate::parser::Error> {
         match self.peek() {
             Some(token) => {
                 match token.kind() {
-                    SyntaxKind::STRING => self.parse_string_node().map(ValueNode::String),
+                    SyntaxKind::STRING => self.parse_string().map(ValueNode::String),
                     SyntaxKind::NUMBER => {
                         let token = self.peek().unwrap();
                         let span = token.span();
@@ -106,10 +138,20 @@ impl<'a> Parser<'a> {
 
                         // Parse as f64
                         match num_str.parse::<f64>() {
-                            Ok(n) => Ok(ValueNode::Number(NumberNode {
-                                value: Number::from_f64(n),
-                                range,
-                            })),
+                            Ok(n) => {
+                                let num = if n.is_nan() || n.is_infinite() {
+                                    // Fallback for NaN or infinity
+                                    if num_str.starts_with('-') {
+                                        Number::from(-0.0)
+                                    } else {
+                                        Number::from(0.0)
+                                    }
+                                } else {
+                                    Number::from_f64(n)
+                                };
+
+                                Ok(ValueNode::Number(NumberNode { value: num, range }))
+                            }
                             Err(_) => Err(Error::InvalidValue),
                         }
                     }
@@ -138,7 +180,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_array(&mut self) -> Result<ValueNode, crate::Error> {
+    fn parse_array(&mut self) -> Result<ValueNode, crate::parser::Error> {
         // Consume the opening bracket
         let open_token = self.expect(T!['['])?;
         let start_range = open_token.range();
@@ -203,11 +245,12 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_object(&mut self) -> Result<ValueNode, crate::Error> {
+    fn parse_object(&mut self) -> Result<ValueNode, crate::parser::Error> {
         // Consume the opening brace
         let open_token = self.expect(T!['{'])?;
         let start_range = open_token.range();
-        let mut properties = Map::new();
+        let mut properties: tombi_json_value::Map<StringNode, ValueNode> =
+            tombi_json_value::Map::new();
 
         // Check if the object is empty
         if let Some(token) = self.peek() {
@@ -215,7 +258,7 @@ impl<'a> Parser<'a> {
                 let close_token = self.advance().unwrap();
                 let full_range = Range::new(start_range.start(), close_token.range().end());
                 return Ok(ValueNode::Object(ObjectNode {
-                    properties: Map::new(),
+                    properties: tombi_json_value::Map::new(),
                     range: full_range,
                 }));
             }
@@ -235,7 +278,7 @@ impl<'a> Parser<'a> {
                 });
             }
 
-            let key = self.parse_string_node()?;
+            let key = self.parse_string()?;
 
             // Check for duplicate keys
             if properties.contains_key(&key) {
@@ -292,45 +335,50 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_document(&mut self) -> Result<Tree, crate::Error> {
-        // Skip leading trivia
-        while let Some(token) = self.peek() {
+    fn peek(&self) -> Option<&Token> {
+        self.lexed.tokens.get(self.position)
+    }
+
+    fn peek_kind(&self) -> Option<SyntaxKind> {
+        self.peek().map(|t| t.kind())
+    }
+
+    fn advance(&mut self) -> Option<&Token> {
+        // Save the start position
+        let position = self.position;
+        let token = self.lexed.tokens.get(position);
+
+        // Advance the position
+        self.position += 1;
+
+        // Skip trivia tokens
+        while let Some(token) = self.lexed.tokens.get(self.position) {
             if token.kind().is_trivia() {
-                self.advance();
+                self.position += 1;
             } else {
                 break;
             }
         }
 
-        let root = self.parse_value()?;
+        token
+    }
 
-        // Skip trailing trivia
-        while let Some(token) = self.peek() {
-            if token.kind().is_trivia() {
-                self.advance();
-            } else {
-                break;
-            }
+    fn expect(&mut self, kind: SyntaxKind) -> Result<&Token, crate::parser::Error> {
+        match self.peek() {
+            Some(token) if token.kind() == kind => Ok(self.advance().unwrap()),
+            Some(token) => Err(Error::UnexpectedToken {
+                expected: kind,
+                actual: token.kind(),
+            }),
+            None => Err(Error::UnexpectedEof),
         }
-
-        // Ensure all tokens have been consumed
-        if let Some(token) = self.peek() {
-            if token.kind() != SyntaxKind::EOF {
-                return Err(Error::UnexpectedToken {
-                    expected: SyntaxKind::EOF,
-                    actual: token.kind(),
-                });
-            }
-        }
-
-        Ok(Tree::new(root))
     }
 }
 
 /// Parse a JSON string into a Tree
-pub fn parse(source: &str) -> Result<Tree, crate::Error> {
+pub fn parse(source: &str) -> Result<ValueNode, crate::parser::Error> {
     let mut parser = Parser::new(source);
-    parser.parse_document()
+    parser.parse()
 }
 
 #[cfg(test)]
@@ -340,64 +388,64 @@ mod tests {
     #[test]
     fn test_parse_null() {
         let source = "null";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_null());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_null());
     }
 
     #[test]
     fn test_parse_boolean() {
         let source = "true";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_bool());
-        assert_eq!(tree.root.as_bool(), Some(true));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_bool());
+        assert_eq!(value_node.as_bool(), Some(true));
 
         let source = "false";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_bool());
-        assert_eq!(tree.root.as_bool(), Some(false));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_bool());
+        assert_eq!(value_node.as_bool(), Some(false));
     }
 
     #[test]
     fn test_parse_number() {
         let source = "42";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_number());
-        assert_eq!(tree.root.as_f64(), Some(42.0));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_number());
+        assert_eq!(value_node.as_f64(), Some(42.0));
 
         let source = "-3.14";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_number());
-        assert_eq!(tree.root.as_f64(), Some(-3.14));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_number());
+        assert_eq!(value_node.as_f64(), Some(-3.14));
     }
 
     #[test]
     fn test_parse_string() {
         let source = r#""hello""#;
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_string());
-        assert_eq!(tree.root.as_str(), Some("hello"));
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_string());
+        assert_eq!(value_node.as_str(), Some("hello"));
     }
 
     #[test]
     fn test_parse_array() {
         let source = "[1, 2, 3]";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_array());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_array());
 
         let source = "[]";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_array());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_array());
     }
 
     #[test]
     fn test_parse_object() {
         let source = r#"{"a": 1, "b": 2}"#;
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_object());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_object());
 
         let source = "{}";
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_object());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_object());
     }
 
     #[test]
@@ -415,7 +463,7 @@ mod tests {
         }
         "#;
 
-        let tree = parse(source).unwrap();
-        assert!(tree.root.is_object());
+        let value_node = parse(source).unwrap();
+        assert!(value_node.is_object());
     }
 }

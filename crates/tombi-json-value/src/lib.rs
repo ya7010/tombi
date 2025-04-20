@@ -7,10 +7,12 @@ use std::hash::Hash;
 mod macros;
 mod map;
 mod number;
+mod object;
 
 // Re-export types
 pub use map::Map;
 pub use number::Number;
+pub use object::Object;
 
 /// Enum representing a JSON value
 #[derive(Debug, Clone, PartialEq)]
@@ -26,7 +28,7 @@ pub enum Value {
     /// Array of values
     Array(Vec<Value>),
     /// Object (using Map)
-    Object(Map<String, Value>),
+    Object(Object),
 }
 
 impl Value {
@@ -100,6 +102,14 @@ impl Value {
         }
     }
 
+    /// Get as u64 value
+    pub fn as_u64(&self) -> Option<u64> {
+        match self {
+            Value::Number(n) => n.as_u64(),
+            _ => None,
+        }
+    }
+
     /// Get as string reference
     pub fn as_str(&self) -> Option<&str> {
         match self {
@@ -125,7 +135,7 @@ impl Value {
     }
 
     /// Get as object reference
-    pub fn as_object(&self) -> Option<&Map<String, Value>> {
+    pub fn as_object(&self) -> Option<&Object> {
         match self {
             Value::Object(o) => Some(o),
             _ => None,
@@ -133,7 +143,7 @@ impl Value {
     }
 
     /// Get as mutable object reference
-    pub fn as_object_mut(&mut self) -> Option<&mut Map<String, Value>> {
+    pub fn as_object_mut(&mut self) -> Option<&mut Object> {
         match self {
             Value::Object(o) => Some(o),
             _ => None,
@@ -240,17 +250,9 @@ where
     }
 }
 
-impl<K, V> From<Map<K, V>> for Value
-where
-    K: Into<String> + Hash + Eq,
-    V: Into<Value>,
-{
-    fn from(m: Map<K, V>) -> Self {
-        let mut map = Map::new();
-        for (k, v) in m {
-            map.insert(k.into(), v.into());
-        }
-        Value::Object(map)
+impl From<Object> for Value {
+    fn from(m: Object) -> Self {
+        Value::Object(m)
     }
 }
 
@@ -260,7 +262,7 @@ where
     V: Into<Value>,
 {
     fn from(m: IndexMap<K, V>) -> Self {
-        let mut map = Map::new();
+        let mut map = Object::new();
         for (k, v) in m {
             map.insert(k.into(), v.into());
         }
@@ -274,7 +276,7 @@ where
     V: Into<Value>,
 {
     fn from(m: HashMap<K, V>) -> Self {
-        let mut map = Map::new();
+        let mut map = Object::new();
         for (k, v) in m {
             map.insert(k.into(), v.into());
         }
@@ -399,7 +401,7 @@ impl<'de> serde::Deserialize<'de> for Value {
             where
                 A: serde::de::MapAccess<'de>,
             {
-                let mut obj = Map::new();
+                let mut obj = Object::new();
                 while let Some((key, value)) = map.next_entry()? {
                     obj.insert(key, value);
                 }
