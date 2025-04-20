@@ -4,7 +4,7 @@ use futures::{future::BoxFuture, FutureExt};
 use tombi_x_keyword::{ArrayValuesOrder, X_TOMBI_ARRAY_VALUES_ORDER};
 
 use super::{
-    CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItemTokio, SchemaUrl,
+    CurrentSchema, FindSchemaCandidates, Referable, SchemaDefinitions, SchemaItem, SchemaUrl,
     ValueSchema,
 };
 use crate::{Accessor, SchemaStore};
@@ -14,7 +14,7 @@ pub struct ArraySchema {
     pub title: Option<String>,
     pub description: Option<String>,
     pub range: tombi_text::Range,
-    pub items: Option<SchemaItemTokio>,
+    pub items: Option<SchemaItem>,
     pub min_items: Option<usize>,
     pub max_items: Option<usize>,
     pub unique_items: Option<bool>,

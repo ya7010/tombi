@@ -45,13 +45,19 @@ pub use table_schema::TableSchema;
 pub use value_schema::*;
 
 pub type SchemaProperties =
-    Arc<tokio::sync::RwLock<indexmap::IndexMap<SchemaAccessor, Referable<ValueSchema>>>>;
+    Arc<tokio::sync::RwLock<indexmap::IndexMap<SchemaAccessor, PropertySchema>>>;
 pub type SchemaPatternProperties =
-    Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
-pub type SchemaItemTokio = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
+    Arc<tokio::sync::RwLock<ahash::AHashMap<String, PropertySchema>>>;
+pub type SchemaItem = Arc<tokio::sync::RwLock<Referable<ValueSchema>>>;
 pub type SchemaDefinitions =
     Arc<tokio::sync::RwLock<ahash::AHashMap<String, Referable<ValueSchema>>>>;
 pub type ReferableValueSchemas = Arc<tokio::sync::RwLock<Vec<Referable<ValueSchema>>>>;
+
+#[derive(Debug, Clone)]
+pub struct PropertySchema {
+    pub key_range: tombi_text::Range,
+    pub property_schema: Referable<ValueSchema>,
+}
 
 #[derive(Debug, Clone)]
 pub struct Schema {

@@ -3,12 +3,12 @@ use std::borrow::Cow;
 use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
 use itertools::Itertools;
-use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::{
-    AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, SchemaAccessor, SchemaContext,
-    ValueSchema,
+    AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, PropertySchema, SchemaAccessor,
+    SchemaContext, ValueSchema,
 };
+use tombi_syntax::SyntaxElement;
 use tombi_validator::Validate;
 use tombi_x_keyword::TableKeysOrder;
 
@@ -162,10 +162,11 @@ where
 
                         for (accessor, targets) in sorted_targets {
                             if let Some(value) = table.get(&accessor.to_string()) {
-                                if let Some(referable_schema) =
-                                    table_schema.properties.write().await.get_mut(&accessor)
+                                if let Some(PropertySchema {
+                                    property_schema, ..
+                                }) = table_schema.properties.write().await.get_mut(&accessor)
                                 {
-                                    if let Ok(Some(current_schema)) = referable_schema
+                                    if let Ok(Some(current_schema)) = property_schema
                                         .resolve(
                                             current_schema.schema_url.clone(),
                                             current_schema.definitions.clone(),
@@ -191,7 +192,7 @@ where
                                         results
                                             .extend(targets.into_iter().map(|(_, target)| target));
                                     }
-                                } else if let Some(referable_schema) =
+                                } else if let Some((_, referable_schema)) =
                                     &table_schema.additional_property_schema
                                 {
                                     if let Ok(Some(current_schema)) = referable_schema

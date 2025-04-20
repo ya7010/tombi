@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
+use itertools::Itertools;
 use tombi_schema_store::{Accessor, ArraySchema, CurrentSchema, DocumentSchema, ValueSchema};
 
 use crate::goto_type_definition::{
@@ -180,7 +181,7 @@ impl GetTypeDefinition for ArraySchema {
         &'a self,
         _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
-        _accessors: &'a [Accessor],
+        accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
@@ -188,6 +189,7 @@ impl GetTypeDefinition for ArraySchema {
             current_schema.map(|schema| {
                 TypeDefinition::new(
                     schema.schema_url.as_ref().clone(),
+                    accessors.iter().map(Into::into).collect_vec(),
                     schema.value_schema.range(),
                 )
             })

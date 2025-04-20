@@ -58,6 +58,7 @@ where
                 {
                     return Some(TypeDefinition {
                         schema_url: schema_url.clone(),
+                        schema_accessors: accessors.iter().map(Into::into).collect_vec(),
                         range: tombi_text::Range::default(),
                     });
                 }
@@ -75,7 +76,7 @@ impl GetTypeDefinition for tombi_schema_store::AllOfSchema {
         &'a self,
         _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
-        _accessors: &'a [Accessor],
+        accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
@@ -86,6 +87,7 @@ impl GetTypeDefinition for tombi_schema_store::AllOfSchema {
 
             Some(TypeDefinition {
                 schema_url: current_schema.schema_url.as_ref().to_owned(),
+                schema_accessors: accessors.iter().map(Into::into).collect_vec(),
                 range: tombi_text::Range::default(),
             })
         }

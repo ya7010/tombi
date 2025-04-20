@@ -2,8 +2,8 @@ use std::borrow::Cow;
 
 use futures::{future::BoxFuture, FutureExt};
 use tombi_schema_store::{
-    Accessor, Accessors, CurrentSchema, DocumentSchema, SchemaAccessor, TableSchema, ValueSchema,
-    ValueType,
+    Accessor, Accessors, CurrentSchema, DocumentSchema, PropertySchema, SchemaAccessor,
+    TableSchema, ValueSchema, ValueType,
 };
 
 use crate::hover::{
@@ -71,7 +71,9 @@ impl GetHoverContent for tombi_document_tree::Table {
                                     None => None,
                                 };
 
-                                if let Some(property_schema) = table_schema
+                                if let Some(PropertySchema {
+                                    property_schema, ..
+                                }) = table_schema
                                     .properties
                                     .write()
                                     .await
@@ -160,12 +162,16 @@ impl GetHoverContent for tombi_document_tree::Table {
                                         });
                                 }
                                 if let Some(pattern_properties) = &table_schema.pattern_properties {
-                                    for (property_key, pattern_property) in
-                                        pattern_properties.write().await.iter_mut()
+                                    for (
+                                        property_key,
+                                        PropertySchema {
+                                            property_schema, ..
+                                        },
+                                    ) in pattern_properties.write().await.iter_mut()
                                     {
                                         if let Ok(pattern) = regex::Regex::new(property_key) {
                                             if pattern.is_match(&key_str) {
-                                                if let Ok(Some(current_schema)) = pattern_property
+                                                if let Ok(Some(current_schema)) = property_schema
                                                     .resolve(
                                                         current_schema.schema_url.clone(),
                                                         current_schema.definitions.clone(),
@@ -251,7 +257,7 @@ impl GetHoverContent for tombi_document_tree::Table {
                                     }
                                 }
 
-                                if let Some(referable_additional_property_schema) =
+                                if let Some((_, referable_additional_property_schema)) =
                                     &table_schema.additional_property_schema
                                 {
                                     let mut referable_schema =

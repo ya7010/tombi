@@ -1,11 +1,11 @@
 use std::borrow::Cow;
 
+use futures::{future::BoxFuture, FutureExt};
 use tombi_diagnostic::SetDiagnostics;
 use tombi_document_tree::ValueImpl;
-use futures::{future::BoxFuture, FutureExt};
 use tombi_schema_store::{
-    Accessor, CurrentSchema, DocumentSchema, SchemaAccessor, SchemaAccessors, ValueSchema,
-    ValueType,
+    Accessor, CurrentSchema, DocumentSchema, PropertySchema, SchemaAccessor, SchemaAccessors,
+    ValueSchema, ValueType,
 };
 
 use super::{validate_all_of, validate_any_of, validate_one_of, Validate};
@@ -122,7 +122,9 @@ impl Validate for tombi_document_tree::Table {
                         .collect::<Vec<_>>();
 
                     let mut matche_key = false;
-                    if let Some(property_schema) = table_schema
+                    if let Some(PropertySchema {
+                        property_schema, ..
+                    }) = table_schema
                         .properties
                         .write()
                         .await
@@ -164,8 +166,12 @@ impl Validate for tombi_document_tree::Table {
                     }
 
                     if let Some(pattern_properties) = &table_schema.pattern_properties {
-                        for (pattern_key, refferable_pattern_property) in
-                            pattern_properties.write().await.iter_mut()
+                        for (
+                            pattern_key,
+                            PropertySchema {
+                                property_schema, ..
+                            },
+                        ) in pattern_properties.write().await.iter_mut()
                         {
                             let Ok(pattern) = regex::Regex::new(pattern_key) else {
                                 tracing::error!("Invalid regex pattern property: {}", pattern_key);
@@ -173,7 +179,7 @@ impl Validate for tombi_document_tree::Table {
                             };
                             if pattern.is_match(&accessor_raw_text) {
                                 matche_key = true;
-                                if let Ok(Some(current_schema)) = refferable_pattern_property
+                                if let Ok(Some(current_schema)) = property_schema
                                     .resolve(
                                         current_schema.schema_url.clone(),
                                         current_schema.definitions.clone(),
@@ -222,7 +228,7 @@ impl Validate for tombi_document_tree::Table {
                         }
                     }
                     if !matche_key {
-                        if let Some(referable_additional_property_schema) =
+                        if let Some((_, referable_additional_property_schema)) =
                             &table_schema.additional_property_schema
                         {
                             let mut referable_schema =

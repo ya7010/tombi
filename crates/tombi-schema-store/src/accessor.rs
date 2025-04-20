@@ -1,3 +1,5 @@
+use crate::SchemaAccessor;
+
 /// Represents an accessor to a value in a TOML-like structure.
 /// It can either be a key (for objects) or an index (for arrays).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -23,6 +25,16 @@ impl std::fmt::Display for Accessor {
         match self {
             Accessor::Key(key) => write!(f, "{}", key),
             Accessor::Index(index) => write!(f, "[{}]", index),
+        }
+    }
+}
+
+impl PartialEq<SchemaAccessor> for Accessor {
+    fn eq(&self, other: &SchemaAccessor) -> bool {
+        match (self, other) {
+            (Accessor::Key(key), SchemaAccessor::Key(other_key)) => key == other_key,
+            (Accessor::Index(_), SchemaAccessor::Index) => true,
+            _ => false,
         }
     }
 }

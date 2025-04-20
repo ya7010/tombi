@@ -1,5 +1,7 @@
 use futures::FutureExt;
-use tombi_schema_store::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaAccessor, ValueSchema};
+use tombi_schema_store::{
+    AllOfSchema, AnyOfSchema, OneOfSchema, PropertySchema, SchemaAccessor, ValueSchema,
+};
 use tombi_validator::Validate;
 
 mod array;
@@ -82,13 +84,15 @@ async fn get_schema<'a: 'b, 'b>(
                     ) = (value, current_schema.value_schema.as_ref())
                     {
                         if let Some(value) = table.get(&key.to_string()) {
-                            if let Some(referable_property_schema) = table_schema
+                            if let Some(PropertySchema {
+                                property_schema, ..
+                            }) = table_schema
                                 .properties
                                 .write()
                                 .await
                                 .get_mut(&SchemaAccessor::Key(key.to_string()))
                             {
-                                if let Ok(Some(current_schema)) = referable_property_schema
+                                if let Ok(Some(current_schema)) = property_schema
                                     .resolve(
                                         current_schema.schema_url.clone(),
                                         current_schema.definitions.clone(),
@@ -107,12 +111,16 @@ async fn get_schema<'a: 'b, 'b>(
                                 }
                             }
                             if let Some(pattern_properties) = &table_schema.pattern_properties {
-                                for (property_key, pattern_property) in
-                                    pattern_properties.write().await.iter_mut()
+                                for (
+                                    property_key,
+                                    PropertySchema {
+                                        property_schema, ..
+                                    },
+                                ) in pattern_properties.write().await.iter_mut()
                                 {
                                     if let Ok(pattern) = regex::Regex::new(property_key) {
                                         if pattern.is_match(&key.to_string()) {
-                                            if let Ok(Some(current_schema)) = pattern_property
+                                            if let Ok(Some(current_schema)) = property_schema
                                                 .resolve(
                                                     current_schema.schema_url.clone(),
                                                     current_schema.definitions.clone(),
@@ -138,7 +146,7 @@ async fn get_schema<'a: 'b, 'b>(
                                     };
                                 }
                             }
-                            if let Some(additional_properties_schema) =
+                            if let Some((_, additional_properties_schema)) =
                                 &table_schema.additional_property_schema
                             {
                                 if let Ok(Some(current_schema)) = additional_properties_schema
