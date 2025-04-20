@@ -37,6 +37,7 @@ jobs:
             target: s390x
           - runner: ubuntu-latest
             target: ppc64le
+      fail-fast: false
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
