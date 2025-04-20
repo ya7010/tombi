@@ -2,6 +2,7 @@
 pub struct BooleanSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub default: Option<bool>,
     pub enumerate: Option<Vec<bool>>,
     pub deprecated: Option<bool>,
@@ -22,6 +23,7 @@ impl BooleanSchema {
                 .and_then(|value| value.as_array())
                 .map(|array| array.items.iter().filter_map(|v| v.as_bool()).collect()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            range: object.range,
         }
     }
 

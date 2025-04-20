@@ -5,8 +5,8 @@ use futures::{
     FutureExt,
 };
 use tombi_schema_store::{
-    is_online_url, Accessor, CurrentSchema, DocumentSchema, FindSchemaCandidates, Referable,
-    SchemaAccessor, SchemaStore, TableSchema, ValueSchema,
+    is_online_url, Accessor, CurrentSchema, DocumentSchema, FindSchemaCandidates, PropertySchema,
+    Referable, SchemaAccessor, SchemaStore, TableSchema, ValueSchema,
 };
 
 use crate::completion::{
@@ -70,8 +70,9 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                 let accessor: Accessor = Accessor::Key(accessor_str.to_string());
 
                                 let mut properties = table_schema.properties.write().await;
-                                if let Some(property) =
-                                    properties.get_mut(&SchemaAccessor::from(&accessor))
+                                if let Some(PropertySchema {
+                                    property_schema, ..
+                                }) = properties.get_mut(&SchemaAccessor::from(&accessor))
                                 {
                                     let need_magic_trigger = match completion_hint {
                                         Some(
@@ -95,7 +96,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                         );
                                     }
 
-                                    if let Ok(Some(current_schema)) = property
+                                    if let Ok(Some(current_schema)) = property_schema
                                         .resolve(
                                             current_schema.schema_url.clone(),
                                             current_schema.definitions.clone(),
@@ -124,7 +125,13 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                             .await;
                                     }
                                 } else if keys.len() == 1 {
-                                    for (key, property) in properties.iter_mut() {
+                                    for (
+                                        key,
+                                        PropertySchema {
+                                            property_schema, ..
+                                        },
+                                    ) in properties.iter_mut()
+                                    {
                                         let key_name = &key.to_string();
                                         if !key_name.starts_with(accessor_str) {
                                             continue;
@@ -136,7 +143,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                             }
                                         }
 
-                                        if let Ok(Some(current_schema)) = property
+                                        if let Ok(Some(current_schema)) = property_schema
                                             .resolve(
                                                 current_schema.schema_url.clone(),
                                                 current_schema.definitions.clone(),
@@ -174,8 +181,12 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                 }
 
                                 if let Some(pattern_properties) = &table_schema.pattern_properties {
-                                    for (property_key, pattern_property_schema) in
-                                        pattern_properties.write().await.iter_mut()
+                                    for (
+                                        property_key,
+                                        PropertySchema {
+                                            property_schema, ..
+                                        },
+                                    ) in pattern_properties.write().await.iter_mut()
                                     {
                                         let Ok(pattern) = regex::Regex::new(property_key) else {
                                             tracing::error!(
@@ -187,16 +198,15 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                         if pattern.is_match(accessor_str) {
                                             tracing::trace!(
                                                 "pattern_property_schema = {:?}",
-                                                &pattern_property_schema
+                                                &property_schema
                                             );
-                                            if let Ok(Some(current_schema)) =
-                                                pattern_property_schema
-                                                    .resolve(
-                                                        current_schema.schema_url.clone(),
-                                                        current_schema.definitions.clone(),
-                                                        schema_context.store,
-                                                    )
-                                                    .await
+                                            if let Ok(Some(current_schema)) = property_schema
+                                                .resolve(
+                                                    current_schema.schema_url.clone(),
+                                                    current_schema.definitions.clone(),
+                                                    schema_context.store,
+                                                )
+                                                .await
                                             {
                                                 return get_property_value_completion_contents(
                                                     value,
@@ -214,7 +224,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                     }
                                 }
 
-                                if let Some(referable_additional_property_schema) =
+                                if let Some((_, referable_additional_property_schema)) =
                                     &table_schema.additional_property_schema
                                 {
                                     tracing::trace!(
@@ -264,8 +274,12 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                 }
                             }
                         } else {
-                            for (accessor, property) in
-                                table_schema.properties.write().await.iter_mut()
+                            for (
+                                accessor,
+                                PropertySchema {
+                                    property_schema, ..
+                                },
+                            ) in table_schema.properties.write().await.iter_mut()
                             {
                                 let key_name = &accessor.to_string();
 
@@ -278,7 +292,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                 // NOTE: To avoid downloading unnecessary schema files,
                                 //       if the property is an unresolved online URL(like https:// or http://),
                                 //       only the overview is used to generate completion candidates.
-                                match property {
+                                match property_schema {
                                     Referable::Ref {
                                         reference,
                                         title,
@@ -299,7 +313,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                     _ => {}
                                 }
 
-                                if let Ok(Some(current_schema)) = property
+                                if let Ok(Some(current_schema)) = property_schema
                                     .resolve(
                                         current_schema.schema_url.clone(),
                                         current_schema.definitions.clone(),
@@ -488,10 +502,16 @@ impl FindCompletionContents for TableSchema {
 
             let mut completion_items = Vec::new();
 
-            for (key, property) in self.properties.write().await.iter_mut() {
+            for (
+                key,
+                PropertySchema {
+                    property_schema, ..
+                },
+            ) in self.properties.write().await.iter_mut()
+            {
                 let label = &key.to_string();
 
-                if let Ok(Some(current_schema)) = property
+                if let Ok(Some(current_schema)) = property_schema
                     .resolve(
                         current_schema.schema_url.clone(),
                         current_schema.definitions.clone(),

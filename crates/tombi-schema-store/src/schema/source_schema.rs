@@ -18,11 +18,7 @@ impl std::fmt::Debug for SourceSchema {
             .sub_schema_url_map
             .iter()
             .map(|(accessors, url)| {
-                format!(
-                    "[{:?}]: {}",
-                    SchemaAccessors::new(accessors.clone()),
-                    url
-                )
+                format!("[{:?}]: {}", SchemaAccessors::new(accessors.clone()), url)
             })
             .collect::<Vec<_>>()
             .join(", ");

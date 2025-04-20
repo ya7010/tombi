@@ -9,6 +9,7 @@ use crate::Referable;
 pub struct AnyOfSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub schemas: ReferableValueSchemas,
     pub default: Option<tombi_json::Value>,
     pub deprecated: Option<bool>,
@@ -43,6 +44,7 @@ impl AnyOfSchema {
             schemas: Arc::new(tokio::sync::RwLock::new(schemas)),
             default: object.get("default").cloned().map(|v| v.into()),
             deprecated: object.get("deprecated").and_then(|v| v.as_bool()),
+            range: object.range,
         }
     }
 

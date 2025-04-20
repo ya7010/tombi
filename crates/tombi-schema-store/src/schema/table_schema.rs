@@ -7,8 +7,8 @@ use tombi_json::StringNode;
 use tombi_x_keyword::{TableKeysOrder, X_TOMBI_TABLE_KEYS_ORDER};
 
 use super::{
-    CurrentSchema, FindSchemaCandidates, SchemaAccessor, SchemaDefinitions, SchemaItemTokio,
-    SchemaPatternProperties, SchemaUrl, ValueSchema,
+    CurrentSchema, FindSchemaCandidates, PropertySchema, SchemaAccessor, SchemaDefinitions,
+    SchemaItem, SchemaPatternProperties, SchemaUrl, ValueSchema,
 };
 use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
 
@@ -16,10 +16,11 @@ use crate::{Accessor, Referable, SchemaProperties, SchemaStore};
 pub struct TableSchema {
     pub title: Option<String>,
     pub description: Option<String>,
+    pub range: tombi_text::Range,
     pub properties: SchemaProperties,
     pub pattern_properties: Option<SchemaPatternProperties>,
     additional_properties: Option<bool>,
-    pub additional_property_schema: Option<SchemaItemTokio>,
+    pub additional_property_schema: Option<(tombi_text::Range, SchemaItem)>,
     pub required: Option<Vec<String>>,
     pub min_properties: Option<usize>,
     pub max_properties: Option<usize>,
@@ -35,10 +36,13 @@ impl TableSchema {
                 let Some(object) = value_node.as_object() else {
                     continue;
                 };
-                if let Some(value_schema) = Referable::<ValueSchema>::new(object) {
+                if let Some(property_schema) = Referable::<ValueSchema>::new(object) {
                     properties.insert(
                         SchemaAccessor::Key(key_node.value.to_string()),
-                        value_schema,
+                        PropertySchema {
+                            property_schema,
+                            key_range: key_node.range,
+                        },
                     );
                 }
             }
@@ -66,7 +70,12 @@ impl TableSchema {
                     let value_schema = Referable::<ValueSchema>::new(object_node);
                     (
                         Some(true),
-                        value_schema.map(|schema| Arc::new(tokio::sync::RwLock::new(schema))),
+                        value_schema.map(|schema| {
+                            (
+                                object_node.range,
+                                Arc::new(tokio::sync::RwLock::new(schema)),
+                            )
+                        }),
                     )
                 }
                 _ => (None, None),
@@ -102,13 +111,24 @@ impl TableSchema {
             description: object_node
                 .get("description")
                 .and_then(|v| v.as_str().map(|s| s.to_string())),
+            range: object_node.range,
             properties: Arc::new(properties.into()),
             pattern_properties: pattern_properties.map(|props| {
-                let converted_props = props
-                    .into_iter()
-                    .map(|(key, value)| (key.value, value))
-                    .collect::<AHashMap<_, _>>();
-                Arc::new(converted_props.into())
+                Arc::new(
+                    props
+                        .into_iter()
+                        .map(|(key, property_schema)| {
+                            (
+                                key.value,
+                                PropertySchema {
+                                    property_schema,
+                                    key_range: key.range,
+                                },
+                            )
+                        })
+                        .collect::<AHashMap<_, _>>()
+                        .into(),
+                )
             }),
             additional_properties,
             additional_property_schema,
@@ -170,12 +190,15 @@ impl FindSchemaCandidates for TableSchema {
             let mut errors = Vec::new();
 
             if accessors.is_empty() {
-                for property in self.properties.write().await.values_mut() {
+                for PropertySchema {
+                    property_schema, ..
+                } in self.properties.write().await.values_mut()
+                {
                     if let Ok(Some(CurrentSchema {
                         value_schema,
                         schema_url,
                         definitions,
-                    })) = property
+                    })) = property_schema
                         .resolve(
                             Cow::Borrowed(schema_url),
                             Cow::Borrowed(definitions),
@@ -199,7 +222,9 @@ impl FindSchemaCandidates for TableSchema {
                 return (candidates, errors);
             }
 
-            if let Some(value) = self
+            if let Some(PropertySchema {
+                property_schema, ..
+            }) = self
                 .properties
                 .write()
                 .await
@@ -209,7 +234,7 @@ impl FindSchemaCandidates for TableSchema {
                     value_schema,
                     schema_url,
                     definitions,
-                })) = value
+                })) = property_schema
                     .resolve(
                         Cow::Borrowed(schema_url),
                         Cow::Borrowed(definitions),

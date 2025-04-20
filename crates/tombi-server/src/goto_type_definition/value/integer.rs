@@ -1,4 +1,5 @@
 use futures::{future::BoxFuture, FutureExt};
+use itertools::Itertools;
 use tombi_schema_store::ValueSchema;
 
 use crate::goto_type_definition::{
@@ -89,17 +90,18 @@ impl GetTypeDefinition for tombi_schema_store::IntegerSchema {
         &'a self,
         _position: tombi_text::Position,
         _keys: &'a [tombi_document_tree::Key],
-        _accessors: &'a [tombi_schema_store::Accessor],
+        accessors: &'a [tombi_schema_store::Accessor],
         current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
         _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
-            current_schema
-                .map(|schema| schema.schema_url.as_ref().clone())
-                .map(|schema_url| TypeDefinition {
-                    schema_url,
-                    range: tombi_text::Range::default(),
-                })
+            current_schema.map(|schema| {
+                TypeDefinition::new(
+                    schema.schema_url.as_ref().clone(),
+                    accessors.iter().map(Into::into).collect_vec(),
+                    schema.value_schema.range(),
+                )
+            })
         }
         .boxed()
     }
