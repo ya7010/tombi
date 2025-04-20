@@ -9,12 +9,13 @@ license = { workspace = true }
 itertools = { workspace = true }
 schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-tokio.workspace = true
+tokio = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-ast-editor = { workspace = true }
 tombi-config = { workspace = true }
 tombi-diagnostic = { workspace = true }
 tombi-document-tree = { workspace = true }
+tombi-json = { workspace = true }
 tombi-parser = { workspace = true }
 tombi-schema-store = { workspace = true }
 tombi-syntax = { workspace = true }

@@ -84,22 +84,24 @@ pub async fn handle_goto_type_definition(
         )
         .await
         {
-            Some(TypeDefinition { schema_url, .. }) => {
+            Some(TypeDefinition {
+                schema_url, range, ..
+            }) => {
                 let url: Url = schema_url.into();
                 if matches!(url.scheme(), "http" | "https") {
                     let remote_url_path = format!("untitled://{}", url.path());
                     let remote_url = Url::parse(&remote_url_path).unwrap();
-                    let (content, _) = fetch_remote_content(&url).await?;
+                    let content = fetch_remote_content(&url).await?;
                     open_remote_file(backend, &remote_url, content).await?;
 
                     Some(GotoTypeDefinitionResponse::Scalar(Location {
                         uri: remote_url,
-                        range: tombi_text::Range::default().into(),
+                        range: range.into(),
                     }))
                 } else {
                     Some(GotoTypeDefinitionResponse::Scalar(Location {
                         uri: url,
-                        range: tombi_text::Range::default().into(),
+                        range: range.into(),
                     }))
                 }
             }
@@ -108,9 +110,7 @@ pub async fn handle_goto_type_definition(
     )
 }
 
-async fn fetch_remote_content(
-    url: &Url,
-) -> Result<(String, tombi_json::ValueNode), tower_lsp::jsonrpc::Error> {
+async fn fetch_remote_content(url: &Url) -> Result<String, tower_lsp::jsonrpc::Error> {
     let client = Client::new();
     let content = match client.get(url.to_string()).send().await {
         Ok(response) => match response.text().await {
@@ -131,12 +131,12 @@ async fn fetch_remote_content(
     };
 
     // Check if the content is valid JSON
-    let value_node = tombi_json::ValueNode::from_str(&content.clone()).map_err(|e| {
+    tombi_json::ValueNode::from_str(&content.clone()).map_err(|e| {
         tracing::error!("Error parsing {url} content: {}", e);
         tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InternalError)
     })?;
 
-    Ok((content, value_node))
+    Ok(content)
 }
 
 async fn open_remote_file(
