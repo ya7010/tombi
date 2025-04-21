@@ -252,14 +252,21 @@ impl Table {
 
     pub fn get<K>(&self, key: &K) -> Option<&Value>
     where
-        K: std::hash::Hash + indexmap::Equivalent<Key>,
+        K: ?Sized + std::hash::Hash + indexmap::Equivalent<Key>,
     {
         self.key_values.get(key)
     }
 
+    pub fn get_key_value<K>(&self, key: &K) -> Option<(&Key, &Value)>
+    where
+        K: ?Sized + std::hash::Hash + indexmap::Equivalent<Key>,
+    {
+        self.key_values.get_key_value(key)
+    }
+
     pub fn get_mut<K>(&mut self, key: &K) -> Option<&mut Value>
     where
-        K: std::hash::Hash + indexmap::Equivalent<Key>,
+        K: ?Sized + std::hash::Hash + indexmap::Equivalent<Key>,
     {
         self.key_values.get_mut(key)
     }

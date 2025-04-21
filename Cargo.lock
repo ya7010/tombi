@@ -1975,7 +1975,14 @@ name = "tombi-cargo-extension"
 version = "0.0.0"
 dependencies = [
  "cargo_metadata",
+ "tombi-ast",
+ "tombi-config",
+ "tombi-document-tree",
  "tombi-extension",
+ "tombi-parser",
+ "tombi-text",
+ "tower-lsp",
+ "tracing",
 ]
 
 [[package]]
@@ -2296,6 +2303,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tombi-ast",
+ "tombi-cargo-extension",
  "tombi-config",
  "tombi-diagnostic",
  "tombi-document",

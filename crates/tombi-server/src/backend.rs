@@ -2,14 +2,17 @@ use std::sync::Arc;
 
 use ahash::AHashMap;
 use itertools::{Either, Itertools};
-use tombi_schema_store::SourceSchema;
-use tombi_syntax::SyntaxNode;
 use tombi_config::{Config, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use tombi_document_tree::TryIntoDocumentTree;
+use tombi_schema_store::SourceSchema;
+use tombi_syntax::SyntaxNode;
 use tower_lsp::{
     lsp_types::{
-        request::{GotoTypeDefinitionParams, GotoTypeDefinitionResponse},
+        request::{
+            GotoDeclarationParams, GotoDeclarationResponse, GotoTypeDefinitionParams,
+            GotoTypeDefinitionResponse,
+        },
         CompletionParams, CompletionResponse, DidChangeConfigurationParams,
         DidChangeTextDocumentParams, DidChangeWatchedFilesParams, DidCloseTextDocumentParams,
         DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentDiagnosticParams,
@@ -27,9 +30,9 @@ use crate::{
         handle_completion, handle_diagnostic, handle_did_change, handle_did_change_configuration,
         handle_did_change_watched_files, handle_did_close, handle_did_open, handle_did_save,
         handle_document_link, handle_document_symbol, handle_folding_range, handle_formatting,
-        handle_get_toml_version, handle_goto_type_definition, handle_hover, handle_initialize,
-        handle_initialized, handle_semantic_tokens_full, handle_shutdown, handle_update_config,
-        handle_update_schema, GetTomlVersionResponse,
+        handle_get_toml_version, handle_goto_declaration, handle_goto_type_definition,
+        handle_hover, handle_initialize, handle_initialized, handle_semantic_tokens_full,
+        handle_shutdown, handle_update_config, handle_update_schema, GetTomlVersionResponse,
     },
 };
 
@@ -74,7 +77,10 @@ impl Backend {
     }
 
     #[inline]
-    async fn get_parsed(&self, text_document_uri: &Url) -> Option<tombi_parser::Parsed<SyntaxNode>> {
+    async fn get_parsed(
+        &self,
+        text_document_uri: &Url,
+    ) -> Option<tombi_parser::Parsed<SyntaxNode>> {
         let document_source = self.document_sources.read().await;
         let document_info = match document_source.get(text_document_uri) {
             Some(document_info) => document_info,
@@ -299,6 +305,13 @@ impl LanguageServer for Backend {
         params: GotoTypeDefinitionParams,
     ) -> Result<Option<GotoTypeDefinitionResponse>, tower_lsp::jsonrpc::Error> {
         handle_goto_type_definition(self, params).await
+    }
+
+    async fn goto_declaration(
+        &self,
+        params: GotoDeclarationParams,
+    ) -> Result<Option<GotoDeclarationResponse>, tower_lsp::jsonrpc::Error> {
+        handle_goto_declaration(self, params).await
     }
 }
 

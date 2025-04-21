@@ -1,7 +1,7 @@
 use itertools::{Either, Itertools};
-use tombi_schema_store::SchemaContext;
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
+use tombi_schema_store::SchemaContext;
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
 use crate::{
