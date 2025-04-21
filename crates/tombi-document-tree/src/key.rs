@@ -88,6 +88,18 @@ impl std::hash::Hash for Key {
     }
 }
 
+impl indexmap::Equivalent<Key> for &str {
+    fn equivalent(&self, other: &Key) -> bool {
+        self == &other.value
+    }
+}
+
+impl std::borrow::Borrow<str> for Key {
+    fn borrow(&self) -> &str {
+        &self.value
+    }
+}
+
 impl std::fmt::Display for Key {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)

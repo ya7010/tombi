@@ -1,6 +1,6 @@
 use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, CompletionOptions, CompletionOptionsCompletionItem,
-    DiagnosticOptions, DiagnosticServerCapabilities, DocumentLinkOptions,
+    DeclarationCapability, DiagnosticOptions, DiagnosticServerCapabilities, DocumentLinkOptions,
     FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
     OneOf, PositionEncodingKind, SemanticTokensFullOptions, SemanticTokensLegend,
     SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
@@ -78,6 +78,7 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
             work_done_progress_options: WorkDoneProgressOptions::default(),
         }),
         type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
+        declaration_provider: Some(DeclarationCapability::Simple(true)),
         document_symbol_provider: Some(OneOf::Left(true)),
         document_formatting_provider: Some(OneOf::Left(true)),
         folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
