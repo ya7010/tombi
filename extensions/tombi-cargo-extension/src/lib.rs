@@ -103,13 +103,19 @@ fn get_workspace_cargo_toml_location(
         return Ok(None);
     };
 
+    let workspace_key = tombi_document_tree::Key::try_new(
+        tombi_document_tree::KeyKind::BareKey,
+        "workspace".to_string(),
+        tombi_text::Range::default(),
+        toml_version,
+    )
+    .unwrap();
+
     let Some((target_key, value)) = dig_keys(
         &document_tree,
-        &itertools::chain(
-            ["workspace"],
-            keys[..keys.len() - 1].iter().map(|k| k.value()),
-        )
-        .collect_vec(),
+        &std::iter::once(workspace_key)
+            .chain(keys[..keys.len() - 1].iter().cloned())
+            .collect_vec(),
     ) else {
         return Ok(None);
     };
@@ -165,10 +171,7 @@ fn get_dependencies_crate_path_location(
         return Ok(None);
     };
 
-    let Some((_, value)) = dig_keys(
-        &document_tree,
-        &keys.iter().map(|k| k.value()).collect_vec(),
-    ) else {
+    let Some((_, value)) = dig_keys(&document_tree, &keys) else {
         return Ok(None);
     };
 
@@ -190,12 +193,12 @@ fn get_dependencies_crate_path_location(
 
 fn dig_keys<'a>(
     document_tree: &'a tombi_document_tree::DocumentTree,
-    keys: &[&str],
+    keys: &[tombi_document_tree::Key],
 ) -> Option<(&'a tombi_document_tree::Key, &'a tombi_document_tree::Value)> {
     if keys.is_empty() {
         return None;
     }
-    let Some((mut key, mut value)) = document_tree.get_key_value(keys[0]) else {
+    let Some((mut key, mut value)) = document_tree.get_key_value(&keys[0]) else {
         return None;
     };
     for k in keys[1..].iter() {

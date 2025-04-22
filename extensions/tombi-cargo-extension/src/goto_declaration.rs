@@ -1,7 +1,7 @@
 use tombi_config::TomlVersion;
-use tower_lsp::lsp_types::{Location, TextDocumentIdentifier, Url};
+use tower_lsp::lsp_types::{Location, TextDocumentIdentifier};
 
-use crate::{find_workspace_cargo_toml, get_workspace_cargo_toml_location};
+use crate::get_workspace_cargo_toml_location;
 
 pub async fn goto_declaration(
     text_document: TextDocumentIdentifier,
