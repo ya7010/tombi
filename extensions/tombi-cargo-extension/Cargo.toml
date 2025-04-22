@@ -9,6 +9,7 @@ license.workspace = true
 
 [dependencies]
 cargo_metadata = { workspace = true }
+itertools = { workspace = true }
 tombi-ast = { workspace = true }
 tombi-config = { workspace = true }
 tombi-document-tree = { workspace = true }

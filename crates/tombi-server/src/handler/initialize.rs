@@ -79,6 +79,7 @@ pub fn server_capabilities(client_capabilities: &ClientCapabilities) -> ServerCa
         }),
         type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
         declaration_provider: Some(DeclarationCapability::Simple(true)),
+        definition_provider: Some(OneOf::Left(true)),
         document_symbol_provider: Some(OneOf::Left(true)),
         document_formatting_provider: Some(OneOf::Left(true)),
         folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
