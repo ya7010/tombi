@@ -1,6 +1,8 @@
 mod goto_declaration;
+mod goto_definition;
 
 pub use goto_declaration::goto_declaration;
+pub use goto_definition::goto_definition;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::TryIntoDocumentTree;

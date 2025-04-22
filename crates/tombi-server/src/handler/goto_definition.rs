@@ -41,7 +41,7 @@ pub async fn handle_goto_definition(
     };
 
     if let Some(location) =
-        tombi_cargo_extension::goto_declaration(text_document, &keys, toml_version).await?
+        tombi_cargo_extension::goto_definition(text_document, &keys, toml_version).await?
     {
         return Ok(Some(GotoDefinitionResponse::Scalar(location)));
     }

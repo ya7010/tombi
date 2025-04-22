@@ -3,7 +3,7 @@ use tower_lsp::lsp_types::{Location, TextDocumentIdentifier, Url};
 
 use crate::find_workspace_cargo_toml;
 
-pub async fn goto_declaration(
+pub async fn goto_definition(
     text_document: TextDocumentIdentifier,
     keys: &[tombi_document_tree::Key],
     toml_version: TomlVersion,
