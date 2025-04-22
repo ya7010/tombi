@@ -277,7 +277,7 @@ mod tests {
                 "#,
             ) -> Err([
                 tombi_schema_store::Error::SchemaFileNotFound{
-                    schema_path: tombi_test_lib::project_root().join("does-not-exist.schema.json"),
+                    schema_path: tombi_test_lib::project_root_path().join("does-not-exist.schema.json"),
                 }
             ]);
         }
@@ -290,7 +290,7 @@ mod tests {
                 "#,
             ) -> Err([
                 tombi_schema_store::Error::SchemaFileNotFound{
-                    schema_path: tombi_test_lib::project_root().join("does-not-exist.schema.json"),
+                    schema_path: tombi_test_lib::project_root_path().join("does-not-exist.schema.json"),
                 }
             ]);
         }
@@ -303,7 +303,7 @@ mod tests {
                 "#,
             ) -> Err([
                 tombi_schema_store::Error::SchemaFileNotFound{
-                    schema_path: tombi_test_lib::project_root().join("../does-not-exist.schema.json"),
+                    schema_path: tombi_test_lib::project_root_path().join("../does-not-exist.schema.json"),
                 }
             ]);
         }

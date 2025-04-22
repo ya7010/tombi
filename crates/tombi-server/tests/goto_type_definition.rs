@@ -243,7 +243,6 @@ mod goto_type_definition_tests {
 
                 tracing::debug!("goto_type_definition result: {:#?}", result);
 
-                // パス用ケース: 結果のパスを検証
                 let expected_path = $expected_schema_path.to_owned();
 
                 match result {
