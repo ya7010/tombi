@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "vinxi dev",
+    "dev": "pnpm run prebuild && vinxi dev",
     "prebuild": "pnpm run generate-search-index",
     "build": "pnpm run prebuild && vinxi build",
     "start": "vinxi start",
