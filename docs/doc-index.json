@@ -88,6 +88,16 @@
     "path": "/docs/json-schema"
   },
   {
+    "title": "Extensions",
+    "path": "/docs/extensions",
+    "children": [
+      {
+        "title": "tombi-cargo-extension",
+        "path": "/docs/extensions/tombi-cargo-extension"
+      }
+    ]
+  },
+  {
     "title": "Reference",
     "path": "/docs/reference",
     "children": [
