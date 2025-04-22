@@ -258,7 +258,7 @@ mod goto_type_definition_tests {
                                 let target_path = target_url.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
-                                assert_eq!(
+                                pretty_assertions::assert_eq!(
                                     target_path,
                                     expected_path,
                                     "Type definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
@@ -271,7 +271,7 @@ mod goto_type_definition_tests {
                                 let target_path = target_url.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
-                                assert_eq!(
+                                pretty_assertions::assert_eq!(
                                     target_path,
                                     expected_path,
                                     "Type definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
@@ -287,7 +287,7 @@ mod goto_type_definition_tests {
                                 let target_path = target_url.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
-                                assert_eq!(
+                                pretty_assertions::assert_eq!(
                                     target_path,
                                     expected_path,
                                     "Type definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
