@@ -942,7 +942,7 @@ mod table_keys_order {
 
                 // Initialize formatter
                 let format_options = FormatOptions::default();
-                let source_path = tombi_test_lib::project_root().join("test.toml");
+                let source_path = tombi_test_lib::project_root_path().join("test.toml");
                 let formatter = Formatter::new(
                     TomlVersion::default(),
                     tombi_formatter::formatter::definitions::FormatDefinitions::default(),

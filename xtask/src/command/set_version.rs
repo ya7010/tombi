@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use xshell::Shell;
 
-use crate::utils::project_root;
+use crate::utils::project_root_path;
 
 pub const DEV_VERSION: &str = "0.0.0";
 
@@ -23,7 +23,7 @@ pub fn run(sh: &Shell) -> anyhow::Result<()> {
 }
 
 fn set_cargo_toml_version(sh: &Shell, version: &str) -> anyhow::Result<()> {
-    let project_root = project_root();
+    let project_root = project_root_path();
     let mut patch = Patch::new(sh, project_root.join("Cargo.toml"))?;
     patch.replace(
         &format!(r#"version = "{}""#, DEV_VERSION),
@@ -36,7 +36,7 @@ fn set_cargo_toml_version(sh: &Shell, version: &str) -> anyhow::Result<()> {
 fn set_editors_vscode_package_json_version(sh: &Shell, version: &str) -> anyhow::Result<()> {
     let mut patch = Patch::new(
         sh,
-        project_root()
+        project_root_path()
             .join("editors")
             .join("vscode")
             .join("package.json"),

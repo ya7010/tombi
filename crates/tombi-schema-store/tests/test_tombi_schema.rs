@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use tombi_schema_store::{DocumentSchema, SchemaUrl};
 
-fn project_root() -> Result<PathBuf, Box<dyn std::error::Error>> {
+fn project_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let cargo_manifest_dir = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);
 
     if cargo_manifest_dir.ends_with("tombi-schema-store") {
@@ -24,7 +24,7 @@ fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
         io::{BufReader, Read},
     };
 
-    let document_path = project_root()?.join("tombi.schema.json");
+    let document_path = project_root_path()?.join("tombi.schema.json");
     let file = File::open(&document_path)?;
     let mut reader = BufReader::new(file);
 

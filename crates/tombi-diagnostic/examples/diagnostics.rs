@@ -11,7 +11,7 @@ pub struct Args {
     verbose: Verbosity<InfoLevel>,
 }
 
-pub fn project_root() -> PathBuf {
+pub fn project_root_path() -> PathBuf {
     let dir = std::env::var("CARGO_MANIFEST_DIR")
         .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_owned());
     PathBuf::from(dir)
@@ -23,7 +23,7 @@ pub fn project_root() -> PathBuf {
 }
 
 pub fn source_file() -> PathBuf {
-    project_root().join("Cargo.toml")
+    project_root_path().join("Cargo.toml")
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

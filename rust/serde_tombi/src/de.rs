@@ -190,7 +190,7 @@ mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use indexmap::{indexmap, IndexMap};
     use serde::Deserialize;
-    use tombi_test_lib::project_root;
+    use tombi_test_lib::project_root_path;
 
     #[tokio::test]
     async fn test_deserialize_struct() {
@@ -635,7 +635,7 @@ optional_string = "provided"
 
     #[tokio::test]
     async fn test_deserialize_actual_tombi_config() {
-        let config_path = project_root().join("tombi.toml");
+        let config_path = project_root_path().join("tombi.toml");
         let config = crate::config::from_str(
             &std::fs::read_to_string(&config_path).unwrap(),
             &config_path,
