@@ -115,6 +115,11 @@ impl Table {
     }
 
     #[inline]
+    pub fn contains_key(&self, key: &str) -> bool {
+        self.key_values.contains_key(key)
+    }
+
+    #[inline]
     pub fn keys(&self) -> impl Iterator<Item = &Key> {
         self.key_values.keys()
     }
