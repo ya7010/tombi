@@ -1,7 +1,7 @@
 use tombi_config::TomlVersion;
 use tower_lsp::lsp_types::{Location, TextDocumentIdentifier, Url};
 
-use crate::find_workspace_cargo_toml;
+use crate::{find_workspace_cargo_toml, get_subcrate_cargo_toml};
 
 pub async fn goto_definition(
     text_document: TextDocumentIdentifier,
@@ -30,7 +30,7 @@ pub async fn goto_definition(
         return Ok(None);
     };
 
-    for key in keys {
+    for key in keys[..keys.len() - 1].iter() {
         let tombi_document_tree::Value::Table(table) = value else {
             return Ok(None);
         };
@@ -41,6 +41,27 @@ pub async fn goto_definition(
 
         target_key = next_key;
         value = next_value;
+    }
+
+    if let tombi_document_tree::Value::Table(table) = value {
+        // Support for subcrate
+        //
+        // ```toml
+        // [workspace.dependencies]
+        // tombi-ast = { path = "crates/tombi-ast" }
+        // ```
+        if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
+            if let Some((subcrate_cargo_toml_path, _)) = get_subcrate_cargo_toml(
+                &workspace_cargo_toml_path,
+                std::path::Path::new(subcrate_path.value()),
+                toml_version,
+            ) {
+                return Ok(Some(Location::new(
+                    Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
+                    tombi_text::Range::default().into(),
+                )));
+            }
+        }
     }
 
     let Ok(workspace_cargo_toml_uri) = Url::from_file_path(workspace_cargo_toml_path) else {

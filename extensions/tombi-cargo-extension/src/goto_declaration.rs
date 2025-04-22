@@ -30,7 +30,7 @@ pub async fn goto_declaration(
         return Ok(None);
     };
 
-    for key in keys {
+    for key in keys[..keys.len() - 1].iter() {
         let tombi_document_tree::Value::Table(table) = value else {
             return Ok(None);
         };
