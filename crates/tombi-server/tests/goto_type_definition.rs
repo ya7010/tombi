@@ -12,8 +12,8 @@ mod goto_type_definition_tests {
                 r#"
                 toml-version = "█v1.0.0"
                 "#,
-                Some(tombi_schema_path()),
-            ) -> Ok(tombi_schema_path());
+                tombi_schema_path(),
+            ) -> Ok(_);
         );
 
         test_goto_type_definition!(
@@ -23,8 +23,8 @@ mod goto_type_definition_tests {
                 [schema.catalog]
                 path = "█https://www.schemastore.org/api/json/catalog.json"
                 "#,
-                Some(tombi_schema_path()),
-            ) -> Ok(tombi_schema_path());
+                tombi_schema_path(),
+            ) -> Ok(_);
         );
 
         test_goto_type_definition!(
@@ -33,8 +33,8 @@ mod goto_type_definition_tests {
                 r#"
                 [[schemas█]]
                 "#,
-                Some(tombi_schema_path()),
-            ) -> Ok(tombi_schema_path());
+                tombi_schema_path(),
+            ) -> Ok(_);
         );
     }
 
@@ -48,8 +48,8 @@ mod goto_type_definition_tests {
                 [package]
                 name█ = "tombi"
                 "#,
-                Some(cargo_schema_path()),
-            ) -> Ok(cargo_schema_path());
+                cargo_schema_path(),
+            ) -> Ok(_);
         );
 
         test_goto_type_definition!(
@@ -59,8 +59,8 @@ mod goto_type_definition_tests {
                 [package]
                 readme = "█README.md"
                 "#,
-                Some(cargo_schema_path()),
-            ) -> Ok(cargo_schema_path());
+                cargo_schema_path(),
+            ) -> Ok(_);
         );
 
         test_goto_type_definition!(
@@ -70,8 +70,8 @@ mod goto_type_definition_tests {
                 [dependencies]
                 serde█ = { workspace = true }
                 "#,
-                Some(cargo_schema_path()),
-            ) -> Ok(cargo_schema_path());
+                cargo_schema_path(),
+            ) -> Ok(_);
         );
 
         test_goto_type_definition!(
@@ -81,8 +81,8 @@ mod goto_type_definition_tests {
                 [profile.release]
                 strip = "debuginfo█"
                 "#,
-                Some(cargo_schema_path()),
-            ) -> Ok(cargo_schema_path());
+                cargo_schema_path(),
+            ) -> Ok(_);
         );
     }
 
@@ -96,8 +96,8 @@ mod goto_type_definition_tests {
                 [project]
                 readme = "█1.0.0"
                 "#,
-                Some(pyproject_schema_path()),
-            ) -> Ok(pyproject_schema_path());
+                pyproject_schema_path(),
+            ) -> Ok(_);
         );
 
         test_goto_type_definition!(
@@ -109,18 +109,43 @@ mod goto_type_definition_tests {
                     "█pytest>=8.3.3",
                 ]
                 "#,
-                Some(pyproject_schema_path()),
-            ) -> Ok(pyproject_schema_path());
+                pyproject_schema_path(),
+            ) -> Ok(_);
         );
     }
 
     #[macro_export]
     macro_rules! test_goto_type_definition {
-        // パスをチェックするバリアント
         (#[tokio::test] async fn $name:ident(
             $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok(_)$(;)?) => {
+            test_goto_type_definition!(
+                #[tokio::test]
+                async fn $name(
+                    $source,
+                    $schema_file_path,
+                ) -> Ok($schema_file_path);
+            );
+        };
+
+        (#[tokio::test] async fn $name:ident(
+            $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok($expected_schema_path:expr)$(;)?) => {
+            test_goto_type_definition!(
+                #[tokio::test]
+                async fn _$name(
+                    $source,
+                    Some($schema_file_path),
+                ) -> Ok($expected_schema_path);
+            );
+        };
+
+        (#[tokio::test] async fn _$name:ident(
+            $source:expr,
             $schema_file_path:expr,
-        ) -> Ok($schema_path:expr);) => {
+        ) -> Ok($expected_schema_path:expr);) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
                 use std::io::Write;
@@ -219,7 +244,7 @@ mod goto_type_definition_tests {
                 tracing::debug!("goto_type_definition result: {:#?}", result);
 
                 // パス用ケース: 結果のパスを検証
-                let expected_path = $schema_path.to_owned();
+                let expected_path = $expected_schema_path.to_owned();
 
                 match result {
                     Some(def_links) => {
