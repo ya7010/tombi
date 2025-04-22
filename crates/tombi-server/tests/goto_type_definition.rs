@@ -1,4 +1,5 @@
 use tombi_test_lib::{cargo_schema_path, pyproject_schema_path, tombi_schema_path};
+
 mod goto_type_definition_tests {
     use super::*;
 
@@ -12,7 +13,7 @@ mod goto_type_definition_tests {
                 toml-version = "█v1.0.0"
                 "#,
                 Some(tombi_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(tombi_schema_path());
         );
 
         test_goto_type_definition!(
@@ -22,8 +23,8 @@ mod goto_type_definition_tests {
                 [schema.catalog]
                 path = "█https://www.schemastore.org/api/json/catalog.json"
                 "#,
-                Some(tombi_schema_path())
-            ) -> Ok(true);
+                Some(tombi_schema_path()),
+            ) -> Ok(tombi_schema_path());
         );
 
         test_goto_type_definition!(
@@ -33,7 +34,7 @@ mod goto_type_definition_tests {
                 [[schemas█]]
                 "#,
                 Some(tombi_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(tombi_schema_path());
         );
     }
 
@@ -48,7 +49,7 @@ mod goto_type_definition_tests {
                 name█ = "tombi"
                 "#,
                 Some(cargo_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(cargo_schema_path());
         );
 
         test_goto_type_definition!(
@@ -59,7 +60,7 @@ mod goto_type_definition_tests {
                 readme = "█README.md"
                 "#,
                 Some(cargo_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(cargo_schema_path());
         );
 
         test_goto_type_definition!(
@@ -70,7 +71,7 @@ mod goto_type_definition_tests {
                 serde█ = { workspace = true }
                 "#,
                 Some(cargo_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(cargo_schema_path());
         );
 
         test_goto_type_definition!(
@@ -81,7 +82,7 @@ mod goto_type_definition_tests {
                 strip = "debuginfo█"
                 "#,
                 Some(cargo_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(cargo_schema_path());
         );
     }
 
@@ -96,7 +97,7 @@ mod goto_type_definition_tests {
                 readme = "█1.0.0"
                 "#,
                 Some(pyproject_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(pyproject_schema_path());
         );
 
         test_goto_type_definition!(
@@ -109,16 +110,17 @@ mod goto_type_definition_tests {
                 ]
                 "#,
                 Some(pyproject_schema_path()),
-            ) -> Ok(true);
+            ) -> Ok(pyproject_schema_path());
         );
     }
 
     #[macro_export]
     macro_rules! test_goto_type_definition {
+        // パスをチェックするバリアント
         (#[tokio::test] async fn $name:ident(
             $source:expr,
-            $schema_file_path:expr$(,)?
-        ) -> Ok($expected:expr);) => {
+            $schema_file_path:expr,
+        ) -> Ok($schema_path:expr);) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
                 use std::io::Write;
@@ -128,6 +130,7 @@ mod goto_type_definition_tests {
                     lsp_types::{
                         DidOpenTextDocumentParams, PartialResultParams, TextDocumentIdentifier,
                         TextDocumentItem, TextDocumentPositionParams, Url, WorkDoneProgressParams,
+                        request::GotoTypeDefinitionResponse,
                     },
                     LspService,
                 };
@@ -215,14 +218,63 @@ mod goto_type_definition_tests {
 
                 tracing::debug!("goto_type_definition result: {:#?}", result);
 
-                // Check if type definition link is returned when schema is specified
-                if $expected {
-                    assert!(result.is_some(), "No type definition link was returned");
-                } else {
-                    assert!(
-                        result.is_none(),
-                        "Type definition link was returned but not expected"
-                    );
+                // パス用ケース: 結果のパスを検証
+                let expected_path = $schema_path.to_owned();
+
+                match result {
+                    Some(def_links) => {
+                        // Handle different return types (single link or array)
+                        match def_links {
+                            GotoTypeDefinitionResponse::Link(links) => {
+                                assert!(!links.is_empty(), "Type definition links were returned but empty");
+
+                                let first_link = &links[0];
+                                let target_url = first_link.target_uri.clone();
+                                let target_path = target_url.to_file_path()
+                                    .expect("Failed to convert URL to file path");
+
+                                assert_eq!(
+                                    target_path,
+                                    expected_path,
+                                    "Type definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
+                                    expected_path,
+                                    target_path
+                                );
+                            },
+                            GotoTypeDefinitionResponse::Scalar(location) => {
+                                let target_url = location.uri.clone();
+                                let target_path = target_url.to_file_path()
+                                    .expect("Failed to convert URL to file path");
+
+                                assert_eq!(
+                                    target_path,
+                                    expected_path,
+                                    "Type definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
+                                    expected_path,
+                                    target_path
+                                );
+                            },
+                            GotoTypeDefinitionResponse::Array(locations) => {
+                                assert!(!locations.is_empty(), "Type definition locations were returned but empty");
+
+                                let first_location = &locations[0];
+                                let target_url = first_location.uri.clone();
+                                let target_path = target_url.to_file_path()
+                                    .expect("Failed to convert URL to file path");
+
+                                assert_eq!(
+                                    target_path,
+                                    expected_path,
+                                    "Type definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
+                                    expected_path,
+                                    target_path
+                                );
+                            }
+                        }
+                    },
+                    None => {
+                        panic!("No type definition link was returned, but expected path: {:?}", expected_path);
+                    }
                 }
 
                 Ok(())
