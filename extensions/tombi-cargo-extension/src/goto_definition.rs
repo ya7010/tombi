@@ -18,7 +18,7 @@ pub async fn goto_definition(
     };
 
     if keys.first().map(|key| key.value()) == Some("workspace") {
-        goto_definition_for_workspace_cargo_toml(keys, &cargo_toml_path, toml_version)
+        goto_definition_for_workspace_cargo_toml(&keys, &cargo_toml_path, toml_version)
     } else {
         goto_definition_for_crate_cargo_toml(keys, &cargo_toml_path, toml_version)
     }
@@ -43,10 +43,14 @@ fn goto_definition_for_crate_cargo_toml(
     toml_version: TomlVersion,
 ) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
     if keys.last().map(|key| key.value()) == Some("workspace") {
-        get_workspace_cargo_toml_location(keys, cargo_toml_path, toml_version, true)
+        get_workspace_cargo_toml_location(&keys, cargo_toml_path, toml_version, true)
     } else if matches!(
         keys.iter().map(|key| key.value()).collect_vec().as_slice(),
-        ["dependencies", _, "path"]
+        [
+            "dependencies" | "dev-dependencies" | "build-dependencies",
+            _,
+            "path"
+        ]
     ) {
         get_dependencies_crate_path_location(keys, cargo_toml_path, toml_version)
     } else {

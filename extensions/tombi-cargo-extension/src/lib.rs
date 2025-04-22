@@ -111,6 +111,16 @@ fn get_workspace_cargo_toml_location(
     )
     .unwrap();
 
+    let keys = {
+        let mut sanitized_keys = vec![sanitize_dependency_key(keys[0].to_owned(), toml_version)];
+        sanitized_keys.extend(
+            keys[1..]
+                .iter()
+                .map(|key| sanitize_dependency_key(key.to_owned(), toml_version)),
+        );
+        sanitized_keys
+    };
+
     let Some((target_key, value)) = dig_keys(
         &document_tree,
         &std::iter::once(workspace_key)
@@ -121,7 +131,10 @@ fn get_workspace_cargo_toml_location(
     };
 
     if jump_to_subcrate {
-        if keys.first().map(|key| key.value()) == Some("dependencies") {
+        if matches!(
+            keys.first().map(|key| key.value()),
+            Some("dependencies" | "dev-dependencies" | "build-dependencies")
+        ) {
             if let tombi_document_tree::Value::Table(table) = value {
                 if let Some(value) = table.get("path") {
                     if let tombi_document_tree::Value::String(subcrate_path) = value {
@@ -164,7 +177,12 @@ fn get_dependencies_crate_path_location(
 ) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
     assert!(matches!(
         keys.iter().map(|key| key.value()).collect_vec().as_slice(),
-        ["workspace", "dependencies", _, "path"] | ["dependencies", _, "path"]
+        ["workspace", "dependencies", _, "path"]
+            | [
+                "dependencies" | "dev-dependencies" | "build-dependencies",
+                _,
+                "path"
+            ]
     ));
 
     let Some(document_tree) = load_cargo_toml(cargo_toml_path, toml_version) else {
@@ -215,4 +233,24 @@ fn dig_keys<'a>(
     }
 
     Some((key, value))
+}
+
+/// Sanitize the dependency key to be "dependencies" if it is "dev-dependencies" or "build-dependencies".
+///
+/// This is because the dependency key is always "dependencies" in the workspace Cargo.toml.
+fn sanitize_dependency_key(
+    key: tombi_document_tree::Key,
+    toml_version: TomlVersion,
+) -> tombi_document_tree::Key {
+    if matches!(key.value(), "dev-dependencies" | "build-dependencies") {
+        tombi_document_tree::Key::try_new(
+            key.kind(),
+            "dependencies".to_string(),
+            key.range(),
+            toml_version,
+        )
+        .unwrap()
+    } else {
+        key
+    }
 }
