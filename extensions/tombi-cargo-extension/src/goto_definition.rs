@@ -1,7 +1,8 @@
+use itertools::Itertools;
 use tombi_config::TomlVersion;
-use tower_lsp::lsp_types::{Location, TextDocumentIdentifier, Url};
+use tower_lsp::lsp_types::{Location, TextDocumentIdentifier};
 
-use crate::{find_workspace_cargo_toml, get_subcrate_cargo_toml};
+use crate::{get_dependencies_crate_path_location, get_workspace_cargo_toml_location};
 
 pub async fn goto_definition(
     text_document: TextDocumentIdentifier,
@@ -12,64 +13,43 @@ pub async fn goto_definition(
     if !text_document.uri.path().ends_with("Cargo.toml") {
         return Ok(None);
     }
-    let Some(cargo_toml_path) = text_document.uri.to_file_path().ok() else {
+    let Ok(cargo_toml_path) = text_document.uri.to_file_path() else {
         return Ok(None);
     };
 
-    if keys.last().map(|key| key.value()) != Some("workspace") {
-        return Ok(None);
+    if keys.first().map(|key| key.value()) == Some("workspace") {
+        goto_definition_for_workspace_cargo_toml(keys, &cargo_toml_path, toml_version)
+    } else {
+        goto_definition_for_crate_cargo_toml(keys, &cargo_toml_path, toml_version)
     }
+}
 
-    let Some((workspace_cargo_toml_path, document_tree)) =
-        find_workspace_cargo_toml(&cargo_toml_path, toml_version)
-    else {
-        return Ok(None);
-    };
-
-    let Some((mut target_key, mut value)) = document_tree.get_key_value("workspace") else {
-        return Ok(None);
-    };
-
-    for key in keys[..keys.len() - 1].iter() {
-        let tombi_document_tree::Value::Table(table) = value else {
-            return Ok(None);
-        };
-
-        let Some((next_key, next_value)) = table.get_key_value(key) else {
-            return Ok(None);
-        };
-
-        target_key = next_key;
-        value = next_value;
-    }
-
-    if let tombi_document_tree::Value::Table(table) = value {
-        // Support for subcrate
-        //
-        // ```toml
-        // [workspace.dependencies]
-        // tombi-ast = { path = "crates/tombi-ast" }
-        // ```
-        if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
-            if let Some((subcrate_cargo_toml_path, _)) = get_subcrate_cargo_toml(
-                &workspace_cargo_toml_path,
-                std::path::Path::new(subcrate_path.value()),
-                toml_version,
-            ) {
-                return Ok(Some(Location::new(
-                    Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
-                    tombi_text::Range::default().into(),
-                )));
-            }
+fn goto_definition_for_workspace_cargo_toml(
+    keys: &[tombi_document_tree::Key],
+    cargo_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
+    match keys.iter().map(|key| key.value()).collect_vec().as_slice() {
+        ["workspace", "dependencies", _, "path"] => {
+            get_dependencies_crate_path_location(&keys, cargo_toml_path, toml_version)
         }
+        _ => Ok(None),
     }
+}
 
-    let Ok(workspace_cargo_toml_uri) = Url::from_file_path(workspace_cargo_toml_path) else {
-        return Ok(None);
-    };
-
-    Ok(Some(Location::new(
-        workspace_cargo_toml_uri,
-        target_key.range().into(),
-    )))
+fn goto_definition_for_crate_cargo_toml(
+    keys: &[tombi_document_tree::Key],
+    cargo_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
+    if keys.last().map(|key| key.value()) == Some("workspace") {
+        get_workspace_cargo_toml_location(keys, cargo_toml_path, toml_version, true)
+    } else if matches!(
+        keys.iter().map(|key| key.value()).collect_vec().as_slice(),
+        ["dependencies", _, "path"]
+    ) {
+        get_dependencies_crate_path_location(keys, cargo_toml_path, toml_version)
+    } else {
+        Ok(None)
+    }
 }

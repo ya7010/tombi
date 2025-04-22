@@ -1975,6 +1975,7 @@ name = "tombi-cargo-extension"
 version = "0.0.0"
 dependencies = [
  "cargo_metadata",
+ "itertools",
  "tombi-ast",
  "tombi-config",
  "tombi-document-tree",
