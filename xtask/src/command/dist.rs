@@ -10,10 +10,10 @@ use xshell::Shell;
 use zip::{write::FileOptions, DateTime, ZipWriter};
 
 use super::set_version::DEV_VERSION;
-use crate::utils::project_root;
+use crate::utils::project_root_path;
 
 pub fn run(sh: &Shell) -> Result<(), anyhow::Error> {
-    let project_root = project_root();
+    let project_root = project_root_path();
     let target = Target::get(&project_root);
     let dist = project_root.join("dist");
 
@@ -37,7 +37,7 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
         std::env::set_var("CC", "clang");
     }
 
-    let manifest_path = project_root()
+    let manifest_path = project_root_path()
         .join("rust")
         .join("tombi-cli")
         .join("Cargo.toml");
@@ -48,7 +48,7 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
     )
     .run()?;
 
-    let dist = project_root().join("dist");
+    let dist = project_root_path().join("dist");
     if target_name.contains("-windows-") {
         zip(
             &target.server_path,
@@ -67,7 +67,7 @@ fn dist_client(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
 }
 
 fn dist_editor_vscode(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
-    let vscode_path = project_root().join("editors").join("vscode");
+    let vscode_path = project_root_path().join("editors").join("vscode");
     let bundle_path = vscode_path.join("server");
     sh.remove_path(&bundle_path)?;
     sh.create_dir(&bundle_path)?;

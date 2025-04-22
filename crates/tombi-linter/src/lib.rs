@@ -71,7 +71,7 @@ macro_rules! test_lint {
             }
 
             // Initialize linter with schema if provided
-            let source_path = tombi_test_lib::project_root().join("test.toml");
+            let source_path = tombi_test_lib::project_root_path().join("test.toml");
             let options = $crate::LintOptions::default();
             let linter = $crate::Linter::new(
                 TomlVersion::default(),
@@ -147,7 +147,7 @@ macro_rules! test_lint {
             }
 
             // Initialize linter with schema if provided
-            let source_path = tombi_test_lib::project_root().join("test.toml");
+            let source_path = tombi_test_lib::project_root_path().join("test.toml");
             let options = $crate::LintOptions::default();
             let linter = $crate::Linter::new(
                 TomlVersion::default(),

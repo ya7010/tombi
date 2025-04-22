@@ -1,19 +1,20 @@
-use tombi_config::TomlVersion;
 use schemars::{generate::SchemaSettings, SchemaGenerator};
+use tombi_config::TomlVersion;
 
-use crate::utils::project_root;
+use crate::utils::project_root_path;
 
 pub fn run() -> Result<(), anyhow::Error> {
     let settings = SchemaSettings::draft07();
     let generator = SchemaGenerator::new(settings);
 
     std::fs::write(
-        project_root().join("schemas/type-test.schema.json"),
+        project_root_path().join("schemas/type-test.schema.json"),
         serde_json::to_string_pretty(&generator.clone().into_root_schema_for::<TypeTest>())? + "\n",
     )?;
     std::fs::write(
-        project_root().join("tombi.schema.json"),
-        serde_json::to_string_pretty(&generator.into_root_schema_for::<tombi_config::Config>())? + "\n",
+        project_root_path().join("tombi.schema.json"),
+        serde_json::to_string_pretty(&generator.into_root_schema_for::<tombi_config::Config>())?
+            + "\n",
     )?;
     Ok(())
 }

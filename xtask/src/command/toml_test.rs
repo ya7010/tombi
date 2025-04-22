@@ -3,7 +3,7 @@ use std::io::Write;
 use tombi_config::TomlVersion;
 use xshell::Shell;
 
-use crate::utils::project_root;
+use crate::utils::project_root_path;
 
 #[derive(clap::Args, Debug)]
 pub struct Args {
@@ -12,7 +12,7 @@ pub struct Args {
 }
 
 pub fn run(sh: &Shell, args: Args) -> anyhow::Result<()> {
-    let project_root = project_root();
+    let project_root = project_root_path();
 
     sh.change_dir(&project_root);
 
