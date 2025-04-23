@@ -2371,6 +2371,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-uv-extension"
+version = "0.0.0"
+
+[[package]]
 name = "tombi-validator"
 version = "0.0.0"
 dependencies = [
