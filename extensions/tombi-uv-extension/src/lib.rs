@@ -183,45 +183,59 @@ fn find_package_project_toml_paths<'a>(
     exclude_patterns: &'a [&'a tombi_document_tree::String],
     workspace_dir_path: &'a std::path::Path,
 ) -> impl Iterator<Item = (&'a tombi_document_tree::String, std::path::PathBuf)> + 'a {
-    member_patterns.iter().filter_map(|&member_pattern| {
-        let mut member_pattern_path = std::path::Path::new(member_pattern.value()).to_path_buf();
-        if !member_pattern_path.is_absolute() {
-            member_pattern_path = workspace_dir_path.join(member_pattern_path);
-        }
+    let exclude_patterns = exclude_patterns
+        .iter()
+        .filter_map(|pattern| match glob::Pattern::new(pattern.value()) {
+            Ok(exclude_glob) => Some(exclude_glob),
+            Err(_) => None,
+        })
+        .collect_vec();
 
-        // Find matching paths using glob
-        let mut glob_paths = match glob::glob(&member_pattern_path.to_string_lossy()) {
-            Ok(paths) => paths,
-            Err(_) => return None,
-        };
+    member_patterns
+        .iter()
+        .filter_map(move |&member_pattern| {
+            let mut project_toml_paths = vec![];
 
-        // Check if any path matches and is not excluded
-        while let Some(Ok(path)) = glob_paths.next() {
-            // Skip if the path doesn't contain pyproject.toml
-            let project_toml_path = if path.is_dir() {
-                path.join("pyproject.toml")
-            } else {
-                path
+            let mut member_pattern_path =
+                std::path::Path::new(member_pattern.value()).to_path_buf();
+            if !member_pattern_path.is_absolute() {
+                member_pattern_path = workspace_dir_path.join(member_pattern_path);
+            }
+
+            // Find matching paths using glob
+            let mut candidate_paths = match glob::glob(&member_pattern_path.to_string_lossy()) {
+                Ok(paths) => paths,
+                Err(_) => return None,
             };
 
-            if !project_toml_path.exists() || !project_toml_path.is_file() {
-                continue;
-            }
+            // Check if any path matches and is not excluded
+            while let Some(Ok(candidate_path)) = candidate_paths.next() {
+                // Skip if the path doesn't contain pyproject.toml
+                let project_toml_path = if candidate_path.is_dir() {
+                    candidate_path.join("pyproject.toml")
+                } else {
+                    continue;
+                };
 
-            // Check if the path is excluded
-            let path_str = project_toml_path.to_string_lossy();
-            let is_excluded = exclude_patterns.iter().any(|&exclude_pattern| {
-                match glob::Pattern::new(exclude_pattern.value()) {
-                    Ok(exclude_glob) => exclude_glob.matches(&path_str),
-                    Err(_) => false,
+                if !project_toml_path.exists() || !project_toml_path.is_file() {
+                    continue;
                 }
-            });
 
-            if !is_excluded {
-                return Some((member_pattern, project_toml_path));
+                // Check if the path is excluded
+                let is_excluded = exclude_patterns.iter().any(|exclude_pattern| {
+                    exclude_pattern.matches(&project_toml_path.to_string_lossy())
+                });
+
+                if !is_excluded {
+                    project_toml_paths.push((member_pattern, project_toml_path));
+                }
             }
-        }
 
-        None
-    })
+            if !project_toml_paths.is_empty() {
+                Some(project_toml_paths)
+            } else {
+                None
+            }
+        })
+        .flatten()
 }
