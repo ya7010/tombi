@@ -13,7 +13,9 @@ impl From<tombi_document_tree::StringKind> for StringKind {
             tombi_document_tree::StringKind::BasicString(_) => Self::BasicString,
             tombi_document_tree::StringKind::LiteralString(_) => Self::LiteralString,
             tombi_document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
-            tombi_document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
+            tombi_document_tree::StringKind::MultiLineLiteralString(_) => {
+                Self::MultiLineLiteralString
+            }
         }
     }
 }
@@ -24,7 +26,9 @@ impl From<&tombi_document_tree::StringKind> for StringKind {
             tombi_document_tree::StringKind::BasicString(_) => Self::BasicString,
             tombi_document_tree::StringKind::LiteralString(_) => Self::LiteralString,
             tombi_document_tree::StringKind::MultiLineBasicString(_) => Self::MultiLineBasicString,
-            tombi_document_tree::StringKind::MultiLineLiteralString(_) => Self::MultiLineLiteralString,
+            tombi_document_tree::StringKind::MultiLineLiteralString(_) => {
+                Self::MultiLineLiteralString
+            }
         }
     }
 }
@@ -118,35 +122,52 @@ mod test {
         #[test]
         fn escape_unicode_v1_1_0(
             r#"
-            # TOML 1.1 supports Unicode for bare keys.
-
             € = 'Euro'
             😂 = "rofl"
-            a‍b = "zwj"
-            ÅÅ = "U+00C5 U+0041 U+030A"
-
-            [中文]
-            中文 = {中文 = "Chinese language"}
-
-            [[tiếng-Việt]]
-            tiəŋ˧˦.viət̚˧˨ʔ = "north"
-
-            [[tiếng-Việt]]
-            tiəŋ˦˧˥.viək̚˨˩ʔ = "central"
             "#,
             TomlVersion::V1_1_0_Preview
-        ) -> Ok(json!({
-            "€": "Euro",
-            "😂": "rofl",
-            "a‍b": "zwj",
-            "ÅÅ": "U+00C5 U+0041 U+030A",
-            "中文": {"中文": {"中文": "Chinese language"}},
-            "tiếng-Việt": [
-                {"tiəŋ˧˦": {"viət̚˧˨ʔ": "north"}},
-                {"tiəŋ˦˧˥": {"viək̚˨˩ʔ": "central"}}
-            ]
-        }))
+        ) -> Err([
+            ("invalid string: unicode key is allowed in TOML v1.1.0 or later", ((0, 0), (0, 1))),
+            ("invalid string: unicode key is allowed in TOML v1.1.0 or later", ((1, 0), (1, 1))),
+        ])
     }
+
+    // TODO: In toml `v1.1.0`, bare key unicode support was not merged and will likely be deferred for discussion in `v1.2.0`.
+    //       See: https://github.com/toml-lang/toml/issues/954#issuecomment-1932268939
+    //
+    // test_deserialize! {
+    //     #[test]
+    //     fn escape_unicode_v1_1_0(
+    //         r#"
+    //         # TOML 1.1 supports Unicode for bare keys.
+
+    //         € = 'Euro'
+    //         😂 = "rofl"
+    //         a‍b = "zwj"
+    //         ÅÅ = "U+00C5 U+0041 U+030A"
+
+    //         [中文]
+    //         中文 = {中文 = "Chinese language"}
+
+    //         [[tiếng-Việt]]
+    //         tiəŋ˧˦.viət̚˧˨ʔ = "north"
+
+    //         [[tiếng-Việt]]
+    //         tiəŋ˦˧˥.viək̚˨˩ʔ = "central"
+    //         "#,
+    //         TomlVersion::V1_1_0_Preview
+    //     ) -> Ok(json!({
+    //         "€": "Euro",
+    //         "😂": "rofl",
+    //         "a‍b": "zwj",
+    //         "ÅÅ": "U+00C5 U+0041 U+030A",
+    //         "中文": {"中文": {"中文": "Chinese language"}},
+    //         "tiếng-Việt": [
+    //             {"tiəŋ˧˦": {"viət̚˧˨ʔ": "north"}},
+    //             {"tiəŋ˦˧˥": {"viək̚˨˩ʔ": "central"}}
+    //         ]
+    //     }))
+    // }
 
     test_deserialize!(
         #[test]

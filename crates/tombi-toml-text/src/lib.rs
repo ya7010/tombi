@@ -39,12 +39,14 @@ pub enum ParseError {
     UnicodeKey,
 }
 
-pub fn try_from_bare_key(value: &str, toml_version: TomlVersion) -> Result<String, ParseError> {
+pub fn try_from_bare_key(value: &str, _toml_version: TomlVersion) -> Result<String, ParseError> {
     if value.chars().any(|c| matches!(c, '+')) {
         return Err(ParseError::PlusCharacter);
     }
 
-    if toml_version >= TomlVersion::V1_1_0_Preview
+    // TODO: In toml `v1.1.0`, bare key unicode support was not merged and will likely be deferred for discussion in `v1.2.0`.
+    //       See: https://github.com/toml-lang/toml/issues/954#issuecomment-1932268939
+    if false // toml_version >= TomlVersion::V1_1_0_Preview
         || value.chars().all(|c| {
             matches!(
                 c,
