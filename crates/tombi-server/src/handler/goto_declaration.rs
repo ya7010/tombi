@@ -40,7 +40,13 @@ pub async fn handle_goto_declaration(
     };
 
     if let Some(location) =
-        tombi_cargo_extension::goto_declaration(text_document, &keys, toml_version).await?
+        tombi_cargo_extension::goto_declaration(&text_document, &keys, toml_version).await?
+    {
+        return Ok(Some(GotoDeclarationResponse::Scalar(location)));
+    }
+
+    if let Some(location) =
+        tombi_uv_extension::goto_declaration(&text_document, &keys, toml_version).await?
     {
         return Ok(Some(GotoDeclarationResponse::Scalar(location)));
     }

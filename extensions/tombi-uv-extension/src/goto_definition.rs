@@ -1,10 +1,11 @@
+use itertools::Itertools;
 use tombi_config::TomlVersion;
 use tower_lsp::lsp_types::{Location, TextDocumentIdentifier};
 
 use crate::get_workspace_pyproject_toml_location;
 
 pub async fn goto_definition(
-    text_document: TextDocumentIdentifier,
+    text_document: &TextDocumentIdentifier,
     keys: &[tombi_document_tree::Key],
     toml_version: TomlVersion,
 ) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
@@ -16,26 +17,11 @@ pub async fn goto_definition(
         return Ok(None);
     };
 
-    if keys.len() >= 3 && keys[0].value() == "tool" && keys[1].value() == "uv" {
-        goto_definition_for_uv_pyproject_toml(&keys, &pyproject_toml_path, toml_version)
-    } else {
-        Ok(None)
-    }
-}
+    let keys = keys.iter().map(|key| key.value()).collect_vec();
+    let keys = keys.as_slice();
 
-fn goto_definition_for_uv_pyproject_toml(
-    keys: &[tombi_document_tree::Key],
-    pyproject_toml_path: &std::path::Path,
-    toml_version: TomlVersion,
-) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
-    // Handle navigation to workspace packages when {workspace = true} is specified
-    if keys.len() >= 4
-        && keys[0].value() == "tool"
-        && keys[1].value() == "uv"
-        && keys[2].value() == "sources"
-        && keys.last().map(|key| key.value()) == Some("workspace")
-    {
-        get_workspace_pyproject_toml_location(&keys, pyproject_toml_path, toml_version, true)
+    if matches!(keys, ["tool", "uv", "sources", _, "workspace"]) {
+        get_workspace_pyproject_toml_location(&keys, &pyproject_toml_path, toml_version, true)
     } else {
         Ok(None)
     }

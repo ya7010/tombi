@@ -1,10 +1,11 @@
+use itertools::Itertools;
 use tombi_config::TomlVersion;
 use tower_lsp::lsp_types::{Location, TextDocumentIdentifier};
 
 use crate::get_workspace_pyproject_toml_location;
 
 pub async fn goto_declaration(
-    text_document: TextDocumentIdentifier,
+    text_document: &TextDocumentIdentifier,
     keys: &[tombi_document_tree::Key],
     toml_version: TomlVersion,
 ) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
@@ -16,14 +17,11 @@ pub async fn goto_declaration(
         return Ok(None);
     };
 
-    // When workspace = true is specified in a project dependency
-    if keys.len() >= 4
-        && keys[0].value() == "tool"
-        && keys[1].value() == "uv"
-        && keys[2].value() == "sources"
-        && keys.last().map(|key| key.value()) == Some("workspace")
-    {
-        get_workspace_pyproject_toml_location(keys, &pyproject_toml_path, toml_version, false)
+    let keys = keys.iter().map(|key| key.value()).collect_vec();
+    let keys = keys.as_slice();
+
+    if matches!(keys, ["tool", "uv", "sources", _, "workspace"]) {
+        get_workspace_pyproject_toml_location(&keys, &pyproject_toml_path, toml_version, false)
     } else {
         Ok(None)
     }

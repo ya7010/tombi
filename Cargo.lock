@@ -2317,6 +2317,7 @@ dependencies = [
  "tombi-syntax",
  "tombi-test-lib",
  "tombi-text",
+ "tombi-uv-extension",
  "tombi-validator",
  "tombi-x-keyword",
  "tower-lsp",
@@ -2374,12 +2375,14 @@ dependencies = [
 name = "tombi-uv-extension"
 version = "0.0.0"
 dependencies = [
+ "glob",
  "itertools",
  "tombi-ast",
  "tombi-config",
  "tombi-document-tree",
  "tombi-extension",
  "tombi-parser",
+ "tombi-test-lib",
  "tombi-text",
  "tower-lsp",
  "tracing",

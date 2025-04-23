@@ -1,8 +1,10 @@
 mod goto_declaration;
 mod goto_definition;
 
+use glob;
 pub use goto_declaration::goto_declaration;
 pub use goto_definition::goto_definition;
+use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::TryIntoDocumentTree;
@@ -37,73 +39,27 @@ fn find_workspace_pyproject_toml(
         let workspace_pyproject_toml_path = current_dir.join("pyproject.toml");
 
         if workspace_pyproject_toml_path.exists() {
-            let Some(document_tree) =
+            let Some(package_pyproject_toml_document_tree) =
                 load_pyproject_toml(&workspace_pyproject_toml_path, toml_version)
             else {
                 continue;
             };
 
             // Check if this pyproject.toml has a [tool.uv.workspace] section
-            if has_uv_workspace_section(&document_tree) {
-                return Some((workspace_pyproject_toml_path, document_tree));
-            };
+
+            if let Some(_) = tombi_document_tree::dig_keys(
+                &package_pyproject_toml_document_tree,
+                &["tool", "uv", "workspace"],
+            ) {
+                return Some((
+                    workspace_pyproject_toml_path,
+                    package_pyproject_toml_document_tree,
+                ));
+            }
         }
     }
 
     None
-}
-
-fn has_uv_workspace_section(document_tree: &tombi_document_tree::DocumentTree) -> bool {
-    // Check if the document tree has [tool.uv.workspace] section
-    let tool_key = create_key("tool", TomlVersion::V1_0_0);
-    let uv_key = create_key("uv", TomlVersion::V1_0_0);
-    let workspace_key = create_key("workspace", TomlVersion::V1_0_0);
-
-    if let Some((_, value)) = document_tree.get_key_value(&tool_key) {
-        if let tombi_document_tree::Value::Table(tool_table) = value {
-            if let Some((_, uv_value)) = tool_table.get_key_value(&uv_key) {
-                if let tombi_document_tree::Value::Table(uv_table) = uv_value {
-                    return uv_table.contains_key(workspace_key.value());
-                }
-            }
-        }
-    }
-    false
-}
-
-fn create_key(key_str: &str, toml_version: TomlVersion) -> tombi_document_tree::Key {
-    tombi_document_tree::Key::try_new(
-        tombi_document_tree::KeyKind::BareKey,
-        key_str.to_string(),
-        tombi_text::Range::default(),
-        toml_version,
-    )
-    .unwrap()
-}
-
-fn get_package_pyproject_toml(
-    workspace_pyproject_toml_path: &std::path::Path,
-    package_path: &std::path::Path,
-    toml_version: TomlVersion,
-) -> Option<(std::path::PathBuf, tombi_document_tree::DocumentTree)> {
-    let mut package_path = package_path.to_path_buf();
-    if !package_path.is_absolute() {
-        if let Some(workspace_dir) = workspace_pyproject_toml_path.parent() {
-            package_path = workspace_dir.join(package_path);
-        }
-    }
-
-    let package_pyproject_toml_path = package_path.join("pyproject.toml");
-    if !package_pyproject_toml_path.exists() {
-        return None;
-    }
-
-    let Some(document_tree) = load_pyproject_toml(&package_pyproject_toml_path, toml_version)
-    else {
-        return None;
-    };
-
-    Some((package_pyproject_toml_path, document_tree))
 }
 
 /// Get the location of the workspace pyproject.toml.
@@ -118,156 +74,154 @@ fn get_package_pyproject_toml(
 /// other-package = { workspace = true }
 /// ```
 fn get_workspace_pyproject_toml_location(
-    keys: &[tombi_document_tree::Key],
+    keys: &[&str],
     pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
     jump_to_package: bool,
 ) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
-    assert!(matches!(
-        keys.last().map(|key| key.value()),
-        Some("workspace")
-    ));
+    assert!(matches!(keys, ["tool", "uv", "sources", _, "workspace"]));
 
-    let Some((workspace_pyproject_toml_path, document_tree)) =
+    let Some((workspace_pyproject_toml_path, workspace_pyproject_toml_document_tree)) =
         find_workspace_pyproject_toml(pyproject_toml_path, toml_version)
     else {
         return Ok(None);
     };
 
-    // Path to follow in workspace: tool -> uv -> workspace
-    let tool_key = create_key("tool", toml_version);
-    let uv_key = create_key("uv", toml_version);
-    let workspace_key = create_key("workspace", toml_version);
-
-    // Adjust keys based on the exact pyproject.toml structure we're looking for
-    let mut sanitized_keys = vec![];
-
-    // If we're coming from a sources section, we handle it specially
-    if keys.len() >= 3
-        && keys[0].value() == "tool"
-        && keys[1].value() == "uv"
-        && keys[2].value() == "sources"
-    {
-        // We're in the [tool.uv.sources] section
-        sanitized_keys.push(create_key("tool", toml_version));
-        sanitized_keys.push(create_key("uv", toml_version));
-        sanitized_keys.push(create_key("sources", toml_version));
-
-        if keys.len() > 3 {
-            sanitized_keys.push(keys[3].clone());
-        }
-    } else {
-        // For other paths, just use the original keys minus the workspace part
-        sanitized_keys = keys[..keys.len() - 1].to_vec();
-    }
-
-    let mut workspace_keys = Vec::new();
-    workspace_keys.push(tool_key.clone());
-    workspace_keys.push(uv_key.clone());
-    workspace_keys.push(workspace_key.clone());
-
-    let Some((target_key, _)) = dig_keys(&document_tree, &workspace_keys) else {
+    let package_name = keys[3];
+    let Some((package_toml_path, member_range)) = find_package_project_toml(
+        package_name,
+        &workspace_pyproject_toml_document_tree,
+        &workspace_pyproject_toml_path,
+        toml_version,
+    ) else {
         return Ok(None);
     };
 
     if jump_to_package {
-        // If we have [tool.uv.sources] and trying to jump to a workspace package
-        if keys.len() >= 4
-            && keys[0].value() == "tool"
-            && keys[1].value() == "uv"
-            && keys[2].value() == "sources"
-        {
-            // Get the workspace members from [tool.uv.workspace]
-            if let Some((_, workspace_value)) = dig_keys(&document_tree, &workspace_keys) {
-                if let tombi_document_tree::Value::Table(workspace_table) = workspace_value {
-                    if let Some((_, members_value)) =
-                        workspace_table.get_key_value(&create_key("members", toml_version))
-                    {
-                        if let tombi_document_tree::Value::Array(members_array) = members_value {
-                            // Try to find the package in the workspace members
-                            for member in members_array.iter() {
-                                if let tombi_document_tree::Value::String(member_glob) = member {
-                                    // For each member glob pattern, try to find matching directories
-                                    if let Some(workspace_dir) =
-                                        workspace_pyproject_toml_path.parent()
-                                    {
-                                        // Simple case: if the glob is like "packages/*"
-                                        if member_glob.value().ends_with('*') {
-                                            let base_dir =
-                                                member_glob.value().trim_end_matches('*');
-                                            let packages_dir = workspace_dir.join(base_dir);
+        let Ok(package_pyproject_toml_uri) = Url::from_file_path(&package_toml_path) else {
+            return Ok(None);
+        };
 
-                                            if packages_dir.exists() && packages_dir.is_dir() {
-                                                if let Ok(entries) = std::fs::read_dir(packages_dir)
-                                                {
-                                                    for entry in entries.flatten() {
-                                                        if entry.path().is_dir() {
-                                                            let package_name = entry.file_name();
-                                                            if package_name.to_string_lossy()
-                                                                == keys[3].value()
-                                                            {
-                                                                if let Some((
-                                                                    package_toml_path,
-                                                                    _,
-                                                                )) = get_package_pyproject_toml(
-                                                                    &workspace_pyproject_toml_path,
-                                                                    &entry.path(),
-                                                                    toml_version,
-                                                                ) {
-                                                                    return Ok(Some(Location::new(
-                                                                        Url::from_file_path(package_toml_path).unwrap(),
-                                                                        tombi_text::Range::default().into(),
-                                                                    )));
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        Ok(Some(Location::new(
+            package_pyproject_toml_uri,
+            tombi_text::Range::default().into(),
+        )))
+    } else {
+        let Ok(workspace_pyproject_toml_uri) = Url::from_file_path(&workspace_pyproject_toml_path)
+        else {
+            return Ok(None);
+        };
+
+        Ok(Some(Location::new(
+            workspace_pyproject_toml_uri,
+            member_range.into(),
+        )))
+    }
+}
+
+fn find_package_project_toml(
+    package_name: &str,
+    workspace_pyproject_toml_document_tree: &tombi_document_tree::DocumentTree,
+    workspace_pyproject_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Option<(std::path::PathBuf, tombi_text::Range)> {
+    let Some(workspace_dir_path) = workspace_pyproject_toml_path.parent() else {
+        return None;
+    };
+
+    let member_patterns = match tombi_document_tree::dig_keys(
+        &workspace_pyproject_toml_document_tree,
+        &[&"tool", &"uv", &"workspace", &"members"],
+    ) {
+        Some((_, tombi_document_tree::Value::Array(members))) => members
+            .iter()
+            .filter_map(|member| match member {
+                tombi_document_tree::Value::String(member_pattern) => Some(member_pattern),
+                _ => None,
+            })
+            .collect_vec(),
+        _ => vec![],
+    };
+
+    let exclude_patterns = match tombi_document_tree::dig_keys(
+        &workspace_pyproject_toml_document_tree,
+        &[&"tool", &"uv", &"workspace", &"exclude"],
+    ) {
+        Some((_, tombi_document_tree::Value::Array(exclude))) => exclude
+            .iter()
+            .filter_map(|member| match member {
+                tombi_document_tree::Value::String(member_pattern) => Some(member_pattern),
+                _ => None,
+            })
+            .collect_vec(),
+        _ => vec![],
+    };
+
+    for (member_item, package_project_toml_path) in
+        find_package_project_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
+    {
+        let Some(package_project_toml_document_tree) =
+            load_pyproject_toml(&package_project_toml_path, toml_version)
+        else {
+            continue;
+        };
+
+        if let Some((_, tombi_document_tree::Value::String(name))) =
+            tombi_document_tree::dig_keys(&package_project_toml_document_tree, &["project", "name"])
+        {
+            if name.value() == package_name {
+                return Some((package_project_toml_path, member_item.range()));
             }
         }
     }
 
-    let Ok(workspace_pyproject_toml_uri) = Url::from_file_path(&workspace_pyproject_toml_path)
-    else {
-        return Ok(None);
-    };
-
-    Ok(Some(Location::new(
-        workspace_pyproject_toml_uri,
-        target_key.range().into(),
-    )))
+    None
 }
 
-fn dig_keys<'a>(
-    document_tree: &'a tombi_document_tree::DocumentTree,
-    keys: &[tombi_document_tree::Key],
-) -> Option<(&'a tombi_document_tree::Key, &'a tombi_document_tree::Value)> {
-    if keys.is_empty() {
-        return None;
-    }
-    let Some((mut key, mut value)) = document_tree.get_key_value(&keys[0]) else {
-        return None;
-    };
-    for k in keys[1..].iter() {
-        let tombi_document_tree::Value::Table(table) = value else {
-            return None;
+fn find_package_project_toml_paths<'a>(
+    member_patterns: &'a [&'a tombi_document_tree::String],
+    exclude_patterns: &'a [&'a tombi_document_tree::String],
+    workspace_dir_path: &'a std::path::Path,
+) -> impl Iterator<Item = (&'a tombi_document_tree::String, std::path::PathBuf)> + 'a {
+    member_patterns.iter().filter_map(|&member_pattern| {
+        let mut member_pattern_path = std::path::Path::new(member_pattern.value()).to_path_buf();
+        if !member_pattern_path.is_absolute() {
+            member_pattern_path = workspace_dir_path.join(member_pattern_path);
+        }
+
+        // Find matching paths using glob
+        let mut glob_paths = match glob::glob(&member_pattern_path.to_string_lossy()) {
+            Ok(paths) => paths,
+            Err(_) => return None,
         };
 
-        let Some((next_key, next_value)) = table.get_key_value(k) else {
-            return None;
-        };
+        // Check if any path matches and is not excluded
+        while let Some(Ok(path)) = glob_paths.next() {
+            // Skip if the path doesn't contain pyproject.toml
+            let project_toml_path = if path.is_dir() {
+                path.join("pyproject.toml")
+            } else {
+                path
+            };
 
-        key = next_key;
-        value = next_value;
-    }
+            if !project_toml_path.exists() || !project_toml_path.is_file() {
+                continue;
+            }
 
-    Some((key, value))
+            // Check if the path is excluded
+            let path_str = project_toml_path.to_string_lossy();
+            let is_excluded = exclude_patterns.iter().any(|&exclude_pattern| {
+                match glob::Pattern::new(exclude_pattern.value()) {
+                    Ok(exclude_glob) => exclude_glob.matches(&path_str),
+                    Err(_) => false,
+                }
+            });
+
+            if !is_excluded {
+                return Some((member_pattern, project_toml_path));
+            }
+        }
+
+        None
+    })
 }

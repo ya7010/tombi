@@ -65,3 +65,32 @@ where
         self.into_document_tree_and_errors(toml_version).ok()
     }
 }
+
+pub fn dig_keys<'a, K>(
+    document_tree: &'a crate::DocumentTree,
+    keys: &[&K],
+) -> Option<(&'a crate::Key, &'a crate::Value)>
+where
+    K: ?Sized + std::hash::Hash + indexmap::Equivalent<Key>,
+{
+    if keys.is_empty() {
+        return None;
+    }
+    let Some((mut key, mut value)) = document_tree.get_key_value(keys[0]) else {
+        return None;
+    };
+    for k in keys[1..].iter() {
+        let crate::Value::Table(table) = value else {
+            return None;
+        };
+
+        let Some((next_key, next_value)) = table.get_key_value(*k) else {
+            return None;
+        };
+
+        key = next_key;
+        value = next_value;
+    }
+
+    Some((key, value))
+}
