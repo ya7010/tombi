@@ -2373,6 +2373,17 @@ dependencies = [
 [[package]]
 name = "tombi-uv-extension"
 version = "0.0.0"
+dependencies = [
+ "itertools",
+ "tombi-ast",
+ "tombi-config",
+ "tombi-document-tree",
+ "tombi-extension",
+ "tombi-parser",
+ "tombi-text",
+ "tower-lsp",
+ "tracing",
+]
 
 [[package]]
 name = "tombi-validator"

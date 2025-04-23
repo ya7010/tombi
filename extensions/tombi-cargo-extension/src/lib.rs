@@ -103,13 +103,7 @@ fn get_workspace_cargo_toml_location(
         return Ok(None);
     };
 
-    let workspace_key = tombi_document_tree::Key::try_new(
-        tombi_document_tree::KeyKind::BareKey,
-        "workspace".to_string(),
-        tombi_text::Range::default(),
-        toml_version,
-    )
-    .unwrap();
+    let workspace_key = create_key("workspace", toml_version);
 
     let keys = {
         let mut sanitized_keys = vec![sanitize_dependency_key(keys[0].to_owned(), toml_version)];
@@ -135,9 +129,19 @@ fn get_workspace_cargo_toml_location(
             keys.first().map(|key| key.value()),
             Some("dependencies" | "dev-dependencies" | "build-dependencies")
         ) {
-            if let tombi_document_tree::Value::Table(table) = value {
-                if let Some(value) = table.get("path") {
-                    if let tombi_document_tree::Value::String(subcrate_path) = value {
+            if matches!(value, tombi_document_tree::Value::Table(table)) {
+                let table = match value {
+                    tombi_document_tree::Value::Table(t) => t,
+                    _ => unreachable!(),
+                };
+
+                if let Some(path_value) = table.get("path") {
+                    if matches!(path_value, tombi_document_tree::Value::String(_)) {
+                        let subcrate_path = match path_value {
+                            tombi_document_tree::Value::String(path) => path,
+                            _ => unreachable!(),
+                        };
+
                         if let Some((subcrate_cargo_toml_path, _)) = get_subcrate_cargo_toml(
                             &workspace_cargo_toml_path,
                             std::path::Path::new(subcrate_path.value()),
@@ -193,7 +197,12 @@ fn get_dependencies_crate_path_location(
         return Ok(None);
     };
 
-    if let tombi_document_tree::Value::String(subcrate_path) = value {
+    if matches!(value, tombi_document_tree::Value::String(subcrate_path)) {
+        let subcrate_path = match value {
+            tombi_document_tree::Value::String(path) => path,
+            _ => unreachable!(),
+        };
+
         if let Some((subcrate_cargo_toml_path, _)) = get_subcrate_cargo_toml(
             &cargo_toml_path,
             std::path::Path::new(subcrate_path.value()),
@@ -235,6 +244,17 @@ fn dig_keys<'a>(
     Some((key, value))
 }
 
+/// Create a new bare key with the given name.
+fn create_key(key_str: &str, toml_version: TomlVersion) -> tombi_document_tree::Key {
+    tombi_document_tree::Key::try_new(
+        tombi_document_tree::KeyKind::BareKey,
+        key_str.to_string(),
+        tombi_text::Range::default(),
+        toml_version,
+    )
+    .unwrap()
+}
+
 /// Sanitize the dependency key to be "dependencies" if it is "dev-dependencies" or "build-dependencies".
 ///
 /// This is because the dependency key is always "dependencies" in the workspace Cargo.toml.
@@ -243,13 +263,7 @@ fn sanitize_dependency_key(
     toml_version: TomlVersion,
 ) -> tombi_document_tree::Key {
     if matches!(key.value(), "dev-dependencies" | "build-dependencies") {
-        tombi_document_tree::Key::try_new(
-            key.kind(),
-            "dependencies".to_string(),
-            key.range(),
-            toml_version,
-        )
-        .unwrap()
+        create_key("dependencies", toml_version)
     } else {
         key
     }

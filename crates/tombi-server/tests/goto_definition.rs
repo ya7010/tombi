@@ -84,6 +84,96 @@ mod goto_definition_tests {
         );
     }
 
+    mod uv_schema {
+        use super::*;
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_sources_package_workspace(
+                r#"
+                [tool.uv.sources]
+                member-package = { workspace█ = true }
+                "#,
+                project_root_path().join("packages/test-package/pyproject.toml"),
+            ) -> Ok(project_root_path().join("pyproject.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_sources_version_and_workspace(
+                r#"
+                [tool.uv.sources]
+                flask = { version = ">=2.0.0", workspace█ = true }
+                "#,
+                project_root_path().join("packages/test-package/pyproject.toml"),
+            ) -> Ok(project_root_path().join("pyproject.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_sources_multiple_dependencies(
+                r#"
+                [tool.uv.sources]
+                requests = { version = ">=2.25.0" }
+                flask = { workspace█ = true }
+                sqlalchemy = { version = ">=1.4.0" }
+                "#,
+                project_root_path().join("packages/test-package/pyproject.toml"),
+            ) -> Ok(project_root_path().join("pyproject.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_workspace_members(
+                r#"
+                [tool.uv.workspace]
+                members█ = ["packages/*"]
+                exclude = ["packages/unused"]
+                "#,
+                project_root_path().join("pyproject.toml"),
+            ) -> Ok(project_root_path().join("pyproject.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_workspace_exclude(
+                r#"
+                [tool.uv.workspace]
+                members = ["packages/*"]
+                exclude█ = ["packages/unused"]
+                "#,
+                project_root_path().join("pyproject.toml"),
+            ) -> Ok(project_root_path().join("pyproject.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_nested_sources(
+                r#"
+                [tool]
+                uv.sources.example-package = { workspace█ = true }
+                "#,
+                project_root_path().join("packages/test-package/pyproject.toml"),
+            ) -> Ok(project_root_path().join("pyproject.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn project_dependencies_with_uv_sources(
+                r#"
+                [project]
+                name = "test-package"
+                version = "0.1.0"
+                dependencies = ["example-package"]
+
+                [tool.uv.sources]
+                example-package = { workspace█ = true }
+                "#,
+                project_root_path().join("packages/test-package/pyproject.toml"),
+            ) -> Ok(project_root_path().join("packages/example-package/pyproject.toml"));
+        );
+    }
+
     #[macro_export]
     macro_rules! test_goto_definition {
         (#[tokio::test] async fn $name:ident(
