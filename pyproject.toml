@@ -2,7 +2,7 @@
 name = "tombi"
 version = "0.0.0"  # We use git tags for versioning. This is just a placeholder.
 description = "Reserved package for tombi"
-readme = "python/README.md"
+readme = "python/tombi/README.md"
 requires-python = ">=3.10"
 dependencies = []
 
@@ -23,7 +23,7 @@ build-backend = "maturin"
 bindings = "bin"
 manifest-path = "rust/tombi-cli/Cargo.toml"
 module-name = "tombi"
-python-source = "python/src"
+python-source = "python/tombi/src"
 
 [tool.uv.workspace]
-members = []
+members = ["python/tombi-beta"]
