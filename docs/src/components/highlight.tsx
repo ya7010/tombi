@@ -26,3 +26,8 @@ export const Tip: ParentComponent = createHighlight({
   icon: "💡",
   title: "Tip",
 });
+
+export const Warning: ParentComponent = createHighlight({
+  icon: "⚠️",
+  title: "Warning",
+});

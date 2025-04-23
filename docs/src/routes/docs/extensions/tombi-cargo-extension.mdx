@@ -18,13 +18,13 @@ serde = { workspace = true }
 tombi-ast = { workspace = true }
 ```
 
-In this case, when your cursor is on `workspace`, executing "Go to Definition" will navigate you to the workspace definition or to the definition of the crate managed by the workspace.
+In this case, when your cursor is on `workspace`, executing "Go to Definition" will navigate you to the **workspace** definition or to the **crate** definition managed by the workspace.
 
-In the example above, for `serde` (an external crate), you'll be navigated to the workspace definition, while for `tombi-ast` (a crate managed by the workspace), you'll be navigated to the crate definition.
+In the example above, for `serde` (an external crate), you'll be navigated to the **workspace** definition, while for `tombi-ast` (a crate managed by the workspace), you'll be navigated to the **crate** definition.
 
 <Note>
-If you consistently want to navigate to the Cargo.toml where the workspace is defined, execute "Go to Declaration".
-</Note>
+If you consistently want to navigate to the **workspace**'s `Cargo.toml`, use "Go to Declaration".
+</Note> 
 
 #### Go to crate definition from `workspace.dependencies`
 ```toml
