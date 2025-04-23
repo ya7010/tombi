@@ -23,6 +23,12 @@ impl std::borrow::Borrow<String> for Key {
     }
 }
 
+impl indexmap::Equivalent<Key> for &Key {
+    fn equivalent(&self, other: &Key) -> bool {
+        self.value == other.value
+    }
+}
+
 impl Key {
     pub fn try_new(
         kind: KeyKind,

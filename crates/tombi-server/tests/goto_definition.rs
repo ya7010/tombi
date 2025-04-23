@@ -84,6 +84,22 @@ mod goto_definition_tests {
         );
     }
 
+    mod pyproject_uv_schema {
+        use super::*;
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_sources_package_workspace(
+                r#"
+                [tool.uv.sources]
+                tombi-beta = { workspace█ = true }
+                "#,
+                project_root_path().join("python
+                /tombi-beta/pyproject.toml"),
+            ) -> Ok(project_root_path().join("python/tombi-beta/pyproject.toml"));
+        );
+    }
+
     #[macro_export]
     macro_rules! test_goto_definition {
         (#[tokio::test] async fn $name:ident(
@@ -163,7 +179,7 @@ mod goto_definition_tests {
                                 let target_path = target_url.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
-                                assert_eq!(
+                                pretty_assertions::assert_eq!(
                                     target_path,
                                     expected_path,
                                     "Definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
@@ -176,7 +192,7 @@ mod goto_definition_tests {
                                 let target_path = target_url.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
-                                assert_eq!(
+                                pretty_assertions::assert_eq!(
                                     target_path,
                                     expected_path,
                                     "Definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
@@ -192,7 +208,7 @@ mod goto_definition_tests {
                                 let target_path = target_url.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
-                                assert_eq!(
+                                pretty_assertions::assert_eq!(
                                     target_path,
                                     expected_path,
                                     "Definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",

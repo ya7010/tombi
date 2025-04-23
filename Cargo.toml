@@ -72,6 +72,7 @@ tombi-test-lib = { path = "crates/tombi-test-lib" }
 tombi-text = { path = "crates/tombi-text" }
 tombi-toml-text = { path = "crates/tombi-toml-text" }
 tombi-toml-version = { path = "crates/tombi-toml-version" }
+tombi-uv-extension = { path = "extensions/tombi-uv-extension" }
 tombi-validator = { path = "crates/tombi-validator" }
 tombi-x-keyword = { path = "crates/tombi-x-keyword" }
 tower-lsp = { version = "0.20.0" }

@@ -94,6 +94,10 @@
       {
         "title": "tombi-cargo-extension",
         "path": "/docs/extensions/tombi-cargo-extension"
+      },
+      {
+        "title": "tombi-uv-extension",
+        "path": "/docs/extensions/tombi-uv-extension"
       }
     ]
   },

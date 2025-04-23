@@ -26,4 +26,4 @@ module-name = "tombi"
 python-source = "python/tombi/src"
 
 [tool.uv.workspace]
-members = []
+members = ["python/tombi-beta"]
