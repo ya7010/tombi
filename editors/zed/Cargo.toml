@@ -1,0 +1,15 @@
+[package]
+name = "zed-tombi"
+version = "0.1.0"
+authors = { workspace = true }
+edition = { workspace = true }
+description = "Tombi: TOML Language Server"
+repository = { workspace = true }
+license = { workspace = true }
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+zed_extension_api = "0.1.0"
