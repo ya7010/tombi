@@ -1,6 +1,13 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "extensions/*", "rust/*", "toml-test", "xtask"]
+members = [
+  "crates/*",
+  "editors/zed",
+  "extensions/*",
+  "rust/*",
+  "toml-test",
+  "xtask",
+]
 
 [workspace.package]
 version = "0.0.0"  # We use git tags for versioning. This is just a placeholder.
