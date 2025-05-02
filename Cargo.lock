@@ -2096,6 +2096,10 @@ dependencies = [
 [[package]]
 name = "tombi-extension"
 version = "0.0.0"
+dependencies = [
+ "tombi-text",
+ "tower-lsp",
+]
 
 [[package]]
 name = "tombi-formatter"

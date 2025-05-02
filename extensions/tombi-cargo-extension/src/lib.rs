@@ -7,7 +7,7 @@ use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::{TryIntoDocumentTree, ValueImpl};
-use tower_lsp::lsp_types::{Location, Url};
+use tower_lsp::lsp_types::Url;
 
 fn load_cargo_toml(
     cargo_toml_path: &std::path::Path,
@@ -91,7 +91,7 @@ fn get_workspace_cargo_toml_location(
     cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
     jump_to_subcrate: bool,
-) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     assert!(matches!(keys.last(), Some(&"workspace")));
 
     let Some((workspace_cargo_toml_path, workspace_cargo_toml_document_tree)) =
@@ -128,7 +128,7 @@ fn get_workspace_cargo_toml_location(
                     std::path::Path::new(subcrate_path.value()),
                     toml_version,
                 ) {
-                    return Ok(Some(Location::new(
+                    return Ok(Some(tombi_extension::DefinitionLocation::new(
                         Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
                         tombi_text::Range::default().into(),
                     )));
@@ -141,7 +141,7 @@ fn get_workspace_cargo_toml_location(
         return Ok(None);
     };
 
-    Ok(Some(Location::new(
+    Ok(Some(tombi_extension::DefinitionLocation::new(
         workspace_cargo_toml_uri,
         key.range().into(),
     )))
@@ -157,7 +157,7 @@ fn get_dependencies_crate_path_location(
     keys: &[&str],
     cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
-) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     assert!(matches!(
         keys,
         ["workspace", "dependencies", _, "path"]
@@ -187,7 +187,7 @@ fn get_dependencies_crate_path_location(
             std::path::Path::new(subcrate_path.value()),
             toml_version,
         ) {
-            return Ok(Some(Location::new(
+            return Ok(Some(tombi_extension::DefinitionLocation::new(
                 Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
                 tombi_text::Range::default().into(),
             )));
