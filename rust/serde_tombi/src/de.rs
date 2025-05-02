@@ -2,11 +2,11 @@ mod error;
 
 pub use error::Error;
 use itertools::{Either, Itertools};
-use tombi_schema_store::{SchemaStore, SourceSchema};
 use serde::de::DeserializeOwned;
 use tombi_ast::AstNode;
 use tombi_document::IntoDocument;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
+use tombi_schema_store::{SchemaStore, SourceSchema};
 use tombi_toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
@@ -645,7 +645,7 @@ optional_string = "provided"
         // Verify the parsed values
         assert_eq!(
             config.toml_version,
-            Some(tombi_toml_version::TomlVersion::V1_1_0_Preview)
+            Some(tombi_toml_version::TomlVersion::V1_0_0)
         );
         assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
         assert!(config.format.is_some());
