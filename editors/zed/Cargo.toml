@@ -3,7 +3,7 @@ name = "zed-tombi"
 version = "0.1.0"
 authors = { workspace = true }
 edition = { workspace = true }
-description = "🦅  TOML Language Server"
+description = "🦅  TOML Language Server  🦅 "
 repository = { workspace = true }
 license = { workspace = true }
 
