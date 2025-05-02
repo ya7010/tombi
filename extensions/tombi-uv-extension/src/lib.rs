@@ -8,7 +8,7 @@ use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::TryIntoDocumentTree;
-use tower_lsp::lsp_types::{Location, Url};
+use tower_lsp::lsp_types::Url;
 
 fn load_pyproject_toml(
     pyproject_toml_path: &std::path::Path,
@@ -78,7 +78,7 @@ fn get_workspace_pyproject_toml_location(
     pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
     jump_to_package: bool,
-) -> Result<Option<Location>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     assert!(matches!(keys, ["tool", "uv", "sources", _, "workspace"]));
 
     let Some((workspace_pyproject_toml_path, workspace_pyproject_toml_document_tree)) =
@@ -102,7 +102,7 @@ fn get_workspace_pyproject_toml_location(
             return Ok(None);
         };
 
-        Ok(Some(Location::new(
+        Ok(Some(tombi_extension::DefinitionLocation::new(
             package_pyproject_toml_uri,
             tombi_text::Range::default().into(),
         )))
@@ -112,7 +112,7 @@ fn get_workspace_pyproject_toml_location(
             return Ok(None);
         };
 
-        Ok(Some(Location::new(
+        Ok(Some(tombi_extension::DefinitionLocation::new(
             workspace_pyproject_toml_uri,
             member_range.into(),
         )))
