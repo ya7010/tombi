@@ -33,6 +33,7 @@ pub async fn serve(_args: impl Into<Args>, offline: bool) {
     .custom_method("tombi/getTomlVersion", Backend::get_toml_version)
     .custom_method("tombi/updateSchema", Backend::update_schema)
     .custom_method("tombi/updateConfig", Backend::update_config)
+    .custom_method("tombi/associateSchema", Backend::associate_schema)
     .finish();
 
     tower_lsp::Server::new(stdin, stdout, socket)

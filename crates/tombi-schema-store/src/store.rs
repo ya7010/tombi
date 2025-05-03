@@ -476,4 +476,14 @@ impl SchemaStore {
             }
         })
     }
+
+    pub async fn associate_schema(&self, schema_url: SchemaUrl, include: Vec<String>) {
+        let mut schemas = self.schemas.write().await;
+        schemas.push(crate::Schema {
+            url: schema_url,
+            include,
+            toml_version: None,
+            sub_root_keys: None,
+        });
+    }
 }
