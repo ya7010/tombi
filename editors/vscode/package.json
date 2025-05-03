@@ -30,6 +30,7 @@
     "test": "vitest run --passWithNoTests ./src"
   },
   "dependencies": {
+    "valibot": "^1.0.0",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {

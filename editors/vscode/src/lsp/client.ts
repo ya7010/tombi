@@ -19,3 +19,13 @@ export type UpdateSchemaParams = TextDocumentIdentifier;
 export const updateSchema = new RequestType<UpdateSchemaParams, boolean, void>(
   "tombi/updateSchema",
 );
+
+export type AssociateSchemaParams = {
+  url: string;
+  fileMatch: string[];
+};
+export const associateSchema = new RequestType<
+  AssociateSchemaParams,
+  void,
+  void
+>("tombi/associateSchema");

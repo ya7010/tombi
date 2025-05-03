@@ -1,3 +1,4 @@
+mod associate_schema;
 mod completion;
 mod diagnostic;
 mod did_change;
@@ -22,6 +23,7 @@ mod shutdown;
 mod update_config;
 mod update_schema;
 
+pub use associate_schema::{handle_associate_schema, AssociateSchemaParams};
 pub use completion::handle_completion;
 pub use diagnostic::handle_diagnostic;
 pub use did_change::handle_did_change;

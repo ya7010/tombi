@@ -8,6 +8,7 @@ import * as command from "@/command";
 import { bootstrap } from "@/bootstrap";
 import { log } from "@/logging";
 import { getTomlVersion, updateConfig, updateSchema } from "@/lsp/client";
+import { registerExtensionSchemas } from "@/tomlValidation";
 export type { Settings };
 
 export const EXTENTION_ID = "tombi";
@@ -31,6 +32,7 @@ export class Extension {
 
     this.registerEvents();
     this.registerCommands();
+    this.registerExtensionSchemas();
   }
 
   static async activate(context: vscode.ExtensionContext): Promise<Extension> {
@@ -99,6 +101,10 @@ export class Extension {
         await this.onDidSaveTextDocument(document);
       }),
     );
+  }
+
+  private registerExtensionSchemas(): void {
+    registerExtensionSchemas(this.client);
   }
 
   private async updateStatusBarItem(): Promise<void> {
