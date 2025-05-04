@@ -25,7 +25,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
         "max-h-[calc(100vh-5rem)]": props.isOpen(),
       }}
     >
-      <nav class="flex flex-col p-x-4 p-b-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
+      <nav class="flex flex-col px-4 pb-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
         <For each={menuItems}>
           {(item, idx) => (
             <HeaderDropdownItem

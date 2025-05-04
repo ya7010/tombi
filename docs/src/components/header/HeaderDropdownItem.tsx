@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { createSignal, For } from "solid-js";
 import type { ParentProps } from "solid-js";
-import { IoChevronDown } from "solid-icons/io";
+import { IoChevronForward } from "solid-icons/io";
 import type { DicIndex } from "~/utils/doc-index";
 
 interface HeaderDropdownItemProps {
@@ -53,8 +53,9 @@ export function HeaderDropdownItem(
             aria-expanded={isExpanded()}
             aria-label={isExpanded() ? "Collapse section" : "Expand section"}
           >
-            <IoChevronDown
-              classList={{ "rotate-180": isExpanded() }}
+            <IoChevronForward
+              class="transition-transform duration-500 ease-in-out"
+              classList={{ "rotate-90": isExpanded() }}
               size={16}
             />
           </button>
@@ -62,7 +63,7 @@ export function HeaderDropdownItem(
       </A>
       {hasChildren && (
         <div
-          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-600"
+          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-500 ease-linear"
           classList={{
             "max-h-0": !isExpanded(),
             "max-h-[9999px]": isExpanded(),
