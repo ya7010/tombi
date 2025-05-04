@@ -1,6 +1,7 @@
 import type { Accessor } from "solid-js";
-import { For } from "solid-js";
+import { Show, For } from "solid-js";
 import { HeaderDropdownItem } from "./HeaderDropdownItem";
+import type { DicIndex } from "~/utils/doc-index";
 import docIndex from "../../../doc-index.json";
 
 interface HeaderDropdownProps {
@@ -8,38 +9,33 @@ interface HeaderDropdownProps {
   onSelect: () => void;
 }
 
-export function HeaderDropdown(props: HeaderDropdownProps) {
-  const menuItems = [
-    { href: "/", label: "Home", childrenItems: undefined },
-    {
-      href: "/docs",
-      label: "Docs",
-      childrenItems: docIndex,
-    },
-    { href: "/playground", label: "Playground", childrenItems: undefined },
+const menuItems: { href: string; label: string; childrenItems?: DicIndex[] }[] =
+  [
+    { href: "/", label: "Home" },
+    { href: "/docs", label: "Docs", childrenItems: docIndex },
+    { href: "/playground", label: "Playground" },
   ];
 
+export function HeaderDropdown(props: HeaderDropdownProps) {
   return (
-    <div
-      class={`fixed inset-x-0 top-20 bottom-0 bg-tombi-primary shadow-lg z-40 md:hidden ${
-        props.isOpen() ? "block" : "hidden"
-      }`}
-    >
-      <div class="h-full overflow-y-auto p-4 flex flex-col">
-        <For each={menuItems}>
-          {(item, index) => (
-            <HeaderDropdownItem
-              href={item.href}
-              hasBorder={index() < menuItems.length - 1}
-              onSelect={props.onSelect}
-              childrenItems={item.childrenItems}
-              level={0}
-            >
-              {item.label}
-            </HeaderDropdownItem>
-          )}
-        </For>
-      </div>
-    </div>
+    <Show when={props.isOpen()}>
+      <aside class="fixed inset-x-0 top-20 bottom-0 bg-tombi-primary shadow-lg z-40 md:hidden overflow-y-auto">
+        <nav class="flex flex-col p-4 gap-y-2">
+          <For each={menuItems}>
+            {(item, idx) => (
+              <HeaderDropdownItem
+                href={item.href}
+                onSelect={props.onSelect}
+                childrenItems={item.childrenItems}
+                level={0}
+                hasBorder={idx() < menuItems.length - 1}
+              >
+                {item.label}
+              </HeaderDropdownItem>
+            )}
+          </For>
+        </nav>
+      </aside>
+    </Show>
   );
 }
