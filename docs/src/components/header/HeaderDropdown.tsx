@@ -19,8 +19,8 @@ const menuItems: { href: string; label: string; childrenItems?: DicIndex[] }[] =
 export function HeaderDropdown(props: HeaderDropdownProps) {
   return (
     <Show when={props.isOpen()}>
-      <aside class="fixed inset-x-0 top-20 bottom-0 bg-tombi-primary shadow-lg z-40 md:hidden overflow-y-auto">
-        <nav class="flex flex-col p-4 gap-y-2">
+      <div class="fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <nav class="flex flex-col p-2 gap-y-1">
           <For each={menuItems}>
             {(item, idx) => (
               <HeaderDropdownItem
@@ -35,7 +35,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
             )}
           </For>
         </nav>
-      </aside>
+      </div>
     </Show>
   );
 }
