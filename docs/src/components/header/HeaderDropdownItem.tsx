@@ -49,7 +49,7 @@ export function HeaderDropdownItem(
           <button
             type="button"
             onClick={toggleExpanded}
-            class="w-8 h-16 p-x-8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 focus:outline-none bg-transparent border-none rounded transition-transform duration-300 ease-in-out"
+            class="w-8 h-16 p-x-8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 focus:outline-none bg-transparent border-none rounded"
             aria-expanded={isExpanded()}
             aria-label={isExpanded() ? "Collapse section" : "Expand section"}
           >
@@ -62,27 +62,25 @@ export function HeaderDropdownItem(
       </A>
       {hasChildren && (
         <div
-          class="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-600"
           classList={{
             "max-h-0": !isExpanded(),
             "max-h-fit": isExpanded(),
           }}
         >
-          <div class="flex flex-col pl-4 space-y-1">
-            <For each={props.childrenItems}>
-              {(child) => (
-                <HeaderDropdownItem
-                  href={child.path}
-                  onSelect={props.onSelect}
-                  childrenItems={child.children}
-                  level={level + 1}
-                  hasBorder={false}
-                >
-                  {child.title}
-                </HeaderDropdownItem>
-              )}
-            </For>
-          </div>
+          <For each={props.childrenItems}>
+            {(child) => (
+              <HeaderDropdownItem
+                href={child.path}
+                onSelect={props.onSelect}
+                childrenItems={child.children}
+                level={level + 1}
+                hasBorder={false}
+              >
+                {child.title}
+              </HeaderDropdownItem>
+            )}
+          </For>
         </div>
       )}
     </div>
