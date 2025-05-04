@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createSignal, Show, For } from "solid-js";
+import { createSignal, For } from "solid-js";
 import type { ParentProps } from "solid-js";
 import { IoChevronDown } from "solid-icons/io";
 import type { DicIndex } from "~/utils/doc-index";
@@ -60,23 +60,31 @@ export function HeaderDropdownItem(
           </button>
         )}
       </A>
-      <Show when={hasChildren && isExpanded()}>
-        <div class="flex flex-col pl-4 space-y-1">
-          <For each={props.childrenItems}>
-            {(child) => (
-              <HeaderDropdownItem
-                href={child.path}
-                onSelect={props.onSelect}
-                childrenItems={child.children}
-                level={level + 1}
-                hasBorder={false}
-              >
-                {child.title}
-              </HeaderDropdownItem>
-            )}
-          </For>
+      {hasChildren && (
+        <div
+          class="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+          classList={{
+            "max-h-0": !isExpanded(),
+            "max-h-fit": isExpanded(),
+          }}
+        >
+          <div class="flex flex-col pl-4 space-y-1">
+            <For each={props.childrenItems}>
+              {(child) => (
+                <HeaderDropdownItem
+                  href={child.path}
+                  onSelect={props.onSelect}
+                  childrenItems={child.children}
+                  level={level + 1}
+                  hasBorder={false}
+                >
+                  {child.title}
+                </HeaderDropdownItem>
+              )}
+            </For>
+          </div>
         </div>
-      </Show>
+      )}
     </div>
   );
 }
