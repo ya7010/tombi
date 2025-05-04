@@ -39,7 +39,7 @@ export function HeaderDropdownItem(
     >
       <A
         href={props.href}
-        class={`flex items-center px-2 py-4 text-white ${level === 0 ? "text-lg" : "text-base"} font-medium no-underline hover:bg-white/5 active:bg-white/10 transition-colors`}
+        class={`flex items-center pl-3 h-16 text-white ${level === 0 ? "text-lg" : "text-base"} font-medium no-underline hover:bg-white/5 active:bg-white/10 transition-colors`}
         onClick={handleClick}
       >
         <span class="flex-grow" style={{ "padding-left": `${level}rem` }}>
@@ -49,7 +49,7 @@ export function HeaderDropdownItem(
           <button
             type="button"
             onClick={toggleExpanded}
-            class="w-8 h-8 p-x-8 flex items-center justify-center text-white/60 hover:text-white focus:outline-none bg-transparent border-none transition-transform duration-300 ease-in-out"
+            class="w-8 h-16 p-x-8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 focus:outline-none bg-transparent border-none rounded transition-transform duration-300 ease-in-out"
             aria-expanded={isExpanded()}
             aria-label={isExpanded() ? "Collapse section" : "Expand section"}
           >
