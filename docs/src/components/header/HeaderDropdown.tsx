@@ -19,7 +19,7 @@ const menuItems: { href: string; label: string; childrenItems?: DicIndex[] }[] =
 export function HeaderDropdown(props: HeaderDropdownProps) {
   return (
     <div
-      class="fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-[max-height] duration-600"
+      class="fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-[max-height] duration-500"
       classList={{
         "max-h-0": !props.isOpen(),
         "max-h-[calc(100vh-5rem)]": props.isOpen(),

@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createSignal, For } from "solid-js";
+import { createSignal, For, createEffect } from "solid-js";
 import type { ParentProps } from "solid-js";
 import { IoChevronDown } from "solid-icons/io";
 import type { DicIndex } from "~/utils/doc-index";
@@ -16,6 +16,15 @@ export function HeaderDropdownItem(
   props: ParentProps<HeaderDropdownItemProps>,
 ) {
   const [isExpanded, setIsExpanded] = createSignal(false);
+  let submenuRef: HTMLDivElement | undefined;
+
+  createEffect(() => {
+    if (!submenuRef) return;
+    submenuRef.style.maxHeight = isExpanded()
+      ? `${submenuRef.scrollHeight}px`
+      : "0px";
+  });
+
   const level = props.level ?? 0;
   const hasChildren = !!props.childrenItems?.length;
 
@@ -62,11 +71,9 @@ export function HeaderDropdownItem(
       </A>
       {hasChildren && (
         <div
-          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-600"
-          classList={{
-            "max-h-0": !isExpanded(),
-            "max-h-fit": isExpanded(),
-          }}
+          ref={submenuRef}
+          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-500"
+          style={{ "max-height": "0px" }}
         >
           <For each={props.childrenItems}>
             {(child) => (
