@@ -49,7 +49,7 @@ export function HeaderDropdownItem(
           <button
             type="button"
             onClick={toggleExpanded}
-            class="w-5 h-5 flex items-center justify-center text-white/60 hover:text-white focus:outline-none bg-transparent border-none transition-transform duration-300 ease-in-out"
+            class="w-8 h-8 p-x-8 flex items-center justify-center text-white/60 hover:text-white focus:outline-none bg-transparent border-none transition-transform duration-300 ease-in-out"
             aria-expanded={isExpanded()}
             aria-label={isExpanded() ? "Collapse section" : "Expand section"}
           >
