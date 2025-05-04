@@ -39,7 +39,7 @@ export function HeaderDropdownItem(
     >
       <A
         href={props.href}
-        class={`flex items-center px-2 py-1 text-white ${level === 0 ? "text-lg" : "text-base"} font-medium no-underline hover:bg-white/5 active:bg-white/10 transition-colors`}
+        class={`flex items-center px-2 py-4 text-white ${level === 0 ? "text-lg" : "text-base"} font-medium no-underline hover:bg-white/5 active:bg-white/10 transition-colors`}
         onClick={handleClick}
       >
         <span class="flex-grow" style={{ "padding-left": `${level}rem` }}>

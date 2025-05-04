@@ -20,7 +20,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
   return (
     <Show when={props.isOpen()}>
       <div class="fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden max-h-[calc(100vh-5rem)] overflow-y-auto">
-        <nav class="flex flex-col p-2 gap-y-1">
+        <nav class="flex flex-col p-x-4 p-b-6">
           <For each={menuItems}>
             {(item, idx) => (
               <HeaderDropdownItem
