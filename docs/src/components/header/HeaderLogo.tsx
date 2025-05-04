@@ -39,7 +39,7 @@ export function HeaderLogo() {
   };
 
   return (
-    <div class="flex-shrink-0 flex items-center relative ">
+    <div class="flex-shrink-0 flex items-center relative">
       <div
         onClick={toggleMenu}
         onKeyUp={toggleMenu}
@@ -50,13 +50,20 @@ export function HeaderLogo() {
             <A
               id={props.id}
               href="/"
-              class={`${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
+              class={`${props.linkClass} outline-none items-center no-underline transition-all duration-300 ease-in-out focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
               onClick={(e) => props.preventDefault && e.preventDefault()}
             >
               <img
                 src={props.src}
                 alt="Tombi Logo"
-                class={`${props.class} rounded-lg`}
+                class={`${props.class} rounded-lg transition-transform duration-300 ease-in-out ${
+                  isOpen() ? "scale-95" : "scale-100"
+                }`}
+              />
+              <div
+                class={`absolute bottom-0 left-0 right-0 h-1 bg-tombi-focus transition-transform duration-300 ease-in-out transform ${
+                  isOpen() ? "scale-x-100" : "scale-x-0"
+                }`}
               />
             </A>
           )}
