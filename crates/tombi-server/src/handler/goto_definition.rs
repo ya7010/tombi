@@ -1,4 +1,5 @@
 use itertools::Either;
+use tombi_schema_store::Accessor;
 use tower_lsp::lsp_types::{
     GotoDefinitionParams, GotoDefinitionResponse, TextDocumentPositionParams,
 };
@@ -40,14 +41,19 @@ pub async fn handle_goto_definition(
         return Ok(None);
     };
 
+    let accessors = keys
+        .iter()
+        .map(|key| Accessor::Key(key.value().to_string()))
+        .collect::<Vec<_>>();
+
     if let Some(location) =
-        tombi_cargo_extension::goto_definition(&text_document, &keys, toml_version).await?
+        tombi_cargo_extension::goto_definition(&text_document, &accessors, toml_version).await?
     {
         return Ok(location.into());
     }
 
     if let Some(location) =
-        tombi_uv_extension::goto_definition(&text_document, &keys, toml_version).await?
+        tombi_uv_extension::goto_definition(&text_document, &accessors, toml_version).await?
     {
         return Ok(location.into());
     }
