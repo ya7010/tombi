@@ -1,4 +1,5 @@
 import type { Accessor } from "solid-js";
+import { For } from "solid-js";
 import { HeaderDropdownItem } from "./HeaderDropdownItem";
 import docIndex from "../../../doc-index.json";
 
@@ -20,34 +21,24 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
 
   return (
     <div
-      class={`fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden
-              overflow-hidden transition-[max-height] duration-300 ease-out`}
-      style={{
-        "max-height": props.isOpen() ? "100vh" : "0px",
-        height: "auto",
-      }}
+      class={`fixed inset-x-0 top-20 bottom-0 bg-tombi-primary shadow-lg z-40 md:hidden ${
+        props.isOpen() ? "block" : "hidden"
+      }`}
     >
-      <div
-        class="flex flex-col overflow-y-auto"
-        style={{
-          "max-height": "calc(100vh - 5rem)",
-          height: "auto",
-        }}
-      >
-        {props.isOpen() &&
-          menuItems.map((item, index) => (
+      <div class="h-full overflow-y-auto p-4 flex flex-col">
+        <For each={menuItems}>
+          {(item, index) => (
             <HeaderDropdownItem
-              // @ts-ignore
-              key={item.href}
               href={item.href}
-              hasBorder={index < menuItems.length - 1}
+              hasBorder={index() < menuItems.length - 1}
               onSelect={props.onSelect}
               childrenItems={item.childrenItems}
               level={0}
             >
               {item.label}
             </HeaderDropdownItem>
-          ))}
+          )}
+        </For>
       </div>
     </div>
   );
