@@ -56,14 +56,7 @@ export function HeaderLogo() {
               <img
                 src={props.src}
                 alt="Tombi Logo"
-                class={`${props.class} rounded-lg transition-transform duration-300 ease-in-out ${
-                  isOpen() ? "scale-95" : "scale-100"
-                }`}
-              />
-              <div
-                class={`absolute bottom-0 left-0 right-0 h-1 bg-tombi-focus transition-transform duration-300 ease-in-out transform ${
-                  isOpen() ? "scale-x-100" : "scale-x-0"
-                }`}
+                class={`${props.class} rounded-lg`}
               />
             </A>
           )}
