@@ -7,7 +7,7 @@ import {
   createEffect,
 } from "solid-js";
 import { A, useLocation } from "@solidjs/router";
-import { IoChevronDown } from "solid-icons/io";
+import { IoChevronForward } from "solid-icons/io";
 import docIndex from "../../doc-index.json";
 import type { DicIndex } from "~/utils/doc-index";
 
@@ -58,9 +58,9 @@ const TreeItem = (props: {
           >
             <div
               class="transform transition-transform duration-300"
-              classList={{ "rotate-180": isExpanded() }}
+              classList={{ "rotate-90": isExpanded() }}
             >
-              <IoChevronDown size={16} />
+              <IoChevronForward size={16} />
             </div>
           </button>
         )}
