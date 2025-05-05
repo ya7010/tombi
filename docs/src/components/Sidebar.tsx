@@ -39,13 +39,13 @@ const TreeItem = (props: {
     <div class={`my-2 pl-${props.level * 2}`}>
       <div class="flex items-center">
         {isCurrentPage() ? (
-          <span class="font-bold text-tombi-700 dark:text-color-yellow text-sm block py-1 flex-grow">
+          <span class="font-bold text-tombi-700 dark:text-color-yellow text-sm block pl-2 mr-2 py-1 flex-grow">
             {props.item.title}
           </span>
         ) : (
           <A
             href={props.item.path}
-            class="text-[--color-text] no-underline text-sm block py-1 hover:text-[--color-primary] flex-grow"
+            class="text-[--color-text] no-underline text-sm block pl-2 mr-2 py-1 hover:text-[--color-primary] flex-grow"
           >
             {props.item.title}
           </A>
@@ -54,7 +54,7 @@ const TreeItem = (props: {
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded())}
-            class="w-5 h-5 mr-3 flex items-center justify-center font-bold text-[--color-primary] hover:text-blue-600 focus:outline-none bg-transparent border-none"
+            class="w-5 h-5 flex items-center justify-center font-bold text-[--color-primary] hover:text-blue-600 bg-transparent border-none"
           >
             <div
               class="transform transition-transform duration-300"
