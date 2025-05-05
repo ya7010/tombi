@@ -1,8 +1,9 @@
 import type { Accessor } from "solid-js";
-import { For } from "solid-js";
+import { For, createEffect } from "solid-js";
 import { HeaderDropdownItem } from "./HeaderDropdownItem";
 import type { DicIndex } from "~/utils/doc-index";
 import docIndex from "../../../doc-index.json";
+import { isServer } from "solid-js/web";
 
 interface HeaderDropdownProps {
   isExpanded: Accessor<boolean>;
@@ -16,9 +17,28 @@ const menuItems: DicIndex[] = [
 ];
 
 export function HeaderDropdown(props: HeaderDropdownProps) {
+  const handleClickOutside = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      !target.closest(".header-dropdown") &&
+      !target.closest(".menu-toggle")
+    ) {
+      props.onSelect();
+    }
+  };
+
+  createEffect(() => {
+    if (!isServer && props.isExpanded()) {
+      document.addEventListener("click", handleClickOutside);
+      return () => {
+        document.removeEventListener("click", handleClickOutside);
+      };
+    }
+  });
+
   return (
     <div
-      class="fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-all duration-500 ease-linear"
+      class="header-dropdown fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-all duration-500 ease-linear"
       classList={{
         "max-h-0": !props.isExpanded(),
         "max-h-[calc(100vh-5rem)]": props.isExpanded(),
