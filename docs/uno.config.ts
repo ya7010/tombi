@@ -1,11 +1,5 @@
 import { defineConfig, presetUno, presetTypography } from "unocss";
-
-export const breakpoints = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-};
+import breakpoints from "./breakpoints.json" with { type: "json" };
 
 export default defineConfig({
   presets: [presetUno(), presetTypography()],

@@ -4,7 +4,7 @@ import { detectOperatingSystem } from "~/utils/platform";
 import { IconButton } from "../button/IconButton";
 import { searchDocumentation, type SearchResult } from "~/utils/search";
 import { SearchResults } from "../search/SearchResults";
-import { breakpoints } from "../../../uno.config";
+import breakpoints from "../../../breakpoints.json";
 
 export function HeaderSearch() {
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
