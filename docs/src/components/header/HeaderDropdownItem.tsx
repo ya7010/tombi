@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createSignal, For } from "solid-js";
+import { createSignal, For, createEffect } from "solid-js";
 import type { ParentProps } from "solid-js";
 import { IoChevronForward } from "solid-icons/io";
 import type { DicIndex } from "~/utils/doc-index";
@@ -33,6 +33,14 @@ export function HeaderDropdownItem(
     props.onSelect();
   };
 
+  // Manage max-height for smooth collapse/expand animation
+  const [contentEl, setContentEl] = createSignal<HTMLDivElement>();
+  createEffect(() => {
+    const el = contentEl();
+    if (!el) return;
+    el.style.maxHeight = isExpanded() ? `${el.scrollHeight}px` : "0px";
+  });
+
   return (
     <div
       class={`flex flex-col ${props.hasBorder ? "border-b border-white/10" : ""}`}
@@ -63,11 +71,8 @@ export function HeaderDropdownItem(
       </A>
       {hasChildren && (
         <div
-          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-500 ease-linear"
-          classList={{
-            "max-h-0": !isExpanded(),
-            "max-h-[9999px]": isExpanded(),
-          }}
+          ref={setContentEl}
+          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-500 ease-in-out"
         >
           <For each={props.childrenItems}>
             {(child) => (
