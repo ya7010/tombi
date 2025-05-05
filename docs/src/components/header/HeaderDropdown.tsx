@@ -5,7 +5,7 @@ import type { DicIndex } from "~/utils/doc-index";
 import docIndex from "../../../doc-index.json";
 
 interface HeaderDropdownProps {
-  isOpen: Accessor<boolean>;
+  isExpanded: Accessor<boolean>;
   onSelect: () => void;
 }
 
@@ -20,8 +20,8 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
     <div
       class="fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-all duration-500 ease-linear"
       classList={{
-        "max-h-0": !props.isOpen(),
-        "max-h-[calc(100vh-5rem)]": props.isOpen(),
+        "max-h-0": !props.isExpanded(),
+        "max-h-[calc(100vh-5rem)]": props.isExpanded(),
       }}
     >
       <nav class="flex flex-col px-4 pb-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
@@ -33,6 +33,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
               childrenItems={item.children}
               level={0}
               hasBorder={idx() < menuItems.length - 1}
+              isExpanded={props.isExpanded()}
             >
               {item.title}
             </HeaderDropdownItem>

@@ -11,6 +11,7 @@ interface HeaderDropdownItemProps {
   onChildrenResize?: () => void;
   childrenItems?: DicIndex[];
   level?: number;
+  isExpanded: boolean;
 }
 
 export function HeaderDropdownItem(
@@ -18,7 +19,7 @@ export function HeaderDropdownItem(
 ) {
   const [isExpanded, setIsExpanded] = createSignal(false);
 
-  const toggleExpanded = (e: MouseEvent) => {
+  const toggleOpen = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsExpanded(!isExpanded());
@@ -62,8 +63,9 @@ export function HeaderDropdownItem(
     >
       <A
         href={props.href}
-        class={`flex items-center pl-3 h-16 text-white ${level === 0 ? "text-lg" : "text-base"} font-medium no-underline hover:bg-white/5 active:bg-white/10 transition-colors`}
+        class={`flex items-center pl-3 m-1 h-16 text-white ${level === 0 ? "text-lg" : "text-base"} font-medium no-underline hover:bg-white/5 active:bg-white/10 transition-colors`}
         onClick={handleClick}
+        tabindex={props.isExpanded ? 0 : -1}
       >
         <span class="flex-grow" style={{ "padding-left": `${level}rem` }}>
           {props.children}
@@ -71,10 +73,11 @@ export function HeaderDropdownItem(
         {hasChildren && (
           <button
             type="button"
-            onClick={toggleExpanded}
-            class="w-8 h-16 p-x-8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 focus:outline-none bg-transparent border-none rounded"
+            onClick={toggleOpen}
+            class="w-8 h-16 p-x-8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 bg-transparent border-none rounded"
             aria-expanded={isExpanded()}
             aria-label={isExpanded() ? "Collapse section" : "Expand section"}
+            tabindex={props.isExpanded ? 0 : -1}
           >
             <IoChevronForward
               class="transition-transform duration-400 ease-in-out"
@@ -101,6 +104,7 @@ export function HeaderDropdownItem(
                 level={level + 1}
                 hasBorder={false}
                 onChildrenResize={updateHeight}
+                isExpanded={isExpanded()}
               >
                 {child.title}
               </HeaderDropdownItem>

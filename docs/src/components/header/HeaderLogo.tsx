@@ -63,7 +63,7 @@ export function HeaderLogo() {
         </For>
       </div>
 
-      <HeaderDropdown isOpen={isOpen} onSelect={handleSelect} />
+      <HeaderDropdown isExpanded={isOpen} onSelect={handleSelect} />
     </div>
   );
 }
