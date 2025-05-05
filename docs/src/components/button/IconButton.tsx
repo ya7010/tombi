@@ -5,6 +5,7 @@ interface IconButtonProps {
   onClick: () => void;
   alt: string;
   class?: string;
+  style?: string;
 }
 
 export const IconButton: ParentComponent<IconButtonProps> = (props) => {
@@ -18,6 +19,7 @@ export const IconButton: ParentComponent<IconButtonProps> = (props) => {
       onClick={props.onClick}
       class={`${baseClasses} ${props.class || ""}`}
       aria-label={props.alt}
+      style={props.style}
     >
       {props.children}
     </button>
