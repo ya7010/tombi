@@ -9,12 +9,11 @@ interface HeaderDropdownProps {
   onSelect: () => void;
 }
 
-const menuItems: { href: string; label: string; childrenItems?: DicIndex[] }[] =
-  [
-    { href: "/", label: "Home" },
-    { href: "/docs", label: "Docs", childrenItems: docIndex },
-    { href: "/playground", label: "Playground" },
-  ];
+const menuItems: DicIndex[] = [
+  { title: "Home", path: "/" },
+  { title: "Docs", path: "/docs", children: docIndex },
+  { title: "Playground", path: "/playground" },
+];
 
 export function HeaderDropdown(props: HeaderDropdownProps) {
   return (
@@ -29,13 +28,13 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
         <For each={menuItems}>
           {(item, idx) => (
             <HeaderDropdownItem
-              href={item.href}
+              href={item.path}
               onSelect={props.onSelect}
-              childrenItems={item.childrenItems}
+              childrenItems={item.children}
               level={0}
               hasBorder={idx() < menuItems.length - 1}
             >
-              {item.label}
+              {item.title}
             </HeaderDropdownItem>
           )}
         </For>
