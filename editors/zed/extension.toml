@@ -1,5 +1,5 @@
 id = "tombi"
-name = "Tombi"
+name = "Tombi | TOML Toolkit"
 version = "0.1.0"
 description = "🦅  TOML Language Server  🦅 "
 schema_version = 1
