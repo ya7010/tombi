@@ -4,6 +4,7 @@ import { detectOperatingSystem } from "~/utils/platform";
 import { IconButton } from "../button/IconButton";
 import { searchDocumentation, type SearchResult } from "~/utils/search";
 import { SearchResults } from "../search/SearchResults";
+import { breakpoints } from "../../../uno.config";
 
 export function HeaderSearch() {
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
@@ -12,12 +13,18 @@ export function HeaderSearch() {
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [isLoading, setIsLoading] = createSignal(false);
   const [isFocused, setIsFocused] = createSignal(false);
+  const [isDesktop, setIsDesktop] = createSignal(false);
   let searchInputRef: HTMLInputElement | undefined;
 
   onMount(() => {
     setIsMac(detectOperatingSystem() === "mac");
+    setIsDesktop(window.innerWidth >= breakpoints.md);
 
     if (typeof window !== "undefined") {
+      window.addEventListener("resize", () => {
+        setIsDesktop(window.innerWidth >= breakpoints.md);
+      });
+
       document.addEventListener("keydown", (e) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "k") {
           e.preventDefault();
@@ -67,7 +74,7 @@ export function HeaderSearch() {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
-            tabindex={isSearchOpen() ? 0 : -1}
+            tabindex={isDesktop() || isSearchOpen() ? 0 : -1}
           />
           <div
             class={`absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg transition-opacity duration-50 ${isFocused() ? "opacity-0" : "opacity-100"}`}
