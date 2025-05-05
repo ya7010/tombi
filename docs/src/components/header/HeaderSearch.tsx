@@ -48,13 +48,13 @@ export function HeaderSearch() {
   };
 
   return (
-    <div class="flex justify-end w-full items-center max-w-150">
+    <div class="flex justify-end w-full items-center max-w-200">
       <div
         class={`${
           isSearchOpen() ? "w-full opacity-100" : "w-0 opacity-0"
         } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center relative`}
       >
-        <div class="relative w-full min-w-[200px]">
+        <div class="relative w-full min-w-[200px] ml-4">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
             <TbSearch size={24} />
           </div>
@@ -67,6 +67,7 @@ export function HeaderSearch() {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
+            tabindex={isSearchOpen() ? 0 : -1}
           />
           <div
             class={`absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg transition-opacity duration-50 ${isFocused() ? "opacity-0" : "opacity-100"}`}

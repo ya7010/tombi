@@ -14,14 +14,14 @@ const logoProps: LogoProps[] = [
   {
     id: "mobile-logo",
     src: `${import.meta.env.BASE_URL}/icon.svg`,
-    class: "mx-4 h-16 w-16",
+    class: "h-16 w-16",
     linkClass: "md:hidden flex",
     preventDefault: true,
   },
   {
     id: "desktop-logo",
     src: `${import.meta.env.BASE_URL}/tombi-transparent.svg`,
-    class: "ml-4 mr-0 h-16 w-auto",
+    class: "h-16 w-auto",
     linkClass: "hidden md:flex",
     preventDefault: false,
   },
@@ -39,18 +39,18 @@ export function HeaderLogo() {
   };
 
   return (
-    <div class="flex-shrink-0 flex items-center relative ">
+    <div class="flex-shrink-0 flex items-center relative">
       <div
         onClick={toggleMenu}
         onKeyUp={toggleMenu}
-        class="cursor-pointer md:cursor-default"
+        class="cursor-pointer md:cursor-default ml-4"
       >
         <For each={logoProps}>
           {(props) => (
             <A
               id={props.id}
               href="/"
-              class={`${props.linkClass} outline-none items-center no-underline transition-colors focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
+              class={`${props.linkClass} outline-none items-center no-underline transition-all duration-300 ease-in-out focus-visible:ring-2 focus-visible:ring-tombi-focus focus:rounded-lg relative`}
               onClick={(e) => props.preventDefault && e.preventDefault()}
             >
               <img
@@ -63,7 +63,7 @@ export function HeaderLogo() {
         </For>
       </div>
 
-      <HeaderDropdown isOpen={isOpen} onSelect={handleSelect} />
+      <HeaderDropdown isExpanded={isOpen} onSelect={handleSelect} />
     </div>
   );
 }
