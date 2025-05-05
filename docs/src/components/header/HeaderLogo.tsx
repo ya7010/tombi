@@ -14,14 +14,14 @@ const logoProps: LogoProps[] = [
   {
     id: "mobile-logo",
     src: `${import.meta.env.BASE_URL}/icon.svg`,
-    class: "mx-4 h-16 w-16",
+    class: "h-16 w-16",
     linkClass: "md:hidden flex",
     preventDefault: true,
   },
   {
     id: "desktop-logo",
     src: `${import.meta.env.BASE_URL}/tombi-transparent.svg`,
-    class: "ml-4 mr-0 h-16 w-auto",
+    class: "h-16 w-auto",
     linkClass: "hidden md:flex",
     preventDefault: false,
   },
@@ -43,7 +43,7 @@ export function HeaderLogo() {
       <div
         onClick={toggleMenu}
         onKeyUp={toggleMenu}
-        class="cursor-pointer md:cursor-default"
+        class="cursor-pointer md:cursor-default ml-4"
       >
         <For each={logoProps}>
           {(props) => (

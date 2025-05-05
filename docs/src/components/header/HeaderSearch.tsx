@@ -48,13 +48,13 @@ export function HeaderSearch() {
   };
 
   return (
-    <div class="flex justify-end w-full items-center max-w-150">
+    <div class="flex justify-end w-full items-center max-w-200">
       <div
         class={`${
           isSearchOpen() ? "w-full opacity-100" : "w-0 opacity-0"
         } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center relative`}
       >
-        <div class="relative w-full min-w-[200px]">
+        <div class="relative w-full min-w-[200px] ml-4">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
             <TbSearch size={24} />
           </div>
