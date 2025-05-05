@@ -43,7 +43,7 @@ export function HeaderLogo() {
       <div
         onClick={toggleMenu}
         onKeyUp={toggleMenu}
-        class="cursor-pointer md:cursor-default ml-4"
+        class="cursor-pointer md:cursor-default ml-4 menu-toggle"
       >
         <For each={logoProps}>
           {(props) => (
