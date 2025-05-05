@@ -77,7 +77,7 @@ export function HeaderDropdownItem(
             aria-label={isExpanded() ? "Collapse section" : "Expand section"}
           >
             <IoChevronForward
-              class="transition-transform duration-500 ease-in-out"
+              class="transition-transform duration-400 ease-in-out"
               classList={{ "rotate-90": isExpanded() }}
               size={16}
             />
@@ -89,7 +89,7 @@ export function HeaderDropdownItem(
           ref={(el) => {
             contentRef = el;
           }}
-          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-all duration-500 ease-linear"
+          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-all duration-400 ease-linear"
           style={{ "max-height": maxHeightStyle() }}
         >
           <For each={props.childrenItems}>
