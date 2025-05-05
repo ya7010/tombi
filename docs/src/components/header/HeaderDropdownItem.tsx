@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { createSignal, For, createEffect } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, For } from "solid-js";
 import type { ParentProps } from "solid-js";
 import { IoChevronForward } from "solid-icons/io";
 import type { DicIndex } from "~/utils/doc-index";
@@ -8,6 +8,7 @@ interface HeaderDropdownItemProps {
   href: string;
   hasBorder?: boolean;
   onSelect: () => void;
+  onChildrenResize?: () => void;
   childrenItems?: DicIndex[];
   level?: number;
 }
@@ -16,6 +17,7 @@ export function HeaderDropdownItem(
   props: ParentProps<HeaderDropdownItemProps>,
 ) {
   const [isExpanded, setIsExpanded] = createSignal(false);
+
   const toggleExpanded = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -33,12 +35,25 @@ export function HeaderDropdownItem(
     props.onSelect();
   };
 
-  // Manage max-height for smooth collapse/expand animation
-  const [contentEl, setContentEl] = createSignal<HTMLDivElement>();
-  createEffect(() => {
-    const el = contentEl();
-    if (!el) return;
-    el.style.maxHeight = isExpanded() ? `${el.scrollHeight}px` : "0px";
+  let contentRef: HTMLDivElement | undefined;
+  const [maxHeightStyle, setMaxHeightStyle] = createSignal("0px");
+
+  const updateHeight = () => {
+    if (contentRef) {
+      const newHeight = isExpanded() ? contentRef.scrollHeight : 0;
+      setMaxHeightStyle(`${newHeight}px`);
+      props.onChildrenResize?.();
+    }
+  };
+
+  createEffect(updateHeight);
+
+  onMount(() => {
+    if (contentRef) {
+      const observer = new ResizeObserver(updateHeight);
+      observer.observe(contentRef);
+      onCleanup(() => observer.disconnect());
+    }
   });
 
   return (
@@ -71,8 +86,11 @@ export function HeaderDropdownItem(
       </A>
       {hasChildren && (
         <div
-          ref={setContentEl}
-          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-[max-height] duration-500 ease-in-out"
+          ref={(el) => {
+            contentRef = el;
+          }}
+          class="flex flex-col pl-4 space-y-1 overflow-hidden transition-all duration-500 ease-linear"
+          style={{ "max-height": maxHeightStyle() }}
         >
           <For each={props.childrenItems}>
             {(child) => (
@@ -82,6 +100,7 @@ export function HeaderDropdownItem(
                 childrenItems={child.children}
                 level={level + 1}
                 hasBorder={false}
+                onChildrenResize={updateHeight}
               >
                 {child.title}
               </HeaderDropdownItem>
