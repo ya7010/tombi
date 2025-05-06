@@ -82,6 +82,45 @@ mod goto_definition_tests {
                 project_root_path().join("Cargo.toml"),
             ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
         );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn workspace_members_xtask(
+                r#"
+                [workspace]
+                members = [
+                    "xtask█"
+                ]
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(project_root_path().join("xtask/Cargo.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn workspace_members_crate_tombi_ast(
+                r#"
+                [workspace]
+                members = [
+                    "crates/tombi-ast█"
+                ]
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn workspace_members_extension_tombi_cargo_extension(
+                r#"
+                [workspace]
+                members = [
+                    "extensions/*█"
+                ]
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(project_root_path().join("extensions/tombi-cargo-extension/Cargo.toml"));
+        );
     }
 
     mod pyproject_uv_schema {
