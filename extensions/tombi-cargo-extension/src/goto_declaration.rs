@@ -1,4 +1,5 @@
 use tombi_config::TomlVersion;
+use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
 use crate::get_workspace_cargo_toml_location;
@@ -17,8 +18,7 @@ pub async fn goto_declaration(
         return Ok(None);
     };
 
-    if matches!(accessors.last(), Some(tombi_schema_store::Accessor::Key(key)) if key == "workspace")
-    {
+    if match_accessors!(accessors[accessors.len() - 1..], ["workspace"]) {
         get_workspace_cargo_toml_location(accessors, &cargo_toml_path, toml_version, false)
     } else {
         Ok(None)

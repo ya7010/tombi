@@ -19,8 +19,7 @@ pub async fn goto_definition(
         return Ok(None);
     };
 
-    let locations = if matches!(accessors.first(), Some(tombi_schema_store::Accessor::Key(key)) if key == "workspace")
-    {
+    let locations = if match_accessors!(accessors[..1], ["workspace"]) {
         goto_definition_for_workspace_cargo_toml(
             document_tree,
             accessors,
