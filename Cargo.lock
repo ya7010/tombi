@@ -2005,6 +2005,7 @@ name = "tombi-cargo-extension"
 version = "0.0.0"
 dependencies = [
  "cargo_metadata",
+ "glob",
  "itertools",
  "tombi-ast",
  "tombi-config",

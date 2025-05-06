@@ -1,13 +1,14 @@
 mod goto_declaration;
 mod goto_definition;
 
+use glob;
 pub use goto_declaration::goto_declaration;
 pub use goto_definition::goto_definition;
 use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::{TryIntoDocumentTree, ValueImpl};
-use tombi_schema_store::{self, match_accessors};
+use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::Url;
 
 fn load_cargo_toml(
@@ -168,8 +169,9 @@ fn get_workspace_cargo_toml_location(
 /// tombi-ast = { path = "crates/tombi-ast" }
 /// ```
 fn get_dependencies_crate_path_location(
+    workspace_document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[tombi_schema_store::Accessor],
-    cargo_toml_path: &std::path::Path,
+    workspace_cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     assert!(
@@ -179,23 +181,7 @@ fn get_dependencies_crate_path_location(
             || match_accessors!(accessors, ["build-dependencies", _, "path"])
     );
 
-    let Some(document_tree) = load_cargo_toml(cargo_toml_path, toml_version) else {
-        return Ok(None);
-    };
-
-    let keys = accessors
-        .iter()
-        .filter_map(|a| {
-            if let tombi_schema_store::Accessor::Key(key) = a {
-                Some(key.as_str())
-            } else {
-                None
-            }
-        })
-        .collect_vec();
-
-    let Some((_, value)) =
-        tombi_document_tree::dig_keys(&document_tree, &keys.iter().collect_vec())
+    let Some((_, value)) = tombi_schema_store::dig_accessors(&workspace_document_tree, accessors)
     else {
         return Ok(None);
     };
@@ -207,7 +193,7 @@ fn get_dependencies_crate_path_location(
         };
 
         if let Some((subcrate_cargo_toml_path, _)) = get_subcrate_cargo_toml(
-            &cargo_toml_path,
+            &workspace_cargo_toml_path,
             std::path::Path::new(subcrate_path.value()),
             toml_version,
         ) {
@@ -231,4 +217,66 @@ fn sanitize_dependency_key(key: &str) -> &str {
     } else {
         key
     }
+}
+
+fn find_package_cargo_toml_paths<'a>(
+    member_patterns: &'a [&'a tombi_document_tree::String],
+    exclude_patterns: &'a [&'a tombi_document_tree::String],
+    workspace_dir_path: &'a std::path::Path,
+) -> impl Iterator<Item = (&'a tombi_document_tree::String, std::path::PathBuf)> + 'a {
+    let exclude_patterns = exclude_patterns
+        .iter()
+        .filter_map(|pattern| match glob::Pattern::new(pattern.value()) {
+            Ok(exclude_glob) => Some(exclude_glob),
+            Err(_) => None,
+        })
+        .collect_vec();
+
+    member_patterns
+        .iter()
+        .filter_map(move |&member_pattern| {
+            let mut cargo_toml_paths = vec![];
+
+            let mut member_pattern_path =
+                std::path::Path::new(member_pattern.value()).to_path_buf();
+            if !member_pattern_path.is_absolute() {
+                member_pattern_path = workspace_dir_path.join(member_pattern_path);
+            }
+
+            // Find matching paths using glob
+            let mut candidate_paths = match glob::glob(&member_pattern_path.to_string_lossy()) {
+                Ok(paths) => paths,
+                Err(_) => return None,
+            };
+
+            // Check if any path matches and is not excluded
+            while let Some(Ok(candidate_path)) = candidate_paths.next() {
+                // Skip if the path doesn't contain Cargo.toml
+                let cargo_toml_path = if candidate_path.is_dir() {
+                    candidate_path.join("Cargo.toml")
+                } else {
+                    continue;
+                };
+
+                if !cargo_toml_path.exists() || !cargo_toml_path.is_file() {
+                    continue;
+                }
+
+                // Check if the path is excluded
+                let is_excluded = exclude_patterns.iter().any(|exclude_pattern| {
+                    exclude_pattern.matches(&cargo_toml_path.to_string_lossy())
+                });
+
+                if !is_excluded {
+                    cargo_toml_paths.push((member_pattern, cargo_toml_path));
+                }
+            }
+
+            if !cargo_toml_paths.is_empty() {
+                Some(cargo_toml_paths)
+            } else {
+                None
+            }
+        })
+        .flatten()
 }

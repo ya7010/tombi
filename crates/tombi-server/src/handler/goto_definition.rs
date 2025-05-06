@@ -1,10 +1,10 @@
 use itertools::Either;
-use tombi_schema_store::Accessor;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tower_lsp::lsp_types::{
     GotoDefinitionParams, GotoDefinitionResponse, TextDocumentPositionParams,
 };
 
-use crate::handler::hover::get_hover_keys_and_range;
+use crate::handler::hover::{get_hover_accessors, get_hover_keys_and_range};
 use crate::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -42,21 +42,29 @@ pub async fn handle_goto_definition(
         return Ok(None);
     };
 
-    let accessors = keys
-        .iter()
-        .map(|key| Accessor::Key(key.value().to_string()))
-        .collect::<Vec<_>>();
+    let document_tree = root.into_document_tree_and_errors(toml_version).tree;
+    let accessors = get_hover_accessors(&document_tree, &keys, position);
 
-    if let Some(location) =
-        tombi_cargo_extension::goto_definition(&text_document, &accessors, toml_version).await?
+    if let Some(locations) = tombi_cargo_extension::goto_definition(
+        &text_document,
+        &document_tree,
+        &accessors,
+        toml_version,
+    )
+    .await?
     {
-        return Ok(location.into());
+        return Ok(locations.into());
     }
 
-    if let Some(location) =
-        tombi_uv_extension::goto_definition(&text_document, &accessors, toml_version).await?
+    if let Some(locations) = tombi_uv_extension::goto_definition(
+        &text_document,
+        &document_tree,
+        &accessors,
+        toml_version,
+    )
+    .await?
     {
-        return Ok(location.into());
+        return Ok(locations.into());
     }
 
     Ok(None)
