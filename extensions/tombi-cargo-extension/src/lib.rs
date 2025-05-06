@@ -11,6 +11,7 @@ use tombi_document_tree::{TryIntoDocumentTree, ValueImpl};
 use tombi_schema_store::{dig_accessors, match_accessors};
 use tower_lsp::lsp_types::Url;
 
+#[derive(Debug, Clone)]
 struct CrateLocation {
     cargo_toml_path: std::path::PathBuf,
     package_name_key_range: tombi_text::Range,
@@ -268,14 +269,17 @@ fn get_dependencies_crate_locations(
                 continue;
             };
 
-            if let Some((crate_key, _)) =
-                tombi_document_tree::dig_keys(&crate_document_tree, &["dependencies", &crate_name])
-            {
-                if let Some(mut definition_location) =
-                    Option::<tombi_extension::DefinitionLocation>::from(crate_location)
-                {
-                    definition_location.range = crate_key.range();
-                    locations.push(definition_location);
+            for dependency_key in ["dependencies", "dev-dependencies", "build-dependencies"] {
+                if let Some((crate_key, _)) = tombi_document_tree::dig_keys(
+                    &crate_document_tree,
+                    &[dependency_key, &crate_name],
+                ) {
+                    if let Some(mut definition_location) =
+                        Option::<tombi_extension::DefinitionLocation>::from(crate_location.clone())
+                    {
+                        definition_location.range = crate_key.range();
+                        locations.push(definition_location);
+                    }
                 }
             }
         }
