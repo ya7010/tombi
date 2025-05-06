@@ -1,8 +1,15 @@
 import { defineConfig, presetUno, presetTypography } from "unocss";
+import breakpoints from "./breakpoints.json" with { type: "json" };
 
 export default defineConfig({
   presets: [presetUno(), presetTypography()],
   theme: {
+    breakpoints: {
+      sm: `${breakpoints.sm}px`,
+      md: `${breakpoints.md}px`,
+      lg: `${breakpoints.lg}px`,
+      xl: `${breakpoints.xl}px`,
+    },
     colors: {
       tombi: {
         primary: "#000066", // Primary color

@@ -8,32 +8,32 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-chrono = { workspace = true }
-futures = { workspace = true }
-indexmap = { workspace = true }
-itertools = { workspace = true }
-serde = { workspace = true }
-textwrap = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
-tombi-ast = { workspace = true }
-tombi-config = { workspace = true }
-tombi-date-time = { workspace = true }
-tombi-diagnostic = { workspace = true }
-tombi-document = { workspace = true }
-tombi-document-tree = { workspace = true }
-tombi-formatter = { workspace = true }
-tombi-parser = { workspace = true }
-tombi-schema-store = { workspace = true }
-tombi-text = { workspace = true }
-tombi-toml-text = { workspace = true }
-tombi-toml-version = { workspace = true }
-tracing = { workspace = true }
-typed-builder = { workspace = true }
-url = { workspace = true }
+chrono.workspace = true
+futures.workspace = true
+indexmap.workspace = true
+itertools.workspace = true
+serde.workspace = true
+textwrap.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tombi-ast.workspace = true
+tombi-config.workspace = true
+tombi-date-time.workspace = true
+tombi-diagnostic.workspace = true
+tombi-document.workspace = true
+tombi-document-tree.workspace = true
+tombi-formatter.workspace = true
+tombi-parser.workspace = true
+tombi-schema-store.workspace = true
+tombi-text.workspace = true
+tombi-toml-text.workspace = true
+tombi-toml-version.workspace = true
+tracing.workspace = true
+typed-builder.workspace = true
+url.workspace = true
 
 [dev-dependencies]
-maplit = { workspace = true }
-pretty_assertions = { workspace = true }
+maplit.workspace = true
+pretty_assertions.workspace = true
 tokio = { workspace = true, features = ["macros"] }
-tombi-test-lib = { workspace = true }
+tombi-test-lib.workspace = true

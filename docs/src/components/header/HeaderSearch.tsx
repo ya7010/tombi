@@ -1,28 +1,39 @@
-import { TbSearch, TbX, TbLoader, TbLoaderQuarter } from "solid-icons/tb";
+import { TbSearch, TbX, TbLoaderQuarter } from "solid-icons/tb";
 import { createSignal, onMount } from "solid-js";
 import { detectOperatingSystem } from "~/utils/platform";
 import { IconButton } from "../button/IconButton";
 import { searchDocumentation, type SearchResult } from "~/utils/search";
 import { SearchResults } from "../search/SearchResults";
+import breakpoints from "../../../breakpoints.json";
 
-export function HeaderSearch() {
-  const [isSearchOpen, setIsSearchOpen] = createSignal(false);
+interface HeaderSearchProps {
+  isSearchOpen: boolean;
+  setIsSearchOpen: (open: boolean) => void;
+}
+
+export function HeaderSearch(props: HeaderSearchProps) {
   const [isMac, setIsMac] = createSignal(false);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [searchResults, setSearchResults] = createSignal<SearchResult[]>([]);
   const [isLoading, setIsLoading] = createSignal(false);
   const [isFocused, setIsFocused] = createSignal(false);
+  const [isDesktop, setIsDesktop] = createSignal(false);
   let searchInputRef: HTMLInputElement | undefined;
 
   onMount(() => {
     setIsMac(detectOperatingSystem() === "mac");
+    setIsDesktop(window.innerWidth >= breakpoints.md);
 
     if (typeof window !== "undefined") {
+      window.addEventListener("resize", () => {
+        setIsDesktop(window.innerWidth >= breakpoints.md);
+      });
+
       document.addEventListener("keydown", (e) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "k") {
           e.preventDefault();
           searchInputRef?.focus();
-          setIsSearchOpen(true);
+          props.setIsSearchOpen(true);
         }
       });
     }
@@ -48,13 +59,23 @@ export function HeaderSearch() {
   };
 
   return (
-    <div class="flex justify-end w-full items-center max-w-150">
+    <div
+      class={`
+        ${props.isSearchOpen ? "w-full" : "w-18"}
+        flex justify-end md:w-full items-center max-w-200
+      `}
+    >
       <div
         class={`${
-          isSearchOpen() ? "w-full opacity-100" : "w-0 opacity-0"
+          props.isSearchOpen ? "w-full opacity-100" : "w-0 opacity-0"
         } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center relative`}
       >
-        <div class="relative w-full min-w-[200px]">
+        <div
+          class="relative w-full min-w-[160px]"
+          classList={{
+            "ml-4": !isDesktop(),
+          }}
+        >
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
             <TbSearch size={24} />
           </div>
@@ -67,6 +88,7 @@ export function HeaderSearch() {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             class="w-full h-11 pl-12 bg-white/20 text-white placeholder-white/60 text-lg focus:bg-white/30 outline-none border-none box-border rounded-2"
+            tabindex={isDesktop() || props.isSearchOpen ? 0 : -1}
           />
           <div
             class={`absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-lg transition-opacity duration-50 ${isFocused() ? "opacity-0" : "opacity-100"}`}
@@ -91,22 +113,22 @@ export function HeaderSearch() {
       </div>
       <IconButton
         onClick={() => {
-          setIsSearchOpen(!isSearchOpen());
-          if (!isSearchOpen()) {
+          props.setIsSearchOpen(!props.isSearchOpen);
+          if (!props.isSearchOpen) {
             setSearchQuery("");
             setSearchResults([]);
           }
         }}
         class="md:hidden m-4 py-1 relative"
-        alt={isSearchOpen() ? "Close Search" : "Search"}
+        alt={props.isSearchOpen ? "Close Search" : "Search"}
       >
         <div
-          class={`absolute transition-all duration-300 ${isSearchOpen() ? "opacity-100 rotate-0" : "opacity-0 -rotate-90"}`}
+          class={`absolute transition-all duration-300 ${props.isSearchOpen ? "opacity-100 rotate-0" : "opacity-0 -rotate-90"}`}
         >
           <TbX size={24} />
         </div>
         <div
-          class={`transition-all duration-300 ${isSearchOpen() ? "opacity-0 rotate-90" : "opacity-100 rotate-0"}`}
+          class={`transition-all duration-300 ${props.isSearchOpen ? "opacity-0 rotate-90" : "opacity-100 rotate-0"}`}
         >
           <TbSearch size={24} />
         </div>
