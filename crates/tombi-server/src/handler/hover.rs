@@ -277,27 +277,36 @@ pub(crate) fn get_hover_accessors(
     position: tombi_text::Position,
 ) -> Vec<tombi_schema_store::Accessor> {
     let mut accessors: Vec<tombi_schema_store::Accessor> = Vec::new();
-    let mut current_node: &tombi_document_tree::Value = document_tree.into();
+    let mut current_value: &tombi_document_tree::Value = document_tree.into();
 
     for key in keys {
         accessors.push(tombi_schema_store::Accessor::Key(key.value().to_string()));
 
-        match current_node {
+        match current_value {
             tombi_document_tree::Value::Array(array) => {
                 for (index, value) in array.values().iter().enumerate() {
                     if value.range().contains(position) {
                         accessors.push(tombi_schema_store::Accessor::Index(index));
-                        current_node = value;
+                        current_value = value;
                         break;
                     }
                 }
             }
             tombi_document_tree::Value::Table(table) => {
                 if let Some(value) = table.get(key) {
-                    current_node = value;
+                    current_value = value;
                 }
             }
             _ => {}
+        }
+    }
+
+    if let tombi_document_tree::Value::Array(array) = current_value {
+        for (index, value) in array.values().iter().enumerate() {
+            if value.range().contains(position) {
+                accessors.push(tombi_schema_store::Accessor::Index(index));
+                break;
+            }
         }
     }
 
