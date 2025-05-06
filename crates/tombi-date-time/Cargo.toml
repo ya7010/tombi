@@ -9,7 +9,7 @@ license.workspace = true
 [dependencies]
 chrono = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-thiserror = { workspace = true }
+thiserror.workspace = true
 tracing.workspace = true
 
 [dev-dependencies]
