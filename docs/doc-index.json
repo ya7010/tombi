@@ -76,6 +76,10 @@
       {
         "title": "Completion",
         "path": "/docs/language-server/completion"
+      },
+      {
+        "title": "Goto Definition",
+        "path": "/docs/language-server/goto-definition"
       }
     ]
   },
