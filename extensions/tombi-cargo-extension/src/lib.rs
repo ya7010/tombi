@@ -7,7 +7,7 @@ use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::{TryIntoDocumentTree, ValueImpl};
-use tombi_schema_store::{self, match_accessors};
+use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::Url;
 
 fn load_cargo_toml(

@@ -1,12 +1,12 @@
 use tombi_config::TomlVersion;
-use tombi_schema_store::Accessor;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
 use crate::get_workspace_cargo_toml_location;
 
 pub async fn goto_declaration(
     text_document: &TextDocumentIdentifier,
-    accessors: &[Accessor],
+    _document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[tombi_schema_store::Accessor],
     toml_version: TomlVersion,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     // Check if current file is Cargo.toml
@@ -17,7 +17,8 @@ pub async fn goto_declaration(
         return Ok(None);
     };
 
-    if matches!(accessors.last(), Some(Accessor::Key(key)) if key == "workspace") {
+    if matches!(accessors.last(), Some(tombi_schema_store::Accessor::Key(key)) if key == "workspace")
+    {
         get_workspace_cargo_toml_location(accessors, &cargo_toml_path, toml_version, false)
     } else {
         Ok(None)

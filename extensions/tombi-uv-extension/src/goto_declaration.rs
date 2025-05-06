@@ -1,12 +1,13 @@
 use tombi_config::TomlVersion;
-use tombi_schema_store::{match_accessors, Accessor};
+use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
-use crate::get_workspace_pyproject_toml_location;
+use crate::get_tool_uv_sources_workspace_location;
 
 pub async fn goto_declaration(
     text_document: &TextDocumentIdentifier,
-    accessors: &[Accessor],
+    document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[tombi_schema_store::Accessor],
     toml_version: TomlVersion,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     // Check if current file is pyproject.toml
@@ -18,7 +19,13 @@ pub async fn goto_declaration(
     };
 
     if match_accessors!(accessors, ["tool", "uv", "sources", _, "workspace"]) {
-        get_workspace_pyproject_toml_location(&accessors, &pyproject_toml_path, toml_version, false)
+        get_tool_uv_sources_workspace_location(
+            document_tree,
+            &accessors,
+            &pyproject_toml_path,
+            toml_version,
+            false,
+        )
     } else {
         Ok(None)
     }
