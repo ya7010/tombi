@@ -17,10 +17,9 @@ export function Header() {
     if (path === "/playground") return "Playground";
 
     const flattenedPages = flattenDocPages(docIndex);
-    const page = flattenedPages.find((page) => {
-      console.log(`${import.meta.env.BASE_URL}${page.path}`, path);
-      return `${import.meta.env.BASE_URL}${page.path}` === path;
-    });
+    const page = flattenedPages.find(
+      (page) => `${import.meta.env.BASE_URL}${page.path}` === path,
+    );
     return page?.title || "Tombi";
   };
 
