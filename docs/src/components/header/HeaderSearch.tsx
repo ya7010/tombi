@@ -1,4 +1,4 @@
-import { TbSearch, TbX, TbLoader, TbLoaderQuarter } from "solid-icons/tb";
+import { TbSearch, TbX, TbLoaderQuarter } from "solid-icons/tb";
 import { createSignal, onMount } from "solid-js";
 import { detectOperatingSystem } from "~/utils/platform";
 import { IconButton } from "../button/IconButton";

@@ -1,13 +1,29 @@
 import { createSignal } from "solid-js";
-import { TbSearch, TbX } from "solid-icons/tb";
-import { IconButton } from "../button/IconButton";
+import { useLocation } from "@solidjs/router";
 import { HeaderLogo } from "./HeaderLogo";
 import { HeaderSearch } from "./HeaderSearch";
 import { HeaderIcons } from "./HeaderIcons";
 import { HeaderTab } from "./HeaderTab";
+import { flattenDocPages } from "~/utils/doc-index";
+import docIndex from "../../../doc-index.json";
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = createSignal(false);
+  const location = useLocation();
+
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === "/") return "Tombi";
+    if (path === "/playground") return "Playground";
+
+    const flattenedPages = flattenDocPages(docIndex);
+    const page = flattenedPages.find((page) => {
+      console.log(`${import.meta.env.BASE_URL}${page.path}`, path);
+      return `${import.meta.env.BASE_URL}${page.path}` === path;
+    });
+    return page?.title || "Tombi";
+  };
+
   return (
     <header class="fixed top-0 left-0 right-0 bg-tombi-primary shadow-lg z-40">
       <nav class="max-w-7xl mx-auto">
@@ -22,7 +38,7 @@ export function Header() {
               !isSearchOpen() ? "w-full md:opacity-100" : "w-0 opacity-0"
             } flex justify-center text-white text-lg font-bold text-center md:hidden`}
           >
-            Tombi
+            {getPageTitle()}
           </h1>
           <HeaderSearch
             isSearchOpen={isSearchOpen()}
