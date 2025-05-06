@@ -1,9 +1,10 @@
 use itertools::Either;
+use tombi_schema_store::Accessor;
 use tower_lsp::lsp_types::{
     GotoDefinitionParams, GotoDefinitionResponse, TextDocumentPositionParams,
 };
 
-use crate::handler::hover::get_hover_range;
+use crate::handler::hover::get_hover_keys_and_range;
 use crate::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -36,18 +37,24 @@ pub async fn handle_goto_definition(
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let Some((keys, _)) = get_hover_range(&root, position.into(), toml_version).await else {
+    let position = position.into();
+    let Some((keys, _)) = get_hover_keys_and_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 
+    let accessors = keys
+        .iter()
+        .map(|key| Accessor::Key(key.value().to_string()))
+        .collect::<Vec<_>>();
+
     if let Some(location) =
-        tombi_cargo_extension::goto_definition(&text_document, &keys, toml_version).await?
+        tombi_cargo_extension::goto_definition(&text_document, &accessors, toml_version).await?
     {
         return Ok(location.into());
     }
 
     if let Some(location) =
-        tombi_uv_extension::goto_definition(&text_document, &keys, toml_version).await?
+        tombi_uv_extension::goto_definition(&text_document, &accessors, toml_version).await?
     {
         return Ok(location.into());
     }

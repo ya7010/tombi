@@ -8,6 +8,7 @@ use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::TryIntoDocumentTree;
+use tombi_schema_store::{match_accessors, Accessor};
 use tower_lsp::lsp_types::Url;
 
 fn load_pyproject_toml(
@@ -74,12 +75,15 @@ fn find_workspace_pyproject_toml(
 /// other-package = { workspace = true }
 /// ```
 fn get_workspace_pyproject_toml_location(
-    keys: &[&str],
+    accessors: &[Accessor],
     pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
     jump_to_package: bool,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
-    assert!(matches!(keys, ["tool", "uv", "sources", _, "workspace"]));
+    assert!(match_accessors!(
+        accessors,
+        ["tool", "uv", "sources", _, "workspace"]
+    ));
 
     let Some((workspace_pyproject_toml_path, workspace_pyproject_toml_document_tree)) =
         find_workspace_pyproject_toml(pyproject_toml_path, toml_version)
@@ -87,7 +91,12 @@ fn get_workspace_pyproject_toml_location(
         return Ok(None);
     };
 
-    let package_name = keys[3];
+    let package_name = if let Accessor::Key(key) = &accessors[3] {
+        key
+    } else {
+        return Ok(None);
+    };
+
     let Some((package_toml_path, member_range)) = find_package_project_toml(
         package_name,
         &workspace_pyproject_toml_document_tree,

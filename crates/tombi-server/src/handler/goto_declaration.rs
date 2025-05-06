@@ -1,8 +1,9 @@
 use itertools::Either;
+use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tower_lsp::lsp_types::request::{GotoDeclarationParams, GotoDeclarationResponse};
 use tower_lsp::lsp_types::TextDocumentPositionParams;
 
-use crate::handler::hover::get_hover_range;
+use crate::handler::hover::{get_hover_accessors, get_hover_keys_and_range};
 use crate::Backend;
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -33,20 +34,25 @@ pub async fn handle_goto_declaration(
         .ok()
         .flatten();
 
+    let position = position.into();
+
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let Some((keys, _)) = get_hover_range(&root, position.into(), toml_version).await else {
+    let Some((keys, _)) = get_hover_keys_and_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 
+    let document_tree = root.into_document_tree_and_errors(toml_version).tree;
+    let accessors = get_hover_accessors(&document_tree, &keys, position);
+
     if let Some(location) =
-        tombi_cargo_extension::goto_declaration(&text_document, &keys, toml_version).await?
+        tombi_cargo_extension::goto_declaration(&text_document, &accessors, toml_version).await?
     {
         return Ok(Some(location.into()));
     }
 
     if let Some(location) =
-        tombi_uv_extension::goto_declaration(&text_document, &keys, toml_version).await?
+        tombi_uv_extension::goto_declaration(&text_document, &accessors, toml_version).await?
     {
         return Ok(Some(location.into()));
     }

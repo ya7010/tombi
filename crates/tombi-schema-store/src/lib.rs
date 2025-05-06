@@ -1,6 +1,7 @@
 mod accessor;
 mod error;
 pub mod json;
+pub mod macros;
 mod options;
 mod schema;
 mod store;
