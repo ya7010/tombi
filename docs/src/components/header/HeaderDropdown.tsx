@@ -38,7 +38,7 @@ export function HeaderDropdown(props: HeaderDropdownProps) {
 
   return (
     <div
-      class="header-dropdown fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-all duration-500 ease-linear"
+      class="header-dropdown fixed inset-x-0 top-20 bg-tombi-primary shadow-lg z-40 md:hidden overflow-hidden transition-all duration-300 ease-linear"
       classList={{
         "max-h-0": !props.isExpanded(),
         "max-h-[calc(100vh-5rem)]": props.isExpanded(),
