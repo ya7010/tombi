@@ -14,29 +14,18 @@ mod goto_definition_tests {
                 serde = { workspace█ = true }
                 "#,
                 project_root_path().join("crates/test-crate/Cargo.toml"),
-            ) -> Ok(project_root_path().join("Cargo.toml"));
+            ) -> Ok([project_root_path().join("Cargo.toml")]);
         );
 
         test_goto_definition!(
             #[tokio::test]
-            async fn dev_dependencies_rstest_workspace(
+            async fn dependencies_serde(
                 r#"
-                [dev-dependencies]
-                rstest = { workspace█ = true }
+                [dependencies]
+                serde█ = { workspace = true }
                 "#,
                 project_root_path().join("crates/test-crate/Cargo.toml"),
-            ) -> Ok(project_root_path().join("Cargo.toml"));
-        );
-
-        test_goto_definition!(
-            #[tokio::test]
-            async fn build_dependencies_rstest_workspace(
-                r#"
-                [build-dependencies]
-                serde = { workspace█ = true }
-                "#,
-                project_root_path().join("crates/test-crate/Cargo.toml"),
-            ) -> Ok(project_root_path().join("Cargo.toml"));
+            ) -> Ok([project_root_path().join("Cargo.toml")]);
         );
 
         test_goto_definition!(
@@ -47,7 +36,40 @@ mod goto_definition_tests {
                 tombi-ast = { workspace█ = true }
                 "#,
                 project_root_path().join("crates/test-crate/Cargo.toml"),
-            ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
+            ) -> Ok([project_root_path().join("crates/tombi-ast/Cargo.toml")]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn dependencies_tombi_ast(
+                r#"
+                [dependencies]
+                tombi-ast█ = { workspace = true }
+                "#,
+                project_root_path().join("crates/test-crate/Cargo.toml"),
+            ) -> Ok([project_root_path().join("crates/tombi-ast/Cargo.toml")]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn dev_dependencies_rstest_workspace(
+                r#"
+                [dev-dependencies]
+                rstest = { workspace█ = true }
+                "#,
+                project_root_path().join("crates/test-crate/Cargo.toml"),
+            ) -> Ok([project_root_path().join("Cargo.toml")]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn build_dependencies_rstest_workspace(
+                r#"
+                [build-dependencies]
+                serde = { workspace█ = true }
+                "#,
+                project_root_path().join("crates/test-crate/Cargo.toml"),
+            ) -> Ok([project_root_path().join("Cargo.toml")]);
         );
 
         test_goto_definition!(
@@ -58,7 +80,7 @@ mod goto_definition_tests {
                 tombi-ast = { workspace█ = true }
                 "#,
                 project_root_path().join("crates/test-crate/Cargo.toml"),
-            ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
+            ) -> Ok([project_root_path().join("crates/tombi-ast/Cargo.toml")]);
         );
 
         test_goto_definition!(
@@ -69,18 +91,53 @@ mod goto_definition_tests {
                 tombi-ast = { workspace█ = true }
                 "#,
                 project_root_path().join("crates/test-crate/Cargo.toml"),
-            ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
+            ) -> Ok([project_root_path().join("crates/tombi-ast/Cargo.toml")]);
         );
 
         test_goto_definition!(
             #[tokio::test]
-            async fn dependencies_tombi_ast_path(
+            async fn workspace_dependencies_tombi_ast(
                 r#"
                 [workspace.dependencies]
                 tombi-ast = { path█ = "crates/tombi-ast" }
                 "#,
                 project_root_path().join("Cargo.toml"),
-            ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
+            ) -> Ok([project_root_path().join("crates/tombi-ast/Cargo.toml")]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn workspace_dependencies_tombi_ast_editor(
+                r#"
+                [workspace]
+                resolver = "2"
+                members = ["crates/*"]
+
+                [workspace.dependencies]
+                tombi-ast-editor█ = { path = "crates/tombi-ast-editor" }
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok([
+                project_root_path().join("crates/tombi-ast-editor/Cargo.toml"),
+                project_root_path().join("crates/tombi-formatter/Cargo.toml"),
+            ]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn workspace_dependencies_semver(
+                r#"
+                [workspace]
+                resolver = "2"
+                members = ["crates/*"]
+
+                [workspace.dependencies]
+                semver█ = { version = "1.0.23" }
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok([
+                project_root_path().join("crates/tombi-server/Cargo.toml"),
+            ]);
         );
 
         test_goto_definition!(
@@ -93,7 +150,7 @@ mod goto_definition_tests {
                 ]
                 "#,
                 project_root_path().join("Cargo.toml"),
-            ) -> Ok(project_root_path().join("xtask/Cargo.toml"));
+            ) -> Ok([project_root_path().join("xtask/Cargo.toml")]);
         );
 
         test_goto_definition!(
@@ -106,7 +163,7 @@ mod goto_definition_tests {
                 ]
                 "#,
                 project_root_path().join("Cargo.toml"),
-            ) -> Ok(project_root_path().join("crates/tombi-ast/Cargo.toml"));
+            ) -> Ok([project_root_path().join("crates/tombi-ast/Cargo.toml")]);
         );
 
         test_goto_definition!(
@@ -119,7 +176,10 @@ mod goto_definition_tests {
                 ]
                 "#,
                 project_root_path().join("Cargo.toml"),
-            ) -> Ok(project_root_path().join("extensions/tombi-cargo-extension/Cargo.toml"));
+            ) -> Ok([
+                project_root_path().join("extensions/tombi-cargo-extension/Cargo.toml"),
+                project_root_path().join("extensions/tombi-uv-extension/Cargo.toml"),
+            ]);
         );
     }
 
@@ -133,9 +193,8 @@ mod goto_definition_tests {
                 [tool.uv.sources]
                 tombi-beta = { workspace█ = true }
                 "#,
-                project_root_path().join("python
-                /tombi-beta/pyproject.toml"),
-            ) -> Ok(project_root_path().join("python/tombi-beta/pyproject.toml"));
+                project_root_path().join("python/tombi-beta/pyproject.toml"),
+            ) -> Ok([project_root_path().join("python/tombi-beta/pyproject.toml")]);
         );
     }
 
@@ -144,7 +203,7 @@ mod goto_definition_tests {
         (#[tokio::test] async fn $name:ident(
             $source:expr,
             $file_path:expr,
-        ) -> Ok($expected_file_path:expr);) => {
+        ) -> Ok([$($expected_file_path:expr),*$(,)?]);) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
                 use tombi_server::handler::{handle_did_open, handle_goto_definition};
@@ -204,7 +263,7 @@ mod goto_definition_tests {
 
                 tracing::debug!("goto_definition result: {:#?}", result);
 
-                let expected_path = $expected_file_path.to_owned();
+                let expected_paths = vec![$($expected_file_path.to_owned()),*];
 
                 match result {
                     Some(def_links) => {
@@ -212,53 +271,50 @@ mod goto_definition_tests {
                         match def_links {
                             GotoDefinitionResponse::Link(links) => {
                                 assert!(!links.is_empty(), "Definition links were returned but empty");
-
-                                let first_link = &links[0];
-                                let target_url = first_link.target_uri.clone();
-                                let target_path = target_url.to_file_path()
-                                    .expect("Failed to convert URL to file path");
+                                let target_paths: Vec<_> = links.iter()
+                                    .map(|link| link.target_uri.to_file_path()
+                                        .expect("Failed to convert URL to file path"))
+                                    .collect();
 
                                 pretty_assertions::assert_eq!(
-                                    target_path,
-                                    expected_path,
-                                    "Definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
-                                    expected_path,
-                                    target_path
+                                    target_paths,
+                                    expected_paths,
+                                    "Definition links point to unexpected schema paths\nExpected: {:?}\nActual: {:?}",
+                                    expected_paths,
+                                    target_paths
                                 );
                             },
                             GotoDefinitionResponse::Scalar(location) => {
-                                let target_url = location.uri.clone();
-                                let target_path = target_url.to_file_path()
+                                let target_path = location.uri.to_file_path()
                                     .expect("Failed to convert URL to file path");
 
                                 pretty_assertions::assert_eq!(
-                                    target_path,
-                                    expected_path,
+                                    vec![target_path.clone()],
+                                    expected_paths,
                                     "Definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
-                                    expected_path,
+                                    expected_paths,
                                     target_path
                                 );
                             },
                             GotoDefinitionResponse::Array(locations) => {
                                 assert!(!locations.is_empty(), "Definition locations were returned but empty");
-
-                                let first_location = &locations[0];
-                                let target_url = first_location.uri.clone();
-                                let target_path = target_url.to_file_path()
-                                    .expect("Failed to convert URL to file path");
+                                let target_paths: Vec<_> = locations.iter()
+                                    .map(|loc| loc.uri.to_file_path()
+                                        .expect("Failed to convert URL to file path"))
+                                    .collect();
 
                                 pretty_assertions::assert_eq!(
-                                    target_path,
-                                    expected_path,
-                                    "Definition link points to an unexpected schema path\nExpected: {:?}\nActual: {:?}",
-                                    expected_path,
-                                    target_path
+                                    target_paths,
+                                    expected_paths,
+                                    "Definition locations point to unexpected schema paths\nExpected: {:?}\nActual: {:?}",
+                                    expected_paths,
+                                    target_paths
                                 );
                             }
                         }
                     },
                     None => {
-                        panic!("No definition link was returned, but expected path: {:?}", expected_path);
+                        panic!("No definition link was returned, but expected paths: {:?}", expected_paths);
                     }
                 }
 
