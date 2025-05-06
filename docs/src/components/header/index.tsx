@@ -12,14 +12,16 @@ export function Header() {
   const location = useLocation();
 
   const getPageTitle = () => {
-    const path = location.pathname;
+    const base = import.meta.env.BASE_URL;
+    let path = location.pathname;
+    if (base && path.startsWith(base)) {
+      path = path.slice(base.length) || "/";
+    }
     if (path === "/") return "Tombi";
     if (path === "/playground") return "Playground";
 
     const flattenedPages = flattenDocPages(docIndex);
-    const page = flattenedPages.find(
-      (page) => `${import.meta.env.BASE_URL}${page.path}` === path,
-    );
+    const page = flattenedPages.find((page) => page.path === path);
     return page?.title || "Tombi";
   };
 
