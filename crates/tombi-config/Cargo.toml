@@ -10,14 +10,14 @@ license.workspace = true
 clap = { workspace = true, optional = true }
 schemars = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-thiserror = { workspace = true }
-tombi-toml-version = { workspace = true }
-tombi-x-keyword = { workspace = true }
-tracing = { workspace = true }
-url = { workspace = true }
+thiserror.workspace = true
+tombi-toml-version.workspace = true
+tombi-x-keyword.workspace = true
+tracing.workspace = true
+url.workspace = true
 
 [dev-dependencies]
-assert_matches = { workspace = true }
+assert_matches.workspace = true
 
 [features]
 clap = ["dep:clap"]

@@ -7,5 +7,5 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-tombi-text = { workspace = true }
-tower-lsp = { workspace = true }
+tombi-text.workspace = true
+tower-lsp.workspace = true

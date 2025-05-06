@@ -7,15 +7,15 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-itertools = { workspace = true }
-regex = { workspace = true }
-thiserror = { workspace = true }
+itertools.workspace = true
+regex.workspace = true
+thiserror.workspace = true
 tombi-json-syntax = { path = "../tombi-json-syntax" }
-tombi-text = { workspace = true }
-tracing = { workspace = true }
+tombi-text.workspace = true
+tracing.workspace = true
 
 [dev-dependencies]
-pretty_assertions = { workspace = true }
-rstest = { workspace = true }
-textwrap = { workspace = true }
+pretty_assertions.workspace = true
+rstest.workspace = true
+textwrap.workspace = true
 tombi-test-lib.workspace = true
