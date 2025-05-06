@@ -21,6 +21,12 @@ impl From<DocumentTree> for crate::Value {
     }
 }
 
+impl From<&DocumentTree> for &crate::Value {
+    fn from(tree: &DocumentTree) -> Self {
+        unsafe { std::mem::transmute(tree) }
+    }
+}
+
 impl Deref for DocumentTree {
     type Target = Table;
 

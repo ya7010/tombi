@@ -12,7 +12,7 @@ use tower_lsp::lsp_types::{
 use crate::{
     backend::Backend,
     goto_type_definition::{get_type_definition, TypeDefinition},
-    handler::hover::get_hover_range,
+    handler::hover::get_hover_keys_and_range,
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -46,7 +46,7 @@ pub async fn handle_goto_type_definition(
         return Ok(None);
     }
 
-    let position = position.into();
+    let position = tombi_text::Position::from(position);
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
@@ -59,8 +59,9 @@ pub async fn handle_goto_type_definition(
         .flatten();
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
+    let position = position.into();
 
-    let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
+    let Some((keys, range)) = get_hover_keys_and_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 

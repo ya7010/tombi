@@ -53,7 +53,7 @@ pub async fn handle_hover(
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let Some((keys, range)) = get_hover_range(&root, position, toml_version).await else {
+    let Some((keys, range)) = get_hover_keys_and_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 
@@ -81,7 +81,7 @@ pub async fn handle_hover(
     }));
 }
 
-pub(crate) async fn get_hover_range(
+pub(crate) async fn get_hover_keys_and_range(
     root: &tombi_ast::Root,
     position: tombi_text::Position,
     toml_version: tombi_config::TomlVersion,
@@ -269,4 +269,37 @@ pub(crate) async fn get_hover_range(
         keys_vec.into_iter().rev().flatten().collect_vec(),
         hover_range,
     ))
+}
+
+pub(crate) fn get_hover_accessors(
+    document_tree: &tombi_document_tree::DocumentTree,
+    keys: &[tombi_document_tree::Key],
+    position: tombi_text::Position,
+) -> Vec<tombi_schema_store::Accessor> {
+    let mut accessors: Vec<tombi_schema_store::Accessor> = Vec::new();
+    let mut current_node: &tombi_document_tree::Value = document_tree.into();
+
+    for key in keys {
+        accessors.push(tombi_schema_store::Accessor::Key(key.value().to_string()));
+
+        match current_node {
+            tombi_document_tree::Value::Array(array) => {
+                for (index, value) in array.values().iter().enumerate() {
+                    if value.range().contains(position) {
+                        accessors.push(tombi_schema_store::Accessor::Index(index));
+                        current_node = value;
+                        break;
+                    }
+                }
+            }
+            tombi_document_tree::Value::Table(table) => {
+                if let Some(value) = table.get(key) {
+                    current_node = value;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    accessors
 }
