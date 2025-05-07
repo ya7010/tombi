@@ -53,7 +53,7 @@ pub async fn handle_goto_declaration(
     )
     .await?
     {
-        return Ok(Some(location.into()));
+        return Ok(location.into());
     }
 
     if let Some(location) = tombi_uv_extension::goto_declaration(
