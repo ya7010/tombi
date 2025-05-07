@@ -107,7 +107,7 @@ fn get_subcrate_cargo_toml(
 /// [dependencies]
 /// tombi-ast = { workspace = true }
 /// ```
-fn get_workspace_cargo_toml_location(
+fn goto_workspace(
     accessors: &[tombi_schema_store::Accessor],
     cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
@@ -439,15 +439,9 @@ fn goto_definition_for_workspace_cargo_toml(
             Some(location) => Ok(vec![location]),
             None => Ok(Vec::with_capacity(0)),
         }
-    } else if match_accessors!(accessors, ["workspace", "members"]) {
-        goto_workspace_member_crates(
-            workspace_document_tree,
-            accessors,
-            workspace_cargo_toml_path,
-            toml_version,
-        )
-        .map(|locations| locations.into_iter().filter_map(Into::into).collect_vec())
-    } else if match_accessors!(accessors, ["workspace", "members", _]) {
+    } else if match_accessors!(accessors, ["workspace", "members"])
+        | match_accessors!(accessors, ["workspace", "members", _])
+    {
         goto_workspace_member_crates(
             workspace_document_tree,
             accessors,
@@ -480,12 +474,7 @@ fn goto_definition_for_crate_cargo_toml(
         );
     } else if matches!(accessors.last(), Some(tombi_schema_store::Accessor::Key(key)) if key == "workspace")
     {
-        get_workspace_cargo_toml_location(
-            accessors,
-            cargo_toml_path,
-            toml_version,
-            jump_to_subcrate,
-        )
+        goto_workspace(accessors, cargo_toml_path, toml_version, jump_to_subcrate)
     } else if match_accessors!(accessors, ["dependencies", _, "path"])
         || match_accessors!(accessors, ["dev-dependencies", _, "path"])
         || match_accessors!(accessors, ["build-dependencies", _, "path"])

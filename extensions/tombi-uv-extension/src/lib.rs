@@ -69,8 +69,8 @@ fn goto_definition_for_member_pyproject_toml(
     pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
 ) -> Result<Vec<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
-    if match_accessors!(accessors, ["tool", "uv", "sources"])
-        || match_accessors!(accessors, ["tool", "uv", "sources", _])
+    if match_accessors!(accessors, ["tool", "uv", "sources", _])
+        || match_accessors!(accessors, ["tool", "uv", "sources", _, "workspace"])
     {
         match goto_workspace_member(
             document_tree,
