@@ -533,13 +533,10 @@ fn goto_workspace_member_crates(
         };
 
     let mut locations = Vec::new();
-    for (_, cargo_toml_path) in crate::find_package_cargo_toml_paths(
-        &member_patterns,
-        &exclude_patterns,
-        workspace_dir_path,
-    ) {
-        let Some(member_document_tree) = crate::load_cargo_toml(&cargo_toml_path, toml_version)
-        else {
+    for (_, cargo_toml_path) in
+        find_package_cargo_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
+    {
+        let Some(member_document_tree) = load_cargo_toml(&cargo_toml_path, toml_version) else {
             continue;
         };
 
