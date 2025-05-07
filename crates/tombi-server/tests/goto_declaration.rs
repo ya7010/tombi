@@ -58,7 +58,18 @@ mod goto_declaration_tests {
 
         test_goto_declaration!(
             #[tokio::test]
-            async fn tool_uv_sources_package_workspace(
+            async fn tool_uv_sources_tombi_beta(
+                r#"
+                [tool.uv.sources]
+                tombi-beta█ = { workspace = true }
+                "#,
+                project_root_path().join("python/tombi-beta/pyproject.toml"),
+            ) -> Ok([project_root_path().join("pyproject.toml")]);
+        );
+
+        test_goto_declaration!(
+            #[tokio::test]
+            async fn tool_uv_sources_tombi_beta_workspace(
                 r#"
                 [tool.uv.sources]
                 tombi-beta = { workspace█ = true }

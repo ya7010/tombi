@@ -149,6 +149,7 @@ fn goto_definition_for_member_pyproject_toml(
     accessors: &[tombi_schema_store::Accessor],
     pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
+    jump_to_package: bool,
 ) -> Result<Vec<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
     if match_accessors!(accessors, ["tool", "uv", "sources", _])
         || match_accessors!(accessors, ["tool", "uv", "sources", _, "workspace"])
@@ -158,7 +159,7 @@ fn goto_definition_for_member_pyproject_toml(
             accessors,
             &pyproject_toml_path,
             toml_version,
-            true,
+            jump_to_package,
         )? {
             Some(location) => Ok(vec![location]),
             None => Ok(Vec::with_capacity(0)),

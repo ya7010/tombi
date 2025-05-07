@@ -27,6 +27,7 @@ pub async fn goto_definition(
             accessors,
             &pyproject_toml_path,
             toml_version,
+            true,
         )?
     } else if match_accessors!(accessors[..3], ["tool", "uv", "workspace"]) {
         goto_definition_for_workspace_pyproject_toml(
