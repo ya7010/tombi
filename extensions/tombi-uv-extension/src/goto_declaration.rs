@@ -2,7 +2,7 @@ use tombi_config::TomlVersion;
 use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
-use crate::get_tool_uv_sources_workspace_location;
+use crate::goto_workspace_member;
 
 pub async fn goto_declaration(
     text_document: &TextDocumentIdentifier,
@@ -19,7 +19,7 @@ pub async fn goto_declaration(
     };
 
     if match_accessors!(accessors, ["tool", "uv", "sources", _, "workspace"]) {
-        get_tool_uv_sources_workspace_location(
+        goto_workspace_member(
             document_tree,
             &accessors,
             &pyproject_toml_path,

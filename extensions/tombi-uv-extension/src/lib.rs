@@ -8,7 +8,7 @@ use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
 use tombi_document_tree::TryIntoDocumentTree;
-use tombi_schema_store::match_accessors;
+use tombi_schema_store::{dig_accessors, match_accessors};
 use tower_lsp::lsp_types::Url;
 
 fn load_pyproject_toml(
@@ -63,6 +63,53 @@ fn find_workspace_pyproject_toml(
     None
 }
 
+fn goto_definition_for_member_pyproject_toml(
+    document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[tombi_schema_store::Accessor],
+    pyproject_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Vec<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
+    if match_accessors!(accessors, ["tool", "uv", "sources"])
+        || match_accessors!(accessors, ["tool", "uv", "sources", _])
+    {
+        match goto_workspace_member(
+            document_tree,
+            accessors,
+            &pyproject_toml_path,
+            toml_version,
+            true,
+        )? {
+            Some(location) => Ok(vec![location]),
+            None => Ok(Vec::with_capacity(0)),
+        }
+    } else {
+        Ok(Vec::with_capacity(0))
+    }
+}
+
+fn goto_definition_for_workspace_pyproject_toml(
+    workspace_document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[tombi_schema_store::Accessor],
+    workspace_pyproject_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Vec<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
+    if match_accessors!(accessors, ["tool", "uv", "workspace", "members"])
+        || match_accessors!(accessors, ["tool", "uv", "workspace", "members", _])
+    {
+        match goto_member_pyprojects(
+            workspace_document_tree,
+            accessors,
+            &workspace_pyproject_toml_path,
+            toml_version,
+        )? {
+            Some(location) => Ok(vec![location]),
+            None => Ok(Vec::with_capacity(0)),
+        }
+    } else {
+        Ok(Vec::with_capacity(0))
+    }
+}
+
 /// Get the location of the workspace pyproject.toml.
 ///
 /// ```toml
@@ -74,17 +121,17 @@ fn find_workspace_pyproject_toml(
 /// [tool.uv.sources]
 /// other-package = { workspace = true }
 /// ```
-fn get_tool_uv_sources_workspace_location(
-    _document_tree: &tombi_document_tree::DocumentTree,
+fn goto_workspace_member(
+    document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[tombi_schema_store::Accessor],
     pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
     jump_to_package: bool,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
-    assert!(match_accessors!(
-        accessors,
-        ["tool", "uv", "sources", _, "workspace"]
-    ));
+    assert!(
+        match_accessors!(accessors, ["tool", "uv", "sources", _])
+            || match_accessors!(accessors, ["tool", "uv", "sources", _, "workspace"])
+    );
 
     let Some((workspace_pyproject_toml_path, workspace_pyproject_toml_document_tree)) =
         find_workspace_pyproject_toml(pyproject_toml_path, toml_version)
@@ -97,6 +144,15 @@ fn get_tool_uv_sources_workspace_location(
     } else {
         return Ok(None);
     };
+    if accessors.len() == 3 {
+        if let Some((_, tombi_document_tree::Value::Table(table))) =
+            dig_accessors(document_tree, accessors)
+        {
+            if !table.contains_key("workspace") {
+                return Ok(None);
+            }
+        }
+    }
 
     let Some((package_toml_path, member_range)) = find_package_project_toml(
         package_name,
@@ -127,6 +183,41 @@ fn get_tool_uv_sources_workspace_location(
             member_range.into(),
         )))
     }
+}
+
+/// Get the location of the workspace members definition.
+///
+/// ```toml
+/// [tool.uv.workspace]
+/// members = ["python/tombi-beta"]
+/// ```
+fn goto_member_pyprojects(
+    workspace_document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[tombi_schema_store::Accessor],
+    workspace_pyproject_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
+    assert!(
+        match_accessors!(accessors, ["tool", "uv", "workspace", "members"])
+            || match_accessors!(accessors, ["tool", "uv", "workspace", "members", _])
+    );
+
+    let Some((key, _)) = tombi_document_tree::dig_keys(
+        &workspace_document_tree,
+        &["tool", "uv", "workspace", "members"],
+    ) else {
+        return Ok(None);
+    };
+
+    let Ok(workspace_pyproject_toml_uri) = Url::from_file_path(&workspace_pyproject_toml_path)
+    else {
+        return Ok(None);
+    };
+
+    Ok(Some(tombi_extension::DefinitionLocation::new(
+        workspace_pyproject_toml_uri,
+        key.range().into(),
+    )))
 }
 
 fn find_package_project_toml(

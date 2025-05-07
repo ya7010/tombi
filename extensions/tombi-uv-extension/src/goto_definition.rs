@@ -1,8 +1,11 @@
 use tombi_config::TomlVersion;
+use tombi_extension::DefinitionLocations;
 use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
-use crate::get_tool_uv_sources_workspace_location;
+use crate::{
+    goto_definition_for_member_pyproject_toml, goto_definition_for_workspace_pyproject_toml,
+};
 
 pub async fn goto_definition(
     text_document: &TextDocumentIdentifier,
@@ -18,16 +21,27 @@ pub async fn goto_definition(
         return Ok(None);
     };
 
-    if match_accessors!(accessors, ["tool", "uv", "sources", _, "workspace"]) {
-        Ok(get_tool_uv_sources_workspace_location(
+    let locations = if match_accessors!(accessors[..3], ["tool", "uv", "sources"]) {
+        goto_definition_for_member_pyproject_toml(
             document_tree,
             accessors,
             &pyproject_toml_path,
             toml_version,
-            true,
         )?
-        .map(Into::into))
+    } else if match_accessors!(accessors[..3], ["tool", "uv", "workspace"]) {
+        goto_definition_for_workspace_pyproject_toml(
+            document_tree,
+            accessors,
+            &pyproject_toml_path,
+            toml_version,
+        )?
     } else {
-        Ok(None)
+        Vec::with_capacity(0)
+    };
+
+    if locations.is_empty() {
+        return Ok(None);
     }
+
+    Ok(Some(DefinitionLocations(locations)))
 }
