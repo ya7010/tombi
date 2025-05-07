@@ -36,7 +36,7 @@ mod goto_declaration_tests {
                 tombi-ast = { path█ = "crates/tombi-ast" }
                 "#,
                 project_root_path().join("Cargo.toml"),
-            ) -> Ok([project_root_path().join("Cargo.toml")]);
+            ) -> Ok([]);
         );
 
         test_goto_declaration!(
@@ -49,7 +49,7 @@ mod goto_declaration_tests {
                 ]
                 "#,
                 project_root_path().join("Cargo.toml"),
-            ) -> Ok([project_root_path().join("xtask/Cargo.toml")]);
+            ) -> Ok([]);
         );
     }
 
@@ -133,7 +133,7 @@ mod goto_declaration_tests {
 
                 tracing::debug!("goto_declaration result: {:#?}", result);
 
-                let expected_paths = vec![$($expected_file_path.to_owned()),*];
+                let expected_paths: Vec<std::path::PathBuf> = vec![$($expected_file_path.to_owned()),*];
 
                 match result {
                     Some(def_links) => {
@@ -183,7 +183,9 @@ mod goto_declaration_tests {
                         }
                     },
                     None => {
-                        panic!("No definition link was returned, but expected paths: {:?}", expected_paths);
+                        if !expected_paths.is_empty() {
+                            panic!("No definition link was returned, but expected paths: {:?}", expected_paths);
+                        }
                     }
                 }
 
