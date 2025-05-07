@@ -434,6 +434,14 @@ fn goto_definition_for_workspace_cargo_toml(
             Some(location) => Ok(vec![location]),
             None => Ok(Vec::with_capacity(0)),
         }
+    } else if match_accessors!(accessors, ["workspace", "members"]) {
+        get_dependencies_workspace_members(
+            workspace_document_tree,
+            accessors,
+            workspace_cargo_toml_path,
+            toml_version,
+        )
+        .map(|locations| locations.into_iter().filter_map(Into::into).collect_vec())
     } else if match_accessors!(accessors, ["workspace", "members", _]) {
         get_dependencies_workspace_members(
             workspace_document_tree,
