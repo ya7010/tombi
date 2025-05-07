@@ -207,6 +207,28 @@ mod goto_definition_tests {
                 project_root_path().join("python/tombi-beta/pyproject.toml"),
             ) -> Ok([project_root_path().join("python/tombi-beta/pyproject.toml")]);
         );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_workspace_members(
+                r#"
+                [tool.uv.workspace]
+                members█ = ["python/tombi-beta"]
+                "#,
+                project_root_path().join("pyproject.toml"),
+            ) -> Ok([project_root_path().join("python/tombi-beta/pyproject.toml")]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn tool_uv_workspace_members_python_tombi_beta(
+                r#"
+                [tool.uv.workspace]
+                members = ["python/tombi-beta█"]
+                "#,
+                project_root_path().join("pyproject.toml"),
+            ) -> Ok([project_root_path().join("python/tombi-beta/pyproject.toml")]);
+        );
     }
 
     #[macro_export]
