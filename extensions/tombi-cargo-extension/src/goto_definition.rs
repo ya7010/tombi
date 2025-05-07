@@ -24,6 +24,7 @@ pub async fn goto_definition(
             accessors,
             &cargo_toml_path,
             toml_version,
+            true,
         )
     } else {
         goto_definition_for_crate_cargo_toml(
@@ -31,6 +32,7 @@ pub async fn goto_definition(
             accessors,
             &cargo_toml_path,
             toml_version,
+            true,
         )
     }?;
 
