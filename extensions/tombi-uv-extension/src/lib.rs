@@ -82,7 +82,7 @@ fn find_workspace_pyproject_toml(
     None
 }
 
-fn find_package_pyproject_toml_paths<'a>(
+fn find_member_pyproject_toml_paths<'a>(
     member_patterns: &'a [&'a tombi_document_tree::String],
     exclude_patterns: &'a [&'a tombi_document_tree::String],
     workspace_dir_path: &'a std::path::Path,
@@ -177,7 +177,7 @@ fn goto_definition_for_workspace_pyproject_toml(
     if match_accessors!(accessors, ["tool", "uv", "workspace", "members"])
         || match_accessors!(accessors, ["tool", "uv", "workspace", "members", _])
     {
-        goto_member_packages(
+        goto_member_pyprojects(
             workspace_document_tree,
             accessors,
             &workspace_pyproject_toml_path,
@@ -233,7 +233,7 @@ fn goto_workspace_member(
         }
     }
 
-    let Some((package_toml_path, member_range)) = find_package_project_toml(
+    let Some((package_toml_path, member_range)) = find_member_project_toml(
         package_name,
         &workspace_pyproject_toml_document_tree,
         &workspace_pyproject_toml_path,
@@ -270,7 +270,7 @@ fn goto_workspace_member(
 /// [tool.uv.workspace]
 /// members = ["python/tombi-beta"]
 /// ```
-fn goto_member_packages(
+fn goto_member_pyprojects(
     workspace_document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[tombi_schema_store::Accessor],
     workspace_pyproject_toml_path: &std::path::Path,
@@ -319,9 +319,13 @@ fn goto_member_packages(
     };
 
     let mut locations = Vec::new();
+    tracing::info!("member_patterns: {:?}", member_patterns);
+    tracing::info!("exclude_patterns: {:?}", exclude_patterns);
+    tracing::info!("workspace_dir_path: {:?}", workspace_dir_path);
     for (_, pyproject_toml_path) in
-        find_package_pyproject_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
+        find_member_pyproject_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
     {
+        tracing::info!("pyproject_toml_path: {:?}", pyproject_toml_path);
         let Some(member_document_tree) =
             crate::load_pyproject_toml(&pyproject_toml_path, toml_version)
         else {
@@ -329,7 +333,7 @@ fn goto_member_packages(
         };
 
         let Some((_, tombi_document_tree::Value::String(package_name))) =
-            tombi_document_tree::dig_keys(&member_document_tree, &["package", "name"])
+            tombi_document_tree::dig_keys(&member_document_tree, &["project", "name"])
         else {
             continue;
         };
@@ -343,7 +347,7 @@ fn goto_member_packages(
     Ok(locations)
 }
 
-fn find_package_project_toml(
+fn find_member_project_toml(
     package_name: &str,
     workspace_pyproject_toml_document_tree: &tombi_document_tree::DocumentTree,
     workspace_pyproject_toml_path: &std::path::Path,
@@ -382,7 +386,7 @@ fn find_package_project_toml(
     };
 
     for (member_item, package_project_toml_path) in
-        find_package_project_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
+        find_member_project_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
     {
         let Some(package_project_toml_document_tree) =
             load_pyproject_toml(&package_project_toml_path, toml_version)
@@ -402,7 +406,7 @@ fn find_package_project_toml(
     None
 }
 
-fn find_package_project_toml_paths<'a>(
+fn find_member_project_toml_paths<'a>(
     member_patterns: &'a [&'a tombi_document_tree::String],
     exclude_patterns: &'a [&'a tombi_document_tree::String],
     workspace_dir_path: &'a std::path::Path,
