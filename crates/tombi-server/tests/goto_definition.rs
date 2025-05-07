@@ -96,6 +96,17 @@ mod goto_definition_tests {
 
         test_goto_definition!(
             #[tokio::test]
+            async fn workspace_dependencies_serde(
+                r#"
+                [workspace.dependencies]
+                serde█ = { version = "1.0.0" }
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok([]);
+        );
+
+        test_goto_definition!(
+            #[tokio::test]
             async fn workspace_dependencies_tombi_ast(
                 r#"
                 [workspace.dependencies]
@@ -263,11 +274,10 @@ mod goto_definition_tests {
 
                 tracing::debug!("goto_definition result: {:#?}", result);
 
-                let expected_paths = vec![$($expected_file_path.to_owned()),*];
+                let expected_paths: Vec<std::path::PathBuf> = vec![$($expected_file_path.to_owned()),*];
 
                 match result {
                     Some(def_links) => {
-                        // Handle different return types (single link or array)
                         match def_links {
                             GotoDefinitionResponse::Link(links) => {
                                 assert!(!links.is_empty(), "Definition links were returned but empty");
@@ -314,7 +324,9 @@ mod goto_definition_tests {
                         }
                     },
                     None => {
-                        panic!("No definition link was returned, but expected paths: {:?}", expected_paths);
+                        if !expected_paths.is_empty() {
+                            panic!("No definition link was returned, but expected paths: {:?}", expected_paths);
+                        }
                     }
                 }
 
