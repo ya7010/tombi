@@ -2146,6 +2146,7 @@ version = "0.0.0"
 dependencies = [
  "indexmap",
  "itertools",
+ "pretty_assertions",
  "serde",
  "thiserror",
  "tombi-json-lexer",
@@ -2184,6 +2185,7 @@ name = "tombi-json-value"
 version = "0.0.0"
 dependencies = [
  "indexmap",
+ "pretty_assertions",
  "serde",
  "tracing",
 ]
@@ -2261,6 +2263,7 @@ dependencies = [
  "countme",
  "hashbrown 0.15.3",
  "itertools",
+ "pretty_assertions",
  "rustc-hash",
  "tombi-text",
 ]
@@ -2363,6 +2366,7 @@ dependencies = [
 name = "tombi-text"
 version = "0.0.0"
 dependencies = [
+ "pretty_assertions",
  "rstest",
  "serde",
  "tower-lsp",

@@ -222,7 +222,7 @@ opt = "optional"
         let result: Test = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -255,7 +255,7 @@ value = "nested value"
         let result: Test = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -274,7 +274,7 @@ value = "nested value"
         let result: SimpleArrayTest = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -311,7 +311,7 @@ three = 3
         let result: MapTest = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -335,7 +335,7 @@ three = 3
         let result: EnumTest = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -359,7 +359,7 @@ updated_at = "2023-07-20T14:45:30Z"
         let result: DateTimeTest = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -380,7 +380,7 @@ updated_at = "2023-07-20T14:45:30Z"
         let result: OptionTest = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -404,7 +404,7 @@ empty_map = {}
         let result: EmptyContainers = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -434,7 +434,7 @@ escape_chars = "\\t\\n\\r\\\""
         let result: SpecialChars = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -470,7 +470,7 @@ negative_zero = -0.0
         let result: NumericBoundaries = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -547,7 +547,7 @@ key4 = "value4"
         let result: ComplexNested = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -582,7 +582,7 @@ mixed = [42, 3.14, "hello", true]
         let result: MixedTypeArray = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -618,7 +618,7 @@ optional_string = "provided"
         let result: DefaultValues = from_str_async(toml)
             .await
             .expect("TOML deserialization failed");
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[tokio::test]
@@ -643,11 +643,11 @@ optional_string = "provided"
         .expect("Failed to parse tombi.toml");
 
         // Verify the parsed values
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             config.toml_version,
             Some(tombi_toml_version::TomlVersion::V1_0_0)
         );
-        assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
+        pretty_assertions::assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
         assert!(config.format.is_some());
         assert!(config.lint.is_some());
         assert!(config.server.is_some());
@@ -655,23 +655,23 @@ optional_string = "provided"
         assert!(config.schemas.is_some());
 
         let schema = config.schema.unwrap();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             schema.enabled,
             Some(tombi_config::BoolDefaultTrue::default())
         );
 
         let schemas = config.schemas.unwrap();
-        assert_eq!(schemas.len(), 5);
+        pretty_assertions::assert_eq!(schemas.len(), 5);
 
         // Verify the first schema
         let first_schema = &schemas[0];
-        assert_eq!(first_schema.path(), "tombi.schema.json");
-        assert_eq!(first_schema.include(), &["tombi.toml"]);
+        pretty_assertions::assert_eq!(first_schema.path(), "tombi.schema.json");
+        pretty_assertions::assert_eq!(first_schema.include(), &["tombi.toml"]);
 
         // Verify the last schema
         let last_schema = &schemas[4];
-        assert_eq!(last_schema.path(), "schemas/partial-taskipy.schema.json");
-        assert_eq!(last_schema.include(), &["pyproject.toml"]);
-        assert_eq!(last_schema.root_keys(), Some("tool.taskipy"));
+        pretty_assertions::assert_eq!(last_schema.path(), "schemas/partial-taskipy.schema.json");
+        pretty_assertions::assert_eq!(last_schema.include(), &["pyproject.toml"]);
+        pretty_assertions::assert_eq!(last_schema.root_keys(), Some("tool.taskipy"));
     }
 }

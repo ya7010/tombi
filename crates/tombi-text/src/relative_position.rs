@@ -106,6 +106,6 @@ mod test {
     #[case("abc\ndef\nghi", (2, 3))]
     #[case("abc\r\ndef\r\nghi", (2, 3))]
     fn test_position(#[case] source: &str, #[case] expected: (Line, Column)) {
-        assert_eq!(RelativePosition::of(source), expected.into());
+        pretty_assertions::assert_eq!(RelativePosition::of(source), expected.into());
     }
 }

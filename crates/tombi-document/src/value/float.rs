@@ -58,19 +58,19 @@ mod test {
     #[test]
     fn inf() {
         let float = crate::value::Float::try_new("inf").unwrap();
-        assert_eq!(float.value(), f64::INFINITY);
+        pretty_assertions::assert_eq!(float.value(), f64::INFINITY);
     }
 
     #[test]
     fn p_inf() {
         let float = crate::value::Float::try_new("+inf").unwrap();
-        assert_eq!(float.value(), f64::INFINITY);
+        pretty_assertions::assert_eq!(float.value(), f64::INFINITY);
     }
 
     #[test]
     fn m_inf() {
         let float = crate::value::Float::try_new("-inf").unwrap();
-        assert_eq!(float.value(), f64::NEG_INFINITY);
+        pretty_assertions::assert_eq!(float.value(), f64::NEG_INFINITY);
     }
 
     #[test]

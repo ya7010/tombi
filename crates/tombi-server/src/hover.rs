@@ -9,7 +9,9 @@ use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use constraints::DataConstraints;
 use futures::future::BoxFuture;
-use tombi_schema_store::{get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType};
+use tombi_schema_store::{
+    get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType,
+};
 
 pub async fn get_hover_content(
     tree: &tombi_document_tree::DocumentTree,
@@ -155,6 +157,6 @@ mod test {
     #[case("file://tombi.schema.json")]
     fn url_content(#[case] url: &str) {
         let url = SchemaUrl::parse(url).unwrap();
-        assert_eq!(get_schema_name(&url).unwrap(), "tombi.schema.json");
+        pretty_assertions::assert_eq!(get_schema_name(&url).unwrap(), "tombi.schema.json");
     }
 }
