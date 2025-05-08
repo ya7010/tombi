@@ -44,3 +44,11 @@ pipx install tombi
   image="/zed.jpeg"
   url="https://zed.dev/extensions?query=tombi&filter=language-servers"
 />
+
+## GitHub Actions
+
+```yaml
+- uses: actions/checkout@v4
+- uses: tombi-toml/setup-tombi@v1
+- run: tombi --version
+```
