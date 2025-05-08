@@ -122,7 +122,7 @@ impl GreenNodeBuilder<'_> {
     /// are paired!
     #[inline]
     pub fn finish(mut self) -> GreenNode {
-        assert_eq!(self.children.len(), 1);
+        debug_assert_eq!(self.children.len(), 1);
         match self.children.pop().unwrap().1 {
             NodeOrToken::Node(node) => node,
             NodeOrToken::Token(_) => panic!(),

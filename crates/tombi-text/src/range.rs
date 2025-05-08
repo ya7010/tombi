@@ -27,7 +27,11 @@ impl Range {
             end: if start <= end {
                 end
             } else {
-                tracing::error!("Invalid tombi_text::Range: start: {:?} > end: {:?}", start, end);
+                tracing::error!(
+                    "Invalid tombi_text::Range: start: {:?} > end: {:?}",
+                    start,
+                    end
+                );
                 start
             },
         }
@@ -159,7 +163,7 @@ mod test {
         let r1 = Range::from(range);
         let r2 = Range::from(other);
 
-        assert_eq!(r1.cmp(&r2), expected);
+        pretty_assertions::assert_eq!(r1.cmp(&r2), expected);
     }
 
     #[rstest]
@@ -173,6 +177,6 @@ mod test {
     ) {
         let mut range = Range::from(range);
         range += RelativePosition::of(text);
-        assert_eq!(range, expected.into());
+        pretty_assertions::assert_eq!(range, expected.into());
     }
 }

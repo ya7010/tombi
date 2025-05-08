@@ -1,5 +1,5 @@
-use tombi_config::TomlVersion;
 use itertools::Itertools;
+use tombi_config::TomlVersion;
 
 use crate::Accessor;
 
@@ -245,6 +245,6 @@ mod tests {
     ])]
     fn test_schema_accessor(#[case] input: &str, #[case] expected: Vec<SchemaAccessor>) {
         let result = SchemaAccessor::parse(input).unwrap();
-        assert_eq!(result, expected, "Failed for input: {}", input);
+        pretty_assertions::assert_eq!(result, expected, "Failed for input: {}", input);
     }
 }

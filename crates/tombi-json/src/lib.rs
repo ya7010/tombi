@@ -689,12 +689,12 @@ mod tests {
         let json = "true";
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_bool());
-        assert_eq!(value_node.as_bool(), Some(true));
+        pretty_assertions::assert_eq!(value_node.as_bool(), Some(true));
 
         let json = "false";
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_bool());
-        assert_eq!(value_node.as_bool(), Some(false));
+        pretty_assertions::assert_eq!(value_node.as_bool(), Some(false));
     }
 
     #[test]
@@ -702,12 +702,12 @@ mod tests {
         let json = "42";
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_number());
-        assert_eq!(value_node.as_f64(), Some(42.0));
+        pretty_assertions::assert_eq!(value_node.as_f64(), Some(42.0));
 
         let json = "-3.14";
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_number());
-        assert_eq!(value_node.as_f64(), Some(-3.14));
+        pretty_assertions::assert_eq!(value_node.as_f64(), Some(-3.14));
     }
 
     #[test]
@@ -715,7 +715,7 @@ mod tests {
         let json = r#""hello""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(value_node.as_str(), Some("hello"));
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("hello"));
     }
 
     #[test]
@@ -749,16 +749,16 @@ mod tests {
         assert!(node.is_object());
 
         if let Some(obj) = node.as_object() {
-            assert_eq!(obj.len(), 2);
+            pretty_assertions::assert_eq!(obj.len(), 2);
 
             if let Some(name_node) = obj.properties.get("name") {
-                assert_eq!(name_node.as_str(), Some("John"));
+                pretty_assertions::assert_eq!(name_node.as_str(), Some("John"));
             } else {
                 panic!("name property not found");
             }
 
             if let Some(age_node) = obj.properties.get("age") {
-                assert_eq!(age_node.as_i64(), Some(30));
+                pretty_assertions::assert_eq!(age_node.as_i64(), Some(30));
             } else {
                 panic!("age property not found");
             }
@@ -786,18 +786,18 @@ mod tests {
         // Convert to Value for easier testing
         let value: Value = value_node.into();
         let obj = value.as_object().unwrap();
-        assert_eq!(obj.get("name").unwrap().as_str(), Some("John"));
-        assert_eq!(obj.get("age").unwrap().as_i64(), Some(30));
-        assert_eq!(obj.get("isStudent").unwrap().as_bool(), Some(false));
+        pretty_assertions::assert_eq!(obj.get("name").unwrap().as_str(), Some("John"));
+        pretty_assertions::assert_eq!(obj.get("age").unwrap().as_i64(), Some(30));
+        pretty_assertions::assert_eq!(obj.get("isStudent").unwrap().as_bool(), Some(false));
 
         let courses = obj.get("courses").unwrap().as_array().unwrap();
-        assert_eq!(courses.len(), 2);
-        assert_eq!(courses[0].as_str(), Some("Math"));
-        assert_eq!(courses[1].as_str(), Some("Physics"));
+        pretty_assertions::assert_eq!(courses.len(), 2);
+        pretty_assertions::assert_eq!(courses[0].as_str(), Some("Math"));
+        pretty_assertions::assert_eq!(courses[1].as_str(), Some("Physics"));
 
         let address = obj.get("address").unwrap().as_object().unwrap();
-        assert_eq!(address.get("city").unwrap().as_str(), Some("New York"));
-        assert_eq!(address.get("zip").unwrap().as_str(), Some("10001"));
+        pretty_assertions::assert_eq!(address.get("city").unwrap().as_str(), Some("New York"));
+        pretty_assertions::assert_eq!(address.get("zip").unwrap().as_str(), Some("10001"));
     }
 
     #[test]
@@ -812,9 +812,9 @@ mod tests {
         let json = r#"{"name": "John", "age": 30, "is_student": false}"#;
         let person: Person = from_str(json).unwrap();
 
-        assert_eq!(person.name, "John");
-        assert_eq!(person.age, 30);
-        assert_eq!(person.is_student, false);
+        pretty_assertions::assert_eq!(person.name, "John");
+        pretty_assertions::assert_eq!(person.age, 30);
+        pretty_assertions::assert_eq!(person.is_student, false);
     }
 
     #[test]
@@ -845,10 +845,10 @@ mod tests {
 
         let person: Person = from_str(json).unwrap();
 
-        assert_eq!(person.name, "John");
-        assert_eq!(person.age, 30);
-        assert_eq!(person.address.city, "New York");
-        assert_eq!(person.address.zip, "10001");
+        pretty_assertions::assert_eq!(person.name, "John");
+        pretty_assertions::assert_eq!(person.age, 30);
+        pretty_assertions::assert_eq!(person.address.city, "New York");
+        pretty_assertions::assert_eq!(person.address.zip, "10001");
     }
 
     #[test]
@@ -864,15 +864,15 @@ mod tests {
 
         let json = r#""Red""#;
         let color: Color = from_str(json).unwrap();
-        assert_eq!(color, Color::Red);
+        pretty_assertions::assert_eq!(color, Color::Red);
 
         let json = r#"{"RGB": [255, 255, 255]}"#;
         let color: Color = from_str(json).unwrap();
-        assert_eq!(color, Color::RGB(255, 255, 255));
+        pretty_assertions::assert_eq!(color, Color::RGB(255, 255, 255));
 
         let json = r###"{"HexCode": "#FFFFFF"}"###;
         let color: Color = from_str(json).unwrap();
-        assert_eq!(color, Color::HexCode("#FFFFFF".to_string()));
+        pretty_assertions::assert_eq!(color, Color::HexCode("#FFFFFF".to_string()));
     }
 
     #[test]
@@ -890,7 +890,7 @@ mod tests {
                 assert!(name_node.range().start() != name_node.range().end());
 
                 // 値が "John" であることを確認
-                assert_eq!(name_node.as_str(), Some("John"));
+                pretty_assertions::assert_eq!(name_node.as_str(), Some("John"));
             }
 
             if let Some(age_node) = object_node.properties.get("age") {
@@ -898,7 +898,7 @@ mod tests {
                 assert!(age_node.range().start() != age_node.range().end());
 
                 // 値が 30 であることを確認
-                assert_eq!(age_node.as_i64(), Some(30));
+                pretty_assertions::assert_eq!(age_node.as_i64(), Some(30));
             }
         }
     }
@@ -908,7 +908,7 @@ mod tests {
         let json = r#""This string contains \"quotes\" inside it""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             value_node.as_str(),
             Some(r#"This string contains "quotes" inside it"#)
         );
@@ -919,7 +919,7 @@ mod tests {
         let json = r#""Line1\nLine2\tTabbed\rCarriage Return\\Backslash""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             value_node.as_str(),
             Some("Line1\nLine2\tTabbed\rCarriage Return\\Backslash")
         );
@@ -930,7 +930,7 @@ mod tests {
         let json = r#""こんにちは世界! 🌍 🌎 🌏""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(value_node.as_str(), Some("こんにちは世界! 🌍 🌎 🌏"));
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("こんにちは世界! 🌍 🌎 🌏"));
     }
 
     #[test]
@@ -938,7 +938,7 @@ mod tests {
         let json = r#""\u3053\u3093\u306B\u3061\u306F\u4E16\u754C""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(value_node.as_str(), Some("こんにちは世界"));
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("こんにちは世界"));
     }
 
     #[test]
@@ -946,7 +946,7 @@ mod tests {
         let json = r#""Mixed: \"quotes\", 日本語, and \u0065\u0073\u0063\u0061\u0070\u0065\u0064 text with 🚀""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             value_node.as_str(),
             Some(r#"Mixed: "quotes", 日本語, and escaped text with 🚀"#)
         );
@@ -957,7 +957,7 @@ mod tests {
         let json = r#""\u0000\u0001\u0002\b\f""#;
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             value_node.as_str(),
             Some("\u{0000}\u{0001}\u{0002}\u{0008}\u{000C}")
         );

@@ -13,5 +13,8 @@ itertools.workspace = true
 rustc-hash = "2.0.0"
 tombi-text.workspace = true
 
+[dev-dependencies]
+pretty_assertions.workspace = true
+
 [features]
 default = []

@@ -11,6 +11,9 @@ indexmap.workspace = true
 serde = { workspace = true, optional = true }
 tracing.workspace = true
 
+[dev-dependencies]
+pretty_assertions.workspace = true
+
 [features]
 default = ["serde"]
 serde = ["dep:serde"]

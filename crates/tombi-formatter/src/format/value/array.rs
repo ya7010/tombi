@@ -162,8 +162,8 @@ fn format_singleline_array(
 
 #[cfg(test)]
 mod tests {
-    use tombi_config::{QuoteStyle, TomlVersion};
     use rstest::rstest;
+    use tombi_config::{QuoteStyle, TomlVersion};
 
     use super::*;
     use crate::{formatter::definitions::FormatDefinitions, test_format};
@@ -401,13 +401,13 @@ mod tests {
     #[case("[1, 2, 3]", false)]
     fn has_tailing_comma_after_last_value(#[case] source: &str, #[case] expected: bool) {
         let p = tombi_parser::parse_as::<tombi_ast::Array>(source);
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             p.errors(TomlVersion::default()).collect_vec(),
             Vec::<&tombi_parser::Error>::new()
         );
 
         let ast = tombi_ast::Array::cast(p.syntax_node()).unwrap();
-        assert_eq!(ast.has_tailing_comma_after_last_value(), expected);
+        pretty_assertions::assert_eq!(ast.has_tailing_comma_after_last_value(), expected);
     }
 
     test_format! {

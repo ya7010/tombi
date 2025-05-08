@@ -397,12 +397,12 @@ mod tests {
         let source = "true";
         let value_node = parse(source).unwrap();
         assert!(value_node.is_bool());
-        assert_eq!(value_node.as_bool(), Some(true));
+        pretty_assertions::assert_eq!(value_node.as_bool(), Some(true));
 
         let source = "false";
         let value_node = parse(source).unwrap();
         assert!(value_node.is_bool());
-        assert_eq!(value_node.as_bool(), Some(false));
+        pretty_assertions::assert_eq!(value_node.as_bool(), Some(false));
     }
 
     #[test]
@@ -410,12 +410,12 @@ mod tests {
         let source = "42";
         let value_node = parse(source).unwrap();
         assert!(value_node.is_number());
-        assert_eq!(value_node.as_f64(), Some(42.0));
+        pretty_assertions::assert_eq!(value_node.as_f64(), Some(42.0));
 
         let source = "-3.14";
         let value_node = parse(source).unwrap();
         assert!(value_node.is_number());
-        assert_eq!(value_node.as_f64(), Some(-3.14));
+        pretty_assertions::assert_eq!(value_node.as_f64(), Some(-3.14));
     }
 
     #[test]
@@ -423,7 +423,7 @@ mod tests {
         let source = r#""hello""#;
         let value_node = parse(source).unwrap();
         assert!(value_node.is_string());
-        assert_eq!(value_node.as_str(), Some("hello"));
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("hello"));
     }
 
     #[test]
