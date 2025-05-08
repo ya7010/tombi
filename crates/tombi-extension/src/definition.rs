@@ -21,30 +21,30 @@ impl From<DefinitionLocation> for tower_lsp::lsp_types::Location {
     }
 }
 
-impl Into<GotoDeclarationResponse> for DefinitionLocation {
-    fn into(self) -> GotoDeclarationResponse {
-        GotoDeclarationResponse::Scalar(self.into())
+impl From<DefinitionLocation> for GotoDeclarationResponse {
+    fn from(val: DefinitionLocation) -> Self {
+        GotoDeclarationResponse::Scalar(val.into())
     }
 }
 
-impl Into<DefinitionLocations> for DefinitionLocation {
-    fn into(self) -> DefinitionLocations {
-        DefinitionLocations(vec![self])
+impl From<DefinitionLocation> for DefinitionLocations {
+    fn from(val: DefinitionLocation) -> Self {
+        DefinitionLocations(vec![val])
     }
 }
 
 #[derive(Debug)]
 pub struct DefinitionLocations(pub Vec<DefinitionLocation>);
 
-impl Into<Option<GotoDeclarationResponse>> for DefinitionLocations {
-    fn into(self) -> Option<GotoDeclarationResponse> {
-        match self.0.len() {
+impl From<DefinitionLocations> for Option<GotoDeclarationResponse> {
+    fn from(val: DefinitionLocations) -> Self {
+        match val.0.len() {
             0 => None,
             1 => Some(GotoDeclarationResponse::Scalar(
-                self.0.into_iter().next().unwrap().into(),
+                val.0.into_iter().next().unwrap().into(),
             )),
             _ => Some(GotoDeclarationResponse::Array(
-                self.0.into_iter().map(|location| location.into()).collect(),
+                val.0.into_iter().map(|location| location.into()).collect(),
             )),
         }
     }

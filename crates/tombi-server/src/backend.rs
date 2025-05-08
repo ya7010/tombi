@@ -128,7 +128,7 @@ impl Backend {
 
         let source_schema = self
             .schema_store
-            .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document_uri)))
+            .try_get_source_schema_from_ast(&root, Some(Either::Left(text_document_uri)))
             .await
             .ok()
             .flatten();
@@ -153,11 +153,11 @@ impl Backend {
         &self,
         text_document_uri: &Url,
     ) -> Option<tombi_document_tree::DocumentTree> {
-        let root = self.get_incomplete_ast(&text_document_uri).await?;
+        let root = self.get_incomplete_ast(text_document_uri).await?;
 
         let source_schema = self
             .schema_store
-            .try_get_source_schema_from_ast(&root, Some(Either::Left(&text_document_uri)))
+            .try_get_source_schema_from_ast(&root, Some(Either::Left(text_document_uri)))
             .await
             .ok()
             .flatten();

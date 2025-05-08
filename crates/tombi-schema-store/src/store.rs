@@ -19,6 +19,12 @@ pub struct SchemaStore {
     options: crate::Options,
 }
 
+impl Default for SchemaStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SchemaStore {
     /// New with default options
     ///
