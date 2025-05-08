@@ -1,7 +1,6 @@
 mod goto_declaration;
 mod goto_definition;
 
-use glob;
 pub use goto_declaration::goto_declaration;
 pub use goto_definition::goto_definition;
 use itertools::Itertools;
@@ -183,7 +182,7 @@ fn goto_workspace(
 
     Ok(Some(tombi_extension::DefinitionLocation::new(
         workspace_cargo_toml_uri,
-        key.range().into(),
+        key.range(),
     )))
 }
 
@@ -208,7 +207,7 @@ fn goto_dependency_crates(
     );
 
     let Some((tombi_schema_store::Accessor::Key(crate_name), crate_value)) =
-        tombi_schema_store::dig_accessors(&workspace_document_tree, accessors)
+        tombi_schema_store::dig_accessors(workspace_document_tree, accessors)
     else {
         return Ok(Vec::with_capacity(0));
     };
@@ -219,7 +218,7 @@ fn goto_dependency_crates(
         if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
             if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) =
                 get_subcrate_cargo_toml(
-                    &workspace_cargo_toml_path,
+                    workspace_cargo_toml_path,
                     std::path::Path::new(subcrate_path.value()),
                     toml_version,
                 )
@@ -275,7 +274,7 @@ fn goto_dependency_crates(
             for dependency_key in ["dependencies", "dev-dependencies", "build-dependencies"] {
                 if let Some((crate_key, _)) = tombi_document_tree::dig_keys(
                     &crate_document_tree,
-                    &[dependency_key, &crate_name],
+                    &[dependency_key, crate_name],
                 ) {
                     if let Some(mut definition_location) =
                         Option::<tombi_extension::DefinitionLocation>::from(crate_location.clone())
@@ -310,7 +309,7 @@ fn goto_crate_package(
             || match_accessors!(accessors, ["build-dependencies", _, "path"])
     );
 
-    let Some((_, value)) = tombi_schema_store::dig_accessors(&workspace_document_tree, accessors)
+    let Some((_, value)) = tombi_schema_store::dig_accessors(workspace_document_tree, accessors)
     else {
         return Ok(None);
     };
@@ -322,7 +321,7 @@ fn goto_crate_package(
         };
 
         if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) = get_subcrate_cargo_toml(
-            &workspace_cargo_toml_path,
+            workspace_cargo_toml_path,
             std::path::Path::new(subcrate_path.value()),
             toml_version,
         ) {

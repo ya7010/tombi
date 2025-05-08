@@ -68,7 +68,13 @@ pub struct Serializer<'a> {
     schema_store: Option<&'a tombi_schema_store::SchemaStore>,
 }
 
-impl<'a> Serializer<'a> {
+impl Default for Serializer<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Serializer<'_> {
     pub const fn new() -> Self {
         Self {
             config: None,
@@ -135,7 +141,7 @@ impl<'a> Serializer<'a> {
             format_definitions,
             &format_options,
             self.source_path
-                .map(|source_path| Either::Right(source_path)),
+                .map(Either::Right),
             schema_store,
         );
 

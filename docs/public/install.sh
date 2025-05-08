@@ -31,7 +31,9 @@ print_success() {
 while [[ $# -gt 0 ]]; do
     case $1 in
     --version)
-        SPECIFIED_VERSION="$2"
+        if [[ "$2" != "latest" ]]; then
+            SPECIFIED_VERSION="$2"
+        fi
         shift 2
         ;;
     *)

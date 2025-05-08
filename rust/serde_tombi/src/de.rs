@@ -71,7 +71,13 @@ pub struct Deserializer<'de> {
     schema_store: Option<&'de tombi_schema_store::SchemaStore>,
 }
 
-impl<'de> Deserializer<'de> {
+impl Default for Deserializer<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Deserializer<'_> {
     pub fn new() -> Self {
         Self {
             config: None,

@@ -16,8 +16,10 @@ pub use object::Object;
 
 /// Enum representing a JSON value
 #[derive(Debug, Clone, PartialEq)]
+#[derive(Default)]
 pub enum Value {
     /// `null` value
+    #[default]
     Null,
     /// Boolean value
     Bool(bool),
@@ -151,11 +153,6 @@ impl Value {
     }
 }
 
-impl Default for Value {
-    fn default() -> Self {
-        Value::Null
-    }
-}
 
 impl From<bool> for Value {
     fn from(b: bool) -> Self {

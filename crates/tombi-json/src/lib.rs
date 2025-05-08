@@ -63,7 +63,7 @@ pub struct ValueNodeDeserializer<'de> {
     _marker: PhantomData<&'de ()>,
 }
 
-impl<'de> ValueNodeDeserializer<'de> {
+impl ValueNodeDeserializer<'_> {
     pub fn new(node: ValueNode) -> Self {
         ValueNodeDeserializer {
             node,
@@ -298,7 +298,7 @@ impl<'de> SerdeDeserializer<'de> for ValueNodeDeserializer<'de> {
                     match item {
                         ValueNode::Number(n) => {
                             if let Some(i) = n.value.as_i64() {
-                                if i >= 0 && i <= 255 {
+                                if (0..=255).contains(&i) {
                                     bytes.push(i as u8);
                                 } else {
                                     return Err(Error::Custom(format!(
@@ -544,7 +544,7 @@ impl<'de> serde::de::MapAccess<'de> for MapAccess {
     where
         V: de::DeserializeSeed<'de>,
     {
-        if let Some(value_node) = std::mem::replace(&mut self.value, None) {
+        if let Some(value_node) = self.value.take() {
             seed.deserialize(ValueNodeDeserializer::new(value_node))
         } else {
             Err(Error::Custom(format!("no value for key: {:?}", self.key)))

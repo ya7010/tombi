@@ -22,7 +22,7 @@ pub async fn goto_declaration(
     let locations = if match_accessors!(accessors[..3], ["tool", "uv", "sources"]) {
         goto_definition_for_member_pyproject_toml(
             document_tree,
-            &accessors,
+            accessors,
             &pyproject_toml_path,
             toml_version,
             false,

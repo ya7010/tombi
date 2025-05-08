@@ -33,13 +33,13 @@ impl<'a> Cursor<'a> {
     pub fn peek(&self, i: usize) -> char {
         assert!(i != 0, "peek(0) is invalid");
 
-        let peeked_char = self
+        
+
+        self
             .chars
             .clone()
             .nth(i.saturating_sub(1))
-            .unwrap_or(EOF_CHAR);
-
-        peeked_char
+            .unwrap_or(EOF_CHAR)
     }
 
     pub fn peek_with_current_while(&self, mut predicate: impl FnMut(char) -> bool) -> String {

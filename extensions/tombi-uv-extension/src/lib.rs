@@ -1,7 +1,6 @@
 mod goto_declaration;
 mod goto_definition;
 
-use glob;
 pub use goto_declaration::goto_declaration;
 pub use goto_definition::goto_definition;
 use itertools::Itertools;
@@ -67,10 +66,10 @@ fn find_workspace_pyproject_toml(
 
             // Check if this pyproject.toml has a [tool.uv.workspace] section
 
-            if let Some(_) = tombi_document_tree::dig_keys(
+            if tombi_document_tree::dig_keys(
                 &package_pyproject_toml_document_tree,
                 &["tool", "uv", "workspace"],
-            ) {
+            ).is_some() {
                 return Some((
                     workspace_pyproject_toml_path,
                     package_pyproject_toml_document_tree,
@@ -157,7 +156,7 @@ fn goto_definition_for_member_pyproject_toml(
         match goto_workspace_member(
             document_tree,
             accessors,
-            &pyproject_toml_path,
+            pyproject_toml_path,
             toml_version,
             jump_to_package,
         )? {
@@ -181,7 +180,7 @@ fn goto_definition_for_workspace_pyproject_toml(
         goto_member_pyprojects(
             workspace_document_tree,
             accessors,
-            &workspace_pyproject_toml_path,
+            workspace_pyproject_toml_path,
             toml_version,
         )
         .map(|locations| locations.into_iter().filter_map(Into::into).collect_vec())
@@ -250,7 +249,7 @@ fn goto_workspace_member(
 
         Ok(Some(tombi_extension::DefinitionLocation::new(
             package_pyproject_toml_uri,
-            tombi_text::Range::default().into(),
+            tombi_text::Range::default(),
         )))
     } else {
         let Ok(workspace_pyproject_toml_uri) = Url::from_file_path(&workspace_pyproject_toml_path)
@@ -260,7 +259,7 @@ fn goto_workspace_member(
 
         Ok(Some(tombi_extension::DefinitionLocation::new(
             workspace_pyproject_toml_uri,
-            member_range.into(),
+            member_range,
         )))
     }
 }
@@ -359,7 +358,7 @@ fn find_member_project_toml(
     };
 
     let member_patterns = match tombi_document_tree::dig_keys(
-        &workspace_pyproject_toml_document_tree,
+        workspace_pyproject_toml_document_tree,
         &[&"tool", &"uv", &"workspace", &"members"],
     ) {
         Some((_, tombi_document_tree::Value::Array(members))) => members
@@ -373,7 +372,7 @@ fn find_member_project_toml(
     };
 
     let exclude_patterns = match tombi_document_tree::dig_keys(
-        &workspace_pyproject_toml_document_tree,
+        workspace_pyproject_toml_document_tree,
         &[&"tool", &"uv", &"workspace", &"exclude"],
     ) {
         Some((_, tombi_document_tree::Value::Array(exclude))) => exclude
