@@ -20,8 +20,14 @@ pub struct ServerOptions {
     /// # Diagnostics Feature options.
     pub diagnostics: Option<ServerDiagnostics>,
 
-    /// # Document Symbol Feature options.
-    pub goto_type_definition: Option<ServerGotoTypeDefinition>,
+    /// # Goto Declaration Feature options.
+    pub goto_declaration: Option<ServerGotoDefinition>,
+
+    /// # Goto Definition Feature options.
+    pub goto_definition: Option<ServerGotoDefinition>,
+
+    /// # Goto Type Definition Feature options.
+    pub goto_type_definition: Option<ServerGotoDefinition>,
 }
 
 impl ServerOptions {
@@ -31,6 +37,8 @@ impl ServerOptions {
             completion: None,
             formatting: None,
             diagnostics: None,
+            goto_declaration: None,
+            goto_definition: None,
             goto_type_definition: None,
         }
     }
@@ -57,8 +65,6 @@ pub struct ServerCompletion {
     /// # Enable completion feature.
     ///
     /// Whether to enable completion.
-    ///
-    /// **WARNING**: 🚧 This feature is experimental 🚧
     pub enabled: Option<BoolDefaultTrue>,
 }
 
@@ -97,9 +103,9 @@ impl ServerCompletion {
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct ServerGotoTypeDefinition {
-    /// # Enable goto type definition feature.
+pub struct ServerGotoDefinition {
+    /// # Enable goto definition feature.
     ///
-    /// Whether to enable goto type definition.
+    /// Whether to enable goto definition.
     pub enabled: Option<BoolDefaultTrue>,
 }

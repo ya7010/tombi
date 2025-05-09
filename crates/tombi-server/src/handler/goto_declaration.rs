@@ -23,6 +23,19 @@ pub async fn handle_goto_declaration(
         ..
     } = params;
 
+    let config = backend.config().await;
+
+    if !config
+        .server
+        .and_then(|server| server.goto_declaration)
+        .and_then(|goto_declaration| goto_declaration.enabled)
+        .unwrap_or_default()
+        .value()
+    {
+        tracing::debug!("`server.goto_declaration.enabled` is false");
+        return Ok(None);
+    }
+
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
