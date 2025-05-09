@@ -4,7 +4,7 @@ pub mod printer;
 pub use level::Level;
 pub use printer::Print;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Diagnostic {
     level: level::Level,
     message: String,
