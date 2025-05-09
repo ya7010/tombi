@@ -169,8 +169,30 @@
             }
           ]
         },
+        "goto-declaration": {
+          "title": "Goto Declaration Feature options.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ServerGotoDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "goto-definition": {
-          "title": "Document Symbol Feature options.",
+          "title": "Goto Definition Feature options.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ServerGotoDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "goto-type-definition": {
+          "title": "Goto Type Definition Feature options.",
           "anyOf": [
             {
               "$ref": "#/definitions/ServerGotoDefinition"
