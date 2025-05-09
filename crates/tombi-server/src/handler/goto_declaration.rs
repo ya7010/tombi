@@ -27,12 +27,12 @@ pub async fn handle_goto_declaration(
 
     if !config
         .server
-        .and_then(|server| server.goto_definition)
-        .and_then(|goto_definition| goto_definition.enabled)
+        .and_then(|server| server.goto_declaration)
+        .and_then(|goto_declaration| goto_declaration.enabled)
         .unwrap_or_default()
         .value()
     {
-        tracing::debug!("`server.goto_definition.enabled` is false");
+        tracing::debug!("`server.goto_declaration.enabled` is false");
         return Ok(None);
     }
 
