@@ -298,6 +298,9 @@ mod completion_labels {
                 "completion",
                 "diagnostics",
                 "formatting",
+                "goto-declaration",
+                "goto-definition",
+                "goto-type-definition",
                 "hover",
             ]);
         }
@@ -316,6 +319,9 @@ mod completion_labels {
                 "completion",
                 "diagnostics",
                 "formatting",
+                "goto-declaration",
+                "goto-definition",
+                "goto-type-definition",
                 "hover",
             ]);
         }
