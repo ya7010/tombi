@@ -1,4 +1,4 @@
-use itertools::Either;
+use itertools::{Either, Itertools};
 use tombi_config::LintOptions;
 use tower_lsp::lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
@@ -64,7 +64,7 @@ pub async fn handle_diagnostic(
         .lint(&document.source)
         .await
         .map_or_else(
-            |diagnostics| diagnostics.into_iter().map(Into::into).collect(),
+            |diagnostics| diagnostics.into_iter().unique().map(Into::into).collect(),
             |_| vec![],
         ),
         None => vec![],
