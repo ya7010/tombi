@@ -168,6 +168,17 @@
               "type": "null"
             }
           ]
+        },
+        "goto-definition": {
+          "title": "Document Symbol Feature options.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ServerGotoDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false,
@@ -200,7 +211,7 @@
       "properties": {
         "enabled": {
           "title": "Enable completion feature.",
-          "description": "Whether to enable completion.\n\n **WARNING**: 🚧 This feature is experimental 🚧",
+          "description": "Whether to enable completion.",
           "anyOf": [
             {
               "$ref": "#/definitions/BoolDefaultTrue"
@@ -237,6 +248,24 @@
         "enabled": {
           "title": "Enable diagnostics feature.",
           "description": "Whether to enable diagnostics.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BoolDefaultTrue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ServerGotoDefinition": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "title": "Enable goto definition feature.",
+          "description": "Whether to enable goto definition.",
           "anyOf": [
             {
               "$ref": "#/definitions/BoolDefaultTrue"

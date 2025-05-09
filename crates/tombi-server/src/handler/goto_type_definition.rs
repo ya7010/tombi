@@ -37,12 +37,12 @@ pub async fn handle_goto_type_definition(
 
     if !config
         .server
-        .and_then(|server| server.goto_type_definition)
-        .and_then(|goto_type_definition| goto_type_definition.enabled)
+        .and_then(|server| server.goto_definition)
+        .and_then(|goto_definition| goto_definition.enabled)
         .unwrap_or_default()
         .value()
     {
-        tracing::debug!("`server.goto_type_definition.enabled` is false");
+        tracing::debug!("`server.goto_definition.enabled` is false");
         return Ok(None);
     }
 
