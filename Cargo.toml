@@ -69,10 +69,10 @@ tombi-json-syntax = { path = "crates/tombi-json-syntax" }
 tombi-json-value = { path = "crates/tombi-json-value" }
 tombi-lexer = { path = "crates/tombi-lexer" }
 tombi-linter = { path = "crates/tombi-linter" }
+tombi-lsp = { path = "crates/tombi-lsp" }
 tombi-parser = { path = "crates/tombi-parser" }
 tombi-rg-tree = { path = "crates/tombi-rg-tree" }
 tombi-schema-store = { path = "crates/tombi-schema-store" }
-tombi-server = { path = "crates/tombi-server" }
 tombi-syntax = { path = "crates/tombi-syntax" }
 tombi-test-lib = { path = "crates/tombi-test-lib" }
 tombi-text = { path = "crates/tombi-text" }
