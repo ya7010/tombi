@@ -1,7 +1,7 @@
 use tombi_syntax::{SyntaxKind::*, T};
 use tombi_toml_version::TomlVersion;
 
-use crate::{support, ArrayOfTable, AstChildren, AstNode};
+use crate::{support, ArrayOfTable, AstChildren, AstNode, TableOrArrayOfTable};
 
 impl crate::ArrayOfTable {
     pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment> {
@@ -39,6 +39,29 @@ impl crate::ArrayOfTable {
 
     pub fn key_values_end_dangling_comments(&self) -> Vec<Vec<crate::EndDanglingComment>> {
         support::node::end_dangling_comments(self.syntax().children_with_tokens())
+    }
+
+    /// Returns an iterator over the subtables of this table.
+    ///
+    /// ```toml
+    /// [[foo]]  # <- This is a self array of table
+    /// key = "value"
+    ///
+    /// [foo.bar]  # <- This is a subtable
+    /// key = "value"
+    ///
+    /// [[foo.baz]]  # <- This is also a subtable
+    /// key = true
+    /// ```
+    pub fn subtables(&self) -> impl Iterator<Item = TableOrArrayOfTable> + '_ {
+        support::node::next_siblings_nodes(self)
+            .skip(1)
+            .take_while(|t: &TableOrArrayOfTable| {
+                let keys = t.header().unwrap().keys();
+                let self_keys = self.header().unwrap().keys();
+
+                keys.starts_with(&self_keys) && keys.count() != self_keys.count()
+            })
     }
 
     pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {
