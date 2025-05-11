@@ -104,6 +104,7 @@ lt2 = 00:32:00.999999  # lt2 tailing comment
 
 # table leading comment1
 # table leading comment2
+# table leading comment3
 [aaaa.ccc]
 key1 = 11
 key2 = "22"
