@@ -397,5 +397,6 @@ fn tombi_json_value_to_completion_item(
         documentation,
         CompletionEdit::new_literal(&value, position, completion_hint),
         schema_url,
+        None,
     ))
 }

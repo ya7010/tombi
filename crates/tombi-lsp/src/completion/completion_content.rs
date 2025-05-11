@@ -1,5 +1,5 @@
-use tombi_schema_store::{get_schema_name, SchemaUrl};
 use tombi_config::TomlVersion;
+use tombi_schema_store::{get_schema_name, SchemaUrl};
 
 use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
 
@@ -27,6 +27,7 @@ pub struct CompletionContent {
     pub documentation: Option<String>,
     pub filter_text: Option<String>,
     pub schema_url: Option<SchemaUrl>,
+    pub deprecated: Option<bool>,
     pub edit: Option<CompletionEdit>,
     pub preselect: Option<bool>,
 }
@@ -39,6 +40,7 @@ impl CompletionContent {
         documentation: Option<String>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&SchemaUrl>,
+        deprecated: Option<bool>,
     ) -> Self {
         Self {
             label: label.clone(),
@@ -50,6 +52,7 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
+            deprecated,
             preselect: None,
         }
     }
@@ -61,6 +64,7 @@ impl CompletionContent {
         documentation: Option<String>,
         edit: Option<CompletionEdit>,
         schema_url: Option<&SchemaUrl>,
+        deprecated: Option<bool>,
     ) -> Self {
         Self {
             label,
@@ -72,6 +76,7 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
+            deprecated,
             preselect: Some(true),
         }
     }
@@ -93,6 +98,7 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
+            deprecated: None,
             preselect: None,
         }
     }
@@ -116,6 +122,7 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
+            deprecated: None,
             preselect: None,
         }
     }
@@ -137,6 +144,7 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit,
+            deprecated: None,
             preselect: None,
         }
     }
@@ -156,6 +164,7 @@ impl CompletionContent {
             filter_text: None,
             schema_url: schema_url.cloned(),
             edit: CompletionEdit::new_inline_table(position, completion_hint),
+            deprecated: None,
             preselect: None,
         }
     }
@@ -179,6 +188,7 @@ impl CompletionContent {
             filter_text: Some(key_name),
             schema_url: schema_url.cloned(),
             edit,
+            deprecated: None,
             preselect: None,
         }
     }
@@ -202,6 +212,7 @@ impl CompletionContent {
                 completion_hint,
             ),
             schema_url: schema_url.cloned(),
+            deprecated: None,
             preselect: None,
         }
     }
@@ -213,6 +224,7 @@ impl CompletionContent {
         documentation: Option<String>,
         required_keys: Option<&Vec<String>>,
         schema_url: Option<&SchemaUrl>,
+        deprecated: Option<bool>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         let label = key_name.to_string();
@@ -241,6 +253,7 @@ impl CompletionContent {
             filter_text: None,
             edit: CompletionEdit::new_key(key_name, key_range, completion_hint),
             schema_url: schema_url.cloned(),
+            deprecated,
             preselect: None,
         }
     }
@@ -273,6 +286,7 @@ impl CompletionContent {
                 completion_hint,
             ),
             schema_url: schema_url.cloned(),
+            deprecated: None,
             preselect: None,
         }
     }
@@ -280,6 +294,7 @@ impl CompletionContent {
     pub fn new_additional_key(
         position: tombi_text::Position,
         schema_url: Option<&SchemaUrl>,
+        deprecated: Option<bool>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
         Self {
@@ -296,6 +311,7 @@ impl CompletionContent {
                 completion_hint,
             ),
             schema_url: schema_url.cloned(),
+            deprecated,
             preselect: None,
         }
     }
@@ -317,6 +333,7 @@ impl CompletionContent {
                 filter_text: Some(format!("{key}{trigger}")),
                 edit: CompletionEdit::new_magic_trigger(trigger, position),
                 schema_url: schema_url.cloned(),
+                deprecated: None,
                 preselect: None,
             })
             .collect()
@@ -338,6 +355,7 @@ impl CompletionContent {
             filter_text: None,
             edit,
             schema_url: None,
+            deprecated: None,
             preselect: None,
         }
     }
@@ -451,6 +469,7 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
             insert_text_mode: Some(tower_lsp::lsp_types::InsertTextMode::ADJUST_INDENTATION),
             additional_text_edits,
             preselect: completion_content.preselect,
+            deprecated: completion_content.deprecated,
             ..Default::default()
         }
     }

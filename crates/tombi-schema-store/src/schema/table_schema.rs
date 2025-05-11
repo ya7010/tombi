@@ -170,11 +170,6 @@ impl TableSchema {
     pub fn check_strict_additional_properties_violation(&self, strict: bool) -> bool {
         strict && self.additional_properties.is_none() && self.pattern_properties.is_none()
     }
-
-    #[inline]
-    pub fn has_additional_property_schema(&self) -> bool {
-        self.additional_property_schema.is_some()
-    }
 }
 
 impl FindSchemaCandidates for TableSchema {

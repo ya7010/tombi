@@ -30,6 +30,7 @@ impl FindCompletionContents for LocalTimeSchema {
                         self.description.clone(),
                         edit,
                         schema_url,
+                        self.deprecated,
                     ));
                 }
             }
@@ -44,6 +45,7 @@ impl FindCompletionContents for LocalTimeSchema {
                     self.description.clone(),
                     edit,
                     schema_url,
+                    self.deprecated,
                 ));
             }
 

@@ -30,6 +30,7 @@ impl FindCompletionContents for StringSchema {
                     self.description.clone(),
                     edit,
                     schema_url,
+                    self.deprecated,
                 ));
             }
 
@@ -44,6 +45,7 @@ impl FindCompletionContents for StringSchema {
                         self.description.clone(),
                         edit,
                         schema_url,
+                        self.deprecated,
                     ));
                 }
                 return completion_items;
