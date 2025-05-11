@@ -32,41 +32,31 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
 
     for node in root.syntax().descendants() {
         if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
-            let folding_range = tombi_text::Range::new(
-                table.folding_range().start(),
-                table
-                    .subtables()
-                    .last()
-                    .map_or(table.folding_range(), |t| t.folding_range())
-                    .end(),
-            );
-
-            ranges.push(FoldingRange {
-                start_line: folding_range.start().line(),
-                start_character: Some(folding_range.start().column()),
-                end_line: folding_range.end().line(),
-                end_character: Some(folding_range.end().column()),
-                kind: Some(FoldingRangeKind::Region),
-                collapsed_text: None,
-            });
+            for folding_range in [table.get_folding_range()] {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(FoldingRange {
+                        start_line: folding_range.start().line(),
+                        start_character: Some(folding_range.start().column()),
+                        end_line: folding_range.end().line(),
+                        end_character: Some(folding_range.end().column()),
+                        kind: Some(FoldingRangeKind::Region),
+                        collapsed_text: None,
+                    });
+                }
+            }
         } else if let Some(array_of_table) = tombi_ast::ArrayOfTable::cast(node.to_owned()) {
-            let folding_range = tombi_text::Range::new(
-                array_of_table.folding_range().start(),
-                array_of_table
-                    .subtables()
-                    .last()
-                    .map_or(array_of_table.folding_range(), |t| t.folding_range())
-                    .end(),
-            );
-
-            ranges.push(FoldingRange {
-                start_line: folding_range.start().line(),
-                start_character: Some(folding_range.start().column()),
-                end_line: folding_range.end().line(),
-                end_character: Some(folding_range.end().column()),
-                kind: Some(FoldingRangeKind::Region),
-                collapsed_text: None,
-            });
+            for folding_range in [array_of_table.get_folding_range()] {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(FoldingRange {
+                        start_line: folding_range.start().line(),
+                        start_character: Some(folding_range.start().column()),
+                        end_line: folding_range.end().line(),
+                        end_character: Some(folding_range.end().column()),
+                        kind: Some(FoldingRangeKind::Region),
+                        collapsed_text: None,
+                    });
+                }
+            }
         } else if let Some(array) = tombi_ast::Array::cast(node.to_owned()) {
             let start_position = array.bracket_start().unwrap().range().start();
             let end_position = array.bracket_end().unwrap().range().end();
@@ -97,12 +87,12 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
     ranges
 }
 
-trait TombiFoldingRange {
-    fn folding_range(&self) -> tombi_text::Range;
+trait GetFoldingRange {
+    fn get_folding_range(&self) -> Option<tombi_text::Range>;
 }
 
-impl TombiFoldingRange for tombi_ast::Table {
-    fn folding_range(&self) -> tombi_text::Range {
+impl GetFoldingRange for tombi_ast::Table {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
         use tombi_syntax::{SyntaxKind::*, T};
 
         let children_with_tokens = self.syntax().children_with_tokens().collect_vec();
@@ -115,16 +105,21 @@ impl TombiFoldingRange for tombi_ast::Table {
             .find(|child| !matches!(child.kind(), WHITESPACE | LINE_BREAK));
 
         match (first_child, last_child) {
-            (Some(first), Some(last)) => {
-                tombi_text::Range::new(first.range().start(), last.range().end())
-            }
-            _ => self.syntax().range(),
+            (Some(first), Some(last)) => Some(tombi_text::Range::new(
+                first.range().start(),
+                self.subtables()
+                    .last()
+                    .and_then(|t| t.get_folding_range())
+                    .unwrap_or(last.range())
+                    .end(),
+            )),
+            _ => None,
         }
     }
 }
 
-impl TombiFoldingRange for tombi_ast::ArrayOfTable {
-    fn folding_range(&self) -> tombi_text::Range {
+impl GetFoldingRange for tombi_ast::ArrayOfTable {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
         use tombi_syntax::{SyntaxKind::*, T};
 
         let children_with_tokens = self.syntax().children_with_tokens().collect_vec();
@@ -137,19 +132,46 @@ impl TombiFoldingRange for tombi_ast::ArrayOfTable {
             .find(|child| !matches!(child.kind(), WHITESPACE | LINE_BREAK));
 
         match (first_child, last_child) {
-            (Some(first), Some(last)) => {
-                tombi_text::Range::new(first.range().start(), last.range().end())
-            }
-            _ => self.syntax().range(),
+            (Some(first), Some(last)) => Some(tombi_text::Range::new(
+                first.range().start(),
+                self.subtables()
+                    .last()
+                    .and_then(|t| t.get_folding_range())
+                    .unwrap_or(last.range())
+                    .end(),
+            )),
+            _ => None,
         }
     }
 }
 
-impl TombiFoldingRange for tombi_ast::TableOrArrayOfTable {
-    fn folding_range(&self) -> tombi_text::Range {
+impl GetFoldingRange for tombi_ast::TableOrArrayOfTable {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
         match self {
-            Self::Table(table) => table.folding_range(),
-            Self::ArrayOfTable(array_of_table) => array_of_table.folding_range(),
+            Self::Table(table) => table.get_folding_range(),
+            Self::ArrayOfTable(array_of_table) => array_of_table.get_folding_range(),
         }
+    }
+}
+
+impl GetFoldingRange for Vec<tombi_ast::LeadingComment> {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
+        let first = self.first()?;
+        let last = self.last()?;
+        Some(tombi_text::Range::new(
+            first.syntax().range().start(),
+            last.syntax().range().end(),
+        ))
+    }
+}
+
+impl GetFoldingRange for Vec<tombi_ast::BeginDanglingComment> {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
+        let first = self.first()?;
+        let last = self.last()?;
+        Some(tombi_text::Range::new(
+            first.syntax().range().start(),
+            last.syntax().range().end(),
+        ))
     }
 }
