@@ -29,8 +29,8 @@ pub async fn handle_hover(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.hover)
+        .lsp()
+        .and_then(|server| server.hover.as_ref())
         .and_then(|hover| hover.enabled)
         .unwrap_or_default()
         .value()

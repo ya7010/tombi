@@ -29,8 +29,8 @@ pub async fn handle_completion(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.completion)
+        .lsp()
+        .and_then(|server| server.completion.as_ref())
         .and_then(|completion| completion.enabled)
         .unwrap_or_default()
         .value()

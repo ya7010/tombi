@@ -64,16 +64,28 @@
         }
       ]
     },
-    "server": {
-      "title": "Language server options.",
+    "lsp": {
+      "title": "Language Server Protocol options.",
       "anyOf": [
         {
-          "$ref": "#/definitions/ServerOptions"
+          "$ref": "#/definitions/LspOptions"
         },
         {
           "type": "null"
         }
       ]
+    },
+    "server": {
+      "title": "Deprecated. Use `lsp` instead.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/LspOptions"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "deprecated": true
     },
     "schema": {
       "title": "Schema options.",
@@ -121,15 +133,14 @@
       "additionalProperties": false,
       "x-tombi-table-keys-order": "schema"
     },
-    "ServerOptions": {
-      "title": "Language Server options.",
+    "LspOptions": {
       "type": "object",
       "properties": {
         "hover": {
           "title": "Hover Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerHover"
+              "$ref": "#/definitions/LspHover"
             },
             {
               "type": "null"
@@ -140,7 +151,7 @@
           "title": "Completion Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerCompletion"
+              "$ref": "#/definitions/LspCompletion"
             },
             {
               "type": "null"
@@ -151,7 +162,7 @@
           "title": "Formatting Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerFormatting"
+              "$ref": "#/definitions/LspFormatting"
             },
             {
               "type": "null"
@@ -162,7 +173,7 @@
           "title": "Diagnostics Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerDiagnostics"
+              "$ref": "#/definitions/LspDiagnostics"
             },
             {
               "type": "null"
@@ -173,7 +184,7 @@
           "title": "Goto Declaration Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerGotoDefinition"
+              "$ref": "#/definitions/LspGotoDefinition"
             },
             {
               "type": "null"
@@ -184,7 +195,7 @@
           "title": "Goto Definition Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerGotoDefinition"
+              "$ref": "#/definitions/LspGotoDefinition"
             },
             {
               "type": "null"
@@ -195,7 +206,7 @@
           "title": "Goto Type Definition Feature options.",
           "anyOf": [
             {
-              "$ref": "#/definitions/ServerGotoDefinition"
+              "$ref": "#/definitions/LspGotoDefinition"
             },
             {
               "type": "null"
@@ -206,7 +217,7 @@
       "additionalProperties": false,
       "x-tombi-table-keys-order": "schema"
     },
-    "ServerHover": {
+    "LspHover": {
       "type": "object",
       "properties": {
         "enabled": {
@@ -228,7 +239,7 @@
       "type": "boolean",
       "default": true
     },
-    "ServerCompletion": {
+    "LspCompletion": {
       "type": "object",
       "properties": {
         "enabled": {
@@ -246,7 +257,7 @@
       },
       "additionalProperties": false
     },
-    "ServerFormatting": {
+    "LspFormatting": {
       "type": "object",
       "properties": {
         "enabled": {
@@ -264,7 +275,7 @@
       },
       "additionalProperties": false
     },
-    "ServerDiagnostics": {
+    "LspDiagnostics": {
       "type": "object",
       "properties": {
         "enabled": {
@@ -282,7 +293,7 @@
       },
       "additionalProperties": false
     },
-    "ServerGotoDefinition": {
+    "LspGotoDefinition": {
       "type": "object",
       "properties": {
         "enabled": {

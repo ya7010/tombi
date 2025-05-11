@@ -21,6 +21,7 @@ mod completion_labels {
                 "format",
                 "include",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -73,6 +74,7 @@ mod completion_labels {
                 "format",
                 "include",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -87,7 +89,7 @@ mod completion_labels {
                 toml-version = "v1.0.0"
                 █
 
-                [server]
+                [lsp]
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
@@ -95,6 +97,7 @@ mod completion_labels {
                 "format",
                 "include",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -110,6 +113,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -128,6 +132,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -148,6 +153,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -162,6 +168,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -214,7 +221,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server_completion_dot(
                 r#"
-                [server]
+                [lsp]
                 completion.█
                 "#,
                 tombi_schema_path(),
@@ -228,7 +235,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server_completion_equal(
                 r#"
-                [server]
+                [lsp]
                 completion=█
                 "#,
                 tombi_schema_path(),
@@ -289,7 +296,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server2(
                 r#"
-                [server]
+                [lsp]
                 █
                 completion.enabled = true
                 "#,
@@ -309,7 +316,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server3(
                 r#"
-                [server]
+                [lsp]
                 formatting.enabled = true
                 █
                 completion.enabled = true
@@ -330,7 +337,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server_completion(
                 r#"
-                [server]
+                [lsp]
                 completion.enabled = █
                 "#,
                 tombi_schema_path(),
@@ -344,7 +351,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server_comp(
                 r#"
-                [server]
+                [lsp]
                 comp█
                 "#,
                 tombi_schema_path(),
@@ -357,7 +364,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server_comp2(
                 r#"
-                [server.comp█]
+                [lsp.comp█]
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
@@ -369,7 +376,7 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_server_comp3(
                 r#"
-                [server]
+                [lsp]
                 comp█
 
                 [schema]

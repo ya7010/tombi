@@ -10,7 +10,7 @@ exclude = ["node_modules/**/*"]
 
 [lint]
 
-[server]
+[lsp]
 
 [schema]
 enabled = true

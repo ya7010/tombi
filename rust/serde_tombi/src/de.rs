@@ -656,7 +656,7 @@ optional_string = "provided"
         pretty_assertions::assert_eq!(config.exclude, Some(vec!["node_modules/**/*".to_string()]));
         assert!(config.format.is_some());
         assert!(config.lint.is_some());
-        assert!(config.server.is_some());
+        assert!(config.lsp().is_some());
         assert!(config.schema.is_some());
         assert!(config.schemas.is_some());
 

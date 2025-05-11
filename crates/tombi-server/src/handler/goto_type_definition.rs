@@ -36,8 +36,8 @@ pub async fn handle_goto_type_definition(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.goto_type_definition)
+        .lsp()
+        .and_then(|server| server.goto_type_definition.as_ref())
         .and_then(|goto_type_definition| goto_type_definition.enabled)
         .unwrap_or_default()
         .value()

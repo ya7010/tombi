@@ -27,8 +27,8 @@ pub async fn handle_goto_definition(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.goto_definition)
+        .lsp()
+        .and_then(|server| server.goto_definition.as_ref())
         .and_then(|goto_definition| goto_definition.enabled)
         .unwrap_or_default()
         .value()

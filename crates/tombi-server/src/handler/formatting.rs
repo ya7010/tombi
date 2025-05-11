@@ -19,8 +19,8 @@ pub async fn handle_formatting(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.formatting)
+        .lsp()
+        .and_then(|server| server.formatting.as_ref())
         .and_then(|formatting| formatting.enabled)
         .unwrap_or_default()
         .value()
