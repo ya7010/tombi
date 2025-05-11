@@ -80,29 +80,43 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                 }
             }
         } else if let Some(array) = tombi_ast::Array::cast(node.to_owned()) {
-            let start_position = array.bracket_start().unwrap().range().start();
-            let end_position = array.bracket_end().unwrap().range().end();
-
-            ranges.push(FoldingRange {
-                start_line: start_position.line(),
-                start_character: Some(start_position.column()),
-                end_line: end_position.line(),
-                end_character: Some(end_position.column()),
-                kind: Some(FoldingRangeKind::Region),
-                collapsed_text: None,
-            });
+            for folding_range in [
+                array.inner_begin_dangling_comments().get_folding_range(),
+                array.get_folding_range(),
+                array.inner_end_dangling_comments().get_folding_range(),
+            ] {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(FoldingRange {
+                        start_line: folding_range.start().line(),
+                        start_character: Some(folding_range.start().column()),
+                        end_line: folding_range.end().line(),
+                        end_character: Some(folding_range.end().column()),
+                        kind: Some(FoldingRangeKind::Region),
+                        collapsed_text: None,
+                    })
+                }
+            }
         } else if let Some(inline_table) = tombi_ast::InlineTable::cast(node.to_owned()) {
-            let start_position = inline_table.brace_start().unwrap().range().start();
-            let end_position = inline_table.brace_end().unwrap().range().end();
-
-            ranges.push(FoldingRange {
-                start_line: start_position.line(),
-                start_character: Some(start_position.column()),
-                end_line: end_position.line(),
-                end_character: Some(end_position.column()),
-                kind: Some(FoldingRangeKind::Region),
-                collapsed_text: None,
-            });
+            for folding_range in [
+                inline_table
+                    .inner_begin_dangling_comments()
+                    .get_folding_range(),
+                inline_table.get_folding_range(),
+                inline_table
+                    .inner_end_dangling_comments()
+                    .get_folding_range(),
+            ] {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(FoldingRange {
+                        start_line: folding_range.start().line(),
+                        start_character: Some(folding_range.start().column()),
+                        end_line: folding_range.end().line(),
+                        end_character: Some(folding_range.end().column()),
+                        kind: Some(FoldingRangeKind::Region),
+                        collapsed_text: None,
+                    });
+                }
+            }
         }
     }
 
@@ -173,6 +187,24 @@ impl GetFoldingRange for tombi_ast::TableOrArrayOfTable {
             Self::Table(table) => table.get_folding_range(),
             Self::ArrayOfTable(array_of_table) => array_of_table.get_folding_range(),
         }
+    }
+}
+
+impl GetFoldingRange for tombi_ast::Array {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
+        let start_position = self.bracket_start()?.range().start();
+        let end_position = self.bracket_end()?.range().end();
+
+        Some(tombi_text::Range::new(start_position, end_position))
+    }
+}
+
+impl GetFoldingRange for tombi_ast::InlineTable {
+    fn get_folding_range(&self) -> Option<tombi_text::Range> {
+        let start_position = self.brace_start()?.range().start();
+        let end_position = self.brace_end()?.range().end();
+
+        Some(tombi_text::Range::new(start_position, end_position))
     }
 }
 
