@@ -32,6 +32,7 @@ impl FindCompletionContents for BooleanSchema {
                             self.description.clone(),
                             edit,
                             schema_url,
+                            self.deprecated,
                         )
                     })
                     .collect()

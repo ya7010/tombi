@@ -297,6 +297,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                         reference,
                                         title,
                                         description,
+                                        deprecated,
                                         ..
                                     } if is_online_url(reference) => {
                                         completion_contents.push(CompletionContent::new_key(
@@ -306,6 +307,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                             description.clone(),
                                             table_schema.required.as_ref(),
                                             Some(current_schema.schema_url.as_ref()),
+                                            *deprecated,
                                             completion_hint,
                                         ));
                                         continue;
@@ -379,6 +381,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                                             Some(
                                                                 current_schema.schema_url.as_ref(),
                                                             ),
+                                                            value_schema.deprecated(),
                                                             completion_hint,
                                                         ),
                                                     );
@@ -403,14 +406,32 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                         Some(current_schema.schema_url.as_ref()),
                                         completion_hint,
                                     ))
-                                } else if table_schema.has_additional_property_schema() {
-                                    completion_contents.push(
-                                        CompletionContent::new_additional_key(
-                                            position,
-                                            Some(current_schema.schema_url.as_ref()),
-                                            completion_hint,
-                                        ),
-                                    );
+                                } else if let Some((_, additional_property_schema)) =
+                                    &table_schema.additional_property_schema
+                                {
+                                    if let Ok(Some(CurrentSchema {
+                                        value_schema,
+                                        schema_url,
+                                        ..
+                                    })) = additional_property_schema
+                                        .write()
+                                        .await
+                                        .resolve(
+                                            current_schema.schema_url.clone(),
+                                            current_schema.definitions.clone(),
+                                            schema_context.store,
+                                        )
+                                        .await
+                                    {
+                                        completion_contents.push(
+                                            CompletionContent::new_additional_key(
+                                                position,
+                                                Some(schema_url.as_ref()),
+                                                value_schema.deprecated(),
+                                                completion_hint,
+                                            ),
+                                        );
+                                    }
                                 }
                             }
                         }
@@ -564,6 +585,7 @@ impl FindCompletionContents for TableSchema {
                                 .await,
                             self.required.as_ref(),
                             Some(current_schema.schema_url.as_ref()),
+                            current_schema.value_schema.deprecated(),
                             completion_hint,
                         ));
                     }
@@ -864,6 +886,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                     .await,
                 table_schema.required.as_ref(),
                 Some(&current_schema.schema_url),
+                current_schema.value_schema.deprecated(),
                 completion_hint,
             ));
         }
