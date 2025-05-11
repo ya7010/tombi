@@ -408,7 +408,7 @@ mod hover_keys_value {
         });) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-                use tombi_server::Backend;
+                use tombi_lsp::Backend;
                 use std::io::Write;
                 use tower_lsp::{
                     lsp_types::{
@@ -417,11 +417,11 @@ mod hover_keys_value {
                     },
                     LspService,
                 };
-                use tombi_server::handler::handle_did_open;
+                use tombi_lsp::handler::handle_did_open;
 
                 tombi_test_lib::init_tracing();
 
-                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_server::backend::Options::default()));
+                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_lsp::backend::Options::default()));
 
                 let backend = service.inner();
 
@@ -488,7 +488,7 @@ mod hover_keys_value {
                 )
                 .await;
 
-                let Ok(Some(hover_content)) = tombi_server::handler::handle_hover(
+                let Ok(Some(hover_content)) = tombi_lsp::handler::handle_hover(
                     &backend,
                     tower_lsp::lsp_types::HoverParams {
                         text_document_position_params: tower_lsp::lsp_types::TextDocumentPositionParams {

@@ -9,7 +9,7 @@ export function serverOptions(
 
   const run = {
     command: serverPath,
-    args: ["serve", ...serveArgs],
+    args: ["lsp", ...serveArgs],
     options: {
       env: {
         NO_COLOR: "1",

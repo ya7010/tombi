@@ -147,7 +147,7 @@ impl zed::Extension for TombiExtension {
         let tombi_binary = self.language_server_binary(language_server_id, worktree)?;
         Ok(zed::Command {
             command: tombi_binary.path,
-            args: tombi_binary.args.unwrap_or_else(|| vec!["serve".into()]),
+            args: tombi_binary.args.unwrap_or_else(|| vec!["lsp".into()]),
             env: vec![],
         })
     }

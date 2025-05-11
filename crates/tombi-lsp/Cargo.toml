@@ -1,5 +1,5 @@
 [package]
-name = "tombi-server"
+name = "tombi-lsp"
 version = "0.0.0"
 authors.workspace = true
 edition.workspace = true

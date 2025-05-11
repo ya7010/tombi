@@ -219,7 +219,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server_completion_dot(
+            async fn tombi_lsp_completion_dot(
                 r#"
                 [lsp]
                 completion.█
@@ -233,7 +233,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server_completion_equal(
+            async fn tombi_lsp_completion_equal(
                 r#"
                 [lsp]
                 completion=█
@@ -294,7 +294,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server2(
+            async fn tombi_lsp2(
                 r#"
                 [lsp]
                 █
@@ -314,7 +314,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server3(
+            async fn tombi_lsp3(
                 r#"
                 [lsp]
                 formatting.enabled = true
@@ -335,7 +335,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server_completion(
+            async fn tombi_lsp_completion(
                 r#"
                 [lsp]
                 completion.enabled = █
@@ -349,7 +349,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server_comp(
+            async fn tombi_lsp_comp(
                 r#"
                 [lsp]
                 comp█
@@ -362,7 +362,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server_comp2(
+            async fn tombi_lsp_comp2(
                 r#"
                 [lsp.comp█]
                 "#,
@@ -374,7 +374,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn tombi_server_comp3(
+            async fn tombi_lsp_comp3(
                 r#"
                 [lsp]
                 comp█
@@ -932,7 +932,7 @@ mod completion_labels {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
                 use itertools::Itertools;
-                use tombi_server::Backend;
+                use tombi_lsp::Backend;
                 use std::io::Write;
                 use tower_lsp::{
                     lsp_types::{
@@ -942,11 +942,11 @@ mod completion_labels {
                     },
                     LspService,
                 };
-                use tombi_server::handler::handle_did_open;
+                use tombi_lsp::handler::handle_did_open;
 
                 tombi_test_lib::init_tracing();
 
-                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_server::backend::Options::default()));
+                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_lsp::backend::Options::default()));
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = $schema_file_path.as_ref() {
@@ -1016,7 +1016,7 @@ mod completion_labels {
                 )
                 .await;
 
-                let Ok(Some(completions)) = tombi_server::handler::handle_completion(
+                let Ok(Some(completions)) = tombi_lsp::handler::handle_completion(
                     &backend,
                     CompletionParams {
                         text_document_position: TextDocumentPositionParams {
@@ -1176,7 +1176,7 @@ mod completion_labels {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
                 use itertools::Itertools;
-                use tombi_server::Backend;
+                use tombi_lsp::Backend;
                 use std::io::Write;
                 use tower_lsp::{
                     lsp_types::{
@@ -1186,11 +1186,11 @@ mod completion_labels {
                     },
                     LspService,
                 };
-                use tombi_server::handler::handle_did_open;
+                use tombi_lsp::handler::handle_did_open;
 
                 tombi_test_lib::init_tracing();
 
-                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_server::backend::Options::default()));
+                let (service, _) = LspService::new(|client| Backend::new(client, &tombi_lsp::backend::Options::default()));
                 let backend = service.inner();
 
                 if let Some(schema_file_path) = $schema_file_path.as_ref() {
@@ -1285,7 +1285,7 @@ mod completion_labels {
                 )
                 .await;
 
-                let Ok(Some(completions)) = tombi_server::handler::handle_completion(
+                let Ok(Some(completions)) = tombi_lsp::handler::handle_completion(
                     &backend,
                     CompletionParams {
                         text_document_position: TextDocumentPositionParams {
