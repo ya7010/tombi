@@ -20,8 +20,8 @@ pub async fn handle_diagnostic(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.diagnostics)
+        .lsp()
+        .and_then(|server| server.diagnostics.as_ref())
         .and_then(|diagnostics| diagnostics.enabled)
         .unwrap_or_default()
         .value()

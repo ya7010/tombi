@@ -26,8 +26,8 @@ pub async fn handle_goto_declaration(
     let config = backend.config().await;
 
     if !config
-        .server
-        .and_then(|server| server.goto_declaration)
+        .lsp()
+        .and_then(|server| server.goto_declaration.as_ref())
         .and_then(|goto_declaration| goto_declaration.enabled)
         .unwrap_or_default()
         .value()

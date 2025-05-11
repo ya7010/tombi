@@ -1,4 +1,6 @@
-use tombi_test_lib::{today_local_date, today_local_date_time, today_local_time, today_offset_date_time};
+use tombi_test_lib::{
+    today_local_date, today_local_date_time, today_local_time, today_offset_date_time,
+};
 
 struct Select<T>(T);
 mod completion_edit {
@@ -13,14 +15,14 @@ mod completion_edit {
             #[tokio::test]
             async fn tombi_server_completion_dot(
                 r#"
-                [server]
+                [lsp]
                 completion.█
                 "#,
                 Select("enabled"),
                 tombi_schema_path(),
             ) -> Ok(
                 r#"
-                [server]
+                [lsp]
                 completion.enabled
                 "#
             );
@@ -30,14 +32,14 @@ mod completion_edit {
             #[tokio::test]
             async fn tombi_server_completion_equal(
                 r#"
-                [server]
+                [lsp]
                 completion=█
                 "#,
                 Select("enabled"),
                 tombi_schema_path(),
             ) -> Ok(
                 r#"
-                [server]
+                [lsp]
                 completion = { enabled$1 }$0
                 "#
             );

@@ -10,7 +10,7 @@ pub use format::FormatOptions;
 pub use lint::LintOptions;
 pub use schema::SchemaOptions;
 pub use schema::{RootSchema, Schema, SubSchema};
-pub use server::{ServerCompletion, ServerOptions};
+pub use server::{LspCompletion, LspOptions};
 pub use tombi_toml_version::TomlVersion;
 pub use types::*;
 
@@ -58,12 +58,23 @@ pub struct Config {
     /// # Linter options.
     pub lint: Option<LintOptions>,
 
-    /// # Language server options.
-    pub server: Option<ServerOptions>,
+    /// # Language Server Protocol options.
+    lsp: Option<LspOptions>,
+
+    /// # Deprecated. Use `lsp` instead.
+    #[cfg_attr(feature = "jsonschema", deprecated)]
+    server: Option<LspOptions>,
 
     /// # Schema options.
     pub schema: Option<SchemaOptions>,
 
     /// # Schema catalog items.
     pub schemas: Option<Vec<Schema>>,
+}
+
+impl Config {
+    pub fn lsp(&self) -> Option<&LspOptions> {
+        #[allow(deprecated)]
+        self.lsp.as_ref().or_else(|| self.server.as_ref())
+    }
 }
