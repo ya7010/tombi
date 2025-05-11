@@ -21,6 +21,7 @@ mod completion_labels {
                 "format",
                 "include",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -73,6 +74,7 @@ mod completion_labels {
                 "format",
                 "include",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -95,6 +97,7 @@ mod completion_labels {
                 "format",
                 "include",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -110,6 +113,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -128,6 +132,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -148,6 +153,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
@@ -162,6 +168,7 @@ mod completion_labels {
             ) -> Ok([
                 "format",
                 "lint",
+                "lsp",
                 "schema",
                 "schemas",
                 "server",
