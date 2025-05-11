@@ -2012,8 +2012,8 @@ dependencies = [
  "tombi-diagnostic",
  "tombi-formatter",
  "tombi-linter",
+ "tombi-lsp",
  "tombi-schema-store",
- "tombi-server",
  "tracing",
  "tracing-subscriber",
  "url",
@@ -2235,6 +2235,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-lsp"
+version = "0.0.0"
+dependencies = [
+ "ahash",
+ "camino",
+ "chrono",
+ "clap",
+ "futures",
+ "futures-util",
+ "indexmap",
+ "itertools",
+ "pretty_assertions",
+ "regex",
+ "reqwest",
+ "rstest",
+ "rustc-hash",
+ "semver",
+ "serde",
+ "serde_json",
+ "serde_tombi",
+ "tempfile",
+ "textwrap",
+ "thiserror",
+ "tokio",
+ "tombi-ast",
+ "tombi-cargo-extension",
+ "tombi-config",
+ "tombi-diagnostic",
+ "tombi-document",
+ "tombi-document-tree",
+ "tombi-formatter",
+ "tombi-json",
+ "tombi-linter",
+ "tombi-parser",
+ "tombi-schema-store",
+ "tombi-syntax",
+ "tombi-test-lib",
+ "tombi-text",
+ "tombi-uv-extension",
+ "tombi-validator",
+ "tombi-x-keyword",
+ "tower-lsp",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "tombi-parser"
 version = "0.0.0"
 dependencies = [
@@ -2294,53 +2341,6 @@ dependencies = [
  "tombi-x-keyword",
  "tracing",
  "url",
-]
-
-[[package]]
-name = "tombi-server"
-version = "0.0.0"
-dependencies = [
- "ahash",
- "camino",
- "chrono",
- "clap",
- "futures",
- "futures-util",
- "indexmap",
- "itertools",
- "pretty_assertions",
- "regex",
- "reqwest",
- "rstest",
- "rustc-hash",
- "semver",
- "serde",
- "serde_json",
- "serde_tombi",
- "tempfile",
- "textwrap",
- "thiserror",
- "tokio",
- "tombi-ast",
- "tombi-cargo-extension",
- "tombi-config",
- "tombi-diagnostic",
- "tombi-document",
- "tombi-document-tree",
- "tombi-formatter",
- "tombi-json",
- "tombi-linter",
- "tombi-parser",
- "tombi-schema-store",
- "tombi-syntax",
- "tombi-test-lib",
- "tombi-text",
- "tombi-uv-extension",
- "tombi-validator",
- "tombi-x-keyword",
- "tower-lsp",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
