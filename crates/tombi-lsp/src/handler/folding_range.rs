@@ -87,6 +87,140 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                     ranges.push(folding_range);
                 }
             }
+        } else if let Some(integer_bin) = tombi_ast::IntegerBin::cast(node.to_owned()) {
+            for folding_range in [integer_bin
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(integer_oct) = tombi_ast::IntegerOct::cast(node.to_owned()) {
+            for folding_range in [integer_oct
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(integer_dec) = tombi_ast::IntegerDec::cast(node.to_owned()) {
+            for folding_range in [integer_dec
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(integer_hex) = tombi_ast::IntegerHex::cast(node.to_owned()) {
+            for folding_range in [integer_hex
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(float) = tombi_ast::Float::cast(node.to_owned()) {
+            for folding_range in [float
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(basic_string) = tombi_ast::BasicString::cast(node.to_owned()) {
+            for folding_range in [basic_string
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(literal_string) = tombi_ast::LiteralString::cast(node.to_owned()) {
+            for folding_range in [literal_string
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(multi_line_basic_string) =
+            tombi_ast::MultiLineBasicString::cast(node.to_owned())
+        {
+            for folding_range in [multi_line_basic_string
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(multi_line_literal_string) =
+            tombi_ast::MultiLineLiteralString::cast(node.to_owned())
+        {
+            for folding_range in [multi_line_literal_string
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(offset_date_time) = tombi_ast::OffsetDateTime::cast(node.to_owned()) {
+            for folding_range in [offset_date_time
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(local_date_time) = tombi_ast::LocalDateTime::cast(node.to_owned()) {
+            for folding_range in [local_date_time
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(local_date) = tombi_ast::LocalDate::cast(node.to_owned()) {
+            for folding_range in [local_date
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+        } else if let Some(local_time) = tombi_ast::LocalTime::cast(node.to_owned()) {
+            for folding_range in [local_time
+                .leading_comments()
+                .collect_vec()
+                .get_comment_folding_range()]
+            {
+                if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
         } else if let Some(array) = tombi_ast::Array::cast(node.to_owned()) {
             for folding_range in [
                 array
@@ -121,6 +255,19 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
             ] {
                 if let Some(folding_range) = folding_range {
                     ranges.push(folding_range);
+                }
+            }
+        } else if let Some(root) = tombi_ast::Root::cast(node.to_owned()) {
+            for folding_range in [
+                root.key_values_begin_dangling_comments()
+                    .get_comment_folding_range(),
+                root.key_values_end_dangling_comments()
+                    .get_comment_folding_range(),
+            ] {
+                {
+                    if let Some(folding_range) = folding_range {
+                        ranges.push(folding_range);
+                    }
                 }
             }
         }
