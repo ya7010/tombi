@@ -52,12 +52,14 @@ impl crate::Table {
     /// key = true
     /// ```
     pub fn subtables(&self) -> impl Iterator<Item = TableOrArrayOfTable> + '_ {
-        support::node::next_siblings_nodes(self).take_while(|t: &TableOrArrayOfTable| {
-            t.header()
-                .unwrap()
-                .keys()
-                .starts_with(&self.header().unwrap().keys())
-        })
+        support::node::next_siblings_nodes(self)
+            .skip(1)
+            .take_while(|t: &TableOrArrayOfTable| {
+                let keys = t.header().unwrap().keys();
+                let self_keys = self.header().unwrap().keys();
+
+                keys.starts_with(&self_keys) && keys.count() != self_keys.count()
+            })
     }
 
     pub fn array_of_tables_keys(&self) -> impl Iterator<Item = AstChildren<crate::Key>> + '_ {

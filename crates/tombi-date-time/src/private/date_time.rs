@@ -201,8 +201,6 @@ impl std::str::FromStr for DateTime {
                 nanosecond,
             };
 
-            tracing::error!("time: {:?}", time);
-
             if time.hour >= 24 {
                 return Err(crate::parse::Error::InvalidHour);
             }

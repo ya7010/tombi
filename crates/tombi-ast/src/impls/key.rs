@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 
+use itertools::{EitherOrBoth, Itertools};
 use tombi_toml_version::TomlVersion;
 
 use crate::AstChildren;
@@ -43,13 +44,17 @@ impl PartialOrd for crate::Key {
 
 impl AstChildren<crate::Key> {
     pub fn starts_with(&self, other: &AstChildren<crate::Key>) -> bool {
-        self.clone().zip(other.clone()).all(|(a, b)| {
-            match (
-                a.try_to_raw_text(TomlVersion::latest()),
-                b.try_to_raw_text(TomlVersion::latest()),
-            ) {
-                (Ok(a), Ok(b)) => a == b,
-                _ => false,
+        self.clone().zip_longest(other.clone()).all(|m| match m {
+            EitherOrBoth::Left(_) => true,
+            EitherOrBoth::Right(_) => false,
+            EitherOrBoth::Both(a, b) => {
+                match (
+                    a.try_to_raw_text(TomlVersion::latest()),
+                    b.try_to_raw_text(TomlVersion::latest()),
+                ) {
+                    (Ok(a), Ok(b)) => a == b,
+                    _ => false,
+                }
             }
         })
     }
