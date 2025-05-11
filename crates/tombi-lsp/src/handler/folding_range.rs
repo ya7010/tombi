@@ -239,6 +239,19 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                     ranges.push(folding_range);
                 }
             }
+            for (_, comma) in array.values_with_comma() {
+                let Some(comma) = comma else {
+                    continue;
+                };
+
+                if let Some(folding_range) = comma
+                    .leading_comments()
+                    .collect_vec()
+                    .get_comment_folding_range()
+                {
+                    ranges.push(folding_range);
+                }
+            }
         } else if let Some(inline_table) = tombi_ast::InlineTable::cast(node.to_owned()) {
             for folding_range in [
                 inline_table
@@ -254,6 +267,19 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                     .get_comment_folding_range(),
             ] {
                 if let Some(folding_range) = folding_range {
+                    ranges.push(folding_range);
+                }
+            }
+            for (_, comma) in inline_table.key_values_with_comma() {
+                let Some(comma) = comma else {
+                    continue;
+                };
+
+                if let Some(folding_range) = comma
+                    .leading_comments()
+                    .collect_vec()
+                    .get_comment_folding_range()
+                {
                     ranges.push(folding_range);
                 }
             }
@@ -408,11 +434,16 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::BeginDanglingComment>> {
             .skip_while(|group| group.is_empty())
             .next()?
             .iter()
+            .rev()
             .next()?;
+
+        if first.syntax().range().start().line() == last.syntax().range().end().line() {
+            return None;
+        }
 
         Some(tombi_text::Range::new(
             first.syntax().range().start(),
-            tombi_text::Position::new(last.syntax().range().end().line() + 1, 0),
+            last.syntax().range().end(),
         ))
     }
 }
@@ -431,11 +462,16 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::EndDanglingComment>> {
             .skip_while(|group| group.is_empty())
             .next()?
             .iter()
+            .rev()
             .next()?;
+
+        if first.syntax().range().start().line() == last.syntax().range().end().line() {
+            return None;
+        }
 
         Some(tombi_text::Range::new(
             first.syntax().range().start(),
-            tombi_text::Position::new(last.syntax().range().end().line() + 1, 0),
+            last.syntax().range().end(),
         ))
     }
 }
