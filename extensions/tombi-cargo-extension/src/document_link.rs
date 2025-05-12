@@ -141,8 +141,6 @@ fn document_link_for_dependency(
 ) -> Result<Vec<tombi_extension::DocumentLink>, tower_lsp::jsonrpc::Error> {
     let mut registory = "https://crates.io/crates".to_string();
 
-    tracing::info!("document_link_for_dependency: {:?}", crate_key);
-
     if let tombi_document_tree::Value::Table(table) = crate_value {
         if table.contains_key("workspace") {
             // At this stage, the workspace Cargo.toml has already been moved, so this condition is ignored.
@@ -162,7 +160,7 @@ fn document_link_for_dependency(
             return Ok(vec![tombi_extension::DocumentLink {
                 range: tombi_text::Range::default(),
                 target,
-                tooltip: format!("Open: {}", git_url.value()),
+                tooltip: "Open Git Repository".to_string(),
             }]);
         }
         if let Some(tombi_document_tree::Value::String(registory_name)) = table.get("registory") {
@@ -194,12 +192,10 @@ fn document_link_for_dependency(
             let Ok(target) = Url::parse(&format!("{registory}/{}", package_name.value())) else {
                 return Ok(Vec::with_capacity(0));
             };
-            let tooltip = format!("Open: {target}");
-
             return Ok(vec![tombi_extension::DocumentLink {
                 range: tombi_text::Range::default(),
                 target,
-                tooltip,
+                tooltip: "Open crates.io".to_string(),
             }]);
         }
     }
@@ -208,13 +204,9 @@ fn document_link_for_dependency(
         return Ok(Vec::with_capacity(0));
     };
 
-    tracing::info!("document_link_for_dependency: {target}");
-
-    let tooltip = format!("Open: {target}");
-
     Ok(vec![tombi_extension::DocumentLink {
         range: crate_key.range(),
         target,
-        tooltip,
+        tooltip: "Open crates.io".to_string(),
     }])
 }
