@@ -304,6 +304,7 @@ mod completion_labels {
             ) -> Ok([
                 "completion",
                 "diagnostics",
+                "document-link",
                 "formatting",
                 "goto-declaration",
                 "goto-definition",
@@ -325,6 +326,7 @@ mod completion_labels {
             ) -> Ok([
                 "completion",
                 "diagnostics",
+                "document-link",
                 "formatting",
                 "goto-declaration",
                 "goto-definition",
