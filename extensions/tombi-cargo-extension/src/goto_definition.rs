@@ -1,7 +1,6 @@
 use crate::{goto_definition_for_crate_cargo_toml, goto_definition_for_workspace_cargo_toml};
 use tombi_config::TomlVersion;
 use tombi_extension::DefinitionLocations;
-use tombi_schema_store::match_accessors;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
 pub async fn goto_definition(
@@ -18,23 +17,24 @@ pub async fn goto_definition(
         return Ok(None);
     };
 
-    let locations = if match_accessors!(accessors[..1], ["workspace"]) {
-        goto_definition_for_workspace_cargo_toml(
-            document_tree,
-            accessors,
-            &cargo_toml_path,
-            toml_version,
-            true,
-        )
-    } else {
-        goto_definition_for_crate_cargo_toml(
-            document_tree,
-            accessors,
-            &cargo_toml_path,
-            toml_version,
-            true,
-        )
-    }?;
+    let locations =
+        if accessors.first() == Some(&tombi_schema_store::Accessor::Key("workspace".to_string())) {
+            goto_definition_for_workspace_cargo_toml(
+                document_tree,
+                accessors,
+                &cargo_toml_path,
+                toml_version,
+                true,
+            )
+        } else {
+            goto_definition_for_crate_cargo_toml(
+                document_tree,
+                accessors,
+                &cargo_toml_path,
+                toml_version,
+                true,
+            )
+        }?;
 
     if locations.is_empty() {
         return Ok(None);

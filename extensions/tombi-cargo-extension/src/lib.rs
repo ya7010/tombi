@@ -1,6 +1,8 @@
+mod document_link;
 mod goto_declaration;
 mod goto_definition;
 
+pub use document_link::document_link;
 pub use goto_declaration::goto_declaration;
 pub use goto_definition::goto_definition;
 use itertools::Itertools;
@@ -108,7 +110,7 @@ fn get_subcrate_cargo_toml(
 /// ```
 fn goto_workspace(
     accessors: &[tombi_schema_store::Accessor],
-    cargo_toml_path: &std::path::Path,
+    crate_cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
     jump_to_subcrate: bool,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
@@ -118,7 +120,7 @@ fn goto_workspace(
     ));
 
     let Some((workspace_cargo_toml_path, workspace_cargo_toml_document_tree)) =
-        find_workspace_cargo_toml(cargo_toml_path, toml_version)
+        find_workspace_cargo_toml(crate_cargo_toml_path, toml_version)
     else {
         return Ok(None);
     };
