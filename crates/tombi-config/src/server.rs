@@ -4,20 +4,20 @@ use crate::BoolDefaultTrue;
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
-#[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = tombi_x_keyword::TableKeysOrder::Schema)))]
+#[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = tombi_x_keyword::TableKeysOrder::Ascending)))]
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct LspOptions {
-    /// # Hover Feature options.
-    pub hover: Option<LspHover>,
-
     /// # Completion Feature options.
     pub completion: Option<LspCompletion>,
 
-    /// # Formatting Feature options.
-    pub formatting: Option<LspFormatting>,
-
     /// # Diagnostics Feature options.
     pub diagnostics: Option<LspDiagnostics>,
+
+    /// # Document Link Feature options.
+    pub document_link: Option<LspDocumentLink>,
+
+    /// # Formatting Feature options.
+    pub formatting: Option<LspFormatting>,
 
     /// # Goto Declaration Feature options.
     pub goto_declaration: Option<LspGotoDefinition>,
@@ -27,18 +27,22 @@ pub struct LspOptions {
 
     /// # Goto Type Definition Feature options.
     pub goto_type_definition: Option<LspGotoDefinition>,
+
+    /// # Hover Feature options.
+    pub hover: Option<LspHover>,
 }
 
 impl LspOptions {
     pub const fn default() -> Self {
         Self {
-            hover: None,
             completion: None,
-            formatting: None,
             diagnostics: None,
+            document_link: None,
+            formatting: None,
             goto_declaration: None,
             goto_definition: None,
             goto_type_definition: None,
+            hover: None,
         }
     }
 }
@@ -91,10 +95,16 @@ pub struct LspDiagnostics {
     pub enabled: Option<BoolDefaultTrue>,
 }
 
-impl LspCompletion {
-    pub const fn default() -> Self {
-        Self { enabled: None }
-    }
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct LspDocumentLink {
+    /// # Enable document link feature.
+    ///
+    /// Whether to enable document link.
+    pub enabled: Option<BoolDefaultTrue>,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
