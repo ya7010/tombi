@@ -2265,6 +2265,7 @@ dependencies = [
  "tombi-diagnostic",
  "tombi-document",
  "tombi-document-tree",
+ "tombi-extension",
  "tombi-formatter",
  "tombi-json",
  "tombi-linter",

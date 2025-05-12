@@ -29,6 +29,7 @@ tombi-config.workspace = true
 tombi-diagnostic.workspace = true
 tombi-document.workspace = true
 tombi-document-tree.workspace = true
+tombi-extension.workspace = true
 tombi-formatter.workspace = true
 tombi-json.workspace = true
 tombi-linter.workspace = true
