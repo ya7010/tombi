@@ -112,7 +112,7 @@ mod folding_range_tests {
             # Line 4
             inner = [ # Line 5
 
-                # Line 8
+                # Line 7
                 # Line 8
                 1,
                 # Line 10
