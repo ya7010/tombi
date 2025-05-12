@@ -18,7 +18,11 @@ mod folding_range_tests {
             # Line 10
             # Line 11
             "#,
-        ) -> [0..4, 10..11, 6..7];
+        ) -> [
+            0..4,
+            6..7,
+            10..11,
+        ];
     );
 
     test_folding_range!(
@@ -30,7 +34,10 @@ mod folding_range_tests {
             [table] # Line 2
             key = "value" # Line 3
             "#,
-        ) -> [0..1, 2..3];
+        ) -> [
+            0..1,
+            2..3,
+        ];
     );
 
     test_folding_range!(
@@ -46,7 +53,12 @@ mod folding_range_tests {
             [table2] # Line 6
             key3 = "value3" # Line 7
             "#,
-        ) -> [0..0, 1..3, 5..5, 6..7];
+        ) -> [
+            0..0,
+            1..3,
+            5..5,
+            6..7,
+        ];
     );
 
     test_folding_range!(
@@ -61,7 +73,12 @@ mod folding_range_tests {
             # Line 5
             key2 = "value2" # Line 6
             "#,
-        ) -> [0..2, 1..1, 4..6, 5..5];
+        ) -> [
+            0..2,
+            1..1,
+            4..6,
+            5..5,
+        ];
     );
 
     test_folding_range!(
@@ -77,7 +94,12 @@ mod folding_range_tests {
             # Line 6
             # Line 7
             "#,
-        ) -> [0..1, 2..7, 6..7, 3..4];
+        ) -> [
+            0..1,
+            2..7,
+            3..4,
+            6..7,
+        ];
     );
 
     test_folding_range!(
@@ -98,7 +120,12 @@ mod folding_range_tests {
               # Line 11
             ] # Line 12
             "#,
-        ) -> [0..12, 8..11, 2..3, 5..6];
+        ) -> [
+            0..12,
+            2..3,
+            5..6,
+            8..11,
+        ];
     );
 
     test_folding_range!(
@@ -124,7 +151,15 @@ mod folding_range_tests {
             # Line 16
             # Line 17
             "#,
-        ) -> [0..1, 2..17, 13..17, 3..4, 5..12, 10..11, 7..8];
+        ) -> [
+            0..1,
+            2..17,
+            3..4,
+            5..12,
+            7..8,
+            10..11,
+            13..17,
+        ];
     );
 
     test_folding_range!(
@@ -149,7 +184,15 @@ mod folding_range_tests {
             # Line 15
             # Line 16
             "#,
-        ) -> [0..1, 2..7, 6..7, 3..4, 9..16, 13..16, 10..11];
+        ) -> [
+            0..1,
+            2..7,
+            3..4,
+            6..7,
+            9..16,
+            10..11,
+            13..16,
+        ];
     );
 
     #[macro_export]
@@ -172,6 +215,7 @@ mod folding_range_tests {
                     },
                     LspService,
                 };
+                use itertools::Itertools;
 
                 let (service, _) = LspService::new(|client| {
                     Backend::new(client, &tombi_lsp::backend::Options::default())
@@ -208,6 +252,7 @@ mod folding_range_tests {
                 let expected: Vec<std::ops::Range<u32>> = vec![$($expected),*];
                 let actual: Vec<std::ops::Range<u32>> = result
                     .into_iter()
+                    .sorted_by_key(|r| (r.start_line, r.start_character))
                     .map(|r| r.start_line..r.end_line)
                     .collect();
 
