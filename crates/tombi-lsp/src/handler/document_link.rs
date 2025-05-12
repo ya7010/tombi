@@ -13,6 +13,19 @@ pub async fn handle_document_link(
 
     let DocumentLinkParams { text_document, .. } = params;
 
+    let config = backend.config().await;
+
+    if !config
+        .lsp()
+        .and_then(|server| server.document_link.as_ref())
+        .and_then(|document_link| document_link.enabled)
+        .unwrap_or_default()
+        .value()
+    {
+        tracing::debug!("`server.document_link.enabled` is false");
+        return Ok(None);
+    }
+
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
