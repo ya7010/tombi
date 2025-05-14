@@ -19,11 +19,11 @@ mod document_link_tests {
 
         test_document_link!(
             #[tokio::test]
-            async fn cargo_package_readme_without_schema(
+            async fn cargo_workspace_package_readme_without_schema(
                 r#"
                 #:schema schemas/Cargo.json
 
-                [package]
+                [workspace.package]
                 readme = "README.md"
                 "#,
                 project_root_path().join("Cargo.toml"),
@@ -37,12 +37,12 @@ mod document_link_tests {
 
         test_document_link!(
             #[tokio::test]
-            async fn cargo_dependencies_tombi_lsp(
+            async fn cargo_workspace_dependencies_tombi_lsp(
                 r#"
-                [package]
+                [workspace.package]
                 readme = "README.md"
 
-                [dependencies]
+                [workspace.dependencies]
                 tombi-lsp.path = "crates/tombi-lsp"
                 "#,
                 project_root_path().join("Cargo.toml"),
@@ -57,12 +57,12 @@ mod document_link_tests {
 
         test_document_link!(
             #[tokio::test]
-            async fn cargo_dependencies_serde(
+            async fn cargo_workspace_dependencies_serde(
                 r#"
-                [package]
+                [workspace.package]
                 readme = "README.md"
 
-                [dependencies]
+                [workspace.dependencies]
                 serde = "1.0"
                 "#,
                 project_root_path().join("Cargo.toml"),
@@ -74,7 +74,47 @@ mod document_link_tests {
                 }
             ]));
         );
+
+        test_document_link!(
+            #[tokio::test]
+            async fn cargo_workspace_dependencies_serde_toml(
+                r#"
+                [workspace.package]
+                readme = "README.md"
+
+                [workspace.dependencies]
+                serde_toml = { version = "0.1", package = "toml" }
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(Some(vec![
+                {
+                    url: "https://crates.io/crates/toml",
+                    range: 4:0..4:10,
+                    tooltip: tombi_cargo_extension::DocumentLinkToolTip::CrateIo,
+                }
+            ]));
+        );
     }
+
+    test_document_link!(
+        #[tokio::test]
+        async fn cargo_dependencies_serde_toml(
+            r#"
+                [package]
+                readme = "README.md"
+
+                [dependencies]
+                serde_toml = { version = "0.1", package = "toml" }
+                "#,
+            project_root_path().join("Cargo.toml"),
+        ) -> Ok(Some(vec![
+            {
+                url: "https://crates.io/crates/toml",
+                range: 4:0..4:10,
+                tooltip: tombi_cargo_extension::DocumentLinkToolTip::CrateIo,
+            }
+        ]));
+    );
 }
 
 #[macro_export]

@@ -212,7 +212,7 @@ fn document_link_for_dependency(
             };
 
             return Ok(vec![tombi_extension::DocumentLink {
-                range: tombi_text::Range::default(),
+                range: crate_key.range(),
                 target,
                 tooltip: DocumentLinkToolTip::GitRepository.to_string(),
             }]);
@@ -247,7 +247,7 @@ fn document_link_for_dependency(
                 return Ok(Vec::with_capacity(0));
             };
             return Ok(vec![tombi_extension::DocumentLink {
-                range: tombi_text::Range::default(),
+                range: crate_key.range(),
                 target,
                 tooltip: DocumentLinkToolTip::CrateIo.to_string(),
             }]);
