@@ -161,70 +161,24 @@ macro_rules! test_document_link {
         range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal,
         tooltip: $tooltip:expr $(,)?
     }),* $(,)?]));) => {
-        #[tokio::test]
-        async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-            use tombi_lsp::handler::{handle_did_open, handle_document_link};
-            use tombi_lsp::Backend;
-            use tower_lsp::{
-                lsp_types::{DidOpenTextDocumentParams, DocumentLinkParams, PartialResultParams, TextDocumentIdentifier, TextDocumentItem, Url, WorkDoneProgressParams, DocumentLink, Range, Position},
-                LspService,
-            };
-
-            tombi_test_lib::init_tracing();
-
-            let (service, _) = LspService::new(|client| {
-                Backend::new(client, &tombi_lsp::backend::Options::default())
-            });
-
-            let backend = service.inner();
-
-            let toml_file_url =
-                Url::from_file_path($file_path).expect("failed to convert file path to URL");
-
-            let toml_text = textwrap::dedent($source).trim().to_string();
-
-            handle_did_open(
-                backend,
-                DidOpenTextDocumentParams {
-                    text_document: TextDocumentItem {
-                        uri: toml_file_url.clone(),
-                        language_id: "toml".to_string(),
-                        version: 0,
-                        text: toml_text.clone(),
+        test_document_link!{
+        #[tokio::test] async fn _$name(
+            $source,
+            $file_path,
+        ) -> Ok(Some(vec![
+            $(
+                tower_lsp::lsp_types::DocumentLink {
+                    range: tower_lsp::lsp_types::Range {
+                        start: tower_lsp::lsp_types::Position { line: $start_line, character: $start_char },
+                        end: tower_lsp::lsp_types::Position { line: $end_line, character: $end_char },
                     },
-                },
-            )
-            .await;
-
-            let params = DocumentLinkParams {
-                text_document: TextDocumentIdentifier { uri: toml_file_url },
-                work_done_progress_params: WorkDoneProgressParams::default(),
-                partial_result_params: PartialResultParams::default(),
-            };
-
-            let result = handle_document_link(&backend, params).await;
-
-            tracing::debug!("document_link result: {:#?}", result);
-
-            let expected_links = Some(vec![
-                $(
-                    DocumentLink {
-                        range: Range {
-                            start: Position { line: $start_line, character: $start_char },
-                            end: Position { line: $end_line, character: $end_char },
-                        },
-                        target: Url::parse($url).ok(),
-                        tooltip: Some($tooltip.to_string()),
-                        data: None,
-                    }
-                ),*
-            ]);
-
-            pretty_assertions::assert_eq!(result, Ok(expected_links));
-
-            Ok(())
-        }
-    };
+                    target: Url::parse($url).ok(),
+                    tooltip: Some($tooltip.to_string()),
+                    data: None,
+                }
+            ),*
+        ]));
+    }};
     // Pattern: with file path (path only), no tooltip (default tooltip)
     (#[tokio::test] async fn $name:ident(
         $source:expr,
@@ -248,7 +202,7 @@ macro_rules! test_document_link {
         ]));
     }};
     // Fallback: original (for DocumentLink struct literal)
-    (#[tokio::test] async fn $name:ident(
+    (#[tokio::test] async fn _$name:ident(
         $source:expr,
         $file_path:expr,
     ) -> Ok($expected_links:expr);) => {
