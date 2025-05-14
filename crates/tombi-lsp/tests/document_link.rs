@@ -94,27 +94,27 @@ mod document_link_tests {
                 }
             ]));
         );
-    }
 
-    test_document_link!(
-        #[tokio::test]
-        async fn cargo_workspace_dependencies_serde_git(
-            r#"
+        test_document_link!(
+            #[tokio::test]
+            async fn cargo_workspace_dependencies_serde_git(
+                r#"
                 [workspace.package]
                 readme = "README.md"
 
                 [workspace.dependencies]
                 serde = { git = "https://github.com/serde-rs/serde" }
                 "#,
-            project_root_path().join("Cargo.toml"),
-        ) -> Ok(Some(vec![
-            {
-                url: "https://github.com/serde-rs/serde",
-                range: 4:0..4:5,
-                tooltip: tombi_cargo_extension::DocumentLinkToolTip::GitRepository,
-            }
-        ]));
-    );
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(Some(vec![
+                {
+                    url: "https://github.com/serde-rs/serde",
+                    range: 4:0..4:5,
+                    tooltip: tombi_cargo_extension::DocumentLinkToolTip::GitRepository,
+                }
+            ]));
+        );
+    }
 }
 
 #[macro_export]
