@@ -98,12 +98,12 @@ mod document_link_tests {
 
     test_document_link!(
         #[tokio::test]
-        async fn cargo_dependencies_serde_toml(
+        async fn cargo_workspace_dependencies_serde_toml(
             r#"
-                [package]
+                [workspace.package]
                 readme = "README.md"
 
-                [dependencies]
+                [workspace.dependencies]
                 serde_toml = { version = "0.1", package = "toml" }
                 "#,
             project_root_path().join("Cargo.toml"),
