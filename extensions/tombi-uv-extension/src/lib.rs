@@ -69,7 +69,9 @@ fn find_workspace_pyproject_toml(
             if tombi_document_tree::dig_keys(
                 &package_pyproject_toml_document_tree,
                 &["tool", "uv", "workspace"],
-            ).is_some() {
+            )
+            .is_some()
+            {
                 return Some((
                     workspace_pyproject_toml_path,
                     package_pyproject_toml_document_tree,
@@ -319,13 +321,9 @@ fn goto_member_pyprojects(
     };
 
     let mut locations = Vec::new();
-    tracing::info!("member_patterns: {:?}", member_patterns);
-    tracing::info!("exclude_patterns: {:?}", exclude_patterns);
-    tracing::info!("workspace_dir_path: {:?}", workspace_dir_path);
     for (_, pyproject_toml_path) in
         find_member_pyproject_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
     {
-        tracing::info!("pyproject_toml_path: {:?}", pyproject_toml_path);
         let Some(member_document_tree) =
             crate::load_pyproject_toml(&pyproject_toml_path, toml_version)
         else {

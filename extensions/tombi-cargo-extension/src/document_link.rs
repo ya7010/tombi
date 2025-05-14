@@ -161,10 +161,6 @@ fn document_link_for_dependency(
     toml_version: TomlVersion,
 ) -> Result<Vec<tombi_extension::DocumentLink>, tower_lsp::jsonrpc::Error> {
     let mut registory = "https://crates.io/crates".to_string();
-    tracing::info!("crate_key: {:?}", crate_key);
-    tracing::info!("crate_value: {:?}", crate_value);
-    tracing::info!("crate_cargo_toml_path: {:?}", crate_cargo_toml_path);
-    tracing::info!("workspace_cargo_toml_path: {:?}", workspace_cargo_toml_path);
 
     if let tombi_document_tree::Value::Table(table) = crate_value {
         if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
