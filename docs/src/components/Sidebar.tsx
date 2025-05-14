@@ -1,11 +1,4 @@
-import {
-  For,
-  createSignal,
-  Show,
-  createMemo,
-  onMount,
-  createEffect,
-} from "solid-js";
+import { For, createSignal, createMemo } from "solid-js";
 import { A, useLocation } from "@solidjs/router";
 import { IoChevronForward } from "solid-icons/io";
 import docIndex from "../../doc-index.json";
@@ -78,7 +71,7 @@ const TreeItem = (props: {
 
 export function Sidebar() {
   return (
-    <nav class="w-[200px] h-screen overflow-y-scroll p-4 bg-[--color-bg-secondary] border-r border-[--color-border] sm:block hidden scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-200">
+    <nav class="w-[200px] h-screen overflow-y-scroll p-4 bg-[--color-bg-secondary] border-r border-[--color-border] md:block hidden scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-200">
       <For each={docIndexs}>{(item) => <TreeItem item={item} level={0} />}</For>
     </nav>
   );
