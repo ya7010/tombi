@@ -1,7 +1,23 @@
-use crate::{find_workspace_cargo_toml, get_subcrate_cargo_toml, load_cargo_toml};
+use crate::{find_workspace_cargo_toml, get_path_crate_cargo_toml, load_cargo_toml};
 use tombi_config::TomlVersion;
 use tombi_document_tree::dig_keys;
 use tower_lsp::lsp_types::{TextDocumentIdentifier, Url};
+
+pub enum DocumentLinkToolTip {
+    GitRepository,
+    CrateIo,
+    CargoToml,
+}
+
+impl std::fmt::Display for DocumentLinkToolTip {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DocumentLinkToolTip::GitRepository => write!(f, "Open Git Repository"),
+            DocumentLinkToolTip::CrateIo => write!(f, "Open CrateIo"),
+            DocumentLinkToolTip::CargoToml => write!(f, "Open Cargo.toml"),
+        }
+    }
+}
 
 pub async fn document_link(
     text_document: &TextDocumentIdentifier,
@@ -153,7 +169,7 @@ fn document_link_for_dependency(
     if let tombi_document_tree::Value::Table(table) = crate_value {
         if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
             if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) =
-                get_subcrate_cargo_toml(
+                get_path_crate_cargo_toml(
                     &crate_cargo_toml_path,
                     std::path::Path::new(subcrate_path.value()),
                     toml_version,
@@ -177,7 +193,7 @@ fn document_link_for_dependency(
                         return Ok(vec![tombi_extension::DocumentLink {
                             target,
                             range: crate_key.range(),
-                            tooltip: "Open Cargo.toml".to_string(),
+                            tooltip: DocumentLinkToolTip::CargoToml.to_string(),
                         }]);
                     }
                 }
@@ -196,9 +212,9 @@ fn document_link_for_dependency(
             };
 
             return Ok(vec![tombi_extension::DocumentLink {
-                range: tombi_text::Range::default(),
+                range: crate_key.range(),
                 target,
-                tooltip: "Open Git Repository".to_string(),
+                tooltip: DocumentLinkToolTip::GitRepository.to_string(),
             }]);
         }
         if let Some(tombi_document_tree::Value::String(registory_name)) = table.get("registory") {
@@ -231,9 +247,9 @@ fn document_link_for_dependency(
                 return Ok(Vec::with_capacity(0));
             };
             return Ok(vec![tombi_extension::DocumentLink {
-                range: tombi_text::Range::default(),
+                range: crate_key.range(),
                 target,
-                tooltip: "Open crates.io".to_string(),
+                tooltip: DocumentLinkToolTip::CrateIo.to_string(),
             }]);
         }
     }
@@ -245,6 +261,6 @@ fn document_link_for_dependency(
     Ok(vec![tombi_extension::DocumentLink {
         range: crate_key.range(),
         target,
-        tooltip: "Open crates.io".to_string(),
+        tooltip: DocumentLinkToolTip::CrateIo.to_string(),
     }])
 }
