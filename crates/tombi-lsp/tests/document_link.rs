@@ -34,12 +34,52 @@ mod document_link_tests {
                 }
             ]));
         );
+
+        test_document_link!(
+            #[tokio::test]
+            async fn cargo_dependencies_tombi_lsp(
+                r#"
+                [package]
+                readme = "README.md"
+
+                [dependencies]
+                tombi-lsp.path = "crates/tombi-lsp"
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(Some(vec![
+                {
+                    path: project_root_path().join("crates/tombi-lsp/Cargo.toml"),
+                    range: 4:0..4:9,
+                    tooltip: tombi_cargo_extension::DocumentLinkToolTip::CargoToml,
+                }
+            ]));
+        );
+
+        test_document_link!(
+            #[tokio::test]
+            async fn cargo_dependencies_serde(
+                r#"
+                [package]
+                readme = "README.md"
+
+                [dependencies]
+                serde = "1.0"
+                "#,
+                project_root_path().join("Cargo.toml"),
+            ) -> Ok(Some(vec![
+                {
+                    url: "https://crates.io/crates/serde",
+                    range: 4:0..4:5,
+                    tooltip: tombi_cargo_extension::DocumentLinkToolTip::CrateIo,
+                }
+            ]));
+        );
     }
 }
 
 #[macro_export]
 macro_rules! test_document_link {
-    // New: Accepts simplified link spec with tooltip
+    // Pattern: with file path (path), with tooltip
     (#[tokio::test] async fn $name:ident(
         $source:expr,
         $file_path:expr,
@@ -95,10 +135,10 @@ macro_rules! test_document_link {
 
             let expected_links = Some(vec![
                 $(
-                    DocumentLink {
-                        range: Range {
-                            start: Position { line: $start_line, character: $start_char },
-                            end: Position { line: $end_line, character: $end_char },
+                    tower_lsp::lsp_types::DocumentLink {
+                        range: tower_lsp::lsp_types::Range {
+                            start: tower_lsp::lsp_types::Position { line: $start_line, character: $start_char },
+                            end: tower_lsp::lsp_types::Position { line: $end_line, character: $end_char },
                         },
                         target: Url::from_file_path($path).ok(),
                         tooltip: Some($tooltip.to_string()),
@@ -112,13 +152,14 @@ macro_rules! test_document_link {
             Ok(())
         }
     };
-    // New: Accepts simplified link spec without tooltip (default tooltip)
+    // Pattern: with url, with tooltip
     (#[tokio::test] async fn $name:ident(
         $source:expr,
         $file_path:expr,
     ) -> Ok(Some(vec![$({
-        path: $path:expr,
-        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal $(,)?
+        url: $url:expr,
+        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal,
+        tooltip: $tooltip:expr $(,)?
     }),* $(,)?]));) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
@@ -172,8 +213,8 @@ macro_rules! test_document_link {
                             start: Position { line: $start_line, character: $start_char },
                             end: Position { line: $end_line, character: $end_char },
                         },
-                        target: Url::from_file_path($path).ok(),
-                        tooltip: Some("Open JSON Schema".to_string()),
+                        target: Url::parse($url).ok(),
+                        tooltip: Some($tooltip.to_string()),
                         data: None,
                     }
                 ),*
@@ -184,6 +225,28 @@ macro_rules! test_document_link {
             Ok(())
         }
     };
+    // Pattern: with file path (path only), no tooltip (default tooltip)
+    (#[tokio::test] async fn $name:ident(
+        $source:expr,
+        $file_path:expr,
+    ) -> Ok(Some(vec![$({
+        path: $path:expr,
+        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal $(,)?
+    }),* $(,)?]));) => {
+        test_document_link!{
+        #[tokio::test] async fn $name(
+            $source,
+            $file_path,
+        ) -> Ok(Some(vec![
+            $(
+                {
+                    path: $path,
+                    range: $start_line:$start_char..$end_line:$end_char,
+                    tooltip: "Open JSON Schema",
+                }
+            ),*
+        ]));
+    }};
     // Fallback: original (for DocumentLink struct literal)
     (#[tokio::test] async fn $name:ident(
         $source:expr,

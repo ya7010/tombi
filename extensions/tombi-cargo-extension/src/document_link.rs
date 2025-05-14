@@ -3,6 +3,22 @@ use tombi_config::TomlVersion;
 use tombi_document_tree::dig_keys;
 use tower_lsp::lsp_types::{TextDocumentIdentifier, Url};
 
+pub enum DocumentLinkToolTip {
+    GitRepository,
+    CrateIo,
+    CargoToml,
+}
+
+impl std::fmt::Display for DocumentLinkToolTip {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DocumentLinkToolTip::GitRepository => write!(f, "Open Git Repository"),
+            DocumentLinkToolTip::CrateIo => write!(f, "Open CrateIo"),
+            DocumentLinkToolTip::CargoToml => write!(f, "Open Cargo.toml"),
+        }
+    }
+}
+
 pub async fn document_link(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
@@ -177,7 +193,7 @@ fn document_link_for_dependency(
                         return Ok(vec![tombi_extension::DocumentLink {
                             target,
                             range: crate_key.range(),
-                            tooltip: "Open Cargo.toml".to_string(),
+                            tooltip: DocumentLinkToolTip::CargoToml.to_string(),
                         }]);
                     }
                 }
@@ -198,7 +214,7 @@ fn document_link_for_dependency(
             return Ok(vec![tombi_extension::DocumentLink {
                 range: tombi_text::Range::default(),
                 target,
-                tooltip: "Open Git Repository".to_string(),
+                tooltip: DocumentLinkToolTip::GitRepository.to_string(),
             }]);
         }
         if let Some(tombi_document_tree::Value::String(registory_name)) = table.get("registory") {
@@ -233,7 +249,7 @@ fn document_link_for_dependency(
             return Ok(vec![tombi_extension::DocumentLink {
                 range: tombi_text::Range::default(),
                 target,
-                tooltip: "Open crates.io".to_string(),
+                tooltip: DocumentLinkToolTip::CrateIo.to_string(),
             }]);
         }
     }
@@ -245,6 +261,6 @@ fn document_link_for_dependency(
     Ok(vec![tombi_extension::DocumentLink {
         range: crate_key.range(),
         target,
-        tooltip: "Open crates.io".to_string(),
+        tooltip: DocumentLinkToolTip::CrateIo.to_string(),
     }])
 }
