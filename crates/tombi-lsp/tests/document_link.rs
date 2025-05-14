@@ -98,20 +98,20 @@ mod document_link_tests {
 
     test_document_link!(
         #[tokio::test]
-        async fn cargo_workspace_dependencies_serde_toml(
+        async fn cargo_workspace_dependencies_serde_git(
             r#"
                 [workspace.package]
                 readme = "README.md"
 
                 [workspace.dependencies]
-                serde_toml = { version = "0.1", package = "toml" }
+                serde = { git = "https://github.com/serde-rs/serde" }
                 "#,
             project_root_path().join("Cargo.toml"),
         ) -> Ok(Some(vec![
             {
-                url: "https://crates.io/crates/toml",
-                range: 4:0..4:10,
-                tooltip: tombi_cargo_extension::DocumentLinkToolTip::CrateIo,
+                url: "https://github.com/serde-rs/serde",
+                range: 4:0..4:5,
+                tooltip: tombi_cargo_extension::DocumentLinkToolTip::GitRepository,
             }
         ]));
     );
