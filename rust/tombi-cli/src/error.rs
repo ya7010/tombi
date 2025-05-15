@@ -62,13 +62,13 @@ impl std::fmt::Display for NotFormattedError {
 }
 
 impl Print<Pretty> for Error {
-    fn print(&self, _printer: Pretty) {
-        self.print(Simple);
+    fn print(&self, _printer: &mut Pretty) {
+        self.print(&mut Simple);
     }
 }
 
 impl Print<Simple> for Error {
-    fn print(&self, printer: Simple) {
+    fn print(&self, printer: &mut Simple) {
         Level::ERROR.print(printer);
         println!(": {}", Style::new().bold().paint(self.to_string()));
     }

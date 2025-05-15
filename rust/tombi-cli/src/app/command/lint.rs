@@ -48,13 +48,13 @@ pub fn run(args: Args, offline: bool) -> Result<(), crate::Error> {
 
 fn inner_run<P>(
     args: Args,
-    printer: P,
+    mut printer: P,
     offline: bool,
 ) -> Result<(usize, usize), Box<dyn std::error::Error>>
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
-    P: Copy + Clone + Send + 'static,
+    P: Clone + Send + 'static,
 {
     let (config, config_path) = serde_tombi::config::load_with_path()?;
 
@@ -125,6 +125,7 @@ where
                             tracing::debug!("linting... {:?}", source_path);
                             match tokio::fs::File::open(&source_path).await {
                                 Ok(file) => {
+                                    let printer = printer.clone();
                                     let options = lint_options.clone();
                                     let schema_store = schema_store.clone();
 
@@ -142,16 +143,16 @@ where
                                 }
                                 Err(err) => {
                                     if err.kind() == std::io::ErrorKind::NotFound {
-                                        crate::Error::FileNotFound(source_path).print(printer);
+                                        crate::Error::FileNotFound(source_path).print(&mut printer);
                                     } else {
-                                        crate::Error::Io(err).print(printer);
+                                        crate::Error::Io(err).print(&mut printer);
                                     }
                                     error_num += 1;
                                 }
                             }
                         }
                         Err(err) => {
-                            err.print(printer);
+                            err.print(&mut printer);
                             error_num += 1;
                         }
                     }
@@ -183,7 +184,7 @@ where
 
 async fn lint_file<R, P>(
     mut reader: R,
-    printer: P,
+    mut printer: P,
     source_path: Option<&std::path::Path>,
     toml_version: TomlVersion,
     lint_options: &LintOptions,
@@ -192,7 +193,7 @@ async fn lint_file<R, P>(
 where
     Diagnostic: Print<P>,
     crate::Error: Print<P>,
-    P: Copy + Send,
+    P: Send,
     R: AsyncReadExt + Unpin + Send,
 {
     let mut source = String::new();
@@ -217,7 +218,7 @@ where
             } else {
                 diagnostics
             }
-            .print(printer),
+            .print(&mut printer),
         }
     }
     false
