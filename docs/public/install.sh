@@ -1,14 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Tombi installation script
 # Automatically installs tombi from GitHub releases based on detected architecture
-
-# Color settings
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
 
 # Temporary directory for installation
 TEMP_DIR=$(mktemp -d)
@@ -16,22 +10,23 @@ trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Helper functions
 print_step() {
-    echo "${BLUE}==>${NC} $1"
+    printf '\033[34m==>\033[m %s\n' "$1" >&2
 }
 
 print_error() {
-    echo "${RED}Error:${NC} $1"
+    printf '\033[31mError:\033[m %s\n' "$1" >&2
 }
 
 print_success() {
-    echo "${GREEN}Success:${NC} $1"
+    printf '\033[32mSuccess:\033[m %s\n' "$1" >&2
 }
 
 # Parse command line options
-while [[ $# -gt 0 ]]; do
+SPECIFIED_VERSION=""
+while [ $# -gt 0 ]; do
     case $1 in
     --version)
-        if [[ "$2" != "latest" ]]; then
+        if [ "$2" != "latest" ]; then
             SPECIFIED_VERSION="$2"
         fi
         shift 2
@@ -51,10 +46,10 @@ detect_os_arch() {
     case "${OS}" in
     Linux)
         OS="unknown-linux"
-        if [[ "${ARCH}" == "aarch64" ]]; then
+        if [ "${ARCH}" = "aarch64" ]; then
             ARCH="aarch64"
             TARGET="${ARCH}-${OS}-gnu"
-        elif [[ "${ARCH}" == "armv7l" ]]; then
+        elif [ "${ARCH}" = "armv7l" ]; then
             ARCH="arm"
             TARGET="${ARCH}-${OS}-gnueabihf"
         else
@@ -64,7 +59,7 @@ detect_os_arch() {
         ;;
     Darwin)
         OS="apple-darwin"
-        if [[ "${ARCH}" == "arm64" ]]; then
+        if [ "${ARCH}" = "arm64" ]; then
             ARCH="aarch64"
         else
             ARCH="x86_64"
@@ -73,7 +68,7 @@ detect_os_arch() {
         ;;
     MINGW* | MSYS* | CYGWIN* | Windows_NT)
         OS="pc-windows-msvc"
-        if [[ "${ARCH}" == "aarch64" ]]; then
+        if [ "${ARCH}" = "aarch64" ]; then
             ARCH="aarch64"
         else
             ARCH="x86_64"
@@ -107,7 +102,7 @@ create_install_dir() {
     BIN_DIR="${HOME}/.local/bin"
     mkdir -p "${BIN_DIR}"
 
-    if [[ ! ":$PATH:" == *":${BIN_DIR}:"* ]]; then
+    if ! echo ":$PATH:" | grep -q ":${BIN_DIR}:"; then
         print_step "${BIN_DIR} is not in your PATH. Consider adding it to your shell configuration file."
     fi
 }
@@ -140,9 +135,9 @@ download_and_install() {
         exit 1
     fi
 
-    if [[ "${ARTIFACT_EXTENSION}" == ".zip" ]]; then
+    if [ "${ARTIFACT_EXTENSION}" = ".zip" ]; then
         unzip -o "${TEMP_FILE}" -d "${TEMP_DIR}"
-    elif [[ "${ARTIFACT_EXTENSION}" == ".gz" ]]; then
+    elif [ "${ARTIFACT_EXTENSION}" = ".gz" ]; then
         gzip -d "${TEMP_FILE}" -f
     fi
 
@@ -178,19 +173,19 @@ main() {
     if command -v tombi >/dev/null 2>&1; then
         if tombi --version >/dev/null 2>&1; then
             INSTALLED_VERSION=$(tombi --version 2>&1 | head -n 1 | sed 's/tombi //g' || echo "unknown")
-            if [ "v${INSTALLED_VERSION}" != "v${VERSION}" ]; then
+            if [ "$INSTALLED_VERSION" != "$VERSION" ]; then
                 print_error "Installed version mismatch: expected v${VERSION}, but got v${INSTALLED_VERSION}"
                 exit 1
             fi
-            echo "Usage: ${GREEN}tombi --help${NC}"
+            printf 'Usage: \033[34mtombi --help\033[m\n' >&2
         else
             print_error "Installation completed, but tombi command cannot be executed. "
-            echo "To run manually: ${GREEN}${BIN_DIR}/tombi --help${NC}"
+            printf 'To run manually: \033[34m%s/tombi --help\033[m\n' "${BIN_DIR}" >&2
             exit 1
         fi
     else
         print_error "Installation completed, but tombi command not found. Please check your PATH settings."
-        echo "To run manually: ${GREEN}${BIN_DIR}/tombi --help${NC}"
+        printf 'To run manually: \033[34m%s/tombi --help\033[m\n' "${BIN_DIR}" >&2
         exit 1
     fi
 }
