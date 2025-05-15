@@ -6,8 +6,9 @@ use clap::{
     builder::styling::{AnsiColor, Color, Style},
     Parser,
 };
-use clap_verbosity_flag::{InfoLevel, Verbosity};
+use clap_verbosity_flag::{log, InfoLevel, Verbosity};
 use tracing_formatter::TombiFormatter;
+use tracing_subscriber::filter;
 use tracing_subscriber::prelude::*;
 
 #[derive(clap::Parser)]
@@ -41,12 +42,22 @@ where
     }
 }
 
+/// Convert [`clap_verbosity_flag::log::LevelFilter`] to [`tracing_subscriber::filter::LevelFilter`]
+fn convert_log_level_filter(level: log::LevelFilter) -> filter::LevelFilter {
+    match level {
+        log::LevelFilter::Off => filter::LevelFilter::OFF,
+        log::LevelFilter::Error => filter::LevelFilter::ERROR,
+        log::LevelFilter::Warn => filter::LevelFilter::WARN,
+        log::LevelFilter::Info => filter::LevelFilter::INFO,
+        log::LevelFilter::Debug => filter::LevelFilter::DEBUG,
+        log::LevelFilter::Trace => filter::LevelFilter::TRACE,
+    }
+}
+
 pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
     let args: Args = args.into();
     tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::from(
-            args.verbose.log_level_filter().to_string(),
-        ))
+        .with(convert_log_level_filter(args.verbose.log_level_filter()))
         .with(
             tracing_subscriber::fmt::layer()
                 .event_format(TombiFormatter::from(args.verbose.log_level_filter()))
