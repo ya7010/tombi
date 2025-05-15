@@ -27,7 +27,7 @@ export default function App() {
           <MDXProvider components={components}>
             <Layout>
               <main class="flex-1 mt-20 pt-0">
-                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="max-w-7xl mx-auto md:px-6 lg:px-8">
                   <Suspense
                     fallback={<div class="text-center">Loading...</div>}
                   >
