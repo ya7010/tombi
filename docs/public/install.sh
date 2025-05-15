@@ -48,13 +48,13 @@ detect_os_arch() {
         OS="unknown-linux"
         if [ "${ARCH}" = "aarch64" ]; then
             ARCH="aarch64"
-            TARGET="${ARCH}-${OS}-gnu"
+            TARGET="${ARCH}-${OS}-musl"
         elif [ "${ARCH}" = "armv7l" ]; then
             ARCH="arm"
             TARGET="${ARCH}-${OS}-gnueabihf"
         else
             ARCH="x86_64"
-            TARGET="${ARCH}-${OS}-gnu"
+            TARGET="${ARCH}-${OS}-musl"
         fi
         ;;
     Darwin)
