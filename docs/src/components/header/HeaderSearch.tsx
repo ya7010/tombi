@@ -61,8 +61,8 @@ export function HeaderSearch(props: HeaderSearchProps) {
   return (
     <div
       class={`
-        ${props.isSearchOpen ? "w-full" : "w-18"}
-        flex justify-end md:w-full items-center max-w-200
+        ${props.isSearchOpen ? "w-full" : "w-10"}
+        flex justify-end md:w-full items-center max-w-200 gap-2
       `}
     >
       <div
@@ -71,7 +71,7 @@ export function HeaderSearch(props: HeaderSearchProps) {
         } md:w-full md:opacity-100 transition-all duration-300 ease-in-out overflow-hidden flex items-center relative`}
       >
         <div
-          class="relative w-full min-w-[160px]"
+          class="relative w-full min-w-5"
           classList={{
             "ml-4": !isDesktop(),
           }}
@@ -119,7 +119,7 @@ export function HeaderSearch(props: HeaderSearchProps) {
             setSearchResults([]);
           }
         }}
-        class="md:hidden m-4 py-1 relative"
+        class="md:hidden sm:mr-0 ml-2 mr-4 py-1 relative"
         alt={props.isSearchOpen ? "Close Search" : "Search"}
       >
         <div
