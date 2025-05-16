@@ -20,6 +20,10 @@ pub fn parse(source: &str) -> Parsed<SyntaxNode> {
     parse_as::<tombi_ast::Root>(source)
 }
 
+pub fn parse_comments(source: &str) -> Parsed<SyntaxNode> {
+    parse_as::<tombi_ast::Root>(source)
+}
+
 #[allow(private_bounds)]
 pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
     let lexed = tombi_lexer::lex(source);
