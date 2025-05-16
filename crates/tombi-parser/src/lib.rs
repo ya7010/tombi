@@ -21,7 +21,26 @@ pub fn parse(source: &str) -> Parsed<SyntaxNode> {
 }
 
 pub fn parse_comments(source: &str) -> Parsed<SyntaxNode> {
-    parse_as::<tombi_ast::Root>(source)
+    let lexed = tombi_lexer::lex_comments(source);
+    let mut p = crate::parser::Parser::new(source, &lexed.tokens);
+
+    tombi_ast::Root::parse(&mut p);
+
+    let (tokens, events) = p.finish();
+
+    let output = crate::event::process(events);
+
+    let (green_tree, errs) = build_green_tree(source, &tokens, output);
+
+    let mut errors = lexed
+        .errors
+        .into_iter()
+        .map(crate::TomlVersionedError::from)
+        .collect::<Vec<_>>();
+
+    errors.extend(errs);
+
+    Parsed::new(green_tree, errors)
 }
 
 #[allow(private_bounds)]
@@ -46,19 +65,6 @@ pub fn parse_as<P: Parse>(source: &str) -> Parsed<SyntaxNode> {
     errors.extend(errs);
 
     Parsed::new(green_tree, errors)
-}
-
-pub fn parsed_and_ast(source: &str) -> (crate::Parsed<tombi_ast::Root>, tombi_ast::Root) {
-    let parsed = crate::parse(source);
-
-    let Some(parsed) = parsed.cast::<tombi_ast::Root>() else {
-        unreachable!("TOML Root node is always a valid AST node even if source is empty.")
-    };
-
-    let root = parsed.tree();
-    tracing::trace!("TOML AST before editing: {:#?}", root);
-
-    (parsed, root)
 }
 
 pub fn build_green_tree(
