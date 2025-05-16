@@ -44,6 +44,5 @@ fn tombi_schema() -> Result<(), Box<dyn std::error::Error>> {
     let document_schema =
         DocumentSchema::new(object, SchemaUrl::from_file_path(&document_path).unwrap());
 
-    dbg!(document_schema);
     Ok(())
 }
