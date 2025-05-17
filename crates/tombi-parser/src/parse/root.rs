@@ -65,6 +65,8 @@ fn unknwon_line(p: &mut Parser<'_>) {
 
 #[cfg(test)]
 mod test {
+    use tombi_config::TomlVersion;
+
     #[test]
     fn test_begin_dangling_comments() {
         let input = r#"
@@ -76,7 +78,7 @@ mod test {
 [table]
         "#
         .trim();
-        let p = crate::parse(input, None);
+        let p = crate::parse(input, TomlVersion::default());
 
         assert_eq!(p.errors, vec![]);
     }

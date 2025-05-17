@@ -121,10 +121,7 @@ impl Backend {
             })
             .unwrap_or(self.config.read().await.toml_version.unwrap_or_default());
 
-        Some(tombi_parser::parse(
-            &document_info.source,
-            Some(toml_version),
-        ))
+        Some(tombi_parser::parse(&document_info.source, toml_version))
     }
 
     #[inline]

@@ -25,7 +25,7 @@ fn main() -> Result<(), anyhow::Error> {
 }
 
 fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Error> {
-    let p = tombi_parser::parse(source, Some(toml_version));
+    let p = tombi_parser::parse(source, toml_version);
 
     if !p.errors.is_empty() {
         for error in p.errors {

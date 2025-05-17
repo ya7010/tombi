@@ -400,7 +400,7 @@ mod tests {
     #[case("[1, 2, 3,]", true)]
     #[case("[1, 2, 3]", false)]
     fn has_tailing_comma_after_last_value(#[case] source: &str, #[case] expected: bool) {
-        let p = tombi_parser::parse_as::<tombi_ast::Array>(source, None);
+        let p = tombi_parser::parse_as::<tombi_ast::Array>(source, TomlVersion::default());
         pretty_assertions::assert_eq!(p.errors, Vec::<tombi_parser::Error>::new());
 
         let ast = tombi_ast::Array::cast(p.syntax_node()).unwrap();
