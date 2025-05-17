@@ -9,7 +9,7 @@ This package provides a way to install the Rust-built tombi binary through npm. 
 ## Installation
 
 ```
-npm install -g @tombi/cli
+npm install -g @tombi/tombi
 ```
 
 After installation, the `tombi` command becomes available globally.
