@@ -67,7 +67,7 @@ impl<'a> Formatter<'a> {
             })
             .unwrap_or(self.toml_version);
 
-        let root = tombi_parser::parse(source, Some(self.toml_version))
+        let root = tombi_parser::parse(source, self.toml_version)
             .try_into_root()
             .map_err(|errors| {
                 let mut diagnostics = vec![];

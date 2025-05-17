@@ -15,7 +15,7 @@ use parse::Parse;
 pub use parsed::Parsed;
 pub use tombi_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
-pub fn parse(source: &str, toml_version: Option<tombi_config::TomlVersion>) -> Parsed<SyntaxNode> {
+pub fn parse(source: &str, toml_version: tombi_config::TomlVersion) -> Parsed<SyntaxNode> {
     parse_as::<tombi_ast::Root>(source, toml_version)
 }
 
@@ -45,10 +45,10 @@ pub fn parse_document_header_comments(source: &str) -> Parsed<SyntaxNode> {
 #[allow(private_bounds)]
 pub fn parse_as<P: Parse>(
     source: &str,
-    toml_version: Option<tombi_config::TomlVersion>,
+    toml_version: tombi_config::TomlVersion,
 ) -> Parsed<SyntaxNode> {
     let lexed = tombi_lexer::lex(source);
-    let mut p = crate::parser::Parser::new(source, toml_version, &lexed.tokens);
+    let mut p = crate::parser::Parser::new(source, Some(toml_version), &lexed.tokens);
 
     P::parse(&mut p);
 
@@ -99,7 +99,7 @@ macro_rules! test_parser {
     {#[test] fn $name:ident($source:expr, $toml_version:expr) -> Ok(_)} => {
         #[test]
         fn $name() {
-            let p = $crate::parse(textwrap::dedent($source).trim(), Some($toml_version));
+            let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
             pretty_assertions::assert_eq!(
                 p.errors,
                 Vec::<$crate::Error>::new()
@@ -132,7 +132,7 @@ macro_rules! test_parser {
     )} => {
         #[test]
         fn $name() {
-            let p = $crate::parse(textwrap::dedent($source).trim(), Some($toml_version));
+            let p = $crate::parse(textwrap::dedent($source).trim(), $toml_version);
 
             pretty_assertions::assert_eq!(
                 p.errors,
