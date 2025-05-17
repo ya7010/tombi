@@ -17,6 +17,7 @@ pub fn run(sh: &Shell) -> anyhow::Result<()> {
     set_cargo_toml_version(sh, &version)?;
     set_editors_vscode_package_json_version(sh, &version)?;
     set_pyproject_toml_version(sh, &version)?;
+    set_package_json_version(sh, &version)?;
 
     println!("TOMBI_VERSION={}", version);
 
@@ -62,6 +63,24 @@ fn set_pyproject_toml_version(sh: &Shell, version: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
+fn set_package_json_version(sh: &Shell, version: &str) -> anyhow::Result<()> {
+    let mut patch = Patch::new(
+        sh,
+        project_root_path()
+            .join("typescript")
+            .join("tombi")
+            .join("package.json"),
+    )?;
+
+    patch.replace(
+        &format!(r#""version": "{}""#, DEV_VERSION),
+        &format!(r#""version": "{}""#, version),
+    );
+
+    patch.commit(sh)?;
+    Ok(())
+}
+
 struct Patch {
     path: PathBuf,
     contents: String,
@@ -75,7 +94,7 @@ impl Patch {
     }
 
     fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
-        assert!(self.contents.contains(from));
+        pretty_assertions::assert_eq!(self.contents.contains(from), true);
         self.contents = self.contents.replace(from, to);
         self
     }

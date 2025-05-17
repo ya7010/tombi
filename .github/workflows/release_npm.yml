@@ -1,0 +1,29 @@
+name: Release NPM Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: cd typescript/tombi && npm ci
+
+      - name: Build
+        run: cd typescript/tombi && npm run build
+
+      - name: Publish to NPM
+        run: cd typescript/tombi && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
