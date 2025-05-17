@@ -14,7 +14,7 @@ impl crate::Root {
         &self,
         source_path: Option<&std::path::Path>,
     ) -> Option<(Result<url::Url, String>, tombi_text::Range)> {
-        if let Some(comments) = self.get_first_document_comment_group() {
+        if let Some(comments) = self.get_document_header_comments() {
             for comment in comments {
                 if let Some((schema_url, url_range)) = comment.schema_url(source_path) {
                     return Some((schema_url, url_range));
@@ -25,26 +25,16 @@ impl crate::Root {
     }
 
     #[inline]
-    pub fn get_first_document_comment_group(&self) -> Option<Vec<crate::Comment>> {
+    pub fn get_document_header_comments(&self) -> Option<Vec<crate::Comment>> {
         itertools::chain!(
             self.key_values_begin_dangling_comments()
                 .into_iter()
                 .next()
-                .map(|comment| {
-                    comment
-                        .into_iter()
-                        .map(crate::Comment::from)
-                        .collect_vec()
-                }),
+                .map(|comment| { comment.into_iter().map(crate::Comment::from).collect_vec() }),
             self.key_values_dangling_comments()
                 .into_iter()
                 .next()
-                .map(|comment| {
-                    comment
-                        .into_iter()
-                        .map(crate::Comment::from)
-                        .collect_vec()
-                }),
+                .map(|comment| { comment.into_iter().map(crate::Comment::from).collect_vec() }),
             self.items().next().map(|item| {
                 item.leading_comments()
                     .map(crate::Comment::from)

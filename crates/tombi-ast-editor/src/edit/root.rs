@@ -20,7 +20,7 @@ impl crate::Edit for tombi_ast::Root {
             if self.file_schema_url(None).is_some() {
                 changes.push(crate::Change::AppendTop {
                     new: self
-                        .get_first_document_comment_group()
+                        .get_document_header_comments()
                         .unwrap()
                         .into_iter()
                         .map(|comment| SyntaxElement::Token(comment.syntax().clone()))

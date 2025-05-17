@@ -10,7 +10,7 @@ pub fn get_comment_completion_contents(
         return Vec::with_capacity(0);
     }
 
-    if let Some(comments) = root.get_first_document_comment_group() {
+    if let Some(comments) = root.get_document_header_comments() {
         for comment in comments {
             let comment_range = comment.syntax().range();
 
