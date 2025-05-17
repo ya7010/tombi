@@ -49,7 +49,3 @@ tombi lint --fix path/to/file.toml
 - macOS (x86_64, aarch64)
 - Linux (x86_64)
 - Windows (x86_64)
-
-## License
-
-MIT
