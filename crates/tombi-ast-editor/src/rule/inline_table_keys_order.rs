@@ -97,7 +97,6 @@ pub async fn inline_table_keys_order<'a>(
         changes.extend(inline_table_comma_tailing_comment(
             key_value,
             comma.as_ref(),
-            schema_context.toml_version,
         ));
     }
 
