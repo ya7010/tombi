@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  TOMBI_VERSION: null
+  TOMBI_VERSION: ""
 
 jobs:
   linux:
@@ -44,9 +44,8 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-      - run: cargo xtask set-version
       - run: uv python install
-      - run: python python/set_version.py >> $GITHUB_ENV
+      - uses: ./.github/actions/set-version
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build wheels
@@ -88,7 +87,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install
-      - run: python python/set_version.py >> $GITHUB_ENV
+      - uses: ./.github/actions/set-version
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build wheels
@@ -151,7 +150,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install
-      - run: python python/set_version.py >> $GITHUB_ENV
+      - uses: ./.github/actions/set-version
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build wheels
@@ -174,7 +173,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install
-      - run: python python/set_version.py >> $GITHUB_ENV
+      - uses: ./.github/actions/set-version
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build sdist
@@ -219,7 +218,7 @@ jobs:
     needs: [release-python]
     steps:
       - uses: actions/checkout@v4
-      - run: python python/set_version.py >> $GITHUB_ENV
+      - uses: ./.github/actions/set-version
       - name: Get TOMBI_VERSION
         run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - uses: geekyeggo/delete-artifact@v5
