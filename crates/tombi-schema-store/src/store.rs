@@ -4,7 +4,7 @@ use ahash::AHashMap;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Either;
 use tokio::sync::RwLock;
-use tombi_config::Schema;
+use tombi_config::{Schema, SchemaOptions};
 
 use crate::{
     json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
@@ -63,25 +63,29 @@ impl SchemaStore {
         config_path: Option<&std::path::Path>,
     ) -> Result<(), crate::Error> {
         let base_dirpath = config_path.and_then(|p| p.parent());
-        self.load_schemas(
-            match &config.schemas {
-                Some(schemas) => schemas,
-                None => &[],
-            },
-            base_dirpath,
-        )
-        .await;
+        let schema_options = match &config.schema {
+            Some(schema) => schema,
+            None => &SchemaOptions::default(),
+        };
 
-        if let Some(schema_options) = &config.schema {
+        if schema_options.enabled.unwrap_or_default().value() {
+            self.load_schemas(
+                match &config.schemas {
+                    Some(schemas) => schemas,
+                    None => &[],
+                },
+                base_dirpath,
+            )
+            .await;
+
             for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
-                self.load_schemas_from_catalog_url(&CatalogUrl::new(
-                    catalog_path.try_to_catalog_url(base_dirpath).map_err(|_| {
-                        crate::Error::CatalogPathConvertUrlFailed {
-                            catalog_path: catalog_path.to_string(),
-                        }
-                    })?,
-                ))
-                .await?;
+                let Ok(catalog_url) = catalog_path.try_to_catalog_url(base_dirpath) else {
+                    return Err(crate::Error::CatalogPathConvertUrlFailed {
+                        catalog_path: catalog_path.to_string(),
+                    });
+                };
+                self.load_schemas_from_catalog_url(&CatalogUrl::new(catalog_url))
+                    .await?;
             }
         }
 

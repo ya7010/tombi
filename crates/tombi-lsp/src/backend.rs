@@ -42,7 +42,7 @@ pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
     pub document_sources: Arc<tokio::sync::RwLock<AHashMap<Url, DocumentSource>>>,
-    pub config_dirpath: Option<std::path::PathBuf>,
+    pub config_path: Option<std::path::PathBuf>,
     config: Arc<tokio::sync::RwLock<Config>>,
     pub schema_store: tombi_schema_store::SchemaStore,
 }
@@ -71,7 +71,7 @@ impl Backend {
         Self {
             client,
             document_sources: Default::default(),
-            config_dirpath: config_path.and_then(|path| path.parent().map(ToOwned::to_owned)),
+            config_path,
             config: Arc::new(tokio::sync::RwLock::new(config)),
             schema_store: tombi_schema_store::SchemaStore::new_with_options(options),
         }
