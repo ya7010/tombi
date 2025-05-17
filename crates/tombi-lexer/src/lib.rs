@@ -70,7 +70,7 @@ pub fn lex(source: &str) -> Lexed {
     lexed
 }
 
-pub fn lex_comments(source: &str) -> Lexed {
+pub fn lex_document_header_comments(source: &str) -> Lexed {
     let mut lexed = Lexed::default();
     let mut was_joint = false;
     let mut last_offset = tombi_text::Offset::default();

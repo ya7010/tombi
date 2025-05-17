@@ -34,7 +34,7 @@ impl<'a> Linter<'a> {
 
     pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
         let source_schema =
-            if let Some(parsed) = tombi_parser::parse_comments(source).cast::<tombi_ast::Root>() {
+            if let Some(parsed) = tombi_parser::parse_document_header_comments(source).cast::<tombi_ast::Root>() {
                 match self
                     .schema_store
                     .try_get_source_schema_from_ast(&parsed.tree(), self.source_url_or_path)

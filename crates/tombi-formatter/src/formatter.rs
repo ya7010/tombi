@@ -45,16 +45,17 @@ impl<'a> Formatter<'a> {
 
     /// Format a TOML document and return the result as a string
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let source_schema =
-            if let Some(parsed) = tombi_parser::parse_comments(source).cast::<tombi_ast::Root>() {
-                self.schema_store
-                    .try_get_source_schema_from_ast(&parsed.tree(), self.source_url_or_path)
-                    .await
-                    .ok()
-                    .flatten()
-            } else {
-                None
-            };
+        let source_schema = if let Some(parsed) =
+            tombi_parser::parse_document_header_comments(source).cast::<tombi_ast::Root>()
+        {
+            self.schema_store
+                .try_get_source_schema_from_ast(&parsed.tree(), self.source_url_or_path)
+                .await
+                .ok()
+                .flatten()
+        } else {
+            None
+        };
 
         self.toml_version = source_schema
             .as_ref()

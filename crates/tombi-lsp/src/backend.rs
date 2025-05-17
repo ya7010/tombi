@@ -92,7 +92,8 @@ impl Backend {
         };
 
         let source_schema = if let Some(parsed) =
-            tombi_parser::parse_comments(&document_info.source).cast::<tombi_ast::Root>()
+            tombi_parser::parse_document_header_comments(&document_info.source)
+                .cast::<tombi_ast::Root>()
         {
             match self
                 .schema_store

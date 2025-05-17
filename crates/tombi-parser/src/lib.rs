@@ -19,8 +19,8 @@ pub fn parse(source: &str, toml_version: Option<tombi_config::TomlVersion>) -> P
     parse_as::<tombi_ast::Root>(source, toml_version)
 }
 
-pub fn parse_comments(source: &str) -> Parsed<SyntaxNode> {
-    let lexed = tombi_lexer::lex_comments(source);
+pub fn parse_document_header_comments(source: &str) -> Parsed<SyntaxNode> {
+    let lexed = tombi_lexer::lex_document_header_comments(source);
     let mut p = crate::parser::Parser::new(source, None, &lexed.tokens);
 
     tombi_ast::Root::parse(&mut p);

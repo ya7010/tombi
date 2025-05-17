@@ -143,7 +143,7 @@ impl Deserializer<'_> {
             }
         }
 
-        let parsed = tombi_parser::parse_comments(toml_text)
+        let parsed = tombi_parser::parse_document_header_comments(toml_text)
             .cast::<tombi_ast::Root>()
             .expect("AST Root must be present");
         let root = parsed.tree();
