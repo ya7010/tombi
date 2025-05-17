@@ -8,21 +8,23 @@ const os = require('os');
 const { execSync } = require('child_process');
 
 // Configuration for downloading binary from GitHub releases
-const REPO_URL = 'https://github.com/tombi-toml/tombi';
-const VERSION = '0.1.0'; // Release version
+const REPO = 'tombi-toml/tombi';
+const GITHUB_RELEASE_URL = `https://github.com/${REPO}/releases/download`;
 const BINARY_NAME = 'tombi';
 const BIN_PATH = path.join(__dirname, '..', 'bin');
 
 async function main() {
   try {
-    // Determine platform and architecture
-    const platform = getPlatform();
-    const arch = getArch();
+    // Get latest version from GitHub API
+    const version = await getLatestVersion();
+    console.log(`🦅 Installing tombi v${version}...`);
 
-    console.log(`🦅 Installing tombi v${VERSION} for ${platform}-${arch}...`);
+    // Determine platform and architecture
+    const { target, artifactExtension } = detectOsArch();
+    console.log(`Detected system: ${target}`);
 
     // Build download URL
-    const downloadUrl = getDownloadUrl(platform, arch);
+    const downloadUrl = `${GITHUB_RELEASE_URL}/v${version}/tombi-cli-${version}-${target}${artifactExtension}`;
 
     // Create bin directory
     if (!fs.existsSync(BIN_PATH)) {
@@ -30,13 +32,13 @@ async function main() {
     }
 
     // Download and extract tarball
-    await downloadAndExtract(downloadUrl);
+    await downloadAndExtract(downloadUrl, artifactExtension);
 
     // Add execute permission to binary
     const binaryPath = path.join(BIN_PATH, BINARY_NAME);
     fs.chmodSync(binaryPath, 0o755);
 
-    console.log(`✅ Installation of tombi v${VERSION} completed!`);
+    console.log(`✅ Installation of tombi v${version} completed!`);
     console.log(`Binary location: ${binaryPath}`);
 
   } catch (error) {
@@ -46,55 +48,57 @@ async function main() {
   }
 }
 
-function getPlatform() {
+async function getLatestVersion() {
+  try {
+    const response = await axios.get(`https://api.github.com/repos/${REPO}/releases/latest`);
+    return response.data.tag_name.replace('v', '');
+  } catch (error) {
+    throw new Error(`Failed to get latest version: ${error.message}`);
+  }
+}
+
+function detectOsArch() {
   const platform = os.platform();
+  const arch = os.arch();
+  let target;
+  let artifactExtension;
 
   switch (platform) {
     case 'darwin':
-      return 'macos';
-    case 'win32':
-      return 'windows';
+      if (arch === 'arm64') {
+        target = 'aarch64-apple-darwin';
+      } else {
+        target = 'x86_64-apple-darwin';
+      }
+      artifactExtension = '.gz';
+      break;
     case 'linux':
-      return 'linux';
+      if (arch === 'arm64') {
+        target = 'aarch64-unknown-linux-musl';
+      } else if (arch === 'arm') {
+        target = 'arm-unknown-linux-gnueabihf';
+      } else {
+        target = 'x86_64-unknown-linux-musl';
+      }
+      artifactExtension = '.gz';
+      break;
+    case 'win32':
+      if (arch === 'arm64') {
+        target = 'aarch64-pc-windows-msvc';
+      } else {
+        target = 'x86_64-pc-windows-msvc';
+      }
+      artifactExtension = '.zip';
+      break;
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
+
+  return { target, artifactExtension };
 }
 
-function getArch() {
-  const arch = os.arch();
-
-  switch (arch) {
-    case 'x64':
-      return 'x86_64';
-    case 'arm64':
-      return 'aarch64';
-    default:
-      throw new Error(`Unsupported architecture: ${arch}`);
-  }
-}
-
-function getDownloadUrl(platform, arch) {
-  // Build download URL from GitHub releases
-  // Example: https://github.com/tombi-toml/tombi/releases/download/v0.1.0/tombi-v0.1.0-x86_64-apple-darwin.tar.gz
-
-  let targetTriple;
-
-  if (platform === 'macos') {
-    targetTriple = `${arch}-apple-darwin`;
-  } else if (platform === 'linux') {
-    targetTriple = `${arch}-unknown-linux-gnu`;
-  } else if (platform === 'windows') {
-    targetTriple = `${arch}-pc-windows-msvc`;
-  } else {
-    throw new Error(`Unsupported platform: ${platform}`);
-  }
-
-  return `${REPO_URL}/releases/download/v${VERSION}/tombi-v${VERSION}-${targetTriple}.tar.gz`;
-}
-
-async function downloadAndExtract(url) {
-  const tempFile = path.join(os.tmpdir(), `tombi-${VERSION}.tar.gz`);
+async function downloadAndExtract(url, artifactExtension) {
+  const tempFile = path.join(os.tmpdir(), `tombi-${Date.now()}${artifactExtension}`);
 
   try {
     // Download
@@ -115,10 +119,18 @@ async function downloadAndExtract(url) {
 
     // Extract
     console.log('📂 Extracting binary...');
-    await tar.extract({
-      file: tempFile,
-      cwd: BIN_PATH
-    });
+    if (artifactExtension === '.zip') {
+      // Windowsの場合、zipファイルの処理
+      const AdmZip = require('adm-zip');
+      const zip = new AdmZip(tempFile);
+      zip.extractAllTo(BIN_PATH, true);
+    } else {
+      // Linux/macOSの場合、tar.gzファイルの処理
+      await tar.extract({
+        file: tempFile,
+        cwd: BIN_PATH
+      });
+    }
 
   } catch (error) {
     throw new Error(`Failed to download or extract: ${error.message}`);
