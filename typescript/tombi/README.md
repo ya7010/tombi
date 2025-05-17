@@ -1,55 +1,55 @@
 # @tombi/cli
 
-🦅 tombiのTOMLツールキットのRustバイナリインストーラー
+🦅 Rust binary installer for tombi TOML toolkit
 
-## 概要
+## Overview
 
-このパッケージは、Rust製のtombiバイナリをnpmを通じてインストールするためのものです。インストール時に自動的にプラットフォームに適したバイナリがダウンロードされます。
+This package provides a way to install the Rust-built tombi binary through npm. The appropriate binary for your platform is automatically downloaded during installation.
 
-## インストール
+## Installation
 
 ```
 npm install -g @tombi/cli
 ```
 
-インストール後、`tombi`コマンドがグローバルに使用可能になります。
+After installation, the `tombi` command becomes available globally.
 
-## 使い方
+## Usage
 
-### フォーマット
+### Format
 
-TOMLファイルをフォーマットします：
+Format TOML files:
 
 ```
 tombi format path/to/file.toml
 ```
 
-ファイルを直接編集するには `-i` オプションを使用します：
+Use the `-i` option to edit files in place:
 
 ```
 tombi format -i path/to/file.toml
 ```
 
-### リント
+### Lint
 
-TOMLファイルをリントします：
+Lint TOML files:
 
 ```
 tombi lint path/to/file.toml
 ```
 
-可能な場合は問題を自動修正するには `--fix` オプションを使用します：
+Use the `--fix` option to automatically fix issues when possible:
 
 ```
 tombi lint --fix path/to/file.toml
 ```
 
-## サポートされているプラットフォーム
+## Supported Platforms
 
 - macOS (x86_64, aarch64)
 - Linux (x86_64)
 - Windows (x86_64)
 
-## ライセンス
+## License
 
-MIT 
+MIT
