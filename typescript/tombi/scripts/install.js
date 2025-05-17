@@ -7,40 +7,40 @@ const tar = require('tar');
 const os = require('os');
 const { execSync } = require('child_process');
 
-// GitHubリリースからバイナリをダウンロードする設定
+// Configuration for downloading binary from GitHub releases
 const REPO_URL = 'https://github.com/tombi-toml/tombi';
-const VERSION = '0.1.0'; // リリースバージョン
+const VERSION = '0.1.0'; // Release version
 const BINARY_NAME = 'tombi';
 const BIN_PATH = path.join(__dirname, '..', 'bin');
 
 async function main() {
   try {
-    // プラットフォームとアーキテクチャを判定
+    // Determine platform and architecture
     const platform = getPlatform();
     const arch = getArch();
 
-    console.log(`🦅 tombi v${VERSION} for ${platform}-${arch} をインストールしています...`);
+    console.log(`🦅 Installing tombi v${VERSION} for ${platform}-${arch}...`);
 
-    // ダウンロードURLを構築
+    // Build download URL
     const downloadUrl = getDownloadUrl(platform, arch);
 
-    // binディレクトリを作成
+    // Create bin directory
     if (!fs.existsSync(BIN_PATH)) {
       fs.mkdirSync(BIN_PATH, { recursive: true });
     }
 
-    // tarballをダウンロードして展開
+    // Download and extract tarball
     await downloadAndExtract(downloadUrl);
 
-    // バイナリに実行権限を付与
+    // Add execute permission to binary
     const binaryPath = path.join(BIN_PATH, BINARY_NAME);
     fs.chmodSync(binaryPath, 0o755);
 
-    console.log(`✅ tombi v${VERSION} のインストールが完了しました！`);
-    console.log(`バイナリの場所: ${binaryPath}`);
+    console.log(`✅ Installation of tombi v${VERSION} completed!`);
+    console.log(`Binary location: ${binaryPath}`);
 
   } catch (error) {
-    console.error('❌ インストール中にエラーが発生しました:');
+    console.error('❌ An error occurred during installation:');
     console.error(error.message || error);
     process.exit(1);
   }
@@ -57,7 +57,7 @@ function getPlatform() {
     case 'linux':
       return 'linux';
     default:
-      throw new Error(`サポートされていないプラットフォーム: ${platform}`);
+      throw new Error(`Unsupported platform: ${platform}`);
   }
 }
 
@@ -70,13 +70,13 @@ function getArch() {
     case 'arm64':
       return 'aarch64';
     default:
-      throw new Error(`サポートされていないアーキテクチャ: ${arch}`);
+      throw new Error(`Unsupported architecture: ${arch}`);
   }
 }
 
 function getDownloadUrl(platform, arch) {
-  // GitHubリリースからダウンロードするURLを構築
-  // 例: https://github.com/tombi-toml/tombi/releases/download/v0.1.0/tombi-v0.1.0-x86_64-apple-darwin.tar.gz
+  // Build download URL from GitHub releases
+  // Example: https://github.com/tombi-toml/tombi/releases/download/v0.1.0/tombi-v0.1.0-x86_64-apple-darwin.tar.gz
 
   let targetTriple;
 
@@ -87,7 +87,7 @@ function getDownloadUrl(platform, arch) {
   } else if (platform === 'windows') {
     targetTriple = `${arch}-pc-windows-msvc`;
   } else {
-    throw new Error(`サポートされていないプラットフォーム: ${platform}`);
+    throw new Error(`Unsupported platform: ${platform}`);
   }
 
   return `${REPO_URL}/releases/download/v${VERSION}/tombi-v${VERSION}-${targetTriple}.tar.gz`;
@@ -97,8 +97,8 @@ async function downloadAndExtract(url) {
   const tempFile = path.join(os.tmpdir(), `tombi-${VERSION}.tar.gz`);
 
   try {
-    // ダウンロード
-    console.log(`📦 ${url} からバイナリをダウンロードしています...`);
+    // Download
+    console.log(`📦 Downloading binary from ${url}...`);
     const response = await axios({
       method: 'get',
       url: url,
@@ -113,17 +113,17 @@ async function downloadAndExtract(url) {
       writer.on('error', reject);
     });
 
-    // 展開
-    console.log('📂 バイナリを展開しています...');
+    // Extract
+    console.log('📂 Extracting binary...');
     await tar.extract({
       file: tempFile,
       cwd: BIN_PATH
     });
 
   } catch (error) {
-    throw new Error(`ダウンロードまたは展開に失敗しました: ${error.message}`);
+    throw new Error(`Failed to download or extract: ${error.message}`);
   } finally {
-    // 一時ファイルの削除
+    // Clean up temporary file
     if (fs.existsSync(tempFile)) {
       fs.unlinkSync(tempFile);
     }
