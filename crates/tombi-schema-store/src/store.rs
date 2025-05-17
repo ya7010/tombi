@@ -103,9 +103,7 @@ impl SchemaStore {
     }
 
     pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
-        let mut store_schemas = self.schemas.write().await;
-
-        for schema in schemas.iter() {
+        futures::future::join_all(schemas.iter().map(|schema| async move {
             let schema_url = if let Ok(schema_url) = SchemaUrl::parse(schema.path()) {
                 schema_url
             } else if let Ok(schema_url) = match base_dirpath {
@@ -115,18 +113,19 @@ impl SchemaStore {
                 schema_url
             } else {
                 tracing::error!("invalid schema path: {}", schema.path());
-                continue;
+                return;
             };
 
             tracing::debug!("load config schema from: {}", schema_url);
 
-            store_schemas.push(crate::Schema {
+            self.schemas.write().await.push(crate::Schema {
                 url: schema_url,
                 include: schema.include().to_vec(),
                 toml_version: schema.toml_version(),
                 sub_root_keys: schema.root_keys().and_then(SchemaAccessor::parse),
             });
-        }
+        }))
+        .await;
     }
 
     pub async fn load_schemas_from_catalog_url(
