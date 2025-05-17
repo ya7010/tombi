@@ -79,24 +79,19 @@ impl SchemaStore {
             .await;
 
             let catalog_paths = schema_options.catalog_paths().unwrap_or_default();
-            let mut tasks = Vec::with_capacity(catalog_paths.len());
 
-            for catalog_path in catalog_paths.iter() {
-                tasks.push(async move {
-                    let Ok(catalog_url) = catalog_path.try_to_catalog_url(base_dirpath) else {
-                        return Err(crate::Error::CatalogPathConvertUrlFailed {
-                            catalog_path: catalog_path.to_string(),
-                        });
-                    };
-                    let catalog_url = CatalogUrl::new(catalog_url);
-                    self.load_schemas_from_catalog_url(&catalog_url).await
-                });
-            }
-
-            futures::future::join_all(tasks)
-                .await
-                .into_iter()
-                .collect::<Result<Vec<_>, _>>()?;
+            futures::future::join_all(catalog_paths.iter().map(|catalog_path| async move {
+                let Ok(catalog_url) = catalog_path.try_to_catalog_url(base_dirpath) else {
+                    return Err(crate::Error::CatalogPathConvertUrlFailed {
+                        catalog_path: catalog_path.to_string(),
+                    });
+                };
+                let catalog_url = CatalogUrl::new(catalog_url);
+                self.load_schemas_from_catalog_url(&catalog_url).await
+            }))
+            .await
+            .into_iter()
+            .collect::<Result<(), _>>()?;
         }
 
         Ok(())
