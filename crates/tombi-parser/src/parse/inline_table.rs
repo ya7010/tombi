@@ -1,5 +1,5 @@
-use tombi_syntax::{SyntaxKind::*, T};
 use tombi_config::TomlVersion;
+use tombi_syntax::{SyntaxKind::*, T};
 
 use crate::{
     parse::{
@@ -60,16 +60,20 @@ impl Parse for tombi_ast::InlineTable {
         }
 
         if (end_range.start().line() - begin_range.start().line()) != key_value_lines {
-            p.new_syntax_error(
-                crate::Error::new(InlineTableMustSingleLine, begin_range + end_range),
-                TomlVersion::V1_1_0_Preview,
-            );
+            if p.toml_version < TomlVersion::V1_1_0_Preview {
+                p.error(crate::Error::new(
+                    InlineTableMustSingleLine,
+                    begin_range + end_range,
+                ));
+            }
         }
         if let Some(comma_range) = last_comma_range {
-            p.new_syntax_error(
-                crate::Error::new(ForbiddenInlineTableLastComma, comma_range),
-                TomlVersion::V1_1_0_Preview,
-            );
+            if p.toml_version < TomlVersion::V1_1_0_Preview {
+                p.error(crate::Error::new(
+                    ForbiddenInlineTableLastComma,
+                    comma_range,
+                ));
+            }
         }
 
         tailing_comment(p);

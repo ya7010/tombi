@@ -2,7 +2,7 @@ pub mod definitions;
 
 use std::fmt::Write;
 
-use itertools::{Either, Itertools};
+use itertools::Either;
 use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use unicode_segmentation::UnicodeSegmentation;
@@ -66,9 +66,9 @@ impl<'a> Formatter<'a> {
             })
             .unwrap_or(self.toml_version);
 
-        let parsed = tombi_parser::parse(source);
+        let parsed = tombi_parser::parse(source, Some(self.toml_version));
 
-        let errors = parsed.errors(self.toml_version).collect_vec();
+        let errors = &parsed.errors;
         if !errors.is_empty() {
             let mut diagnostics = Vec::new();
             for error in errors {

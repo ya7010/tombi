@@ -62,9 +62,9 @@ impl<'a> Linter<'a> {
             })
             .unwrap_or(self.toml_version);
 
-        let parsed = tombi_parser::parse(source);
+        let parsed = tombi_parser::parse(source, Some(toml_version));
 
-        for errors in parsed.errors(toml_version) {
+        for errors in &parsed.errors {
             errors.set_diagnostics(&mut self.diagnostics);
         }
 

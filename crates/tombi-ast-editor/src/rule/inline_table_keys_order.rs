@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::{SchemaContext, TableSchema};
+use tombi_syntax::SyntaxElement;
 use tombi_x_keyword::TableKeysOrder;
 
 use crate::rule::inline_table_comma_tailing_comment;
@@ -97,6 +97,7 @@ pub async fn inline_table_keys_order<'a>(
         changes.extend(inline_table_comma_tailing_comment(
             key_value,
             comma.as_ref(),
+            schema_context.toml_version,
         ));
     }
 

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use ahash::AHashMap;
-use itertools::{Either, Itertools};
+use itertools::Either;
 use tombi_config::{Config, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use tombi_document_tree::TryIntoDocumentTree;
@@ -91,7 +91,39 @@ impl Backend {
             }
         };
 
-        Some(tombi_parser::parse(&document_info.source))
+        let source_schema = if let Some(parsed) =
+            tombi_parser::parse_comments(&document_info.source).cast::<tombi_ast::Root>()
+        {
+            match self
+                .schema_store
+                .try_get_source_schema_from_ast(
+                    &parsed.tree(),
+                    Some(Either::Left(text_document_uri)),
+                )
+                .await
+            {
+                Ok(Some(schema)) => Some(schema),
+                Ok(None) => None,
+                Err(_) => None,
+            }
+        } else {
+            None
+        };
+
+        let toml_version = source_schema
+            .as_ref()
+            .and_then(|schema| {
+                schema
+                    .root_schema
+                    .as_ref()
+                    .and_then(|root| root.toml_version())
+            })
+            .unwrap_or(self.config.read().await.toml_version.unwrap_or_default());
+
+        Some(tombi_parser::parse(
+            &document_info.source,
+            Some(toml_version),
+        ))
     }
 
     #[inline]
@@ -133,16 +165,13 @@ impl Backend {
             .ok()
             .flatten();
 
-        let (toml_version, _) = self.source_toml_version(source_schema.as_ref()).await;
-
-        let errors = parsed.errors(toml_version).collect_vec();
-        if errors.is_empty() {
+        if parsed.errors.is_empty() {
             Some(Ok((root, source_schema)))
         } else {
-            let mut diagnostics = Vec::with_capacity(errors.len());
-            errors.iter().for_each(|error| {
+            let mut diagnostics = Vec::with_capacity(parsed.errors.len());
+            for error in parsed.errors {
                 error.set_diagnostics(&mut diagnostics);
-            });
+            }
 
             Some(Err(diagnostics))
         }

@@ -1,21 +1,17 @@
 use std::marker::PhantomData;
 
 use tombi_ast::AstNode;
-use tombi_config::TomlVersion;
 use tombi_syntax::SyntaxNode;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Parsed<T> {
     green_tree: tombi_rg_tree::GreenNode,
-    errors: Vec<crate::TomlVersionedError>,
+    pub errors: Vec<crate::Error>,
     _ty: PhantomData<fn() -> T>,
 }
 
 impl<T> Parsed<T> {
-    pub fn new(
-        green_tree: tombi_rg_tree::GreenNode,
-        errors: Vec<crate::TomlVersionedError>,
-    ) -> Parsed<T> {
+    pub fn new(green_tree: tombi_rg_tree::GreenNode, errors: Vec<crate::Error>) -> Parsed<T> {
         Parsed {
             green_tree,
             errors,
@@ -33,20 +29,6 @@ impl<T> Parsed<T> {
 
     pub fn into_syntax_node_mut(self) -> SyntaxNode {
         SyntaxNode::new_root_mut(self.green_tree)
-    }
-
-    pub fn errors(&self, toml_version: TomlVersion) -> impl Iterator<Item = &crate::Error> {
-        self.errors
-            .iter()
-            .filter(move |e| e.is_compatible_with(toml_version))
-            .map(|e| e.error())
-    }
-
-    pub fn into_errors(self, toml_version: TomlVersion) -> impl Iterator<Item = crate::Error> {
-        self.errors
-            .into_iter()
-            .filter(move |e| e.is_compatible_with(toml_version))
-            .map(|e| e.into_error())
     }
 }
 

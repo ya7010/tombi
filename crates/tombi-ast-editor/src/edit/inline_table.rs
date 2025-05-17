@@ -41,6 +41,7 @@ impl crate::Edit for tombi_ast::InlineTable {
                 changes.extend(inline_table_comma_tailing_comment(
                     &key_value,
                     comma.as_ref(),
+                    schema_context.toml_version,
                 ));
                 changes.extend(key_value.edit(accessors, None, schema_context).await);
             }

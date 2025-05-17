@@ -1,7 +1,7 @@
 mod error;
 
 pub use error::Error;
-use itertools::{Either, Itertools};
+use itertools::Either;
 use serde::de::DeserializeOwned;
 use tombi_ast::AstNode;
 use tombi_document::IntoDocument;
@@ -91,15 +91,12 @@ impl Deserializer<'_> {
     where
         T: DeserializeOwned,
     {
-        let parsed = tombi_parser::parse(toml_text);
+        let toml_version = self.get_toml_version(&toml_text).await?;
+        let parsed = tombi_parser::parse(toml_text, Some(toml_version));
         let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
-        let toml_version = self.get_toml_version(&root).await?;
-        let errors: Vec<&tombi_parser::Error> = parsed.errors(toml_version).collect_vec();
         // Check if there are any parsing errors
-        if !errors.is_empty() {
-            return Err(crate::de::Error::Parser(
-                parsed.into_errors(toml_version).collect_vec(),
-            ));
+        if !parsed.errors.is_empty() {
+            return Err(crate::de::Error::Parser(parsed.errors));
         }
         from_document(self.try_to_document(root, toml_version)?)
     }
@@ -114,10 +111,7 @@ impl Deserializer<'_> {
         Ok(T::deserialize(&document)?)
     }
 
-    async fn get_toml_version(
-        &self,
-        root: &tombi_ast::Root,
-    ) -> Result<TomlVersion, crate::de::Error> {
+    async fn get_toml_version(&self, toml_text: &str) -> Result<TomlVersion, crate::de::Error> {
         let schema_store = match self.schema_store {
             Some(schema_store) => schema_store,
             None => &SchemaStore::new(),
@@ -149,9 +143,14 @@ impl Deserializer<'_> {
             }
         }
 
+        let parsed = tombi_parser::parse_comments(toml_text)
+            .cast::<tombi_ast::Root>()
+            .expect("AST Root must be present");
+        let root = parsed.tree();
+
         if let Some(source_path) = self.source_path {
             match schema_store
-                .try_get_source_schema_from_ast(root, Some(Either::Right(source_path)))
+                .try_get_source_schema_from_ast(&root, Some(Either::Right(source_path)))
                 .await
             {
                 Ok(Some(SourceSchema {

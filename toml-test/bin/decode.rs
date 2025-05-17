@@ -1,7 +1,6 @@
 use std::io::Read;
 
 use clap::Parser;
-use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_document_tree::TryIntoDocumentTree;
 use tombi_toml_version::TomlVersion;
@@ -26,11 +25,10 @@ fn main() -> Result<(), anyhow::Error> {
 }
 
 fn decode(source: &str, toml_version: TomlVersion) -> Result<Value, anyhow::Error> {
-    let p = tombi_parser::parse(source);
+    let p = tombi_parser::parse(source, Some(toml_version));
 
-    let errors = p.errors(toml_version).collect_vec();
-    if !errors.is_empty() {
-        for error in errors {
+    if !p.errors.is_empty() {
+        for error in p.errors {
             eprintln!("{}", error);
         }
         return Err(anyhow::anyhow!(INVALID_MESSAGE));

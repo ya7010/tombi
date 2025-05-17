@@ -175,7 +175,8 @@ impl SortableValues {
             SortableType::Boolean => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     if let tombi_ast::Value::Boolean(_) = value {
                         match value.syntax().to_string().as_ref() {
                             "true" => sortable_values.push((true, value, comma)),
@@ -191,7 +192,8 @@ impl SortableValues {
             SortableType::Integer => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     match value.clone() {
                         tombi_ast::Value::IntegerBin(integer_bin) => {
                             if let Ok(tombi_document_tree::Value::Integer(integer)) =
@@ -237,7 +239,8 @@ impl SortableValues {
             SortableType::String => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     match value.clone() {
                         tombi_ast::Value::BasicString(basic_string) => {
                             if let Ok(tombi_document_tree::Value::String(string)) =
@@ -283,7 +286,8 @@ impl SortableValues {
             SortableType::OffsetDateTime => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     if let tombi_ast::Value::OffsetDateTime(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
@@ -295,7 +299,8 @@ impl SortableValues {
             SortableType::LocalDateTime => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     if let tombi_ast::Value::LocalDateTime(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
@@ -307,7 +312,8 @@ impl SortableValues {
             SortableType::LocalDate => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     if let tombi_ast::Value::LocalDate(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
@@ -319,7 +325,8 @@ impl SortableValues {
             SortableType::LocalTime => {
                 let mut sortable_values = Vec::with_capacity(values_with_comma.len());
                 for (value, comma) in values_with_comma {
-                    let comma = comma.unwrap_or(tombi_ast::Comma::cast(make_comma()).unwrap());
+                    let comma =
+                        comma.unwrap_or(tombi_ast::Comma::cast(make_comma(toml_version)).unwrap());
                     if let tombi_ast::Value::LocalTime(_) = value {
                         sortable_values.push((value.syntax().to_string(), value, comma));
                     } else {
