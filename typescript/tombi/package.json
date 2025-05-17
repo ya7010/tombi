@@ -1,12 +1,14 @@
 {
-  "name": "@tombi/tombi",
+  "name": "@tombi/cli",
   "version": "0.0.1",
-  "description": "Reserved package for tombi",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "Rust版tombiバイナリのインストーラー",
+  "bin": {
+    "tombi": "./bin/tombi"
   },
-  "keywords": [],
+  "scripts": {
+    "postinstall": "node ./scripts/install.js"
+  },
+  "keywords": ["toml", "cli", "formatter", "linter"],
   "author": "yassun7010",
   "license": "MIT",
   "private": false,
@@ -18,8 +20,11 @@
     "url": "https://github.com/tombi-toml/tombi/issues"
   },
   "homepage": "https://github.com/tombi-toml/tombi#readme",
-  "devDependencies": {
-    "@types/node": "^22.10.1",
-    "typescript": "^5.7.2"
+  "dependencies": {
+    "axios": "^1.9.0",
+    "tar": "^6.2.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
