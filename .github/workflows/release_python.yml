@@ -44,6 +44,7 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
+      - run: cargo xtask set-version >> $GITHUB_ENV
       - run: uv python install
       - run: python python/set_version.py >> $GITHUB_ENV
       - name: Get TOMBI_VERSION
