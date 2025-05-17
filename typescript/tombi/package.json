@@ -6,7 +6,7 @@
     "tombi": "./bin/tombi"
   },
   "scripts": {
-    "postinstall": "node ./scripts/install.js"
+    "postinstall": "node ./scripts/postinstall.js"
   },
   "keywords": ["toml", "cli", "formatter", "linter"],
   "author": "yassun7010",
@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/tombi-toml/tombi/issues"
   },
-  "homepage": "https://github.com/tombi-toml/tombi#readme",
+  "homepage": "https://tombi-toml.github.io/tombi/",
   "dependencies": {
     "axios": "^1.9.0",
     "tar": "^6.2.1"

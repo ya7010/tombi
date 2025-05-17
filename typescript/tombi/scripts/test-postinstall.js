@@ -10,7 +10,7 @@ console.log('🧪 Testing installation process...');
 
 try {
   // Execute installation script
-  execSync('node scripts/install.js', {
+  execSync('node scripts/postinstall.js', {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..')
   });
