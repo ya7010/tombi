@@ -4,7 +4,7 @@ use ahash::AHashMap;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Either;
 use tokio::sync::RwLock;
-use tombi_config::Schema;
+use tombi_config::{Schema, SchemaOptions};
 
 use crate::{
     json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
@@ -63,35 +63,42 @@ impl SchemaStore {
         config_path: Option<&std::path::Path>,
     ) -> Result<(), crate::Error> {
         let base_dirpath = config_path.and_then(|p| p.parent());
-        self.load_schemas(
-            match &config.schemas {
-                Some(schemas) => schemas,
-                None => &[],
-            },
-            base_dirpath,
-        )
-        .await;
+        let schema_options = match &config.schema {
+            Some(schema) => schema,
+            None => &SchemaOptions::default(),
+        };
 
-        if let Some(schema_options) = &config.schema {
-            for catalog_path in schema_options.catalog_paths().unwrap_or_default().iter() {
-                self.load_schemas_from_catalog_url(&CatalogUrl::new(
-                    catalog_path.try_to_catalog_url(base_dirpath).map_err(|_| {
-                        crate::Error::CatalogPathConvertUrlFailed {
-                            catalog_path: catalog_path.to_string(),
-                        }
-                    })?,
-                ))
-                .await?;
-            }
+        if schema_options.enabled.unwrap_or_default().value() {
+            self.load_schemas(
+                match &config.schemas {
+                    Some(schemas) => schemas,
+                    None => &[],
+                },
+                base_dirpath,
+            )
+            .await;
+
+            let catalog_paths = schema_options.catalog_paths().unwrap_or_default();
+
+            futures::future::join_all(catalog_paths.iter().map(|catalog_path| async move {
+                let Ok(catalog_url) = catalog_path.try_to_catalog_url(base_dirpath) else {
+                    return Err(crate::Error::CatalogPathConvertUrlFailed {
+                        catalog_path: catalog_path.to_string(),
+                    });
+                };
+                let catalog_url = CatalogUrl::new(catalog_url);
+                self.load_schemas_from_catalog_url(&catalog_url).await
+            }))
+            .await
+            .into_iter()
+            .collect::<Result<(), _>>()?;
         }
 
         Ok(())
     }
 
     pub async fn load_schemas(&self, schemas: &[Schema], base_dirpath: Option<&std::path::Path>) {
-        let mut store_schemas = self.schemas.write().await;
-
-        for schema in schemas.iter() {
+        futures::future::join_all(schemas.iter().map(|schema| async move {
             let schema_url = if let Ok(schema_url) = SchemaUrl::parse(schema.path()) {
                 schema_url
             } else if let Ok(schema_url) = match base_dirpath {
@@ -101,18 +108,19 @@ impl SchemaStore {
                 schema_url
             } else {
                 tracing::error!("invalid schema path: {}", schema.path());
-                continue;
+                return;
             };
 
             tracing::debug!("load config schema from: {}", schema_url);
 
-            store_schemas.push(crate::Schema {
+            self.schemas.write().await.push(crate::Schema {
                 url: schema_url,
                 include: schema.include().to_vec(),
                 toml_version: schema.toml_version(),
                 sub_root_keys: schema.root_keys().and_then(SchemaAccessor::parse),
             });
-        }
+        }))
+        .await;
     }
 
     pub async fn load_schemas_from_catalog_url(

@@ -7,8 +7,8 @@ use cursor::Cursor;
 use error::ErrorKind::*;
 pub use error::{Error, ErrorKind};
 pub use lexed::Lexed;
-use tombi_syntax::{SyntaxKind, T};
 pub use token::Token;
+use tombi_syntax::{SyntaxKind, T};
 
 macro_rules! regex {
     ($($var:ident = $re:expr);+;) => {
@@ -26,12 +26,12 @@ regex!(
     REGEX_INTEGER_HEX = r"^0x[0-9A-Fa-f](:?_?[0-9A-Fa-f])*$";
     REGEX_INTEGER_DEC = r"^(:?[1-9](:?_?[0-9])*|0)$";
     REGEX_FLOAT = r"^[0-9_]+(:?(:?\.[0-9_]+)?[eE][+-]?[0-9_]+|\.[0-9_]+)$";
-    REGEX_IS_DATE_TIME = r"^\d{4}-\d{2}-\d{2}";
+    REGEX_IS_DATE_TIME = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}";
     REGEX_OFFSET_DATE_TIME =
-        r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:[\.,]\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$";
-    REGEX_LOCAL_DATE_TIME = r"^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2})?(?:[\.,]\d+)?$";
-    REGEX_LOCAL_DATE = r"^\d{4}-\d{2}-\d{2}$";
-    REGEX_LOCAL_TIME = r"^\d{2}:\d{2}(?::\d{2})?(?:[\.,]\d+)?$";
+        r"^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt ][0-9]{2}:[0-9]{2}(?::[0-9]{2})?(?:[\.,][0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})$";
+    REGEX_LOCAL_DATE_TIME = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt ][0-9]{2}:[0-9]{2}(?::[0-9]{2})?(?:[\.,][0-9]+)?$";
+    REGEX_LOCAL_DATE = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$";
+    REGEX_LOCAL_TIME = r"^[0-9]{2}:[0-9]{2}(?::[0-9]{2})?(?:[\.,][0-9]+)?$";
 );
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -54,6 +54,49 @@ pub fn lex(source: &str) -> Lexed {
         let (last_span, last_range) = lexed.push_result_token(result);
         last_offset = last_span.end();
         last_position = last_range.end();
+    }
+
+    lexed.tokens.push(crate::Token::new(
+        SyntaxKind::EOF,
+        (
+            tombi_text::Span::new(last_offset, tombi_text::Offset::new(source.len() as u32)),
+            tombi_text::Range::new(
+                last_position,
+                last_position + tombi_text::RelativePosition::of(&source[last_offset.into()..]),
+            ),
+        ),
+    ));
+
+    lexed
+}
+
+pub fn lex_document_header_comments(source: &str) -> Lexed {
+    let mut lexed = Lexed::default();
+    let mut was_joint = false;
+    let mut last_offset = tombi_text::Offset::default();
+    let mut last_position = tombi_text::Position::default();
+
+    for result in tokenize(source) {
+        match result {
+            Ok(token) => match token.kind() {
+                SyntaxKind::COMMENT => {
+                    if was_joint {
+                        lexed.set_joint();
+                    }
+                    was_joint = true;
+                    let (last_span, last_range) = lexed.push_result_token(Ok(token));
+                    last_offset = last_span.end();
+                    last_position = last_range.end();
+                }
+                SyntaxKind::LINE_BREAK | SyntaxKind::WHITESPACE => {
+                    let (last_span, last_range) = lexed.push_result_token(Ok(token));
+                    last_offset = last_span.end();
+                    last_position = last_range.end();
+                }
+                _ => break,
+            },
+            Err(_) => break,
+        }
     }
 
     lexed.tokens.push(crate::Token::new(

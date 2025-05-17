@@ -41,10 +41,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let warning = Diagnostic::new_warning("Some warning occured.".to_owned(), ((2, 1), (2, 3)));
     let error = Diagnostic::new_error("Some error occured.".to_owned(), ((2, 1), (2, 3)));
 
-    warning.print(Pretty);
-    warning.with_source_file(&source_file).print(Pretty);
-    error.print(Pretty);
-    error.with_source_file(&source_file).print(Pretty);
+    warning.print(&mut Pretty);
+    warning.with_source_file(&source_file).print(&mut Pretty);
+    error.print(&mut Pretty);
+    error.with_source_file(&source_file).print(&mut Pretty);
 
     Ok(())
 }

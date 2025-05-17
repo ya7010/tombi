@@ -1,5 +1,3 @@
-use tombi_config::TomlVersion;
-
 #[derive(thiserror::Error, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
 pub enum ErrorKind {
@@ -149,59 +147,15 @@ impl From<tombi_lexer::Error> for Error {
 
 #[cfg(feature = "diagnostic")]
 impl tombi_diagnostic::SetDiagnostics for Error {
+    /// Converts an error into diagnostic information.
+    ///
+    /// Since a single error may be converted into multiple diagnostics,
+    /// this function takes a vector of diagnostics and appends the conversion results to it.
+    #[inline]
     fn set_diagnostics(&self, diagnostics: &mut Vec<tombi_diagnostic::Diagnostic>) {
         diagnostics.push(tombi_diagnostic::Diagnostic::new_error(
             self.to_message(),
             self.range(),
         ));
-    }
-}
-
-/// A wrapper type for errors that includes information about whether the error depends on the version of TOML.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum TomlVersionedError {
-    /// Errors that do not depend on the version of TOML
-    Common(Error),
-    /// Error when not compatible with new syntax
-    NewSyntax {
-        error: Error,
-        minimum_version: TomlVersion,
-    },
-}
-
-impl TomlVersionedError {
-    pub fn error(&self) -> &Error {
-        match self {
-            Self::Common(error) => error,
-            Self::NewSyntax { error, .. } => error,
-        }
-    }
-
-    pub fn into_error(self) -> Error {
-        match self {
-            Self::Common(error) => error,
-            Self::NewSyntax { error, .. } => error,
-        }
-    }
-
-    pub fn is_compatible_with(&self, toml_version: TomlVersion) -> bool {
-        match self {
-            Self::Common(_) => true,
-            Self::NewSyntax {
-                minimum_version, ..
-            } => toml_version < *minimum_version,
-        }
-    }
-}
-
-impl From<Error> for TomlVersionedError {
-    fn from(error: Error) -> Self {
-        Self::Common(error)
-    }
-}
-
-impl From<tombi_lexer::Error> for TomlVersionedError {
-    fn from(error: tombi_lexer::Error) -> Self {
-        Self::Common(error.into())
     }
 }

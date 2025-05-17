@@ -6,13 +6,13 @@ use crate::{Diagnostic, Level, Print};
 pub struct Simple;
 
 impl Print<Simple> for Level {
-    fn print(&self, _printer: Simple) {
+    fn print(&self, _printer: &mut Simple) {
         print!("{}", self.color().bold().paint(self.as_padded_str()));
     }
 }
 
 impl Print<Simple> for Diagnostic {
-    fn print(&self, printer: Simple) {
+    fn print(&self, printer: &mut Simple) {
         self.level().print(printer);
         println!(": {}", Style::new().bold().paint(self.message()));
     }

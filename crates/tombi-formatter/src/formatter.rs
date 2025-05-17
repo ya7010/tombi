@@ -2,7 +2,7 @@ pub mod definitions;
 
 use std::fmt::Write;
 
-use itertools::{Either, Itertools};
+use itertools::Either;
 use tombi_config::{DateTimeDelimiter, IndentStyle, LineEnding, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use unicode_segmentation::UnicodeSegmentation;
@@ -45,14 +45,17 @@ impl<'a> Formatter<'a> {
 
     /// Format a TOML document and return the result as a string
     pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let (parsed, root) = tombi_parser::parsed_and_ast(source);
-
-        let source_schema = self
-            .schema_store
-            .try_get_source_schema_from_ast(&root, self.source_url_or_path)
-            .await
-            .ok()
-            .flatten();
+        let source_schema = if let Some(parsed) =
+            tombi_parser::parse_document_header_comments(source).cast::<tombi_ast::Root>()
+        {
+            self.schema_store
+                .try_get_source_schema_from_ast(&parsed.tree(), self.source_url_or_path)
+                .await
+                .ok()
+                .flatten()
+        } else {
+            None
+        };
 
         self.toml_version = source_schema
             .as_ref()
@@ -64,14 +67,16 @@ impl<'a> Formatter<'a> {
             })
             .unwrap_or(self.toml_version);
 
-        let errors = parsed.errors(self.toml_version).collect_vec();
-        if !errors.is_empty() {
-            let mut diagnostics = Vec::new();
-            for error in errors {
-                error.set_diagnostics(&mut diagnostics);
-            }
-            return Err(diagnostics);
-        }
+        let root = tombi_parser::parse(source, self.toml_version)
+            .try_into_root()
+            .map_err(|errors| {
+                let mut diagnostics = vec![];
+                for error in errors {
+                    error.set_diagnostics(&mut diagnostics);
+                }
+
+                diagnostics
+            })?;
 
         let root = tombi_ast_editor::Editor::new(
             root,

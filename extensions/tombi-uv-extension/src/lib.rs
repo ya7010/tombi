@@ -37,7 +37,8 @@ fn load_pyproject_toml(
         return None;
     };
 
-    let Some(root) = tombi_ast::Root::cast(tombi_parser::parse(&toml_text).into_syntax_node())
+    let Some(root) =
+        tombi_ast::Root::cast(tombi_parser::parse(&toml_text, toml_version).into_syntax_node())
     else {
         return None;
     };

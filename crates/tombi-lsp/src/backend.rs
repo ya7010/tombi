@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use ahash::AHashMap;
-use itertools::{Either, Itertools};
+use itertools::Either;
 use tombi_config::{Config, TomlVersion};
 use tombi_diagnostic::{Diagnostic, SetDiagnostics};
 use tombi_document_tree::TryIntoDocumentTree;
@@ -42,7 +42,7 @@ pub struct Backend {
     #[allow(dead_code)]
     pub client: tower_lsp::Client,
     pub document_sources: Arc<tokio::sync::RwLock<AHashMap<Url, DocumentSource>>>,
-    pub config_dirpath: Option<std::path::PathBuf>,
+    pub config_path: Option<std::path::PathBuf>,
     config: Arc<tokio::sync::RwLock<Config>>,
     pub schema_store: tombi_schema_store::SchemaStore,
 }
@@ -71,7 +71,7 @@ impl Backend {
         Self {
             client,
             document_sources: Default::default(),
-            config_dirpath: config_path.and_then(|path| path.parent().map(ToOwned::to_owned)),
+            config_path,
             config: Arc::new(tokio::sync::RwLock::new(config)),
             schema_store: tombi_schema_store::SchemaStore::new_with_options(options),
         }
@@ -91,7 +91,37 @@ impl Backend {
             }
         };
 
-        Some(tombi_parser::parse(&document_info.source))
+        let source_schema = if let Some(parsed) =
+            tombi_parser::parse_document_header_comments(&document_info.source)
+                .cast::<tombi_ast::Root>()
+        {
+            match self
+                .schema_store
+                .try_get_source_schema_from_ast(
+                    &parsed.tree(),
+                    Some(Either::Left(text_document_uri)),
+                )
+                .await
+            {
+                Ok(Some(schema)) => Some(schema),
+                Ok(None) => None,
+                Err(_) => None,
+            }
+        } else {
+            None
+        };
+
+        let toml_version = source_schema
+            .as_ref()
+            .and_then(|schema| {
+                schema
+                    .root_schema
+                    .as_ref()
+                    .and_then(|root| root.toml_version())
+            })
+            .unwrap_or(self.config.read().await.toml_version.unwrap_or_default());
+
+        Some(tombi_parser::parse(&document_info.source, toml_version))
     }
 
     #[inline]
@@ -107,45 +137,19 @@ impl Backend {
         &self,
         text_document_uri: &Url,
     ) -> Option<Result<tombi_ast::Root, Vec<Diagnostic>>> {
-        self.try_get_ast_and_source_schema(text_document_uri)
-            .await
-            .map(|result| result.map(|(root, _)| root))
-    }
+        Some(
+            self.get_parsed(text_document_uri)
+                .await?
+                .try_into_root()
+                .map_err(|errors| {
+                    let mut diagnostics = vec![];
+                    for error in errors {
+                        error.set_diagnostics(&mut diagnostics);
+                    }
 
-    #[inline]
-    pub async fn try_get_ast_and_source_schema(
-        &self,
-        text_document_uri: &Url,
-    ) -> Option<Result<(tombi_ast::Root, Option<SourceSchema>), Vec<Diagnostic>>> {
-        let Some(parsed) = self
-            .get_parsed(text_document_uri)
-            .await?
-            .cast::<tombi_ast::Root>()
-        else {
-            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
-        };
-        let root = parsed.tree();
-
-        let source_schema = self
-            .schema_store
-            .try_get_source_schema_from_ast(&root, Some(Either::Left(text_document_uri)))
-            .await
-            .ok()
-            .flatten();
-
-        let (toml_version, _) = self.source_toml_version(source_schema.as_ref()).await;
-
-        let errors = parsed.errors(toml_version).collect_vec();
-        if errors.is_empty() {
-            Some(Ok((root, source_schema)))
-        } else {
-            let mut diagnostics = Vec::with_capacity(errors.len());
-            errors.iter().for_each(|error| {
-                error.set_diagnostics(&mut diagnostics);
-            });
-
-            Some(Err(diagnostics))
-        }
+                    diagnostics
+                }),
+        )
     }
 
     #[inline]

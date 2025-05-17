@@ -1,10 +1,10 @@
 mod error;
 
 use itertools::Either;
-use tombi_schema_store::SchemaStore;
 use serde::Serialize;
 use tombi_formatter::formatter::definitions::FormatDefinitions;
 use tombi_formatter::FormatOptions;
+use tombi_schema_store::SchemaStore;
 use tombi_toml_version::TomlVersion;
 use typed_builder::TypedBuilder;
 
@@ -140,8 +140,7 @@ impl Serializer<'_> {
             TomlVersion::default(),
             format_definitions,
             &format_options,
-            self.source_path
-                .map(Either::Right),
+            self.source_path.map(Either::Right),
             schema_store,
         );
 
