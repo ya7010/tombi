@@ -117,12 +117,7 @@ async function downloadAndExtract(url, artifactExtension) {
       writer.on('error', reject);
     });
 
-    // Check temporary file contents
-    console.log(`📂 Temporary file: ${tempFile}`);
-    console.log(`📂 File size: ${fs.statSync(tempFile).size} bytes`);
-
     // Extract
-    console.log('📂 Extracting binary...');
     if (artifactExtension === '.zip') {
       // Handle zip file for Windows
       const AdmZip = require('adm-zip');
