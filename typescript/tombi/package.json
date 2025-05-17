@@ -1,7 +1,7 @@
 {
   "name": "@tombi-toml/tombi",
   "version": "0.0.0",
-  "description": "Installer for the Rust version of tombi binary",
+  "description": "🦅 TOML Toolkit 🦅",
   "bin": {
     "tombi": "./bin/tombi"
   },
