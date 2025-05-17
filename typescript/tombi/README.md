@@ -1,4 +1,4 @@
-# @tombi/cli
+# @tombi/tombi
 
 🦅 Rust binary installer for tombi TOML toolkit
 
