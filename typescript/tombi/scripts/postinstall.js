@@ -9,7 +9,7 @@ const { execSync } = require('child_process');
 const zlib = require('zlib');
 
 // Configuration for downloading binary from GitHub releases
-const GITHUB_URL = `https://github.com/tombi-toml/tombi`;
+const REPO = 'tombi-toml/tombi';
 const BINARY_NAME = 'tombi';
 const BIN_PATH = path.join(__dirname, '..', 'bin');
 
@@ -24,7 +24,7 @@ async function main() {
     console.log(`Detected system: ${target}`);
 
     // Build download URL
-    const downloadUrl = `${GITHUB_URL}/releases/download/v${version}/tombi-cli-${version}-${target}${artifactExtension}`;
+    const downloadUrl = `https://github.com/${REPO}/releases/download/v${version}/tombi-cli-${version}-${target}${artifactExtension}`;
 
     // Create bin directory
     if (!fs.existsSync(BIN_PATH)) {
@@ -50,7 +50,7 @@ async function main() {
 
 async function getLatestVersion() {
   try {
-    const response = await axios.get(`https://api.github.com/repos/tombi-toml/tombi/releases/latest`);
+    const response = await axios.get(`https://api.github.com/repos/${REPO}/releases/latest`);
     return response.data.tag_name.replace('v', '');
   } catch (error) {
     throw new Error(`Failed to get latest version: ${error.message}`);
@@ -117,19 +117,19 @@ async function downloadAndExtract(url, artifactExtension) {
       writer.on('error', reject);
     });
 
-    // 一時ファイルの内容を確認
+    // Check temporary file contents
     console.log(`📂 Temporary file: ${tempFile}`);
     console.log(`📂 File size: ${fs.statSync(tempFile).size} bytes`);
 
     // Extract
     console.log('📂 Extracting binary...');
     if (artifactExtension === '.zip') {
-      // Windowsの場合、zipファイルの処理
+      // Handle zip file for Windows
       const AdmZip = require('adm-zip');
       const zip = new AdmZip(tempFile);
       zip.extractAllTo(BIN_PATH, true);
     } else {
-      // Linux/macOSの場合、tar.gzファイルの処理
+      // Handle tar.gz file for Linux/macOS
       const binaryPath = path.join(BIN_PATH, BINARY_NAME);
       const inp = fs.createReadStream(tempFile);
       const out = fs.createWriteStream(binaryPath);
