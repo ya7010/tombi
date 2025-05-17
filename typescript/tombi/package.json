@@ -9,7 +9,7 @@
     "postinstall": "node ./scripts/postinstall.js"
   },
   "keywords": ["toml", "cli", "formatter", "linter"],
-  "author": "yassun7010",
+  "author": "tombi-toml",
   "license": "MIT",
   "private": false,
   "repository": {
