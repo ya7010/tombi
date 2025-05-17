@@ -95,10 +95,6 @@ jobs:
 
       - uses: ./.github/actions/set-version
 
-      - name: Get TOMBI_VERSION
-        if: matrix.os != 'windows-latest'
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
-
       - name: Rub xtask dist
         run: cargo xtask dist
         env:

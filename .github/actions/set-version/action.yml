@@ -12,3 +12,7 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: cargo xtask set-version >> $env:GITHUB_ENV
+
+    - name: Get TOMBI_VERSION
+      shell: bash
+      run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"

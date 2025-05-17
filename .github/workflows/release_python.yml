@@ -46,8 +46,6 @@ jobs:
           enable-cache: true
       - run: uv python install
       - uses: ./.github/actions/set-version
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -88,8 +86,6 @@ jobs:
           enable-cache: true
       - run: uv python install
       - uses: ./.github/actions/set-version
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -119,9 +115,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install
-      - run: python python/set_version.py >> $env:GITHUB_ENV
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
+      - uses: ./.github/actions/set-version
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -151,8 +145,6 @@ jobs:
           enable-cache: true
       - run: uv python install
       - uses: ./.github/actions/set-version
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -174,8 +166,6 @@ jobs:
           enable-cache: true
       - run: uv python install
       - uses: ./.github/actions/set-version
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -219,8 +209,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/set-version
-      - name: Get TOMBI_VERSION
-        run: echo "TOMBI_VERSION=${{ env.TOMBI_VERSION }}"
       - uses: geekyeggo/delete-artifact@v5
         with:
             name: tombi-py-wheels-${{ env.TOMBI_VERSION }}-*
