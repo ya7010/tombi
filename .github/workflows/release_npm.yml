@@ -25,6 +25,6 @@ jobs:
         run: cd typescript/tombi && npm run build
 
       - name: Publish to NPM
-        run: cd typescript/tombi && npm publish --access public
+        run: cd typescript/tombi && npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
