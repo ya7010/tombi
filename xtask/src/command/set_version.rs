@@ -94,7 +94,7 @@ impl Patch {
     }
 
     fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
-        assert!(self.contents.contains(from));
+        pretty_assertions::assert_eq!(self.contents.contains(from), true);
         self.contents = self.contents.replace(from, to);
         self
     }

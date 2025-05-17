@@ -3216,6 +3216,7 @@ dependencies = [
  "convert_case",
  "flate2",
  "itertools",
+ "pretty_assertions",
  "proc-macro2",
  "quote",
  "schemars",
