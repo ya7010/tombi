@@ -139,16 +139,6 @@ impl Backend {
         &self,
         text_document_uri: &Url,
     ) -> Option<Result<tombi_ast::Root, Vec<Diagnostic>>> {
-        self.try_get_ast_and_source_schema(text_document_uri)
-            .await
-            .map(|result| result.map(|(root, _)| root))
-    }
-
-    #[inline]
-    pub async fn try_get_ast_and_source_schema(
-        &self,
-        text_document_uri: &Url,
-    ) -> Option<Result<(tombi_ast::Root, Option<SourceSchema>), Vec<Diagnostic>>> {
         let Some(parsed) = self
             .get_parsed(text_document_uri)
             .await?
@@ -156,17 +146,9 @@ impl Backend {
         else {
             unreachable!("TOML Root node is always a valid AST node even if source is empty.")
         };
-        let root = parsed.tree();
-
-        let source_schema = self
-            .schema_store
-            .try_get_source_schema_from_ast(&root, Some(Either::Left(text_document_uri)))
-            .await
-            .ok()
-            .flatten();
 
         if parsed.errors.is_empty() {
-            Some(Ok((root, source_schema)))
+            Some(Ok(parsed.tree()))
         } else {
             let mut diagnostics = Vec::with_capacity(parsed.errors.len());
             for error in parsed.errors {
