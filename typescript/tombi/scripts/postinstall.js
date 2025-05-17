@@ -13,8 +13,12 @@ const BIN_PATH = path.join(__dirname, '..', 'bin');
 
 async function main() {
   try {
-    // Get latest version from GitHub API
-    const version = await getLatestVersion();
+    // Get package version
+    const packageJson = require('../package.json');
+    const currentVersion = packageJson.version;
+
+    // Get version to use
+    const version = currentVersion === '0.0.0' ? await getLatestVersion() : currentVersion;
     console.log(`🦅 Installing tombi v${version}...`);
 
     // Determine platform and architecture
