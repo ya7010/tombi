@@ -1,6 +1,6 @@
 {
   "name": "@tombi/cli",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Rust版tombiバイナリのインストーラー",
   "bin": {
     "tombi": "./bin/tombi"
