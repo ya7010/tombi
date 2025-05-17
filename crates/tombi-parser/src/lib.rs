@@ -19,6 +19,10 @@ pub fn parse(source: &str, toml_version: Option<tombi_config::TomlVersion>) -> P
     parse_as::<tombi_ast::Root>(source, toml_version)
 }
 
+/// Parses the source code and returns a syntax tree of the document header comments.
+///
+/// This function checks for schema URL specification in the first comment of the document
+/// and uses it to determine the TOML version information.
 pub fn parse_document_header_comments(source: &str) -> Parsed<SyntaxNode> {
     let lexed = tombi_lexer::lex_document_header_comments(source);
     let mut p = crate::parser::Parser::new(source, None, &lexed.tokens);
