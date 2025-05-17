@@ -144,7 +144,7 @@ impl Backend {
                 .await?
                 .try_into_root()
                 .map_err(|errors| {
-                    let mut diagnostics = Vec::with_capacity(errors.len());
+                    let mut diagnostics = vec![];
                     for error in errors {
                         error.set_diagnostics(&mut diagnostics);
                     }
