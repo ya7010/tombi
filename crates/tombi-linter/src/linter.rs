@@ -62,16 +62,10 @@ impl<'a> Linter<'a> {
             })
             .unwrap_or(self.toml_version);
 
-        let parsed = tombi_parser::parse(source, Some(toml_version));
-
-        for errors in &parsed.errors {
-            errors.set_diagnostics(&mut self.diagnostics);
+        let (root, errors) = tombi_parser::parse(source, Some(toml_version)).into_root_and_errors();
+        for error in errors {
+            error.set_diagnostics(&mut self.diagnostics);
         }
-
-        let root = parsed
-            .cast::<tombi_ast::Root>()
-            .expect("TOML Root node is always a valid AST node even if source is empty.")
-            .tree();
 
         root.lint(&mut self);
 

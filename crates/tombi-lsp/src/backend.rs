@@ -139,24 +139,19 @@ impl Backend {
         &self,
         text_document_uri: &Url,
     ) -> Option<Result<tombi_ast::Root, Vec<Diagnostic>>> {
-        let Some(parsed) = self
-            .get_parsed(text_document_uri)
-            .await?
-            .cast::<tombi_ast::Root>()
-        else {
-            unreachable!("TOML Root node is always a valid AST node even if source is empty.")
-        };
+        Some(
+            self.get_parsed(text_document_uri)
+                .await?
+                .try_into_root()
+                .map_err(|errors| {
+                    let mut diagnostics = Vec::with_capacity(errors.len());
+                    for error in errors {
+                        error.set_diagnostics(&mut diagnostics);
+                    }
 
-        if parsed.errors.is_empty() {
-            Some(Ok(parsed.tree()))
-        } else {
-            let mut diagnostics = Vec::with_capacity(parsed.errors.len());
-            for error in parsed.errors {
-                error.set_diagnostics(&mut diagnostics);
-            }
-
-            Some(Err(diagnostics))
-        }
+                    diagnostics
+                }),
+        )
     }
 
     #[inline]

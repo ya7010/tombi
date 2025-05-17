@@ -66,21 +66,16 @@ impl<'a> Formatter<'a> {
             })
             .unwrap_or(self.toml_version);
 
-        let parsed = tombi_parser::parse(source, Some(self.toml_version));
+        let root = tombi_parser::parse(source, Some(self.toml_version))
+            .try_into_root()
+            .map_err(|errors| {
+                let mut diagnostics = Vec::with_capacity(errors.len());
+                for error in errors {
+                    error.set_diagnostics(&mut diagnostics);
+                }
 
-        let errors = &parsed.errors;
-        if !errors.is_empty() {
-            let mut diagnostics = Vec::new();
-            for error in errors {
-                error.set_diagnostics(&mut diagnostics);
-            }
-            return Err(diagnostics);
-        }
-
-        let root = parsed
-            .cast::<tombi_ast::Root>()
-            .expect("TOML Root node is always a valid AST node even if source is empty.")
-            .tree();
+                diagnostics
+            })?;
 
         let root = tombi_ast_editor::Editor::new(
             root,
