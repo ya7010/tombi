@@ -11,21 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-
+          node-version-file: '.node-version'
+          cache: 'pnpm'
+      - uses: ./.github/actions/set-version
       - name: Install dependencies
-        run: cd typescript/tombi && npm ci
-
-      - name: Build
-        run: cd typescript/tombi && npm run build
+        run: cd typescript/tombi && pnpm install
 
       - name: Publish to NPM
         if: startsWith(github.ref, 'refs/tags/')
-        run: cd typescript/tombi && npm publish
+        run: cd typescript/tombi && pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
