@@ -135,17 +135,16 @@ importers:
         version: 2.1.8(@types/node@22.10.2)(jsdom@26.0.0)(terser@5.38.2)
 
   typescript/tombi:
-    dependencies:
+    devDependencies:
+      adm-zip:
+        specifier: ^0.5.16
+        version: 0.5.16
       axios:
         specifier: ^1.9.0
         version: 1.9.0
       tar:
         specifier: ^6.2.1
         version: 6.2.1
-    devDependencies:
-      adm-zip:
-        specifier: ^0.5.16
-        version: 0.5.16
 
 packages:
 

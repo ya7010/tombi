@@ -3,9 +3,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const tar = require('tar');
 const os = require('os');
-const { execSync } = require('child_process');
 const zlib = require('zlib');
 
 // Configuration for downloading binary from GitHub releases
