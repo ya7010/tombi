@@ -1,4 +1,3 @@
-use tombi_config::TomlVersion;
 use tombi_syntax::{
     SyntaxKind::{self, *},
     T,
@@ -11,15 +10,21 @@ pub(crate) struct Parser<'t> {
     source: &'t str,
     input_tokens: &'t [tombi_lexer::Token],
     pos: usize,
+    pub toml_version: tombi_config::TomlVersion,
     pub tokens: Vec<tombi_lexer::Token>,
     pub(crate) events: Vec<crate::Event>,
 }
 
 impl<'t> Parser<'t> {
-    pub(crate) fn new(source: &'t str, input_tokens: &'t [tombi_lexer::Token]) -> Self {
+    pub(crate) fn new(
+        source: &'t str,
+        toml_version: Option<tombi_config::TomlVersion>,
+        input_tokens: &'t [tombi_lexer::Token],
+    ) -> Self {
         Self {
             source,
             input_tokens,
+            toml_version: toml_version.unwrap_or_default(),
             pos: input_tokens
                 .iter()
                 .enumerate()
@@ -316,19 +321,6 @@ impl<'t> Parser<'t> {
     /// Emit error with the `message`
     #[inline]
     pub(crate) fn error(&mut self, error: crate::Error) {
-        self.push_event(Event::Error {
-            error: crate::TomlVersionedError::Common(error),
-        });
-    }
-
-    /// Emit new syntax error with the `message`
-    #[inline]
-    pub(crate) fn new_syntax_error(&mut self, error: crate::Error, minimum_version: TomlVersion) {
-        self.push_event(Event::Error {
-            error: crate::TomlVersionedError::NewSyntax {
-                error,
-                minimum_version,
-            },
-        });
+        self.push_event(Event::Error { error });
     }
 }

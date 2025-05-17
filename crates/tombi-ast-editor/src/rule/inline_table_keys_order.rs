@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::{SchemaContext, TableSchema};
+use tombi_syntax::SyntaxElement;
 use tombi_x_keyword::TableKeysOrder;
 
 use crate::rule::inline_table_comma_tailing_comment;

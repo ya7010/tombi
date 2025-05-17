@@ -102,7 +102,7 @@ pub enum Step<'a> {
     AddToken { kind: SyntaxKind, text: &'a str },
     StartNode { kind: SyntaxKind },
     FinishNode,
-    Error { error: crate::TomlVersionedError },
+    Error { error: crate::Error },
 }
 
 pub fn intersperse_trivia(

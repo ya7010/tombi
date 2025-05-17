@@ -114,15 +114,14 @@ macro_rules! test_deserialize {
         #[test]
         fn $name() {
             use tombi_ast::AstNode;
-            use itertools::Itertools;
             use tombi_document_tree::IntoDocumentTreeAndErrors;
             use $crate::IntoDocument;
 
             tombi_test_lib::init_tracing();
 
             let source = textwrap::dedent($source);
-            let p = tombi_parser::parse(&source.trim());
-            pretty_assertions::assert_eq!(p.errors($toml_version).collect_vec(), Vec::<&tombi_parser::Error>::new());
+            let p = tombi_parser::parse(&source.trim(), Some($toml_version));
+            pretty_assertions::assert_eq!(p.errors, Vec::<tombi_parser::Error>::new());
             let root = tombi_ast::Root::cast(p.into_syntax_node()).unwrap();
             let (document_tree, errors) = root.into_document_tree_and_errors($toml_version).into();
             pretty_assertions::assert_eq!(errors, vec![]);
@@ -145,16 +144,15 @@ macro_rules! test_deserialize {
             use tombi_document_tree::IntoDocumentTreeAndErrors;
 
             let source = textwrap::dedent($source);
-            let p = tombi_parser::parse(&source.trim());
+            let p = tombi_parser::parse(&source.trim(), Some($toml_version));
             let expected_errors = $errors
                 .into_iter()
                 .map(|(m, r)| (m.to_string(), tombi_text::Range::from(r)))
                 .collect_vec();
 
-            let errors = p.errors($toml_version).collect_vec();
-            if !errors.is_empty() {
+            if !p.errors.is_empty() {
                 pretty_assertions::assert_eq!(
-                    errors
+                    p.errors
                         .iter()
                         .map(|e| (e.to_message(), e.range()))
                         .collect_vec(),

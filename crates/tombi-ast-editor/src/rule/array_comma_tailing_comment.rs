@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use tombi_syntax::SyntaxElement;
 use tombi_ast::AstNode;
 use tombi_schema_store::SchemaContext;
+use tombi_syntax::SyntaxElement;
 
 use crate::{change::Change, node::make_comma_with_tailing_comment};
 

@@ -65,8 +65,6 @@ fn unknwon_line(p: &mut Parser<'_>) {
 
 #[cfg(test)]
 mod test {
-    use itertools::Itertools;
-
     #[test]
     fn test_begin_dangling_comments() {
         let input = r#"
@@ -78,11 +76,8 @@ mod test {
 [table]
         "#
         .trim();
-        let p = crate::parse(input);
+        let p = crate::parse(input, None);
 
-        assert_eq!(
-            p.errors(tombi_config::TomlVersion::default()).collect_vec(),
-            Vec::<&crate::Error>::new()
-        );
+        assert_eq!(p.errors, vec![]);
     }
 }
