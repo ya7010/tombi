@@ -381,7 +381,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                                             Some(
                                                                 current_schema.schema_url.as_ref(),
                                                             ),
-                                                            value_schema.deprecated(),
+                                                            value_schema.deprecated().await,
                                                             completion_hint,
                                                         ),
                                                     );
@@ -427,7 +427,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                             CompletionContent::new_additional_key(
                                                 position,
                                                 Some(schema_url.as_ref()),
-                                                value_schema.deprecated(),
+                                                value_schema.deprecated().await,
                                                 completion_hint,
                                             ),
                                         );
@@ -585,7 +585,7 @@ impl FindCompletionContents for TableSchema {
                                 .await,
                             self.required.as_ref(),
                             Some(current_schema.schema_url.as_ref()),
-                            current_schema.value_schema.deprecated(),
+                            current_schema.value_schema.deprecated().await,
                             completion_hint,
                         ));
                     }
@@ -886,7 +886,7 @@ fn collect_table_key_completion_contents<'a: 'b, 'b>(
                     .await,
                 table_schema.required.as_ref(),
                 Some(&current_schema.schema_url),
-                current_schema.value_schema.deprecated(),
+                current_schema.value_schema.deprecated().await,
                 completion_hint,
             ));
         }
