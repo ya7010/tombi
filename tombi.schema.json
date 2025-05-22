@@ -470,6 +470,18 @@
       "title": "The schema for the sub value.",
       "type": "object",
       "properties": {
+        "root": {
+          "title": "The accessors to apply the sub schema.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "examples": [
+            "tools.tombi",
+            "items[0].name"
+          ],
+          "minLength": 1
+        },
         "path": {
           "title": "The sub schema path.",
           "type": "string"
@@ -482,18 +494,6 @@
             "type": "string"
           },
           "minItems": 1
-        },
-        "root": {
-          "title": "The accessors to apply the sub schema.",
-          "type": [
-            "string",
-            "null"
-          ],
-          "examples": [
-            "tools.tombi",
-            "items[0].name"
-          ],
-          "minLength": 1
         }
       },
       "additionalProperties": false,
