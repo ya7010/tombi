@@ -106,8 +106,8 @@ impl std::fmt::Display for Error {
             f,
             "{} in {}..{}",
             self.kind,
-            self.range.start(),
-            self.range.end()
+            self.range.start,
+            self.range.end
         )
     }
 }

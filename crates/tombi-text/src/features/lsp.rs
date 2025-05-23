@@ -16,8 +16,8 @@ impl From<tower_lsp::lsp_types::Position> for crate::Position {
 impl From<crate::Range> for tower_lsp::lsp_types::Range {
     fn from(val: crate::Range) -> Self {
         tower_lsp::lsp_types::Range {
-            start: val.start().into(),
-            end: val.end().into(),
+            start: val.start.into(),
+            end: val.end.into(),
         }
     }
 }

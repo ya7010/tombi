@@ -74,30 +74,27 @@ impl crate::String {
         match self.kind() {
             StringKind::BasicString(node) => {
                 let mut range = node.token().unwrap().range();
-                range.start().column += 1;
-                range.end().column -= 1;
+                range.start.column += 1;
+                range.end.column -= 1;
                 range
             }
             StringKind::LiteralString(node) => {
-                let range = node.token().unwrap().range();
-                tombi_text::Range::new(
-                    tombi_text::Position::new(range.start().line(), range.start().column() + 1),
-                    tombi_text::Position::new(range.end().line(), range.end().column() - 1),
-                )
+                let mut range = node.token().unwrap().range();
+                range.start.column += 1;
+                range.end.column -= 1;
+                range
             }
             StringKind::MultiLineBasicString(node) => {
-                let range = node.token().unwrap().range();
-                tombi_text::Range::new(
-                    tombi_text::Position::new(range.start().line(), range.start().column() + 3),
-                    tombi_text::Position::new(range.end().line(), range.end().column() - 3),
-                )
+                let mut range = node.token().unwrap().range();
+                range.start.column += 3;
+                range.end.column -= 3;
+                range
             }
             StringKind::MultiLineLiteralString(node) => {
-                let range = node.token().unwrap().range();
-                tombi_text::Range::new(
-                    tombi_text::Position::new(range.start().line(), range.start().column() + 3),
-                    tombi_text::Position::new(range.end().line(), range.end().column() - 3),
-                )
+                let mut range = node.token().unwrap().range();
+                range.start.column += 3;
+                range.end.column -= 3;
+                range
             }
         }
     }
