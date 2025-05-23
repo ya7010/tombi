@@ -250,20 +250,20 @@ fn goto_workspace_member(
             return Ok(None);
         };
 
-        Ok(Some(tombi_extension::DefinitionLocation::new(
-            package_pyproject_toml_uri,
-            tombi_text::Range::default(),
-        )))
+        Ok(Some(tombi_extension::DefinitionLocation {
+            uri: package_pyproject_toml_uri,
+            range: tombi_text::Range::default(),
+        }))
     } else {
         let Ok(workspace_pyproject_toml_uri) = Url::from_file_path(&workspace_pyproject_toml_path)
         else {
             return Ok(None);
         };
 
-        Ok(Some(tombi_extension::DefinitionLocation::new(
-            workspace_pyproject_toml_uri,
-            member_range,
-        )))
+        Ok(Some(tombi_extension::DefinitionLocation {
+            uri: workspace_pyproject_toml_uri,
+            range: member_range,
+        }))
     }
 }
 
