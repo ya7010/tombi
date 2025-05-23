@@ -188,7 +188,7 @@ fn document_link_for_dependency(
                         };
                         return Ok(vec![tombi_extension::DocumentLink {
                             target,
-                            range: crate_key.range(),
+                            range: crate_key.inner_range(),
                             tooltip: DocumentLinkToolTip::CargoToml.to_string(),
                         }]);
                     }
@@ -208,7 +208,7 @@ fn document_link_for_dependency(
             };
 
             return Ok(vec![tombi_extension::DocumentLink {
-                range: crate_key.range(),
+                range: crate_key.inner_range(),
                 target,
                 tooltip: DocumentLinkToolTip::GitRepository.to_string(),
             }]);
@@ -243,7 +243,7 @@ fn document_link_for_dependency(
                 return Ok(Vec::with_capacity(0));
             };
             return Ok(vec![tombi_extension::DocumentLink {
-                range: crate_key.range(),
+                range: crate_key.inner_range(),
                 target,
                 tooltip: DocumentLinkToolTip::CrateIo.to_string(),
             }]);
@@ -255,7 +255,7 @@ fn document_link_for_dependency(
     };
 
     Ok(vec![tombi_extension::DocumentLink {
-        range: crate_key.range(),
+        range: crate_key.inner_range(),
         target,
         tooltip: DocumentLinkToolTip::CrateIo.to_string(),
     }])
