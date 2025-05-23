@@ -554,7 +554,7 @@ fn goto_workspace_member_crates(
 
         locations.push(CrateLocation {
             cargo_toml_path,
-            package_name_key_range: package_name.range(),
+            package_name_key_range: package_name.inner_range(),
         });
     }
 
