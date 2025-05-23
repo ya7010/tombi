@@ -2112,6 +2112,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-extension-tombi"
+version = "0.0.0"
+dependencies = [
+ "tombi-config",
+ "tombi-document-tree",
+ "tombi-extension",
+ "tombi-schema-store",
+ "tombi-text",
+ "tower-lsp",
+ "tracing",
+]
+
+[[package]]
 name = "tombi-extension-uv"
 version = "0.0.0"
 dependencies = [
@@ -2284,6 +2297,7 @@ dependencies = [
  "tombi-document-tree",
  "tombi-extension",
  "tombi-extension-cargo",
+ "tombi-extension-tombi",
  "tombi-extension-uv",
  "tombi-formatter",
  "tombi-json",

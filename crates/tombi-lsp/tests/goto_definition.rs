@@ -189,6 +189,7 @@ mod goto_definition_tests {
                 project_root_path().join("Cargo.toml"),
             ) -> Ok([
                 project_root_path().join("extensions/tombi-extension-cargo/Cargo.toml"),
+                project_root_path().join("extensions/tombi-extension-tombi/Cargo.toml"),
                 project_root_path().join("extensions/tombi-extension-uv/Cargo.toml"),
             ]);
         );

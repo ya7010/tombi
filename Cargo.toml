@@ -58,6 +58,7 @@ tombi-document = { path = "crates/tombi-document" }
 tombi-document-tree = { path = "crates/tombi-document-tree" }
 tombi-extension = { path = "crates/tombi-extension" }
 tombi-extension-cargo = { path = "extensions/tombi-extension-cargo" }
+tombi-extension-tombi = { path = "extensions/tombi-extension-tombi" }
 tombi-extension-uv = { path = "extensions/tombi-extension-uv" }
 tombi-formatter = { path = "crates/tombi-formatter" }
 tombi-json = { path = "crates/tombi-json" }
