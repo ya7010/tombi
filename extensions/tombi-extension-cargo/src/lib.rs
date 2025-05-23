@@ -175,7 +175,7 @@ fn goto_workspace(
                     {
                         return Ok(Some(tombi_extension::DefinitionLocation {
                             uri: Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
-                            range: package_name.range(),
+                            range: package_name.inner_range(),
                         }));
                     }
                 }
@@ -189,7 +189,7 @@ fn goto_workspace(
 
     Ok(Some(tombi_extension::DefinitionLocation {
         uri: workspace_cargo_toml_uri,
-        range: key.range(),
+        range: key.inner_range(),
     }))
 }
 
@@ -235,7 +235,7 @@ fn goto_dependency_crates(
                 {
                     locations.push(tombi_extension::DefinitionLocation {
                         uri: Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
-                        range: package_name.range(),
+                        range: package_name.inner_range(),
                     });
                 }
             }
@@ -286,7 +286,7 @@ fn goto_dependency_crates(
                     if let Some(mut definition_location) =
                         Option::<tombi_extension::DefinitionLocation>::from(crate_location.clone())
                     {
-                        definition_location.range = crate_key.range();
+                        definition_location.range = crate_key.inner_range();
                         locations.push(definition_location);
                     }
                 }
@@ -337,7 +337,7 @@ fn goto_crate_package(
             {
                 return Ok(Some(tombi_extension::DefinitionLocation {
                     uri: Url::from_file_path(subcrate_cargo_toml_path).unwrap(),
-                    range: package_name.range(),
+                    range: package_name.inner_range(),
                 }));
             }
         }
