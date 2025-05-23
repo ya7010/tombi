@@ -339,7 +339,7 @@ fn goto_member_pyprojects(
 
         locations.push(PackageLocation {
             pyproject_toml_path,
-            package_name_key_range: package_name.inner_range(),
+            package_name_key_range: package_name.unquoted_range(),
         });
     }
 
@@ -397,7 +397,7 @@ fn find_member_project_toml(
             tombi_document_tree::dig_keys(&package_project_toml_document_tree, &["project", "name"])
         {
             if name.value() == package_name {
-                return Some((package_project_toml_path, member_item.inner_range()));
+                return Some((package_project_toml_path, member_item.unquoted_range()));
             }
         }
     }

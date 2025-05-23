@@ -38,7 +38,7 @@ pub async fn document_link(
         if let Some(target) = str2url(path.value(), &tombi_toml_path) {
             document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: path.inner_range(),
+                range: path.unquoted_range(),
                 tooltip: DocumentLinkToolTip::Catalog.to_string(),
             });
         };
@@ -60,7 +60,7 @@ pub async fn document_link(
 
             document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: path.inner_range(),
+                range: path.unquoted_range(),
                 tooltip: DocumentLinkToolTip::Schema.to_string(),
             });
         }
