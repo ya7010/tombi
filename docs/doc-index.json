@@ -96,8 +96,8 @@
     "path": "/docs/extensions",
     "children": [
       {
-        "title": "tombi-cargo-extension",
-        "path": "/docs/extensions/tombi-cargo-extension"
+        "title": "tombi-extension-cargo",
+        "path": "/docs/extensions/tombi-extension-cargo"
       },
       {
         "title": "tombi-uv-extension",

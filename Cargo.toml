@@ -51,13 +51,13 @@ thiserror = { version = "2.0.12" }
 tokio = { version = "1.45.0", features = ["fs", "io-std", "rt-multi-thread"] }
 tombi-ast = { path = "crates/tombi-ast" }
 tombi-ast-editor = { path = "crates/tombi-ast-editor" }
-tombi-cargo-extension = { path = "extensions/tombi-cargo-extension" }
 tombi-config = { path = "crates/tombi-config" }
 tombi-date-time = { path = "crates/tombi-date-time" }
 tombi-diagnostic = { path = "crates/tombi-diagnostic" }
 tombi-document = { path = "crates/tombi-document" }
 tombi-document-tree = { path = "crates/tombi-document-tree" }
 tombi-extension = { path = "crates/tombi-extension" }
+tombi-extension-cargo = { path = "extensions/tombi-extension-cargo" }
 tombi-formatter = { path = "crates/tombi-formatter" }
 tombi-json = { path = "crates/tombi-json" }
 tombi-json-lexer = { path = "crates/tombi-json-lexer" }
