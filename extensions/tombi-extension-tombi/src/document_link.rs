@@ -81,7 +81,11 @@ fn str2url(url: &str, tombi_toml_path: &std::path::Path) -> Option<Url> {
         if file_path.is_relative() {
             file_path = tombi_config_dir.join(file_path);
         }
-        Url::from_file_path(file_path).ok()
+        if file_path.exists() {
+            Url::from_file_path(file_path).ok()
+        } else {
+            None
+        }
     } else {
         None
     }
