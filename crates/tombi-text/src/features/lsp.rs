@@ -1,8 +1,8 @@
 impl From<crate::Position> for tower_lsp::lsp_types::Position {
     fn from(val: crate::Position) -> Self {
         tower_lsp::lsp_types::Position {
-            line: val.line(),
-            character: val.column(),
+            line: val.line,
+            character: val.column,
         }
     }
 }

@@ -96,7 +96,7 @@ pub async fn get_completion_contents(
 
             if position < bracket_start_range.start()
                 || (bracket_end_range.end() <= position
-                    && position.line() == bracket_end_range.end().line())
+                    && position.line == bracket_end_range.end().line)
             {
                 return Vec::with_capacity(0);
             } else {
@@ -120,7 +120,7 @@ pub async fn get_completion_contents(
 
             if position < double_bracket_start_range.start()
                 && (double_bracket_end_range.end() <= position
-                    && position.line() == double_bracket_end_range.end().line())
+                    && position.line == double_bracket_end_range.end().line)
             {
                 return Vec::with_capacity(0);
             } else {

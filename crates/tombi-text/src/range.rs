@@ -40,8 +40,8 @@ impl Range {
     #[inline]
     pub fn new_1_based(range: Self) -> Self {
         Self::new(
-            Position::new(range.start().line() + 1, range.start().column() + 1),
-            Position::new(range.end().line() + 1, range.end().column() + 1),
+            Position::new(range.start().line + 1, range.start().column + 1),
+            Position::new(range.end().line + 1, range.end().column + 1),
         )
     }
 
@@ -62,7 +62,7 @@ impl Range {
 
     #[inline]
     pub const fn is_empty(self) -> bool {
-        self.start().line() == self.end().line() && self.start().column() == self.end().column()
+        self.start().line == self.end().line && self.start().column == self.end().column
     }
 
     #[inline]

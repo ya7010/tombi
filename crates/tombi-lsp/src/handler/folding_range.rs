@@ -307,10 +307,10 @@ trait GetFoldingRange {
 
     fn get_region_folding_range(&self) -> Option<FoldingRange> {
         self.get_folding_range().map(|range| FoldingRange {
-            start_line: range.start().line(),
-            start_character: Some(range.start().column()),
-            end_line: range.end().line(),
-            end_character: Some(range.end().column()),
+            start_line: range.start().line,
+            start_character: Some(range.start().column),
+            end_line: range.end().line,
+            end_character: Some(range.end().column),
             kind: Some(FoldingRangeKind::Region),
             collapsed_text: None,
         })
@@ -318,10 +318,10 @@ trait GetFoldingRange {
 
     fn get_comment_folding_range(&self) -> Option<FoldingRange> {
         self.get_folding_range().map(|range| FoldingRange {
-            start_line: range.start().line(),
-            start_character: Some(range.start().column()),
-            end_line: range.end().line(),
-            end_character: Some(range.end().column()),
+            start_line: range.start().line,
+            start_character: Some(range.start().column),
+            end_line: range.end().line,
+            end_character: Some(range.end().column),
             kind: Some(FoldingRangeKind::Comment),
             collapsed_text: None,
         })
@@ -437,7 +437,7 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::BeginDanglingComment>> {
             .rev()
             .next()?;
 
-        if first.syntax().range().start().line() == last.syntax().range().end().line() {
+        if first.syntax().range().start().line == last.syntax().range().end().line {
             return None;
         }
 
@@ -465,7 +465,7 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::EndDanglingComment>> {
             .rev()
             .next()?;
 
-        if first.syntax().range().start().line() == last.syntax().range().end().line() {
+        if first.syntax().range().start().line == last.syntax().range().end().line {
             return None;
         }
 
