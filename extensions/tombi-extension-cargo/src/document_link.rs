@@ -13,7 +13,7 @@ impl std::fmt::Display for DocumentLinkToolTip {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             DocumentLinkToolTip::GitRepository => write!(f, "Open Git Repository"),
-            DocumentLinkToolTip::CrateIo => write!(f, "Open CrateIo"),
+            DocumentLinkToolTip::CrateIo => write!(f, "Open crate.io"),
             DocumentLinkToolTip::CargoToml => write!(f, "Open Cargo.toml"),
         }
     }

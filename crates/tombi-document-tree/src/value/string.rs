@@ -70,6 +70,15 @@ impl crate::String {
     }
 
     #[inline]
+    pub fn inner_range(&self) -> tombi_text::Range {
+        let range = self.range();
+        tombi_text::Range::new(
+            tombi_text::Position::new(range.start().line(), range.start().column() + 1),
+            tombi_text::Position::new(range.end().line(), range.end().column() - 1),
+        )
+    }
+
+    #[inline]
     pub fn symbol_range(&self) -> tombi_text::Range {
         self.range()
     }
