@@ -71,11 +71,36 @@ impl crate::String {
 
     #[inline]
     pub fn inner_range(&self) -> tombi_text::Range {
-        let range = self.range();
-        tombi_text::Range::new(
-            tombi_text::Position::new(range.start().line(), range.start().column() + 1),
-            tombi_text::Position::new(range.end().line(), range.end().column() - 1),
-        )
+        match self.kind() {
+            StringKind::BasicString(node) => {
+                let range = node.token().unwrap().range();
+                tombi_text::Range::new(
+                    tombi_text::Position::new(range.start().line(), range.start().column() + 1),
+                    tombi_text::Position::new(range.end().line(), range.end().column() - 1),
+                )
+            }
+            StringKind::LiteralString(node) => {
+                let range = node.token().unwrap().range();
+                tombi_text::Range::new(
+                    tombi_text::Position::new(range.start().line(), range.start().column() + 1),
+                    tombi_text::Position::new(range.end().line(), range.end().column() - 1),
+                )
+            }
+            StringKind::MultiLineBasicString(node) => {
+                let range = node.token().unwrap().range();
+                tombi_text::Range::new(
+                    tombi_text::Position::new(range.start().line(), range.start().column() + 3),
+                    tombi_text::Position::new(range.end().line(), range.end().column() - 3),
+                )
+            }
+            StringKind::MultiLineLiteralString(node) => {
+                let range = node.token().unwrap().range();
+                tombi_text::Range::new(
+                    tombi_text::Position::new(range.start().line(), range.start().column() + 3),
+                    tombi_text::Position::new(range.end().line(), range.end().column() - 3),
+                )
+            }
+        }
     }
 
     #[inline]
