@@ -2112,6 +2112,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-extension-uv"
+version = "0.0.0"
+dependencies = [
+ "glob",
+ "itertools",
+ "tombi-ast",
+ "tombi-config",
+ "tombi-document-tree",
+ "tombi-extension",
+ "tombi-parser",
+ "tombi-schema-store",
+ "tombi-test-lib",
+ "tombi-text",
+ "tower-lsp",
+ "tracing",
+]
+
+[[package]]
 name = "tombi-formatter"
 version = "0.0.0"
 dependencies = [
@@ -2266,6 +2284,7 @@ dependencies = [
  "tombi-document-tree",
  "tombi-extension",
  "tombi-extension-cargo",
+ "tombi-extension-uv",
  "tombi-formatter",
  "tombi-json",
  "tombi-linter",
@@ -2274,7 +2293,6 @@ dependencies = [
  "tombi-syntax",
  "tombi-test-lib",
  "tombi-text",
- "tombi-uv-extension",
  "tombi-validator",
  "tombi-x-keyword",
  "tower-lsp",
@@ -2389,24 +2407,6 @@ dependencies = [
  "clap",
  "schemars",
  "serde",
-]
-
-[[package]]
-name = "tombi-uv-extension"
-version = "0.0.0"
-dependencies = [
- "glob",
- "itertools",
- "tombi-ast",
- "tombi-config",
- "tombi-document-tree",
- "tombi-extension",
- "tombi-parser",
- "tombi-schema-store",
- "tombi-test-lib",
- "tombi-text",
- "tower-lsp",
- "tracing",
 ]
 
 [[package]]

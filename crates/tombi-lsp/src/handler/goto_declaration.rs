@@ -69,7 +69,7 @@ pub async fn handle_goto_declaration(
         return Ok(locations.into());
     }
 
-    if let Some(locations) = tombi_uv_extension::goto_declaration(
+    if let Some(locations) = tombi_extension_uv::goto_declaration(
         &text_document,
         &document_tree,
         &accessors,

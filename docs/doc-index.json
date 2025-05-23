@@ -100,8 +100,8 @@
         "path": "/docs/extensions/tombi-extension-cargo"
       },
       {
-        "title": "tombi-uv-extension",
-        "path": "/docs/extensions/tombi-uv-extension"
+        "title": "tombi-extension-uv",
+        "path": "/docs/extensions/tombi-extension-uv"
       }
     ]
   },
