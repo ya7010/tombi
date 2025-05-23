@@ -50,7 +50,7 @@ impl Diagnostic {
 
     #[inline]
     pub fn position(&self) -> tombi_text::Position {
-        self.range.start()
+        self.range.start
     }
 
     #[inline]

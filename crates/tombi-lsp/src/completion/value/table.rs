@@ -78,7 +78,7 @@ impl FindCompletionContents for tombi_document_tree::Table {
                                         Some(
                                             CompletionHint::DotTrigger { range, .. }
                                             | CompletionHint::EqualTrigger { range, .. },
-                                        ) => range.end() <= key.range().start(),
+                                        ) => range.end <= key.range().start,
                                         Some(
                                             CompletionHint::InArray | CompletionHint::InTableHeader,
                                         ) => false,
@@ -694,7 +694,7 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                 ) => {
                     let key = keys.first().unwrap();
                     if current_schema.is_none() {
-                        if range.end() <= key.range().start() {
+                        if range.end <= key.range().start {
                             return vec![CompletionContent::new_type_hint_key(
                                 key,
                                 schema_context.toml_version,
