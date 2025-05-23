@@ -78,7 +78,7 @@ impl Key {
     }
 
     #[inline]
-    pub fn inner_range(&self) -> tombi_text::Range {
+    pub fn unquoted_range(&self) -> tombi_text::Range {
         match self.kind {
             KeyKind::BareKey => self.range,
             KeyKind::BasicString | KeyKind::LiteralString => {

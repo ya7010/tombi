@@ -70,7 +70,7 @@ impl crate::String {
     }
 
     #[inline]
-    pub fn inner_range(&self) -> tombi_text::Range {
+    pub fn unquoted_range(&self) -> tombi_text::Range {
         match self.kind() {
             StringKind::BasicString(node) => {
                 let mut range = node.token().unwrap().range();
