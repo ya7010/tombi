@@ -422,18 +422,13 @@ impl GetFoldingRange for Vec<tombi_ast::LeadingComment> {
 
 impl GetFoldingRange for Vec<Vec<tombi_ast::BeginDanglingComment>> {
     fn get_folding_range(&self) -> Option<tombi_text::Range> {
-        let first = self
-            .iter()
-            .skip_while(|group| group.is_empty())
-            .next()?
-            .iter()
-            .next()?;
+        let first = self.iter().find(|group| !group.is_empty())?.iter().next()?;
         let last = self
             .iter()
             .rev()
-            .skip_while(|group| group.is_empty())
-            .next()?
-            .iter().next_back()?;
+            .find(|group| !group.is_empty())?
+            .iter()
+            .next_back()?;
 
         if first.syntax().range().start.line == last.syntax().range().end.line {
             return None;
@@ -448,18 +443,13 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::BeginDanglingComment>> {
 
 impl GetFoldingRange for Vec<Vec<tombi_ast::EndDanglingComment>> {
     fn get_folding_range(&self) -> Option<tombi_text::Range> {
-        let first = self
-            .iter()
-            .skip_while(|group| group.is_empty())
-            .next()?
-            .iter()
-            .next()?;
+        let first = self.iter().find(|group| !group.is_empty())?.iter().next()?;
         let last = self
             .iter()
             .rev()
-            .skip_while(|group| group.is_empty())
-            .next()?
-            .iter().next_back()?;
+            .find(|group| !group.is_empty())?
+            .iter()
+            .next_back()?;
 
         if first.syntax().range().start.line == last.syntax().range().end.line {
             return None;
