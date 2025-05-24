@@ -7,7 +7,7 @@ mod value;
 
 use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
-use constraints::DataConstraints;
+use constraints::ValueConstraints;
 use futures::future::BoxFuture;
 use tombi_schema_store::{
     get_schema_name, Accessor, Accessors, CurrentSchema, SchemaUrl, ValueType,
@@ -60,7 +60,7 @@ pub struct HoverContent {
     pub description: Option<String>,
     pub accessors: Accessors,
     pub value_type: ValueType,
-    pub constraints: Option<DataConstraints>,
+    pub constraints: Option<ValueConstraints>,
     pub schema_url: Option<SchemaUrl>,
     pub range: Option<tombi_text::Range>,
 }
