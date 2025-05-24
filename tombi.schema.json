@@ -151,7 +151,7 @@
         "key-empty": {
           "anyOf": [
             {
-              "$ref": "#/definitions/WarnSeverityLevel"
+              "$ref": "#/definitions/SeverityLevelDefaultWarn"
             },
             {
               "type": "null"
@@ -162,7 +162,7 @@
       "additionalProperties": false,
       "x-tombi-table-keys-order": "schema"
     },
-    "WarnSeverityLevel": {
+    "SeverityLevelDefaultWarn": {
       "default": "warn",
       "allOf": [
         {

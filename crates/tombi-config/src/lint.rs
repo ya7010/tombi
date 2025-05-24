@@ -21,7 +21,7 @@ impl LintOptions {
 #[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = tombi_x_keyword::TableKeysOrder::Schema)))]
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct LintRules {
-    pub key_empty: Option<WarnSeverityLevel>,
+    pub key_empty: Option<SeverityLevelDefaultWarn>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -57,6 +57,6 @@ macro_rules! severity_level_wrapper {
     };
 }
 
-severity_level_wrapper!(WarnSeverityLevel, Warn, "warn");
-severity_level_wrapper!(ErrorSeverityLevel, Error, "error");
-severity_level_wrapper!(OffSeverityLevel, Off, "off");
+severity_level_wrapper!(SeverityLevelDefaultWarn, Warn, "warn");
+severity_level_wrapper!(SeverityLevelDefaultError, Error, "error");
+severity_level_wrapper!(SeverityLevelDefaultOff, Off, "off");
