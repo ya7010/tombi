@@ -676,6 +676,7 @@ mod tests {
 
     use super::*;
     use serde::Deserialize;
+    use std::str::FromStr;
 
     #[test]
     fn test_deserialize_null() {

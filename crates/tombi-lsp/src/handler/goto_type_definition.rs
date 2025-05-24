@@ -1,5 +1,6 @@
 use itertools::Either;
 use reqwest::Client;
+use std::str::FromStr;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tombi_schema_store::SchemaContext;
 use tower_lsp::lsp_types::{
