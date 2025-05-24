@@ -232,6 +232,21 @@ mod goto_definition_tests {
         );
     }
 
+    mod tombi_schema {
+        use super::*;
+
+        test_goto_definition!(
+            #[tokio::test]
+            async fn schema_catalog_path(
+                r#"
+                [[schemas]]
+                path = "█tombi.schema.json"
+                "#,
+                project_root_path().join("tombi.toml"),
+            ) -> Ok([project_root_path().join("tombi.schema.json")]);
+        );
+    }
+
     #[macro_export]
     macro_rules! test_goto_definition {
         (#[tokio::test] async fn $name:ident(
