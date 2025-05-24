@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
-use futures::FutureExt;
 use itertools::Itertools;
 use tombi_document_tree::IntoDocumentTreeAndErrors;
+use tombi_future::{BoxFuture, Boxable};
 use tombi_schema_store::{CurrentSchema, GetHeaderSchemarAccessors, SchemaAccessor};
 
 use crate::{edit::get_schema, rule::table_keys_order};
@@ -13,7 +13,7 @@ impl crate::Edit for tombi_ast::ArrayOfTable {
         _accessors: &'a [tombi_schema_store::SchemaAccessor],
         current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
         schema_context: &'a tombi_schema_store::SchemaContext<'a>,
-    ) -> futures::future::BoxFuture<'b, Vec<crate::Change>> {
+    ) -> BoxFuture<'b, Vec<crate::Change>> {
         tracing::trace!("current_schema = {:?}", current_schema);
 
         async move {

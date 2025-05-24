@@ -1,10 +1,10 @@
 use std::{ops::Deref, sync::Arc};
 
 use ahash::AHashMap;
-use futures::{future::BoxFuture, FutureExt};
 use itertools::Either;
 use tokio::sync::RwLock;
 use tombi_config::{Schema, SchemaOptions};
+use tombi_future::{BoxFuture, Boxable};
 
 use crate::{
     json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,

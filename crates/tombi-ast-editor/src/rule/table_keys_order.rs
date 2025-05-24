@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
-use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
 use itertools::Itertools;
 use tombi_ast::AstNode;
+use tombi_future::{BoxFuture, Boxable};
 use tombi_schema_store::{
     AllOfSchema, AnyOfSchema, CurrentSchema, OneOfSchema, PropertySchema, SchemaAccessor,
     SchemaContext, ValueSchema,

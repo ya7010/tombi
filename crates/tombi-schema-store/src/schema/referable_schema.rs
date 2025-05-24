@@ -1,10 +1,9 @@
 use std::borrow::Cow;
 
-use futures::future::BoxFuture;
-
 use crate::x_taplo::XTaplo;
 
 use super::{AllOfSchema, AnyOfSchema, OneOfSchema, SchemaDefinitions, SchemaUrl, ValueSchema};
+use tombi_future::BoxFuture;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Referable<T> {

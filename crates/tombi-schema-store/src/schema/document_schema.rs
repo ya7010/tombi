@@ -1,6 +1,6 @@
 use ahash::AHashMap;
-use futures::{future::BoxFuture, FutureExt};
 use tombi_config::TomlVersion;
+use tombi_future::{BoxFuture, Boxable};
 
 use super::{
     referable_schema::Referable, FindSchemaCandidates, SchemaDefinitions, SchemaUrl, ValueSchema,
