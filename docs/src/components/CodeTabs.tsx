@@ -9,8 +9,8 @@ export type Tab = {
 
 type CodeTabsProps = {
   tabs: Tab[];
-  defaultKey?: string;
-  language?: string;
+  defaultKey: string;
+  language: string;
 };
 
 export default function CodeTabs(props: CodeTabsProps) {
@@ -44,10 +44,7 @@ export default function CodeTabs(props: CodeTabsProps) {
           </button>
         )}
       </For>
-      <CodeBlock
-        code={current()?.command || ""}
-        language={props.language || "bash"}
-      />
+      <CodeBlock code={current()?.command || ""} language={props.language} />
     </div>
   );
 }
