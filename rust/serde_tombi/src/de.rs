@@ -572,13 +572,13 @@ key4 = "value4"
         }
 
         let toml = r#"
-mixed = [42, 3.14, "hello", true]
+mixed = [42, 3.02, "hello", true]
 "#;
 
         let expected = MixedTypeArray {
             mixed: vec![
                 MixedType::Integer(42),
-                MixedType::Float(3.14),
+                MixedType::Float(3.02),
                 MixedType::String("hello".to_string()),
                 MixedType::Boolean(true),
             ],
