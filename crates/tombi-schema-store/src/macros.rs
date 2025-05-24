@@ -85,6 +85,7 @@ mod tests {
         ));
 
         // Empty pattern
+        #[clippy::assertions_on_constants]
         assert!(!match_accessors!(&accessors, []));
 
         // Empty accessors
