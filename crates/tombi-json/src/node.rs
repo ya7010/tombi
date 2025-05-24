@@ -243,8 +243,14 @@ pub struct ArrayNode {
 }
 
 impl ArrayNode {
+    #[inline]
     pub fn len(&self) -> usize {
         self.items.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.items.is_empty()
     }
 }
 
@@ -272,8 +278,14 @@ impl ObjectNode {
         self.properties.get(key)
     }
 
+    #[inline]
     pub fn len(&self) -> usize {
         self.properties.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.properties.is_empty()
     }
 }
 
