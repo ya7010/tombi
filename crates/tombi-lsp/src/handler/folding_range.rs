@@ -433,9 +433,7 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::BeginDanglingComment>> {
             .rev()
             .skip_while(|group| group.is_empty())
             .next()?
-            .iter()
-            .rev()
-            .next()?;
+            .iter().next_back()?;
 
         if first.syntax().range().start.line == last.syntax().range().end.line {
             return None;
@@ -461,9 +459,7 @@ impl GetFoldingRange for Vec<Vec<tombi_ast::EndDanglingComment>> {
             .rev()
             .skip_while(|group| group.is_empty())
             .next()?
-            .iter()
-            .rev()
-            .next()?;
+            .iter().next_back()?;
 
         if first.syntax().range().start.line == last.syntax().range().end.line {
             return None;

@@ -41,10 +41,10 @@ pub async fn handle_document_link(
     if let Some((Ok(schema_url), range)) =
         root.file_schema_url(text_document.uri.to_file_path().ok().as_deref())
     {
-        let tooltip = format!("Open JSON Schema");
+        let tooltip = "Open JSON Schema".to_string();
         document_links.push(
             tombi_extension::DocumentLink {
-                range: range.into(),
+                range,
                 target: schema_url,
                 tooltip,
             }
