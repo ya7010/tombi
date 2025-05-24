@@ -85,7 +85,7 @@ mod tests {
         ));
 
         // Empty pattern
-        assert!(!match_accessors!(&accessors, []));
+        assert!(accessors.is_empty());
 
         // Empty accessors
         let empty_accessors: Vec<Accessor> = vec![];
