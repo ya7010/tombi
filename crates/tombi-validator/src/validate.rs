@@ -17,8 +17,8 @@ use std::borrow::Cow;
 
 use all_of::validate_all_of;
 use any_of::validate_any_of;
-use futures::{future::BoxFuture, FutureExt};
 use one_of::validate_one_of;
+use tombi_future::{BoxFuture, Boxable};
 use tombi_schema_store::CurrentSchema;
 
 pub trait Validate {

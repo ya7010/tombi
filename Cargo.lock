@@ -1969,6 +1969,7 @@ dependencies = [
  "thiserror",
  "tombi-ast",
  "tombi-document-tree",
+ "tombi-future",
  "tombi-parser",
  "tombi-schema-store",
  "tombi-syntax",
@@ -2172,6 +2173,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-future"
+version = "0.0.0"
+dependencies = [
+ "futures",
+]
+
+[[package]]
 name = "tombi-json"
 version = "0.0.0"
 dependencies = [
@@ -2369,6 +2377,7 @@ dependencies = [
  "tombi-config",
  "tombi-document",
  "tombi-document-tree",
+ "tombi-future",
  "tombi-json",
  "tombi-text",
  "tombi-x-keyword",
@@ -2433,6 +2442,7 @@ dependencies = [
  "thiserror",
  "tombi-diagnostic",
  "tombi-document-tree",
+ "tombi-future",
  "tombi-schema-store",
  "tombi-text",
  "tracing",
