@@ -1,6 +1,4 @@
 use tombi_config::TomlVersion;
-use tombi_document_tree::dig_keys;
-use tombi_extension::DefinitionLocations;
 use tombi_schema_store::dig_accessors;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
@@ -9,14 +7,14 @@ pub async fn goto_definition(
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[tombi_schema_store::Accessor],
     _toml_version: TomlVersion,
-) -> Result<Option<tombi_extension::DefinitionLocations>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<Vec<tombi_extension::DefinitionLocation>>, tower_lsp::jsonrpc::Error> {
     // Check if current file is tombi.toml
     if !text_document.uri.path().ends_with("tombi.toml") {
-        return Ok(None);
+        return Ok(Default::default());
     }
 
     let Some(tombi_toml_path) = text_document.uri.to_file_path().ok() else {
-        return Ok(None);
+        return Ok(Default::default());
     };
 
     let mut locations = vec![];
@@ -38,5 +36,5 @@ pub async fn goto_definition(
         return Ok(None);
     }
 
-    Ok(Some(DefinitionLocations(locations)))
+    Ok(Some(locations))
 }
