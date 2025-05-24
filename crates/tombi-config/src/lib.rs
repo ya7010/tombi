@@ -7,7 +7,7 @@ mod types;
 
 pub use error::Error;
 pub use format::FormatOptions;
-pub use lint::LintOptions;
+pub use lint::{LintOptions, SeverityLevel};
 pub use schema::SchemaOptions;
 pub use schema::{RootSchema, Schema, SubSchema};
 pub use server::{LspCompletion, LspOptions};
