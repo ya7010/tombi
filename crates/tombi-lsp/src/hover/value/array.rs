@@ -83,7 +83,8 @@ impl GetHoverContent for tombi_document_tree::Array {
                                             .await?;
 
                                         if keys.is_empty()
-                                            && self.kind() == tombi_document_tree::ArrayKind::ArrayOfTable
+                                            && self.kind()
+                                                == tombi_document_tree::ArrayKind::ArrayOfTable
                                         {
                                             if let Some(constraints) =
                                                 &mut hover_content.constraints
