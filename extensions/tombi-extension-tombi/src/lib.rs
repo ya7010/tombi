@@ -1,7 +1,7 @@
 mod document_link;
 mod goto_definition;
 
-pub use document_link::document_link;
+pub use document_link::{document_link, DocumentLinkToolTip};
 pub use goto_definition::goto_definition;
 use tower_lsp::lsp_types::Url;
 

@@ -10,8 +10,8 @@ pub enum DocumentLinkToolTip {
 impl std::fmt::Display for DocumentLinkToolTip {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DocumentLinkToolTip::Catalog => write!(f, "Open Catalog"),
-            DocumentLinkToolTip::Schema => write!(f, "Open Schema"),
+            DocumentLinkToolTip::Catalog => write!(f, "Open JSON Schema Catalog"),
+            DocumentLinkToolTip::Schema => write!(f, "Open JSON Schema"),
         }
     }
 }
