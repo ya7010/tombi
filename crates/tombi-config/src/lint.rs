@@ -5,6 +5,7 @@
 #[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = tombi_x_keyword::TableKeysOrder::Schema)))]
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct LintOptions {
+    /// # Lint rules.
     pub rules: Option<LintRules>,
 }
 
@@ -21,6 +22,12 @@ impl LintOptions {
 #[cfg_attr(feature = "jsonschema", schemars(extend("x-tombi-table-keys-order" = tombi_x_keyword::TableKeysOrder::Schema)))]
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct LintRules {
+    /// # Key empty.
+    ///
+    /// Check if the key is empty.
+    /// ```toml
+    /// "" = true
+    /// ```
     pub key_empty: Option<SeverityLevelDefaultWarn>,
 }
 

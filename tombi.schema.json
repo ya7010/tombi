@@ -132,6 +132,7 @@
       "type": "object",
       "properties": {
         "rules": {
+          "title": "Lint rules.",
           "anyOf": [
             {
               "$ref": "#/definitions/LintRules"
@@ -149,6 +150,8 @@
       "type": "object",
       "properties": {
         "key-empty": {
+          "title": "Key empty.",
+          "description": "Check if the key is empty.\n ```toml\n \"\" = true\n ```",
           "anyOf": [
             {
               "$ref": "#/definitions/SeverityLevelDefaultWarn"
