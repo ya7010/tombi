@@ -7,7 +7,7 @@ use tombi_schema_store::{
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    constraints::DataConstraints, one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
+    constraints::ValueConstraints, one_of::get_one_of_hover_content, GetHoverContent, HoverContent,
 };
 
 impl GetHoverContent for tombi_document_tree::Array {
@@ -230,7 +230,7 @@ impl GetHoverContent for ArraySchema {
                 description: self.description.clone(),
                 accessors: Accessors::new(accessors.to_vec()),
                 value_type: ValueType::Array,
-                constraints: Some(DataConstraints {
+                constraints: Some(ValueConstraints {
                     min_items: self.min_items,
                     max_items: self.max_items,
                     unique_items: self.unique_items,

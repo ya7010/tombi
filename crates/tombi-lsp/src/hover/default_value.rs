@@ -12,6 +12,31 @@ pub enum DefaultValue {
     Table(Vec<(String, DefaultValue)>),
 }
 
+impl TryFrom<&tombi_json::Value> for DefaultValue {
+    type Error = ();
+
+    fn try_from(value: &tombi_json::Value) -> Result<Self, Self::Error> {
+        match value {
+            tombi_json::Value::Bool(boolean) => Ok(DefaultValue::Boolean(*boolean)),
+            tombi_json::Value::Number(number) => match number {
+                tombi_json::Number::Integer(integer) => Ok(DefaultValue::Integer(*integer)),
+                tombi_json::Number::Float(float) => Ok(DefaultValue::Float(*float)),
+            },
+            tombi_json::Value::String(string) => Ok(DefaultValue::String(string.clone())),
+            tombi_json::Value::Array(array) => Ok(DefaultValue::Array(
+                array.iter().map(|item| item.try_into().unwrap()).collect(),
+            )),
+            tombi_json::Value::Object(object) => Ok(DefaultValue::Table(
+                object
+                    .iter()
+                    .map(|(key, value)| (key.clone(), value.try_into().unwrap()))
+                    .collect(),
+            )),
+            tombi_json::Value::Null => Err(()),
+        }
+    }
+}
+
 impl std::fmt::Display for DefaultValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

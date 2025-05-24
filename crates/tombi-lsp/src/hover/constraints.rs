@@ -3,7 +3,7 @@ use tombi_x_keyword::{ArrayValuesOrder, TableKeysOrder};
 use super::default_value::DefaultValue;
 
 #[derive(Debug, Clone, Default)]
-pub struct DataConstraints {
+pub struct ValueConstraints {
     // Common
     pub enumerate: Option<Vec<DefaultValue>>,
     pub default: Option<DefaultValue>,
@@ -34,7 +34,7 @@ pub struct DataConstraints {
     pub keys_order: Option<TableKeysOrder>,
 }
 
-impl std::fmt::Display for DataConstraints {
+impl std::fmt::Display for ValueConstraints {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(enumerate) = &self.enumerate {
             write!(f, "Enumerated Values:\n\n")?;
