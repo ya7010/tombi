@@ -61,6 +61,7 @@ tombi-extension-cargo = { path = "extensions/tombi-extension-cargo" }
 tombi-extension-tombi = { path = "extensions/tombi-extension-tombi" }
 tombi-extension-uv = { path = "extensions/tombi-extension-uv" }
 tombi-formatter = { path = "crates/tombi-formatter" }
+tombi-future = { path = "crates/tombi-future" }
 tombi-json = { path = "crates/tombi-json" }
 tombi-json-lexer = { path = "crates/tombi-json-lexer" }
 tombi-json-syntax = { path = "crates/tombi-json-syntax" }

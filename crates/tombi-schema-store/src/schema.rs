@@ -20,6 +20,7 @@ mod table_schema;
 mod value_schema;
 
 use std::sync::Arc;
+use tombi_future::BoxFuture;
 
 use crate::{Accessor, SchemaStore};
 pub use all_of_schema::AllOfSchema;
@@ -28,7 +29,6 @@ pub use array_schema::ArraySchema;
 pub use boolean_schema::BooleanSchema;
 pub use document_schema::DocumentSchema;
 pub use float_schema::FloatSchema;
-use futures::future::BoxFuture;
 pub use integer_schema::IntegerSchema;
 pub use local_date_schema::LocalDateSchema;
 pub use local_date_time_schema::LocalDateTimeSchema;

@@ -1,9 +1,7 @@
 use std::{borrow::Cow, sync::Arc};
 
-use futures::{
-    future::{join_all, BoxFuture},
-    FutureExt,
-};
+use futures::future::join_all;
+use tombi_future::{BoxFuture, Boxable};
 use tombi_json::StringNode;
 
 use super::{

@@ -1,8 +1,8 @@
 use std::{borrow::Cow, sync::Arc};
 
 use ahash::AHashMap;
-use futures::{future::BoxFuture, FutureExt};
 use indexmap::IndexMap;
+use tombi_future::{BoxFuture, Boxable};
 use tombi_json::StringNode;
 use tombi_x_keyword::{TableKeysOrder, X_TOMBI_TABLE_KEYS_ORDER};
 
