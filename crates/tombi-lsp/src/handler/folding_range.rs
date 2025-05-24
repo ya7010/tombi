@@ -216,10 +216,10 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                 .leading_comments()
                 .collect_vec()
                 .get_comment_folding_range()]
+            .into_iter()
+            .flatten()
             {
-                if let Some(folding_range) = folding_range {
-                    ranges.push(folding_range);
-                }
+                ranges.push(folding_range);
             }
         } else if let Some(array) = tombi_ast::Array::cast(node.to_owned()) {
             for folding_range in [
@@ -234,10 +234,11 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                 array
                     .inner_end_dangling_comments()
                     .get_comment_folding_range(),
-            ] {
-                if let Some(folding_range) = folding_range {
-                    ranges.push(folding_range);
-                }
+            ]
+            .into_iter()
+            .flatten()
+            {
+                ranges.push(folding_range);
             }
             for (_, comma) in array.values_with_comma() {
                 let Some(comma) = comma else {
@@ -265,10 +266,11 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                 inline_table
                     .inner_end_dangling_comments()
                     .get_comment_folding_range(),
-            ] {
-                if let Some(folding_range) = folding_range {
-                    ranges.push(folding_range);
-                }
+            ]
+            .into_iter()
+            .flatten()
+            {
+                ranges.push(folding_range);
             }
             for (_, comma) in inline_table.key_values_with_comma() {
                 let Some(comma) = comma else {
@@ -289,12 +291,11 @@ fn create_folding_ranges(root: tombi_ast::Root) -> Vec<FoldingRange> {
                     .get_comment_folding_range(),
                 root.key_values_end_dangling_comments()
                     .get_comment_folding_range(),
-            ] {
-                {
-                    if let Some(folding_range) = folding_range {
-                        ranges.push(folding_range);
-                    }
-                }
+            ]
+            .into_iter()
+            .flatten()
+            {
+                ranges.push(folding_range);
             }
         }
     }

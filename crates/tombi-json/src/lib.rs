@@ -704,10 +704,10 @@ mod tests {
         assert!(value_node.is_number());
         pretty_assertions::assert_eq!(value_node.as_f64(), Some(42.0));
 
-        let json = "-3.14";
+        let json = "-3.02";
         let value_node = ValueNode::from_str(json).unwrap();
         assert!(value_node.is_number());
-        pretty_assertions::assert_eq!(value_node.as_f64(), Some(-3.14));
+        pretty_assertions::assert_eq!(value_node.as_f64(), Some(-3.02));
     }
 
     #[test]
