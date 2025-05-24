@@ -46,7 +46,7 @@ pub async fn handle_goto_type_definition(
         return Ok(None);
     }
 
-    let position = tombi_text::Position::from(position);
+    let position = position.into();
     let Some(root) = backend.get_incomplete_ast(&text_document.uri).await else {
         return Ok(None);
     };
@@ -59,7 +59,6 @@ pub async fn handle_goto_type_definition(
         .flatten();
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
-    let position = position;
 
     let Some((keys, range)) = get_hover_keys_and_range(&root, position, toml_version).await else {
         return Ok(None);
