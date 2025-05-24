@@ -858,7 +858,7 @@ mod tests {
             Red,
             Green,
             Blue,
-            RGB(u8, u8, u8),
+            Rgb(u8, u8, u8),
             HexCode(String),
         }
 
@@ -866,9 +866,9 @@ mod tests {
         let color: Color = from_str(json).unwrap();
         pretty_assertions::assert_eq!(color, Color::Red);
 
-        let json = r#"{"RGB": [255, 255, 255]}"#;
+        let json = r#"{"Rgb": [255, 255, 255]}"#;
         let color: Color = from_str(json).unwrap();
-        pretty_assertions::assert_eq!(color, Color::RGB(255, 255, 255));
+        pretty_assertions::assert_eq!(color, Color::Rgb(255, 255, 255));
 
         let json = r###"{"HexCode": "#FFFFFF"}"###;
         let color: Color = from_str(json).unwrap();
