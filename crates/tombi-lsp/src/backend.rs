@@ -26,6 +26,7 @@ use tower_lsp::{
 
 use crate::{
     document::DocumentSource,
+    goto_definition::into_definition_locations,
     handler::{
         handle_associate_schema, handle_completion, handle_diagnostic, handle_did_change,
         handle_did_change_configuration, handle_did_change_watched_files, handle_did_close,
@@ -309,21 +310,21 @@ impl LanguageServer for Backend {
         &self,
         params: GotoDefinitionParams,
     ) -> Result<Option<GotoDefinitionResponse>, tower_lsp::jsonrpc::Error> {
-        handle_goto_definition(self, params).await
+        into_definition_locations(self, handle_goto_definition(self, params).await?).await
     }
 
     async fn goto_type_definition(
         &self,
         params: GotoTypeDefinitionParams,
     ) -> Result<Option<GotoTypeDefinitionResponse>, tower_lsp::jsonrpc::Error> {
-        handle_goto_type_definition(self, params).await
+        into_definition_locations(self, handle_goto_type_definition(self, params).await?).await
     }
 
     async fn goto_declaration(
         &self,
         params: GotoDeclarationParams,
     ) -> Result<Option<GotoDeclarationResponse>, tower_lsp::jsonrpc::Error> {
-        handle_goto_declaration(self, params).await
+        into_definition_locations(self, handle_goto_declaration(self, params).await?).await
     }
 }
 
