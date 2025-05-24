@@ -162,7 +162,10 @@ impl Deserializer<'_> {
                     }
                 }
                 Err((error, url_range)) => {
-                    return Err(crate::de::Error::DocumentCommentSchemaUrl { error, url_range });
+                    return Err(crate::de::Error::DocumentCommentSchemaUrl {
+                        error: Box::new(error),
+                        url_range,
+                    });
                 }
                 _ => {}
             }
