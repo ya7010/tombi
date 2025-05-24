@@ -75,6 +75,6 @@ pub struct Config {
 impl Config {
     pub fn lsp(&self) -> Option<&LspOptions> {
         #[allow(deprecated)]
-        self.lsp.as_ref().or_else(|| self.server.as_ref())
+        self.lsp.as_ref().or(self.server.as_ref())
     }
 }

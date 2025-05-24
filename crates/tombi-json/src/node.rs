@@ -134,10 +134,6 @@ impl ValueNode {
         }
     }
 
-    pub fn from_str(s: &str) -> Result<Self, crate::Error> {
-        Ok(crate::parser::parse(s)?)
-    }
-
     pub fn from_reader<R>(reader: R) -> Result<Self, crate::Error>
     where
         R: std::io::Read,
@@ -146,6 +142,14 @@ impl ValueNode {
         let mut s = String::new();
         reader.read_to_string(&mut s)?;
         Ok(crate::parser::parse(&s)?)
+    }
+}
+
+impl std::str::FromStr for ValueNode {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(crate::parser::parse(s)?)
     }
 }
 
@@ -243,8 +247,14 @@ pub struct ArrayNode {
 }
 
 impl ArrayNode {
+    #[inline]
     pub fn len(&self) -> usize {
         self.items.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.items.is_empty()
     }
 }
 
@@ -272,8 +282,14 @@ impl ObjectNode {
         self.properties.get(key)
     }
 
+    #[inline]
     pub fn len(&self) -> usize {
         self.properties.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.properties.is_empty()
     }
 }
 

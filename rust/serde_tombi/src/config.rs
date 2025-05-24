@@ -23,7 +23,7 @@ pub(crate) fn from_str(
     let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
     // Check if there are any parsing errors
     if !parsed.errors.is_empty() {
-        return Err(crate::de::Error::Parser(parsed.errors));
+        return Err(parsed.errors.into());
     }
 
     deserializer.from_document(deserializer.try_to_document(root, TOMBI_CONFIG_TOML_VERSION)?)
@@ -46,7 +46,7 @@ impl PyProjectToml {
         let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
         // Check if there are any parsing errors
         if !parsed.errors.is_empty() {
-            return Err(crate::de::Error::Parser(parsed.errors));
+            return Err(parsed.errors.into());
         }
 
         deserializer.from_document(deserializer.try_to_document(root, TomlVersion::V1_0_0)?)

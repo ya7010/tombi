@@ -412,10 +412,10 @@ mod tests {
         assert!(value_node.is_number());
         pretty_assertions::assert_eq!(value_node.as_f64(), Some(42.0));
 
-        let source = "-3.14";
+        let source = "-3.02";
         let value_node = parse(source).unwrap();
         assert!(value_node.is_number());
-        pretty_assertions::assert_eq!(value_node.as_f64(), Some(-3.14));
+        pretty_assertions::assert_eq!(value_node.as_f64(), Some(-3.02));
     }
 
     #[test]
