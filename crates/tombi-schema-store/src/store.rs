@@ -282,7 +282,7 @@ impl SchemaStore {
         Ok(DocumentSchema::new(schema, schema_url.clone()))
     }
 
-    pub fn get_document_schema<'a: 'b, 'b>(
+    pub fn try_get_document_schema<'a: 'b, 'b>(
         &'a self,
         schema_url: &'a SchemaUrl,
     ) -> BoxFuture<'b, Result<Option<DocumentSchema>, crate::Error>> {
@@ -311,7 +311,7 @@ impl SchemaStore {
     }
 
     #[inline]
-    async fn get_source_schema_from_remote_url(
+    async fn try_get_source_schema_from_remote_url(
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<Option<SourceSchema>, crate::Error> {
@@ -321,7 +321,7 @@ impl SchemaStore {
         }
 
         Ok(Some(SourceSchema {
-            root_schema: self.get_document_schema(schema_url).await?,
+            root_schema: self.try_get_document_schema(schema_url).await?,
             sub_schema_url_map: Default::default(),
         }))
     }
@@ -353,7 +353,7 @@ impl SchemaStore {
                 }
             };
             return self
-                .get_source_schema_from_remote_url(&SchemaUrl::new(schema_url))
+                .try_get_source_schema_from_remote_url(&SchemaUrl::new(schema_url))
                 .await
                 .map_err(|err| (err, url_range));
         }
@@ -393,8 +393,7 @@ impl SchemaStore {
 
         let mut source_schema: Option<SourceSchema> = None;
         for matching_schema in matching_schemas {
-            if let Ok(Some(document_schema)) =
-                self.get_document_schema(&matching_schema.url).await
+            if let Ok(Some(document_schema)) = self.try_get_document_schema(&matching_schema.url).await
             {
                 match &matching_schema.sub_root_keys {
                     Some(sub_root_keys) => match source_schema {
@@ -455,11 +454,7 @@ impl SchemaStore {
                 self.resolve_source_schema_from_path(&source_path).await
             }
             "http" | "https" => {
-                if self.offline() {
-                    tracing::debug!("offline mode, skip fetch source from url: {}", source_url);
-                    return Ok(None);
-                }
-                self.get_source_schema_from_remote_url(&SchemaUrl::new(source_url.clone()))
+                self.try_get_source_schema_from_remote_url(&SchemaUrl::new(source_url.clone()))
                     .await
             }
             "untitled" => Ok(None),

@@ -35,7 +35,7 @@ impl Validate for tombi_document_tree::Table {
                         ..
                     })) = schema_context
                         .store
-                        .get_document_schema(sub_schema_url)
+                        .try_get_document_schema(sub_schema_url)
                         .await
                     {
                         return self
