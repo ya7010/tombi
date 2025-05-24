@@ -80,5 +80,16 @@ pub async fn handle_goto_definition(
         return Ok(locations.into());
     }
 
+    if let Some(locations) = tombi_extension_tombi::goto_definition(
+        &text_document,
+        &document_tree,
+        &accessors,
+        toml_version,
+    )
+    .await?
+    {
+        return Ok(locations.into());
+    }
+
     Ok(None)
 }
