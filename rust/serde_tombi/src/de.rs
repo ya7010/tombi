@@ -96,7 +96,7 @@ impl Deserializer<'_> {
         let root = tombi_ast::Root::cast(parsed.syntax_node()).expect("AST Root must be present");
         // Check if there are any parsing errors
         if !parsed.errors.is_empty() {
-            return Err(crate::de::Error::Parser(parsed.errors));
+            return Err(parsed.errors.into());
         }
         from_document(self.try_to_document(root, toml_version)?)
     }
@@ -161,11 +161,8 @@ impl Deserializer<'_> {
                         toml_version = new_toml_version;
                     }
                 }
-                Err((error, url_range)) => {
-                    return Err(crate::de::Error::DocumentCommentSchemaUrl {
-                        error: Box::new(error),
-                        url_range,
-                    });
+                Err((error, _)) => {
+                    return Err(error.into());
                 }
                 _ => {}
             }
@@ -184,7 +181,7 @@ impl Deserializer<'_> {
 
         // Check for errors during document tree construction
         if !errors.is_empty() {
-            return Err(crate::de::Error::DocumentTree(errors));
+            return Err(errors.into());
         }
 
         // Convert to a Document
