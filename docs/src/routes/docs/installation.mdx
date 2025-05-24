@@ -1,3 +1,5 @@
+import CodeTabs from "../../components/CodeTabs";
+
 # Installation
 
 ## CLI
@@ -22,21 +24,52 @@ uvx tombi
 
 ### Project Installation
 
-```bash
-uv add --dev tombi
-```
+<CodeTabs
+  tabs={[
+    {
+      key: "uv",
+      label: "uv",
+      command: "uv add --dev tombi",
+    },
+    {
+      key: "poetry",
+      label: "poetry",
+      command: "poetry add --dev tombi",
+    },
+    {
+      key: "hatch",
+      label: "hatch",
+      command: "hatch add --dev tombi",
+    },
+    {
+      key: "pip",
+      label: "pip",
+      command: "pip install tombi",
+    },
+  ]}
+  defaultKey="uv"
+  language="bash"
+/>
+
 
 ### Global Installation
 
-```bash
-uv tool install tombi
-```
-
-Or
-
-```bash
-pipx install tombi
-```
+<CodeTabs
+  tabs={[
+    {
+      key: "uv",
+      label: "uv",
+      command: "uv tool install tombi",
+    },
+    {
+      key: "pipx",
+      label: "pipx",
+      command: "pipx install tombi",
+    },
+  ]}
+  defaultKey="uv"
+  language="bash"
+/>
 
 ## VSCode/Cursor
 
