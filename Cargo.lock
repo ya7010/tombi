@@ -1657,6 +1657,7 @@ dependencies = [
  "tombi-text",
  "tombi-toml-text",
  "tombi-toml-version",
+ "tombi-url",
  "tracing",
  "typed-builder",
  "url",
@@ -1953,6 +1954,7 @@ dependencies = [
  "tombi-text",
  "tombi-toml-text",
  "tombi-toml-version",
+ "tombi-url",
  "tracing",
  "url",
 ]
@@ -2013,6 +2015,7 @@ dependencies = [
  "serde",
  "thiserror",
  "tombi-toml-version",
+ "tombi-url",
  "tombi-x-keyword",
  "tracing",
  "url",
@@ -2380,6 +2383,7 @@ dependencies = [
  "tombi-future",
  "tombi-json",
  "tombi-text",
+ "tombi-url",
  "tombi-x-keyword",
  "tracing",
  "url",
@@ -2430,6 +2434,13 @@ dependencies = [
  "clap",
  "schemars",
  "serde",
+]
+
+[[package]]
+name = "tombi-url"
+version = "0.0.0"
+dependencies = [
+ "url",
 ]
 
 [[package]]
