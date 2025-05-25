@@ -1,14 +1,14 @@
 use std::{ops::Deref, sync::Arc};
 
+use crate::{
+    json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
+};
 use ahash::AHashMap;
 use itertools::Either;
 use tokio::sync::RwLock;
 use tombi_config::{Schema, SchemaOptions};
 use tombi_future::{BoxFuture, Boxable};
-
-use crate::{
-    json::CatalogUrl, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
-};
+use tombi_url::url_to_file_path;
 
 #[derive(Debug, Clone)]
 pub struct SchemaStore {
@@ -151,11 +151,9 @@ impl SchemaStore {
             }
         } else if catalog_url.scheme() == "file" {
             let catalog_path =
-                catalog_url
-                    .to_file_path()
-                    .map_err(|_| crate::Error::InvalidCatalogFileUrl {
-                        catalog_url: catalog_url.clone(),
-                    })?;
+                url_to_file_path(catalog_url).map_err(|_| crate::Error::InvalidCatalogFileUrl {
+                    catalog_url: catalog_url.clone(),
+                })?;
 
             let content = std::fs::read_to_string(&catalog_path).map_err(|_| {
                 crate::Error::CatalogFileReadFailed {
@@ -219,11 +217,9 @@ impl SchemaStore {
         let tombi_json::ValueNode::Object(schema) = match schema_url.scheme() {
             "file" => {
                 let schema_path =
-                    schema_url
-                        .to_file_path()
-                        .map_err(|_| crate::Error::InvalidSchemaUrl {
-                            schema_url: schema_url.to_string(),
-                        })?;
+                    url_to_file_path(schema_url).map_err(|_| crate::Error::InvalidSchemaUrl {
+                        schema_url: schema_url.to_string(),
+                    })?;
                 if !schema_path.exists() {
                     return Err(crate::Error::SchemaFileNotFound {
                         schema_path: schema_path.clone(),
@@ -333,7 +329,7 @@ impl SchemaStore {
     ) -> Result<Option<SourceSchema>, (crate::Error, tombi_text::Range)> {
         let source_path = match source_url_or_path {
             Some(Either::Left(url)) => match url.scheme() {
-                "file" => url.to_file_path().ok(),
+                "file" => url_to_file_path(url).ok(),
                 _ => None,
             },
             Some(Either::Right(path)) => Some(path.to_path_buf()),
@@ -393,7 +389,8 @@ impl SchemaStore {
 
         let mut source_schema: Option<SourceSchema> = None;
         for matching_schema in matching_schemas {
-            if let Ok(Some(document_schema)) = self.try_get_document_schema(&matching_schema.url).await
+            if let Ok(Some(document_schema)) =
+                self.try_get_document_schema(&matching_schema.url).await
             {
                 match &matching_schema.sub_root_keys {
                     Some(sub_root_keys) => match source_schema {
