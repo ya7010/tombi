@@ -248,6 +248,13 @@ impl SchemaStore {
                         reason: err.to_string(),
                     })?;
 
+                if !response.status().is_success() {
+                    return Err(crate::Error::SchemaFetchFailed {
+                        schema_url: schema_url.clone(),
+                        reason: response.status().to_string(),
+                    });
+                }
+
                 let bytes =
                     response
                         .bytes()
@@ -311,11 +318,6 @@ impl SchemaStore {
         &self,
         schema_url: &SchemaUrl,
     ) -> Result<Option<SourceSchema>, crate::Error> {
-        if self.offline() && matches!(schema_url.scheme(), "http" | "https") {
-            tracing::debug!("offline mode, skip fetch schema: {}", schema_url);
-            return Ok(None);
-        }
-
         Ok(Some(SourceSchema {
             root_schema: self.try_get_document_schema(schema_url).await?,
             sub_schema_url_map: Default::default(),
