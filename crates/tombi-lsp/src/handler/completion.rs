@@ -95,6 +95,7 @@ pub async fn handle_completion(
         get_completion_contents(
             root,
             position.into(),
+            &text_document.uri,
             &tombi_schema_store::SchemaContext {
                 toml_version,
                 root_schema,
