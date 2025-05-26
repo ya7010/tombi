@@ -5,7 +5,7 @@ use itertools::Itertools;
 use tombi_schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{
-    constraints::ValueConstraints, default_value::DefaultValue, GetHoverContent, HoverContent,
+    constraints::ValueConstraints, default_value::DisplayValue, GetHoverContent, HoverContent,
 };
 
 pub fn get_any_of_hover_content<'a: 'b, 'b, T>(
@@ -28,7 +28,7 @@ where
         let default = any_of_schema
             .default
             .as_ref()
-            .and_then(|default| DefaultValue::try_from(default).ok());
+            .and_then(|default| DisplayValue::try_from(default).ok());
 
         for referable_schema in any_of_schema.schemas.write().await.iter_mut() {
             let Ok(Some(CurrentSchema { value_schema, .. })) = referable_schema

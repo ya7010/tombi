@@ -3,7 +3,7 @@ use tombi_schema_store::{Accessor, BooleanSchema, CurrentSchema, ValueSchema};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    constraints::ValueConstraints, default_value::DefaultValue, one_of::get_one_of_hover_content,
+    constraints::ValueConstraints, default_value::DisplayValue, one_of::get_one_of_hover_content,
     GetHoverContent, HoverContent,
 };
 
@@ -113,11 +113,11 @@ impl GetHoverContent for BooleanSchema {
                 accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type: tombi_schema_store::ValueType::Boolean,
                 constraints: Some(ValueConstraints {
-                    default: self.default.map(DefaultValue::Boolean),
+                    default: self.default.map(DisplayValue::Boolean),
                     enumerate: self.enumerate.as_ref().map(|value| {
                         value
                             .iter()
-                            .map(|value| DefaultValue::Boolean(*value))
+                            .map(|value| DisplayValue::Boolean(*value))
                             .collect()
                     }),
                     ..Default::default()

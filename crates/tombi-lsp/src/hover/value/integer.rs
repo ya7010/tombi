@@ -3,7 +3,7 @@ use tombi_schema_store::{Accessor, CurrentSchema, IntegerSchema, ValueSchema};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    constraints::ValueConstraints, default_value::DefaultValue, one_of::get_one_of_hover_content,
+    constraints::ValueConstraints, default_value::DisplayValue, one_of::get_one_of_hover_content,
     GetHoverContent, HoverContent,
 };
 
@@ -113,18 +113,18 @@ impl GetHoverContent for IntegerSchema {
                 accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type: tombi_schema_store::ValueType::Integer,
                 constraints: Some(ValueConstraints {
-                    default: self.default.map(DefaultValue::Integer),
+                    default: self.default.map(DisplayValue::Integer),
                     enumerate: self.enumerate.as_ref().map(|value| {
                         value
                             .iter()
-                            .map(|value| DefaultValue::Integer(*value))
+                            .map(|value| DisplayValue::Integer(*value))
                             .collect()
                     }),
-                    minimum: self.minimum.map(DefaultValue::Integer),
-                    maximum: self.maximum.map(DefaultValue::Integer),
-                    exclusive_minimum: self.exclusive_minimum.map(DefaultValue::Integer),
-                    exclusive_maximum: self.exclusive_maximum.map(DefaultValue::Integer),
-                    multiple_of: self.multiple_of.map(DefaultValue::Integer),
+                    minimum: self.minimum.map(DisplayValue::Integer),
+                    maximum: self.maximum.map(DisplayValue::Integer),
+                    exclusive_minimum: self.exclusive_minimum.map(DisplayValue::Integer),
+                    exclusive_maximum: self.exclusive_maximum.map(DisplayValue::Integer),
+                    multiple_of: self.multiple_of.map(DisplayValue::Integer),
                     ..Default::default()
                 }),
                 schema_url: current_schema.map(|schema| schema.schema_url.as_ref().clone()),
