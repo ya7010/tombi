@@ -1,7 +1,7 @@
 mod all_of;
 mod any_of;
 mod constraints;
-mod default_value;
+mod display_value;
 mod one_of;
 mod value;
 

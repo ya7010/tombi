@@ -3,7 +3,7 @@ use tombi_schema_store::{Accessor, CurrentSchema, StringSchema, ValueSchema};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    constraints::ValueConstraints, default_value::DisplayValue, one_of::get_one_of_hover_content,
+    constraints::ValueConstraints, display_value::DisplayValue, one_of::get_one_of_hover_content,
     GetHoverContent, HoverContent,
 };
 
@@ -113,14 +113,20 @@ impl GetHoverContent for StringSchema {
                 accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type: tombi_schema_store::ValueType::String,
                 constraints: Some(ValueConstraints {
-                    default: self
-                        .default
-                        .as_ref()
-                        .map(|value| DisplayValue::String(value.clone())),
                     enumerate: self.enumerate.as_ref().map(|value| {
                         value
                             .iter()
                             .map(|value| DisplayValue::String(value.clone()))
+                            .collect()
+                    }),
+                    default: self
+                        .default
+                        .as_ref()
+                        .map(|value| DisplayValue::String(value.clone())),
+                    examples: self.examples.as_ref().map(|examples| {
+                        examples
+                            .iter()
+                            .map(|example| DisplayValue::String(example.clone()))
                             .collect()
                     }),
                     min_length: self.min_length,

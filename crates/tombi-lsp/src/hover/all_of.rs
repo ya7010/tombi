@@ -4,7 +4,7 @@ use futures::{future::BoxFuture, FutureExt};
 use tombi_schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{
-    constraints::ValueConstraints, default_value::DisplayValue, GetHoverContent, HoverContent,
+    constraints::ValueConstraints, display_value::DisplayValue, GetHoverContent, HoverContent,
 };
 
 pub fn get_all_of_hover_content<'a: 'b, 'b, T>(
