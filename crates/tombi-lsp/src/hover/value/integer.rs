@@ -3,7 +3,7 @@ use tombi_schema_store::{Accessor, CurrentSchema, IntegerSchema, ValueSchema};
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    constraints::ValueConstraints, default_value::DisplayValue, one_of::get_one_of_hover_content,
+    constraints::ValueConstraints, display_value::DisplayValue, one_of::get_one_of_hover_content,
     GetHoverContent, HoverContent,
 };
 
@@ -113,11 +113,17 @@ impl GetHoverContent for IntegerSchema {
                 accessors: tombi_schema_store::Accessors::new(accessors.to_vec()),
                 value_type: tombi_schema_store::ValueType::Integer,
                 constraints: Some(ValueConstraints {
-                    default: self.default.map(DisplayValue::Integer),
                     enumerate: self.enumerate.as_ref().map(|value| {
                         value
                             .iter()
                             .map(|value| DisplayValue::Integer(*value))
+                            .collect()
+                    }),
+                    default: self.default.map(DisplayValue::Integer),
+                    examples: self.examples.as_ref().map(|examples| {
+                        examples
+                            .iter()
+                            .map(|example| DisplayValue::Integer(*example))
                             .collect()
                     }),
                     minimum: self.minimum.map(DisplayValue::Integer),

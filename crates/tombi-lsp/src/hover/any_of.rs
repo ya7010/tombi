@@ -5,7 +5,7 @@ use itertools::Itertools;
 use tombi_schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{
-    constraints::ValueConstraints, default_value::DisplayValue, GetHoverContent, HoverContent,
+    constraints::ValueConstraints, display_value::DisplayValue, GetHoverContent, HoverContent,
 };
 
 pub fn get_any_of_hover_content<'a: 'b, 'b, T>(

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 #[derive(Debug, Clone)]
 pub enum DisplayValue {
     Boolean(bool),
@@ -10,6 +12,32 @@ pub enum DisplayValue {
     LocalTime(String),
     Array(Vec<DisplayValue>),
     Table(Vec<(String, DisplayValue)>),
+}
+
+impl DisplayValue {
+    pub fn try_new_offset_date_time(
+        local_date_time: &str,
+    ) -> Result<Self, tombi_date_time::parse::Error> {
+        tombi_date_time::LocalDateTime::from_str(local_date_time)?;
+        Ok(DisplayValue::OffsetDateTime(local_date_time.to_string()))
+    }
+
+    pub fn try_new_local_date_time(
+        local_date_time: &str,
+    ) -> Result<Self, tombi_date_time::parse::Error> {
+        tombi_date_time::LocalDateTime::from_str(local_date_time)?;
+        Ok(DisplayValue::LocalDateTime(local_date_time.to_string()))
+    }
+
+    pub fn try_new_local_date(local_date: &str) -> Result<Self, tombi_date_time::parse::Error> {
+        tombi_date_time::LocalDate::from_str(local_date)?;
+        Ok(DisplayValue::LocalDate(local_date.to_string()))
+    }
+
+    pub fn try_new_local_time(local_time: &str) -> Result<Self, tombi_date_time::parse::Error> {
+        tombi_date_time::LocalTime::from_str(local_time)?;
+        Ok(DisplayValue::LocalTime(local_time.to_string()))
+    }
 }
 
 impl TryFrom<&tombi_json::Value> for DisplayValue {
@@ -34,6 +62,29 @@ impl TryFrom<&tombi_json::Value> for DisplayValue {
             )),
             tombi_json::Value::Null => Err(()),
         }
+    }
+}
+
+impl From<tombi_json::Object> for DisplayValue {
+    fn from(object: tombi_json::Object) -> Self {
+        DisplayValue::Table(
+            object
+                .into_inner()
+                .iter()
+                .filter_map(|(key, value)| value.try_into().map(|v| (key.clone(), v)).ok())
+                .collect(),
+        )
+    }
+}
+
+impl From<&tombi_json::Object> for DisplayValue {
+    fn from(object: &tombi_json::Object) -> Self {
+        DisplayValue::Table(
+            object
+                .iter()
+                .filter_map(|(key, value)| value.try_into().map(|v| (key.clone(), v)).ok())
+                .collect(),
+        )
     }
 }
 
