@@ -3,7 +3,7 @@ use tombi_schema_store::{Accessor, CurrentSchema, OffsetDateTimeSchema, ValueSch
 
 use crate::hover::{
     all_of::get_all_of_hover_content, any_of::get_any_of_hover_content,
-    constraints::ValueConstraints, default_value::DefaultValue, one_of::get_one_of_hover_content,
+    constraints::ValueConstraints, default_value::DisplayValue, one_of::get_one_of_hover_content,
     GetHoverContent, HoverContent,
 };
 
@@ -108,11 +108,11 @@ impl GetHoverContent for OffsetDateTimeSchema {
                     default: self
                         .default
                         .as_ref()
-                        .map(|value| DefaultValue::OffsetDateTime(value.clone())),
+                        .map(|value| DisplayValue::OffsetDateTime(value.clone())),
                     enumerate: self.enumerate.as_ref().map(|value| {
                         value
                             .iter()
-                            .map(|value| DefaultValue::OffsetDateTime(value.clone()))
+                            .map(|value| DisplayValue::OffsetDateTime(value.clone()))
                             .collect()
                     }),
                     ..Default::default()

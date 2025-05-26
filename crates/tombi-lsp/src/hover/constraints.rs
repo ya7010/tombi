@@ -1,19 +1,19 @@
 use tombi_x_keyword::{ArrayValuesOrder, TableKeysOrder};
 
-use super::default_value::DefaultValue;
+use super::default_value::DisplayValue;
 
 #[derive(Debug, Clone, Default)]
 pub struct ValueConstraints {
     // Common
-    pub enumerate: Option<Vec<DefaultValue>>,
-    pub default: Option<DefaultValue>,
+    pub enumerate: Option<Vec<DisplayValue>>,
+    pub default: Option<DisplayValue>,
 
     // Integer OR Float
-    pub minimum: Option<DefaultValue>,
-    pub maximum: Option<DefaultValue>,
-    pub exclusive_minimum: Option<DefaultValue>,
-    pub exclusive_maximum: Option<DefaultValue>,
-    pub multiple_of: Option<DefaultValue>,
+    pub minimum: Option<DisplayValue>,
+    pub maximum: Option<DisplayValue>,
+    pub exclusive_minimum: Option<DisplayValue>,
+    pub exclusive_maximum: Option<DisplayValue>,
+    pub multiple_of: Option<DisplayValue>,
     // String
     pub min_length: Option<usize>,
     pub max_length: Option<usize>,
