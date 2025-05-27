@@ -2303,6 +2303,7 @@ dependencies = [
  "tokio",
  "tombi-ast",
  "tombi-config",
+ "tombi-date-time",
  "tombi-diagnostic",
  "tombi-document",
  "tombi-document-tree",
