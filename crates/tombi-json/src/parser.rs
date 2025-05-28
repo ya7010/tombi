@@ -99,9 +99,47 @@ impl<'a> Parser<'a> {
                                         _ => return Err(Error::InvalidUnicodeEscape),
                                     }
                                 }
-                                match std::char::from_u32(code_point) {
-                                    Some(unicode_char) => processed.push(unicode_char),
-                                    None => return Err(Error::InvalidUnicodeCodePoint),
+
+                                // Check for surrogate pairs
+                                if (0xD800..=0xDBFF).contains(&code_point) {
+                                    // High surrogate - expect low surrogate to follow
+                                    if chars.next() == Some('\\') && chars.next() == Some('u') {
+                                        let mut low_surrogate = 0u32;
+                                        for _ in 0..4 {
+                                            match chars.next() {
+                                                Some(hex) if hex.is_ascii_hexdigit() => {
+                                                    low_surrogate = low_surrogate * 16
+                                                        + hex.to_digit(16).unwrap();
+                                                }
+                                                _ => return Err(Error::InvalidUnicodeEscape),
+                                            }
+                                        }
+
+                                        if (0xDC00..=0xDFFF).contains(&low_surrogate) {
+                                            // Valid surrogate pair - decode to actual Unicode code point
+                                            let high = code_point - 0xD800;
+                                            let low = low_surrogate - 0xDC00;
+                                            let unicode_code_point = 0x10000 + (high << 10) + low;
+
+                                            match std::char::from_u32(unicode_code_point) {
+                                                Some(unicode_char) => processed.push(unicode_char),
+                                                None => return Err(Error::InvalidUnicodeCodePoint),
+                                            }
+                                        } else {
+                                            return Err(Error::InvalidUnicodeCodePoint);
+                                        }
+                                    } else {
+                                        return Err(Error::InvalidUnicodeCodePoint);
+                                    }
+                                } else if (0xDC00..=0xDFFF).contains(&code_point) {
+                                    // Low surrogate without high surrogate
+                                    return Err(Error::InvalidUnicodeCodePoint);
+                                } else {
+                                    // Regular Unicode code point
+                                    match std::char::from_u32(code_point) {
+                                        Some(unicode_char) => processed.push(unicode_char),
+                                        None => return Err(Error::InvalidUnicodeCodePoint),
+                                    }
                                 }
                             }
                             _ => return Err(Error::InvalidEscapeSequence),

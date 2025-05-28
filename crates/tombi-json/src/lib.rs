@@ -963,4 +963,49 @@ mod tests {
             Some("\u{0000}\u{0001}\u{0002}\u{0008}\u{000C}")
         );
     }
+
+    #[test]
+    fn test_surrogate_pairs() {
+        // Test emoji using surrogate pairs (🎉 = U+1F389)
+        let json = r#""\uD83C\uDF89""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("🎉"));
+
+        // Test another emoji (😀 = U+1F600)
+        let json = r#""\uD83D\uDE00""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("😀"));
+
+        // Test mathematical alphanumeric symbols (𝐀 = U+1D400)
+        let json = r#""\uD835\uDC00""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("𝐀"));
+    }
+
+    #[test]
+    fn test_invalid_surrogate_pairs() {
+        // High surrogate without low surrogate
+        let json = r#""\uD800""#;
+        assert!(ValueNode::from_str(json).is_err());
+
+        // Low surrogate without high surrogate
+        let json = r#""\uDC00""#;
+        assert!(ValueNode::from_str(json).is_err());
+
+        // High surrogate followed by non-surrogate
+        let json = r#""\uD800\u0041""#;
+        assert!(ValueNode::from_str(json).is_err());
+    }
+
+    #[test]
+    fn test_mixed_surrogate_and_regular() {
+        // Mix of regular characters and surrogate pairs
+        let json = r#""Hello \uD83D\uDE00 World!""#;
+        let value_node = ValueNode::from_str(json).unwrap();
+        assert!(value_node.is_string());
+        pretty_assertions::assert_eq!(value_node.as_str(), Some("Hello 😀 World!"));
+    }
 }
