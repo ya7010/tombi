@@ -310,5 +310,14 @@ pub(crate) fn get_hover_accessors(
         accessors.push(tombi_schema_store::Accessor::Key(key.value().to_string()));
     }
 
+    if let tombi_document_tree::Value::Array(array) = current_value {
+        for (index, value) in array.values().iter().enumerate() {
+            if value.range().contains(position) {
+                accessors.push(tombi_schema_store::Accessor::Index(index));
+                break;
+            }
+        }
+    }
+
     accessors
 }
