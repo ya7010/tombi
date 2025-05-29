@@ -23,7 +23,7 @@ time = { version = "0.3.36", default-features = false }
 tombi-config = { workspace = true, features = ["jsonschema"] }
 ungrammar = "1.16.1"
 xshell = "0.2.7"
-zip = { version = "2.2.1", default-features = false, features = [
+zip = { version = "2.3.0", default-features = false, features = [
   "deflate",
   "time",
 ] }
