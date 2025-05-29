@@ -49,6 +49,7 @@ semver = { version = "1.0.26" }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 serde_tombi = { path = "rust/serde_tombi" }
+surf = "2.3.2"
 textwrap = { version = "0.16.2" }
 thiserror = { version = "2.0.12" }
 tokio = { version = "1.45.0", features = ["fs", "io-std", "rt-multi-thread"] }

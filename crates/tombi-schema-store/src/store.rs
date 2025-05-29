@@ -1,8 +1,7 @@
 use std::{ops::Deref, sync::Arc};
 
-use crate::http_client::HttpClient;
 use crate::{
-    json::CatalogUrl, DefaultClient, DocumentSchema, SchemaAccessor, SchemaAccessors, SchemaUrl,
+    json::CatalogUrl, DocumentSchema, HttpClient, SchemaAccessor, SchemaAccessors, SchemaUrl,
     SourceSchema,
 };
 use ahash::AHashMap;
@@ -14,7 +13,7 @@ use tombi_url::url_to_file_path;
 
 #[derive(Debug, Clone)]
 pub struct SchemaStore {
-    http_client: Arc<dyn HttpClient>,
+    http_client: HttpClient,
     document_schemas:
         Arc<tokio::sync::RwLock<AHashMap<SchemaUrl, Result<DocumentSchema, crate::Error>>>>,
     schemas: Arc<RwLock<Vec<crate::Schema>>>,
@@ -41,16 +40,8 @@ impl SchemaStore {
     /// Create a store with the given options.
     /// Note that the new_with_options() does not automatically load schemas from Config etc.
     pub fn new_with_options(options: crate::Options) -> Self {
-        Self::new_with_client(DefaultClient::new(), options)
-    }
-
-    /// New with an http client
-    ///
-    /// Create a store with the given an http client and options.
-    /// Note that the new_with_options() does not automatically load schemas from Config etc.
-    pub fn new_with_client(client: impl HttpClient + 'static, options: crate::Options) -> Self {
         Self {
-            http_client: Arc::new(client),
+            http_client: HttpClient::new(),
             document_schemas: Arc::new(RwLock::default()),
             schemas: Arc::new(RwLock::new(Vec::new())),
             options,

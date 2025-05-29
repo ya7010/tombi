@@ -19,6 +19,7 @@ regex.workspace = true
 reqwest = { workspace = true, optional = true }
 serde.workspace = true
 serde_json.workspace = true
+surf = { workspace = true, optional = true }
 thiserror.workspace = true
 tokio.workspace = true
 tombi-ast.workspace = true
@@ -39,5 +40,6 @@ rstest.workspace = true
 
 [features]
 default = ["native"]
-native = ["reqwest"]
-wasm = ["gloo-net"]
+native = ["dep:reqwest"]
+wasm = ["dep:gloo-net"]
+surf = ["dep:surf"]
