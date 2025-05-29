@@ -17,7 +17,7 @@ pub async fn goto_declaration(
         return Ok(Default::default());
     };
 
-    let locations = if match_accessors!(accessors[..1], ["workspace"]) {
+    let locations = if match_accessors!(accessors[..accessors.len().min(1)], ["workspace"]) {
         vec![]
     } else {
         goto_definition_for_crate_cargo_toml(

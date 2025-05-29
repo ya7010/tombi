@@ -210,7 +210,8 @@ fn goto_dependency_crates(
         return Ok(Vec::with_capacity(0));
     };
 
-    let is_workspace_cargo_toml = match_accessors!(accessors[..1], ["workspace"]);
+    let is_workspace_cargo_toml =
+        match_accessors!(accessors[..accessors.len().min(1)], ["workspace"]);
     let mut locations = Vec::new();
     if let tombi_document_tree::Value::Table(table) = crate_value {
         if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {

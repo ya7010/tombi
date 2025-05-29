@@ -20,7 +20,10 @@ pub async fn goto_definition(
         return Ok(Default::default());
     };
 
-    let locations = if match_accessors!(accessors[..3], ["tool", "uv", "sources"]) {
+    let locations = if match_accessors!(
+        accessors[..accessors.len().min(3)],
+        ["tool", "uv", "sources"]
+    ) {
         goto_definition_for_member_pyproject_toml(
             document_tree,
             accessors,
@@ -28,7 +31,10 @@ pub async fn goto_definition(
             toml_version,
             true,
         )?
-    } else if match_accessors!(accessors[..3], ["tool", "uv", "workspace"]) {
+    } else if match_accessors!(
+        accessors[..accessors.len().min(3)],
+        ["tool", "uv", "workspace"]
+    ) {
         goto_definition_for_workspace_pyproject_toml(
             document_tree,
             accessors,
