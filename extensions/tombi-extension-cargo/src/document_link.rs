@@ -166,6 +166,37 @@ fn document_link_for_crate_cargo_toml(
     if let Some((workspace_cargo_toml_path, workspace_document_tree)) =
         find_workspace_cargo_toml(crate_cargo_toml_path, toml_version)
     {
+        for package_item in [
+            "version",
+            "authors",
+            "edition",
+            "rust-version",
+            "description",
+            "documentation",
+            "readme",
+            "homepage",
+            "repository",
+            "license",
+            "license-file",
+            "keywords",
+            "categories",
+            "exclude",
+            "include",
+            "publish",
+        ] {
+            if let Some((workspace_key, tombi_document_tree::Value::Boolean(value))) =
+                dig_keys(crate_document_tree, &["package", package_item, "workspace"])
+            {
+                let Ok(target) = Url::from_file_path(&workspace_cargo_toml_path) else {
+                    continue;
+                };
+                total_document_links.push(tombi_extension::DocumentLink {
+                    target,
+                    range: workspace_key.range() + value.range(),
+                    tooltip: DocumentLinkToolTip::WorkspaceCargoToml.to_string(),
+                });
+            }
+        }
         for (crate_key, crate_value) in total_dependencies {
             if let tombi_document_tree::Value::Table(crate_table) = crate_value {
                 if let Some((workspace_key, tombi_document_tree::Value::Boolean(is_workspace))) =
