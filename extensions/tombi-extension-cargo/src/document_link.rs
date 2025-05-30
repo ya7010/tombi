@@ -11,6 +11,7 @@ pub enum DocumentLinkToolTip {
     CrateIo,
     CargoToml,
     CargoTomlFirstMember,
+    WorkspaceCargoToml,
 }
 
 impl std::fmt::Display for DocumentLinkToolTip {
@@ -21,6 +22,9 @@ impl std::fmt::Display for DocumentLinkToolTip {
             DocumentLinkToolTip::CargoToml => write!(f, "Open Cargo.toml"),
             DocumentLinkToolTip::CargoTomlFirstMember => {
                 write!(f, "Open first Cargo.toml in members")
+            }
+            DocumentLinkToolTip::WorkspaceCargoToml => {
+                write!(f, "Open Workspace Cargo.toml")
             }
         }
     }
@@ -182,11 +186,17 @@ fn document_link_for_crate_cargo_toml(
                                 toml_version,
                             ) {
                                 for document_link in document_links {
-                                    total_document_links.push(document_link.clone());
-                                    let mut document_link = document_link;
-                                    document_link.range =
-                                        workspace_key.range() + is_workspace.range();
-                                    total_document_links.push(document_link)
+                                    total_document_links.push(document_link);
+                                    if let Ok(target) =
+                                        Url::from_file_path(&workspace_cargo_toml_path)
+                                    {
+                                        total_document_links.push(tombi_extension::DocumentLink {
+                                            target,
+                                            range: workspace_key.range() + is_workspace.range(),
+                                            tooltip: DocumentLinkToolTip::WorkspaceCargoToml
+                                                .to_string(),
+                                        });
+                                    }
                                 }
                             }
                         }
