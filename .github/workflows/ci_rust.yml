@@ -14,13 +14,15 @@ env:
   CARGO_NET_RETRY: 10
   CI: 1
   RUSTUP_MAX_RETRIES: 10
+  CARGO_PROFILE_TEST_DEBUG: 0
 
 jobs:
   ci-rust:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: Swatinem/rust-cache@v2
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --locked
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo nextest run --verbose --locked
