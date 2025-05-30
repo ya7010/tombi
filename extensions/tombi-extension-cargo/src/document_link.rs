@@ -1,4 +1,7 @@
-use crate::{find_workspace_cargo_toml, get_path_crate_cargo_toml, load_cargo_toml};
+use crate::{
+    find_workspace_cargo_toml, get_path_crate_cargo_toml, goto_workspace_member_crates,
+    load_cargo_toml,
+};
 use tombi_config::TomlVersion;
 use tombi_document_tree::dig_keys;
 use tower_lsp::lsp_types::{TextDocumentIdentifier, Url};
@@ -7,6 +10,7 @@ pub enum DocumentLinkToolTip {
     GitRepository,
     CrateIo,
     CargoToml,
+    CargoTomlFirstMember,
 }
 
 impl std::fmt::Display for DocumentLinkToolTip {
@@ -15,6 +19,9 @@ impl std::fmt::Display for DocumentLinkToolTip {
             DocumentLinkToolTip::GitRepository => write!(f, "Open Git Repository"),
             DocumentLinkToolTip::CrateIo => write!(f, "Open crate.io"),
             DocumentLinkToolTip::CargoToml => write!(f, "Open Cargo.toml"),
+            DocumentLinkToolTip::CargoTomlFirstMember => {
+                write!(f, "Open first Cargo.toml in members")
+            }
         }
     }
 }
@@ -60,12 +67,67 @@ fn document_link_for_workspace_cargo_toml(
     workspace_cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
 ) -> Result<Vec<tombi_extension::DocumentLink>, tower_lsp::jsonrpc::Error> {
-    let Some((_, tombi_document_tree::Value::Table(dependencies))) =
-        dig_keys(workspace_document_tree, &["workspace", "dependencies"])
-    else {
-        return Ok(Vec::with_capacity(0));
-    };
+    let mut total_document_links = vec![];
 
+    if let Some((_, tombi_document_tree::Value::Table(dependencies))) =
+        dig_keys(workspace_document_tree, &["workspace", "dependencies"])
+    {
+        total_document_links.extend(document_link_for_workspace_depencencies(
+            dependencies,
+            workspace_cargo_toml_path,
+            toml_version,
+        )?);
+    }
+    if let Some((_, tombi_document_tree::Value::Array(members))) =
+        dig_keys(workspace_document_tree, &["workspace", "members"])
+    {
+        for (i, member) in members.values().iter().enumerate() {
+            let member = match member {
+                tombi_document_tree::Value::String(member) => member,
+                _ => continue,
+            };
+            let mut member_document_links = goto_workspace_member_crates(
+                workspace_document_tree,
+                &[
+                    tombi_schema_store::Accessor::Key("workspace".to_string()),
+                    tombi_schema_store::Accessor::Key("members".to_string()),
+                    tombi_schema_store::Accessor::Index(i),
+                ],
+                workspace_cargo_toml_path,
+                toml_version,
+            )?
+            .into_iter()
+            .filter_map(|location| {
+                Url::from_file_path(location.cargo_toml_path)
+                    .map(|target| tombi_extension::DocumentLink {
+                        target,
+                        range: member.unquoted_range(),
+                        tooltip: DocumentLinkToolTip::CargoTomlFirstMember.to_string(),
+                    })
+                    .ok()
+            });
+            match member_document_links.size_hint() {
+                (_, Some(n)) if n > 0 => {
+                    if let Some(mut document_link) = member_document_links.next() {
+                        if n == 1 {
+                            document_link.tooltip = DocumentLinkToolTip::CargoToml.to_string();
+                        }
+                        total_document_links.push(document_link);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    Ok(total_document_links)
+}
+
+fn document_link_for_workspace_depencencies(
+    dependencies: &tombi_document_tree::Table,
+    workspace_cargo_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Vec<tombi_extension::DocumentLink>, tower_lsp::jsonrpc::Error> {
     let mut total_document_links = vec![];
     for (crate_name, crate_value) in dependencies.key_values() {
         if let Ok(document_links) = document_link_for_dependency(
@@ -186,11 +248,18 @@ fn document_link_for_dependency(
                         let Ok(target) = Url::from_file_path(subcrate_cargo_toml_path) else {
                             return Ok(Vec::with_capacity(0));
                         };
-                        return Ok(vec![tombi_extension::DocumentLink {
-                            target,
-                            range: crate_key.unquoted_range(),
-                            tooltip: DocumentLinkToolTip::CargoToml.to_string(),
-                        }]);
+                        return Ok(vec![
+                            tombi_extension::DocumentLink {
+                                target: target.clone(),
+                                range: crate_key.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                            },
+                            tombi_extension::DocumentLink {
+                                target,
+                                range: subcrate_path.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                            },
+                        ]);
                     }
                 }
             }
