@@ -186,11 +186,18 @@ fn document_link_for_dependency(
                         let Ok(target) = Url::from_file_path(subcrate_cargo_toml_path) else {
                             return Ok(Vec::with_capacity(0));
                         };
-                        return Ok(vec![tombi_extension::DocumentLink {
-                            target,
-                            range: crate_key.unquoted_range(),
-                            tooltip: DocumentLinkToolTip::CargoToml.to_string(),
-                        }]);
+                        return Ok(vec![
+                            tombi_extension::DocumentLink {
+                                target: target.clone(),
+                                range: crate_key.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                            },
+                            tombi_extension::DocumentLink {
+                                target,
+                                range: subcrate_path.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                            },
+                        ]);
                     }
                 }
             }
