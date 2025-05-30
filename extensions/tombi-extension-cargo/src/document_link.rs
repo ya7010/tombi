@@ -60,12 +60,24 @@ fn document_link_for_workspace_cargo_toml(
     workspace_cargo_toml_path: &std::path::Path,
     toml_version: TomlVersion,
 ) -> Result<Vec<tombi_extension::DocumentLink>, tower_lsp::jsonrpc::Error> {
-    let Some((_, tombi_document_tree::Value::Table(dependencies))) =
+    if let Some((_, tombi_document_tree::Value::Table(dependencies))) =
         dig_keys(workspace_document_tree, &["workspace", "dependencies"])
-    else {
+    {
+        document_link_for_workspace_depencencies(
+            dependencies,
+            workspace_cargo_toml_path,
+            toml_version,
+        )
+    } else {
         return Ok(Vec::with_capacity(0));
-    };
+    }
+}
 
+fn document_link_for_workspace_depencencies(
+    dependencies: &tombi_document_tree::Table,
+    workspace_cargo_toml_path: &std::path::Path,
+    toml_version: TomlVersion,
+) -> Result<Vec<tombi_extension::DocumentLink>, tower_lsp::jsonrpc::Error> {
     let mut total_document_links = vec![];
     for (crate_name, crate_value) in dependencies.key_values() {
         if let Ok(document_links) = document_link_for_dependency(
