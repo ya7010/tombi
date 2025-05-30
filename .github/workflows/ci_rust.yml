@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: taiki-e/install-action@nextest
     - uses: Swatinem/rust-cache@v2
+    - uses: taiki-e/install-action@nextest
     - name: Build
       run: cargo build --verbose --locked
     - name: Run tests
