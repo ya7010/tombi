@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct DocumentLink {
     pub target: tower_lsp::lsp_types::Url,
     pub range: tombi_text::Range,

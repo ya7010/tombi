@@ -164,8 +164,8 @@ fn document_link_for_crate_cargo_toml(
     {
         for (crate_key, crate_value) in total_dependencies {
             if let tombi_document_tree::Value::Table(crate_table) = crate_value {
-                if let Some(tombi_document_tree::Value::Boolean(is_workspace)) =
-                    crate_table.get("workspace")
+                if let Some((workspace_key, tombi_document_tree::Value::Boolean(is_workspace))) =
+                    crate_table.get_key_value("workspace")
                 {
                     if is_workspace.value() {
                         let Some((_, tombi_document_tree::Value::Table(dependencies))) =
@@ -181,7 +181,13 @@ fn document_link_for_crate_cargo_toml(
                                 &workspace_cargo_toml_path,
                                 toml_version,
                             ) {
-                                total_document_links.extend(document_links);
+                                for document_link in document_links {
+                                    total_document_links.push(document_link.clone());
+                                    let mut document_link = document_link;
+                                    document_link.range =
+                                        workspace_key.range() + is_workspace.range();
+                                    total_document_links.push(document_link)
+                                }
                             }
                         }
                         continue;
