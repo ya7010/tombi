@@ -90,7 +90,7 @@ fn document_link_for_workspace_cargo_toml(
                 tombi_document_tree::Value::String(member) => member,
                 _ => continue,
             };
-            let mut member_document_links = goto_workspace_member_crates(
+            let Ok(member_crate_locations) = goto_workspace_member_crates(
                 workspace_document_tree,
                 &[
                     tombi_schema_store::Accessor::Key("workspace".to_string()),
@@ -99,17 +99,19 @@ fn document_link_for_workspace_cargo_toml(
                 ],
                 workspace_cargo_toml_path,
                 toml_version,
-            )?
-            .into_iter()
-            .filter_map(|location| {
-                Url::from_file_path(location.cargo_toml_path)
-                    .map(|target| tombi_extension::DocumentLink {
-                        target,
-                        range: member.unquoted_range(),
-                        tooltip: DocumentLinkToolTip::CargoTomlFirstMember.to_string(),
-                    })
-                    .ok()
-            });
+            ) else {
+                continue;
+            };
+            let mut member_document_links =
+                member_crate_locations.into_iter().filter_map(|location| {
+                    Url::from_file_path(location.cargo_toml_path)
+                        .map(|target| tombi_extension::DocumentLink {
+                            target,
+                            range: member.unquoted_range(),
+                            tooltip: DocumentLinkToolTip::CargoTomlFirstMember.to_string(),
+                        })
+                        .ok()
+                });
             match member_document_links.size_hint() {
                 (_, Some(n)) if n > 0 => {
                     if let Some(mut document_link) = member_document_links.next() {
