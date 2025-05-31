@@ -333,18 +333,11 @@ fn document_link_for_dependency(
                             "L{}",
                             package_name_key.range().start.line + 1
                         )));
-                        return Ok(vec![
-                            tombi_extension::DocumentLink {
-                                target: target.clone(),
-                                range: crate_key.unquoted_range(),
-                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
-                            },
-                            tombi_extension::DocumentLink {
-                                target,
-                                range: subcrate_path.unquoted_range(),
-                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
-                            },
-                        ]);
+                        return Ok(vec![tombi_extension::DocumentLink {
+                            target: target.clone(),
+                            range: crate_key.unquoted_range(),
+                            tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                        }]);
                     }
                 }
             }
