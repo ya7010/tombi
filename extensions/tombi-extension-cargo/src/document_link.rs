@@ -105,10 +105,16 @@ fn document_link_for_workspace_cargo_toml(
             let mut member_document_links =
                 member_crate_locations.into_iter().filter_map(|location| {
                     Url::from_file_path(location.cargo_toml_path)
-                        .map(|target| tombi_extension::DocumentLink {
-                            target,
-                            range: member.unquoted_range(),
-                            tooltip: DocumentLinkToolTip::CargoTomlFirstMember.to_string(),
+                        .map(|mut target| {
+                            target.set_fragment(Some(&format!(
+                                "L{}",
+                                member.unquoted_range().start.line + 1
+                            )));
+                            tombi_extension::DocumentLink {
+                                target,
+                                range: member.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoTomlFirstMember.to_string(),
+                            }
                         })
                         .ok()
                 });
@@ -186,12 +192,23 @@ fn document_link_for_crate_cargo_toml(
             "include",
             "publish",
         ] {
-            if let Some((workspace_key, tombi_document_tree::Value::Boolean(value))) =
-                dig_keys(crate_document_tree, &["package", package_item, "workspace"])
-            {
-                let Ok(target) = Url::from_file_path(&workspace_cargo_toml_path) else {
+            if let (
+                Some((workspace_key, tombi_document_tree::Value::Boolean(value))),
+                Some((package_item_key, _)),
+            ) = (
+                dig_keys(crate_document_tree, &["package", package_item, "workspace"]),
+                dig_keys(
+                    &workspace_document_tree,
+                    &["workspace", "package", package_item],
+                ),
+            ) {
+                let Ok(mut target) = Url::from_file_path(&workspace_cargo_toml_path) else {
                     continue;
                 };
+                target.set_fragment(Some(&format!(
+                    "L{}",
+                    package_item_key.range().start.line + 1
+                )));
                 total_document_links.push(tombi_extension::DocumentLink {
                     target,
                     range: workspace_key.range() + value.range(),
@@ -199,41 +216,56 @@ fn document_link_for_crate_cargo_toml(
                 });
             }
         }
+        let workspace_dependencies =
+            if let Some((_, tombi_document_tree::Value::Table(dependencies))) =
+                dig_keys(&workspace_document_tree, &["workspace", "dependencies"])
+            {
+                Some(dependencies)
+            } else {
+                None
+            };
         for (crate_key, crate_value) in total_dependencies {
             if let tombi_document_tree::Value::Table(crate_table) = crate_value {
                 if let Some((workspace_key, tombi_document_tree::Value::Boolean(is_workspace))) =
                     crate_table.get_key_value("workspace")
                 {
                     if is_workspace.value() {
-                        let Some((_, tombi_document_tree::Value::Table(dependencies))) =
-                            dig_keys(&workspace_document_tree, &["workspace", "dependencies"])
-                        else {
-                            continue;
-                        };
-                        if let Some(workspace_crate_value) = dependencies.get(&crate_key) {
-                            if let Ok(document_links) = document_link_for_dependency(
-                                crate_key,
-                                workspace_crate_value,
-                                &workspace_cargo_toml_path,
-                                &workspace_cargo_toml_path,
-                                toml_version,
-                            ) {
-                                for document_link in document_links {
-                                    total_document_links.push(document_link);
-                                    if let Ok(target) =
-                                        Url::from_file_path(&workspace_cargo_toml_path)
-                                    {
-                                        total_document_links.push(tombi_extension::DocumentLink {
-                                            target,
-                                            range: workspace_key.range() + is_workspace.range(),
-                                            tooltip: DocumentLinkToolTip::WorkspaceCargoToml
-                                                .to_string(),
-                                        });
+                        if let Some(workspace_dependencies) = workspace_dependencies {
+                            if let Some(workspace_crate_value) =
+                                workspace_dependencies.get(&crate_key)
+                            {
+                                if let Ok(document_links) = document_link_for_dependency(
+                                    crate_key,
+                                    workspace_crate_value,
+                                    &workspace_cargo_toml_path,
+                                    &workspace_cargo_toml_path,
+                                    toml_version,
+                                ) {
+                                    for document_link in document_links {
+                                        total_document_links.push(document_link);
+                                        if let Ok(mut target) =
+                                            Url::from_file_path(&workspace_cargo_toml_path)
+                                        {
+                                            target.set_fragment(Some(&format!(
+                                                "L{}",
+                                                workspace_crate_value.range().start.line + 1
+                                            )));
+                                            total_document_links.push(
+                                                tombi_extension::DocumentLink {
+                                                    target,
+                                                    range: workspace_key.range()
+                                                        + is_workspace.range(),
+                                                    tooltip:
+                                                        DocumentLinkToolTip::WorkspaceCargoToml
+                                                            .to_string(),
+                                                },
+                                            );
+                                        }
                                     }
+                                    continue;
                                 }
                             }
-                        }
-                        continue;
+                        };
                     }
                 }
             }
@@ -282,7 +314,7 @@ fn document_link_for_dependency(
                     toml_version,
                 )
             {
-                if let Some((_, tombi_document_tree::Value::String(package_name))) =
+                if let Some((package_name_key, tombi_document_tree::Value::String(package_name))) =
                     tombi_document_tree::dig_keys(&subcrate_document_tree, &["package", "name"])
                 {
                     let package_name_check =
@@ -294,9 +326,13 @@ fn document_link_for_dependency(
                             package_name.value() == crate_key.value()
                         };
                     if package_name_check {
-                        let Ok(target) = Url::from_file_path(subcrate_cargo_toml_path) else {
+                        let Ok(mut target) = Url::from_file_path(subcrate_cargo_toml_path) else {
                             return Ok(Vec::with_capacity(0));
                         };
+                        target.set_fragment(Some(&format!(
+                            "L{}",
+                            package_name_key.range().start.line + 1
+                        )));
                         return Ok(vec![
                             tombi_extension::DocumentLink {
                                 target: target.clone(),
