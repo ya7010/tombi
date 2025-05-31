@@ -16,15 +16,11 @@ pub struct Args {
     /// Check only and don't overwrite files.
     #[arg(long, default_value_t = false)]
     check: bool,
-
-    /// Always output formatted TOML to stdout, even if unchanged
-    #[arg(long, default_value_t = false)]
-    always_output: bool,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn run(args: Args, offline: bool) -> Result<(), crate::Error> {
-    let (success_num, not_needed_num, error_num) = match inner_run(args, Pretty, offline) {
+    let (success_num, nmt_needed_num, error_num) = match inner_run(args, Pretty, offline) {
         Ok((success_num, not_needed_num, error_num)) => (success_num, not_needed_num, error_num),
         Err(error) => {
             tracing::error!("{}", error);
@@ -127,7 +123,6 @@ where
                     args.check,
                     &format_options,
                     &schema_store,
-                    args.always_output,
                 )
                 .await
                 {
@@ -206,7 +201,7 @@ where
     })
 }
 
-// For standard input: supports always_output
+// For standard input: --check outputs formatted TOML and returns error if different
 async fn format_stdin<P>(
     mut file: FormatFile,
     mut printer: P,
@@ -214,7 +209,6 @@ async fn format_stdin<P>(
     check: bool,
     format_options: &FormatOptions,
     schema_store: &tombi_schema_store::SchemaStore,
-    always_output: bool,
 ) -> Result<bool, ()>
 where
     Diagnostic: Print<P>,
@@ -233,16 +227,20 @@ where
         .await
         {
             Ok(formatted) => {
-                if source != formatted {
-                    // Output to stdout if there are changes
+                if check {
                     print!("{formatted}");
-                    Ok(true)
-                } else if always_output {
-                    // Output to stdout even if there are no changes
-                    print!("{source}");
-                    Ok(false)
+                    if source != formatted {
+                        return Err(());
+                    } else {
+                        return Ok(false);
+                    }
                 } else {
-                    Ok(false)
+                    if source != formatted {
+                        print!("{formatted}");
+                        Ok(true)
+                    } else {
+                        Ok(false)
+                    }
                 }
             }
             Err(diagnostics) => {
