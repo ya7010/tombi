@@ -250,7 +250,7 @@ fn document_link_for_crate_cargo_toml(
                                                 "L{}",
                                                 workspace_crate_value.range().start.line + 1
                                             )));
-                                            total_document_links.push(
+                                            let workspace_document_link =
                                                 tombi_extension::DocumentLink {
                                                     target,
                                                     range: workspace_key.range()
@@ -258,8 +258,12 @@ fn document_link_for_crate_cargo_toml(
                                                     tooltip:
                                                         DocumentLinkToolTip::WorkspaceCargoToml
                                                             .to_string(),
-                                                },
-                                            );
+                                                };
+                                            if !total_document_links
+                                                .contains(&workspace_document_link)
+                                            {
+                                                total_document_links.push(workspace_document_link);
+                                            }
                                         }
                                     }
                                     continue;
@@ -306,11 +310,11 @@ fn document_link_for_dependency(
     let mut registory = "https://crates.io/crates".to_string();
 
     if let tombi_document_tree::Value::Table(table) = crate_value {
-        if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
+        if let Some(tombi_document_tree::Value::String(crate_path)) = table.get("path") {
             if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) =
                 get_path_crate_cargo_toml(
                     crate_cargo_toml_path,
-                    std::path::Path::new(subcrate_path.value()),
+                    std::path::Path::new(crate_path.value()),
                     toml_version,
                 )
             {
@@ -333,11 +337,18 @@ fn document_link_for_dependency(
                             "L{}",
                             package_name_key.range().start.line + 1
                         )));
-                        return Ok(vec![tombi_extension::DocumentLink {
-                            target: target.clone(),
-                            range: crate_key.unquoted_range(),
-                            tooltip: DocumentLinkToolTip::CargoToml.to_string(),
-                        }]);
+                        return Ok(vec![
+                            tombi_extension::DocumentLink {
+                                target: target.clone(),
+                                range: crate_key.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                            },
+                            tombi_extension::DocumentLink {
+                                target,
+                                range: crate_path.unquoted_range(),
+                                tooltip: DocumentLinkToolTip::CargoToml.to_string(),
+                            },
+                        ]);
                     }
                 }
             }
