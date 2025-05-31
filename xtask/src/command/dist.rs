@@ -44,7 +44,7 @@ fn dist_server(sh: &Shell, target: &Target) -> Result<(), anyhow::Error> {
 
     xshell::cmd!(
         sh,
-        "cargo build --manifest-path {manifest_path} --bin tombi --target {target_name} --release"
+        "cargo build --locked --manifest-path {manifest_path} --bin tombi --target {target_name} --release"
     )
     .run()?;
 
