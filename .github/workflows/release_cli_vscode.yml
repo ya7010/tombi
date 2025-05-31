@@ -68,7 +68,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup target add ${{ matrix.target }}
-
+      - uses: Swatinem/rust-cache@v2
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
