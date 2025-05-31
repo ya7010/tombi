@@ -16,6 +16,10 @@ pub struct Args {
     /// Check only and don't overwrite files.
     #[arg(long, default_value_t = false)]
     check: bool,
+
+    /// Always output formatted TOML to stdout, even if unchanged
+    #[arg(long, default_value_t = false)]
+    always_output: bool,
 }
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -116,14 +120,14 @@ where
         match input {
             arg::FileInput::Stdin => {
                 tracing::debug!("formatting... stdin input");
-                match format_file(
+                match format_stdin(
                     FormatFile::from_stdin(),
                     printer,
-                    None,
                     toml_version,
                     args.check,
                     &format_options,
                     &schema_store,
+                    args.always_output,
                 )
                 .await
                 {
@@ -200,6 +204,55 @@ where
 
         Ok((success_num, not_needed_num, error_num))
     })
+}
+
+// For standard input: supports always_output
+async fn format_stdin<P>(
+    mut file: FormatFile,
+    mut printer: P,
+    toml_version: TomlVersion,
+    check: bool,
+    format_options: &FormatOptions,
+    schema_store: &tombi_schema_store::SchemaStore,
+    always_output: bool,
+) -> Result<bool, ()>
+where
+    Diagnostic: Print<P>,
+    crate::Error: Print<P>,
+{
+    let mut source = String::new();
+    if file.read_to_string(&mut source).await.is_ok() {
+        match tombi_formatter::Formatter::new(
+            toml_version,
+            FormatDefinitions::default(),
+            format_options,
+            None,
+            schema_store,
+        )
+        .format(&source)
+        .await
+        {
+            Ok(formatted) => {
+                if source != formatted {
+                    // Output to stdout if there are changes
+                    print!("{formatted}");
+                    Ok(true)
+                } else if always_output {
+                    // Output to stdout even if there are no changes
+                    print!("{source}");
+                    Ok(false)
+                } else {
+                    Ok(false)
+                }
+            }
+            Err(diagnostics) => {
+                diagnostics.print(&mut printer);
+                Err(())
+            }
+        }
+    } else {
+        Err(())
+    }
 }
 
 async fn format_file<P>(
