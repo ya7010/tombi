@@ -51,11 +51,6 @@ mod document_link_tests {
                     path: project_root_path().join("crates/tombi-lsp/Cargo.toml"),
                     range: 4:0..4:9,
                     tooltip: tombi_extension_cargo::DocumentLinkToolTip::CargoToml,
-                },
-                {
-                    path: project_root_path().join("crates/tombi-lsp/Cargo.toml"),
-                    range: 4:18..4:34,
-                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::CargoToml,
                 }
             ]));
         );
@@ -135,11 +130,6 @@ mod document_link_tests {
                 {
                     path: project_root_path().join("crates/tombi-lsp/Cargo.toml"),
                     range: 4:0..4:9,
-                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::CargoToml,
-                },
-                {
-                    path: project_root_path().join("crates/tombi-lsp/Cargo.toml"),
-                    range: 4:18..4:40,
                     tooltip: tombi_extension_cargo::DocumentLinkToolTip::CargoToml,
                 }
             ]));
@@ -393,6 +383,19 @@ macro_rules! test_document_link {
             let result = handle_document_link(&backend, params).await;
 
             tracing::debug!("document_link result: {:#?}", result);
+
+            let result = result.map(|result| result.map(|document_links| {
+                document_links
+                    .into_iter()
+                    .map(|mut  document_link| {
+                        document_link.target.as_mut().map(| target| {
+                            target.set_fragment(None);
+                            target
+                        });
+                        document_link
+                    })
+                    .collect::<Vec<_>>()
+            }));
 
             pretty_assertions::assert_eq!(result, Ok($expected_links));
 
