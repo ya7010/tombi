@@ -241,7 +241,10 @@ fn document_link_for_crate_cargo_toml(
                                     &workspace_cargo_toml_path,
                                     toml_version,
                                 ) {
-                                    for document_link in document_links {
+                                    for mut document_link in document_links {
+                                        document_link.range =
+                                            workspace_key.range() + is_workspace.range();
+
                                         total_document_links.push(document_link);
                                         if let Ok(mut target) =
                                             Url::from_file_path(&workspace_cargo_toml_path)
@@ -311,7 +314,7 @@ fn document_link_for_dependency(
 
     if let tombi_document_tree::Value::Table(table) = crate_value {
         if let Some(tombi_document_tree::Value::String(crate_path)) = table.get("path") {
-            if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) =
+            if let Some((path_target_cargo_toml_path, path_target_document_tree)) =
                 get_path_crate_cargo_toml(
                     crate_cargo_toml_path,
                     std::path::Path::new(crate_path.value()),
@@ -319,18 +322,19 @@ fn document_link_for_dependency(
                 )
             {
                 if let Some((package_name_key, tombi_document_tree::Value::String(package_name))) =
-                    tombi_document_tree::dig_keys(&subcrate_document_tree, &["package", "name"])
+                    tombi_document_tree::dig_keys(&path_target_document_tree, &["package", "name"])
                 {
                     let package_name_check =
-                        if let Some(tombi_document_tree::Value::String(package_name)) =
+                        if let Some(tombi_document_tree::Value::String(real_package_name)) =
                             table.get("package")
                         {
-                            package_name.value() == crate_key.value()
+                            real_package_name.value() == crate_key.value()
                         } else {
                             package_name.value() == crate_key.value()
                         };
                     if package_name_check {
-                        let Ok(mut target) = Url::from_file_path(subcrate_cargo_toml_path) else {
+                        let Ok(mut target) = Url::from_file_path(path_target_cargo_toml_path)
+                        else {
                             return Ok(Vec::with_capacity(0));
                         };
                         target.set_fragment(Some(&format!(
