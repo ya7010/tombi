@@ -1,6 +1,6 @@
 {
   "name": "@tombi-toml/tombi",
-  "version": "0.0.0",
+  "version": "0.0.0-dev",
   "description": "🦅 TOML Toolkit 🦅",
   "bin": {
     "tombi": "./bin/tombi"

@@ -5,6 +5,9 @@
 cargo tombi
 ```
 
+> [!NOTE]
+> The version of the built `tombi` command is `0.0.0-dev`. If you want to execute a specific version, please refer to the [Installation Document](https://tombi-toml.github.io/tombi/docs/installation).
+
 ## Debug VSCode Extension
 1. Select `Run and Debug` from the sidebar
 2. Select `Run Extension (Debug Build)` from the dropdown
