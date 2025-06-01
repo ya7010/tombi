@@ -116,6 +116,11 @@ mod document_link_tests {
                     url: "https://github.com/serde-rs/serde",
                     range: 4:0..4:5,
                     tooltip: tombi_extension_cargo::DocumentLinkToolTip::GitRepository,
+                },
+                {
+                    url: "https://github.com/serde-rs/serde",
+                    range: 4:17..4:50,
+                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::GitRepository,
                 }
             ]));
         );
@@ -201,6 +206,11 @@ mod document_link_tests {
                     url: "https://github.com/serde-rs/serde",
                     range: 4:0..4:5,
                     tooltip: tombi_extension_cargo::DocumentLinkToolTip::GitRepository,
+                },
+                {
+                    url: "https://github.com/serde-rs/serde",
+                    range: 4:17..4:50,
+                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::GitRepository,
                 }
             ]));
         );
@@ -218,9 +228,9 @@ mod document_link_tests {
                 project_root_path().join("subcrate/Cargo.toml"),
             ) -> Ok(Some(vec![
                 {
-                    url: "https://crates.io/crates/tombi-lsp",
+                    path: project_root_path().join("crates/tombi-lsp/Cargo.toml"),
                     range: 4:0..4:9,
-                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::CrateIo,
+                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::CargoToml,
                 },
                 {
                     path: project_root_path().join("Cargo.toml"),
