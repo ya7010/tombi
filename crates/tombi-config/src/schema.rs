@@ -101,7 +101,8 @@ fn catalog_paths_default() -> Option<Vec<SchemaCatalogPath>> {
 pub struct SchemaCatalogOld {
     /// # The schema catalog path or url.
     ///
-    /// **[Deprecated]** Please use `paths` instead.
+    /// **🚧 Deprecated 🚧**\
+    /// Please use `schema.catalog.paths` instead.
     #[cfg_attr(
         feature = "jsonschema",
         schemars(default = "OneOrMany::<SchemaCatalogPath>::default")
@@ -224,7 +225,8 @@ pub struct OldSubSchema {
 
     /// # The keys to apply the sub schema.
     ///
-    /// **[Deprecated]** Please use `root` instead.
+    /// **🚧 Deprecated 🚧**\
+    /// Please use `schemas[*].root` instead.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     #[cfg_attr(feature = "jsonschema", deprecated)]
     pub root_keys: Option<String>,

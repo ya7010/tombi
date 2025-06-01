@@ -468,7 +468,7 @@
       "properties": {
         "path": {
           "title": "The schema catalog path or url.",
-          "description": "**[Deprecated]** Please use `paths` instead.",
+          "description": "**🚧 Deprecated 🚧**\\\n Please use `schema.catalog.paths` instead.",
           "anyOf": [
             {
               "$ref": "#/definitions/OneOrMany_for_SchemaCatalogPath"
@@ -602,7 +602,7 @@
         },
         "root-keys": {
           "title": "The keys to apply the sub schema.",
-          "description": "**[Deprecated]** Please use `root` instead.",
+          "description": "**🚧 Deprecated 🚧**\\\n Please use `schemas[*].root` instead.",
           "type": [
             "string",
             "null"
