@@ -125,12 +125,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "assert_matches"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
-
-[[package]]
 name = "async-trait"
 version = "0.1.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2002,8 +1996,8 @@ dependencies = [
 name = "tombi-config"
 version = "0.0.0"
 dependencies = [
- "assert_matches",
  "clap",
+ "pretty_assertions",
  "schemars",
  "serde",
  "thiserror",
@@ -2144,7 +2138,6 @@ dependencies = [
 name = "tombi-formatter"
 version = "0.0.0"
 dependencies = [
- "assert_matches",
  "itertools",
  "pretty_assertions",
  "rstest",
@@ -2246,7 +2239,6 @@ dependencies = [
 name = "tombi-linter"
 version = "0.0.0"
 dependencies = [
- "assert_matches",
  "futures",
  "itertools",
  "pretty_assertions",
