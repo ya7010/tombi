@@ -228,22 +228,21 @@ where
         {
             Ok(formatted) => {
                 if check {
-                    print!("{formatted}");
                     if source != formatted {
-                        return Err(());
-                    } else {
-                        return Ok(false);
-                    }
-                } else {
-                    if source != formatted {
-                        print!("{formatted}");
-                        Ok(true)
+                        crate::error::NotFormattedError::from(file.source())
+                            .into_error()
+                            .print(&mut printer);
+                        Err(())
                     } else {
                         Ok(false)
                     }
+                } else {
+                    print!("{formatted}");
+                    Ok(source != formatted)
                 }
             }
             Err(diagnostics) => {
+                print!("{source}");
                 diagnostics.print(&mut printer);
                 Err(())
             }
