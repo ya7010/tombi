@@ -1631,7 +1631,7 @@ dependencies = [
 
 [[package]]
 name = "serde_tombi"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "chrono",
  "futures",
@@ -1935,7 +1935,7 @@ dependencies = [
 
 [[package]]
 name = "tombi"
-version = "0.0.0"
+version = "0.0.0-dev"
 
 [[package]]
 name = "tombi-ast"
@@ -1977,7 +1977,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-cli"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
@@ -2093,7 +2093,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-extension-cargo"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "glob",
  "itertools",
@@ -2110,7 +2110,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-extension-tombi"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "tombi-config",
  "tombi-document-tree",
@@ -2123,7 +2123,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-extension-uv"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "glob",
  "itertools",
@@ -2385,7 +2385,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-syntax"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "rstest",
  "thiserror",
@@ -2404,7 +2404,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-text"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "pretty_assertions",
  "rstest",
@@ -2423,7 +2423,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-toml-version"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "clap",
  "schemars",
@@ -2455,7 +2455,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-x-keyword"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "clap",
  "schemars",
@@ -2464,7 +2464,7 @@ dependencies = [
 
 [[package]]
 name = "toml-test"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3237,7 +3237,7 @@ checksum = "32ac00cd3f8ec9c1d33fb3e7958a82df6989c42d747bd326c822b1d625283547"
 
 [[package]]
 name = "xtask"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "anyhow",
  "chrono",

@@ -4,7 +4,7 @@ use xshell::Shell;
 
 use crate::utils::project_root_path;
 
-pub const DEV_VERSION: &str = "0.0.0";
+pub const DEV_VERSION: &str = "0.0.0-dev";
 
 pub fn run(sh: &Shell) -> anyhow::Result<()> {
     let version = match std::env::var("GITHUB_REF") {
@@ -94,7 +94,12 @@ impl Patch {
     }
 
     fn replace(&mut self, from: &str, to: &str) -> &mut Patch {
-        pretty_assertions::assert_eq!(self.contents.contains(from), true);
+        pretty_assertions::assert_eq!(
+            self.contents.contains(from),
+            true,
+            "{}",
+            format!("Expected '{}' to be in '{}'", from, self.path.display())
+        );
         self.contents = self.contents.replace(from, to);
         self
     }

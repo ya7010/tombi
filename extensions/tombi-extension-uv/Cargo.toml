@@ -1,6 +1,6 @@
 [package]
 name = "tombi-extension-uv"
-version = "0.0.0"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 description = "Tombi extension for uv Python project management"
