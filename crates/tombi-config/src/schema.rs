@@ -38,7 +38,7 @@ impl SchemaOptions {
                 self.catalog
                     .as_ref()
                     .and_then(|catalog| catalog.paths().as_ref().map(|path| path.to_vec()))
-                    .unwrap_or_else(|| vec![JSON_SCHEMA_STORE_CATALOG_URL.into()]),
+                    .unwrap_or_default(),
             )
         } else {
             None
