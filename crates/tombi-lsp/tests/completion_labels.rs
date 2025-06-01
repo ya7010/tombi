@@ -1,3 +1,4 @@
+use tombi_config::JSON_SCHEMA_STORE_CATALOG_URL;
 use tombi_test_lib::{
     today_local_date, today_local_date_time, today_local_time, today_offset_date_time,
 };
@@ -280,6 +281,7 @@ mod completion_labels {
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
+                format!("[\"{JSON_SCHEMA_STORE_CATALOG_URL}\"]"),
                 "[]",
             ]);
         }
