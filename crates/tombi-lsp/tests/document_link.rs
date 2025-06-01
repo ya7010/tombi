@@ -204,6 +204,31 @@ mod document_link_tests {
                 }
             ]));
         );
+
+        test_document_link!(
+            #[tokio::test]
+            async fn cargo_dependencies_tombi_lsp_workspace_true(
+                r#"
+                [package]
+                readme = "README.md"
+
+                [dependencies]
+                tombi-lsp = { workspace = true, default-features = [] }
+                "#,
+                project_root_path().join("subcrate/Cargo.toml"),
+            ) -> Ok(Some(vec![
+                {
+                    url: "https://crates.io/crates/tombi-lsp",
+                    range: 4:0..4:9,
+                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::CrateIo,
+                },
+                {
+                    path: project_root_path().join("Cargo.toml"),
+                    range: 4:14..4:30,
+                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::WorkspaceCargoToml,
+                }
+            ]));
+        );
     }
 
     mod tombi_schema {
@@ -281,83 +306,20 @@ mod document_link_tests {
 
 #[macro_export]
 macro_rules! test_document_link {
-    // Pattern: with file path (path), with tooltip
-    (#[tokio::test] async fn $name:ident(
-        $source:expr,
-        $file_path:expr,
-    ) -> Ok(Some(vec![$({
-        path: $path:expr,
-        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal,
-        tooltip: $tooltip:expr $(,)?
-    }),* $(,)?]));) => {
-        test_document_link! {
-            #[tokio::test] async fn _$name(
-                $source,
-                $file_path,
-            ) -> Ok(Some(vec![
-                $(
-                    tower_lsp::lsp_types::DocumentLink {
-                        range: tower_lsp::lsp_types::Range {
-                            start: tower_lsp::lsp_types::Position { line: $start_line, character: $start_char },
-                            end: tower_lsp::lsp_types::Position { line: $end_line, character: $end_char },
-                        },
-                        target: Url::from_file_path($path).ok(),
-                        tooltip: Some($tooltip.to_string()),
-                        data: None,
-                    }
-                ),*
-            ]));
-        }
-    };
     // Pattern: with url, with tooltip
     (#[tokio::test] async fn $name:ident(
         $source:expr,
         $file_path:expr,
-    ) -> Ok(Some(vec![$({
-        url: $url:expr,
-        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal,
-        tooltip: $tooltip:expr $(,)?
-    }),* $(,)?]));) => {
+    ) -> Ok(Some(vec![$($document_link:tt),* $(,)?]));) => {
         test_document_link! {
             #[tokio::test] async fn _$name(
                 $source,
                 $file_path,
             ) -> Ok(Some(vec![
                 $(
-                    tower_lsp::lsp_types::DocumentLink {
-                        range: tower_lsp::lsp_types::Range {
-                            start: tower_lsp::lsp_types::Position { line: $start_line, character: $start_char },
-                            end: tower_lsp::lsp_types::Position { line: $end_line, character: $end_char },
-                        },
-                        target: Url::parse($url).ok(),
-                        tooltip: Some($tooltip.to_string()),
-                        data: None,
-                    }
-                ),*
-            ]));
-        }
-    };
-    // Pattern: with file path (path only), no tooltip (default tooltip)
-    (#[tokio::test] async fn $name:ident(
-        $source:expr,
-        $file_path:expr,
-    ) -> Ok(Some(vec![$({
-        path: $path:expr,
-        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal $(,)?
-    }),* $(,)?]));) => {
-        test_document_link! {
-            #[tokio::test] async fn $name(
-                $source,
-                $file_path,
-            ) -> Ok(Some(vec![
-                $(
-                    {
-                        path: $path,
-                        range: $start_line:$start_char..$end_line:$end_char,
-                        tooltip: "Open JSON Schema",
-                    }
-                ),*
-            ]));
+                    _document_link!($document_link),
+                )*
+                ]));
         }
     };
     // Fallback: original (for DocumentLink struct literal)
@@ -371,7 +333,10 @@ macro_rules! test_document_link {
             use tombi_lsp::handler::{handle_did_open, handle_document_link};
             use tombi_lsp::Backend;
             use tower_lsp::{
-                lsp_types::{DidOpenTextDocumentParams, DocumentLinkParams, PartialResultParams, TextDocumentIdentifier, TextDocumentItem, Url, WorkDoneProgressParams},
+                lsp_types::{
+                    DidOpenTextDocumentParams, DocumentLinkParams, PartialResultParams,
+                    TextDocumentIdentifier, TextDocumentItem, Url, WorkDoneProgressParams,
+                },
                 LspService,
             };
 
@@ -411,22 +376,80 @@ macro_rules! test_document_link {
 
             tracing::debug!("document_link result: {:#?}", result);
 
-            let result = result.map(|result| result.map(|document_links| {
-                document_links
-                    .into_iter()
-                    .map(|mut  document_link| {
-                        document_link.target.as_mut().map(| target| {
-                            target.set_fragment(None);
-                            target
-                        });
-                        document_link
-                    })
-                    .collect::<Vec<_>>()
-            }));
+            let result = result.map(|result| {
+                result.map(|document_links| {
+                    document_links
+                        .into_iter()
+                        .map(|mut document_link| {
+                            document_link.target.as_mut().map(|target| {
+                                target.set_fragment(None);
+                                target
+                            });
+                            document_link
+                        })
+                        .collect::<Vec<_>>()
+                })
+            });
 
             pretty_assertions::assert_eq!(result, Ok($expected_links));
 
             Ok(())
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! _document_link {
+    ({
+        path: $path:expr,
+        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal $(,)?
+    }) => {
+        _document_link! ({
+            path: $path,
+            range: $start_line:$start_char..$end_line:$end_char,
+            tooltip: "Open JSON Schema",
+        })
+    };
+    ({
+        path: $path:expr,
+        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal,
+        tooltip: $tooltip:expr $(,)?
+    }) => {
+        tower_lsp::lsp_types::DocumentLink {
+            range: tower_lsp::lsp_types::Range {
+                start: tower_lsp::lsp_types::Position {
+                    line: $start_line,
+                    character: $start_char,
+                },
+                end: tower_lsp::lsp_types::Position {
+                    line: $end_line,
+                    character: $end_char,
+                },
+            },
+            target: Url::from_file_path($path).ok(),
+            tooltip: Some($tooltip.to_string()),
+            data: None,
+        }
+    };
+    ({
+        url: $url:expr,
+        range: $start_line:literal : $start_char:literal .. $end_line:literal : $end_char:literal,
+        tooltip: $tooltip:expr $(,)?
+    }) => {
+        tower_lsp::lsp_types::DocumentLink {
+            range: tower_lsp::lsp_types::Range {
+                start: tower_lsp::lsp_types::Position {
+                    line: $start_line,
+                    character: $start_char,
+                },
+                end: tower_lsp::lsp_types::Position {
+                    line: $end_line,
+                    character: $end_char,
+                },
+            },
+            target: Url::parse($url).ok(),
+            tooltip: Some($tooltip.to_string()),
+            data: None,
         }
     };
 }
