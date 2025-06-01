@@ -1,7 +1,7 @@
 {
   "name": "tombi",
   "displayName": "Tombi",
-  "version": "0.0.0",
+  "version": "0.0.0-dev",
   "description": "TOML Language Server",
   "publisher": "tombi-toml",
   "author": {

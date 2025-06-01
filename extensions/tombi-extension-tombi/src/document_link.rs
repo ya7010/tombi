@@ -32,16 +32,49 @@ pub async fn document_link(
 
     let mut document_links = vec![];
 
-    if let Some((_, tombi_document_tree::Value::String(path))) =
-        dig_keys(document_tree, &["schema", "catalog", "path"])
-    {
-        if let Some(target) = crate::str2url(path.value(), &tombi_toml_path) {
-            document_links.push(tombi_extension::DocumentLink {
-                target,
-                range: path.unquoted_range(),
-                tooltip: DocumentLinkToolTip::Catalog.to_string(),
-            });
+    if let Some((_, path)) = dig_keys(document_tree, &["schema", "catalog", "path"]) {
+        let paths = match path {
+            tombi_document_tree::Value::String(path) => vec![path],
+            tombi_document_tree::Value::Array(paths) => paths
+                .iter()
+                .filter_map(|v| {
+                    if let tombi_document_tree::Value::String(s) = v {
+                        Some(s)
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+            _ => Vec::with_capacity(0),
         };
+        for path in paths {
+            // Convert the path to a URL
+            if let Some(target) = crate::str2url(path.value(), &tombi_toml_path) {
+                document_links.push(tombi_extension::DocumentLink {
+                    target,
+                    range: path.unquoted_range(),
+                    tooltip: DocumentLinkToolTip::Catalog.to_string(),
+                });
+            }
+        }
+    }
+
+    if let Some((_, tombi_document_tree::Value::Array(paths))) =
+        dig_keys(document_tree, &["schema", "catalog", "paths"])
+    {
+        for path in paths.iter() {
+            let tombi_document_tree::Value::String(path) = path else {
+                continue;
+            };
+            // Convert the path to a URL
+            if let Some(target) = crate::str2url(path.value(), &tombi_toml_path) {
+                document_links.push(tombi_extension::DocumentLink {
+                    target,
+                    range: path.unquoted_range(),
+                    tooltip: DocumentLinkToolTip::Catalog.to_string(),
+                });
+            }
+        }
     }
 
     if let Some((_, tombi_document_tree::Value::Array(schemas))) =

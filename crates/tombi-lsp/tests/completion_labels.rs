@@ -1,4 +1,4 @@
-use tombi_schema_store::json::DEFAULT_CATALOG_URL;
+use tombi_config::JSON_SCHEMA_STORE_CATALOG_URL;
 use tombi_test_lib::{
     today_local_date, today_local_date_time, today_local_time, today_offset_date_time,
 };
@@ -250,14 +250,12 @@ mod completion_labels {
             async fn tombi_schema_catalog_path(
                 r#"
                 [schema.catalog]
-                path =█
+                paths =[█]
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
-                format!("\"{}\"", DEFAULT_CATALOG_URL),
                 "\"\"",
                 "''",
-                "[]",
             ]);
         }
 
@@ -266,14 +264,12 @@ mod completion_labels {
             async fn tombi_schema_catalog_path2(
                 r#"
                 [schema.catalog]
-                path = █
+                paths = [█]
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
-                format!("\"{}\"", DEFAULT_CATALOG_URL),
                 "\"\"",
                 "''",
-                "[]",
             ]);
         }
 
@@ -281,13 +277,11 @@ mod completion_labels {
             #[tokio::test]
             async fn tombi_schema_catalog_path_inline(
                 r#"
-                schema.catalog.path =█
+                schema.catalog.paths =█
                 "#,
                 tombi_schema_path(),
             ) -> Ok([
-                format!("\"{}\"", DEFAULT_CATALOG_URL),
-                "\"\"",
-                "''",
+                format!("[\"{JSON_SCHEMA_STORE_CATALOG_URL}\"]"),
                 "[]",
             ]);
         }

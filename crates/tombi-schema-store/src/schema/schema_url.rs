@@ -38,6 +38,12 @@ impl std::ops::Deref for SchemaUrl {
     }
 }
 
+impl std::ops::DerefMut for SchemaUrl {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl From<SchemaUrl> for url::Url {
     fn from(schema_url: SchemaUrl) -> Self {
         schema_url.0
