@@ -20,7 +20,7 @@ pub struct Args {
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn run(args: Args, offline: bool) -> Result<(), crate::Error> {
-    let (success_num, nmt_needed_num, error_num) = match inner_run(args, Pretty, offline) {
+    let (success_num, not_needed_num, error_num) = match inner_run(args, Pretty, offline) {
         Ok((success_num, not_needed_num, error_num)) => (success_num, not_needed_num, error_num),
         Err(error) => {
             tracing::error!("{}", error);
