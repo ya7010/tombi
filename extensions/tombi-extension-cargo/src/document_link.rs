@@ -191,23 +191,25 @@ fn document_link_for_crate_cargo_toml(
         let registories =
             get_registories(&workspace_cargo_toml_path, toml_version).unwrap_or_default();
 
+        // Support Package Table
+        // See: https://doc.rust-lang.org/cargo/reference/workspaces.html#the-package-table
         for package_item in [
-            "version",
             "authors",
-            "edition",
-            "rust-version",
+            "categories",
             "description",
             "documentation",
-            "readme",
-            "homepage",
-            "repository",
-            "license",
-            "license-file",
-            "keywords",
-            "categories",
+            "edition",
             "exclude",
+            "homepage",
             "include",
+            "keywords",
+            "license-file",
+            "license",
             "publish",
+            "readme",
+            "repository",
+            "rust-version",
+            "version",
         ] {
             if let (
                 Some((workspace_key, tombi_document_tree::Value::Boolean(value))),
