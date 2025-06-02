@@ -8,7 +8,7 @@ pub use goto_definition::goto_definition;
 use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_config::TomlVersion;
-use tombi_document_tree::{TryIntoDocumentTree, ValueImpl};
+use tombi_document_tree::{dig_keys, TryIntoDocumentTree, ValueImpl};
 use tombi_schema_store::{dig_accessors, match_accessors};
 use tower_lsp::lsp_types::Url;
 
@@ -45,9 +45,32 @@ fn load_cargo_toml(
 
 fn find_workspace_cargo_toml(
     cargo_toml_path: &std::path::Path,
+    workspace_path: Option<&str>,
     toml_version: TomlVersion,
 ) -> Option<(std::path::PathBuf, tombi_document_tree::DocumentTree)> {
     let mut current_dir = cargo_toml_path.parent()?;
+
+    if let Some(workspace_path) = workspace_path {
+        let mut workspace_cargo_toml_path =
+            std::path::PathBuf::from(workspace_path).join("Cargo.toml");
+        if !workspace_cargo_toml_path.is_absolute() {
+            if let Some(joined_path) = cargo_toml_path
+                .parent()
+                .map(|parent| parent.join(&workspace_cargo_toml_path))
+            {
+                workspace_cargo_toml_path = joined_path;
+            }
+        }
+        if let Ok(canonicalized_path) = std::fs::canonicalize(&workspace_cargo_toml_path) {
+            let Some(document_tree) = load_cargo_toml(&canonicalized_path, toml_version) else {
+                return None;
+            };
+            if document_tree.contains_key("workspace") {
+                return Some((canonicalized_path, document_tree));
+            };
+        }
+        return None;
+    }
 
     while let Some(target_dir) = current_dir.parent() {
         current_dir = target_dir;
@@ -107,6 +130,7 @@ fn get_path_crate_cargo_toml(
 fn goto_workspace(
     accessors: &[tombi_schema_store::Accessor],
     crate_cargo_toml_path: &std::path::Path,
+    workspace_path: Option<&str>,
     toml_version: TomlVersion,
     jump_to_subcrate: bool,
 ) -> Result<Option<tombi_extension::DefinitionLocation>, tower_lsp::jsonrpc::Error> {
@@ -116,7 +140,7 @@ fn goto_workspace(
     ));
 
     let Some((workspace_cargo_toml_path, workspace_cargo_toml_document_tree)) =
-        find_workspace_cargo_toml(crate_cargo_toml_path, toml_version)
+        find_workspace_cargo_toml(crate_cargo_toml_path, workspace_path, toml_version)
     else {
         return Ok(None);
     };
@@ -472,7 +496,13 @@ fn goto_definition_for_crate_cargo_toml(
         );
     } else if matches!(accessors.last(), Some(tombi_schema_store::Accessor::Key(key)) if key == "workspace")
     {
-        goto_workspace(accessors, cargo_toml_path, toml_version, jump_to_subcrate)
+        goto_workspace(
+            accessors,
+            cargo_toml_path,
+            get_workspace_path(document_tree),
+            toml_version,
+            jump_to_subcrate,
+        )
     } else if match_accessors!(accessors, ["dependencies", _, "path"])
         || match_accessors!(accessors, ["dev-dependencies", _, "path"])
         || match_accessors!(accessors, ["build-dependencies", _, "path"])
@@ -551,4 +581,18 @@ fn goto_workspace_member_crates(
     }
 
     Ok(locations)
+}
+
+/// Get the workspace path from Cargo.toml
+///
+/// See: https://doc.rust-lang.org/cargo/reference/manifest.html#the-workspace-field
+#[inline]
+fn get_workspace_path(document_tree: &tombi_document_tree::DocumentTree) -> Option<&str> {
+    dig_keys(document_tree, &["package", "workspace"]).and_then(|(_, workspace)| {
+        if let tombi_document_tree::Value::String(workspace_path) = workspace {
+            Some(workspace_path.value())
+        } else {
+            None
+        }
+    })
 }
