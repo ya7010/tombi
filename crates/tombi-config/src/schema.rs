@@ -34,12 +34,12 @@ impl SchemaOptions {
 
     pub fn catalog_paths(&self) -> Option<Vec<SchemaCatalogPath>> {
         if self.enabled.unwrap_or_default().value() {
-            Some(
-                self.catalog
-                    .as_ref()
-                    .and_then(|catalog| catalog.paths().as_ref().map(|path| path.to_vec()))
-                    .unwrap_or_default(),
-            )
+            self.catalog
+                .clone()
+                .unwrap_or_default()
+                .paths()
+                .as_ref()
+                .map(|path| path.to_vec())
         } else {
             None
         }
@@ -79,7 +79,7 @@ impl SchemaCatalog {
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NewSchemaCatalog {
     /// # The schema catalog path/url array.
     ///
@@ -87,6 +87,14 @@ pub struct NewSchemaCatalog {
     #[cfg_attr(feature = "jsonschema", schemars(default = "catalog_paths_default"))]
     #[cfg_attr(feature = "serde", serde(default = "catalog_paths_default"))]
     pub paths: Option<Vec<SchemaCatalogPath>>,
+}
+
+impl Default for NewSchemaCatalog {
+    fn default() -> Self {
+        Self {
+            paths: catalog_paths_default(),
+        }
+    }
 }
 
 fn catalog_paths_default() -> Option<Vec<SchemaCatalogPath>> {
@@ -234,8 +242,6 @@ pub struct OldSubSchema {
 
 #[cfg(test)]
 mod tests {
-    use assert_matches::assert_matches;
-
     use crate::JSON_SCHEMA_STORE_CATALOG_URL;
 
     use super::*;
@@ -243,9 +249,10 @@ mod tests {
     #[test]
     fn schema_catalog_paths_default() {
         let schema = SchemaOptions::default();
-        let _expected = [JSON_SCHEMA_STORE_CATALOG_URL];
+        let expected = Some(vec![JSON_SCHEMA_STORE_CATALOG_URL.into()]);
+        let default_paths = schema.catalog_paths();
 
-        assert_matches!(schema.catalog_paths(), Some(_expected));
+        pretty_assertions::assert_eq!(default_paths, expected);
     }
 
     #[test]
@@ -257,8 +264,7 @@ mod tests {
             ..Default::default()
         };
 
-        let _expected: Vec<SchemaCatalogPath> = vec![];
-
-        assert_matches!(schema.catalog_paths(), Some(_expected));
+        let expected: Vec<SchemaCatalogPath> = vec![];
+        pretty_assertions::assert_eq!(schema.catalog_paths(), Some(expected));
     }
 }
