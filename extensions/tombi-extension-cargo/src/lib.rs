@@ -585,6 +585,9 @@ fn goto_workspace_member_crates(
     Ok(locations)
 }
 
+/// Get the workspace path from Cargo.toml
+///
+/// See: https://doc.rust-lang.org/cargo/reference/manifest.html#the-workspace-field
 #[inline]
 fn get_workspace_path(document_tree: &tombi_document_tree::DocumentTree) -> Option<&str> {
     dig_keys(document_tree, &["package", "workspace"]).and_then(|(_, workspace)| {
