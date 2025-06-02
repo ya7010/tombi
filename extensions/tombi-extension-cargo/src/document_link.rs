@@ -251,6 +251,30 @@ fn document_link_for_crate_cargo_toml(
                 });
             }
         }
+
+        // Support Lints Workspace
+        // See: https://doc.rust-lang.org/cargo/reference/workspaces.html#the-lints-table
+        if let (
+            Some((workspace_key, tombi_document_tree::Value::Boolean(value))),
+            Some((workspace_lints_key, _)),
+        ) = (
+            dig_keys(crate_document_tree, &["lints", "workspace"]),
+            dig_keys(&workspace_document_tree, &["workspace", "lints"]),
+        ) {
+            if let Ok(mut target) = Url::from_file_path(&workspace_cargo_toml_path) {
+                target.set_fragment(Some(&format!(
+                    "L{}",
+                    workspace_lints_key.range().start.line + 1
+                )));
+                total_document_links.push(tombi_extension::DocumentLink {
+                    target,
+                    range: workspace_key.range() + value.range(),
+                    tooltip: DocumentLinkToolTip::WorkspaceCargoToml.to_string(),
+                });
+            };
+        }
+
+        // Support Workspace Dependencies
         let workspace_dependencies =
             if let Some((_, tombi_document_tree::Value::Table(dependencies))) =
                 dig_keys(&workspace_document_tree, &["workspace", "dependencies"])
