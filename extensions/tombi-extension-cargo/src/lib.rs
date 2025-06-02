@@ -54,21 +54,19 @@ fn find_workspace_cargo_toml(
         let mut workspace_cargo_toml_path =
             std::path::PathBuf::from(workspace_path).join("Cargo.toml");
         if !workspace_cargo_toml_path.is_absolute() {
-            if let Some(absolute_path) = cargo_toml_path
+            if let Some(joined_path) = cargo_toml_path
                 .parent()
-                .map(|parent| parent.join(workspace_path))
+                .map(|parent| parent.join(&workspace_cargo_toml_path))
             {
-                workspace_cargo_toml_path = absolute_path;
+                workspace_cargo_toml_path = joined_path;
             }
         }
-        if workspace_cargo_toml_path.exists() {
-            let Some(document_tree) = load_cargo_toml(&workspace_cargo_toml_path, toml_version)
-            else {
+        if let Ok(canonicalized_path) = std::fs::canonicalize(&workspace_cargo_toml_path) {
+            let Some(document_tree) = load_cargo_toml(&canonicalized_path, toml_version) else {
                 return None;
             };
-
             if document_tree.contains_key("workspace") {
-                return Some((workspace_cargo_toml_path, document_tree));
+                return Some((canonicalized_path, document_tree));
             };
         }
         return None;

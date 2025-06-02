@@ -239,6 +239,23 @@ mod document_link_tests {
                 }
             ]));
         );
+
+        test_document_link!(
+            #[tokio::test]
+            async fn cargo_package_workspace(
+                r#"
+                [package]
+                workspace = "../../"
+                "#,
+                project_root_path().join("crates/tombi-lsp/Cargo.toml"),
+            ) -> Ok(Some(vec![
+                {
+                    path: project_root_path().join("Cargo.toml"),
+                    range: 1:13..1:19,
+                    tooltip: tombi_extension_cargo::DocumentLinkToolTip::WorkspaceCargoToml,
+                }
+            ]));
+        );
     }
 
     mod tombi_schema {

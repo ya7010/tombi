@@ -193,6 +193,20 @@ fn document_link_for_crate_cargo_toml(
         let registories =
             get_registories(&workspace_cargo_toml_path, toml_version).unwrap_or_default();
 
+        // Support Workspace
+        // See: https://doc.rust-lang.org/cargo/reference/manifest.html#the-workspace-field
+        if let Some((_, tombi_document_tree::Value::String(workspace_path))) =
+            dig_keys(&crate_document_tree, &["package", "workspace"])
+        {
+            if let Ok(target) = Url::from_file_path(&workspace_cargo_toml_path) {
+                total_document_links.push(tombi_extension::DocumentLink {
+                    target,
+                    range: workspace_path.unquoted_range(),
+                    tooltip: DocumentLinkToolTip::WorkspaceCargoToml.to_string(),
+                });
+            }
+        }
+
         // Support Package Table
         // See: https://doc.rust-lang.org/cargo/reference/workspaces.html#the-package-table
         for package_item in [
