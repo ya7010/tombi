@@ -587,7 +587,7 @@ fn goto_workspace_member_crates(
 
 #[inline]
 fn get_workspace_path(document_tree: &tombi_document_tree::DocumentTree) -> Option<&str> {
-    dig_keys(document_tree, &["project", "workspace"]).and_then(|(_, workspace)| {
+    dig_keys(document_tree, &["package", "workspace"]).and_then(|(_, workspace)| {
         if let tombi_document_tree::Value::String(workspace_path) = workspace {
             Some(workspace_path.value())
         } else {
