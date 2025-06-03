@@ -66,6 +66,9 @@ where
     }
 }
 
+/// Follows the given keys in order and retrieves the value if it exists.
+///
+/// NOTE: You cannot follow indices. Use `tombi_schema_store::dig_accessors` for that.
 pub fn dig_keys<'a, K>(
     document_tree: &'a crate::DocumentTree,
     keys: &[&K],
