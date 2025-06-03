@@ -1,7 +1,5 @@
 use itertools::Either;
-use tower_lsp::lsp_types::{
-    CompletionContext, CompletionParams, CompletionTriggerKind, TextDocumentPositionParams,
-};
+use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
 use crate::{
     backend,
@@ -22,7 +20,6 @@ pub async fn handle_completion(
                 text_document,
                 position,
             },
-        context,
         ..
     } = params;
 
@@ -62,34 +59,9 @@ pub async fn handle_completion(
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let document_sources = backend.document_sources.read().await;
-    let Some(document_source) = document_sources.get(&text_document.uri) else {
-        return Ok(None);
-    };
-
     let root_schema = source_schema
         .as_ref()
         .and_then(|schema| schema.root_schema.as_ref());
-
-    // Skip completion if the trigger character is a whitespace or if there is no schema.
-    if let Some(CompletionContext {
-        trigger_kind: CompletionTriggerKind::TRIGGER_CHARACTER,
-        trigger_character: Some(trigger_character),
-        ..
-    }) = context
-    {
-        if trigger_character == "\n" {
-            let pos_line = position.line as usize;
-            if pos_line > 0 {
-                if let Some(prev_line) = &document_source.source.lines().nth(pos_line - 1) {
-                    if prev_line.trim().is_empty() || root_schema.is_none() {
-                        tracing::trace!("completion skipped due to consecutive line breaks");
-                        return Ok(None);
-                    }
-                }
-            }
-        }
-    }
 
     Ok(Some(
         get_completion_contents(
