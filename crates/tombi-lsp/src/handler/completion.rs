@@ -1,7 +1,5 @@
 use itertools::Either;
-use tower_lsp::lsp_types::{
-    CompletionContext, CompletionParams, CompletionTriggerKind, TextDocumentPositionParams,
-};
+use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
 use crate::{
     backend,
@@ -22,7 +20,6 @@ pub async fn handle_completion(
                 text_document,
                 position,
             },
-        context,
         ..
     } = params;
 
