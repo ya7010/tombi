@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use tombi_config::TomlVersion;
 use tombi_document_tree::dig_keys;
 use tower_lsp::lsp_types::{TextDocumentIdentifier, Url};
@@ -10,17 +12,35 @@ pub enum DocumentLinkToolTip {
     WorkspacePyprojectToml,
 }
 
-impl std::fmt::Display for DocumentLinkToolTip {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Into<&'static str> for &DocumentLinkToolTip {
+    #[inline]
+    fn into(self) -> &'static str {
         match self {
-            DocumentLinkToolTip::PyprojectToml => write!(f, "Open pyproject.toml"),
-            DocumentLinkToolTip::PyprojectTomlFirstMember => {
-                write!(f, "Open first pyproject.toml in members")
-            }
-            DocumentLinkToolTip::WorkspacePyprojectToml => {
-                write!(f, "Open Workspace pyproject.toml")
-            }
+            DocumentLinkToolTip::PyprojectToml => "Open pyproject.toml",
+            DocumentLinkToolTip::PyprojectTomlFirstMember => "Open first pyproject.toml in members",
+            DocumentLinkToolTip::WorkspacePyprojectToml => "Open Workspace pyproject.toml",
         }
+    }
+}
+
+impl Into<&'static str> for DocumentLinkToolTip {
+    #[inline]
+    fn into(self) -> &'static str {
+        (&self).into()
+    }
+}
+
+impl Into<Cow<'static, str>> for DocumentLinkToolTip {
+    #[inline]
+    fn into(self) -> Cow<'static, str> {
+        Cow::Borrowed(self.into())
+    }
+}
+
+impl std::fmt::Display for DocumentLinkToolTip {
+    #[inline]
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Into::<&'static str>::into(self))
     }
 }
 
@@ -110,7 +130,7 @@ fn document_link_for_workspace_pyproject_toml(
                 Some(tombi_extension::DocumentLink {
                     target: member_pyproject_toml_url,
                     range: member.unquoted_range(),
-                    tooltip: DocumentLinkToolTip::PyprojectTomlFirstMember.to_string(),
+                    tooltip: DocumentLinkToolTip::PyprojectTomlFirstMember.into(),
                 })
             });
 
@@ -118,7 +138,7 @@ fn document_link_for_workspace_pyproject_toml(
             (_, Some(n)) if n > 0 => {
                 if let Some(mut document_link) = member_document_links.next() {
                     if n == 1 {
-                        document_link.tooltip = DocumentLinkToolTip::PyprojectToml.to_string();
+                        document_link.tooltip = DocumentLinkToolTip::PyprojectToml.into();
                     }
                     total_document_links.push(document_link);
                 }
@@ -167,13 +187,13 @@ fn document_link_for_member_pyproject_toml(
                     document_links.push(tombi_extension::DocumentLink {
                         target: member_project_toml_url,
                         range: package_name_key.unquoted_range(),
-                        tooltip: DocumentLinkToolTip::PyprojectToml.to_string(),
+                        tooltip: DocumentLinkToolTip::PyprojectToml.into(),
                     });
                 }
                 document_links.push(tombi_extension::DocumentLink {
                     target: workspace_pyproject_toml_url.clone(),
                     range: workspace_key.range() + is_workspace.range(),
-                    tooltip: DocumentLinkToolTip::WorkspacePyprojectToml.to_string(),
+                    tooltip: DocumentLinkToolTip::WorkspacePyprojectToml.into(),
                 });
             }
         }
