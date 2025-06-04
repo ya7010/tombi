@@ -2186,6 +2186,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "tombi-json-arena"
+version = "0.0.0-dev"
+
+[[package]]
 name = "tombi-json-lexer"
 version = "0.0.0"
 dependencies = [
