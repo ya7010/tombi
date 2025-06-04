@@ -3,8 +3,8 @@ use tombi_json_arena::{parse, Value};
 #[test]
 fn parse_simple_string() {
     let json = "\"hello\"";
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::String(sid) => {
             let s = value_arena.str_arena().get(*sid).unwrap();
@@ -17,8 +17,8 @@ fn parse_simple_string() {
 #[test]
 fn parse_simple_number() {
     let json = "42";
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Number(n) => {
             assert_eq!(*n, 42.0);
@@ -30,8 +30,8 @@ fn parse_simple_number() {
 #[test]
 fn parse_simple_boolean() {
     let json = "true";
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Bool(v) => {
             assert_eq!(*v, true);
@@ -43,8 +43,8 @@ fn parse_simple_boolean() {
 #[test]
 fn parse_null() {
     let json = "null";
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Null => {}
         _ => panic!("not a null value"),
@@ -54,8 +54,8 @@ fn parse_null() {
 #[test]
 fn parse_array() {
     let json = "[1, 2, 3]";
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Array(array_id) => {
             let arr = value_arena.array_arena().get(*array_id).unwrap();
@@ -75,8 +75,8 @@ fn parse_array() {
 #[test]
 fn parse_object() {
     let json = r#"{"a": 1, "b": true}"#;
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Object(obj_id) => {
             let obj = value_arena.object_arena().get(*obj_id).unwrap();
@@ -104,8 +104,8 @@ fn parse_object() {
 #[test]
 fn parse_nested() {
     let json = r#"{"arr": [null, {"x": 2}]}"#;
-    let (value_arena, value_id) = parse(json);
-    let value = value_arena.get(value_id.unwrap()).unwrap();
+    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Object(obj_id) => {
             let obj = value_arena.object_arena().get(*obj_id).unwrap();
