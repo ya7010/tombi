@@ -9,3 +9,4 @@ license.workspace = true
 [dependencies]
 indexmap.workspace = true
 tombi-json-lexer.workspace = true
+tombi-json-syntax.workspace = true

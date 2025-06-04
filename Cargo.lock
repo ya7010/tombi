@@ -2191,6 +2191,7 @@ version = "0.0.0-dev"
 dependencies = [
  "indexmap",
  "tombi-json-lexer",
+ "tombi-json-syntax",
 ]
 
 [[package]]
