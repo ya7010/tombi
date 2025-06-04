@@ -293,6 +293,23 @@ impl ObjectNode {
     }
 }
 
+impl From<ObjectNode> for Object {
+    fn from(node: ObjectNode) -> Self {
+        node.properties
+            .into_iter()
+            .map(|(k, v)| (k.value, v.into()))
+            .collect()
+    }
+}
+
+impl From<&ObjectNode> for Object {
+    fn from(node: &ObjectNode) -> Self {
+        node.properties
+            .iter()
+            .map(|(k, v)| (k.value.clone(), v.into()))
+            .collect()
+    }
+}
 impl std::fmt::Display for ObjectNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(

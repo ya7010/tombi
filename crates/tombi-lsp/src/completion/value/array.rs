@@ -232,11 +232,28 @@ impl FindCompletionContents for ArraySchema {
         async move {
             match completion_hint {
                 Some(CompletionHint::InTableHeader) => Vec::with_capacity(0),
-                _ => type_hint_array(
-                    position,
-                    current_schema.map(|schema| schema.schema_url.as_ref()),
-                    completion_hint,
-                ),
+                _ => {
+                    let schema_url = current_schema.map(|schema| schema.schema_url.as_ref());
+
+                    let mut completion_items =
+                        type_hint_array(position, schema_url, completion_hint);
+
+                    if let Some(default) = &self.default {
+                        let label = default.to_string();
+                        let edit = CompletionEdit::new_literal(&label, position, completion_hint);
+                        completion_items.push(CompletionContent::new_default_value(
+                            CompletionKind::Integer,
+                            label,
+                            self.title.clone(),
+                            self.description.clone(),
+                            edit,
+                            schema_url,
+                            self.deprecated,
+                        ));
+                    }
+
+                    completion_items
+                }
             }
         }
         .boxed()

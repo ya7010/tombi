@@ -28,20 +28,10 @@ regex!(
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn lex(source: &str) -> Lexed {
     let mut lexed = Lexed::default();
-    let mut was_joint = false;
     let mut last_offset = tombi_text::Offset::default();
     let mut last_position = tombi_text::Position::default();
 
     for result in tokenize(source) {
-        match result {
-            Ok(token) if token.kind().is_trivia() => was_joint = false,
-            _ => {
-                if was_joint {
-                    lexed.set_joint();
-                }
-                was_joint = true;
-            }
-        }
         let (last_span, last_range) = lexed.push_result_token(result);
         last_offset = last_span.end();
         last_position = last_range.end;

@@ -1,6 +1,6 @@
 use tombi_toml_version::TomlVersion;
 
-use crate::{BoolDefaultTrue, OneOrMany, SchemaCatalogPath};
+use crate::{BoolDefaultTrue, OneOrMany, SchemaCatalogPath, JSON_SCHEMA_STORE_CATALOG_URL};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -34,12 +34,12 @@ impl SchemaOptions {
 
     pub fn catalog_paths(&self) -> Option<Vec<SchemaCatalogPath>> {
         if self.enabled.unwrap_or_default().value() {
-            Some(
-                self.catalog
-                    .as_ref()
-                    .and_then(|catalog| catalog.path.as_ref().map(|path| path.as_ref().to_vec()))
-                    .unwrap_or_else(|| vec![SchemaCatalogPath::default()]),
-            )
+            self.catalog
+                .clone()
+                .unwrap_or_default()
+                .paths()
+                .as_ref()
+                .map(|path| path.to_vec())
         } else {
             None
         }
@@ -49,24 +49,73 @@ impl SchemaOptions {
         self.strict.as_ref().map(|strict| strict.value())
     }
 }
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", serde(untagged))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum SchemaCatalog {
+    New(NewSchemaCatalog),
+    Old(SchemaCatalogOld),
+}
+
+impl Default for SchemaCatalog {
+    fn default() -> Self {
+        Self::New(NewSchemaCatalog::default())
+    }
+}
+impl SchemaCatalog {
+    pub fn paths(&self) -> Option<&[SchemaCatalogPath]> {
+        match self {
+            Self::New(item) => item.paths.as_ref().map(|v| v.as_slice()),
+            #[allow(deprecated)]
+            Self::Old(item) => item.path.as_ref().map(|v| v.as_ref()),
+        }
+    }
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
+#[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
+#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct NewSchemaCatalog {
+    /// # The schema catalog path/url array.
+    ///
+    /// The catalog is evaluated after the schemas specified by [[schemas]].
+    #[cfg_attr(feature = "jsonschema", schemars(default = "catalog_paths_default"))]
+    #[cfg_attr(feature = "serde", serde(default = "catalog_paths_default"))]
+    pub paths: Option<Vec<SchemaCatalogPath>>,
+}
+
+impl Default for NewSchemaCatalog {
+    fn default() -> Self {
+        Self {
+            paths: catalog_paths_default(),
+        }
+    }
+}
+
+fn catalog_paths_default() -> Option<Vec<SchemaCatalogPath>> {
+    Some(vec![JSON_SCHEMA_STORE_CATALOG_URL.into()])
+}
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
 #[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct SchemaCatalog {
+pub struct SchemaCatalogOld {
     /// # The schema catalog path or url.
     ///
-    /// The catalog is evaluated after the schemas specified by [[schemas]].
-    ///
-    /// You can specify multiple catalogs by making it an array.
-    /// If you specify an array, the catalogs are searched in order of priority starting from the first catalog.
-    /// If you want to disable the default catalog, specify an empty array.
+    /// **🚧 Deprecated 🚧**\
+    /// Please use `schema.catalog.paths` instead.
     #[cfg_attr(
         feature = "jsonschema",
-        schemars(default = "SchemaCatalogPath::default")
+        schemars(default = "OneOrMany::<SchemaCatalogPath>::default")
     )]
+    #[cfg_attr(feature = "jsonschema", deprecated)]
     pub path: Option<OneOrMany<SchemaCatalogPath>>,
 }
 
@@ -184,7 +233,8 @@ pub struct OldSubSchema {
 
     /// # The keys to apply the sub schema.
     ///
-    /// Please use `root` instead.
+    /// **🚧 Deprecated 🚧**\
+    /// Please use `schemas[*].root` instead.
     #[cfg_attr(feature = "jsonschema", schemars(length(min = 1)))]
     #[cfg_attr(feature = "jsonschema", deprecated)]
     pub root_keys: Option<String>,
@@ -192,29 +242,29 @@ pub struct OldSubSchema {
 
 #[cfg(test)]
 mod tests {
-    use assert_matches::assert_matches;
+    use crate::JSON_SCHEMA_STORE_CATALOG_URL;
 
     use super::*;
 
     #[test]
     fn schema_catalog_paths_default() {
         let schema = SchemaOptions::default();
-        let _expected = [SchemaCatalogPath::default()];
+        let expected = Some(vec![JSON_SCHEMA_STORE_CATALOG_URL.into()]);
+        let default_paths = schema.catalog_paths();
 
-        assert_matches!(schema.catalog_paths(), Some(_expected));
+        pretty_assertions::assert_eq!(default_paths, expected);
     }
 
     #[test]
     fn schema_catalog_paths_empty() {
         let schema = SchemaOptions {
-            catalog: Some(SchemaCatalog {
-                path: Some(vec![].into()),
-            }),
+            catalog: Some(SchemaCatalog::New(NewSchemaCatalog {
+                paths: Some(vec![].into()),
+            })),
             ..Default::default()
         };
 
-        let _expected: Vec<SchemaCatalogPath> = vec![];
-
-        assert_matches!(schema.catalog_paths(), Some(_expected));
+        let expected: Vec<SchemaCatalogPath> = vec![];
+        pretty_assertions::assert_eq!(schema.catalog_paths(), Some(expected));
     }
 }

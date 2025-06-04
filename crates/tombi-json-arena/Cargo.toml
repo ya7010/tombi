@@ -1,0 +1,14 @@
+[package]
+name = "tombi-json-arena"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+ahash.workspace = true
+indexmap.workspace = true
+thiserror.workspace = true
+tombi-json-lexer.workspace = true
+tombi-json-syntax.workspace = true
