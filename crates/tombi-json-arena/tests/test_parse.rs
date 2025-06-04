@@ -3,7 +3,9 @@ use tombi_json_arena::{parse, Value};
 #[test]
 fn parse_simple_string() {
     let json = "\"hello\"";
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::String(sid) => {
@@ -17,7 +19,9 @@ fn parse_simple_string() {
 #[test]
 fn parse_simple_number() {
     let json = "42";
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Number(n) => {
@@ -30,7 +34,9 @@ fn parse_simple_number() {
 #[test]
 fn parse_simple_boolean() {
     let json = "true";
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Bool(v) => {
@@ -43,7 +49,9 @@ fn parse_simple_boolean() {
 #[test]
 fn parse_null() {
     let json = "null";
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Null => {}
@@ -54,7 +62,9 @@ fn parse_null() {
 #[test]
 fn parse_array() {
     let json = "[1, 2, 3]";
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Array(array_id) => {
@@ -75,7 +85,9 @@ fn parse_array() {
 #[test]
 fn parse_object() {
     let json = r#"{"a": 1, "b": true}"#;
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Object(obj_id) => {
@@ -104,7 +116,9 @@ fn parse_object() {
 #[test]
 fn parse_nested() {
     let json = r#"{"arr": [null, {"x": 2}]}"#;
-    let Ok((value_id, value_arena)) = parse(json) else { panic!("parse error") };
+    let Ok((value_id, value_arena)) = parse(json) else {
+        panic!("parse error: {:?}", parse(json).unwrap_err())
+    };
     let value = value_arena.get(value_id).unwrap();
     match value {
         Value::Object(obj_id) => {

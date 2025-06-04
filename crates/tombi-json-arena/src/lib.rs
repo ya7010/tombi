@@ -19,16 +19,16 @@ use tombi_json_lexer::Token;
 use tombi_json_syntax::SyntaxKind;
 
 /// JSON文字列をパースし、ValueArenaとValueIdを返す
-pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Error> {
+pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<Error>> {
     let mut value_arena = ValueArena::default();
     let lexed = tombi_json_lexer::lex(json_text);
     if !lexed.errors.is_empty() {
-        return Err(Error::Lexer(lexed.errors));
+        return Err(lexed.errors.into_iter().map(Error::Lexer).collect());
     }
     let tokens = &lexed.tokens;
     let mut pos = 0;
     let value_id = parse_value(tokens, &mut pos, json_text, &mut value_arena)
-        .ok_or_else(|| Error::Parse("No value found".to_string()))?;
+        .ok_or_else(|| vec![Error::Parse("No value found".to_string())])?;
     Ok((value_id, value_arena))
 }
 
