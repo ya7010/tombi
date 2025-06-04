@@ -37,7 +37,7 @@ fn parse_simple_number() {
     let tokens: Vec<Token> = tokenize(json)
         .collect::<Result<_, _>>()
         .expect("tokenize failed");
-    // 数値トークンを探す
+
     let number_token = tokens
         .iter()
         .find(|t| t.kind() == SyntaxKind::NUMBER)
@@ -63,7 +63,6 @@ fn parse_simple_boolean() {
     let tokens: Vec<Token> = tokenize(json)
         .collect::<Result<_, _>>()
         .expect("tokenize failed");
-    // 真偽値トークンを探す
     let bool_token = tokens
         .iter()
         .find(|t| t.kind() == SyntaxKind::BOOLEAN)
