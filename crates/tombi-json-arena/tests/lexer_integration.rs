@@ -54,3 +54,33 @@ fn parse_simple_number() {
         _ => panic!("not a number value"),
     }
 }
+
+#[test]
+fn parse_simple_boolean() {
+    let json = "true";
+    let mut value_arena = ValueArena::default();
+
+    let tokens: Vec<Token> = tokenize(json)
+        .collect::<Result<_, _>>()
+        .expect("tokenize failed");
+    // 真偽値トークンを探す
+    let bool_token = tokens
+        .iter()
+        .find(|t| t.kind() == SyntaxKind::BOOLEAN)
+        .expect("no boolean token");
+    let span = bool_token.span();
+    let value_str = &json[span.start().into()..span.end().into()];
+    let b = match value_str {
+        "true" => true,
+        "false" => false,
+        _ => panic!("unexpected boolean literal"),
+    };
+    let value_id = value_arena.alloc(Value::Bool(b));
+    let value = value_arena.get(value_id).unwrap();
+    match value {
+        Value::Bool(v) => {
+            assert_eq!(*v, true);
+        }
+        _ => panic!("not a boolean value"),
+    }
+}
