@@ -15,8 +15,7 @@ use tombi_json_lexer::{lex, Token};
 use tombi_json_syntax::SyntaxKind;
 
 /// JSON文字列をパースし、ValueArenaとValueIdを返す
-pub fn parse(json_text: &str) -> (StrArena, ValueArena, Option<ValueId>) {
-    let mut str_arena = StrArena::default();
+pub fn parse(json_text: &str) -> (ValueArena, Option<ValueId>) {
     let mut value_arena = ValueArena::default();
     let tokens: Vec<Token> = lex(json_text).tokens;
     let mut value_id = None;
@@ -26,7 +25,7 @@ pub fn parse(json_text: &str) -> (StrArena, ValueArena, Option<ValueId>) {
                 let span = token.span();
                 let value_str = &json_text[span.start().into()..span.end().into()];
                 let value_str = &value_str[1..value_str.len() - 1];
-                let str_id = str_arena.alloc(value_str);
+                let str_id = value_arena.str_arena_mut().alloc(value_str);
                 value_id = Some(value_arena.alloc(Value::String(str_id)));
             }
             SyntaxKind::NUMBER => {
@@ -52,5 +51,5 @@ pub fn parse(json_text: &str) -> (StrArena, ValueArena, Option<ValueId>) {
             _ => {}
         }
     }
-    (str_arena, value_arena, value_id)
+    (value_arena, value_id)
 }
