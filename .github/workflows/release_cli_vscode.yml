@@ -87,7 +87,7 @@ jobs:
         if: matrix.target == 'arm-unknown-linux-gnueabihf'
         run: sudo apt-get install gcc-arm-linux-gnueabihf
 
-      - run: pnpm install --filter tombi --no-frozen-lockfile && pnpm run build
+      - run: pnpm install --filter tombi && pnpm run build
         working-directory: ./editors/vscode
 
       - run: which pnpm
