@@ -25,16 +25,16 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "optionalDependencies": {
-    "@tombi-toml/cli-darwin-arm64": "0.0.0-dev",
-    "@tombi-toml/cli-darwin-x64": "0.0.0-dev",
-    "@tombi-toml/cli-linux-arm64": "0.0.0-dev",
-    "@tombi-toml/cli-linux-arm64-musl": "0.0.0-dev",
-    "@tombi-toml/cli-linux-x64": "0.0.0-dev",
-    "@tombi-toml/cli-linux-x64-musl": "0.0.0-dev",
-    "@tombi-toml/cli-win32-arm64": "0.0.0-dev",
-    "@tombi-toml/cli-win32-x64": "0.0.0-dev"
-  },
+  // "optionalDependencies": {
+  //   "@tombi-toml/cli-darwin-arm64": "0.0.0-dev",
+  //   "@tombi-toml/cli-darwin-x64": "0.0.0-dev",
+  //   "@tombi-toml/cli-linux-arm64": "0.0.0-dev",
+  //   "@tombi-toml/cli-linux-arm64-musl": "0.0.0-dev",
+  //   "@tombi-toml/cli-linux-x64": "0.0.0-dev",
+  //   "@tombi-toml/cli-linux-x64-musl": "0.0.0-dev",
+  //   "@tombi-toml/cli-win32-arm64": "0.0.0-dev",
+  //   "@tombi-toml/cli-win32-x64": "0.0.0-dev"
+  // },
   "devDependencies": {
     "axios": "^1.9.0",
     "tar": "^6.2.1",
