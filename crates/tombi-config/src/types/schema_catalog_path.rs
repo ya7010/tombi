@@ -1,7 +1,8 @@
 use super::OneOrMany;
 use tombi_url::url_from_file_path;
 
-pub const JSON_SCHEMA_STORE_CATALOG_URL: &str = "https://www.schemastore.org/api/json/catalog.json";
+pub const JSON_SCHEMA_STORE_CATALOG_URL: &str =
+    "https://json.schemastore.org/api/json/catalog.json";
 
 /// Generic value that can be either single or multiple
 #[derive(Debug, Clone, PartialEq, Eq)]
