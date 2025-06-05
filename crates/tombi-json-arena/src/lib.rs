@@ -18,7 +18,6 @@ use ahash::{HashMap, HashMapExt};
 use tombi_json_lexer::Token;
 use tombi_json_syntax::SyntaxKind;
 
-/// JSON文字列をパースし、ValueArenaとValueIdを返す
 pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<Error>> {
     let mut value_arena = ValueArena::default();
     let lexed = tombi_json_lexer::lex(json_text);
@@ -192,4 +191,38 @@ fn parse_object(
     }
     let obj_id = value_arena.object_arena_mut().insert(map);
     value_arena.alloc(Value::Object(obj_id))
+}
+
+use serde_json::Value as SerdeValue;
+
+/// Convert a tombi-json-arena Value to serde_json::Value
+pub fn to_serde_json_value(value_id: ValueId, arena: &ValueArena) -> SerdeValue {
+    match arena.get(value_id).expect("Invalid ValueId") {
+        Value::Null => SerdeValue::Null,
+        Value::Bool(b) => SerdeValue::Bool(*b),
+        Value::Number(n) => SerdeValue::Number(
+            serde_json::Number::from_f64(*n).unwrap_or_else(|| serde_json::Number::from(0)),
+        ),
+        Value::String(str_id) => {
+            let s = arena.str_arena().get(*str_id).unwrap_or("");
+            SerdeValue::String(s.to_string())
+        }
+        Value::Array(array_id) => {
+            let arr = arena.array_arena().get(*array_id).unwrap();
+            SerdeValue::Array(
+                arr.iter()
+                    .map(|vid| to_serde_json_value(*vid, arena))
+                    .collect(),
+            )
+        }
+        Value::Object(obj_id) => {
+            let obj = arena.object_arena().get(*obj_id).unwrap();
+            let mut map = serde_json::Map::new();
+            for (k, v) in obj.iter() {
+                let key = arena.str_arena().get(*k).unwrap_or("");
+                map.insert(key.to_string(), to_serde_json_value(*v, arena));
+            }
+            SerdeValue::Object(map)
+        }
+    }
 }
