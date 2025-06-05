@@ -134,7 +134,23 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@22.10.2)(jsdom@26.0.0)(terser@5.38.2)
 
-  typescript/tombi:
+  typescript/@tombi-toml/cli-darwin-arm64: {}
+
+  typescript/@tombi-toml/cli-darwin-x64: {}
+
+  typescript/@tombi-toml/cli-linux-arm64: {}
+
+  typescript/@tombi-toml/cli-linux-arm64-musl: {}
+
+  typescript/@tombi-toml/cli-linux-x64: {}
+
+  typescript/@tombi-toml/cli-linux-x64-musl: {}
+
+  typescript/@tombi-toml/cli-win32-arm64: {}
+
+  typescript/@tombi-toml/cli-win32-x64: {}
+
+  typescript/@tombi-toml/tombi:
     devDependencies:
       adm-zip:
         specifier: ^0.5.16
