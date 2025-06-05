@@ -272,7 +272,7 @@ mod document_link_tests {
             ) -> Ok(Some(vec![
                 {
                     url: "https://json.schemastore.org/api/json/catalog.json",
-                    range: 1:20..1:69,
+                    range: 1:20..1:70,
                     tooltip: tombi_extension_tombi::DocumentLinkToolTip::Catalog,
                 }
             ]));
@@ -289,7 +289,7 @@ mod document_link_tests {
             ) -> Ok(Some(vec![
                 {
                     url: "https://json.schemastore.org/api/json/catalog.json",
-                    range: 1:22..1:71,
+                    range: 1:22..1:72,
                     tooltip: tombi_extension_tombi::DocumentLinkToolTip::Catalog,
                 }
             ]));
