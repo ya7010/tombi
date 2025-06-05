@@ -19,8 +19,11 @@ pub enum Error {
     #[error("failed to convert to catalog url: {catalog_path}")]
     CatalogPathConvertUrlFailed { catalog_path: String },
 
-    #[error("failed to fetch catalog: {catalog_url}")]
-    CatalogUrlFetchFailed { catalog_url: CatalogUrl },
+    #[error("failed to fetch catalog: {catalog_url}, reason: {reason}")]
+    CatalogUrlFetchFailed {
+        catalog_url: CatalogUrl,
+        reason: String,
+    },
 
     #[error("invalid catalog file url: {catalog_url}")]
     InvalidCatalogFileUrl { catalog_url: CatalogUrl },

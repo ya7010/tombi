@@ -1,0 +1,17 @@
+{
+  "name": "@tombi-toml/cli-linux-arm64-musl",
+  "version": "0.0.0-dev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tombi-toml/tombi.git",
+    "directory": "typescript/@tombi-toml/cli-linux-arm64-musl"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "homepage": "https://tombi-toml.github.io/tombi/",
+  "os": ["linux"],
+  "cpu": ["arm64"],
+  "libc": ["musl"]
+}
