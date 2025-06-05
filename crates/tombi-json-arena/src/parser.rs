@@ -172,6 +172,21 @@ where
                 }));
                 break;
             }
+            Some(token)
+                if !(token.kind() == SyntaxKind::STRING
+                    || token.kind() == SyntaxKind::NUMBER
+                    || token.kind() == SyntaxKind::BOOLEAN
+                    || token.kind() == SyntaxKind::NULL
+                    || token.kind() == SyntaxKind::BRACKET_START
+                    || token.kind() == SyntaxKind::BRACE_START) =>
+            {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedValue,
+                    range: token.range(),
+                }));
+                tokens.next();
+                continue;
+            }
             _ => {}
         }
         match parse_value(tokens, json_text, value_arena, str_map) {
@@ -214,6 +229,14 @@ where
             Some(token) if token.kind() == SyntaxKind::BRACE_END => {
                 tokens.next();
                 break;
+            }
+            Some(token) if token.kind() != SyntaxKind::STRING => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedValue,
+                    range: token.range(),
+                }));
+                tokens.next();
+                continue;
             }
             None => {
                 errors.push(crate::Error::Parser(ParserError {
