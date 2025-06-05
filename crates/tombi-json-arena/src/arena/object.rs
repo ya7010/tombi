@@ -1,9 +1,10 @@
 use super::{StrId, ValueId};
-use indexmap::IndexMap;
+use ahash::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ObjectArena {
-    data: Vec<IndexMap<StrId, ValueId>>,
+    /// Note that this is not an IndexMap. We prioritize memory efficiency since it is only used for interpreting JSON Schema.
+    data: Vec<HashMap<StrId, ValueId>>,
 }
 
 impl ObjectArena {
@@ -11,13 +12,13 @@ impl ObjectArena {
         ObjectArena { data: Vec::new() }
     }
 
-    pub fn insert(&mut self, object: IndexMap<StrId, ValueId>) -> ObjectId {
+    pub fn insert(&mut self, object: HashMap<StrId, ValueId>) -> ObjectId {
         let id = ObjectId(self.data.len());
         self.data.push(object);
         id
     }
 
-    pub fn get(&self, id: ObjectId) -> Option<&IndexMap<StrId, ValueId>> {
+    pub fn get(&self, id: ObjectId) -> Option<&HashMap<StrId, ValueId>> {
         self.data.get(id.0)
     }
 }

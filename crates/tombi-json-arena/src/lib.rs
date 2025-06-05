@@ -14,7 +14,7 @@ pub enum Value {
     Object(ObjectId),
 }
 
-use indexmap::IndexMap;
+use ahash::{HashMap, HashMapExt};
 use tombi_json_lexer::Token;
 use tombi_json_syntax::SyntaxKind;
 
@@ -151,7 +151,7 @@ fn parse_object(
     value_arena: &mut ValueArena,
 ) -> ValueId {
     *pos += 1; // skip {
-    let mut map = IndexMap::new();
+    let mut map = HashMap::new();
     loop {
         while *pos < tokens.len()
             && (tokens[*pos].kind().is_trivia() || tokens[*pos].kind() == SyntaxKind::COMMA)
