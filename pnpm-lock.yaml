@@ -150,6 +150,8 @@ importers:
 
   typescript/@tombi-toml/cli-win32-x64: {}
 
+  typescript/@tombi-toml/tombi: {}
+
 packages:
 
   '@alloc/quick-lru@5.2.0':
