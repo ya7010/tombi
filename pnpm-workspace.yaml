@@ -1,4 +1,4 @@
 packages:
-  # - "editors/vscode" # ja: pnpm のロックファイルが影響を受けるため、ワークスペースから外す
+  - "editors/vscode"
   - "typescript/@tombi-toml/*"
   - "docs"
