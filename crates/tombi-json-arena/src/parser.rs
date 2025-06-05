@@ -14,9 +14,8 @@ pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<crate::Error>
     if !lexed.errors.is_empty() {
         return Err(lexed.errors.into_iter().map(crate::Error::Lexer).collect());
     }
-    let tokens = &lexed.tokens;
-    let mut pos = 0;
-    match parse_value(tokens, &mut pos, json_text, &mut value_arena, &mut str_map) {
+    let mut tokens = lexed.tokens.iter().peekable();
+    match parse_value(&mut tokens, json_text, &mut value_arena, &mut str_map) {
         Ok(value_id) => Ok((value_id, value_arena)),
         Err(mut errs) => {
             if errs.is_empty() {
@@ -30,22 +29,23 @@ pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<crate::Error>
     }
 }
 
-fn parse_value<'a>(
-    tokens: &[Token],
-    pos: &mut usize,
+fn parse_value<'a, I>(
+    tokens: &mut std::iter::Peekable<I>,
     json_text: &'a str,
     value_arena: &mut ValueArena,
     str_map: &mut HashMap<&'a str, StrId>,
-) -> Result<ValueId, Vec<crate::Error>> {
-    while *pos < tokens.len() {
-        let token = &tokens[*pos];
+) -> Result<ValueId, Vec<crate::Error>>
+where
+    I: Iterator<Item = &'a Token>,
+{
+    while let Some(token) = tokens.peek() {
         match token.kind() {
             SyntaxKind::STRING => {
-                *pos += 1;
+                let token = tokens.next().unwrap();
                 return Ok(parse_string(token, json_text, value_arena, str_map));
             }
             SyntaxKind::NUMBER => {
-                *pos += 1;
+                let token = tokens.next().unwrap();
                 return parse_number(token, json_text, value_arena).ok_or_else(|| {
                     vec![crate::Error::Parser(ParserError {
                         kind: ParserErrorKind::UnexpectedToken,
@@ -54,7 +54,7 @@ fn parse_value<'a>(
                 });
             }
             SyntaxKind::BOOLEAN => {
-                *pos += 1;
+                let token = tokens.next().unwrap();
                 return parse_bool(token, json_text, value_arena).ok_or_else(|| {
                     vec![crate::Error::Parser(ParserError {
                         kind: ParserErrorKind::UnexpectedToken,
@@ -63,14 +63,14 @@ fn parse_value<'a>(
                 });
             }
             SyntaxKind::NULL => {
-                *pos += 1;
+                tokens.next();
                 return Ok(value_arena.alloc(Value::Null));
             }
             SyntaxKind::BRACKET_START => {
-                return parse_array(tokens, pos, json_text, value_arena, str_map);
+                return parse_array(tokens, json_text, value_arena, str_map);
             }
             SyntaxKind::BRACE_START => {
-                return parse_object(tokens, pos, json_text, value_arena, str_map);
+                return parse_object(tokens, json_text, value_arena, str_map);
             }
             SyntaxKind::COMMA
             | SyntaxKind::COLON
@@ -87,7 +87,7 @@ fn parse_value<'a>(
             | SyntaxKind::INVALID_TOKEN
             | SyntaxKind::TOMBSTONE
             | SyntaxKind::__LAST => {
-                *pos += 1;
+                tokens.next();
                 continue;
             }
         }
@@ -131,34 +131,41 @@ fn parse_bool(token: &Token, json_text: &str, value_arena: &mut ValueArena) -> O
     }
 }
 
-fn parse_array<'a>(
-    tokens: &[Token],
-    pos: &mut usize,
+fn parse_array<'a, I>(
+    tokens: &mut std::iter::Peekable<I>,
     json_text: &'a str,
     value_arena: &mut ValueArena,
     str_map: &mut HashMap<&'a str, StrId>,
-) -> Result<ValueId, Vec<crate::Error>> {
-    *pos += 1; // skip [
+) -> Result<ValueId, Vec<crate::Error>>
+where
+    I: Iterator<Item = &'a Token>,
+{
+    tokens.next(); // skip [
     let mut elements = Vec::new();
     let mut errors = Vec::new();
     loop {
-        while *pos < tokens.len()
-            && (tokens[*pos].kind() == SyntaxKind::COMMA || tokens[*pos].kind().is_trivia())
-        {
-            *pos += 1;
+        while let Some(token) = tokens.peek() {
+            if token.kind() == SyntaxKind::COMMA || token.kind().is_trivia() {
+                tokens.next();
+            } else {
+                break;
+            }
         }
-        if *pos < tokens.len() && tokens[*pos].kind() == SyntaxKind::BRACKET_END {
-            *pos += 1;
-            break;
+        match tokens.peek() {
+            Some(token) if token.kind() == SyntaxKind::BRACKET_END => {
+                tokens.next();
+                break;
+            }
+            None => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedToken,
+                    range: Range::default(),
+                }));
+                break;
+            }
+            _ => {}
         }
-        if *pos >= tokens.len() {
-            errors.push(crate::Error::Parser(ParserError {
-                kind: ParserErrorKind::ExpectedToken,
-                range: Range::default(),
-            }));
-            break;
-        }
-        match parse_value(tokens, pos, json_text, value_arena, str_map) {
+        match parse_value(tokens, json_text, value_arena, str_map) {
             Ok(elem_id) => elements.push(elem_id),
             Err(mut es) => {
                 errors.append(&mut es);
@@ -174,65 +181,95 @@ fn parse_array<'a>(
     }
 }
 
-fn parse_object<'a>(
-    tokens: &[Token],
-    pos: &mut usize,
+fn parse_object<'a, I>(
+    tokens: &mut std::iter::Peekable<I>,
     json_text: &'a str,
     value_arena: &mut ValueArena,
     str_map: &mut HashMap<&'a str, StrId>,
-) -> Result<ValueId, Vec<crate::Error>> {
-    *pos += 1; // skip {
+) -> Result<ValueId, Vec<crate::Error>>
+where
+    I: Iterator<Item = &'a Token>,
+{
+    tokens.next(); // skip {
     let mut map = HashMap::new();
     let mut errors = Vec::new();
     loop {
-        while *pos < tokens.len()
-            && (tokens[*pos].kind().is_trivia() || tokens[*pos].kind() == SyntaxKind::COMMA)
-        {
-            *pos += 1;
+        while let Some(token) = tokens.peek() {
+            if token.kind().is_trivia() || token.kind() == SyntaxKind::COMMA {
+                tokens.next();
+            } else {
+                break;
+            }
         }
-        if *pos < tokens.len() && tokens[*pos].kind() == SyntaxKind::BRACE_END {
-            *pos += 1;
-            break;
+        match tokens.peek() {
+            Some(token) if token.kind() == SyntaxKind::BRACE_END => {
+                tokens.next();
+                break;
+            }
+            None => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedToken,
+                    range: Range::default(),
+                }));
+                break;
+            }
+            _ => {}
         }
-        if *pos >= tokens.len() {
-            errors.push(crate::Error::Parser(ParserError {
-                kind: ParserErrorKind::ExpectedToken,
-                range: Range::default(),
-            }));
-            break;
-        }
-        let key_token = &tokens[*pos];
-        if key_token.kind() != SyntaxKind::STRING {
-            errors.push(crate::Error::Parser(ParserError {
-                kind: ParserErrorKind::UnexpectedToken,
-                range: key_token.range(),
-            }));
-            break;
-        }
+        let key_token = match tokens.peek() {
+            Some(token) if token.kind() == SyntaxKind::STRING => tokens.next().unwrap(),
+            Some(token) => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::UnexpectedToken,
+                    range: token.range(),
+                }));
+                break;
+            }
+            None => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedToken,
+                    range: Range::default(),
+                }));
+                break;
+            }
+        };
         let key_span = key_token.span();
         let key_str = &json_text[key_span.start().into()..key_span.end().into()];
         let key_str = &key_str[1..key_str.len() - 1];
         let key_id = value_arena.str_arena_mut().alloc(key_str);
-        *pos += 1;
-        while *pos < tokens.len() && tokens[*pos].kind().is_trivia() {
-            *pos += 1;
+        while let Some(token) = tokens.peek() {
+            if token.kind().is_trivia() {
+                tokens.next();
+            } else {
+                break;
+            }
         }
-        if *pos >= tokens.len() || tokens[*pos].kind() != SyntaxKind::COLON {
-            errors.push(crate::Error::Parser(ParserError {
-                kind: ParserErrorKind::ExpectedToken,
-                range: if *pos < tokens.len() {
-                    tokens[*pos].range()
-                } else {
-                    Range::default()
-                },
-            }));
-            break;
+        match tokens.peek() {
+            Some(token) if token.kind() == SyntaxKind::COLON => {
+                tokens.next();
+            }
+            Some(token) => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedToken,
+                    range: token.range(),
+                }));
+                break;
+            }
+            None => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedToken,
+                    range: Range::default(),
+                }));
+                break;
+            }
         }
-        *pos += 1;
-        while *pos < tokens.len() && tokens[*pos].kind().is_trivia() {
-            *pos += 1;
+        while let Some(token) = tokens.peek() {
+            if token.kind().is_trivia() {
+                tokens.next();
+            } else {
+                break;
+            }
         }
-        match parse_value(tokens, pos, json_text, value_arena, str_map) {
+        match parse_value(tokens, json_text, value_arena, str_map) {
             Ok(val_id) => {
                 map.insert(key_id, val_id);
             }
