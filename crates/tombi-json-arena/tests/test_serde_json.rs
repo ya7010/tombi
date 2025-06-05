@@ -1,8 +1,11 @@
 use serde_json::json;
-use tombi_json_arena::{parse, to_serde_json_value};
 
+#[cfg(feature = "serde_json1")]
 #[test]
 fn test_parse_to_serde_json_value() {
+    use tombi_json_arena::features::serde_json::to_value;
+    use tombi_json_arena::parse;
+
     let cases = vec![
         ("\"hello\"", json!("hello")),
         ("42", json!(42.0)),
@@ -17,7 +20,7 @@ fn test_parse_to_serde_json_value() {
     ];
     for (src, expected) in cases {
         let (id, arena) = parse(src).expect("parse error");
-        let actual = to_serde_json_value(id, &arena);
+        let actual = to_value(&id, &arena);
         assert_eq!(actual, expected, "failed for input: {}", src);
     }
 }

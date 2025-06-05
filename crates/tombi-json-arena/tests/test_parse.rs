@@ -6,7 +6,7 @@ fn parse_simple_string() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::String(sid) => {
             let s = value_arena.str_arena().get(*sid).unwrap();
@@ -22,7 +22,7 @@ fn parse_simple_number() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::Number(n) => {
             assert_eq!(*n, 42.0);
@@ -37,7 +37,7 @@ fn parse_simple_boolean() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::Bool(v) => {
             assert_eq!(*v, true);
@@ -52,7 +52,7 @@ fn parse_null() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::Null => {}
         _ => panic!("not a null value"),
@@ -65,13 +65,13 @@ fn parse_array() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::Array(array_id) => {
             let arr = value_arena.array_arena().get(*array_id).unwrap();
             let nums: Vec<f64> = arr
                 .iter()
-                .map(|vid| match value_arena.get(*vid).unwrap() {
+                .map(|vid| match value_arena.get(vid).unwrap() {
                     Value::Number(n) => *n,
                     _ => panic!("not a number in array"),
                 })
@@ -88,7 +88,7 @@ fn parse_object() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::Object(obj_id) => {
             let obj = value_arena.object_arena().get(*obj_id).unwrap();
@@ -100,11 +100,11 @@ fn parse_object() {
                 .iter()
                 .find(|(k, _)| value_arena.str_arena().get(**k) == Some("b"))
                 .unwrap();
-            match value_arena.get(*a.1).unwrap() {
+            match value_arena.get(a.1).unwrap() {
                 Value::Number(n) => assert_eq!(*n, 1.0),
                 _ => panic!("a is not a number"),
             }
-            match value_arena.get(*b.1).unwrap() {
+            match value_arena.get(b.1).unwrap() {
                 Value::Bool(v) => assert_eq!(*v, true),
                 _ => panic!("b is not a bool"),
             }
@@ -119,7 +119,7 @@ fn parse_nested() {
     let Ok((value_id, value_arena)) = parse(json) else {
         panic!("parse error: {:?}", parse(json).unwrap_err())
     };
-    let value = value_arena.get(value_id).unwrap();
+    let value = value_arena.get(&value_id).unwrap();
     match value {
         Value::Object(obj_id) => {
             let obj = value_arena.object_arena().get(*obj_id).unwrap();
@@ -128,11 +128,11 @@ fn parse_nested() {
                 .find(|(k, _)| value_arena.str_arena().get(**k) == Some("arr"))
                 .unwrap()
                 .1;
-            match value_arena.get(*arr_id).unwrap() {
+            match value_arena.get(arr_id).unwrap() {
                 Value::Array(array_id) => {
                     let arr = value_arena.array_arena().get(*array_id).unwrap();
-                    assert!(matches!(value_arena.get(arr[0]).unwrap(), Value::Null));
-                    match value_arena.get(arr[1]).unwrap() {
+                    assert!(matches!(value_arena.get(&arr[0]).unwrap(), Value::Null));
+                    match value_arena.get(&arr[1]).unwrap() {
                         Value::Object(inner_obj_id) => {
                             let inner_obj = value_arena.object_arena().get(*inner_obj_id).unwrap();
                             let x_id = inner_obj
@@ -140,7 +140,7 @@ fn parse_nested() {
                                 .find(|(k, _)| value_arena.str_arena().get(**k) == Some("x"))
                                 .unwrap()
                                 .1;
-                            match value_arena.get(*x_id).unwrap() {
+                            match value_arena.get(&x_id).unwrap() {
                                 Value::Number(n) => assert_eq!(*n, 2.0),
                                 _ => panic!("x is not a number"),
                             }

@@ -31,7 +31,7 @@ impl ValueArena {
         self.values.push(value);
         id
     }
-    pub fn get(&self, id: ValueId) -> Option<&crate::Value> {
+    pub fn get(&self, id: &ValueId) -> Option<&crate::Value> {
         self.values.get(id.0)
     }
     pub fn str_arena(&self) -> &StrArena {
