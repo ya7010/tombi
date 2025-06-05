@@ -1,8 +1,8 @@
 #[derive(Debug, thiserror::Error, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorKind {
-    #[error("Unexpected token")] // 詳細はParserError側で持つ
+    #[error("Unexpected token")]
     UnexpectedToken,
-    #[error("Expected token")] // 詳細はParserError側で持つ
+    #[error("Expected token")]
     ExpectedToken,
 }
 
