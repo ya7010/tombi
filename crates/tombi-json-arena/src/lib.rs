@@ -1,5 +1,6 @@
 mod arena;
 mod error;
+pub mod features;
 use crate::error::Error;
 
 pub use arena::{ArrayArena, ArrayId, ObjectArena, ObjectId, StrArena, StrId, ValueArena, ValueId};
@@ -18,7 +19,6 @@ use ahash::{HashMap, HashMapExt};
 use tombi_json_lexer::Token;
 use tombi_json_syntax::SyntaxKind;
 
-/// JSON文字列をパースし、ValueArenaとValueIdを返す
 pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<Error>> {
     let mut value_arena = ValueArena::default();
     let lexed = tombi_json_lexer::lex(json_text);

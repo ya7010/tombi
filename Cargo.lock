@@ -2190,6 +2190,7 @@ name = "tombi-json-arena"
 version = "0.0.0-dev"
 dependencies = [
  "ahash",
+ "serde_json",
  "thiserror",
  "tombi-json-lexer",
  "tombi-json-syntax",
