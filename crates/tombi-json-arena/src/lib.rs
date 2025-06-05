@@ -21,29 +21,31 @@ use tombi_json_syntax::SyntaxKind;
 
 pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<Error>> {
     let mut value_arena = ValueArena::default();
+    let mut str_map = HashMap::new();
     let lexed = tombi_json_lexer::lex(json_text);
     if !lexed.errors.is_empty() {
         return Err(lexed.errors.into_iter().map(Error::Lexer).collect());
     }
     let tokens = &lexed.tokens;
     let mut pos = 0;
-    let value_id = parse_value(tokens, &mut pos, json_text, &mut value_arena)
+    let value_id = parse_value(tokens, &mut pos, json_text, &mut value_arena, &mut str_map)
         .ok_or_else(|| vec![Error::Parse("No value found".to_string())])?;
     Ok((value_id, value_arena))
 }
 
-fn parse_value(
+fn parse_value<'a>(
     tokens: &[Token],
     pos: &mut usize,
-    json_text: &str,
+    json_text: &'a str,
     value_arena: &mut ValueArena,
+    str_map: &mut HashMap<&'a str, StrId>,
 ) -> Option<ValueId> {
     while *pos < tokens.len() {
         let token = &tokens[*pos];
         match token.kind() {
             SyntaxKind::STRING => {
                 *pos += 1;
-                return Some(parse_string(token, json_text, value_arena));
+                return Some(parse_string(token, json_text, value_arena, str_map));
             }
             SyntaxKind::NUMBER => {
                 *pos += 1;
@@ -58,10 +60,10 @@ fn parse_value(
                 return Some(value_arena.alloc(Value::Null));
             }
             SyntaxKind::BRACKET_START => {
-                return Some(parse_array(tokens, pos, json_text, value_arena));
+                return Some(parse_array(tokens, pos, json_text, value_arena, str_map));
             }
             SyntaxKind::BRACE_START => {
-                return Some(parse_object(tokens, pos, json_text, value_arena));
+                return Some(parse_object(tokens, pos, json_text, value_arena, str_map));
             }
             SyntaxKind::COMMA
             | SyntaxKind::COLON
@@ -86,12 +88,18 @@ fn parse_value(
     None
 }
 
-fn parse_string(token: &Token, json_text: &str, value_arena: &mut ValueArena) -> ValueId {
+fn parse_string<'a>(
+    token: &Token,
+    json_text: &'a str,
+    value_arena: &mut ValueArena,
+    str_map: &mut HashMap<&'a str, StrId>,
+) -> ValueId {
     let span = token.span();
-    let value_str = &json_text[span.start().into()..span.end().into()];
-    let value_str = &value_str[1..value_str.len() - 1];
-    let str_id = value_arena.str_arena_mut().alloc(value_str);
-    value_arena.alloc(Value::String(str_id))
+    let value_str = &json_text[(usize::from(span.start()) + 1)..(usize::from(span.end()) - 1)];
+    let str_id = str_map
+        .entry(value_str)
+        .or_insert_with(|| value_arena.str_arena_mut().alloc(value_str));
+    value_arena.alloc(Value::String(*str_id))
 }
 
 fn parse_number(token: &Token, json_text: &str, value_arena: &mut ValueArena) -> Option<ValueId> {
@@ -113,11 +121,12 @@ fn parse_bool(token: &Token, json_text: &str, value_arena: &mut ValueArena) -> O
     }
 }
 
-fn parse_array(
+fn parse_array<'a>(
     tokens: &[Token],
     pos: &mut usize,
-    json_text: &str,
+    json_text: &'a str,
     value_arena: &mut ValueArena,
+    str_map: &mut HashMap<&'a str, StrId>,
 ) -> ValueId {
     *pos += 1; // skip [
     let mut elements = Vec::new();
@@ -134,7 +143,7 @@ fn parse_array(
         if *pos >= tokens.len() {
             break;
         }
-        if let Some(elem_id) = parse_value(tokens, pos, json_text, value_arena) {
+        if let Some(elem_id) = parse_value(tokens, pos, json_text, value_arena, str_map) {
             elements.push(elem_id);
         } else {
             break;
@@ -144,11 +153,12 @@ fn parse_array(
     value_arena.alloc(Value::Array(array_id))
 }
 
-fn parse_object(
+fn parse_object<'a>(
     tokens: &[Token],
     pos: &mut usize,
-    json_text: &str,
+    json_text: &'a str,
     value_arena: &mut ValueArena,
+    str_map: &mut HashMap<&'a str, StrId>,
 ) -> ValueId {
     *pos += 1; // skip {
     let mut map = HashMap::new();
@@ -184,7 +194,7 @@ fn parse_object(
         while *pos < tokens.len() && tokens[*pos].kind().is_trivia() {
             *pos += 1;
         }
-        if let Some(val_id) = parse_value(tokens, pos, json_text, value_arena) {
+        if let Some(val_id) = parse_value(tokens, pos, json_text, value_arena, str_map) {
             map.insert(key_id, val_id);
         } else {
             break;
