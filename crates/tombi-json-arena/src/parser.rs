@@ -38,6 +38,7 @@ fn parse_value<'a, I>(
 where
     I: Iterator<Item = &'a Token>,
 {
+    let mut errors = Vec::new();
     while let Some(token) = tokens.peek() {
         match token.kind() {
             SyntaxKind::STRING => {
@@ -87,15 +88,23 @@ where
             | SyntaxKind::INVALID_TOKEN
             | SyntaxKind::TOMBSTONE
             | SyntaxKind::__LAST => {
+                errors.push(crate::Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedValue,
+                    range: token.range(),
+                }));
                 tokens.next();
                 continue;
             }
         }
     }
-    Err(vec![crate::Error::Parser(ParserError {
-        kind: ParserErrorKind::ExpectedToken,
-        range: Range::default(),
-    })])
+    if errors.is_empty() {
+        Err(vec![crate::Error::Parser(ParserError {
+            kind: ParserErrorKind::ExpectedToken,
+            range: Range::default(),
+        })])
+    } else {
+        Err(errors)
+    }
 }
 
 fn parse_string<'a>(

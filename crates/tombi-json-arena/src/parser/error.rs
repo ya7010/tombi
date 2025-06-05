@@ -4,6 +4,8 @@ pub enum ErrorKind {
     UnexpectedToken,
     #[error("Expected token")]
     ExpectedToken,
+    #[error("Expected value")]
+    ExpectedValue,
 }
 
 #[derive(Debug, thiserror::Error)]
