@@ -83,8 +83,8 @@ fn set_package_json_versions(sh: &Shell, version: &str) -> anyhow::Result<()> {
             if package_json.exists() {
                 let mut patch = Patch::new(sh, &package_json)?;
                 patch.replace(
-                    &format!(r#"version": "{}""#, DEV_VERSION),
-                    &format!(r#"version": "{}""#, version),
+                    &format!(r#""{}""#, DEV_VERSION),
+                    &format!(r#""{}""#, version),
                 );
                 patch.commit(sh)?;
             }
