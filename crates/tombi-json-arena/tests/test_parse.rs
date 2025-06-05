@@ -186,3 +186,31 @@ fn parse_invalid_key_in_object() {
         errors
     );
 }
+
+#[test]
+fn parse_trailing_comma_in_array() {
+    let json = "[1, 2, 3,]";
+    let result = parse(json);
+    assert!(result.is_err(), "should fail for trailing comma in array");
+}
+
+#[test]
+fn parse_leading_comma_in_array() {
+    let json = "[,1, 2, 3]";
+    let result = parse(json);
+    assert!(result.is_err(), "should fail for leading comma in array");
+}
+
+#[test]
+fn parse_trailing_comma_in_object() {
+    let json = r#"{"a": 1, "b": 2,}"#;
+    let result = parse(json);
+    assert!(result.is_err(), "should fail for trailing comma in object");
+}
+
+#[test]
+fn parse_leading_comma_in_object() {
+    let json = r#"{,"a": 1, "b": 2}"#;
+    let result = parse(json);
+    assert!(result.is_err(), "should fail for leading comma in object");
+}

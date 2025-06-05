@@ -152,9 +152,10 @@ where
     tokens.next(); // skip [
     let mut elements = Vec::new();
     let mut errors = Vec::new();
+    let mut expect_value = true;
     loop {
         while let Some(token) = tokens.peek() {
-            if token.kind() == SyntaxKind::COMMA || token.kind().is_trivia() {
+            if token.kind().is_trivia() {
                 tokens.next();
             } else {
                 break;
@@ -162,8 +163,29 @@ where
         }
         match tokens.peek() {
             Some(token) if token.kind() == SyntaxKind::BRACKET_END => {
+                if expect_value && !elements.is_empty() {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedValue,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    break;
+                }
                 tokens.next();
                 break;
+            }
+            Some(token) if token.kind() == SyntaxKind::COMMA => {
+                if expect_value {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedValue,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    continue;
+                }
+                tokens.next();
+                expect_value = true;
+                continue;
             }
             None => {
                 errors.push(crate::Error::Parser(ParserError {
@@ -172,28 +194,34 @@ where
                 }));
                 break;
             }
-            Some(token)
-                if !(token.kind() == SyntaxKind::STRING
-                    || token.kind() == SyntaxKind::NUMBER
-                    || token.kind() == SyntaxKind::BOOLEAN
-                    || token.kind() == SyntaxKind::NULL
-                    || token.kind() == SyntaxKind::BRACKET_START
-                    || token.kind() == SyntaxKind::BRACE_START) =>
-            {
-                errors.push(crate::Error::Parser(ParserError {
-                    kind: ParserErrorKind::ExpectedValue,
-                    range: token.range(),
-                }));
-                tokens.next();
-                continue;
-            }
             _ => {}
         }
-        match parse_value(tokens, json_text, value_arena, str_map) {
-            Ok(elem_id) => elements.push(elem_id),
-            Err(mut es) => {
-                errors.append(&mut es);
-                break;
+        if expect_value {
+            match parse_value(tokens, json_text, value_arena, str_map) {
+                Ok(elem_id) => {
+                    elements.push(elem_id);
+                    expect_value = false;
+                }
+                Err(mut es) => {
+                    errors.append(&mut es);
+                    break;
+                }
+            }
+        } else {
+            match tokens.peek() {
+                Some(token)
+                    if token.kind() != SyntaxKind::BRACKET_END
+                        && token.kind() != SyntaxKind::COMMA
+                        && !token.kind().is_trivia() =>
+                {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedToken,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    continue;
+                }
+                _ => {}
             }
         }
     }
@@ -217,9 +245,10 @@ where
     tokens.next(); // skip {
     let mut map = HashMap::new();
     let mut errors = Vec::new();
+    let mut expect_key = true;
     loop {
         while let Some(token) = tokens.peek() {
-            if token.kind().is_trivia() || token.kind() == SyntaxKind::COMMA {
+            if token.kind().is_trivia() {
                 tokens.next();
             } else {
                 break;
@@ -227,15 +256,28 @@ where
         }
         match tokens.peek() {
             Some(token) if token.kind() == SyntaxKind::BRACE_END => {
+                if expect_key && !map.is_empty() {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedValue,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    break;
+                }
                 tokens.next();
                 break;
             }
-            Some(token) if token.kind() != SyntaxKind::STRING => {
-                errors.push(crate::Error::Parser(ParserError {
-                    kind: ParserErrorKind::ExpectedValue,
-                    range: token.range(),
-                }));
+            Some(token) if token.kind() == SyntaxKind::COMMA => {
+                if expect_key {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedValue,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    continue;
+                }
                 tokens.next();
+                expect_key = true;
                 continue;
             }
             None => {
@@ -247,67 +289,87 @@ where
             }
             _ => {}
         }
-        let key_token = match tokens.peek() {
-            Some(token) if token.kind() == SyntaxKind::STRING => tokens.next().unwrap(),
-            Some(token) => {
-                errors.push(crate::Error::Parser(ParserError {
-                    kind: ParserErrorKind::UnexpectedToken,
-                    range: token.range(),
-                }));
-                break;
+        if expect_key {
+            let key_token = match tokens.peek() {
+                Some(token) if token.kind() == SyntaxKind::STRING => tokens.next().unwrap(),
+                Some(token) => {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedValue,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    continue;
+                }
+                None => {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedToken,
+                        range: Range::default(),
+                    }));
+                    break;
+                }
+            };
+            let key_span = key_token.span();
+            let key_str = &json_text[key_span.start().into()..key_span.end().into()];
+            let key_str = &key_str[1..key_str.len() - 1];
+            let key_id = value_arena.str_arena_mut().alloc(key_str);
+            while let Some(token) = tokens.peek() {
+                if token.kind().is_trivia() {
+                    tokens.next();
+                } else {
+                    break;
+                }
             }
-            None => {
-                errors.push(crate::Error::Parser(ParserError {
-                    kind: ParserErrorKind::ExpectedToken,
-                    range: Range::default(),
-                }));
-                break;
+            match tokens.peek() {
+                Some(token) if token.kind() == SyntaxKind::COLON => {
+                    tokens.next();
+                }
+                Some(token) => {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedToken,
+                        range: token.range(),
+                    }));
+                    break;
+                }
+                None => {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedToken,
+                        range: Range::default(),
+                    }));
+                    break;
+                }
             }
-        };
-        let key_span = key_token.span();
-        let key_str = &json_text[key_span.start().into()..key_span.end().into()];
-        let key_str = &key_str[1..key_str.len() - 1];
-        let key_id = value_arena.str_arena_mut().alloc(key_str);
-        while let Some(token) = tokens.peek() {
-            if token.kind().is_trivia() {
-                tokens.next();
-            } else {
-                break;
+            while let Some(token) = tokens.peek() {
+                if token.kind().is_trivia() {
+                    tokens.next();
+                } else {
+                    break;
+                }
             }
-        }
-        match tokens.peek() {
-            Some(token) if token.kind() == SyntaxKind::COLON => {
-                tokens.next();
+            match parse_value(tokens, json_text, value_arena, str_map) {
+                Ok(val_id) => {
+                    map.insert(key_id, val_id);
+                    expect_key = false;
+                }
+                Err(mut es) => {
+                    errors.append(&mut es);
+                    break;
+                }
             }
-            Some(token) => {
-                errors.push(crate::Error::Parser(ParserError {
-                    kind: ParserErrorKind::ExpectedToken,
-                    range: token.range(),
-                }));
-                break;
-            }
-            None => {
-                errors.push(crate::Error::Parser(ParserError {
-                    kind: ParserErrorKind::ExpectedToken,
-                    range: Range::default(),
-                }));
-                break;
-            }
-        }
-        while let Some(token) = tokens.peek() {
-            if token.kind().is_trivia() {
-                tokens.next();
-            } else {
-                break;
-            }
-        }
-        match parse_value(tokens, json_text, value_arena, str_map) {
-            Ok(val_id) => {
-                map.insert(key_id, val_id);
-            }
-            Err(mut es) => {
-                errors.append(&mut es);
-                break;
+        } else {
+            match tokens.peek() {
+                Some(token)
+                    if token.kind() != SyntaxKind::BRACE_END
+                        && token.kind() != SyntaxKind::COMMA
+                        && !token.kind().is_trivia() =>
+                {
+                    errors.push(crate::Error::Parser(ParserError {
+                        kind: ParserErrorKind::ExpectedToken,
+                        range: token.range(),
+                    }));
+                    tokens.next();
+                    continue;
+                }
+                _ => {}
             }
         }
     }
