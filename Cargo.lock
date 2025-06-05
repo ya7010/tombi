@@ -2190,7 +2190,6 @@ name = "tombi-json-arena"
 version = "0.0.0-dev"
 dependencies = [
  "ahash",
- "indexmap",
  "thiserror",
  "tombi-json-lexer",
  "tombi-json-syntax",
