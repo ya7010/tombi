@@ -11,7 +11,10 @@ pub fn run(sh: &Shell) -> anyhow::Result<()> {
         Ok(github_ref) if github_ref.starts_with("refs/tags/v") => {
             github_ref.trim_start_matches("refs/tags/v").to_owned()
         }
-        _ => DEV_VERSION.to_owned(),
+        _ => {
+            eprintln!("INFO: If you want to set a specific version, please use the GITHUB_REF environment variable with a tag like 'refs/tags/v1.2.3'.");
+            DEV_VERSION.to_owned()
+        }
     };
 
     set_cargo_toml_version(sh, &version)?;
