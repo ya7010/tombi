@@ -154,3 +154,35 @@ fn parse_nested() {
         _ => panic!("not an object value"),
     }
 }
+
+#[test]
+fn parse_invalid_value_in_array() {
+    let json = "[1, @, 2]";
+    let result = parse(json);
+    assert!(result.is_err(), "should fail for invalid value in array");
+    let errors = result.unwrap_err();
+    let found = errors.iter().any(|e| {
+        format!("{:?}", e).contains("ExpectedValue") || format!("{:?}", e).contains("InvalidToken")
+    });
+    assert!(
+        found,
+        "ExpectedValue or InvalidToken error not found: {:?}",
+        errors
+    );
+}
+
+#[test]
+fn parse_invalid_key_in_object() {
+    let json = r#"{ @: 1 }"#;
+    let result = parse(json);
+    assert!(result.is_err(), "should fail for invalid key in object");
+    let errors = result.unwrap_err();
+    let found = errors.iter().any(|e| {
+        format!("{:?}", e).contains("ExpectedValue") || format!("{:?}", e).contains("InvalidToken")
+    });
+    assert!(
+        found,
+        "ExpectedValue or InvalidToken error not found: {:?}",
+        errors
+    );
+}
