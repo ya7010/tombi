@@ -2224,6 +2224,7 @@ dependencies = [
  "thiserror",
  "tombi-json-lexer",
  "tombi-json-syntax",
+ "tombi-text",
 ]
 
 [[package]]

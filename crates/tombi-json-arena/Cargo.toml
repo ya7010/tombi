@@ -13,6 +13,7 @@ serde_json = { workspace = true, optional = true }
 thiserror.workspace = true
 tombi-json-lexer.workspace = true
 tombi-json-syntax.workspace = true
+tombi-text.workspace = true
 
 [features]
 default = ["serde_json1"]

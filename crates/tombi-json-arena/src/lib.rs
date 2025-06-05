@@ -1,7 +1,10 @@
 mod arena;
 mod error;
 pub mod features;
+mod parser;
 use crate::error::Error;
+use crate::parser::{Error as ParserError, ErrorKind as ParserErrorKind};
+use tombi_text::Range;
 
 pub use arena::{ArrayArena, ArrayId, ObjectArena, ObjectId, StrArena, StrId, ValueArena, ValueId};
 
@@ -28,9 +31,18 @@ pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<Error>> {
     }
     let tokens = &lexed.tokens;
     let mut pos = 0;
-    let value_id = parse_value(tokens, &mut pos, json_text, &mut value_arena, &mut str_map)
-        .ok_or_else(|| vec![Error::NoValue])?;
-    Ok((value_id, value_arena))
+    match parse_value(tokens, &mut pos, json_text, &mut value_arena, &mut str_map) {
+        Ok(value_id) => Ok((value_id, value_arena)),
+        Err(mut errs) => {
+            if errs.is_empty() {
+                errs.push(Error::Parser(ParserError {
+                    kind: ParserErrorKind::ExpectedToken,
+                    range: Range::default(),
+                }));
+            }
+            Err(errs)
+        }
+    }
 }
 
 fn parse_value<'a>(
@@ -39,31 +51,41 @@ fn parse_value<'a>(
     json_text: &'a str,
     value_arena: &mut ValueArena,
     str_map: &mut HashMap<&'a str, StrId>,
-) -> Option<ValueId> {
+) -> Result<ValueId, Vec<Error>> {
     while *pos < tokens.len() {
         let token = &tokens[*pos];
         match token.kind() {
             SyntaxKind::STRING => {
                 *pos += 1;
-                return Some(parse_string(token, json_text, value_arena, str_map));
+                return Ok(parse_string(token, json_text, value_arena, str_map));
             }
             SyntaxKind::NUMBER => {
                 *pos += 1;
-                return parse_number(token, json_text, value_arena);
+                return parse_number(token, json_text, value_arena).ok_or_else(|| {
+                    vec![Error::Parser(ParserError {
+                        kind: ParserErrorKind::UnexpectedToken,
+                        range: token.range(),
+                    })]
+                });
             }
             SyntaxKind::BOOLEAN => {
                 *pos += 1;
-                return parse_bool(token, json_text, value_arena);
+                return parse_bool(token, json_text, value_arena).ok_or_else(|| {
+                    vec![Error::Parser(ParserError {
+                        kind: ParserErrorKind::UnexpectedToken,
+                        range: token.range(),
+                    })]
+                });
             }
             SyntaxKind::NULL => {
                 *pos += 1;
-                return Some(value_arena.alloc(Value::Null));
+                return Ok(value_arena.alloc(Value::Null));
             }
             SyntaxKind::BRACKET_START => {
-                return Some(parse_array(tokens, pos, json_text, value_arena, str_map));
+                return parse_array(tokens, pos, json_text, value_arena, str_map);
             }
             SyntaxKind::BRACE_START => {
-                return Some(parse_object(tokens, pos, json_text, value_arena, str_map));
+                return parse_object(tokens, pos, json_text, value_arena, str_map);
             }
             SyntaxKind::COMMA
             | SyntaxKind::COLON
@@ -85,7 +107,10 @@ fn parse_value<'a>(
             }
         }
     }
-    None
+    Err(vec![Error::Parser(ParserError {
+        kind: ParserErrorKind::ExpectedToken,
+        range: Range::default(),
+    })])
 }
 
 fn parse_string<'a>(
@@ -127,9 +152,10 @@ fn parse_array<'a>(
     json_text: &'a str,
     value_arena: &mut ValueArena,
     str_map: &mut HashMap<&'a str, StrId>,
-) -> ValueId {
+) -> Result<ValueId, Vec<Error>> {
     *pos += 1; // skip [
     let mut elements = Vec::new();
+    let mut errors = Vec::new();
     loop {
         while *pos < tokens.len()
             && (tokens[*pos].kind() == SyntaxKind::COMMA || tokens[*pos].kind().is_trivia())
@@ -141,16 +167,26 @@ fn parse_array<'a>(
             break;
         }
         if *pos >= tokens.len() {
+            errors.push(Error::Parser(ParserError {
+                kind: ParserErrorKind::ExpectedToken,
+                range: Range::default(),
+            }));
             break;
         }
-        if let Some(elem_id) = parse_value(tokens, pos, json_text, value_arena, str_map) {
-            elements.push(elem_id);
-        } else {
-            break;
+        match parse_value(tokens, pos, json_text, value_arena, str_map) {
+            Ok(elem_id) => elements.push(elem_id),
+            Err(mut es) => {
+                errors.append(&mut es);
+                break;
+            }
         }
     }
-    let array_id = value_arena.array_arena_mut().insert(elements);
-    value_arena.alloc(Value::Array(array_id))
+    if errors.is_empty() {
+        let array_id = value_arena.array_arena_mut().insert(elements);
+        Ok(value_arena.alloc(Value::Array(array_id)))
+    } else {
+        Err(errors)
+    }
 }
 
 fn parse_object<'a>(
@@ -159,9 +195,10 @@ fn parse_object<'a>(
     json_text: &'a str,
     value_arena: &mut ValueArena,
     str_map: &mut HashMap<&'a str, StrId>,
-) -> ValueId {
+) -> Result<ValueId, Vec<Error>> {
     *pos += 1; // skip {
     let mut map = HashMap::new();
+    let mut errors = Vec::new();
     loop {
         while *pos < tokens.len()
             && (tokens[*pos].kind().is_trivia() || tokens[*pos].kind() == SyntaxKind::COMMA)
@@ -173,10 +210,18 @@ fn parse_object<'a>(
             break;
         }
         if *pos >= tokens.len() {
+            errors.push(Error::Parser(ParserError {
+                kind: ParserErrorKind::ExpectedToken,
+                range: Range::default(),
+            }));
             break;
         }
         let key_token = &tokens[*pos];
         if key_token.kind() != SyntaxKind::STRING {
+            errors.push(Error::Parser(ParserError {
+                kind: ParserErrorKind::UnexpectedToken,
+                range: key_token.range(),
+            }));
             break;
         }
         let key_span = key_token.span();
@@ -188,18 +233,34 @@ fn parse_object<'a>(
             *pos += 1;
         }
         if *pos >= tokens.len() || tokens[*pos].kind() != SyntaxKind::COLON {
+            errors.push(Error::Parser(ParserError {
+                kind: ParserErrorKind::ExpectedToken,
+                range: if *pos < tokens.len() {
+                    tokens[*pos].range()
+                } else {
+                    Range::default()
+                },
+            }));
             break;
         }
         *pos += 1;
         while *pos < tokens.len() && tokens[*pos].kind().is_trivia() {
             *pos += 1;
         }
-        if let Some(val_id) = parse_value(tokens, pos, json_text, value_arena, str_map) {
-            map.insert(key_id, val_id);
-        } else {
-            break;
+        match parse_value(tokens, pos, json_text, value_arena, str_map) {
+            Ok(val_id) => {
+                map.insert(key_id, val_id);
+            }
+            Err(mut es) => {
+                errors.append(&mut es);
+                break;
+            }
         }
     }
-    let obj_id = value_arena.object_arena_mut().insert(map);
-    value_arena.alloc(Value::Object(obj_id))
+    if errors.is_empty() {
+        let obj_id = value_arena.object_arena_mut().insert(map);
+        Ok(value_arena.alloc(Value::Object(obj_id)))
+    } else {
+        Err(errors)
+    }
 }
