@@ -266,12 +266,12 @@ mod document_link_tests {
             async fn tombi_schema_catalog_paths(
                 r#"
                 [schema]
-                catalog = { path = "https://www.schemastore.org/api/json/catalog.json" }
+                catalog = { path = "https://json.schemastore.org/api/json/catalog.json" }
                 "#,
                 project_root_path().join("tombi.toml"),
             ) -> Ok(Some(vec![
                 {
-                    url: "https://www.schemastore.org/api/json/catalog.json",
+                    url: "https://json.schemastore.org/api/json/catalog.json",
                     range: 1:20..1:69,
                     tooltip: tombi_extension_tombi::DocumentLinkToolTip::Catalog,
                 }
@@ -283,12 +283,12 @@ mod document_link_tests {
             async fn tombi_schema_catalog_path(
                 r#"
                 [schema]
-                catalog = { paths = ["https://www.schemastore.org/api/json/catalog.json"] }
+                catalog = { paths = ["https://json.schemastore.org/api/json/catalog.json"] }
                 "#,
                 project_root_path().join("tombi.toml"),
             ) -> Ok(Some(vec![
                 {
-                    url: "https://www.schemastore.org/api/json/catalog.json",
+                    url: "https://json.schemastore.org/api/json/catalog.json",
                     range: 1:22..1:71,
                     tooltip: tombi_extension_tombi::DocumentLinkToolTip::Catalog,
                 }
