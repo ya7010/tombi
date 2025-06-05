@@ -29,7 +29,7 @@ pub fn parse(json_text: &str) -> Result<(ValueId, ValueArena), Vec<Error>> {
     let tokens = &lexed.tokens;
     let mut pos = 0;
     let value_id = parse_value(tokens, &mut pos, json_text, &mut value_arena, &mut str_map)
-        .ok_or_else(|| vec![Error::Parse("No value found".to_string())])?;
+        .ok_or_else(|| vec![Error::NoValue])?;
     Ok((value_id, value_arena))
 }
 
