@@ -3,8 +3,9 @@
   "version": "0.0.0-dev",
   "description": "🦅 TOML Toolkit 🦅",
   "bin": {
-    "tombi": "./bin/tombi"
+    "tombi": "bin/tombi"
   },
+  "files": ["bin/tombi", "scripts/postinstall.js", "README.md", "LICENSE"],
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js"
   },
@@ -12,33 +13,20 @@
   "author": "tombi-toml",
   "license": "MIT",
   "private": false,
+  "homepage": "https://tombi-toml.github.io/tombi/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tombi-toml/tombi.git"
+    "url": "git+https://github.com/tombi-toml/tombi.git",
+    "directory": "typescript/@tombi-toml/tombi"
   },
   "bugs": {
     "url": "https://github.com/tombi-toml/tombi/issues"
   },
-  "homepage": "https://tombi-toml.github.io/tombi/",
   "engines": {
     "node": ">=14.0.0"
   },
-  "optionalDependencies": {
-    "@tombi-toml/cli-darwin-arm64": "0.0.0-dev",
-    "@tombi-toml/cli-darwin-x64": "0.0.0-dev",
-    "@tombi-toml/cli-linux-arm64": "0.0.0-dev",
-    "@tombi-toml/cli-linux-arm64-musl": "0.0.0-dev",
-    "@tombi-toml/cli-linux-x64": "0.0.0-dev",
-    "@tombi-toml/cli-linux-x64-musl": "0.0.0-dev",
-    "@tombi-toml/cli-win32-arm64": "0.0.0-dev",
-    "@tombi-toml/cli-win32-x64": "0.0.0-dev"
-  },
-  "devDependencies": {
-    "axios": "^1.9.0",
-    "tar": "^6.2.1",
-    "adm-zip": "^0.5.16"
-  },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

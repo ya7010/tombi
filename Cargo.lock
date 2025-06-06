@@ -2306,7 +2306,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-lsp"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "ahash",
  "camino",
