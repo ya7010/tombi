@@ -39,9 +39,11 @@ hover.enabled = true
 [schema]
 enabled = true
 strict = true
-
-[schema.catalog]
-path = "https://www.schemastore.org/api/json/catalog.json"
+catalog = {
+  paths = [
+    "https://json.schemastore.org/api/json/catalog.json",
+  ],
+}
 
 # Root Schema
 [[schemas]]

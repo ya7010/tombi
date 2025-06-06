@@ -21,7 +21,7 @@ mod goto_type_definition_tests {
             async fn tombi_schema_catalog_path(
                 r#"
                 [schema.catalog]
-                path = "█https://www.schemastore.org/api/json/catalog.json"
+                path = "█https://json.schemastore.org/api/json/catalog.json"
                 "#,
                 tombi_schema_path(),
             ) -> Ok(_);

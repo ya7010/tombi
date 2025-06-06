@@ -18,7 +18,10 @@ pub async fn goto_declaration(
         return Ok(Default::default());
     };
 
-    let locations = if match_accessors!(accessors[..3], ["tool", "uv", "sources"]) {
+    let locations = if match_accessors!(
+        accessors[..accessors.len().min(3)],
+        ["tool", "uv", "sources"]
+    ) {
         goto_definition_for_member_pyproject_toml(
             document_tree,
             accessors,

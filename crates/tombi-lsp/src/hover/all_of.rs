@@ -4,7 +4,7 @@ use futures::{future::BoxFuture, FutureExt};
 use tombi_schema_store::{Accessor, CurrentSchema, SchemaContext, SchemaUrl};
 
 use super::{
-    constraints::ValueConstraints, default_value::DefaultValue, GetHoverContent, HoverContent,
+    constraints::ValueConstraints, display_value::DisplayValue, GetHoverContent, HoverContent,
 };
 
 pub fn get_all_of_hover_content<'a: 'b, 'b, T>(
@@ -27,7 +27,7 @@ where
         let default = all_of_schema
             .default
             .as_ref()
-            .and_then(|default| DefaultValue::try_from(default).ok());
+            .and_then(|default| DisplayValue::try_from(default).ok());
 
         for referable_schema in all_of_schema.schemas.write().await.iter_mut() {
             let Ok(Some(current_schema)) = referable_schema

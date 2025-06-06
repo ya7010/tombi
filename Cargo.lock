@@ -179,12 +179,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "assert_matches"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
-
-[[package]]
 name = "async-channel"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -430,6 +424,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b96ec4966b5813e2c0507c1f86115c8c5abaadc3980879c3424042a02fd1ad3"
 
 [[package]]
+name = "castaway"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0abae9be0aaf9ea96a3b1b8b1b55c602ca751eba1b1500220cea4ecbafe7c0d5"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "cc"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -531,6 +534,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b63caa9aa9397e2d9480a9b13673856c78d8ac123288526c37d7839f2a86990"
 
 [[package]]
+name = "compact_str"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fdb1325a1cece981e8a296ab8f0f9b63ae357bd0784a9faaf548cc7b480707a"
+dependencies = [
+ "castaway",
+ "cfg-if",
+ "itoa",
+ "rustversion",
+ "ryu",
+ "static_assertions",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -609,9 +626,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.20"
+version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
+checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
 name = "crypto-mac"
@@ -678,9 +695,9 @@ dependencies = [
 
 [[package]]
 name = "deranged"
-version = "0.3.11"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b42b6fa04a440b495c8b04d0e71b707c585f83cb9cb28cf8cd0d976c315e31b4"
+checksum = "9c9e6a11ca8224451684bc0d7d5a7adbf8f2fd6887261a1cfc3c0432f9d4068e"
 dependencies = [
  "powerfmt",
 ]
@@ -2466,7 +2483,7 @@ dependencies = [
 
 [[package]]
 name = "serde_tombi"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "chrono",
  "futures",
@@ -2638,6 +2655,12 @@ checksum = "e113fb6f3de07a243d434a56ec6f186dfd51cb08448239fe7bcae73f87ff28ff"
 dependencies = [
  "version_check",
 ]
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "stdweb"
@@ -2857,9 +2880,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.36"
+version = "0.3.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dfd88e563464686c916c7e46e623e520ddc6d79fa6641390f2e3fa86e83e885"
+checksum = "8a7619e19bc266e0f9c5e6686659d394bc57973859340060a69221e57dbc0c40"
 dependencies = [
  "deranged",
  "num-conv",
@@ -2870,9 +2893,9 @@ dependencies = [
 
 [[package]]
 name = "time-core"
-version = "0.1.2"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
+checksum = "c9e9a38711f559d9e3ce1cdb06dd7c5b8ea546bc90052da6d06bb76da74bb07c"
 
 [[package]]
 name = "time-macros"
@@ -2974,7 +2997,7 @@ dependencies = [
 
 [[package]]
 name = "tombi"
-version = "0.0.0"
+version = "0.0.0-dev"
 
 [[package]]
 name = "tombi-ast"
@@ -3016,7 +3039,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-cli"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
@@ -3041,8 +3064,8 @@ dependencies = [
 name = "tombi-config"
 version = "0.0.0"
 dependencies = [
- "assert_matches",
  "clap",
+ "pretty_assertions",
  "schemars",
  "serde",
  "thiserror 2.0.12",
@@ -3132,8 +3155,9 @@ dependencies = [
 
 [[package]]
 name = "tombi-extension-cargo"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
+ "ahash",
  "glob",
  "itertools",
  "tombi-ast",
@@ -3149,7 +3173,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-extension-tombi"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "tombi-config",
  "tombi-document-tree",
@@ -3162,7 +3186,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-extension-uv"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "glob",
  "itertools",
@@ -3182,7 +3206,6 @@ dependencies = [
 name = "tombi-formatter"
 version = "0.0.0"
 dependencies = [
- "assert_matches",
  "itertools",
  "pretty_assertions",
  "rstest",
@@ -3228,6 +3251,19 @@ dependencies = [
  "tombi-json-value",
  "tombi-text",
  "tracing",
+]
+
+[[package]]
+name = "tombi-json-arena"
+version = "0.0.0-dev"
+dependencies = [
+ "ahash",
+ "compact_str",
+ "serde_json",
+ "thiserror 2.0.12",
+ "tombi-json-lexer",
+ "tombi-json-syntax",
+ "tombi-text",
 ]
 
 [[package]]
@@ -3284,7 +3320,6 @@ dependencies = [
 name = "tombi-linter"
 version = "0.0.0"
 dependencies = [
- "assert_matches",
  "futures",
  "itertools",
  "pretty_assertions",
@@ -3310,7 +3345,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-lsp"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "ahash",
  "camino",
@@ -3335,6 +3370,7 @@ dependencies = [
  "tokio",
  "tombi-ast",
  "tombi-config",
+ "tombi-date-time",
  "tombi-diagnostic",
  "tombi-document",
  "tombi-document-tree",
@@ -3427,7 +3463,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-syntax"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "rstest",
  "thiserror 2.0.12",
@@ -3446,7 +3482,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-text"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "pretty_assertions",
  "rstest",
@@ -3465,7 +3501,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-toml-version"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "clap",
  "schemars",
@@ -3497,7 +3533,7 @@ dependencies = [
 
 [[package]]
 name = "tombi-x-keyword"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "clap",
  "schemars",
@@ -3506,7 +3542,7 @@ dependencies = [
 
 [[package]]
 name = "toml-test"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "anyhow",
  "chrono",
@@ -4336,7 +4372,7 @@ checksum = "32ac00cd3f8ec9c1d33fb3e7958a82df6989c42d747bd326c822b1d625283547"
 
 [[package]]
 name = "xtask"
-version = "0.0.0"
+version = "0.0.0-dev"
 dependencies = [
  "anyhow",
  "chrono",
@@ -4351,7 +4387,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.12",
- "time 0.3.36",
+ "time 0.3.41",
  "tombi-config",
  "ungrammar",
  "xshell",
@@ -4478,9 +4514,9 @@ dependencies = [
 
 [[package]]
 name = "zip"
-version = "2.2.1"
+version = "2.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99d52293fc86ea7cf13971b3bb81eb21683636e7ae24c729cdaf1b7c4157a352"
+checksum = "fabe6324e908f85a1c52063ce7aa26b68dcb7eb6dbc83a2d148403c9bc3eba50"
 dependencies = [
  "arbitrary",
  "crc32fast",
@@ -4490,7 +4526,7 @@ dependencies = [
  "indexmap",
  "memchr",
  "thiserror 2.0.12",
- "time 0.3.36",
+ "time 0.3.41",
  "zopfli",
 ]
 

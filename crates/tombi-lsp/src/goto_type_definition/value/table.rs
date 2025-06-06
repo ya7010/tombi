@@ -206,8 +206,14 @@ impl GetTypeDefinition for tombi_document_tree::Table {
                                     )
                                     .await
                             } else {
+                                let mut schema_url = current_schema.schema_url.as_ref().clone();
+                                schema_url.set_fragment(Some(&format!(
+                                    "L{}",
+                                    key.range().start.line + 1
+                                )));
+
                                 Some(TypeDefinition {
-                                    schema_url: current_schema.schema_url.as_ref().clone(),
+                                    schema_url,
                                     schema_accessors: accessors
                                         .iter()
                                         .map(Into::into)
@@ -309,10 +315,15 @@ impl GetTypeDefinition for TableSchema {
         _schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Option<TypeDefinition>> {
         async move {
-            current_schema.map(|schema| TypeDefinition {
-                schema_url: schema.schema_url.as_ref().clone(),
-                schema_accessors: accessors.iter().map(Into::into).collect_vec(),
-                range: schema.value_schema.range(),
+            current_schema.map(|schema| {
+                let mut schema_url = schema.schema_url.as_ref().clone();
+                schema_url.set_fragment(Some(&format!("L{}", self.range.start.line + 1)));
+
+                TypeDefinition {
+                    schema_url,
+                    schema_accessors: accessors.iter().map(Into::into).collect_vec(),
+                    range: schema.value_schema.range(),
+                }
             })
         }
         .boxed()

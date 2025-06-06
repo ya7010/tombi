@@ -1,6 +1,9 @@
 use super::OneOrMany;
 use tombi_url::url_from_file_path;
 
+pub const JSON_SCHEMA_STORE_CATALOG_URL: &str =
+    "https://json.schemastore.org/api/json/catalog.json";
+
 /// Generic value that can be either single or multiple
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -34,14 +37,14 @@ impl std::fmt::Display for SchemaCatalogPath {
     }
 }
 
-impl Default for SchemaCatalogPath {
+impl Default for OneOrMany<SchemaCatalogPath> {
     fn default() -> Self {
-        SchemaCatalogPath("https://www.schemastore.org/api/json/catalog.json".to_string())
+        Self::One(JSON_SCHEMA_STORE_CATALOG_URL.into())
     }
 }
 
-impl Default for OneOrMany<SchemaCatalogPath> {
-    fn default() -> Self {
-        Self::One(SchemaCatalogPath::default())
+impl From<&str> for SchemaCatalogPath {
+    fn from(value: &str) -> Self {
+        SchemaCatalogPath(value.to_string())
     }
 }

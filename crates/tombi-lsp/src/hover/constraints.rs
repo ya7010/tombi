@@ -1,19 +1,20 @@
 use tombi_x_keyword::{ArrayValuesOrder, TableKeysOrder};
 
-use super::default_value::DefaultValue;
+use super::display_value::DisplayValue;
 
 #[derive(Debug, Clone, Default)]
 pub struct ValueConstraints {
     // Common
-    pub enumerate: Option<Vec<DefaultValue>>,
-    pub default: Option<DefaultValue>,
+    pub enumerate: Option<Vec<DisplayValue>>,
+    pub default: Option<DisplayValue>,
+    pub examples: Option<Vec<DisplayValue>>,
 
     // Integer OR Float
-    pub minimum: Option<DefaultValue>,
-    pub maximum: Option<DefaultValue>,
-    pub exclusive_minimum: Option<DefaultValue>,
-    pub exclusive_maximum: Option<DefaultValue>,
-    pub multiple_of: Option<DefaultValue>,
+    pub minimum: Option<DisplayValue>,
+    pub maximum: Option<DisplayValue>,
+    pub exclusive_minimum: Option<DisplayValue>,
+    pub exclusive_maximum: Option<DisplayValue>,
+    pub multiple_of: Option<DisplayValue>,
     // String
     pub min_length: Option<usize>,
     pub max_length: Option<usize>,
@@ -46,6 +47,14 @@ impl std::fmt::Display for ValueConstraints {
 
         if let Some(default) = &self.default {
             write!(f, "Default: `{}`\n\n", default)?;
+        }
+
+        if let Some(examples) = &self.examples {
+            write!(f, "Examples:\n\n")?;
+            for example in examples {
+                write!(f, "  - `{}`\n\n", example)?;
+            }
+            writeln!(f)?;
         }
 
         if let Some(minimum) = &self.minimum {

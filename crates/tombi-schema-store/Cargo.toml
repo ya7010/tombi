@@ -41,5 +41,5 @@ rstest.workspace = true
 [features]
 default = ["native"]
 native = ["dep:reqwest"]
-wasm = ["dep:gloo-net"]
 surf = ["dep:surf"]
+wasm = ["dep:gloo-net"]

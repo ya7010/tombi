@@ -1,4 +1,4 @@
 packages:
-  - "editors/vscode"
-  - "typescript/*"
   - "docs"
+  - "editors/vscode"
+  - "typescript/@tombi-toml/*"

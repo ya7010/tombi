@@ -17,7 +17,11 @@ document-link = { enabled = true }
 
 [schema]
 enabled = true
-catalog = { path = "https://www.schemastore.org/api/json/catalog.json" }
+catalog = {
+  paths = [
+    "https://json.schemastore.org/api/json/catalog.json",
+  ],
+}
 
 [[schemas]]
 path = "tombi.schema.json"

@@ -135,8 +135,8 @@ impl SchemaStore {
             }
             tracing::debug!("loading schema catalog: {}", catalog_url);
 
-            if let Ok(result) = self.http_client.get_bytes(catalog_url.as_str()).await {
-                match serde_json::from_slice::<crate::json::JsonCatalog>(&result) {
+            match self.http_client.get_bytes(catalog_url.as_str()).await {
+                Ok(result) => match serde_json::from_slice::<crate::json::JsonCatalog>(&result) {
                     Ok(catalog) => catalog,
                     Err(err) => {
                         return Err(crate::Error::InvalidJsonFormat {
@@ -144,11 +144,13 @@ impl SchemaStore {
                             reason: err.to_string(),
                         })
                     }
+                },
+                Err(err) => {
+                    return Err(crate::Error::CatalogUrlFetchFailed {
+                        catalog_url: catalog_url.clone(),
+                        reason: err.to_string(),
+                    });
                 }
-            } else {
-                return Err(crate::Error::CatalogUrlFetchFailed {
-                    catalog_url: catalog_url.clone(),
-                });
             }
         } else if catalog_url.scheme() == "file" {
             let catalog_path =

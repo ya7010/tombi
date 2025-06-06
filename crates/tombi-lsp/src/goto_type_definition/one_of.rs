@@ -59,8 +59,11 @@ where
             }
         }
 
+        let mut schema_url = schema_url.clone();
+        schema_url.set_fragment(Some(&format!("L{}", one_of_schema.range.start.line + 1)));
+
         Some(TypeDefinition {
-            schema_url: schema_url.clone(),
+            schema_url,
             schema_accessors: accessors.iter().map(Into::into).collect_vec(),
             range: tombi_text::Range::default(),
         })
@@ -82,8 +85,11 @@ impl GetTypeDefinition for tombi_schema_store::OneOfSchema {
                 unreachable!("schema must be provided");
             };
 
+            let mut schema_url = current_schema.schema_url.as_ref().to_owned();
+            schema_url.set_fragment(Some(&format!("L{}", self.range.start.line + 1)));
+
             Some(TypeDefinition {
-                schema_url: current_schema.schema_url.as_ref().to_owned(),
+                schema_url,
                 schema_accessors: accessors.iter().map(Into::into).collect_vec(),
                 range: tombi_text::Range::default(),
             })
