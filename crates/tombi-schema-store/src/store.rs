@@ -293,7 +293,7 @@ impl SchemaStore {
                         include_str!("../../../schemas/pyproject.schema.json")
                     }
                     "/json/schemas/tombi.schema.json" => {
-                        include_str!("../../../tombi.schema.json")
+                        include_str!("../../../schemas/tombi.schema.json")
                     }
                     _ => {
                         return Err(crate::Error::SchemaResourceNotFound {

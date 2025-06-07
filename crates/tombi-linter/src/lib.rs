@@ -282,7 +282,7 @@ mod tests {
             #[test]
             fn test_schema_file(
                 r#"
-                #:schema ./tombi.schema.json
+                #:schema ./schemas/tombi.schema.json
                 "#,
             ) -> Ok(_);
         }
