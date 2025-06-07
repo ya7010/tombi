@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use ahash::AHashMap;
 use itertools::Itertools;
+use tombi_schema_store::get_tombi_github_schema_url;
 use tower_lsp::lsp_types::{
     CreateFile, CreateFileOptions, DocumentChangeOperation, DocumentChanges,
     GotoDefinitionResponse, OneOf, OptionalVersionedTextDocumentIdentifier, ResourceOp,
@@ -53,13 +54,23 @@ pub async fn open_remote_file(
     backend: &Backend,
     url: &Url,
 ) -> Result<Option<Url>, tower_lsp::jsonrpc::Error> {
-    if matches!(url.scheme(), "http" | "https") {
-        let remote_url = Url::parse(&format!("untitled://{}", url.path())).unwrap();
-        let content = fetch_remote_content(&url).await?;
-        open_remote_content(backend, &remote_url, content).await?;
-        Ok(Some(remote_url))
-    } else {
-        Ok(None)
+    match url.scheme() {
+        "http" | "https" => {
+            let remote_url = Url::parse(&format!("untitled://{}", url.path())).unwrap();
+            let content = fetch_remote_content(&url).await?;
+            open_remote_content(backend, &remote_url, content).await?;
+            Ok(Some(remote_url))
+        }
+        "tombi" => {
+            let remote_url = Url::parse(&format!("untitled://{}", url.path())).unwrap();
+            let Some(github_schema_url) = get_tombi_github_schema_url(url) else {
+                return Ok(None);
+            };
+            let content = fetch_remote_content(&github_schema_url).await?;
+            open_remote_content(backend, &remote_url, content).await?;
+            Ok(Some(remote_url))
+        }
+        _ => Ok(None),
     }
 }
 
