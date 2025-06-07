@@ -300,13 +300,13 @@ mod document_link_tests {
             async fn tombi_schemas_path(
                 r#"
                 [[schemas]]
-                path = "tombi.schema.json"
+                path = "schemas/tombi.schema.json"
                 "#,
                 project_root_path().join("tombi.toml"),
             ) -> Ok(Some(vec![
                 {
-                    path: project_root_path().join("tombi.schema.json"),
-                    range: 1:8..1:25,
+                    path: project_root_path().join("schemas/tombi.schema.json"),
+                    range: 1:8..1:33,
                     tooltip: tombi_extension_tombi::DocumentLinkToolTip::Schema,
                 }
             ]));

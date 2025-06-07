@@ -1,7 +1,7 @@
 use itertools::{Either, Itertools};
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
-use tombi_schema_store::SchemaContext;
+use tombi_schema_store::{get_tombi_github_schema_url, SchemaContext};
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
 use crate::{
@@ -77,6 +77,13 @@ pub async fn handle_hover(
     .await
     .map(|mut content| {
         content.range = range;
+        if let Some(schema_url) = content
+            .schema_url
+            .as_ref()
+            .and_then(|url| get_tombi_github_schema_url(url))
+        {
+            content.schema_url = Some(schema_url);
+        }
         content
     }));
 }

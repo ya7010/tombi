@@ -18,7 +18,7 @@
     "RUST_LOG": "trace"
   },
   "yaml.schemas": {
-    "./tombi.schema.json": ["tombi.yaml"]
+    "./schemas/tombi.schema.json": ["tombi.yaml"]
   },
   "[typescript]": {
     "editor.tabSize": 2,

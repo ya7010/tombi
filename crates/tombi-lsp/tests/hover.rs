@@ -90,7 +90,7 @@ mod hover_keys_value {
             async fn tombi_schemas_path(
                 r#"
                 [[schemas]]
-                path = "█tombi.schema.json"
+                path = "█schemas/tombi.schema.json"
                 "#,
                 tombi_schema_path(),
             ) -> Ok({
