@@ -1,6 +1,7 @@
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use crate::{
+    get_tombi_scheme_content,
     json::{CatalogUrl, JsonCatalog},
     DocumentSchema, HttpClient, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
 };
@@ -285,21 +286,10 @@ impl SchemaStore {
                 tombi_json::ValueNode::from_reader(std::io::Cursor::new(bytes))
             }
             "tombi" => {
-                let content = match schema_url.path() {
-                    "/json/schemas/cargo.schema.json" => {
-                        include_str!("../../../schemas/cargo.schema.json")
-                    }
-                    "/json/schemas/pyproject.schema.json" => {
-                        include_str!("../../../schemas/pyproject.schema.json")
-                    }
-                    "/json/schemas/tombi.schema.json" => {
-                        include_str!("../../../schemas/tombi.schema.json")
-                    }
-                    _ => {
-                        return Err(crate::Error::SchemaResourceNotFound {
-                            schema_url: schema_url.to_owned(),
-                        });
-                    }
+                let Some(content) = get_tombi_scheme_content(schema_url) else {
+                    return Err(crate::Error::SchemaResourceNotFound {
+                        schema_url: schema_url.to_owned(),
+                    });
                 };
                 tombi_json::ValueNode::from_str(content)
             }
