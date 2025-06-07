@@ -62,7 +62,7 @@ pub enum Error {
     },
 
     #[error("unsupported source url: {source_url}")]
-    SourceUrlUnsupported { source_url: url::Url },
+    UnsupportedSourceUrl { source_url: url::Url },
 
     #[error("invalid source url: {source_url}")]
     SourceUrlParseFailed { source_url: url::Url },
