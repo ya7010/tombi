@@ -401,8 +401,8 @@ impl SchemaStore {
         let schemas = self.schemas.read().await;
         let matching_schemas = schemas
             .iter()
-            .filter(|catalog| {
-                catalog.include.iter().any(|pat| {
+            .filter(|schema| {
+                schema.include.iter().any(|pat| {
                     let pattern = if !pat.contains("*") {
                         format!("**/{}", pat)
                     } else {
@@ -479,12 +479,8 @@ impl SchemaStore {
                         })?;
                 self.resolve_source_schema_from_path(&source_path).await
             }
-            "http" | "https" => {
-                self.try_get_source_schema_from_remote_url(&SchemaUrl::new(source_url.clone()))
-                    .await
-            }
             "untitled" => Ok(None),
-            _ => Err(crate::Error::SourceUrlUnsupported {
+            _ => Err(crate::Error::UnsupportedSourceUrl {
                 source_url: source_url.to_owned(),
             }),
         }
