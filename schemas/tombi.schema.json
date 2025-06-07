@@ -444,7 +444,7 @@
       "properties": {
         "paths": {
           "title": "The schema catalog path/url array.",
-          "description": "The catalog is evaluated after the schemas specified by [[schemas]].",
+          "description": "The catalog is evaluated after the schemas specified by [[schemas]].\\\n Schemas are loaded in order from the beginning of the catalog list.",
           "type": [
             "array",
             "null"
@@ -453,6 +453,7 @@
             "$ref": "#/definitions/SchemaCatalogPath"
           },
           "default": [
+            "tombi:///json/catalog.json",
             "https://json.schemastore.org/api/json/catalog.json"
           ]
         }

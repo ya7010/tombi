@@ -16,4 +16,6 @@ pub use line_ending::LineEnding;
 pub use line_width::LineWidth;
 pub use one_or_many::OneOrMany;
 pub use quote_style::QuoteStyle;
-pub use schema_catalog_path::{SchemaCatalogPath, JSON_SCHEMA_STORE_CATALOG_URL};
+pub use schema_catalog_path::{
+    SchemaCatalogPath, JSON_SCHEMA_STORE_CATALOG_URL, TOMBI_CATALOG_URL,
+};
