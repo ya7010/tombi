@@ -55,20 +55,3 @@ impl std::fmt::Display for SchemaUrl {
         write!(f, "{}", self.0)
     }
 }
-
-pub fn get_tombi_github_schema_url(schema_url: &url::Url) -> Option<SchemaUrl> {
-    if schema_url.scheme() == "tombi" {
-        let Some(schema_filename) = schema_url.path().strip_prefix("/json/schemas/") else {
-            return None;
-        };
-        let Ok(schema_url) = SchemaUrl::parse(&format!(
-            "https://raw.githubusercontent.com/tombi-toml/tombi/refs/tags/v0.4.2/schemas/{}",
-            schema_filename
-        )) else {
-            return None;
-        };
-        Some(schema_url)
-    } else {
-        None
-    }
-}

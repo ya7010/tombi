@@ -13,7 +13,10 @@ pub struct SourceSchema {
 
 impl std::fmt::Debug for SourceSchema {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let root_schema_url = self.root_schema.as_ref().map(|schema| &schema.schema_url);
+        let root_schema_url = self
+            .root_schema
+            .as_ref()
+            .map(|schema| schema.schema_url.to_string());
         let sub_schema_url_map = self
             .sub_schema_url_map
             .iter()
