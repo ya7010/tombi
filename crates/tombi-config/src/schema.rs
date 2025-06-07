@@ -255,7 +255,10 @@ mod tests {
     #[test]
     fn schema_catalog_paths_default() {
         let schema = SchemaOptions::default();
-        let expected = Some(vec![JSON_SCHEMA_STORE_CATALOG_URL.into()]);
+        let expected = Some(vec![
+            TOMBI_CATALOG_URL.into(),
+            JSON_SCHEMA_STORE_CATALOG_URL.into(),
+        ]);
         let default_paths = schema.catalog_paths();
 
         pretty_assertions::assert_eq!(default_paths, expected);
