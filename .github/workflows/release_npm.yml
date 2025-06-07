@@ -85,6 +85,9 @@ jobs:
 
 
       # Copy the CLI binary and rename it to include the name of the target platform
+      - run: ls target
+      - run: ls target/${{ matrix.target }}
+      - run: ls target/${{ matrix.target }}/release
       - name: Copy CLI binary
         if: matrix.os == 'windows-2022'
         run: |
