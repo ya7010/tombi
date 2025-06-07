@@ -1,7 +1,7 @@
 use itertools::{Either, Itertools};
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
-use tombi_schema_store::{get_tombi_github_schema_url, SchemaContext};
+use tombi_schema_store::{SchemaContext, SchemaUrl};
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
 use crate::{
@@ -327,4 +327,26 @@ pub(crate) fn get_hover_accessors(
     }
 
     accessors
+}
+
+pub fn get_tombi_github_schema_url(schema_url: &tower_lsp::lsp_types::Url) -> Option<SchemaUrl> {
+    if schema_url.scheme() == "tombi" {
+        let Some(schema_filename) = schema_url.path().strip_prefix("/json/schemas/") else {
+            return None;
+        };
+        let version = env!("CARGO_PKG_VERSION");
+        let branch = if version == "0.0.0-dev" {
+            "main".to_string()
+        } else {
+            format!("refs/tags/v{version}")
+        };
+        let Ok(schema_url) = SchemaUrl::parse(&format!(
+            "https://raw.githubusercontent.com/tombi-toml/tombi/{branch}/schemas/{schema_filename}"
+        )) else {
+            return None;
+        };
+        Some(schema_url)
+    } else {
+        None
+    }
 }
