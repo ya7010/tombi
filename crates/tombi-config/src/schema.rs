@@ -1,6 +1,8 @@
 use tombi_toml_version::TomlVersion;
 
-use crate::{BoolDefaultTrue, OneOrMany, SchemaCatalogPath, JSON_SCHEMA_STORE_CATALOG_URL};
+use crate::{
+    BoolDefaultTrue, OneOrMany, SchemaCatalogPath, JSON_SCHEMA_STORE_CATALOG_URL, TOMBI_CATALOG_URL,
+};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
@@ -83,7 +85,8 @@ impl SchemaCatalog {
 pub struct NewSchemaCatalog {
     /// # The schema catalog path/url array.
     ///
-    /// The catalog is evaluated after the schemas specified by [[schemas]].
+    /// The catalog is evaluated after the schemas specified by [[schemas]].\
+    /// Schemas are loaded in order from the beginning of the catalog list.
     #[cfg_attr(feature = "jsonschema", schemars(default = "catalog_paths_default"))]
     #[cfg_attr(feature = "serde", serde(default = "catalog_paths_default"))]
     pub paths: Option<Vec<SchemaCatalogPath>>,
@@ -98,7 +101,10 @@ impl Default for NewSchemaCatalog {
 }
 
 fn catalog_paths_default() -> Option<Vec<SchemaCatalogPath>> {
-    Some(vec![JSON_SCHEMA_STORE_CATALOG_URL.into()])
+    Some(vec![
+        TOMBI_CATALOG_URL.into(),
+        JSON_SCHEMA_STORE_CATALOG_URL.into(),
+    ])
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -249,7 +255,10 @@ mod tests {
     #[test]
     fn schema_catalog_paths_default() {
         let schema = SchemaOptions::default();
-        let expected = Some(vec![JSON_SCHEMA_STORE_CATALOG_URL.into()]);
+        let expected = Some(vec![
+            TOMBI_CATALOG_URL.into(),
+            JSON_SCHEMA_STORE_CATALOG_URL.into(),
+        ]);
         let default_paths = schema.catalog_paths();
 
         pretty_assertions::assert_eq!(default_paths, expected);
