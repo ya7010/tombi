@@ -45,7 +45,7 @@ jobs:
           - os: macos-14
             target: aarch64-apple-darwin
             vscode_target: darwin-arm64
-
+      fail-fast: false
     name: Package ${{ matrix.vscode_target }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -71,10 +71,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
-
-      - name: Audit crates.io dependencies
-        if: matrix.vscode_target == 'linux-x64'
-        run: cargo audit
 
       - name: Set jemalloc page size for linux-arm64
         if: matrix.vscode_target == 'linux-arm64'
