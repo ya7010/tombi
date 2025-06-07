@@ -128,50 +128,71 @@ impl SchemaStore {
         &self,
         catalog_url: &CatalogUrl,
     ) -> Result<(), crate::Error> {
-        let catalog = if matches!(catalog_url.scheme(), "http" | "https") {
-            if self.offline() {
-                tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
-                return Ok(());
-            }
-            tracing::debug!("loading schema catalog: {}", catalog_url);
+        let catalog = match catalog_url.scheme() {
+            "http" | "https" => {
+                if self.offline() {
+                    tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
+                    return Ok(());
+                }
+                tracing::debug!("loading schema catalog: {}", catalog_url);
 
-            match self.http_client.get_bytes(catalog_url.as_str()).await {
-                Ok(result) => match serde_json::from_slice::<crate::json::JsonCatalog>(&result) {
-                    Ok(catalog) => catalog,
+                match self.http_client.get_bytes(catalog_url.as_str()).await {
+                    Ok(result) => match serde_json::from_slice::<crate::json::JsonCatalog>(&result)
+                    {
+                        Ok(catalog) => catalog,
+                        Err(err) => {
+                            return Err(crate::Error::InvalidJsonFormat {
+                                url: catalog_url.deref().clone(),
+                                reason: err.to_string(),
+                            })
+                        }
+                    },
                     Err(err) => {
-                        return Err(crate::Error::InvalidJsonFormat {
-                            url: catalog_url.deref().clone(),
+                        return Err(crate::Error::CatalogUrlFetchFailed {
+                            catalog_url: catalog_url.clone(),
                             reason: err.to_string(),
-                        })
+                        });
                     }
-                },
-                Err(err) => {
-                    return Err(crate::Error::CatalogUrlFetchFailed {
-                        catalog_url: catalog_url.clone(),
-                        reason: err.to_string(),
-                    });
                 }
             }
-        } else if catalog_url.scheme() == "file" {
-            let catalog_path =
-                url_to_file_path(catalog_url).map_err(|_| crate::Error::InvalidCatalogFileUrl {
-                    catalog_url: catalog_url.clone(),
+            "file" => {
+                let catalog_path = url_to_file_path(catalog_url).map_err(|_| {
+                    crate::Error::InvalidCatalogFileUrl {
+                        catalog_url: catalog_url.clone(),
+                    }
                 })?;
 
-            let content = std::fs::read_to_string(&catalog_path).map_err(|_| {
-                crate::Error::CatalogFileReadFailed {
-                    catalog_path: catalog_path.to_path_buf(),
-                }
-            })?;
+                let content = std::fs::read_to_string(&catalog_path).map_err(|_| {
+                    crate::Error::CatalogFileReadFailed {
+                        catalog_path: catalog_path.to_path_buf(),
+                    }
+                })?;
 
-            serde_json::from_str(&content).map_err(|err| crate::Error::InvalidJsonFormat {
-                url: catalog_url.deref().clone(),
-                reason: err.to_string(),
-            })?
-        } else {
-            return Err(crate::Error::UnsupportedUrlSchema {
-                schema: catalog_url.to_string(),
-            });
+                serde_json::from_str(&content).map_err(|err| crate::Error::InvalidJsonFormat {
+                    url: catalog_url.deref().clone(),
+                    reason: err.to_string(),
+                })?
+            }
+            "tombi" => {
+                if catalog_url.path() != "json/catalog.json" {
+                    return Err(crate::Error::InvalidCatalogFileUrl {
+                        catalog_url: catalog_url.clone(),
+                    });
+                }
+
+                serde_json::from_str::<crate::json::JsonCatalog>(include_str!(
+                    "../../../schemas/catalog.json"
+                ))
+                .map_err(|err| crate::Error::InvalidJsonFormat {
+                    url: catalog_url.deref().clone(),
+                    reason: err.to_string(),
+                })?
+            }
+            _ => {
+                return Err(crate::Error::UnsupportedUrlSchema {
+                    schema: catalog_url.to_string(),
+                });
+            }
         };
 
         let mut schemas = self.schemas.write().await;
