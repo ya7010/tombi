@@ -418,6 +418,18 @@ impl SchemaStore {
 
         let mut source_schema: Option<SourceSchema> = None;
         for matching_schema in matching_schemas {
+            // Skip if the same schema (by URL and sub_root_keys) is already loaded in source_schema
+            let already_loaded = match &matching_schema.sub_root_keys {
+                Some(sub_root_keys) => source_schema.as_ref().map_or(false, |source_schema| {
+                    source_schema.sub_schema_url_map.contains_key(sub_root_keys)
+                }),
+                None => source_schema
+                    .as_ref()
+                    .map_or(false, |source_schema| source_schema.root_schema.is_some()),
+            };
+            if already_loaded {
+                continue;
+            }
             if let Ok(Some(document_schema)) =
                 self.try_get_document_schema(&matching_schema.url).await
             {
