@@ -173,6 +173,21 @@ impl SchemaStore {
                     reason: err.to_string(),
                 })?
             }
+            "tombi" => {
+                if catalog_url.path() != "json/catalog.json" {
+                    return Err(crate::Error::InvalidCatalogFileUrl {
+                        catalog_url: catalog_url.clone(),
+                    });
+                }
+
+                serde_json::from_str::<crate::json::JsonCatalog>(include_str!(
+                    "../../../schemas/catalog.json"
+                ))
+                .map_err(|err| crate::Error::InvalidJsonFormat {
+                    url: catalog_url.deref().clone(),
+                    reason: err.to_string(),
+                })?
+            }
             _ => {
                 return Err(crate::Error::UnsupportedUrlSchema {
                     schema: catalog_url.to_string(),
