@@ -89,12 +89,12 @@ jobs:
       - run: ls target/${{ matrix.target }}
       - run: ls target/${{ matrix.target }}/release
       - name: Copy CLI binary
-        if: matrix.os == 'windows-2022'
+        if: startsWith(matrix.os, 'windows') == true
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/tombi.exe ./dist/tombi-${{ matrix.vscode_target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'windows-2022'
+        if: startsWith(matrix.os, 'windows') == false
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/tombi ./dist/tombi-${{ matrix.vscode_target }}
