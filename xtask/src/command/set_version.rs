@@ -7,15 +7,18 @@ use crate::utils::project_root_path;
 pub const DEV_VERSION: &str = "0.0.0-dev";
 
 pub fn run(sh: &Shell) -> anyhow::Result<()> {
-    let version = match std::env::var("GITHUB_REF") {
-        Ok(github_ref) if github_ref.starts_with("refs/tags/v") => {
-            github_ref.trim_start_matches("refs/tags/v").to_owned()
-        }
-        _ => {
-            eprint!("INFO: If you want to set a specific version, please use the GITHUB_REF environment variable.\n\n");
-            eprint!("      $ GITHUB_REF=refs/tags/v1.2.3 cargo xtask set-version\n\n");
-            DEV_VERSION.to_owned()
-        }
+    let version = match std::env::var("TOMBI_VERSION") {
+        Ok(version) if !version.is_empty() => version,
+        _ => match std::env::var("GITHUB_REF") {
+            Ok(github_ref) if github_ref.starts_with("refs/tags/v") => {
+                github_ref.trim_start_matches("refs/tags/v").to_owned()
+            }
+            _ => {
+                eprint!("INFO: If you want to set a specific version, please use the GITHUB_REF environment variable.\n\n");
+                eprint!("      $ GITHUB_REF=refs/tags/v1.2.3 cargo xtask set-version\n\n");
+                DEV_VERSION.to_owned()
+            }
+        },
     };
 
     set_cargo_toml_version(sh, &version)?;
