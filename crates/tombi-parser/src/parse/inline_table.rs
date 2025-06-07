@@ -59,7 +59,9 @@ impl Parse for tombi_ast::InlineTable {
             p.error(crate::Error::new(ExpectedBraceEnd, p.current_range()));
         }
 
-        if (end_range.start.line - begin_range.start.line) != key_value_lines && p.toml_version < TomlVersion::V1_1_0_Preview {
+        if (end_range.start.line - begin_range.start.line) != key_value_lines
+            && p.toml_version < TomlVersion::V1_1_0_Preview
+        {
             p.error(crate::Error::new(
                 InlineTableMustSingleLine,
                 begin_range + end_range,
