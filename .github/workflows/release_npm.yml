@@ -43,7 +43,7 @@ jobs:
             target: aarch64-apple-darwin
             vscode_target: darwin-arm64
 
-    name: Package ${{ matrix.code-target }}
+    name: Package ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -58,23 +58,23 @@ jobs:
         run: rustup target add ${{ matrix.target }}
 
       - name: Install arm64 toolchain
-        if: matrix.code-target == 'linux-arm64' || matrix.code-target == 'linux-arm64-musl'
+        if: matrix.target == 'linux-arm64' || matrix.target == 'linux-arm64-musl'
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Install musl toolchain
-        if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
+        if: matrix.target == 'linux-x64-musl' || matrix.target == 'linux-arm64-musl'
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
       - name: Audit crates.io dependencies
-        if: matrix.code-target == 'linux-x64'
+        if: matrix.target == 'linux-x64'
         run: cargo audit
 
       - name: Set jemalloc page size for linux-arm64
-        if: matrix.code-target == 'linux-arm64'
+        if: matrix.target == 'linux-arm64'
         run: |
           echo "JEMALLOC_SYS_WITH_LG_PAGE=16" >> $GITHUB_ENV
 
@@ -90,12 +90,12 @@ jobs:
         if: matrix.os == 'windows-2022'
         run: |
           mkdir dist
-          cp target/${{ matrix.target }}/release/tombi.exe ./dist/tombi-${{ matrix.code-target }}.exe
+          cp target/${{ matrix.target }}/release/tombi.exe ./dist/tombi-${{ matrix.target }}.exe
       - name: Copy CLI binary
         if: matrix.os != 'windows-2022'
         run: |
           mkdir dist
-          cp target/${{ matrix.target }}/release/tombi ./dist/tombi-${{ matrix.code-target }}
+          cp target/${{ matrix.target }}/release/tombi ./dist/tombi-${{ matrix.target }}
 
       # Upload the CLI binary as a build artifact
       - name: Upload CLI artifact
