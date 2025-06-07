@@ -2,16 +2,17 @@ use tower_lsp::lsp_types::{
     ClientCapabilities, ClientInfo, CompletionOptions, CompletionOptionsCompletionItem,
     DeclarationCapability, DiagnosticOptions, DiagnosticServerCapabilities, DocumentLinkOptions,
     FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, PositionEncodingKind, SemanticTokensFullOptions, SemanticTokensLegend,
+    MessageType, OneOf, PositionEncodingKind, SemanticTokensFullOptions, SemanticTokensLegend,
     SemanticTokensOptions, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
     TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
     TypeDefinitionProviderCapability, WorkDoneProgressOptions,
 };
 
-use crate::semantic_tokens::SUPPORTED_TOKEN_TYPES;
+use crate::{semantic_tokens::SUPPORTED_TOKEN_TYPES, Backend};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_initialize(
+    backend: &Backend,
     params: InitializeParams,
 ) -> Result<InitializeResult, tower_lsp::jsonrpc::Error> {
     tracing::debug!("handle_initialize");
@@ -26,6 +27,21 @@ pub async fn handle_initialize(
     if let Some(ClientInfo { name, version }) = client_info {
         let version = version.unwrap_or_default();
         tracing::info!("{name} version: {version}",);
+    }
+
+    tracing::info!("Loading config...");
+    if let Err(error) = backend
+        .schema_store
+        .load_config(&backend.config().await, backend.config_path.as_deref())
+        .await
+    {
+        if let Err(error) = backend
+            .client
+            .show_message_request(MessageType::ERROR, error.to_string(), None)
+            .await
+        {
+            tracing::error!("{:?}", error);
+        }
     }
 
     Ok(InitializeResult {
