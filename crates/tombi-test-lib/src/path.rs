@@ -13,7 +13,7 @@ pub fn project_root_path() -> PathBuf {
 }
 
 pub fn tombi_schema_path() -> PathBuf {
-    project_root_path().join("tombi.schema.json")
+    project_root_path().join("schemas/tombi.schema.json")
 }
 
 pub fn cargo_schema_path() -> PathBuf {

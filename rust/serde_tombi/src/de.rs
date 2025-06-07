@@ -666,17 +666,10 @@ optional_string = "provided"
         );
 
         let schemas = config.schemas.unwrap();
-        pretty_assertions::assert_eq!(schemas.len(), 5);
+        pretty_assertions::assert_eq!(schemas.len(), 1);
 
         // Verify the first schema
         let first_schema = &schemas[0];
-        pretty_assertions::assert_eq!(first_schema.path(), "tombi.schema.json");
-        pretty_assertions::assert_eq!(first_schema.include(), &["tombi.toml"]);
-
-        // Verify the last schema
-        let last_schema = &schemas[4];
-        pretty_assertions::assert_eq!(last_schema.path(), "schemas/partial-taskipy.schema.json");
-        pretty_assertions::assert_eq!(last_schema.include(), &["pyproject.toml"]);
-        pretty_assertions::assert_eq!(last_schema.root(), Some("tool.taskipy"));
+        pretty_assertions::assert_eq!(first_schema.path(), "schemas/type-test.schema.json");
     }
 }

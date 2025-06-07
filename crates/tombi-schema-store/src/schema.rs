@@ -38,7 +38,7 @@ pub use one_of_schema::OneOfSchema;
 pub use referable_schema::{is_online_url, CurrentSchema, Referable};
 pub use schema_accessor::{GetHeaderSchemarAccessors, SchemaAccessor, SchemaAccessors};
 pub use schema_context::SchemaContext;
-pub use schema_url::SchemaUrl;
+pub use schema_url::{get_tombi_github_schema_url, SchemaUrl};
 pub use source_schema::{SourceSchema, SubSchemaUrlMap};
 pub use string_schema::StringSchema;
 pub use table_schema::TableSchema;
