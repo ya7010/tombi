@@ -19,27 +19,11 @@ document-link = { enabled = true }
 enabled = true
 catalog = {
   paths = [
-    "https://json.schemastore.org/api/json/catalog.json",
+    "tombi:///json/catalog.json",
+    # "https://json.schemastore.org/api/json/catalog.json",
   ],
 }
 
 [[schemas]]
-path = "tombi.schema.json"
-include = ["tombi.toml"]
-
-[[schemas]]
-path = "schemas/cargo.schema.json"
-include = ["Cargo.toml"]
-
-[[schemas]]
-path = "schemas/pyproject.schema.json"
-include = ["pyproject.toml"]
-
-[[schemas]]
 path = "schemas/type-test.schema.json"
 include = ["type-test.toml"]
-
-[[schemas]]
-root = "tool.taskipy"
-path = "schemas/partial-taskipy.schema.json"
-include = ["pyproject.toml"]

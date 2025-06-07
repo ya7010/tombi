@@ -1,8 +1,8 @@
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use crate::{
-    json::CatalogUrl, DocumentSchema, HttpClient, SchemaAccessor, SchemaAccessors, SchemaUrl,
-    SourceSchema,
+    json::{CatalogUrl, JsonCatalog},
+    DocumentSchema, HttpClient, SchemaAccessor, SchemaAccessors, SchemaUrl, SourceSchema,
 };
 use ahash::AHashMap;
 use itertools::Either;
@@ -81,18 +81,27 @@ impl SchemaStore {
 
             let catalog_paths = schema_options.catalog_paths().unwrap_or_default();
 
-            futures::future::join_all(catalog_paths.iter().map(|catalog_path| async move {
-                let Ok(catalog_url) = catalog_path.try_to_catalog_url(base_dirpath) else {
-                    return Err(crate::Error::CatalogPathConvertUrlFailed {
-                        catalog_path: catalog_path.to_string(),
-                    });
-                };
-                let catalog_url = CatalogUrl::new(catalog_url);
-                self.load_schemas_from_catalog_url(&catalog_url).await
-            }))
-            .await
-            .into_iter()
-            .collect::<Result<(), _>>()?;
+            let catalogs_results =
+                futures::future::join_all(catalog_paths.iter().map(|catalog_path| async move {
+                    let Ok(catalog_url) = catalog_path.try_to_catalog_url(base_dirpath) else {
+                        return Err(crate::Error::CatalogPathConvertUrlFailed {
+                            catalog_path: catalog_path.to_string(),
+                        });
+                    };
+                    let catalog_url = CatalogUrl::new(catalog_url);
+                    self.load_json_catalog_from_catalog_url(&catalog_url).await
+                }))
+                .await;
+
+            for catalog_result in catalogs_results {
+                match catalog_result {
+                    Ok(Some(catalog)) => {
+                        self.add_json_catalog(catalog).await?;
+                    }
+                    Ok(None) => {}
+                    Err(e) => return Err(e),
+                }
+            }
         }
 
         Ok(())
@@ -124,15 +133,15 @@ impl SchemaStore {
         .await;
     }
 
-    pub async fn load_schemas_from_catalog_url(
+    async fn load_json_catalog_from_catalog_url(
         &self,
         catalog_url: &CatalogUrl,
-    ) -> Result<(), crate::Error> {
-        let catalog = match catalog_url.scheme() {
+    ) -> Result<Option<JsonCatalog>, crate::Error> {
+        Ok(Some(match catalog_url.scheme() {
             "http" | "https" => {
                 if self.offline() {
                     tracing::debug!("offline mode, skip fetch catalog from url: {}", catalog_url);
-                    return Ok(());
+                    return Ok(None);
                 }
                 tracing::debug!("loading schema catalog: {}", catalog_url);
 
@@ -174,7 +183,7 @@ impl SchemaStore {
                 })?
             }
             "tombi" => {
-                if catalog_url.path() != "json/catalog.json" {
+                if catalog_url.path() != "/json/catalog.json" {
                     return Err(crate::Error::InvalidCatalogFileUrl {
                         catalog_url: catalog_url.clone(),
                     });
@@ -193,10 +202,12 @@ impl SchemaStore {
                     schema: catalog_url.to_string(),
                 });
             }
-        };
+        }))
+    }
 
+    async fn add_json_catalog(&self, json_catalog: JsonCatalog) -> Result<(), crate::Error> {
         let mut schemas = self.schemas.write().await;
-        for schema in catalog.schemas {
+        for schema in json_catalog.schemas {
             if schema
                 .file_match
                 .iter()
@@ -275,13 +286,13 @@ impl SchemaStore {
             }
             "tombi" => {
                 let content = match schema_url.path() {
-                    "json/schemas/cargo.schema.json" => {
+                    "/json/schemas/cargo.schema.json" => {
                         include_str!("../../../schemas/cargo.schema.json")
                     }
-                    "json/schemas/pyproject.schema.json" => {
+                    "/json/schemas/pyproject.schema.json" => {
                         include_str!("../../../schemas/pyproject.schema.json")
                     }
-                    "json/schemas/tombi.schema.json" => {
+                    "/json/schemas/tombi.schema.json" => {
                         include_str!("../../../tombi.schema.json")
                     }
                     _ => {
