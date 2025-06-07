@@ -21,30 +21,27 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-2022
-            target: x86_64-pc-windows-msvc
-            code-target: win32-x64
-          - os: windows-2022
-            target: aarch64-pc-windows-msvc
-            code-target: win32-arm64
-          - os: ubuntu-20.04
-            target: x86_64-unknown-linux-gnu
-            code-target: linux-x64
-          - os: ubuntu-20.04
-            target: aarch64-unknown-linux-gnu
-            code-target: linux-arm64
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             target: x86_64-unknown-linux-musl
-            code-target: linux-x64-musl
-          - os: ubuntu-20.04
+            vscode_target: linux-x64
+          - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-musl
-            code-target: linux-arm64-musl
-          - os: macos-14
+            vscode_target: linux-arm64
+          - os: ubuntu-24.04
+            target: arm-unknown-linux-gnueabihf
+            vscode_target: linux-armhf
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            vscode_target: win32-x64
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            vscode_target: win32-arm64
+          - os: macos-13
             target: x86_64-apple-darwin
-            code-target: darwin-x64
+            vscode_target: darwin-x64
           - os: macos-14
             target: aarch64-apple-darwin
-            code-target: darwin-arm64
+            vscode_target: darwin-arm64
 
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
