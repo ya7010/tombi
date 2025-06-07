@@ -43,6 +43,9 @@ pub enum Error {
     #[error("schema file not found: {schema_path}")]
     SchemaFileNotFound { schema_path: PathBuf },
 
+    #[error("schema resource not found: {schema_url}")]
+    SchemaResourceNotFound { schema_url: SchemaUrl },
+
     #[error("failed to read schema: \"{schema_path}\"")]
     SchemaFileReadFailed { schema_path: PathBuf },
 

@@ -1,4 +1,4 @@
-use std::{ops::Deref, sync::Arc};
+use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use crate::{
     json::CatalogUrl, DocumentSchema, HttpClient, SchemaAccessor, SchemaAccessors, SchemaUrl,
@@ -272,6 +272,25 @@ impl SchemaStore {
                     })?;
 
                 tombi_json::ValueNode::from_reader(std::io::Cursor::new(bytes))
+            }
+            "tombi" => {
+                let content = match schema_url.path() {
+                    "json/schemas/cargo.schema.json" => {
+                        include_str!("../../../schemas/cargo.schema.json")
+                    }
+                    "json/schemas/pyproject.schema.json" => {
+                        include_str!("../../../schemas/pyproject.schema.json")
+                    }
+                    "json/schemas/tombi.schema.json" => {
+                        include_str!("../../../tombi.schema.json")
+                    }
+                    _ => {
+                        return Err(crate::Error::SchemaResourceNotFound {
+                            schema_url: schema_url.to_owned(),
+                        });
+                    }
+                };
+                tombi_json::ValueNode::from_str(content)
             }
             _ => {
                 return Err(crate::Error::UnsupportedSchemaUrl {
