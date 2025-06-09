@@ -13,6 +13,10 @@ pub const X_TOMBI_TABLE_KEYS_ORDER: &str = "x-tombi-table-keys-order";
 pub enum ArrayValuesOrder {
     Ascending,
     Descending,
+    // Version Sorting
+    //
+    // See: https://doc.rust-lang.org/nightly/style-guide/index.html#sorting
+    VersionSort,
 }
 
 impl std::fmt::Display for ArrayValuesOrder {
@@ -20,6 +24,7 @@ impl std::fmt::Display for ArrayValuesOrder {
         match self {
             Self::Ascending => write!(f, "ascending"),
             Self::Descending => write!(f, "descending"),
+            Self::VersionSort => write!(f, "version-sort"),
         }
     }
 }
