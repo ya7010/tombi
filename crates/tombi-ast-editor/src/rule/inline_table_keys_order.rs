@@ -3,7 +3,7 @@ use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_schema_store::{SchemaContext, TableSchema};
 use tombi_syntax::SyntaxElement;
-use tombi_x_keyword::version_sort;
+use tombi_version_sort::version_sort;
 use tombi_x_keyword::TableKeysOrder;
 
 pub async fn inline_table_keys_order<'a>(

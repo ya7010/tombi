@@ -3027,6 +3027,7 @@ dependencies = [
  "tombi-text",
  "tombi-toml-version",
  "tombi-validator",
+ "tombi-version-sort",
  "tombi-x-keyword",
  "tracing",
 ]
@@ -3522,6 +3523,13 @@ dependencies = [
  "tombi-schema-store",
  "tombi-text",
  "tracing",
+]
+
+[[package]]
+name = "tombi-version-sort"
+version = "0.0.0-dev"
+dependencies = [
+ "itertools",
 ]
 
 [[package]]
