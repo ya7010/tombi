@@ -55,6 +55,11 @@ pub async fn array_values_order<'a>(
             .rev()
             .map(|(value, comma)| (value, Some(comma)))
             .collect_vec(),
+        ArrayValuesOrder::VersionSort => sortable_values
+            .sorted_version()
+            .into_iter()
+            .map(|(value, comma)| (value, Some(comma)))
+            .collect_vec(),
     };
 
     if let Some((_, comma)) = sorted_values_with_comma.last_mut() {
@@ -391,6 +396,19 @@ impl SortableValues {
                     .map(|(_, value, comma)| (value, comma))
                     .collect_vec()
             }
+        }
+    }
+
+    pub fn sorted_version(self) -> Vec<(tombi_ast::Value, tombi_ast::Comma)> {
+        match self {
+            Self::String(mut sortable_values) => {
+                sortable_values.sort_by(|(a, _, _), (b, _, _)| tombi_x_keyword::version_sort(a, b));
+                sortable_values
+                    .into_iter()
+                    .map(|(_, value, comma)| (value, comma))
+                    .collect_vec()
+            }
+            _ => self.sorted(),
         }
     }
 }

@@ -157,6 +157,21 @@ where
                                 sorted_targets.extend(new_targets_map);
                                 sorted_targets
                             }
+                            Some(TableKeysOrder::VersionSort) => {
+                                let mut sorted_targets = new_targets_map.into_iter().collect_vec();
+                                sorted_targets.sort_by(|(a_accessor, _), (b_accessor, _)| {
+                                    match (a_accessor, b_accessor) {
+                                        (
+                                            SchemaAccessor::Key(a_key),
+                                            SchemaAccessor::Key(b_key),
+                                        ) => tombi_x_keyword::version_sort(a_key, b_key),
+                                        _ => unreachable!(
+                                            "Unexpected accessor type in table keys order sorting"
+                                        ),
+                                    }
+                                });
+                                sorted_targets
+                            }
                             None => new_targets_map.into_iter().collect_vec(),
                         };
 
