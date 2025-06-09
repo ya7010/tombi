@@ -134,6 +134,12 @@ jobs:
         run: node typescript/@tombi-toml/tombi/scripts/generate-packages.mjs
 
       - name: Publish npm package as latest
-        run: npm publish packages/@tombi-toml/tombi --tag latest --access public --provenance
+        run: |
+          set -e
+          if npm view @tombi-toml/tombi@${TOMBI_VERSION} version > /dev/null 2>&1; then
+            echo "@tombi-toml/tombi@${TOMBI_VERSION} is already published. Skipping publish."
+            exit 0
+          fi
+          npm publish packages/@tombi-toml/tombi --tag latest --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
