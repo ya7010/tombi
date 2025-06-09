@@ -164,7 +164,7 @@ where
                                         (
                                             SchemaAccessor::Key(a_key),
                                             SchemaAccessor::Key(b_key),
-                                        ) => tombi_x_keyword::version_sort(a_key, b_key),
+                                        ) => tombi_version_sort::version_sort(a_key, b_key),
                                         _ => unreachable!(
                                             "Unexpected accessor type in table keys order sorting"
                                         ),

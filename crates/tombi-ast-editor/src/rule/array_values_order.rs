@@ -402,7 +402,8 @@ impl SortableValues {
     pub fn sorted_version(self) -> Vec<(tombi_ast::Value, tombi_ast::Comma)> {
         match self {
             Self::String(mut sortable_values) => {
-                sortable_values.sort_by(|(a, _, _), (b, _, _)| tombi_x_keyword::version_sort(a, b));
+                sortable_values
+                    .sort_by(|(a, _, _), (b, _, _)| tombi_version_sort::version_sort(a, b));
                 sortable_values
                     .into_iter()
                     .map(|(_, value, comma)| (value, comma))
