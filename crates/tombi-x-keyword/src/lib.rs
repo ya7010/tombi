@@ -1,3 +1,7 @@
+mod version_sort;
+
+pub use version_sort::version_sort;
+
 pub const X_TOMBI_TOML_VERSION: &str = "x-tombi-toml-version";
 pub const X_TOMBI_ARRAY_VALUES_ORDER: &str = "x-tombi-array-values-order";
 pub const X_TOMBI_TABLE_KEYS_ORDER: &str = "x-tombi-table-keys-order";
@@ -28,6 +32,10 @@ pub enum TableKeysOrder {
     Ascending,
     Descending,
     Schema,
+    // Version Sorting
+    //
+    // See: https://doc.rust-lang.org/nightly/style-guide/index.html#sorting
+    VersionSort,
 }
 
 impl std::fmt::Display for TableKeysOrder {
@@ -36,6 +44,7 @@ impl std::fmt::Display for TableKeysOrder {
             TableKeysOrder::Ascending => write!(f, "ascending"),
             TableKeysOrder::Descending => write!(f, "descending"),
             TableKeysOrder::Schema => write!(f, "schema"),
+            TableKeysOrder::VersionSort => write!(f, "version-sort"),
         }
     }
 }

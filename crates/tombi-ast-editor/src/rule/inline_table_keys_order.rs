@@ -1,10 +1,10 @@
+use crate::rule::inline_table_comma_tailing_comment;
 use itertools::Itertools;
 use tombi_ast::AstNode;
 use tombi_schema_store::{SchemaContext, TableSchema};
 use tombi_syntax::SyntaxElement;
+use tombi_x_keyword::version_sort;
 use tombi_x_keyword::TableKeysOrder;
-
-use crate::rule::inline_table_comma_tailing_comment;
 
 pub async fn inline_table_keys_order<'a>(
     key_values_with_comma: Vec<(tombi_ast::KeyValue, Option<tombi_ast::Comma>)>,
@@ -79,6 +79,28 @@ pub async fn inline_table_keys_order<'a>(
 
             new_key_values_with_comma
         }
+        TableKeysOrder::VersionSort => key_values_with_comma
+            .into_iter()
+            .sorted_by(|(a, _), (b, _)| {
+                let a_key = a
+                    .keys()
+                    .unwrap()
+                    .keys()
+                    .next()
+                    .unwrap()
+                    .try_to_raw_text(schema_context.toml_version)
+                    .unwrap();
+                let b_key = b
+                    .keys()
+                    .unwrap()
+                    .keys()
+                    .next()
+                    .unwrap()
+                    .try_to_raw_text(schema_context.toml_version)
+                    .unwrap();
+                version_sort(&a_key, &b_key)
+            })
+            .collect_vec(),
     };
 
     if let Some((_, comma)) = sorted_key_values_with_comma.last_mut() {
