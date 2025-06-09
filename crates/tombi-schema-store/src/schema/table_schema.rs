@@ -84,17 +84,11 @@ impl TableSchema {
                 _ => (None, None),
             };
 
-        let keys_order = match object_node
-            .get(X_TOMBI_TABLE_KEYS_ORDER)
-            // NOTE: support old name
-            .or_else(|| object_node.get("x-tombi-table-keys-order-by"))
-        {
+        let keys_order = match object_node.get(X_TOMBI_TABLE_KEYS_ORDER) {
             Some(tombi_json::ValueNode::String(StringNode { value: order, .. })) => {
-                match order.as_str() {
-                    "ascending" => Some(TableKeysOrder::Ascending),
-                    "descending" => Some(TableKeysOrder::Descending),
-                    "schema" => Some(TableKeysOrder::Schema),
-                    _ => {
+                match TableKeysOrder::try_from(order.as_str()) {
+                    Ok(val) => Some(val),
+                    Err(_) => {
                         tracing::error!("invalid {X_TOMBI_TABLE_KEYS_ORDER}: {order}");
                         None
                     }

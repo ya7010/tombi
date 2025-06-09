@@ -61,17 +61,19 @@ impl ArraySchema {
                 .map(|array| array.items.iter().map(|v| v.into()).collect()),
             values_order: object
                 .get(X_TOMBI_ARRAY_VALUES_ORDER)
-                // NOTE: support old name
-                .or_else(|| object.get("x-tombi-array-values-order-by"))
                 .and_then(|order| match order {
-                    tombi_json::ValueNode::String(str) => match str.value.as_str() {
-                        "ascending" => Some(ArrayValuesOrder::Ascending),
-                        "descending" => Some(ArrayValuesOrder::Descending),
-                        _ => {
-                            tracing::error!("invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}", str.value);
-                            None
+                    tombi_json::ValueNode::String(string) => {
+                        match ArrayValuesOrder::try_from(string.value.as_ref()) {
+                            Ok(val) => Some(val),
+                            Err(_) => {
+                                tracing::error!(
+                                    "invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}",
+                                    string.value
+                                );
+                                None
+                            }
                         }
-                    },
+                    }
                     _ => {
                         tracing::error!(
                             "invalid {X_TOMBI_ARRAY_VALUES_ORDER}: {}",
