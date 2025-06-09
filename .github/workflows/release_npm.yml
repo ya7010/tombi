@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  TOMBI_VERSION: "4.0.1"
+  TOMBI_VERSION: ""
   CC_aarch64-unknown-linux-gnu: aarch64-linux-gnu-gcc
   CC_arm_unknown_linux_gnueabihf: arm-linux-gnueabihf-gcc
   CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
