@@ -29,6 +29,19 @@ impl std::fmt::Display for ArrayValuesOrder {
     }
 }
 
+impl<'a> TryFrom<&'a str> for ArrayValuesOrder {
+    type Error = &'a str;
+
+    fn try_from(value: &'a str) -> Result<Self, Self::Error> {
+        match value {
+            "ascending" => Ok(Self::Ascending),
+            "descending" => Ok(Self::Descending),
+            "version-sort" => Ok(Self::VersionSort),
+            _ => Err(value),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "kebab-case"))]
@@ -50,6 +63,20 @@ impl std::fmt::Display for TableKeysOrder {
             TableKeysOrder::Descending => write!(f, "descending"),
             TableKeysOrder::Schema => write!(f, "schema"),
             TableKeysOrder::VersionSort => write!(f, "version-sort"),
+        }
+    }
+}
+
+impl<'a> TryFrom<&'a str> for TableKeysOrder {
+    type Error = &'a str;
+
+    fn try_from(value: &'a str) -> Result<Self, Self::Error> {
+        match value {
+            "ascending" => Ok(Self::Ascending),
+            "descending" => Ok(Self::Descending),
+            "schema" => Ok(Self::Schema),
+            "version-sort" => Ok(Self::VersionSort),
+            _ => Err("Invalid table keys order"),
         }
     }
 }
