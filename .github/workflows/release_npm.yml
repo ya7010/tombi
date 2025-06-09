@@ -131,7 +131,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Generate npm package
-        run: node packages/@tombi-toml/tombi/scripts/generate-packages.mjs
+        run: node typescript/@tombi-toml/tombi/scripts/generate-packages.mjs
 
       - name: Publish npm package as latest
         run: npm publish packages/@tombi-toml/tombi --tag latest --access public --provenance
