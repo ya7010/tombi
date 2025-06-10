@@ -55,6 +55,7 @@
         tombiPkg = craneLib.buildPackage {
           inherit src;
 
+          pname = "tombi";
           # Can't run 'cargo test' after build since nix
           # doesn't allow for network calls in sandbox
           doCheck = false;
