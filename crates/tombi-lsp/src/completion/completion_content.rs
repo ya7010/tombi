@@ -339,6 +339,11 @@ impl CompletionContent {
             .collect()
     }
 
+    /// Creates a new comment directive completion content.
+    ///
+    /// ```toml
+    /// #:schema https://...
+    /// ```
     pub fn new_comment_directive(
         directive: &str,
         detail: impl Into<String>,
