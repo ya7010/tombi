@@ -1,16 +1,13 @@
-use itertools::Either;
+use itertools::{Either, Itertools};
 use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
-use crate::{
-    backend,
-    completion::{get_completion_contents, CompletionContent},
-};
+use crate::{backend, completion::get_completion_contents};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_completion(
     backend: &backend::Backend,
     params: CompletionParams,
-) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<Vec<tower_lsp::lsp_types::CompletionItem>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_completion");
     tracing::trace!(?params);
 
@@ -77,6 +74,9 @@ pub async fn handle_completion(
                 store: &backend.schema_store,
             },
         )
-        .await,
+        .await
+        .into_iter()
+        .map(|content| content.into())
+        .collect_vec(),
     ))
 }
