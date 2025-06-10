@@ -35,18 +35,6 @@ pub async fn get_completion_contents(
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        tracing::trace!("node = {:?}", node);
-        tracing::trace!(
-            "prev_sibling_or_token() = {:?}",
-            node.prev_sibling_or_token()
-        );
-        tracing::trace!(
-            "next_sibling_or_token() = {:?}",
-            node.next_sibling_or_token()
-        );
-        tracing::trace!("first_child_or_token() = {:?}", node.first_child_or_token());
-        tracing::trace!("last_child_or_token() = {:?}", node.last_child_or_token());
-
         if let Some(SyntaxElement::Token(token)) = node.first_child_or_token() {
             if token.kind() == SyntaxKind::COMMENT && token.range().contains(position) {
                 return get_comment_completion_contents(&root, position, text_document_uri);
