@@ -2,7 +2,7 @@
   "$id": "https://json.schemastore.org/tombi.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Tombi",
-  "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.\n See the [GitHub repository](https://github.com/tombi-toml/tombi) for more information.",
+  "description": "**Tombi** (鳶) is a toolkit for TOML; providing a formatter/linter and language server.\nSee the [GitHub repository](https://github.com/tombi-toml/tombi) for more information.",
   "type": "object",
   "properties": {
     "format": {
@@ -31,7 +31,7 @@
     },
     "include": {
       "title": "File patterns to include.",
-      "description": "The file match pattern to include in formatting and linting.\n Supports glob pattern.",
+      "description": "The file match pattern to include in formatting and linting.\nSupports glob pattern.",
       "type": [
         "array",
         "null"
@@ -43,7 +43,7 @@
     },
     "exclude": {
       "title": "File patterns to exclude.",
-      "description": "The file match pattern to exclude from formatting and linting.\n Supports glob pattern.",
+      "description": "The file match pattern to exclude from formatting and linting.\nSupports glob pattern.",
       "type": [
         "array",
         "null"
@@ -123,7 +123,7 @@
     },
     "FormatOptions": {
       "title": "Formatter options.",
-      "description": "To avoid needless discussion of formatting rules,\n we do not currently have a configuration item for formatting.",
+      "description": "To avoid needless discussion of formatting rules,\nwe do not currently have a configuration item for formatting.",
       "type": "object",
       "additionalProperties": false,
       "x-tombi-table-keys-order": "schema"
@@ -151,7 +151,7 @@
       "properties": {
         "key-empty": {
           "title": "Key empty.",
-          "description": "Check if the key is empty.\n ```toml\n \"\" = true\n ```",
+          "description": "Check if the key is empty.\n```toml\n\"\" = true\n```",
           "anyOf": [
             {
               "$ref": "#/definitions/SeverityLevelDefaultWarn"
@@ -404,7 +404,7 @@
         },
         "strict": {
           "title": "Enable or disable strict schema validation.",
-          "description": "If `additionalProperties` is not specified in the JSON Schema,\n the strict mode treats it as `additionalProperties: false`,\n which is different from the JSON Schema specification.",
+          "description": "If `additionalProperties` is not specified in the JSON Schema,\nthe strict mode treats it as `additionalProperties: false`,\nwhich is different from the JSON Schema specification.",
           "anyOf": [
             {
               "$ref": "#/definitions/BoolDefaultTrue"
@@ -444,7 +444,7 @@
       "properties": {
         "paths": {
           "title": "The schema catalog path/url array.",
-          "description": "The catalog is evaluated after the schemas specified by [[schemas]].\\\n Schemas are loaded in order from the beginning of the catalog list.",
+          "description": "The catalog is evaluated after the schemas specified by [[schemas]].\\\nSchemas are loaded in order from the beginning of the catalog list.",
           "type": [
             "array",
             "null"
@@ -469,10 +469,10 @@
       "properties": {
         "path": {
           "title": "The schema catalog path or url.",
-          "description": "**🚧 Deprecated 🚧**\\\n Please use `schema.catalog.paths` instead.",
+          "description": "**🚧 Deprecated 🚧**\\\nPlease use `schema.catalog.paths` instead.",
           "anyOf": [
             {
-              "$ref": "#/definitions/OneOrMany_for_SchemaCatalogPath"
+              "$ref": "#/definitions/OneOrMany"
             },
             {
               "type": "null"
@@ -484,7 +484,7 @@
       },
       "additionalProperties": false
     },
-    "OneOrMany_for_SchemaCatalogPath": {
+    "OneOrMany": {
       "anyOf": [
         {
           "$ref": "#/definitions/SchemaCatalogPath"
@@ -531,7 +531,7 @@
         },
         "include": {
           "title": "The file match pattern of the schema.",
-          "description": "The file match pattern to include the target to apply the schema.\n Supports glob pattern.",
+          "description": "The file match pattern to include the target to apply the schema.\nSupports glob pattern.",
           "type": "array",
           "items": {
             "type": "string"
@@ -568,7 +568,7 @@
         },
         "include": {
           "title": "The file match pattern of the sub schema.",
-          "description": "The file match pattern to include the target to apply the sub schema.\n Supports glob pattern.",
+          "description": "The file match pattern to include the target to apply the sub schema.\nSupports glob pattern.",
           "type": "array",
           "items": {
             "type": "string"
@@ -594,7 +594,7 @@
         },
         "include": {
           "title": "The file match pattern of the sub schema.",
-          "description": "The file match pattern to include the target to apply the sub schema.\n Supports glob pattern.",
+          "description": "The file match pattern to include the target to apply the sub schema.\nSupports glob pattern.",
           "type": "array",
           "items": {
             "type": "string"
@@ -603,7 +603,7 @@
         },
         "root-keys": {
           "title": "The keys to apply the sub schema.",
-          "description": "**🚧 Deprecated 🚧**\\\n Please use `schemas[*].root` instead.",
+          "description": "**🚧 Deprecated 🚧**\\\nPlease use `schemas[*].root` instead.",
           "type": [
             "string",
             "null"
