@@ -1,5 +1,5 @@
 {
-  description = "Nix-flake development environment for my personal website";
+  description = "Nix-flake development environment for tombi";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
