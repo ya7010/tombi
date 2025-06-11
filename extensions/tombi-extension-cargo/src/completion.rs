@@ -102,7 +102,6 @@ pub async fn completion(
                         preselect: None,
                     })
                     .collect();
-                tracing::error!(?items, "Crate versions completion items");
                 return Ok(Some(items));
             }
         }
