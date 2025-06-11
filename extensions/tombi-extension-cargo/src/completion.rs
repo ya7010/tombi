@@ -3,6 +3,7 @@ use serde::Deserialize;
 use tombi_config::TomlVersion;
 use tombi_extension::CompletionContent;
 use tombi_extension::CompletionKind;
+use tombi_schema_store::dig_accessors;
 use tombi_schema_store::Accessor;
 use tombi_schema_store::HttpClient;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
@@ -19,68 +20,46 @@ struct CratesIoVersion {
 
 pub async fn completion(
     _text_document: &TextDocumentIdentifier,
-    _document_tree: &tombi_document_tree::DocumentTree,
+    document_tree: &tombi_document_tree::DocumentTree,
+    position: tombi_text::Position,
     accessors: &[Accessor],
     _toml_version: TomlVersion,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
-    // Determine if this is a version completion for [dependencies], [workspace.dependencies], etc.
-    // 1. [dependencies, crate, version] pattern
-    // 2. [workspace, dependencies, crate, version] pattern
-    // 3. [dependencies, crate] pattern (e.g. serde = "1.0.0")
-    // 4. [workspace, dependencies, crate] pattern
+    use tombi_schema_store::match_accessors;
     let mut crate_name: Option<&str> = None;
+    let mut version_value = None;
     let mut should_complete = false;
 
-    if accessors.len() >= 3 {
-        // [dependencies, crate, version] etc.
-        if let (Some(dep_table), Some(c_name), Some(version_key)) = (
-            accessors.get(accessors.len() - 3).and_then(|a| a.as_key()),
-            accessors.get(accessors.len() - 2).and_then(|a| a.as_key()),
-            accessors.get(accessors.len() - 1).and_then(|a| a.as_key()),
-        ) {
-            let dep_tables = ["dependencies", "dev-dependencies", "build-dependencies"];
-            if dep_tables.contains(&dep_table) && version_key == "version" {
-                crate_name = Some(c_name);
-                should_complete = true;
+    if match_accessors!(accessors, ["dependencies", _, "version"])
+        || match_accessors!(accessors, ["dev-dependencies", _, "version"])
+        || match_accessors!(accessors, ["build-dependencies", _, "version"])
+        || match_accessors!(accessors, ["workspace", "dependencies", _, "version"])
+    {
+        // crate名を抽出
+        if let Some(Accessor::Key(c_name)) = accessors.get(1) {
+            crate_name = Some(c_name.as_str());
+            should_complete = true;
+            // version値の取得
+            if let Some((_, tombi_document_tree::Value::String(value_string))) =
+                dig_accessors(document_tree, accessors)
+            {
+                version_value = Some(value_string);
             }
         }
     }
-    if !should_complete && accessors.len() >= 4 {
-        // [workspace, dependencies, crate, version]
-        if let (Some(ws), Some(dep_table), Some(c_name), Some(version_key)) = (
-            accessors.get(accessors.len() - 4).and_then(|a| a.as_key()),
-            accessors.get(accessors.len() - 3).and_then(|a| a.as_key()),
-            accessors.get(accessors.len() - 2).and_then(|a| a.as_key()),
-            accessors.get(accessors.len() - 1).and_then(|a| a.as_key()),
-        ) {
-            if ws == "workspace" && dep_table == "dependencies" && version_key == "version" {
-                crate_name = Some(c_name);
-                should_complete = true;
-            }
-        }
-    }
-    if !should_complete && accessors.len() >= 2 {
-        // Pattern like serde = "1.0.0": [dependencies, crate] or [workspace, dependencies, crate]
-        if let (Some(dep_table), Some(c_name)) = (
-            accessors.get(accessors.len() - 2).and_then(|a| a.as_key()),
-            accessors.get(accessors.len() - 1).and_then(|a| a.as_key()),
-        ) {
-            let dep_tables = ["dependencies", "dev-dependencies", "build-dependencies"];
-            if dep_tables.contains(&dep_table) {
-                crate_name = Some(c_name);
-                should_complete = true;
-            }
-        }
-        if !should_complete && accessors.len() >= 3 {
-            if let (Some(ws), Some(dep_table), Some(c_name)) = (
-                accessors.get(accessors.len() - 3).and_then(|a| a.as_key()),
-                accessors.get(accessors.len() - 2).and_then(|a| a.as_key()),
-                accessors.get(accessors.len() - 1).and_then(|a| a.as_key()),
-            ) {
-                if ws == "workspace" && dep_table == "dependencies" {
-                    crate_name = Some(c_name);
-                    should_complete = true;
-                }
+    // [dependencies.*] or [workspace.dependencies.*] (e.g. serde = "1.0.0")
+    else if match_accessors!(accessors, ["dependencies", _])
+        || match_accessors!(accessors, ["dev-dependencies", _])
+        || match_accessors!(accessors, ["build-dependencies", _])
+        || match_accessors!(accessors, ["workspace", "dependencies", _])
+    {
+        if let Some(Accessor::Key(c_name)) = accessors.last() {
+            crate_name = Some(c_name.as_str());
+            should_complete = true;
+            if let Some((_, tombi_document_tree::Value::String(value_string))) =
+                dig_accessors(document_tree, accessors)
+            {
+                version_value = Some(value_string);
             }
         }
     }
@@ -94,21 +73,36 @@ pub async fn completion(
                     .take(100)
                     .enumerate()
                     .map(|(i, ver)| CompletionContent {
-                        label: ver,
+                        label: format!("\"{ver}\""),
                         kind: CompletionKind::String,
                         emoji_icon: Some('🦀'),
                         priority: tombi_extension::CompletionContentPriority::Custom(format!(
-                            "0__cargo_{i:>3}__",
+                            "1__cargo_{i:>03}__",
                         )),
                         detail: Some("Crate version".to_string()),
                         documentation: None,
                         filter_text: None,
                         schema_url: None,
                         deprecated: None,
-                        edit: None,
+                        edit: version_value.map(|value| tombi_extension::CompletionEdit {
+                            text_edit: tower_lsp::lsp_types::CompletionTextEdit::Edit(
+                                tower_lsp::lsp_types::TextEdit {
+                                    range: tombi_text::Range::at(position).into(),
+                                    new_text: format!("\"{ver}\""),
+                                },
+                            ),
+                            insert_text_format: Some(
+                                tower_lsp::lsp_types::InsertTextFormat::PLAIN_TEXT,
+                            ),
+                            additional_text_edits: Some(vec![tower_lsp::lsp_types::TextEdit {
+                                range: value.range().into(),
+                                new_text: "".to_string(),
+                            }]),
+                        }),
                         preselect: None,
                     })
                     .collect();
+                tracing::error!(?items, "Crate versions completion items");
                 return Ok(Some(items));
             }
         }
