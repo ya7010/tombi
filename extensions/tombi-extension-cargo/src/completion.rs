@@ -36,7 +36,7 @@ pub async fn completion(
         || match_accessors!(accessors, ["workspace", "dependencies", _, "version"])
     {
         // crate名を抽出
-        if let Some(Accessor::Key(c_name)) = accessors.get(1) {
+        if let Some(Accessor::Key(c_name)) = accessors.get(accessors.len() - 2) {
             crate_name = Some(c_name.as_str());
             should_complete = true;
             // version値の取得
@@ -124,6 +124,7 @@ async fn fetch_crate_versions(crate_name: &str) -> Option<Vec<String>> {
             return None;
         }
     };
+    tracing::error!(?url, ?bytes);
     let resp: CratesIoVersionsResponse = match serde_json::from_slice(&bytes) {
         Ok(resp) => resp,
         Err(e) => {
