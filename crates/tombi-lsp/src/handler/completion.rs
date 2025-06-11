@@ -86,7 +86,7 @@ pub async fn handle_completion(
     }
 
     let Some((keys, completion_hint)) = extract_keys_and_hint(&root, position, toml_version) else {
-        return Ok(None);
+        return Ok(Some(Vec::with_capacity(0)));
     };
     let document_tree = root.into_document_tree_and_errors(toml_version).tree;
     let schema_context = tombi_schema_store::SchemaContext {
