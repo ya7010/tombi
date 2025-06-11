@@ -22,7 +22,10 @@ pub fn extract_keys_and_hint(
     root: &tombi_ast::Root,
     position: tombi_text::Position,
     toml_version: TomlVersion,
-) -> (Vec<tombi_document_tree::Key>, Option<CompletionHint>) {
+) -> (
+    Option<Vec<tombi_document_tree::Key>>,
+    Option<CompletionHint>,
+) {
     let mut keys: Vec<tombi_document_tree::Key> = vec![];
     let mut completion_hint = None;
 
@@ -66,13 +69,13 @@ pub fn extract_keys_and_hint(
                     (Some(bracket_start), Some(blacket_end)) => {
                         (bracket_start.range(), blacket_end.range())
                     }
-                    _ => return (Vec::with_capacity(0), completion_hint),
+                    _ => return (None, completion_hint),
                 };
             if position < bracket_start_range.start
                 || (bracket_end_range.end <= position
                     && position.line == bracket_end_range.end.line)
             {
-                return (Vec::with_capacity(0), completion_hint);
+                return (None, completion_hint);
             } else {
                 if table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
@@ -88,14 +91,14 @@ pub fn extract_keys_and_hint(
                     (Some(double_bracket_start), Some(double_bracket_end)) => {
                         (double_bracket_start.range(), double_bracket_end.range())
                     }
-                    _ => return (Vec::with_capacity(0), completion_hint),
+                    _ => return (None, completion_hint),
                 }
             };
             if position < double_bracket_start_range.start
                 && (double_bracket_end_range.end <= position
                     && position.line == double_bracket_end_range.end.line)
             {
-                return (Vec::with_capacity(0), completion_hint);
+                return (None, completion_hint);
             } else {
                 if array_of_table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
@@ -115,7 +118,7 @@ pub fn extract_keys_and_hint(
             {
                 match key.try_into_document_tree(toml_version) {
                     Ok(Some(key)) => new_keys.push(key),
-                    _ => return (vec![], completion_hint),
+                    _ => return (None, completion_hint),
                 }
             }
             new_keys
@@ -124,7 +127,7 @@ pub fn extract_keys_and_hint(
             for key in ast_keys.keys() {
                 match key.try_into_document_tree(toml_version) {
                     Ok(Some(key)) => new_keys.push(key),
-                    _ => return (vec![], completion_hint),
+                    _ => return (None, completion_hint),
                 }
             }
             new_keys
@@ -132,7 +135,7 @@ pub fn extract_keys_and_hint(
         new_keys.extend(keys);
         keys = new_keys;
     }
-    (keys, completion_hint)
+    (Some(keys), completion_hint)
 }
 
 pub async fn find_completion_contents_with_tree(
