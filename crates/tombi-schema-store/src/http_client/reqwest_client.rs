@@ -6,7 +6,12 @@ pub struct HttpClient(reqwest::Client);
 
 impl HttpClient {
     pub fn new() -> Self {
-        Self(reqwest::Client::new())
+        Self(
+            reqwest::Client::builder()
+                .user_agent("tombi-language-server")
+                .build()
+                .expect("Failed to create reqwest client"),
+        )
     }
 
     pub async fn get_bytes(&self, url: &str) -> Result<Bytes, FetchError> {

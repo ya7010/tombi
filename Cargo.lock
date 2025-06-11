@@ -3156,6 +3156,8 @@ dependencies = [
  "ahash",
  "glob",
  "itertools",
+ "serde",
+ "serde_json",
  "tombi-ast",
  "tombi-config",
  "tombi-document-tree",
