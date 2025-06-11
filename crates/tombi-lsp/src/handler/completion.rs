@@ -110,9 +110,14 @@ pub async fn handle_completion(
     );
 
     let accessors = get_hover_accessors(&document_tree, &keys, position);
-    if let Some(items) =
-        tombi_extension_cargo::completion(&text_document, &document_tree, &accessors, toml_version)
-            .await?
+    if let Some(items) = tombi_extension_cargo::completion(
+        &text_document,
+        &document_tree,
+        position,
+        &accessors,
+        toml_version,
+    )
+    .await?
     {
         completion_items.extend(items);
     }
