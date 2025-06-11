@@ -2,7 +2,6 @@ use itertools::Either;
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tombi_extension::CompletionContent;
-use tombi_schema_store::dig_accessors;
 use tombi_syntax::{SyntaxElement, SyntaxKind};
 use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
