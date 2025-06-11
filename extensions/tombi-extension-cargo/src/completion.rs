@@ -124,7 +124,7 @@ async fn fetch_crate_versions(crate_name: &str) -> Option<Vec<String>> {
             return None;
         }
     };
-    tracing::error!(?url, ?bytes);
+
     let resp: CratesIoVersionsResponse = match serde_json::from_slice(&bytes) {
         Ok(resp) => resp,
         Err(e) => {
