@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use serde::Deserialize;
 use tombi_config::TomlVersion;
 use tombi_extension::CompletionContent;
@@ -88,16 +89,24 @@ pub async fn completion(
             if let Some(versions) = fetch_crate_versions(crate_name).await {
                 let items = versions
                     .into_iter()
-                    .map(|ver| {
-                        CompletionContent::new_default_value(
-                            CompletionKind::String,
-                            format!("\"{}\"", ver),
-                            Some("crates.io version".to_string()),
-                            None,
-                            None,
-                            None,
-                            None,
-                        )
+                    .sorted_by(|a, b| tombi_version_sort::version_sort(a, b))
+                    .rev()
+                    .take(100)
+                    .enumerate()
+                    .map(|(i, ver)| CompletionContent {
+                        label: ver,
+                        kind: CompletionKind::String,
+                        emoji_icon: Some('🦀'),
+                        priority: tombi_extension::CompletionContentPriority::Custom(format!(
+                            "0__cargo_{i:>3}__",
+                        )),
+                        detail: Some("Crate version".to_string()),
+                        documentation: None,
+                        filter_text: None,
+                        schema_url: None,
+                        deprecated: None,
+                        edit: None,
+                        preselect: None,
                     })
                     .collect();
                 return Ok(Some(items));

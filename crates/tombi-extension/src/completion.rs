@@ -7,10 +7,11 @@ pub use completion_hint::CompletionHint;
 pub use completion_kind::CompletionKind;
 use tombi_schema_store::{get_schema_name, SchemaUrl};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum CompletionContentPriority {
-    Default = 0,
+    Custom(String),
+    Default,
     Enum,
     Key,
     OptionalKey,
@@ -19,6 +20,23 @@ pub enum CompletionContentPriority {
     TypeHintKey,
     TypeHintTrue,
     TypeHintFalse,
+}
+
+impl CompletionContentPriority {
+    pub fn as_prefix(&self) -> String {
+        match self {
+            CompletionContentPriority::Custom(value) => value.to_string(),
+            CompletionContentPriority::Default => "1".to_string(),
+            CompletionContentPriority::Enum => "2".to_string(),
+            CompletionContentPriority::Key => "3".to_string(),
+            CompletionContentPriority::OptionalKey => "4".to_string(),
+            CompletionContentPriority::AdditionalKey => "5".to_string(),
+            CompletionContentPriority::TypeHint => "6".to_string(),
+            CompletionContentPriority::TypeHintKey => "7".to_string(),
+            CompletionContentPriority::TypeHintTrue => "8".to_string(),
+            CompletionContentPriority::TypeHintFalse => "9".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -375,7 +393,8 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
 
         let sorted_text = format!(
             "{}_{}",
-            completion_content.priority as u8, &completion_content.label
+            completion_content.priority.as_prefix(),
+            &completion_content.label
         );
 
         let mut schema_text = None;
@@ -406,6 +425,12 @@ impl From<CompletionContent> for tower_lsp::lsp_types::CompletionItem {
         };
 
         let label_details = match completion_content.priority {
+            CompletionContentPriority::Custom(_) => {
+                Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
+                    detail: None,
+                    description: completion_content.detail.clone(),
+                })
+            }
             CompletionContentPriority::Default => {
                 Some(tower_lsp::lsp_types::CompletionItemLabelDetails {
                     detail: None,

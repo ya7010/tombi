@@ -3165,6 +3165,7 @@ dependencies = [
  "tombi-parser",
  "tombi-schema-store",
  "tombi-text",
+ "tombi-version-sort",
  "tower-lsp",
  "tracing",
 ]
