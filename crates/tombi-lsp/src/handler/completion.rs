@@ -10,6 +10,7 @@ use crate::{
     completion::{
         extract_keys_and_hint, find_completion_contents_with_tree, get_comment_completion_contents,
     },
+    handler::hover::get_hover_accessors,
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -84,32 +85,34 @@ pub async fn handle_completion(
         }
     }
 
-    let (keys, completion_hint) = extract_keys_and_hint(&root, position, toml_version);
+    let Some((keys, completion_hint)) = extract_keys_and_hint(&root, position, toml_version) else {
+        return Ok(Some(Vec::with_capacity(0)));
+    };
     let document_tree = root.into_document_tree_and_errors(toml_version).tree;
-    if let Some(keys) = &keys {
-        let schema_context = tombi_schema_store::SchemaContext {
-            toml_version,
-            root_schema,
-            sub_schema_url_map: source_schema
-                .as_ref()
-                .map(|schema| &schema.sub_schema_url_map),
-            store: &backend.schema_store,
-        };
+    let schema_context = tombi_schema_store::SchemaContext {
+        toml_version,
+        root_schema,
+        sub_schema_url_map: source_schema
+            .as_ref()
+            .map(|schema| &schema.sub_schema_url_map),
+        store: &backend.schema_store,
+    };
 
-        completion_items.extend(
-            find_completion_contents_with_tree(
-                &document_tree,
-                position,
-                &keys,
-                &schema_context,
-                completion_hint,
-            )
-            .await,
-        );
-    }
+    completion_items.extend(
+        find_completion_contents_with_tree(
+            &document_tree,
+            position,
+            &keys,
+            &schema_context,
+            completion_hint,
+        )
+        .await,
+    );
 
+    let accessors = get_hover_accessors(&document_tree, &keys, position);
     if let Some(items) =
-        tombi_extension_cargo::completion(&text_document, &document_tree, &[], toml_version).await?
+        tombi_extension_cargo::completion(&text_document, &document_tree, &accessors, toml_version)
+            .await?
     {
         completion_items.extend(items);
     }
