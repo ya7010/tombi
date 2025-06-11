@@ -1,46 +1,32 @@
 mod comment;
-mod completion_content;
-mod completion_edit;
-mod completion_kind;
-mod hint;
 mod schema_completion;
 mod value;
 
 use std::{borrow::Cow, ops::Deref};
 
 use ahash::AHashMap;
-use comment::get_comment_completion_contents;
-pub use completion_content::CompletionContent;
-pub use completion_edit::CompletionEdit;
-use completion_kind::CompletionKind;
+pub use comment::get_comment_completion_contents;
 use futures::{future::BoxFuture, FutureExt};
-pub use hint::CompletionHint;
 use itertools::Itertools;
 use tombi_ast::{algo::ancestors_at_position, AstNode};
-use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
+use tombi_config::TomlVersion;
+use tombi_document_tree::TryIntoDocumentTree;
+use tombi_extension::{CompletionContent, CompletionEdit, CompletionHint, CompletionKind};
 use tombi_schema_store::{
     Accessor, CurrentSchema, ReferableValueSchemas, SchemaDefinitions, SchemaStore, SchemaUrl,
     ValueSchema,
 };
 use tombi_syntax::{SyntaxElement, SyntaxKind};
-use tower_lsp::lsp_types::Url;
 
-pub async fn get_completion_contents(
-    root: tombi_ast::Root,
+pub fn extract_keys_and_hint(
+    root: &tombi_ast::Root,
     position: tombi_text::Position,
-    text_document_uri: &Url,
-    schema_context: &tombi_schema_store::SchemaContext<'_>,
-) -> Vec<CompletionContent> {
+    toml_version: TomlVersion,
+) -> (Vec<tombi_document_tree::Key>, Option<CompletionHint>) {
     let mut keys: Vec<tombi_document_tree::Key> = vec![];
     let mut completion_hint = None;
 
     for node in ancestors_at_position(root.syntax(), position) {
-        if let Some(SyntaxElement::Token(token)) = node.first_child_or_token() {
-            if token.kind() == SyntaxKind::COMMENT && token.range().contains(position) {
-                return get_comment_completion_contents(&root, position, text_document_uri);
-            }
-        }
-
         let ast_keys = if tombi_ast::Keys::cast(node.to_owned()).is_some() {
             if let Some(SyntaxElement::Token(last_token)) = node.last_child_or_token() {
                 if last_token.kind() == SyntaxKind::DOT {
@@ -73,7 +59,6 @@ pub async fn get_completion_contents(
                 }
                 _ => {}
             }
-
             kv.keys()
         } else if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
             let (bracket_start_range, bracket_end_range) =
@@ -81,14 +66,13 @@ pub async fn get_completion_contents(
                     (Some(bracket_start), Some(blacket_end)) => {
                         (bracket_start.range(), blacket_end.range())
                     }
-                    _ => return Vec::with_capacity(0),
+                    _ => return (Vec::with_capacity(0), completion_hint),
                 };
-
             if position < bracket_start_range.start
                 || (bracket_end_range.end <= position
                     && position.line == bracket_end_range.end.line)
             {
-                return Vec::with_capacity(0);
+                return (Vec::with_capacity(0), completion_hint);
             } else {
                 if table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
@@ -104,15 +88,14 @@ pub async fn get_completion_contents(
                     (Some(double_bracket_start), Some(double_bracket_end)) => {
                         (double_bracket_start.range(), double_bracket_end.range())
                     }
-                    _ => return Vec::with_capacity(0),
+                    _ => return (Vec::with_capacity(0), completion_hint),
                 }
             };
-
             if position < double_bracket_start_range.start
                 && (double_bracket_end_range.end <= position
                     && position.line == double_bracket_end_range.end.line)
             {
-                return Vec::with_capacity(0);
+                return (Vec::with_capacity(0), completion_hint);
             } else {
                 if array_of_table.contains_header(position) {
                     completion_hint = Some(CompletionHint::InTableHeader);
@@ -130,31 +113,35 @@ pub async fn get_completion_contents(
                 .keys()
                 .take_while(|key| key.token().unwrap().range().start <= position)
             {
-                match key.try_into_document_tree(schema_context.toml_version) {
+                match key.try_into_document_tree(toml_version) {
                     Ok(Some(key)) => new_keys.push(key),
-                    _ => return vec![],
+                    _ => return (vec![], completion_hint),
                 }
             }
             new_keys
         } else {
             let mut new_keys = Vec::with_capacity(ast_keys.keys().count());
             for key in ast_keys.keys() {
-                match key.try_into_document_tree(schema_context.toml_version) {
+                match key.try_into_document_tree(toml_version) {
                     Ok(Some(key)) => new_keys.push(key),
-                    _ => return vec![],
+                    _ => return (vec![], completion_hint),
                 }
             }
             new_keys
         };
-
         new_keys.extend(keys);
         keys = new_keys;
     }
+    (keys, completion_hint)
+}
 
-    let document_tree = root
-        .into_document_tree_and_errors(schema_context.toml_version)
-        .tree;
-
+pub async fn find_completion_contents_with_tree(
+    document_tree: &tombi_document_tree::DocumentTree,
+    position: tombi_text::Position,
+    keys: &[tombi_document_tree::Key],
+    schema_context: &tombi_schema_store::SchemaContext<'_>,
+    completion_hint: Option<CompletionHint>,
+) -> Vec<CompletionContent> {
     let current_schema = schema_context.root_schema.and_then(|document_schema| {
         document_schema
             .value_schema
@@ -166,21 +153,17 @@ pub async fn get_completion_contents(
             })
     });
 
-    let completion_contents = document_tree
+    document_tree
         .deref()
         .find_completion_contents(
             position,
-            &keys,
+            keys,
             &[],
             current_schema.as_ref(),
             schema_context,
             completion_hint,
         )
-        .await;
-
-    // NOTE: If there are completion contents with the same priority,
-    //       remove the completion contents with lower priority.
-    completion_contents
+        .await
         .into_iter()
         .fold(AHashMap::new(), |mut acc: AHashMap<_, Vec<_>>, content| {
             acc.entry(content.label.clone()).or_default().push(content);

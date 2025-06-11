@@ -1,13 +1,22 @@
-use itertools::{Either, Itertools};
+use itertools::Either;
+use tombi_ast::{algo::ancestors_at_position, AstNode};
+use tombi_document_tree::IntoDocumentTreeAndErrors;
+use tombi_extension::CompletionContent;
+use tombi_syntax::{SyntaxElement, SyntaxKind};
 use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
-use crate::{backend, completion::get_completion_contents};
+use crate::{
+    backend,
+    completion::{
+        extract_keys_and_hint, find_completion_contents_with_tree, get_comment_completion_contents,
+    },
+};
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub async fn handle_completion(
     backend: &backend::Backend,
     params: CompletionParams,
-) -> Result<Option<Vec<tower_lsp::lsp_types::CompletionItem>>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     tracing::info!("handle_completion");
     tracing::trace!(?params);
 
@@ -60,23 +69,49 @@ pub async fn handle_completion(
         .as_ref()
         .and_then(|schema| schema.root_schema.as_ref());
 
-    Ok(Some(
-        get_completion_contents(
-            root,
-            position.into(),
-            &text_document.uri,
-            &tombi_schema_store::SchemaContext {
-                toml_version,
-                root_schema,
-                sub_schema_url_map: source_schema
-                    .as_ref()
-                    .map(|schema| &schema.sub_schema_url_map),
-                store: &backend.schema_store,
-            },
+    let mut completion_items = Vec::new();
+    let position = position.into();
+
+    for node in ancestors_at_position(root.syntax(), position) {
+        if let Some(SyntaxElement::Token(token)) = node.first_child_or_token() {
+            if token.kind() == SyntaxKind::COMMENT && token.range().contains(position) {
+                return Ok(Some(get_comment_completion_contents(
+                    &root,
+                    position,
+                    &text_document.uri,
+                )));
+            }
+        }
+    }
+
+    let (keys, completion_hint) = extract_keys_and_hint(&root, position, toml_version);
+    tracing::debug!(?keys, ?completion_hint, "extracted keys and hint");
+    let document_tree = root.into_document_tree_and_errors(toml_version).tree;
+    let schema_context = tombi_schema_store::SchemaContext {
+        toml_version,
+        root_schema,
+        sub_schema_url_map: source_schema
+            .as_ref()
+            .map(|schema| &schema.sub_schema_url_map),
+        store: &backend.schema_store,
+    };
+
+    completion_items.extend(
+        find_completion_contents_with_tree(
+            &document_tree,
+            position,
+            &keys,
+            &schema_context,
+            completion_hint,
         )
-        .await
-        .into_iter()
-        .map(|content| content.into())
-        .collect_vec(),
-    ))
+        .await,
+    );
+
+    if let Some(items) =
+        tombi_extension_cargo::completion(&text_document, &document_tree, &[], toml_version).await?
+    {
+        completion_items.extend(items);
+    }
+
+    Ok(Some(completion_items))
 }

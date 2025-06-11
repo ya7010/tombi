@@ -251,9 +251,10 @@ impl LanguageServer for Backend {
         &self,
         params: CompletionParams,
     ) -> Result<Option<CompletionResponse>, tower_lsp::jsonrpc::Error> {
-        handle_completion(self, params)
-            .await
-            .map(|response| response.map(|items| CompletionResponse::Array(items)))
+        handle_completion(self, params).await.map(|response| {
+            response
+                .map(|items| CompletionResponse::Array(items.into_iter().map(Into::into).collect()))
+        })
     }
 
     async fn semantic_tokens_full(

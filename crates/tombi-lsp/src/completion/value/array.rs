@@ -3,6 +3,7 @@ use std::borrow::Cow;
 use futures::{future::BoxFuture, FutureExt};
 use itertools::Itertools;
 use tombi_document_tree::ArrayKind;
+use tombi_extension::CompletionKind;
 use tombi_schema_store::{
     Accessor, ArraySchema, CurrentSchema, DocumentSchema, SchemaUrl, ValueSchema,
 };
@@ -11,10 +12,7 @@ use super::{
     all_of::find_all_of_completion_items, any_of::find_any_of_completion_items,
     one_of::find_one_of_completion_items, type_hint_value, CompletionHint, FindCompletionContents,
 };
-use crate::completion::{
-    completion_kind::CompletionKind, schema_completion::SchemaCompletion, CompletionContent,
-    CompletionEdit,
-};
+use crate::completion::{schema_completion::SchemaCompletion, CompletionContent, CompletionEdit};
 
 impl FindCompletionContents for tombi_document_tree::Array {
     fn find_completion_contents<'a: 'b, 'b>(
@@ -181,8 +179,8 @@ impl FindCompletionContents for tombi_document_tree::Array {
                             {
                                 let key = &keys.first().unwrap();
                                 return vec![CompletionContent::new_type_hint_key(
-                                    key,
-                                    schema_context.toml_version,
+                                    &key.to_raw_text(schema_context.toml_version),
+                                    key.range(),
                                     None,
                                     Some(CompletionHint::InArray),
                                 )];

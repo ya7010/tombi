@@ -696,8 +696,8 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                     if current_schema.is_none() {
                         if range.end <= key.range().start {
                             return vec![CompletionContent::new_type_hint_key(
-                                key,
-                                schema_context.toml_version,
+                                &key.to_raw_text(schema_context.toml_version),
+                                key.range(),
                                 None,
                                 completion_hint,
                             )];
@@ -737,8 +737,8 @@ fn get_property_value_completion_contents<'a: 'b, 'b>(
                             }
                             Some(CompletionHint::InArray) => {
                                 return vec![CompletionContent::new_type_hint_key(
-                                    key,
-                                    schema_context.toml_version,
+                                    &key.to_raw_text(schema_context.toml_version),
+                                    key.range(),
                                     current_schema.map(|schema| schema.schema_url.as_ref()),
                                     completion_hint,
                                 )];
