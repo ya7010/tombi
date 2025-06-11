@@ -85,7 +85,6 @@ pub async fn handle_completion(
     }
 
     let (keys, completion_hint) = extract_keys_and_hint(&root, position, toml_version);
-    tracing::debug!(?keys, ?completion_hint, "extracted keys and hint");
     let document_tree = root.into_document_tree_and_errors(toml_version).tree;
     if let Some(keys) = &keys {
         let schema_context = tombi_schema_store::SchemaContext {
