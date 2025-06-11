@@ -1,7 +1,11 @@
-use tombi_config::TomlVersion;
-use tombi_schema_store::{get_schema_name, SchemaUrl};
+mod completion_edit;
+mod completion_hint;
+mod completion_kind;
 
-use super::{completion_edit::CompletionEdit, completion_kind::CompletionKind, CompletionHint};
+pub use completion_edit::CompletionEdit;
+pub use completion_hint::CompletionHint;
+pub use completion_kind::CompletionKind;
+use tombi_schema_store::{get_schema_name, SchemaUrl};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -170,13 +174,12 @@ impl CompletionContent {
     }
 
     pub fn new_type_hint_key(
-        key: &tombi_document_tree::Key,
-        toml_version: TomlVersion,
+        key_name: &str,
+        key_range: tombi_text::Range,
         schema_url: Option<&SchemaUrl>,
         completion_hint: Option<CompletionHint>,
     ) -> Self {
-        let key_name = key.to_raw_text(toml_version);
-        let edit = CompletionEdit::new_key(&key_name, key.range(), completion_hint);
+        let edit = CompletionEdit::new_key(&key_name, key_range, completion_hint);
 
         Self {
             label: "$key".to_string(),
@@ -185,7 +188,7 @@ impl CompletionContent {
             priority: CompletionContentPriority::TypeHintKey,
             detail: Some("Key".to_string()),
             documentation: None,
-            filter_text: Some(key_name),
+            filter_text: Some(key_name.to_string()),
             schema_url: schema_url.cloned(),
             edit,
             deprecated: None,
@@ -339,6 +342,11 @@ impl CompletionContent {
             .collect()
     }
 
+    /// Creates a new comment directive completion content.
+    ///
+    /// ```toml
+    /// #:schema https://...
+    /// ```
     pub fn new_comment_directive(
         directive: &str,
         detail: impl Into<String>,

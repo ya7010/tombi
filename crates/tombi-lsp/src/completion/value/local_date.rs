@@ -1,9 +1,9 @@
 use futures::{future::BoxFuture, FutureExt};
+use tombi_extension::CompletionKind;
 use tombi_schema_store::{Accessor, CurrentSchema, LocalDateSchema, SchemaUrl};
 
 use crate::completion::{
-    completion_kind::CompletionKind, CompletionContent, CompletionEdit, CompletionHint,
-    FindCompletionContents,
+    CompletionContent, CompletionEdit, CompletionHint, FindCompletionContents,
 };
 
 impl FindCompletionContents for LocalDateSchema {

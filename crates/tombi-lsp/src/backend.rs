@@ -252,9 +252,8 @@ impl LanguageServer for Backend {
         params: CompletionParams,
     ) -> Result<Option<CompletionResponse>, tower_lsp::jsonrpc::Error> {
         handle_completion(self, params).await.map(|response| {
-            response.map(|completion_content| {
-                CompletionResponse::Array(completion_content.into_iter().map(Into::into).collect())
-            })
+            response
+                .map(|items| CompletionResponse::Array(items.into_iter().map(Into::into).collect()))
         })
     }
 
