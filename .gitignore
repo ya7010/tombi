@@ -20,3 +20,6 @@ libcairo.2.dylib
 
 # node
 node_modules
+
+# envrc
+.direnv/

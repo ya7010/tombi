@@ -124,6 +124,7 @@ jobs:
           pattern: tombi-cli-*
           merge-multiple: true
 
+      - uses: ./.github/actions/set-version
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
