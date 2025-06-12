@@ -137,10 +137,13 @@ jobs:
       - name: Publish npm package as latest
         run: |
           set -e
-          if npm view @tombi-toml/tombi@${TOMBI_VERSION} version > /dev/null 2>&1; then
-            echo "@tombi-toml/tombi@${TOMBI_VERSION} is already published. Skipping publish."
-            exit 0
-          fi
-          for package in typescript/@tombi-toml/*; do npm publish $package --tag latest --access public --provenance; done
+          cd typescript
+          for package in @tombi-toml/*; do
+            if npm view ${package}@${TOMBI_VERSION} version > /dev/null 2>&1; then
+              echo "${package}@${TOMBI_VERSION} is already published. Skipping publish."
+              exit 0
+            fi
+            npm publish $package --tag latest --access public --provenance
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
