@@ -1,6 +1,6 @@
 use itertools::{Either, Itertools};
 use tombi_ast::{algo::ancestors_at_position, AstNode};
-use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree};
+use tombi_document_tree::{IntoDocumentTreeAndErrors, TryIntoDocumentTree, ValueImpl};
 use tombi_schema_store::{SchemaContext, SchemaUrl};
 use tower_lsp::lsp_types::{HoverParams, TextDocumentPositionParams};
 
@@ -287,32 +287,6 @@ pub(crate) fn get_hover_accessors(
     let mut current_value: &tombi_document_tree::Value = document_tree.into();
 
     for key in keys {
-        fn find_value_in_current<'a>(
-            current_value: &'a tombi_document_tree::Value,
-            key: &tombi_document_tree::Key,
-            accessors: &mut Vec<tombi_schema_store::Accessor>,
-            position: tombi_text::Position,
-        ) -> &'a tombi_document_tree::Value {
-            match current_value {
-                tombi_document_tree::Value::Array(array) => {
-                    for (index, value) in array.values().iter().enumerate() {
-                        if value.range().contains(position) {
-                            accessors.push(tombi_schema_store::Accessor::Index(index));
-                            return find_value_in_current(value, key, accessors, position);
-                        }
-                    }
-                }
-                tombi_document_tree::Value::Table(table) => {
-                    if let Some(value) = table.get(key) {
-                        return value;
-                    }
-                }
-                _ => {}
-            }
-
-            current_value
-        }
-
         current_value = find_value_in_current(current_value, key, &mut accessors, position);
         accessors.push(tombi_schema_store::Accessor::Key(key.value().to_string()));
     }
@@ -327,6 +301,32 @@ pub(crate) fn get_hover_accessors(
     }
 
     accessors
+}
+
+fn find_value_in_current<'a>(
+    current_value: &'a tombi_document_tree::Value,
+    key: &tombi_document_tree::Key,
+    accessors: &mut Vec<tombi_schema_store::Accessor>,
+    position: tombi_text::Position,
+) -> &'a tombi_document_tree::Value {
+    match current_value {
+        tombi_document_tree::Value::Array(array) => {
+            for (index, value) in array.values().iter().enumerate() {
+                if value.range().contains(position) {
+                    accessors.push(tombi_schema_store::Accessor::Index(index));
+                    return find_value_in_current(value, key, accessors, position);
+                }
+            }
+        }
+        tombi_document_tree::Value::Table(table) => {
+            if let Some(value) = table.get(key) {
+                return value;
+            }
+        }
+        _ => {}
+    }
+
+    current_value
 }
 
 pub fn get_tombi_github_schema_url(schema_url: &tower_lsp::lsp_types::Url) -> Option<SchemaUrl> {

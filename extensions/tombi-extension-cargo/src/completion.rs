@@ -71,8 +71,6 @@ async fn completion_workspace(
     accessors: &[Accessor],
     _toml_version: TomlVersion,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
-    use tombi_schema_store::match_accessors;
-    let mut crate_name: Option<&str> = None;
     if match_accessors!(accessors, ["workspace", "dependencies", _]) {
         if let Some(Accessor::Key(crate_name)) = accessors.last() {
             return complete_crate_version(crate_name.as_str(), document_tree, accessors, position)
@@ -83,9 +81,12 @@ async fn completion_workspace(
             return complete_crate_version(crate_name.as_str(), document_tree, accessors, position)
                 .await;
         }
-    } else if match_accessors!(accessors, ["workspace", "dependencies", _, "features", _]) {
+    } else if match_accessors!(accessors, ["workspace", "dependencies", _, "features"])
+        | match_accessors!(accessors, ["workspace", "dependencies", _, "features", _])
+    {
         if let Some(Accessor::Key(crate_name)) = accessors.get(2) {
-            return complete_crate_feature(crate_name.as_str(), document_tree, accessors).await;
+            return complete_crate_feature(crate_name.as_str(), document_tree, &accessors[..4])
+                .await;
         }
     }
     Ok(None)
@@ -116,10 +117,14 @@ async fn completion_member(
         }
     } else if (match_accessors!(accessors, ["dependencies", _, "features", _])
         || match_accessors!(accessors, ["dev-dependencies", _, "features", _])
-        || match_accessors!(accessors, ["build-dependencies", _, "features", _]))
+        || match_accessors!(accessors, ["build-dependencies", _, "features", _])
+        || match_accessors!(accessors, ["dependencies", _, "features"])
+        || match_accessors!(accessors, ["dev-dependencies", _, "features"])
+        || match_accessors!(accessors, ["build-dependencies", _, "features"]))
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(1) {
-            return complete_crate_feature(crate_name.as_str(), document_tree, accessors).await;
+            return complete_crate_feature(crate_name.as_str(), document_tree, &accessors[..3])
+                .await;
         }
     }
     Ok(None)
@@ -179,12 +184,12 @@ async fn complete_crate_version(
 async fn complete_crate_feature(
     crate_name: &str,
     document_tree: &tombi_document_tree::DocumentTree,
-    accessors: &[Accessor],
+    features_accessors: &[Accessor],
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     let version_string = if let Some((_, tombi_document_tree::Value::String(value_string))) =
         dig_accessors(
             document_tree,
-            &accessors[..accessors.len() - 2]
+            &features_accessors[..features_accessors.len() - 1]
                 .iter()
                 .chain(std::iter::once(&Accessor::Key("version".to_string())))
                 .cloned()
@@ -194,6 +199,7 @@ async fn complete_crate_feature(
     } else {
         None
     };
+
     let features = fetch_crate_features(crate_name, version_string.as_deref())
         .await
         .ok_or_else(|| {
@@ -201,21 +207,22 @@ async fn complete_crate_feature(
                 "Failed to fetch features for crate {crate_name}"
             ))
         })?;
-    let already_features: Vec<String> =
-        match dig_accessors(document_tree, &accessors[..accessors.len() - 1]) {
-            Some((_, tombi_document_tree::Value::Array(array))) => array
-                .values()
-                .into_iter()
-                .filter_map(|feature| {
-                    if let tombi_document_tree::Value::String(feature_string) = feature {
-                        Some(feature_string.value().to_string())
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
-            _ => vec![],
-        };
+
+    let already_features: Vec<String> = match dig_accessors(document_tree, &features_accessors) {
+        Some((_, tombi_document_tree::Value::Array(array))) => array
+            .values()
+            .into_iter()
+            .filter_map(|feature| {
+                if let tombi_document_tree::Value::String(feature_string) = feature {
+                    Some(feature_string.value().to_string())
+                } else {
+                    None
+                }
+            })
+            .collect(),
+        _ => Vec::with_capacity(0),
+    };
+
     let items = features
         .into_iter()
         .filter(|feat| !already_features.contains(feat))
