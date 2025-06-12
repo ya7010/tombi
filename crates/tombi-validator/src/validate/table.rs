@@ -18,10 +18,6 @@ impl Validate for tombi_document_tree::Table {
         current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
         schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> BoxFuture<'b, Result<(), Vec<tombi_diagnostic::Diagnostic>>> {
-        tracing::trace!("self = {:?}", self);
-        tracing::trace!("accessors = {:?}", accessors);
-        tracing::trace!("current_schema = {:?}", current_schema);
-
         async move {
             if let Some(sub_schema_url) = schema_context
                 .sub_schema_url_map
@@ -130,8 +126,6 @@ impl Validate for tombi_document_tree::Table {
                         .await
                         .get_mut(&SchemaAccessor::from(&accessor))
                     {
-                        tracing::trace!("property_schema = {:?}", property_schema);
-
                         matche_key = true;
                         match property_schema
                             .resolve(

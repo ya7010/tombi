@@ -17,9 +17,6 @@ pub fn validate_one_of<'a: 'b, 'b, T>(
 where
     T: Validate + ValueImpl + Sync + Send + Debug,
 {
-    tracing::trace!("value = {:?}", value);
-    tracing::trace!("one_of_schema = {:?}", one_of_schema);
-
     async move {
         let mut valid_count = 0;
 
@@ -39,7 +36,10 @@ where
 
             let diagnostics = match (value.value_type(), current_schema.value_schema.as_ref()) {
                 (tombi_document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
-                | (tombi_document_tree::ValueType::Integer, ValueSchema::Integer(_))
+                | (
+                    tombi_document_tree::ValueType::Integer,
+                    ValueSchema::Integer(_) | ValueSchema::Float(_),
+                )
                 | (tombi_document_tree::ValueType::Float, ValueSchema::Float(_))
                 | (tombi_document_tree::ValueType::String, ValueSchema::String(_))
                 | (
