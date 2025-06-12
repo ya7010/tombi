@@ -40,7 +40,9 @@
     "@types/vscode": "^1.93.0",
     "@vscode/vsce": "^3.2.1",
     "esbuild": "^0.25.0",
-    "vitest": "^2.1.9"
+    "ovsx": "^0.10.4",
+    "vitest": "^2.1.9",
+    "vsce": "^2.15.0"
   },
   "activationEvents": ["onLanguage:cargoLock"],
   "icon": "icon.png",
