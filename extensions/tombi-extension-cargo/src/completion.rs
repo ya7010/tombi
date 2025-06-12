@@ -1,3 +1,4 @@
+use ahash::AHashMap;
 use itertools::Itertools;
 use serde::Deserialize;
 use tombi_config::TomlVersion;
@@ -18,7 +19,7 @@ struct CratesIoVersionsResponse {
 #[derive(Debug, Deserialize)]
 struct CratesIoVersion {
     num: String,
-    features: ahash::HashMap<String, Vec<String>>,
+    features: AHashMap<String, Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -255,18 +256,32 @@ async fn complete_crate_feature(
 
     let items = features
         .into_iter()
-        .filter(|feature| !already_features.contains(feature))
-        .sorted_by(|a, b| version_sort(a, b))
+        .filter(|(feature, _)| !already_features.contains(feature))
+        .sorted_by(|(a, _), (b, _)| version_sort(a, b))
         .enumerate()
-        .map(|(i, feature)| CompletionContent {
+        .map(|(i, (feature, feature_dependencies))| CompletionContent {
             label: format!("\"{}\"", feature),
             kind: CompletionKind::String,
             emoji_icon: Some('🦀'),
             priority: tombi_extension::CompletionContentPriority::Custom(format!(
-                "1__cargo_feature_{i:>03}__",
+                "1__cargo_feature_{:>03}__",
+                if feature == "default" {
+                    0 // default feature should be the first
+                } else if feature.starts_with('_') {
+                    900 + i // features starting with `_` are considered private
+                } else {
+                    i + 1
+                }
             )),
             detail: Some("Crate feature".to_string()),
-            documentation: None,
+            documentation: (!feature_dependencies.is_empty()).then(|| {
+                "Feature dependencies:\n".to_string()
+                    + &feature_dependencies
+                        .into_iter()
+                        .map(|dep| format!("- `{dep}`"))
+                        .collect_vec()
+                        .join("\n")
+            }),
             filter_text: None,
             schema_url: None,
             deprecated: None,
@@ -316,7 +331,10 @@ async fn fetch_crate_versions(crate_name: &str) -> Option<Vec<String>> {
 }
 
 /// Fetch crate features list from crates.io API
-async fn fetch_crate_features(crate_name: &str, version: Option<&str>) -> Option<Vec<String>> {
+async fn fetch_crate_features(
+    crate_name: &str,
+    version: Option<&str>,
+) -> Option<AHashMap<String, Vec<String>>> {
     let client = HttpClient::new();
     let version = if let Some(ver) = version {
         ver.to_string()
@@ -333,7 +351,5 @@ async fn fetch_crate_features(crate_name: &str, version: Option<&str>) -> Option
     let url = format!("https://crates.io/api/v1/crates/{crate_name}/{version}");
     let bytes = client.get_bytes(&url).await.ok()?;
     let resp: CratesIoVersionDetailResponse = serde_json::from_slice(&bytes).ok()?;
-    let mut features: Vec<String> = resp.version.features.keys().cloned().collect();
-    features.sort();
-    Some(features)
+    Some(resp.version.features)
 }

@@ -17,7 +17,7 @@ repository = "https://github.com/tombi-toml/tombi"
 license = "MIT"
 
 [workspace.dependencies]
-ahash = "0.8.11"
+ahash = { version = "0.8.11", features = ["serde"] }
 anyhow = "1.0.98"
 async-trait = "0.1.88"
 bytes = "1.10.1"
