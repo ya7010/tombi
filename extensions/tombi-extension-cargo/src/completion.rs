@@ -85,8 +85,22 @@ async fn completion_workspace(
         | match_accessors!(accessors, ["workspace", "dependencies", _, "features", _])
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(2) {
-            return complete_crate_feature(crate_name.as_str(), document_tree, &accessors[..4])
-                .await;
+            return complete_crate_feature(
+                crate_name.as_str(),
+                document_tree,
+                &accessors[..4],
+                position,
+                accessors.get(4).and_then(|_| {
+                    dig_accessors(document_tree, accessors).and_then(|(_, feature)| {
+                        if let tombi_document_tree::Value::String(feature_string) = feature {
+                            Some(feature_string)
+                        } else {
+                            None
+                        }
+                    })
+                }),
+            )
+            .await;
         }
     }
     Ok(None)
@@ -123,8 +137,22 @@ async fn completion_member(
         || match_accessors!(accessors, ["build-dependencies", _, "features"]))
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(1) {
-            return complete_crate_feature(crate_name.as_str(), document_tree, &accessors[..3])
-                .await;
+            return complete_crate_feature(
+                crate_name.as_str(),
+                document_tree,
+                &accessors[..3],
+                position,
+                accessors.get(3).and_then(|_| {
+                    dig_accessors(document_tree, accessors).and_then(|(_, feature)| {
+                        if let tombi_document_tree::Value::String(feature_string) = feature {
+                            Some(feature_string)
+                        } else {
+                            None
+                        }
+                    })
+                }),
+            )
+            .await;
         }
     }
     Ok(None)
@@ -185,6 +213,8 @@ async fn complete_crate_feature(
     crate_name: &str,
     document_tree: &tombi_document_tree::DocumentTree,
     features_accessors: &[Accessor],
+    position: tombi_text::Position,
+    feature_string: Option<&tombi_document_tree::String>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     let version_string = if let Some((_, tombi_document_tree::Value::String(value_string))) =
         dig_accessors(
@@ -225,11 +255,11 @@ async fn complete_crate_feature(
 
     let items = features
         .into_iter()
-        .filter(|feat| !already_features.contains(feat))
+        .filter(|feature| !already_features.contains(feature))
         .sorted_by(|a, b| version_sort(a, b))
         .enumerate()
-        .map(|(i, feat)| CompletionContent {
-            label: format!("\"{}\"", feat),
+        .map(|(i, feature)| CompletionContent {
+            label: format!("\"{}\"", feature),
             kind: CompletionKind::String,
             emoji_icon: Some('🦀'),
             priority: tombi_extension::CompletionContentPriority::Custom(format!(
@@ -240,7 +270,19 @@ async fn complete_crate_feature(
             filter_text: None,
             schema_url: None,
             deprecated: None,
-            edit: None,
+            edit: feature_string.map(|value| tombi_extension::CompletionEdit {
+                text_edit: tower_lsp::lsp_types::CompletionTextEdit::Edit(
+                    tower_lsp::lsp_types::TextEdit {
+                        range: tombi_text::Range::at(position).into(),
+                        new_text: format!("\"{feature}\""),
+                    },
+                ),
+                insert_text_format: Some(tower_lsp::lsp_types::InsertTextFormat::PLAIN_TEXT),
+                additional_text_edits: Some(vec![tower_lsp::lsp_types::TextEdit {
+                    range: value.range().into(),
+                    new_text: "".to_string(),
+                }]),
+            }),
             preselect: None,
         })
         .collect();
