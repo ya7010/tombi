@@ -17,9 +17,6 @@ pub fn validate_one_of<'a: 'b, 'b, T>(
 where
     T: Validate + ValueImpl + Sync + Send + Debug,
 {
-    tracing::trace!("value = {:?}", value);
-    tracing::trace!("one_of_schema = {:?}", one_of_schema);
-
     async move {
         let mut valid_count = 0;
 
