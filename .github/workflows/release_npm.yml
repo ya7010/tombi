@@ -141,6 +141,6 @@ jobs:
             echo "@tombi-toml/tombi@${TOMBI_VERSION} is already published. Skipping publish."
             exit 0
           fi
-          npm publish typescript/@tombi-toml/tombi --tag latest --access public --provenance
+          for package in typescript/@tombi-toml/*; do npm publish $package --tag latest --access public --provenance; done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
