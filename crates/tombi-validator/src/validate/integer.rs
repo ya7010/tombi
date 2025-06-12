@@ -18,6 +18,7 @@ impl Validate for tombi_document_tree::Integer {
             if let Some(current_schema) = current_schema {
                 match current_schema.value_schema.value_type().await {
                     ValueType::Integer
+                    | ValueType::Float
                     | ValueType::OneOf(_)
                     | ValueType::AnyOf(_)
                     | ValueType::AllOf(_) => {}
@@ -36,8 +37,173 @@ impl Validate for tombi_document_tree::Integer {
                     }
                 }
 
-                let integer_schema = match current_schema.value_schema.as_ref() {
-                    tombi_schema_store::ValueSchema::Integer(integer_schema) => integer_schema,
+                match current_schema.value_schema.as_ref() {
+                    tombi_schema_store::ValueSchema::Integer(integer_schema) => {
+                        let value = self.value();
+                        if let Some(enumerate) = &integer_schema.enumerate {
+                            if !enumerate.contains(&value) {
+                                crate::Error {
+                                    kind: crate::ErrorKind::Eunmerate {
+                                        expected: enumerate
+                                            .iter()
+                                            .map(ToString::to_string)
+                                            .collect(),
+                                        actual: value.to_string(),
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(maximum) = &integer_schema.maximum {
+                            if value > *maximum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::MaximumInteger {
+                                        maximum: *maximum,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(minimum) = &integer_schema.minimum {
+                            if value < *minimum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::MinimumInteger {
+                                        minimum: *minimum,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(exclusive_maximum) = &integer_schema.exclusive_maximum {
+                            if value >= *exclusive_maximum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::ExclusiveMaximumInteger {
+                                        maximum: *exclusive_maximum - 1,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(exclusive_minimum) = &integer_schema.exclusive_minimum {
+                            if value <= *exclusive_minimum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::ExclusiveMinimumInteger {
+                                        minimum: *exclusive_minimum + 1,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(multiple_of) = &integer_schema.multiple_of {
+                            if value % *multiple_of != 0 {
+                                crate::Error {
+                                    kind: crate::ErrorKind::MultipleOfInteger {
+                                        multiple_of: *multiple_of,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+                    }
+                    tombi_schema_store::ValueSchema::Float(float_schema) => {
+                        let value = self.value() as f64;
+                        if let Some(enumerate) = &float_schema.enumerate {
+                            if !enumerate.contains(&value) {
+                                crate::Error {
+                                    kind: crate::ErrorKind::Eunmerate {
+                                        expected: enumerate
+                                            .iter()
+                                            .map(ToString::to_string)
+                                            .collect(),
+                                        actual: value.to_string(),
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(maximum) = &float_schema.maximum {
+                            if value > *maximum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::MaximumFloat {
+                                        maximum: *maximum,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(minimum) = &float_schema.minimum {
+                            if value < *minimum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::MinimumFloat {
+                                        minimum: *minimum,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(exclusive_maximum) = &float_schema.exclusive_maximum {
+                            if value >= *exclusive_maximum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::ExclusiveMaximumFloat {
+                                        maximum: *exclusive_maximum - 1.0,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(exclusive_minimum) = &float_schema.exclusive_minimum {
+                            if value <= *exclusive_minimum {
+                                crate::Error {
+                                    kind: crate::ErrorKind::ExclusiveMinimumFloat {
+                                        minimum: *exclusive_minimum + 1.0,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+
+                        if let Some(multiple_of) = &float_schema.multiple_of {
+                            if value % *multiple_of != 0.0 {
+                                crate::Error {
+                                    kind: crate::ErrorKind::MultipleOfFloat {
+                                        multiple_of: *multiple_of,
+                                        actual: value,
+                                    },
+                                    range: self.range(),
+                                }
+                                .set_diagnostics(&mut diagnostics);
+                            }
+                        }
+                    }
                     tombi_schema_store::ValueSchema::OneOf(one_of_schema) => {
                         return validate_one_of(
                             self,
@@ -68,87 +234,8 @@ impl Validate for tombi_document_tree::Integer {
                         )
                         .await
                     }
-                    _ => unreachable!("Expected an Integer schema"),
+                    _ => unreachable!("Expected an Float schema"),
                 };
-
-                let value = self.value();
-                if let Some(enumerate) = &integer_schema.enumerate {
-                    if !enumerate.contains(&value) {
-                        crate::Error {
-                            kind: crate::ErrorKind::Eunmerate {
-                                expected: enumerate.iter().map(ToString::to_string).collect(),
-                                actual: value.to_string(),
-                            },
-                            range: self.range(),
-                        }
-                        .set_diagnostics(&mut diagnostics);
-                    }
-                }
-
-                if let Some(maximum) = &integer_schema.maximum {
-                    if value > *maximum {
-                        crate::Error {
-                            kind: crate::ErrorKind::MaximumInteger {
-                                maximum: *maximum,
-                                actual: value,
-                            },
-                            range: self.range(),
-                        }
-                        .set_diagnostics(&mut diagnostics);
-                    }
-                }
-
-                if let Some(minimum) = &integer_schema.minimum {
-                    if value < *minimum {
-                        crate::Error {
-                            kind: crate::ErrorKind::MinimumInteger {
-                                minimum: *minimum,
-                                actual: value,
-                            },
-                            range: self.range(),
-                        }
-                        .set_diagnostics(&mut diagnostics);
-                    }
-                }
-
-                if let Some(exclusive_maximum) = &integer_schema.exclusive_maximum {
-                    if value >= *exclusive_maximum {
-                        crate::Error {
-                            kind: crate::ErrorKind::ExclusiveMaximumInteger {
-                                maximum: *exclusive_maximum - 1,
-                                actual: value,
-                            },
-                            range: self.range(),
-                        }
-                        .set_diagnostics(&mut diagnostics);
-                    }
-                }
-
-                if let Some(exclusive_minimum) = &integer_schema.exclusive_minimum {
-                    if value <= *exclusive_minimum {
-                        crate::Error {
-                            kind: crate::ErrorKind::ExclusiveMinimumInteger {
-                                minimum: *exclusive_minimum + 1,
-                                actual: value,
-                            },
-                            range: self.range(),
-                        }
-                        .set_diagnostics(&mut diagnostics);
-                    }
-                }
-
-                if let Some(multiple_of) = &integer_schema.multiple_of {
-                    if value % *multiple_of != 0 {
-                        crate::Error {
-                            kind: crate::ErrorKind::MultipleOfInteger {
-                                multiple_of: *multiple_of,
-                                actual: value,
-                            },
-                            range: self.range(),
-                        }
-                        .set_diagnostics(&mut diagnostics);
-                    }
-                }
             }
 
             if diagnostics.is_empty() {

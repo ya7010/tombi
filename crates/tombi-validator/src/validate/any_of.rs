@@ -38,7 +38,10 @@ where
 
             let diagnostics = match (value.value_type(), current_schema.value_schema.as_ref()) {
                 (tombi_document_tree::ValueType::Boolean, ValueSchema::Boolean(_))
-                | (tombi_document_tree::ValueType::Integer, ValueSchema::Integer(_))
+                | (
+                    tombi_document_tree::ValueType::Integer,
+                    ValueSchema::Integer(_) | ValueSchema::Float(_),
+                )
                 | (tombi_document_tree::ValueType::Float, ValueSchema::Float(_))
                 | (tombi_document_tree::ValueType::String, ValueSchema::String(_))
                 | (
