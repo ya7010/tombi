@@ -3,12 +3,15 @@ macro_rules! match_accessors {
     ($accessors:expr, []) => {
         false
     };
-    ($accessors:expr, [$($pattern:tt),* $(,)?]) => {
-        {
+    ($accessors:expr, [$($pattern:tt),+ $(,)?]) => {{
+        let patterns_len = 0 $(+ { let _ = stringify!($pattern); 1 })*;
+        if $accessors.len() != patterns_len {
+            false
+        } else {
             let mut iter = $accessors.iter();
             $crate::match_accessors_inner!(iter, $($pattern),*)
         }
-    };
+    }};
 }
 
 #[macro_export]
