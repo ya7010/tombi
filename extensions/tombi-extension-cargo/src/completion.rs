@@ -34,29 +34,29 @@ struct CratesIoVersionDetailResponse {
 }
 
 pub async fn completion(
-    _text_document: &TextDocumentIdentifier,
+    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
-    _toml_version: TomlVersion,
+    toml_version: TomlVersion,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     if let Some(Accessor::Key(first)) = accessors.first() {
         if first == "workspace" {
             completion_workspace(
-                _text_document,
+                text_document,
                 document_tree,
                 position,
                 accessors,
-                _toml_version,
+                toml_version,
             )
             .await
         } else {
             completion_member(
-                _text_document,
+                text_document,
                 document_tree,
                 position,
                 accessors,
-                _toml_version,
+                toml_version,
             )
             .await
         }
@@ -66,11 +66,11 @@ pub async fn completion(
 }
 
 async fn completion_workspace(
-    _text_document: &TextDocumentIdentifier,
+    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
-    _toml_version: TomlVersion,
+    toml_version: TomlVersion,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     if match_accessors!(accessors, ["workspace", "dependencies", _]) {
         if let Some(Accessor::Key(crate_name)) = accessors.last() {
@@ -108,11 +108,11 @@ async fn completion_workspace(
 }
 
 async fn completion_member(
-    _text_document: &TextDocumentIdentifier,
+    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
-    _toml_version: TomlVersion,
+    toml_version: TomlVersion,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     if match_accessors!(accessors, ["dependencies", _, "version"])
         || match_accessors!(accessors, ["dev-dependencies", _, "version"])
