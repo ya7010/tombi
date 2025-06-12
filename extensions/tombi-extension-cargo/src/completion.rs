@@ -167,7 +167,8 @@ async fn complete_crate_version(
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     let version_value = match dig_accessors(document_tree, accessors) {
         Some((_, tombi_document_tree::Value::String(value_string))) => Some(value_string),
-        _ => None,
+        Some((_, tombi_document_tree::Value::Incomplete { .. })) => None,
+        _ => return Ok(None),
     };
     if let Some(versions) = fetch_crate_versions(crate_name).await {
         let items = versions
