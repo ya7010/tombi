@@ -232,13 +232,16 @@ async fn complete_crate_feature(
         None
     };
 
-    let features = fetch_crate_features(crate_name, version_string.as_deref())
+    let Ok(features) = fetch_crate_features(crate_name, version_string.as_deref())
         .await
         .ok_or_else(|| {
             tower_lsp::jsonrpc::Error::invalid_params(format!(
                 "Failed to fetch features for crate {crate_name}"
             ))
-        })?;
+        })
+    else {
+        return Ok(None);
+    };
 
     let already_features: Vec<String> = match dig_accessors(document_tree, &features_accessors) {
         Some((_, tombi_document_tree::Value::Array(array))) => array
