@@ -64,12 +64,12 @@ pub async fn handle_code_action(
     let mut code_actions = Vec::new();
 
     if let Some(code_action) =
-        dot_keys_to_inline_table(&text_document, &document_tree, &accessors, contexts)
+        dot_keys_to_inline_table(&text_document, &document_tree, &accessors, &contexts)
     {
         code_actions.push(code_action.into());
     }
     if let Some(code_action) =
-        inline_table_to_dot_keys(&text_document, &document_tree, &accessors, contexts)
+        inline_table_to_dot_keys(&text_document, &document_tree, &accessors, &contexts)
     {
         code_actions.push(code_action.into());
     }
@@ -85,7 +85,7 @@ fn dot_keys_to_inline_table(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
-    contexts: Vec<KeyContext>,
+    contexts: &[KeyContext],
 ) -> Option<CodeAction> {
     if accessors.len() < 2 {
         return None;
@@ -159,7 +159,7 @@ fn inline_table_to_dot_keys(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
-    contexts: Vec<KeyContext>,
+    contexts: &[KeyContext],
 ) -> Option<CodeAction> {
     None
 }
