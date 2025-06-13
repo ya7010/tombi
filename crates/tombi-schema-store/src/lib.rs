@@ -12,10 +12,15 @@ mod x_taplo;
 pub use accessor::{Accessor, Accessors};
 pub use error::Error;
 pub use http_client::*;
+use itertools::Itertools;
 pub use options::Options;
 pub use schema::*;
 pub use store::SchemaStore;
+use tombi_ast::{algo::ancestors_at_position, AstNode};
+use tombi_document_tree::TryIntoDocumentTree;
 pub use value_type::ValueType;
+
+pub use crate::accessor::{AccessorContext, AccessorKeyKind, KeyContext};
 
 pub fn get_schema_name(schema_url: &SchemaUrl) -> Option<&str> {
     if let Some(path) = schema_url.path().split('/').last() {
@@ -119,4 +124,99 @@ pub fn get_tombi_scheme_content(schema_url: &url::Url) -> Option<&'static str> {
         }
         _ => None,
     }
+}
+
+pub async fn get_completion_keys_with_context(
+    root: &tombi_ast::Root,
+    position: tombi_text::Position,
+    toml_version: tombi_config::TomlVersion,
+) -> Option<(Vec<tombi_document_tree::Key>, Vec<KeyContext>)> {
+    let mut keys_vec = vec![];
+    let mut key_contexts = vec![];
+
+    for node in ancestors_at_position(root.syntax(), position) {
+        if let Some(kv) = tombi_ast::KeyValue::cast(node.to_owned()) {
+            let keys = kv.keys()?;
+            let keys = if keys.range().contains(position) {
+                keys.keys()
+                    .take_while(|key| key.token().unwrap().range().start <= position)
+                    .collect_vec()
+            } else {
+                keys.keys().collect_vec()
+            };
+            for (i, key) in keys.into_iter().rev().enumerate() {
+                match key.try_into_document_tree(toml_version) {
+                    Ok(Some(key_dt)) => {
+                        let kind = if i == 0 {
+                            AccessorKeyKind::KeyValue
+                        } else {
+                            AccessorKeyKind::Dotted
+                        };
+                        keys_vec.push(key_dt.clone());
+                        key_contexts.push(KeyContext {
+                            kind,
+                            range: key_dt.range(),
+                        });
+                    }
+                    _ => return None,
+                }
+            }
+        } else if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
+            if let Some(header) = table.header() {
+                for key in header.keys().rev() {
+                    match key.try_into_document_tree(toml_version) {
+                        Ok(Some(key_dt)) => {
+                            keys_vec.push(key_dt.clone());
+                            key_contexts.push(KeyContext {
+                                kind: AccessorKeyKind::Header,
+                                range: key_dt.range(),
+                            });
+                        }
+                        _ => return None,
+                    }
+                }
+            }
+        } else if let Some(array_of_table) = tombi_ast::ArrayOfTable::cast(node.to_owned()) {
+            if let Some(header) = array_of_table.header() {
+                for key in header.keys().rev() {
+                    match key.try_into_document_tree(toml_version) {
+                        Ok(Some(key_dt)) => {
+                            keys_vec.push(key_dt.clone());
+                            key_contexts.push(KeyContext {
+                                kind: AccessorKeyKind::Header,
+                                range: key_dt.range(),
+                            });
+                        }
+                        _ => return None,
+                    }
+                }
+            }
+        }
+    }
+
+    if keys_vec.is_empty() {
+        return None;
+    }
+    Some((
+        keys_vec.into_iter().rev().collect(),
+        key_contexts.into_iter().rev().collect(),
+    ))
+}
+
+pub fn build_accessor_contexts<'a>(
+    accessors: &[Accessor],
+    key_contexts: &mut impl Iterator<Item = KeyContext>,
+) -> Vec<AccessorContext> {
+    accessors
+        .iter()
+        .filter_map(|accessor| match accessor {
+            Accessor::Key(_) => {
+                let Some(context) = key_contexts.next() else {
+                    return None;
+                };
+                Some(AccessorContext::Key(context))
+            }
+            Accessor::Index(_) => Some(AccessorContext::Index),
+        })
+        .collect_vec()
 }

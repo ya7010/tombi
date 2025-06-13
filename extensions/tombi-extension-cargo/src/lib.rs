@@ -1,8 +1,10 @@
+mod code_action;
 mod completion;
 mod document_link;
 mod goto_declaration;
 mod goto_definition;
 
+pub use code_action::code_action;
 pub use completion::completion;
 pub use document_link::{document_link, DocumentLinkToolTip};
 pub use goto_declaration::goto_declaration;

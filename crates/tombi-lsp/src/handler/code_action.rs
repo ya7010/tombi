@@ -1,8 +1,10 @@
 use crate::Backend;
-use itertools::{Either, Itertools};
-use tombi_ast::{algo::ancestors_at_position, AstNode};
+use itertools::Either;
 use tombi_document_tree::{TableKind, TryIntoDocumentTree};
-use tombi_schema_store::{dig_accessors, get_accessors, Accessor};
+use tombi_schema_store::{
+    build_accessor_contexts, dig_accessors, get_accessors, get_completion_keys_with_context,
+    Accessor, AccessorContext, AccessorKeyKind,
+};
 use tower_lsp::lsp_types::{
     CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, DocumentChanges, OneOf,
     OptionalVersionedTextDocumentIdentifier, TextDocumentEdit, TextDocumentIdentifier, TextEdit,
@@ -82,6 +84,12 @@ pub async fn handle_code_action(
         code_actions.push(code_action.into());
     }
 
+    if let Some(extension_code_actions) =
+        tombi_extension_cargo::code_action(&document_tree, &accessors, &accessor_contexts)?
+    {
+        code_actions.extend(extension_code_actions);
+    }
+
     if code_actions.is_empty() {
         return Ok(None);
     }
@@ -111,7 +119,10 @@ fn dot_keys_to_inline_table(
     match (accessor, value) {
         (Accessor::Key(parent_key), tombi_document_tree::Value::Table(table))
             if table.len() == 1
-                && matches!(parent_context.kind, KeyKind::Dotted | KeyKind::KeyValue) =>
+                && matches!(
+                    parent_context.kind,
+                    AccessorKeyKind::Dotted | AccessorKeyKind::KeyValue
+                ) =>
         {
             let (key, value) = table.key_values().iter().next().unwrap();
 
@@ -227,123 +238,10 @@ fn inline_table_to_dot_keys(
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum KeyKind {
-    Header,
-    Dotted,
-    KeyValue,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct KeyContext {
-    kind: KeyKind,
-    range: tombi_text::Range,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum AccessorContext {
-    Key(KeyContext),
-    Index,
-}
-
-async fn get_completion_keys_with_context(
-    root: &tombi_ast::Root,
-    position: tombi_text::Position,
-    toml_version: tombi_config::TomlVersion,
-) -> Option<(Vec<tombi_document_tree::Key>, Vec<KeyContext>)> {
-    let mut keys_vec = vec![];
-    let mut key_contexts = vec![];
-
-    for node in ancestors_at_position(root.syntax(), position) {
-        if let Some(kv) = tombi_ast::KeyValue::cast(node.to_owned()) {
-            let keys = kv.keys()?;
-            let keys = if keys.range().contains(position) {
-                keys.keys()
-                    .take_while(|key| key.token().unwrap().range().start <= position)
-                    .collect_vec()
-            } else {
-                keys.keys().collect_vec()
-            };
-            for (i, key) in keys.into_iter().rev().enumerate() {
-                match key.try_into_document_tree(toml_version) {
-                    Ok(Some(key_dt)) => {
-                        let kind = if i == 0 {
-                            KeyKind::KeyValue
-                        } else {
-                            KeyKind::Dotted
-                        };
-                        keys_vec.push(key_dt.clone());
-                        key_contexts.push(KeyContext {
-                            kind,
-                            range: key_dt.range(),
-                        });
-                    }
-                    _ => return None,
-                }
-            }
-        } else if let Some(table) = tombi_ast::Table::cast(node.to_owned()) {
-            if let Some(header) = table.header() {
-                for key in header.keys().rev() {
-                    match key.try_into_document_tree(toml_version) {
-                        Ok(Some(key_dt)) => {
-                            keys_vec.push(key_dt.clone());
-                            key_contexts.push(KeyContext {
-                                kind: KeyKind::Header,
-                                range: key_dt.range(),
-                            });
-                        }
-                        _ => return None,
-                    }
-                }
-            }
-        } else if let Some(array_of_table) = tombi_ast::ArrayOfTable::cast(node.to_owned()) {
-            if let Some(header) = array_of_table.header() {
-                for key in header.keys().rev() {
-                    match key.try_into_document_tree(toml_version) {
-                        Ok(Some(key_dt)) => {
-                            keys_vec.push(key_dt.clone());
-                            key_contexts.push(KeyContext {
-                                kind: KeyKind::Header,
-                                range: key_dt.range(),
-                            });
-                        }
-                        _ => return None,
-                    }
-                }
-            }
-        }
-    }
-
-    if keys_vec.is_empty() {
-        return None;
-    }
-    Some((
-        keys_vec.into_iter().rev().collect(),
-        key_contexts.into_iter().rev().collect(),
-    ))
-}
-
-fn build_accessor_contexts<'a>(
-    accessors: &[Accessor],
-    key_contexts: &mut impl Iterator<Item = KeyContext>,
-) -> Vec<AccessorContext> {
-    accessors
-        .iter()
-        .filter_map(|accessor| match accessor {
-            Accessor::Key(_) => {
-                let Some(context) = key_contexts.next() else {
-                    return None;
-                };
-                Some(AccessorContext::Key(context))
-            }
-            Accessor::Index(_) => Some(AccessorContext::Index),
-        })
-        .collect_vec()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tombi_ast::AstNode;
     use tombi_config::TomlVersion;
     use tombi_parser::parse;
     use tombi_text::Position;
@@ -360,7 +258,7 @@ mod tests {
         let (keys, contexts) = result.unwrap();
         assert_eq!(keys.len(), 1);
         assert_eq!(contexts.len(), 1);
-        assert_eq!(contexts[0].kind, KeyKind::KeyValue);
+        assert_eq!(contexts[0].kind, AccessorKeyKind::KeyValue);
     }
 
     #[tokio::test]
@@ -375,7 +273,7 @@ mod tests {
         let (keys, contexts) = result.unwrap();
         assert!(!keys.is_empty());
 
-        assert!(contexts.iter().any(|c| c.kind == KeyKind::Header));
+        assert!(contexts.iter().any(|c| c.kind == AccessorKeyKind::Header));
     }
 
     #[tokio::test]
