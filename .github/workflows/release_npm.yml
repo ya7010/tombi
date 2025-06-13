@@ -144,6 +144,7 @@ jobs:
               continue
             fi
             npm publish typescript/$package --tag latest --access public --provenance
+            echo npm publish typescript/$package --tag latest --access public --provenance
           done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
