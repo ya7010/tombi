@@ -80,9 +80,9 @@ impl Table {
             range: node.syntax().range(),
             symbol_range: tombi_text::Range::new(
                 node.brace_start()
-                    .map(|brace| brace.range().start)
-                    .unwrap_or_else(|| node.range().start),
-                node.range().end,
+                    .map_or_else(|| node.range().start, |brace| brace.range().start),
+                node.brace_end()
+                    .map_or_else(|| node.range().end, |brace| brace.range().end),
             ),
         }
     }
@@ -110,7 +110,7 @@ impl Table {
             kind: TableKind::ParentKey,
             key_values: Default::default(),
             range: tombi_text::Range::new(parent_key.range().start, self.range.end),
-            symbol_range: self.symbol_range,
+            symbol_range: tombi_text::Range::new(parent_key.range().start, self.symbol_range.end),
         }
     }
 
@@ -546,6 +546,7 @@ impl IntoDocumentTreeAndErrors<Table> for tombi_ast::KeyValue {
         let table = if let Some(key) = keys.pop() {
             let mut seed_key_value = Table::new_key_value(&self);
             seed_key_value.range = key.range() + value.range();
+            seed_key_value.symbol_range = key.range() + value.symbol_range();
             match seed_key_value.insert(key, value) {
                 Ok(table) => table,
                 Err(errs) => {
@@ -554,7 +555,10 @@ impl IntoDocumentTreeAndErrors<Table> for tombi_ast::KeyValue {
                 }
             }
         } else {
-            return make_keys_table(keys, table, errors);
+            return DocumentTreeAndErrors {
+                tree: table,
+                errors,
+            };
         };
 
         make_keys_table(keys, table, errors)
