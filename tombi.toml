@@ -13,7 +13,7 @@ exclude = ["node_modules/**/*"]
 key-empty = "warn"
 
 [lsp]
-document-link = { enabled = true }
+document-link.enabled = true
 
 [schema]
 enabled = true

@@ -1,10 +1,7 @@
-use crate::{
-    handler::hover::{get_accessors_with_range, get_keys_with_range},
-    Backend,
-};
-use itertools::{Either, Itertools};
+use crate::{handler::hover::get_hover_keys_with_range, Backend};
+use itertools::Either;
 use tombi_document_tree::TryIntoDocumentTree;
-use tombi_schema_store::{dig_accessors, Accessor};
+use tombi_schema_store::{dig_accessors, get_accessors, Accessor};
 use tower_lsp::lsp_types::{
     CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, DocumentChanges, OneOf,
     OptionalVersionedTextDocumentIdentifier, TextDocumentEdit, TextDocumentIdentifier, TextEdit,
@@ -51,7 +48,7 @@ pub async fn handle_code_action(
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let Some((keys, _)) = get_keys_with_range(&root, position, toml_version).await else {
+    let Some((keys, range)) = get_hover_keys_with_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 
@@ -59,11 +56,12 @@ pub async fn handle_code_action(
         return Ok(None);
     };
 
+    let accessors = get_accessors(&document_tree, &keys, position);
+
     let mut code_actions = Vec::new();
-    let accessors_with_range = get_accessors_with_range(&document_tree, &keys, position);
 
     if let Some(code_action) =
-        dot_keys_to_inline_table(&text_document, &document_tree, &accessors_with_range)
+        dot_keys_to_inline_table(&text_document, &document_tree, &accessors, range)
     {
         code_actions.push(code_action.into());
     }
@@ -78,17 +76,16 @@ pub async fn handle_code_action(
 fn dot_keys_to_inline_table(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
-    accessors_with_range: &[(Accessor, tombi_text::Range)],
+    accessors: &[Accessor],
+    parent_range: Option<tombi_text::Range>,
 ) -> Option<CodeAction> {
-    if accessors_with_range.len() < 2 {
+    if accessors.len() < 2 {
         return None;
     }
-
-    let parent_range = accessors_with_range[accessors_with_range.len() - 2].1;
-    let accessors = accessors_with_range
-        .iter()
-        .map(|(accessor, _)| accessor.clone())
-        .collect_vec();
+    let Some(parent_range) = parent_range else {
+        return None;
+    };
+    tracing::error!(?accessors, ?parent_range);
 
     let Some((accessor, value)) = dig_accessors(&document_tree, &accessors[..accessors.len() - 1])
     else {

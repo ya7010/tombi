@@ -2,6 +2,7 @@ use itertools::Either;
 use tombi_ast::{algo::ancestors_at_position, AstNode};
 use tombi_document_tree::IntoDocumentTreeAndErrors;
 use tombi_extension::CompletionContent;
+use tombi_schema_store::get_accessors;
 use tombi_syntax::{SyntaxElement, SyntaxKind};
 use tower_lsp::lsp_types::{CompletionParams, TextDocumentPositionParams};
 
@@ -10,7 +11,6 @@ use crate::{
     completion::{
         extract_keys_and_hint, find_completion_contents_with_tree, get_comment_completion_contents,
     },
-    handler::hover::get_accessors,
 };
 
 #[tracing::instrument(level = "debug", skip_all)]

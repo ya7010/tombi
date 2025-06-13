@@ -53,7 +53,7 @@ pub async fn handle_hover(
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let Some((keys, range)) = get_keys_with_range(&root, position, toml_version).await else {
+    let Some((keys, range)) = get_hover_keys_with_range(&root, position, toml_version).await else {
         return Ok(None);
     };
 
@@ -88,7 +88,7 @@ pub async fn handle_hover(
     }));
 }
 
-pub(crate) async fn get_keys_with_range(
+pub(crate) async fn get_hover_keys_with_range(
     root: &tombi_ast::Root,
     position: tombi_text::Position,
     toml_version: tombi_config::TomlVersion,
@@ -276,71 +276,6 @@ pub(crate) async fn get_keys_with_range(
         keys_vec.into_iter().rev().flatten().collect_vec(),
         hover_range,
     ))
-}
-
-pub(crate) fn get_accessors(
-    document_tree: &tombi_document_tree::DocumentTree,
-    keys: &[tombi_document_tree::Key],
-    position: tombi_text::Position,
-) -> Vec<tombi_schema_store::Accessor> {
-    get_accessors_with_range(document_tree, keys, position)
-        .into_iter()
-        .map(|(accessor, _)| accessor)
-        .collect()
-}
-
-pub(crate) fn get_accessors_with_range(
-    document_tree: &tombi_document_tree::DocumentTree,
-    keys: &[tombi_document_tree::Key],
-    position: tombi_text::Position,
-) -> Vec<(tombi_schema_store::Accessor, tombi_text::Range)> {
-    let mut accessors: Vec<(tombi_schema_store::Accessor, tombi_text::Range)> = Vec::new();
-    let mut current_value: &tombi_document_tree::Value = document_tree.into();
-
-    for key in keys {
-        current_value = find_value_in_current(current_value, key, &mut accessors, position);
-        accessors.push((
-            tombi_schema_store::Accessor::Key(key.value().to_string()),
-            key.range(),
-        ));
-    }
-
-    if let tombi_document_tree::Value::Array(array) = current_value {
-        for (index, value) in array.values().iter().enumerate() {
-            if value.range().contains(position) {
-                accessors.push((tombi_schema_store::Accessor::Index(index), value.range()));
-                break;
-            }
-        }
-    }
-
-    accessors
-}
-
-fn find_value_in_current<'a>(
-    current_value: &'a tombi_document_tree::Value,
-    key: &tombi_document_tree::Key,
-    accessors: &mut Vec<(tombi_schema_store::Accessor, tombi_text::Range)>,
-    position: tombi_text::Position,
-) -> &'a tombi_document_tree::Value {
-    match current_value {
-        tombi_document_tree::Value::Array(array) => {
-            for (index, value) in array.values().iter().enumerate() {
-                if value.range().contains(position) {
-                    accessors.push((tombi_schema_store::Accessor::Index(index), value.range()));
-                    return find_value_in_current(value, key, accessors, position);
-                }
-            }
-        }
-        tombi_document_tree::Value::Table(table) => {
-            if let Some(value) = table.get(key) {
-                return value;
-            }
-        }
-        _ => {}
-    }
-
-    current_value
 }
 
 pub fn get_tombi_github_schema_url(schema_url: &tower_lsp::lsp_types::Url) -> Option<SchemaUrl> {
