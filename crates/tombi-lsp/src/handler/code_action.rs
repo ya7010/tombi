@@ -135,7 +135,7 @@ fn dot_keys_to_inline_table(
 
             Some(
                 CodeAction {
-                    title: "Convert Dotted keys to Inline Table".to_string(),
+                    title: "Convert Dotted Keys to Inline Table".to_string(),
                     kind: Some(CodeActionKind::REFACTOR_REWRITE),
                     edit: Some(WorkspaceEdit {
                         changes: None,
@@ -204,7 +204,7 @@ fn inline_table_to_dot_keys(
             let (key, value) = table.key_values().iter().next().unwrap();
 
             Some(CodeAction {
-                title: "Convert Inline Table to Dotted keys".to_string(),
+                title: "Convert Inline Table to Dotted Keys".to_string(),
                 kind: Some(CodeActionKind::REFACTOR_REWRITE),
                 edit: Some(WorkspaceEdit {
                     changes: None,
