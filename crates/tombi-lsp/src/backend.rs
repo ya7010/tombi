@@ -85,8 +85,8 @@ impl Backend {
         text_document_uri: &Url,
     ) -> Option<tombi_parser::Parsed<SyntaxNode>> {
         let document_source = self.document_sources.read().await;
-        let document_info = match document_source.get(text_document_uri) {
-            Some(document_info) => document_info,
+        let document_source = match document_source.get(text_document_uri) {
+            Some(document_source) => document_source,
             None => {
                 tracing::warn!("document not found: {}", text_document_uri);
                 return None;
@@ -94,7 +94,7 @@ impl Backend {
         };
 
         let source_schema = if let Some(parsed) =
-            tombi_parser::parse_document_header_comments(&document_info.source)
+            tombi_parser::parse_document_header_comments(&document_source.text)
                 .cast::<tombi_ast::Root>()
         {
             match self
@@ -123,7 +123,7 @@ impl Backend {
             })
             .unwrap_or(self.config.read().await.toml_version.unwrap_or_default());
 
-        Some(tombi_parser::parse(&document_info.source, toml_version))
+        Some(tombi_parser::parse(&document_source.text, toml_version))
     }
 
     #[inline]

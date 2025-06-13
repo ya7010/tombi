@@ -277,6 +277,16 @@ impl Table {
     }
 
     #[inline]
+    pub fn len(&self) -> usize {
+        self.key_values.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.key_values.is_empty()
+    }
+
+    #[inline]
     pub fn kind(&self) -> TableKind {
         self.kind
     }

@@ -10,7 +10,7 @@ use crate::{
     completion::{
         extract_keys_and_hint, find_completion_contents_with_tree, get_comment_completion_contents,
     },
-    handler::hover::get_hover_accessors,
+    handler::hover::get_accessors,
 };
 
 #[tracing::instrument(level = "debug", skip_all)]
@@ -109,7 +109,7 @@ pub async fn handle_completion(
         .await,
     );
 
-    let accessors = get_hover_accessors(&document_tree, &keys, position);
+    let accessors = get_accessors(&document_tree, &keys, position);
     if let Some(items) = tombi_extension_cargo::completion(
         &text_document,
         &document_tree,
