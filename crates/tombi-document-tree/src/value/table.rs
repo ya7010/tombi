@@ -105,11 +105,11 @@ impl Table {
         }
     }
 
-    pub(crate) fn new_parent_key(&self) -> Self {
+    pub(crate) fn new_parent_key(&self, parent_key: &Key) -> Self {
         Self {
             kind: TableKind::ParentKey,
             key_values: Default::default(),
-            range: self.range,
+            range: tombi_text::Range::new(parent_key.range().start, self.range.end),
             symbol_range: self.symbol_range,
         }
     }
@@ -544,7 +544,9 @@ impl IntoDocumentTreeAndErrors<Table> for tombi_ast::KeyValue {
         };
 
         let table = if let Some(key) = keys.pop() {
-            match Table::new_key_value(&self).insert(key, value) {
+            let mut seed_key_value = Table::new_key_value(&self);
+            seed_key_value.range = key.range() + value.range();
+            match seed_key_value.insert(key, value) {
                 Ok(table) => table,
                 Err(errs) => {
                     errors.extend(errs);
@@ -690,7 +692,7 @@ fn make_keys_table(
 ) -> DocumentTreeAndErrors<crate::Table> {
     for key in keys.into_iter().rev() {
         let dummy_table = table.clone();
-        match table.new_parent_key().insert(
+        match table.new_parent_key(&key).insert(
             key,
             crate::Value::Table(std::mem::replace(&mut table, dummy_table)),
         ) {
