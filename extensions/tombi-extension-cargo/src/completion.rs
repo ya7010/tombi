@@ -3,6 +3,7 @@ use itertools::Itertools;
 use serde::Deserialize;
 use tombi_config::TomlVersion;
 use tombi_extension::CompletionContent;
+use tombi_extension::CompletionHint;
 use tombi_extension::CompletionKind;
 use tombi_schema_store::dig_accessors;
 use tombi_schema_store::match_accessors;
@@ -34,31 +35,18 @@ struct CratesIoVersionDetailResponse {
 }
 
 pub async fn completion(
-    text_document: &TextDocumentIdentifier,
+    _text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
-    toml_version: TomlVersion,
+    _toml_version: TomlVersion,
+    completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     if let Some(Accessor::Key(first)) = accessors.first() {
         if first == "workspace" {
-            completion_workspace(
-                text_document,
-                document_tree,
-                position,
-                accessors,
-                toml_version,
-            )
-            .await
+            completion_workspace(document_tree, position, accessors, completion_hint).await
         } else {
-            completion_member(
-                text_document,
-                document_tree,
-                position,
-                accessors,
-                toml_version,
-            )
-            .await
+            completion_member(document_tree, position, accessors, completion_hint).await
         }
     } else {
         Ok(None)
@@ -66,21 +54,32 @@ pub async fn completion(
 }
 
 async fn completion_workspace(
-    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
-    toml_version: TomlVersion,
+    completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     if match_accessors!(accessors, ["workspace", "dependencies", _]) {
         if let Some(Accessor::Key(crate_name)) = accessors.last() {
-            return complete_crate_version(crate_name.as_str(), document_tree, accessors, position)
-                .await;
+            return complete_crate_version(
+                crate_name.as_str(),
+                document_tree,
+                accessors,
+                position,
+                completion_hint,
+            )
+            .await;
         }
     } else if match_accessors!(accessors, ["workspace", "dependencies", _, "version"]) {
         if let Some(Accessor::Key(crate_name)) = accessors.get(accessors.len() - 2) {
-            return complete_crate_version(crate_name.as_str(), document_tree, accessors, position)
-                .await;
+            return complete_crate_version(
+                crate_name.as_str(),
+                document_tree,
+                accessors,
+                position,
+                completion_hint,
+            )
+            .await;
         }
     } else if match_accessors!(accessors, ["workspace", "dependencies", _, "features"])
         | match_accessors!(accessors, ["workspace", "dependencies", _, "features", _])
@@ -108,27 +107,38 @@ async fn completion_workspace(
 }
 
 async fn completion_member(
-    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
-    toml_version: TomlVersion,
+    completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     if match_accessors!(accessors, ["dependencies", _, "version"])
         || match_accessors!(accessors, ["dev-dependencies", _, "version"])
         || match_accessors!(accessors, ["build-dependencies", _, "version"])
     {
         if let Some(Accessor::Key(c_name)) = accessors.get(accessors.len() - 2) {
-            return complete_crate_version(c_name.as_str(), document_tree, accessors, position)
-                .await;
+            return complete_crate_version(
+                c_name.as_str(),
+                document_tree,
+                accessors,
+                position,
+                completion_hint,
+            )
+            .await;
         }
     } else if match_accessors!(accessors, ["dependencies", _])
         || match_accessors!(accessors, ["dev-dependencies", _])
         || match_accessors!(accessors, ["build-dependencies", _])
     {
         if let Some(Accessor::Key(c_name)) = accessors.last() {
-            return complete_crate_version(c_name.as_str(), document_tree, accessors, position)
-                .await;
+            return complete_crate_version(
+                c_name.as_str(),
+                document_tree,
+                accessors,
+                position,
+                completion_hint,
+            )
+            .await;
         }
     } else if (match_accessors!(accessors, ["dependencies", _, "features", _])
         || match_accessors!(accessors, ["dev-dependencies", _, "features", _])
@@ -164,6 +174,7 @@ async fn complete_crate_version(
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
     position: tombi_text::Position,
+    completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
     let version_value = match dig_accessors(document_tree, accessors) {
         Some((_, tombi_document_tree::Value::String(value_string))) => Some(value_string),
@@ -189,19 +200,28 @@ async fn complete_crate_version(
                 filter_text: None,
                 schema_url: None,
                 deprecated: None,
-                edit: version_value.map(|value| tombi_extension::CompletionEdit {
-                    text_edit: tower_lsp::lsp_types::CompletionTextEdit::Edit(
-                        tower_lsp::lsp_types::TextEdit {
-                            range: tombi_text::Range::at(position).into(),
-                            new_text: format!("\"{ver}\""),
-                        },
+                edit: match version_value {
+                    Some(value) => Some(tombi_extension::CompletionEdit {
+                        text_edit: tower_lsp::lsp_types::CompletionTextEdit::Edit(
+                            tower_lsp::lsp_types::TextEdit {
+                                range: tombi_text::Range::at(position).into(),
+                                new_text: format!("\"{ver}\""),
+                            },
+                        ),
+                        insert_text_format: Some(
+                            tower_lsp::lsp_types::InsertTextFormat::PLAIN_TEXT,
+                        ),
+                        additional_text_edits: Some(vec![tower_lsp::lsp_types::TextEdit {
+                            range: value.range().into(),
+                            new_text: "".to_string(),
+                        }]),
+                    }),
+                    None => tombi_extension::CompletionEdit::new_literal(
+                        &format!("\"{ver}\""),
+                        position,
+                        completion_hint,
                     ),
-                    insert_text_format: Some(tower_lsp::lsp_types::InsertTextFormat::PLAIN_TEXT),
-                    additional_text_edits: Some(vec![tower_lsp::lsp_types::TextEdit {
-                        range: value.range().into(),
-                        new_text: "".to_string(),
-                    }]),
-                }),
+                },
                 preselect: None,
             })
             .collect();
