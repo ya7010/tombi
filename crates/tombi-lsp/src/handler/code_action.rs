@@ -374,6 +374,7 @@ mod tests {
         assert!(result.is_some());
         let (keys, contexts) = result.unwrap();
         assert!(!keys.is_empty());
+
         assert!(contexts.iter().any(|c| c.kind == KeyKind::Header));
     }
 
@@ -385,6 +386,7 @@ mod tests {
         let pos = Position::new(0, 0);
         let toml_version = TomlVersion::V1_0_0;
         let result = get_completion_keys_with_context(&root, pos, toml_version).await;
+
         assert!(result.is_none());
     }
 
@@ -398,11 +400,13 @@ mod tests {
         let result = get_completion_keys_with_context(&root, pos, toml_version).await;
         assert!(result.is_some());
         let (keys, contexts) = result.unwrap();
-        assert_eq!(keys.len(), 1);
-        assert_eq!(contexts.len(), 1);
-        // 'foo' の範囲
-        let expected_range = keys[0].range();
-        assert_eq!(contexts[0].range, expected_range);
+
+        pretty_assertions::assert_eq!(keys.len(), 1);
+        pretty_assertions::assert_eq!(keys.len(), contexts.len());
+
+        for (key, ctx) in keys.iter().zip(contexts.iter()) {
+            pretty_assertions::assert_eq!(ctx.range, key.range());
+        }
     }
 
     #[tokio::test]
@@ -418,7 +422,7 @@ mod tests {
         assert!(!keys.is_empty());
 
         for (key, ctx) in keys.iter().zip(contexts.iter()) {
-            assert_eq!(ctx.range, key.range());
+            pretty_assertions::assert_eq!(ctx.range, key.range());
         }
     }
 }
