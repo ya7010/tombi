@@ -61,18 +61,7 @@ pub async fn handle_code_action(
 
     let accessors = get_accessors(&document_tree, &keys, position);
     let mut key_contexts = key_contexts.into_iter();
-    let accessor_contexts = accessors
-        .iter()
-        .filter_map(|accessor| match accessor {
-            Accessor::Key(_) => {
-                let Some(context) = key_contexts.next() else {
-                    return None;
-                };
-                Some(AccessorContext::Key(context))
-            }
-            Accessor::Index(_) => return Some(AccessorContext::Index),
-        })
-        .collect_vec();
+    let accessor_contexts = build_accessor_contexts(&accessors, &mut key_contexts);
 
     let mut code_actions = Vec::new();
 
@@ -332,6 +321,24 @@ async fn get_completion_keys_with_context(
         keys_vec.into_iter().rev().collect(),
         key_contexts.into_iter().rev().collect(),
     ))
+}
+
+fn build_accessor_contexts<'a>(
+    accessors: &[Accessor],
+    key_contexts: &mut impl Iterator<Item = KeyContext>,
+) -> Vec<AccessorContext> {
+    accessors
+        .iter()
+        .filter_map(|accessor| match accessor {
+            Accessor::Key(_) => {
+                let Some(context) = key_contexts.next() else {
+                    return None;
+                };
+                Some(AccessorContext::Key(context))
+            }
+            Accessor::Index(_) => Some(AccessorContext::Index),
+        })
+        .collect_vec()
 }
 
 #[cfg(test)]
