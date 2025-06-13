@@ -243,19 +243,18 @@ async fn get_completion_keys_with_context(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use futures::executor::block_on;
     use tombi_config::TomlVersion;
     use tombi_parser::parse;
     use tombi_text::Position;
 
-    #[test]
-    fn test_get_completion_keys_with_context_simple_keyvalue() {
+    #[tokio::test]
+    async fn test_get_completion_keys_with_context_simple_keyvalue() {
         let src = r#"foo = 1\nbar = 2\n"#;
         let root =
             tombi_ast::Root::cast(parse(src, TomlVersion::V1_0_0).into_syntax_node()).unwrap();
         let pos = Position::new(0, 2); // somewhere in 'foo'
         let toml_version = TomlVersion::V1_0_0;
-        let result = block_on(get_completion_keys_with_context(&root, pos, toml_version));
+        let result = get_completion_keys_with_context(&root, pos, toml_version).await;
         assert!(result.is_some());
         let (keys, contexts) = result.unwrap();
         assert_eq!(keys.len(), 1);
@@ -263,39 +262,39 @@ mod tests {
         assert_eq!(contexts[0].kind, KeyKind::KeyValue);
     }
 
-    #[test]
-    fn test_get_completion_keys_with_context_table_header() {
+    #[tokio::test]
+    async fn test_get_completion_keys_with_context_table_header() {
         let src = r#"[table]\nfoo = 1\n"#;
         let root =
             tombi_ast::Root::cast(parse(src, TomlVersion::V1_0_0).into_syntax_node()).unwrap();
         let pos = Position::new(0, 2); // somewhere in 'table'
         let toml_version = TomlVersion::V1_0_0;
-        let result = block_on(get_completion_keys_with_context(&root, pos, toml_version));
+        let result = get_completion_keys_with_context(&root, pos, toml_version).await;
         assert!(result.is_some());
         let (keys, contexts) = result.unwrap();
         assert!(!keys.is_empty());
         assert!(contexts.iter().any(|c| c.kind == KeyKind::Header));
     }
 
-    #[test]
-    fn test_get_completion_keys_with_context_empty() {
+    #[tokio::test]
+    async fn test_get_completion_keys_with_context_empty() {
         let src = r#"# just a comment\n"#;
         let root =
             tombi_ast::Root::cast(parse(src, TomlVersion::V1_0_0).into_syntax_node()).unwrap();
         let pos = Position::new(0, 0);
         let toml_version = TomlVersion::V1_0_0;
-        let result = block_on(get_completion_keys_with_context(&root, pos, toml_version));
+        let result = get_completion_keys_with_context(&root, pos, toml_version).await;
         assert!(result.is_none());
     }
 
-    #[test]
-    fn test_get_completion_keys_with_context_simple_keyvalue_range() {
+    #[tokio::test]
+    async fn test_get_completion_keys_with_context_simple_keyvalue_range() {
         let src = "foo = 1\nbar = 2\n";
         let root =
             tombi_ast::Root::cast(parse(src, TomlVersion::V1_0_0).into_syntax_node()).unwrap();
         let pos = Position::new(0, 2); // somewhere in 'foo'
         let toml_version = TomlVersion::V1_0_0;
-        let result = block_on(get_completion_keys_with_context(&root, pos, toml_version));
+        let result = get_completion_keys_with_context(&root, pos, toml_version).await;
         assert!(result.is_some());
         let (keys, contexts) = result.unwrap();
         assert_eq!(keys.len(), 1);
@@ -305,14 +304,14 @@ mod tests {
         assert_eq!(contexts[0].range, expected_range);
     }
 
-    #[test]
-    fn test_get_completion_keys_with_context_table_header_range() {
+    #[tokio::test]
+    async fn test_get_completion_keys_with_context_table_header_range() {
         let src = "[table]\nfoo = 1\n";
         let root =
             tombi_ast::Root::cast(parse(src, TomlVersion::V1_0_0).into_syntax_node()).unwrap();
         let pos = Position::new(0, 2); // somewhere in 'table'
         let toml_version = TomlVersion::V1_0_0;
-        let result = block_on(get_completion_keys_with_context(&root, pos, toml_version));
+        let result = get_completion_keys_with_context(&root, pos, toml_version).await;
         assert!(result.is_some());
         let (keys, contexts) = result.unwrap();
         assert!(!keys.is_empty());
