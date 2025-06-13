@@ -116,6 +116,7 @@ pub async fn handle_completion(
         position,
         &accessors,
         toml_version,
+        completion_hint,
     )
     .await?
     {
