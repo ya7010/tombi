@@ -6,7 +6,7 @@ use tombi_extension::CompletionContent;
 use tombi_extension::CompletionHint;
 use tombi_extension::CompletionKind;
 use tombi_schema_store::dig_accessors;
-use tombi_schema_store::match_accessors;
+use tombi_schema_store::matches_accessors;
 use tombi_schema_store::Accessor;
 use tombi_schema_store::HttpClient;
 use tombi_version_sort::version_sort;
@@ -35,13 +35,17 @@ struct CratesIoVersionDetailResponse {
 }
 
 pub async fn completion(
-    _text_document: &TextDocumentIdentifier,
+    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     position: tombi_text::Position,
     accessors: &[Accessor],
     _toml_version: TomlVersion,
     completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
+    if !text_document.uri.path().ends_with("Cargo.toml") {
+        return Ok(None);
+    }
+
     if let Some(Accessor::Key(first)) = accessors.first() {
         if first == "workspace" {
             completion_workspace(document_tree, position, accessors, completion_hint).await
@@ -59,7 +63,7 @@ async fn completion_workspace(
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
-    if match_accessors!(accessors, ["workspace", "dependencies", _]) {
+    if matches_accessors!(accessors, ["workspace", "dependencies", _]) {
         if let Some(Accessor::Key(crate_name)) = accessors.last() {
             return complete_crate_version(
                 crate_name.as_str(),
@@ -70,7 +74,7 @@ async fn completion_workspace(
             )
             .await;
         }
-    } else if match_accessors!(accessors, ["workspace", "dependencies", _, "version"]) {
+    } else if matches_accessors!(accessors, ["workspace", "dependencies", _, "version"]) {
         if let Some(Accessor::Key(crate_name)) = accessors.get(accessors.len() - 2) {
             return complete_crate_version(
                 crate_name.as_str(),
@@ -81,8 +85,8 @@ async fn completion_workspace(
             )
             .await;
         }
-    } else if match_accessors!(accessors, ["workspace", "dependencies", _, "features"])
-        | match_accessors!(accessors, ["workspace", "dependencies", _, "features", _])
+    } else if matches_accessors!(accessors, ["workspace", "dependencies", _, "features"])
+        | matches_accessors!(accessors, ["workspace", "dependencies", _, "features", _])
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(2) {
             return complete_crate_feature(
@@ -112,9 +116,9 @@ async fn completion_member(
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
-    if match_accessors!(accessors, ["dependencies", _, "version"])
-        || match_accessors!(accessors, ["dev-dependencies", _, "version"])
-        || match_accessors!(accessors, ["build-dependencies", _, "version"])
+    if matches_accessors!(accessors, ["dependencies", _, "version"])
+        || matches_accessors!(accessors, ["dev-dependencies", _, "version"])
+        || matches_accessors!(accessors, ["build-dependencies", _, "version"])
     {
         if let Some(Accessor::Key(c_name)) = accessors.get(accessors.len() - 2) {
             return complete_crate_version(
@@ -126,9 +130,9 @@ async fn completion_member(
             )
             .await;
         }
-    } else if match_accessors!(accessors, ["dependencies", _])
-        || match_accessors!(accessors, ["dev-dependencies", _])
-        || match_accessors!(accessors, ["build-dependencies", _])
+    } else if matches_accessors!(accessors, ["dependencies", _])
+        || matches_accessors!(accessors, ["dev-dependencies", _])
+        || matches_accessors!(accessors, ["build-dependencies", _])
     {
         if let Some(Accessor::Key(c_name)) = accessors.last() {
             return complete_crate_version(
@@ -140,12 +144,12 @@ async fn completion_member(
             )
             .await;
         }
-    } else if (match_accessors!(accessors, ["dependencies", _, "features", _])
-        || match_accessors!(accessors, ["dev-dependencies", _, "features", _])
-        || match_accessors!(accessors, ["build-dependencies", _, "features", _])
-        || match_accessors!(accessors, ["dependencies", _, "features"])
-        || match_accessors!(accessors, ["dev-dependencies", _, "features"])
-        || match_accessors!(accessors, ["build-dependencies", _, "features"]))
+    } else if (matches_accessors!(accessors, ["dependencies", _, "features", _])
+        || matches_accessors!(accessors, ["dev-dependencies", _, "features", _])
+        || matches_accessors!(accessors, ["build-dependencies", _, "features", _])
+        || matches_accessors!(accessors, ["dependencies", _, "features"])
+        || matches_accessors!(accessors, ["dev-dependencies", _, "features"])
+        || matches_accessors!(accessors, ["build-dependencies", _, "features"]))
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(1) {
             return complete_crate_feature(

@@ -84,9 +84,12 @@ pub async fn handle_code_action(
         code_actions.push(code_action.into());
     }
 
-    if let Some(extension_code_actions) =
-        tombi_extension_cargo::code_action(&document_tree, &accessors, &accessor_contexts)?
-    {
+    if let Some(extension_code_actions) = tombi_extension_cargo::code_action(
+        &text_document,
+        &document_tree,
+        &accessors,
+        &accessor_contexts,
+    )? {
         code_actions.extend(extension_code_actions);
     }
 
