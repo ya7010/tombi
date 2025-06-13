@@ -68,6 +68,11 @@ pub async fn handle_code_action(
     {
         code_actions.push(code_action.into());
     }
+    if let Some(code_action) =
+        inline_table_to_dot_keys(&text_document, &document_tree, &accessors, contexts)
+    {
+        code_actions.push(code_action.into());
+    }
 
     if code_actions.is_empty() {
         return Ok(None);
@@ -148,6 +153,15 @@ fn dot_keys_to_inline_table(
         }
         _ => None,
     }
+}
+
+fn inline_table_to_dot_keys(
+    text_document: &TextDocumentIdentifier,
+    document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[Accessor],
+    contexts: Vec<KeyContext>,
+) -> Option<CodeAction> {
+    None
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
