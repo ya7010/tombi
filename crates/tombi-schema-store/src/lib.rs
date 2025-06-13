@@ -26,6 +26,57 @@ pub fn get_schema_name(schema_url: &SchemaUrl) -> Option<&str> {
     schema_url.host_str()
 }
 
+pub fn get_accessors(
+    document_tree: &tombi_document_tree::DocumentTree,
+    keys: &[tombi_document_tree::Key],
+    position: tombi_text::Position,
+) -> Vec<Accessor> {
+    let mut accessors = Vec::new();
+    let mut current_value: &tombi_document_tree::Value = document_tree.into();
+
+    for key in keys {
+        current_value = find_value_in_current(current_value, key, &mut accessors, position);
+        accessors.push(Accessor::Key(key.value().to_string()));
+    }
+
+    if let tombi_document_tree::Value::Array(array) = current_value {
+        for (index, value) in array.values().iter().enumerate() {
+            if value.range().contains(position) {
+                accessors.push(Accessor::Index(index));
+                break;
+            }
+        }
+    }
+
+    accessors
+}
+
+fn find_value_in_current<'a>(
+    current_value: &'a tombi_document_tree::Value,
+    key: &tombi_document_tree::Key,
+    accessors: &mut Vec<Accessor>,
+    position: tombi_text::Position,
+) -> &'a tombi_document_tree::Value {
+    match current_value {
+        tombi_document_tree::Value::Array(array) => {
+            for (index, value) in array.values().iter().enumerate() {
+                if value.range().contains(position) {
+                    accessors.push(Accessor::Index(index));
+                    return find_value_in_current(value, key, accessors, position);
+                }
+            }
+        }
+        tombi_document_tree::Value::Table(table) => {
+            if let Some(value) = table.get(key) {
+                return value;
+            }
+        }
+        _ => {}
+    }
+
+    current_value
+}
+
 pub fn dig_accessors<'a>(
     document_tree: &'a tombi_document_tree::DocumentTree,
     accessors: &'a [crate::Accessor],
