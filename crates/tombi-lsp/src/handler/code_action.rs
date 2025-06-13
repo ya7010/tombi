@@ -200,9 +200,6 @@ fn inline_table_to_dot_keys(
         {
             let (key, value) = table.key_values().iter().next().unwrap();
 
-            tracing::error!("Table range: {:?}", table.range());
-            tracing::error!("Value range: {:?}", value.range());
-
             Some(CodeAction {
                 title: "Convert Inline Table to Dotted keys".to_string(),
                 kind: Some(CodeActionKind::REFACTOR_REWRITE),
