@@ -49,7 +49,7 @@ pub async fn handle_code_action(
 
     let (toml_version, _) = backend.source_toml_version(source_schema.as_ref()).await;
 
-    let Some((keys, contexts)) =
+    let Some((keys, key_contexts)) =
         get_completion_keys_with_context(&root, position, toml_version).await
     else {
         return Ok(None);
@@ -60,17 +60,36 @@ pub async fn handle_code_action(
     };
 
     let accessors = get_accessors(&document_tree, &keys, position);
+    let mut key_contexts = key_contexts.into_iter();
+    let accessor_contexts = accessors
+        .iter()
+        .filter_map(|accessor| match accessor {
+            Accessor::Key(_) => {
+                let Some(context) = key_contexts.next() else {
+                    return None;
+                };
+                Some(AccessorContext::Key(context))
+            }
+            Accessor::Index(_) => return Some(AccessorContext::Index),
+        })
+        .collect_vec();
 
     let mut code_actions = Vec::new();
 
-    if let Some(code_action) =
-        dot_keys_to_inline_table(&text_document, &document_tree, &accessors, &contexts)
-    {
+    if let Some(code_action) = dot_keys_to_inline_table(
+        &text_document,
+        &document_tree,
+        &accessors,
+        &accessor_contexts,
+    ) {
         code_actions.push(code_action.into());
     }
-    if let Some(code_action) =
-        inline_table_to_dot_keys(&text_document, &document_tree, &accessors, &contexts)
-    {
+    if let Some(code_action) = inline_table_to_dot_keys(
+        &text_document,
+        &document_tree,
+        &accessors,
+        &accessor_contexts,
+    ) {
         code_actions.push(code_action.into());
     }
 
@@ -85,13 +104,15 @@ fn dot_keys_to_inline_table(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
-    contexts: &[KeyContext],
+    contexts: &[AccessorContext],
 ) -> Option<CodeAction> {
     if accessors.len() < 2 {
         return None;
     }
     debug_assert!(accessors.len() == contexts.len());
-    let parent_context = &contexts[accessors.len() - 2];
+    let AccessorContext::Key(parent_context) = &contexts[accessors.len() - 2] else {
+        return None;
+    };
 
     let Some((accessor, value)) = dig_accessors(&document_tree, &accessors[..accessors.len() - 1])
     else {
@@ -139,7 +160,7 @@ fn dot_keys_to_inline_table(
                                     ),
                                 }),
                                 OneOf::Left(TextEdit {
-                                    range: tombi_text::Range::at(value.range().end).into(),
+                                    range: tombi_text::Range::at(value.symbol_range().end).into(),
                                     new_text: " }".to_string(),
                                 }),
                             ],
@@ -159,9 +180,65 @@ fn inline_table_to_dot_keys(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
-    contexts: &[KeyContext],
+    contexts: &[AccessorContext],
 ) -> Option<CodeAction> {
-    None
+    if accessors.len() < 2 {
+        return None;
+    }
+    debug_assert!(accessors.len() == contexts.len());
+    let AccessorContext::Key(parent_context) = &contexts[accessors.len() - 2] else {
+        return None;
+    };
+
+    let Some((_, value)) = dig_accessors(document_tree, &accessors[..accessors.len() - 1]) else {
+        return None;
+    };
+
+    match value {
+        tombi_document_tree::Value::Table(table)
+            if table.len() == 1 && table.kind() == TableKind::InlineTable =>
+        {
+            let (key, value) = table.key_values().iter().next().unwrap();
+
+            tracing::error!("Table range: {:?}", table.range());
+            tracing::error!("Value range: {:?}", value.range());
+
+            Some(CodeAction {
+                title: "Convert Inline Table to Dotted keys".to_string(),
+                kind: Some(CodeActionKind::REFACTOR_REWRITE),
+                edit: Some(WorkspaceEdit {
+                    changes: None,
+                    document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
+                        text_document: OptionalVersionedTextDocumentIdentifier {
+                            uri: text_document.uri.clone(),
+                            version: None,
+                        },
+                        edits: vec![
+                            OneOf::Left(TextEdit {
+                                range: tombi_text::Range::new(
+                                    parent_context.range.end,
+                                    key.range().start,
+                                )
+                                .into(),
+                                new_text: ".".to_string(),
+                            }),
+                            OneOf::Left(TextEdit {
+                                range: tombi_text::Range::new(
+                                    value.range().end,
+                                    table.symbol_range().end,
+                                )
+                                .into(),
+                                new_text: "".to_string(),
+                            }),
+                        ],
+                    }])),
+                    change_annotations: None,
+                }),
+                ..Default::default()
+            })
+        }
+        _ => None,
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -175,6 +252,12 @@ enum KeyKind {
 struct KeyContext {
     kind: KeyKind,
     range: tombi_text::Range,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum AccessorContext {
+    Key(KeyContext),
+    Index,
 }
 
 async fn get_completion_keys_with_context(

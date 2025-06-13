@@ -5,7 +5,7 @@
 
 toml-version = "v1.0.0"
 exclude = ["node_modules/**/*"]
-lsp.document-link.enabled = true
+lsp.document-link.enabled = true  # You can convert Inline Table and Dotted Key to each other using Code Action.
 
 [format]
 
