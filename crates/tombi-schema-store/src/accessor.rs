@@ -55,6 +55,15 @@ impl PartialEq<SchemaAccessor> for Accessor {
     }
 }
 
+impl PartialEq<&str> for Accessor {
+    fn eq(&self, other: &&str) -> bool {
+        match self {
+            Accessor::Key(key) => key == *other,
+            _ => false,
+        }
+    }
+}
+
 /// A collection of `Accessor`.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct Accessors(Vec<Accessor>);
