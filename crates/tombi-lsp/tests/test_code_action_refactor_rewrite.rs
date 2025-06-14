@@ -13,10 +13,10 @@ macro_rules! test_code_action_refactor_rewrite {
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
             use std::io::Write;
             use tombi_lsp::handler::handle_code_action;
+            use tombi_lsp::handler::handle_did_open;
             use tombi_lsp::Backend;
-            use tower_lsp::lsp_types::{
-                CodeActionParams, Position, Range, TextDocumentIdentifier, Url,
-            };
+            use tower_lsp::lsp_types::{CodeActionParams, TextDocumentIdentifier, Url};
+            use tower_lsp::lsp_types::{DidOpenTextDocumentParams, TextDocumentItem};
             use tower_lsp::LspService;
 
             tombi_test_lib::init_tracing();
@@ -57,27 +57,34 @@ macro_rules! test_code_action_refactor_rewrite {
                 );
             };
             toml_text.remove(index);
+            tracing::debug!(?toml_text, "test toml text");
+            tracing::debug!(?index, "test toml text index");
             temp_file.as_file().write_all(toml_text.as_bytes())?;
             let toml_file_url = Url::from_file_path(temp_file.path())
                 .map_err(|_| "failed to convert temporary file path to URL")?;
 
-            let line = toml_text[..index].lines().count() - 1;
-            let character = toml_text[..index].lines().last().map_or(0, |l| l.len());
+            handle_did_open(
+                backend,
+                DidOpenTextDocumentParams {
+                    text_document: TextDocumentItem {
+                        uri: toml_file_url.clone(),
+                        language_id: "toml".to_string(),
+                        version: 0,
+                        text: toml_text.clone(),
+                    },
+                },
+            )
+            .await;
 
             let params = CodeActionParams {
                 text_document: TextDocumentIdentifier {
                     uri: toml_file_url.clone(),
                 },
-                range: Range {
-                    start: Position {
-                        line: line as u32,
-                        character: character as u32,
-                    },
-                    end: Position {
-                        line: line as u32,
-                        character: character as u32,
-                    },
-                },
+                range: tombi_text::Range::at(
+                    (tombi_text::Position::default()
+                        + tombi_text::RelativePosition::of(&toml_text[..index])),
+                )
+                .into(),
                 context: Default::default(),
                 work_done_progress_params: Default::default(),
                 partial_result_params: Default::default(),
@@ -86,8 +93,12 @@ macro_rules! test_code_action_refactor_rewrite {
             let actions = handle_code_action(backend, params)
                 .await?
                 .unwrap_or_default();
+
+            tracing::debug!(?actions, "code actions found");
+
             let selected = $select.0;
             let selected: &str = &selected.to_string();
+
             let Some(action) = actions.into_iter().find_map(|a| match a {
                 tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca)
                     if ca.title == selected =>
@@ -151,7 +162,7 @@ mod refactor_rewrite {
         #[tokio::test]
         async fn dotted_keys_to_inline_table(
             r#"
-            foo.bar = 1█
+            foo.bar█ = 1
             "#,
             Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
             Option::<std::path::PathBuf>::None,
