@@ -1,15 +1,13 @@
-use crate::Backend;
+use crate::{
+    code_action::{dot_keys_to_inline_table_code_action, inline_table_to_dot_keys_code_action},
+    Backend,
+};
 use itertools::Either;
-use tombi_document_tree::{TableKind, TryIntoDocumentTree};
+use tombi_document_tree::TryIntoDocumentTree;
 use tombi_schema_store::{
-    build_accessor_contexts, dig_accessors, get_accessors, get_completion_keys_with_context,
-    Accessor, AccessorContext, AccessorKeyKind,
+    build_accessor_contexts, get_accessors, get_completion_keys_with_context,
 };
-use tower_lsp::lsp_types::{
-    CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, DocumentChanges, OneOf,
-    OptionalVersionedTextDocumentIdentifier, TextDocumentEdit, TextDocumentIdentifier, TextEdit,
-    WorkspaceEdit,
-};
+use tower_lsp::lsp_types::{CodeActionOrCommand, CodeActionParams};
 
 pub async fn handle_code_action(
     backend: &Backend,
@@ -67,7 +65,7 @@ pub async fn handle_code_action(
 
     let mut code_actions = Vec::new();
 
-    if let Some(code_action) = dot_keys_to_inline_table(
+    if let Some(code_action) = dot_keys_to_inline_table_code_action(
         &text_document,
         &document_tree,
         &accessors,
@@ -75,7 +73,7 @@ pub async fn handle_code_action(
     ) {
         code_actions.push(code_action.into());
     }
-    if let Some(code_action) = inline_table_to_dot_keys(
+    if let Some(code_action) = inline_table_to_dot_keys_code_action(
         &text_document,
         &document_tree,
         &accessors,
@@ -89,6 +87,7 @@ pub async fn handle_code_action(
         &document_tree,
         &accessors,
         &accessor_contexts,
+        toml_version,
     )? {
         code_actions.extend(extension_code_actions);
     }
@@ -100,153 +99,13 @@ pub async fn handle_code_action(
     Ok(Some(code_actions))
 }
 
-fn dot_keys_to_inline_table(
-    text_document: &TextDocumentIdentifier,
-    document_tree: &tombi_document_tree::DocumentTree,
-    accessors: &[Accessor],
-    contexts: &[AccessorContext],
-) -> Option<CodeAction> {
-    if accessors.len() < 2 {
-        return None;
-    }
-    debug_assert!(accessors.len() == contexts.len());
-    let AccessorContext::Key(parent_context) = &contexts[accessors.len() - 2] else {
-        return None;
-    };
-
-    let Some((accessor, value)) = dig_accessors(&document_tree, &accessors[..accessors.len() - 1])
-    else {
-        return None;
-    };
-
-    match (accessor, value) {
-        (Accessor::Key(parent_key), tombi_document_tree::Value::Table(table))
-            if table.len() == 1
-                && matches!(
-                    parent_context.kind,
-                    AccessorKeyKind::Dotted | AccessorKeyKind::KeyValue
-                ) =>
-        {
-            let (key, value) = table.key_values().iter().next().unwrap();
-
-            if table.kind() == TableKind::InlineTable {
-                return None;
-            }
-
-            Some(
-                CodeAction {
-                    title: "Convert Dotted Keys to Inline Table".to_string(),
-                    kind: Some(CodeActionKind::REFACTOR_REWRITE),
-                    edit: Some(WorkspaceEdit {
-                        changes: None,
-                        document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
-                            text_document: OptionalVersionedTextDocumentIdentifier {
-                                uri: text_document.clone().uri,
-                                version: None,
-                            },
-                            edits: vec![
-                                OneOf::Left(TextEdit {
-                                    range: tombi_text::Range {
-                                        start: parent_context.range.start,
-                                        end: value.range().start,
-                                    }
-                                    .into(),
-                                    new_text: format!(
-                                        "{} = {{ {}{}",
-                                        parent_key,
-                                        key.value(),
-                                        if table.kind() == TableKind::KeyValue {
-                                            " = "
-                                        } else {
-                                            "."
-                                        }
-                                    ),
-                                }),
-                                OneOf::Left(TextEdit {
-                                    range: tombi_text::Range::at(value.symbol_range().end).into(),
-                                    new_text: " }".to_string(),
-                                }),
-                            ],
-                        }])),
-                        change_annotations: None,
-                    }),
-                    ..Default::default()
-                }
-                .into(),
-            )
-        }
-        _ => None,
-    }
-}
-
-fn inline_table_to_dot_keys(
-    text_document: &TextDocumentIdentifier,
-    document_tree: &tombi_document_tree::DocumentTree,
-    accessors: &[Accessor],
-    contexts: &[AccessorContext],
-) -> Option<CodeAction> {
-    if accessors.len() < 2 {
-        return None;
-    }
-    debug_assert!(accessors.len() == contexts.len());
-    let AccessorContext::Key(parent_context) = &contexts[accessors.len() - 2] else {
-        return None;
-    };
-
-    let Some((_, value)) = dig_accessors(document_tree, &accessors[..accessors.len() - 1]) else {
-        return None;
-    };
-
-    match value {
-        tombi_document_tree::Value::Table(table)
-            if table.len() == 1 && table.kind() == TableKind::InlineTable =>
-        {
-            let (key, value) = table.key_values().iter().next().unwrap();
-
-            Some(CodeAction {
-                title: "Convert Inline Table to Dotted Keys".to_string(),
-                kind: Some(CodeActionKind::REFACTOR_REWRITE),
-                edit: Some(WorkspaceEdit {
-                    changes: None,
-                    document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
-                        text_document: OptionalVersionedTextDocumentIdentifier {
-                            uri: text_document.uri.clone(),
-                            version: None,
-                        },
-                        edits: vec![
-                            OneOf::Left(TextEdit {
-                                range: tombi_text::Range::new(
-                                    parent_context.range.end,
-                                    key.range().start,
-                                )
-                                .into(),
-                                new_text: ".".to_string(),
-                            }),
-                            OneOf::Left(TextEdit {
-                                range: tombi_text::Range::new(
-                                    value.range().end,
-                                    table.symbol_range().end,
-                                )
-                                .into(),
-                                new_text: "".to_string(),
-                            }),
-                        ],
-                    }])),
-                    change_annotations: None,
-                }),
-                ..Default::default()
-            })
-        }
-        _ => None,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use tombi_ast::AstNode;
     use tombi_config::TomlVersion;
     use tombi_parser::parse;
+    use tombi_schema_store::AccessorKeyKind;
     use tombi_text::Position;
 
     #[tokio::test]
