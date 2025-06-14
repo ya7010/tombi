@@ -562,5 +562,22 @@ mod refactor_rewrite {
                 "#
             ));
         }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version_into_table_with_comment(
+                r#"
+                [dependencies]
+                serde█ = "1.0" # comment
+                "#,
+                Select(CodeActionRefactorRewriteName::ConvertDependencyToTableFormat),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { version = "1.0" } # comment
+                "#
+            ));
+        }
     }
 }
