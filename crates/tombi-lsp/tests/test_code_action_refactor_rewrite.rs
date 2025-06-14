@@ -203,6 +203,20 @@ mod refactor_rewrite {
 
     test_code_action_refactor_rewrite! {
         #[tokio::test]
+        async fn dotted_keys_to_inline_table_with_comment(
+            r#"
+            foo.bar█ = 1 # comment
+            "#,
+            Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
+        ) -> Ok(
+            r#"
+            foo = { bar = 1 } # comment
+            "#
+        );
+    }
+
+    test_code_action_refactor_rewrite! {
+        #[tokio::test]
         async fn inline_table_to_dotted_keys(
             r#"
             foo = { bar = █1 }
@@ -211,6 +225,20 @@ mod refactor_rewrite {
         ) -> Ok(
             r#"
             foo.bar = 1
+            "#
+        );
+    }
+
+    test_code_action_refactor_rewrite! {
+        #[tokio::test]
+        async fn inline_table_to_dotted_keys_with_comment(
+            r#"
+            foo = { bar = █1 } # comment
+            "#,
+            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+        ) -> Ok(
+            r#"
+            foo.bar = 1 # comment
             "#
         );
     }
