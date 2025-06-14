@@ -227,11 +227,8 @@ fn use_workspace_depencency_code_action(
     let AccessorContext::Key(crate_key_context) = &contexts[1] else {
         return None;
     };
-    tracing::error!(
-        "use_workspace_depencency_code_action: crate_name = {}, value = {:?}",
-        crate_name,
-        value
-    );
+
+    let title = format!("Use Workspace Dependency \"{}\"", crate_name);
 
     match value {
         tombi_document_tree::Value::String(version) => {
@@ -244,7 +241,7 @@ fn use_workspace_depencency_code_action(
                 return None;
             }
             return Some(CodeAction {
-                title: format!("Inherit from workspace \"{}\" crate", crate_name),
+                title,
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -260,7 +257,46 @@ fn use_workspace_depencency_code_action(
                                 end: version.range().end,
                             }
                             .into(),
-                            new_text: format!("{} = {{ workspace = true }}", crate_name),
+                            new_text: format!("{}.workspace = true", crate_name),
+                        })],
+                    }])),
+                    change_annotations: None,
+                }),
+                ..Default::default()
+            });
+        }
+        tombi_document_tree::Value::Table(table) => {
+            if table.get("workspace").is_some() {
+                return None; // Already a workspace dependency
+            }
+
+            if dig_keys(
+                workspace_document_tree,
+                &["workspace", "dependencies", crate_name],
+            )
+            .is_none()
+            {
+                return None; // No workspace dependency to inherit
+            }
+
+            let Some((key, version)) = table.get_key_value("version") else {
+                return None; // No version to inherit
+            };
+
+            return Some(CodeAction {
+                title,
+                kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
+                diagnostics: None,
+                edit: Some(WorkspaceEdit {
+                    changes: None,
+                    document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
+                        text_document: OptionalVersionedTextDocumentIdentifier {
+                            uri: text_document.clone().uri,
+                            version: None,
+                        },
+                        edits: vec![OneOf::Left(TextEdit {
+                            range: (key.range() + version.range()).into(),
+                            new_text: "workspace = true".to_string(),
                         })],
                     }])),
                     change_annotations: None,
