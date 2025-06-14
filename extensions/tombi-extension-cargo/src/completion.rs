@@ -473,13 +473,13 @@ async fn fetch_crate_features(
 
 /// Fetch crate features from local path Cargo.toml
 async fn fetch_local_crate_features(
-    current_cargo_toml_path: &std::path::Path,
+    cargo_toml_path: &std::path::Path,
     sub_crate_path: &str,
     toml_version: TomlVersion,
 ) -> Option<AHashMap<String, Vec<String>>> {
     // Get the directory of the current Cargo.toml file
     let Some((_, subcrate_document_tree)) = find_path_crate_cargo_toml(
-        current_cargo_toml_path,
+        cargo_toml_path,
         std::path::Path::new(sub_crate_path),
         toml_version,
     ) else {

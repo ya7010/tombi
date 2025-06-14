@@ -755,6 +755,24 @@ mod completion_labels {
                 "''",
             ]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn cargo_dependencies_tombi_date_time_features_eq_array_with_path(
+                r#"
+                [dependencies]
+                tombi-date-time = { path = "../tombi-date-time", features=[█] }
+                "#,
+                Source(project_root_path().join("crates/tombi-document/Cargo.toml")),
+                Schema(cargo_schema_path()),
+            ) -> Ok([
+                "\"default\"",
+                "\"chrono\"",
+                "\"serde\"",
+                "\"\"",
+                "''",
+            ]);
+        }
     }
 
     mod without_schema {
