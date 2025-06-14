@@ -101,6 +101,24 @@ pub async fn handle_code_action(
     Ok(Some(code_actions))
 }
 
+pub enum CodeActionName {
+    DotKeysToInlineTable,
+    InlineTableToDotKeys,
+}
+
+impl std::fmt::Display for CodeActionName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CodeActionName::DotKeysToInlineTable => {
+                write!(f, "Convert Dotted Keys to Inline Table")
+            }
+            CodeActionName::InlineTableToDotKeys => {
+                write!(f, "Convert Inline Table to Dotted Keys")
+            }
+        }
+    }
+}
+
 fn dot_keys_to_inline_table(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
@@ -136,7 +154,7 @@ fn dot_keys_to_inline_table(
 
             Some(
                 CodeAction {
-                    title: "Convert Dotted Keys to Inline Table".to_string(),
+                    title: CodeActionName::DotKeysToInlineTable.to_string(),
                     kind: Some(CodeActionKind::REFACTOR_REWRITE),
                     edit: Some(WorkspaceEdit {
                         changes: None,
@@ -205,7 +223,7 @@ fn inline_table_to_dot_keys(
             let (key, value) = table.key_values().iter().next().unwrap();
 
             Some(CodeAction {
-                title: "Convert Inline Table to Dotted Keys".to_string(),
+                title: CodeActionName::InlineTableToDotKeys.to_string(),
                 kind: Some(CodeActionKind::REFACTOR_REWRITE),
                 edit: Some(WorkspaceEdit {
                     changes: None,
