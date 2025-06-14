@@ -1,4 +1,4 @@
-use tombi_document_tree::dig_keys;
+use tombi_document_tree::{dig_keys, TableKind};
 use tombi_schema_store::{dig_accessors, matches_accessors, Accessor, AccessorContext};
 use tower_lsp::lsp_types::{
     CodeAction, CodeActionOrCommand, DocumentChanges, OneOf,
@@ -8,20 +8,20 @@ use tower_lsp::lsp_types::{
 
 use crate::{find_workspace_cargo_toml, get_workspace_path};
 
-pub enum CodeActionRefactorRewriteName<'a> {
-    UseInheritedWorkspaceSettings,
-    UseWorkspaceDependency { crate_name: &'a str },
+pub enum CodeActionRefactorRewriteName {
+    InheritFromWorkspace,
+    UseWorkspaceDependency,
     ConvertDependencyToTableFormat,
 }
 
-impl<'a> std::fmt::Display for CodeActionRefactorRewriteName<'a> {
+impl std::fmt::Display for CodeActionRefactorRewriteName {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            CodeActionRefactorRewriteName::UseInheritedWorkspaceSettings => {
-                write!(f, "Use Inherited Workspace Settings")
+            CodeActionRefactorRewriteName::InheritFromWorkspace => {
+                write!(f, "Inherit from Workspace")
             }
-            CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name } => {
-                write!(f, "Use Workspace Dependency: {}", crate_name)
+            CodeActionRefactorRewriteName::UseWorkspaceDependency => {
+                write!(f, "Inherit Dependency from Workspace")
             }
             CodeActionRefactorRewriteName::ConvertDependencyToTableFormat => {
                 write!(f, "Convert Dependency to Table Format")
@@ -202,7 +202,7 @@ fn workspace_code_action(
     };
 
     return Some(CodeAction {
-        title: CodeActionRefactorRewriteName::UseInheritedWorkspaceSettings.to_string(),
+        title: CodeActionRefactorRewriteName::InheritFromWorkspace.to_string(),
         kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
@@ -261,8 +261,7 @@ fn use_workspace_depencency_code_action(
                 return None;
             }
             return Some(CodeAction {
-                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
-                    .to_string(),
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -306,9 +305,20 @@ fn use_workspace_depencency_code_action(
                 return None; // No version to inherit
             };
 
+            let text_edit = if table.kind() == TableKind::KeyValue {
+                TextEdit {
+                    range: (crate_key_context.range + version.range()).into(),
+                    new_text: format!("{} = {{ workspace = true }}", crate_name),
+                }
+            } else {
+                TextEdit {
+                    range: (key.range() + version.range()).into(),
+                    new_text: "workspace = true".to_string(),
+                }
+            };
+
             return Some(CodeAction {
-                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
-                    .to_string(),
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -318,12 +328,9 @@ fn use_workspace_depencency_code_action(
                             uri: text_document.clone().uri,
                             version: None,
                         },
-                        edits: vec![OneOf::Left(TextEdit {
-                            range: (key.range() + version.range()).into(),
-                            new_text: "workspace = true".to_string(),
-                        })],
+                        edits: vec![OneOf::Left(text_edit)],
                     }])),
-                    change_annotations: None,
+                    ..Default::default()
                 }),
                 ..Default::default()
             });

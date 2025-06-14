@@ -1,5 +1,3 @@
-use tombi_lsp::code_action::CodeActionRefactorRewriteName;
-
 macro_rules! test_code_action_refactor_rewrite {
     (
         #[tokio::test]
@@ -39,7 +37,7 @@ macro_rules! test_code_action_refactor_rewrite {
         async fn $name:ident(
             $source:expr,
             Select($select:expr),
-            $schema_file_path:expr$(,)?
+            $toml_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
         test_code_action_refactor_rewrite! {
@@ -47,7 +45,7 @@ macro_rules! test_code_action_refactor_rewrite {
             async fn _$name(
                 $source,
                 $select,
-                Some($schema_file_path),
+                Some($toml_file_path),
             ) -> Ok($expected);
         }
     };
@@ -56,7 +54,7 @@ macro_rules! test_code_action_refactor_rewrite {
         #[tokio::test]
         async fn $name:ident(
             $source:expr,
-            $schema_file_path:expr$(,)?
+            $toml_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
         test_code_action_refactor_rewrite! {
@@ -64,7 +62,7 @@ macro_rules! test_code_action_refactor_rewrite {
             async fn _$name(
                 $source,
                 "Dummy Code Action",
-                Some($schema_file_path),
+                Some($toml_file_path),
             ) -> Ok($expected);
         }
     };
@@ -74,12 +72,12 @@ macro_rules! test_code_action_refactor_rewrite {
         async fn _$name:ident(
             $source:expr,
             $select:expr,
-            $schema_file_path:expr$(,)?
+            $toml_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-            use std::io::Write;
+            use itertools::Itertools;
             use tombi_lsp::handler::handle_code_action;
             use tombi_lsp::handler::handle_did_open;
             use tombi_lsp::Backend;
@@ -93,26 +91,6 @@ macro_rules! test_code_action_refactor_rewrite {
                 Backend::new(client, &tombi_lsp::backend::Options::default())
             });
             let backend = service.inner();
-
-            if let Some(schema_file_path) = $schema_file_path.as_ref() {
-                let schema_url = tombi_schema_store::SchemaUrl::from_file_path(schema_file_path)
-                    .expect(&format!(
-                        "failed to convert schema path to URL: {}",
-                        schema_file_path.display()
-                    ));
-                backend
-                    .schema_store
-                    .load_schemas(
-                        &[tombi_config::Schema::Root(tombi_config::RootSchema {
-                            toml_version: None,
-                            path: schema_url.to_string(),
-                            include: vec!["*.toml".to_string()],
-                        })],
-                        None,
-                    )
-                    .await;
-            }
-
             let temp_file = tempfile::NamedTempFile::with_suffix_in(
                 ".toml",
                 std::env::current_dir().expect("failed to get current directory"),
@@ -127,9 +105,13 @@ macro_rules! test_code_action_refactor_rewrite {
             toml_text.remove(index);
             tracing::debug!(?toml_text, "test toml text");
             tracing::debug!(?index, "test toml text index");
-            temp_file.as_file().write_all(toml_text.as_bytes())?;
-            let toml_file_url = Url::from_file_path(temp_file.path())
-                .map_err(|_| "failed to convert temporary file path to URL")?;
+
+            let toml_file_url = $toml_file_path
+                .map(|path| Url::from_file_path(path).expect("failed to convert file path to URL"))
+                .unwrap_or_else(|| {
+                    Url::from_file_path(temp_file.path())
+                        .expect("failed to convert temp file path to URL")
+                });
 
             handle_did_open(
                 backend,
@@ -241,8 +223,33 @@ macro_rules! test_code_action_refactor_rewrite {
                     tracing::debug!("no code actions found, as expected");
                     Ok(())
                 }
-                (Some(_), None) => {
-                    return Err("expected no code actions, but found some".into());
+                (Some(actions), None) => {
+                    let selected = $select;
+                    let selected: &str = &selected.to_string();
+
+                    let None = actions.iter().find_map(|a| match a {
+                        tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca)
+                            if ca.title == selected =>
+                        {
+                            Some(ca)
+                        }
+                        _ => None,
+                    }) else {
+                        return Err(format!(
+                            "expected '{}' but not included in {:?}",
+                            selected,
+                            actions
+                                .iter()
+                                .filter_map(|a| match a {
+                                    tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca) =>
+                                        Some(ca.title.clone()),
+                                    _ => None,
+                                })
+                                .collect_vec()
+                        )
+                        .into());
+                    };
+                    Ok(())
                 }
                 (None, Some(_)) => {
                     return Err("expected code actions, but found none".into());
@@ -253,114 +260,324 @@ macro_rules! test_code_action_refactor_rewrite {
 }
 
 mod refactor_rewrite {
-    use super::*;
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn dotted_keys_to_inline_table(
-            r#"
+    mod common {
+        use tombi_lsp::code_action::CodeActionRefactorRewriteName;
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn dotted_keys_to_inline_table(
+                r#"
             foo.bar█ = 1
             "#,
-            Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
-        ) -> Ok(Some(
-            r#"
+                Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
+            ) -> Ok(Some(
+                r#"
             foo = { bar = 1 }
             "#
-        ));
-    }
+            ));
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn dotted_keys_to_inline_table_with_comment(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn dotted_keys_to_inline_table_with_comment(
+                r#"
             foo.bar█ = 1 # comment
             "#,
-            Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
-        ) -> Ok(Some(
-            r#"
+                Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
+            ) -> Ok(Some(
+                r#"
             foo = { bar = 1 } # comment
             "#
-        ));
-    }
+            ));
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn inline_table_to_dotted_keys(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn nested_dotted_keys_to_inline_table_with_comment(
+                r#"
+            foo.bar█.baz = 1 # comment
+            "#,
+                Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
+            ) -> Ok(Some(
+                r#"
+            foo = { bar.baz = 1 } # comment
+            "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn inline_table_to_dotted_keys(
+                r#"
             foo = { bar = █1 }
             "#,
-            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-        ) -> Ok(Some(
-            r#"
+                Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+            ) -> Ok(Some(
+                r#"
             foo.bar = 1
             "#
-        ));
-    }
+            ));
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn inline_table_to_dotted_keys_with_comment(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn inline_table_to_dotted_keys_with_comment(
+                r#"
             foo = { bar = █1 } # comment
             "#,
-            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-        ) -> Ok(Some(
-            r#"
+                Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+            ) -> Ok(Some(
+                r#"
             foo.bar = 1 # comment
             "#
-        ));
-    }
+            ));
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn inline_table_array_to_dotted_keys_with_comment(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn nested_inline_table_to_dotted_keys_with_comment(
+                r#"
+            foo = { bar█.baz = 1 } # comment
+            "#,
+                Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+            ) -> Ok(Some(
+                r#"
+            foo.bar.baz = 1 # comment
+            "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn inline_table_array_to_dotted_keys_with_comment(
+                r#"
             foo = { bar = █[1, 2, 3] } # comment
             "#,
-            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-        ) -> Ok(Some(
-            r#"
+                Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+            ) -> Ok(Some(
+                r#"
             foo.bar = [1, 2, 3] # comment
             "#
-        ));
-    }
+            ));
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn inline_table_multiline_array_to_dotted_keys_with_comment(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn inline_table_multiline_array_to_dotted_keys_with_comment(
+                r#"
             foo = { bar = █[
               1,
               2,
               3,
             ] } # comment
             "#,
-            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-        ) -> Ok(Some(
-            r#"
+                Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+            ) -> Ok(Some(
+                r#"
             foo.bar = [
               1,
               2,
               3,
             ] # comment
             "#
-        ));
-    }
+            ));
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn inline_table_has_other_keys(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn inline_table_has_other_keys(
+                r#"
             foo = { bar = █1, baz = 2 }
             "#,
-        ) -> Ok(None);
-    }
+            ) -> Ok(None);
+        }
 
-    test_code_action_refactor_rewrite! {
-        #[tokio::test]
-        async fn inline_table_has_other_keys_with_comment(
-            r#"
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn inline_table_has_other_keys_with_comment(
+                r#"
             foo = { bar = █1, baz = 2 } # comment
             "#,
-        ) -> Ok(None);
+            ) -> Ok(None);
+        }
+    }
+
+    mod cargo_toml {
+        use tombi_extension_cargo::CodeActionRefactorRewriteName;
+        use tombi_test_lib::project_root_path;
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_package_version(
+                r#"
+                [package]
+                version█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::InheritFromWorkspace),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [package]
+                version.workspace = true
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_package_version_workspace(
+                r#"
+                [package]
+                version.workspace█ = true
+                "#,
+                Select(CodeActionRefactorRewriteName::InheritFromWorkspace),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(None);
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_dotted_version(
+                r#"
+                [dependencies]
+                serde.version█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { workspace = true }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_inline_table_version(
+                r#"
+                [dependencies]
+                serde = { version█ = "1.0" }
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { workspace = true }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_inline_table_version_with_other_keys(
+                r#"
+                [dependencies]
+                serde = { version█ = "1.0", features = ["derive"] }
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { workspace = true, features = ["derive"] }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_dotted_keys_workspace(
+                r#"
+                [dependencies]
+                serde.workspace█ = true
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(None);
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_inline_table_workspace(
+                r#"
+                [dependencies]
+                serde = { workspace█ = true }
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(None);
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version(
+                r#"
+                [dependencies.serde]
+                version█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies.serde]
+                workspace = true
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version_with_other_keys(
+                r#"
+                [dependencies.serde]
+                version█ = "1.0"
+                default-features = false
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies.serde]
+                workspace = true
+                default-features = false
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version_into_table(
+                r#"
+                [dependencies]
+                serde█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::ConvertDependencyToTableFormat),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { version = "1.0" }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version_into_table_with_comment(
+                r#"
+                [dependencies]
+                serde█ = "1.0" # comment
+                "#,
+                Select(CodeActionRefactorRewriteName::ConvertDependencyToTableFormat),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { version = "1.0" } # comment
+                "#
+            ));
+        }
     }
 }
