@@ -3352,6 +3352,7 @@ dependencies = [
  "tombi-config",
  "tombi-document-tree",
  "tombi-extension",
+ "tombi-future",
  "tombi-parser",
  "tombi-schema-store",
  "tombi-text",

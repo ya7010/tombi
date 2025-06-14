@@ -5,6 +5,8 @@ use tombi_config::TomlVersion;
 use tombi_extension::CompletionContent;
 use tombi_extension::CompletionHint;
 use tombi_extension::CompletionKind;
+use tombi_future::BoxFuture;
+use tombi_future::Boxable;
 use tombi_schema_store::dig_accessors;
 use tombi_schema_store::matches_accessors;
 use tombi_schema_store::Accessor;
@@ -12,7 +14,9 @@ use tombi_schema_store::HttpClient;
 use tombi_version_sort::version_sort;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 
-use crate::get_path_crate_cargo_toml;
+use crate::find_path_crate_cargo_toml;
+use crate::find_workspace_cargo_toml;
+use crate::get_workspace_path;
 
 #[derive(Debug, Deserialize)]
 struct CratesIoVersionsResponse {
@@ -47,12 +51,13 @@ pub async fn completion(
     if !text_document.uri.path().ends_with("Cargo.toml") {
         return Ok(None);
     }
+    let cargo_toml_path = std::path::Path::new(text_document.uri.path());
 
     if let Some(Accessor::Key(first)) = accessors.first() {
         if first == "workspace" {
             completion_workspace(
-                text_document,
                 document_tree,
+                cargo_toml_path,
                 position,
                 accessors,
                 completion_hint,
@@ -61,8 +66,8 @@ pub async fn completion(
             .await
         } else {
             completion_member(
-                text_document,
                 document_tree,
+                cargo_toml_path,
                 position,
                 accessors,
                 completion_hint,
@@ -76,8 +81,8 @@ pub async fn completion(
 }
 
 async fn completion_workspace(
-    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
+    cargo_toml_path: &std::path::Path,
     position: tombi_text::Position,
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
@@ -109,10 +114,16 @@ async fn completion_workspace(
         | matches_accessors!(accessors, ["workspace", "dependencies", _, "features", _])
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(2) {
+            if let Some((_, tombi_document_tree::Value::Incomplete { .. })) =
+                dig_accessors(document_tree, &accessors)
+            {
+                return Ok(None);
+            }
+
             return complete_crate_feature(
-                text_document,
                 crate_name.as_str(),
                 document_tree,
+                cargo_toml_path,
                 &accessors[..4],
                 position,
                 toml_version,
@@ -133,8 +144,8 @@ async fn completion_workspace(
 }
 
 async fn completion_member(
-    text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
+    cargo_toml_path: &std::path::Path,
     position: tombi_text::Position,
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
@@ -176,10 +187,16 @@ async fn completion_member(
         || matches_accessors!(accessors, ["build-dependencies", _, "features"]))
     {
         if let Some(Accessor::Key(crate_name)) = accessors.get(1) {
+            if let Some((_, tombi_document_tree::Value::Incomplete { .. })) =
+                dig_accessors(document_tree, &accessors)
+            {
+                return Ok(None);
+            }
+
             return complete_crate_feature(
-                text_document,
                 crate_name.as_str(),
                 document_tree,
+                cargo_toml_path,
                 &accessors[..3],
                 position,
                 toml_version,
@@ -261,113 +278,147 @@ async fn complete_crate_version(
     }
 }
 
-async fn complete_crate_feature(
-    text_document: &TextDocumentIdentifier,
-    crate_name: &str,
-    document_tree: &tombi_document_tree::DocumentTree,
-    features_accessors: &[Accessor],
+fn complete_crate_feature<'a: 'b, 'b>(
+    crate_name: &'a str,
+    document_tree: &'a tombi_document_tree::DocumentTree,
+    cargo_toml_path: &'a std::path::Path,
+    features_accessors: &'a [Accessor],
     position: tombi_text::Position,
     toml_version: TomlVersion,
-    feature_string: Option<&tombi_document_tree::String>,
-) -> Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error> {
-    // Check if this is a path dependency
-    let features = if let Some((_, tombi_document_tree::Value::String(path_value))) = dig_accessors(
-        document_tree,
-        &features_accessors[..features_accessors.len() - 1]
-            .iter()
-            .chain(std::iter::once(&Accessor::Key("path".to_string())))
-            .cloned()
-            .collect_vec(),
-    ) {
-        // This is a path dependency - read features from local Cargo.toml
-        let current_cargo_toml_path = std::path::Path::new(text_document.uri.path());
-        fetch_local_crate_features(current_cargo_toml_path, path_value.value(), toml_version).await
-    } else {
-        // This is a version dependency - use existing crates.io API logic
-        let version_string = if let Some((_, tombi_document_tree::Value::String(value_string))) =
+    editting_feature_string: Option<&'a tombi_document_tree::String>,
+) -> BoxFuture<'b, Result<Option<Vec<CompletionContent>>, tower_lsp::jsonrpc::Error>> {
+    async move {
+        // Check if this is a path dependency
+        let features = if let Some((_, tombi_document_tree::Value::String(path_value))) =
             dig_accessors(
                 document_tree,
                 &features_accessors[..features_accessors.len() - 1]
                     .iter()
-                    .chain(std::iter::once(&Accessor::Key("version".to_string())))
+                    .chain(std::iter::once(&Accessor::Key("path".to_string())))
                     .cloned()
                     .collect_vec(),
             ) {
-            Some(value_string.value().to_string())
+            // This is a path dependency - read features from local Cargo.toml
+            fetch_local_crate_features(cargo_toml_path, path_value.value(), toml_version).await
+        } else if let Some((_, tombi_document_tree::Value::String(value_string))) = dig_accessors(
+            document_tree,
+            &features_accessors[..features_accessors.len() - 1]
+                .iter()
+                .chain(std::iter::once(&Accessor::Key("version".to_string())))
+                .cloned()
+                .collect_vec(),
+        ) {
+            fetch_crate_features(crate_name, Some(value_string.value())).await
+        } else if let Some((_, tombi_document_tree::Value::Boolean(boolean))) = dig_accessors(
+            document_tree,
+            &features_accessors[..features_accessors.len() - 1]
+                .iter()
+                .chain(std::iter::once(&Accessor::Key("workspace".to_string())))
+                .cloned()
+                .collect_vec(),
+        ) {
+            if boolean.value() {
+                let Some((workspace_cargo_toml_path, workspace_document_tree)) =
+                    find_workspace_cargo_toml(
+                        cargo_toml_path,
+                        get_workspace_path(document_tree),
+                        toml_version,
+                    )
+                else {
+                    return Ok(None);
+                };
+                return complete_crate_feature(
+                    crate_name,
+                    &workspace_document_tree,
+                    &workspace_cargo_toml_path,
+                    &[
+                        Accessor::Key("workspace".to_string()),
+                        Accessor::Key("dependencies".to_string()),
+                        Accessor::Key(crate_name.to_string()),
+                        Accessor::Key("features".to_string()),
+                    ],
+                    position,
+                    toml_version,
+                    editting_feature_string,
+                )
+                .await;
+            } else {
+                fetch_crate_features(crate_name, None).await
+            }
         } else {
-            None
+            fetch_crate_features(crate_name, None).await
         };
 
-        fetch_crate_features(crate_name, version_string.as_deref()).await
-    };
+        let Some(features) = features else {
+            return Ok(None);
+        };
 
-    let Some(features) = features else {
-        return Ok(None);
-    };
+        let already_features: Vec<String> = match dig_accessors(document_tree, &features_accessors)
+        {
+            Some((_, tombi_document_tree::Value::Array(array))) => array
+                .values()
+                .into_iter()
+                .filter_map(|feature| {
+                    if let tombi_document_tree::Value::String(feature_string) = feature {
+                        Some(feature_string.value().to_string())
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+            _ => Vec::with_capacity(0),
+        };
 
-    let already_features: Vec<String> = match dig_accessors(document_tree, &features_accessors) {
-        Some((_, tombi_document_tree::Value::Array(array))) => array
-            .values()
+        let items = features
             .into_iter()
-            .filter_map(|feature| {
-                if let tombi_document_tree::Value::String(feature_string) = feature {
-                    Some(feature_string.value().to_string())
-                } else {
-                    None
-                }
+            .filter(|(feature, _)| !already_features.contains(feature))
+            .sorted_by(|(a, _), (b, _)| version_sort(a, b))
+            .enumerate()
+            .map(|(i, (feature, feature_dependencies))| CompletionContent {
+                label: format!("\"{}\"", feature),
+                kind: CompletionKind::String,
+                emoji_icon: Some('🦀'),
+                priority: tombi_extension::CompletionContentPriority::Custom(format!(
+                    "1__cargo_feature_{:>03}__",
+                    if feature == "default" {
+                        0 // default feature should be the first
+                    } else if feature.starts_with('_') {
+                        900 + i // features starting with `_` are considered private
+                    } else {
+                        i + 1
+                    }
+                )),
+                detail: Some("Crate feature".to_string()),
+                documentation: (!feature_dependencies.is_empty()).then(|| {
+                    "Feature dependencies:\n".to_string()
+                        + &feature_dependencies
+                            .into_iter()
+                            .map(|dep| format!("- `{dep}`"))
+                            .collect_vec()
+                            .join("\n")
+                }),
+                filter_text: None,
+                schema_url: None,
+                deprecated: None,
+                edit: editting_feature_string.map(|value| tombi_extension::CompletionEdit {
+                    text_edit: tower_lsp::lsp_types::CompletionTextEdit::Edit(
+                        tower_lsp::lsp_types::TextEdit {
+                            range: tombi_text::Range::at(position).into(),
+                            new_text: format!("\"{feature}\""),
+                        },
+                    ),
+                    insert_text_format: Some(tower_lsp::lsp_types::InsertTextFormat::PLAIN_TEXT),
+                    additional_text_edits: Some(vec![tower_lsp::lsp_types::TextEdit {
+                        range: value.range().into(),
+                        new_text: "".to_string(),
+                    }]),
+                }),
+                preselect: None,
             })
-            .collect(),
-        _ => Vec::with_capacity(0),
-    };
-
-    let items = features
-        .into_iter()
-        .filter(|(feature, _)| !already_features.contains(feature))
-        .sorted_by(|(a, _), (b, _)| version_sort(a, b))
-        .enumerate()
-        .map(|(i, (feature, feature_dependencies))| CompletionContent {
-            label: format!("\"{}\"", feature),
-            kind: CompletionKind::String,
-            emoji_icon: Some('🦀'),
-            priority: tombi_extension::CompletionContentPriority::Custom(format!(
-                "1__cargo_feature_{:>03}__",
-                if feature == "default" {
-                    0 // default feature should be the first
-                } else if feature.starts_with('_') {
-                    900 + i // features starting with `_` are considered private
-                } else {
-                    i + 1
-                }
-            )),
-            detail: Some("Crate feature".to_string()),
-            documentation: (!feature_dependencies.is_empty()).then(|| {
-                "Feature dependencies:\n".to_string()
-                    + &feature_dependencies
-                        .into_iter()
-                        .map(|dep| format!("- `{dep}`"))
-                        .collect_vec()
-                        .join("\n")
-            }),
-            filter_text: None,
-            schema_url: None,
-            deprecated: None,
-            edit: feature_string.map(|value| tombi_extension::CompletionEdit {
-                text_edit: tower_lsp::lsp_types::CompletionTextEdit::Edit(
-                    tower_lsp::lsp_types::TextEdit {
-                        range: tombi_text::Range::at(position).into(),
-                        new_text: format!("\"{feature}\""),
-                    },
-                ),
-                insert_text_format: Some(tower_lsp::lsp_types::InsertTextFormat::PLAIN_TEXT),
-                additional_text_edits: Some(vec![tower_lsp::lsp_types::TextEdit {
-                    range: value.range().into(),
-                    new_text: "".to_string(),
-                }]),
-            }),
-            preselect: None,
-        })
-        .collect();
-    Ok(Some(items))
+            .collect();
+        Ok(Some(items))
+    }
+    .boxed()
 }
 
 /// Fetch crate version list from crates.io API
@@ -427,7 +478,7 @@ async fn fetch_local_crate_features(
     toml_version: TomlVersion,
 ) -> Option<AHashMap<String, Vec<String>>> {
     // Get the directory of the current Cargo.toml file
-    let Some((_, subcrate_document_tree)) = get_path_crate_cargo_toml(
+    let Some((_, subcrate_document_tree)) = find_path_crate_cargo_toml(
         current_cargo_toml_path,
         std::path::Path::new(sub_crate_path),
         toml_version,
