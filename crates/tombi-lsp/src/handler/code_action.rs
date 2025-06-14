@@ -111,7 +111,7 @@ fn dot_keys_to_inline_table(
         return None;
     }
     debug_assert!(accessors.len() == contexts.len());
-    let AccessorContext::Key(parent_context) = &contexts[accessors.len() - 2] else {
+    let AccessorContext::Key(parent_key_context) = &contexts[accessors.len() - 2] else {
         return None;
     };
 
@@ -124,7 +124,7 @@ fn dot_keys_to_inline_table(
         (Accessor::Key(parent_key), tombi_document_tree::Value::Table(table))
             if table.len() == 1
                 && matches!(
-                    parent_context.kind,
+                    parent_key_context.kind,
                     AccessorKeyKind::Dotted | AccessorKeyKind::KeyValue
                 ) =>
         {
@@ -148,7 +148,7 @@ fn dot_keys_to_inline_table(
                             edits: vec![
                                 OneOf::Left(TextEdit {
                                     range: tombi_text::Range {
-                                        start: parent_context.range.start,
+                                        start: parent_key_context.range.start,
                                         end: value.range().start,
                                     }
                                     .into(),

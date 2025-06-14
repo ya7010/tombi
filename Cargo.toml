@@ -88,6 +88,7 @@ tower-lsp = { version = "0.20.0" }
 tracing = { version = "0.1.41" }
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 typed-builder = "0.21.0"
+ungrammar.version = "1.16.1"
 unicode-segmentation = "1.12.0"
 url = { version = "2.5.4", features = ["serde"] }
 zed_extension_api = "0.1.0"

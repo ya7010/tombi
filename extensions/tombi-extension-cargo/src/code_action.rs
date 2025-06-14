@@ -95,6 +95,16 @@ fn code_actions_for_crate_cargo_toml(
         ) {
             code_actions.push(CodeActionOrCommand::CodeAction(action));
         }
+
+        if let Some(action) = use_workspace_depencency_code_action(
+            text_document,
+            crate_document_tree,
+            &workspace_document_tree,
+            accessors,
+            contexts,
+        ) {
+            code_actions.push(CodeActionOrCommand::CodeAction(action));
+        }
     }
 
     // Add crate-specific code actions here
@@ -189,6 +199,79 @@ fn workspace_code_action(
         }),
         ..Default::default()
     });
+}
+
+fn use_workspace_depencency_code_action(
+    text_document: &TextDocumentIdentifier,
+    crate_document_tree: &tombi_document_tree::DocumentTree,
+    workspace_document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[Accessor],
+    contexts: &[AccessorContext],
+) -> Option<CodeAction> {
+    if accessors.len() < 2 {
+        return None;
+    }
+
+    if !(matches_accessors!(accessors[..2], ["dependencies", _])
+        || matches_accessors!(accessors[..2], ["dev-dependencies", _])
+        || matches_accessors!(accessors[..2], ["build-dependencies", _]))
+    {
+        return None; // Not a dependency accessor
+    }
+
+    let Some((Accessor::Key(crate_name), value)) =
+        dig_accessors(crate_document_tree, &accessors[..2])
+    else {
+        return None; // Not a string value
+    };
+    let AccessorContext::Key(crate_key_context) = &contexts[1] else {
+        return None;
+    };
+    tracing::error!(
+        "use_workspace_depencency_code_action: crate_name = {}, value = {:?}",
+        crate_name,
+        value
+    );
+
+    match value {
+        tombi_document_tree::Value::String(version) => {
+            if dig_keys(
+                workspace_document_tree,
+                &["workspace", "dependencies", crate_name],
+            )
+            .is_none()
+            {
+                return None;
+            }
+            return Some(CodeAction {
+                title: format!("Inherit from workspace \"{}\" crate", crate_name),
+                kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
+                diagnostics: None,
+                edit: Some(WorkspaceEdit {
+                    changes: None,
+                    document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
+                        text_document: OptionalVersionedTextDocumentIdentifier {
+                            uri: text_document.clone().uri,
+                            version: None,
+                        },
+                        edits: vec![OneOf::Left(TextEdit {
+                            range: tombi_text::Range {
+                                start: crate_key_context.range.start,
+                                end: version.range().end,
+                            }
+                            .into(),
+                            new_text: format!("{} = {{ workspace = true }}", crate_name),
+                        })],
+                    }])),
+                    change_annotations: None,
+                }),
+                ..Default::default()
+            });
+        }
+        _ => {}
+    }
+
+    None
 }
 
 fn crate_version_code_action(
