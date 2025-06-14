@@ -277,6 +277,8 @@ fn use_workspace_depencency_code_action(
                                 end: version.range().end,
                             }
                             .into(),
+                            // NOTE: Convert to a workspace dependency to make it easier
+                            //       to add other settings in the future.
                             new_text: format!("{} = {{ workspace = true }}", crate_name),
                         })],
                     }])),
