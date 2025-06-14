@@ -168,7 +168,7 @@ fn workspace_code_action(
     };
 
     return Some(CodeAction {
-        title: "Use inherited workspace settings".to_string(),
+        title: "Use inherited Workspace settings".to_string(),
         kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
