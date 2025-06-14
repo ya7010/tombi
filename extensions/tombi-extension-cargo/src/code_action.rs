@@ -17,14 +17,20 @@ pub fn code_action(
 
     let mut code_actions = Vec::new();
 
-    if let Some(action) = workspace_code_action(text_document, document_tree, accessors, contexts) {
-        code_actions.push(CodeActionOrCommand::CodeAction(action));
-    }
-
-    if let Some(action) =
-        crate_version_code_action(text_document, document_tree, accessors, contexts)
-    {
-        code_actions.push(CodeActionOrCommand::CodeAction(action));
+    if document_tree.contains_key("workspace") {
+        code_actions.extend(code_actions_for_workspace_cargo_toml(
+            text_document,
+            document_tree,
+            accessors,
+            contexts,
+        ))
+    } else {
+        code_actions.extend(code_actions_for_crate_cargo_toml(
+            text_document,
+            document_tree,
+            accessors,
+            contexts,
+        ));
     }
 
     Ok(if code_actions.is_empty() {
@@ -32,6 +38,46 @@ pub fn code_action(
     } else {
         Some(code_actions)
     })
+}
+
+fn code_actions_for_workspace_cargo_toml(
+    text_document: &TextDocumentIdentifier,
+    document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[Accessor],
+    contexts: &[AccessorContext],
+) -> Vec<CodeActionOrCommand> {
+    let mut code_actions = Vec::new();
+
+    if let Some(action) =
+        crate_version_code_action(text_document, document_tree, accessors, contexts)
+    {
+        code_actions.push(CodeActionOrCommand::CodeAction(action));
+    }
+
+    code_actions
+}
+
+fn code_actions_for_crate_cargo_toml(
+    text_document: &TextDocumentIdentifier,
+    document_tree: &tombi_document_tree::DocumentTree,
+    accessors: &[Accessor],
+    contexts: &[AccessorContext],
+) -> Vec<CodeActionOrCommand> {
+    let mut code_actions = Vec::new();
+
+    // Add workspace-specific code actions here
+    if let Some(action) = workspace_code_action(text_document, document_tree, accessors, contexts) {
+        code_actions.push(CodeActionOrCommand::CodeAction(action));
+    }
+
+    // Add crate-specific code actions here
+    if let Some(action) =
+        crate_version_code_action(text_document, document_tree, accessors, contexts)
+    {
+        code_actions.push(CodeActionOrCommand::CodeAction(action));
+    }
+
+    code_actions
 }
 
 fn workspace_code_action(
