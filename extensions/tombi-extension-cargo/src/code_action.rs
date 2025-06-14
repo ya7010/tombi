@@ -8,6 +8,28 @@ use tower_lsp::lsp_types::{
 
 use crate::{find_workspace_cargo_toml, get_workspace_path};
 
+pub enum CodeActionRefactorRewriteName<'a> {
+    UseInheritedWorkspaceSettings,
+    UseWorkspaceDependency { crate_name: &'a str },
+    ConvertDependencyToTableFormat,
+}
+
+impl<'a> std::fmt::Display for CodeActionRefactorRewriteName<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            CodeActionRefactorRewriteName::UseInheritedWorkspaceSettings => {
+                write!(f, "Use Inherited Workspace Settings")
+            }
+            CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name } => {
+                write!(f, "Use Workspace Dependency: {}", crate_name)
+            }
+            CodeActionRefactorRewriteName::ConvertDependencyToTableFormat => {
+                write!(f, "Convert Dependency to Table Format")
+            }
+        }
+    }
+}
+
 pub fn code_action(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
@@ -180,7 +202,7 @@ fn workspace_code_action(
     };
 
     return Some(CodeAction {
-        title: "Use inherited Workspace settings".to_string(),
+        title: CodeActionRefactorRewriteName::UseInheritedWorkspaceSettings.to_string(),
         kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
@@ -228,8 +250,6 @@ fn use_workspace_depencency_code_action(
         return None;
     };
 
-    let title = format!("Use Workspace Dependency \"{}\"", crate_name);
-
     match value {
         tombi_document_tree::Value::String(version) => {
             if dig_keys(
@@ -241,7 +261,8 @@ fn use_workspace_depencency_code_action(
                 return None;
             }
             return Some(CodeAction {
-                title,
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
+                    .to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -257,7 +278,9 @@ fn use_workspace_depencency_code_action(
                                 end: version.range().end,
                             }
                             .into(),
-                            new_text: format!("{}.workspace = true", crate_name),
+                            // NOTE: Convert to a workspace dependency to make it easier
+                            //       to add other settings in the future.
+                            new_text: format!("{} = {{ workspace = true }}", crate_name),
                         })],
                     }])),
                     change_annotations: None,
@@ -284,7 +307,8 @@ fn use_workspace_depencency_code_action(
             };
 
             return Some(CodeAction {
-                title,
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
+                    .to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -325,7 +349,7 @@ fn crate_version_code_action(
             dig_accessors(document_tree, accessors)
         {
             return Some(CodeAction {
-                title: "Convert Dependency to Table Format".to_string(),
+                title: CodeActionRefactorRewriteName::ConvertDependencyToTableFormat.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
