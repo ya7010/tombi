@@ -1,5 +1,3 @@
-use tombi_lsp::code_action::CodeActionRefactorRewriteName;
-
 macro_rules! test_code_action_refactor_rewrite {
     (
         #[tokio::test]
@@ -39,7 +37,7 @@ macro_rules! test_code_action_refactor_rewrite {
         async fn $name:ident(
             $source:expr,
             Select($select:expr),
-            $schema_file_path:expr$(,)?
+            $toml_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
         test_code_action_refactor_rewrite! {
@@ -47,7 +45,7 @@ macro_rules! test_code_action_refactor_rewrite {
             async fn _$name(
                 $source,
                 $select,
-                Some($schema_file_path),
+                Some($toml_file_path),
             ) -> Ok($expected);
         }
     };
@@ -56,7 +54,7 @@ macro_rules! test_code_action_refactor_rewrite {
         #[tokio::test]
         async fn $name:ident(
             $source:expr,
-            $schema_file_path:expr$(,)?
+            $toml_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
         test_code_action_refactor_rewrite! {
@@ -64,7 +62,7 @@ macro_rules! test_code_action_refactor_rewrite {
             async fn _$name(
                 $source,
                 "Dummy Code Action",
-                Some($schema_file_path),
+                Some($toml_file_path),
             ) -> Ok($expected);
         }
     };
@@ -74,12 +72,11 @@ macro_rules! test_code_action_refactor_rewrite {
         async fn _$name:ident(
             $source:expr,
             $select:expr,
-            $schema_file_path:expr$(,)?
+            $toml_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-            use std::io::Write;
             use tombi_lsp::handler::handle_code_action;
             use tombi_lsp::handler::handle_did_open;
             use tombi_lsp::Backend;
@@ -93,26 +90,6 @@ macro_rules! test_code_action_refactor_rewrite {
                 Backend::new(client, &tombi_lsp::backend::Options::default())
             });
             let backend = service.inner();
-
-            if let Some(schema_file_path) = $schema_file_path.as_ref() {
-                let schema_url = tombi_schema_store::SchemaUrl::from_file_path(schema_file_path)
-                    .expect(&format!(
-                        "failed to convert schema path to URL: {}",
-                        schema_file_path.display()
-                    ));
-                backend
-                    .schema_store
-                    .load_schemas(
-                        &[tombi_config::Schema::Root(tombi_config::RootSchema {
-                            toml_version: None,
-                            path: schema_url.to_string(),
-                            include: vec!["*.toml".to_string()],
-                        })],
-                        None,
-                    )
-                    .await;
-            }
-
             let temp_file = tempfile::NamedTempFile::with_suffix_in(
                 ".toml",
                 std::env::current_dir().expect("failed to get current directory"),
@@ -127,9 +104,13 @@ macro_rules! test_code_action_refactor_rewrite {
             toml_text.remove(index);
             tracing::debug!(?toml_text, "test toml text");
             tracing::debug!(?index, "test toml text index");
-            temp_file.as_file().write_all(toml_text.as_bytes())?;
-            let toml_file_url = Url::from_file_path(temp_file.path())
-                .map_err(|_| "failed to convert temporary file path to URL")?;
+
+            let toml_file_url = $toml_file_path
+                .map(|path| Url::from_file_path(path).expect("failed to convert file path to URL"))
+                .unwrap_or_else(|| {
+                    Url::from_file_path(temp_file.path())
+                        .expect("failed to convert temp file path to URL")
+                });
 
             handle_did_open(
                 backend,
@@ -253,10 +234,8 @@ macro_rules! test_code_action_refactor_rewrite {
 }
 
 mod refactor_rewrite {
-    use super::*;
-
     mod common {
-        use super::*;
+        use tombi_lsp::code_action::CodeActionRefactorRewriteName;
 
         test_code_action_refactor_rewrite! {
             #[tokio::test]
@@ -366,6 +345,28 @@ mod refactor_rewrite {
             foo = { bar = █1, baz = 2 } # comment
             "#,
             ) -> Ok(None);
+        }
+    }
+
+    mod cargo_toml {
+        use tombi_extension_cargo::CodeActionRefactorRewriteName;
+        use tombi_test_lib::project_root_path;
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dotted_keys_to_inline_table(
+                r#"
+                [package]
+                version█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::InheritFromWorkspace),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [package]
+                version.workspace = true
+                "#
+            ));
         }
     }
 }
