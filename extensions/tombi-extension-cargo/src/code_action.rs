@@ -1,3 +1,4 @@
+use tombi_document_tree::dig_keys;
 use tombi_schema_store::{dig_accessors, matches_accessors, Accessor, AccessorContext};
 use tower_lsp::lsp_types::{
     CodeAction, CodeActionOrCommand, DocumentChanges, OneOf,
@@ -5,15 +6,21 @@ use tower_lsp::lsp_types::{
     WorkspaceEdit,
 };
 
+use crate::{find_workspace_cargo_toml, get_workspace_path};
+
 pub fn code_action(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
     contexts: &[AccessorContext],
+    toml_version: tombi_config::TomlVersion,
 ) -> Result<Option<Vec<CodeActionOrCommand>>, tower_lsp::jsonrpc::Error> {
     if !text_document.uri.path().ends_with("Cargo.toml") {
         return Ok(None);
     }
+    let Some(cargo_toml_path) = text_document.uri.to_file_path().ok() else {
+        return Ok(None);
+    };
 
     let mut code_actions = Vec::new();
 
@@ -21,15 +28,19 @@ pub fn code_action(
         code_actions.extend(code_actions_for_workspace_cargo_toml(
             text_document,
             document_tree,
+            &cargo_toml_path,
             accessors,
             contexts,
+            toml_version,
         ))
     } else {
         code_actions.extend(code_actions_for_crate_cargo_toml(
             text_document,
             document_tree,
+            &cargo_toml_path,
             accessors,
             contexts,
+            toml_version,
         ));
     }
 
@@ -43,8 +54,10 @@ pub fn code_action(
 fn code_actions_for_workspace_cargo_toml(
     text_document: &TextDocumentIdentifier,
     document_tree: &tombi_document_tree::DocumentTree,
+    _cargo_toml_path: &std::path::Path,
     accessors: &[Accessor],
     contexts: &[AccessorContext],
+    _toml_version: tombi_config::TomlVersion,
 ) -> Vec<CodeActionOrCommand> {
     let mut code_actions = Vec::new();
 
@@ -59,20 +72,34 @@ fn code_actions_for_workspace_cargo_toml(
 
 fn code_actions_for_crate_cargo_toml(
     text_document: &TextDocumentIdentifier,
-    document_tree: &tombi_document_tree::DocumentTree,
+    crate_document_tree: &tombi_document_tree::DocumentTree,
+    crate_cargo_toml_path: &std::path::Path,
     accessors: &[Accessor],
     contexts: &[AccessorContext],
+    toml_version: tombi_config::TomlVersion,
 ) -> Vec<CodeActionOrCommand> {
     let mut code_actions = Vec::new();
 
-    // Add workspace-specific code actions here
-    if let Some(action) = workspace_code_action(text_document, document_tree, accessors, contexts) {
-        code_actions.push(CodeActionOrCommand::CodeAction(action));
+    if let Some((_, workspace_document_tree)) = find_workspace_cargo_toml(
+        crate_cargo_toml_path,
+        get_workspace_path(crate_document_tree),
+        toml_version,
+    ) {
+        // Add workspace-specific code actions here
+        if let Some(action) = workspace_code_action(
+            text_document,
+            crate_document_tree,
+            &workspace_document_tree,
+            accessors,
+            contexts,
+        ) {
+            code_actions.push(CodeActionOrCommand::CodeAction(action));
+        }
     }
 
     // Add crate-specific code actions here
     if let Some(action) =
-        crate_version_code_action(text_document, document_tree, accessors, contexts)
+        crate_version_code_action(text_document, crate_document_tree, accessors, contexts)
     {
         code_actions.push(CodeActionOrCommand::CodeAction(action));
     }
@@ -82,7 +109,8 @@ fn code_actions_for_crate_cargo_toml(
 
 fn workspace_code_action(
     text_document: &TextDocumentIdentifier,
-    document_tree: &tombi_document_tree::DocumentTree,
+    crate_document_tree: &tombi_document_tree::DocumentTree,
+    workspace_document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
     _contexts: &[AccessorContext],
 ) -> Option<CodeAction> {
@@ -121,9 +149,17 @@ fn workspace_code_action(
         return None;
     }
 
-    let Some((_, value)) = dig_accessors(document_tree, &accessors[..2]) else {
+    let Some((_, value)) = dig_accessors(crate_document_tree, &accessors[..2]) else {
         return None;
     };
+    if !dig_keys(
+        workspace_document_tree,
+        &["workspace", "package", key.as_str()],
+    )
+    .is_some()
+    {
+        return None; // No workspace settings to inherit
+    }
 
     if let tombi_document_tree::Value::Table(table) = value {
         if table.get("workspace").is_some() {

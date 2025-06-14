@@ -89,6 +89,7 @@ pub async fn handle_code_action(
         &document_tree,
         &accessors,
         &accessor_contexts,
+        toml_version,
     )? {
         code_actions.extend(extension_code_actions);
     }
