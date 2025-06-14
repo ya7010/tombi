@@ -8,20 +8,20 @@ use tower_lsp::lsp_types::{
 
 use crate::{find_workspace_cargo_toml, get_workspace_path};
 
-pub enum CodeActionRefactorRewriteName<'a> {
+pub enum CodeActionRefactorRewriteName {
     InheritFromWorkspace,
-    UseWorkspaceDependency { crate_name: &'a str },
+    UseWorkspaceDependency,
     ConvertDependencyToTableFormat,
 }
 
-impl<'a> std::fmt::Display for CodeActionRefactorRewriteName<'a> {
+impl std::fmt::Display for CodeActionRefactorRewriteName {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             CodeActionRefactorRewriteName::InheritFromWorkspace => {
                 write!(f, "Inherit from Workspace")
             }
-            CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name } => {
-                write!(f, "Use Workspace Dependency \"{}\"", crate_name)
+            CodeActionRefactorRewriteName::UseWorkspaceDependency => {
+                write!(f, "Inherit Dependency from Workspace")
             }
             CodeActionRefactorRewriteName::ConvertDependencyToTableFormat => {
                 write!(f, "Convert Dependency to Table Format")
@@ -261,8 +261,7 @@ fn use_workspace_depencency_code_action(
                 return None;
             }
             return Some(CodeAction {
-                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
-                    .to_string(),
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -307,8 +306,7 @@ fn use_workspace_depencency_code_action(
             };
 
             return Some(CodeAction {
-                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
-                    .to_string(),
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
