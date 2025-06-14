@@ -8,22 +8,22 @@ use tower_lsp::lsp_types::{
 
 use crate::{find_workspace_cargo_toml, get_workspace_path};
 
-pub enum CodeActionName<'a> {
+pub enum CodeActionRefactorRewriteName<'a> {
     UseInheritedWorkspaceSettings,
     UseWorkspaceDependency { crate_name: &'a str },
     ConvertDependencyToTableFormat,
 }
 
-impl<'a> std::fmt::Display for CodeActionName<'a> {
+impl<'a> std::fmt::Display for CodeActionRefactorRewriteName<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            CodeActionName::UseInheritedWorkspaceSettings => {
+            CodeActionRefactorRewriteName::UseInheritedWorkspaceSettings => {
                 write!(f, "Use Inherited Workspace Settings")
             }
-            CodeActionName::UseWorkspaceDependency { crate_name } => {
+            CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name } => {
                 write!(f, "Use Workspace Dependency: {}", crate_name)
             }
-            CodeActionName::ConvertDependencyToTableFormat => {
+            CodeActionRefactorRewriteName::ConvertDependencyToTableFormat => {
                 write!(f, "Convert Dependency to Table Format")
             }
         }
@@ -202,7 +202,7 @@ fn workspace_code_action(
     };
 
     return Some(CodeAction {
-        title: CodeActionName::UseInheritedWorkspaceSettings.to_string(),
+        title: CodeActionRefactorRewriteName::UseInheritedWorkspaceSettings.to_string(),
         kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
         diagnostics: None,
         edit: Some(WorkspaceEdit {
@@ -261,7 +261,8 @@ fn use_workspace_depencency_code_action(
                 return None;
             }
             return Some(CodeAction {
-                title: CodeActionName::UseWorkspaceDependency { crate_name }.to_string(),
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
+                    .to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -306,7 +307,8 @@ fn use_workspace_depencency_code_action(
             };
 
             return Some(CodeAction {
-                title: CodeActionName::UseWorkspaceDependency { crate_name }.to_string(),
+                title: CodeActionRefactorRewriteName::UseWorkspaceDependency { crate_name }
+                    .to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {
@@ -347,7 +349,7 @@ fn crate_version_code_action(
             dig_accessors(document_tree, accessors)
         {
             return Some(CodeAction {
-                title: CodeActionName::ConvertDependencyToTableFormat.to_string(),
+                title: CodeActionRefactorRewriteName::ConvertDependencyToTableFormat.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
                 diagnostics: None,
                 edit: Some(WorkspaceEdit {

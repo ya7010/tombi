@@ -101,18 +101,18 @@ pub async fn handle_code_action(
     Ok(Some(code_actions))
 }
 
-pub enum CodeActionName {
+pub enum CodeActionRefectorRewriteName {
     DotKeysToInlineTable,
     InlineTableToDotKeys,
 }
 
-impl std::fmt::Display for CodeActionName {
+impl std::fmt::Display for CodeActionRefectorRewriteName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CodeActionName::DotKeysToInlineTable => {
+            CodeActionRefectorRewriteName::DotKeysToInlineTable => {
                 write!(f, "Convert Dotted Keys to Inline Table")
             }
-            CodeActionName::InlineTableToDotKeys => {
+            CodeActionRefectorRewriteName::InlineTableToDotKeys => {
                 write!(f, "Convert Inline Table to Dotted Keys")
             }
         }
@@ -154,7 +154,7 @@ fn dot_keys_to_inline_table(
 
             Some(
                 CodeAction {
-                    title: CodeActionName::DotKeysToInlineTable.to_string(),
+                    title: CodeActionRefectorRewriteName::DotKeysToInlineTable.to_string(),
                     kind: Some(CodeActionKind::REFACTOR_REWRITE),
                     edit: Some(WorkspaceEdit {
                         changes: None,
@@ -223,7 +223,7 @@ fn inline_table_to_dot_keys(
             let (key, value) = table.key_values().iter().next().unwrap();
 
             Some(CodeAction {
-                title: CodeActionName::InlineTableToDotKeys.to_string(),
+                title: CodeActionRefectorRewriteName::InlineTableToDotKeys.to_string(),
                 kind: Some(CodeActionKind::REFACTOR_REWRITE),
                 edit: Some(WorkspaceEdit {
                     changes: None,
