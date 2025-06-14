@@ -151,8 +151,10 @@ jobs:
         run: |
           set -e
           if gh release view "${{ github.ref_name }}" --json body -q ".body" | grep -q .; then
+            echo "Release notes exist for tag ${{ github.ref_name }}"
             echo "exists=true" >> $GITHUB_OUTPUT
           else
+            echo "No release notes found for tag ${{ github.ref_name }}"
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
