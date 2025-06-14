@@ -118,7 +118,7 @@ macro_rules! test_code_action_refactor_rewrite {
             if let Some(doc_changes) = edit.document_changes {
                 if let tower_lsp::lsp_types::DocumentChanges::Edits(edits) = doc_changes {
                     let mut all_edits: Vec<_> = edits.into_iter().flat_map(|e| e.edits).collect();
-                    // range.startの降順でソート
+                    // Sort by range.start in descending order to apply edits from the end of the text.
                     all_edits.sort_by(|a, b| {
                         let a = match a {
                             tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
@@ -130,7 +130,7 @@ macro_rules! test_code_action_refactor_rewrite {
                         };
                         b.line.cmp(&a.line).then(b.character.cmp(&a.character))
                     });
-                    // 1つの文字列バッファでバイトオフセットで適用する
+                    // Apply all edits using a single string buffer and byte offsets.
                     let mut line_offsets = Vec::new();
                     let mut acc = 0;
                     for line in new_text.lines() {
@@ -148,7 +148,7 @@ macro_rules! test_code_action_refactor_rewrite {
                                 line_offsets.get(start_line).copied().unwrap_or(0) + start_char;
                             let end = line_offsets.get(end_line).copied().unwrap_or(0) + end_char;
                             text.replace_range(start..end, &edit.new_text);
-                            // 行オフセットを再計算
+                            // Recalculate line offsets after each edit to ensure correct byte positions.
                             line_offsets.clear();
                             acc = 0;
                             for line in text.lines() {
