@@ -1,6 +1,7 @@
 use tombi_config::{JSON_SCHEMA_STORE_CATALOG_URL, TOMBI_CATALOG_URL};
 use tombi_test_lib::{
-    today_local_date, today_local_date_time, today_local_time, today_offset_date_time,
+    project_root_path, today_local_date, today_local_date_time, today_local_time,
+    today_offset_date_time,
 };
 
 mod completion_labels {
@@ -660,6 +661,53 @@ mod completion_labels {
                 Schema(cargo_schema_path()),
             ) -> Ok([]);
         }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn cargo_workspace_dependencies_tombi_date_time_features(
+                r#"
+                [workspace.dependencies]
+                tombi-date-time = { features█, path = "crates/tombi-date-time" }
+                "#,
+                Source(project_root_path().join("Cargo.toml")),
+                Schema(cargo_schema_path())
+            ) -> Ok([
+                ".",
+                "=",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn cargo_workspace_dependencies_tombi_date_time_features_eq(
+                r#"
+                [workspace.dependencies]
+                tombi-date-time = { features=█, path = "crates/tombi-date-time" }
+                "#,
+                Source(project_root_path().join("Cargo.toml")),
+                Schema(cargo_schema_path()),
+            ) -> Ok([
+                "[]",
+            ]);
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn cargo_workspace_dependencies_tombi_date_time_features_eq_array(
+                r#"
+                [workspace.dependencies]
+                tombi-date-time = { features=[█], path = "crates/tombi-date-time" }
+                "#,
+                Source(project_root_path().join("Cargo.toml")),
+                Schema(cargo_schema_path()),
+            ) -> Ok([
+                "\"default\"",
+                "\"chrono\"",
+                "\"serde\"",
+                "\"\"",
+                "''",
+            ]);
+        }
     }
 
     mod without_schema {
@@ -813,6 +861,40 @@ mod completion_labels {
 
     #[macro_export]
     macro_rules! test_completion_labels {
+        (
+            #[tokio::test]
+            async fn $name:ident(
+                $source:expr,
+                Source($source_file_path:expr)$(,)?
+                Schema($schema_file_path:expr)$(,)?
+            ) -> Ok([$($label:expr),*$(,)?]);
+        ) => {
+            test_completion_labels! {
+                #[tokio::test]
+                async fn _$name(
+                    $source,
+                    Some($source_file_path),
+                    Some($schema_file_path),
+                ) -> Ok([$($label),*]);
+            }
+        };
+        (
+            #[tokio::test]
+            async fn $name:ident(
+                $source:expr,
+                Source($source_file_path:expr)$(,)?
+            ) -> Ok([$($label:expr),*$(,)?]);
+        ) => {
+            test_completion_labels! {
+                #[tokio::test]
+                async fn _$name(
+                    $source,
+                    Some($source_file_path),
+                    Option::<std::path::PathBuf>::None,
+                ) -> Ok([$($label),*]);
+            }
+        };
+
         (
             #[tokio::test]
             async fn $name:ident(
