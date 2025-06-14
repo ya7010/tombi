@@ -5,6 +5,21 @@ macro_rules! test_code_action_refactor_rewrite {
         #[tokio::test]
         async fn $name:ident(
             $source:expr,
+        ) -> Ok($expected:expr);
+    ) => {
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn $name(
+                $source,
+                Select("Dummy Code Action"),
+                Option::<std::path::PathBuf>::None,
+            ) -> Ok($expected);
+        }
+    };
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr,
             $select:expr,
         ) -> Ok($expected:expr);
     ) => {
@@ -107,78 +122,96 @@ macro_rules! test_code_action_refactor_rewrite {
                 partial_result_params: Default::default(),
             };
 
-            let actions = handle_code_action(backend, params)
-                .await?
-                .unwrap_or_default();
+            let Ok(actions) = handle_code_action(backend, params).await else {
+                return Err("failed to get code actions".into());
+            };
 
             tracing::debug!(?actions, "code actions found");
 
-            let selected = $select.0;
-            let selected: &str = &selected.to_string();
+            match (actions, $expected) {
+                (Some(actions), Some(expected)) => {
+                    let selected = $select.0;
+                    let selected: &str = &selected.to_string();
 
-            let Some(action) = actions.into_iter().find_map(|a| match a {
-                tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca)
-                    if ca.title == selected =>
-                {
-                    Some(ca)
-                }
-                _ => None,
-            }) else {
-                return Err(
-                    format!("failed to find the selected code action '{}'.", selected).into(),
-                );
-            };
-            let Some(edit) = action.edit else {
-                return Err("selected code action has no edit".into());
-            };
-            let mut new_text = toml_text.clone();
-            if let Some(doc_changes) = edit.document_changes {
-                if let tower_lsp::lsp_types::DocumentChanges::Edits(edits) = doc_changes {
-                    let mut all_edits: Vec<_> = edits.into_iter().flat_map(|e| e.edits).collect();
-                    // Sort by range.start in descending order to apply edits from the end of the text.
-                    all_edits.sort_by(|a, b| {
-                        let a = match a {
-                            tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
-                            _ => return std::cmp::Ordering::Equal,
-                        };
-                        let b = match b {
-                            tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
-                            _ => return std::cmp::Ordering::Equal,
-                        };
-                        b.line.cmp(&a.line).then(b.character.cmp(&a.character))
-                    });
-                    // Apply all edits using a single string buffer and byte offsets.
-                    let mut line_offsets = Vec::new();
-                    let mut acc = 0;
-                    for line in new_text.lines() {
-                        line_offsets.push(acc);
-                        acc += line.len() + 1; // +1 for '\n'
-                    }
-                    let mut text = new_text.clone();
-                    for text_edit in all_edits {
-                        if let tower_lsp::lsp_types::OneOf::Left(edit) = text_edit {
-                            let start_line = edit.range.start.line as usize;
-                            let start_char = edit.range.start.character as usize;
-                            let end_line = edit.range.end.line as usize;
-                            let end_char = edit.range.end.character as usize;
-                            let start =
-                                line_offsets.get(start_line).copied().unwrap_or(0) + start_char;
-                            let end = line_offsets.get(end_line).copied().unwrap_or(0) + end_char;
-                            text.replace_range(start..end, &edit.new_text);
-                            // Recalculate line offsets after each edit to ensure correct byte positions.
-                            line_offsets.clear();
-                            acc = 0;
-                            for line in text.lines() {
+                    let Some(action) = actions.into_iter().find_map(|a| match a {
+                        tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca)
+                            if ca.title == selected =>
+                        {
+                            Some(ca)
+                        }
+                        _ => None,
+                    }) else {
+                        return Err(format!(
+                            "failed to find the selected code action '{}'.",
+                            selected
+                        )
+                        .into());
+                    };
+                    let Some(edit) = action.edit else {
+                        return Err("selected code action has no edit".into());
+                    };
+                    let mut new_text = toml_text.clone();
+                    if let Some(doc_changes) = edit.document_changes {
+                        if let tower_lsp::lsp_types::DocumentChanges::Edits(edits) = doc_changes {
+                            let mut all_edits: Vec<_> =
+                                edits.into_iter().flat_map(|e| e.edits).collect();
+                            // Sort by range.start in descending order to apply edits from the end of the text.
+                            all_edits.sort_by(|a, b| {
+                                let a = match a {
+                                    tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
+                                    _ => return std::cmp::Ordering::Equal,
+                                };
+                                let b = match b {
+                                    tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
+                                    _ => return std::cmp::Ordering::Equal,
+                                };
+                                b.line.cmp(&a.line).then(b.character.cmp(&a.character))
+                            });
+                            // Apply all edits using a single string buffer and byte offsets.
+                            let mut line_offsets = Vec::new();
+                            let mut acc = 0;
+                            for line in new_text.lines() {
                                 line_offsets.push(acc);
-                                acc += line.len() + 1;
+                                acc += line.len() + 1; // +1 for '\n'
                             }
+                            let mut text = new_text.clone();
+                            for text_edit in all_edits {
+                                if let tower_lsp::lsp_types::OneOf::Left(edit) = text_edit {
+                                    let start_line = edit.range.start.line as usize;
+                                    let start_char = edit.range.start.character as usize;
+                                    let end_line = edit.range.end.line as usize;
+                                    let end_char = edit.range.end.character as usize;
+                                    let start = line_offsets.get(start_line).copied().unwrap_or(0)
+                                        + start_char;
+                                    let end =
+                                        line_offsets.get(end_line).copied().unwrap_or(0) + end_char;
+                                    text.replace_range(start..end, &edit.new_text);
+                                    // Recalculate line offsets after each edit to ensure correct byte positions.
+                                    line_offsets.clear();
+                                    acc = 0;
+                                    for line in text.lines() {
+                                        line_offsets.push(acc);
+                                        acc += line.len() + 1;
+                                    }
+                                }
+                            }
+                            new_text = text;
                         }
                     }
-                    new_text = text;
+                    pretty_assertions::assert_eq!(new_text, textwrap::dedent(expected).trim());
+                    Ok(())
+                }
+                (None, None) => {
+                    tracing::debug!("no code actions found, as expected");
+                    Ok(())
+                }
+                (Some(_), None) => {
+                    return Err("expected no code actions, but found some".into());
+                }
+                (None, Some(_)) => {
+                    return Err("expected code actions, but found none".into());
                 }
             }
-            pretty_assertions::assert_eq!(new_text, textwrap::dedent($expected).trim());
-            Ok(())
         }
     };
 }
@@ -194,11 +227,11 @@ mod refactor_rewrite {
             foo.bar█ = 1
             "#,
             Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
-        ) -> Ok(
+        ) -> Ok(Some(
             r#"
             foo = { bar = 1 }
             "#
-        );
+        ));
     }
 
     test_code_action_refactor_rewrite! {
@@ -208,11 +241,11 @@ mod refactor_rewrite {
             foo.bar█ = 1 # comment
             "#,
             Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
-        ) -> Ok(
+        ) -> Ok(Some(
             r#"
             foo = { bar = 1 } # comment
             "#
-        );
+        ));
     }
 
     test_code_action_refactor_rewrite! {
@@ -222,11 +255,11 @@ mod refactor_rewrite {
             foo = { bar = █1 }
             "#,
             Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-        ) -> Ok(
+        ) -> Ok(Some(
             r#"
             foo.bar = 1
             "#
-        );
+        ));
     }
 
     test_code_action_refactor_rewrite! {
@@ -236,10 +269,64 @@ mod refactor_rewrite {
             foo = { bar = █1 } # comment
             "#,
             Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-        ) -> Ok(
+        ) -> Ok(Some(
             r#"
             foo.bar = 1 # comment
             "#
-        );
+        ));
+    }
+
+    test_code_action_refactor_rewrite! {
+        #[tokio::test]
+        async fn inline_table_array_to_dotted_keys_with_comment(
+            r#"
+            foo = { bar = █[1, 2, 3] } # comment
+            "#,
+            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+        ) -> Ok(Some(
+            r#"
+            foo.bar = [1, 2, 3] # comment
+            "#
+        ));
+    }
+
+    test_code_action_refactor_rewrite! {
+        #[tokio::test]
+        async fn inline_table_multiline_array_to_dotted_keys_with_comment(
+            r#"
+            foo = { bar = █[
+              1,
+              2,
+              3,
+            ] } # comment
+            "#,
+            Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
+        ) -> Ok(Some(
+            r#"
+            foo.bar = [
+              1,
+              2,
+              3,
+            ] # comment
+            "#
+        ));
+    }
+
+    test_code_action_refactor_rewrite! {
+        #[tokio::test]
+        async fn inline_table_has_other_keys(
+            r#"
+            foo = { bar = █1, baz = 2 }
+            "#,
+        ) -> Ok(None);
+    }
+
+    test_code_action_refactor_rewrite! {
+        #[tokio::test]
+        async fn inline_table_has_other_keys_with_comment(
+            r#"
+            foo = { bar = █1, baz = 2 } # comment
+            "#,
+        ) -> Ok(None);
     }
 }
