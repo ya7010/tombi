@@ -693,7 +693,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn cargo_workspace_dependencies_tombi_date_time_features_eq_array(
+            async fn cargo_workspace_dependencies_tombi_date_time_features_eq_array_with_workspace(
                 r#"
                 [workspace.dependencies]
                 tombi-date-time = { features=[█], path = "crates/tombi-date-time" }
@@ -711,7 +711,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn cargo_dependencies_tombi_date_time_features(
+            async fn cargo_dependencies_tombi_date_time_features_with_workspace(
                 r#"
                 [dependencies]
                 tombi-date-time = { workspace = true, features█ }
@@ -726,7 +726,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn cargo_dependencies_tombi_date_time_features_eq(
+            async fn cargo_dependencies_tombi_date_time_features_eq_with_workspace(
                 r#"
                 [dependencies]
                 tombi-date-time = { workspace = true, features=█ }
@@ -740,7 +740,7 @@ mod completion_labels {
 
         test_completion_labels! {
             #[tokio::test]
-            async fn cargo_dependencies_tombi_date_time_features_eq_array(
+            async fn cargo_dependencies_tombi_date_time_features_eq_array_with_workspace(
                 r#"
                 [dependencies]
                 tombi-date-time = { workspace = true, features=[█] }
