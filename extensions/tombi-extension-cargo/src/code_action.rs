@@ -112,7 +112,7 @@ fn workspace_code_action(
     crate_document_tree: &tombi_document_tree::DocumentTree,
     workspace_document_tree: &tombi_document_tree::DocumentTree,
     accessors: &[Accessor],
-    _contexts: &[AccessorContext],
+    contexts: &[AccessorContext],
 ) -> Option<CodeAction> {
     if accessors.len() < 2 {
         return None;
@@ -122,7 +122,9 @@ fn workspace_code_action(
         return None;
     }
 
-    let Accessor::Key(key) = &accessors[1] else {
+    let (Accessor::Key(parent_key), AccessorContext::Key(parent_key_context)) =
+        (&accessors[1], &contexts[1])
+    else {
         return None;
     };
 
@@ -144,7 +146,7 @@ fn workspace_code_action(
         "rust-version",
         "version",
     ]
-    .contains(&key.as_str())
+    .contains(&parent_key.as_str())
     {
         return None;
     }
@@ -154,7 +156,7 @@ fn workspace_code_action(
     };
     if !dig_keys(
         workspace_document_tree,
-        &["workspace", "package", key.as_str()],
+        &["workspace", "package", parent_key.as_str()],
     )
     .is_some()
     {
@@ -179,8 +181,8 @@ fn workspace_code_action(
                     version: None,
                 },
                 edits: vec![OneOf::Left(TextEdit {
-                    range: value.symbol_range().into(),
-                    new_text: "{ workspace = true }".to_string(),
+                    range: (parent_key_context.range + value.symbol_range()).into(),
+                    new_text: format!("{parent_key}.workspace = true"),
                 })],
             }])),
             change_annotations: None,
