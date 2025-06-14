@@ -222,8 +222,21 @@ macro_rules! test_code_action_refactor_rewrite {
                     tracing::debug!("no code actions found, as expected");
                     Ok(())
                 }
-                (Some(_), None) => {
-                    return Err("expected no code actions, but found some".into());
+                (Some(actions), None) => {
+                    let selected = $select;
+                    let selected: &str = &selected.to_string();
+
+                    let None = actions.into_iter().find_map(|a| match a {
+                        tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca)
+                            if ca.title == selected =>
+                        {
+                            Some(ca)
+                        }
+                        _ => None,
+                    }) else {
+                        return Err(format!("expected '{}' not found.", selected).into());
+                    };
+                    Ok(())
                 }
                 (None, Some(_)) => {
                     return Err("expected code actions, but found none".into());
@@ -382,7 +395,7 @@ mod refactor_rewrite {
 
         test_code_action_refactor_rewrite! {
             #[tokio::test]
-            async fn cargo_toml_dotted_keys_to_inline_table(
+            async fn cargo_toml_package_version(
                 r#"
                 [package]
                 version█ = "1.0"
@@ -395,6 +408,18 @@ mod refactor_rewrite {
                 version.workspace = true
                 "#
             ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_package_version_workspace(
+                r#"
+                [package]
+                version.workspace█ = true
+                "#,
+                Select(CodeActionRefactorRewriteName::InheritFromWorkspace),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(None);
         }
     }
 }
