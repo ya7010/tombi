@@ -9,23 +9,24 @@ macro_rules! test_code_action_refactor_rewrite {
     ) => {
         test_code_action_refactor_rewrite! {
             #[tokio::test]
-            async fn $name(
+            async fn _$name(
                 $source,
-                Select("Dummy Code Action"),
+                "Dummy Code Action",
                 Option::<std::path::PathBuf>::None,
             ) -> Ok($expected);
         }
     };
+
     (
         #[tokio::test]
         async fn $name:ident(
             $source:expr,
-            $select:expr,
+            Select($select:expr),
         ) -> Ok($expected:expr);
     ) => {
         test_code_action_refactor_rewrite! {
             #[tokio::test]
-            async fn $name(
+            async fn _$name(
                 $source,
                 $select,
                 Option::<std::path::PathBuf>::None,
@@ -36,6 +37,41 @@ macro_rules! test_code_action_refactor_rewrite {
     (
         #[tokio::test]
         async fn $name:ident(
+            $source:expr,
+            Select($select:expr),
+            $schema_file_path:expr$(,)?
+        ) -> Ok($expected:expr);
+    ) => {
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                $select,
+                Some($schema_file_path),
+            ) -> Ok($expected);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr,
+            $schema_file_path:expr$(,)?
+        ) -> Ok($expected:expr);
+    ) => {
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn _$name(
+                $source,
+                "Dummy Code Action",
+                Some($schema_file_path),
+            ) -> Ok($expected);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn _$name:ident(
             $source:expr,
             $select:expr,
             $schema_file_path:expr$(,)?
@@ -130,7 +166,7 @@ macro_rules! test_code_action_refactor_rewrite {
 
             match (actions, $expected) {
                 (Some(actions), Some(expected)) => {
-                    let selected = $select.0;
+                    let selected = $select;
                     let selected: &str = &selected.to_string();
 
                     let Some(action) = actions.into_iter().find_map(|a| match a {
@@ -215,8 +251,6 @@ macro_rules! test_code_action_refactor_rewrite {
         }
     };
 }
-
-struct Select<T>(T);
 
 mod refactor_rewrite {
     use super::*;
