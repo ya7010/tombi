@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::{
-    find_workspace_cargo_toml, get_path_crate_cargo_toml, get_workspace_path,
+    find_path_crate_cargo_toml, find_workspace_cargo_toml, get_workspace_path,
     goto_workspace_member_crates, load_cargo_toml,
 };
 use itertools::Itertools;
@@ -450,7 +450,7 @@ fn document_link_for_dependency(
 
         if let Some(tombi_document_tree::Value::String(crate_path)) = table.get("path") {
             if let Some((path_target_cargo_toml_path, path_target_document_tree)) =
-                get_path_crate_cargo_toml(
+                find_path_crate_cargo_toml(
                     crate_cargo_toml_path,
                     std::path::Path::new(crate_path.value()),
                     toml_version,

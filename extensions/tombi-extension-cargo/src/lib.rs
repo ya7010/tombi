@@ -95,7 +95,7 @@ fn find_workspace_cargo_toml(
     None
 }
 
-fn get_path_crate_cargo_toml(
+fn find_path_crate_cargo_toml(
     cargo_toml_path: &std::path::Path,
     crate_path: &std::path::Path,
     toml_version: TomlVersion,
@@ -183,7 +183,7 @@ fn goto_workspace(
         if let tombi_document_tree::Value::Table(table) = value {
             if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
                 if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) =
-                    get_path_crate_cargo_toml(
+                    find_path_crate_cargo_toml(
                         &workspace_cargo_toml_path,
                         std::path::Path::new(subcrate_path.value()),
                         toml_version,
@@ -244,7 +244,7 @@ fn goto_dependency_crates(
     if let tombi_document_tree::Value::Table(table) = crate_value {
         if let Some(tombi_document_tree::Value::String(subcrate_path)) = table.get("path") {
             if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) =
-                get_path_crate_cargo_toml(
+                find_path_crate_cargo_toml(
                     workspace_cargo_toml_path,
                     std::path::Path::new(subcrate_path.value()),
                     toml_version,
@@ -347,7 +347,7 @@ fn goto_crate_package(
             _ => unreachable!(),
         };
 
-        if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) = get_path_crate_cargo_toml(
+        if let Some((subcrate_cargo_toml_path, subcrate_document_tree)) = find_path_crate_cargo_toml(
             workspace_cargo_toml_path,
             std::path::Path::new(subcrate_path.value()),
             toml_version,
