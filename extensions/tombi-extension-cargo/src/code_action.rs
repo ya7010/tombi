@@ -1,4 +1,4 @@
-use tombi_document_tree::dig_keys;
+use tombi_document_tree::{dig_keys, TableKind};
 use tombi_schema_store::{dig_accessors, matches_accessors, Accessor, AccessorContext};
 use tower_lsp::lsp_types::{
     CodeAction, CodeActionOrCommand, DocumentChanges, OneOf,
@@ -305,6 +305,18 @@ fn use_workspace_depencency_code_action(
                 return None; // No version to inherit
             };
 
+            let text_edit = if table.kind() == TableKind::KeyValue {
+                TextEdit {
+                    range: (crate_key_context.range + version.range()).into(),
+                    new_text: format!("{} = {{ workspace = true }}", crate_name),
+                }
+            } else {
+                TextEdit {
+                    range: (key.range() + version.range()).into(),
+                    new_text: "workspace = true".to_string(),
+                }
+            };
+
             return Some(CodeAction {
                 title: CodeActionRefactorRewriteName::UseWorkspaceDependency.to_string(),
                 kind: Some(tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE),
@@ -316,12 +328,9 @@ fn use_workspace_depencency_code_action(
                             uri: text_document.clone().uri,
                             version: None,
                         },
-                        edits: vec![OneOf::Left(TextEdit {
-                            range: (key.range() + version.range()).into(),
-                            new_text: "workspace = true".to_string(),
-                        })],
+                        edits: vec![OneOf::Left(text_edit)],
                     }])),
-                    change_annotations: None,
+                    ..Default::default()
                 }),
                 ..Default::default()
             });

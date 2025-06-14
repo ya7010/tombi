@@ -77,6 +77,7 @@ macro_rules! test_code_action_refactor_rewrite {
     ) => {
         #[tokio::test]
         async fn $name() -> Result<(), Box<dyn std::error::Error>> {
+            use itertools::Itertools;
             use tombi_lsp::handler::handle_code_action;
             use tombi_lsp::handler::handle_did_open;
             use tombi_lsp::Backend;
@@ -226,7 +227,7 @@ macro_rules! test_code_action_refactor_rewrite {
                     let selected = $select;
                     let selected: &str = &selected.to_string();
 
-                    let None = actions.into_iter().find_map(|a| match a {
+                    let None = actions.iter().find_map(|a| match a {
                         tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca)
                             if ca.title == selected =>
                         {
@@ -234,7 +235,19 @@ macro_rules! test_code_action_refactor_rewrite {
                         }
                         _ => None,
                     }) else {
-                        return Err(format!("expected '{}' not found.", selected).into());
+                        return Err(format!(
+                            "expected '{}' but not included in {:?}",
+                            selected,
+                            actions
+                                .iter()
+                                .filter_map(|a| match a {
+                                    tower_lsp::lsp_types::CodeActionOrCommand::CodeAction(ca) =>
+                                        Some(ca.title.clone()),
+                                    _ => None,
+                                })
+                                .collect_vec()
+                        )
+                        .into());
                     };
                     Ok(())
                 }
@@ -420,6 +433,117 @@ mod refactor_rewrite {
                 Select(CodeActionRefactorRewriteName::InheritFromWorkspace),
                 project_root_path().join("crates/subcrate/Cargo.toml"),
             ) -> Ok(None);
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_dotted_version(
+                r#"
+                [dependencies]
+                serde.version█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { workspace = true }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_inline_table_version(
+                r#"
+                [dependencies]
+                serde = { version█ = "1.0" }
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { workspace = true }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_inline_table_version_with_other_keys(
+                r#"
+                [dependencies]
+                serde = { version█ = "1.0", features = ["derive"] }
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies]
+                serde = { workspace = true, features = ["derive"] }
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_dotted_keys_workspace(
+                r#"
+                [dependencies]
+                serde.workspace█ = true
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(None);
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_inline_table_workspace(
+                r#"
+                [dependencies]
+                serde = { workspace█ = true }
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(None);
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version(
+                r#"
+                [dependencies.serde]
+                version█ = "1.0"
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies.serde]
+                workspace = true
+                "#
+            ));
+        }
+
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn cargo_toml_dependencies_serde_table_version_with_other_keys(
+                r#"
+                [dependencies.serde]
+                version█ = "1.0"
+                default-features = false
+                "#,
+                Select(CodeActionRefactorRewriteName::UseWorkspaceDependency),
+                project_root_path().join("crates/subcrate/Cargo.toml"),
+            ) -> Ok(Some(
+                r#"
+                [dependencies.serde]
+                workspace = true
+                default-features = false
+                "#
+            ));
         }
     }
 }
