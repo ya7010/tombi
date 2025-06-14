@@ -117,35 +117,47 @@ macro_rules! test_code_action_refactor_rewrite {
             let mut new_text = toml_text.clone();
             if let Some(doc_changes) = edit.document_changes {
                 if let tower_lsp::lsp_types::DocumentChanges::Edits(edits) = doc_changes {
-                    for text_edit in edits.into_iter().flat_map(|e| e.edits) {
+                    let mut all_edits: Vec<_> = edits.into_iter().flat_map(|e| e.edits).collect();
+                    // range.startの降順でソート
+                    all_edits.sort_by(|a, b| {
+                        let a = match a {
+                            tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
+                            _ => return std::cmp::Ordering::Equal,
+                        };
+                        let b = match b {
+                            tower_lsp::lsp_types::OneOf::Left(ref e) => &e.range.start,
+                            _ => return std::cmp::Ordering::Equal,
+                        };
+                        b.line.cmp(&a.line).then(b.character.cmp(&a.character))
+                    });
+                    // 1つの文字列バッファでバイトオフセットで適用する
+                    let mut line_offsets = Vec::new();
+                    let mut acc = 0;
+                    for line in new_text.lines() {
+                        line_offsets.push(acc);
+                        acc += line.len() + 1; // +1 for '\n'
+                    }
+                    let mut text = new_text.clone();
+                    for text_edit in all_edits {
                         if let tower_lsp::lsp_types::OneOf::Left(edit) = text_edit {
-                            let mut lines: Vec<_> =
-                                new_text.lines().map(|l| l.to_string()).collect();
-                            let start = edit.range.start;
-                            let end = edit.range.end;
-                            if start.line == end.line {
-                                let line = &mut lines[start.line as usize];
-                                *line = format!(
-                                    "{}{}{}",
-                                    &line[..start.character as usize],
-                                    edit.new_text,
-                                    &line[end.character as usize..]
-                                );
-                            } else {
-                                // 複数行編集は簡易対応
-                                lines.splice(
-                                    start.line as usize..=end.line as usize,
-                                    vec![format!(
-                                        "{}{}{}",
-                                        &lines[start.line as usize][..start.character as usize],
-                                        edit.new_text,
-                                        &lines[end.line as usize][end.character as usize..]
-                                    )],
-                                );
+                            let start_line = edit.range.start.line as usize;
+                            let start_char = edit.range.start.character as usize;
+                            let end_line = edit.range.end.line as usize;
+                            let end_char = edit.range.end.character as usize;
+                            let start =
+                                line_offsets.get(start_line).copied().unwrap_or(0) + start_char;
+                            let end = line_offsets.get(end_line).copied().unwrap_or(0) + end_char;
+                            text.replace_range(start..end, &edit.new_text);
+                            // 行オフセットを再計算
+                            line_offsets.clear();
+                            acc = 0;
+                            for line in text.lines() {
+                                line_offsets.push(acc);
+                                acc += line.len() + 1;
                             }
-                            new_text = lines.join("\n");
                         }
                     }
+                    new_text = text;
                 }
             }
             pretty_assertions::assert_eq!(new_text, textwrap::dedent($expected).trim());
@@ -172,11 +184,12 @@ mod refactor_rewrite {
             "#
         );
     }
+
     test_code_action_refactor_rewrite! {
         #[tokio::test]
         async fn inline_table_to_dotted_keys(
             r#"
-            foo = { bar = 1█ }
+            foo = { bar = █1 }
             "#,
             Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
             Option::<std::path::PathBuf>::None,
