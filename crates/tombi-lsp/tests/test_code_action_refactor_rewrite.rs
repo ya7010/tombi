@@ -6,6 +6,23 @@ macro_rules! test_code_action_refactor_rewrite {
         async fn $name:ident(
             $source:expr,
             $select:expr,
+        ) -> Ok($expected:expr);
+    ) => {
+        test_code_action_refactor_rewrite! {
+            #[tokio::test]
+            async fn $name(
+                $source,
+                $select,
+                Option::<std::path::PathBuf>::None,
+            ) -> Ok($expected);
+        }
+    };
+
+    (
+        #[tokio::test]
+        async fn $name:ident(
+            $source:expr,
+            $select:expr,
             $schema_file_path:expr$(,)?
         ) -> Ok($expected:expr);
     ) => {
@@ -177,7 +194,6 @@ mod refactor_rewrite {
             foo.bar█ = 1
             "#,
             Select(CodeActionRefactorRewriteName::DottedKeysToInlineTable),
-            Option::<std::path::PathBuf>::None,
         ) -> Ok(
             r#"
             foo = { bar = 1 }
@@ -192,7 +208,6 @@ mod refactor_rewrite {
             foo = { bar = █1 }
             "#,
             Select(CodeActionRefactorRewriteName::InlineTableToDottedKeys),
-            Option::<std::path::PathBuf>::None,
         ) -> Ok(
             r#"
             foo.bar = 1
