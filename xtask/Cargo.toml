@@ -19,11 +19,11 @@ schemars = { workspace = true, features = ["chrono04"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
-time = { workspace = true, default-features = false }
+time = { workspace = true }
 tombi-config = { workspace = true, features = ["jsonschema"] }
 ungrammar = { workspace = true }
 xshell = { workspace = true }
-zip = { workspace = true, default-features = false, features = [
+zip = { workspace = true, features = [
   "deflate",
   "time",
 ] }
