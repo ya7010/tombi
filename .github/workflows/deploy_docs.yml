@@ -1,28 +1,41 @@
-name: Deploy Docs to GitHub Pages
+name: Build and Deploy Docs
 
 on:
   push:
     branches: ["main"]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: "pages"
+  group: "docs-build"
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+            echo "is_latest=true" >> $GITHUB_OUTPUT
+            echo "base_url=/tombi/${VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "version=dev" >> $GITHUB_OUTPUT
+            echo "is_latest=false" >> $GITHUB_OUTPUT
+            echo "base_url=/tombi/dev" >> $GITHUB_OUTPUT
+          fi
 
       - uses: pnpm/action-setup@v4
         with:
@@ -37,20 +50,95 @@ jobs:
         working-directory: ./docs
         run: pnpm install
 
-      - name: Build
+      - name: Build documentation
         working-directory: ./docs
         run: pnpm add -D tsx && pnpm run build
         env:
-          BASE_URL: /tombi
+          BASE_URL: ${{ steps.version.outputs.base_url }}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Checkout docs branch
+        uses: actions/checkout@v4
         with:
-          path: './docs/.output/public'
+          ref: docs
+          path: docs-branch
+        continue-on-error: true
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Initialize docs branch if it doesn't exist
+        run: |
+          if [ ! -d "docs-branch" ]; then
+            git clone --single-branch --branch docs https://github.com/${{ github.repository }}.git docs-branch 2>/dev/null || {
+              mkdir docs-branch
+              cd docs-branch
+              git init
+              git remote add origin https://github.com/${{ github.repository }}.git
+              git checkout -b docs
+              echo "# Documentation Site" > README.md
+              git add README.md
+              git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "Initialize docs branch"
+              git push -u origin docs
+              cd ..
+            }
+          fi
+
+      - name: Update docs branch
+        run: |
+          cd docs-branch
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create version directory
+          mkdir -p "${{ steps.version.outputs.version }}"
+          
+          # Copy new build to version directory
+          cp -r ../docs/.output/public/* "${{ steps.version.outputs.version }}/"
+          
+          # If this is a release (latest), also copy to latest directory and update symlink
+          if [ "${{ steps.version.outputs.is_latest }}" = "true" ]; then
+            rm -rf latest
+            mkdir -p latest
+            cp -r ../docs/.output/public/* latest/
+            
+            # Update versions.json
+            if [ ! -f versions.json ]; then
+              echo '{"versions": []}' > versions.json
+            fi
+            
+            # Add version to versions.json if not exists
+            VERSION="${{ steps.version.outputs.version }}"
+            jq --arg version "$VERSION" '.versions |= if index($version) then . else [$version] + . end' versions.json > versions.json.tmp
+            mv versions.json.tmp versions.json
+          fi
+          
+          # Create root index.html that redirects to latest
+          cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <title>Redirecting...</title>
+              <script>
+                  window.location.href = './latest/';
+              </script>
+              <noscript>
+                  <meta http-equiv="refresh" content="0; url=./latest/">
+              </noscript>
+          </head>
+          <body>
+              <p>Redirecting to <a href="./latest/">latest version</a>...</p>
+          </body>
+          </html>
+          EOF
+          
+          # Add .nojekyll for GitHub Pages
+          touch .nojekyll
+          
+          # Commit and push changes
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Deploy docs for ${{ steps.version.outputs.version }} from ${{ github.sha }}"
+            git push origin docs
+          fi
