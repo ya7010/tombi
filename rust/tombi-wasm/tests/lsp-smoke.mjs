@@ -54,8 +54,43 @@ await init({ module_or_path: wasm });
 
 set_workspace_files([
   {
+    uri: "file:///workspace/.git/HEAD",
+    text: "ref: refs/heads/main\n",
+  },
+  {
+    uri: "file:///workspace/.gitignore",
+    text: "**/.terraform/*\nconflict.toml\n",
+  },
+  {
+    uri: "file:///workspace/.git/info/exclude",
+    text: "**/.private/*\n",
+  },
+  {
+    uri: "file:///workspace/.ignore",
+    text: "**/.cache/*\n!conflict.toml\n",
+  },
+  {
+    uri: "file:///workspace/module/.terraform/existing.toml",
+    text: "key =\n",
+  },
+  {
+    uri: "file:///workspace/module/.private/existing.toml",
+    text: "key =\n",
+  },
+  {
+    uri: "file:///workspace/module/.cache/existing.toml",
+    text: "key =\n",
+  },
+  {
+    uri: "file:///workspace/conflict.toml",
+    text: "key = 1\n",
+  },
+  {
     uri: "file:///workspace/tombi.toml",
     text: `toml-version = "v1.1.0"
+
+[files]
+respect-ignore-files = true
 
 [format.rules]
 
@@ -102,6 +137,7 @@ const input = new AsyncByteQueue();
 let outputBuffer = new Uint8Array();
 const messages = [];
 const outputWaiters = [];
+let deferWorkspaceFoldersResponse = false;
 
 function waitForMessages(count) {
   if (messages.length >= count) return Promise.resolve();
@@ -131,7 +167,9 @@ async function waitForMessage(predicate) {
 }
 
 function waitForResponse(id) {
-  return waitForMessage((message) => message.id === id);
+  return waitForMessage(
+    (message) => message.id === id && message.method === undefined,
+  );
 }
 
 const output = new WritableStream({
@@ -151,7 +189,21 @@ const output = new WritableStream({
       const message = JSON.parse(decoder.decode(outputBuffer.slice(bodyStart, bodyStart + length)));
       messages.push(message);
       if (message.id !== undefined && message.method) {
-        input.push(encode({ jsonrpc: "2.0", id: message.id, result: null }));
+        if (
+          message.method !== "workspace/workspaceFolders" ||
+          !deferWorkspaceFoldersResponse
+        ) {
+          input.push(
+            encode({
+              jsonrpc: "2.0",
+              id: message.id,
+              result:
+                message.method === "workspace/workspaceFolders"
+                  ? [{ name: "workspace", uri: "file:///workspace" }]
+                  : null,
+            }),
+          );
+        }
       }
       outputBuffer = outputBuffer.slice(bodyStart + length);
       for (const waiter of outputWaiters.splice(0)) {
@@ -186,12 +238,147 @@ assert.ok(messages[0]?.result?.capabilities?.codeActionProvider);
 assert.ok(messages[0]?.result?.capabilities?.semanticTokensProvider);
 
 input.push(encode({ jsonrpc: "2.0", method: "initialized", params: {} }));
+
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    id: 10,
+    method: "workspace/diagnostic",
+    params: {
+      identifier: null,
+      partialResultToken: null,
+      previousResultIds: [],
+      workDoneToken: null,
+    },
+  }),
+);
+const workspaceDiagnosticResponse = await waitForResponse(10);
+assert.equal(workspaceDiagnosticResponse?.error, undefined);
+for (const ignoredUri of [
+  "file:///workspace/module/.terraform/existing.toml",
+  "file:///workspace/module/.private/existing.toml",
+  "file:///workspace/module/.cache/existing.toml",
+]) {
+  assert.ok(
+    !workspaceDiagnosticResponse?.result?.items?.some(
+      (item) => item.uri === ignoredUri,
+    ),
+    `WASM workspace discovery should exclude ${ignoredUri}: ${JSON.stringify(workspaceDiagnosticResponse)}`,
+  );
+}
+assert.ok(
+  workspaceDiagnosticResponse?.result?.items?.some(
+    (item) => item.uri === "file:///workspace/conflict.toml",
+  ),
+  `.ignore whitelist should override .gitignore: ${JSON.stringify(workspaceDiagnosticResponse)}`,
+);
+
+const watchedIgnoredUri = "file:///workspace/module/.terraform/watched.toml";
+set_workspace_file(watchedIgnoredUri, "key =\n");
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    method: "workspace/didChangeWatchedFiles",
+    params: {
+      changes: [{ type: 1, uri: watchedIgnoredUri }],
+    },
+  }),
+);
+const ignoredWatcherDiagnostics = await waitForMessage(
+  (message) =>
+    message.method === "textDocument/publishDiagnostics" &&
+    message.params?.uri === watchedIgnoredUri,
+);
+assert.deepEqual(ignoredWatcherDiagnostics.params?.diagnostics, []);
+
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    method: "textDocument/didOpen",
+    params: {
+      textDocument: {
+        languageId: "toml",
+        text: "key =\n",
+        uri: watchedIgnoredUri,
+        version: 1,
+      },
+    },
+  }),
+);
+const explicitlyOpenedIgnoredDiagnostics = await waitForMessage(
+  (message) =>
+    message.method === "textDocument/publishDiagnostics" &&
+    message.params?.uri === watchedIgnoredUri &&
+    message.params?.version === 1,
+);
+assert.ok(explicitlyOpenedIgnoredDiagnostics.params?.diagnostics?.length > 0);
+
+const concurrentOpenUri =
+  "file:///workspace/module/.terraform/concurrent-open.toml";
+set_workspace_file(concurrentOpenUri, "key =\n");
+deferWorkspaceFoldersResponse = true;
+const previousWorkspaceFolderRequests = new Set(
+  messages.filter((message) => message.method === "workspace/workspaceFolders"),
+);
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    method: "workspace/didChangeWatchedFiles",
+    params: { changes: [{ type: 1, uri: concurrentOpenUri }] },
+  }),
+);
+const deferredWorkspaceFoldersRequest = await waitForMessage(
+  (message) =>
+    message.method === "workspace/workspaceFolders" &&
+    !previousWorkspaceFolderRequests.has(message),
+);
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    method: "textDocument/didOpen",
+    params: {
+      textDocument: {
+        languageId: "toml",
+        text: "key =\n",
+        uri: concurrentOpenUri,
+        version: 1,
+      },
+    },
+  }),
+);
+await waitForMessage(
+  (message) =>
+    message.method === "textDocument/publishDiagnostics" &&
+    message.params?.uri === concurrentOpenUri &&
+    message.params?.version === 1,
+);
+const messagesBeforeWatcherResume = new Set(messages);
+deferWorkspaceFoldersResponse = false;
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    id: deferredWorkspaceFoldersRequest.id,
+    result: [{ name: "workspace", uri: "file:///workspace" }],
+  }),
+);
+const concurrentWatcherDiagnostics = await waitForMessage(
+  (message) =>
+    !messagesBeforeWatcherResume.has(message) &&
+    message.method === "textDocument/publishDiagnostics" &&
+    message.params?.uri === concurrentOpenUri,
+);
+assert.equal(concurrentWatcherDiagnostics.params?.version, 1);
+assert.ok(concurrentWatcherDiagnostics.params?.diagnostics?.length > 0);
+
 for (const textDocument of [
   {
     languageId: "toml",
     uri: "file:///workspace/tombi.toml",
     version: 1,
     text: `toml-version = "v1.1.0"
+
+[files]
+respect-ignore-files = true
 
 [format.rules]
 
@@ -262,7 +449,10 @@ input.push(
 
 const diagnosticResponse = await waitForResponse(2);
 assert.equal(diagnosticResponse?.error, undefined);
-assert.ok(diagnosticResponse?.result?.items?.length > 0);
+assert.ok(
+  diagnosticResponse?.result?.items?.length > 0,
+  `WASM LSP pull diagnostics should report invalid TOML: ${JSON.stringify(diagnosticResponse)}`,
+);
 
 input.push(
   encode({
@@ -386,7 +576,7 @@ input.push(
     id: 6,
     method: "textDocument/hover",
     params: {
-      position: { line: 2, character: 5 },
+      position: { line: 5, character: 5 },
       textDocument: { uri: "file:///workspace/tombi.toml" },
     },
   }),
@@ -403,7 +593,7 @@ input.push(
     method: "textDocument/completion",
     params: {
       context: { triggerKind: 1 },
-      position: { line: 3, character: 0 },
+      position: { line: 6, character: 0 },
       textDocument: { uri: "file:///workspace/tombi.toml" },
     },
   }),
@@ -417,6 +607,9 @@ assert.ok(
 );
 
 const updatedConfig = `toml-version = "v1.1.0"
+
+[files]
+respect-ignore-files = false
 
 [format.rules]
 group-blank-lines-limit = 5
@@ -448,6 +641,25 @@ input.push(
 const updateConfigResponse = await waitForResponse(8);
 assert.equal(updateConfigResponse?.error, undefined);
 assert.equal(updateConfigResponse?.result, true);
+
+const watchedIncludedUri =
+  "file:///workspace/module/.terraform/watched-when-disabled.toml";
+set_workspace_file(watchedIncludedUri, "key =\n");
+input.push(
+  encode({
+    jsonrpc: "2.0",
+    method: "workspace/didChangeWatchedFiles",
+    params: {
+      changes: [{ type: 1, uri: watchedIncludedUri }],
+    },
+  }),
+);
+const includedWatcherDiagnostics = await waitForMessage(
+  (message) =>
+    message.method === "textDocument/publishDiagnostics" &&
+    message.params?.uri === watchedIncludedUri,
+);
+assert.ok(includedWatcherDiagnostics.params?.diagnostics?.length > 0);
 
 input.push(
   encode({
