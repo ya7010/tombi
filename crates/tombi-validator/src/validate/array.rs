@@ -204,7 +204,7 @@ async fn validate_array(
                 Some(overflow_item) => {
                     match tombi_schema_store::resolve_schema_item(
                         overflow_item,
-                        current_schema.schema_uri.clone(),
+                        current_schema.schema_base_uri.clone(),
                         current_schema.definitions.clone(),
                         current_schema.strict,
                         schema_context.store,
@@ -242,7 +242,7 @@ async fn validate_array(
                 evaluated[index] = true;
                 match tombi_schema_store::resolve_schema_item(
                     &prefix_items[index],
-                    current_schema.schema_uri.clone(),
+                    current_schema.schema_base_uri.clone(),
                     current_schema.definitions.clone(),
                     current_schema.strict,
                     schema_context.store,
@@ -330,7 +330,7 @@ async fn validate_array(
         // Single schema for all items
         match tombi_schema_store::resolve_schema_item(
             items,
-            current_schema.schema_uri.clone(),
+            current_schema.schema_base_uri.clone(),
             current_schema.definitions.clone(),
             current_schema.strict,
             schema_context.store,
@@ -384,7 +384,7 @@ async fn validate_array(
     let contains_schema = match &array_schema.contains {
         Some(contains) => match tombi_schema_store::resolve_schema_item(
             contains,
-            current_schema.schema_uri.clone(),
+            current_schema.schema_base_uri.clone(),
             current_schema.definitions.clone(),
             current_schema.strict,
             schema_context.store,
@@ -487,7 +487,7 @@ async fn validate_array(
         let unevaluated_schema = if let Some(schema_item) = &array_schema.unevaluated_items_schema {
             match tombi_schema_store::resolve_schema_item(
                 schema_item,
-                current_schema.schema_uri.clone(),
+                current_schema.schema_base_uri.clone(),
                 current_schema.definitions.clone(),
                 current_schema.strict,
                 schema_context.store,

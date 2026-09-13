@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "value": {
+      "$ref": "./cross-source-duplicate-target.json"
+    }
+  },
+  "$defs": {
+    "local": {
+      "$id": "https://example.com/cross-source-duplicate",
+      "type": "boolean"
+    }
+  }
+}

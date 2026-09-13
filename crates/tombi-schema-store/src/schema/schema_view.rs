@@ -107,7 +107,7 @@ impl SchemaView {
                 targets.insert(
                     0,
                     Referable::Resolved {
-                        schema_uri: None,
+                        schema_base_uri: None,
                         value: Arc::new(SchemaView::AllOf(*existing)),
                         semantic_schema: None,
                     },
@@ -143,7 +143,7 @@ impl SchemaView {
         }
 
         let mut schemas = vec![Referable::Resolved {
-            schema_uri: None,
+            schema_base_uri: None,
             value: Arc::new(self),
             semantic_schema: None,
         }];
@@ -678,7 +678,7 @@ impl SchemaView {
     pub fn match_flattened_schemas<'a: 'b, 'b, T: Fn(&SchemaView) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -687,7 +687,7 @@ impl SchemaView {
             let schema_visits = crate::SchemaVisits::default();
             self.match_flattened_schemas_with_visits(
                 condition,
-                schema_uri,
+                schema_base_uri,
                 definitions,
                 strict,
                 schema_store,
@@ -701,7 +701,7 @@ impl SchemaView {
     fn match_flattened_schemas_with_visits<'a: 'b, 'b, T: Fn(&SchemaView) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -715,7 +715,7 @@ impl SchemaView {
                 | SchemaView::AllOf(AllOfSchema { schemas, .. }) => {
                     let Some(collected) = crate::resolve_and_collect_schemas(
                         schemas,
-                        Cow::Borrowed(schema_uri),
+                        Cow::Borrowed(schema_base_uri),
                         Cow::Borrowed(definitions),
                         strict,
                         schema_store,
@@ -733,7 +733,7 @@ impl SchemaView {
                                 .schema_view
                                 .match_flattened_schemas_with_visits(
                                     condition,
-                                    &current_schema.schema_uri,
+                                    &current_schema.schema_base_uri,
                                     &current_schema.definitions,
                                     current_schema.strict,
                                     schema_store,
@@ -758,7 +758,7 @@ impl SchemaView {
     pub fn is_match<'a, 'b, T: Fn(&SchemaView) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -770,7 +770,7 @@ impl SchemaView {
             let schema_visits = crate::SchemaVisits::default();
             self.is_match_with_visits(
                 condition,
-                schema_uri,
+                schema_base_uri,
                 definitions,
                 strict,
                 schema_store,
@@ -784,7 +784,7 @@ impl SchemaView {
     fn is_match_with_visits<'a, 'b, T: Fn(&SchemaView) -> bool + Sync + Send>(
         &'a self,
         condition: &'a T,
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -799,7 +799,7 @@ impl SchemaView {
                 | SchemaView::AnyOf(AnyOfSchema { schemas, .. }) => {
                     let Some(collected) = crate::resolve_and_collect_schemas(
                         schemas,
-                        Cow::Borrowed(schema_uri),
+                        Cow::Borrowed(schema_base_uri),
                         Cow::Borrowed(definitions),
                         strict,
                         schema_store,
@@ -816,7 +816,7 @@ impl SchemaView {
                             .schema_view
                             .is_match_with_visits(
                                 condition,
-                                &current_schema.schema_uri,
+                                &current_schema.schema_base_uri,
                                 &current_schema.definitions,
                                 current_schema.strict,
                                 schema_store,
@@ -831,7 +831,7 @@ impl SchemaView {
                 SchemaView::AllOf(AllOfSchema { schemas, .. }) => {
                     let Some(collected) = crate::resolve_and_collect_schemas(
                         schemas,
-                        Cow::Borrowed(schema_uri),
+                        Cow::Borrowed(schema_base_uri),
                         Cow::Borrowed(definitions),
                         strict,
                         schema_store,
@@ -848,7 +848,7 @@ impl SchemaView {
                             .schema_view
                             .is_match_with_visits(
                                 condition,
-                                &current_schema.schema_uri,
+                                &current_schema.schema_base_uri,
                                 &current_schema.definitions,
                                 current_schema.strict,
                                 schema_store,
@@ -869,7 +869,7 @@ impl SchemaView {
     fn find_schema_candidates_with_visits<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -900,7 +900,7 @@ impl SchemaView {
 
                     let Some(collected) = crate::resolve_and_collect_schemas(
                         schemas,
-                        Cow::Borrowed(schema_uri),
+                        Cow::Borrowed(schema_base_uri),
                         Cow::Borrowed(definitions),
                         strict,
                         schema_store,
@@ -917,7 +917,7 @@ impl SchemaView {
                             .schema_view
                             .find_schema_candidates_with_visits(
                                 accessors,
-                                &current_schema.schema_uri,
+                                &current_schema.schema_base_uri,
                                 &current_schema.definitions,
                                 current_schema.strict,
                                 schema_store,
@@ -950,7 +950,7 @@ impl FindSchemaCandidates for SchemaView {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -959,7 +959,7 @@ impl FindSchemaCandidates for SchemaView {
             let schema_visits = crate::SchemaVisits::default();
             self.find_schema_candidates_with_visits(
                 accessors,
-                schema_uri,
+                schema_base_uri,
                 definitions,
                 strict,
                 schema_store,
@@ -979,7 +979,7 @@ mod tests {
 
     fn string_target() -> Referable<SchemaView> {
         Referable::Resolved {
-            schema_uri: None,
+            schema_base_uri: None,
             value: Arc::new(SchemaView::String(StringSchema::default())),
             semantic_schema: None,
         }

@@ -29,7 +29,8 @@ pub(crate) async fn edit<'a>(
             .map(|schema_view| CurrentSchema {
                 schema_view: schema_view.clone(),
                 semantic_schema: document_schema.semantic_schema.clone(),
-                schema_uri: Cow::Borrowed(&document_schema.schema_uri),
+                schema_base_uri: Cow::Borrowed(document_schema.schema_base_uri()),
+                schema_document_uri: Cow::Borrowed(document_schema.schema_document_uri()),
                 definitions: Cow::Borrowed(&document_schema.definitions),
                 strict: document_schema.strict,
             })

@@ -302,29 +302,20 @@ impl SchemaContext<'_> {
 
     fn root_schema_overrides(&self) -> Option<&crate::SchemaOverrides> {
         let document_schema = self.root_schema?;
-        let mut schema_uri = document_schema.schema_uri.clone();
-        if schema_uri.fragment().is_some() {
-            schema_uri.set_fragment(None);
-        }
-        self.schema_overrides?.get(&schema_uri)
+        self.schema_overrides?
+            .get(document_schema.schema_document_uri())
     }
 
     fn root_schema_format_rules(&self) -> Option<&SchemaFormatRules> {
         let document_schema = self.root_schema?;
-        let mut schema_uri = document_schema.schema_uri.clone();
-        if schema_uri.fragment().is_some() {
-            schema_uri.set_fragment(None);
-        }
-        self.schema_format_rules?.get(&schema_uri)
+        self.schema_format_rules?
+            .get(document_schema.schema_document_uri())
     }
 
     fn root_schema_lint_rules(&self) -> Option<&SchemaLintRules> {
         let document_schema = self.root_schema?;
-        let mut schema_uri = document_schema.schema_uri.clone();
-        if schema_uri.fragment().is_some() {
-            schema_uri.set_fragment(None);
-        }
-        self.schema_lint_rules?.get(&schema_uri)
+        self.schema_lint_rules?
+            .get(document_schema.schema_document_uri())
     }
 
     fn normalize_schema_uri(
@@ -332,11 +323,7 @@ impl SchemaContext<'_> {
         current_schema: Option<&crate::CurrentSchema<'_>>,
     ) -> Option<crate::SchemaUri> {
         let current_schema = current_schema?;
-        let mut schema_uri = current_schema.schema_uri.clone().into_owned();
-        if schema_uri.fragment().is_some() {
-            schema_uri.set_fragment(None);
-        }
-        Some(schema_uri)
+        Some(current_schema.schema_document_uri_for_config())
     }
 
     pub async fn get_subschema(
@@ -356,8 +343,10 @@ impl SchemaContext<'_> {
                     _ => Some(candidate),
                 })
             && current_schema.is_none_or(|current_schema| {
-                current_schema.schema_uri.as_ref() != &sub_schema_link.schema_uri
-                    || current_schema.strict != Some(sub_schema_link.strict.into())
+                let same_document = current_schema.schema_document_uri_for_config()
+                    == sub_schema_link.schema_uri
+                    || current_schema.schema_base_uri.as_ref() == &sub_schema_link.schema_uri;
+                !same_document || current_schema.strict != Some(sub_schema_link.strict.into())
             })
         {
             return match self

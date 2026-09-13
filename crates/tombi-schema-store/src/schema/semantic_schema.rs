@@ -287,7 +287,7 @@ impl SemanticSchema {
                     schema
                         .schema_view_for_type(instance_type, string_formats)
                         .map(|value| super::Referable::Resolved {
-                            schema_uri: None,
+                            schema_base_uri: None,
                             value: std::sync::Arc::new(value),
                             semantic_schema: Some(std::sync::Arc::new(schema.clone())),
                         })
@@ -390,7 +390,7 @@ impl SemanticSchema {
                 dynamic_anchor_collector.as_deref_mut(),
             ) {
                 schemas.push(super::Referable::Resolved {
-                    schema_uri: None,
+                    schema_base_uri: None,
                     value: std::sync::Arc::new(value),
                     semantic_schema: None,
                 });

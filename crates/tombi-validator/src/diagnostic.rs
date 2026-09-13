@@ -41,14 +41,14 @@ pub enum DiagnosticKind {
 
     #[error(
         "in strict mode, {accessors} does not allow \"{key}\" key. \
-         Please add `\"additionalProperties\": true` to the location where it is defined in {schema_uri}, \
+         Please add `\"additionalProperties\": true` to the location where it is defined in {schema_base_uri}, \
          or add `#:tombi schema.strict = false` as a document comment directive at the top of your document, \
          or set `strict = false` in the matching `schemas[*].strict` / `schema.strict` entry in your `tombi.toml`."
     )]
     TableStrictAdditionalKeys {
         accessors: MarkdownSchemaAccessors,
         key: String,
-        schema_uri: SchemaUri,
+        schema_base_uri: SchemaUri,
     },
 
     #[error("\"{key}\" is not allowed")]

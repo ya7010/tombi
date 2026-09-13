@@ -231,7 +231,7 @@ impl FindSchemaCandidates for ArraySchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -245,14 +245,14 @@ impl FindSchemaCandidates for ArraySchema {
             };
 
             if let Ok(Some(CurrentSchema {
-                schema_uri,
+                schema_base_uri,
                 schema_view,
                 definitions,
                 strict,
                 ..
             })) = crate::resolve_schema_item(
                 items,
-                Cow::Borrowed(schema_uri),
+                Cow::Borrowed(schema_base_uri),
                 Cow::Borrowed(definitions),
                 strict,
                 schema_store,
@@ -263,7 +263,7 @@ impl FindSchemaCandidates for ArraySchema {
                 let (mut item_candidates, mut item_errors) = schema_view
                     .find_schema_candidates(
                         &accessors[1..],
-                        &schema_uri,
+                        &schema_base_uri,
                         &definitions,
                         strict,
                         schema_store,

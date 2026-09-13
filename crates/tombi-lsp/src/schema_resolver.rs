@@ -21,7 +21,7 @@ async fn resolve_schema_item_owned(
 ) -> Option<CurrentSchema<'static>> {
     tombi_schema_store::resolve_schema_item(
         schema_item,
-        current_schema.schema_uri.clone(),
+        current_schema.schema_base_uri.clone(),
         current_schema.definitions.clone(),
         current_schema.strict,
         schema_context.store,
@@ -162,7 +162,8 @@ async fn resolve_current_schema(
     let current_schema = CurrentSchema {
         schema_view: schema_view.clone(),
         semantic_schema: document_schema.semantic_schema.clone(),
-        schema_uri: Cow::Owned(document_schema.schema_uri.clone()),
+        schema_base_uri: Cow::Owned(document_schema.schema_base_uri().clone()),
+        schema_document_uri: Cow::Owned(document_schema.schema_document_uri().clone()),
         definitions: Cow::Owned(document_schema.definitions.clone()),
         strict: document_schema.strict,
     };
@@ -234,7 +235,7 @@ fn resolve_schema_with_accessors<'a: 'b, 'b>(
                 let next_schema = table_schema
                     .resolve_property_schema(
                         &SchemaAccessor::from(accessor),
-                        current_schema.schema_uri.clone(),
+                        current_schema.schema_base_uri.clone(),
                         current_schema.definitions.clone(),
                         current_schema.strict,
                         schema_context.store,
@@ -291,7 +292,7 @@ fn resolve_composite_schema_with_accessors<'a: 'b, 'b>(
     async move {
         let collected = tombi_schema_store::resolve_and_collect_schemas(
             schemas,
-            current_schema.schema_uri.clone(),
+            current_schema.schema_base_uri.clone(),
             current_schema.definitions.clone(),
             current_schema.strict,
             schema_context.store,
@@ -402,7 +403,7 @@ fn resolve_composite_schema_with_accessors<'a: 'b, 'b>(
                 let referables = candidates
                     .into_iter()
                     .map(|candidate| tombi_schema_store::Referable::Resolved {
-                        schema_uri: Some(candidate.schema_uri.into_owned()),
+                        schema_base_uri: Some(candidate.schema_base_uri.into_owned()),
                         value: candidate.schema_view,
                         semantic_schema: candidate.semantic_schema,
                     })
@@ -425,7 +426,8 @@ fn resolve_composite_schema_with_accessors<'a: 'b, 'b>(
                 Some(CurrentSchema {
                     schema_view: Arc::new(schema_view),
                     semantic_schema,
-                    schema_uri: current_schema.schema_uri,
+                    schema_base_uri: current_schema.schema_base_uri,
+                    schema_document_uri: current_schema.schema_document_uri,
                     definitions: current_schema.definitions,
                     strict: current_schema.strict,
                 })

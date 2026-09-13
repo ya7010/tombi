@@ -71,7 +71,7 @@ async fn validate_dependent_schemas<'a>(
 
         match tombi_schema_store::resolve_schema_item(
             schema_item,
-            current_schema.schema_uri.clone(),
+            current_schema.schema_base_uri.clone(),
             current_schema.definitions.clone(),
             current_schema.strict,
             schema_context.store,
@@ -333,7 +333,7 @@ async fn validate_table(
             match table_schema
                 .resolve_property_schema(
                     &schema_accessor,
-                    current_schema.schema_uri.clone(),
+                    current_schema.schema_base_uri.clone(),
                     current_schema.definitions.clone(),
                     current_schema.strict,
                     schema_context.store,
@@ -397,7 +397,7 @@ async fn validate_table(
                     match table_schema
                         .resolve_pattern_property_schema(
                             &pattern_key,
-                            current_schema.schema_uri.clone(),
+                            current_schema.schema_base_uri.clone(),
                             current_schema.definitions.clone(),
                             current_schema.strict,
                             schema_context.store,
@@ -505,7 +505,7 @@ async fn validate_table(
             {
                 match tombi_schema_store::resolve_schema_item(
                     referable_additional_property_schema,
-                    current_schema.schema_uri.clone(),
+                    current_schema.schema_base_uri.clone(),
                     current_schema.definitions.clone(),
                     current_schema.strict,
                     schema_context.store,
@@ -568,7 +568,7 @@ async fn validate_table(
                 if let Some(schema_item) = &table_schema.unevaluated_property_schema {
                     match tombi_schema_store::resolve_schema_item(
                         schema_item,
-                        current_schema.schema_uri.clone(),
+                        current_schema.schema_base_uri.clone(),
                         current_schema.definitions.clone(),
                         current_schema.strict,
                         schema_context.store,
@@ -630,7 +630,7 @@ async fn validate_table(
                 crate::Diagnostic {
                     kind: Box::new(crate::DiagnosticKind::TableStrictAdditionalKeys {
                         accessors: MarkdownSchemaAccessors::from(accessors),
-                        schema_uri: current_schema.schema_uri.as_ref().clone(),
+                        schema_base_uri: current_schema.schema_base_uri.as_ref().clone(),
                         key: key.to_string(),
                     }),
                     range: key.range() + value.range(),
@@ -945,7 +945,7 @@ async fn validate_table(
         if let Some(property_name_schema) = &table_schema.property_names {
             match tombi_schema_store::resolve_schema_item(
                 property_name_schema,
-                current_schema.schema_uri.clone(),
+                current_schema.schema_base_uri.clone(),
                 current_schema.definitions.clone(),
                 current_schema.strict,
                 schema_context.store,
@@ -1182,7 +1182,7 @@ fn collect_evaluated_properties_from_referable_schemas<'a>(
         let mut result = crate::Valid::new();
         let Some(schemas) = tombi_schema_store::resolve_and_collect_schemas(
             applicator.schemas(),
-            current_schema.schema_uri.clone(),
+            current_schema.schema_base_uri.clone(),
             current_schema.definitions.clone(),
             current_schema.strict,
             schema_context.store,

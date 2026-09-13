@@ -3219,6 +3219,30 @@ mod completion_labels {
         }
     }
 
+    mod issue_2164_compound_schema {
+        use super::*;
+
+        fn fixture_path() -> std::path::PathBuf {
+            project_root_path().join("crates/tombi-lsp/tests/fixtures/issue-2164-compound-schema")
+        }
+
+        test_completion_labels! {
+            #[tokio::test]
+            async fn completes_value_from_embedded_resource(
+                r#"
+                [tool.tombi]
+                strict = █
+                "#,
+                SourcePath(fixture_path().join("input.toml")),
+                SchemaPath(fixture_path().join("schema.json")),
+                tombi_lsp::backend::Options {
+                    offline: Some(true),
+                    no_cache: Some(true),
+                },
+            ) -> Ok(["true", "false"]);
+        }
+    }
+
     #[macro_export]
     macro_rules! test_completion_labels {
         (

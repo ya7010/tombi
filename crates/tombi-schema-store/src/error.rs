@@ -105,6 +105,30 @@ pub enum Error {
     #[error("schema must be an object or boolean: {schema_uri}")]
     SchemaMustBeObjectOrBoolean { schema_uri: SchemaUri },
 
+    #[error(
+        "duplicate $id `{schema_uri}` in {document}: first at `{first_location}`, again at `{second_location}`",
+        document = format_schema_document(schema_document_uri)
+    )]
+    DuplicateSchemaResourceInDocument {
+        schema_uri: SchemaUri,
+        schema_document_uri: SchemaUri,
+        first_location: String,
+        second_location: String,
+    },
+
+    #[error(
+        "duplicate $id `{schema_uri}`: already defined in {existing_document} at `{existing_location}`, also claimed by {conflicting_document} at `{conflicting_location}`",
+        existing_document = format_schema_document(existing_schema_document_uri),
+        conflicting_document = format_schema_document(conflicting_schema_document_uri)
+    )]
+    DuplicateSchemaResourceAcrossDocuments {
+        schema_uri: SchemaUri,
+        existing_schema_document_uri: SchemaUri,
+        existing_location: String,
+        conflicting_schema_document_uri: SchemaUri,
+        conflicting_location: String,
+    },
+
     #[error(transparent)]
     CacheError(#[from] tombi_cache::Error),
 }
@@ -118,4 +142,14 @@ impl Error {
             range,
         )
     }
+}
+
+pub(crate) fn format_schema_document(uri: &SchemaUri) -> String {
+    if uri.scheme() == "file"
+        && let Ok(path) = uri.to_file_path()
+        && let Some(file_name) = path.file_name()
+    {
+        return file_name.to_string_lossy().into_owned();
+    }
+    uri.to_string()
 }

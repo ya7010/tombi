@@ -42,7 +42,8 @@ pub async fn get_hover_content(
                     .map(|schema_view| CurrentSchema {
                         schema_view: schema_view.clone(),
                         semantic_schema: document_schema.semantic_schema.clone(),
-                        schema_uri: Cow::Borrowed(&document_schema.schema_uri),
+                        schema_base_uri: Cow::Owned(document_schema.schema_base_uri().clone()),
+                        schema_document_uri: Cow::Borrowed(document_schema.schema_document_uri()),
                         definitions: Cow::Borrowed(&document_schema.definitions),
                         strict: document_schema.strict,
                     });
@@ -70,17 +71,17 @@ pub(super) trait GetHoverContent {
 }
 
 pub(super) fn schema_link_uri(
-    schema_uri: &SchemaUri,
+    schema_base_uri: &SchemaUri,
     schema_range: tombi_text::Range,
 ) -> SchemaUri {
-    tombi_extension::get_schema_link_uri(schema_uri, schema_range.start).into()
+    tombi_extension::get_schema_link_uri(schema_base_uri, schema_range.start).into()
 }
 
 pub(super) fn current_schema_link_uri(
     current_schema: Option<&CurrentSchema<'_>>,
 ) -> Option<SchemaUri> {
     current_schema
-        .map(|schema| schema_link_uri(schema.schema_uri.as_ref(), schema.schema_view.range()))
+        .map(|schema| schema_link_uri(schema.schema_base_uri.as_ref(), schema.schema_view.range()))
 }
 
 fn merge_optional_vec<T: PartialEq>(
@@ -149,7 +150,7 @@ pub(super) fn merge_hover_value_content(
     base.title = base.title.or(adjacent.title);
     base.description = base.description.or(adjacent.description);
     base.constraints = merge_constraints(base.constraints, adjacent.constraints);
-    base.schema_uri = base.schema_uri.or(adjacent.schema_uri);
+    base.schema_base_uri = base.schema_base_uri.or(adjacent.schema_base_uri);
     base.range = base.range.or(adjacent.range);
     base
 }
@@ -198,10 +199,10 @@ pub(super) fn first_most_specific_hover_value_content(
         .map(HoverValueContent::schema_tooltip)
         .collect_vec();
     let mut selected = None;
-    let mut schema_uri = None;
+    let mut schema_base_uri = None;
     let mut range = None;
     for mut content in contents {
-        schema_uri = schema_uri.or_else(|| content.schema_uri.take());
+        schema_base_uri = schema_base_uri.or_else(|| content.schema_base_uri.take());
         range = range.or(content.range);
         selected.get_or_insert(content);
     }
@@ -210,7 +211,7 @@ pub(super) fn first_most_specific_hover_value_content(
     selected.title = None;
     selected.description = None;
     selected.constraints = None;
-    selected.schema_uri = schema_uri;
+    selected.schema_base_uri = schema_base_uri;
     selected.range = range;
     if value_types.len() > 1 {
         selected.value_type = match applicator {
@@ -304,7 +305,7 @@ pub(super) async fn merge_adjacent_hover_content<
                 keys,
                 accessors,
                 one_of_schema,
-                &current_schema.schema_uri,
+                &current_schema.schema_base_uri,
                 &current_schema.definitions,
                 current_schema.strict,
                 schema_context,
@@ -321,7 +322,7 @@ pub(super) async fn merge_adjacent_hover_content<
                 keys,
                 accessors,
                 any_of_schema,
-                &current_schema.schema_uri,
+                &current_schema.schema_base_uri,
                 &current_schema.definitions,
                 current_schema.strict,
                 schema_context,
@@ -338,7 +339,7 @@ pub(super) async fn merge_adjacent_hover_content<
                 keys,
                 accessors,
                 all_of_schema,
-                &current_schema.schema_uri,
+                &current_schema.schema_base_uri,
                 &current_schema.definitions,
                 current_schema.strict,
                 schema_context,
@@ -395,7 +396,7 @@ pub struct HoverValueContent {
     pub accessors: Accessors,
     pub value_type: ValueType,
     pub constraints: Option<ValueConstraints>,
-    pub schema_uri: Option<SchemaUri>,
+    pub schema_base_uri: Option<SchemaUri>,
     pub range: Option<tombi_text::Range>,
     pub(super) schema_tooltip: Option<SchemaTooltip>,
 }
@@ -408,12 +409,12 @@ impl HoverValueContent {
                 .constraints
                 .as_ref()
                 .is_some_and(|constraints| constraints != &ValueConstraints::default())
-            || self.schema_uri.is_some()
+            || self.schema_base_uri.is_some()
             || self.schema_tooltip.is_some()
     }
 
     pub(crate) fn schema_tooltip(&self) -> SchemaTooltip {
-        let schema = self.schema_uri.as_ref().and_then(|schema_uri| {
+        let schema = self.schema_base_uri.as_ref().and_then(|schema_uri| {
             get_schema_name(schema_uri).map(|name| format!("Schema: [{name}]({schema_uri})"))
         });
         let common = SchemaTooltipContent {

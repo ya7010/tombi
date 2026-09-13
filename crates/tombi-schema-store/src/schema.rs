@@ -17,6 +17,7 @@ mod one_of_schema;
 mod referable_schema;
 mod schema_context;
 mod schema_cycle_guard;
+mod schema_document_resources;
 mod schema_view;
 mod semantic_schema;
 mod source_schema;
@@ -48,6 +49,7 @@ pub use referable_schema::{
 };
 pub use schema_context::{ResolvedFormatOrder, SchemaContext};
 pub use schema_cycle_guard::{SchemaCycleGuard, SchemaVisits};
+pub(crate) use schema_document_resources::{SchemaDocumentResources, resolve_schema_resource_uri};
 pub use schema_view::*;
 pub use semantic_schema::*;
 pub use source_schema::{
@@ -256,15 +258,31 @@ pub(crate) fn referable_from_schema_value(
     dynamic_anchor_collector: Option<&mut DynamicAnchorCollector>,
 ) -> Option<Referable<SchemaView>> {
     match value {
-        tombi_json::ValueNode::Object(object) => Referable::<SchemaView>::new(
-            object,
-            string_formats,
-            dialect,
-            anchor_collector,
-            dynamic_anchor_collector,
-        ),
+        tombi_json::ValueNode::Object(object) => {
+            // A non-fragment `$id` starts a new schema resource. Its anchors belong to
+            // that resource and must not leak into the enclosing resource's scope.
+            let starts_resource = object
+                .get("$id")
+                .and_then(tombi_json::ValueNode::as_str)
+                .is_some_and(|id| {
+                    !id.split_once('#')
+                        .is_some_and(|(_, fragment)| !fragment.is_empty())
+                });
+            let (anchor_collector, dynamic_anchor_collector) = if starts_resource {
+                (None, None)
+            } else {
+                (anchor_collector, dynamic_anchor_collector)
+            };
+            Referable::<SchemaView>::new(
+                object,
+                string_formats,
+                dialect,
+                anchor_collector,
+                dynamic_anchor_collector,
+            )
+        }
         tombi_json::ValueNode::Bool(bool) => Some(Referable::Resolved {
-            schema_uri: None,
+            schema_base_uri: None,
             value: Arc::new(bool_schema_view(bool.value, bool.range)),
             semantic_schema: SemanticSchema::from_value_node(value, dialect).map(Arc::new),
         }),
@@ -467,7 +485,7 @@ pub trait FindSchemaCandidates {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,

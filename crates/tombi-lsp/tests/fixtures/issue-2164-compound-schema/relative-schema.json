@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/bundle/root.json",
+  "$ref": "resources/alias",
+  "$defs": {
+    "alias": {
+      "$id": "resources/alias",
+      "$ref": "versioned.json"
+    },
+    "versioned": {
+      "$id": "resources/versioned.json",
+      "type": "object",
+      "properties": {
+        "tool": {
+          "$ref": "nested/settings"
+        }
+      },
+      "$defs": {
+        "settings": {
+          "$id": "nested/settings",
+          "type": "object",
+          "properties": {
+            "strict": {
+              "$ref": "../../types#boolean"
+            }
+          }
+        }
+      }
+    },
+    "boolean": {
+      "$id": "types",
+      "$anchor": "boolean",
+      "type": "boolean"
+    }
+  }
+}

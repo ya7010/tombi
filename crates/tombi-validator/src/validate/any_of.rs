@@ -72,7 +72,7 @@ where
         let Some((resolved_schemas, resolution_errors)) =
             tombi_schema_store::resolve_and_collect_schemas_with_errors(
                 &any_of_schema.schemas,
-                current_schema.schema_uri.clone(),
+                current_schema.schema_base_uri.clone(),
                 current_schema.definitions.clone(),
                 current_schema.strict,
                 schema_context.store,

@@ -11,7 +11,7 @@ pub fn get_all_of_type_definition<'a: 'b, 'b, T>(
     keys: &'a [tombi_document_tree_syntax::Key],
     accessors: &'a [tombi_schema_store::Accessor],
     all_of_schema: &'a tombi_schema_store::AllOfSchema,
-    schema_uri: &'a SchemaUri,
+    schema_base_uri: &'a SchemaUri,
     definitions: &'a tombi_schema_store::SchemaDefinitions,
     strict: Option<tombi_schema_type::BoolDefaultTrue>,
     schema_context: &'a tombi_schema_store::SchemaContext,
@@ -23,13 +23,13 @@ where
     log::trace!("keys: {:?}", keys);
     log::trace!("accessors: {:?}", accessors);
     log::trace!("all_of_schema: {:?}", all_of_schema);
-    log::trace!("schema_uri: {:?}", schema_uri);
+    log::trace!("schema_base_uri: {:?}", schema_base_uri);
 
     async move {
         let mut result = Vec::new();
         let Some(resolved_schemas) = tombi_schema_store::resolve_and_collect_schemas(
             &all_of_schema.schemas,
-            Cow::Borrowed(schema_uri),
+            Cow::Borrowed(schema_base_uri),
             Cow::Borrowed(definitions),
             strict,
             schema_context.store,
@@ -81,7 +81,7 @@ impl GetTypeDefinition for tombi_schema_store::AllOfSchema {
             };
 
             vec![schema_type_definition(
-                current_schema.schema_uri.as_ref(),
+                current_schema.schema_base_uri.as_ref(),
                 accessors,
                 self.range,
             )]

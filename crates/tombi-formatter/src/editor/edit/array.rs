@@ -155,7 +155,7 @@ fn resolve_array_item_edit_context<'a: 'b, 'b>(
                 | SchemaView::OneOf(OneOfSchema { schemas, .. }) => {
                     if let Some(resolved_schemas) = tombi_schema_store::resolve_and_collect_schemas(
                         schemas,
-                        current_schema.schema_uri.clone(),
+                        current_schema.schema_base_uri.clone(),
                         current_schema.definitions.clone(),
                         current_schema.strict,
                         schema_context.store,
@@ -190,7 +190,7 @@ fn resolve_array_item_edit_context<'a: 'b, 'b>(
             && let Some(item_schema) = &array_schema.items
             && let Ok(Some(current_schema)) = tombi_schema_store::resolve_schema_item(
                 item_schema,
-                current_schema.schema_uri.clone(),
+                current_schema.schema_base_uri.clone(),
                 current_schema.definitions.clone(),
                 current_schema.strict,
                 schema_context.store,

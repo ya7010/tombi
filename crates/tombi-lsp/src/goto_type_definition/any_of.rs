@@ -12,7 +12,7 @@ pub fn get_any_of_type_definition<'a: 'b, 'b, T>(
     keys: &'a [tombi_document_tree_syntax::Key],
     accessors: &'a [tombi_schema_store::Accessor],
     any_of_schema: &'a tombi_schema_store::AnyOfSchema,
-    schema_uri: &'a SchemaUri,
+    schema_base_uri: &'a SchemaUri,
     definitions: &'a tombi_schema_store::SchemaDefinitions,
     strict: Option<tombi_schema_type::BoolDefaultTrue>,
     schema_context: &'a tombi_schema_store::SchemaContext,
@@ -29,12 +29,12 @@ where
     log::trace!("keys: {:?}", keys);
     log::trace!("accessors: {:?}", accessors);
     log::trace!("any_of_schema: {:?}", any_of_schema);
-    log::trace!("schema_uri: {:?}", schema_uri);
+    log::trace!("schema_base_uri: {:?}", schema_base_uri);
 
     async move {
         let Some(resolved_schemas) = tombi_schema_store::resolve_and_collect_schemas(
             &any_of_schema.schemas,
-            Cow::Borrowed(schema_uri),
+            Cow::Borrowed(schema_base_uri),
             Cow::Borrowed(definitions),
             strict,
             schema_context.store,
@@ -86,11 +86,11 @@ where
             return result;
         }
 
-        let mut schema_uri = schema_uri.clone();
-        schema_uri.set_fragment(Some(&format!("L{}", any_of_schema.range.start.line + 1)));
+        let mut schema_base_uri = schema_base_uri.clone();
+        schema_base_uri.set_fragment(Some(&format!("L{}", any_of_schema.range.start.line + 1)));
 
         vec![TypeDefinition {
-            schema_uri,
+            schema_base_uri,
             schema_accessors: accessors.iter().map(Into::into).collect_vec(),
             range: tombi_text::Range::default(),
         }]
@@ -113,7 +113,7 @@ impl GetTypeDefinition for tombi_schema_store::AnyOfSchema {
             };
 
             vec![schema_type_definition(
-                current_schema.schema_uri.as_ref(),
+                current_schema.schema_base_uri.as_ref(),
                 accessors,
                 self.range,
             )]

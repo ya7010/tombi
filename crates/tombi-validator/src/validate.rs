@@ -62,7 +62,8 @@ pub fn validate<'a: 'b, 'b>(
                         .map(|schema_view| CurrentSchema {
                             schema_view: schema_view.clone(),
                             semantic_schema: root_schema.semantic_schema.clone(),
-                            schema_uri: Cow::Borrowed(&root_schema.schema_uri),
+                            schema_base_uri: Cow::Owned(root_schema.schema_base_uri().clone()),
+                            schema_document_uri: Cow::Borrowed(root_schema.schema_document_uri()),
                             definitions: Cow::Borrowed(&root_schema.definitions),
                             strict: root_schema.strict,
                         })
@@ -191,7 +192,8 @@ pub fn project_current_schema_for_value(
                 semantic_schema.range(),
             )),
             semantic_schema: None,
-            schema_uri: Cow::Owned(current_schema.schema_uri.as_ref().clone()),
+            schema_base_uri: Cow::Owned(current_schema.schema_base_uri.as_ref().clone()),
+            schema_document_uri: Cow::Owned(current_schema.schema_document_uri.as_ref().clone()),
             definitions: Cow::Owned(current_schema.definitions.as_ref().clone()),
             strict: current_schema.strict,
         });
