@@ -105,32 +105,40 @@ pub enum Error {
     #[error("schema must be an object or boolean: {schema_uri}")]
     SchemaMustBeObjectOrBoolean { schema_uri: SchemaUri },
 
-    #[error(
-        "duplicate $id `{schema_uri}` in {document}: first at `{first_location}`, again at `{second_location}`",
-        document = format_schema_document(schema_document_uri)
-    )]
-    DuplicateSchemaResourceInDocument {
-        schema_uri: SchemaUri,
-        schema_document_uri: SchemaUri,
-        first_location: String,
-        second_location: String,
-    },
+    #[error(transparent)]
+    DuplicateSchemaResourceInDocument(Box<DuplicateSchemaResourceInDocument>),
 
-    #[error(
-        "duplicate $id `{schema_uri}`: already defined in {existing_document} at `{existing_location}`, also claimed by {conflicting_document} at `{conflicting_location}`",
-        existing_document = format_schema_document(existing_schema_document_uri),
-        conflicting_document = format_schema_document(conflicting_schema_document_uri)
-    )]
-    DuplicateSchemaResourceAcrossDocuments {
-        schema_uri: SchemaUri,
-        existing_schema_document_uri: SchemaUri,
-        existing_location: String,
-        conflicting_schema_document_uri: SchemaUri,
-        conflicting_location: String,
-    },
+    #[error(transparent)]
+    DuplicateSchemaResourceAcrossDocuments(Box<DuplicateSchemaResourceAcrossDocuments>),
 
     #[error(transparent)]
     CacheError(#[from] tombi_cache::Error),
+}
+
+#[derive(Debug, Clone, thiserror::Error)]
+#[error(
+    "duplicate $id `{schema_uri}` in {document}: first at `{first_location}`, again at `{second_location}`",
+    document = format_schema_document(schema_document_uri)
+)]
+pub struct DuplicateSchemaResourceInDocument {
+    pub schema_uri: SchemaUri,
+    pub schema_document_uri: SchemaUri,
+    pub first_location: String,
+    pub second_location: String,
+}
+
+#[derive(Debug, Clone, thiserror::Error)]
+#[error(
+    "duplicate $id `{schema_uri}`: already defined in {existing_document} at `{existing_location}`, also claimed by {conflicting_document} at `{conflicting_location}`",
+    existing_document = format_schema_document(existing_schema_document_uri),
+    conflicting_document = format_schema_document(conflicting_schema_document_uri)
+)]
+pub struct DuplicateSchemaResourceAcrossDocuments {
+    pub schema_uri: SchemaUri,
+    pub existing_schema_document_uri: SchemaUri,
+    pub existing_location: String,
+    pub conflicting_schema_document_uri: SchemaUri,
+    pub conflicting_location: String,
 }
 
 impl Error {

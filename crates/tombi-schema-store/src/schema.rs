@@ -265,8 +265,8 @@ pub(crate) fn referable_from_schema_value(
                 .get("$id")
                 .and_then(tombi_json::ValueNode::as_str)
                 .is_some_and(|id| {
-                    !id.split_once('#')
-                        .is_some_and(|(_, fragment)| !fragment.is_empty())
+                    id.split_once('#')
+                        .is_none_or(|(_, fragment)| fragment.is_empty())
                 });
             let (anchor_collector, dynamic_anchor_collector) = if starts_resource {
                 (None, None)

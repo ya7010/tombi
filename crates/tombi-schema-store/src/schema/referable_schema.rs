@@ -941,7 +941,7 @@ async fn resolve_external_reference(
         )
         .await
         .and_then(|resolved| {
-            resolved.ok_or_else(|| crate::Error::InvalidJsonPointer {
+            resolved.ok_or(crate::Error::InvalidJsonPointer {
                 pointer: reference_with_fragment,
                 schema_uri: resolved_schema_uri,
             })

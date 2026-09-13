@@ -46,12 +46,14 @@ impl SchemaDocumentResources {
         if schema_document_uri != &root_schema_resource_uri
             && let Some(existing) = resources.get(schema_document_uri)
         {
-            return Err(crate::Error::DuplicateSchemaResourceInDocument {
-                schema_uri: schema_document_uri.clone(),
-                schema_document_uri: schema_document_uri.clone(),
-                first_location: existing.location.clone(),
-                second_location: "#".to_string(),
-            });
+            return Err(crate::Error::DuplicateSchemaResourceInDocument(Box::new(
+                crate::error::DuplicateSchemaResourceInDocument {
+                    schema_uri: schema_document_uri.clone(),
+                    schema_document_uri: schema_document_uri.clone(),
+                    first_location: existing.location.clone(),
+                    second_location: "#".to_string(),
+                },
+            )));
         }
 
         Ok(Arc::new(Self {
@@ -138,12 +140,14 @@ fn collect_schema_resources_from_value(
 
     if let Some(schema_resource_uri) = &schema_resource_uri {
         if let Some(existing) = resources.get(schema_resource_uri) {
-            return Err(crate::Error::DuplicateSchemaResourceInDocument {
-                schema_uri: schema_resource_uri.clone(),
-                schema_document_uri: schema_document_uri.clone(),
-                first_location: existing.location.clone(),
-                second_location: location.to_string(),
-            });
+            return Err(crate::Error::DuplicateSchemaResourceInDocument(Box::new(
+                crate::error::DuplicateSchemaResourceInDocument {
+                    schema_uri: schema_resource_uri.clone(),
+                    schema_document_uri: schema_document_uri.clone(),
+                    first_location: existing.location.clone(),
+                    second_location: location.to_string(),
+                },
+            )));
         }
         resources.insert(
             schema_resource_uri.clone(),

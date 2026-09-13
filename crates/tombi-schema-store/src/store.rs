@@ -802,13 +802,15 @@ impl SchemaStore {
                     .resource(schema_resource_uri)
                     .map(|resource| resource.location.clone())
                     .unwrap_or_else(|| "#".to_string());
-                return Err(crate::Error::DuplicateSchemaResourceAcrossDocuments {
-                    schema_uri: alias_uri.clone(),
-                    existing_schema_document_uri: existing.schema_document_uri.clone(),
-                    existing_location,
-                    conflicting_schema_document_uri: schema_document_uri.clone(),
-                    conflicting_location,
-                });
+                return Err(crate::Error::DuplicateSchemaResourceAcrossDocuments(
+                    Box::new(crate::error::DuplicateSchemaResourceAcrossDocuments {
+                        schema_uri: alias_uri.clone(),
+                        existing_schema_document_uri: existing.schema_document_uri.clone(),
+                        existing_location,
+                        conflicting_schema_document_uri: schema_document_uri.clone(),
+                        conflicting_location,
+                    }),
+                ));
             }
         }
 
