@@ -259,20 +259,30 @@ pub(crate) fn referable_from_schema_value(
 ) -> Option<Referable<SchemaView>> {
     match value {
         tombi_json::ValueNode::Object(object) => {
-            // A non-fragment `$id` starts a new schema resource. Its anchors belong to
-            // that resource and must not leak into the enclosing resource's scope.
-            let starts_resource = object
-                .get("$id")
-                .and_then(tombi_json::ValueNode::as_str)
-                .is_some_and(|id| {
-                    id.split_once('#')
-                        .is_none_or(|(_, fragment)| fragment.is_empty())
+            // A non-fragment `$id` starts a new schema resource. Match `$defs` handling:
+            // expose it as a `$ref` to that identity so resolve() loads the embedded
+            // DocumentSchema (correct base / anchors / definitions) instead of an
+            // inline Resolved with `schema_base_uri: None` that would inherit the parent.
+            if let Some(id) = object.get("$id").and_then(tombi_json::ValueNode::as_str)
+                && id
+                    .split_once('#')
+                    .is_none_or(|(_, fragment)| fragment.is_empty())
+            {
+                let reference = id
+                    .split_once('#')
+                    .map(|(base, _)| base.to_string())
+                    .unwrap_or_else(|| id.to_string());
+                return Some(Referable::Ref {
+                    reference,
+                    kind: ReferenceKind::Ref,
+                    semantic_schema: None,
+                    title: None,
+                    description: None,
+                    default: None,
+                    examples: None,
+                    deprecation: None,
                 });
-            let (anchor_collector, dynamic_anchor_collector) = if starts_resource {
-                (None, None)
-            } else {
-                (anchor_collector, dynamic_anchor_collector)
-            };
+            }
             Referable::<SchemaView>::new(
                 object,
                 string_formats,

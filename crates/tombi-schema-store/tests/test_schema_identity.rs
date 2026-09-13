@@ -196,3 +196,134 @@ async fn cyclic_embedded_root_refs_do_not_stack_overflow() {
         "root document schema should retain a usable view or semantic schema"
     );
 }
+
+#[tokio::test]
+async fn property_with_non_fragment_id_uses_embedded_resource_base() {
+    use std::borrow::Cow;
+
+    use tombi_schema_store::SchemaView;
+
+    let mut schema_file =
+        tempfile::NamedTempFile::with_suffix(".json").expect("temporary schema file");
+    schema_file
+        .write_all(
+            br#"{
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://example.com/root.json",
+                "type": "object",
+                "properties": {
+                    "child": {
+                        "$id": "https://example.com/child.json",
+                        "type": "string"
+                    }
+                }
+            }"#,
+        )
+        .expect("write schema");
+    let schema_document_uri =
+        SchemaUri::from_file_path(schema_file.path()).expect("valid schema file URI");
+    let child_uri =
+        SchemaUri::from_str("https://example.com/child.json").expect("valid child URI");
+    let schema_store = SchemaStore::new();
+    let document_schema = schema_store
+        .try_get_document_schema(&schema_document_uri)
+        .await
+        .expect("load schema")
+        .expect("schema present");
+
+    let SchemaView::Table(table) = document_schema
+        .schema_view
+        .as_deref()
+        .expect("root table view")
+    else {
+        panic!("expected table schema view");
+    };
+    let mut child = table
+        .properties
+        .read()
+        .await
+        .get(&tombi_accessor::SchemaAccessor::Key("child".to_string()))
+        .expect("child property")
+        .property_schema
+        .clone();
+
+    let resolved = child
+        .resolve(
+            Cow::Borrowed(document_schema.schema_base_uri()),
+            Cow::Borrowed(&document_schema.definitions),
+            None,
+            &schema_store,
+        )
+        .await
+        .expect("resolve child resource")
+        .expect("child schema");
+
+    assert_eq!(resolved.schema_base_uri.as_ref(), &child_uri);
+    assert!(
+        matches!(&*resolved.schema_view, SchemaView::String(_)),
+        "child resource should expose its own string schema"
+    );
+}
+
+#[tokio::test]
+async fn json_pointer_into_retrieval_uri_uses_canonical_root_base() {
+    use std::borrow::Cow;
+
+    use tombi_schema_store::{Referable, ReferenceKind};
+
+    let mut schema_file =
+        tempfile::NamedTempFile::with_suffix(".json").expect("temporary schema file");
+    schema_file
+        .write_all(
+            br#"{
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://example.com/canonical.json",
+                "type": "object",
+                "properties": {
+                    "value": { "type": "boolean" }
+                }
+            }"#,
+        )
+        .expect("write schema");
+    let schema_document_uri =
+        SchemaUri::from_file_path(schema_file.path()).expect("valid schema file URI");
+    let canonical_uri =
+        SchemaUri::from_str("https://example.com/canonical.json").expect("valid canonical URI");
+    let schema_store = SchemaStore::new();
+    let document_schema = schema_store
+        .try_get_document_schema(&schema_document_uri)
+        .await
+        .expect("load schema")
+        .expect("schema present");
+    assert_eq!(document_schema.schema_base_uri(), &canonical_uri);
+
+    // Resolve a pointer against the retrieval URI (not the canonical `$id`) to
+    // mimic external/file fragment refs that still land in this document.
+    let mut via_pointer = Referable::Ref {
+        reference: "#/properties/value".to_string(),
+        kind: ReferenceKind::Ref,
+        semantic_schema: None,
+        title: None,
+        description: None,
+        default: None,
+        examples: None,
+        deprecation: None,
+    };
+
+    let resolved = via_pointer
+        .resolve(
+            Cow::Owned(schema_document_uri.clone()),
+            Cow::Borrowed(&document_schema.definitions),
+            None,
+            &schema_store,
+        )
+        .await
+        .expect("resolve pointer")
+        .expect("pointer target");
+
+    assert_eq!(
+        resolved.schema_base_uri.as_ref(),
+        &canonical_uri,
+        "pointer targets under a retrieval URI must keep the root resource `$id` as base"
+    );
+}

@@ -1072,6 +1072,14 @@ async fn resolve_pointer_current_schema(
                 schema_uri,
             });
         };
+        // Prefer the resource's canonical `$id` even when the pointer stays inside the
+        // retrieval document (root `$id` differs from the document / fetch URI).
+        let schema_base_uri = schema_value
+            .as_object()
+            .and_then(|object| object.get("$id"))
+            .and_then(tombi_json::ValueNode::as_str)
+            .and_then(|id| super::resolve_schema_resource_uri(&schema_uri, id))
+            .unwrap_or_else(|| schema_uri.clone());
         let mut instance_uri = schema_document_uri.clone();
         if let Some(fragment) = pointer.strip_prefix('#') {
             instance_uri.set_fragment(Some(fragment));
@@ -1082,7 +1090,7 @@ async fn resolve_pointer_current_schema(
                 .and_then(|value| super::SemanticSchema::from_value_node(value, dialect))
                 .map(Arc::new),
             schema_uri: Cow::Owned(instance_uri),
-            schema_base_uri: Cow::Owned(schema_uri),
+            schema_base_uri: Cow::Owned(schema_base_uri),
             schema_document_uri: Cow::Owned(schema_document_uri),
             definitions: Cow::Owned(definitions),
             strict,

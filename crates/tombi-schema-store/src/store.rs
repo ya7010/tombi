@@ -584,11 +584,12 @@ impl SchemaStore {
                     return Ok(Some(resource.value.clone()));
                 }
             } else if location.schema_document_uri != schema_resource_uri {
+                // Stale Weak index entry: drop it and fall through to file/HTTP fetch
+                // so embedded-then-external fallback still works.
                 self.schema_resource_index
                     .write()
                     .await
                     .remove(&schema_resource_uri);
-                return Ok(None);
             }
         }
 
