@@ -43,6 +43,11 @@ pub struct CurrentSchema<'a> {
     /// Lossless JSON Schema representation and the source of truth.
     /// `schema_view` is only a derived, instance-specific presentation view.
     pub semantic_schema: Option<Arc<super::SemanticSchema>>,
+    /// URI of this schema instance. Equals the physical document URI by default;
+    /// fragment lookups may set a fragment-bearing URI (e.g. `file:///schema.json#/defs/Foo`).
+    /// Distinct from [`Self::schema_base_uri`] (`$ref` base / `$id`) and
+    /// [`Self::schema_document_uri`] (physical document).
+    pub schema_uri: Cow<'a, SchemaUri>,
     /// **schema_base_uri**: Base for resolving `$ref` and relative references. Usually equals
     /// `schema_resource_uri`; may differ after resolving a root-level `$ref`.
     pub schema_base_uri: Cow<'a, SchemaUri>,
@@ -59,6 +64,7 @@ impl<'a> CurrentSchema<'a> {
         CurrentSchema {
             schema_view: self.schema_view,
             semantic_schema: self.semantic_schema,
+            schema_uri: Cow::Owned(self.schema_uri.into_owned()),
             schema_base_uri: Cow::Owned(self.schema_base_uri.into_owned()),
             schema_document_uri: Cow::Owned(self.schema_document_uri.into_owned()),
             definitions: Cow::Owned(self.definitions.into_owned()),
@@ -89,6 +95,7 @@ impl<'a> CurrentSchema<'a> {
                 .map(Arc::new)
                 .unwrap_or_else(|| self.schema_view.clone()),
             semantic_schema: Some(semantic_schema.clone()),
+            schema_uri: Cow::Owned(self.schema_uri.as_ref().clone()),
             schema_base_uri: Cow::Owned(self.schema_base_uri.as_ref().clone()),
             schema_document_uri: Cow::Owned(self.schema_document_uri.as_ref().clone()),
             definitions: Cow::Owned(self.definitions.as_ref().clone()),
@@ -153,6 +160,7 @@ impl std::fmt::Debug for CurrentSchema<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CurrentSchema")
             .field("schema_view", &self.schema_view)
+            .field("schema_uri", &self.schema_uri.to_string())
             .field("schema_base_uri", &self.schema_base_uri.to_string())
             .field("schema_document_uri", &self.schema_document_uri.to_string())
             .finish()
@@ -602,13 +610,14 @@ impl Referable<SchemaView> {
                     value: schema_view,
                     semantic_schema,
                 } => {
-                    let (schema_base_uri, schema_document_uri, definitions) = {
+                    let (schema_uri, schema_base_uri, schema_document_uri, definitions) = {
                         match reference_url {
                             Some(reference_url) => {
                                 if let Some(document_schema) =
                                     schema_store.try_get_document_schema(reference_url).await?
                                 {
                                     (
+                                        Cow::Owned(document_schema.schema_uri.clone()),
                                         Cow::Owned(schema_base_uri_from_document(&document_schema)),
                                         Cow::Owned(document_schema.schema_document_uri().clone()),
                                         Cow::Owned(document_schema.definitions.clone()),
@@ -619,16 +628,25 @@ impl Referable<SchemaView> {
                                             .schema_document_uri_for(schema_base_uri.as_ref())
                                             .await,
                                     );
-                                    (schema_base_uri, schema_document_uri, definitions)
+                                    (
+                                        Cow::Owned(reference_url.clone()),
+                                        schema_base_uri,
+                                        schema_document_uri,
+                                        definitions,
+                                    )
                                 }
                             }
                             None => {
-                                let schema_document_uri = Cow::Owned(
+                                let schema_document_uri =
                                     schema_store
                                         .schema_document_uri_for(schema_base_uri.as_ref())
-                                        .await,
-                                );
-                                (schema_base_uri, schema_document_uri, definitions)
+                                        .await;
+                                (
+                                    Cow::Owned(schema_document_uri.clone()),
+                                    schema_base_uri,
+                                    Cow::Owned(schema_document_uri),
+                                    definitions,
+                                )
                             }
                         }
                     };
@@ -636,6 +654,7 @@ impl Referable<SchemaView> {
                     Ok(Some(CurrentSchema {
                         schema_view: schema_view.clone(),
                         semantic_schema: semantic_schema.clone(),
+                        schema_uri,
                         schema_base_uri,
                         schema_document_uri,
                         definitions,
@@ -665,19 +684,21 @@ impl Referable<SchemaView> {
                 value: schema_view,
                 semantic_schema,
             } => {
-                let (resolved_schema_base_uri, schema_document_uri, definitions) =
+                let (schema_uri, resolved_schema_base_uri, schema_document_uri, definitions) =
                     match reference_url {
                         Some(reference_url) => {
                             if let Some(document_schema) =
                                 schema_store.try_get_document_schema(reference_url).await?
                             {
                                 (
+                                    document_schema.schema_uri.clone(),
                                     schema_base_uri_from_document(&document_schema),
                                     document_schema.schema_document_uri().clone(),
                                     document_schema.definitions.clone(),
                                 )
                             } else {
                                 (
+                                    reference_url.clone(),
                                     schema_base_uri.clone().into_owned(),
                                     schema_store
                                         .schema_document_uri_for(schema_base_uri.as_ref())
@@ -686,18 +707,23 @@ impl Referable<SchemaView> {
                                 )
                             }
                         }
-                        None => (
-                            schema_base_uri.clone().into_owned(),
-                            schema_store
+                        None => {
+                            let schema_document_uri = schema_store
                                 .schema_document_uri_for(schema_base_uri.as_ref())
-                                .await,
-                            definitions.into_owned(),
-                        ),
+                                .await;
+                            (
+                                schema_document_uri.clone(),
+                                schema_base_uri.clone().into_owned(),
+                                schema_document_uri,
+                                definitions.into_owned(),
+                            )
+                        }
                     };
 
                 Ok(Some(CurrentSchema {
                     schema_view: schema_view.clone(),
                     semantic_schema: semantic_schema.clone(),
+                    schema_uri: Cow::Owned(schema_uri),
                     schema_base_uri: Cow::Owned(resolved_schema_base_uri),
                     schema_document_uri: Cow::Owned(schema_document_uri),
                     definitions: Cow::Owned(definitions),
@@ -969,6 +995,7 @@ fn current_schema_from_document<'a>(
     CurrentSchema {
         schema_view,
         semantic_schema,
+        schema_uri: Cow::Owned(document_schema.schema_uri.clone()),
         schema_base_uri: Cow::Owned(schema_base_uri_from_document(document_schema)),
         schema_document_uri: Cow::Owned(document_schema.schema_document_uri().clone()),
         definitions,
@@ -1048,11 +1075,16 @@ async fn resolve_pointer_current_schema(
                 schema_uri,
             });
         };
+        let mut instance_uri = schema_document_uri.clone();
+        if let Some(fragment) = pointer.strip_prefix('#') {
+            instance_uri.set_fragment(Some(fragment));
+        }
         return Ok(Some(CurrentSchema {
             schema_view: Arc::new(schema_view),
             semantic_schema: resolve_json_pointer_node(&schema_value, &pointer)
                 .and_then(|value| super::SemanticSchema::from_value_node(value, dialect))
                 .map(Arc::new),
+            schema_uri: Cow::Owned(instance_uri),
             schema_base_uri: Cow::Owned(schema_uri),
             schema_document_uri: Cow::Owned(schema_document_uri),
             definitions: Cow::Owned(definitions),
@@ -1265,38 +1297,46 @@ pub async fn resolve_and_collect_schemas_with_errors(
         let default_definitions = definitions.clone().into_owned();
 
         for (resolved_schema_uri, schema_view, semantic_schema) in resolved_schemas {
-            let (current_schema_base_uri, current_schema_document_uri, current_definitions) =
-                if let Some(resolved_schema_uri) = resolved_schema_uri {
-                    match schema_store
-                        .try_get_document_schema(&resolved_schema_uri)
-                        .await
-                    {
-                        Ok(Some(document_schema)) => (
-                            schema_base_uri_from_document(&document_schema),
-                            document_schema.schema_document_uri().clone(),
-                            document_schema.definitions.clone(),
-                        ),
-                        Ok(None) => (
-                            default_schema_base_uri.clone(),
-                            default_schema_document_uri.clone(),
-                            default_definitions.clone(),
-                        ),
-                        Err(err) => {
-                            errors.push(err);
-                            continue;
-                        }
-                    }
-                } else {
-                    (
+            let (
+                current_schema_uri,
+                current_schema_base_uri,
+                current_schema_document_uri,
+                current_definitions,
+            ) = if let Some(resolved_schema_uri) = resolved_schema_uri {
+                match schema_store
+                    .try_get_document_schema(&resolved_schema_uri)
+                    .await
+                {
+                    Ok(Some(document_schema)) => (
+                        document_schema.schema_uri.clone(),
+                        schema_base_uri_from_document(&document_schema),
+                        document_schema.schema_document_uri().clone(),
+                        document_schema.definitions.clone(),
+                    ),
+                    Ok(None) => (
+                        resolved_schema_uri.clone(),
                         default_schema_base_uri.clone(),
                         default_schema_document_uri.clone(),
                         default_definitions.clone(),
-                    )
-                };
+                    ),
+                    Err(err) => {
+                        errors.push(err);
+                        continue;
+                    }
+                }
+            } else {
+                (
+                    default_schema_document_uri.clone(),
+                    default_schema_base_uri.clone(),
+                    default_schema_document_uri.clone(),
+                    default_definitions.clone(),
+                )
+            };
 
             collected.push(CurrentSchema {
                 schema_view,
                 semantic_schema,
+                schema_uri: Cow::Owned(current_schema_uri),
                 schema_base_uri: Cow::Owned(current_schema_base_uri),
                 schema_document_uri: Cow::Owned(current_schema_document_uri),
                 definitions: Cow::Owned(current_definitions),

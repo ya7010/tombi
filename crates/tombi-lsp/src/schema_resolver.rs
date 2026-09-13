@@ -162,6 +162,7 @@ async fn resolve_current_schema(
     let current_schema = CurrentSchema {
         schema_view: schema_view.clone(),
         semantic_schema: document_schema.semantic_schema.clone(),
+        schema_uri: Cow::Owned(document_schema.schema_uri.clone()),
         schema_base_uri: Cow::Owned(document_schema.schema_base_uri().clone()),
         schema_document_uri: Cow::Owned(document_schema.schema_document_uri().clone()),
         definitions: Cow::Owned(document_schema.definitions.clone()),
@@ -426,6 +427,7 @@ fn resolve_composite_schema_with_accessors<'a: 'b, 'b>(
                 Some(CurrentSchema {
                     schema_view: Arc::new(schema_view),
                     semantic_schema,
+                    schema_uri: current_schema.schema_uri,
                     schema_base_uri: current_schema.schema_base_uri,
                     schema_document_uri: current_schema.schema_document_uri,
                     definitions: current_schema.definitions,

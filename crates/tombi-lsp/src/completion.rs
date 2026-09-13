@@ -458,6 +458,7 @@ pub(super) async fn merge_adjacent_schema_completion_items(
                 &CurrentSchema {
                     schema_view: Arc::new(SchemaView::OneOf(one_of_schema.clone())),
                     semantic_schema: None,
+                    schema_uri: current_schema.schema_uri.clone(),
                     schema_base_uri: current_schema.schema_base_uri.clone(),
                     schema_document_uri: current_schema.schema_document_uri.clone(),
                     definitions: current_schema.definitions.clone(),
@@ -480,6 +481,7 @@ pub(super) async fn merge_adjacent_schema_completion_items(
                 &CurrentSchema {
                     schema_view: Arc::new(SchemaView::AnyOf(any_of_schema.clone())),
                     semantic_schema: None,
+                    schema_uri: current_schema.schema_uri.clone(),
                     schema_base_uri: current_schema.schema_base_uri.clone(),
                     schema_document_uri: current_schema.schema_document_uri.clone(),
                     definitions: current_schema.definitions.clone(),
@@ -502,6 +504,7 @@ pub(super) async fn merge_adjacent_schema_completion_items(
                 &CurrentSchema {
                     schema_view: Arc::new(SchemaView::AllOf(all_of_schema.clone())),
                     semantic_schema: None,
+                    schema_uri: current_schema.schema_uri.clone(),
                     schema_base_uri: current_schema.schema_base_uri.clone(),
                     schema_document_uri: current_schema.schema_document_uri.clone(),
                     definitions: current_schema.definitions.clone(),

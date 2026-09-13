@@ -1234,7 +1234,7 @@ impl SchemaStore {
                                 source_schema.sub_schema_link_map.insert(
                                     sub_root_accessors.clone(),
                                     SubSchemaLink {
-                                        schema_uri: document_schema.schema_document_uri().clone(),
+                                        schema_uri: document_schema.schema_uri.clone(),
                                         strict: matching_schema
                                             .strict
                                             .or_else(|| self.strict())
@@ -1268,7 +1268,7 @@ impl SchemaStore {
                             sub_schema_link_map.insert(
                                 sub_root_accessors.clone(),
                                 SubSchemaLink {
-                                    schema_uri: document_schema.schema_document_uri().clone(),
+                                    schema_uri: document_schema.schema_uri.clone(),
                                     strict: matching_schema
                                         .strict
                                         .or_else(|| self.strict())

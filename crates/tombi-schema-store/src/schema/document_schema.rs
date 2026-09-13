@@ -374,6 +374,7 @@ impl DocumentSchema {
         self.schema_view.as_ref().map(|schema_view| CurrentSchema {
             schema_view: schema_view.clone(),
             semantic_schema: self.semantic_schema.clone(),
+            schema_uri: Cow::Borrowed(&self.schema_uri),
             schema_base_uri: Cow::Owned(self.schema_base_uri().clone()),
             schema_document_uri: Cow::Borrowed(self.schema_document_uri()),
             definitions: Cow::Borrowed(&self.definitions),

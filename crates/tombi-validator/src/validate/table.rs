@@ -630,7 +630,7 @@ async fn validate_table(
                 crate::Diagnostic {
                     kind: Box::new(crate::DiagnosticKind::TableStrictAdditionalKeys {
                         accessors: MarkdownSchemaAccessors::from(accessors),
-                        schema_base_uri: current_schema.schema_base_uri.as_ref().clone(),
+                        schema_uri: current_schema.schema_uri.as_ref().clone(),
                         key: key.to_string(),
                     }),
                     range: key.range() + value.range(),

@@ -191,6 +191,7 @@ where
                     .with_reference_targets(targets),
             ),
             semantic_schema: None,
+            schema_uri: local.schema_uri,
             schema_base_uri: local.schema_base_uri,
             schema_document_uri: local.schema_document_uri,
             definitions: local.definitions,

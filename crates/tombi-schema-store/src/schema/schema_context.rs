@@ -343,10 +343,8 @@ impl SchemaContext<'_> {
                     _ => Some(candidate),
                 })
             && current_schema.is_none_or(|current_schema| {
-                let same_document = current_schema.schema_document_uri_for_config()
-                    == sub_schema_link.schema_uri
-                    || current_schema.schema_base_uri.as_ref() == &sub_schema_link.schema_uri;
-                !same_document || current_schema.strict != Some(sub_schema_link.strict.into())
+                current_schema.schema_uri.as_ref() != &sub_schema_link.schema_uri
+                    || current_schema.strict != Some(sub_schema_link.strict.into())
             })
         {
             return match self
