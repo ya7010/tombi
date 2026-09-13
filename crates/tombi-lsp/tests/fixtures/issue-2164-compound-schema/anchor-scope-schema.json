@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "shoko://scope/outer",
+  "$defs": {
+    "outer": {
+      "$id": "shoko://scope/outer",
+      "type": "object",
+      "properties": {
+        "nested": {
+          "$ref": "shoko://scope/nested"
+        },
+        "outer": {
+          "$ref": "#value"
+        }
+      },
+      "$defs": {
+        "nested": {
+          "$id": "shoko://scope/nested",
+          "type": "object",
+          "properties": {
+            "value": {
+              "$ref": "#value"
+            }
+          },
+          "$defs": {
+            "string": {
+              "$anchor": "value",
+              "type": "string"
+            }
+          }
+        },
+        "boolean": {
+          "$anchor": "value",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

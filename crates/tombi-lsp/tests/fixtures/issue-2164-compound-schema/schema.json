@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "shoko://python/pyproject",
+  "$defs": {
+    "python-pyproject-alias": {
+      "$id": "shoko://python/pyproject",
+      "$ref": "shoko://python/pyproject/versions/1.0.0/schema.json"
+    },
+    "python-pyproject-1.0.0": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "shoko://python/pyproject/versions/1.0.0/schema.json",
+      "type": "object",
+      "properties": {
+        "tool": {
+          "type": "object",
+          "properties": {
+            "tombi": {
+              "$ref": "shoko://tombi-toml/tombi"
+            }
+          },
+          "required": ["tombi"]
+        }
+      },
+      "required": ["tool"]
+    },
+    "tombi-alias": {
+      "$id": "shoko://tombi-toml/tombi",
+      "$ref": "shoko://tombi-toml/tombi/versions/1.2.3/schema.json"
+    },
+    "tombi-1.2.3": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "shoko://tombi-toml/tombi/versions/1.2.3/schema.json",
+      "type": "object",
+      "title": "Tombi settings",
+      "properties": {
+        "strict": {
+          "type": "boolean",
+          "description": "Enable strict validation."
+        }
+      },
+      "required": ["strict"],
+      "additionalProperties": false
+    }
+  }
+}

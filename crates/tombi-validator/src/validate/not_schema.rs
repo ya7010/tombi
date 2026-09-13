@@ -22,7 +22,7 @@ where
 {
     let matches_not_schema = match tombi_schema_store::resolve_schema_item(
         &not_schema.schema,
-        current_schema.schema_uri.clone(),
+        current_schema.schema_base_uri.clone(),
         current_schema.definitions.clone(),
         current_schema.strict,
         schema_context.store,

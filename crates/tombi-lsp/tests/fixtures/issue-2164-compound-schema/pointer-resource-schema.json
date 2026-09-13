@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/pointer-bundle/root.json",
+  "type": "object",
+  "properties": {
+    "tool": {
+      "$ref": "#/$defs/settings"
+    }
+  },
+  "$defs": {
+    "settings": {
+      "$id": "resources/settings.json",
+      "type": "object",
+      "properties": {
+        "strict": {
+          "$ref": "boolean.json"
+        }
+      }
+    },
+    "boolean": {
+      "$id": "resources/boolean.json",
+      "type": "boolean"
+    }
+  }
+}

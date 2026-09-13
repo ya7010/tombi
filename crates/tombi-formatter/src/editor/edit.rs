@@ -63,7 +63,7 @@ fn edit_recursive<'a: 'b, 'b>(
                 | SchemaView::OneOf(OneOfSchema { schemas, .. }) => {
                     let Some(resolved_schemas) = tombi_schema_store::resolve_and_collect_schemas(
                         schemas,
-                        current_schema.schema_uri.clone(),
+                        current_schema.schema_base_uri.clone(),
                         current_schema.definitions.clone(),
                         current_schema.strict,
                         schema_context.store,
@@ -137,7 +137,7 @@ fn edit_recursive<'a: 'b, 'b>(
                     if let Ok(Some(current_schema)) = table_schema
                         .resolve_property_schema(
                             &key_schema_accessor,
-                            current_schema.schema_uri.clone(),
+                            current_schema.schema_base_uri.clone(),
                             current_schema.definitions.clone(),
                             current_schema.strict,
                             schema_context.store,
@@ -175,7 +175,7 @@ fn edit_recursive<'a: 'b, 'b>(
                                 && let Ok(Some(current_schema)) = table_schema
                                     .resolve_pattern_property_schema(
                                         &property_key,
-                                        current_schema.schema_uri.clone(),
+                                        current_schema.schema_base_uri.clone(),
                                         current_schema.definitions.clone(),
                                         current_schema.strict,
                                         schema_context.store,
@@ -205,7 +205,7 @@ fn edit_recursive<'a: 'b, 'b>(
 
                         if let Ok(Some(current_schema)) = tombi_schema_store::resolve_schema_item(
                             referable_additional_property_schema,
-                            current_schema.schema_uri.clone(),
+                            current_schema.schema_base_uri.clone(),
                             current_schema.definitions.clone(),
                             current_schema.strict,
                             schema_context.store,
@@ -228,7 +228,7 @@ fn edit_recursive<'a: 'b, 'b>(
                     if let Some(items) = &array_schema.items
                         && let Ok(Some(current_schema)) = tombi_schema_store::resolve_schema_item(
                             items,
-                            current_schema.schema_uri.clone(),
+                            current_schema.schema_base_uri.clone(),
                             current_schema.definitions.clone(),
                             current_schema.strict,
                             schema_context.store,

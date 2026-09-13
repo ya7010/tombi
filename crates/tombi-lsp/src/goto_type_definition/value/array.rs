@@ -158,7 +158,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Array {
                             keys,
                             accessors,
                             one_of_schema,
-                            &current_schema.schema_uri,
+                            &current_schema.schema_base_uri,
                             &current_schema.definitions,
                             current_schema.strict,
                             schema_context,
@@ -172,7 +172,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Array {
                             keys,
                             accessors,
                             any_of_schema,
-                            &current_schema.schema_uri,
+                            &current_schema.schema_base_uri,
                             &current_schema.definitions,
                             current_schema.strict,
                             schema_context,
@@ -186,7 +186,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Array {
                             keys,
                             accessors,
                             all_of_schema,
-                            &current_schema.schema_uri,
+                            &current_schema.schema_base_uri,
                             &current_schema.definitions,
                             current_schema.strict,
                             schema_context,
@@ -233,11 +233,11 @@ impl GetTypeDefinition for ArraySchema {
     ) -> tombi_future::BoxFuture<'b, Vec<TypeDefinition>> {
         async move {
             current_schema.map_or_else(Vec::new, |schema| {
-                let mut schema_uri = schema.schema_uri.as_ref().clone();
-                schema_uri.set_fragment(Some(&format!("L{}", self.range.start.line + 1)));
+                let mut schema_base_uri = schema.schema_base_uri.as_ref().clone();
+                schema_base_uri.set_fragment(Some(&format!("L{}", self.range.start.line + 1)));
 
                 vec![TypeDefinition {
-                    schema_uri,
+                    schema_base_uri,
                     schema_accessors: accessors.iter().map(Into::into).collect_vec(),
                     range: schema.schema_view.range(),
                 }]

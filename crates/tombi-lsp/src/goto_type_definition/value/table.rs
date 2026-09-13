@@ -79,7 +79,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     if let Ok(Some(current_schema)) = table_schema
                                         .resolve_property_schema(
                                             &schema_accessor,
-                                            current_schema.schema_uri.clone(),
+                                            current_schema.schema_base_uri.clone(),
                                             current_schema.definitions.clone(),
                                             current_schema.strict,
                                             schema_context.store,
@@ -148,7 +148,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                                 if let Ok(Some(current_schema)) = table_schema
                                                     .resolve_pattern_property_schema(
                                                         &property_key,
-                                                        current_schema.schema_uri.clone(),
+                                                        current_schema.schema_base_uri.clone(),
                                                         current_schema.definitions.clone(),
                                                         current_schema.strict,
                                                         schema_context.store,
@@ -199,7 +199,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     && let Ok(Some(current_schema)) =
                                         tombi_schema_store::resolve_schema_item(
                                             referable_additional_property_schema,
-                                            current_schema.schema_uri.clone(),
+                                            current_schema.schema_base_uri.clone(),
                                             current_schema.definitions.clone(),
                                             current_schema.strict,
                                             schema_context.store,
@@ -230,7 +230,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                         keys,
                                         &accessors,
                                         one_of_schema,
-                                        &current_schema.schema_uri,
+                                        &current_schema.schema_base_uri,
                                         &current_schema.definitions,
                                         current_schema.strict,
                                         schema_context,
@@ -247,7 +247,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                         keys,
                                         &accessors,
                                         any_of_schema,
-                                        &current_schema.schema_uri,
+                                        &current_schema.schema_base_uri,
                                         &current_schema.definitions,
                                         current_schema.strict,
                                         schema_context,
@@ -264,7 +264,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                         keys,
                                         &accessors,
                                         all_of_schema,
-                                        &current_schema.schema_uri,
+                                        &current_schema.schema_base_uri,
                                         &current_schema.definitions,
                                         current_schema.strict,
                                         schema_context,
@@ -304,14 +304,15 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     )
                                     .await
                             } else {
-                                let mut schema_uri = current_schema.schema_uri.as_ref().clone();
-                                schema_uri.set_fragment(Some(&format!(
+                                let mut schema_base_uri =
+                                    current_schema.schema_base_uri.as_ref().clone();
+                                schema_base_uri.set_fragment(Some(&format!(
                                     "L{}",
                                     key.range().start.line + 1
                                 )));
 
                                 vec![TypeDefinition {
-                                    schema_uri,
+                                    schema_base_uri,
                                     schema_accessors: accessors
                                         .iter()
                                         .map(Into::into)
@@ -341,7 +342,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     keys,
                                     accessors,
                                     one_of_schema,
-                                    &current_schema.schema_uri,
+                                    &current_schema.schema_base_uri,
                                     &current_schema.definitions,
                                     current_schema.strict,
                                     schema_context,
@@ -358,7 +359,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     keys,
                                     accessors,
                                     any_of_schema,
-                                    &current_schema.schema_uri,
+                                    &current_schema.schema_base_uri,
                                     &current_schema.definitions,
                                     current_schema.strict,
                                     schema_context,
@@ -375,7 +376,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     keys,
                                     accessors,
                                     all_of_schema,
-                                    &current_schema.schema_uri,
+                                    &current_schema.schema_base_uri,
                                     &current_schema.definitions,
                                     current_schema.strict,
                                     schema_context,
@@ -396,7 +397,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                             keys,
                             accessors,
                             one_of_schema,
-                            &current_schema.schema_uri,
+                            &current_schema.schema_base_uri,
                             &current_schema.definitions,
                             current_schema.strict,
                             schema_context,
@@ -410,7 +411,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                             keys,
                             accessors,
                             any_of_schema,
-                            &current_schema.schema_uri,
+                            &current_schema.schema_base_uri,
                             &current_schema.definitions,
                             current_schema.strict,
                             schema_context,
@@ -424,7 +425,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                             keys,
                             accessors,
                             all_of_schema,
-                            &current_schema.schema_uri,
+                            &current_schema.schema_base_uri,
                             &current_schema.definitions,
                             current_schema.strict,
                             schema_context,
@@ -432,7 +433,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                         .await
                     }
                     _ => vec![TypeDefinition {
-                        schema_uri: current_schema.schema_uri.as_ref().clone(),
+                        schema_base_uri: current_schema.schema_base_uri.as_ref().clone(),
                         schema_accessors: accessors.iter().map(Into::into).collect_vec(),
                         range: tombi_text::Range::default(),
                     }],
@@ -475,11 +476,11 @@ impl GetTypeDefinition for TableSchema {
     ) -> tombi_future::BoxFuture<'b, Vec<TypeDefinition>> {
         async move {
             current_schema.map_or_else(Vec::new, |schema| {
-                let mut schema_uri = schema.schema_uri.as_ref().clone();
-                schema_uri.set_fragment(Some(&format!("L{}", self.range.start.line + 1)));
+                let mut schema_base_uri = schema.schema_base_uri.as_ref().clone();
+                schema_base_uri.set_fragment(Some(&format!("L{}", self.range.start.line + 1)));
 
                 vec![TypeDefinition {
-                    schema_uri,
+                    schema_base_uri,
                     schema_accessors: accessors.iter().map(Into::into).collect_vec(),
                     range: schema.schema_view.range(),
                 }]

@@ -357,18 +357,18 @@ pub(super) fn take_completion_schema_tooltip(
     item: &mut CompletionContent,
     current_schema: &CurrentSchema<'_>,
 ) -> Option<SchemaTooltip> {
-    if item.schema_uri.as_ref() == Some(current_schema.schema_uri.as_ref()) {
-        item.schema_uri = Some(
+    if item.schema_base_uri.as_ref() == Some(current_schema.schema_base_uri.as_ref()) {
+        item.schema_base_uri = Some(
             tombi_extension::get_schema_link_uri(
-                current_schema.schema_uri.as_ref(),
+                current_schema.schema_document_uri.as_ref(),
                 current_schema.schema_view.range().start,
             )
             .into(),
         );
     }
     let mut markdown = item.documentation.take().unwrap_or_default();
-    if let Some(schema_uri) = item.schema_uri.take()
-        && let Some(schema_name) = get_schema_name(&schema_uri)
+    if let Some(schema_base_uri) = item.schema_base_uri.take()
+        && let Some(schema_name) = get_schema_name(&schema_base_uri)
     {
         if !markdown.is_empty() && !markdown.ends_with("\n\n") {
             if markdown.ends_with('\n') {
@@ -377,7 +377,7 @@ pub(super) fn take_completion_schema_tooltip(
                 markdown.push_str("\n\n");
             }
         }
-        markdown.push_str(&format!("Schema: [{schema_name}]({schema_uri})\n"));
+        markdown.push_str(&format!("Schema: [{schema_name}]({schema_base_uri})\n"));
     }
 
     (!markdown.is_empty()).then_some(SchemaTooltip::Markdown(markdown))
@@ -459,6 +459,8 @@ pub(super) async fn merge_adjacent_schema_completion_items(
                     schema_view: Arc::new(SchemaView::OneOf(one_of_schema.clone())),
                     semantic_schema: None,
                     schema_uri: current_schema.schema_uri.clone(),
+                    schema_base_uri: current_schema.schema_base_uri.clone(),
+                    schema_document_uri: current_schema.schema_document_uri.clone(),
                     definitions: current_schema.definitions.clone(),
                     strict: current_schema.strict,
                 },
@@ -480,6 +482,8 @@ pub(super) async fn merge_adjacent_schema_completion_items(
                     schema_view: Arc::new(SchemaView::AnyOf(any_of_schema.clone())),
                     semantic_schema: None,
                     schema_uri: current_schema.schema_uri.clone(),
+                    schema_base_uri: current_schema.schema_base_uri.clone(),
+                    schema_document_uri: current_schema.schema_document_uri.clone(),
                     definitions: current_schema.definitions.clone(),
                     strict: current_schema.strict,
                 },
@@ -501,6 +505,8 @@ pub(super) async fn merge_adjacent_schema_completion_items(
                     schema_view: Arc::new(SchemaView::AllOf(all_of_schema.clone())),
                     semantic_schema: None,
                     schema_uri: current_schema.schema_uri.clone(),
+                    schema_base_uri: current_schema.schema_base_uri.clone(),
+                    schema_document_uri: current_schema.schema_document_uri.clone(),
                     definitions: current_schema.definitions.clone(),
                     strict: current_schema.strict,
                 },
@@ -538,7 +544,7 @@ pub(super) async fn merge_adjacent_schema_completion_items(
 pub trait CompletionCandidate {
     fn title<'a: 'b, 'b>(
         &'a self,
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -547,7 +553,7 @@ pub trait CompletionCandidate {
 
     fn description<'a: 'b, 'b>(
         &'a self,
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -556,14 +562,14 @@ pub trait CompletionCandidate {
 
     async fn detail(
         &self,
-        schema_uri: &SchemaUri,
+        schema_base_uri: &SchemaUri,
         definitions: &SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
         self.title(
-            schema_uri,
+            schema_base_uri,
             definitions,
             strict,
             schema_store,
@@ -574,14 +580,14 @@ pub trait CompletionCandidate {
 
     async fn documentation(
         &self,
-        schema_uri: &SchemaUri,
+        schema_base_uri: &SchemaUri,
         definitions: &SchemaDefinitions,
         strict: Option<tombi_schema_type::BoolDefaultTrue>,
         schema_store: &SchemaStore,
         completion_hint: Option<CompletionHint>,
     ) -> Option<String> {
         self.description(
-            schema_uri,
+            schema_base_uri,
             definitions,
             strict,
             schema_store,
@@ -593,7 +599,7 @@ pub trait CompletionCandidate {
 
 fn composite_title<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
     composite_schema: &'a T,
-    schema_uri: &'a SchemaUri,
+    schema_base_uri: &'a SchemaUri,
     definitions: &'a SchemaDefinitions,
     strict: Option<tombi_schema_type::BoolDefaultTrue>,
     schema_store: &'a SchemaStore,
@@ -605,7 +611,7 @@ fn composite_title<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
 
         if let Some(resolved_schemas) = tombi_schema_store::resolve_and_collect_schemas(
             composite_schema.schemas(),
-            Cow::Borrowed(schema_uri),
+            Cow::Borrowed(schema_base_uri),
             Cow::Borrowed(definitions),
             strict,
             schema_store,
@@ -621,7 +627,7 @@ fn composite_title<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
 
                 if let Some(candidate) = CompletionCandidate::title(
                     current_schema.schema_view.as_ref(),
-                    &current_schema.schema_uri,
+                    &current_schema.schema_base_uri,
                     &current_schema.definitions,
                     current_schema.strict,
                     schema_store,
@@ -648,7 +654,7 @@ fn composite_title<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
 
 fn composite_description<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
     composite_schema: &'a T,
-    schema_uri: &'a SchemaUri,
+    schema_base_uri: &'a SchemaUri,
     definitions: &'a SchemaDefinitions,
     strict: Option<tombi_schema_type::BoolDefaultTrue>,
     schema_store: &'a SchemaStore,
@@ -660,7 +666,7 @@ fn composite_description<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
 
         if let Some(resolved_schemas) = tombi_schema_store::resolve_and_collect_schemas(
             composite_schema.schemas(),
-            Cow::Borrowed(schema_uri),
+            Cow::Borrowed(schema_base_uri),
             Cow::Borrowed(definitions),
             strict,
             schema_store,
@@ -676,7 +682,7 @@ fn composite_description<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
 
                 let title = CompletionCandidate::title(
                     current_schema.schema_view.as_ref(),
-                    &current_schema.schema_uri,
+                    &current_schema.schema_base_uri,
                     &current_schema.definitions,
                     current_schema.strict,
                     schema_store,
@@ -685,7 +691,7 @@ fn composite_description<'a: 'b, 'b, T: CompositeSchema + Sync + Send>(
                 .await;
                 let description = CompletionCandidate::description(
                     current_schema.schema_view.as_ref(),
-                    &current_schema.schema_uri,
+                    &current_schema.schema_base_uri,
                     &current_schema.definitions,
                     current_schema.strict,
                     schema_store,
@@ -719,7 +725,7 @@ macro_rules! impl_composite_completion_candidate {
         impl CompletionCandidate for $ty {
             fn title<'a: 'b, 'b>(
                 &'a self,
-                schema_uri: &'a SchemaUri,
+                schema_base_uri: &'a SchemaUri,
                 definitions: &'a SchemaDefinitions,
                 strict: Option<tombi_schema_type::BoolDefaultTrue>,
                 schema_store: &'a SchemaStore,
@@ -727,7 +733,7 @@ macro_rules! impl_composite_completion_candidate {
             ) -> tombi_future::BoxFuture<'b, Option<String>> {
                 composite_title(
                     self,
-                    schema_uri,
+                    schema_base_uri,
                     definitions,
                     strict,
                     schema_store,
@@ -737,7 +743,7 @@ macro_rules! impl_composite_completion_candidate {
 
             fn description<'a: 'b, 'b>(
                 &'a self,
-                schema_uri: &'a SchemaUri,
+                schema_base_uri: &'a SchemaUri,
                 definitions: &'a SchemaDefinitions,
                 strict: Option<tombi_schema_type::BoolDefaultTrue>,
                 schema_store: &'a SchemaStore,
@@ -745,7 +751,7 @@ macro_rules! impl_composite_completion_candidate {
             ) -> tombi_future::BoxFuture<'b, Option<String>> {
                 composite_description(
                     self,
-                    schema_uri,
+                    schema_base_uri,
                     definitions,
                     strict,
                     schema_store,
@@ -765,7 +771,7 @@ fn tombi_json_value_to_completion_default_item(
     position: tombi_text::Position,
     detail: Option<String>,
     documentation: Option<String>,
-    schema_uri: Option<&SchemaUri>,
+    schema_base_uri: Option<&SchemaUri>,
     completion_hint: Option<CompletionHint>,
 ) -> Option<CompletionContent> {
     if !matches!(
@@ -783,7 +789,7 @@ fn tombi_json_value_to_completion_default_item(
         detail,
         documentation,
         edit,
-        schema_uri,
+        schema_base_uri,
         None,
     ))
 }
@@ -793,7 +799,7 @@ fn tombi_json_value_to_completion_example_item(
     position: tombi_text::Position,
     detail: Option<String>,
     documentation: Option<String>,
-    schema_uri: Option<&SchemaUri>,
+    schema_base_uri: Option<&SchemaUri>,
     completion_hint: Option<CompletionHint>,
 ) -> Option<CompletionContent> {
     if !matches!(
@@ -811,7 +817,7 @@ fn tombi_json_value_to_completion_example_item(
         detail,
         documentation,
         edit,
-        schema_uri,
+        schema_base_uri,
         None,
     ))
 }
@@ -821,7 +827,7 @@ fn tombi_json_value_to_completion_enum_item(
     position: tombi_text::Position,
     detail: Option<String>,
     documentation: Option<String>,
-    schema_uri: Option<&SchemaUri>,
+    schema_base_uri: Option<&SchemaUri>,
     completion_hint: Option<CompletionHint>,
 ) -> Option<CompletionContent> {
     if !matches!(
@@ -838,7 +844,7 @@ fn tombi_json_value_to_completion_enum_item(
         detail,
         documentation,
         edit,
-        schema_uri,
+        schema_base_uri,
         None,
     ))
 }

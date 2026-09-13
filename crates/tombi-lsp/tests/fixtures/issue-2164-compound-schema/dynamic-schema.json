@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "shoko://dynamic/root",
+  "$defs": {
+    "root": {
+      "$id": "shoko://dynamic/root",
+      "type": "object",
+      "properties": {
+        "strict": {
+          "$dynamicRef": "#value"
+        }
+      },
+      "$defs": {
+        "boolean": {
+          "$dynamicAnchor": "value",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

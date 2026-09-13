@@ -388,7 +388,7 @@ impl TableSchema {
     pub async fn resolve_property_schema(
         &self,
         accessor: &SchemaAccessor,
-        schema_uri: Cow<'_, SchemaUri>,
+        schema_base_uri: Cow<'_, SchemaUri>,
         definitions: Cow<'_, SchemaDefinitions>,
         strict: Option<BoolDefaultTrue>,
         schema_store: &SchemaStore,
@@ -404,7 +404,7 @@ impl TableSchema {
 
             if property_schema.is_resolved() {
                 return property_schema
-                    .to_current_schema(schema_uri, definitions, strict, schema_store)
+                    .to_current_schema(schema_base_uri, definitions, strict, schema_store)
                     .await;
             }
 
@@ -413,7 +413,7 @@ impl TableSchema {
 
         let resolved = property_schema
             .resolve(
-                schema_uri.clone(),
+                schema_base_uri.clone(),
                 definitions.clone(),
                 strict,
                 schema_store,
@@ -440,7 +440,7 @@ impl TableSchema {
     pub async fn resolve_pattern_property_schema(
         &self,
         pattern_key: &str,
-        schema_uri: Cow<'_, SchemaUri>,
+        schema_base_uri: Cow<'_, SchemaUri>,
         definitions: Cow<'_, SchemaDefinitions>,
         strict: Option<BoolDefaultTrue>,
         schema_store: &SchemaStore,
@@ -460,7 +460,7 @@ impl TableSchema {
 
             if property_schema.is_resolved() {
                 return property_schema
-                    .to_current_schema(schema_uri, definitions, strict, schema_store)
+                    .to_current_schema(schema_base_uri, definitions, strict, schema_store)
                     .await;
             }
 
@@ -469,7 +469,7 @@ impl TableSchema {
 
         let resolved = pattern_property_schema
             .resolve(
-                schema_uri.clone(),
+                schema_base_uri.clone(),
                 definitions.clone(),
                 strict,
                 schema_store,
@@ -498,7 +498,7 @@ impl FindSchemaCandidates for TableSchema {
     fn find_schema_candidates<'a: 'b, 'b>(
         &'a self,
         accessors: &'a [Accessor],
-        schema_uri: &'a SchemaUri,
+        schema_base_uri: &'a SchemaUri,
         definitions: &'a SchemaDefinitions,
         strict: Option<BoolDefaultTrue>,
         schema_store: &'a SchemaStore,
@@ -513,7 +513,7 @@ impl FindSchemaCandidates for TableSchema {
                     let current_schema = self
                         .resolve_property_schema(
                             &property_key,
-                            Cow::Borrowed(schema_uri),
+                            Cow::Borrowed(schema_base_uri),
                             Cow::Borrowed(definitions),
                             strict,
                             schema_store,
@@ -521,8 +521,8 @@ impl FindSchemaCandidates for TableSchema {
                         .await
                         .inspect_err(|err| {
                             log::warn!(
-                                "cannot resolve property schema: schema_uri={schema_uri} accessors={accessors} error={err}",
-                                schema_uri = schema_uri,
+                                "cannot resolve property schema: schema_base_uri={schema_base_uri} accessors={accessors} error={err}",
+                                schema_base_uri = schema_base_uri,
                                 accessors = Accessors::from(accessors.to_vec()),
                             )
                         })
@@ -531,7 +531,7 @@ impl FindSchemaCandidates for TableSchema {
 
                     if let Some(CurrentSchema {
                         schema_view,
-                        schema_uri,
+                        schema_base_uri,
                         definitions,
                         strict,
                         ..
@@ -540,7 +540,7 @@ impl FindSchemaCandidates for TableSchema {
                         let (schema_candidates, schema_errors) = schema_view
                             .find_schema_candidates(
                                 accessors,
-                                &schema_uri,
+                                &schema_base_uri,
                                 &definitions,
                                 strict,
                                 schema_store,
@@ -557,7 +557,7 @@ impl FindSchemaCandidates for TableSchema {
             let current_schema = self
                 .resolve_property_schema(
                     &SchemaAccessor::from(&accessors[0]),
-                    Cow::Borrowed(schema_uri),
+                    Cow::Borrowed(schema_base_uri),
                     Cow::Borrowed(definitions),
                     strict,
                     schema_store,
@@ -565,8 +565,8 @@ impl FindSchemaCandidates for TableSchema {
                 .await
                 .inspect_err(|err| {
                     log::warn!(
-                        "cannot resolve property schema: schema_uri={schema_uri} accessors={accessors} error={err}",
-                        schema_uri = schema_uri,
+                        "cannot resolve property schema: schema_base_uri={schema_base_uri} accessors={accessors} error={err}",
+                        schema_base_uri = schema_base_uri,
                         accessors = Accessors::from(accessors.to_vec()),
                     )
                 })
@@ -575,7 +575,7 @@ impl FindSchemaCandidates for TableSchema {
 
             if let Some(CurrentSchema {
                 schema_view,
-                schema_uri,
+                schema_base_uri,
                 definitions,
                 strict,
                 ..
@@ -584,7 +584,7 @@ impl FindSchemaCandidates for TableSchema {
                 return schema_view
                     .find_schema_candidates(
                         &accessors[1..],
-                        &schema_uri,
+                        &schema_base_uri,
                         &definitions,
                         strict,
                         schema_store,

@@ -26,5 +26,7 @@ pub async fn comment_directive_document_schema(
         // Value Comment Directive Schema is embedded in the crate
         .unwrap()
         .unwrap();
-    DocumentSchema::new(schema_value, schema_uri, None, store).await
+    DocumentSchema::new(schema_value, schema_uri, None, store)
+        .await
+        .expect("embedded comment directive schema")
 }

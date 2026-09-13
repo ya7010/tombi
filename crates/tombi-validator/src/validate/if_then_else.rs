@@ -40,7 +40,7 @@ where
     // Resolve and validate the `if` schema
     let if_result = match tombi_schema_store::resolve_schema_item(
         &if_then_else_schema.if_schema,
-        current_schema.schema_uri.clone(),
+        current_schema.schema_base_uri.clone(),
         current_schema.definitions.clone(),
         current_schema.strict,
         schema_context.store,
@@ -70,7 +70,7 @@ where
         if let Some(then_schema) = &if_then_else_schema.then_schema {
             match tombi_schema_store::resolve_schema_item(
                 then_schema,
-                current_schema.schema_uri.clone(),
+                current_schema.schema_base_uri.clone(),
                 current_schema.definitions.clone(),
                 current_schema.strict,
                 schema_context.store,
@@ -102,7 +102,7 @@ where
         if let Some(else_schema) = &if_then_else_schema.else_schema {
             match tombi_schema_store::resolve_schema_item(
                 else_schema,
-                Cow::Borrowed(current_schema.schema_uri.as_ref()),
+                Cow::Borrowed(current_schema.schema_base_uri.as_ref()),
                 Cow::Borrowed(current_schema.definitions.as_ref()),
                 current_schema.strict,
                 schema_context.store,

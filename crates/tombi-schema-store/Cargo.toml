@@ -36,8 +36,10 @@ tombi-x-keyword.workspace = true
 [dev-dependencies]
 pretty_assertions.workspace = true
 reqwest = { workspace = true, features = ["blocking"] }
+tempfile.workspace = true
 tokio = { workspace = true, features = ["macros", "test-util"] }
 tombi-test-lib.workspace = true
+tombi-config.workspace = true
 
 [features]
 default = ["native"]
