@@ -124,3 +124,75 @@ async fn reload_config_drops_embedded_resource_index() {
         "embedded resource must not survive config reload"
     );
 }
+
+#[tokio::test]
+async fn document_schema_new_registers_embedded_resources_for_offline_refs() {
+    let schema_document_uri =
+        SchemaUri::from_str("https://example.com/compound.json").expect("valid document URI");
+    let embedded_uri =
+        SchemaUri::from_str("shoko://example/resource").expect("valid embedded URI");
+    let schema_store = SchemaStore::new();
+
+    let document_schema = DocumentSchema::new(
+        tombi_json::ValueNode::from_str(
+            r#"{
+                "$ref": "shoko://example/resource",
+                "$defs": {
+                    "resource": {
+                        "$id": "shoko://example/resource",
+                        "type": "boolean"
+                    }
+                }
+            }"#,
+        )
+        .expect("valid schema"),
+        schema_document_uri,
+        None,
+        &schema_store,
+    )
+    .await
+    .expect("DocumentSchema::new registers resources");
+
+    assert!(document_schema.schema_view.is_some());
+    assert!(
+        schema_store
+            .try_get_document_schema(&embedded_uri)
+            .await
+            .expect("lookup embedded resource")
+            .is_some()
+    );
+}
+
+#[tokio::test]
+async fn cyclic_embedded_root_refs_do_not_stack_overflow() {
+    let mut schema_file =
+        tempfile::NamedTempFile::with_suffix(".json").expect("temporary schema file");
+    schema_file
+        .write_all(
+            br#"{
+                "$ref": "urn:cycle:a",
+                "$defs": {
+                    "a": {
+                        "$id": "urn:cycle:a",
+                        "$ref": "urn:cycle:b"
+                    },
+                    "b": {
+                        "$id": "urn:cycle:b",
+                        "$ref": "urn:cycle:a"
+                    }
+                }
+            }"#,
+        )
+        .expect("write schema");
+    let schema_uri = SchemaUri::from_file_path(schema_file.path()).expect("valid schema file URI");
+    let schema_store = SchemaStore::new();
+
+    let result = schema_store.try_get_document_schema(&schema_uri).await;
+    let document_schema = result
+        .expect("cyclic embedded root $refs must not panic")
+        .expect("cyclic embedded root $refs must still yield a root document schema");
+    assert!(
+        document_schema.schema_view.is_some() || document_schema.semantic_schema.is_some(),
+        "root document schema should retain a usable view or semantic schema"
+    );
+}

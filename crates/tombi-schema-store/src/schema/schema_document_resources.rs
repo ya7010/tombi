@@ -1,7 +1,5 @@
 use std::{str::FromStr, sync::Arc};
 
-use itertools::Itertools;
-
 use super::SchemaUri;
 use crate::JsonSchemaDialect;
 
@@ -75,19 +73,8 @@ impl SchemaDocumentResources {
         self.resources.get(schema_resource_uri)
     }
 
-    pub(crate) fn aliases(&self) -> Vec<(SchemaUri, SchemaUri)> {
-        let mut aliases = self
-            .resources
-            .keys()
-            .map(|schema_resource_uri| (schema_resource_uri.clone(), schema_resource_uri.clone()))
-            .collect_vec();
-        if self.schema_document_uri != self.root_schema_resource_uri {
-            aliases.push((
-                self.schema_document_uri.clone(),
-                self.root_schema_resource_uri.clone(),
-            ));
-        }
-        aliases
+    pub(crate) fn resource_uris(&self) -> impl Iterator<Item = &SchemaUri> + '_ {
+        self.resources.keys()
     }
 }
 
@@ -282,19 +269,21 @@ fn collect_schema_resources_from_value(
     Ok(schema_resource_uri)
 }
 
-fn escape_json_pointer_token(token: &str) -> String {
-    token.replace('~', "~0").replace('/', "~1")
-}
-
 fn json_pointer_join(parent: &str, key: &str, child: Option<&str>) -> String {
     let mut pointer = if parent == "#" {
-        format!("#/{}", escape_json_pointer_token(key))
+        format!(
+            "#/{}",
+            crate::keyword_support::escape_json_pointer_token(key)
+        )
     } else {
-        format!("{parent}/{}", escape_json_pointer_token(key))
+        format!(
+            "{parent}/{}",
+            crate::keyword_support::escape_json_pointer_token(key)
+        )
     };
     if let Some(child) = child {
         pointer.push('/');
-        pointer.push_str(&escape_json_pointer_token(child));
+        pointer.push_str(&crate::keyword_support::escape_json_pointer_token(child));
     }
     pointer
 }

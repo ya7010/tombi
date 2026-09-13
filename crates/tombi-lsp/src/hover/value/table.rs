@@ -135,7 +135,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                                     key_patterns,
                                                     ..Default::default()
                                                 }),
-                                                schema_base_uri:
+                                                schema_document_uri:
                                                     super::super::current_schema_link_uri(Some(
                                                         &current_schema,
                                                     )),
@@ -416,9 +416,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         one_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -432,9 +430,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         any_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -448,9 +444,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         all_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -530,9 +524,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         one_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -546,9 +538,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         any_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -562,9 +552,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         all_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -605,9 +593,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         one_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -621,9 +607,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         any_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -637,9 +621,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                                         keys,
                                         accessors,
                                         all_of_schema,
-                                        &current_schema.schema_base_uri,
-                                        &current_schema.definitions,
-                                        current_schema.strict,
+                                        current_schema,
                                         schema_context,
                                     )
                                     .await
@@ -658,9 +640,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                             keys,
                             accessors,
                             one_of_schema,
-                            &current_schema.schema_base_uri,
-                            &current_schema.definitions,
-                            current_schema.strict,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -672,9 +652,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                             keys,
                             accessors,
                             any_of_schema,
-                            &current_schema.schema_base_uri,
-                            &current_schema.definitions,
-                            current_schema.strict,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -686,9 +664,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                             keys,
                             accessors,
                             all_of_schema,
-                            &current_schema.schema_base_uri,
-                            &current_schema.definitions,
-                            current_schema.strict,
+                            current_schema,
                             schema_context,
                         )
                         .await
@@ -721,7 +697,7 @@ impl GetHoverContent for tombi_document_tree_syntax::Table {
                     accessors: Accessors::from(accessors.to_vec()),
                     value_type: ValueType::Table,
                     constraints: None,
-                    schema_base_uri: None,
+                    schema_document_uri: None,
                     range: Some(self.range()),
                     schema_tooltip: None,
                 }))
@@ -791,7 +767,7 @@ impl GetHoverContent for TableSchema {
                     array_values_order_by: self.array_values_order_by.clone(),
                     ..Default::default()
                 }),
-                schema_base_uri: super::super::current_schema_link_uri(current_schema),
+                schema_document_uri: super::super::current_schema_link_uri(current_schema),
                 range: None,
                 schema_tooltip: None,
             }))

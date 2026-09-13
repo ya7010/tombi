@@ -51,8 +51,12 @@ impl DocumentSchema {
         schema_store: &SchemaStore,
     ) -> Result<Self, crate::Error> {
         // Fail closed on duplicate `$id` / collect errors, matching
-        // `SchemaStore::fetch_document_schema`.
+        // `SchemaStore::fetch_document_schema`. Register the resource index before
+        // building so root `$ref` targets to embedded `$id`s resolve offline.
         let schema_resources = SchemaDocumentResources::collect(&node, &schema_document_uri)?;
+        schema_store
+            .replace_schema_resources(schema_resources.clone())
+            .await?;
         Ok(Self::new_resource(
             schema_resources.clone(),
             schema_resources.root_schema_resource_uri().clone(),
@@ -70,32 +74,11 @@ impl DocumentSchema {
         schema_store: &SchemaStore,
     ) -> Option<Self> {
         let resource = schema_resources.resource(&schema_resource_uri)?.clone();
-        Some(
-            Self::new_with_resource_context(
-                resource.value,
-                schema_resources.schema_document_uri().clone(),
-                resource.schema_resource_uri,
-                resource.id,
-                resource.dialect,
-                strict,
-                schema_store,
-                schema_resources,
-            )
-            .await,
-        )
-    }
-
-    async fn new_with_resource_context(
-        node: tombi_json::ValueNode,
-        schema_uri: SchemaUri,
-        schema_resource_uri: SchemaUri,
-        id: Option<SchemaUri>,
-        inherited_dialect: Option<JsonSchemaDialect>,
-        strict: Option<BoolDefaultTrue>,
-        schema_store: &SchemaStore,
-        schema_resources: Arc<SchemaDocumentResources>,
-    ) -> Self {
-        match node {
+        let schema_uri = schema_resources.schema_document_uri().clone();
+        let schema_resource_uri = resource.schema_resource_uri;
+        let id = resource.id;
+        let inherited_dialect = resource.dialect;
+        Some(match resource.value {
             tombi_json::ValueNode::Object(object) => {
                 Self::new_from_object(
                     object,
@@ -147,7 +130,7 @@ impl DocumentSchema {
                 dynamic_anchors: SchemaDynamicAnchors::new(Default::default()),
                 schema_resources,
             },
-        }
+        })
     }
 
     async fn new_from_object(

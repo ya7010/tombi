@@ -618,7 +618,7 @@ impl Referable<SchemaView> {
                                 {
                                     (
                                         Cow::Owned(document_schema.schema_uri.clone()),
-                                        Cow::Owned(schema_base_uri_from_document(&document_schema)),
+                                        Cow::Owned(document_schema.schema_base_uri().clone()),
                                         Cow::Owned(document_schema.schema_document_uri().clone()),
                                         Cow::Owned(document_schema.definitions.clone()),
                                     )
@@ -692,7 +692,7 @@ impl Referable<SchemaView> {
                             {
                                 (
                                     document_schema.schema_uri.clone(),
-                                    schema_base_uri_from_document(&document_schema),
+                                    document_schema.schema_base_uri().clone(),
                                     document_schema.schema_document_uri().clone(),
                                     document_schema.definitions.clone(),
                                 )
@@ -882,7 +882,7 @@ async fn resolve_dynamic_anchor_from_scope(
         if let Some(dynamic_anchor_schema) = dynamic_anchor_schema {
             return Ok(Some((
                 dynamic_anchor_schema,
-                schema_base_uri_from_document(&document_schema),
+                document_schema.schema_base_uri().clone(),
                 document_schema.definitions.clone(),
             )));
         }
@@ -942,7 +942,7 @@ async fn resolve_external_reference(
         {
             return referable
                 .resolve(
-                    Cow::Owned(schema_base_uri_from_document(&document_schema)),
+                    Cow::Owned(document_schema.schema_base_uri().clone()),
                     Cow::Owned(document_schema.definitions.clone()),
                     strict,
                     schema_store,
@@ -981,9 +981,6 @@ async fn resolve_external_reference(
     })
 }
 
-fn schema_base_uri_from_document(document_schema: &crate::DocumentSchema) -> SchemaUri {
-    document_schema.schema_base_uri().clone()
-}
 
 fn current_schema_from_document<'a>(
     document_schema: &crate::DocumentSchema,
@@ -996,7 +993,7 @@ fn current_schema_from_document<'a>(
         schema_view,
         semantic_schema,
         schema_uri: Cow::Owned(document_schema.schema_uri.clone()),
-        schema_base_uri: Cow::Owned(schema_base_uri_from_document(document_schema)),
+        schema_base_uri: Cow::Owned(document_schema.schema_base_uri().clone()),
         schema_document_uri: Cow::Owned(document_schema.schema_document_uri().clone()),
         definitions,
         strict,
@@ -1309,7 +1306,7 @@ pub async fn resolve_and_collect_schemas_with_errors(
                 {
                     Ok(Some(document_schema)) => (
                         document_schema.schema_uri.clone(),
-                        schema_base_uri_from_document(&document_schema),
+                        document_schema.schema_base_uri().clone(),
                         document_schema.schema_document_uri().clone(),
                         document_schema.definitions.clone(),
                     ),

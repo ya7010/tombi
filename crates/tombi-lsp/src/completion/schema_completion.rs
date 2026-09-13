@@ -17,7 +17,7 @@ fn set_schema_link_uri(
     current_schema: &CurrentSchema<'_>,
 ) {
     let schema_uri = tombi_extension::get_schema_link_uri(
-        current_schema.schema_base_uri.as_ref(),
+        current_schema.schema_document_uri.as_ref(),
         current_schema.schema_view.range().start,
     );
     for item in completion_items {

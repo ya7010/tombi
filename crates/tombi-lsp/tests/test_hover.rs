@@ -2774,14 +2774,14 @@ mod hover_keys_value {
 
                 if let Some(expected_has_schema) = None::<bool> $(.or(Some($has_schema)))? {
                     assert_eq!(
-                        hover_content.schema_base_uri.is_some(),
+                        hover_content.schema_document_uri.is_some(),
                         expected_has_schema,
                         "Schema presence is not equal",
                     );
                 } else if args.schema_file_path.is_some() || !args.schema_items.is_empty() {
-                    assert!(hover_content.schema_base_uri.is_some(), "The hover target is not defined in the schema.");
+                    assert!(hover_content.schema_document_uri.is_some(), "The hover target is not defined in the schema.");
                 } else {
-                    assert!(hover_content.schema_base_uri.is_none(), "The hover target is defined in the schema.");
+                    assert!(hover_content.schema_document_uri.is_none(), "The hover target is defined in the schema.");
                 }
 
                 pretty_assertions::assert_eq!(hover_content.accessors.to_string(), $keys, "Keys are not equal");
