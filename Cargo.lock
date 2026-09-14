@@ -1236,7 +1236,6 @@ dependencies = [
  "clap",
  "flate2",
  "itertools 0.14.0",
- "pretty_assertions",
  "serde",
  "serde_json",
  "tar",

@@ -26,8 +26,5 @@ tombi-diagnostic.workspace = true
 tombi-linter.workspace = true
 tombi-schema-store = { workspace = true, features = ["ast-syntax", "native"] }
 
-[dev-dependencies]
-pretty_assertions.workspace = true
-
 [lints]
 workspace = true
