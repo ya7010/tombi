@@ -33,7 +33,7 @@ cargo run -p json-schema-test -- --allow-fail
 
 ## Suite pin
 
-Upstream commit is pinned in [`SUITE_PIN`](./SUITE_PIN). Updating the pin
+Upstream commit is pinned in [`src/SUITE_PIN`](./src/SUITE_PIN). Updating the pin
 re-downloads the suite on the next run.
 
 ## CI

@@ -9,7 +9,7 @@ use flate2::read::GzDecoder;
 use tar::Archive;
 
 /// Pinned upstream commit of json-schema-org/JSON-Schema-Test-Suite.
-pub const SUITE_COMMIT: &str = include_str!("../SUITE_PIN");
+pub const SUITE_COMMIT: &str = include_str!("SUITE_PIN");
 
 const SUITE_ARCHIVE_URL: &str = "https://github.com/json-schema-org/JSON-Schema-Test-Suite/archive";
 

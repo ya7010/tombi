@@ -13,7 +13,6 @@ default-members = [
   "crates/*",
   "editors/zed",
   "extensions/*",
-  "json-schema-test",
   "rust/serde_tombi",
   "rust/tombi",
   "rust/tombi-cli",
