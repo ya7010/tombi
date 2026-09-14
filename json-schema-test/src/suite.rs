@@ -209,10 +209,20 @@ pub fn rewrite_localhost_remotes(value: &mut serde_json::Value, remotes: &Path) 
 
 fn rewrite_localhost_uri(uri: &str, remotes: &Path) -> Option<String> {
     const BASE: &str = "http://localhost:1234";
-    let relative = if uri == BASE {
+
+    let (without_fragment, fragment) = match uri.split_once('#') {
+        Some((path, fragment)) => (path, Some(fragment)),
+        None => (uri, None),
+    };
+    let (without_query, query) = match without_fragment.split_once('?') {
+        Some((path, query)) => (path, Some(query)),
+        None => (without_fragment, None),
+    };
+
+    let relative = if without_query == BASE {
         ""
     } else {
-        uri.strip_prefix(&format!("{BASE}/"))?
+        without_query.strip_prefix(&format!("{BASE}/"))?
     };
 
     let path = if relative.is_empty() {
@@ -220,8 +230,42 @@ fn rewrite_localhost_uri(uri: &str, remotes: &Path) -> Option<String> {
     } else {
         remotes.join(relative)
     };
-    let file_uri = tombi_schema_store::SchemaUri::from_file_path(&path).ok()?;
-    Some(file_uri.to_string())
+    let mut file_uri = tombi_schema_store::SchemaUri::from_file_path(&path)
+        .ok()?
+        .to_string();
+    if let Some(query) = query {
+        file_uri.push('?');
+        file_uri.push_str(query);
+    }
+    if let Some(fragment) = fragment {
+        file_uri.push('#');
+        file_uri.push_str(fragment);
+    }
+    Some(file_uri)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn rewrite_preserves_json_pointer_fragment() {
+        let remotes = PathBuf::from("/tmp/remotes");
+        let rewritten = rewrite_localhost_uri(
+            "http://localhost:1234/draft7/subSchemas.json#/definitions/integer",
+            &remotes,
+        )
+        .expect("rewrite");
+        let (path_part, fragment) = rewritten
+            .split_once('#')
+            .expect("rewritten URI should keep a fragment");
+        assert!(
+            path_part.ends_with("subSchemas.json"),
+            "filesystem path should be the json file: {rewritten}"
+        );
+        assert_eq!(fragment, "/definitions/integer");
+    }
 }
 
 pub fn inject_dialect_if_missing(schema: &mut serde_json::Value, draft: Draft) {

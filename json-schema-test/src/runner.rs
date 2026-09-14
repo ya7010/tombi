@@ -9,7 +9,8 @@ use tombi_config::TomlVersion;
 use tombi_diagnostic::Level;
 use tombi_linter::{LintOptions, Linter};
 use tombi_schema_store::{
-    AssociateSchemaOptions, Options as SchemaStoreOptions, SchemaStore, SchemaUri,
+    AssociateSchemaOptions, Options as SchemaStoreOptions, SCHEMA_RESOLUTION_DIAGNOSTIC_CODE,
+    SchemaStore, SchemaUri,
 };
 
 use crate::{
@@ -192,9 +193,19 @@ async fn validate_case(schema: &JsonValue, data: &JsonValue) -> Result<bool> {
 
     let actual_valid = match linter.lint(&toml_text).await {
         Ok(()) => true,
-        Err(diagnostics) => diagnostics
-            .iter()
-            .all(|diagnostic| diagnostic.level() != Level::ERROR),
+        Err(diagnostics) => {
+            if diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code() == SCHEMA_RESOLUTION_DIAGNOSTIC_CODE)
+            {
+                // Schema never applied; do not treat as a successful validation.
+                false
+            } else {
+                diagnostics
+                    .iter()
+                    .all(|diagnostic| diagnostic.level() != Level::ERROR)
+            }
+        }
     };
 
     Ok(actual_valid)
