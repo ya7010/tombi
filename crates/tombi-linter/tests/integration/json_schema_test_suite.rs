@@ -146,6 +146,53 @@ mod compound_resource_pointer_locations {
     );
 }
 
+mod schema_resource_load_context {
+    use super::*;
+
+    suite_test!(
+        #[tokio::test] async fn nested_definition_anchor_remains_available(
+            "value = 1",
+            JsonSchema(serde_json::json!({
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$ref": "#target",
+                "$defs": {
+                    "container": {
+                        "$defs": {
+                            "target": {
+                                "$anchor": "target",
+                                "type": "object",
+                                "properties": {"value": {"type": "integer"}}
+                            }
+                        }
+                    }
+                }
+            })),
+        ) -> Ok(_);
+    );
+
+    suite_test!(
+        #[tokio::test] async fn nested_resource_inherits_overridden_dialect(
+            "value = 1",
+            JsonSchema(serde_json::json!({
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://example.com/root/",
+                "$ref": "nested/",
+                "$defs": {
+                    "nested": {
+                        "$id": "nested/",
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$ref": "target",
+                        "type": "string",
+                        "$defs": {
+                            "target": {"$id": "target", "type": "object"}
+                        }
+                    }
+                }
+            })),
+        ) -> Ok(_);
+    );
+}
+
 mod issue_2190_reference_annotations {
     use super::*;
 

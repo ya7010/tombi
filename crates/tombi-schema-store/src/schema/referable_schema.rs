@@ -237,6 +237,19 @@ fn bare_combinator_referable(view: SchemaView) -> Referable<SchemaView> {
     }
 }
 
+fn contains_anchor_keyword(value: &tombi_json::ValueNode) -> bool {
+    match value {
+        tombi_json::ValueNode::Object(object) => object.properties.iter().any(|(key, value)| {
+            matches!(
+                key.value.as_str(),
+                "$anchor" | "$dynamicAnchor" | "$recursiveAnchor" | "$id"
+            ) || contains_anchor_keyword(value)
+        }),
+        tombi_json::ValueNode::Array(array) => array.items.iter().any(contains_anchor_keyword),
+        _ => false,
+    }
+}
+
 impl Referable<SchemaView> {
     pub fn new(
         object: &tombi_json::ObjectNode,
@@ -486,6 +499,9 @@ impl Referable<SchemaView> {
                     .and_then(tombi_json::ValueNode::as_str)
                     .is_some_and(|id| id.split_once('#').is_none_or(|(base, _)| !base.is_empty()));
                 if starts_new_resource {
+                    continue;
+                }
+                if !contains_anchor_keyword(value) {
                     continue;
                 }
 
