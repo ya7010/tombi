@@ -487,6 +487,10 @@ impl Referable<SchemaView> {
         mut anchor_collector: Option<&mut AnchorCollector>,
         mut dynamic_anchor_collector: Option<&mut DynamicAnchorCollector>,
     ) {
+        if anchor_collector.is_none() && dynamic_anchor_collector.is_none() {
+            return;
+        }
+
         for defs_key in ["definitions", "$defs"] {
             let Some(tombi_json::ValueNode::Object(definitions)) = object.get(defs_key) else {
                 continue;
@@ -499,6 +503,23 @@ impl Referable<SchemaView> {
                     .and_then(tombi_json::ValueNode::as_str)
                     .is_some_and(|id| id.split_once('#').is_none_or(|(base, _)| !base.is_empty()));
                 if starts_new_resource {
+                    continue;
+                }
+                // A schema containing only definitions has no view or anchor of its own.
+                // Descend directly instead of constructing and discarding every carrier.
+                if let Some(definition) = value.as_object()
+                    && definition.properties.len() == 1
+                    && ["definitions", "$defs"].into_iter().any(|key| {
+                        matches!(definition.get(key), Some(tombi_json::ValueNode::Object(_)))
+                    })
+                {
+                    Self::collect_nested_definition_anchors(
+                        definition,
+                        string_formats,
+                        dialect,
+                        anchor_collector.as_deref_mut(),
+                        dynamic_anchor_collector.as_deref_mut(),
+                    );
                     continue;
                 }
                 if !contains_anchor_keyword(value) {

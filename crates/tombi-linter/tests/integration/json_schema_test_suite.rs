@@ -149,6 +149,45 @@ mod compound_resource_pointer_locations {
 mod schema_resource_load_context {
     use super::*;
 
+    fn deeply_nested_anchor_schema() -> JsonValue {
+        let mut schema = serde_json::json!({
+            "$anchor": "target",
+            "type": "object",
+            "properties": {"value": {"type": "integer"}},
+            "required": ["value"]
+        });
+        for _ in 0..50 {
+            schema = serde_json::json!({"$defs": {"child": schema}});
+        }
+        serde_json::json!({
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "#target",
+            "$defs": {"child": schema}
+        })
+    }
+
+    suite_test!(
+        #[tokio::test] async fn deep_definition_anchor_accepts_matching_value(
+            "value = 1",
+            JsonSchema(deeply_nested_anchor_schema()),
+        ) -> Ok(_);
+    );
+
+    suite_test!(
+        #[tokio::test] async fn deep_definition_anchor_rejects_wrong_type(
+            "value = \"x\"",
+            JsonSchema(deeply_nested_anchor_schema()),
+        ) -> Err([
+            tombi_validator::Diagnostic::new(
+                tombi_validator::DiagnosticKind::TypeMismatch {
+                    expected: tombi_schema_store::ValueType::Integer,
+                    actual: tombi_document_tree_syntax::ValueType::String,
+                },
+                ((0, 8), (0, 11)),
+            ),
+        ]);
+    );
+
     suite_test!(
         #[tokio::test] async fn nested_definition_anchor_remains_available(
             "value = 1",
