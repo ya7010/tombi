@@ -13,6 +13,8 @@ pub(crate) struct SchemaResource {
     pub validation_vocabulary_disabled: bool,
     /// JSON Pointer to this resource within the physical document (e.g. `#/$defs/foo`).
     pub location: String,
+    parent_resource_uri: Option<SchemaUri>,
+    has_schema_keyword: bool,
 }
 
 #[derive(Debug)]
@@ -138,14 +140,14 @@ async fn inherit_resource_contexts(
     schema_document_uri: &SchemaUri,
     schema_store: &SchemaStore,
 ) {
-    if resources.len() <= 1 {
+    if resources.len() <= 1
+        || !resources
+            .values()
+            .any(|resource| resource.location != "#" && resource.has_schema_keyword)
+    {
         return;
     }
 
-    let resource_uris_by_location = resources
-        .iter()
-        .map(|(uri, resource)| (resource.location.clone(), uri.clone()))
-        .collect::<tombi_hashmap::HashMap<_, _>>();
     let mut resource_uris = resources.keys().cloned().collect::<Vec<_>>();
     resource_uris.sort_by_key(|uri| {
         resources
@@ -161,30 +163,23 @@ async fn inherit_resource_contexts(
         if resource.location == "#" {
             continue;
         }
-        let mut ancestor = resource.location.as_str();
-        let parent_context = loop {
-            let Some(separator) = ancestor.rfind('/') else {
-                break None;
-            };
-            ancestor = &ancestor[..separator];
-            if let Some(parent_uri) = resource_uris_by_location.get(ancestor)
-                && let Some(parent) = resources.get(parent_uri)
-            {
-                break Some((parent.dialect, parent.validation_vocabulary_disabled));
-            }
-        };
-        let Some((inherited_dialect, inherited_disabled)) = parent_context else {
+        let Some((inherited_dialect, inherited_disabled)) = resource
+            .parent_resource_uri
+            .as_ref()
+            .and_then(|uri| resources.get(uri))
+            .map(|parent| (parent.dialect, parent.validation_vocabulary_disabled))
+        else {
             continue;
         };
-        let Some(value) = resource_value_at_location(root, &resource.location) else {
-            continue;
-        };
-        let (dialect, disabled) = match value {
-            tombi_json::ValueNode::Object(object) if object.get("$schema").is_some() => {
+        let (dialect, disabled) = if resource.has_schema_keyword {
+            if let Some(value) = resource_value_at_location(root, &resource.location) {
                 let base_uri = resource.id.as_ref().unwrap_or(schema_document_uri);
                 root_schema_context(value, base_uri, schema_store).await
+            } else {
+                continue;
             }
-            _ => (inherited_dialect, inherited_disabled),
+        } else {
+            (inherited_dialect, inherited_disabled)
         };
         if let Some(resource) = resources.get_mut(&resource_uri) {
             resource.dialect = dialect;
@@ -244,6 +239,8 @@ fn collect_schema_resources_from_value(
                     dialect: inherited_dialect,
                     validation_vocabulary_disabled: inherited_validation_vocabulary_disabled,
                     location: location.to_string(),
+                    parent_resource_uri: None,
+                    has_schema_keyword: false,
                 },
             );
             return Ok(Some(schema_resource_uri));
@@ -291,6 +288,8 @@ fn collect_schema_resources_from_value(
                 dialect,
                 validation_vocabulary_disabled,
                 location: location.to_string(),
+                parent_resource_uri: (!is_document_root).then(|| enclosing_schema_base_uri.clone()),
+                has_schema_keyword: object.get("$schema").is_some(),
             },
         );
     }
