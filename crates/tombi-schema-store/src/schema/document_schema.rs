@@ -54,7 +54,7 @@ impl DocumentSchema {
         // `SchemaStore::fetch_document_schema`. Register the resource index before
         // building so root `$ref` targets to embedded `$id`s resolve offline.
         let schema_resources =
-            SchemaDocumentResources::collect(&node, &schema_document_uri, schema_store).await?;
+            SchemaDocumentResources::collect(node, &schema_document_uri, schema_store).await?;
         schema_store
             .replace_schema_resources(schema_resources.clone())
             .await?;
@@ -74,13 +74,13 @@ impl DocumentSchema {
         strict: Option<BoolDefaultTrue>,
         schema_store: &SchemaStore,
     ) -> Option<Self> {
-        let resource = schema_resources.resource(&schema_resource_uri)?.clone();
+        let resource = schema_resources.resource(&schema_resource_uri)?;
         let schema_uri = schema_resources.schema_document_uri().clone();
-        let schema_resource_uri = resource.schema_resource_uri;
-        let id = resource.id;
+        let schema_resource_uri = resource.schema_resource_uri.clone();
+        let id = resource.id.clone();
         let inherited_dialect = resource.dialect;
         let validation_vocabulary_disabled = resource.validation_vocabulary_disabled;
-        Some(match resource.value {
+        Some(match schema_resources.resource_value(resource)?.clone() {
             tombi_json::ValueNode::Object(object) => {
                 Self::new_from_object(
                     object,

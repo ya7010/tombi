@@ -119,6 +119,7 @@ async fn run_suite_file(draft: Draft, path: &Path, remotes: &Path) -> Result<Sui
 
     let mut summary = SuiteSummary::default();
     for case in cases {
+        let mut prepared_schema = None;
         for test in case.tests {
             if !supports_instance(&test.data) {
                 summary.skipped += 1;
@@ -126,11 +127,14 @@ async fn run_suite_file(draft: Draft, path: &Path, remotes: &Path) -> Result<Sui
             }
 
             summary.supported += 1;
-            let mut schema = case.schema.clone();
-            inject_dialect_if_missing(&mut schema, draft);
-            rewrite_localhost_remotes(&mut schema, remotes);
+            let schema = prepared_schema.get_or_insert_with(|| {
+                let mut schema = case.schema.clone();
+                inject_dialect_if_missing(&mut schema, draft);
+                rewrite_localhost_remotes(&mut schema, remotes);
+                schema
+            });
 
-            let actual_valid = validate_case(&schema, &test.data).await.with_context(|| {
+            let actual_valid = validate_case(schema, &test.data).await.with_context(|| {
                 format!(
                     "validation error in {} :: {} :: {}",
                     file_label, case.description, test.description

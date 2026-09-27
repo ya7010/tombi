@@ -618,7 +618,7 @@ impl SchemaStore {
                 if schema_resource_uri != *schema_resources.schema_document_uri()
                     && let Some(resource) = schema_resources.resource(&location.schema_resource_uri)
                 {
-                    return Ok(Some(resource.value.clone()));
+                    return Ok(schema_resources.resource_value(resource).cloned());
                 }
             } else if location.schema_document_uri != schema_resource_uri {
                 // Stale Weak index entry: drop it and fall through to file/HTTP fetch
@@ -757,7 +757,7 @@ impl SchemaStore {
             });
         }
         let schema_resources =
-            SchemaDocumentResources::collect(&schema_value, schema_uri, self).await?;
+            SchemaDocumentResources::collect(schema_value, schema_uri, self).await?;
         self.replace_schema_resources(schema_resources.clone())
             .await?;
         let document_schema = DocumentSchema::new_resource(
