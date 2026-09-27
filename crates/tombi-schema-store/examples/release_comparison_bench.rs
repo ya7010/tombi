@@ -12,8 +12,12 @@ fn schema_for(shape: &str) -> String {
                 .join(",");
             format!(r#"{{"type":"object","properties":{{{properties}}}}}"#)
         }
-        "nested-defs" | "nested-ids" => {
-            let mut schema = r#"{"type":"object"}"#.to_string();
+        "nested-defs" | "nested-ids" | "nested-anchor" => {
+            let mut schema = if shape == "nested-anchor" {
+                r##"{"$anchor":"leaf","type":"object"}"##.to_string()
+            } else {
+                r#"{"type":"object"}"#.to_string()
+            };
             for index in (0..50).rev() {
                 let id = if shape == "nested-ids" {
                     format!(r#""$id":"r{index}/","#)
