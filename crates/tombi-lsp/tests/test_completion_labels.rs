@@ -1296,7 +1296,7 @@ mod completion_labels {
                 },
                 {
                     "label": "value",
-                    "documentation": ")\n---\n\nsecond anyOf value",
+                    "documentation": ")\n\n---\n\nsecond anyOf value",
                 },
             ]);
         }
@@ -1316,7 +1316,7 @@ mod completion_labels {
                 },
                 {
                     "label": "\"red\"",
-                    "documentation": ")\n---\n\nsecond enum value",
+                    "documentation": ")\n\n---\n\nsecond enum value",
                 },
                 {
                     "label": "\"blue\"",
@@ -1340,7 +1340,7 @@ mod completion_labels {
                 },
                 {
                     "label": "\"bbb\"",
-                    "documentation": ")\n---\n\nsecond constrained value",
+                    "documentation": ")\n\n---\n\nsecond constrained value",
                 },
                 {
                     "label": "\"cccc\"",
@@ -1348,7 +1348,7 @@ mod completion_labels {
                 },
                 {
                     "label": "\"cccc\"",
-                    "documentation": ")\n---\n\nsecond constrained value",
+                    "documentation": ")\n\n---\n\nsecond constrained value",
                 },
             ]);
         }
