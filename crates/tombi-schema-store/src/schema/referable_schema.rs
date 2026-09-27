@@ -1761,12 +1761,11 @@ pub async fn resolve_and_collect_schemas_in_scope(
     Some(collected)
 }
 
-/// Two-path schema collection: tries a read lock first for already-resolved schemas,
+/// Two-path schema collection: reads already-resolved schemas,
 /// resolves refs on cloned entries, and writes back only newly-resolved entries.
 ///
 /// Returns the successfully resolved schemas together with any resolution errors.
-/// Returns `None` when schema traversal is re-entrant (cycle guard) or when
-/// an initial read lock cannot be acquired due to concurrent mutation.
+/// Returns `None` when schema traversal is re-entrant (cycle guard).
 pub async fn resolve_and_collect_schemas_with_errors(
     schemas: &super::ReferableSchemaViews,
     schema_base_uri: Cow<'_, SchemaUri>,
@@ -1810,14 +1809,9 @@ pub async fn resolve_and_collect_schemas_with_errors_in_scope(
 
     let mut schema_entries = Vec::new();
     let resolved_schemas = {
-        let Ok(schema_guard) = schemas.try_read() else {
-            // try_read() failed -- a write lock is held.
-            log::debug!(
-                "failed to acquire read lock for composite schema collection: schema_base_uri={schema_base_uri} accessors={accessors} reason=write_lock_held",
-                schema_base_uri = schema_base_uri.as_ref(),
-                accessors = crate::Accessors::from(accessors.to_vec())
-            );
-            return None;
+        let schema_guard = match schemas.try_read() {
+            Ok(guard) => guard,
+            Err(_) => schemas.read().await,
         };
 
         if schema_guard.iter().all(Referable::is_resolved) {

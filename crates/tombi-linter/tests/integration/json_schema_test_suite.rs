@@ -99,6 +99,53 @@ macro_rules! suite_test {
     };
 }
 
+mod compound_resource_pointer_locations {
+    use super::*;
+
+    fn nested_ids_under_escaped_keys_schema() -> JsonValue {
+        serde_json::json!({
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.com/root/",
+            "$ref": "nested/child",
+            "$defs": {
+                "a/b~c": {
+                    "$id": "nested/",
+                    "$defs": {
+                        "child": {
+                            "$id": "child",
+                            "type": "object",
+                            "properties": {"value": {"type": "integer"}},
+                            "required": ["value"]
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    suite_test!(
+        #[tokio::test] async fn resolves_nested_ids_under_escaped_keys(
+            "value = 1",
+            JsonSchema(nested_ids_under_escaped_keys_schema()),
+        ) -> Ok(_);
+    );
+
+    suite_test!(
+        #[tokio::test] async fn rejects_invalid_value_under_escaped_keys(
+            "value = \"x\"",
+            JsonSchema(nested_ids_under_escaped_keys_schema()),
+        ) -> Err([
+            tombi_validator::Diagnostic::new(
+                tombi_validator::DiagnosticKind::TypeMismatch {
+                    expected: tombi_schema_store::ValueType::Integer,
+                    actual: tombi_document_tree_syntax::ValueType::String,
+                },
+                ((0, 8), (0, 11)),
+            ),
+        ]);
+    );
+}
+
 mod issue_2190_reference_annotations {
     use super::*;
 

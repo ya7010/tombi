@@ -13,7 +13,6 @@ pub(crate) struct SchemaResource {
     pub validation_vocabulary_disabled: bool,
     /// JSON Pointer to this resource within the physical document (e.g. `#/$defs/foo`).
     pub location: String,
-    pub value: tombi_json::ValueNode,
 }
 
 #[derive(Debug)]
@@ -22,20 +21,21 @@ pub(crate) struct SchemaDocumentResources {
     /// Not `$id`.
     schema_document_uri: SchemaUri,
     root_schema_resource_uri: SchemaUri,
+    root: tombi_json::ValueNode,
     resources: tombi_hashmap::HashMap<SchemaUri, SchemaResource>,
 }
 
 impl SchemaDocumentResources {
     pub(crate) async fn collect(
-        root: &tombi_json::ValueNode,
+        root: tombi_json::ValueNode,
         schema_document_uri: &SchemaUri,
         schema_store: &SchemaStore,
     ) -> Result<Arc<Self>, crate::Error> {
         let (root_dialect, root_validation_vocabulary_disabled) =
-            root_schema_context(root, schema_document_uri, schema_store).await;
+            root_schema_context(&root, schema_document_uri, schema_store).await;
         let mut resources = tombi_hashmap::HashMap::default();
         let root_schema_resource_uri = collect_schema_resources_from_value(
-            root,
+            &root,
             schema_document_uri,
             schema_document_uri,
             root_dialect,
@@ -45,7 +45,7 @@ impl SchemaDocumentResources {
             &mut resources,
         )?
         .expect("the root schema always defines a schema resource");
-        inherit_resource_contexts(&mut resources, schema_document_uri, schema_store).await;
+        inherit_resource_contexts(&mut resources, &root, schema_document_uri, schema_store).await;
 
         if schema_document_uri != &root_schema_resource_uri
             && let Some(existing) = resources.get(schema_document_uri)
@@ -63,6 +63,7 @@ impl SchemaDocumentResources {
         Ok(Arc::new(Self {
             schema_document_uri: schema_document_uri.clone(),
             root_schema_resource_uri,
+            root,
             resources,
         }))
     }
@@ -77,6 +78,13 @@ impl SchemaDocumentResources {
 
     pub(crate) fn resource(&self, schema_resource_uri: &SchemaUri) -> Option<&SchemaResource> {
         self.resources.get(schema_resource_uri)
+    }
+
+    pub(crate) fn resource_value(
+        &self,
+        resource: &SchemaResource,
+    ) -> Option<&tombi_json::ValueNode> {
+        resource_value_at_location(&self.root, &resource.location)
     }
 
     pub(crate) fn resource_uris(&self) -> impl Iterator<Item = &SchemaUri> + '_ {
@@ -126,9 +134,18 @@ async fn root_schema_context(
 
 async fn inherit_resource_contexts(
     resources: &mut tombi_hashmap::HashMap<SchemaUri, SchemaResource>,
+    root: &tombi_json::ValueNode,
     schema_document_uri: &SchemaUri,
     schema_store: &SchemaStore,
 ) {
+    if resources.len() <= 1 {
+        return;
+    }
+
+    let resource_uris_by_location = resources
+        .iter()
+        .map(|(uri, resource)| (resource.location.clone(), uri.clone()))
+        .collect::<tombi_hashmap::HashMap<_, _>>();
     let mut resource_uris = resources.keys().cloned().collect::<Vec<_>>();
     resource_uris.sort_by_key(|uri| {
         resources
@@ -144,21 +161,28 @@ async fn inherit_resource_contexts(
         if resource.location == "#" {
             continue;
         }
-        let parent_context = resources
-            .values()
-            .filter(|parent| {
-                resource.location.starts_with(&parent.location)
-                    && resource.location.as_bytes().get(parent.location.len()) == Some(&b'/')
-            })
-            .max_by_key(|parent| parent.location.len())
-            .map(|parent| (parent.dialect, parent.validation_vocabulary_disabled));
+        let mut ancestor = resource.location.as_str();
+        let parent_context = loop {
+            let Some(separator) = ancestor.rfind('/') else {
+                break None;
+            };
+            ancestor = &ancestor[..separator];
+            if let Some(parent_uri) = resource_uris_by_location.get(ancestor)
+                && let Some(parent) = resources.get(parent_uri)
+            {
+                break Some((parent.dialect, parent.validation_vocabulary_disabled));
+            }
+        };
         let Some((inherited_dialect, inherited_disabled)) = parent_context else {
             continue;
         };
-        let (dialect, disabled) = match &resource.value {
+        let Some(value) = resource_value_at_location(root, &resource.location) else {
+            continue;
+        };
+        let (dialect, disabled) = match value {
             tombi_json::ValueNode::Object(object) if object.get("$schema").is_some() => {
                 let base_uri = resource.id.as_ref().unwrap_or(schema_document_uri);
-                root_schema_context(&resource.value, base_uri, schema_store).await
+                root_schema_context(value, base_uri, schema_store).await
             }
             _ => (inherited_dialect, inherited_disabled),
         };
@@ -220,7 +244,6 @@ fn collect_schema_resources_from_value(
                     dialect: inherited_dialect,
                     validation_vocabulary_disabled: inherited_validation_vocabulary_disabled,
                     location: location.to_string(),
-                    value: value.clone(),
                 },
             );
             return Ok(Some(schema_resource_uri));
@@ -268,7 +291,6 @@ fn collect_schema_resources_from_value(
                 dialect,
                 validation_vocabulary_disabled,
                 location: location.to_string(),
-                value: value.clone(),
             },
         );
     }
@@ -417,6 +439,30 @@ fn json_pointer_join(parent: &str, key: &str, child: Option<&str>) -> String {
         pointer.push_str(&crate::keyword_support::escape_json_pointer_token(child));
     }
     pointer
+}
+
+fn resource_value_at_location<'a>(
+    root: &'a tombi_json::ValueNode,
+    location: &str,
+) -> Option<&'a tombi_json::ValueNode> {
+    if location == "#" {
+        return Some(root);
+    }
+
+    let mut value = root;
+    for token in location.strip_prefix("#/")?.split('/') {
+        let token = if token.contains('~') {
+            std::borrow::Cow::Owned(token.replace("~1", "/").replace("~0", "~"))
+        } else {
+            std::borrow::Cow::Borrowed(token)
+        };
+        value = match value {
+            tombi_json::ValueNode::Object(object) => object.get(token.as_ref())?,
+            tombi_json::ValueNode::Array(array) => array.get(token.parse().ok()?)?,
+            _ => return None,
+        };
+    }
+    Some(value)
 }
 
 pub(crate) fn resolve_schema_resource_uri(
