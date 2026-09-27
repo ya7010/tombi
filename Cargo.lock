@@ -3103,6 +3103,7 @@ version = "0.0.0-dev"
 dependencies = [
  "percent-encoding",
  "pretty_assertions",
+ "rstest",
  "serde",
  "url",
 ]
