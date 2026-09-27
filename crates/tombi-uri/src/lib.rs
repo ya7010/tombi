@@ -61,7 +61,7 @@ impl<'de> serde::Deserialize<'de> for Uri {
     where
         D: serde::Deserializer<'de>,
     {
-        url::Url::deserialize(deserializer).map(Self::from)
+        <url::Url as serde::Deserialize>::deserialize(deserializer).map(Self::from)
     }
 }
 
@@ -257,5 +257,12 @@ mod tests {
             assert_ne!(path_uri, converted_uri);
             assert_ne!(path_uri, deserialized_uri);
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn from_file_path_normalizes_windows_drive_letter() {
+        let uri = Uri::from_file_path(r"C:\project\Cargo.toml").unwrap();
+        assert_eq!(uri.as_str(), "file:///c:/project/Cargo.toml");
     }
 }
