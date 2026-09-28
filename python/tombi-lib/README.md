@@ -13,7 +13,8 @@ assert result.diagnostics
 ```
 
 `options` accepts a `dict` matching a `tombi.toml` configuration, e.g. `{"config": "[schema]\nenabled = false\n"}`.
-Errors raise `tombi_lib.TombiError` (base), `tombi_lib.TombiConfigError`, or `tombi_lib.TombiSchemaError`.
+Configuration, schema resolution, and I/O failures raise `tombi_lib.TombiError`.
+Malformed `options` raise `TypeError`.
 
 `format_async`/`lint_async` are also available for `asyncio` callers:
 

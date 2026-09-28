@@ -1,12 +1,15 @@
 mod error;
 
 use error::to_py_err;
-use pyo3::{exceptions::PyValueError, prelude::*};
+use pyo3::{exceptions::PyTypeError, prelude::*};
 
 fn deserialize_options(options: Option<&Bound<'_, PyAny>>) -> PyResult<tombi_lib::Options> {
     match options {
-        Some(options) => pythonize::depythonize(options)
-            .map_err(|error| PyValueError::new_err(error.to_string())),
+        // Malformed options are a caller bug (not a `TombiError`), so they
+        // raise the standard `TypeError`, like the Node.js/wasm bindings.
+        Some(options) => {
+            pythonize::depythonize(options).map_err(|error| PyTypeError::new_err(error.to_string()))
+        }
         None => Ok(tombi_lib::Options::default()),
     }
 }
@@ -81,13 +84,5 @@ fn _tombi_lib(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<tombi_lib::Position>()?;
     m.add_class::<tombi_lib::Range>()?;
     m.add("TombiError", m.py().get_type::<error::TombiError>())?;
-    m.add(
-        "TombiConfigError",
-        m.py().get_type::<error::TombiConfigError>(),
-    )?;
-    m.add(
-        "TombiSchemaError",
-        m.py().get_type::<error::TombiSchemaError>(),
-    )?;
     Ok(())
 }

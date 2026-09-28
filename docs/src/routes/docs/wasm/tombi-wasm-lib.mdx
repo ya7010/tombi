@@ -14,7 +14,7 @@ pnpm add tombi-wasm-lib
 Initialize the WASM module before calling `format`:
 
 ```ts
-import init, { format, type TombiWasmError } from "tombi-wasm-lib";
+import init, { format, type TombiError } from "tombi-wasm-lib";
 
 await init();
 
@@ -38,21 +38,21 @@ try {
     }
   }
 } catch (error) {
-  console.error((error as TombiWasmError).message);
+  console.error((error as TombiError).message);
 }
 ```
 
 `format` resolves to an object containing the formatted TOML when formatting
 succeeds and an array of diagnostics. The diagnostics array is empty when none were
 reported. When diagnostics prevent formatting, `formatted` is omitted.
-Configuration and execution errors reject the Promise as `TombiWasmError`.
+Configuration and execution errors reject the Promise as `TombiError`.
 
 ## Lint TOML
 
 Initialize the WASM module before calling `lint`:
 
 ```ts
-import init, { lint, type TombiWasmError } from "tombi-wasm-lib";
+import init, { lint, type TombiError } from "tombi-wasm-lib";
 
 await init();
 
@@ -79,13 +79,13 @@ try {
   }
 } catch (error) {
   // Configuration and execution errors reject the Promise.
-  console.error((error as TombiWasmError).message);
+  console.error((error as TombiError).message);
 }
 ```
 
 `lint` resolves to an object containing a diagnostics array. The array is empty when
 no diagnostics were reported. Configuration and execution errors reject the Promise
-as `TombiWasmError`.
+as `TombiError`.
 
 Both functions accept an optional options object as the third argument. `config`
 replaces the automatically discovered configuration and accepts an object or string:

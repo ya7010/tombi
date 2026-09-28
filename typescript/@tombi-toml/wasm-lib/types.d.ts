@@ -58,9 +58,12 @@ export function lint(
   options?: Options,
 ): Promise<LintResult>;
 
-/** An error reported when an operation cannot be executed. */
-export interface TombiWasmError extends Error {
-  readonly name: "TombiWasmError";
+/**
+ * The error `format`/`lint` reject with when the configuration, a schema, or an
+ * I/O operation fails. Malformed `options` reject with a `TypeError` instead.
+ */
+export interface TombiError extends Error {
+  readonly name: "TombiError";
 }
 
 /** One entry of the browser-backed virtual workspace. */

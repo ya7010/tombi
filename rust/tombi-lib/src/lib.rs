@@ -4,8 +4,9 @@
 //! schemas the same way regardless of target, so `tombi-wasm`'s `lib` feature
 //! calls them directly from its own async (wasm-bindgen-futures) executor.
 //! `format_sync`/`lint_sync` additionally block on a Tokio runtime, for
-//! synchronous callers such as the Python (`python` feature) and Node.js
-//! (`node` feature) bindings; they are only available on non-wasm targets.
+//! synchronous callers such as the Python (`tombi-lib-python`) and Node.js
+//! (`tombi-lib-node`) binding crates; they are only available on non-wasm
+//! targets.
 
 mod error;
 mod format;
