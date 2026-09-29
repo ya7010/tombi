@@ -1,0 +1,35 @@
+# Python
+
+## Install
+
+```sh
+pip install tombi-lib
+```
+
+## Usage
+
+```python
+import tombi_lib
+
+result = tombi_lib.format("key=1", "example.toml")
+print(result.formatted)  # key = 1
+
+result = tombi_lib.lint("key =", "example.toml")
+for diagnostic in result.diagnostics:
+    print(diagnostic.level, diagnostic.message)
+```
+
+`format_async` / `lint_async` are also available for `asyncio`:
+
+```python
+result = await tombi_lib.format_async("key=1", "example.toml")
+```
+
+## Configuration
+
+By default, `tombi.toml` is searched from the current directory.
+Pass `config` to use an in-memory configuration instead:
+
+```python
+tombi_lib.format(source, "Cargo.toml", {"config": "[format.rules]\nindent-width = 4\n"})
+```

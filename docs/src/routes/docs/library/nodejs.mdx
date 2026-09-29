@@ -1,0 +1,38 @@
+# Node.js
+
+## Install
+
+```sh
+npm install tombi-lib
+```
+
+## Usage
+
+```ts
+import { format, lint } from "tombi-lib";
+
+const { formatted } = await format("key=1", "example.toml");
+console.log(formatted); // key = 1
+
+const { diagnostics } = await lint("key =", "example.toml");
+for (const diagnostic of diagnostics) {
+  console.log(diagnostic.level, diagnostic.message);
+}
+```
+
+`formatSync` / `lintSync` are also available when a synchronous call is needed:
+
+```ts
+import { formatSync } from "tombi-lib";
+
+const { formatted } = formatSync("key=1", "example.toml");
+```
+
+## Configuration
+
+By default, `tombi.toml` is searched from the current directory.
+Pass `config` to use an in-memory configuration instead:
+
+```ts
+await format(source, "Cargo.toml", { config: "[format.rules]\nindent-width = 4\n" });
+```
