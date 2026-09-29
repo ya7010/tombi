@@ -5,9 +5,17 @@ requires-python = ">=3.12"
 [manifest]
 members = [
     "tombi",
-    "tombi-beta",
     "tombi-lib",
 ]
+
+[manifest.dependency-groups]
+dev = [
+    { name = "maturin", specifier = ">=1.5,<2.0" },
+    { name = "pytest", specifier = ">=9.0.3" },
+    { name = "pytest-stub", specifier = ">=1.1.0" },
+    { name = "ruff", specifier = ">=0.7.4" },
+]
+stub = [{ name = "pytest-stub", specifier = ">=1.1.0" }]
 
 [[package]]
 name = "colorama"
@@ -131,34 +139,7 @@ wheels = [
 [[package]]
 name = "tombi"
 version = "0.0.0.dev0"
-source = { editable = "." }
-
-[package.dev-dependencies]
-dev = [
-    { name = "maturin" },
-    { name = "pytest" },
-    { name = "pytest-stub" },
-    { name = "ruff" },
-]
-stub = [
-    { name = "pytest-stub" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "maturin", specifier = ">=1.5,<2.0" },
-    { name = "pytest", specifier = ">=9.0.3" },
-    { name = "pytest-stub", specifier = ">=1.1.0" },
-    { name = "ruff", specifier = ">=0.7.4" },
-]
-stub = [{ name = "pytest-stub", specifier = ">=1.1.0" }]
-
-[[package]]
-name = "tombi-beta"
-version = "0.1.0"
-source = { editable = "python/tombi-beta" }
+source = { editable = "python/tombi" }
 
 [[package]]
 name = "tombi-lib"
