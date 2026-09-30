@@ -13,6 +13,36 @@
     "message_only": {
       "type": "integer",
       "deprecationMessage": "Use `value` instead"
+    },
+    "any_of_value": {
+      "anyOf": [
+        { "type": "integer", "deprecated": true },
+        { "type": "string" }
+      ]
+    },
+    "one_of_value": {
+      "oneOf": [
+        { "type": "integer", "deprecated": true },
+        { "type": "string" }
+      ]
+    },
+    "all_of_value": {
+      "allOf": [{ "type": "integer", "deprecated": true }]
+    },
+    "any_of_overlapping_value": {
+      "anyOf": [
+        { "type": "integer", "deprecated": true },
+        { "type": "integer" }
+      ]
+    },
+    "all_of_overlapping_value": {
+      "allOf": [
+        { "type": "integer", "deprecated": true },
+        { "type": "integer" }
+      ]
+    },
+    "all_of_non_deprecated_value": {
+      "allOf": [{ "type": "integer" }, { "type": "integer" }]
     }
   },
   "additionalProperties": false
