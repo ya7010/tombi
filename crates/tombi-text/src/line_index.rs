@@ -201,9 +201,17 @@ impl LineIndexCursor<'_> {
 
         let offset_in_line = offset.min(line_index.line_end(self.line));
         if offset_in_line > self.offset {
-            self.column += self
-                .encoding
-                .measure(&line_index.text[Span::new(self.offset, offset_in_line)]);
+            self.column = if self.encoding == EncodingKind::GraphemeCluster {
+                // Grapheme cluster widths don't add up across a split point
+                // (a combining mark after it joins the cluster before it),
+                // so the column is measured from the start of the line.
+                line_index.column(self.line, offset_in_line, self.encoding)
+            } else {
+                self.column
+                    + self
+                        .encoding
+                        .measure(&line_index.text[Span::new(self.offset, offset_in_line)])
+            };
             self.offset = offset_in_line;
         }
         Position::new(self.line as Line, self.column)
@@ -315,14 +323,20 @@ mod tests {
 
     #[test]
     fn cursor_matches_random_access() {
-        let text = "a = \"é\"\n\n🦅 = [1, \"👨‍👩‍👧\"]\r\nb = 2\n";
+        // "e\u{301}" is one grapheme cluster split by a char boundary.
+        let text = "a = \"é\"\n\n🦅 = [1, \"👨‍👩‍👧\", \"e\u{301}\"]\r\nb = 2\n";
         let index = LineIndex::new(text);
         let offsets = (0..=text.len())
             .filter(|offset| text.is_char_boundary(*offset))
             .map(|offset| Offset::new(offset as u32))
             .collect::<Vec<_>>();
 
-        for encoding in [EncodingKind::Utf8, EncodingKind::Utf16, EncodingKind::Utf32] {
+        for encoding in [
+            EncodingKind::Utf8,
+            EncodingKind::Utf16,
+            EncodingKind::Utf32,
+            EncodingKind::GraphemeCluster,
+        ] {
             let mut cursor = index.cursor(encoding);
             for offset in &offsets {
                 assert_eq!(cursor.position(*offset), index.position(*offset, encoding));

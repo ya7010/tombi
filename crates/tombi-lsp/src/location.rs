@@ -18,7 +18,6 @@ pub async fn into_lsp_locations(
     }
 
     let encoding = backend.capabilities.read().await.encoding_kind;
-    let document_sources = backend.document_sources.try_read().ok();
 
     let mut lsp_locations = Vec::with_capacity(locations.len());
     for mut location in locations {
@@ -26,14 +25,10 @@ pub async fn into_lsp_locations(
             location.uri = remote_uri.clone();
         }
         let range = match location.span {
+            // The span is an offset into the text its line index was built from,
+            // so it must be converted with that line index, even if the file is open
+            // with unsaved changes.
             Some(tombi_extension::LocatedSpan { span, line_index }) => {
-                // An open document may have unsaved changes, so its line index is preferred.
-                let line_index = document_sources
-                    .as_ref()
-                    .and_then(|ds| ds.get(&location.uri))
-                    .map_or(line_index, |document_source| {
-                        document_source.line_index_arc()
-                    });
                 span.into_lsp(&line_index, encoding)
             }
             // A file that is not parsed is opened at its start.
