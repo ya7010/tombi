@@ -8,8 +8,10 @@ pub(super) mod sarif;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use tombi_diagnostic::{Diagnostic, Level};
+use tombi_text::LineIndex;
 
 use super::format_reporter::FormatReporter;
 
@@ -58,14 +60,21 @@ impl FileProblem {
 pub struct FileReport {
     /// `None` only for stdin without `--stdin-filename`, which is rejected for report formats.
     pub path: Option<PathBuf>,
-    pub source: String,
+    /// The line index built while parsing the file, to convert the spans of the diagnostics.
+    ///
+    /// `None` if the file could not be read, in which case there are no diagnostics.
+    pub line_index: Option<Arc<LineIndex>>,
     pub diagnostics: Vec<Diagnostic>,
     pub problem: Option<FileProblem>,
 }
 
 impl FileReport {
     /// Creates a report, attaching `path` to the diagnostics.
-    pub fn new(path: Option<PathBuf>, source: String, diagnostics: Vec<Diagnostic>) -> Self {
+    pub fn new(
+        path: Option<PathBuf>,
+        line_index: Option<Arc<LineIndex>>,
+        diagnostics: Vec<Diagnostic>,
+    ) -> Self {
         let diagnostics = match &path {
             Some(path) => diagnostics
                 .into_iter()
@@ -75,7 +84,7 @@ impl FileReport {
         };
         Self {
             path,
-            source,
+            line_index,
             diagnostics,
             problem: None,
         }
@@ -89,10 +98,13 @@ pub(super) trait ReportFormat {
     /// The format adds 1 when it writes a line or a column.
     type Range: Copy + Send;
 
-    /// Converts the ranges of the diagnostics in `source`, whose columns count grapheme clusters.
+    /// Converts the spans of the diagnostics in the source indexed by `line_index`.
     ///
-    /// Must return as many ranges as given, in the same order.
-    fn convert_ranges(source: &str, ranges: &[tombi_text::Range]) -> Vec<Self::Range>;
+    /// The spans are sorted by their start. Must return as many ranges as given, in the same order.
+    fn convert_spans(
+        line_index: &tombi_text::LineIndex,
+        spans: &[tombi_text::Span],
+    ) -> Vec<Self::Range>;
 
     fn render(report: &Report<Self::Range>) -> String;
 }
@@ -140,7 +152,7 @@ impl<F: ReportFormat> FormatReporter for CollectingReporter<F> {
     }
 }
 
-/// A checked file whose ranges are already converted, so that its source can be dropped.
+/// A checked file whose spans are already converted into ranges, so that its source can be dropped.
 pub(super) struct CollectedFile<R> {
     path: Option<PathBuf>,
     /// Sorted by position, code, and message.
@@ -173,32 +185,31 @@ impl<R: Copy> CollectedFile<R> {
         // Sorted before the conversion, which keeps the order of the positions.
         fn sort_key(
             diagnostic: &Diagnostic,
-        ) -> (tombi_text::Position, tombi_text::Position, &str, &str) {
-            let range = diagnostic.range();
+        ) -> (tombi_text::Offset, tombi_text::Offset, &str, &str) {
+            let span = diagnostic.span();
             (
-                range.start,
-                range.end,
+                span.start,
+                span.end,
                 diagnostic.code(),
                 diagnostic.message(),
             )
         }
         let mut diagnostics = file.diagnostics;
         diagnostics.sort_by(|a, b| sort_key(a).cmp(&sort_key(b)));
-        let ranges = diagnostics
-            .iter()
-            .map(Diagnostic::range)
-            .collect::<Vec<_>>();
-        findings.extend(
-            diagnostics
-                .iter()
-                .zip(F::convert_ranges(&file.source, &ranges))
-                .map(|(diagnostic, range)| CollectedFinding {
-                    level: diagnostic.level(),
-                    code: diagnostic.code().to_owned(),
-                    message: diagnostic.message().to_owned(),
-                    range: Some(range),
-                }),
-        );
+        let spans = diagnostics.iter().map(Diagnostic::span).collect::<Vec<_>>();
+        debug_assert!(spans.is_empty() || file.line_index.is_some());
+        let ranges = match &file.line_index {
+            Some(line_index) if !spans.is_empty() => F::convert_spans(line_index, &spans),
+            _ => Vec::new(),
+        };
+        findings.extend(diagnostics.iter().zip(ranges).map(|(diagnostic, range)| {
+            CollectedFinding {
+                level: diagnostic.level(),
+                code: diagnostic.code().to_owned(),
+                message: diagnostic.message().to_owned(),
+                range: Some(range),
+            }
+        }));
 
         Self {
             path: file.path,
@@ -242,6 +253,15 @@ pub(super) struct Finding<'a, R> {
     pub range: Option<R>,
     /// Number of preceding findings in the same file with the same code and message.
     pub occurrence: usize,
+}
+
+/// Converts sorted spans into ranges whose columns count grapheme clusters, as an editor shows them.
+fn grapheme_ranges(
+    line_index: &tombi_text::LineIndex,
+    spans: &[tombi_text::Span],
+) -> Vec<tombi_text::Range> {
+    let mut cursor = line_index.cursor(tombi_text::EncodingKind::GraphemeCluster);
+    spans.iter().map(|span| cursor.range(*span)).collect()
 }
 
 /// `{ "line": _, "column": _ }` of a 1-based position.
@@ -362,7 +382,7 @@ pub(super) fn to_slash(path: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
-    use tombi_text::{Position, Range};
+    use tombi_text::{EncodingKind, Position, Range};
 
     use super::json::JsonFormat;
     use super::sarif::SarifFormat;
@@ -404,14 +424,36 @@ mod tests {
         Range::new(Position::new(sl, sc), Position::new(el, ec))
     }
 
+    /// The span of `source` at the range whose columns count grapheme clusters.
+    /// The line index of `source`, as the parser builds it.
+    pub(super) fn index(source: &str) -> Option<Arc<LineIndex>> {
+        Some(Arc::clone(tombi_parser::parse(source).line_index()))
+    }
+
+    pub(super) fn span(source: &str, start: (u32, u32), end: (u32, u32)) -> tombi_text::Span {
+        index(source)
+            .unwrap()
+            .span(range(start, end), EncodingKind::GraphemeCluster)
+    }
+
+    const LINT_SOURCE: &str = "key\nb = 1\n";
+
     /// A file with an error at 1:1-1:4 and a warning at 2:1-2:2.
     pub(super) fn lint_file(path: &str) -> FileReport {
         FileReport {
             path: Some(PathBuf::from(path)),
-            source: "key\nb = 1\n".to_owned(),
+            line_index: index(LINT_SOURCE),
             diagnostics: vec![
-                Diagnostic::new_warning("unused key", "key-unused", range((1, 0), (1, 1))),
-                Diagnostic::new_error("expected '='", "expected-equal", range((0, 0), (0, 3))),
+                Diagnostic::new_warning(
+                    "unused key",
+                    "key-unused",
+                    span(LINT_SOURCE, (1, 0), (1, 1)),
+                ),
+                Diagnostic::new_error(
+                    "expected '='",
+                    "expected-equal",
+                    span(LINT_SOURCE, (0, 0), (0, 3)),
+                ),
             ],
             problem: None,
         }
@@ -420,7 +462,7 @@ mod tests {
     pub(super) fn clean_file(path: &str) -> FileReport {
         FileReport {
             path: Some(PathBuf::from(path)),
-            source: "a = 1\n".to_owned(),
+            line_index: index("a = 1\n"),
             ..Default::default()
         }
     }
@@ -428,7 +470,7 @@ mod tests {
     pub(super) fn not_formatted_file(path: &str) -> FileReport {
         FileReport {
             path: Some(PathBuf::from(path)),
-            source: "a=1\n".to_owned(),
+            line_index: index("a=1\n"),
             problem: Some(FileProblem::NotFormatted),
             ..Default::default()
         }
@@ -439,8 +481,14 @@ mod tests {
         let mut reporter = CollectingReporter::<F>::default();
         let file = FileReport::new(
             Some(PathBuf::from("a.toml")),
-            source.to_owned(),
-            vec![Diagnostic::new_error("message", "code", range)],
+            index(source),
+            vec![Diagnostic::new_error(
+                "message",
+                "code",
+                index(source)
+                    .unwrap()
+                    .span(range, EncodingKind::GraphemeCluster),
+            )],
         );
         reporter.record(file, &mut std::io::sink()).unwrap();
         let mut output = Vec::new();
@@ -551,10 +599,18 @@ mod tests {
         let root = test_root();
         let files = vec![FileReport {
             path: Some(PathBuf::from("a.toml")),
-            source: "a = 1\na = 2\n".to_owned(),
+            line_index: index("a = 1\na = 2\n"),
             diagnostics: vec![
-                Diagnostic::new_error("duplicate key", "key-duplicated", range((1, 0), (1, 1))),
-                Diagnostic::new_error("duplicate key", "key-duplicated", range((0, 0), (0, 1))),
+                Diagnostic::new_error(
+                    "duplicate key",
+                    "key-duplicated",
+                    span("a = 1\na = 2\n", (1, 0), (1, 1)),
+                ),
+                Diagnostic::new_error(
+                    "duplicate key",
+                    "key-duplicated",
+                    span("a = 1\na = 2\n", (0, 0), (0, 1)),
+                ),
             ],
             problem: None,
         }];

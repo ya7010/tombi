@@ -27,6 +27,7 @@ impl std::fmt::Display for CodeActionRefactorRewriteName {
 pub fn dot_keys_to_inline_table_code_action(
     text_document_uri: &tombi_uri::Uri,
     line_index: &tombi_text::LineIndex,
+    encoding: tombi_text::EncodingKind,
     _root: &tombi_ast_syntax::Root,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
@@ -65,11 +66,11 @@ pub fn dot_keys_to_inline_table_code_action(
                         },
                         edits: vec![
                             OneOf::Left(TextEdit {
-                                range: tombi_text::Range {
-                                    start: parent_key_context.range.start,
-                                    end: value.range().start,
-                                }
-                                .into_lsp(line_index),
+                                range: tombi_text::Span::new(
+                                    parent_key_context.span.start,
+                                    value.span().start,
+                                )
+                                .into_lsp(line_index, encoding),
                                 new_text: format!(
                                     "{} = {{ {}{}",
                                     parent_key,
@@ -82,8 +83,8 @@ pub fn dot_keys_to_inline_table_code_action(
                                 ),
                             }),
                             OneOf::Left(TextEdit {
-                                range: tombi_text::Range::at(value.symbol_range().end)
-                                    .into_lsp(line_index),
+                                range: tombi_text::Span::empty(value.symbol_span().end)
+                                    .into_lsp(line_index, encoding),
                                 new_text: " }".to_string(),
                             }),
                         ],
@@ -100,6 +101,7 @@ pub fn dot_keys_to_inline_table_code_action(
 pub fn inline_table_to_dot_keys_code_action(
     text_document_uri: &tombi_uri::Uri,
     line_index: &tombi_text::LineIndex,
+    encoding: tombi_text::EncodingKind,
     root: &tombi_ast_syntax::Root,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
@@ -138,19 +140,19 @@ pub fn inline_table_to_dot_keys_code_action(
                         },
                         edits: vec![
                             OneOf::Left(TextEdit {
-                                range: tombi_text::Range::new(
-                                    parent_context.range.end,
-                                    key.range().start,
+                                range: tombi_text::Span::new(
+                                    parent_context.span.end,
+                                    key.span().start,
                                 )
-                                .into_lsp(line_index),
+                                .into_lsp(line_index, encoding),
                                 new_text: ".".to_string(),
                             }),
                             OneOf::Left(TextEdit {
-                                range: tombi_text::Range::new(
-                                    value.range().end,
-                                    table.symbol_range().end,
+                                range: tombi_text::Span::new(
+                                    value.span().end,
+                                    table.symbol_span().end,
                                 )
-                                .into_lsp(line_index),
+                                .into_lsp(line_index, encoding),
                                 new_text: "".to_string(),
                             }),
                         ],
@@ -168,6 +170,6 @@ fn get_ast_inline_table_node(
     root: &tombi_ast_syntax::Root,
     table: &tombi_document_tree_syntax::Table,
 ) -> Option<tombi_ast_syntax::InlineTable> {
-    let target_range = table.range();
-    root.inline_table_at_range(target_range)
+    let target_span = table.span();
+    root.inline_table_at_span(target_span)
 }

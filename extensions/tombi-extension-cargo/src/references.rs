@@ -138,7 +138,10 @@ fn collect_workspace_dependency_references(
         if dependency_package_name(dependency_key.value(), dependency_value) == package_name {
             locations.push(tombi_extension::Location {
                 uri: uri.clone(),
-                range: dependency_key.unquoted_range(),
+                span: Some(tombi_extension::LocatedSpan {
+                    span: dependency_key.unquoted_span(),
+                    line_index: std::sync::Arc::clone(workspace_document_tree.line_index()),
+                }),
             });
         }
     }
@@ -158,7 +161,13 @@ fn collect_member_dependency_references(
         if let Some((_, Value::Table(dependencies))) =
             dig_keys(crate_document_tree, &[dependency_kind])
         {
-            collect_dependency_table_references(locations, &uri, dependencies, package_name);
+            collect_dependency_table_references(
+                locations,
+                &uri,
+                crate_document_tree.line_index(),
+                dependencies,
+                package_name,
+            );
         }
     }
 
@@ -173,7 +182,13 @@ fn collect_member_dependency_references(
                 else {
                     continue;
                 };
-                collect_dependency_table_references(locations, &uri, dependencies, package_name);
+                collect_dependency_table_references(
+                    locations,
+                    &uri,
+                    crate_document_tree.line_index(),
+                    dependencies,
+                    package_name,
+                );
             }
         }
     }
@@ -182,6 +197,7 @@ fn collect_member_dependency_references(
 fn collect_dependency_table_references(
     locations: &mut Vec<tombi_extension::Location>,
     uri: &tombi_uri::Uri,
+    line_index: &std::sync::Arc<tombi_text::LineIndex>,
     dependencies: &tombi_document_tree_syntax::Table,
     package_name: &str,
 ) {
@@ -189,7 +205,10 @@ fn collect_dependency_table_references(
         if dependency_package_name(dependency_key.value(), dependency_value) == package_name {
             locations.push(tombi_extension::Location {
                 uri: uri.clone(),
-                range: dependency_key.unquoted_range(),
+                span: Some(tombi_extension::LocatedSpan {
+                    span: dependency_key.unquoted_span(),
+                    line_index: std::sync::Arc::clone(line_index),
+                }),
             });
         }
     }

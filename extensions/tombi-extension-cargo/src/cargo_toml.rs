@@ -6,7 +6,9 @@ use tombi_document_tree_syntax::TryIntoDocumentTree;
 #[derive(Debug, Clone)]
 pub(crate) struct CrateLocation {
     pub(crate) cargo_toml_path: std::path::PathBuf,
-    pub(crate) package_name_key_range: tombi_text::Range,
+    pub(crate) package_name_key_span: tombi_text::Span,
+    /// The line index of the manifest, built while parsing it.
+    pub(crate) line_index: std::sync::Arc<tombi_text::LineIndex>,
 }
 
 impl From<CrateLocation> for Option<tombi_extension::Location> {
@@ -17,7 +19,10 @@ impl From<CrateLocation> for Option<tombi_extension::Location> {
 
         Some(tombi_extension::Location {
             uri,
-            range: crate_location.package_name_key_range,
+            span: Some(tombi_extension::LocatedSpan {
+                span: crate_location.package_name_key_span,
+                line_index: crate_location.line_index,
+            }),
         })
     }
 }

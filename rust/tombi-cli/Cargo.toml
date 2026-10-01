@@ -34,6 +34,7 @@ tombi-fs.workspace = true
 tombi-glob.workspace = true
 tombi-linter.workspace = true
 tombi-lsp.workspace = true
+tombi-parser.workspace = true
 tombi-schema-store = { workspace = true, features = ["native"] }
 tombi-text = { workspace = true, features = ["lsp"] }
 tower.workspace = true

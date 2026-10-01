@@ -1,5 +1,4 @@
-use itertools::Itertools;
-use tombi_ast_syntax::{AstToken, SchemaDocumentCommentDirective};
+use tombi_ast_syntax::{AstNode, AstToken, SchemaDocumentCommentDirective};
 use tombi_comment_directive::{
     TOMBI_COMMENT_DIRECTIVE_TOML_VERSION, TombiCommentDirectiveImpl,
     document::TombiDocumentDirectiveContent,
@@ -21,7 +20,7 @@ use super::{CompletionContent, CompletionEdit};
 pub async fn get_document_comment_directive_completion_contents(
     root: &tombi_ast_syntax::Root,
     comment: &tombi_ast_syntax::Comment,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     text_document_uri: &Uri,
 ) -> Option<Vec<CompletionContent>> {
     let comment_text = comment.syntax().text();
@@ -30,23 +29,22 @@ pub async fn get_document_comment_directive_completion_contents(
             .chars()
             .all(|c| c.is_whitespace())
     {
-        let comment_range = comment.syntax().range();
-        let mut prefix_range = comment_range;
-        prefix_range.end.column = comment_range.start.column + 1 + colon_pos as u32;
-
+        let comment_span = comment.syntax().span();
         let directive_len = comment_text[colon_pos + 1..]
             .chars()
             .take_while(|c| !c.is_whitespace())
-            .collect_vec()
-            .len();
-        let mut directive_range = prefix_range;
-        directive_range.end.column += directive_len as u32;
+            .map(char::len_utf8)
+            .sum::<usize>();
+        let directive_span = tombi_text::Span::new(
+            comment_span.start,
+            comment_span.start + (1 + colon_pos + directive_len) as u32,
+        );
 
-        if directive_range.contains(position) {
+        if directive_span.contains_inclusive(offset) {
             return Some(document_comment_directive_completion_contents(
                 root,
-                position,
-                comment_range,
+                offset,
+                comment_span,
                 text_document_uri,
             ));
         }
@@ -54,15 +52,15 @@ pub async fn get_document_comment_directive_completion_contents(
         // Check if this is a schema directive and provide file path completion
         if let Some(source_path) = text_document_uri.to_file_path().ok().as_deref()
             && let Some(schema_directive) = comment.get_document_schema_directive(Some(source_path))
-            && let Some((schema_text, schema_range)) =
-                get_schema_text_and_range(comment_text, &schema_directive)
+            && let Some((schema_text, schema_span)) =
+                get_schema_text_and_span(comment, &schema_directive)
         {
-            // Check if position is in the schema value part
-            if schema_range.contains(position)
+            // Check if offset is in the schema value part
+            if schema_span.contains_inclusive(offset)
                 && let Some(base_dir) = source_path.parent()
             {
                 let completions =
-                    get_file_path_completions(base_dir, schema_text, schema_range, Some(&["json"]));
+                    get_file_path_completions(base_dir, schema_text, schema_span, Some(&["json"]));
                 if !completions.is_empty() {
                     return Some(completions);
                 }
@@ -71,7 +69,7 @@ pub async fn get_document_comment_directive_completion_contents(
 
         if let Some(comment_directive_context) = comment
             .get_tombi_document_directive()
-            .and_then(|directive| directive.get_context(position))
+            .and_then(|directive| directive.get_context(offset))
             && let Some(completions) = get_tombi_comment_directive_content_completion_contents(
                 comment_directive_context,
                 TombiDocumentDirectiveContent::comment_directive_schema_url(),
@@ -87,8 +85,8 @@ pub async fn get_document_comment_directive_completion_contents(
 
 fn document_comment_directive_completion_contents(
     root: &tombi_ast_syntax::Root,
-    position: tombi_text::Position,
-    comment_range: tombi_text::Range,
+    offset: tombi_text::Offset,
+    comment_span: tombi_text::Span,
     text_document_uri: &Uri,
 ) -> Vec<CompletionContent> {
     let mut completion_contents = Vec::new();
@@ -104,18 +102,14 @@ fn document_comment_directive_completion_contents(
             "schema",
             DOCUMENT_SCHEMA_DIRECTIVE_TITLE,
             DOCUMENT_SCHEMA_DIRECTIVE_DESCRIPTION,
-            CompletionEdit::new_schema_comment_directive(
-                position,
-                comment_range,
-                text_document_uri,
-            ),
+            CompletionEdit::new_schema_comment_directive(offset, comment_span, text_document_uri),
         ));
     }
     completion_contents.push(CompletionContent::new_comment_directive(
         "tombi",
         DOCUMENT_TOMBI_DIRECTIVE_TITLE,
         DOCUMENT_TOMBI_DIRECTIVE_DESCRIPTION,
-        CompletionEdit::new_comment_directive("tombi", position, comment_range),
+        CompletionEdit::new_comment_directive("tombi", offset, comment_span),
     ));
 
     completion_contents
@@ -127,8 +121,8 @@ pub async fn get_tombi_comment_directive_content_completion_contents(
 ) -> Option<Vec<CompletionContent>> {
     let CommentDirectiveContext::Content {
         content,
-        content_range,
-        position_in_content,
+        content_span,
+        offset_in_content,
     } = comment_directive_context
     else {
         return None;
@@ -138,11 +132,13 @@ pub async fn get_tombi_comment_directive_content_completion_contents(
     let (root, _) = tombi_parser::parse(&content).into_root_and_errors();
 
     let Some((keys, completion_hint)) =
-        extract_keys_and_hint(&root, position_in_content, toml_version, None)
+        extract_keys_and_hint(&root, offset_in_content, toml_version, None)
     else {
         return Some(Vec::new());
     };
 
+    // The positions are in the content of the directive, which is parsed as a separate document.
+    let line_index = std::sync::Arc::clone(root.syntax().line_index());
     let document_tree = root.into_document_tree_and_errors(toml_version).tree;
 
     let schema_store = tombi_comment_directive_store::schema_store().await;
@@ -166,7 +162,7 @@ pub async fn get_tombi_comment_directive_content_completion_contents(
     Some(
         find_completion_contents(
             &document_tree,
-            position_in_content,
+            crate::CursorPosition::new(offset_in_content, &line_index),
             &keys,
             &schema_context,
             completion_hint,
@@ -175,24 +171,24 @@ pub async fn get_tombi_comment_directive_content_completion_contents(
         .into_iter()
         .map(|mut content| {
             content.in_comment = true;
-            content.with_position(content_range.start)
+            content.with_offset(content_span.start)
         })
         .collect(),
     )
 }
 
-fn get_schema_text_and_range<'a>(
-    comment_text: &'a str,
+fn get_schema_text_and_span<'a>(
+    comment: &'a tombi_ast_syntax::Comment,
     schema_directive: &'a SchemaDocumentCommentDirective,
-) -> Option<(&'a str, tombi_text::Range)> {
+) -> Option<(&'a str, tombi_text::Span)> {
     let schema_text = match &schema_directive.uri {
         Ok(schema_uri) if matches!(schema_uri.scheme(), "file") => {
-            &comment_text[schema_directive.uri_range.start.column as usize
-                ..schema_directive.uri_range.end.column as usize]
+            let comment_start = comment.syntax().span().start;
+            &comment.syntax().text()[schema_directive.uri_span - comment_start]
         }
         Err(schema_path) => schema_path,
         Ok(_) => return None,
     };
 
-    Some((schema_text, schema_directive.uri_range))
+    Some((schema_text, schema_directive.uri_span))
 }

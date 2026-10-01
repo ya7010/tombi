@@ -43,7 +43,7 @@ pub struct WorkspaceEdit {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DocumentEdits {
-    pub line_index: tombi_text::LineIndex,
+    pub line_index: std::sync::Arc<tombi_text::LineIndex>,
     pub edits: Vec<crate::TextEdit>,
 }
 
@@ -55,7 +55,7 @@ pub enum DocumentChanges {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextDocumentEdit {
     pub text_document: OptionalVersionedTextDocumentIdentifier,
-    pub line_index: tombi_text::LineIndex,
+    pub line_index: std::sync::Arc<tombi_text::LineIndex>,
     pub edits: Vec<OneOf<crate::TextEdit, AnnotatedTextEdit>>,
 }
 

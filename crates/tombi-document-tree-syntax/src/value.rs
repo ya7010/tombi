@@ -36,41 +36,41 @@ pub enum Value {
     LocalTime(LocalTime),
     Array(Array),
     Table(Table),
-    Incomplete { range: tombi_text::Range },
+    Incomplete { span: tombi_text::Span },
 }
 
 impl Value {
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
+    pub fn span(&self) -> tombi_text::Span {
         match self {
-            Value::Boolean(value) => value.range(),
-            Value::Integer(value) => value.range(),
-            Value::Float(value) => value.range(),
-            Value::String(value) => value.range(),
-            Value::OffsetDateTime(value) => value.range(),
-            Value::LocalDateTime(value) => value.range(),
-            Value::LocalDate(value) => value.range(),
-            Value::LocalTime(value) => value.range(),
-            Value::Array(value) => value.range(),
-            Value::Table(value) => value.range(),
-            Value::Incomplete { range } => *range,
+            Value::Boolean(value) => value.span(),
+            Value::Integer(value) => value.span(),
+            Value::Float(value) => value.span(),
+            Value::String(value) => value.span(),
+            Value::OffsetDateTime(value) => value.span(),
+            Value::LocalDateTime(value) => value.span(),
+            Value::LocalDate(value) => value.span(),
+            Value::LocalTime(value) => value.span(),
+            Value::Array(value) => value.span(),
+            Value::Table(value) => value.span(),
+            Value::Incomplete { span } => *span,
         }
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> tombi_text::Range {
+    pub fn symbol_span(&self) -> tombi_text::Span {
         match self {
-            Value::Boolean(value) => value.range(),
-            Value::Integer(value) => value.range(),
-            Value::Float(value) => value.range(),
-            Value::String(value) => value.range(),
-            Value::OffsetDateTime(value) => value.range(),
-            Value::LocalDateTime(value) => value.range(),
-            Value::LocalDate(value) => value.range(),
-            Value::LocalTime(value) => value.range(),
-            Value::Array(value) => value.symbol_range(),
-            Value::Table(value) => value.symbol_range(),
-            Value::Incomplete { range } => *range,
+            Value::Boolean(value) => value.span(),
+            Value::Integer(value) => value.span(),
+            Value::Float(value) => value.span(),
+            Value::String(value) => value.span(),
+            Value::OffsetDateTime(value) => value.span(),
+            Value::LocalDateTime(value) => value.span(),
+            Value::LocalDate(value) => value.span(),
+            Value::LocalTime(value) => value.span(),
+            Value::Array(value) => value.symbol_span(),
+            Value::Table(value) => value.symbol_span(),
+            Value::Incomplete { span } => *span,
         }
     }
 
@@ -177,10 +177,11 @@ impl Value {
         }
     }
 
-    pub fn contains(&self, position: tombi_text::Position) -> bool {
-        self.range().contains(position)
+    pub fn contains(&self, offset: tombi_text::Offset) -> bool {
+        self.span().contains_inclusive(offset)
             || self.comment_directives().is_some_and(|mut directives| {
-                directives.any(|comment_directive| comment_directive.range().contains(position))
+                directives
+                    .any(|comment_directive| comment_directive.span().contains_inclusive(offset))
             })
     }
 }
@@ -220,8 +221,8 @@ impl crate::ValueImpl for Value {
         }
     }
 
-    fn range(&self) -> tombi_text::Range {
-        self.range()
+    fn span(&self) -> tombi_text::Span {
+        self.span()
     }
 }
 

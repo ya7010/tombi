@@ -8,7 +8,7 @@ use tombi_document_tree::KeyKind;
 pub struct Key {
     kind: KeyKind,
     pub(crate) value: crate::DocumentText,
-    range: tombi_text::Range,
+    span: tombi_text::Span,
     pub(crate) comment_directives: Option<Vec<TombiValueCommentDirective>>,
 }
 
@@ -31,19 +31,19 @@ impl Key {
     }
 
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.range
+    pub fn span(&self) -> tombi_text::Span {
+        self.span
     }
 
     #[inline]
-    pub fn unquoted_range(&self) -> tombi_text::Range {
+    pub fn unquoted_span(&self) -> tombi_text::Span {
         match self.kind {
-            KeyKind::BareKey => self.range,
+            KeyKind::BareKey => self.span,
             KeyKind::BasicString | KeyKind::LiteralString => {
-                let mut range = self.range;
-                range.start.column += 1;
-                range.end.column -= 1;
-                range
+                let mut span = self.span;
+                span.start += 1;
+                span.end -= 1;
+                span
             }
         }
     }
@@ -111,11 +111,11 @@ impl IntoDocumentTreeWithContext<Option<Key>> for tombi_ast_syntax::Key {
         self,
         context: &crate::DocumentTreeContext,
     ) -> crate::DocumentTreeAndErrors<Option<Key>> {
-        let range = self.syntax().range();
+        let span = self.syntax().span();
         let Some(token) = self.token() else {
             return DocumentTreeAndErrors {
                 tree: None,
-                errors: vec![crate::Error::IncompleteNode { range }],
+                errors: vec![crate::Error::IncompleteNode { span }],
             };
         };
 
@@ -126,7 +126,7 @@ impl IntoDocumentTreeWithContext<Option<Key>> for tombi_ast_syntax::Key {
                 crate::DocumentText::new_raw(syntax, &context.decoded_text),
                 vec![crate::Error::ParseStringError {
                     error,
-                    range: self.range(),
+                    span: self.span(),
                 }],
             ),
         };
@@ -138,7 +138,7 @@ impl IntoDocumentTreeWithContext<Option<Key>> for tombi_ast_syntax::Key {
                 tombi_ast_syntax::Key::LiteralString(_) => KeyKind::LiteralString,
             },
             value,
-            range: token.range(),
+            span: token.span(),
             comment_directives: None,
         };
 
@@ -176,8 +176,8 @@ impl ValueImpl for Key {
         ValueType::String
     }
 
-    fn range(&self) -> tombi_text::Range {
-        self.range
+    fn span(&self) -> tombi_text::Span {
+        self.span
     }
 }
 

@@ -11,8 +11,11 @@ impl ReportFormat for JunitFormat {
     type Range = tombi_text::Range;
 
     /// Columns count grapheme clusters, like the output of `pretty`.
-    fn convert_ranges(_source: &str, ranges: &[tombi_text::Range]) -> Vec<tombi_text::Range> {
-        ranges.to_vec()
+    fn convert_spans(
+        line_index: &tombi_text::LineIndex,
+        spans: &[tombi_text::Span],
+    ) -> Vec<tombi_text::Range> {
+        super::grapheme_ranges(line_index, spans)
     }
 
     /// Renders a JUnit XML report.
@@ -168,7 +171,7 @@ a.toml:2:1: warning [key-unused] unused key</failure>
         fn junit_escapes_xml(
             JunitFormat,
             [FileReport {
-                diagnostics: vec![Diagnostic::new_warning("<\"&\u{1b}\">", "code", range((0, 0), (0, 1)))],
+                diagnostics: vec![Diagnostic::new_warning("<\"&\u{1b}\">", "code", span("a = 1\n", (0, 0), (0, 1)))],
                 ..clean_file("a&b.toml")
             }],
         ) -> Ok("<?xml version=\"1.0\" encoding=\"UTF-8\"?>

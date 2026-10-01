@@ -15,7 +15,7 @@ impl AppendSemanticTokens for tombi_ast_syntax::KeyValue {
         }
 
         if let Some(token) = self.eq() {
-            builder.add_token(TokenType::OPERATOR, token.range())
+            builder.add_token(TokenType::OPERATOR, token.span())
         }
 
         if let Some(value) = self.value() {

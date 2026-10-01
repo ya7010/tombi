@@ -28,7 +28,11 @@ fn parse_syntax<P: parse::Parse>(
 
     let (events, synthetic_tokens, errs) = p.finish();
 
-    let syntax = build_syntax_tape(source, &lexed.tokens, &synthetic_tokens, &events);
+    let line_index = std::sync::Arc::new(tombi_text::LineIndex::from_line_starts(
+        std::sync::Arc::new(source.into()),
+        lexed.line_starts,
+    ));
+    let syntax = build_syntax_tape(line_index, &lexed.tokens, &synthetic_tokens, &events);
 
     let mut errors = lexed.errors.into_iter().map(Into::into).collect_vec();
 
@@ -38,12 +42,12 @@ fn parse_syntax<P: parse::Parse>(
 }
 
 fn build_syntax_tape(
-    source: &str,
+    line_index: std::sync::Arc<tombi_text::LineIndex>,
     tokens: &[tombi_lexer::Token],
     synthetic_tokens: &[tombi_lexer::Token],
     events: &[crate::event::Event],
 ) -> SyntaxNode {
-    let mut builder = tombi_ast_syntax::SyntaxTreeBuilder::with_capacity(source, events.len());
+    let mut builder = tombi_ast_syntax::SyntaxTreeBuilder::with_capacity(line_index, events.len());
     let mut offset = tombi_text::Offset::default();
 
     builder::intersperse_trivia(tokens, synthetic_tokens, events, |step| match step {
@@ -260,13 +264,22 @@ macro_rules! test_parser {
         fn $name() {
             tombi_test_lib::init_log();
 
-            let p = $crate::parse(textwrap::dedent($source).trim());
+            let source = textwrap::dedent($source);
+            let source = source.trim();
+            let p = $crate::parse(source);
 
             log::debug!("root: {:#?}", p.root());
 
+            let line_index = p.line_index();
             pretty_assertions::assert_eq!(
-                p.errors,
-                vec![$($crate::Error::new($error_kind, (($line1, $column1), ($line2, $column2)).into())),*]
+                p.errors
+                    .iter()
+                    .map(|error| (
+                        error.kind(),
+                        line_index.range(error.span(), tombi_text::EncodingKind::GraphemeCluster)
+                    ))
+                    .collect::<Vec<_>>(),
+                vec![$(($error_kind, tombi_text::Range::from((($line1, $column1), ($line2, $column2))))),*]
             );
         }
     };

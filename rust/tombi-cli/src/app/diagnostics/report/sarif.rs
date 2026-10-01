@@ -3,7 +3,7 @@ use std::path::Path;
 
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use serde_json::json;
-use tombi_text::{EncodingKind, IntoLsp, LineIndex};
+use tombi_text::{EncodingKind, LineIndex};
 
 use super::{Report, ReportFormat, level_str, to_slash};
 
@@ -41,12 +41,9 @@ impl ReportFormat for SarifFormat {
     /// Columns count UTF-16 code units, as declared by `columnKind: utf16CodeUnits`.
     type Range = tower_lsp::lsp_types::Range;
 
-    fn convert_ranges(source: &str, ranges: &[tombi_text::Range]) -> Vec<Self::Range> {
-        let line_index = LineIndex::new(source, EncodingKind::Utf16);
-        ranges
-            .iter()
-            .map(|range| (*range).into_lsp(&line_index))
-            .collect()
+    fn convert_spans(line_index: &LineIndex, spans: &[tombi_text::Span]) -> Vec<Self::Range> {
+        let mut cursor = line_index.cursor(EncodingKind::Utf16);
+        spans.iter().map(|span| cursor.lsp_range(*span)).collect()
     }
 
     /// Renders a SARIF 2.1.0 report.
@@ -340,11 +337,11 @@ mod tests {
     fn sarif_columns_are_utf16() {
         let root = test_root();
         let files = vec![FileReport {
-            source: "\"😀\" = 1\n".to_owned(),
+            line_index: index("\"😀\" = 1\n"),
             diagnostics: vec![Diagnostic::new_error(
                 "error",
                 "code",
-                range((0, 3), (0, 4)),
+                span("\"😀\" = 1\n", (0, 3), (0, 4)),
             )],
             ..clean_file("a.toml")
         }];
@@ -384,8 +381,12 @@ mod tests {
                 let (start, end) = $range;
                 let file = FileReport::new(
                     Some(std::path::PathBuf::from("a.toml")),
-                    $source.to_owned(),
-                    vec![Diagnostic::new_error("message", "code", range(start, end))],
+                    index($source),
+                    vec![Diagnostic::new_error(
+                        "message",
+                        "code",
+                        span($source, start, end),
+                    )],
                 );
                 let range = CollectedFile::new::<SarifFormat>(file).findings[0]
                     .range

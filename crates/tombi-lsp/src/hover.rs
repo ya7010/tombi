@@ -28,7 +28,7 @@ pub(super) enum CompositeKind {
 
 pub async fn get_hover_content(
     tree: &tombi_document_tree_syntax::DocumentTree,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     keys: &[tombi_document_tree_syntax::Key],
     schema_context: &tombi_schema_store::SchemaContext<'_>,
 ) -> Option<HoverContent> {
@@ -37,12 +37,12 @@ pub async fn get_hover_content(
         Some(document_schema) => {
             let current_schema = document_schema.as_current_schema();
             table
-                .get_hover_content(position, keys, &[], current_schema.as_ref(), schema_context)
+                .get_hover_content(offset, keys, &[], current_schema.as_ref(), schema_context)
                 .await
         }
         None => {
             table
-                .get_hover_content(position, keys, &[], None, schema_context)
+                .get_hover_content(offset, keys, &[], None, schema_context)
                 .await
         }
     }
@@ -51,7 +51,7 @@ pub async fn get_hover_content(
 pub(super) trait GetHoverContent {
     fn get_hover_content<'a: 'b, 'b>(
         &'a self,
-        position: tombi_text::Position,
+        offset: tombi_text::Offset,
         keys: &'a [tombi_document_tree_syntax::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
@@ -144,7 +144,7 @@ pub(super) fn merge_hover_value_content(
     base.description = base.description.or(adjacent.description);
     base.constraints = merge_constraints(base.constraints, adjacent.constraints);
     base.schema_document_uri = base.schema_document_uri.or(adjacent.schema_document_uri);
-    base.range = base.range.or(adjacent.range);
+    base.span = base.span.or(adjacent.span);
     base
 }
 
@@ -193,10 +193,10 @@ pub(super) fn first_most_specific_hover_value_content(
         .collect_vec();
     let mut selected = None;
     let mut schema_document_uri = None;
-    let mut range = None;
+    let mut span = None;
     for mut content in contents {
         schema_document_uri = schema_document_uri.or_else(|| content.schema_document_uri.take());
-        range = range.or(content.range);
+        span = span.or(content.span);
         selected.get_or_insert(content);
     }
 
@@ -205,7 +205,7 @@ pub(super) fn first_most_specific_hover_value_content(
     selected.description = None;
     selected.constraints = None;
     selected.schema_document_uri = schema_document_uri;
-    selected.range = range;
+    selected.span = span;
     if value_types.len() > 1 {
         selected.value_type = match applicator {
             CompositeKind::Any => ValueType::AnyOf(value_types.into_iter().collect()),
@@ -273,7 +273,7 @@ pub(super) async fn merge_adjacent_hover_content<
         + std::fmt::Debug,
 >(
     value: &T,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     keys: &[tombi_document_tree_syntax::Key],
     accessors: &[Accessor],
     current_schema: Option<&CurrentSchema<'_>>,
@@ -294,7 +294,7 @@ pub(super) async fn merge_adjacent_hover_content<
             hover_content,
             one_of::get_one_of_hover_content(
                 value,
-                position,
+                offset,
                 keys,
                 accessors,
                 one_of_schema,
@@ -309,7 +309,7 @@ pub(super) async fn merge_adjacent_hover_content<
             hover_content,
             any_of::get_any_of_hover_content(
                 value,
-                position,
+                offset,
                 keys,
                 accessors,
                 any_of_schema,
@@ -324,7 +324,7 @@ pub(super) async fn merge_adjacent_hover_content<
             hover_content,
             all_of::get_all_of_hover_content(
                 value,
-                position,
+                offset,
                 keys,
                 accessors,
                 all_of_schema,
@@ -346,11 +346,15 @@ pub enum HoverContent {
 }
 
 impl FromLsp<HoverContent> for tower_lsp::lsp_types::Hover {
-    fn from_lsp(source: HoverContent, line_index: &tombi_text::LineIndex) -> Self {
+    fn from_lsp(
+        source: HoverContent,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self {
         match source {
-            HoverContent::Value(content) => content.into_lsp(line_index),
-            HoverContent::Directive(content) => content.into_lsp(line_index),
-            HoverContent::DirectiveContent(content) => content.into_lsp(line_index),
+            HoverContent::Value(content) => content.into_lsp(line_index, encoding),
+            HoverContent::Directive(content) => content.into_lsp(line_index, encoding),
+            HoverContent::DirectiveContent(content) => content.into_lsp(line_index, encoding),
         }
     }
 }
@@ -359,11 +363,15 @@ impl FromLsp<HoverContent> for tower_lsp::lsp_types::Hover {
 pub struct HoverDirectiveContent {
     pub title: String,
     pub description: String,
-    pub range: tombi_text::Range,
+    pub span: tombi_text::Span,
 }
 
 impl FromLsp<HoverDirectiveContent> for tower_lsp::lsp_types::Hover {
-    fn from_lsp(source: HoverDirectiveContent, line_index: &tombi_text::LineIndex) -> Self {
+    fn from_lsp(
+        source: HoverDirectiveContent,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self {
         tower_lsp::lsp_types::Hover {
             contents: tower_lsp::lsp_types::HoverContents::Markup(
                 tower_lsp::lsp_types::MarkupContent {
@@ -371,7 +379,7 @@ impl FromLsp<HoverDirectiveContent> for tower_lsp::lsp_types::Hover {
                     value: format!("#### {}\n\n{}", source.title, source.description),
                 },
             ),
-            range: Some(source.range.into_lsp(line_index)),
+            range: Some(source.span.into_lsp(line_index, encoding)),
         }
     }
 }
@@ -384,7 +392,7 @@ pub struct HoverValueContent {
     pub value_type: ValueType,
     pub constraints: Option<ValueConstraints>,
     pub schema_document_uri: Option<SchemaUri>,
-    pub range: Option<tombi_text::Range>,
+    pub span: Option<tombi_text::Span>,
     pub(super) schema_tooltip: Option<SchemaTooltip>,
 }
 
@@ -436,7 +444,7 @@ impl PartialEq for HoverValueContent {
             && self.value_type == other.value_type
             && self.constraints == other.constraints
             && self.schema_tooltip == other.schema_tooltip
-            && self.range == other.range
+            && self.span == other.span
     }
 }
 
@@ -450,7 +458,7 @@ impl std::hash::Hash for HoverValueContent {
         self.value_type.hash(state);
         self.constraints.hash(state);
         self.schema_tooltip.hash(state);
-        self.range.hash(state);
+        self.span.hash(state);
     }
 }
 
@@ -462,7 +470,11 @@ impl std::fmt::Display for HoverValueContent {
 }
 
 impl FromLsp<HoverValueContent> for tower_lsp::lsp_types::Hover {
-    fn from_lsp(source: HoverValueContent, line_index: &tombi_text::LineIndex) -> Self {
+    fn from_lsp(
+        source: HoverValueContent,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self {
         tower_lsp::lsp_types::Hover {
             contents: tower_lsp::lsp_types::HoverContents::Markup(
                 tower_lsp::lsp_types::MarkupContent {
@@ -470,7 +482,7 @@ impl FromLsp<HoverValueContent> for tower_lsp::lsp_types::Hover {
                     value: source.to_string(),
                 },
             ),
-            range: source.range.map(|range| range.into_lsp(line_index)),
+            range: source.span.map(|span| span.into_lsp(line_index, encoding)),
         }
     }
 }

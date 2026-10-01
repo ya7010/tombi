@@ -16,15 +16,15 @@ impl Parse for tombi_ast_syntax::KeyValue {
         tombi_ast_syntax::Keys::parse(p);
 
         if !p.eat(T![=]) {
-            p.error(crate::Error::new(ExpectedEqual, p.current_range()));
+            p.error(crate::Error::new(ExpectedEqual, p.current_span()));
         }
 
         if p.at_ts(TS_LINE_END) {
             p.invalid_token();
-            p.error(crate::Error::new(ExpectedValue, p.current_range()));
+            p.error(crate::Error::new(ExpectedValue, p.current_span()));
         } else if p.at(COMMENT) {
             p.invalid_token();
-            p.error(crate::Error::new(ExpectedValue, p.previous_range()));
+            p.error(crate::Error::new(ExpectedValue, p.previous_span()));
         } else {
             tombi_ast_syntax::Value::parse(p);
         }

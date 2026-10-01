@@ -60,11 +60,7 @@ impl LintedFile {
     fn failed(source_path: Option<&std::path::Path>, error: crate::Error) -> Self {
         Self {
             result: Err(error),
-            report: FileReport::new(
-                source_path.map(ToOwned::to_owned),
-                String::new(),
-                Vec::new(),
-            ),
+            report: FileReport::new(source_path.map(ToOwned::to_owned), None, Vec::new()),
         }
     }
 }
@@ -325,13 +321,15 @@ where
         return LintedFile::failed(source_path, crate::Error::read_failed(source_path, error));
     }
 
+    let parsed = tombi_parser::parse(&source);
+    let line_index = std::sync::Arc::clone(parsed.line_index());
     let diagnostics = tombi_linter::Linter::new(
         toml_version,
         lint_options,
         source_path.map(itertools::Either::Right),
         schema_store,
     )
-    .lint(&source)
+    .lint_parsed(parsed)
     .await
     .err()
     .unwrap_or_default();
@@ -344,6 +342,10 @@ where
 
     LintedFile {
         result: Ok(success),
-        report: FileReport::new(source_path.map(ToOwned::to_owned), source, diagnostics),
+        report: FileReport::new(
+            source_path.map(ToOwned::to_owned),
+            Some(line_index),
+            diagnostics,
+        ),
     }
 }

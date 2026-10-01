@@ -132,7 +132,10 @@ fn dependency_source_declaration_locations(
 
     Ok(vec![tombi_extension::Location {
         uri,
-        range: source_key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: source_key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }])
 }
 
@@ -175,6 +178,9 @@ pub fn get_current_declaration(
 
     Some(tombi_extension::Location {
         uri: pyproject_toml_uri.clone(),
-        range: group_key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: group_key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     })
 }

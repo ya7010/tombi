@@ -183,7 +183,7 @@ pub(crate) fn goto_workspace_member(
         return Ok(None);
     }
 
-    let Some((package_location, member_range)) = find_member_project_toml(
+    let Some((package_location, member_span)) = find_member_project_toml(
         package_name,
         &workspace_pyproject_toml_document_tree,
         &workspace_pyproject_toml_path,
@@ -201,7 +201,10 @@ pub(crate) fn goto_workspace_member(
 
         Ok(Some(tombi_extension::Location {
             uri: package_pyproject_toml_uri,
-            range: package_location.package_name_key_range,
+            span: Some(tombi_extension::LocatedSpan {
+                span: package_location.package_name_key_span,
+                line_index: package_location.line_index,
+            }),
         }))
     } else {
         let Ok(workspace_pyproject_toml_uri) =
@@ -212,7 +215,12 @@ pub(crate) fn goto_workspace_member(
 
         Ok(Some(tombi_extension::Location {
             uri: workspace_pyproject_toml_uri,
-            range: member_range,
+            span: Some(tombi_extension::LocatedSpan {
+                span: member_span,
+                line_index: std::sync::Arc::clone(
+                    workspace_pyproject_toml_document_tree.line_index(),
+                ),
+            }),
         }))
     }
 }
@@ -250,7 +258,8 @@ pub(crate) fn goto_member_pyprojects(
 
         locations.push(PackageLocation {
             pyproject_toml_path,
-            package_name_key_range: package_name.unquoted_range(),
+            package_name_key_span: package_name.unquoted_span(),
+            line_index: std::sync::Arc::clone(member_document_tree.line_index()),
         });
     }
 
@@ -262,7 +271,7 @@ pub(crate) fn find_member_project_toml(
     workspace_pyproject_toml_document_tree: &tombi_document_tree_syntax::DocumentTree,
     workspace_pyproject_toml_path: &std::path::Path,
     toml_version: TomlVersion,
-) -> Option<(PackageLocation, tombi_text::Range)> {
+) -> Option<(PackageLocation, tombi_text::Span)> {
     let workspace_dir_path = workspace_pyproject_toml_path.parent()?;
 
     let member_patterns = extract_member_patterns(workspace_pyproject_toml_document_tree, &[]);
@@ -283,9 +292,12 @@ pub(crate) fn find_member_project_toml(
             return Some((
                 PackageLocation {
                     pyproject_toml_path: package_project_toml_path,
-                    package_name_key_range: name.unquoted_range(),
+                    package_name_key_span: name.unquoted_span(),
+                    line_index: std::sync::Arc::clone(
+                        package_project_toml_document_tree.line_index(),
+                    ),
                 },
-                member_item.unquoted_range(),
+                member_item.unquoted_span(),
             ));
         }
     }

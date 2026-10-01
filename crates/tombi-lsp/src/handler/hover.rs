@@ -57,11 +57,14 @@ pub async fn handle_hover(
     let Some(document_source) = document_sources.get(&text_document_uri) else {
         return Ok(None);
     };
-    let (root, document_tree, toml_version, position) = (
+    let (root, document_tree, toml_version, offset): (_, _, _, tombi_text::Offset) = (
         document_source.ast(),
         document_source.document_tree(),
         document_source.toml_version,
-        position.into_lsp(document_source.line_index()),
+        position.into_lsp(
+            document_source.line_index(),
+            document_source.encoding_kind(),
+        ),
     );
 
     let source_schema = schema_store
@@ -71,20 +74,20 @@ pub async fn handle_hover(
         .flatten();
 
     let source_path = text_document_uri.to_file_path().ok();
-    // Check if position is in a #:tombi comment directive
+    // Check if offset is in a #:tombi comment directive
     if let Some(content) =
-        get_document_comment_directive_hover_content(&root, position, source_path.as_deref()).await
+        get_document_comment_directive_hover_content(&root, offset, source_path.as_deref()).await
     {
         return Ok(Some(content));
     }
 
-    let Some((keys, range)) = get_hover_keys_with_range(&root, position, toml_version).await else {
-        log::debug!("failed to get hover keys with range");
+    let Some((keys, span)) = get_hover_keys_with_span(&root, offset, toml_version).await else {
+        log::debug!("failed to get hover keys with span");
         return Ok(None);
     };
 
-    if keys.is_empty() && range.is_none() {
-        log::debug!("keys and range are empty");
+    if keys.is_empty() && span.is_none() {
+        log::debug!("keys and span are empty");
         return Ok(None);
     }
 
@@ -98,13 +101,12 @@ pub async fn handle_hover(
         strict,
     );
 
-    let mut hover_content =
-        get_hover_content(&document_tree, position, &keys, &schema_context).await;
+    let mut hover_content = get_hover_content(&document_tree, offset, &keys, &schema_context).await;
 
     if let Some(HoverContent::Value(hover_value_content)) = &mut hover_content {
-        hover_value_content.range = range;
+        hover_value_content.span = span;
 
-        let accessors = tombi_document_tree_syntax::get_accessors(&document_tree, &keys, position);
+        let accessors = tombi_document_tree_syntax::get_accessors(&document_tree, &keys, offset);
         let offline = schema_store.offline();
         let cache_options = schema_store.cache_options();
         let tombi_hover_enabled = config
@@ -152,7 +154,7 @@ pub async fn handle_hover(
                 &text_document_uri,
                 &document_tree,
                 &accessors,
-                position,
+                offset,
                 toml_version,
                 offline,
             )
@@ -170,7 +172,7 @@ pub async fn handle_hover(
                     &text_document_uri,
                     &document_tree,
                     &accessors,
-                    position,
+                    offset,
                     toml_version,
                     offline,
                     cache_options,
@@ -189,7 +191,7 @@ pub async fn handle_hover(
                     &text_document_uri,
                     &document_tree,
                     &accessors,
-                    position,
+                    offset,
                     toml_version,
                     offline,
                     cache_options,
@@ -229,42 +231,42 @@ fn apply_hover_text_change(target: &mut Option<String>, change: Option<HoverText
     }
 }
 
-pub async fn get_hover_keys_with_range(
+pub async fn get_hover_keys_with_span(
     root: &tombi_ast_syntax::Root,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     toml_version: tombi_config::TomlVersion,
 ) -> Option<(
     Vec<tombi_document_tree_syntax::Key>,
-    Option<tombi_text::Range>,
+    Option<tombi_text::Span>,
 )> {
     let mut keys_vec = vec![];
-    let mut hover_range = None;
+    let mut hover_span = None;
 
-    for node in root.nodes_at_position(position) {
+    for node in root.nodes_at_offset(offset) {
         if let tombi_ast_syntax::TomlNode::Array(array) = &node {
             let on_leading_comment = array
                 .leading_comments()
-                .any(|comment| comment.syntax().range().contains(position));
+                .any(|comment| comment.syntax().span().contains_inclusive(offset));
             let on_bracket_start_trailing_comment = array
                 .bracket_start_trailing_comment()
-                .is_some_and(|comment| comment.syntax().range().contains(position));
+                .is_some_and(|comment| comment.syntax().span().contains_inclusive(offset));
             let on_trailing_comment = array
                 .trailing_comment()
-                .is_some_and(|comment| comment.syntax().range().contains(position));
+                .is_some_and(|comment| comment.syntax().span().contains_inclusive(offset));
 
-            if hover_range.is_none() && (on_leading_comment || on_bracket_start_trailing_comment) {
-                hover_range = Some(array.syntax().range());
-            } else if hover_range.is_none() && on_trailing_comment {
-                hover_range = Some(key_value_parent_or_self_range(root, array.syntax().range()));
+            if hover_span.is_none() && (on_leading_comment || on_bracket_start_trailing_comment) {
+                hover_span = Some(array.syntax().span());
+            } else if hover_span.is_none() && on_trailing_comment {
+                hover_span = Some(key_value_parent_or_self_span(root, array.syntax().span()));
             } else {
                 for groups in array.value_with_comma_groups() {
                     match groups {
                         DanglingCommentGroupOr::DanglingCommentGroup(comment_group) => {
                             if comment_group
                                 .comments()
-                                .any(|comment| comment.syntax().range().contains(position))
+                                .any(|comment| comment.syntax().span().contains_inclusive(offset))
                             {
-                                hover_range = Some(comment_group.syntax().range());
+                                hover_span = Some(comment_group.syntax().span());
                                 break;
                             }
                         }
@@ -272,15 +274,14 @@ pub async fn get_hover_keys_with_range(
                             for (value_or_key_value, comma) in
                                 value_group.value_or_key_values_with_comma()
                             {
-                                if hover_range.is_none() {
-                                    let Some(range) = array_value_hover_range(
-                                        &value_or_key_value,
-                                        comma.as_ref(),
-                                    ) else {
+                                if hover_span.is_none() {
+                                    let Some(span) =
+                                        array_value_hover_span(&value_or_key_value, comma.as_ref())
+                                    else {
                                         continue;
                                     };
-                                    if range.contains(position) {
-                                        hover_range = Some(range);
+                                    if span.contains_inclusive(offset) {
+                                        hover_span = Some(span);
                                         break;
                                     }
                                 }
@@ -292,20 +293,20 @@ pub async fn get_hover_keys_with_range(
         } else if let tombi_ast_syntax::TomlNode::InlineTable(inline_table) = &node {
             let on_leading_comment = inline_table
                 .leading_comments()
-                .any(|comment| comment.syntax().range().contains(position));
+                .any(|comment| comment.syntax().span().contains_inclusive(offset));
             let on_brace_start_trailing_comment = inline_table
                 .brace_start_trailing_comment()
-                .is_some_and(|comment| comment.syntax().range().contains(position));
+                .is_some_and(|comment| comment.syntax().span().contains_inclusive(offset));
             let on_trailing_comment = inline_table
                 .trailing_comment()
-                .is_some_and(|comment| comment.syntax().range().contains(position));
+                .is_some_and(|comment| comment.syntax().span().contains_inclusive(offset));
 
-            if hover_range.is_none() && on_leading_comment || on_brace_start_trailing_comment {
-                hover_range = Some(inline_table.syntax().range());
-            } else if hover_range.is_none() && on_trailing_comment {
-                hover_range = Some(key_value_parent_or_self_range(
+            if hover_span.is_none() && on_leading_comment || on_brace_start_trailing_comment {
+                hover_span = Some(inline_table.syntax().span());
+            } else if hover_span.is_none() && on_trailing_comment {
+                hover_span = Some(key_value_parent_or_self_span(
                     root,
-                    inline_table.syntax().range(),
+                    inline_table.syntax().span(),
                 ));
             } else {
                 for groups in inline_table.key_value_with_comma_groups() {
@@ -313,23 +314,23 @@ pub async fn get_hover_keys_with_range(
                         DanglingCommentGroupOr::DanglingCommentGroup(comment_group) => {
                             if comment_group
                                 .comments()
-                                .any(|comment| comment.syntax().range().contains(position))
+                                .any(|comment| comment.syntax().span().contains_inclusive(offset))
                             {
-                                hover_range = Some(comment_group.syntax().range());
+                                hover_span = Some(comment_group.syntax().span());
                                 break;
                             }
                         }
                         DanglingCommentGroupOr::ItemGroup(key_value_group) => {
                             for (key_value, comma) in key_value_group.key_values_with_comma() {
-                                if hover_range.is_none() {
-                                    let Some(range) = inline_table_key_value_hover_range(
+                                if hover_span.is_none() {
+                                    let Some(span) = inline_table_key_value_hover_span(
                                         &key_value,
                                         comma.as_ref(),
                                     ) else {
                                         continue;
                                     };
-                                    if range.contains(position) {
-                                        hover_range = Some(range);
+                                    if span.contains_inclusive(offset) {
+                                        hover_span = Some(span);
                                     }
                                 }
                             }
@@ -340,49 +341,49 @@ pub async fn get_hover_keys_with_range(
         };
 
         let keys = if let tombi_ast_syntax::TomlNode::KeyValue(kv) = node {
-            if hover_range.is_none() {
-                hover_range = Some(
-                    kv.item_range_with_comma(position)
+            if hover_span.is_none() {
+                hover_span = Some(
+                    kv.item_span_with_comma(offset)
                         .or_else(|| {
                             kv.leading_comments()
                                 .next()
-                                .map(|comment| comment.syntax().range().start)
-                                .or_else(|| kv.keys().map(|keys| keys.range().start))
-                                .map(|start| tombi_text::Range::new(start, kv.range().end))
+                                .map(|comment| comment.syntax().span().start)
+                                .or_else(|| kv.keys().map(|keys| keys.span().start))
+                                .map(|start| tombi_text::Span::new(start, kv.span().end))
                         })
-                        .unwrap_or_else(|| kv.range()),
+                        .unwrap_or_else(|| kv.span()),
                 );
             }
             kv.keys()
         } else if let tombi_ast_syntax::TomlNode::Table(table) = node {
             let header = table.header();
             if let Some(header) = &header
-                && hover_range.is_none()
+                && hover_span.is_none()
                 && (header
                     .keys()
                     .last()
-                    .is_none_or(|key| key.syntax().range().contains(position))
+                    .is_none_or(|key| key.syntax().span().contains_inclusive(offset))
                     || table
                         .header_leading_comments()
-                        .any(|comment| comment.syntax().range().contains(position))
+                        .any(|comment| comment.syntax().span().contains_inclusive(offset))
                     || table
                         .header_trailing_comment()
-                        .is_some_and(|comment| comment.syntax().range().contains(position))
+                        .is_some_and(|comment| comment.syntax().span().contains_inclusive(offset))
                     || table.dangling_comment_groups().any(|comment_group| {
                         comment_group
                             .comments()
-                            .any(|comment| comment.syntax().range().contains(position))
+                            .any(|comment| comment.syntax().span().contains_inclusive(offset))
                     }))
             {
-                let mut range = table.syntax().range();
+                let mut span = table.syntax().span();
                 if let Some(max_end) = table
                     .sub_tables()
-                    .map(|subtable| subtable.syntax().range().end)
+                    .map(|subtable| subtable.syntax().span().end)
                     .max()
                 {
-                    range.end = max_end;
+                    span.end = max_end;
                 }
-                hover_range = Some(range);
+                hover_span = Some(span);
             } else {
                 for group in table
                     .key_value_groups()
@@ -390,9 +391,9 @@ pub async fn get_hover_keys_with_range(
                 {
                     if group
                         .comments()
-                        .any(|comment| comment.syntax().range().contains(position))
+                        .any(|comment| comment.syntax().span().contains_inclusive(offset))
                     {
-                        hover_range = Some(group.syntax().range());
+                        hover_span = Some(group.syntax().span());
                         break;
                     }
                 }
@@ -402,34 +403,34 @@ pub async fn get_hover_keys_with_range(
         } else if let tombi_ast_syntax::TomlNode::ArrayOfTable(array_of_table) = node {
             let header = array_of_table.header();
             if let Some(header) = &header
-                && hover_range.is_none()
+                && hover_span.is_none()
                 && (header
                     .keys()
                     .last()
-                    .is_none_or(|key| key.syntax().range().contains(position))
+                    .is_none_or(|key| key.syntax().span().contains_inclusive(offset))
                     || array_of_table
                         .header_leading_comments()
-                        .any(|comment| comment.syntax().range().contains(position))
+                        .any(|comment| comment.syntax().span().contains_inclusive(offset))
                     || array_of_table
                         .header_trailing_comment()
-                        .is_some_and(|comment| comment.syntax().range().contains(position))
+                        .is_some_and(|comment| comment.syntax().span().contains_inclusive(offset))
                     || array_of_table
                         .dangling_comment_groups()
                         .any(|comment_group| {
                             comment_group
                                 .comments()
-                                .any(|comment| comment.syntax().range().contains(position))
+                                .any(|comment| comment.syntax().span().contains_inclusive(offset))
                         }))
             {
-                let mut range = array_of_table.syntax().range();
+                let mut span = array_of_table.syntax().span();
                 if let Some(max_end) = array_of_table
                     .sub_tables()
-                    .map(|subtable| subtable.syntax().range().end)
+                    .map(|subtable| subtable.syntax().span().end)
                     .max()
                 {
-                    range.end = max_end;
+                    span.end = max_end;
                 }
-                hover_range = Some(range);
+                hover_span = Some(span);
             } else {
                 for group in array_of_table
                     .key_value_groups()
@@ -437,9 +438,9 @@ pub async fn get_hover_keys_with_range(
                 {
                     if group
                         .comments()
-                        .any(|comment| comment.syntax().range().contains(position))
+                        .any(|comment| comment.syntax().span().contains_inclusive(offset))
                     {
-                        hover_range = Some(group.syntax().range());
+                        hover_span = Some(group.syntax().span());
                         break;
                     }
                 }
@@ -447,14 +448,14 @@ pub async fn get_hover_keys_with_range(
 
             header
         } else if let tombi_ast_syntax::TomlNode::Root(root) = node {
-            if hover_range.is_none()
+            if hover_span.is_none()
                 && (root.dangling_comment_groups().any(|comment_group| {
                     comment_group
                         .comments()
-                        .any(|comment| comment.syntax().range().contains(position))
+                        .any(|comment| comment.syntax().span().contains_inclusive(offset))
                 }))
             {
-                hover_range = Some(root.syntax().range());
+                hover_span = Some(root.syntax().span());
             } else {
                 for group in root
                     .key_value_groups()
@@ -462,9 +463,9 @@ pub async fn get_hover_keys_with_range(
                 {
                     if group
                         .comments()
-                        .any(|comment| comment.syntax().range().contains(position))
+                        .any(|comment| comment.syntax().span().contains_inclusive(offset))
                     {
-                        hover_range = Some(group.syntax().range());
+                        hover_span = Some(group.syntax().span());
                         break;
                     }
                 }
@@ -477,11 +478,11 @@ pub async fn get_hover_keys_with_range(
 
         let Some(keys) = keys else { continue };
 
-        let keys = if keys.range().contains(position) {
+        let keys = if keys.span().contains_inclusive(offset) {
             let mut new_keys = Vec::with_capacity(keys.keys().count());
             for key in keys
                 .keys()
-                .take_while(|key| key.token().unwrap().range().start <= position)
+                .take_while(|key| key.token().unwrap().span().start <= offset)
             {
                 let document_tree_key = key.into_document_tree_and_errors(toml_version).tree;
                 if let Some(document_tree_key) = document_tree_key {
@@ -500,8 +501,8 @@ pub async fn get_hover_keys_with_range(
             new_keys
         };
 
-        if hover_range.is_none() {
-            hover_range = keys.iter().map(|key| key.range()).reduce(|k1, k2| k1 + k2);
+        if hover_span.is_none() {
+            hover_span = keys.iter().map(|key| key.span()).reduce(|k1, k2| k1 + k2);
         }
 
         keys_vec.push(keys);
@@ -509,73 +510,73 @@ pub async fn get_hover_keys_with_range(
 
     Some((
         keys_vec.into_iter().rev().flatten().collect_vec(),
-        hover_range,
+        hover_span,
     ))
 }
 
-fn key_value_parent_or_self_range(
+fn key_value_parent_or_self_span(
     root: &tombi_ast_syntax::Root,
-    fallback_range: tombi_text::Range,
-) -> tombi_text::Range {
-    root.enclosing_key_value(fallback_range.start)
-        .map_or(fallback_range, |key_value| key_value.range())
+    fallback_span: tombi_text::Span,
+) -> tombi_text::Span {
+    root.enclosing_key_value(fallback_span.start)
+        .map_or(fallback_span, |key_value| key_value.span())
 }
 
 #[inline]
-fn array_value_hover_range(
+fn array_value_hover_span(
     value_or_key_value: &tombi_ast_syntax::ValueOrKeyValue,
     comma: Option<&tombi_ast_syntax::Comma>,
-) -> Option<tombi_text::Range> {
+) -> Option<tombi_text::Span> {
     let start = value_or_key_value
         .leading_comments()
         .next()
-        .map(|comment| comment.syntax().range().start)
+        .map(|comment| comment.syntax().span().start)
         .or_else(|| match value_or_key_value {
-            tombi_ast_syntax::ValueOrKeyValue::Value(value) => Some(value.token_range().start),
+            tombi_ast_syntax::ValueOrKeyValue::Value(value) => Some(value.token_span().start),
             tombi_ast_syntax::ValueOrKeyValue::KeyValue(key_value) => {
-                key_value.keys().map(|keys| keys.range().start)
+                key_value.keys().map(|keys| keys.span().start)
             }
         })?;
     let end = match value_or_key_value {
-        tombi_ast_syntax::ValueOrKeyValue::Value(value) => value.range().end,
+        tombi_ast_syntax::ValueOrKeyValue::Value(value) => value.span().end,
         tombi_ast_syntax::ValueOrKeyValue::KeyValue(key_value) => key_value
             .value()
-            .map(|value| value.range().end)
-            .unwrap_or(key_value.range().end),
+            .map(|value| value.span().end)
+            .unwrap_or(key_value.span().end),
     };
 
-    Some(with_comma_item_hover_range(start, end, comma))
+    Some(with_comma_item_hover_span(start, end, comma))
 }
 
 #[inline]
-fn inline_table_key_value_hover_range(
+fn inline_table_key_value_hover_span(
     key_value: &tombi_ast_syntax::KeyValue,
     comma: Option<&tombi_ast_syntax::Comma>,
-) -> Option<tombi_text::Range> {
+) -> Option<tombi_text::Span> {
     let start = key_value
         .leading_comments()
         .next()
-        .map(|comment| comment.syntax().range().start)
-        .or_else(|| key_value.keys().map(|keys| keys.range().start))?;
+        .map(|comment| comment.syntax().span().start)
+        .or_else(|| key_value.keys().map(|keys| keys.span().start))?;
     let end = key_value
         .value()
-        .map(|value| value.range().end)
-        .unwrap_or(key_value.range().end);
+        .map(|value| value.span().end)
+        .unwrap_or(key_value.span().end);
 
-    Some(with_comma_item_hover_range(start, end, comma))
+    Some(with_comma_item_hover_span(start, end, comma))
 }
 
 #[inline]
-fn with_comma_item_hover_range(
-    start: tombi_text::Position,
-    end: tombi_text::Position,
+fn with_comma_item_hover_span(
+    start: tombi_text::Offset,
+    end: tombi_text::Offset,
     comma: Option<&tombi_ast_syntax::Comma>,
-) -> tombi_text::Range {
-    let mut range = tombi_text::Range::new(start, end);
+) -> tombi_text::Span {
+    let mut span = tombi_text::Span::new(start, end);
     if let Some(comma) = comma {
-        range += comma.range();
+        span += comma.span();
     }
-    range
+    span
 }
 
 #[cfg(test)]
@@ -584,20 +585,20 @@ mod tests {
     use textwrap::dedent;
     use tombi_config::TomlVersion;
     use tombi_parser::parse;
-    use tombi_text::{Position, RelativePosition};
+    use tombi_text::{EncodingKind, Offset};
 
-    fn parse_root_and_position_with_marker(
+    fn parse_root_and_offset_with_marker(
         source_with_marker: &str,
-    ) -> (tombi_ast_syntax::Root, Position) {
+    ) -> (tombi_ast_syntax::Root, Offset) {
         let marker = '█';
         let mut source = dedent(source_with_marker).trim().to_string();
         let marker_index = source.find(marker).unwrap();
         source.remove(marker_index);
 
         let root = parse(&source).into_root();
-        let position = Position::default() + RelativePosition::of(&source[..marker_index]);
+        let offset = Offset::of(&source[..marker_index]);
 
-        (root, position)
+        (root, offset)
     }
 
     macro_rules! test_hover_range {
@@ -606,15 +607,18 @@ mod tests {
         ) -> Ok((($start_line:expr, $start_col:expr), ($end_line:expr, $end_col:expr))) $(;)?) => {
             #[tokio::test]
             async fn $name() -> Result<(), Box<dyn std::error::Error>> {
-                let (root, position) = parse_root_and_position_with_marker($source);
+                let (root, offset) = parse_root_and_offset_with_marker($source);
 
-                let (_, hover_range) =
-                    get_hover_keys_with_range(&root, position, TomlVersion::V1_0_0)
-                        .await
-                        .ok_or("failed to get hover keys with range")?;
+                let (_, hover_span) = get_hover_keys_with_span(&root, offset, TomlVersion::V1_0_0)
+                    .await
+                    .ok_or("failed to get hover keys with span")?;
 
                 pretty_assertions::assert_eq!(
-                    hover_range,
+                    hover_span.map(|span| {
+                        root.syntax()
+                            .line_index()
+                            .range(span, EncodingKind::GraphemeCluster)
+                    }),
                     Some(tombi_text::Range::from((
                         ($start_line, $start_col),
                         ($end_line, $end_col)

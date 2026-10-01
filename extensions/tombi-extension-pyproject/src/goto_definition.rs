@@ -101,7 +101,10 @@ fn goto_definition_for_project_name(
 
     vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: project_name.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: project_name.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }]
 }
 
@@ -119,7 +122,10 @@ fn goto_definition_for_dependency_group_name(
 
     vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }]
 }
 
@@ -224,10 +230,7 @@ fn goto_definition_for_relative_file(
         return Vec::new();
     };
 
-    vec![tombi_extension::Location {
-        uri,
-        range: tombi_text::Range::default(),
-    }]
+    vec![tombi_extension::Location { uri, span: None }]
 }
 
 #[inline]
@@ -357,7 +360,10 @@ fn goto_definition_for_dependency_string(
 
     vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: dependency.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: dependency.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }]
 }
 
@@ -380,7 +386,10 @@ fn goto_definition_for_include_group(
 
     Ok(vec![tombi_extension::Location {
         uri,
-        range: group_key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: group_key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }])
 }
 
@@ -413,7 +422,10 @@ pub(crate) fn collect_workspace_project_dependency_definitions(
                 if requirement.name.as_ref() == package_name {
                     Some(tombi_extension::Location {
                         uri: workspace_uri.clone(),
-                        range: dependency.unquoted_range(),
+                        span: Some(tombi_extension::LocatedSpan {
+                            span: dependency.unquoted_span(),
+                            line_index: std::sync::Arc::clone(workspace_document_tree.line_index()),
+                        }),
                     })
                 } else {
                     None
@@ -440,7 +452,10 @@ pub(crate) fn get_workspace_member_package_definition(
 
     Some(tombi_extension::Location {
         uri: member_uri,
-        range: package_location.package_name_key_range,
+        span: Some(tombi_extension::LocatedSpan {
+            span: package_location.package_name_key_span,
+            line_index: package_location.line_index,
+        }),
     })
 }
 
@@ -482,7 +497,10 @@ pub(crate) fn get_workspace_member_dependency_definitions(
                 };
                 locations.push(tombi_extension::Location {
                     uri,
-                    range: dependency.unquoted_range(),
+                    span: Some(tombi_extension::LocatedSpan {
+                        span: dependency.unquoted_span(),
+                        line_index: std::sync::Arc::clone(member_document_tree.line_index()),
+                    }),
                 });
             }
         }
@@ -507,6 +525,9 @@ pub fn get_path_dependency_definition(
 
     Some(tombi_extension::Location {
         uri: member_pyproject_toml_uri,
-        range: package_name.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: package_name.unquoted_span(),
+            line_index: std::sync::Arc::clone(member_document_tree.line_index()),
+        }),
     })
 }

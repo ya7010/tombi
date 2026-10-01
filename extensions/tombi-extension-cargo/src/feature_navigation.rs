@@ -23,18 +23,31 @@ pub(crate) enum CargoFeatureRef<'a> {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub(crate) struct CargoTargetLocation {
     pub(crate) cargo_toml_path: PathBuf,
-    pub(crate) range: tombi_text::Range,
+    pub(crate) span: tombi_text::Span,
+    /// The line index of the manifest, built while parsing it.
+    pub(crate) line_index: std::sync::Arc<tombi_text::LineIndex>,
 }
+
+impl PartialEq for CargoTargetLocation {
+    fn eq(&self, other: &Self) -> bool {
+        self.cargo_toml_path == other.cargo_toml_path && self.span == other.span
+    }
+}
+
+impl Eq for CargoTargetLocation {}
 
 impl CargoTargetLocation {
     pub(crate) fn get_location(&self) -> Option<tombi_extension::Location> {
         let uri = tombi_uri::Uri::from_file_path(&self.cargo_toml_path).ok()?;
         Some(tombi_extension::Location {
             uri,
-            range: self.range,
+            span: Some(tombi_extension::LocatedSpan {
+                span: self.span,
+                line_index: std::sync::Arc::clone(&self.line_index),
+            }),
         })
     }
 }
@@ -162,7 +175,8 @@ pub(crate) fn find_local_feature(
     let (feature_key, _) = dig_keys(document_tree, &["features", feature_name])?;
     Some(CargoTargetLocation {
         cargo_toml_path: canonicalize_or_original(cargo_toml_path.to_path_buf()),
-        range: feature_key.unquoted_range(),
+        span: feature_key.unquoted_span(),
+        line_index: std::sync::Arc::clone(document_tree.line_index()),
     })
 }
 
@@ -180,7 +194,8 @@ pub(crate) fn find_optional_dependency(
         match optional_value {
             Value::Boolean(optional) if optional.value() => Some(CargoTargetLocation {
                 cargo_toml_path: canonicalize_or_original(cargo_toml_path.to_path_buf()),
-                range: optional.range(),
+                span: optional.span(),
+                line_index: std::sync::Arc::clone(document_tree.line_index()),
             }),
             _ => None,
         }
@@ -232,12 +247,13 @@ fn sort_and_dedup_feature_usage_locations(
     locations.sort_by(|left, right| {
         left.cargo_toml_path
             .cmp(&right.cargo_toml_path)
-            .then_with(|| left.range.cmp(&right.range))
+            .then_with(|| left.span.start.cmp(&right.span.start))
+            .then_with(|| left.span.end.cmp(&right.span.end))
     });
 
     locations
         .into_iter()
-        .unique_by(|location| (location.cargo_toml_path.clone(), location.range))
+        .unique_by(|location| (location.cargo_toml_path.clone(), location.span))
         .collect()
 }
 
@@ -549,7 +565,8 @@ fn collect_feature_table_usage_locations(
                 .matches_usage_target(target)
                 .then_some(CargoTargetLocation {
                     cargo_toml_path: canonicalize_or_original(cargo_toml_path.to_path_buf()),
-                    range: feature_string.unquoted_range(),
+                    span: feature_string.unquoted_span(),
+                    line_index: std::sync::Arc::clone(document_tree.line_index()),
                 })
         })
         .collect()
@@ -587,7 +604,8 @@ fn collect_dependency_feature_usage_locations(
             if resolved.matches_usage_target(target) {
                 locations.push(CargoTargetLocation {
                     cargo_toml_path: canonicalize_or_original(cargo_toml_path.to_path_buf()),
-                    range: feature_string.unquoted_range(),
+                    span: feature_string.unquoted_span(),
+                    line_index: std::sync::Arc::clone(document_tree.line_index()),
                 });
             }
         }

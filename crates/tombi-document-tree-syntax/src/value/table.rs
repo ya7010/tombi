@@ -11,8 +11,8 @@ use tombi_document_tree::TableKind;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Table {
     kind: TableKind,
-    range: tombi_text::Range,
-    symbol_range: tombi_text::Range,
+    span: tombi_text::Span,
+    symbol_span: tombi_text::Span,
     key_values: tombi_hashmap::IndexMap<Key, Value>,
     pub(crate) header_comment_directives: Option<Vec<TombiValueCommentDirective>>,
     pub(crate) body_comment_directives: Option<Vec<TombiValueCommentDirective>>,
@@ -24,8 +24,8 @@ impl Table {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
-            range: tombi_text::Range::default(),
-            symbol_range: tombi_text::Range::default(),
+            span: tombi_text::Span::default(),
+            symbol_span: tombi_text::Span::default(),
             header_comment_directives: None,
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -36,8 +36,8 @@ impl Table {
         Self {
             kind: TableKind::Root,
             key_values: Default::default(),
-            range: node.syntax().range(),
-            symbol_range: node.syntax().range(),
+            span: node.syntax().span(),
+            symbol_span: node.syntax().span(),
             header_comment_directives: None,
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -48,12 +48,12 @@ impl Table {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
-            range: node.syntax().range(),
-            symbol_range: tombi_text::Range::new(
+            span: node.syntax().span(),
+            symbol_span: tombi_text::Span::new(
                 node.bracket_start()
-                    .map(|bracket| bracket.range().start)
-                    .unwrap_or_else(|| node.range().start),
-                node.range().end,
+                    .map(|bracket| bracket.span().start)
+                    .unwrap_or_else(|| node.span().start),
+                node.span().end,
             ),
             header_comment_directives: None,
             body_comment_directives: None,
@@ -65,12 +65,12 @@ impl Table {
         Self {
             kind: TableKind::Table,
             key_values: Default::default(),
-            range: node.syntax().range(),
-            symbol_range: tombi_text::Range::new(
+            span: node.syntax().span(),
+            symbol_span: tombi_text::Span::new(
                 node.double_bracket_start()
-                    .map(|bracket| bracket.range().start)
-                    .unwrap_or_else(|| node.range().start),
-                node.range().end,
+                    .map(|bracket| bracket.span().start)
+                    .unwrap_or_else(|| node.span().start),
+                node.span().end,
             ),
             header_comment_directives: None,
             body_comment_directives: None,
@@ -83,18 +83,18 @@ impl Table {
             || node.dangling_comment_groups().next().is_some()
             || node.has_inner_comments();
 
-        let symbol_range = tombi_text::Range::new(
+        let symbol_span = tombi_text::Span::new(
             node.brace_start()
-                .map_or_else(|| node.range().start, |brace| brace.range().start),
+                .map_or_else(|| node.span().start, |brace| brace.span().start),
             node.brace_end()
-                .map_or_else(|| node.range().end, |brace| brace.range().end),
+                .map_or_else(|| node.span().end, |brace| brace.span().end),
         );
 
         Self {
             kind: TableKind::InlineTable { has_comment },
             key_values: Default::default(),
-            range: node.syntax().range(),
-            symbol_range,
+            span: node.syntax().span(),
+            symbol_span,
             header_comment_directives: None,
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -105,8 +105,8 @@ impl Table {
         Self {
             kind: TableKind::KeyValue,
             key_values: Default::default(),
-            range: node.syntax().range(),
-            symbol_range: node.syntax().range(),
+            span: node.syntax().span(),
+            symbol_span: node.syntax().span(),
             header_comment_directives: None,
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -117,8 +117,8 @@ impl Table {
         Self {
             kind: TableKind::ParentTable,
             key_values: Default::default(),
-            range: self.range,
-            symbol_range: self.symbol_range,
+            span: self.span,
+            symbol_span: self.symbol_span,
             header_comment_directives: self.header_comment_directives.clone(),
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -129,8 +129,8 @@ impl Table {
         Self {
             kind: TableKind::ParentKey,
             key_values: Default::default(),
-            range: tombi_text::Range::new(parent_key.range().start, self.range.end),
-            symbol_range: tombi_text::Range::new(parent_key.range().start, self.symbol_range.end),
+            span: tombi_text::Span::new(parent_key.span().start, self.span.end),
+            symbol_span: tombi_text::Span::new(parent_key.span().start, self.symbol_span.end),
             header_comment_directives: parent_key.comment_directives.clone(),
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -236,14 +236,14 @@ impl Table {
 
         if is_conflict {
             errors.push(crate::Error::ConflictTable {
-                range1: self.symbol_range,
-                range2: other.symbol_range,
+                range1: self.symbol_span,
+                range2: other.symbol_span,
             });
             return Err(errors);
         }
 
-        self.range += other.range;
-        self.symbol_range += other.symbol_range;
+        self.span += other.span;
+        self.symbol_span += other.symbol_span;
 
         // Merge the key_values of the two tables recursively
         for (key, value2) in other.key_values {
@@ -264,10 +264,10 @@ impl Table {
                             }
                         }
                         _ => {
-                            let range = key.range();
+                            let span = key.span();
                             errors.push(crate::Error::DuplicateKey {
                                 key: key.value.into_string(),
-                                range,
+                                span,
                             });
                         }
                     }
@@ -307,7 +307,7 @@ impl Table {
                     _ => {
                         errors.push(crate::Error::DuplicateKey {
                             key: entry.key().value.to_string(),
-                            range: entry.key().range(),
+                            span: entry.key().span(),
                         });
                     }
                 }
@@ -403,13 +403,13 @@ impl Table {
     }
 
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.range
+    pub fn span(&self) -> tombi_text::Span {
+        self.span
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> tombi_text::Range {
-        self.symbol_range
+    pub fn symbol_span(&self) -> tombi_text::Span {
+        self.symbol_span
     }
 }
 
@@ -446,8 +446,8 @@ impl ValueImpl for Table {
         ValueType::Table
     }
 
-    fn range(&self) -> tombi_text::Range {
-        self.range()
+    fn span(&self) -> tombi_text::Span {
+        self.span()
     }
 }
 
@@ -504,9 +504,7 @@ impl IntoDocumentTreeWithContext<crate::Table> for tombi_ast_syntax::Table {
         let empty_table = table.clone();
 
         let Some(header_keys) = self.header() else {
-            errors.push(crate::Error::IncompleteNode {
-                range: self.range(),
-            });
+            errors.push(crate::Error::IncompleteNode { span: self.span() });
             return DocumentTreeAndErrors {
                 tree: empty_table,
                 errors,
@@ -631,9 +629,7 @@ impl IntoDocumentTreeWithContext<Table> for tombi_ast_syntax::ArrayOfTable {
         let empty_table = table.clone();
 
         let Some(header_keys) = self.header() else {
-            errors.push(crate::Error::IncompleteNode {
-                range: self.range(),
-            });
+            errors.push(crate::Error::IncompleteNode { span: self.span() });
 
             return DocumentTreeAndErrors {
                 tree: empty_table,
@@ -752,9 +748,7 @@ impl IntoDocumentTreeWithContext<Table> for tombi_ast_syntax::KeyValue {
         let empty_table = table.clone();
 
         let Some(keys) = self.keys() else {
-            errors.push(crate::Error::IncompleteNode {
-                range: self.range(),
-            });
+            errors.push(crate::Error::IncompleteNode { span: self.span() });
             return DocumentTreeAndErrors {
                 tree: empty_table,
                 errors,
@@ -794,18 +788,16 @@ impl IntoDocumentTreeWithContext<Table> for tombi_ast_syntax::KeyValue {
                 value
             }
             None => {
-                errors.push(crate::Error::IncompleteNode {
-                    range: table.range(),
-                });
+                errors.push(crate::Error::IncompleteNode { span: table.span() });
                 Value::Incomplete {
-                    range: tombi_text::Range::at(self.range().end),
+                    span: tombi_text::Span::empty(self.span().end),
                 }
             }
         };
 
         let mut table = if let Some(mut key) = keys.pop() {
-            table.range = key.range() + value.range();
-            table.symbol_range = key.range() + value.symbol_range();
+            table.span = key.span() + value.span();
+            table.symbol_span = key.span() + value.symbol_span();
             if !combined_comment_directives.is_empty() {
                 key.comment_directives = Some(combined_comment_directives.clone());
             }

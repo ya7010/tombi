@@ -24,12 +24,12 @@ pub(super) enum CompletionSource<'a> {
 impl<'a> CompletionSource<'a> {
     pub(super) async fn new(
         document_tree: &'a tombi_document_tree_syntax::DocumentTree,
-        position: tombi_text::Position,
+        offset: tombi_text::Offset,
         keys: &'a [tombi_document_tree_syntax::Key],
         schema_context: &tombi_schema_store::SchemaContext<'_>,
         completion_hint: Option<CompletionHint>,
     ) -> Option<Self> {
-        let accessors = tombi_document_tree_syntax::get_accessors(document_tree, keys, position);
+        let accessors = tombi_document_tree_syntax::get_accessors(document_tree, keys, offset);
         let (mut accessors, mut current_schema) =
             resolve_accessors_for_document_or_schema(document_tree, accessors, schema_context)
                 .await;

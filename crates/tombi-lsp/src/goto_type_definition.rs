@@ -20,12 +20,12 @@ use self::type_definition_source::TypeDefinitionSource;
 
 pub async fn get_type_definition(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    position: tombi_text::Position,
+    cursor: crate::CursorPosition<'_>,
     keys: &[tombi_document_tree_syntax::Key],
     schema_context: &tombi_schema_store::SchemaContext<'_>,
 ) -> Vec<TypeDefinition> {
-    let Some(source) =
-        TypeDefinitionSource::new(document_tree, position, keys, schema_context).await
+    let offset = cursor.offset();
+    let Some(source) = TypeDefinitionSource::new(document_tree, offset, keys, schema_context).await
     else {
         return Vec::new();
     };
@@ -39,7 +39,7 @@ pub async fn get_type_definition(
             document_tree
                 .deref()
                 .get_type_definition(
-                    position,
+                    cursor,
                     remaining_keys,
                     &accessors,
                     current_schema.as_ref(),
@@ -59,7 +59,7 @@ pub async fn get_type_definition(
             };
             value
                 .get_type_definition(
-                    position,
+                    cursor,
                     remaining_keys,
                     &accessors,
                     current_schema.as_ref(),
@@ -75,7 +75,7 @@ pub async fn get_type_definition(
             current_schema
                 .schema_view
                 .get_type_definition(
-                    position,
+                    cursor,
                     remaining_keys,
                     &accessors,
                     Some(&current_schema),
@@ -88,7 +88,7 @@ pub async fn get_type_definition(
 
 pub async fn try_get_type_definition_response(
     backend: &Backend,
-    locations: Option<Vec<tombi_extension::Location>>,
+    locations: Option<Vec<SchemaLocation>>,
 ) -> Result<Option<GotoDefinitionResponse>, tower_lsp::jsonrpc::Error> {
     let Some(locations) = locations else {
         return Ok(None);
@@ -135,6 +135,16 @@ pub struct TypeDefinition {
     pub range: tombi_text::Range,
 }
 
+/// A location in a JSON Schema file.
+///
+/// Unlike [`tombi_extension::Location`], its range is the one of the JSON Schema file,
+/// not converted from a span of a TOML file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SchemaLocation {
+    pub uri: tombi_uri::Uri,
+    pub range: tombi_text::Range,
+}
+
 pub(crate) fn location_key(
     schema_base_uri: &SchemaUri,
     range: tombi_text::Range,
@@ -174,7 +184,7 @@ fn prefer_type_definitions(
 pub(super) trait GetTypeDefinition {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: tombi_text::Position,
+        cursor: crate::CursorPosition<'a>,
         keys: &'a [tombi_document_tree_syntax::Key],
         accessors: &'a [tombi_schema_store::Accessor],
         current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
@@ -191,7 +201,7 @@ pub(super) async fn adjacent_type_definition<
         + std::fmt::Debug,
 >(
     value: &T,
-    position: tombi_text::Position,
+    cursor: crate::CursorPosition<'_>,
     keys: &[tombi_document_tree_syntax::Key],
     accessors: &[Accessor],
     current_schema: Option<&CurrentSchema<'_>>,
@@ -207,7 +217,7 @@ pub(super) async fn adjacent_type_definition<
     if let Some(one_of_schema) = one_of_schema
         && let type_definitions = one_of::get_one_of_type_definition(
             value,
-            position,
+            cursor,
             keys,
             accessors,
             one_of_schema,
@@ -222,7 +232,7 @@ pub(super) async fn adjacent_type_definition<
     if let Some(any_of_schema) = any_of_schema
         && let type_definitions = any_of::get_any_of_type_definition(
             value,
-            position,
+            cursor,
             keys,
             accessors,
             any_of_schema,
@@ -237,7 +247,7 @@ pub(super) async fn adjacent_type_definition<
     if let Some(all_of_schema) = all_of_schema
         && let type_definitions = all_of::get_all_of_type_definition(
             value,
-            position,
+            cursor,
             keys,
             accessors,
             all_of_schema,

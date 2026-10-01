@@ -19,7 +19,15 @@ impl PrettyReporter {
 
 impl FormatReporter for PrettyReporter {
     fn record(&mut self, file: FileReport, writer: &mut dyn Write) -> std::io::Result<()> {
-        file.diagnostics.print(&self.printer, writer)
+        let Some(line_index) = &file.line_index else {
+            return Ok(());
+        };
+        for diagnostic in &file.diagnostics {
+            diagnostic
+                .located(line_index, tombi_text::EncodingKind::GraphemeCluster)
+                .print(&self.printer, writer)?;
+        }
+        Ok(())
     }
 
     fn record_runtime_error(&mut self) {}

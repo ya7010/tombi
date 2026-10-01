@@ -63,7 +63,7 @@ pub async fn get_tombi_document_comment_directive_and_diagnostics(
 
         for tombi_ast_syntax::TombiDocumentCommentDirective {
             content,
-            content_range,
+            content_span,
             ..
         } in tombi_directive_iter
         {
@@ -77,7 +77,7 @@ pub async fn get_tombi_document_comment_directive_and_diagnostics(
                 total_diagnostics.extend(
                     diagnostics
                         .into_iter()
-                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_range)),
+                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_span)),
                 );
                 continue;
             }
@@ -95,7 +95,7 @@ pub async fn get_tombi_document_comment_directive_and_diagnostics(
                 total_diagnostics.extend(
                     diagnostics
                         .into_iter()
-                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_range)),
+                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_span)),
                 );
             } else if let Err(diagnostics) =
                 crate::validate(document_tree.clone(), Some(&source_schema), &schema_context).await
@@ -103,7 +103,7 @@ pub async fn get_tombi_document_comment_directive_and_diagnostics(
                 total_diagnostics.extend(
                     diagnostics
                         .into_iter()
-                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_range)),
+                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_span)),
                 );
             }
             if let Some(total_document_tree_table) = total_document_tree_table.as_mut() {
@@ -113,9 +113,9 @@ pub async fn get_tombi_document_comment_directive_and_diagnostics(
                         error.set_diagnostics(&mut diagnostics);
                     }
                     total_diagnostics.extend(
-                        diagnostics.into_iter().map(|diagnostic| {
-                            into_directive_diagnostic(&diagnostic, content_range)
-                        }),
+                        diagnostics
+                            .into_iter()
+                            .map(|diagnostic| into_directive_diagnostic(&diagnostic, content_span)),
                     );
                 }
             } else {

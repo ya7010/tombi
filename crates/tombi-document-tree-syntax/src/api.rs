@@ -5,8 +5,8 @@ macro_rules! impl_node {
         $(
             impl api::Node for $ty {
                 #[inline]
-                fn range(&self) -> tombi_text::Range {
-                    <$ty>::range(self)
+                fn span(&self) -> tombi_text::Span {
+                    <$ty>::span(self)
                 }
 
             }
@@ -25,30 +25,30 @@ impl_node!(
     crate::LocalTime,
 );
 
-macro_rules! impl_node_with_symbol_range {
+macro_rules! impl_node_with_symbol_span {
     ($($ty:ty),+ $(,)?) => {
         $(
             impl api::Node for $ty {
                 #[inline]
-                fn range(&self) -> tombi_text::Range {
-                    <$ty>::range(self)
+                fn span(&self) -> tombi_text::Span {
+                    <$ty>::span(self)
                 }
 
                 #[inline]
-                fn symbol_range(&self) -> tombi_text::Range {
-                    <$ty>::symbol_range(self)
+                fn symbol_span(&self) -> tombi_text::Span {
+                    <$ty>::symbol_span(self)
                 }
             }
         )+
     };
 }
 
-impl_node_with_symbol_range!(crate::Array, crate::Table, crate::Value);
+impl_node_with_symbol_span!(crate::Array, crate::Table, crate::Value);
 
 impl api::Node for crate::Key {
     #[inline]
-    fn range(&self) -> tombi_text::Range {
-        self.range()
+    fn span(&self) -> tombi_text::Span {
+        self.span()
     }
 }
 
@@ -73,8 +73,8 @@ impl api::Key for crate::Key {
     }
 
     #[inline]
-    fn unquoted_range(&self) -> tombi_text::Range {
-        self.unquoted_range()
+    fn unquoted_span(&self) -> tombi_text::Span {
+        self.unquoted_span()
     }
 }
 
@@ -130,36 +130,36 @@ impl api::ValueNode for crate::Value {
     fn value(&self) -> api::Value<'_, crate::Array, crate::Table> {
         match self {
             crate::Value::Boolean(value) => {
-                api::Value::Boolean(api::BooleanValue::new(value.value(), value.range()))
+                api::Value::Boolean(api::BooleanValue::new(value.value(), value.span()))
             }
             crate::Value::Integer(value) => api::Value::Integer(api::IntegerValue::new(
                 value.kind(),
                 value.value(),
-                value.range(),
+                value.span(),
             )),
             crate::Value::Float(value) => {
-                api::Value::Float(api::FloatValue::new(value.value(), value.range()))
+                api::Value::Float(api::FloatValue::new(value.value(), value.span()))
             }
             crate::Value::String(value) => api::Value::String(api::StringValue::new(
                 value.kind(),
                 value.value(),
-                value.range(),
+                value.span(),
             )),
             crate::Value::OffsetDateTime(value) => api::Value::OffsetDateTime(
-                api::OffsetDateTimeValue::new(value.value(), value.range()),
+                api::OffsetDateTimeValue::new(value.value(), value.span()),
             ),
-            crate::Value::LocalDateTime(value) => api::Value::LocalDateTime(
-                api::LocalDateTimeValue::new(value.value(), value.range()),
-            ),
+            crate::Value::LocalDateTime(value) => {
+                api::Value::LocalDateTime(api::LocalDateTimeValue::new(value.value(), value.span()))
+            }
             crate::Value::LocalDate(value) => {
-                api::Value::LocalDate(api::LocalDateValue::new(value.value(), value.range()))
+                api::Value::LocalDate(api::LocalDateValue::new(value.value(), value.span()))
             }
             crate::Value::LocalTime(value) => {
-                api::Value::LocalTime(api::LocalTimeValue::new(value.value(), value.range()))
+                api::Value::LocalTime(api::LocalTimeValue::new(value.value(), value.span()))
             }
             crate::Value::Array(value) => api::Value::Array(value),
             crate::Value::Table(value) => api::Value::Table(value),
-            crate::Value::Incomplete { range } => api::Value::Incomplete { range: *range },
+            crate::Value::Incomplete { span } => api::Value::Incomplete { span: *span },
         }
     }
 }

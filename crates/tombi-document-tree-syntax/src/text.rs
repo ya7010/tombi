@@ -9,7 +9,7 @@ use std::{borrow::Borrow, fmt, hash::Hash, ops::Deref, sync::Arc};
 #[derive(Clone)]
 pub struct DocumentText {
     buffer: Arc<Box<str>>,
-    range: tombi_text::Span,
+    span: tombi_text::Span,
 }
 
 impl DocumentText {
@@ -18,8 +18,8 @@ impl DocumentText {
         syntax: &tombi_ast_syntax::SyntaxNode,
         resolver: &tombi_ast_syntax::DecodedTextResolver,
     ) -> Result<Self, tombi_toml_text::ParseError> {
-        let (buffer, range) = syntax.resolve_text(resolver)?;
-        Ok(Self { buffer, range })
+        let (buffer, span) = syntax.resolve_text(resolver)?;
+        Ok(Self { buffer, span })
     }
 
     #[inline]
@@ -27,13 +27,13 @@ impl DocumentText {
         syntax: &tombi_ast_syntax::SyntaxNode,
         resolver: &tombi_ast_syntax::DecodedTextResolver,
     ) -> Self {
-        let (buffer, range) = syntax.resolve_raw_text(resolver);
-        Self { buffer, range }
+        let (buffer, span) = syntax.resolve_raw_text(resolver);
+        Self { buffer, span }
     }
 
     #[inline]
     pub fn as_str(&self) -> &str {
-        &self.buffer[self.range]
+        &self.buffer[self.span]
     }
 
     #[inline]
@@ -148,14 +148,14 @@ mod tests {
 
     #[test]
     fn document_text_span_is_local_to_its_buffer() {
-        let range = tombi_text::Span::new(0.into(), 6.into());
+        let span = tombi_text::Span::new(0.into(), 6.into());
         let source = DocumentText {
             buffer: Arc::new("source".into()),
-            range,
+            span,
         };
         let decoded = DocumentText {
             buffer: Arc::new("decoded".into()),
-            range,
+            span,
         };
 
         assert_eq!(source.as_str(), "source");

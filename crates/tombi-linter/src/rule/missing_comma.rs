@@ -1,6 +1,6 @@
 use tombi_ast_syntax::DanglingCommentGroupOr;
 use tombi_config::SeverityLevel;
-use tombi_text::Range;
+use tombi_text::Span;
 
 use crate::{Diagnostic, DiagnosticKind, Rule};
 
@@ -21,7 +21,7 @@ impl Rule<tombi_ast_syntax::Array> for MissingCommaRule {
                 l.extend_diagnostics(Diagnostic {
                     kind: DiagnosticKind::MissingArrayComma,
                     level: SeverityLevel::Error,
-                    range: Range::at(value.range().end),
+                    span: Span::empty(value.span().end),
                 });
             }
         }
@@ -44,7 +44,7 @@ impl Rule<tombi_ast_syntax::InlineTable> for MissingCommaRule {
                 l.extend_diagnostics(Diagnostic {
                     kind: DiagnosticKind::MissingInlineTableComma,
                     level: SeverityLevel::Error,
-                    range: Range::at(key_value.range().end),
+                    span: Span::empty(key_value.span().end),
                 });
             }
         }

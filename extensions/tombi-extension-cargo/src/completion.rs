@@ -34,7 +34,7 @@ enum CargoCompletionFeature {
 pub async fn completion(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     accessors: &[Accessor],
     toml_version: TomlVersion,
     completion_hint: Option<CompletionHint>,
@@ -62,7 +62,7 @@ pub async fn completion(
     }
 
     if let Some(completions) = cargo_completion_enabled(features, CargoCompletionFeature::Path)
-        .then(|| completion_cargo_file_path(text_document_uri, document_tree, position, accessors))
+        .then(|| completion_cargo_file_path(text_document_uri, document_tree, offset, accessors))
         .flatten()
     {
         return Ok(Some(completions));
@@ -77,7 +77,7 @@ pub async fn completion(
             completion_workspace(
                 document_tree,
                 &cargo_toml_path,
-                position,
+                offset,
                 accessors,
                 completion_hint,
                 toml_version,
@@ -90,7 +90,7 @@ pub async fn completion(
             completion_member(
                 document_tree,
                 &cargo_toml_path,
-                position,
+                offset,
                 accessors,
                 completion_hint,
                 toml_version,
@@ -109,14 +109,14 @@ pub async fn completion(
 fn completion_cargo_file_path(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     accessors: &[Accessor],
 ) -> Option<Vec<CompletionContent>> {
     if matches_accessors!(accessors, ["workspace", "members", _])
         || matches_accessors!(accessors, ["workspace", "exclude", _])
         || matches_accessors!(accessors, ["workspace", "default-members", _])
     {
-        return completion_directory_path(text_document_uri, document_tree, position, accessors);
+        return completion_directory_path(text_document_uri, document_tree, offset, accessors);
     }
 
     if (matches_accessors!(accessors, ["package", "build"])
@@ -129,7 +129,7 @@ fn completion_cargo_file_path(
         && let Some(completions) = completion_file_path_from_uri(
             text_document_uri,
             document_tree,
-            position,
+            offset,
             accessors,
             Some(&["rs"]),
         )
@@ -177,7 +177,7 @@ fn completion_cargo_file_path(
         && let Some(completions) = completion_file_path_from_uri(
             text_document_uri,
             document_tree,
-            position,
+            offset,
             accessors,
             Some(&[]),
         )
@@ -191,7 +191,7 @@ fn completion_cargo_file_path(
 async fn completion_workspace(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     cargo_toml_path: &std::path::Path,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
     toml_version: TomlVersion,
@@ -208,7 +208,7 @@ async fn completion_workspace(
                 crate_name.as_str(),
                 document_tree,
                 accessors,
-                position,
+                offset,
                 completion_hint,
                 offline,
                 cache_options,
@@ -224,7 +224,7 @@ async fn completion_workspace(
                 crate_name.as_str(),
                 document_tree,
                 accessors,
-                position,
+                offset,
                 completion_hint,
                 offline,
                 cache_options,
@@ -270,7 +270,7 @@ async fn completion_workspace(
 async fn completion_member(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     cargo_toml_path: &std::path::Path,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
     toml_version: TomlVersion,
@@ -281,7 +281,7 @@ async fn completion_member(
     if let Some(completions) = complete_workspace_dependency_inheritance(
         document_tree,
         cargo_toml_path,
-        position,
+        offset,
         accessors,
         completion_hint,
         toml_version,
@@ -304,7 +304,7 @@ async fn completion_member(
                 c_name.as_str(),
                 document_tree,
                 accessors,
-                position,
+                offset,
                 completion_hint,
                 offline,
                 cache_options,
@@ -320,7 +320,7 @@ async fn completion_member(
                 c_name.as_str(),
                 document_tree,
                 accessors,
-                position,
+                offset,
                 completion_hint,
                 offline,
                 cache_options,
@@ -406,7 +406,7 @@ fn cargo_completion_enabled(
 fn complete_workspace_dependency_inheritance(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     cargo_toml_path: &std::path::Path,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     accessors: &[Accessor],
     completion_hint: Option<CompletionHint>,
     toml_version: TomlVersion,
@@ -423,7 +423,7 @@ fn complete_workspace_dependency_inheritance(
         return None;
     };
 
-    let completion_range = if let Some(Accessor::Key(dependency_name)) = dependency_name {
+    let completion_span = if let Some(Accessor::Key(dependency_name)) = dependency_name {
         let Some((Accessor::Key(_), tombi_document_tree_syntax::Value::Incomplete { .. })) =
             dig_accessors(document_tree, accessors)
         else {
@@ -433,9 +433,9 @@ fn complete_workspace_dependency_inheritance(
         let (current_dependency_key, _) =
             current_dependency_table.get_key_value(dependency_name.as_str())?;
 
-        current_dependency_key.range()
+        current_dependency_key.span()
     } else {
-        tombi_text::Range::at(position)
+        tombi_text::Span::empty(offset)
     };
 
     let (_, _, workspace_document_tree) = find_workspace_cargo_toml(
@@ -480,7 +480,7 @@ fn complete_workspace_dependency_inheritance(
             deprecated: None,
             edit: Some(tombi_extension::CompletionEdit {
                 text_edit: CompletionTextEdit::Edit(TextEdit {
-                    range: completion_range,
+                    span: completion_span,
                     new_text: format!("{}.workspace = true", key.value()),
                 }),
                 insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
@@ -528,7 +528,7 @@ async fn complete_crate_version(
     crate_name: &str,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     completion_hint: Option<CompletionHint>,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
@@ -569,22 +569,22 @@ async fn complete_crate_version(
                     tombi_document_tree_syntax::Value::String(value_string) => {
                         tombi_extension::CompletionEdit::new_string_literal_while_editing(
                             &format!("\"{version_str}\""),
-                            value_string.range(),
+                            value_string.span(),
                         )
                     }
                     tombi_document_tree_syntax::Value::Incomplete { .. } => {
                         Some(tombi_extension::CompletionEdit {
                             text_edit: CompletionTextEdit::Edit(tombi_extension::TextEdit {
-                                range: tombi_text::Range::at(position),
+                                span: tombi_text::Span::empty(offset),
                                 new_text: format!(" = \"{version_str}\""),
                             }),
                             insert_text_format: Some(InsertTextFormat::PLAIN_TEXT),
                             additional_text_edits: match completion_hint {
                                 Some(
-                                    CompletionHint::DotTrigger { range, .. }
-                                    | CompletionHint::EqualTrigger { range, .. },
+                                    CompletionHint::DotTrigger { span, .. }
+                                    | CompletionHint::EqualTrigger { span, .. },
                                 ) => Some(vec![TextEdit {
-                                    range,
+                                    span,
                                     new_text: "".to_string(),
                                 }]),
                                 _ => None,
@@ -745,7 +745,7 @@ fn complete_crate_feature<'a: 'b, 'b>(
                     schema_base_uri: None,
                     deprecated: None,
                     edit: editing_feature_string.and_then(|value| {
-                        CompletionEdit::new_string_literal_while_editing(&label, value.range())
+                        CompletionEdit::new_string_literal_while_editing(&label, value.span())
                     }),
                     preselect: None,
                     in_comment: false,

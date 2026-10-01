@@ -3,7 +3,7 @@ use crate::{Diagnostic, Error, Options};
 /// The result of linting a TOML document.
 ///
 /// `Serialize` is only derived under the `wasm` feature: `Diagnostic` itself
-/// only implements `Serialize` there (`tombi-diagnostic`'s `wasm` feature).
+/// only implements `Serialize` there.
 #[derive(Debug, Clone, Default)]
 #[cfg_attr(feature = "wasm", derive(serde::Serialize))]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, skip_from_py_object))]
@@ -33,17 +33,21 @@ pub async fn lint_async(
         return Ok(LintResult::default());
     };
 
+    let parsed = tombi_parser::parse(&source);
+    let line_index = std::sync::Arc::clone(parsed.line_index());
     match tombi_linter::Linter::new(
         toml_version,
         &lint_options,
         Some(itertools::Either::Right(&source_path)),
         &schema_store,
     )
-    .lint(&source)
+    .lint_parsed(parsed)
     .await
     {
         Ok(()) => Ok(LintResult::default()),
-        Err(diagnostics) => Ok(LintResult { diagnostics }),
+        Err(diagnostics) => Ok(LintResult {
+            diagnostics: Diagnostic::from_diagnostics(diagnostics, &line_index),
+        }),
     }
 }
 

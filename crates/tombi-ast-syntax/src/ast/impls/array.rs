@@ -13,16 +13,13 @@ impl crate::Array {
     }
 
     /// Returns the comma immediately following the array item containing
-    /// `position`. Invalid nodes are inspected so this also works while the
+    /// `offset`. Invalid nodes are inspected so this also works while the
     /// user is typing incomplete TOML.
-    pub fn comma_after(
-        &self,
-        position: tombi_text::Position,
-    ) -> Option<tombi_ast_syntax::SyntaxToken> {
+    pub fn comma_after(&self, offset: tombi_text::Offset) -> Option<tombi_ast_syntax::SyntaxToken> {
         let following = self
             .syntax()
             .child_elements()
-            .skip_while(|element| !element.range().contains(position))
+            .skip_while(|element| !element.span().contains_inclusive(offset))
             .nth(1)?;
         match following {
             tombi_ast_syntax::SyntaxElement::Node(node)

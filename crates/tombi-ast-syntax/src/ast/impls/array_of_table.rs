@@ -7,9 +7,9 @@ use crate::{
 };
 
 impl crate::ArrayOfTable {
-    /// Range from the opening double bracket through the last non-trivia
+    /// Span from the opening double bracket through the last non-trivia
     /// element owned directly by this array-of-table.
-    pub fn content_range(&self) -> Option<tombi_text::Range> {
+    pub fn content_span(&self) -> Option<tombi_text::Span> {
         let mut elements = self.syntax().child_elements();
         let first = elements.find(|element| element.kind() == T!("[["))?;
         let last = self
@@ -23,10 +23,7 @@ impl crate::ArrayOfTable {
                 )
             })
             .last()?;
-        Some(tombi_text::Range::new(
-            first.range().start,
-            last.range().end,
-        ))
+        Some(tombi_text::Span::new(first.span().start, last.span().end))
     }
 
     #[inline]
@@ -107,12 +104,12 @@ impl crate::ArrayOfTable {
     }
 
     #[inline]
-    pub fn contains_header(&self, position: tombi_text::Position) -> bool {
+    pub fn contains_header(&self, offset: tombi_text::Offset) -> bool {
         self.double_bracket_start()
-            .is_some_and(|start| start.range().end <= position)
+            .is_some_and(|start| start.span().end <= offset)
             && self
                 .double_bracket_end()
-                .is_none_or(|end| position <= end.range().start)
+                .is_none_or(|end| offset <= end.span().start)
     }
 
     /// Returns an iterator over the sub-tables of this table.

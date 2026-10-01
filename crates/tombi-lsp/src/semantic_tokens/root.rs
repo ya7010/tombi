@@ -12,16 +12,16 @@ impl AppendSemanticTokens for tombi_ast_syntax::Root {
                 if let Some(schema_document_directive) = &schema_document_directive
                     && comment
                         .syntax()
-                        .range()
-                        .contains(schema_document_directive.directive_range.start)
+                        .span()
+                        .contains_inclusive(schema_document_directive.directive_span.start)
                 {
                     builder
-                        .add_comment_directive(&comment, schema_document_directive.directive_range);
+                        .add_comment_directive(&comment, schema_document_directive.directive_span);
                     continue;
                 }
                 if let Some(tombi_document_directive) = comment.get_tombi_document_directive() {
                     builder
-                        .add_comment_directive(&comment, tombi_document_directive.directive_range);
+                        .add_comment_directive(&comment, tombi_document_directive.directive_span);
                 } else {
                     comment.append_semantic_tokens(builder);
                 }

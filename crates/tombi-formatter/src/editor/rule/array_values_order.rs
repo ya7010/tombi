@@ -90,7 +90,7 @@ pub(in crate::editor) async fn array_values_order<'a>(
 
     let old_order = values_with_comma
         .iter()
-        .map(|(value, _)| value.syntax().range())
+        .map(|(value, _)| value.syntax().span())
         .collect_vec();
     let mut changes = vec![];
 
@@ -132,7 +132,7 @@ pub(in crate::editor) async fn array_values_order<'a>(
 
     if old_order.into_iter().eq(sorted_values_with_comma
         .iter()
-        .map(|(value, _)| value.syntax().range()))
+        .map(|(value, _)| value.syntax().span()))
     {
         return Vec::new();
     }
@@ -170,7 +170,7 @@ pub(in crate::editor) async fn array_values_order<'a>(
 
     changes.insert(
         0,
-        crate::editor::Change::replace_range(&old_first, &old_last, new),
+        crate::editor::Change::replace_span(&old_first, &old_last, new),
     );
 
     changes

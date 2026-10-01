@@ -31,7 +31,7 @@ pub async fn handle_get_status(
         let document_sources = backend.document_sources.read().await;
         if let Some(document_source) = document_sources.get(&text_document_uri) {
             let (toml_version, source) = backend
-                .text_document_toml_version_and_source(&text_document_uri, document_source.text())
+                .text_document_toml_version_and_source(&text_document_uri, &document_source.ast())
                 .await;
 
             let root = document_source.ast();

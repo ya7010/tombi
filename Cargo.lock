@@ -2703,7 +2703,6 @@ name = "tombi-ast-syntax"
 version = "0.0.0-dev"
 dependencies = [
  "itertools 0.14.0",
- "memchr",
  "pretty_assertions",
  "tempfile",
  "thiserror 2.0.20",
@@ -2713,7 +2712,6 @@ dependencies = [
  "tombi-toml-text",
  "tombi-toml-version",
  "tombi-uri",
- "unicode-segmentation",
 ]
 
 [[package]]
@@ -2757,6 +2755,7 @@ dependencies = [
  "tombi-glob",
  "tombi-linter",
  "tombi-lsp",
+ "tombi-parser",
  "tombi-regex",
  "tombi-schema-store",
  "tombi-text",
@@ -2843,11 +2842,9 @@ dependencies = [
  "clap",
  "env_logger",
  "nu-ansi-term",
- "pyo3",
  "serde",
  "tombi-text",
  "tower-lsp",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -3163,7 +3160,9 @@ dependencies = [
  "tombi-formatter",
  "tombi-glob",
  "tombi-linter",
+ "tombi-parser",
  "tombi-schema-store",
+ "tombi-text",
 ]
 
 [[package]]

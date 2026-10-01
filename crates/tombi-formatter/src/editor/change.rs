@@ -61,7 +61,7 @@ impl Change {
         })
     }
 
-    pub(super) fn replace_range(
+    pub(super) fn replace_span(
         first: &SyntaxNode,
         last: &SyntaxNode,
         new: Vec<SourcePart>,
@@ -156,7 +156,7 @@ pub(super) fn apply(root: &SyntaxNode, changes: Vec<Change>) -> Result<String, R
                     })
                     .collect::<Result<Vec<_>, _>>()?;
                 insert_marker(&mut pieces, old.start).ok_or(RewriteError::TargetNotFound {
-                    operation: "replace range",
+                    operation: "replace span",
                 })?;
                 remove_source_span(&mut pieces, old);
                 for part in &new {

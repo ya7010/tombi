@@ -50,7 +50,7 @@ pub(in crate::editor) async fn inline_table_keys_order<'a>(
 
     let old_order = key_values_with_comma
         .iter()
-        .map(|(key_value, _)| key_value.syntax().range())
+        .map(|(key_value, _)| key_value.syntax().span())
         .collect_vec();
     let mut changes = vec![];
 
@@ -87,7 +87,7 @@ pub(in crate::editor) async fn inline_table_keys_order<'a>(
 
     if old_order.into_iter().eq(sorted_key_values_with_comma
         .iter()
-        .map(|(key_value, _)| key_value.syntax().range()))
+        .map(|(key_value, _)| key_value.syntax().span()))
     {
         return Vec::new();
     }
@@ -125,7 +125,7 @@ pub(in crate::editor) async fn inline_table_keys_order<'a>(
 
     changes.insert(
         0,
-        crate::editor::Change::replace_range(&old_first, &old_last, new),
+        crate::editor::Change::replace_span(&old_first, &old_last, new),
     );
 
     changes

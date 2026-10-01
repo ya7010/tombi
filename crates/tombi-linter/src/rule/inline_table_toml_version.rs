@@ -13,19 +13,19 @@ impl Rule<tombi_ast_syntax::InlineTable> for InlineTableTomlVersionRule {
             l.extend_diagnostics(Diagnostic {
                 kind: DiagnosticKind::InlineTableMustSingleLine,
                 level: SeverityLevel::Error,
-                range: node.range(),
+                span: node.span(),
             });
         }
         if node.has_last_key_value_trailing_comma()
-            && let Some(comma_range) = node
+            && let Some(comma_span) = node
                 .key_values_with_comma()
                 .last()
-                .and_then(|(_, comma)| comma.map(|c| c.range()))
+                .and_then(|(_, comma)| comma.map(|c| c.span()))
         {
             l.extend_diagnostics(Diagnostic {
                 kind: DiagnosticKind::ForbiddenInlineTableLastComma,
                 level: SeverityLevel::Error,
-                range: comma_range,
+                span: comma_span,
             });
         }
     }

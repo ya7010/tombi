@@ -65,11 +65,7 @@ impl FormattedFile {
     fn failed(source_path: Option<&std::path::Path>, error: crate::Error) -> Self {
         Self {
             result: Err(error),
-            report: FileReport::new(
-                source_path.map(ToOwned::to_owned),
-                String::new(),
-                Vec::new(),
-            ),
+            report: FileReport::new(source_path.map(ToOwned::to_owned), None, Vec::new()),
         }
     }
 }
@@ -357,13 +353,15 @@ async fn format_stdin(
         );
     }
 
+    let parsed = tombi_parser::parse(&source);
+    let line_index = std::sync::Arc::clone(parsed.line_index());
     let (result, diagnostics) = match tombi_formatter::Formatter::new(
         toml_version,
         format_options,
         file.source().map(itertools::Either::Right),
         schema_store,
     )
-    .format(&source)
+    .format_parsed(parsed)
     .await
     {
         Ok(formatted) => {
@@ -392,7 +390,11 @@ async fn format_stdin(
 
     FormattedFile {
         result,
-        report: FileReport::new(file.source().map(ToOwned::to_owned), source, diagnostics),
+        report: FileReport::new(
+            file.source().map(ToOwned::to_owned),
+            Some(line_index),
+            diagnostics,
+        ),
     }
 }
 
@@ -413,13 +415,15 @@ async fn format_file(
         );
     }
 
+    let parsed = tombi_parser::parse(&source);
+    let line_index = std::sync::Arc::clone(parsed.line_index());
     let (result, diagnostics) = match tombi_formatter::Formatter::new(
         toml_version,
         format_options,
         Some(itertools::Either::Right(source_path)),
         schema_store,
     )
-    .format(&source)
+    .format_parsed(parsed)
     .await
     {
         Ok(formatted) => {
@@ -457,7 +461,7 @@ async fn format_file(
 
     FormattedFile {
         result,
-        report: FileReport::new(Some(source_path.to_owned()), source, diagnostics),
+        report: FileReport::new(Some(source_path.to_owned()), Some(line_index), diagnostics),
     }
 }
 

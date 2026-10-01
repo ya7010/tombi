@@ -9,8 +9,11 @@ impl ReportFormat for JsonFormat {
     type Range = tombi_text::Range;
 
     /// Columns count grapheme clusters, like the output of `pretty`.
-    fn convert_ranges(_source: &str, ranges: &[tombi_text::Range]) -> Vec<tombi_text::Range> {
-        ranges.to_vec()
+    fn convert_spans(
+        line_index: &tombi_text::LineIndex,
+        spans: &[tombi_text::Span],
+    ) -> Vec<tombi_text::Range> {
+        super::grapheme_ranges(line_index, spans)
     }
 
     /// Renders a JSON array of diagnostics.

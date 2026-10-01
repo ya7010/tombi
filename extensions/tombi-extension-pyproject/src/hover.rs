@@ -16,7 +16,7 @@ pub async fn hover(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     toml_version: TomlVersion,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
@@ -33,7 +33,7 @@ pub async fn hover(
         || matches_accessors!(accessors, ["tool", "uv", "sources", _, _])
     {
         if let Some((_, value)) = dig_accessors(document_tree, &accessors[..4])
-            && value.contains(position)
+            && value.contains(offset)
         {
             return Ok(None);
         }

@@ -17,12 +17,13 @@ use crate::{
 impl GetTypeDefinition for tombi_document_tree_syntax::Table {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        position: tombi_text::Position,
+        cursor: crate::CursorPosition<'a>,
         keys: &'a [tombi_document_tree_syntax::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,
         schema_context: &'a tombi_schema_store::SchemaContext,
     ) -> tombi_future::BoxFuture<'b, Vec<TypeDefinition>> {
+        let offset = cursor.offset();
         log::trace!("self = {:?}", self);
         log::trace!("keys = {:?}", keys);
         log::trace!("accessors = {:?}", accessors);
@@ -30,7 +31,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
 
         async move {
             if let Some((comment_directive_context, schema_uri)) =
-                get_table_comment_directive_content_with_schema_uri(self, position, accessors)
+                get_table_comment_directive_content_with_schema_uri(self, offset, accessors)
                 && let hover_content = get_tombi_value_comment_directive_type_definition(
                     comment_directive_context,
                     schema_uri,
@@ -47,7 +48,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
             {
                 return self
                     .get_type_definition(
-                        position,
+                        cursor,
                         keys,
                         accessors,
                         Some(&current_schema),
@@ -87,13 +88,13 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                         )
                                         .await
                                     {
-                                        if tombi_document_tree_syntax::ValueImpl::range(key)
-                                            .contains(position)
+                                        if tombi_document_tree_syntax::ValueImpl::span(key)
+                                            .contains_inclusive(offset)
                                         {
                                             return current_schema
                                                 .schema_view
                                                 .get_type_definition(
-                                                    position,
+                                                    cursor,
                                                     &keys[1..],
                                                     &accessors,
                                                     Some(&current_schema),
@@ -109,7 +110,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                         }
                                         return value
                                             .get_type_definition(
-                                                position,
+                                                cursor,
                                                 &keys[1..],
                                                 &accessors,
                                                 Some(&current_schema),
@@ -125,7 +126,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
 
                                     return value
                                         .get_type_definition(
-                                            position,
+                                            cursor,
                                             &keys[1..],
                                             &accessors,
                                             None,
@@ -159,7 +160,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                                 {
                                                     return value
                                                         .get_type_definition(
-                                                            position,
+                                                            cursor,
                                                             &keys[1..],
                                                             &accessors,
                                                             Some(&current_schema),
@@ -177,7 +178,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
 
                                                 return value
                                                     .get_type_definition(
-                                                        position,
+                                                        cursor,
                                                         &keys[1..],
                                                         &accessors,
                                                         None,
@@ -211,7 +212,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                 {
                                     return value
                                         .get_type_definition(
-                                            position,
+                                            cursor,
                                             &keys[1..],
                                             &accessors,
                                             Some(&current_schema),
@@ -229,7 +230,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                 if let Some(one_of_schema) = table_schema.one_of.as_deref()
                                     && let type_definitions = get_one_of_type_definition(
                                         self,
-                                        position,
+                                        cursor,
                                         keys,
                                         &accessors,
                                         one_of_schema,
@@ -244,7 +245,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                 if let Some(any_of_schema) = table_schema.any_of.as_deref()
                                     && let type_definitions = get_any_of_type_definition(
                                         self,
-                                        position,
+                                        cursor,
                                         keys,
                                         &accessors,
                                         any_of_schema,
@@ -259,7 +260,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                 if let Some(all_of_schema) = table_schema.all_of.as_deref()
                                     && let type_definitions = get_all_of_type_definition(
                                         self,
-                                        position,
+                                        cursor,
                                         keys,
                                         &accessors,
                                         all_of_schema,
@@ -282,7 +283,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                 {
                                     return value
                                         .get_type_definition(
-                                            position,
+                                            cursor,
                                             &keys[1..],
                                             &accessors,
                                             Some(&current_schema),
@@ -293,7 +294,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
 
                                 value
                                     .get_type_definition(
-                                        position,
+                                        cursor,
                                         &keys[1..],
                                         &accessors,
                                         None,
@@ -301,11 +302,12 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                                     )
                                     .await
                             } else {
+                                // The fragment is a line of the schema, not of the TOML document.
                                 let mut schema_base_uri =
                                     current_schema.schema_base_uri.as_ref().clone();
                                 schema_base_uri.set_fragment(Some(&format!(
                                     "L{}",
-                                    key.range().start.line + 1
+                                    current_schema.schema_view.range().start.line + 1
                                 )));
 
                                 vec![TypeDefinition {
@@ -320,7 +322,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                         } else {
                             let type_definition = table_schema
                                 .get_type_definition(
-                                    position,
+                                    cursor,
                                     keys,
                                     accessors,
                                     Some(current_schema),
@@ -335,7 +337,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                             if let Some(one_of_schema) = table_schema.one_of.as_deref()
                                 && let type_definitions = get_one_of_type_definition(
                                     self,
-                                    position,
+                                    cursor,
                                     keys,
                                     accessors,
                                     one_of_schema,
@@ -350,7 +352,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                             if let Some(any_of_schema) = table_schema.any_of.as_deref()
                                 && let type_definitions = get_any_of_type_definition(
                                     self,
-                                    position,
+                                    cursor,
                                     keys,
                                     accessors,
                                     any_of_schema,
@@ -365,7 +367,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                             if let Some(all_of_schema) = table_schema.all_of.as_deref()
                                 && let type_definitions = get_all_of_type_definition(
                                     self,
-                                    position,
+                                    cursor,
                                     keys,
                                     accessors,
                                     all_of_schema,
@@ -384,7 +386,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                     SchemaView::OneOf(one_of_schema) => {
                         get_one_of_type_definition(
                             self,
-                            position,
+                            cursor,
                             keys,
                             accessors,
                             one_of_schema,
@@ -396,7 +398,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                     SchemaView::AnyOf(any_of_schema) => {
                         get_any_of_type_definition(
                             self,
-                            position,
+                            cursor,
                             keys,
                             accessors,
                             any_of_schema,
@@ -408,7 +410,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
                     SchemaView::AllOf(all_of_schema) => {
                         get_all_of_type_definition(
                             self,
-                            position,
+                            cursor,
                             keys,
                             accessors,
                             all_of_schema,
@@ -431,7 +433,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
 
                     return value
                         .get_type_definition(
-                            position,
+                            cursor,
                             &keys[1..],
                             &accessors
                                 .iter()
@@ -453,7 +455,7 @@ impl GetTypeDefinition for tombi_document_tree_syntax::Table {
 impl GetTypeDefinition for TableSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        _position: tombi_text::Position,
+        _cursor: crate::CursorPosition<'a>,
         _keys: &'a [tombi_document_tree_syntax::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,

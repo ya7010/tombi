@@ -8,17 +8,18 @@
 //! (`tombi-lib-node`) binding crates; they are only available on non-wasm
 //! targets.
 
+mod diagnostic;
 mod error;
 mod format;
 mod lint;
 
+pub use diagnostic::Diagnostic;
 pub use error::Error;
 pub use format::{FormatResult, format_async};
 pub use lint::{LintResult, lint_async};
-pub use tombi_diagnostic::Diagnostic;
 
 #[cfg(feature = "python")]
-pub use tombi_diagnostic::{Position, Range};
+pub use diagnostic::{Position, Range};
 
 #[cfg(not(target_family = "wasm"))]
 pub use format::format_sync;

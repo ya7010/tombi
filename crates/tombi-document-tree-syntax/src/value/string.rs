@@ -14,7 +14,7 @@ use tombi_document_tree::StringKind;
 pub struct String {
     kind: StringKind,
     value: crate::DocumentText,
-    range: tombi_text::Range,
+    span: tombi_text::Span,
     pub(crate) comment_directives: Option<Vec<TombiValueCommentDirective>>,
 }
 
@@ -37,13 +37,13 @@ impl crate::String {
     fn new(
         kind: StringKind,
         value: crate::DocumentText,
-        range: tombi_text::Range,
+        span: tombi_text::Span,
         comment_directives: Option<Vec<TombiValueCommentDirective>>,
     ) -> Self {
         Self {
             kind,
             value,
-            range,
+            span,
             comment_directives,
         }
     }
@@ -59,24 +59,24 @@ impl crate::String {
     }
 
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.range
+    pub fn span(&self) -> tombi_text::Span {
+        self.span
     }
 
     #[inline]
-    pub fn unquoted_range(&self) -> tombi_text::Range {
+    pub fn unquoted_span(&self) -> tombi_text::Span {
         match self.kind() {
             StringKind::BasicString | StringKind::LiteralString => {
-                let mut range = self.range;
-                range.start.column += 1;
-                range.end.column -= 1;
-                range
+                let mut span = self.span;
+                span.start += 1;
+                span.end -= 1;
+                span
             }
             StringKind::MultiLineBasicString | StringKind::MultiLineLiteralString => {
-                let mut range = self.range;
-                range.start.column += 3;
-                range.end.column -= 3;
-                range
+                let mut span = self.span;
+                span.start += 3;
+                span.end -= 3;
+                span
             }
         }
     }
@@ -94,8 +94,8 @@ impl ValueImpl for crate::String {
         ValueType::String
     }
 
-    fn range(&self) -> tombi_text::Range {
-        self.range
+    fn span(&self) -> tombi_text::Span {
+        self.span
     }
 }
 
@@ -115,9 +115,9 @@ impl IntoDocumentTreeWithContext<crate::Value> for tombi_ast_syntax::BasicString
         context: &crate::DocumentTreeContext,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let token = self.token();
-        let range = self.range();
+        let span = self.span();
 
-        into_string_and_errors(self, StringKind::BasicString, token, range, context)
+        into_string_and_errors(self, StringKind::BasicString, token, span, context)
     }
 }
 
@@ -127,9 +127,9 @@ impl IntoDocumentTreeWithContext<crate::Value> for tombi_ast_syntax::LiteralStri
         context: &crate::DocumentTreeContext,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let token = self.token();
-        let range = self.range();
+        let span = self.span();
 
-        into_string_and_errors(self, StringKind::LiteralString, token, range, context)
+        into_string_and_errors(self, StringKind::LiteralString, token, span, context)
     }
 }
 
@@ -139,15 +139,9 @@ impl IntoDocumentTreeWithContext<crate::Value> for tombi_ast_syntax::MultiLineBa
         context: &crate::DocumentTreeContext,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let token = self.token();
-        let range = self.range();
+        let span = self.span();
 
-        into_string_and_errors(
-            self,
-            StringKind::MultiLineBasicString,
-            token,
-            range,
-            context,
-        )
+        into_string_and_errors(self, StringKind::MultiLineBasicString, token, span, context)
     }
 }
 
@@ -157,13 +151,13 @@ impl IntoDocumentTreeWithContext<crate::Value> for tombi_ast_syntax::MultiLineLi
         context: &crate::DocumentTreeContext,
     ) -> DocumentTreeAndErrors<crate::Value> {
         let token = self.token();
-        let range = self.range();
+        let span = self.span();
 
         into_string_and_errors(
             self,
             StringKind::MultiLineLiteralString,
             token,
-            range,
+            span,
             context,
         )
     }
@@ -173,16 +167,16 @@ fn into_string_and_errors<T: AstNode>(
     node: T,
     string_kind: StringKind,
     token: Option<tombi_ast_syntax::SyntaxToken>,
-    range: tombi_text::Range,
+    span: tombi_text::Span,
     context: &crate::DocumentTreeContext,
 ) -> DocumentTreeAndErrors<crate::Value> {
     let (comment_directives, mut errors) = collect_comment_directives_and_errors(&node);
 
     let Some(token) = token else {
-        errors.push(crate::Error::IncompleteNode { range });
+        errors.push(crate::Error::IncompleteNode { span });
 
         return DocumentTreeAndErrors {
-            tree: crate::Value::Incomplete { range },
+            tree: crate::Value::Incomplete { span },
             errors,
         };
     };
@@ -191,13 +185,13 @@ fn into_string_and_errors<T: AstNode>(
         Ok(value) => crate::Value::String(crate::String::new(
             string_kind,
             value,
-            token.range(),
+            token.span(),
             comment_directives,
         )),
         Err(error) => {
-            errors.push(crate::Error::ParseStringError { error, range });
+            errors.push(crate::Error::ParseStringError { error, span });
 
-            crate::Value::Incomplete { range }
+            crate::Value::Incomplete { span }
         }
     };
 

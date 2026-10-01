@@ -9,8 +9,8 @@ macro_rules! impl_node {
         $(
             impl tombi_ast::Node for $ty {
                 #[inline]
-                fn range(&self) -> tombi_text::Range {
-                    self.syntax().range()
+                fn span(&self) -> tombi_text::Span {
+                    self.syntax().span()
                 }
 
                 #[inline]
@@ -37,8 +37,8 @@ impl_node!(
 
 impl tombi_ast::Node for crate::Comment {
     #[inline]
-    fn range(&self) -> tombi_text::Range {
-        self.syntax().range()
+    fn span(&self) -> tombi_text::Span {
+        self.syntax().span()
     }
 
     #[inline]

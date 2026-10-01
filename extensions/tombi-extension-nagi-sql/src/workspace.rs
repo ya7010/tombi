@@ -55,7 +55,10 @@ pub(crate) fn workspace_source_definition_location(
 
     Some(tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: source_key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: source_key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     })
 }
 
@@ -151,7 +154,10 @@ fn source_reference_location(
 
     Some(tombi_extension::Location {
         uri: tombi_uri::Uri::from_file_path(config_path).ok()?,
-        range: source_key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: source_key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     })
 }
 
@@ -165,7 +171,7 @@ fn member_config_locations(
         .filter_map(|config_path| {
             Some(tombi_extension::Location {
                 uri: tombi_uri::Uri::from_file_path(config_path).ok()?,
-                range: tombi_text::Range::default(),
+                span: None,
             })
         })
         .collect()
@@ -241,7 +247,10 @@ fn workspace_source_location(
             dig_keys(member_document_tree, &["workspace", "sources", source_name])?;
         return Some(tombi_extension::Location {
             uri: tombi_uri::Uri::from_file_path(member_config_path).ok()?,
-            range: source_key.unquoted_range(),
+            span: Some(tombi_extension::LocatedSpan {
+                span: source_key.unquoted_span(),
+                line_index: std::sync::Arc::clone(member_document_tree.line_index()),
+            }),
         });
     }
 
@@ -254,7 +263,10 @@ fn workspace_source_location(
 
     Some(tombi_extension::Location {
         uri: tombi_uri::Uri::from_file_path(workspace_config_path).ok()?,
-        range: source_key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: source_key.unquoted_span(),
+            line_index: std::sync::Arc::clone(workspace_document_tree.line_index()),
+        }),
     })
 }
 

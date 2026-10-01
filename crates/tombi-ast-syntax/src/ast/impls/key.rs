@@ -32,11 +32,11 @@ impl crate::Key {
         self.syntax().try_to_content(toml_version)
     }
 
-    pub fn range(&self) -> tombi_text::Range {
+    pub fn span(&self) -> tombi_text::Span {
         match self {
-            Self::BareKey(key) => key.range(),
-            Self::BasicString(key) => key.range(),
-            Self::LiteralString(key) => key.range(),
+            Self::BareKey(key) => key.span(),
+            Self::BasicString(key) => key.span(),
+            Self::LiteralString(key) => key.span(),
         }
     }
 }

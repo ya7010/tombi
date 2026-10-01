@@ -92,7 +92,7 @@ pub async fn document_link(
                 if let Some(target) = get_document_link(path.value(), &tombi_toml_path) {
                     document_links.push(tombi_extension::DocumentLink {
                         target,
-                        range: path.unquoted_range(),
+                        span: path.unquoted_span(),
                         tooltip: DocumentLinkToolTip::Catalog.into(),
                     });
                 }
@@ -110,7 +110,7 @@ pub async fn document_link(
                 if let Some(target) = get_document_link(path.value(), &tombi_toml_path) {
                     document_links.push(tombi_extension::DocumentLink {
                         target,
-                        range: path.unquoted_range(),
+                        span: path.unquoted_span(),
                         tooltip: DocumentLinkToolTip::Catalog.into(),
                     });
                 }
@@ -134,7 +134,7 @@ pub async fn document_link(
 
                 document_links.push(tombi_extension::DocumentLink {
                     target,
-                    range: path.unquoted_range(),
+                    span: path.unquoted_span(),
                     tooltip: DocumentLinkToolTip::Schema.into(),
                 });
             }

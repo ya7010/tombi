@@ -14,6 +14,6 @@ pub(crate) fn try_from_comment(value: &str) -> Result<String, ParseError> {
 pub(crate) fn try_new_comment(node: &tombi_ast_syntax::Comment) -> Result<String, crate::Error> {
     try_from_comment(node.syntax().text()).map_err(|error| crate::Error::ParseCommentError {
         error,
-        range: node.syntax().range(),
+        span: node.syntax().span(),
     })
 }

@@ -20,8 +20,9 @@ pub async fn handle_semantic_tokens_full(
         return Ok(None);
     };
     let line_index = document_source.line_index();
+    let encoding = document_source.encoding_kind();
 
-    let mut tokens_builder = SemanticTokensBuilder::new(text_document_uri, line_index);
+    let mut tokens_builder = SemanticTokensBuilder::new(text_document_uri, line_index, encoding);
 
     document_source
         .ast()

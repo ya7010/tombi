@@ -12,10 +12,10 @@ impl crate::Root {
             .filter(|token| token.kind() == crate::SyntaxKind::LINE_BREAK)
     }
 
-    pub fn comment_at_position(&self, position: tombi_text::Position) -> Option<crate::Comment> {
+    pub fn comment_at_offset(&self, offset: tombi_text::Offset) -> Option<crate::Comment> {
         use crate::AstToken;
 
-        match self.syntax().token_at_position(position) {
+        match self.syntax().token_at_offset(offset) {
             crate::TokenAtOffset::Single(token) => crate::Comment::cast(token),
             crate::TokenAtOffset::Between(left, right) => {
                 crate::Comment::cast(left).or_else(|| crate::Comment::cast(right))
@@ -32,53 +32,52 @@ impl crate::Root {
             .filter_map(crate::TomlNode::cast)
     }
 
-    /// TOML nodes containing `position`, ordered from the innermost node to
+    /// TOML nodes containing `offset`, ordered from the innermost node to
     /// the root. Parser-only grouping nodes are intentionally omitted.
-    pub fn nodes_at_position(
+    pub fn nodes_at_offset(
         &self,
-        position: tombi_text::Position,
+        offset: tombi_text::Offset,
     ) -> impl Iterator<Item = crate::TomlNode> {
-        crate::algo::ancestors_at_position(self.syntax(), position)
-            .filter_map(crate::TomlNode::cast)
+        crate::algo::ancestors_at_offset(self.syntax(), offset).filter_map(crate::TomlNode::cast)
     }
 
     /// Returns commas immediately before and after the syntax item at
-    /// `position`, including commas recovered as invalid syntax.
-    pub fn adjacent_commas(&self, position: tombi_text::Position) -> crate::AdjacentCommas {
+    /// `offset`, including commas recovered as invalid syntax.
+    pub fn adjacent_commas(&self, offset: tombi_text::Offset) -> crate::AdjacentCommas {
         use crate::{Direction, NodeOrToken, SyntaxElement, SyntaxKind};
 
-        let Some(node) = crate::algo::ancestors_at_position(self.syntax(), position).next() else {
+        let Some(node) = crate::algo::ancestors_at_offset(self.syntax(), offset).next() else {
             return crate::AdjacentCommas::default();
         };
 
         let before = node
             .last_child()
             .filter(|child| child.kind() == SyntaxKind::COMMA)
-            .map(|child| child.range())
+            .map(|child| child.span())
             .or_else(|| {
                 node.siblings_with_tokens(Direction::Prev)
-                    .find(|element| !element.range().contains(position))
+                    .find(|element| !element.span().contains_inclusive(offset))
                     .filter(|element| element.kind() == SyntaxKind::COMMA)
-                    .map(|element| element.range())
+                    .map(|element| element.span())
             });
 
         let after = node
             .siblings_with_tokens(Direction::Next)
             .next()
             .and_then(|element| match element.kind() {
-                SyntaxKind::COMMA => Some(element.range()),
+                SyntaxKind::COMMA => Some(element.span()),
                 SyntaxKind::INVALID_TOKEN => match element {
                     NodeOrToken::Node(node) => node
                         .first_child_or_token()
                         .and_then(SyntaxElement::into_token)
                         .filter(|token| token.kind() == SyntaxKind::COMMA)
-                        .map(|token| token.range()),
+                        .map(|token| token.span()),
                     NodeOrToken::Token(_) => None,
                 },
                 SyntaxKind::ARRAY => match element {
                     NodeOrToken::Node(node) => crate::Array::cast(node)
-                        .and_then(|array| array.comma_after(position))
-                        .map(|comma| comma.range()),
+                        .and_then(|array| array.comma_after(offset))
+                        .map(|comma| comma.span()),
                     NodeOrToken::Token(_) => None,
                 },
                 _ => None,
@@ -87,25 +86,24 @@ impl crate::Root {
         crate::AdjacentCommas { before, after }
     }
 
-    /// Innermost key-value containing `position`.
-    pub fn enclosing_key_value(&self, position: tombi_text::Position) -> Option<crate::KeyValue> {
-        self.nodes_at_position(position)
-            .find_map(|node| match node {
-                crate::TomlNode::KeyValue(key_value) => Some(key_value),
-                _ => None,
-            })
-    }
-
-    pub fn array_at_range(&self, range: tombi_text::Range) -> Option<crate::Array> {
-        self.nodes().find_map(|node| match node {
-            crate::TomlNode::Array(array) if array.range() == range => Some(array),
+    /// Innermost key-value containing `offset`.
+    pub fn enclosing_key_value(&self, offset: tombi_text::Offset) -> Option<crate::KeyValue> {
+        self.nodes_at_offset(offset).find_map(|node| match node {
+            crate::TomlNode::KeyValue(key_value) => Some(key_value),
             _ => None,
         })
     }
 
-    pub fn inline_table_at_range(&self, range: tombi_text::Range) -> Option<crate::InlineTable> {
+    pub fn array_at_span(&self, span: tombi_text::Span) -> Option<crate::Array> {
         self.nodes().find_map(|node| match node {
-            crate::TomlNode::InlineTable(table) if table.range() == range => Some(table),
+            crate::TomlNode::Array(array) if array.span() == span => Some(array),
+            _ => None,
+        })
+    }
+
+    pub fn inline_table_at_span(&self, span: tombi_text::Span) -> Option<crate::InlineTable> {
+        self.nodes().find_map(|node| match node {
+            crate::TomlNode::InlineTable(table) if table.span() == span => Some(table),
             _ => None,
         })
     }

@@ -86,7 +86,7 @@ struct CargoLockInlayCacheData {
 
 struct DependencyVersionHint {
     dependency_name: String,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     current_version: Option<String>,
     always_show: bool,
     local_version_source: Option<LocalVersionSource>,
@@ -98,7 +98,7 @@ enum LocalVersionSource {
 }
 
 struct DefaultFeaturesHint {
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     label: String,
     tooltip: String,
 }
@@ -149,7 +149,7 @@ impl WorkspaceDocumentTree<'_> {
 pub async fn inlay_hint(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     toml_version: TomlVersion,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
@@ -190,11 +190,11 @@ pub async fn inlay_hint(
                 preload_local_cargo_toml_cache(
                     document_tree,
                     &cargo_toml_path,
-                    visible_range,
+                    visible_span,
                     toml_version,
                     dependency_version_enabled,
                     default_features_enabled,
-                    has_visible_workspace_value_targets(document_tree, visible_range),
+                    has_visible_workspace_value_targets(document_tree, visible_span),
                 )
                 .await
             } else {
@@ -210,7 +210,7 @@ pub async fn inlay_hint(
         inlay_hint_impl(
             &sync_text_document_uri,
             &sync_document_tree,
-            visible_range,
+            visible_span,
             cargo_lock_cache,
             local_cargo_toml_cache,
             toml_version,
@@ -234,7 +234,7 @@ pub async fn inlay_hint(
             registry_default_features_inlay_hints(
                 text_document_uri,
                 document_tree,
-                visible_range,
+                visible_span,
                 toml_version,
                 offline,
                 cache_options,
@@ -246,7 +246,7 @@ pub async fn inlay_hint(
     if hints.is_empty() {
         Ok(None)
     } else {
-        hints.sort_by_key(|hint| hint.position);
+        hints.sort_by_key(|hint| hint.offset);
         Ok(Some(hints))
     }
 }
@@ -254,7 +254,7 @@ pub async fn inlay_hint(
 fn inlay_hint_impl(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     cargo_lock_cache: Option<CargoLockInlayCacheData>,
     mut local_cargo_toml_cache: LocalCargoTomlCache,
     toml_version: TomlVersion,
@@ -286,7 +286,7 @@ fn inlay_hint_impl(
             &cargo_toml_path,
             &mut local_cargo_toml_cache,
             toml_version,
-            visible_range,
+            visible_span,
             &mut hints,
         );
     }
@@ -300,7 +300,7 @@ fn inlay_hint_impl(
                 cargo_lock_cache.as_ref(),
                 &mut local_cargo_toml_cache,
                 toml_version,
-                visible_range,
+                visible_span,
                 dependency_version_enabled,
                 default_features_enabled,
                 &mut hints,
@@ -314,7 +314,7 @@ fn inlay_hint_impl(
             cargo_lock_cache.as_ref(),
             &mut local_cargo_toml_cache,
             toml_version,
-            visible_range,
+            visible_span,
             dependency_version_enabled,
             default_features_enabled,
             &mut hints,
@@ -334,7 +334,7 @@ fn inlay_hint_impl(
                         cargo_lock_cache.as_ref(),
                         &mut local_cargo_toml_cache,
                         toml_version,
-                        visible_range,
+                        visible_span,
                         dependency_version_enabled,
                         default_features_enabled,
                         &mut hints,
@@ -347,7 +347,7 @@ fn inlay_hint_impl(
     if hints.is_empty() {
         Ok(None)
     } else {
-        hints.sort_by_key(|hint| hint.position);
+        hints.sort_by_key(|hint| hint.offset);
         Ok(Some(hints))
     }
 }
@@ -357,10 +357,10 @@ fn collect_workspace_value_inlay_hints(
     cargo_toml_path: &Path,
     local_cargo_toml_cache: &mut LocalCargoTomlCache,
     toml_version: TomlVersion,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     hints: &mut Vec<InlayHint>,
 ) {
-    if !has_visible_workspace_value_targets(document_tree, visible_range) {
+    if !has_visible_workspace_value_targets(document_tree, visible_span) {
         return;
     }
 
@@ -377,13 +377,13 @@ fn collect_workspace_value_inlay_hints(
     collect_workspace_package_inlay_hints(
         document_tree,
         workspace_document_tree,
-        visible_range,
+        visible_span,
         hints,
     );
     collect_workspace_lints_inlay_hints(
         document_tree,
         workspace_document_tree,
-        visible_range,
+        visible_span,
         hints,
     );
 }
@@ -391,7 +391,7 @@ fn collect_workspace_value_inlay_hints(
 fn collect_workspace_package_inlay_hints(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     workspace_document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     hints: &mut Vec<InlayHint>,
 ) {
     for package_item in WORKSPACE_PACKAGE_ITEMS {
@@ -411,14 +411,14 @@ fn collect_workspace_package_inlay_hints(
             continue;
         };
 
-        push_workspace_value_hint(workspace, workspace_value, visible_range, hints);
+        push_workspace_value_hint(workspace, workspace_value, visible_span, hints);
     }
 }
 
 fn collect_workspace_lints_inlay_hints(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     workspace_document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     hints: &mut Vec<InlayHint>,
 ) {
     let Some((_, Value::Boolean(workspace))) = dig_keys(document_tree, &["lints", "workspace"])
@@ -434,35 +434,35 @@ fn collect_workspace_lints_inlay_hints(
         return;
     };
 
-    push_workspace_value_hint(workspace, workspace_value, visible_range, hints);
+    push_workspace_value_hint(workspace, workspace_value, visible_span, hints);
 }
 
 fn has_visible_workspace_value_targets(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
 ) -> bool {
     WORKSPACE_PACKAGE_ITEMS.iter().any(|package_item| {
         matches!(
             dig_keys(document_tree, &["package", package_item, "workspace"]),
             Some((_, Value::Boolean(workspace)))
                 if workspace.value()
-                    && tombi_text::Range::at(workspace.range().end).intersects(visible_range)
+                    && tombi_text::Span::empty(workspace.span().end).intersects(visible_span)
         )
     }) || matches!(
         dig_keys(document_tree, &["lints", "workspace"]),
         Some((_, Value::Boolean(workspace)))
             if workspace.value()
-                && tombi_text::Range::at(workspace.range().end).intersects(visible_range)
+                && tombi_text::Span::empty(workspace.span().end).intersects(visible_span)
     )
 }
 
 fn push_workspace_value_hint(
     workspace: &tombi_document_tree_syntax::Boolean,
     workspace_value: &Value,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     hints: &mut Vec<InlayHint>,
 ) {
-    if !tombi_text::Range::at(workspace.range().end).intersects(visible_range) {
+    if !tombi_text::Span::empty(workspace.span().end).intersects(visible_span) {
         return;
     }
 
@@ -471,7 +471,7 @@ fn push_workspace_value_hint(
     };
 
     hints.push(InlayHint {
-        position: workspace.range().end,
+        offset: workspace.span().end,
         label,
         kind: Some(InlayHintKind::TYPE),
         tooltip: Some(WORKSPACE_INHERITED_VALUE_TOOLTIP.to_string()),
@@ -487,7 +487,7 @@ fn collect_dependency_inlay_hints(
     cargo_lock_cache: Option<&CargoLockInlayCacheData>,
     local_cargo_toml_cache: &mut LocalCargoTomlCache,
     toml_version: TomlVersion,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     dependency_version_enabled: bool,
     default_features_enabled: bool,
     hints: &mut Vec<InlayHint>,
@@ -503,7 +503,7 @@ fn collect_dependency_inlay_hints(
         if dependency_version_enabled
             && let Some(version_hint) =
                 dependency_version_hint(dependency_key.value(), dependency_value)
-            && tombi_text::Range::at(version_hint.position).intersects(visible_range)
+            && tombi_text::Span::empty(version_hint.offset).intersects(visible_span)
         {
             version_hints.push(version_hint);
         }
@@ -517,7 +517,7 @@ fn collect_dependency_inlay_hints(
                 local_cargo_toml_cache,
                 toml_version,
             )
-            && tombi_text::Range::at(default_features_hint.position).intersects(visible_range)
+            && tombi_text::Span::empty(default_features_hint.offset).intersects(visible_span)
         {
             default_feature_hints.push(default_features_hint);
         }
@@ -577,7 +577,7 @@ fn collect_dependency_inlay_hints(
     for version_hint in version_hints {
         let DependencyVersionHint {
             dependency_name,
-            position,
+            offset,
             current_version,
             always_show,
             local_version_source,
@@ -623,7 +623,7 @@ fn collect_dependency_inlay_hints(
         };
 
         hints.push(InlayHint {
-            position,
+            offset,
             label,
             kind: Some(InlayHintKind::TYPE),
             tooltip: Some(tooltip.to_string()),
@@ -633,7 +633,7 @@ fn collect_dependency_inlay_hints(
     }
 
     hints.extend(default_feature_hints.into_iter().map(|hint| InlayHint {
-        position: hint.position,
+        offset: hint.offset,
         label: hint.label,
         kind: Some(InlayHintKind::TYPE),
         tooltip: Some(hint.tooltip),
@@ -650,7 +650,7 @@ fn dependency_version_hint(
     match dependency_value {
         Value::String(version) => Some(DependencyVersionHint {
             dependency_name,
-            position: version.range().end,
+            offset: version.span().end,
             current_version: Some(version.value().to_string()),
             always_show: false,
             local_version_source: None,
@@ -659,7 +659,7 @@ fn dependency_version_hint(
             if let Some(Value::String(version)) = table.get("version") {
                 return Some(DependencyVersionHint {
                     dependency_name,
-                    position: version.range().end,
+                    offset: version.span().end,
                     current_version: Some(version.value().to_string()),
                     always_show: false,
                     local_version_source: None,
@@ -671,7 +671,7 @@ fn dependency_version_hint(
             {
                 return Some(DependencyVersionHint {
                     dependency_name,
-                    position: workspace.range().end,
+                    offset: workspace.span().end,
                     current_version: None,
                     always_show: true,
                     local_version_source: Some(LocalVersionSource::WorkspaceDependency(
@@ -683,7 +683,7 @@ fn dependency_version_hint(
             if let Some(Value::String(path)) = table.get("path") {
                 return Some(DependencyVersionHint {
                     dependency_name,
-                    position: path.range().end,
+                    offset: path.span().end,
                     current_version: None,
                     always_show: false,
                     local_version_source: Some(LocalVersionSource::Path(path.value().to_string())),
@@ -693,7 +693,7 @@ fn dependency_version_hint(
             if let Some(Value::String(git)) = table.get("git") {
                 return Some(DependencyVersionHint {
                     dependency_name,
-                    position: git.range().end,
+                    offset: git.span().end,
                     current_version: None,
                     always_show: false,
                     local_version_source: None,
@@ -837,7 +837,7 @@ fn dependency_default_features_hint(
     )?;
 
     build_default_features_hint(
-        features.range().end,
+        features.span().end,
         default_features,
         &collect_feature_names(features),
     )
@@ -907,7 +907,7 @@ fn dependency_default_features(
 async fn preload_local_cargo_toml_cache(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     cargo_toml_path: &Path,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     toml_version: TomlVersion,
     dependency_version_enabled: bool,
     default_features_enabled: bool,
@@ -915,7 +915,7 @@ async fn preload_local_cargo_toml_cache(
 ) -> LocalCargoTomlCache {
     let requests = collect_local_cargo_toml_requests(
         document_tree,
-        visible_range,
+        visible_span,
         dependency_version_enabled,
         default_features_enabled,
     );
@@ -967,7 +967,7 @@ async fn preload_local_cargo_toml_cache(
 
 fn collect_local_cargo_toml_requests(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     dependency_version_enabled: bool,
     default_features_enabled: bool,
 ) -> LocalCargoTomlRequests {
@@ -977,7 +977,7 @@ fn collect_local_cargo_toml_requests(
         collect_local_cargo_toml_requests_from_keys(
             document_tree,
             &[dependency_key],
-            visible_range,
+            visible_span,
             dependency_version_enabled,
             default_features_enabled,
             &mut requests,
@@ -987,7 +987,7 @@ fn collect_local_cargo_toml_requests(
     collect_local_cargo_toml_requests_from_keys(
         document_tree,
         &["workspace", "dependencies"],
-        visible_range,
+        visible_span,
         dependency_version_enabled,
         default_features_enabled,
         &mut requests,
@@ -1003,7 +1003,7 @@ fn collect_local_cargo_toml_requests(
                 collect_local_cargo_toml_requests_from_keys(
                     document_tree,
                     &["target", target_key.value(), dependency_key],
-                    visible_range,
+                    visible_span,
                     dependency_version_enabled,
                     default_features_enabled,
                     &mut requests,
@@ -1018,7 +1018,7 @@ fn collect_local_cargo_toml_requests(
 fn collect_local_cargo_toml_requests_from_keys(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     dependency_keys: &[&str],
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     dependency_version_enabled: bool,
     default_features_enabled: bool,
     requests: &mut LocalCargoTomlRequests,
@@ -1034,7 +1034,7 @@ fn collect_local_cargo_toml_requests_from_keys(
         if !needs_visible_local_cargo_toml_prefetch(
             dependency_key.value(),
             dependency_value,
-            visible_range,
+            visible_span,
             dependency_version_enabled,
             default_features_enabled,
         ) {
@@ -1058,27 +1058,25 @@ fn collect_local_cargo_toml_requests_from_keys(
 fn needs_visible_local_cargo_toml_prefetch(
     dependency_key: &str,
     dependency_value: &Value,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     dependency_version_enabled: bool,
     default_features_enabled: bool,
 ) -> bool {
     if dependency_version_enabled
         && dependency_version_hint(dependency_key, dependency_value).is_some_and(|hint| {
             hint.local_version_source.is_some()
-                && tombi_text::Range::at(hint.position).intersects(visible_range)
+                && tombi_text::Span::empty(hint.offset).intersects(visible_span)
         })
     {
         return true;
     }
 
     default_features_enabled
-        && local_default_features_request_position(dependency_value)
-            .is_some_and(|position| tombi_text::Range::at(position).intersects(visible_range))
+        && local_default_features_request_offset(dependency_value)
+            .is_some_and(|offset| tombi_text::Span::empty(offset).intersects(visible_span))
 }
 
-fn local_default_features_request_position(
-    dependency_value: &Value,
-) -> Option<tombi_text::Position> {
+fn local_default_features_request_offset(dependency_value: &Value) -> Option<tombi_text::Offset> {
     let Value::Table(table) = dependency_value else {
         return None;
     };
@@ -1092,7 +1090,7 @@ fn local_default_features_request_position(
     let is_local_dependency = table.get("path").is_some()
         || matches!(table.get("workspace"), Some(Value::Boolean(workspace)) if workspace.value());
 
-    is_local_dependency.then_some(features.range().end)
+    is_local_dependency.then_some(features.span().end)
 }
 
 async fn load_local_cargo_toml_entries(
@@ -1360,7 +1358,7 @@ fn find_workspace_cargo_toml_with_local_cache(
 async fn registry_default_features_inlay_hints(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     toml_version: TomlVersion,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
@@ -1383,7 +1381,7 @@ async fn registry_default_features_inlay_hints(
             &cargo_toml_path,
             cargo_lock.as_ref(),
             toml_version,
-            visible_range,
+            visible_span,
             offline,
             cache_options,
             &mut hints,
@@ -1397,7 +1395,7 @@ async fn registry_default_features_inlay_hints(
         &cargo_toml_path,
         cargo_lock.as_ref(),
         toml_version,
-        visible_range,
+        visible_span,
         offline,
         cache_options,
         &mut hints,
@@ -1417,7 +1415,7 @@ async fn registry_default_features_inlay_hints(
                     &cargo_toml_path,
                     cargo_lock.as_ref(),
                     toml_version,
-                    visible_range,
+                    visible_span,
                     offline,
                     cache_options,
                     &mut hints,
@@ -1436,7 +1434,7 @@ async fn collect_registry_default_features_inlay_hints(
     cargo_toml_path: &Path,
     cargo_lock: Option<&CargoLock>,
     toml_version: TomlVersion,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
     hints: &mut Vec<InlayHint>,
@@ -1461,12 +1459,12 @@ async fn collect_registry_default_features_inlay_hints(
             continue;
         };
 
-        if !tombi_text::Range::at(hint.position).intersects(visible_range) {
+        if !tombi_text::Span::empty(hint.offset).intersects(visible_span) {
             continue;
         }
 
         hints.push(InlayHint {
-            position: hint.position,
+            offset: hint.offset,
             label: hint.label,
             kind: Some(InlayHintKind::TYPE),
             tooltip: Some(hint.tooltip),
@@ -1562,7 +1560,7 @@ async fn registry_dependency_default_features_hint(
     };
 
     Ok(build_default_features_hint(
-        features.range().end,
+        features.span().end,
         default_features,
         &collect_feature_names(features),
     ))
@@ -1602,7 +1600,7 @@ fn dependency_table_default_features_disabled(table: &tombi_document_tree_syntax
 }
 
 fn build_default_features_hint(
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     mut default_features: Vec<String>,
     existing_features: &HashSet<String>,
 ) -> Option<DefaultFeaturesHint> {
@@ -1619,7 +1617,7 @@ fn build_default_features_hint(
     }
 
     Some(DefaultFeaturesHint {
-        position,
+        offset,
         label: format_default_features_label(&missing_default_features),
         tooltip: format_default_features_tooltip(&default_features),
     })
@@ -2161,7 +2159,9 @@ mod tests {
 
     use super::*;
     use crate::cargo_lock::{CargoLockDependency, CargoLockPackage};
+    use tombi_ast_syntax::AstNode as _;
     use tombi_document_tree_syntax::TryIntoDocumentTree;
+    use tombi_text::EncodingKind;
 
     fn parse_document_tree(source: &str) -> tombi_document_tree_syntax::DocumentTree {
         let root = tombi_parser::parse(source).into_root();
@@ -2186,14 +2186,13 @@ mod tests {
         );
         let (_, serde_value) =
             dig_keys(&document_tree, &["dependencies", "serde"]).expect("expected serde");
-        let visible_range = tombi_text::Range::at(
+        let visible_span = tombi_text::Span::empty(
             dependency_version_hint("serde", serde_value)
                 .unwrap()
-                .position,
+                .offset,
         );
 
-        let requests =
-            collect_local_cargo_toml_requests(&document_tree, visible_range, true, false);
+        let requests = collect_local_cargo_toml_requests(&document_tree, visible_span, true, false);
 
         assert_eq!(requests.path_dependencies.len(), 1);
         assert!(requests.path_dependencies.contains("../serde"));
@@ -2212,13 +2211,11 @@ mod tests {
         );
         let (_, serde_value) =
             dig_keys(&document_tree, &["dependencies", "serde"]).expect("expected serde");
-        let visible_range = tombi_text::Range::at(
-            local_default_features_request_position(serde_value)
-                .expect("expected feature position"),
+        let visible_span = tombi_text::Span::empty(
+            local_default_features_request_offset(serde_value).expect("expected feature offset"),
         );
 
-        let requests =
-            collect_local_cargo_toml_requests(&document_tree, visible_range, false, true);
+        let requests = collect_local_cargo_toml_requests(&document_tree, visible_span, false, true);
 
         assert!(requests.path_dependencies.is_empty());
         assert_eq!(requests.workspace_dependencies.len(), 1);
@@ -2237,7 +2234,7 @@ mod tests {
 
         let requests = collect_local_cargo_toml_requests(
             &document_tree,
-            tombi_text::Range::at(tombi_text::Position::new(0, 0)),
+            tombi_text::Span::empty(tombi_text::Offset::new(0)),
             true,
             true,
         );
@@ -2332,8 +2329,9 @@ mod tests {
         )
         .expect("expected Cargo.toml");
 
-        let (_, document_tree) =
+        let (root, document_tree) =
             load_cargo_toml(&cargo_toml_path, TomlVersion::default()).expect("expected Cargo.toml");
+        let line_index = root.syntax().line_index();
         let uri = tombi_uri::Uri::from_file_path(&cargo_toml_path).expect("expected uri");
         let features = tombi_config::CargoExtensionFeatures::Features(
             tombi_config::CargoExtensionFeatureTree {
@@ -2357,9 +2355,12 @@ mod tests {
         let hints = inlay_hint_impl(
             &uri,
             &document_tree,
-            tombi_text::Range::new(
-                tombi_text::Position::new(0, 0),
-                tombi_text::Position::new(8, 0),
+            line_index.span(
+                tombi_text::Range::new(
+                    tombi_text::Position::new(0, 0),
+                    tombi_text::Position::new(8, 0),
+                ),
+                EncodingKind::GraphemeCluster,
             ),
             None,
             LocalCargoTomlCache::default(),
@@ -2371,7 +2372,10 @@ mod tests {
         assert_eq!(
             hints,
             Some(vec![InlayHint {
-                position: tombi_text::Position::new(3, 40),
+                offset: line_index.offset(
+                    tombi_text::Position::new(3, 40),
+                    EncodingKind::GraphemeCluster,
+                ),
                 label: r#" → "0.0.0-dev""#.to_string(),
                 kind: Some(InlayHintKind::TYPE),
                 tooltip: Some(WORKSPACE_INHERITED_VALUE_TOOLTIP.to_string()),
@@ -2401,8 +2405,9 @@ mod tests {
         )
         .expect("expected Cargo.toml");
 
-        let (_, document_tree) =
+        let (root, document_tree) =
             load_cargo_toml(&cargo_toml_path, TomlVersion::default()).expect("expected Cargo.toml");
+        let line_index = root.syntax().line_index();
         let uri = tombi_uri::Uri::from_file_path(&cargo_toml_path).expect("expected uri");
         let features = tombi_config::CargoExtensionFeatures::Features(
             tombi_config::CargoExtensionFeatureTree {
@@ -2426,9 +2431,12 @@ mod tests {
         let hints = inlay_hint_impl(
             &uri,
             &document_tree,
-            tombi_text::Range::new(
-                tombi_text::Position::new(0, 0),
-                tombi_text::Position::new(8, 0),
+            line_index.span(
+                tombi_text::Range::new(
+                    tombi_text::Position::new(0, 0),
+                    tombi_text::Position::new(8, 0),
+                ),
+                EncodingKind::GraphemeCluster,
             ),
             None,
             LocalCargoTomlCache::default(),

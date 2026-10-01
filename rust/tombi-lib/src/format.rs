@@ -3,7 +3,7 @@ use crate::{Diagnostic, Error, Options};
 /// The result of formatting a TOML document.
 ///
 /// `Serialize` is only derived under the `wasm` feature: `Diagnostic` itself
-/// only implements `Serialize` there (`tombi-diagnostic`'s `wasm` feature).
+/// only implements `Serialize` there.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "wasm", derive(serde::Serialize))]
 #[cfg_attr(feature = "python", pyo3::pyclass(get_all, skip_from_py_object))]
@@ -39,13 +39,15 @@ pub async fn format_async(
         });
     };
 
+    let parsed = tombi_parser::parse(&source);
+    let line_index = std::sync::Arc::clone(parsed.line_index());
     match tombi_formatter::Formatter::new(
         toml_version,
         &format_options,
         Some(itertools::Either::Right(&source_path)),
         &schema_store,
     )
-    .format(&source)
+    .format_parsed(parsed)
     .await
     {
         Ok(formatted) => Ok(FormatResult {
@@ -54,7 +56,7 @@ pub async fn format_async(
         }),
         Err(diagnostics) => Ok(FormatResult {
             formatted: None,
-            diagnostics,
+            diagnostics: Diagnostic::from_diagnostics(diagnostics, &line_index),
         }),
     }
 }

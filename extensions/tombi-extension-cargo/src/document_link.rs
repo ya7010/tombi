@@ -7,6 +7,7 @@ use crate::{
     resolve_dependency_feature_string, resolve_feature_table_string,
 };
 use itertools::Itertools;
+use tombi_ast_syntax::AstNode as _;
 use tombi_config::TomlVersion;
 use tombi_document_tree_syntax::dig_keys;
 use tombi_schema_store::Accessor;
@@ -216,7 +217,7 @@ fn create_member_document_links(
         let mut member_document_links: Vec<_> =
             find_package_cargo_toml_paths(&member_patterns, &exclude_patterns, workspace_dir_path)
                 .filter_map(|(_, cargo_toml_path)| {
-                    let (_, cargo_toml_document_tree) =
+                    let (cargo_toml_root, cargo_toml_document_tree) =
                         load_cargo_toml(&cargo_toml_path, toml_version)?;
                     let (_, package_name) =
                         dig_keys(&cargo_toml_document_tree, &["package", "name"])?;
@@ -228,12 +229,16 @@ fn create_member_document_links(
                     let mut target = tombi_uri::Uri::from_file_path(&cargo_toml_path).ok()?;
                     target.set_fragment(Some(&format!(
                         "L{}",
-                        package_name.unquoted_range().start.line + 1
+                        cargo_toml_root
+                            .syntax()
+                            .line_index()
+                            .line(package_name.unquoted_span().start)
+                            + 1
                     )));
 
                     Some(tombi_extension::DocumentLink {
                         target,
-                        range: member.unquoted_range(),
+                        span: member.unquoted_span(),
                         tooltip: DocumentLinkToolTip::CargoTomlFirstMember.into(),
                     })
                 })
@@ -339,7 +344,7 @@ fn document_link_for_crate_cargo_toml(
         {
             total_document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: workspace_path.unquoted_range(),
+                span: workspace_path.unquoted_span(),
                 tooltip: DocumentLinkToolTip::WorkspaceCargoToml.into(),
             });
         }
@@ -379,13 +384,14 @@ fn document_link_for_crate_cargo_toml(
                     else {
                         continue;
                     };
-                    target.set_fragment(Some(&format!(
-                        "L{}",
-                        package_item_key.range().start.line + 1
-                    )));
+                    let line = workspace_document_tree
+                        .line_index()
+                        .line(package_item_key.span().start)
+                        + 1;
+                    target.set_fragment(Some(&format!("L{line}")));
                     total_document_links.push(tombi_extension::DocumentLink {
                         target,
-                        range: workspace_key.range() + value.range(),
+                        span: workspace_key.span() + value.span(),
                         tooltip: DocumentLinkToolTip::WorkspaceCargoToml.into(),
                     });
                 }
@@ -404,13 +410,14 @@ fn document_link_for_crate_cargo_toml(
             )
             && let Ok(mut target) = tombi_uri::Uri::from_file_path(&workspace_cargo_toml_path)
         {
-            target.set_fragment(Some(&format!(
-                "L{}",
-                workspace_lints_key.range().start.line + 1
-            )));
+            let line = workspace_document_tree
+                .line_index()
+                .line(workspace_lints_key.span().start)
+                + 1;
+            target.set_fragment(Some(&format!("L{line}")));
             total_document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: workspace_key.range() + value.range(),
+                span: workspace_key.span() + value.span(),
                 tooltip: DocumentLinkToolTip::WorkspaceCargoToml.into(),
             });
         };
@@ -431,6 +438,7 @@ fn document_link_for_crate_cargo_toml(
                 crate_cargo_toml_path,
                 workspace_dependencies,
                 &workspace_cargo_toml_path,
+                workspace_document_tree.line_index(),
                 &registries,
                 toml_version,
                 features,
@@ -527,7 +535,7 @@ fn document_link_for_feature_table_strings(
                 return None;
             }
             cargo_toml_document_link(
-                feature_string.unquoted_range(),
+                feature_string.unquoted_span(),
                 &target,
                 DocumentLinkToolTip::CargoToml,
             )
@@ -664,7 +672,7 @@ where
                             return None;
                         }
                         cargo_toml_document_link(
-                            feature_string.unquoted_range(),
+                            feature_string.unquoted_span(),
                             &target,
                             DocumentLinkToolTip::CargoToml,
                         )
@@ -677,15 +685,16 @@ where
 }
 
 fn cargo_toml_document_link(
-    range: tombi_text::Range,
+    span: tombi_text::Span,
     target: &crate::CargoTargetLocation,
     tooltip: DocumentLinkToolTip,
 ) -> Option<tombi_extension::DocumentLink> {
     let mut target_uri = tombi_uri::Uri::from_file_path(&target.cargo_toml_path).ok()?;
-    target_uri.set_fragment(Some(&format!("L{}", target.range.start.line + 1)));
+    let line = target.line_index.line(target.span.start) + 1;
+    target_uri.set_fragment(Some(&format!("L{line}")));
     Some(tombi_extension::DocumentLink {
         target: target_uri,
-        range,
+        span,
         tooltip: tooltip.into(),
     })
 }
@@ -751,7 +760,8 @@ fn workspace_dependency_target(
 
     package_name_matches.then(|| crate::CargoTargetLocation {
         cargo_toml_path,
-        range: package_name_key.range(),
+        span: package_name_key.span(),
+        line_index: std::sync::Arc::clone(document_tree.line_index()),
     })
 }
 
@@ -807,7 +817,7 @@ fn document_link_for_workspace_dependency(
                 {
                     links.push(tombi_extension::DocumentLink {
                         target: document_link.target.clone(),
-                        range: crate_key.unquoted_range(),
+                        span: crate_key.unquoted_span(),
                         tooltip,
                     });
                 }
@@ -824,6 +834,7 @@ fn document_link_for_crate_dependency_has_workspace(
     crate_cargo_toml_path: &std::path::Path,
     workspace_dependencies: Option<&tombi_document_tree_syntax::Table>,
     workspace_cargo_toml_path: &std::path::Path,
+    workspace_line_index: &tombi_text::LineIndex,
     registries: &RegistryMap,
     toml_version: TomlVersion,
     features: Option<&tombi_config::CargoExtensionFeatures>,
@@ -847,7 +858,7 @@ fn document_link_for_crate_dependency_has_workspace(
                 {
                     links.push(tombi_extension::DocumentLink {
                         target: document_link.target.clone(),
-                        range: crate_key.unquoted_range(),
+                        span: crate_key.unquoted_span(),
                         tooltip,
                     });
                 }
@@ -877,7 +888,7 @@ fn document_link_for_crate_dependency_has_workspace(
                 .flatten()
                 .and_then(|target_location| {
                     cargo_toml_document_link(
-                        crate_key.unquoted_range(),
+                        crate_key.unquoted_span(),
                         &target_location,
                         DocumentLinkToolTip::CargoToml,
                     )
@@ -910,13 +921,11 @@ fn document_link_for_crate_dependency_has_workspace(
         if workspace_document_link_enabled(features)
             && let Ok(mut target) = tombi_uri::Uri::from_file_path(workspace_cargo_toml_path)
         {
-            target.set_fragment(Some(&format!(
-                "L{}",
-                workspace_crate_value.range().start.line + 1
-            )));
+            let line = workspace_line_index.line(workspace_crate_value.span().start) + 1;
+            target.set_fragment(Some(&format!("L{line}")));
             document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: workspace_key.range() + is_workspace.range(),
+                span: workspace_key.span() + is_workspace.span(),
                 tooltip: DocumentLinkToolTip::WorkspaceCargoToml.into(),
             });
         }
@@ -961,7 +970,7 @@ fn document_link_for_bin_targets(
 
             Some(tombi_extension::DocumentLink {
                 target,
-                range: path_string.unquoted_range(),
+                span: path_string.unquoted_span(),
                 tooltip: DocumentLinkToolTip::PathFile.into(),
             })
         })
@@ -986,7 +995,7 @@ fn document_link_for_dependency(
 
         if path_document_link_enabled(features)
             && let Some(tombi_document_tree_syntax::Value::String(crate_path)) = table.get("path")
-            && let Some((path_target_cargo_toml_path, _, path_target_document_tree)) =
+            && let Some((path_target_cargo_toml_path, path_target_root, path_target_document_tree)) =
                 find_cargo_toml(
                     crate_cargo_toml_path,
                     std::path::Path::new(crate_path.value()),
@@ -1013,12 +1022,16 @@ fn document_link_for_dependency(
                 };
                 target.set_fragment(Some(&format!(
                     "L{}",
-                    package_name_key.range().start.line + 1
+                    path_target_root
+                        .syntax()
+                        .line_index()
+                        .line(package_name_key.span().start)
+                        + 1
                 )));
 
                 document_links.push(tombi_extension::DocumentLink {
                     target,
-                    range: crate_path.unquoted_range(),
+                    span: crate_path.unquoted_span(),
                     tooltip: DocumentLinkToolTip::PathFile.into(),
                 });
             }
@@ -1037,7 +1050,7 @@ fn document_link_for_dependency(
 
             document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: git_url.unquoted_range(),
+                span: git_url.unquoted_span(),
                 tooltip: DocumentLinkToolTip::GitRepository.into(),
             });
         }
@@ -1051,7 +1064,7 @@ fn document_link_for_dependency(
         {
             document_links.push(tombi_extension::DocumentLink {
                 target,
-                range: registry_name.unquoted_range(),
+                span: registry_name.unquoted_span(),
                 tooltip: DocumentLinkToolTip::CrateIo.into(),
             });
         }
@@ -1163,7 +1176,7 @@ fn get_crate_io_crate_link(
     tombi_uri::Uri::from_str(&format!("{DEFAULT_REGISTRY_INDEX}/{crate_name}"))
         .map(|target| tombi_extension::DocumentLink {
             target,
-            range: crate_key.unquoted_range(),
+            span: crate_key.unquoted_span(),
             tooltip: DocumentLinkToolTip::CrateIo.into(),
         })
         .ok()

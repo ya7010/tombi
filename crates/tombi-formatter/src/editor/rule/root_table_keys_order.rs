@@ -78,7 +78,7 @@ pub(in crate::editor) async fn root_table_keys_order<'a>(
 
     let old_order = table_or_array_of_tables
         .iter()
-        .map(|table| table.syntax().range())
+        .map(|table| table.syntax().span())
         .collect_vec();
     let old_first = table_or_array_of_tables.first().unwrap().syntax().clone();
     let old_last = table_or_array_of_tables.last().unwrap().syntax().clone();
@@ -114,14 +114,14 @@ pub(in crate::editor) async fn root_table_keys_order<'a>(
 
     if old_order
         .into_iter()
-        .eq(sorted_table.iter().map(|table| table.syntax().range()))
+        .eq(sorted_table.iter().map(|table| table.syntax().span()))
     {
         return changes;
     }
 
     let new = sorted_table.iter().map(SourcePart::node).collect_vec();
 
-    changes.push(crate::editor::Change::replace_range(
+    changes.push(crate::editor::Change::replace_span(
         &old_first, &old_last, new,
     ));
 
