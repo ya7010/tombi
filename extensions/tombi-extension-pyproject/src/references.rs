@@ -145,7 +145,10 @@ fn collect_project_name_references_in_manifest(
     {
         locations.push(tombi_extension::Location {
             uri: uri.clone(),
-            range: source_key.unquoted_range(),
+            span: Some(tombi_extension::LocatedSpan {
+                span: source_key.unquoted_span(),
+                line_index: std::sync::Arc::clone(document_tree.line_index()),
+            }),
         });
     }
 
@@ -153,7 +156,10 @@ fn collect_project_name_references_in_manifest(
         if requirement.requirement.name.as_ref() == project_name {
             locations.push(tombi_extension::Location {
                 uri: uri.clone(),
-                range: requirement.dependency.unquoted_range(),
+                span: Some(tombi_extension::LocatedSpan {
+                    span: requirement.dependency.unquoted_span(),
+                    line_index: std::sync::Arc::clone(document_tree.line_index()),
+                }),
             });
         }
     }

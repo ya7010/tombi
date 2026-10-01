@@ -143,6 +143,8 @@ macro_rules! test_deserialize {
 
             let source = textwrap::dedent($source);
             let p = tombi_parser::parse(&source.trim());
+            let line_index = std::sync::Arc::clone(p.line_index());
+            let range = |span| line_index.range(span, tombi_text::EncodingKind::GraphemeCluster);
             let expected_errors = $errors
                 .into_iter()
                 .map(|(m, r)| (m.to_string(), tombi_text::Range::from(r)))
@@ -152,7 +154,7 @@ macro_rules! test_deserialize {
                 pretty_assertions::assert_eq!(
                     p.errors
                         .iter()
-                        .map(|e| (e.to_message(), e.range()))
+                        .map(|e| (e.to_message(), range(e.span())))
                         .collect_vec(),
                     expected_errors,
                 );
@@ -162,7 +164,7 @@ macro_rules! test_deserialize {
             pretty_assertions::assert_eq!(
                 errs
                     .iter()
-                    .map(|e| (e.to_message(), e.range()))
+                    .map(|e| (e.to_message(), range(e.span())))
                     .collect_vec(),
                 expected_errors
             );

@@ -85,7 +85,7 @@ struct PyprojectDependencyHint<'a> {
 pub async fn inlay_hint(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     toml_version: TomlVersion,
     features: Option<&tombi_config::PyprojectExtensionFeatures>,
 ) -> Result<Option<Vec<InlayHint>>, tower_lsp::jsonrpc::Error> {
@@ -111,21 +111,21 @@ pub async fn inlay_hint(
     let document_tree = document_tree.clone();
     let uv_lock_cache = load_uv_lock_cache(&pyproject_toml_path, toml_version).await;
 
-    tombi_fs::run_blocking(move || inlay_hint_impl(&document_tree, visible_range, uv_lock_cache))
+    tombi_fs::run_blocking(move || inlay_hint_impl(&document_tree, visible_span, uv_lock_cache))
         .await
         .map_err(|_| tower_lsp::jsonrpc::Error::new(tower_lsp::jsonrpc::ErrorCode::InternalError))?
 }
 
 fn inlay_hint_impl(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
-    visible_range: tombi_text::Range,
+    visible_span: tombi_text::Span,
     uv_lock_cache: Option<UvLockInlayCacheData>,
 ) -> Result<Option<Vec<InlayHint>>, tower_lsp::jsonrpc::Error> {
     let current_package = current_package(document_tree);
 
     let visible_dependency_hints = collect_dependency_hints(document_tree)
         .into_iter()
-        .filter(|hint| tombi_text::Range::at(hint.dependency.range().end).intersects(visible_range))
+        .filter(|hint| tombi_text::Span::empty(hint.dependency.span().end).intersects(visible_span))
         .collect::<Vec<_>>();
 
     if visible_dependency_hints.is_empty() {
@@ -157,7 +157,7 @@ fn inlay_hint_impl(
             let label = version_hint_label(current_version.as_deref(), &resolved_version)?;
 
             Some(InlayHint {
-                position: hint.dependency.range().end,
+                offset: hint.dependency.span().end,
                 label,
                 kind: Some(InlayHintKind::TYPE),
                 tooltip: Some(RESOLVED_VERSION_TOOLTIP.to_string()),

@@ -18,8 +18,8 @@ impl Array {
         support::node::token(&self.syntax, T![']'])
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -41,8 +41,8 @@ impl ArrayOfTable {
         support::node::token(&self.syntax, T!["]]"])
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -56,8 +56,8 @@ impl BareKey {
         support::node::token(&self.syntax, BARE_KEY)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -71,8 +71,8 @@ impl BasicString {
         support::node::token(&self.syntax, BASIC_STRING)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -86,8 +86,8 @@ impl Boolean {
         support::node::token(&self.syntax, BOOLEAN)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -101,8 +101,8 @@ impl Comma {
         support::node::token(&self.syntax, T ! [,])
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -116,8 +116,8 @@ impl Float {
         support::node::token(&self.syntax, FLOAT)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -135,8 +135,8 @@ impl InlineTable {
         support::node::token(&self.syntax, T!['}'])
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -150,8 +150,8 @@ impl IntegerBin {
         support::node::token(&self.syntax, INTEGER_BIN)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -165,8 +165,8 @@ impl IntegerDec {
         support::node::token(&self.syntax, INTEGER_DEC)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -180,8 +180,8 @@ impl IntegerHex {
         support::node::token(&self.syntax, INTEGER_HEX)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -195,8 +195,8 @@ impl IntegerOct {
         support::node::token(&self.syntax, INTEGER_OCT)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -218,8 +218,8 @@ impl KeyValue {
         support::node::token(&self.syntax, T ! [=])
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -233,8 +233,8 @@ impl Keys {
         self.syntax.child_nodes().filter_map(Key::cast)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -248,8 +248,8 @@ impl LiteralString {
         support::node::token(&self.syntax, LITERAL_STRING)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -263,8 +263,8 @@ impl LocalDate {
         support::node::token(&self.syntax, LOCAL_DATE)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -278,8 +278,8 @@ impl LocalDateTime {
         support::node::token(&self.syntax, LOCAL_DATE_TIME)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -293,8 +293,8 @@ impl LocalTime {
         support::node::token(&self.syntax, LOCAL_TIME)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -308,8 +308,8 @@ impl MultiLineBasicString {
         support::node::token(&self.syntax, MULTI_LINE_BASIC_STRING)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -323,8 +323,8 @@ impl MultiLineLiteralString {
         support::node::token(&self.syntax, MULTI_LINE_LITERAL_STRING)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -338,8 +338,8 @@ impl OffsetDateTime {
         support::node::token(&self.syntax, OFFSET_DATE_TIME)
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -349,8 +349,8 @@ pub struct Root {
 }
 impl Root {
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 
@@ -372,8 +372,8 @@ impl Table {
         support::node::token(&self.syntax, T![']'])
     }
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.syntax.range()
+    pub fn span(&self) -> tombi_text::Span {
+        self.syntax.span()
     }
 }
 

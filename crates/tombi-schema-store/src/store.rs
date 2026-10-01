@@ -1285,7 +1285,7 @@ impl SchemaStore {
         &self,
         root: &tombi_ast_syntax::Root,
         source_uri_or_path: Option<Either<&tombi_uri::Uri, &std::path::Path>>,
-    ) -> Result<Option<SourceSchema>, (crate::Error, tombi_text::Range)> {
+    ) -> Result<Option<SourceSchema>, (crate::Error, tombi_text::Span)> {
         let source_path = match source_uri_or_path {
             Some(Either::Left(url)) => match url.scheme() {
                 "file" => tombi_uri::Uri::to_file_path(url).ok(),
@@ -1297,7 +1297,7 @@ impl SchemaStore {
             None => None,
         };
 
-        if let Some(SchemaDocumentCommentDirective { uri, uri_range, .. }) =
+        if let Some(SchemaDocumentCommentDirective { uri, uri_span, .. }) =
             root.schema_document_comment_directive(source_path.as_deref())
         {
             let schema_uri = match uri {
@@ -1307,14 +1307,14 @@ impl SchemaStore {
                         crate::Error::InvalidSchemaUriOrFilePath {
                             schema_uri_or_file_path,
                         },
-                        uri_range,
+                        uri_span,
                     ));
                 }
             };
             return self
                 .try_get_source_schema_from_remote_url(&schema_uri, source_path.as_deref())
                 .await
-                .map_err(|err| (err, uri_range));
+                .map_err(|err| (err, uri_span));
         }
 
         if let Some(source_uri_or_path) = source_uri_or_path {

@@ -294,7 +294,10 @@ pub(crate) fn goto_workspace(
 
         return Ok(Some(tombi_extension::Location {
             uri: subcrate_cargo_toml_uri,
-            range: package_name.unquoted_range(),
+            span: Some(tombi_extension::LocatedSpan {
+                span: package_name.unquoted_span(),
+                line_index: std::sync::Arc::clone(subcrate_document_tree.line_index()),
+            }),
         }));
     }
 
@@ -305,7 +308,10 @@ pub(crate) fn goto_workspace(
 
     Ok(Some(tombi_extension::Location {
         uri: workspace_cargo_toml_uri,
-        range: key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: key.unquoted_span(),
+            line_index: std::sync::Arc::clone(workspace_cargo_toml_document_tree.line_index()),
+        }),
     }))
 }
 
@@ -341,7 +347,10 @@ pub(crate) fn goto_dependency_crates(
             {
                 locations.push(tombi_extension::Location {
                     uri: subcrate_cargo_toml_uri,
-                    range: package_name.unquoted_range(),
+                    span: Some(tombi_extension::LocatedSpan {
+                        span: package_name.unquoted_span(),
+                        line_index: std::sync::Arc::clone(subcrate_document_tree.line_index()),
+                    }),
                 });
             }
         } else if let Some(tombi_document_tree_syntax::Value::Boolean(has_workspace)) =
@@ -410,7 +419,10 @@ pub(crate) fn workspace_dependency_usage_locations(
             ) && let Some(mut definition_location) =
                 Option::<tombi_extension::Location>::from(crate_location.clone())
             {
-                definition_location.range = crate_key.unquoted_range();
+                definition_location.span = Some(tombi_extension::LocatedSpan {
+                    span: crate_key.unquoted_span(),
+                    line_index: std::sync::Arc::clone(crate_document_tree.line_index()),
+                });
                 locations.push(definition_location);
             }
         }
@@ -437,7 +449,10 @@ pub(crate) fn workspace_dependency_usage_locations(
                     if let Some(mut definition_location) =
                         Option::<tombi_extension::Location>::from(crate_location.clone())
                     {
-                        definition_location.range = crate_key.unquoted_range();
+                        definition_location.span = Some(tombi_extension::LocatedSpan {
+                            span: crate_key.unquoted_span(),
+                            line_index: std::sync::Arc::clone(crate_document_tree.line_index()),
+                        });
                         locations.push(definition_location);
                     }
                 }
@@ -484,7 +499,10 @@ pub(crate) fn goto_crate_package(
 
             return Ok(Some(tombi_extension::Location {
                 uri: subcrate_cargo_toml_uri,
-                range: package_name.unquoted_range(),
+                span: Some(tombi_extension::LocatedSpan {
+                    span: package_name.unquoted_span(),
+                    line_index: std::sync::Arc::clone(subcrate_document_tree.line_index()),
+                }),
             }));
         }
     }
@@ -511,10 +529,7 @@ pub(crate) fn goto_bin_path_target(
         return Ok(None);
     };
 
-    Ok(Some(tombi_extension::Location {
-        uri,
-        range: tombi_text::Range::default(),
-    }))
+    Ok(Some(tombi_extension::Location { uri, span: None }))
 }
 
 #[inline]
@@ -744,7 +759,8 @@ pub(crate) fn goto_workspace_member_crates(
 
         locations.push(CrateLocation {
             cargo_toml_path,
-            package_name_key_range: package_name.unquoted_range(),
+            package_name_key_span: package_name.unquoted_span(),
+            line_index: std::sync::Arc::clone(member_document_tree.line_index()),
         });
     }
 

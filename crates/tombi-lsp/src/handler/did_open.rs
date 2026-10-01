@@ -22,12 +22,13 @@ pub async fn handle_did_open(backend: &Backend, params: DidOpenTextDocumentParam
 
     let text_document_uri: tombi_uri::Uri = text_document.uri.into();
     backend.begin_document_open(text_document_uri.clone());
+    let parsed = tombi_parser::parse(&text_document.text);
     let toml_version = backend
-        .text_document_toml_version(&text_document_uri, &text_document.text)
+        .text_document_toml_version(&text_document_uri, &parsed.root())
         .await;
     let encoding_kind = backend.capabilities.read().await.encoding_kind;
     let document_source = DocumentSource::new(
-        text_document.text,
+        parsed,
         Some(text_document.version),
         toml_version,
         encoding_kind,

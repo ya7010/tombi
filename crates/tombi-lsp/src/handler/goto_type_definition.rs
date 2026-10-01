@@ -7,15 +7,13 @@ use crate::{
     backend::Backend,
     config_manager::ConfigSchemaStore,
     goto_type_definition::{
-        TypeDefinition, get_tombi_document_comment_directive_type_definition, get_type_definition,
-        location_key,
+        SchemaLocation, TypeDefinition, get_tombi_document_comment_directive_type_definition,
+        get_type_definition, location_key,
     },
-    handler::hover::get_hover_keys_with_range,
+    handler::hover::get_hover_keys_with_span,
 };
 
-fn type_definition_locations(
-    type_definitions: Vec<TypeDefinition>,
-) -> Vec<tombi_extension::Location> {
+fn type_definition_locations(type_definitions: Vec<TypeDefinition>) -> Vec<SchemaLocation> {
     let mut unique_type_definitions: Vec<TypeDefinition> =
         Vec::with_capacity(type_definitions.len());
     for type_definition in type_definitions {
@@ -28,7 +26,7 @@ fn type_definition_locations(
     }
     unique_type_definitions
         .into_iter()
-        .map(|type_definition| tombi_extension::Location {
+        .map(|type_definition| SchemaLocation {
             uri: type_definition.schema_base_uri.into(),
             range: type_definition.range,
         })
@@ -38,7 +36,7 @@ fn type_definition_locations(
 pub async fn handle_goto_type_definition(
     backend: &Backend,
     params: GotoTypeDefinitionParams,
-) -> Result<Option<Vec<tombi_extension::Location>>, tower_lsp::jsonrpc::Error> {
+) -> Result<Option<Vec<SchemaLocation>>, tower_lsp::jsonrpc::Error> {
     log::trace!("{:?}", params);
 
     let GotoTypeDefinitionParams {
@@ -85,11 +83,12 @@ pub async fn handle_goto_type_definition(
     let root = document_source.ast();
     let toml_version = document_source.toml_version;
     let line_index = document_source.line_index();
+    let encoding = document_source.encoding_kind();
 
-    let position = position.into_lsp(line_index);
+    let offset: tombi_text::Offset = position.into_lsp(line_index, encoding);
 
     let type_definitions =
-        get_tombi_document_comment_directive_type_definition(&root, position).await;
+        get_tombi_document_comment_directive_type_definition(&root, offset).await;
     if !type_definitions.is_empty() {
         return Ok(Some(type_definition_locations(type_definitions)));
     }
@@ -100,11 +99,11 @@ pub async fn handle_goto_type_definition(
         .ok()
         .flatten();
 
-    let Some((keys, range)) = get_hover_keys_with_range(&root, position, toml_version).await else {
+    let Some((keys, span)) = get_hover_keys_with_span(&root, offset, toml_version).await else {
         return Ok(Default::default());
     };
 
-    if keys.is_empty() && range.is_none() {
+    if keys.is_empty() && span.is_none() {
         return Ok(Default::default());
     }
 
@@ -120,7 +119,7 @@ pub async fn handle_goto_type_definition(
 
     let mut type_definitions = get_type_definition(
         &document_source.document_tree(),
-        position,
+        crate::CursorPosition::new(offset, line_index),
         &keys,
         &schema_context,
     )

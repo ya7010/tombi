@@ -46,10 +46,7 @@ pub async fn goto_definition(
                 dig_accessors(document_tree, accessors)
             && let Some(uri) = get_definition_link(path.value(), &tombi_toml_path)
         {
-            locations.push(tombi_extension::Location {
-                uri,
-                range: tombi_text::Range::default(),
-            });
+            locations.push(tombi_extension::Location { uri, span: None });
         }
 
         if matches!(accessors.len(), 3 | 4)
@@ -69,10 +66,7 @@ pub async fn goto_definition(
                     continue;
                 }
                 if let Some(uri) = get_definition_link(path.value(), &tombi_toml_path) {
-                    locations.push(tombi_extension::Location {
-                        uri,
-                        range: tombi_text::Range::default(),
-                    });
+                    locations.push(tombi_extension::Location { uri, span: None });
                 }
             }
         }

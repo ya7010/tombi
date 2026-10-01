@@ -426,7 +426,7 @@ pub async fn get_comment_directive_document_tree_and_diagnostics<'a>(
 
     for tombi_ast_syntax::TombiValueCommentDirective {
         content,
-        content_range,
+        content_span,
         ..
     } in comment_directives
     {
@@ -440,7 +440,7 @@ pub async fn get_comment_directive_document_tree_and_diagnostics<'a>(
             total_diagnostics.extend(
                 diagnostics
                     .into_iter()
-                    .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_range)),
+                    .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_span)),
             );
             continue;
         }
@@ -457,7 +457,7 @@ pub async fn get_comment_directive_document_tree_and_diagnostics<'a>(
             total_diagnostics.extend(
                 diagnostics
                     .into_iter()
-                    .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_range)),
+                    .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_span)),
             );
         } else if let Err(diagnostics) =
             crate::validate(document_tree.clone(), Some(&source_schema), &schema_context).await
@@ -465,7 +465,7 @@ pub async fn get_comment_directive_document_tree_and_diagnostics<'a>(
             total_diagnostics.extend(
                 diagnostics
                     .into_iter()
-                    .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_range)),
+                    .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_span)),
             );
         }
 
@@ -478,7 +478,7 @@ pub async fn get_comment_directive_document_tree_and_diagnostics<'a>(
                 total_diagnostics.extend(
                     diagnostics
                         .into_iter()
-                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_range)),
+                        .map(|diagnostic| into_directive_diagnostic(&diagnostic, *content_span)),
                 );
             }
         } else {

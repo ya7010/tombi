@@ -23,7 +23,7 @@ fn check_key_value_groups(
                 l.extend_diagnostics(Diagnostic {
                     kind: DiagnosticKind::ForbiddenKeyValueTrailingComma,
                     level: SeverityLevel::Error,
-                    range: comma_token.range(),
+                    span: comma_token.span(),
                 });
             }
         }

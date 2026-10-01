@@ -3,23 +3,23 @@ use tombi_text::IntoLsp as _;
 pub trait IntoLsp {
     type Lsp;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp;
-}
-
-impl IntoLsp for tombi_extension::Location {
-    type Lsp = tower_lsp::lsp_types::Location;
-
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
-        Self::Lsp::new(self.uri.into(), self.range.into_lsp(line_index))
-    }
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp;
 }
 
 impl IntoLsp for tombi_extension::DocumentLink {
     type Lsp = tower_lsp::lsp_types::DocumentLink;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
-            range: self.range.into_lsp(line_index),
+            range: self.span.into_lsp(line_index, encoding),
             target: Some(self.target.into()),
             tooltip: Some(self.tooltip.into_owned()),
             data: None,
@@ -30,9 +30,13 @@ impl IntoLsp for tombi_extension::DocumentLink {
 impl IntoLsp for tombi_extension::InlayHint {
     type Lsp = tower_lsp::lsp_types::InlayHint;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
-            position: self.position.into_lsp(line_index),
+            position: self.offset.into_lsp(line_index, encoding),
             label: self.label.into(),
             kind: self.kind.map(|kind| match kind {
                 tombi_extension::InlayHintKind::Type => tower_lsp::lsp_types::InlayHintKind::TYPE,
@@ -52,9 +56,13 @@ impl IntoLsp for tombi_extension::InlayHint {
 impl IntoLsp for tombi_extension::TextEdit {
     type Lsp = tower_lsp::lsp_types::TextEdit;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
-            range: self.range.into_lsp(line_index),
+            range: self.span.into_lsp(line_index, encoding),
             new_text: self.new_text,
         }
     }
@@ -63,11 +71,15 @@ impl IntoLsp for tombi_extension::TextEdit {
 impl IntoLsp for tombi_extension::InsertReplaceEdit {
     type Lsp = tower_lsp::lsp_types::InsertReplaceEdit;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
             new_text: self.new_text,
-            insert: self.insert.into_lsp(line_index),
-            replace: self.replace.into_lsp(line_index),
+            insert: self.insert.into_lsp(line_index, encoding),
+            replace: self.replace.into_lsp(line_index, encoding),
         }
     }
 }
@@ -75,13 +87,17 @@ impl IntoLsp for tombi_extension::InsertReplaceEdit {
 impl IntoLsp for tombi_extension::CompletionTextEdit {
     type Lsp = tower_lsp::lsp_types::CompletionTextEdit;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         match self {
             tombi_extension::CompletionTextEdit::Edit(edit) => {
-                Self::Lsp::Edit(edit.into_lsp_type(line_index))
+                Self::Lsp::Edit(edit.into_lsp_type(line_index, encoding))
             }
             tombi_extension::CompletionTextEdit::InsertAndReplace(edit) => {
-                Self::Lsp::InsertAndReplace(edit.into_lsp_type(line_index))
+                Self::Lsp::InsertAndReplace(edit.into_lsp_type(line_index, encoding))
             }
         }
     }
@@ -90,7 +106,11 @@ impl IntoLsp for tombi_extension::CompletionTextEdit {
 impl IntoLsp for tombi_extension::CompletionContent {
     type Lsp = tower_lsp::lsp_types::CompletionItem;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         use tombi_extension::CompletionContentPriority as Priority;
         use tower_lsp::lsp_types::{
             CompletionItem, CompletionItemLabelDetails, Documentation, InsertTextMode,
@@ -130,11 +150,11 @@ impl IntoLsp for tombi_extension::CompletionContent {
                         tower_lsp::lsp_types::InsertTextFormat::SNIPPET
                     }
                 }),
-                Some(edit.text_edit.into_lsp_type(line_index)),
+                Some(edit.text_edit.into_lsp_type(line_index, encoding)),
                 edit.additional_text_edits.map(|edits| {
                     edits
                         .into_iter()
-                        .map(|edit| edit.into_lsp_type(line_index))
+                        .map(|edit| edit.into_lsp_type(line_index, encoding))
                         .collect()
                 }),
             ),
@@ -220,10 +240,14 @@ impl IntoLsp for tombi_extension::CompletionContent {
 impl IntoLsp for tombi_extension::CodeActionOrCommand {
     type Lsp = tower_lsp::lsp_types::CodeActionOrCommand;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         match self {
             tombi_extension::CodeActionOrCommand::CodeAction(action) => {
-                Self::Lsp::CodeAction(action.into_lsp_type(line_index))
+                Self::Lsp::CodeAction(action.into_lsp_type(line_index, encoding))
             }
             tombi_extension::CodeActionOrCommand::Command(command) => {
                 Self::Lsp::Command(tower_lsp::lsp_types::Command {
@@ -239,7 +263,11 @@ impl IntoLsp for tombi_extension::CodeActionOrCommand {
 impl IntoLsp for tombi_extension::CodeAction {
     type Lsp = tower_lsp::lsp_types::CodeAction;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
             title: self.title,
             kind: self.kind.map(|kind| match kind {
@@ -247,7 +275,9 @@ impl IntoLsp for tombi_extension::CodeAction {
                     tower_lsp::lsp_types::CodeActionKind::REFACTOR_REWRITE
                 }
             }),
-            edit: self.edit.map(|edit| edit.into_lsp_type(line_index)),
+            edit: self
+                .edit
+                .map(|edit| edit.into_lsp_type(line_index, encoding)),
             disabled: self
                 .disabled
                 .map(|disabled| tower_lsp::lsp_types::CodeActionDisabled {
@@ -261,7 +291,11 @@ impl IntoLsp for tombi_extension::CodeAction {
 impl IntoLsp for tombi_extension::WorkspaceEdit {
     type Lsp = tower_lsp::lsp_types::WorkspaceEdit;
 
-    fn into_lsp_type(self, line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
             changes: self.changes.map(|changes| {
                 changes
@@ -272,7 +306,9 @@ impl IntoLsp for tombi_extension::WorkspaceEdit {
                             document_edits
                                 .edits
                                 .into_iter()
-                                .map(|edit| edit.into_lsp_type(&document_edits.line_index))
+                                .map(|edit| {
+                                    edit.into_lsp_type(&document_edits.line_index, encoding)
+                                })
                                 .collect(),
                         )
                     })
@@ -283,7 +319,7 @@ impl IntoLsp for tombi_extension::WorkspaceEdit {
                     tower_lsp::lsp_types::DocumentChanges::Edits(
                         edits
                             .into_iter()
-                            .map(|edit| edit.into_lsp_type(line_index))
+                            .map(|edit| edit.into_lsp_type(line_index, encoding))
                             .collect(),
                     )
                 }
@@ -296,7 +332,11 @@ impl IntoLsp for tombi_extension::WorkspaceEdit {
 impl IntoLsp for tombi_extension::TextDocumentEdit {
     type Lsp = tower_lsp::lsp_types::TextDocumentEdit;
 
-    fn into_lsp_type(self, _line_index: &tombi_text::LineIndex) -> Self::Lsp {
+    fn into_lsp_type(
+        self,
+        _line_index: &tombi_text::LineIndex,
+        encoding: tombi_text::EncodingKind,
+    ) -> Self::Lsp {
         Self::Lsp {
             text_document: tower_lsp::lsp_types::OptionalVersionedTextDocumentIdentifier {
                 uri: self.text_document.uri.into(),
@@ -306,12 +346,12 @@ impl IntoLsp for tombi_extension::TextDocumentEdit {
                 .edits
                 .into_iter()
                 .map(|edit| match edit {
-                    tombi_extension::OneOf::Left(edit) => {
-                        tower_lsp::lsp_types::OneOf::Left(edit.into_lsp_type(&self.line_index))
-                    }
+                    tombi_extension::OneOf::Left(edit) => tower_lsp::lsp_types::OneOf::Left(
+                        edit.into_lsp_type(&self.line_index, encoding),
+                    ),
                     tombi_extension::OneOf::Right(edit) => tower_lsp::lsp_types::OneOf::Right(
                         tower_lsp::lsp_types::AnnotatedTextEdit {
-                            text_edit: edit.text_edit.into_lsp_type(&self.line_index),
+                            text_edit: edit.text_edit.into_lsp_type(&self.line_index, encoding),
                             annotation_id: edit.annotation_id,
                         },
                     ),
@@ -361,7 +401,7 @@ mod tests {
         DocumentChanges, OneOf, OptionalVersionedTextDocumentIdentifier, TextDocumentEdit,
         TextEdit, WorkspaceEdit,
     };
-    use tombi_text::{EncodingKind, LineIndex, Position, Range};
+    use tombi_text::{EncodingKind, LineIndex, Offset, Span};
 
     use super::IntoLsp;
 
@@ -369,8 +409,8 @@ mod tests {
     fn workspace_edit_uses_each_target_document_line_index() {
         let workspace_uri = tombi_uri::Uri::from_str("file:///workspace.toml").unwrap();
         let member_uri = tombi_uri::Uri::from_str("file:///member.toml").unwrap();
-        let workspace_line_index = LineIndex::new("e\u{301}x", EncodingKind::Utf16);
-        let member_line_index = LineIndex::new("👨‍👩‍👧‍👦x", EncodingKind::Utf16);
+        let workspace_line_index = std::sync::Arc::new(LineIndex::new("e\u{301}x"));
+        let member_line_index = std::sync::Arc::new(LineIndex::new("👨‍👩‍👧‍👦x"));
         let edit = WorkspaceEdit {
             changes: None,
             document_changes: Some(DocumentChanges::Edits(vec![
@@ -380,8 +420,9 @@ mod tests {
                         version: None,
                     },
                     line_index: workspace_line_index,
+                    // After the first grapheme cluster.
                     edits: vec![OneOf::Left(TextEdit {
-                        range: Range::at(Position::new(0, 1)),
+                        span: Span::empty(Offset::of("e\u{301}")),
                         new_text: String::new(),
                     })],
                 },
@@ -392,20 +433,21 @@ mod tests {
                     },
                     line_index: member_line_index,
                     edits: vec![OneOf::Left(TextEdit {
-                        range: Range::at(Position::new(0, 1)),
+                        span: Span::empty(Offset::of("👨‍👩‍👧‍👦")),
                         new_text: String::new(),
                     })],
                 },
             ])),
         };
 
-        let fallback = LineIndex::new("a", EncodingKind::Utf16);
-        let Some(tower_lsp::lsp_types::DocumentChanges::Edits(edits)) =
-            edit.into_lsp_type(&fallback).document_changes
+        let fallback = LineIndex::new("a");
+        let Some(tower_lsp::lsp_types::DocumentChanges::Edits(edits)) = edit
+            .into_lsp_type(&fallback, EncodingKind::Utf16)
+            .document_changes
         else {
             panic!("expected document edits");
         };
-        let positions: Vec<_> = edits
+        let offsets: Vec<_> = edits
             .into_iter()
             .map(|edit| match &edit.edits[0] {
                 tower_lsp::lsp_types::OneOf::Left(edit) => edit.range.start.character,
@@ -413,6 +455,6 @@ mod tests {
             })
             .collect();
 
-        assert_eq!(positions, [2, 11]);
+        assert_eq!(offsets, [2, 11]);
     }
 }

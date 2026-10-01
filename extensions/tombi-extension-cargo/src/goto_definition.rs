@@ -112,7 +112,10 @@ fn goto_definition_for_package_name(
 
     vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: package_name.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: package_name.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }]
 }
 
@@ -133,7 +136,10 @@ fn goto_definition_for_feature_key(
 
     vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }]
 }
 
@@ -157,7 +163,10 @@ fn goto_definition_for_optional_dependency(
 
     vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: optional_key.range() + optional.range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: optional_key.span() + optional.span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }]
 }
 
@@ -192,7 +201,10 @@ fn goto_workspace_definition_locations(
 
     Ok(vec![tombi_extension::Location {
         uri: text_document_uri.clone(),
-        range: key.unquoted_range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: key.unquoted_span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     }])
 }
 

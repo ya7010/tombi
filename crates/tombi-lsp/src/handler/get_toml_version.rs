@@ -22,7 +22,7 @@ pub async fn handle_get_toml_version(
         };
         if let Some(document_source) = document_sources.get(&text_document_uri) {
             backend
-                .text_document_toml_version_and_source(&text_document_uri, document_source.text())
+                .text_document_toml_version_and_source(&text_document_uri, &document_source.ast())
                 .await
         } else {
             (TomlVersion::default(), TomlVersionSource::Default)

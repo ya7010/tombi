@@ -1,6 +1,6 @@
 use nu_ansi_term::{Color, Style};
 
-use crate::{Diagnostic, Level, Print, printer::Simple};
+use crate::{Level, LocatedDiagnostic, Print, printer::Simple};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pretty {
@@ -26,9 +26,10 @@ impl Print<Pretty> for Level {
     }
 }
 
-impl Print<Pretty> for Diagnostic {
+impl Print<Pretty> for LocatedDiagnostic<'_> {
     fn print(&self, printer: &Pretty, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
-        self.level().print(printer, writer)?;
+        let diagnostic = self.diagnostic();
+        diagnostic.level().print(printer, writer)?;
 
         let (message_style, at_style, link_style) = if printer.use_ansi_color {
             (
@@ -40,9 +41,9 @@ impl Print<Pretty> for Diagnostic {
             (Style::new(), Style::new(), Style::new())
         };
 
-        writeln!(writer, ": {}", message_style.paint(self.message()))?;
+        writeln!(writer, ": {}", message_style.paint(diagnostic.message()))?;
 
-        if let Some(source_file) = self.source_file() {
+        if let Some(source_file) = diagnostic.source_file() {
             writeln!(
                 writer,
                 "    {} {}",
@@ -50,8 +51,8 @@ impl Print<Pretty> for Diagnostic {
                 link_style.paint(format!(
                     "{}:{}:{}",
                     source_file.display(),
-                    self.position().line + 1,
-                    self.position().column + 1
+                    self.range().start.line + 1,
+                    self.range().start.column + 1
                 )),
             )
         } else {
@@ -60,8 +61,8 @@ impl Print<Pretty> for Diagnostic {
                 "    {}",
                 at_style.paint(format!(
                     "at line {} column {}",
-                    self.position().line + 1,
-                    self.position().column + 1
+                    self.range().start.line + 1,
+                    self.range().start.column + 1
                 )),
             )
         }

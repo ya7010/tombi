@@ -51,7 +51,7 @@ where
         };
 
         total_diagnostics.extend(resolution_errors.into_iter().filter_map(|err| {
-            crate::validate::schema_resolution_diagnostic(&err, value.range(), common_rules)
+            crate::validate::schema_resolution_diagnostic(&err, value.span(), common_rules)
         }));
 
         if all_of_schema.reference_siblings {

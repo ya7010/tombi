@@ -4,7 +4,7 @@ use tower_lsp::lsp_types::request::GotoDeclarationParams;
 
 use crate::Backend;
 use crate::config_manager::ConfigSchemaStore;
-use crate::handler::hover::get_hover_keys_with_range;
+use crate::handler::hover::get_hover_keys_with_span;
 
 pub async fn handle_goto_declaration(
     backend: &Backend,
@@ -51,15 +51,16 @@ pub async fn handle_goto_declaration(
     let root = document_source.ast();
     let toml_version = document_source.toml_version;
     let line_index = document_source.line_index();
+    let encoding = document_source.encoding_kind();
 
-    let position = position.into_lsp(line_index);
+    let offset: tombi_text::Offset = position.into_lsp(line_index, encoding);
 
-    let Some((keys, _)) = get_hover_keys_with_range(&root, position, toml_version).await else {
+    let Some((keys, _)) = get_hover_keys_with_span(&root, offset, toml_version).await else {
         return Ok(None);
     };
 
     let document_tree = document_source.document_tree();
-    let accessors = tombi_document_tree_syntax::get_accessors(&document_tree, &keys, position);
+    let accessors = tombi_document_tree_syntax::get_accessors(&document_tree, &keys, offset);
 
     if config.cargo_extension_enabled()
         && let Some(locations) = tombi_extension_cargo::goto_declaration(

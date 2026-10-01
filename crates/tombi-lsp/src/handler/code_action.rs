@@ -55,19 +55,20 @@ pub async fn handle_code_action(
     };
 
     let toml_version = document_source.toml_version;
-    let line_index = document_source.line_index();
+    let line_index = &document_source.line_index_arc();
+    let encoding = document_source.encoding_kind();
 
-    let position: tombi_text::Position = range.start.into_lsp(line_index);
+    let offset: tombi_text::Offset = range.start.into_lsp(line_index, encoding);
 
     let Some((keys, key_contexts)) =
-        get_completion_keys_with_context(&document_source.ast(), position, toml_version).await
+        get_completion_keys_with_context(&document_source.ast(), offset, toml_version).await
     else {
         return Ok(None);
     };
 
     let root = document_source.ast();
     let document_tree = document_source.document_tree();
-    let accessors = get_accessors(&document_tree, &keys, position);
+    let accessors = get_accessors(&document_tree, &keys, offset);
     let mut key_contexts = key_contexts.into_iter();
     let accessor_contexts = build_accessor_contexts(&accessors, &mut key_contexts);
 
@@ -76,6 +77,7 @@ pub async fn handle_code_action(
     if let Some(code_action) = dot_keys_to_inline_table_code_action(
         &text_document_uri,
         line_index,
+        encoding,
         &root,
         &document_tree,
         &accessors,
@@ -87,6 +89,7 @@ pub async fn handle_code_action(
     if let Some(code_action) = inline_table_to_dot_keys_code_action(
         &text_document_uri,
         line_index,
+        encoding,
         &root,
         &document_tree,
         &accessors,
@@ -113,7 +116,7 @@ pub async fn handle_code_action(
         code_actions.extend(
             extension_code_actions
                 .into_iter()
-                .map(|action| action.into_lsp_type(line_index)),
+                .map(|action| action.into_lsp_type(line_index, encoding)),
         );
     }
 
@@ -134,7 +137,7 @@ pub async fn handle_code_action(
         code_actions.extend(
             extension_code_actions
                 .into_iter()
-                .map(|action| action.into_lsp_type(line_index)),
+                .map(|action| action.into_lsp_type(line_index, encoding)),
         );
     }
 
@@ -148,10 +151,11 @@ pub async fn handle_code_action(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tombi_ast_syntax::AstNode as _;
     use tombi_config::TomlVersion;
     use tombi_parser::parse;
     use tombi_schema_store::AccessorKeyKind;
-    use tombi_text::Position;
+    use tombi_text::{EncodingKind, Position};
 
     macro_rules! test_get_completion_keys_with_context {
         (#[tokio::test] async fn $name:ident($src:expr, $pos:expr) -> None;) => {
@@ -159,8 +163,12 @@ mod tests {
             async fn $name() {
                 let src = $src.trim();
                 let root = parse(src).into_root();
+                let offset = root
+                    .syntax()
+                    .line_index()
+                    .offset($pos, EncodingKind::GraphemeCluster);
                 let result =
-                    get_completion_keys_with_context(&root, $pos, TomlVersion::V1_0_0).await;
+                    get_completion_keys_with_context(&root, offset, TomlVersion::V1_0_0).await;
 
                 assert!(result.is_none());
             }
@@ -171,8 +179,12 @@ mod tests {
             async fn $name() {
                 let src = $src.trim();
                 let root = parse(src).into_root();
+                let offset = root
+                    .syntax()
+                    .line_index()
+                    .offset($pos, EncodingKind::GraphemeCluster);
                 let result =
-                    get_completion_keys_with_context(&root, $pos, TomlVersion::V1_0_0).await;
+                    get_completion_keys_with_context(&root, offset, TomlVersion::V1_0_0).await;
 
                 assert!(result.is_some());
                 let ($keys, $contexts) = result.unwrap();
@@ -220,7 +232,7 @@ mod tests {
 
     test_get_completion_keys_with_context! {
         #[tokio::test]
-        async fn test_get_completion_keys_with_context_simple_keyvalue_range(
+        async fn test_get_completion_keys_with_context_simple_keyvalue_span(
             r#"
             foo = 1
             bar = 2
@@ -231,14 +243,14 @@ mod tests {
             pretty_assertions::assert_eq!(keys.len(), contexts.len());
 
             for (key, ctx) in keys.iter().zip(contexts.iter()) {
-                pretty_assertions::assert_eq!(ctx.range, key.range());
+                pretty_assertions::assert_eq!(ctx.span, key.span());
             }
         });
     }
 
     test_get_completion_keys_with_context! {
         #[tokio::test]
-        async fn test_get_completion_keys_with_context_table_header_range(
+        async fn test_get_completion_keys_with_context_table_header_span(
             r#"
             [table]
             foo = 1
@@ -248,7 +260,7 @@ mod tests {
             assert!(!keys.is_empty());
 
             for (key, ctx) in keys.iter().zip(contexts.iter()) {
-                pretty_assertions::assert_eq!(ctx.range, key.range());
+                pretty_assertions::assert_eq!(ctx.span, key.span());
             }
         });
     }

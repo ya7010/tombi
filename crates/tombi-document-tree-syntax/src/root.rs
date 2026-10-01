@@ -3,11 +3,23 @@ use std::{ops::Deref, sync::Arc};
 use crate::{DocumentTreeAndErrors, IntoDocumentTreeWithContext, Table};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct DocumentTree(pub(crate) Arc<Table>);
+pub struct DocumentTree {
+    table: Arc<Table>,
+    /// The line index of the source, built while parsing it.
+    line_index: Arc<tombi_text::LineIndex>,
+}
+
+impl DocumentTree {
+    /// The line index of the source, to convert the spans of the tree into ranges.
+    #[inline]
+    pub fn line_index(&self) -> &Arc<tombi_text::LineIndex> {
+        &self.line_index
+    }
+}
 
 impl From<DocumentTree> for Table {
     fn from(tree: DocumentTree) -> Self {
-        Arc::try_unwrap(tree.0).unwrap_or_else(|table| (*table).clone())
+        Arc::try_unwrap(tree.table).unwrap_or_else(|table| (*table).clone())
     }
 }
 
@@ -21,7 +33,7 @@ impl Deref for DocumentTree {
     type Target = Table;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.table
     }
 }
 
@@ -51,7 +63,10 @@ impl IntoDocumentTreeWithContext<crate::DocumentTree> for tombi_ast_syntax::Root
                 table.body_comment_directives = Some(body_comment_directives);
             }
 
-            crate::DocumentTree(Arc::new(table))
+            crate::DocumentTree {
+                table: Arc::new(table),
+                line_index: Arc::clone(tombi_ast_syntax::AstNode::syntax(&self).line_index()),
+            }
         };
 
         {
@@ -65,7 +80,7 @@ impl IntoDocumentTreeWithContext<crate::DocumentTree> for tombi_ast_syntax::Root
                             if !errs.is_empty() {
                                 errors.extend(errs);
                             }
-                            if let Err(errs) = Arc::make_mut(&mut tree.0).merge(table) {
+                            if let Err(errs) = Arc::make_mut(&mut tree.table).merge(table) {
                                 errors.extend(errs);
                             }
                         }
@@ -82,7 +97,7 @@ impl IntoDocumentTreeWithContext<crate::DocumentTree> for tombi_ast_syntax::Root
                 }
             }
             if !group_boundary_comment_directives.is_empty() {
-                Arc::make_mut(&mut tree.0).group_boundary_comment_directives =
+                Arc::make_mut(&mut tree.table).group_boundary_comment_directives =
                     Some(group_boundary_comment_directives);
             }
         }
@@ -102,7 +117,7 @@ impl IntoDocumentTreeWithContext<crate::DocumentTree> for tombi_ast_syntax::Root
                 errors.extend(errs);
             }
 
-            if let Err(errs) = Arc::make_mut(&mut tree.0).merge(table) {
+            if let Err(errs) = Arc::make_mut(&mut tree.table).merge(table) {
                 errors.extend(errs);
             }
         }

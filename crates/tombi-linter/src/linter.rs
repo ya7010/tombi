@@ -11,7 +11,7 @@ use crate::lint::Lint;
 pub struct Linter<'a> {
     toml_version: TomlVersion,
     options: Cow<'a, crate::LintOptions>,
-    source_text: Cow<'a, str>,
+    line_index: Option<std::sync::Arc<tombi_text::LineIndex>>,
     source_uri_or_path: Option<Either<&'a tombi_uri::Uri, &'a std::path::Path>>,
     schema_store: &'a tombi_schema_store::SchemaStore,
     pub(crate) diagnostics: Vec<tombi_diagnostic::Diagnostic>,
@@ -27,31 +27,41 @@ impl<'a> Linter<'a> {
         Self {
             toml_version,
             options: Cow::Borrowed(options),
-            source_text: Cow::Borrowed(""),
+            line_index: None,
             source_uri_or_path,
             schema_store,
             diagnostics: Vec::new(),
         }
     }
 
-    pub async fn lint(mut self, source: &str) -> Result<(), Vec<Diagnostic>> {
-        self.source_text = Cow::Borrowed(source);
+    pub async fn lint(self, source: &str) -> Result<(), Vec<Diagnostic>> {
+        self.lint_parsed(tombi_parser::parse(source)).await
+    }
 
-        let (root, errors) = tombi_parser::parse(source).into_root_and_errors();
+    /// Lints a parsed document.
+    ///
+    /// The caller can keep [`tombi_parser::ParseResult::line_index`] to convert the spans of
+    /// the diagnostics into ranges, without indexing the lines of the source again.
+    pub async fn lint_parsed(
+        mut self,
+        parsed: tombi_parser::ParseResult,
+    ) -> Result<(), Vec<Diagnostic>> {
+        self.line_index = Some(std::sync::Arc::clone(parsed.line_index()));
+
+        let (root, errors) = parsed.into_root_and_errors();
         for error in errors {
             error.set_diagnostics(&mut self.diagnostics);
         }
 
         let (source_schema, tombi_document_comment_directive) = {
-            let (source_schema, error_with_range) =
-                tombi_schema_store::lint_source_schema_from_ast(
-                    &root,
-                    self.source_uri_or_path,
-                    self.schema_store,
-                )
-                .await;
-            if let Some((err, range)) = error_with_range {
-                self.diagnostics.push(err.to_warning_diagnostic(range));
+            let (source_schema, error_with_span) = tombi_schema_store::lint_source_schema_from_ast(
+                &root,
+                self.source_uri_or_path,
+                self.schema_store,
+            )
+            .await;
+            if let Some((err, span)) = error_with_span {
+                self.diagnostics.push(err.to_warning_diagnostic(span));
             };
 
             let (tombi_document_comment_directive, diagnostics) =
@@ -158,7 +168,9 @@ impl<'a> Linter<'a> {
     }
 
     pub fn source_text(&self) -> &str {
-        self.source_text.as_ref()
+        self.line_index
+            .as_ref()
+            .map_or("", |line_index| line_index.text())
     }
 
     #[inline]
@@ -202,12 +214,12 @@ impl<'a> Linter<'a> {
                     tombi_severity_level::SeverityLevel::Warn => Some(Diagnostic::new_warning(
                         d.message().to_string(),
                         d.code().to_string(),
-                        d.range(),
+                        d.span(),
                     )),
                     tombi_severity_level::SeverityLevel::Error => Some(Diagnostic::new_error(
                         d.message().to_string(),
                         d.code().to_string(),
-                        d.range(),
+                        d.span(),
                     )),
                 }
             })

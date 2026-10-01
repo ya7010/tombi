@@ -8,7 +8,7 @@ use super::{GetTypeDefinition, TypeDefinition, schema_type_definition};
 
 pub fn get_any_of_type_definition<'a: 'b, 'b, T>(
     value: &'a T,
-    position: tombi_text::Position,
+    cursor: crate::CursorPosition<'a>,
     keys: &'a [tombi_document_tree_syntax::Key],
     accessors: &'a [tombi_schema_store::Accessor],
     any_of_schema: &'a tombi_schema_store::AnyOfSchema,
@@ -23,6 +23,7 @@ where
         + Send
         + std::fmt::Debug,
 {
+    let offset = cursor.offset();
     log::trace!("value: {:?}", value);
     log::trace!("keys: {:?}", keys);
     log::trace!("accessors: {:?}", accessors);
@@ -54,7 +55,7 @@ where
         .await;
         let applicable_count = evaluation.applicable_count();
         let is_property_key = keys.first().is_some_and(|key| {
-            tombi_document_tree_syntax::ValueImpl::range(key).contains(position)
+            tombi_document_tree_syntax::ValueImpl::span(key).contains_inclusive(offset)
         });
         let mut result = Vec::new();
 
@@ -71,7 +72,7 @@ where
 
             let type_definitions = value
                 .get_type_definition(
-                    position,
+                    cursor,
                     keys,
                     accessors,
                     Some(navigation_schema),
@@ -100,7 +101,7 @@ where
 impl GetTypeDefinition for tombi_schema_store::AnyOfSchema {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
-        _position: tombi_text::Position,
+        _cursor: crate::CursorPosition<'a>,
         _keys: &'a [tombi_document_tree_syntax::Key],
         accessors: &'a [Accessor],
         current_schema: Option<&'a CurrentSchema<'a>>,

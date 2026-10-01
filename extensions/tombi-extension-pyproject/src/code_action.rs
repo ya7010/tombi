@@ -104,7 +104,7 @@ pub async fn code_action(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
     toml_version: tombi_config::TomlVersion,
-    line_index: &tombi_text::LineIndex,
+    line_index: &std::sync::Arc<tombi_text::LineIndex>,
     features: Option<&tombi_config::PyprojectExtensionFeatures>,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
@@ -170,16 +170,8 @@ pub async fn code_action(
             return Ok(None);
         };
 
-        // Load workspace text and create line index for workspace document
-        let Ok(workspace_text) = tombi_fs::read_to_string(&workspace_path) else {
-            log::warn!(
-                "failed to read workspace pyproject.toml: {:?}",
-                workspace_path.display()
-            );
-            return Ok(None);
-        };
-        let workspace_line_index =
-            tombi_text::LineIndex::new(&workspace_text, line_index.encoding_kind);
+        // The line index built while loading the workspace document.
+        let workspace_line_index = std::sync::Arc::clone(workspace_root.syntax().line_index());
 
         // Try "Use Workspace Dependency" (when dependency exists in workspace)
         if features
@@ -235,7 +227,7 @@ pub async fn code_action(
 
 async fn update_dependency_to_latest_version_code_action(
     text_document_uri: &tombi_uri::Uri,
-    line_index: &tombi_text::LineIndex,
+    line_index: &std::sync::Arc<tombi_text::LineIndex>,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
     offline: bool,
@@ -269,7 +261,7 @@ async fn update_dependency_to_latest_version_code_action(
         return Ok(None);
     };
 
-    let Some(version_range) = find_version_specifier_range(dep_str.value()) else {
+    let Some(version_span) = find_version_specifier_span(dep_str.value()) else {
         return Ok(None);
     };
     let new_version_specifier = format_exact_pinned_dependency(&latest_version);
@@ -291,7 +283,7 @@ async fn update_dependency_to_latest_version_code_action(
                 },
                 line_index: line_index.clone(),
                 edits: vec![OneOf::Left(TextEdit {
-                    range: offset_range(dep_str.unquoted_range(), version_range),
+                    span: version_span + dep_str.unquoted_span().start,
                     new_text: new_version_specifier,
                 })],
             }])),
@@ -321,7 +313,7 @@ fn format_exact_pinned_dependency(latest_version: &str) -> String {
         .to_string()
 }
 
-fn find_version_specifier_range(dependency: &str) -> Option<tombi_text::Range> {
+fn find_version_specifier_span(dependency: &str) -> Option<tombi_text::Span> {
     let marker_start = dependency.find(';').unwrap_or(dependency.len());
     let dependency_without_marker = &dependency[..marker_start];
     let mut cursor = 0;
@@ -376,17 +368,10 @@ fn find_version_specifier_range(dependency: &str) -> Option<tombi_text::Range> {
         return None;
     }
 
-    Some(tombi_text::Range::new(
-        tombi_text::Position::new(0, version_start as u32),
-        tombi_text::Position::new(0, version_end as u32),
+    Some(tombi_text::Span::new(
+        tombi_text::Offset::new(version_start as u32),
+        tombi_text::Offset::new(version_end as u32),
     ))
-}
-
-fn offset_range(base: tombi_text::Range, relative: tombi_text::Range) -> tombi_text::Range {
-    tombi_text::Range::new(
-        base.start + tombi_text::RelativePosition::from(relative.start),
-        base.start + tombi_text::RelativePosition::from(relative.end),
-    )
 }
 
 fn calculate_insertion_index(existing_package_names: &[&str], new_package_name: &str) -> usize {
@@ -398,24 +383,24 @@ fn calculate_insertion_index(existing_package_names: &[&str], new_package_name: 
         .unwrap_or(existing_package_names.len())
 }
 
-/// Get AST array from document tree range
-/// First finds the range in document_tree, then locates the corresponding AST node
+/// Get AST array from document tree span
+/// First finds the span in document_tree, then locates the corresponding AST node
 fn get_ast_array_from_document_tree(
     root: &tombi_ast_syntax::Root,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
 ) -> Option<tombi_ast_syntax::Array> {
-    // Get the value from document tree to find its range
+    // Get the value from document tree to find its span
     let (_, value) = tombi_document_tree_syntax::dig_accessors(document_tree, accessors)?;
 
     let tombi_document_tree_syntax::Value::Array(doc_array) = value else {
         return None;
     };
 
-    // Get the range of the array in the document tree
-    let target_range = doc_array.range();
+    // Get the span of the array in the document tree
+    let target_span = doc_array.span();
 
-    root.array_at_range(target_range)
+    root.array_at_span(target_span)
 }
 
 /// Calculate insertion position and text for array insertion with comma handling
@@ -424,7 +409,7 @@ fn calculate_array_insertion(
     ast_array: &tombi_ast_syntax::Array,
     insertion_index: usize,
     new_element: &tombi_document_tree_syntax::String,
-) -> Option<(tombi_text::Position, String)> {
+) -> Option<(tombi_text::Offset, String)> {
     let values_with_comma: Vec<_> = ast_array.value_or_key_values_with_comma().collect();
 
     if values_with_comma.is_empty() {
@@ -435,12 +420,12 @@ fn calculate_array_insertion(
             .and_then(|group| group.comments().last())
         {
             Some((
-                dangling_comment.syntax().range().end,
+                dangling_comment.syntax().span().end,
                 format!("\n\n{},\n", new_element),
             ))
         } else {
             Some((
-                ast_array.bracket_start()?.range().end,
+                ast_array.bracket_start()?.span().end,
                 format!("{}", new_element),
             ))
         };
@@ -449,43 +434,43 @@ fn calculate_array_insertion(
     if insertion_index == 0 {
         // Insert at the beginning
         let (first_value, _) = values_with_comma.first()?;
-        let insert_pos = first_value.syntax().range().start;
+        let insert_offset = first_value.syntax().span().start;
         let new_text = format!("{},\n", new_element);
-        return Some((insert_pos, new_text));
+        return Some((insert_offset, new_text));
     }
 
     if insertion_index >= values_with_comma.len() {
         // Insert at the end
         let (last_value, last_comma) = values_with_comma.last()?;
         if let Some(last_comma) = last_comma {
-            let insert_pos = last_comma.range().end;
+            let insert_offset = last_comma.span().end;
             let new_text = format!("\n{}, ", new_element);
-            return Some((insert_pos, new_text));
+            return Some((insert_offset, new_text));
         } else {
-            let insert_pos = last_value.syntax().range().end;
+            let insert_offset = last_value.syntax().span().end;
             let new_text = format!(", {}", new_element);
-            return Some((insert_pos, new_text));
+            return Some((insert_offset, new_text));
         }
     }
 
     // Insert in the middle
     let (target_value, target_comma) = values_with_comma.get(insertion_index)?;
-    let insert_pos = if let Some(target_comma) = target_comma {
-        target_comma.range().end
+    let insert_offset = if let Some(target_comma) = target_comma {
+        target_comma.span().end
     } else {
-        target_value.syntax().range().end
+        target_value.syntax().span().end
     };
     let new_text = format!("\n{},\n", new_element);
-    Some((insert_pos, new_text))
+    Some((insert_offset, new_text))
 }
 
 fn add_workspace_dependency_code_action(
     text_document_uri: &tombi_uri::Uri,
-    line_index: &tombi_text::LineIndex,
+    line_index: &std::sync::Arc<tombi_text::LineIndex>,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
     workspace_pyproject_toml_path: &std::path::Path,
-    workspace_line_index: &tombi_text::LineIndex,
+    workspace_line_index: &std::sync::Arc<tombi_text::LineIndex>,
     workspace_root: &tombi_ast_syntax::Root,
     workspace_document_tree: &tombi_document_tree_syntax::DocumentTree,
 ) -> Option<CodeAction> {
@@ -570,7 +555,7 @@ fn add_workspace_dependency_code_action(
 /// Generate TextEdit for adding dependency to workspace [project.dependencies]
 fn generate_workspace_dependency_edit(
     accessors: &[Accessor],
-    _workspace_line_index: &tombi_text::LineIndex,
+    _workspace_line_index: &std::sync::Arc<tombi_text::LineIndex>,
     workspace_root: &tombi_ast_syntax::Root,
     workspace_document_tree: &tombi_document_tree_syntax::DocumentTree,
     dependency_requirement: &DependencyRequirement,
@@ -626,14 +611,14 @@ fn generate_workspace_dependency_edit(
     let insertion_index = calculate_insertion_index(&existing_packages, &package_name);
 
     // Determine insertion position and comma handling using AST
-    let (insertion_range, new_text) = calculate_array_insertion(
+    let (insertion_offset, new_text) = calculate_array_insertion(
         &deps_ast_array,
         insertion_index,
         dependency_requirement.dependency,
     )?;
 
     Some(TextEdit {
-        range: tombi_text::Range::at(insertion_range),
+        span: tombi_text::Span::empty(insertion_offset),
         new_text,
     })
 }
@@ -644,19 +629,19 @@ fn generate_member_dependency_edit(
         requirement,
         dependency,
     }: &DependencyRequirement,
-    _line_index: &tombi_text::LineIndex,
+    _line_index: &std::sync::Arc<tombi_text::LineIndex>,
 ) -> Option<TextEdit> {
     let new_dep_str = format_dependency_without_version(requirement);
 
     Some(TextEdit {
-        range: dependency.range(),
+        span: dependency.span(),
         new_text: format!("\"{}\"", new_dep_str),
     })
 }
 
 fn use_workspace_dependency_code_action(
     text_document_uri: &tombi_uri::Uri,
-    line_index: &tombi_text::LineIndex,
+    line_index: &std::sync::Arc<tombi_text::LineIndex>,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
     workspace_document_tree: &tombi_document_tree_syntax::DocumentTree,
@@ -694,8 +679,8 @@ fn use_workspace_dependency_code_action(
     // Format dependency without version (preserving extras)
     let new_dep_str = format_dependency_without_version(workspace_requirement);
 
-    // Use the string's range for replacement
-    let range = dep_str.range();
+    // Use the string's span for replacement
+    let span = dep_str.span();
 
     Some(CodeAction {
         title: CodeActionRefactorRewriteName::UseWorkspaceDependency.to_string(),
@@ -709,7 +694,7 @@ fn use_workspace_dependency_code_action(
                 },
                 line_index: line_index.clone(),
                 edits: vec![OneOf::Left(TextEdit {
-                    range,
+                    span,
                     new_text: format!("\"{}\"", new_dep_str),
                 })],
             }])),
@@ -750,12 +735,11 @@ mod tests {
             async fn $name() {
                 let uri = tombi_uri::Uri::from_file_path("/path/to/pyproject.toml").unwrap();
                 let root = tombi_parser::parse($toml_text).into_root();
+                let line_index = std::sync::Arc::clone(root.syntax().line_index());
                 let document_tree = root
                     .clone()
                     .try_into_document_tree(tombi_config::TomlVersion::default())
                     .unwrap();
-                let line_index =
-                    tombi_text::LineIndex::new($toml_text, tombi_text::EncodingKind::default());
 
                 let _cache_home = TestCacheHome::new();
                 let cache_options = tombi_cache::Options {
@@ -864,29 +848,23 @@ mod tests {
     }
 
     #[test]
-    fn test_find_version_specifier_range_with_marker() {
+    fn test_find_version_specifier_span_with_marker() {
         let dependency = "requests>=2.0; python_version < '3.13'";
-        let range = find_version_specifier_range(dependency).unwrap();
-        assert_eq!(
-            &dependency[range.start.column as usize..range.end.column as usize],
-            ">=2.0"
-        );
+        let span = find_version_specifier_span(dependency).unwrap();
+        assert_eq!(&dependency[span], ">=2.0");
     }
 
     #[test]
-    fn test_find_version_specifier_range_with_extras() {
+    fn test_find_version_specifier_span_with_extras() {
         let dependency = "requests[security] >= 2.0, < 3";
-        let range = find_version_specifier_range(dependency).unwrap();
-        assert_eq!(
-            &dependency[range.start.column as usize..range.end.column as usize],
-            ">= 2.0, < 3"
-        );
+        let span = find_version_specifier_span(dependency).unwrap();
+        assert_eq!(&dependency[span], ">= 2.0, < 3");
     }
 
     #[test]
-    fn test_find_version_specifier_range_returns_none_for_url() {
+    fn test_find_version_specifier_span_returns_none_for_url() {
         let dependency = "requests @ https://example.com/requests.whl";
-        assert!(find_version_specifier_range(dependency).is_none());
+        assert!(find_version_specifier_span(dependency).is_none());
     }
 
     #[tokio::test]
@@ -897,11 +875,11 @@ mod tests {
 name = "test"
 "#;
         let root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(root.syntax().line_index());
         let document_tree = root
             .clone()
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         let result = code_action(
             &uri,
@@ -931,11 +909,11 @@ members = ["member1"]
 dependencies = ["pydantic>=2.10"]
 "#;
         let root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(root.syntax().line_index());
         let document_tree = root
             .clone()
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         let result = code_action(
             &uri,
@@ -984,11 +962,11 @@ dependencies = ["pydantic>=2.10"]
 name = "test"
 "#;
         let root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(root.syntax().line_index());
         let document_tree = root
             .clone()
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         // Test with invalid accessor (not dependencies)
         let result = code_action(
@@ -1036,6 +1014,7 @@ name = "member"
 dependencies = ["pydantic>=2.10,<3.0"]
 "#;
         let document_root = tombi_parser::parse(member_toml).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1052,8 +1031,6 @@ dependencies = ["pydantic>=2.10,<3.0"]
         let workspace_tree = workspace_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index =
-            tombi_text::LineIndex::new(member_toml, tombi_text::EncodingKind::default());
 
         // Call use_workspace_dependency_code_action
         let result = use_workspace_dependency_code_action(
@@ -1084,6 +1061,7 @@ name = "member"
 dependencies = ["pydantic[email,dotenv]>=2.10,<3.0"]
 "#;
         let document_root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1099,7 +1077,6 @@ dependencies = ["pydantic>=2.10"]
         let workspace_tree = workspace_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         let result = use_workspace_dependency_code_action(
             &text_document_uri,
@@ -1127,6 +1104,7 @@ name = "member"
 dependencies = ["pydantic"]
 "#;
         let document_root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1142,7 +1120,6 @@ dependencies = ["pydantic>=2.10"]
         let workspace_tree = workspace_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         let result = use_workspace_dependency_code_action(
             &member_uri,
@@ -1170,6 +1147,7 @@ name = "member"
 dependencies = ["requests>=2.28"]
 "#;
         let document_root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1185,7 +1163,6 @@ dependencies = ["pydantic>=2.10"]
         let workspace_tree = workspace_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         let result = use_workspace_dependency_code_action(
             &text_document_uri,
@@ -1247,6 +1224,7 @@ name = "member"
 dependencies = ["requests>=2.28"]
 "#;
         let member_root = tombi_parser::parse(member_toml).into_root();
+        let member_line_index = std::sync::Arc::clone(member_root.syntax().line_index());
         let member_tree = member_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1259,14 +1237,11 @@ members = ["member"]
 dependencies = ["pydantic>=2.10"]
 "#;
         let workspace_root = tombi_parser::parse(workspace_toml).into_root();
+        let workspace_line_index = std::sync::Arc::clone(workspace_root.syntax().line_index());
         let workspace_root_for_tree = workspace_root.clone();
         let workspace_tree = workspace_root_for_tree
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let member_line_index =
-            tombi_text::LineIndex::new(member_toml, tombi_text::EncodingKind::default());
-        let workspace_line_index =
-            tombi_text::LineIndex::new(workspace_toml, tombi_text::EncodingKind::default());
 
         let result = add_workspace_dependency_code_action(
             &member_uri,
@@ -1304,6 +1279,7 @@ name = "member"
 dependencies = ["pydantic>=2.10"]
 "#;
         let member_root = tombi_parser::parse(member_toml).into_root();
+        let member_line_index = std::sync::Arc::clone(member_root.syntax().line_index());
         let member_tree = member_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1316,14 +1292,11 @@ members = ["member"]
 dependencies = ["pydantic>=2.10,<3.0"]
 "#;
         let workspace_root = tombi_parser::parse(workspace_toml).into_root();
+        let workspace_line_index = std::sync::Arc::clone(workspace_root.syntax().line_index());
         let workspace_root_for_tree = workspace_root.clone();
         let workspace_tree = workspace_root_for_tree
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let member_line_index =
-            tombi_text::LineIndex::new(member_toml, tombi_text::EncodingKind::default());
-        let workspace_line_index =
-            tombi_text::LineIndex::new(workspace_toml, tombi_text::EncodingKind::default());
 
         let result = add_workspace_dependency_code_action(
             &member_uri,
@@ -1359,6 +1332,7 @@ name = "member"
 dependencies = ["pydantic>=2.10"]
 "#;
         let document_root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1371,13 +1345,11 @@ members = ["member"]
 dependencies = ["pydantic>=2.10,<3.0"]
 "#;
         let workspace_root = tombi_parser::parse(workspace_toml).into_root();
+        let workspace_line_index = std::sync::Arc::clone(workspace_root.syntax().line_index());
         let workspace_root_for_tree = workspace_root.clone();
         let workspace_tree = workspace_root_for_tree
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
-        let workspace_line_index =
-            tombi_text::LineIndex::new(workspace_toml, tombi_text::EncodingKind::default());
 
         // "Use Workspace Dependency" should be provided
         let use_result = use_workspace_dependency_code_action(
@@ -1424,6 +1396,7 @@ name = "member"
 dependencies = ["requests>=2.28"]
 "#;
         let document_root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1436,13 +1409,11 @@ members = ["member"]
 dependencies = ["pydantic>=2.10"]
 "#;
         let workspace_root = tombi_parser::parse(workspace_toml).into_root();
+        let workspace_line_index = std::sync::Arc::clone(workspace_root.syntax().line_index());
         let workspace_root_for_tree = workspace_root.clone();
         let workspace_tree = workspace_root_for_tree
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
-        let workspace_line_index =
-            tombi_text::LineIndex::new(workspace_toml, tombi_text::EncodingKind::default());
 
         // "Use Workspace Dependency" should NOT be provided
         let use_result = use_workspace_dependency_code_action(
@@ -1489,6 +1460,7 @@ name = "member"
 dev = ["pytest>=7.0"]
 "#;
         let document_root = tombi_parser::parse(toml_text).into_root();
+        let line_index = std::sync::Arc::clone(document_root.syntax().line_index());
         let document_tree = document_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
@@ -1504,7 +1476,6 @@ dependencies = ["pytest>=7.0,<8.0"]
         let workspace_tree = workspace_root
             .try_into_document_tree(tombi_config::TomlVersion::default())
             .unwrap();
-        let line_index = tombi_text::LineIndex::new(toml_text, tombi_text::EncodingKind::default());
 
         let result = use_workspace_dependency_code_action(
             &text_document_uri,

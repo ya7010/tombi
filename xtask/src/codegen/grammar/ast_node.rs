@@ -73,8 +73,8 @@ pub fn generate_ast_node(ast: &AstSrc) -> Result<String, anyhow::Error> {
                         #(#methods)*
 
                         #[inline]
-                        pub fn range(&self) -> tombi_text::Range {
-                            self.syntax.range()
+                        pub fn span(&self) -> tombi_text::Span {
+                            self.syntax.span()
                         }
                     }
                 },

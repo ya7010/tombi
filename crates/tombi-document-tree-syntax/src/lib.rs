@@ -52,7 +52,7 @@ impl<T> From<DocumentTreeAndErrors<T>> for (T, Vec<crate::Error>) {
 pub trait ValueImpl {
     fn value_type(&self) -> ValueType;
 
-    fn range(&self) -> tombi_text::Range;
+    fn span(&self) -> tombi_text::Span;
 }
 
 pub trait LikeString {
@@ -175,19 +175,19 @@ where
 pub fn get_accessors(
     document_tree: &crate::DocumentTree,
     keys: &[crate::Key],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
 ) -> Vec<tombi_accessor::Accessor> {
     let mut accessors = Vec::new();
     let mut current = CurrentValue::Root(document_tree);
 
     for key in keys {
-        current = find_value_in_current(current, key, &mut accessors, position);
+        current = find_value_in_current(current, key, &mut accessors, offset);
         accessors.push(tombi_accessor::Accessor::Key(key.value().to_owned()));
     }
 
     if let CurrentValue::Value(crate::Value::Array(array)) = current {
         for (index, value) in array.values().iter().enumerate() {
-            if value.contains(position) {
+            if value.contains(offset) {
                 accessors.push(tombi_accessor::Accessor::Index(index));
                 break;
             }
@@ -207,19 +207,19 @@ fn find_value_in_current<'a>(
     current: CurrentValue<'a>,
     key: &crate::Key,
     accessors: &mut Vec<tombi_accessor::Accessor>,
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
 ) -> CurrentValue<'a> {
     match current {
         CurrentValue::Root(table) => table.get(key).map_or(current, CurrentValue::Value),
         CurrentValue::Value(crate::Value::Array(array)) => {
             for (index, value) in array.values().iter().enumerate() {
-                if value.contains(position) {
+                if value.contains(offset) {
                     accessors.push(tombi_accessor::Accessor::Index(index));
                     return find_value_in_current(
                         CurrentValue::Value(value),
                         key,
                         accessors,
-                        position,
+                        offset,
                     );
                 }
             }

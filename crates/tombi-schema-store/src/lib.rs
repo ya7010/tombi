@@ -260,7 +260,7 @@ pub async fn lint_source_schema_from_ast(
     schema_store: &SchemaStore,
 ) -> (
     Option<SourceSchema>,
-    Option<(crate::Error, tombi_text::Range)>,
+    Option<(crate::Error, tombi_text::Span)>,
 ) {
     match schema_store
         .resolve_source_schema_from_ast(root, source_uri_or_path)
@@ -268,7 +268,7 @@ pub async fn lint_source_schema_from_ast(
     {
         Ok(Some(source_schema)) => (Some(source_schema), None),
         Ok(None) => (None, None),
-        Err(error_with_range) => {
+        Err(error_with_span) => {
             let source_schema = if let Some(source_uri_or_path) = source_uri_or_path {
                 schema_store
                     .resolve_source_schema(source_uri_or_path)
@@ -278,7 +278,7 @@ pub async fn lint_source_schema_from_ast(
             } else {
                 None
             };
-            (source_schema, Some(error_with_range))
+            (source_schema, Some(error_with_span))
         }
     }
 }

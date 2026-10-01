@@ -42,7 +42,6 @@ use tombi_comment_directive::TOMBI_COMMENT_DIRECTIVE_TOML_VERSION;
 use tombi_document_tree_syntax::{TryIntoDocumentTree, dig_keys};
 use tombi_future::{BoxFuture, Boxable};
 use tombi_severity_level::{SeverityLevel, SeverityLevelDefaultError, SeverityLevelDefaultWarn};
-use tombi_text::RelativePosition;
 
 pub fn validate<'a: 'b, 'b>(
     tree: tombi_document_tree_syntax::DocumentTree,
@@ -260,7 +259,7 @@ pub fn handle_deprecated<'a, T>(
 
         crate::Diagnostic {
             kind: Box::new(kind),
-            range: value.range(),
+            span: value.span(),
         }
         .push_diagnostic_with_level(level, diagnostics);
     } else if common_rules
@@ -306,7 +305,7 @@ pub fn handle_deprecated_value<'a, T>(
 
         crate::Diagnostic {
             kind: Box::new(kind),
-            range: value.range(),
+            span: value.span(),
         }
         .push_diagnostic_with_level(level, diagnostics);
     } else if common_rules
@@ -322,7 +321,7 @@ pub fn handle_deprecated_value<'a, T>(
 fn handle_type_mismatch(
     expected: tombi_schema_store::ValueType,
     actual: tombi_document_tree_syntax::ValueType,
-    range: tombi_text::Range,
+    span: tombi_text::Span,
     common_rules: Option<&tombi_comment_directive::value::CommonLintRules>,
 ) -> Result<crate::Valid, crate::Invalid> {
     let mut diagnostics = vec![];
@@ -338,7 +337,7 @@ fn handle_type_mismatch(
 
     crate::Diagnostic {
         kind: Box::new(crate::DiagnosticKind::TypeMismatch { expected, actual }),
-        range,
+        span,
     }
     .push_diagnostic_with_level(level, &mut diagnostics);
 
@@ -369,7 +368,7 @@ where
     let mut diagnostics = vec![];
     crate::Diagnostic {
         kind: Box::new(crate::DiagnosticKind::Nothing),
-        range: value.range(),
+        span: value.span(),
     }
     .push_diagnostic_with_level(SeverityLevelDefaultError::default(), &mut diagnostics);
     Err(diagnostics.into())
@@ -397,7 +396,7 @@ fn handle_unused_noqa<'a>(
 
     for tombi_ast_syntax::TombiValueCommentDirective {
         content,
-        content_range,
+        content_span,
         ..
     } in comment_directives
     {
@@ -413,14 +412,14 @@ fn handle_unused_noqa<'a>(
         if let Some((key, value)) =
             dig_keys(&document_tree, &["lint", "rules", rule_name, "disabled"])
         {
-            let range = key.range() + value.range();
-            let range = tombi_text::Range::new(
-                content_range.start + RelativePosition::from(range.start),
-                content_range.start + RelativePosition::from(range.end),
+            let span = key.span() + value.span();
+            let span = tombi_text::Span::new(
+                content_span.start + span.start,
+                content_span.start + span.end,
             );
             crate::Diagnostic {
                 kind: Box::new(crate::DiagnosticKind::UnusedNoqa { rule_name }),
-                range,
+                span,
             }
             .push_diagnostic_with_level(SeverityLevel::Warn, diagnostics);
             return;
@@ -439,7 +438,7 @@ pub(crate) fn merge_branch_diagnostics(
         a: &tombi_diagnostic::Diagnostic,
         b: &tombi_diagnostic::Diagnostic,
     ) -> bool {
-        a.code() == b.code() && a.message() == b.message() && a.range() == b.range()
+        a.code() == b.code() && a.message() == b.message() && a.span() == b.span()
     }
 
     if !branch_diagnostics
@@ -494,14 +493,14 @@ pub(crate) fn with_lint_diagnostics(
 
 pub(crate) fn schema_resolution_diagnostic(
     error: &tombi_schema_store::Error,
-    range: tombi_text::Range,
+    span: tombi_text::Span,
     common_rules: Option<&tombi_comment_directive::value::CommonLintRules>,
 ) -> Option<tombi_diagnostic::Diagnostic> {
     (!common_rules
         .and_then(|rules| rules.schema_resolution.as_ref())
         .and_then(|rule| rule.disabled)
         .unwrap_or_default())
-    .then(|| error.to_warning_diagnostic(range))
+    .then(|| error.to_warning_diagnostic(span))
 }
 
 /// Drops the annotations a subschema produced when its own assertions failed —
@@ -770,7 +769,7 @@ where
             handle_type_mismatch(
                 current_schema.schema_view.value_type().await,
                 value.value_type(),
-                value.range(),
+                value.span(),
                 common_rules,
             )
         }
@@ -949,7 +948,7 @@ mod tests {
             diagnostics: vec![tombi_diagnostic::Diagnostic::new_warning(
                 "warn",
                 "warn-code",
-                tombi_text::Range::default(),
+                tombi_text::Span::default(),
             )],
             local_evaluated_locations: crate::Valid::default(),
         };
@@ -965,7 +964,7 @@ mod tests {
             diagnostics: vec![tombi_diagnostic::Diagnostic::new_error(
                 "lint error",
                 "lint-code",
-                tombi_text::Range::default(),
+                tombi_text::Span::default(),
             )],
             local_evaluated_locations: crate::Valid::default(),
         };
@@ -989,12 +988,12 @@ mod tests {
                 tombi_diagnostic::Diagnostic::new_warning(
                     "strict additional",
                     "table-strict-additional-keys",
-                    tombi_text::Range::default(),
+                    tombi_text::Span::default(),
                 ),
                 tombi_diagnostic::Diagnostic::new_warning(
                     "other warning",
                     "deprecated",
-                    tombi_text::Range::default(),
+                    tombi_text::Span::default(),
                 ),
             ],
             local_evaluated_locations: crate::Valid::default(),
@@ -1013,7 +1012,7 @@ mod tests {
             diagnostics: vec![tombi_diagnostic::Diagnostic::new_warning(
                 "strict additional",
                 "table-strict-additional-keys",
-                tombi_text::Range::default(),
+                tombi_text::Span::default(),
             )],
             local_evaluated_locations: crate::Valid::default(),
         });
@@ -1057,7 +1056,7 @@ mod tests {
             vec![tombi_diagnostic::Diagnostic::new_warning(
                 "lint warning",
                 "lint-warning",
-                tombi_text::Range::default(),
+                tombi_text::Span::default(),
             )],
         )
         .expect_err("lint warnings should still surface");

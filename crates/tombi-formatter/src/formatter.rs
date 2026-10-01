@@ -48,9 +48,18 @@ impl<'a> Formatter<'a> {
     }
 
     /// Format a TOML document and return the result as a string
-    pub async fn format(mut self, source: &str) -> Result<String, Vec<Diagnostic>> {
-        let parsed = tombi_parser::parse(source);
+    pub async fn format(self, source: &str) -> Result<String, Vec<Diagnostic>> {
+        self.format_parsed(tombi_parser::parse(source)).await
+    }
 
+    /// Format a parsed TOML document and return the result as a string.
+    ///
+    /// The caller can keep [`tombi_parser::ParseResult::line_index`] to convert the spans of
+    /// the diagnostics into ranges, without indexing the lines of the source again.
+    pub async fn format_parsed(
+        mut self,
+        parsed: tombi_parser::ParseResult,
+    ) -> Result<String, Vec<Diagnostic>> {
         let root = parsed.root();
         let (source_schema, tombi_document_comment_directive) = (
             self.schema_store
@@ -78,7 +87,7 @@ impl<'a> Formatter<'a> {
                     log::info!("skip formatting for stdin due to `format.disable`");
                 }
             }
-            return Ok(source.to_string());
+            return Ok(parsed.line_index().text().to_string());
         }
 
         self.toml_version = tombi_document_comment_directive

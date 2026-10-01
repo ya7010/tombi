@@ -8,8 +8,8 @@ use tombi_document_tree::ArrayKind;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Array {
     kind: ArrayKind,
-    range: tombi_text::Range,
-    symbol_range: tombi_text::Range,
+    span: tombi_text::Span,
+    symbol_span: tombi_text::Span,
     values: Vec<Value>,
     pub(crate) header_comment_directives: Option<Vec<TombiValueCommentDirective>>,
     pub(crate) body_comment_directives: Option<Vec<TombiValueCommentDirective>>,
@@ -22,12 +22,12 @@ impl Array {
         Self {
             kind: ArrayKind::Array,
             values: vec![],
-            range: node.range(),
-            symbol_range: match (node.bracket_start(), node.bracket_end()) {
+            span: node.span(),
+            symbol_span: match (node.bracket_start(), node.bracket_end()) {
                 (Some(start), Some(end)) => {
-                    tombi_text::Range::new(start.range().start, end.range().end)
+                    tombi_text::Span::new(start.span().start, end.span().end)
                 }
-                _ => node.range(),
+                _ => node.span(),
             },
             header_comment_directives: None,
             body_comment_directives: None,
@@ -40,8 +40,8 @@ impl Array {
         Self {
             kind: ArrayKind::ArrayOfTable,
             values: vec![],
-            range: table.range(),
-            symbol_range: table.symbol_range(),
+            span: table.span(),
+            symbol_span: table.symbol_span(),
             header_comment_directives: None,
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -53,8 +53,8 @@ impl Array {
         Self {
             kind: ArrayKind::ParentArrayOfTable,
             values: vec![],
-            range: table.range(),
-            symbol_range: table.symbol_range(),
+            span: table.span(),
+            symbol_span: table.symbol_span(),
             header_comment_directives: None,
             body_comment_directives: None,
             group_boundary_comment_directives: None,
@@ -83,8 +83,8 @@ impl Array {
 
     #[inline]
     pub fn push(&mut self, value: Value) {
-        self.range += value.range();
-        self.symbol_range += value.symbol_range();
+        self.span += value.span();
+        self.symbol_span += value.symbol_span();
 
         self.values.push(value);
     }
@@ -119,8 +119,8 @@ impl Array {
             }
             (Array, _) | (_, Array) => {
                 errors.push(crate::Error::ConflictArray {
-                    range1: self.symbol_range,
-                    range2: other.symbol_range,
+                    range1: self.symbol_span,
+                    range2: other.symbol_span,
                 });
             }
         }
@@ -148,13 +148,13 @@ impl Array {
     }
 
     #[inline]
-    pub fn range(&self) -> tombi_text::Range {
-        self.range
+    pub fn span(&self) -> tombi_text::Span {
+        self.span
     }
 
     #[inline]
-    pub fn symbol_range(&self) -> tombi_text::Range {
-        self.symbol_range
+    pub fn symbol_span(&self) -> tombi_text::Span {
+        self.symbol_span
     }
 
     #[inline]
@@ -232,8 +232,8 @@ impl ValueImpl for Array {
         ValueType::Array
     }
 
-    fn range(&self) -> tombi_text::Range {
-        self.range
+    fn span(&self) -> tombi_text::Span {
+        self.span
     }
 }
 

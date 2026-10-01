@@ -200,7 +200,7 @@ impl DiagnosticsReporter {
         crate::Error: Print<P>,
     {
         if let crate::Error::TombiGlob(tombi_glob::Error::FileNotFound(path)) = error {
-            let file = FileReport::new(Some(path.clone()), String::new(), Vec::new());
+            let file = FileReport::new(Some(path.clone()), None, Vec::new());
             self.record(file, Some(error), printer);
         } else {
             self.record_failure(error, false, printer);

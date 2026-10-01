@@ -72,7 +72,10 @@ pub fn get_current_declaration(
         let feature_key = feature_key_at_accessors(document_tree, accessors)?;
         return Some(tombi_extension::Location {
             uri: cargo_toml_uri.clone(),
-            range: feature_key.unquoted_range(),
+            span: Some(tombi_extension::LocatedSpan {
+                span: feature_key.unquoted_span(),
+                line_index: std::sync::Arc::clone(document_tree.line_index()),
+            }),
         });
     }
 
@@ -91,6 +94,9 @@ pub fn get_current_declaration(
 
     Some(tombi_extension::Location {
         uri: cargo_toml_uri.clone(),
-        range: optional_key.range() + optional.range(),
+        span: Some(tombi_extension::LocatedSpan {
+            span: optional_key.span() + optional.span(),
+            line_index: std::sync::Arc::clone(document_tree.line_index()),
+        }),
     })
 }

@@ -237,7 +237,7 @@ fn document_link_for_workspace_pyproject_toml(
                 };
                 Some(tombi_extension::DocumentLink {
                     target: member_pyproject_toml_uri,
-                    range: member.unquoted_range(),
+                    span: member.unquoted_span(),
                     tooltip: DocumentLinkToolTip::PyprojectTomlFirstMember.into(),
                 })
             });
@@ -301,13 +301,13 @@ fn document_link_for_member_pyproject_toml(
         {
             document_links.push(tombi_extension::DocumentLink {
                 target: member_project_toml_uri,
-                range: package_name_key.unquoted_range(),
+                span: package_name_key.unquoted_span(),
                 tooltip: DocumentLinkToolTip::PyprojectToml.into(),
             });
         }
         document_links.push(tombi_extension::DocumentLink {
             target: workspace_pyproject_toml_uri.clone(),
-            range: workspace_key.range() + is_workspace.range(),
+            span: workspace_key.span() + is_workspace.span(),
             tooltip: DocumentLinkToolTip::WorkspacePyprojectToml.into(),
         });
     }
@@ -356,10 +356,10 @@ fn document_link_for_project_dependencies(
                                         DocumentLinkToolTip::PyprojectToml,
                                     )
                                 {
-                                    // Update the range to point to the dependency spec
+                                    // Update the span to point to the dependency spec
                                     document_links.push(tombi_extension::DocumentLink {
                                         target: link.target,
-                                        range: dep_spec.unquoted_range(),
+                                        span: dep_spec.unquoted_span(),
                                         tooltip: link.tooltip,
                                     });
                                 }
@@ -373,7 +373,7 @@ fn document_link_for_project_dependencies(
                     )) {
                         document_links.push(tombi_extension::DocumentLink {
                             target: pypi_uri,
-                            range: dep_spec.unquoted_range(),
+                            span: dep_spec.unquoted_span(),
                             tooltip: DocumentLinkToolTip::PyPI.into(),
                         });
                     }

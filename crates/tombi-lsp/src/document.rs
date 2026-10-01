@@ -7,10 +7,16 @@ use tombi_document_tree_syntax::IntoDocumentTreeAndErrors;
 
 #[derive(Debug, Clone)]
 pub struct DocumentSource {
-    /// The text of the document.
-    text: Arc<str>,
+    /// The parse result of the text, which owns the text and its line index.
+    ///
+    /// The linter and the formatter reuse it, so the text is parsed and indexed only once.
+    parsed: tombi_parser::ParseResult,
 
+    /// The line index of the text, built while parsing it.
     line_index: Arc<LineIndex>,
+
+    /// The column unit of the LSP client.
+    encoding_kind: EncodingKind,
 
     /// The version of the document.
     ///
@@ -34,85 +40,63 @@ pub struct DocumentSource {
 
 impl DocumentSource {
     pub fn new(
-        text: impl Into<String>,
+        parsed: tombi_parser::ParseResult,
         version: Option<i32>,
         toml_version: tombi_config::TomlVersion,
         encoding_kind: EncodingKind,
     ) -> Self {
-        let text: Arc<str> = Arc::<str>::from(text.into());
-
-        let (ast, errors) = tombi_parser::parse(text.as_ref()).into_root_and_errors();
-
-        // Convert parser errors to diagnostics
-        let mut ast_errors = Vec::with_capacity(errors.len());
-        for error in errors {
+        let ast = parsed.root();
+        let mut ast_errors = Vec::with_capacity(parsed.errors.len());
+        for error in parsed.errors.iter().cloned() {
             error.set_diagnostics(&mut ast_errors);
         }
-
-        // Create DocumentTree from AST and collect DocumentTree errors
-        let (document_tree, errors) = ast
-            .clone()
-            .into_document_tree_and_errors(toml_version)
-            .into();
-
-        let mut document_tree_errors = Vec::with_capacity(errors.len());
-        for error in errors {
-            error.set_diagnostics(&mut document_tree_errors);
-        }
+        let (document_tree, document_tree_errors) = build_document_tree(&ast, toml_version);
 
         Self {
-            line_index: Arc::new(LineIndex::from_arc(Arc::clone(&text), encoding_kind)),
-            text,
+            line_index: Arc::clone(parsed.line_index()),
+            parsed,
+            encoding_kind,
             version,
             toml_version,
             ast: Arc::new(ast),
             ast_errors,
-            document_tree: Arc::new(document_tree),
+            document_tree,
             document_tree_errors,
         }
     }
 
     pub fn text(&self) -> &str {
-        self.text.as_ref()
+        self.line_index.text()
     }
 
-    pub fn text_arc(&self) -> Arc<str> {
-        Arc::clone(&self.text)
+    /// The parse result of the text, to lint or format it without parsing it again.
+    pub fn parsed(&self) -> &tombi_parser::ParseResult {
+        &self.parsed
     }
 
-    pub fn set_text(&mut self, text: impl Into<String>, toml_version: tombi_config::TomlVersion) {
-        self.text = Arc::<str>::from(text.into());
+    pub fn set_text(&mut self, text: &str, toml_version: tombi_config::TomlVersion) {
+        *self = Self::new(
+            tombi_parser::parse(text),
+            self.version,
+            toml_version,
+            self.encoding_kind,
+        );
+    }
+
+    /// Rebuilds only the document tree for `toml_version`, reusing the parsed AST.
+    pub fn set_toml_version(&mut self, toml_version: tombi_config::TomlVersion) {
         self.toml_version = toml_version;
-        self.line_index = Arc::new(LineIndex::from_arc(
-            Arc::clone(&self.text),
-            self.line_index.encoding_kind,
-        ));
-
-        // Re-parse the text and collect errors
-        let (ast, errors) = tombi_parser::parse(self.text.as_ref()).into_root_and_errors();
-        self.ast = Arc::new(ast);
-
-        // Convert parser errors to diagnostics
-        self.ast_errors = Vec::with_capacity(errors.len());
-        for error in errors {
-            error.set_diagnostics(&mut self.ast_errors);
-        }
-
-        let (document_tree, errors) = self
-            .ast
-            .as_ref()
-            .clone()
-            .into_document_tree_and_errors(toml_version)
-            .into();
-        self.document_tree = Arc::new(document_tree);
-        self.document_tree_errors = Vec::with_capacity(errors.len());
-        for error in errors {
-            error.set_diagnostics(&mut self.document_tree_errors);
-        }
+        (self.document_tree, self.document_tree_errors) =
+            build_document_tree(&self.ast, toml_version);
     }
 
     pub fn line_index(&self) -> &LineIndex {
         self.line_index.as_ref()
+    }
+
+    /// The column unit of the LSP client, to convert spans into LSP ranges.
+    pub fn encoding_kind(&self) -> EncodingKind {
+        self.encoding_kind
     }
 
     pub fn line_index_arc(&self) -> Arc<LineIndex> {
@@ -140,6 +124,24 @@ impl DocumentSource {
     }
 }
 
+fn build_document_tree(
+    ast: &tombi_ast_syntax::Root,
+    toml_version: tombi_config::TomlVersion,
+) -> (
+    Arc<tombi_document_tree_syntax::DocumentTree>,
+    Vec<tombi_diagnostic::Diagnostic>,
+) {
+    let (document_tree, errors) = ast
+        .clone()
+        .into_document_tree_and_errors(toml_version)
+        .into();
+    let mut document_tree_errors = Vec::with_capacity(errors.len());
+    for error in errors {
+        error.set_diagnostics(&mut document_tree_errors);
+    }
+    (Arc::new(document_tree), document_tree_errors)
+}
+
 #[cfg(test)]
 mod tests {
     use tombi_config::TomlVersion;
@@ -150,7 +152,7 @@ mod tests {
     #[test]
     fn line_index_arc_keeps_original_text_alive() {
         let mut document_source = DocumentSource::new(
-            "name = \"before\"\nversion = \"1.0.0\"",
+            tombi_parser::parse("name = \"before\"\nversion = \"1.0.0\""),
             Some(1),
             TomlVersion::default(),
             EncodingKind::Utf16,

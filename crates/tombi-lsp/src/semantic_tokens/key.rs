@@ -10,6 +10,6 @@ impl AppendSemanticTokens for tombi_ast_syntax::Keys {
 
 impl AppendSemanticTokens for tombi_ast_syntax::Key {
     fn append_semantic_tokens(&self, builder: &mut SemanticTokensBuilder) {
-        builder.add_token(TokenType::KEY, self.range());
+        builder.add_token(TokenType::KEY, self.span());
     }
 }

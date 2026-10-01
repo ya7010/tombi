@@ -194,7 +194,10 @@ pub(crate) fn include_group_locations(
         .into_iter()
         .map(|include_group| tombi_extension::Location {
             uri: uri.clone(),
-            range: include_group.unquoted_range(),
+            span: Some(tombi_extension::LocatedSpan {
+                span: include_group.unquoted_span(),
+                line_index: std::sync::Arc::clone(document_tree.line_index()),
+            }),
         })
         .collect())
 }

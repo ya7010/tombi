@@ -6,7 +6,9 @@ use tombi_document_tree_syntax::{TryIntoDocumentTree, dig_keys};
 #[derive(Debug, Clone)]
 pub(crate) struct PackageLocation {
     pub(crate) pyproject_toml_path: std::path::PathBuf,
-    pub(crate) package_name_key_range: tombi_text::Range,
+    pub(crate) package_name_key_span: tombi_text::Span,
+    /// The line index of the manifest, built while parsing it.
+    pub(crate) line_index: std::sync::Arc<tombi_text::LineIndex>,
 }
 
 impl From<PackageLocation> for Option<tombi_extension::Location> {
@@ -17,7 +19,10 @@ impl From<PackageLocation> for Option<tombi_extension::Location> {
 
         Some(tombi_extension::Location {
             uri,
-            range: package_location.package_name_key_range,
+            span: Some(tombi_extension::LocatedSpan {
+                span: package_location.package_name_key_span,
+                line_index: package_location.line_index,
+            }),
         })
     }
 }

@@ -34,7 +34,7 @@ impl Parse for tombi_ast_syntax::Array {
         }
 
         if !p.eat(T![']']) {
-            p.error(crate::Error::new(ExpectedBracketEnd, p.current_range()));
+            p.error(crate::Error::new(ExpectedBracketEnd, p.current_span()));
         }
 
         trailing_comment(p);

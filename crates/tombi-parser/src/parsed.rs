@@ -1,6 +1,6 @@
 use tombi_ast_syntax::{AstNode, SyntaxNode};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParseResult {
     syntax: SyntaxNode,
     pub errors: Vec<crate::Error>,
@@ -18,6 +18,12 @@ impl ParseResult {
             errors,
             line_ending,
         }
+    }
+
+    /// The line index built while parsing, to convert spans of the source into ranges.
+    #[inline]
+    pub fn line_index(&self) -> &std::sync::Arc<tombi_text::LineIndex> {
+        self.syntax.line_index()
     }
 
     pub fn root(&self) -> tombi_ast_syntax::Root {

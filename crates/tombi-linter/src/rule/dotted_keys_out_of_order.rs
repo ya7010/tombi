@@ -70,7 +70,7 @@ async fn check_dotted_keys_out_of_order(
         return;
     }
 
-    let mut prefix_groups: tombi_hashmap::HashMap<String, Vec<(usize, tombi_text::Range)>> =
+    let mut prefix_groups: tombi_hashmap::HashMap<String, Vec<(usize, tombi_text::Span)>> =
         tombi_hashmap::HashMap::new();
 
     // Single pass to collect all data
@@ -84,34 +84,34 @@ async fn check_dotted_keys_out_of_order(
         let Ok(content) = key.try_to_content(l.toml_version()) else {
             continue;
         };
-        let position = (index, key_value.range());
+        let offset = (index, key_value.span());
 
-        if let Some(positions) = prefix_groups.get_mut(content.as_ref()) {
-            positions.push(position);
+        if let Some(offsets) = prefix_groups.get_mut(content.as_ref()) {
+            offsets.push(offset);
         } else {
-            prefix_groups.insert(content.into_owned(), vec![position]);
+            prefix_groups.insert(content.into_owned(), vec![offset]);
         }
     }
 
     // Check if any prefix group is out of order
-    let mut out_of_order_ranges = Vec::new();
+    let mut out_of_order_spans = Vec::new();
 
-    for (_, positions) in &prefix_groups {
-        if positions
+    for (_, offsets) in &prefix_groups {
+        if offsets
             .windows(2)
             .any(|window| window[0].0 + 1 != window[1].0)
         {
-            out_of_order_ranges.extend(positions.iter().map(|(_, range)| *range))
+            out_of_order_spans.extend(offsets.iter().map(|(_, span)| *span))
         }
     }
 
     // Report diagnostics for all out-of-order dotted keys
-    if !out_of_order_ranges.is_empty() {
-        for range in out_of_order_ranges {
+    if !out_of_order_spans.is_empty() {
+        for span in out_of_order_spans {
             l.extend_diagnostics(crate::Diagnostic {
                 kind: crate::DiagnosticKind::DottedKeysOutOfOrder,
                 level: level.into(),
-                range,
+                span,
             });
         }
     }

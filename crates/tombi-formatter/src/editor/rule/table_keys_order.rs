@@ -55,7 +55,7 @@ pub(in crate::editor) async fn table_keys_order<'a>(
 
     let old_order = key_values_with_comma
         .iter()
-        .map(|(key_value, _)| key_value.syntax().range())
+        .map(|(key_value, _)| key_value.syntax().span())
         .collect_vec();
     let old_first = key_values_with_comma.first().unwrap().0.syntax().clone();
     let (last_key_value, last_comma) = key_values_with_comma.last().unwrap();
@@ -89,7 +89,7 @@ pub(in crate::editor) async fn table_keys_order<'a>(
 
     if old_order.into_iter().eq(sorted_key_values_with_comma
         .iter()
-        .map(|(key_value, _)| key_value.syntax().range()))
+        .map(|(key_value, _)| key_value.syntax().span()))
     {
         return Vec::new();
     }
@@ -102,7 +102,7 @@ pub(in crate::editor) async fn table_keys_order<'a>(
         }
     }
 
-    vec![crate::editor::Change::replace_range(
+    vec![crate::editor::Change::replace_span(
         &old_first, &old_last, new,
     )]
 }
@@ -609,7 +609,7 @@ async fn sort_table_targets<T>(
             let mut sorted_specified_iter = sorted_specified_targets.into_iter();
             let mut unspecified_iter = unspecified_targets.into_iter();
 
-            // Keep keys in unspecified groups at their original positions.
+            // Keep keys in unspecified groups at their original offsets.
             for is_specified_slot in original_slots {
                 let next = if is_specified_slot {
                     sorted_specified_iter.next()

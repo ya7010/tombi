@@ -13,8 +13,11 @@ impl ReportFormat for GitlabFormat {
     type Range = tombi_text::Range;
 
     /// Columns count grapheme clusters, like the output of `pretty`.
-    fn convert_ranges(_source: &str, ranges: &[tombi_text::Range]) -> Vec<tombi_text::Range> {
-        ranges.to_vec()
+    fn convert_spans(
+        line_index: &tombi_text::LineIndex,
+        spans: &[tombi_text::Span],
+    ) -> Vec<tombi_text::Range> {
+        super::grapheme_ranges(line_index, spans)
     }
 
     /// Renders a GitLab Code Quality report.
@@ -174,14 +177,14 @@ mod tests {
     fn duplicated_key_file(lines: &[u32]) -> FileReport {
         FileReport {
             path: Some(PathBuf::from("a.toml")),
-            source: "\n".repeat(10),
+            line_index: index(&"a\n".repeat(10)),
             diagnostics: lines
                 .iter()
                 .map(|line| {
                     Diagnostic::new_error(
                         "duplicate key",
                         "key-duplicated",
-                        range((*line, 0), (*line, 1)),
+                        span(&"a\n".repeat(10), (*line, 0), (*line, 1)),
                     )
                 })
                 .collect(),

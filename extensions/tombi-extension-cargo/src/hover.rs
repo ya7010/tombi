@@ -22,7 +22,7 @@ pub async fn hover(
     text_document_uri: &tombi_uri::Uri,
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     toml_version: TomlVersion,
     offline: bool,
     cache_options: Option<&tombi_cache::Options>,
@@ -42,7 +42,7 @@ pub async fn hover(
         && let Some(metadata) = feature_key_hover_metadata(
             document_tree,
             accessors,
-            position,
+            offset,
             &cargo_toml_path,
             toml_version,
         )
@@ -55,7 +55,7 @@ pub async fn hover(
         && let Some(metadata) = dependency_features_hover_metadata(
             document_tree,
             accessors,
-            position,
+            offset,
             &cargo_toml_path,
             toml_version,
             offline,
@@ -72,30 +72,28 @@ pub async fn hover(
         return Ok(None);
     }
 
-    let (dependency_accessors, hover_target) =
-        if let Some(dependency_accessors) = get_dependency_accessors(accessors) {
-            if is_hovering_dependency_key(document_tree, dependency_accessors, position) {
-                (dependency_accessors, DependencyHoverTarget::Key)
-            } else if is_hovering_string_dependency_version(
-                document_tree,
-                dependency_accessors,
-                position,
-            ) {
-                (dependency_accessors, DependencyHoverTarget::Version)
-            } else {
-                return Ok(None);
-            }
-        } else if is_dependency_version_accessor(accessors) {
-            if !is_hovering_dependency_version(document_tree, accessors, position) {
-                return Ok(None);
-            }
-            (
-                &accessors[..accessors.len().saturating_sub(1)],
-                DependencyHoverTarget::Version,
-            )
+    let (dependency_accessors, hover_target) = if let Some(dependency_accessors) =
+        get_dependency_accessors(accessors)
+    {
+        if is_hovering_dependency_key(document_tree, dependency_accessors, offset) {
+            (dependency_accessors, DependencyHoverTarget::Key)
+        } else if is_hovering_string_dependency_version(document_tree, dependency_accessors, offset)
+        {
+            (dependency_accessors, DependencyHoverTarget::Version)
         } else {
             return Ok(None);
-        };
+        }
+    } else if is_dependency_version_accessor(accessors) {
+        if !is_hovering_dependency_version(document_tree, accessors, offset) {
+            return Ok(None);
+        }
+        (
+            &accessors[..accessors.len().saturating_sub(1)],
+            DependencyHoverTarget::Version,
+        )
+    } else {
+        return Ok(None);
+    };
 
     let Some(Accessor::Key(dependency_key)) = dependency_accessors.last() else {
         return Ok(None);
@@ -173,12 +171,12 @@ struct DependencyFeatureMetadata {
 async fn feature_key_hover_metadata(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
     cargo_toml_path: &Path,
     toml_version: TomlVersion,
 ) -> Option<HoverMetadata> {
     let feature_key = feature_key_at_accessors(document_tree, accessors)?;
-    if !feature_key.range().contains(position) {
+    if !feature_key.span().contains_inclusive(offset) {
         return None;
     }
 
@@ -209,14 +207,15 @@ fn render_feature_usage_links(
 ) -> String {
     let project_root = feature_usage_project_root(document_tree, cargo_toml_path, toml_version);
     let mut lines = vec!["Feature references in this project:".to_string()];
-
     for location in usage_locations {
-        let line = location.range.start.line + 1;
+        let line = Some(location.line_index.line(location.span.start) + 1);
         let label = format_feature_usage_label(&project_root, &location.cargo_toml_path, line);
 
         match tombi_uri::Uri::from_file_path(&location.cargo_toml_path) {
             Ok(mut uri) => {
-                uri.set_fragment(Some(&format!("L{line}")));
+                if let Some(line) = line {
+                    uri.set_fragment(Some(&format!("L{line}")));
+                }
                 lines.push(format!("- [{label}]({uri})"));
             }
             Err(_) => lines.push(format!("- `{label}`")),
@@ -259,20 +258,27 @@ fn feature_usage_project_root(
     })
 }
 
-fn format_feature_usage_label(project_root: &Path, cargo_toml_path: &Path, line: u32) -> String {
+fn format_feature_usage_label(
+    project_root: &Path,
+    cargo_toml_path: &Path,
+    line: Option<tombi_text::Line>,
+) -> String {
     let relative_path = cargo_toml_path
         .strip_prefix(project_root)
         .unwrap_or(cargo_toml_path)
         .to_string_lossy()
         .replace('\\', "/");
 
-    format!("{relative_path}:{line}")
+    match line {
+        Some(line) => format!("{relative_path}:{line}"),
+        None => relative_path,
+    }
 }
 
 async fn dependency_features_hover_metadata(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     accessors: &[Accessor],
-    _position: tombi_text::Position,
+    _offset: tombi_text::Offset,
     cargo_toml_path: &Path,
     toml_version: TomlVersion,
     offline: bool,
@@ -649,7 +655,7 @@ fn is_dependency_version_accessor(accessors: &[Accessor]) -> bool {
 fn is_hovering_dependency_key(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     dependency_accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
 ) -> bool {
     let Some(dependency_keys) = dependency_accessors
         .iter()
@@ -662,13 +668,13 @@ fn is_hovering_dependency_key(
         return false;
     };
 
-    dependency_key.range().contains(position)
+    dependency_key.span().contains_inclusive(offset)
 }
 
 fn is_hovering_dependency_version(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     version_accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
 ) -> bool {
     let Some(version_keys) = version_accessors
         .iter()
@@ -681,17 +687,17 @@ fn is_hovering_dependency_version(
         return false;
     };
 
-    version_key.range().contains(position) || version_value.range().contains(position)
+    version_key.span().contains_inclusive(offset) || version_value.span().contains_inclusive(offset)
 }
 
 fn is_hovering_string_dependency_version(
     document_tree: &tombi_document_tree_syntax::DocumentTree,
     dependency_accessors: &[Accessor],
-    position: tombi_text::Position,
+    offset: tombi_text::Offset,
 ) -> bool {
     matches!(
         dig_accessors(document_tree, dependency_accessors),
-        Some((_, Value::String(version))) if version.range().contains(position)
+        Some((_, Value::String(version))) if version.span().contains_inclusive(offset)
     )
 }
 
@@ -877,20 +883,18 @@ mod tests {
             Accessor::Key("serde".into()),
         ];
 
-        let key_position = tombi_text::Position::default()
-            + tombi_text::RelativePosition::of("[dependencies]\nse");
-        let value_position = tombi_text::Position::default()
-            + tombi_text::RelativePosition::of("[dependencies]\nserde = \"1");
+        let key_offset = tombi_text::Offset::of("[dependencies]\nse");
+        let value_offset = tombi_text::Offset::of("[dependencies]\nserde = \"1");
 
         assert!(is_hovering_dependency_key(
             &document_tree,
             &dependency_accessors,
-            key_position,
+            key_offset,
         ));
         assert!(!is_hovering_dependency_key(
             &document_tree,
             &dependency_accessors,
-            value_position,
+            value_offset,
         ));
     }
 
@@ -905,13 +909,13 @@ mod tests {
             Accessor::Key("version".into()),
         ];
 
-        let version_value_position = tombi_text::Position::default()
-            + tombi_text::RelativePosition::of("[dependencies]\nserde = { version = \"1");
+        let version_value_offset =
+            tombi_text::Offset::of("[dependencies]\nserde = { version = \"1");
 
         assert!(is_hovering_dependency_version(
             &document_tree,
             &version_accessors,
-            version_value_position,
+            version_value_offset,
         ));
     }
 
@@ -925,16 +929,15 @@ mod tests {
             Accessor::Key("serde".into()),
             Accessor::Key("features".into()),
         ];
-        let position = tombi_text::Position::default()
-            + tombi_text::RelativePosition::of(
-                "[dependencies]\nserde = { version = \"1.0\", default-features = false, fe",
-            );
+        let offset = tombi_text::Offset::of(
+            "[dependencies]\nserde = { version = \"1.0\", default-features = false, fe",
+        );
 
         assert_eq!(
             dependency_features_hover_metadata(
                 &document_tree,
                 &accessors,
-                position,
+                offset,
                 Path::new("Cargo.toml"),
                 TomlVersion::V1_0_0,
                 true,
