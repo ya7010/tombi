@@ -891,7 +891,9 @@ mod tests {
         let name_node = object_node.properties.get("name").unwrap();
         pretty_assertions::assert_eq!(&json[name_node.span()], "\"John\"");
         pretty_assertions::assert_eq!(
-            line_index.range(name_node.span(), tombi_text::EncodingKind::Utf16),
+            line_index
+                .as_line_index()
+                .range(name_node.span(), tombi_text::EncodingKind::Utf16),
             tombi_text::Range::new(
                 tombi_text::Position::new(1, 10),
                 tombi_text::Position::new(1, 16)
@@ -901,7 +903,9 @@ mod tests {
         let age_node = object_node.properties.get("age").unwrap();
         pretty_assertions::assert_eq!(&json[age_node.span()], "30");
         pretty_assertions::assert_eq!(
-            line_index.range(age_node.span(), tombi_text::EncodingKind::Utf16),
+            line_index
+                .as_line_index()
+                .range(age_node.span(), tombi_text::EncodingKind::Utf16),
             tombi_text::Range::new(
                 tombi_text::Position::new(2, 9),
                 tombi_text::Position::new(2, 11)

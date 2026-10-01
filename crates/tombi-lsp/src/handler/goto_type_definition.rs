@@ -83,10 +83,7 @@ pub async fn handle_goto_type_definition(
 
     log::info!("handle_goto_type_definition");
 
-    let Ok(document_sources) = backend.document_sources.try_read() else {
-        return Ok(Default::default());
-    };
-    let Some(document_source) = document_sources.get(&text_document_uri) else {
+    let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(Default::default());
     };
 
@@ -109,7 +106,9 @@ pub async fn handle_goto_type_definition(
         .ok()
         .flatten();
 
-    let Some((keys, span)) = get_hover_keys_with_span(&root, offset, toml_version).await else {
+    let Some((keys, span)) =
+        get_hover_keys_with_span(&root, document_source.decoded(), offset, toml_version).await
+    else {
         return Ok(Default::default());
     };
 
@@ -128,7 +127,7 @@ pub async fn handle_goto_type_definition(
     );
 
     let mut type_definitions = get_type_definition(
-        &document_source.document_tree(),
+        document_source.document_tree(),
         crate::CursorPosition::new(offset, line_index),
         &keys,
         &schema_context,

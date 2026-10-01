@@ -89,7 +89,7 @@ impl HeaderIndex {
         }
 
         for node in root.child_nodes() {
-            let Some(item) = TableOrArrayOfTable::cast(node.clone()) else {
+            let Some(item) = TableOrArrayOfTable::cast(node) else {
                 continue;
             };
             let is_array_of_table = matches!(item, TableOrArrayOfTable::ArrayOfTable(_));
@@ -194,6 +194,6 @@ impl HeaderIndex {
 }
 
 pub(crate) fn header_info(node: &tombi_ast_syntax::SyntaxNode) -> HeaderInfo {
-    let root = node.ancestors().last().unwrap_or_else(|| node.clone());
+    let root = node.ancestors().last().unwrap_or(*node);
     root.header_index().get(node)
 }

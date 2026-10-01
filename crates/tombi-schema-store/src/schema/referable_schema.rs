@@ -56,7 +56,7 @@ pub struct CurrentSchema<'a> {
     pub schema_document_uri: Cow<'a, SchemaUri>,
     /// The line index of the document of [`Self::schema_document_uri`],
     /// to convert the spans of its schemas.
-    pub line_index: Arc<tombi_text::LineIndex>,
+    pub line_index: Arc<tombi_text::OwnedLineIndex>,
     pub definitions: Cow<'a, SchemaDefinitions>,
     /// strict setting on root-schema/sub-schema level.
     pub strict: Option<BoolDefaultTrue>,
@@ -2588,7 +2588,7 @@ mod test {
             r#"{ "type": "string" }"#
         );
         pretty_assertions::assert_eq!(
-            resolved.line_index.position(
+            resolved.line_index.as_line_index().position(
                 resolved.schema_view.span().start,
                 tombi_text::EncodingKind::Utf16
             ),

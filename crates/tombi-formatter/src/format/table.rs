@@ -5,7 +5,7 @@ use tombi_ast_syntax::DanglingCommentGroupOr;
 
 use crate::{Format, types::WithAlignmentHint};
 
-impl Format for tombi_ast_syntax::Table {
+impl<'t> Format for tombi_ast_syntax::Table<'t> {
     fn format(&self, f: &mut crate::Formatter) -> Result<(), std::fmt::Error> {
         let header = self.header().unwrap();
 

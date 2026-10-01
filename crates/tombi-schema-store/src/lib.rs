@@ -24,9 +24,9 @@ pub use tombi_accessor::{Accessor, AccessorContext, AccessorKeyKind, Accessors, 
 pub use value_type::ValueType;
 
 /// A line index of an empty text, for a schema whose document is unknown.
-pub(crate) fn empty_line_index() -> std::sync::Arc<tombi_text::LineIndex> {
-    static EMPTY_LINE_INDEX: std::sync::LazyLock<std::sync::Arc<tombi_text::LineIndex>> =
-        std::sync::LazyLock::new(|| std::sync::Arc::new(tombi_text::LineIndex::new("")));
+pub(crate) fn empty_line_index() -> std::sync::Arc<tombi_text::OwnedLineIndex> {
+    static EMPTY_LINE_INDEX: std::sync::LazyLock<std::sync::Arc<tombi_text::OwnedLineIndex>> =
+        std::sync::LazyLock::new(|| std::sync::Arc::new(tombi_text::OwnedLineIndex::new("")));
     EMPTY_LINE_INDEX.clone()
 }
 
@@ -262,7 +262,7 @@ pub fn build_accessor_contexts(
 
 #[cfg(feature = "ast-syntax")]
 pub async fn lint_source_schema_from_ast(
-    root: &tombi_ast_syntax::Root,
+    root: &tombi_ast_syntax::Root<'_>,
     source_uri_or_path: Option<Either<&tombi_uri::Uri, &std::path::Path>>,
     schema_store: &SchemaStore,
 ) -> (

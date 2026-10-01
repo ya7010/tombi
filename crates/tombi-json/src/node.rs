@@ -10,7 +10,7 @@ pub struct Document {
     /// The root value of the document.
     pub value: ValueNode,
     /// The line index of the document, to convert the spans of its nodes.
-    pub line_index: std::sync::Arc<tombi_text::LineIndex>,
+    pub line_index: std::sync::Arc<tombi_text::OwnedLineIndex>,
 }
 
 impl Document {

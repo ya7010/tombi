@@ -5,7 +5,7 @@ use crate::{
     TombiValueCommentDirective, support,
 };
 
-impl crate::ArrayOfTable {
+impl<'t> crate::ArrayOfTable<'t> {
     /// Span from the opening double bracket through the last non-trivia
     /// element owned directly by this array-of-table.
     pub fn content_span(&self) -> Option<tombi_text::Span> {
@@ -48,7 +48,7 @@ impl crate::ArrayOfTable {
     /// [[table]]
     /// ```
     #[inline]
-    pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment> {
+    pub fn header_leading_comments(&self) -> impl Iterator<Item = crate::LeadingComment<'t>> {
         support::comment::leading_comments(self.syntax().child_elements())
     }
 
@@ -58,7 +58,7 @@ impl crate::ArrayOfTable {
     /// [[table]]  # This comment
     /// ```
     #[inline]
-    pub fn header_trailing_comment(&self) -> Option<crate::TrailingComment> {
+    pub fn header_trailing_comment(&self) -> Option<crate::TrailingComment<'t>> {
         support::comment::trailing_comment(self.syntax().child_elements(), T!("]]"))
     }
 
@@ -75,7 +75,7 @@ impl crate::ArrayOfTable {
     /// key = "value"
     /// ```
     #[inline]
-    pub fn dangling_comment_groups(&self) -> impl Iterator<Item = crate::DanglingCommentGroup> {
+    pub fn dangling_comment_groups(&self) -> impl Iterator<Item = crate::DanglingCommentGroup<'t>> {
         support::comment::dangling_comment_groups(
             self.syntax()
                 .child_elements()
@@ -84,7 +84,9 @@ impl crate::ArrayOfTable {
         )
     }
 
-    pub fn key_value_groups(&self) -> impl Iterator<Item = DanglingCommentGroupOr<KeyValueGroup>> {
+    pub fn key_value_groups(
+        &self,
+    ) -> impl Iterator<Item = DanglingCommentGroupOr<'t, KeyValueGroup<'t>>> {
         support::comment::dangling_comment_group_or(
             self.syntax()
                 .child_elements()
@@ -96,7 +98,7 @@ impl crate::ArrayOfTable {
     }
 
     #[inline]
-    pub fn key_values(&self) -> impl Iterator<Item = crate::KeyValue> {
+    pub fn key_values(&self) -> impl Iterator<Item = crate::KeyValue<'t>> {
         self.key_value_groups()
             .filter_map(DanglingCommentGroupOr::into_item_group)
             .flat_map(KeyValueGroup::into_key_values)
@@ -124,7 +126,7 @@ impl crate::ArrayOfTable {
     /// key = true
     /// ```
     #[inline]
-    pub fn last_sub_table(&self) -> Option<TableOrArrayOfTable> {
+    pub fn last_sub_table(&self) -> Option<TableOrArrayOfTable<'t>> {
         let id = crate::header_info(self.syntax()).last_sub_table?;
         TableOrArrayOfTable::cast(self.syntax().node_at(id))
     }

@@ -14,10 +14,7 @@ pub async fn handle_folding_range(
     let FoldingRangeParams { text_document, .. } = params;
     let text_document_uri = text_document.uri.into();
 
-    let Ok(document_sources) = backend.document_sources.try_read() else {
-        return Ok(None);
-    };
-    let Some(document_source) = document_sources.get(&text_document_uri) else {
+    let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(None);
     };
 
@@ -52,7 +49,7 @@ struct FoldingSpan {
     kind: FoldingRangeKind,
 }
 
-fn create_folding_spans(root: &tombi_ast_syntax::Root) -> Vec<FoldingSpan> {
+fn create_folding_spans(root: &tombi_ast_syntax::Root<'_>) -> Vec<FoldingSpan> {
     let mut spans: Vec<FoldingSpan> = vec![];
 
     for node in root.nodes() {
@@ -412,7 +409,7 @@ trait GetCommentFoldingSpan {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::Table {
+impl GetRegionFoldingSpan for tombi_ast_syntax::Table<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         self.content_span().map(|span| {
             tombi_text::Span::new(
@@ -426,7 +423,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::Table {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::ArrayOfTable {
+impl GetRegionFoldingSpan for tombi_ast_syntax::ArrayOfTable<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         self.content_span().map(|span| {
             tombi_text::Span::new(
@@ -440,7 +437,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::ArrayOfTable {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::TableOrArrayOfTable {
+impl GetRegionFoldingSpan for tombi_ast_syntax::TableOrArrayOfTable<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         match self {
             Self::Table(table) => table.get_folding_span(),
@@ -449,7 +446,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::TableOrArrayOfTable {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::Array {
+impl GetRegionFoldingSpan for tombi_ast_syntax::Array<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let start_position = self.bracket_start()?.span().start;
         let end_position = self.bracket_end()?.span().end;
@@ -458,7 +455,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::Array {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::InlineTable {
+impl GetRegionFoldingSpan for tombi_ast_syntax::InlineTable<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let start_position = self.brace_start()?.span().start;
         let end_position = self.brace_end()?.span().end;
@@ -467,7 +464,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::InlineTable {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::MultiLineBasicString {
+impl GetRegionFoldingSpan for tombi_ast_syntax::MultiLineBasicString<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let token = self.token()?;
 
@@ -475,7 +472,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::MultiLineBasicString {
     }
 }
 
-impl GetRegionFoldingSpan for tombi_ast_syntax::MultiLineLiteralString {
+impl GetRegionFoldingSpan for tombi_ast_syntax::MultiLineLiteralString<'_> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let token = self.token()?;
 
@@ -483,7 +480,7 @@ impl GetRegionFoldingSpan for tombi_ast_syntax::MultiLineLiteralString {
     }
 }
 
-impl GetCommentFoldingSpan for Vec<tombi_ast_syntax::LeadingComment> {
+impl GetCommentFoldingSpan for Vec<tombi_ast_syntax::LeadingComment<'_>> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let first = self.first()?;
         let last = self.last()?;
@@ -494,7 +491,7 @@ impl GetCommentFoldingSpan for Vec<tombi_ast_syntax::LeadingComment> {
     }
 }
 
-impl GetCommentFoldingSpan for Vec<tombi_ast_syntax::DanglingComment> {
+impl GetCommentFoldingSpan for Vec<tombi_ast_syntax::DanglingComment<'_>> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let first = self.first()?;
         let last = self.last()?;
@@ -505,7 +502,7 @@ impl GetCommentFoldingSpan for Vec<tombi_ast_syntax::DanglingComment> {
     }
 }
 
-impl GetCommentFoldingSpan for Vec<Vec<tombi_ast_syntax::DanglingComment>> {
+impl GetCommentFoldingSpan for Vec<Vec<tombi_ast_syntax::DanglingComment<'_>>> {
     fn get_folding_span(&self) -> Option<tombi_text::Span> {
         let first = self.iter().find(|group| !group.is_empty())?.iter().next()?;
         let last = self
@@ -532,9 +529,10 @@ mod tests {
     use tombi_ast_syntax::{AstNode, TableOrArrayOfTable};
 
     fn last_sub_tables(source: &str) -> Vec<(String, Option<String>)> {
-        let root = tombi_parser::parse(source).try_into_root().ok().unwrap();
+        let parsed = tombi_parser::parse(source);
+        let root = parsed.try_root().ok().unwrap();
         let header =
-            |item: &TableOrArrayOfTable| item.header().unwrap().syntax().text().to_string();
+            |item: &TableOrArrayOfTable<'_>| item.header().unwrap().syntax().text().to_string();
         root.table_or_array_of_tables()
             .map(|item| {
                 let last = match &item {

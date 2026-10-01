@@ -419,7 +419,7 @@ impl DocumentSchema {
     }
 
     /// The line index of the physical document, to convert the spans of its schemas.
-    pub fn line_index(&self) -> &Arc<tombi_text::LineIndex> {
+    pub fn line_index(&self) -> &Arc<tombi_text::OwnedLineIndex> {
         self.schema_resources.line_index()
     }
 

@@ -19,9 +19,9 @@ use crate::{Backend, remote_file::open_remote_file};
 use self::type_definition_source::TypeDefinitionSource;
 
 pub async fn get_type_definition(
-    document_tree: &tombi_document_tree_syntax::DocumentTree,
+    document_tree: &tombi_document_tree_syntax::DocumentTree<'_>,
     cursor: crate::CursorPosition<'_>,
-    keys: &[tombi_document_tree_syntax::Key],
+    keys: &[tombi_document_tree_syntax::Key<'_>],
     schema_context: &tombi_schema_store::SchemaContext<'_>,
 ) -> Vec<TypeDefinition> {
     let offset = cursor.offset();
@@ -157,10 +157,10 @@ pub(crate) fn location_key(
 
 /// The fragment of a schema URI that opens the JSON Schema file at the line of `span`.
 pub(crate) fn schema_line_fragment(
-    line_index: &tombi_text::LineIndex,
+    line_index: &tombi_text::OwnedLineIndex,
     span: tombi_text::Span,
 ) -> String {
-    format!("L{}", line_index.line(span.start) + 1)
+    format!("L{}", line_index.as_line_index().line(span.start) + 1)
 }
 
 impl TypeDefinition {
@@ -170,7 +170,7 @@ impl TypeDefinition {
         mut self,
         accessors: &[tombi_schema_store::Accessor],
         span: tombi_text::Span,
-        line_index: &std::sync::Arc<tombi_text::LineIndex>,
+        line_index: &std::sync::Arc<tombi_text::OwnedLineIndex>,
     ) -> Self {
         if self.schema_accessors == accessors {
             self.span = Some(tombi_extension::LocatedSpan {
@@ -197,7 +197,7 @@ pub(super) trait GetTypeDefinition {
     fn get_type_definition<'a: 'b, 'b>(
         &'a self,
         cursor: crate::CursorPosition<'a>,
-        keys: &'a [tombi_document_tree_syntax::Key],
+        keys: &'a [tombi_document_tree_syntax::Key<'_>],
         accessors: &'a [tombi_schema_store::Accessor],
         current_schema: Option<&'a tombi_schema_store::CurrentSchema<'a>>,
         schema_context: &'a tombi_schema_store::SchemaContext,
@@ -214,7 +214,7 @@ pub(super) async fn adjacent_type_definition<
 >(
     value: &T,
     cursor: crate::CursorPosition<'_>,
-    keys: &[tombi_document_tree_syntax::Key],
+    keys: &[tombi_document_tree_syntax::Key<'_>],
     accessors: &[Accessor],
     current_schema: Option<&CurrentSchema<'_>>,
     schema_context: &tombi_schema_store::SchemaContext<'_>,

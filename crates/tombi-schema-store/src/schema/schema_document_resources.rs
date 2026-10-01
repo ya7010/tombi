@@ -25,7 +25,7 @@ pub(crate) struct SchemaDocumentResources {
     root_schema_resource_uri: SchemaUri,
     root: tombi_json::ValueNode,
     /// The line index of the physical document, to convert the spans of its schemas.
-    line_index: Arc<tombi_text::LineIndex>,
+    line_index: Arc<tombi_text::OwnedLineIndex>,
     resources: tombi_hashmap::HashMap<SchemaUri, SchemaResource>,
 }
 
@@ -85,7 +85,7 @@ impl SchemaDocumentResources {
         &self.root_schema_resource_uri
     }
 
-    pub(crate) fn line_index(&self) -> &Arc<tombi_text::LineIndex> {
+    pub(crate) fn line_index(&self) -> &Arc<tombi_text::OwnedLineIndex> {
         &self.line_index
     }
 

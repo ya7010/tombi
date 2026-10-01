@@ -392,15 +392,15 @@ pub fn parse(source: &str) -> Result<ValueNode, crate::parser::Error> {
 pub fn parse_document(
     source: impl Into<Box<str>>,
 ) -> Result<crate::Document, crate::parser::Error> {
-    let text = std::sync::Arc::new(source.into());
+    let text: Box<str> = source.into();
     let mut parser = Parser::new(&text);
     let value = parser.parse()?;
     // A successful parse has lexed up to the end of the source.
     let line_starts = parser.lexer.into_line_starts();
     Ok(crate::Document {
         value,
-        line_index: std::sync::Arc::new(tombi_text::LineIndex::from_line_starts(
-            text.clone(),
+        line_index: std::sync::Arc::new(tombi_text::OwnedLineIndex::from_line_starts(
+            text,
             line_starts,
         )),
     })
