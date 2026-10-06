@@ -197,7 +197,7 @@
         },
         "version": {
           "type": "string",
-          "pattern": "^[\\s\\u001c-\\u001f\\u0085]*[vV]?((([0-9]+)!)?([0-9]+(\\.[0-9]+)*)([-_\\.]?([aA][lL][pP][hH][aA]|[aA]|[bB][eE][tT][aA]|[bB]|[pP][rR][eE][vV][iI][eE][wW]|[pP][rR][eE]|[cC]|[rR][cC])[-_\\.]?([0-9]+)?)?((-([0-9]+))|([-_\\.]?([pP][oO][sS][tT]|[rR][eE][vV]|[rR])[-_\\.]?([0-9]+)?))?([-_\\.]?([dD][eE][vV])[-_\\.]?([0-9]+)?)?)(\\+([a-zA-Z0-9]+([-_\\.][a-zA-Z0-9]+)*))?[\\s\\u001c-\\u001f\\u0085]*$",
+          "pattern": "^[\\u0009-\\u000d\\u001c-\\u0020\\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000]*[vV]?((([0-9]+)!)?([0-9]+(\\.[0-9]+)*)([-_\\.]?([aA][lL][pP][hH][aA]|[aA]|[bB][eE][tT][aA]|[bB]|[pP][rR][eE][vV][iI][eE][wW]|[pP][rR][eE]|[cC]|[rR][cC])[-_\\.]?([0-9]+)?)?((-([0-9]+))|([-_\\.]?([pP][oO][sS][tT]|[rR][eE][vV]|[rR])[-_\\.]?([0-9]+)?))?([-_\\.]?([dD][eE][vV])[-_\\.]?([0-9]+)?)?)(\\+([a-zA-Z0-9]+([-_\\.][a-zA-Z0-9]+)*))?[\\u0009-\\u000d\\u001c-\\u0020\\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000]*$",
           "title": "Project version",
           "description": "Version of the project, as defined in the [Version specifier specification](https://packaging.python.org/en/latest/specifications/version-specifiers/), and preferably [already normalized](https://packaging.python.org/en/latest/specifications/version-specifiers/#normalization).",
           "markdownDescription": "Version of the project, as defined in the [Version specifier specification](https://packaging.python.org/en/latest/specifications/version-specifiers/), and preferably [already normalized](https://packaging.python.org/en/latest/specifications/version-specifiers/#normalization).",

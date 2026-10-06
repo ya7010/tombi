@@ -1482,3 +1482,14 @@ license-files = []
         SchemaPath(pyproject_schema_path()),
     ) -> Ok(_)
 }
+
+test_lint! {
+    #[test]
+    fn version_bom_is_not_whitespace(
+        r#"[project]
+name = "example"
+version = "\uFEFF1.0\uFEFF"
+"#,
+        SchemaPath(pyproject_schema_path()),
+    ) -> Diagnostics([{ code: "string-pattern", level: Level::ERROR }])
+}
