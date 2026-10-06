@@ -10,6 +10,12 @@ use super::should_retry_with_github_auth;
     404,
     true
 )]
+#[case::anonymous_rate_limit(
+    "https://raw.githubusercontent.com/owner/repo/main/schema.json",
+    "https://raw.githubusercontent.com/owner/repo/main/schema.json",
+    403,
+    true
+)]
 #[case::other_host(
     "https://example.com/schema.json",
     "https://raw.githubusercontent.com/owner/repo/main/schema.json",

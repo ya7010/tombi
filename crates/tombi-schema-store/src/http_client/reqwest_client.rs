@@ -51,10 +51,6 @@ impl HttpClient for ReqwestHttpClient {
             #[cfg(not(target_arch = "wasm32"))]
             if let Ok(original_url) = reqwest::Url::parse(url)
                 && should_retry_with_github_auth(&original_url, response.url(), response.status())
-                && response
-                    .headers()
-                    .get("x-ratelimit-remaining")
-                    .is_none_or(|value| value != "0")
                 && let Some(authorization) = github_authorization().await.map_err(|error| {
                     FetchError::AuthenticationFailed {
                         reason: error.to_string(),

@@ -170,7 +170,8 @@ pub async fn save_to_cache(
                 file.set_permissions(std::fs::Permissions::from_mode(0o600))
                     .await?;
             }
-            file.write_all(bytes).await
+            file.write_all(bytes).await?;
+            file.flush().await
         }
         .await;
         if let Err(err) = write_result {

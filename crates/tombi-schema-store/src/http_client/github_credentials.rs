@@ -45,10 +45,13 @@ fn authorization_header(token: &str) -> Result<HeaderValue, FetchError> {
 fn github_cli_path() -> Option<PathBuf> {
     let path = std::env::var_os("PATH")?;
     let working_dir = std::env::current_dir().ok()?.canonicalize().ok()?;
-    github_cli_path_from(&path, &working_dir)
+    let workspace_root = working_dir
+        .ancestors()
+        .find(|directory| directory.join(".git").exists());
+    github_cli_path_from(&path, workspace_root)
 }
 
-fn github_cli_path_from(path: &OsStr, working_dir: &Path) -> Option<PathBuf> {
+fn github_cli_path_from(path: &OsStr, workspace_root: Option<&Path>) -> Option<PathBuf> {
     std::env::split_paths(path)
         .filter(|directory| directory.is_absolute())
         .filter_map(|directory| {
@@ -59,7 +62,7 @@ fn github_cli_path_from(path: &OsStr, working_dir: &Path) -> Option<PathBuf> {
         })
         .find(|executable| {
             executable.is_file()
-                && (working_dir.parent().is_none() || !executable.starts_with(working_dir))
+                && workspace_root.is_none_or(|root| !executable.starts_with(root))
                 && is_executable(executable)
         })
 }
