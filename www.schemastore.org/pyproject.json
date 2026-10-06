@@ -7,6 +7,12 @@
   "x-tombi-string-formats": ["email", "uri"],
   "additionalProperties": false,
   "definitions": {
+    "entryPointName": {
+      "type": "string",
+      "not": {
+        "pattern": "(?:=|^\\[|^\\s|\\s$)"
+      }
+    },
     "importNames": {
       "type": "array",
       "items": {
@@ -34,7 +40,8 @@
       ],
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^,]*$"
         },
         "email": {
           "type": "string",
@@ -216,16 +223,22 @@
           "oneOf": [
             {
               "title": "README file path",
-              "type": "string"
+              "type": "string",
+              "not": {
+                "pattern": "^/"
+              }
             },
             {
               "additionalProperties": false,
               "type": "object",
-              "required": ["file"],
+              "required": ["file", "content-type"],
               "properties": {
                 "file": {
                   "title": "README file path",
-                  "type": "string"
+                  "type": "string",
+                  "not": {
+                    "pattern": "^/"
+                  }
                 },
                 "content-type": {
                   "title": "README content-type",
@@ -238,7 +251,7 @@
             {
               "additionalProperties": false,
               "type": "object",
-              "required": ["text"],
+              "required": ["text", "content-type"],
               "properties": {
                 "text": {
                   "title": "README text",
@@ -422,6 +435,9 @@
         },
         "urls": {
           "type": "object",
+          "propertyNames": {
+            "maxLength": 32
+          },
           "additionalProperties": {
             "type": "string",
             "format": "uri"
@@ -450,6 +466,9 @@
         },
         "scripts": {
           "type": "object",
+          "propertyNames": {
+            "$ref": "#/definitions/entryPointName"
+          },
           "additionalProperties": {
             "type": "string"
           },
@@ -472,6 +491,9 @@
         },
         "gui-scripts": {
           "type": "object",
+          "propertyNames": {
+            "$ref": "#/definitions/entryPointName"
+          },
           "additionalProperties": {
             "type": "string"
           },
@@ -498,6 +520,9 @@
           "patternProperties": {
             "^\\w+(\\.\\w+)*$": {
               "type": "object",
+              "propertyNames": {
+                "$ref": "#/definitions/entryPointName"
+              },
               "additionalProperties": {
                 "type": "string"
               },
@@ -593,7 +618,12 @@
           "examples": [["my_package", "_internal ; private"]]
         },
         "import-namespaces": {
-          "$ref": "#/definitions/importNames",
+          "allOf": [
+            {
+              "$ref": "#/definitions/importNames"
+            }
+          ],
+          "minItems": 1,
           "description": "An array of strings specifying the import names that the project provides when installed, but not exclusively.",
           "markdownDescription": "An array of strings specifying the import names that the project provides when installed, but not exclusively.",
           "x-intellij-html-description": "An array of strings specifying the import names that the project provides when installed, but not exclusively.",
