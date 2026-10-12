@@ -1119,6 +1119,26 @@ mod table_keys_order {
 
         test_format! {
             #[tokio::test]
+            async fn test_schema_options_follow_schema_order(
+                r#"
+                [schema]
+                lint = { rules = {} }
+                format = { rules = {} }
+                catalog = { paths = [] }
+                "#,
+                SchemaPath(tombi_schema_path()),
+            ) -> Ok(
+                r#"
+                [schema]
+                catalog = { paths = [] }
+                format = { rules = {} }
+                lint = { rules = {} }
+                "#
+            )
+        }
+
+        test_format! {
+            #[tokio::test]
             async fn test_tombi_schemas_multiple(
                 r#"
                 [[schemas]]
