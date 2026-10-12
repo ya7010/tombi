@@ -1,4 +1,6 @@
-use tower_lsp::lsp_types::{DidChangeWatchedFilesParams, FileChangeType, TextDocumentIdentifier};
+use tower_lsp_server::gen_lsp_types::{
+    DidChangeWatchedFilesParams, FileChangeType, TextDocumentIdentifier,
+};
 
 use crate::{
     backend::Backend,
@@ -26,7 +28,7 @@ pub async fn handle_did_change_watched_files(
     for change in params.changes {
         let uri: tombi_uri::Uri = change.uri.clone().into();
 
-        log::debug!("detected {:?} via watcher: {}", change.typ, uri);
+        log::debug!("detected {:?} via watcher: {}", change.kind, uri);
 
         if is_in_vcs_metadata_dir_uri(&uri) {
             log::debug!("skip watcher event inside VCS metadata directory: {uri}");
@@ -36,8 +38,8 @@ pub async fn handle_did_change_watched_files(
         if is_json_file(&uri) {
             // Only schemas already loaded by the schema stores are updated.
             if matches!(
-                change.typ,
-                FileChangeType::CREATED | FileChangeType::CHANGED
+                change.kind,
+                FileChangeType::Created | FileChangeType::Changed
             ) {
                 match backend
                     .config_manager
@@ -57,8 +59,8 @@ pub async fn handle_did_change_watched_files(
             backend.config_manager.clear_source_config_paths().await;
             config_changed = true;
             if matches!(
-                change.typ,
-                FileChangeType::CREATED | FileChangeType::CHANGED
+                change.kind,
+                FileChangeType::Created | FileChangeType::Changed
             ) {
                 let identifier = TextDocumentIdentifier::new(change.uri.clone());
                 if let Err(err) = crate::handler::handle_update_config(backend, identifier).await {
@@ -68,8 +70,8 @@ pub async fn handle_did_change_watched_files(
         }
 
         if matches!(
-            change.typ,
-            FileChangeType::CREATED | FileChangeType::CHANGED
+            change.kind,
+            FileChangeType::Created | FileChangeType::Changed
         ) {
             if workspace_configs.is_none() {
                 workspace_configs = Some(get_workspace_configs(backend).await.unwrap_or_default());
@@ -103,8 +105,8 @@ pub async fn handle_did_change_watched_files(
             }
         }
 
-        match change.typ {
-            FileChangeType::DELETED => {
+        match change.kind {
+            FileChangeType::Deleted => {
                 if let Ok(path) = uri.to_file_path() {
                     tombi_fs::remove_file(&path);
                 }
@@ -128,7 +130,7 @@ pub async fn handle_did_change_watched_files(
                     .await
                     .untrack(&uri);
             }
-            FileChangeType::CREATED => {
+            FileChangeType::Created => {
                 if upsert_document_source(backend, uri.clone()).await {
                     if workspace_configs.is_none() {
                         workspace_configs =
@@ -151,7 +153,7 @@ pub async fn handle_did_change_watched_files(
                     should_refresh_pull_diagnostics = true;
                 }
             }
-            FileChangeType::CHANGED => {
+            FileChangeType::Changed => {
                 if upsert_document_source(backend, uri.clone()).await {
                     backend
                         .workspace_diagnostics_cache
@@ -164,7 +166,11 @@ pub async fn handle_did_change_watched_files(
                 }
             }
             _ => {
-                log::debug!("ignored file change type {:?} for URI: {}", change.typ, uri);
+                log::debug!(
+                    "ignored file change type {:?} for URI: {}",
+                    change.kind,
+                    uri
+                );
             }
         }
     }
