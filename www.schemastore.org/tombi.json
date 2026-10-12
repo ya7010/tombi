@@ -976,6 +976,17 @@
             }
           ]
         },
+        "catalog": {
+          "title": "Schema catalog options",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SchemaCatalog"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "format": {
           "title": "Schema format options",
           "anyOf": [
@@ -997,21 +1008,39 @@
               "type": "null"
             }
           ]
-        },
-        "catalog": {
-          "title": "Schema catalog options",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/SchemaCatalog"
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "additionalProperties": false,
       "x-tombi-table-keys-order": "schema"
+    },
+    "SchemaCatalog": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "title": "The schema catalog path/url array",
+          "description": "The catalog is evaluated after the schemas specified by [[schemas]].\\\nSchemas are loaded in order from the beginning of the catalog list.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/SchemaCatalogPath"
+          },
+          "default": [
+            "tombi://www.schemastore.org/api/json/catalog.json",
+            "https://www.schemastore.org/api/json/catalog.json"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SchemaCatalogPath": {
+      "description": "Schema catalog path or URL",
+      "type": "string",
+      "examples": [
+        "tombi://www.schemastore.org/api/json/catalog.json",
+        "https://www.schemastore.org/api/json/catalog.json"
+      ]
     },
     "SchemaOverviewFormatOptions": {
       "title": "Global schema format options",
@@ -1139,35 +1168,6 @@
       "enum": [
         "warn",
         "error"
-      ]
-    },
-    "SchemaCatalog": {
-      "type": "object",
-      "properties": {
-        "paths": {
-          "title": "The schema catalog path/url array",
-          "description": "The catalog is evaluated after the schemas specified by [[schemas]].\\\nSchemas are loaded in order from the beginning of the catalog list.",
-          "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "$ref": "#/definitions/SchemaCatalogPath"
-          },
-          "default": [
-            "tombi://www.schemastore.org/api/json/catalog.json",
-            "https://www.schemastore.org/api/json/catalog.json"
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
-    "SchemaCatalogPath": {
-      "description": "Schema catalog path or URL",
-      "type": "string",
-      "examples": [
-        "tombi://www.schemastore.org/api/json/catalog.json",
-        "https://www.schemastore.org/api/json/catalog.json"
       ]
     },
     "SchemaItem": {

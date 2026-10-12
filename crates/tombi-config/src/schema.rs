@@ -25,14 +25,14 @@ pub struct SchemaOverviewOptions {
     /// which is different from the JSON Schema specification.
     pub strict: Option<BoolDefaultTrue>,
 
+    /// # Schema catalog options
+    pub catalog: Option<SchemaCatalog>,
+
     /// # Schema format options
     pub format: Option<SchemaOverviewFormatOptions>,
 
     /// # Schema lint options
     pub lint: Option<SchemaOverviewLintOptions>,
-
-    /// # Schema catalog options
-    pub catalog: Option<SchemaCatalog>,
 }
 
 impl SchemaOverviewOptions {
@@ -40,9 +40,9 @@ impl SchemaOverviewOptions {
         Self {
             enabled: None,
             strict: None,
+            catalog: None,
             format: None,
             lint: None,
-            catalog: None,
         }
     }
 

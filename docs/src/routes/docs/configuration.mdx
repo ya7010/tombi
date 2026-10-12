@@ -226,6 +226,13 @@ catalog = {
   ],
 }
 
+[schema.format.rules]
+array-values-order.enabled = true
+table-keys-order.enabled = true
+
+[schema.lint.rules]
+deprecated = "warn"
+
 # Root Schema
 [[schemas]]
 toml-version = "v1.0.0"
