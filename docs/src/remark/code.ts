@@ -1,14 +1,15 @@
 import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import type { Root } from "mdast";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import { visit } from "unist-util-visit";
 
-const DOCS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const DOCS_ROOT = process.cwd();
 
 // Embed an external file into a code block: ```toml file="snippets/example.toml"
-export function readCodeFile(meta: string | null | undefined): string | undefined {
+export function readCodeFile(
+  meta: string | null | undefined,
+): string | undefined {
   const path = meta?.match(/(?:^|\s)file="([^"]+)"/)?.[1];
   if (!path) {
     return undefined;
