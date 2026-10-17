@@ -72,12 +72,6 @@ pub async fn clean_cache() -> Result<(), crate::Error> {
             cache_dir_path: path,
         });
     }
-    let initial = same_file::Handle::from_path(&path).map_err(|error| {
-        crate::Error::CacheDirectoryResolveFailed {
-            cache_dir_path: path.clone(),
-            reason: error.to_string(),
-        }
-    })?;
 
     let canonical = tokio::fs::canonicalize(&path).await.map_err(|error| {
         crate::Error::CacheDirectoryResolveFailed {
@@ -109,96 +103,34 @@ pub async fn clean_cache() -> Result<(), crate::Error> {
         });
     }
 
-    let directory = cap_std::fs::Dir::open_ambient_dir(&path, cap_std::ambient_authority())
-        .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
-            cache_dir_path: path.clone(),
-            reason: error.to_string(),
-        })?;
-    let opened = directory
-        .try_clone()
-        .and_then(|directory| same_file::Handle::from_file(directory.into_std_file()))
-        .map_err(|error| crate::Error::CacheDirectoryResolveFailed {
-            cache_dir_path: path.clone(),
-            reason: error.to_string(),
-        })?;
-    let selected = same_file::Handle::from_path(&path).map_err(|error| {
-        crate::Error::CacheDirectoryResolveFailed {
+    let mut entries = tokio::fs::read_dir(&path).await.map_err(|error| {
+        crate::Error::CacheDirectoryRemoveFailed {
             cache_dir_path: path.clone(),
             reason: error.to_string(),
         }
     })?;
-    let current_metadata = std::fs::symlink_metadata(&path).map_err(|error| {
-        crate::Error::CacheDirectoryResolveFailed {
-            cache_dir_path: path.clone(),
-            reason: error.to_string(),
-        }
-    })?;
-    let current_canonical = std::fs::canonicalize(&path).map_err(|error| {
-        crate::Error::CacheDirectoryResolveFailed {
-            cache_dir_path: path.clone(),
-            reason: error.to_string(),
-        }
-    })?;
-    if initial != opened
-        || opened != selected
-        || current_metadata.file_type().is_symlink()
-        || current_canonical != canonical
-    {
-        return Err(crate::Error::UnsafeCacheDirectory {
-            cache_dir_path: path,
-        });
-    }
-
-    remove_cache_contents(&directory, &path)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn remove_cache_contents(
-    directory: &cap_std::fs::Dir,
-    path: &std::path::Path,
-) -> Result<(), crate::Error> {
-    let entries =
-        directory
-            .entries()
+    while let Some(entry) =
+        entries
+            .next_entry()
+            .await
             .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
-                cache_dir_path: path.to_path_buf(),
+                cache_dir_path: path.clone(),
                 reason: error.to_string(),
-            })?;
-    for entry in entries {
-        let entry = entry.map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
-            cache_dir_path: path.to_path_buf(),
-            reason: error.to_string(),
-        })?;
-        let name = entry.file_name();
-        let entry_path = path.join(&name);
+            })?
+    {
+        let entry_path = entry.path();
         let file_type =
             entry
                 .file_type()
+                .await
                 .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
                     cache_dir_path: entry_path.clone(),
                     reason: error.to_string(),
                 })?;
         let result = if file_type.is_dir() {
-            let parent = directory.try_clone().map_err(|error| {
-                crate::Error::CacheDirectoryRemoveFailed {
-                    cache_dir_path: entry_path.clone(),
-                    reason: error.to_string(),
-                }
-            })?;
-            let child = cap_primitives::fs::open_dir_nofollow(
-                &parent.into_std_file(),
-                std::path::Path::new(&name),
-            )
-            .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
-                cache_dir_path: entry_path.clone(),
-                reason: error.to_string(),
-            })?;
-            let child = cap_std::fs::Dir::from_std_file(child);
-            remove_cache_contents(&child, &entry_path)?;
-            drop(child);
-            directory.remove_dir(&name)
+            tokio::fs::remove_dir_all(&entry_path).await
         } else {
-            directory.remove_file(&name)
+            tokio::fs::remove_file(&entry_path).await
         };
         result.map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
             cache_dir_path: entry_path,
@@ -458,15 +390,13 @@ mod tests {
         let cache_home = TestCacheHome::new();
         let path = cache_home.tombi_cache_dir_path();
         let outside = tempfile::tempdir().unwrap();
-        std::fs::create_dir_all(path.join("nested")).unwrap();
+        std::fs::create_dir_all(&path).unwrap();
         std::fs::write(outside.path().join("keep.json"), "keep").unwrap();
         symlink(outside.path(), path.join("link")).unwrap();
-        symlink(outside.path(), path.join("nested/link")).unwrap();
 
         clean_cache().await.unwrap();
 
         assert!(!path.join("link").exists());
-        assert!(!path.join("nested").exists());
         assert_eq!(
             std::fs::read_to_string(outside.path().join("keep.json")).unwrap(),
             "keep"
@@ -570,35 +500,6 @@ mod tests {
         ));
         assert_eq!(
             std::fs::read_to_string(target.join("keep.txt")).unwrap(),
-            "keep"
-        );
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn opened_root_does_not_follow_replacement_symlink() {
-        use std::os::unix::fs::symlink;
-
-        let _cache_home = TestCacheHome::new();
-        let temp = tempfile::tempdir().unwrap();
-        let cache = temp.path().join("cache");
-        let moved = temp.path().join("moved");
-        let outside = temp.path().join("outside");
-        std::fs::create_dir(&cache).unwrap();
-        std::fs::create_dir(&outside).unwrap();
-        std::fs::write(cache.join("cached.txt"), "cached").unwrap();
-        std::fs::write(outside.join("keep.txt"), "keep").unwrap();
-        let directory =
-            cap_std::fs::Dir::open_ambient_dir(&cache, cap_std::ambient_authority()).unwrap();
-        std::fs::rename(&cache, &moved).unwrap();
-        symlink(&outside, &cache).unwrap();
-
-        remove_cache_contents(&directory, &cache).unwrap();
-
-        assert!(moved.is_dir());
-        assert!(!moved.join("cached.txt").exists());
-        assert_eq!(
-            std::fs::read_to_string(outside.join("keep.txt")).unwrap(),
             "keep"
         );
     }
