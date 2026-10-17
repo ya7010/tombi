@@ -23,7 +23,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
         let (service, socket) = tombi_lsp::lsp_service(
             args.common.offline,
             args.common.no_cache,
-            args.common.cache_ttl.map(std::time::Duration::from_secs),
+            Some(std::time::Duration::from_secs(args.common.cache_ttl)),
         );
         serve(tokio::io::stdin(), tokio::io::stdout(), socket, service).await;
 

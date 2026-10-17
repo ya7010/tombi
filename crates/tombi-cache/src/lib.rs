@@ -1,7 +1,7 @@
 mod error;
 mod options;
 pub use error::Error;
-pub use options::{DEFAULT_CACHE_TTL, Options};
+pub use options::{DEFAULT_CACHE_TTL_SECONDS, Options};
 pub const CACHE_INDEX_FILE_NAME: &str = "__index__.json";
 
 #[cfg(not(target_arch = "wasm32"))]

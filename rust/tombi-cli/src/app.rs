@@ -51,19 +51,15 @@ struct CommonArgs {
     /// Cache expiration time in seconds
     ///
     /// Overrides TOMBI_CACHE_TTL. Defaults to 86400 seconds (24 hours).
-    #[clap(long, global = true, env("TOMBI_CACHE_TTL"), value_name = "SECONDS")]
-    cache_ttl: Option<u64>,
+    #[clap(long, global = true, env("TOMBI_CACHE_TTL"), default_value_t = tombi_cache::DEFAULT_CACHE_TTL_SECONDS, value_name = "SECONDS")]
+    cache_ttl: u64,
 }
 
 impl CommonArgs {
     fn cache_options(&self) -> tombi_cache::Options {
         tombi_cache::Options {
             no_cache: self.no_cache.then_some(true),
-            cache_ttl: Some(
-                self.cache_ttl
-                    .map(std::time::Duration::from_secs)
-                    .unwrap_or(tombi_cache::DEFAULT_CACHE_TTL),
-            ),
+            cache_ttl: Some(std::time::Duration::from_secs(self.cache_ttl)),
         }
     }
 }
